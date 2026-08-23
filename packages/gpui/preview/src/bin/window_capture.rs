@@ -22,6 +22,8 @@
 //!
 //! - `--fixture <exact-name> --out <png> --receipt <json>` renders one of the
 //!   18 accepted g15.046 Button identities (`window_capture/fixture_capture.rs`);
+//! - `--batch <manifest.json>` renders MANY of them in one process — one
+//!   application, one window at a time, rather than one launch per fixture;
 //! - `--focus-evidence <scene> --out <png> --receipt <json>` renders one
 //!   focused-state scene (`window_capture/focus_evidence.rs`);
 //! - without either, the single-Button smoke contract below applies.
@@ -124,23 +126,92 @@ const USAGE: &str = "usage: poodle-window-capture \
 const FIXTURE_USAGE: &str =
     "usage: poodle-window-capture --fixture <exact-name> --out <png> --receipt <json>";
 
+const BATCH_USAGE: &str = "usage: poodle-window-capture --batch <manifest.json>\n\
+manifest: {\"captures\":[{\"fixture\":\"<exact-name>\",\"out\":\"<png>\",\"receipt\":\"<json>\"}]}";
+
 /// The capture modes. `--fixture` selects fixture mode; `--focus-evidence`
 /// selects the g15.052 focused-state evidence mode; without either the
 /// legacy smoke contract applies unchanged.
 enum CaptureMode {
     Smoke(CaptureArgs),
     Fixture(fixture_capture::FixtureArgs),
+    /// Many fixtures, ONE process. The whole point of this mode is that a
+    /// batch is one application launch and one window at a time, not a
+    /// focus-capable application per fixture.
+    Batch(Vec<fixture_capture::FixtureArgs>),
     FocusEvidence(focus_evidence::FocusEvidenceArgs),
 }
 
 fn parse_cli(argv: &[String]) -> Result<CaptureMode> {
-    if argv.iter().any(|arg| arg == "--fixture") {
+    if argv.iter().any(|arg| arg == "--batch") {
+        parse_batch_args(argv).map(CaptureMode::Batch)
+    } else if argv.iter().any(|arg| arg == "--fixture") {
         parse_fixture_args(argv).map(CaptureMode::Fixture)
     } else if argv.iter().any(|arg| arg == "--focus-evidence") {
         focus_evidence::parse_args(argv).map(CaptureMode::FocusEvidence)
     } else {
         parse_args(argv).map(CaptureMode::Smoke)
     }
+}
+
+/// Batch mode is a closed contract too: exactly `--batch <manifest>`, nothing
+/// else. The manifest is a closed JSON shape, every entry is validated to the
+/// same standard as a single `--fixture` invocation, and duplicate output
+/// paths across entries are rejected — a batch that quietly overwrote its own
+/// earlier capture would produce evidence for a fixture it never kept.
+fn parse_batch_args(argv: &[String]) -> Result<Vec<fixture_capture::FixtureArgs>> {
+    if argv.len() != 2 || argv[0] != "--batch" {
+        bail!("batch mode accepts exactly --batch <manifest.json>\n{BATCH_USAGE}");
+    }
+    let manifest_path = Path::new(&argv[1]);
+    let source = std::fs::read_to_string(manifest_path)
+        .with_context(|| format!("read the batch manifest {}", manifest_path.display()))?;
+
+    #[derive(serde::Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct Manifest {
+        captures: Vec<Entry>,
+    }
+    #[derive(serde::Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct Entry {
+        fixture: String,
+        out: String,
+        receipt: String,
+    }
+
+    let manifest: Manifest = serde_json::from_str(&source)
+        .with_context(|| format!("parse the batch manifest {}", manifest_path.display()))?;
+    if manifest.captures.is_empty() {
+        bail!("the batch manifest declares no captures");
+    }
+
+    let mut parsed = Vec::with_capacity(manifest.captures.len());
+    let mut seen: std::collections::HashSet<PathBuf> = std::collections::HashSet::new();
+    for (index, entry) in manifest.captures.iter().enumerate() {
+        let args = parse_fixture_args(&[
+            "--fixture".to_owned(),
+            entry.fixture.clone(),
+            "--out".to_owned(),
+            entry.out.clone(),
+            "--receipt".to_owned(),
+            entry.receipt.clone(),
+        ])
+        .with_context(|| format!("batch entry {index} ({})", entry.fixture))?;
+
+        for path in [&args.out_png, &args.out_receipt] {
+            if !seen.insert(path.clone()) {
+                bail!(
+                    "batch entry {index} ({}) reuses the output path {} — a batch must not \
+                     overwrite its own earlier capture",
+                    entry.fixture,
+                    path.display()
+                );
+            }
+        }
+        parsed.push(args);
+    }
+    Ok(parsed)
 }
 
 /// Fixture mode is a closed contract: exactly `--fixture`, `--out`, and
@@ -434,13 +505,15 @@ fn run(args: &CaptureArgs) -> ! {
     let out_png = args.out_png.clone();
     let out_receipt = args.out_receipt.clone();
 
-    transport::capture(transport::Scene {
-        logical_width,
-        logical_height,
-        assets: fixture_capture::FixtureAssets {
+    transport::capture(
+        fixture_capture::FixtureAssets {
             base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
         },
-        fonts: Vec::new(),
+        Vec::new(),
+        transport::Shot {
+        label: "smoke".to_owned(),
+        logical_width,
+        logical_height,
         build: Box::new(move |_window, cx: &mut App| {
             cx.new(|_| CaptureRoot { theme })
         }),
@@ -490,10 +563,11 @@ fn run(args: &CaptureArgs) -> ! {
             );
             Ok(())
         }),
-    })
+    },
+    )
 }
 
-/// Every mode ends in `transport::capture`, which owns the process from the
+/// Every mode ends in a `transport` capture, which owns the process from the
 /// point the GPUI application starts. Argument parsing is the last thing that
 /// can fail without a window ever existing, and it runs first.
 fn main() -> ! {
@@ -508,6 +582,7 @@ fn main() -> ! {
     match mode {
         CaptureMode::Smoke(args) => run(&args),
         CaptureMode::Fixture(args) => fixture_capture::run(&args),
+        CaptureMode::Batch(batch) => fixture_capture::run_batch(&batch),
         CaptureMode::FocusEvidence(args) => focus_evidence::run(&args),
     }
 }
@@ -725,6 +800,133 @@ mod tests {
             matches!(mode, CaptureMode::Smoke(_)),
             "no --fixture flag must keep the legacy smoke mode"
         );
+    }
+
+    // ── g16.005 batch mode ──────────────────────────────────────────────
+
+    fn write_manifest(body: &str) -> (std::path::PathBuf, std::path::PathBuf) {
+        let dir = std::env::temp_dir().join(format!(
+            "poodle-window-capture-batch-test-{}-{}",
+            std::process::id(),
+            body.len()
+        ));
+        let _ = std::fs::create_dir_all(&dir);
+        let path = dir.join("batch.json");
+        std::fs::write(&path, body).expect("write manifest");
+        (dir, path)
+    }
+
+    fn parse_manifest(body: &str) -> Result<Vec<fixture_capture::FixtureArgs>> {
+        let (dir, path) = write_manifest(body);
+        let result = parse_batch_args(&argv(&["--batch", path.to_str().expect("utf-8")]));
+        let _ = std::fs::remove_dir_all(&dir);
+        result
+    }
+
+    #[test]
+    fn a_batch_manifest_parses_every_entry() {
+        let batch = parse_manifest(
+            r#"{"captures":[
+                {"fixture":"button/rest-secondary","out":"a.png","receipt":"a.json"},
+                {"fixture":"button/variant-primary","out":"b.png","receipt":"b.json"}
+            ]}"#,
+        )
+        .expect("the canonical batch manifest parses");
+        assert_eq!(batch.len(), 2);
+        assert_eq!(batch[0].fixture, "button/rest-secondary");
+        assert_eq!(batch[1].fixture, "button/variant-primary");
+    }
+
+    /// One bad entry fails the whole batch during parsing, before any window
+    /// opens — the same standard a single `--fixture` invocation is held to.
+    #[test]
+    fn one_unknown_fixture_rejects_the_whole_batch() {
+        let error = parse_manifest(
+            r#"{"captures":[
+                {"fixture":"button/rest-secondary","out":"a.png","receipt":"a.json"},
+                {"fixture":"button/nope","out":"b.png","receipt":"b.json"}
+            ]}"#,
+        )
+        .expect_err("an unknown fixture must reject the batch");
+        let text = format!("{error:#}");
+        assert!(text.contains("batch entry 1"), "names the entry: {text}");
+        assert!(text.contains("button/nope"), "names the offender: {text}");
+    }
+
+    /// A batch that reused an output path would overwrite its own earlier
+    /// capture and publish evidence for a fixture it never kept.
+    #[test]
+    fn a_batch_that_reuses_an_output_path_is_rejected() {
+        for body in [
+            r#"{"captures":[
+                {"fixture":"button/rest-secondary","out":"same.png","receipt":"a.json"},
+                {"fixture":"button/variant-primary","out":"same.png","receipt":"b.json"}
+            ]}"#,
+            r#"{"captures":[
+                {"fixture":"button/rest-secondary","out":"a.png","receipt":"same.json"},
+                {"fixture":"button/variant-primary","out":"b.png","receipt":"same.json"}
+            ]}"#,
+            // A PNG that collides with another entry's receipt.
+            r#"{"captures":[
+                {"fixture":"button/rest-secondary","out":"a.png","receipt":"b.png"},
+                {"fixture":"button/variant-primary","out":"b.png","receipt":"c.json"}
+            ]}"#,
+        ] {
+            let error = parse_manifest(body).expect_err("a reused output path must be rejected");
+            assert!(
+                format!("{error:#}").contains("reuses the output path"),
+                "got {error:#}"
+            );
+        }
+    }
+
+    #[test]
+    fn an_empty_or_malformed_batch_manifest_is_rejected() {
+        assert!(parse_manifest(r#"{"captures":[]}"#).is_err(), "empty batch");
+        assert!(parse_manifest("not json").is_err(), "malformed JSON");
+        assert!(
+            parse_manifest(r#"{"captures":[{"fixture":"button/rest-secondary"}]}"#).is_err(),
+            "an entry missing out/receipt"
+        );
+        assert!(
+            parse_manifest(
+                r#"{"captures":[{"fixture":"button/rest-secondary","out":"a.png","receipt":"a.json","scale":2}]}"#
+            )
+            .is_err(),
+            "unknown keys are rejected, not ignored"
+        );
+        assert!(
+            parse_manifest(r#"{"shots":[]}"#).is_err(),
+            "an unknown top-level key is rejected"
+        );
+    }
+
+    #[test]
+    fn batch_mode_accepts_no_other_flag() {
+        let (dir, path) = write_manifest(r#"{"captures":[]}"#);
+        let manifest = path.to_str().expect("utf-8").to_owned();
+        for extra in [
+            vec!["--batch", &manifest, "--fixture", "button/rest-secondary"],
+            vec!["--batch", &manifest, "--scale", "2.0"],
+            vec!["--batch"],
+        ] {
+            assert!(
+                parse_batch_args(&argv(&extra)).is_err(),
+                "batch mode is a closed contract: {extra:?}"
+            );
+        }
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_batch_flag_selects_batch_mode() {
+        let (dir, path) = write_manifest(
+            r#"{"captures":[{"fixture":"button/rest-secondary","out":"a.png","receipt":"a.json"}]}"#,
+        );
+        let mode = parse_cli(&argv(&["--batch", path.to_str().expect("utf-8")]))
+            .expect("batch mode parses");
+        assert!(matches!(mode, CaptureMode::Batch(ref b) if b.len() == 1));
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// The node-backend observation change behind the fixture landmarks: an

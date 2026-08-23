@@ -66,16 +66,30 @@ export type RoleEvidence = {
 export type WebEnvironment = { kind: "chromium"; version: string };
 /**
  * What the capture process observed about the frontmost application for the
- * whole of its own run. `changed: true` is a contract violation, not a
- * warning: the capture binary refuses to publish in that case, so a receipt
- * that carries it should not exist.
+ * whole of its own run.
+ *
+ * `verdict` is three-valued on purpose: "did not change" and "could not tell"
+ * are different answers, and only `proved` supports the capture contract's
+ * claim. The capture binary refuses to publish anything else, and this
+ * verifier refuses to accept anything else — a receipt is read on machines
+ * and at times far removed from the run that wrote it, so the reader does not
+ * take the writer's word for it.
  */
+export type ForegroundVerdict = "proved" | "changed" | "unprovable";
+
 export type ForegroundEvidence = {
-  baseline: string | null;
+  baseline: string;
   observed: string[];
   samples: number;
-  changed: boolean;
+  verdict: "proved";
 };
+
+/**
+ * Fewest successful frontmost-application readings a receipt must carry.
+ * Mirrors `MIN_FOREGROUND_SAMPLES` in `window_capture/transport.rs`; the
+ * cross-language duplication is the same posture as the inventory loaders.
+ */
+export const MIN_FOREGROUND_SAMPLES = 8;
 
 export type GpuiEnvironment = {
   kind: "macos-window-server-nonactivating";
@@ -128,7 +142,7 @@ const ROLE_KEYS = ["fill", "border", "text", "shadow", "focus-ring"] as const;
 const SHADOW_LAYER_KEYS = ["inset", "offsetX", "offsetY", "blur", "spread", "color"] as const;
 const WEB_ENV_KEYS = ["kind", "version"] as const;
 const GPUI_ENV_KEYS = ["kind", "os", "arch", "gpuiSource", "gpuiVersion", "foreground"] as const;
-const FOREGROUND_KEYS = ["baseline", "observed", "samples", "changed"] as const;
+const FOREGROUND_KEYS = ["baseline", "observed", "samples", "verdict"] as const;
 export const GPUI_TRANSPORT = "macos-window-server-nonactivating";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -275,18 +289,40 @@ function checkForeground(problems: string[], where: string, value: unknown): voi
     return;
   }
   keyProblems(problems, where, value, FOREGROUND_KEYS);
-  if (value.baseline !== null && typeof value.baseline !== "string") {
-    problems.push(`${where}.baseline must be a string or null`);
-  }
-  if (!Array.isArray(value.observed) || value.observed.some((app) => typeof app !== "string")) {
-    problems.push(`${where}.observed must be an array of strings`);
-  }
-  if (typeof value.samples !== "number" || !Number.isInteger(value.samples) || value.samples < 1) {
-    problems.push(`${where}.samples must be a positive integer`);
-  }
-  if (value.changed !== false) {
+
+  // A null baseline means the run never read a frontmost application, so it
+  // watched nothing. That is not a weaker proof, it is no proof.
+  if (typeof value.baseline !== "string" || value.baseline.length === 0) {
     problems.push(
-      `${where}.changed must be false — a capture that changed the frontmost application is not evidence`,
+      `${where}.baseline must name the application that was frontmost before the capture window existed`,
+    );
+  }
+  if (
+    !Array.isArray(value.observed) ||
+    value.observed.length === 0 ||
+    value.observed.some((app) => typeof app !== "string")
+  ) {
+    problems.push(`${where}.observed must be a non-empty array of strings`);
+  } else if (typeof value.baseline === "string") {
+    const strayed = value.observed.filter((app) => app !== value.baseline);
+    if (strayed.length > 0) {
+      problems.push(
+        `${where}.observed must contain only the baseline, got ${JSON.stringify(strayed)}`,
+      );
+    }
+  }
+  if (
+    typeof value.samples !== "number" ||
+    !Number.isInteger(value.samples) ||
+    value.samples < MIN_FOREGROUND_SAMPLES
+  ) {
+    problems.push(
+      `${where}.samples must be at least ${MIN_FOREGROUND_SAMPLES}; fewer readings cannot support the claim`,
+    );
+  }
+  if (value.verdict !== "proved") {
+    problems.push(
+      `${where}.verdict must be 'proved', got ${JSON.stringify(value.verdict)} — only a run that read a baseline, watched long enough, and never saw another application is evidence`,
     );
   }
 }

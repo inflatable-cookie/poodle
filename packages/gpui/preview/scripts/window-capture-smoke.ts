@@ -17,7 +17,7 @@
  * all three.
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -71,6 +71,12 @@ try {
   // itself the proof that no window was involved.
   console.log("## negative cases (rejected before any window opens)");
 
+  function writeManifest(name: string, body: string): string {
+    const path = join(work, `manifest-${name}.json`);
+    writeFileSync(path, body);
+    return path;
+  }
+
   const smokeArgs = (overrides: Record<string, string> = {}, drop: string[] = []): string[] => {
     const base: Record<string, string> = {
       "--out": join(work, "out.png"),
@@ -111,6 +117,32 @@ try {
       "unknown focus-evidence scene",
       ["--focus-evidence", "dialog", "--out", join(work, "r.png"), "--receipt", join(work, "r.json")],
     ],
+    ["batch manifest that does not exist", ["--batch", join(work, "missing.json")]],
+    ["batch manifest that is not JSON", ["--batch", writeManifest("bad", "not json")]],
+    ["empty batch manifest", ["--batch", writeManifest("empty", '{"captures":[]}')]],
+    [
+      "batch entry naming an unknown fixture",
+      ["--batch", writeManifest("unknown", JSON.stringify({ captures: [
+        { fixture: "button/rest-secondary", out: join(work, "b1.png"), receipt: join(work, "b1.json") },
+        { fixture: "button/nope", out: join(work, "b2.png"), receipt: join(work, "b2.json") },
+      ] }))],
+    ],
+    [
+      "batch entry reusing an output path",
+      ["--batch", writeManifest("collide", JSON.stringify({ captures: [
+        { fixture: "button/rest-secondary", out: join(work, "b3.png"), receipt: join(work, "b3.json") },
+        { fixture: "button/variant-primary", out: join(work, "b3.png"), receipt: join(work, "b4.json") },
+      ] }))],
+    ],
+    [
+      "batch manifest with an unknown key",
+      ["--batch", writeManifest("extra", JSON.stringify({ captures: [
+        { fixture: "button/rest-secondary", out: join(work, "b5.png"), receipt: join(work, "b5.json"), scale: 2 },
+      ] }))],
+    ],
+    ["batch mode with any other flag", ["--batch", writeManifest("ok", JSON.stringify({ captures: [
+      { fixture: "button/rest-secondary", out: join(work, "b6.png"), receipt: join(work, "b6.json") },
+    ] })), "--scale", "2.0"]],
   ];
 
   for (const [label, args] of negatives) {
@@ -130,6 +162,10 @@ try {
     join(work, "f.json"),
     join(work, "r.png"),
     join(work, "r.json"),
+    ...["b1", "b2", "b3", "b4", "b5", "b6"].flatMap((stem) => [
+      join(work, `${stem}.png`),
+      join(work, `${stem}.json`),
+    ]),
   ].filter((path) => existsSync(path));
   check("no rejected invocation wrote a file", written.length === 0, written.join(", "));
 } finally {

@@ -214,7 +214,19 @@ struct FocusEvidenceReceipt {
 
 pub fn run(args: &FocusEvidenceArgs) -> ! {
     match prepare(args) {
-        Ok(scene) => transport::capture(scene),
+        Ok(shot) => transport::capture(
+            FixtureAssets {
+                base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
+            },
+            match inter_fonts() {
+                Ok(fonts) => fonts,
+                Err(error) => {
+                    eprintln!("poodle-window-capture: {error:#}");
+                    std::process::exit(1)
+                }
+            },
+            shot,
+        ),
         Err(error) => {
             eprintln!("poodle-window-capture: {error:#}");
             std::process::exit(1)
@@ -229,7 +241,7 @@ struct RingEvidence {
     painted: PaintedRingEvidence,
 }
 
-fn prepare(args: &FocusEvidenceArgs) -> Result<transport::Scene<EvidenceRoot, FixtureAssets>> {
+fn prepare(args: &FocusEvidenceArgs) -> Result<transport::Shot<EvidenceRoot>> {
     let theme = ThemePreset::Eclipse.build_theme();
     let canvas = theme.resolve_color("color.background.canvas");
     let ctx = poodle_render::RenderContext::new(&theme);
@@ -251,13 +263,10 @@ fn prepare(args: &FocusEvidenceArgs) -> Result<transport::Scene<EvidenceRoot, Fi
     // count. `focused` records that focus was already requested.
     let mut focused = false;
 
-    Ok(transport::Scene {
+    Ok(transport::Shot {
+        label: format!("focus-evidence/{}", args.scene),
         logical_width,
         logical_height,
-        assets: FixtureAssets {
-            base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
-        },
-        fonts: inter_fonts()?,
         build: Box::new(move |_window, cx: &mut App| {
             cx.new(|_| EvidenceRoot {
                 node,

@@ -61,6 +61,7 @@ const ICON_ELEMENT_ID: &str = "fixture-icon";
 const SPINNER_ELEMENT_ID: &str = "fixture-spinner";
 
 /// Parsed and validated fixture-mode command line.
+#[derive(Debug)]
 pub struct FixtureArgs {
     pub fixture: String,
     pub out_png: PathBuf,
@@ -525,17 +526,40 @@ fn freeze_node_animations(node: &mut Node) {
 /// Render one accepted fixture in a non-activating window and write its PNG
 /// plus typed receipt.
 pub fn run(args: &FixtureArgs) -> ! {
-    match prepare(args) {
-        Ok(scene) => transport::capture(scene),
-        Err(error) => {
+    run_batch(std::slice::from_ref(args))
+}
+
+/// Render a whole set of fixtures in ONE process.
+///
+/// Every shot is prepared — inventory lookup, icon preflight, font load —
+/// BEFORE the application starts, so a bad entry anywhere in the batch fails
+/// without a single window having opened. The transport then opens, captures,
+/// and closes one window per shot in turn.
+pub fn run_batch(batch: &[FixtureArgs]) -> ! {
+    let prepared: Result<Vec<transport::Shot<FixtureRoot>>> =
+        batch.iter().map(prepare).collect();
+    let fonts = prepared.as_ref().ok().and(inter_fonts().ok());
+    match (prepared, fonts) {
+        (Ok(shots), Some(fonts)) => transport::capture_batch(
+            FixtureAssets {
+                base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
+            },
+            fonts,
+            shots,
+        ),
+        (Err(error), _) => {
             eprintln!("poodle-window-capture: {error:#}");
+            std::process::exit(1)
+        }
+        (Ok(_), None) => {
+            eprintln!("poodle-window-capture: the fixture Inter fonts could not be loaded");
             std::process::exit(1)
         }
     }
 }
 
 /// Everything that can fail before a window exists happens here.
-fn prepare(args: &FixtureArgs) -> Result<transport::Scene<FixtureRoot, FixtureAssets>> {
+fn prepare(args: &FixtureArgs) -> Result<transport::Shot<FixtureRoot>> {
     let fixtures = inventory::load_inventory()?;
     let fixture = fixtures
         .iter()
@@ -582,13 +606,10 @@ fn prepare(args: &FixtureArgs) -> Result<transport::Scene<FixtureRoot, FixtureAs
     let out_png = args.out_png.clone();
     let out_receipt = args.out_receipt.clone();
 
-    Ok(transport::Scene {
+    Ok(transport::Shot {
+        label: receipt_fixture.name.clone(),
         logical_width,
         logical_height,
-        assets: FixtureAssets {
-            base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
-        },
-        fonts: inter_fonts()?,
         build: Box::new(move |_window, cx: &mut App| {
             cx.new(|_| FixtureRoot {
                 node: view_node,

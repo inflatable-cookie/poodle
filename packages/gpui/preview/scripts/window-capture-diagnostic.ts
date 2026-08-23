@@ -38,6 +38,8 @@ const HEIGHT = 80;
 const THEME = "default";
 const CONTROL_SIZE = "md";
 const REPEATS = 3;
+/** Mirrors `MIN_FOREGROUND_SAMPLES` in `window_capture/transport.rs`. */
+const MIN_FOREGROUND_SAMPLES = 8;
 
 let failures = 0;
 function check(label: string, ok: boolean, detail = ""): void {
@@ -71,7 +73,7 @@ interface Receipt {
   scale: number;
   device_dimensions: { width: number; height: number };
   png_sha256: string;
-  foreground: { baseline: string | null; observed: string[]; samples: number; changed: boolean };
+  foreground: { baseline: string; observed: string[]; samples: number; verdict: string };
 }
 
 /** Every claim a receipt makes, verified against the files it describes. */
@@ -102,8 +104,20 @@ function verifyPair(pngPath: string, receiptPath: string): string | null {
   if (receipt.scale !== 2) return "receipt scale is not 2.0";
   if (size.width !== WIDTH * 2) return `device width ${size.width} != logical x 2`;
   if (size.height !== HEIGHT * 2) return `device height ${size.height} != logical x 2`;
-  if (receipt.foreground.changed) return "the run changed the frontmost application";
-  if (receipt.foreground.samples < 2) return "the run recorded no frontmost-application samples";
+  // Three-valued on purpose: "did not change" and "could not tell" are
+  // different answers and only one is proof.
+  if (receipt.foreground.verdict !== "proved") {
+    return `foreground verdict is '${receipt.foreground.verdict}', not 'proved'`;
+  }
+  if (typeof receipt.foreground.baseline !== "string" || receipt.foreground.baseline.length === 0) {
+    return "the run read no baseline frontmost application";
+  }
+  if (receipt.foreground.observed.some((app) => app !== receipt.foreground.baseline)) {
+    return "another application was frontmost during the run";
+  }
+  if (receipt.foreground.samples < MIN_FOREGROUND_SAMPLES) {
+    return `only ${receipt.foreground.samples} frontmost-application samples, ${MIN_FOREGROUND_SAMPLES} required`;
+  }
   return null;
 }
 
@@ -156,13 +170,13 @@ try {
     console.log(`  device:    ${receipt.device_dimensions.width}x${receipt.device_dimensions.height}`);
     console.log(
       `  foreground: baseline=${receipt.foreground.baseline} observed=${JSON.stringify(receipt.foreground.observed)} ` +
-        `samples=${receipt.foreground.samples} changed=${receipt.foreground.changed}`,
+        `samples=${receipt.foreground.samples} verdict=${receipt.foreground.verdict}`,
     );
     check(
-      "the frontmost application never changed across every capture",
+      "every capture proved it left the frontmost application alone",
       runs.every((run) =>
         existsSync(run.receipt) &&
-        !(JSON.parse(readFileSync(run.receipt, "utf8")) as Receipt).foreground.changed
+        (JSON.parse(readFileSync(run.receipt, "utf8")) as Receipt).foreground.verdict === "proved"
       ),
     );
   }

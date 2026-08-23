@@ -75,6 +75,7 @@ pub fn overlay_frame_begin() {
     // focused node that vanished paints nothing this frame, and its entry
     // must not survive it.
     crate::clear_painted_rings();
+    super::clear_painted_inset_shadows();
 }
 
 /// End a rendered frame: drop focus requests the frame's paint never applied

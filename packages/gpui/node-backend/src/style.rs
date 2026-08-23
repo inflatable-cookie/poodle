@@ -297,11 +297,10 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
     }
 
     if !style.shadow_layers.is_empty() {
-        // APPROXIMATION: crates.io gpui 0.2.2 `BoxShadow` has no inset flag,
-        // so inset (highlight) layers are dropped; drop layers map exactly.
-        // g15.045 projected them through the fork's added `inset` field;
-        // g16.005 restored the published crate identity, and the flag went
-        // with it. Reinstate the projection only if upstream publishes it.
+        // Drop layers only. crates.io gpui 0.2.2 `BoxShadow` has no inset
+        // flag, so inset (highlight) layers cannot ride this refinement —
+        // `inset_shadow::apply` paints them instead, and the two halves are
+        // complementary, not a filter that loses one of them.
         let shadows = style
             .shadow_layers
             .iter()

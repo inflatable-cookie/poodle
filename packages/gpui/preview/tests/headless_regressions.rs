@@ -4081,3 +4081,233 @@ fn a_removed_focused_node_leaves_no_painted_ring() {
         assert!(poodle_gpui_node_backend::painted_rings().is_empty());
     });
 }
+
+
+// ── Inset shadow projection (g16.005) ──────────────────────────────────────
+//
+// crates.io `gpui::BoxShadow` has no `inset` flag, so the node backend paints
+// inset layers itself as per-side bands inside the padding box. Accordion,
+// ActionDiscoveryPanel, ListCard, Popover, and Tabs all depend on this; band
+// arithmetic is unit-tested in the backend, and what these prove is that the
+// real paint pass emits them.
+
+const INSET_ID: &str = "inset-shadow-proof";
+
+/// Stamp the observation id on the first node in the tree that declares an
+/// inset layer. Real compositions put the highlight on an inner surface, not
+/// on the composition root, and hunting for it by hand would just encode this
+/// component's current shape into the test.
+fn stamp_first_inset_node(node: &mut Node) -> bool {
+    if node.style.shadow_layers.iter().any(|layer| layer.inset) {
+        node.id = Some(INSET_ID.to_owned());
+        return true;
+    }
+    for child in &mut node.children {
+        if stamp_first_inset_node(child) {
+            return true;
+        }
+    }
+    false
+}
+
+fn inset_shadow_node(layers: Vec<poodle_node::ShadowLayer>) -> Node {
+    let mut node = Node::container();
+    node.id = Some(INSET_ID.to_owned());
+    node.style.descriptor.layout.width = poodle_node::LayoutSizing::Fixed(120.0);
+    node.style.descriptor.layout.height = poodle_node::LayoutSizing::Fixed(48.0);
+    node.style.descriptor.background = Some(poodle_node::ColorValue(0.1, 0.1, 0.1, 1.0));
+    node.style.shadow_layers = layers;
+    node
+}
+
+fn painted_inset_bands(
+    cx: &mut TestAppContext,
+    layers: Vec<poodle_node::ShadowLayer>,
+) -> Vec<poodle_gpui_node_backend::PaintedInsetShadow> {
+    let node = Arc::new(Mutex::new(inset_shadow_node(layers)));
+    let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+    driver.draw_frame();
+    poodle_gpui_node_backend::painted_inset_shadows_for(INSET_ID)
+}
+
+/// The Popover and Accordion top highlight: `offset (0, 1)`, no spread. The
+/// paint pass must emit a 1px band on the top edge only, clipped to the
+/// element's own padding box.
+#[test]
+fn a_top_highlight_inset_layer_paints_a_top_edge_band() {
+    run_headless(|cx| {
+        let painted = painted_inset_bands(
+            cx,
+            vec![poodle_node::ShadowLayer {
+                offset_x: 0.0,
+                offset_y: 1.0,
+                blur: 0.0,
+                spread: 0.0,
+                color: poodle_node::ColorValue(1.0, 1.0, 1.0, 0.08),
+                inset: true,
+            }],
+        );
+        assert_eq!(painted.len(), 1, "one inset layer paints one band set");
+        let band = painted[0];
+        assert_eq!(band.top, 1.0, "the highlight is a 1px top band");
+        assert_eq!((band.left, band.right, band.bottom), (0.0, 0.0, 0.0));
+        assert_eq!(band.color, poodle_node::ColorValue(1.0, 1.0, 1.0, 0.08));
+        assert_eq!(
+            [band.bounds[2], band.bounds[3]],
+            [120.0, 48.0],
+            "the band is clipped to the element's padding box"
+        );
+    });
+}
+
+/// The Tabs drop-target and ActionDiscoveryPanel active ring: spread only, so
+/// an even band on all four sides.
+#[test]
+fn a_spread_inset_layer_paints_an_even_inner_ring() {
+    run_headless(|cx| {
+        let painted = painted_inset_bands(
+            cx,
+            vec![poodle_node::ShadowLayer {
+                offset_x: 0.0,
+                offset_y: 0.0,
+                blur: 0.0,
+                spread: 2.0,
+                color: poodle_node::ColorValue(0.3, 0.6, 1.0, 1.0),
+                inset: true,
+            }],
+        );
+        assert_eq!(painted.len(), 1);
+        let band = painted[0];
+        assert_eq!(
+            (band.left, band.right, band.top, band.bottom),
+            (2.0, 2.0, 2.0, 2.0)
+        );
+    });
+}
+
+/// ListCard composes a highlight ring and an active leading bar. Both must
+/// paint, in declaration order — the regression this whole projection exists
+/// to prevent was losing them.
+#[test]
+fn stacked_inset_layers_all_paint_in_declaration_order() {
+    run_headless(|cx| {
+        let painted = painted_inset_bands(
+            cx,
+            vec![
+                poodle_node::ShadowLayer {
+                    offset_x: 0.0,
+                    offset_y: 0.0,
+                    blur: 0.0,
+                    spread: 1.0,
+                    color: poodle_node::ColorValue(0.3, 0.6, 1.0, 0.12),
+                    inset: true,
+                },
+                poodle_node::ShadowLayer {
+                    offset_x: 3.0,
+                    offset_y: 0.0,
+                    blur: 0.0,
+                    spread: 0.0,
+                    color: poodle_node::ColorValue(0.3, 0.6, 1.0, 1.0),
+                    inset: true,
+                },
+            ],
+        );
+        assert_eq!(painted.len(), 2, "both layers paint");
+        assert_eq!(painted[0].top, 1.0, "the highlight ring is first");
+        assert_eq!(painted[1].left, 3.0, "the leading bar is second");
+        assert_eq!(painted[1].top, 0.0);
+    });
+}
+
+/// A drop layer and an inset layer on the same node take different routes —
+/// the drop through the shadow refinement, the inset through the painter —
+/// and BOTH must survive.
+#[test]
+fn a_drop_layer_and_an_inset_layer_coexist() {
+    run_headless(|cx| {
+        let painted = painted_inset_bands(
+            cx,
+            vec![
+                poodle_node::ShadowLayer {
+                    offset_x: 0.0,
+                    offset_y: 2.0,
+                    blur: 8.0,
+                    spread: 0.0,
+                    color: poodle_node::ColorValue(0.0, 0.0, 0.0, 0.2),
+                    inset: false,
+                },
+                poodle_node::ShadowLayer {
+                    offset_x: 0.0,
+                    offset_y: 1.0,
+                    blur: 0.0,
+                    spread: 0.0,
+                    color: poodle_node::ColorValue(1.0, 1.0, 1.0, 0.4),
+                    inset: true,
+                },
+            ],
+        );
+        assert_eq!(painted.len(), 1, "only the inset layer takes this route");
+        assert_eq!(painted[0].top, 1.0);
+    });
+}
+
+/// A node with no inset layer paints no bands, so the registry cannot report
+/// a stale entry as evidence.
+#[test]
+fn a_node_without_inset_layers_paints_no_bands() {
+    run_headless(|cx| {
+        let painted = painted_inset_bands(
+            cx,
+            vec![poodle_node::ShadowLayer {
+                offset_x: 0.0,
+                offset_y: 2.0,
+                blur: 8.0,
+                spread: 0.0,
+                color: poodle_node::ColorValue(0.0, 0.0, 0.0, 0.2),
+                inset: false,
+            }],
+        );
+        assert!(painted.is_empty());
+    });
+}
+
+/// The end-to-end claim: a REAL Accordion, built by `poodle_render`, still
+/// paints its contracted item highlight after the crates.io recovery. This is
+/// the check that would have caught the regression the synthetic cases above
+/// cannot see — a component composing its own tree, not a hand-built node.
+#[test]
+fn a_real_accordion_still_paints_its_contracted_item_highlight() {
+    run_headless(|cx| {
+        let mut node = poodle_render::accordion(
+            &poodle_specs::AccordionSpec::new(vec![
+                poodle_specs::AccordionItemSpec::new("one", "One"),
+                poodle_specs::AccordionItemSpec::new("two", "Two"),
+            ]),
+            &RenderContext::new(&theme()),
+            None,
+        );
+        // The highlight lives on an item surface, not the composition root.
+        assert!(
+            stamp_first_inset_node(&mut node),
+            "the accordion composition must declare an inset layer at all"
+        );
+        let node = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
+        driver.draw_frame();
+
+        let painted = poodle_gpui_node_backend::painted_inset_shadows_for(INSET_ID);
+        assert_eq!(
+            painted.len(),
+            1,
+            "the accordion's contracted inset highlight must still paint"
+        );
+        assert!(
+            painted[0].top > 0.0,
+            "the highlight is a top-edge band, got {painted:?}"
+        );
+        assert!(
+            painted[0].bounds[2] > 0.0 && painted[0].bounds[3] > 0.0,
+            "the band must be clipped to a real padding box, got {painted:?}"
+        );
+    });
+}

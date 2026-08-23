@@ -18,17 +18,25 @@
 //! It is windowed, not offscreen and not headless. It needs a macOS window
 //! server and Screen Recording permission, so it is an explicit operator
 //! diagnostic and stays out of `qa`, CI, and every release gate.
+//!
+//! A whole batch runs in ONE process. `capture_batch` opens, settles,
+//! captures, and closes each scene's window in turn on a single async driver,
+//! so an 18-fixture run with its repeat pass is one application and 36
+//! sequential windows — not 36 application launches. One foreground monitor
+//! spans the whole batch, so its evidence covers every capture in it.
 
 use std::borrow::Cow;
+use std::cell::RefCell;
 use std::collections::BTreeSet;
+use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use anyhow::{bail, Context as _, Result};
 use gpui::{
-    px, size, App, Application, AssetSource, Bounds, Entity, Point, Render, Window, WindowBounds,
-    WindowOptions,
+    px, size, App, AppContext as _, Application, AssetSource, AsyncApp, Bounds, Entity, Point,
+    Render, VisualContext as _, Window, WindowBounds, WindowOptions,
 };
 use serde::Serialize;
 
@@ -68,11 +76,16 @@ const SETTLE_DEADLINE: Duration = Duration::from_secs(20);
 /// How often the frontmost application is sampled.
 const FOREGROUND_SAMPLE_INTERVAL: Duration = Duration::from_millis(50);
 
-static FRAMES_DRAWN: AtomicBool = AtomicBool::new(false);
+/// How often the settle chain is polled while the run loop paints.
+const SETTLE_POLL: Duration = Duration::from_millis(10);
 
-/// The main thread's settled read, published for the capture thread. `None`
-/// means the read has not run yet; `Some(Err(_))` fails the whole invocation.
-static SETTLED: Mutex<Option<Result<()>>> = Mutex::new(None);
+/// Fewest successful frontmost-application readings a run must have before
+/// its evidence supports the claim. The monitor samples every
+/// `FOREGROUND_SAMPLE_INTERVAL`, and every capture waits at least
+/// `MIN_SETTLE`, so a healthy run records several times this many. A run that
+/// somehow recorded fewer has not watched the foreground long enough to say
+/// anything about it.
+pub const MIN_FOREGROUND_SAMPLES: u64 = 8;
 
 /// What a scene's frame hook reports about its own readiness.
 pub enum Settled {
@@ -100,14 +113,32 @@ pub fn settle_after(frames: u32) -> FrameHook {
     })
 }
 
+/// Whether a run's frontmost-application evidence supports the capture
+/// contract's claim.
+///
+/// Three states, not a boolean, because "did not change" and "could not tell"
+/// are different answers and only one of them is proof.
+#[derive(Serialize, Clone, Copy, PartialEq, Eq, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum ForegroundVerdict {
+    /// A baseline was read, enough samples were taken, and every one of them
+    /// was the baseline. This is the only publishable verdict.
+    Proved,
+    /// Some other application was frontmost at least once.
+    Changed,
+    /// No baseline, no samples, or too few of them. No evidence is not the
+    /// same as evidence of no change.
+    Unprovable,
+}
+
 /// What the run observed about the frontmost application, recorded on every
-/// receipt. `changed` is the claim the capture contract actually makes.
+/// receipt.
 #[derive(Serialize, Clone)]
 pub struct ForegroundEvidence {
     pub baseline: Option<String>,
     pub observed: Vec<String>,
     pub samples: u64,
-    pub changed: bool,
+    pub verdict: ForegroundVerdict,
 }
 
 #[derive(Default)]
@@ -149,7 +180,10 @@ impl ForegroundMonitor {
         let baseline = frontmost_application();
         let state = Arc::new(Mutex::new(ForegroundState {
             observed: baseline.iter().cloned().collect(),
-            samples: 1,
+            // Only a successful reading counts. An unreadable baseline leaves
+            // this at zero, which keeps the verdict `Unprovable` rather than
+            // letting an empty run look like a watched one.
+            samples: u64::from(baseline.is_some()),
             baseline,
         }));
         let stop = Arc::new(AtomicBool::new(false));
@@ -168,32 +202,48 @@ impl ForegroundMonitor {
         Self { state, stop }
     }
 
-    /// Stop sampling and report what was seen.
-    pub fn finish(&self) -> ForegroundEvidence {
-        self.stop.store(true, Ordering::Release);
+    /// Snapshot what has been seen so far, without stopping. A batch calls
+    /// this once per capture; the samples accumulate across the whole run.
+    pub fn evidence(&self) -> ForegroundEvidence {
         let state = self.state.lock().expect("foreground state");
         let observed: Vec<String> = state.observed.iter().cloned().collect();
         ForegroundEvidence {
-            changed: foreground_changed(state.baseline.as_deref(), &observed),
+            verdict: evaluate_foreground(state.baseline.as_deref(), &observed, state.samples),
             baseline: state.baseline.clone(),
             observed,
             samples: state.samples,
         }
     }
+
+    /// Stop sampling. Called once the batch is finished.
+    pub fn stop(&self) {
+        self.stop.store(true, Ordering::Release);
+    }
 }
 
-/// Did the frontmost application change during the run?
+/// Grade a run's foreground evidence.
 ///
-/// A pure function so the claim the receipt makes is testable without a
-/// window server. Note the `None` baseline case: no frontmost application at
-/// all (a locked screen, a login window) means the run cannot prove it kept
-/// its hands off the foreground, so an observation is treated as a change
-/// rather than as an absence of evidence.
-pub fn foreground_changed(baseline: Option<&str>, observed: &[String]) -> bool {
-    match baseline {
-        Some(baseline) => observed.iter().any(|app| app != baseline),
-        None => !observed.is_empty(),
+/// A pure function, so the claim every receipt makes is testable without a
+/// window server. It fails closed in both directions that matter: an
+/// unreadable baseline and a too-short watch are `Unprovable`, never
+/// `Proved`.
+pub fn evaluate_foreground(
+    baseline: Option<&str>,
+    observed: &[String],
+    samples: u64,
+) -> ForegroundVerdict {
+    let Some(baseline) = baseline else {
+        // No frontmost application could be read at all — a locked screen or
+        // a login window. The run cannot say what it did or did not disturb.
+        return ForegroundVerdict::Unprovable;
+    };
+    if observed.iter().any(|app| app != baseline) {
+        return ForegroundVerdict::Changed;
     }
+    if observed.is_empty() || samples < MIN_FOREGROUND_SAMPLES {
+        return ForegroundVerdict::Unprovable;
+    }
+    ForegroundVerdict::Proved
 }
 
 /// Everything one capture produces, handed to the mode's finisher.
@@ -209,59 +259,76 @@ pub struct CaptureFacts {
 
 /// One capture scene: what to render, what to read once it has painted, and
 /// what to write once it has been captured.
-pub struct Scene<V: Render, A: AssetSource> {
+pub struct Shot<V: Render> {
+    /// A short name for progress output. Never enters a receipt.
+    pub label: String,
     pub logical_width: f32,
     pub logical_height: f32,
-    pub assets: A,
-    pub fonts: Vec<Cow<'static, [u8]>>,
     /// Builds the root view. Runs on the main thread.
     pub build: Box<dyn FnOnce(&mut Window, &mut App) -> Entity<V>>,
     /// Drives the scene to its settled frame and reads back whatever the
     /// receipt will carry. Runs on the main thread, once per painted frame.
     pub on_frame: FrameHook,
-    /// Writes the PNG and its receipt. Runs on the capture thread.
+    /// Writes the PNG and its receipt. Runs off the main thread.
     pub finish: Box<dyn FnOnce(&CaptureFacts) -> Result<()> + Send>,
 }
 
-/// Render `scene` in one non-activating window, capture that window, and exit.
+/// Render one scene in one non-activating window, capture it, and exit.
+pub fn capture<V: Render, A: AssetSource>(
+    assets: A,
+    fonts: Vec<Cow<'static, [u8]>>,
+    shot: Shot<V>,
+) -> ! {
+    capture_batch(assets, fonts, vec![shot])
+}
+
+/// Render every scene in turn — ONE process, one window at a time — then exit.
 ///
-/// This never returns: `Application::run` owns the process from here, so the
-/// capture thread terminates it with the run's exit status.
-pub fn capture<V: Render, A: AssetSource>(scene: Scene<V, A>) -> ! {
+/// The card asks for one bounded capture process for a fixture batch rather
+/// than a focus-capable application per fixture. This is that: the
+/// application starts once, and each shot opens its window, settles, is
+/// captured, and has its window removed before the next begins.
+pub fn capture_batch<V: Render, A: AssetSource>(
+    assets: A,
+    fonts: Vec<Cow<'static, [u8]>>,
+    shots: Vec<Shot<V>>,
+) -> ! {
     if !cfg!(target_os = "macos") {
         fail(anyhow::anyhow!(
             "window capture requires macOS: the window-server capture path exists nowhere else"
         ));
     }
+    if shots.is_empty() {
+        fail(anyhow::anyhow!("the capture batch is empty"));
+    }
 
+    // Baseline BEFORE the application exists, let alone a window.
     let monitor = Arc::new(ForegroundMonitor::start());
 
-    let Scene {
-        logical_width,
-        logical_height,
-        assets,
-        fonts,
-        build,
-        on_frame,
-        finish,
-    } = scene;
-
     Application::new().with_assets(assets).run(move |cx: &mut App| {
-        if let Err(error) = open(cx, logical_width, logical_height, fonts, build, on_frame) {
-            fail(error);
+        if !fonts.is_empty() {
+            if let Err(error) = cx
+                .text_system()
+                .add_fonts(fonts)
+                .with_context(|| "load the capture scene fonts")
+            {
+                fail(error);
+            }
         }
 
-        // The window is open and never activated. Everything from here runs
-        // off the main thread so the run loop keeps drawing and the
-        // foreground monitor keeps sampling.
         let monitor = Arc::clone(&monitor);
-        std::thread::spawn(move || {
-            let outcome = run_capture(logical_width, logical_height, &monitor, finish);
-            match outcome {
-                Ok(()) => std::process::exit(0),
-                Err(error) => fail(error),
+        cx.spawn(async move |cx: &mut AsyncApp| {
+            let total = shots.len();
+            for (index, shot) in shots.into_iter().enumerate() {
+                if let Err(error) = capture_one(cx, shot, &monitor, index + 1, total).await {
+                    monitor.stop();
+                    fail(error);
+                }
             }
-        });
+            monitor.stop();
+            std::process::exit(0);
+        })
+        .detach();
     });
 
     // `Application::run` does not return on macOS; if it ever does, the run
@@ -271,19 +338,21 @@ pub fn capture<V: Render, A: AssetSource>(scene: Scene<V, A>) -> ! {
     ));
 }
 
-fn open<V: Render>(
-    cx: &mut App,
-    logical_width: f32,
-    logical_height: f32,
-    fonts: Vec<Cow<'static, [u8]>>,
-    build: Box<dyn FnOnce(&mut Window, &mut App) -> Entity<V>>,
-    on_frame: FrameHook,
+async fn capture_one<V: Render>(
+    cx: &mut AsyncApp,
+    shot: Shot<V>,
+    monitor: &ForegroundMonitor,
+    index: usize,
+    total: usize,
 ) -> Result<()> {
-    if !fonts.is_empty() {
-        cx.text_system()
-            .add_fonts(fonts)
-            .with_context(|| "load the capture scene fonts")?;
-    }
+    let Shot {
+        label,
+        logical_width,
+        logical_height,
+        build,
+        on_frame,
+        finish,
+    } = shot;
 
     let bounds = Bounds {
         origin: Point {
@@ -301,85 +370,93 @@ fn open<V: Render>(
     //
     // `focus: false` with no activation call anywhere is the focus contract.
     let window = cx
-        .open_window(
-            WindowOptions {
-                window_bounds: Some(WindowBounds::Windowed(bounds)),
-                titlebar: None,
-                focus: false,
-                show: true,
-                is_movable: false,
-                is_resizable: false,
-                is_minimizable: false,
-                ..Default::default()
-            },
-            build,
-        )
-        .with_context(|| "open the capture window")?;
-
-    window
-        .update(cx, |_, window, _cx| {
-            window.refresh();
-            schedule_settle(window, 1, on_frame);
+        .update(|cx: &mut App| {
+            cx.open_window(
+                WindowOptions {
+                    window_bounds: Some(WindowBounds::Windowed(bounds)),
+                    titlebar: None,
+                    focus: false,
+                    show: true,
+                    is_movable: false,
+                    is_resizable: false,
+                    is_minimizable: false,
+                    ..Default::default()
+                },
+                build,
+            )
         })
-        .with_context(|| "schedule the settle chain")?;
+        .with_context(|| format!("open the capture window for {label}"))?
+        .with_context(|| format!("open the capture window for {label}"))?;
 
-    Ok(())
-}
+    let opened = Instant::now();
+    let settled: Rc<RefCell<Option<Result<()>>>> = Rc::new(RefCell::new(None));
+    let chain = Rc::clone(&settled);
+    cx.update_window(window.into(), move |_, window, _cx| {
+        window.refresh();
+        schedule_settle(window, 1, on_frame, chain);
+    })
+    .with_context(|| format!("schedule the settle chain for {label}"))?;
 
-/// Run the scene's frame hook on the main thread once per painted frame until
-/// it reports itself settled, then release the capture thread. The hook must
-/// see the same painted frame the capture will.
-fn schedule_settle(window: &mut Window, frame: u32, mut on_frame: FrameHook) {
-    window.on_next_frame(move |window, cx| {
-        let outcome = on_frame(window, cx, frame);
-        let settled = match outcome {
-            Ok(Settled::Ready) => Some(Ok(())),
-            Ok(Settled::Wait) if frame < MAX_SETTLE_FRAMES => None,
-            Ok(Settled::Wait) => Some(Err(anyhow::anyhow!(
-                "the scene never reported itself settled within {MAX_SETTLE_FRAMES} frames"
-            ))),
-            Err(error) => Some(Err(error)),
-        };
-        match settled {
-            Some(result) => {
-                *SETTLED.lock().expect("settle slot") = Some(result);
-                FRAMES_DRAWN.store(true, Ordering::Release);
-            }
-            None => {
-                window.refresh();
-                schedule_settle(window, frame + 1, on_frame);
-            }
+    // Wait for the scene to report itself settled. The run loop keeps
+    // painting on this thread between polls.
+    loop {
+        if settled.borrow().is_some() {
+            break;
         }
-    });
-}
+        if opened.elapsed() > SETTLE_DEADLINE {
+            bail!(
+                "{label}: the capture window never reported a settled frame within {}s",
+                SETTLE_DEADLINE.as_secs()
+            );
+        }
+        cx.background_executor().timer(SETTLE_POLL).await;
+    }
+    settled
+        .borrow_mut()
+        .take()
+        .expect("checked above")
+        .with_context(|| format!("settle {label}"))?;
 
-fn run_capture(
-    logical_width: f32,
-    logical_height: f32,
-    monitor: &ForegroundMonitor,
-    finish: Box<dyn FnOnce(&CaptureFacts) -> Result<()> + Send>,
-) -> Result<()> {
-    wait_for_settled_frame()?;
-    match SETTLED.lock().expect("settle slot").take() {
-        Some(Ok(())) => {}
-        Some(Err(error)) => return Err(error),
-        None => bail!("the settle chain never ran"),
+    // Frames drawn is not readiness. The preview's own screenshot path
+    // learned this: a capture taken too early comes back at half the device
+    // size because the window has painted but is not yet on the Retina
+    // backing store.
+    while opened.elapsed() < MIN_SETTLE {
+        cx.background_executor().timer(SETTLE_POLL).await;
     }
 
-    let png = capture_own_window()?;
+    // `screencapture` blocks; run it off the main thread so the run loop
+    // keeps drawing and the foreground monitor keeps sampling.
+    let png = cx
+        .background_executor()
+        .spawn(async move { capture_own_window() })
+        .await
+        .with_context(|| format!("capture {label}"))?;
+
     let (device_width, device_height) = png_dimensions(&png)?;
-    verify_device_size(logical_width, logical_height, device_width, device_height)?;
+    verify_device_size(logical_width, logical_height, device_width, device_height)
+        .with_context(|| format!("capture {label}"))?;
 
     // The focus claim is checked before anything is published: a run that
-    // changed the frontmost application is not evidence, it is a defect.
-    let foreground = monitor.finish();
-    if foreground.changed {
-        bail!(
-            "the capture changed the frontmost application (baseline {:?}, observed {:?}) — \
-             the non-activating contract was violated and no capture was published",
+    // changed the frontmost application, or that cannot show it did not, is
+    // not evidence.
+    let foreground = monitor.evidence();
+    match foreground.verdict {
+        ForegroundVerdict::Proved => {}
+        ForegroundVerdict::Changed => bail!(
+            "{label}: the capture changed the frontmost application (baseline {:?}, observed \
+             {:?}) — the non-activating contract was violated and nothing was published",
             foreground.baseline,
             foreground.observed
-        );
+        ),
+        ForegroundVerdict::Unprovable => bail!(
+            "{label}: the run cannot prove it left the foreground alone (baseline {:?}, observed \
+             {:?}, {} samples, {MIN_FOREGROUND_SAMPLES} required). No evidence is not the same \
+             as evidence of no change, so nothing was published.",
+            foreground.baseline,
+            foreground.observed,
+            foreground.samples
+        ),
     }
 
     let facts = CaptureFacts {
@@ -389,23 +466,43 @@ fn run_capture(
         scale: ACCEPTED_SCALE,
         foreground,
     };
-    finish(&facts)
+    finish(&facts).with_context(|| format!("publish {label}"))?;
+    eprintln!("[{index}/{total}] {label}");
+
+    // Close this window before the next one opens: one window at a time, for
+    // the whole batch.
+    cx.update_window(window.into(), |_, window, _cx| window.remove_window())
+        .with_context(|| format!("close the capture window for {label}"))?;
+    Ok(())
 }
 
-fn wait_for_settled_frame() -> Result<()> {
-    let started = Instant::now();
-    loop {
-        if FRAMES_DRAWN.load(Ordering::Acquire) && started.elapsed() >= MIN_SETTLE {
-            return Ok(());
+/// Run the scene's frame hook on the main thread once per painted frame until
+/// it reports itself settled, then publish the outcome for the driver. The
+/// hook must see the same painted frame the capture will.
+fn schedule_settle(
+    window: &mut Window,
+    frame: u32,
+    mut on_frame: FrameHook,
+    settled: Rc<RefCell<Option<Result<()>>>>,
+) {
+    window.on_next_frame(move |window, cx| {
+        let outcome = on_frame(window, cx, frame);
+        let done = match outcome {
+            Ok(Settled::Ready) => Some(Ok(())),
+            Ok(Settled::Wait) if frame < MAX_SETTLE_FRAMES => None,
+            Ok(Settled::Wait) => Some(Err(anyhow::anyhow!(
+                "the scene never reported itself settled within {MAX_SETTLE_FRAMES} frames"
+            ))),
+            Err(error) => Some(Err(error)),
+        };
+        match done {
+            Some(result) => *settled.borrow_mut() = Some(result),
+            None => {
+                window.refresh();
+                schedule_settle(window, frame + 1, on_frame, settled);
+            }
         }
-        if started.elapsed() > SETTLE_DEADLINE {
-            bail!(
-                "the capture window never reported a settled frame within {}s",
-                SETTLE_DEADLINE.as_secs()
-            );
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
+    });
 }
 
 /// The exact device size a logical scene must capture at. A pure function so
@@ -600,28 +697,107 @@ mod tests {
         names.iter().map(|n| n.to_string()).collect()
     }
 
+    const ENOUGH: u64 = MIN_FOREGROUND_SAMPLES;
+
     #[test]
-    fn a_run_that_only_ever_saw_the_baseline_did_not_take_focus() {
-        assert!(!foreground_changed(
-            Some("com.example.editor"),
-            &apps(&["com.example.editor"])
-        ));
+    fn a_run_that_only_ever_saw_the_baseline_is_proof() {
+        assert_eq!(
+            evaluate_foreground(
+                Some("com.example.editor"),
+                &apps(&["com.example.editor"]),
+                ENOUGH
+            ),
+            ForegroundVerdict::Proved
+        );
     }
 
     #[test]
-    fn any_other_frontmost_application_counts_as_a_change() {
-        assert!(foreground_changed(
-            Some("com.example.editor"),
-            &apps(&["com.example.editor", "com.inflatablecookie.poodle-window-capture"])
-        ));
+    fn any_other_frontmost_application_is_a_change() {
+        assert_eq!(
+            evaluate_foreground(
+                Some("com.example.editor"),
+                &apps(&[
+                    "com.example.editor",
+                    "com.inflatablecookie.poodle-window-capture"
+                ]),
+                ENOUGH
+            ),
+            ForegroundVerdict::Changed
+        );
     }
 
-    /// Without a baseline the run has no evidence, and no evidence is not the
-    /// same as proof. It must not pass.
+    /// The blocker this closes: without a baseline the run watched nothing,
+    /// and "nothing observed" must not read as "nothing happened". Both the
+    /// empty and the non-empty case are unprovable, and NEITHER is `Proved`.
     #[test]
-    fn an_absent_baseline_with_any_observation_is_not_proof() {
-        assert!(foreground_changed(None, &apps(&["com.example.editor"])));
-        assert!(!foreground_changed(None, &[]));
+    fn an_absent_baseline_is_never_proof() {
+        assert_eq!(
+            evaluate_foreground(None, &[], ENOUGH),
+            ForegroundVerdict::Unprovable
+        );
+        assert_eq!(
+            evaluate_foreground(None, &apps(&["com.example.editor"]), ENOUGH),
+            ForegroundVerdict::Unprovable
+        );
+        assert_eq!(
+            evaluate_foreground(None, &[], 0),
+            ForegroundVerdict::Unprovable
+        );
+    }
+
+    /// A watch too short to mean anything is also not proof. A capture takes
+    /// at least `MIN_SETTLE`, so a healthy run records many times this.
+    #[test]
+    fn too_few_samples_is_never_proof() {
+        for samples in 0..MIN_FOREGROUND_SAMPLES {
+            assert_eq!(
+                evaluate_foreground(
+                    Some("com.example.editor"),
+                    &apps(&["com.example.editor"]),
+                    samples
+                ),
+                ForegroundVerdict::Unprovable,
+                "{samples} samples must not prove anything"
+            );
+        }
+        assert_eq!(
+            evaluate_foreground(
+                Some("com.example.editor"),
+                &apps(&["com.example.editor"]),
+                MIN_FOREGROUND_SAMPLES
+            ),
+            ForegroundVerdict::Proved
+        );
+    }
+
+    /// A baseline that was read but never observed again: the monitor thread
+    /// never got a reading, so there is nothing to stand on.
+    #[test]
+    fn a_baseline_with_no_observations_is_not_proof() {
+        assert_eq!(
+            evaluate_foreground(Some("com.example.editor"), &[], ENOUGH),
+            ForegroundVerdict::Unprovable
+        );
+    }
+
+    /// A change outranks a short watch: if some other application WAS
+    /// frontmost, that is the finding, not "we could not tell".
+    #[test]
+    fn a_change_is_reported_even_when_the_watch_was_short() {
+        assert_eq!(
+            evaluate_foreground(Some("a"), &apps(&["a", "b"]), 1),
+            ForegroundVerdict::Changed
+        );
+    }
+
+    /// The verdict is the receipt's field, so its wire form is part of the
+    /// contract the TypeScript verifier reads.
+    #[test]
+    fn the_verdict_serialises_as_a_closed_lowercase_string() {
+        let json = |v: ForegroundVerdict| serde_json::to_string(&v).expect("verdict serialises");
+        assert_eq!(json(ForegroundVerdict::Proved), "\"proved\"");
+        assert_eq!(json(ForegroundVerdict::Changed), "\"changed\"");
+        assert_eq!(json(ForegroundVerdict::Unprovable), "\"unprovable\"");
     }
 
     /// A 1× display, or a window frame bigger than its content, must fail

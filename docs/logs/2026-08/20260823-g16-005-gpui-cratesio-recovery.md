@@ -72,17 +72,37 @@ them, and all of that is preserved.
 that call site later, against the fork's signature. It is the one delta the
 historical measurement did not predict.
 
-### The one behavioural loss
+### Inset shadows: painted, not dropped
 
-`BoxShadow` has no `inset` flag on crates.io 0.2.2, so the node backend
-returns to the pre-`g15.045` approximation: inset (highlight) shadow layers
-are dropped, drop layers project exactly, and an all-inset stack projects no
-shadow refinement at all. This is a real loss and it is asserted rather than
-quietly reinstated — `g15.045`'s two projection tests were rewritten to pin
-the drop (`inset_shadow_layers_are_dropped_and_drop_layers_map_exactly`,
-`the_fallback_descriptor_shadow_projects_its_single_drop_layer`) and a third
-case was added for the all-inset stack. A future upstream `inset` field is
-then a visible test change, not a silent one.
+`BoxShadow` has no `inset` flag on crates.io 0.2.2, so an inset layer cannot
+ride the ordinary shadow refinement. The first revision of this branch dropped
+those layers and rewrote the tests to accept the loss. Review rejected that
+correctly: Accordion, ActionDiscoveryPanel, ListCard, Popover, and Tabs all
+emit inset layers, so it was a renderer regression shipped inside a dependency
+recovery, and it hit the card's own stop condition.
+
+The backend paints them itself instead (`node-backend/src/inset_shadow.rs`).
+**Every inset layer Poodle declares has `blur == 0`**, which makes the CSS
+definition exactly a solid band inside the padding box: the shadow shape is
+that box offset by `(dx, dy)` and shrunk by `spread`, and the painted region
+is the box minus that shape. For zero blur the per-side widths fall straight
+out of the geometry:
+
+```
+left = max(spread + dx, 0)    right  = max(spread - dx, 0)
+top  = max(spread + dy, 0)    bottom = max(spread - dy, 0)
+```
+
+One `PaintQuad` with those per-side border widths, no background, and the
+element's INNER corner radii (`radius - border`) paints it exactly — through
+the same `gpui::canvas` seam, anchored the same way, that the g15.052 focus
+ring already uses. Two shapes cover all five real declarations, and both are
+exact: an inner ring (`spread` only) and an edge band (`offset` only).
+
+A blurred inset layer would not be exact. Nothing declares one; if one ever
+appears it paints the same solid band and records
+`surface.extended.shadow-inset-blur-approximated`, so the approximation shows
+up in probe evidence instead of becoming folklore.
 
 Everything else is preserved: component rendering, the presentation cascade,
 focus rings, the 18-case fixture inventory, receipt integrity, the comparison
@@ -119,6 +139,34 @@ The capture target no longer needs `gpui/test-support` in the shipping graph.
 The fork-era coupling between "capture" and "test-only APIs" is gone; the
 `window-capture` feature now enables only `sha2` and two `objc2-app-kit`
 feature flags.
+
+### Batch capture: one process, not one per fixture
+
+The card asks for one bounded capture process for a fixture batch rather than
+a focus-capable application per fixture. The first revision missed this: the
+comparison driver spawned the binary twice per fixture, so an 18-fixture run
+launched 36 applications. That is precisely the operator disruption the
+recovery is meant to remove.
+
+`--batch <manifest.json>` takes a closed JSON list of
+`{fixture, out, receipt}` and renders all of them in **one** process. The
+transport's driver is now an async loop on the main thread: open a window,
+settle it, read the frame back, capture it off-thread, publish, remove the
+window, next. One application, one window at a time, one foreground monitor
+spanning the whole batch. `test:visual-button-comparison-windowed` now makes a
+single invocation of 36 captures where it used to make 36.
+
+The manifest is validated to the same standard as a single `--fixture`
+invocation, entry by entry, **before the application starts** — so a bad name
+anywhere in the batch fails without a window ever opening — and duplicate
+output paths across entries are rejected, because a batch that overwrote its
+own earlier capture would publish evidence for a fixture it never kept.
+
+One honest consequence: the repeat pass is still a separate window, settle,
+and window-server capture, so it still catches nondeterministic layout,
+shaping, and compositing. What it no longer catches is nondeterminism that
+only appears across two *processes*. That is the trade the card asks for, and
+it is recorded here rather than left to be discovered.
 
 ### Freezing the loading spinner
 
@@ -166,13 +214,31 @@ during development (an error string and a test temp-directory name still said
 "offscreen"), which is how I know it is not decorative.
 
 **At runtime, on every capture.** `ForegroundMonitor` samples
-`NSWorkspace.frontmostApplication` every 50 ms — baseline taken **before** any
-window exists — for the whole run. `run_capture` evaluates it *before*
-publishing: a run whose frontmost application changed fails with both the
-baseline and the observed set, and writes nothing. `foreground_changed` is a
-pure function with its own tests, including the case that matters most: an
-absent baseline (locked screen, login window) with any observation counts as a
-change, because no evidence is not the same as proof.
+`NSWorkspace.frontmostApplication` every 50 ms — baseline taken **before** the
+application exists, let alone a window — for the whole run.
+
+The verdict is **three-valued**, not a boolean, because "did not change" and
+"could not tell" are different answers and only one of them is proof:
+
+| Verdict | Meaning |
+| --- | --- |
+| `proved` | a baseline was read, at least `MIN_FOREGROUND_SAMPLES` (8) readings were taken, and every one was the baseline |
+| `changed` | some other application was frontmost at least once |
+| `unprovable` | no baseline, no observations, or too few of them |
+
+The first revision returned "unchanged" for `(baseline: None, observed: [])`,
+so a run on a locked screen or login window could publish while proving
+nothing. Review caught it. `evaluate_foreground` is a pure function and only
+`proved` publishes; the other two fail with their own diagnostics naming the
+baseline, the observed set, and the sample count.
+
+The receipt verifier applies the same rule independently
+(`test/visual/button-comparison/receipt.ts`): a receipt is read on machines
+and at times far removed from the run that wrote it, so it must carry a
+non-empty baseline, a non-empty observed set containing only that baseline, at
+least 8 samples, and `verdict: "proved"`. Nine negative tests cover the
+producer side and nine the verifier side, including that the old boolean
+`changed: false` shape no longer validates.
 
 ## Source Policy
 
@@ -230,7 +296,7 @@ resolved: gpui 0.2.2 from registry+https://github.com/rust-lang/crates.io-index
 | Selector | Windowed? | Change |
 | --- | --- | --- |
 | `smoke:gpui-offscreen-capture` | — | **removed**; the transport it drove cannot exist on stock 0.2.2 |
-| `smoke:gpui-window-capture` | no | new; headless. Builds the target, runs its unit tests (activation boundary, device-size policy, foreground rule, publish atomicity), and proves 12 negative invocations are rejected during argument validation. In `ci:native`. |
+| `smoke:gpui-window-capture` | no | new; headless. Builds the target, runs its unit tests (activation boundary, device-size policy, foreground rule, publish atomicity), and proves 19 negative invocations — CLI and batch manifest alike — are rejected during argument validation. In `ci:native`. |
 | `capture:gpui-windowed` | **yes** | new; the capture itself. Repeat byte-identity, receipt verification, foreground evidence. Operator-approved only. |
 | `drift:gpui-consumer-identity` | no | new; the proof above. In `ci:native`. |
 | `test:visual-comparator` | no | new; the comparator's own 26 unit tests, split out so they stay headless |
@@ -252,15 +318,15 @@ preview/QA, release, workflow, tag, or publication command was run.
 
 | Check | Result |
 | --- | --- |
-| `cargo test -p poodle-gpui-node-backend` | 28/28 |
-| `regressions:native` (headless GPUI test platform) | 64/64 |
+| `cargo test -p poodle-gpui-node-backend` | 32/32 |
+| `regressions:native` (headless GPUI test platform) | 70/70 |
 | `probe:gpui-specimens` | 8/8 |
 | `catalogue` / `visual_fixture_inventory` | 7/7, 15/15 |
-| `cargo test --bin poodle-window-capture --features window-capture` | 32/32 |
-| `effigy smoke:gpui-window-capture` | 17/17 checks pass |
+| `cargo test --bin poodle-window-capture --features window-capture` | 42/42 |
+| `effigy smoke:gpui-window-capture` | 24/24 checks pass |
 | `effigy drift:gpui-consumer-identity` | 8/8 checks pass, negative control fails as required |
 | `bun test scripts/audit-repository-security.test.ts` | 12/12 |
-| `bun test test/visual/button-comparison/compare.test.ts` | 26/26 |
+| `bun test test/visual/button-comparison/compare.test.ts` | 35/35 |
 | `effigy ci:native` | pass (exit 0) |
 | `effigy qa` | pass (exit 0) |
 | `effigy docs:check` | pass (exit 0) |
@@ -313,6 +379,16 @@ Stated plainly, because the review run is the thing that settles them:
 - **Corner/shadow effects on the Svelte↔GPUI comparison.** If `(2)` shows new
   corner-region deltas that `g15.047` did not have, that is a finding for a
   follow-up card, not something this branch could have measured.
+- **Inset shadow PIXELS.** The band geometry is unit-tested, and the paint
+  pass is asserted headlessly through a real `poodle_render::accordion`
+  composition, so the bands provably reach `paint_quad` with the right widths,
+  colour, and padding box. What the worker cannot check is how those quads
+  rasterise. Run `(2)` and look at ListCard, Tabs, Accordion, and Popover.
+- **The deferred-overlay case.** Popover's panel is an overlay surface, so
+  observing its paint headlessly needs an overlay host the current regression
+  harness does not stand up. That is a pre-existing harness limit, not
+  something this branch introduced; the real-composition paint test uses
+  Accordion, which reaches the same `apply_shared` seam.
 
 ## Follow-ups (not in scope here)
 

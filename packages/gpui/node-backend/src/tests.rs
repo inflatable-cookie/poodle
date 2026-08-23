@@ -171,10 +171,10 @@ fn generated_identity_counters_are_isolated_per_thread() {
 }
 
 // ── Shadow projection ───────────────────────────────────────────────
-// crates.io gpui 0.2.2 `BoxShadow` has no inset flag (g16.005 restored that
-// published identity), so inset (highlight) layers are dropped and drop
-// layers map exactly. These tests pin the approximation so it stays visible
-// rather than becoming folklore.
+// crates.io gpui 0.2.2 `BoxShadow` has no inset flag, so the refinement
+// carries drop layers only and `inset_shadow` paints the inset ones. The two
+// halves are complementary: no layer is lost. `inset_shadow`'s own tests pin
+// the band geometry; these pin the split.
 
 /// The ring is its own paint channel: declaring one must not disturb the
 /// element's shadow stack (or any other refinement) — composition, not
@@ -205,11 +205,11 @@ fn a_focus_ring_leaves_the_shadow_stack_untouched() {
     assert_eq!(f32::from(shadows[0].offset.y), 2.0);
 }
 
-/// Drop layers project exactly; inset (highlight) layers are dropped because
-/// crates.io `gpui::BoxShadow` cannot express them. This asserts the loss so
-/// a future upstream `inset` field is a visible test change, not a silent one.
+/// Drop layers project into the shadow refinement exactly. Inset layers do
+/// not appear there — not because they are lost, but because
+/// `inset_shadow::apply` paints them, which the next tests cover.
 #[test]
-fn inset_shadow_layers_are_dropped_and_drop_layers_map_exactly() {
+fn the_shadow_refinement_carries_drop_layers_only() {
     let mut node = Node::button("ok");
     node.style.shadow_layers = vec![
         ShadowLayer {
@@ -234,21 +234,17 @@ fn inset_shadow_layers_are_dropped_and_drop_layers_map_exactly() {
         .style()
         .box_shadow
         .as_ref()
-        .expect("shadow layers project into the refinement");
-    assert_eq!(
-        shadows.len(),
-        1,
-        "the inset layer is dropped: gpui 0.2.2 BoxShadow has no inset flag"
-    );
+        .expect("the drop layer projects into the refinement");
+    assert_eq!(shadows.len(), 1, "the inset layer is not a drop shadow");
     assert_eq!(f32::from(shadows[0].offset.y), 2.0);
     assert_eq!(f32::from(shadows[0].blur_radius), 8.0);
     assert_eq!(f32::from(shadows[0].spread_radius), 1.0);
 }
 
-/// An all-inset stack projects nothing at all rather than an empty shadow
-/// refinement — the same shape the pre-g15.045 backend had.
+/// An all-inset stack declares no drop shadow at all, so the refinement stays
+/// absent rather than becoming an empty shadow list.
 #[test]
-fn an_all_inset_shadow_stack_projects_no_shadow_refinement() {
+fn an_all_inset_shadow_stack_declares_no_drop_shadow() {
     let mut node = Node::button("ok");
     node.style.shadow_layers = vec![ShadowLayer {
         offset_x: 0.0,
@@ -261,7 +257,7 @@ fn an_all_inset_shadow_stack_projects_no_shadow_refinement() {
     let mut el = apply_paint(div(), &node);
     assert!(
         el.style().box_shadow.is_none(),
-        "no projectable layer means no shadow refinement"
+        "no drop layer means no shadow refinement"
     );
 }
 
@@ -283,6 +279,79 @@ fn the_fallback_descriptor_shadow_projects_its_single_drop_layer() {
     assert_eq!(shadows.len(), 1);
     assert_eq!(f32::from(shadows[0].offset.y), 3.0);
     assert_eq!(f32::from(shadows[0].spread_radius), 0.0);
+}
+
+// ── Inset shadow band geometry (g16.005) ────────────────────────────
+//
+// Every inset layer Poodle declares has `blur == 0`, which makes a CSS inset
+// shadow exactly a solid band inside the padding box. These pin the geometry
+// against the five real declarations in `poodle-render`.
+
+fn inset(offset_x: f32, offset_y: f32, spread: f32) -> ShadowLayer {
+    ShadowLayer {
+        offset_x,
+        offset_y,
+        blur: 0.0,
+        spread,
+        color: ColorValue(1.0, 1.0, 1.0, 0.4),
+        inset: true,
+    }
+}
+
+/// Tabs drop target, ListCard highlighted, ActionDiscoveryPanel active: a
+/// spread-only layer is an even ring on all four sides.
+#[test]
+fn a_spread_only_inset_layer_is_an_even_inner_ring() {
+    let bands = crate::inset_shadow::band_widths(&inset(0.0, 0.0, 2.0));
+    assert_eq!(bands.left, 2.0);
+    assert_eq!(bands.right, 2.0);
+    assert_eq!(bands.top, 2.0);
+    assert_eq!(bands.bottom, 2.0);
+}
+
+/// Popover and Accordion: a downward offset with no spread is a band along
+/// the TOP inner edge only — the highlight line both contracts declare.
+#[test]
+fn a_downward_offset_inset_layer_is_a_top_edge_band() {
+    let bands = crate::inset_shadow::band_widths(&inset(0.0, 1.0, 0.0));
+    assert_eq!(bands.top, 1.0);
+    assert_eq!(bands.bottom, 0.0, "a negative band never paints");
+    assert_eq!(bands.left, 0.0);
+    assert_eq!(bands.right, 0.0);
+}
+
+/// ListCard active: a leading-edge bar, clipped by the card's radius. That
+/// clipping is why the contract uses an inset shadow rather than a child.
+#[test]
+fn a_rightward_offset_inset_layer_is_a_leading_edge_band() {
+    let bands = crate::inset_shadow::band_widths(&inset(3.0, 0.0, 0.0));
+    assert_eq!(bands.left, 3.0);
+    assert_eq!(bands.right, 0.0);
+    assert_eq!(bands.top, 0.0);
+    assert_eq!(bands.bottom, 0.0);
+}
+
+/// The other three directions, so the derivation is pinned rather than the
+/// two shapes that happen to exist today.
+#[test]
+fn inset_band_widths_follow_the_shadow_rect_in_every_direction() {
+    let up = crate::inset_shadow::band_widths(&inset(0.0, -1.5, 0.0));
+    assert_eq!(up.bottom, 1.5);
+    assert_eq!(up.top, 0.0);
+
+    let left = crate::inset_shadow::band_widths(&inset(-4.0, 0.0, 0.0));
+    assert_eq!(left.right, 4.0);
+    assert_eq!(left.left, 0.0);
+
+    // Offset and spread combine: the shadow rect moves AND shrinks, so the
+    // near side grows by both and the far side by their difference.
+    let both = crate::inset_shadow::band_widths(&inset(0.0, 2.0, 1.0));
+    assert_eq!(both.top, 3.0);
+    assert_eq!(both.bottom, 0.0, "spread 1 - offset 2 clamps at zero");
+
+    let offset_smaller = crate::inset_shadow::band_widths(&inset(0.0, 1.0, 3.0));
+    assert_eq!(offset_smaller.top, 4.0);
+    assert_eq!(offset_smaller.bottom, 2.0);
 }
 
 #[test]
