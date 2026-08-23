@@ -1,9 +1,9 @@
-# g16.006 — v0.2.2 release certification
+# g16.007 — v0.2.2 release certification
 
-Status: **blocked — waits for an accepted `g16.005` candidate and explicit
+Status: **blocked — waits for an accepted `g16.006` candidate and explicit
 operator approval**
-Depends on: `g16.005`
-Governing refs: `005-gpui-cratesio-recovery-candidate.md`,
+Depends on: `g16.006`
+Governing refs: `006-v022-release-candidate.md`,
 `../../contracts/001-working-rules.md`
 
 ## Outcome
@@ -35,4 +35,3 @@ This card is never dispatched to a worker.
   or package-install failure.
 - Do not mutate a release workflow without separate explicit operator
   approval.
-

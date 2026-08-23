@@ -1,8 +1,7 @@
 # g16 — Published Consumer Adoption
 
 Status: active — consumer adoption exposed a released GPUI source-identity
-defect; `g16.005` is the ready `v0.2.2` recovery candidate and Longhorn is
-paused
+defect; `g16.005` is the ready crates.io recovery and Longhorn is paused
 Posture: adoption-first with one blocking Poodle dependency-source recovery
 Opened: 2026-08-23
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -19,9 +18,9 @@ adjacent source tree.
 
 This is a consumer rollout, not a new parity or component programme. Longhorn
 proved that `v0.2.1` leaks Poodle's GPUI fork into the public Rust graph and is
-type-incompatible with crates.io GPUI 0.2.2. Cards `005` and `006` own the one
-blocking Poodle patch recovery; they do not reopen component work or add a
-compatibility shim.
+type-incompatible with crates.io GPUI 0.2.2. Cards `005`–`007` own the one
+blocking Poodle patch recovery and operator release gate; they do not reopen
+component work or add a compatibility shim.
 
 ## Adoption Policy
 
@@ -54,7 +53,7 @@ trees, and in-repository archived applications are excluded.
 
 | Lane | Repositories | State |
 | --- | --- | --- |
-| Release recovery | Poodle | `v0.2.2` crates.io GPUI candidate ready; certification blocked |
+| Release recovery | Poodle | crates.io GPUI implementation ready; candidate and certification blocked |
 | Foundation | Longhorn, Underlay, Soundcheck Library | Underlay and Soundcheck Library reached 0.2.1; Longhorn paused; all need final 0.2.2 state |
 | Adapter follow-up | Jetstream | waits for Longhorn |
 | Product applications | Acowtancy, Bovine Accelerator Desktop, Compli Me, Composer, Contact Patch, Figmatic, Finch, Loophole, Nucleus, Songsprout, Soundcheck, Underlay Reference | waits for the foundation it consumes |
@@ -71,15 +70,17 @@ trees, and in-repository archived applications are excluded.
    complete; PR 4 merged at `750005eb`
 4. [004 — Soundcheck Library Poodle 0.2.1 adoption](004-soundcheck-library-poodle-v021-adoption.md) —
    complete; PR 5 merged at `a720f22`
-5. [005 — GPUI crates.io recovery and v0.2.2 candidate](005-gpui-cratesio-recovery-candidate.md) —
-   ready; blocks every unfinished adoption lane
-6. [006 — v0.2.2 release certification](006-v022-release-certification.md) —
-   blocked; human-owned gate after the exact `005` candidate
-7. `007` — fresh Longhorn v0.2.2 adoption — compile after `006`
-8. `008` — Underlay 0.2.2 follow-up — compile after `006`
-9. `009` — Soundcheck Library 0.2.2 follow-up — compile after `006`
-10. `010` — Jetstream adoption — compile after Longhorn lands
-11. `011+` — exact product-repository cards — compile after their foundation
+5. [005 — GPUI crates.io recovery](005-gpui-cratesio-recovery.md) —
+   ready; restores and proves the public dependency boundary
+6. [006 — v0.2.2 release candidate](006-v022-release-candidate.md) —
+   blocked behind accepted `005`
+7. [007 — v0.2.2 release certification](007-v022-release-certification.md) —
+   blocked; human-owned gate after the exact `006` candidate
+8. `008` — fresh Longhorn v0.2.2 adoption — compile after `007`
+9. `009` — Underlay 0.2.2 follow-up — compile after `007`
+10. `010` — Soundcheck Library 0.2.2 follow-up — compile after `007`
+11. `011` — Jetstream adoption — compile after Longhorn lands
+12. `012+` — exact product-repository cards — compile after their foundation
     dependencies land and expose any migration requirements
 
 ## Current Task And Parallel Lanes

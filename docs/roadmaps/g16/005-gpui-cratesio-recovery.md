@@ -1,8 +1,8 @@
-# g16.005 — GPUI crates.io recovery and v0.2.2 candidate
+# g16.005 — GPUI crates.io recovery
 
 Status: **ready**
 Depends on: `g16.001`, completed crates.io non-activating capture prototype
-Blocks: Longhorn and every remaining `g16` adoption lane
+Blocks: `g16.006` and every remaining `g16` adoption lane
 Governing refs: `../../research/gpui-cratesio-nonactivating-capture.md`,
 `../../research/gpui-offscreen-capture-feasibility.md`,
 `../../contracts/001-working-rules.md`,
@@ -11,14 +11,14 @@ Governing refs: `../../research/gpui-cratesio-nonactivating-capture.md`,
 
 ## Outcome
 
-Prepare one exact Poodle `v0.2.2` recovery candidate that restores crates.io
-GPUI source compatibility for consumers. Replace the fork-only offscreen
-capture transport with an honestly named, non-activating window capture tool,
-without changing component behaviour or admitting visible capture to default
-QA.
+Restore crates.io GPUI source compatibility for consumers. Replace the
+fork-only offscreen capture transport with an honestly named, non-activating
+window capture tool, without changing component behaviour or admitting visible
+capture to default QA.
 
-This card prepares a candidate only. It must not create a tag, publish a
-package, or edit a release workflow. `g16.006` is the operator gate.
+This card proves the corrected source and capture boundary at the current
+version. `g16.006` owns versioning and candidate preparation; `g16.007` is the
+operator release gate.
 
 ## Failure Boundary
 
@@ -51,14 +51,8 @@ public package boundary.
   validation. It remains an operator-approved local diagnostic.
 - Add a deterministic source-policy check that rejects Git-sourced `gpui` or
   `gpui_platform` in Poodle's active package graph.
-- Advance all release-bearing TypeScript and Rust manifests, intra-repository
-  requirements, generated version stamps, and lockfiles to `0.2.2` in
-  lockstep.
-- Add `0.2.2` release notes and changelog history that name the dependency
-  identity defect and the capture downgrade honestly.
-- Run the complete headless release board, pack the same core/Svelte/React
-  artifacts as `v0.2.1`, and record one exact candidate SHA and artifact
-  digests. Core and Svelte remain the publish set; React remains source-only.
+- Record one execution log that names the source-identity failure, mechanical
+  API reversal, retained headless evidence, and window-capture limitations.
 
 ## Capture Contract
 
@@ -90,10 +84,8 @@ public package boundary.
       not run a `*-windowed` selector without renewed approval.
 - [ ] Default `effigy qa` and release gates open no window and require no
       Screen Recording permission.
-- [ ] Every release-bearing manifest, generated version stamp, and lockfile
-      agrees on `0.2.2`.
-- [ ] Full headless QA, release gates, package packs, clean-install checks, and
-      exact candidate receipt pass.
+- [ ] Full headless QA and a clean downstream dual-dependency compile proof
+      pass without version or release mutation.
 
 ## Stop Conditions
 
@@ -104,9 +96,10 @@ public package boundary.
 - Pixel capture requires application activation, a modified GPUI source, a
   desktop-wide capture, or a silent fallback.
 - A default QA, CI, or release path opens a window.
-- Version or lockfile regeneration introduces unrelated dependency upgrades.
-- Release mutation, tag creation, publication, or workflow editing becomes
-  necessary. Stop at the candidate and return to `g16.006`.
+- Lockfile regeneration introduces unrelated dependency upgrades.
+- Version mutation, release notes, candidate preparation, tag creation,
+  publication, or workflow editing becomes necessary. Stop and return to
+  `g16.006`.
 
 ## Validation
 
@@ -116,10 +109,8 @@ Use Effigy selectors discovered from the branch. At minimum:
 - focused node-backend and GPUI preview tests;
 - `effigy ci:native`;
 - `effigy qa`;
-- `effigy release gates`;
-- `effigy docs:check`, `effigy ir:check`, and `effigy catalogue:check`;
-- pack and clean-install verification;
+- `effigy docs:check`;
 - `git diff --check`.
 
 Do not run any windowed selector in the worker. Record the exact command the
-orchestrator should run after code review and before accepting the candidate.
+orchestrator should run after code review and before accepting the recovery.

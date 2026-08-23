@@ -15,8 +15,8 @@ resumes.
 - `g16` has frozen the 17-repository consumer estate. Underlay and Soundcheck
   Library reached 0.2.1, while Longhorn proved that the released Rust graph
   exposes an incompatible fork-sourced GPUI identity. `g16.005` restores
-  crates.io GPUI and prepares v0.2.2; all remaining adoption waits for its
-  operator-owned release gate.
+  crates.io GPUI; `g16.006` and `007` prepare and gate v0.2.2. All remaining
+  adoption waits for that release.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;

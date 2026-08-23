@@ -9,12 +9,13 @@ Updated: 2026-08-23
     source-identity defect; v0.2.2 recovery ready
   - Posture: published-package adoption paused behind one dependency-source
     recovery; no component or public API redesign
-  - Range: `001` to `006`; application cards compile after v0.2.2 and foundation evidence
+  - Range: `001` to `007`; application cards compile after v0.2.2 and foundation evidence
   - Evidence: 17 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: execute `005`, review its exact candidate, then take `006` through
-    the explicit operator release gate before recompiling Longhorn adoption.
+  - Next: execute and review `005`, prepare the exact candidate through `006`,
+    then take `007` through the explicit operator release gate before
+    recompiling Longhorn adoption.
 
 ## Latest Completed Track
 
