@@ -18,12 +18,12 @@ commit carrying this card's handoff
 
 ## Candidate SHA
 
-**`4428ad10174ccf36de42658ce0e1346b90191d75`** — the complete candidate tree.
+**`7922a3a951e94b607566563ff2750fe825ad7b0d`** — the complete candidate tree.
 
 Every result below was measured from a clean worktree at exactly that commit.
 This receipt commit adds only this file; it does not repin the candidate.
 
-Four earlier candidate commits were replaced rather than reused. No result
+Five earlier candidate commits were replaced rather than reused. No result
 from any of them is carried forward, and the complete board was rerun each
 time:
 
@@ -33,14 +33,17 @@ time:
 | `214725ff` | PR #72 review round 1 requested four release-truth fixes, all candidate-bearing |
 | `8fece26f` | PR #72 review round 2 required portable release-note links on the published artifact surface |
 | `5f9dd91d` | PR #72 review round 3 extended that to the complete published-README link sweep |
+| `4428ad10` | the `g15.013` registry preflight proved core and Svelte `0.1.0` were already published, contradicting the accepted release history |
 
 ## Absence Of Release Mutations
 
 No tag was created or pushed. No GitHub release was created. No workflow was
-dispatched. No `npm publish` ran. No registry was contacted or mutated. No
-`effigy release prepare` or `effigy release execute` ran. `effigy release
-gates` is read-only and is the only `release` subcommand used. No
-`*-windowed`, native-visual, or Jetstream preview/QA selector ran.
+dispatched. No `npm publish` ran. No registry was mutated. Read-only `npm view`
+queries established the existing `0.1.0` publication history. No `effigy
+release prepare` or `effigy release execute` ran. The read-only `effigy release
+simulate` command was attempted and stopped on the changelog-parser mismatch
+recorded below; `effigy release gates` then ran the configured release board.
+No `*-windowed`, native-visual, or Jetstream preview/QA selector ran.
 
 Tarballs live in the ignored `.artifacts/` tree and are not committed. This
 receipt records how to reproduce them; it is not an artifact store.
@@ -208,9 +211,10 @@ specimen, or visual baseline was touched.
    drift class but is not behavioural parity — and names what each backend
    still owns. The twelve themes are no longer listed as a `0.2.0` addition;
    the 22 token stylesheets and 108 icon modules moved into package posture
-   with the theme set marked unchanged since `0.1.0`. The note's opening,
-   which still said nothing had been published, was aligned to the same
-   claim. `CHANGELOG.md` now calls the old `TabVariant` union six-member.
+   with the theme set marked unchanged since `0.1.0`. The note's opening was
+   aligned to the then-understood publication posture; the `g15.013` registry
+   preflight later corrected that history in section 7 below. `CHANGELOG.md`
+   now calls the old `TabVariant` union six-member.
 4. **Release authority.** `poodle-ir` was added to spec 022's current
    preview-channel Rust package list, matching `packages/release-manifest.json`,
    the 0.1.0 notes, and this candidate. `packages/release-operations.json`'s
@@ -247,9 +251,32 @@ Verified from inside the built tarballs, not from the working tree: each
 pattern check for any remaining relative target — `](.`, `](/`, or any
 non-`http` scheme — returns **0** on all three packed READMEs.
 
+### 7. `g15.013` registry preflight — publication history correction
+
+The read-only certification step queried npm before creating a tag. Both
+published packages already carry `0.1.0` under `latest`:
+
+- `@inflatable-cookie/poodle-core@0.1.0` — published 2026-08-10 13:09 UTC;
+- `@inflatable-cookie/poodle-svelte@0.1.0` — published 2026-08-10 13:10 UTC.
+
+Remote tag `v0.1.0` also exists. React remains absent from npm. That evidence
+contradicted the accepted candidate's claim that `0.1.0` never reached a
+registry and that `0.2.0` would be the first publication. `CHANGELOG.md`, both
+release-note files, and both published package READMEs now state the real
+history: `0.1.0` was initially documented as a source baseline, then tagged
+and published for core and Svelte; `0.2.0` supersedes it while React stays
+source-only.
+
+`effigy release simulate` also stops before simulation because its changelog
+parser rejects Poodle's accepted prose. The repository's documented release
+path is the explicit `v0.2.0` tag plus `release.yml` dispatch; that workflow
+does not use the generic parser and still runs the configured Effigy release
+gate. The mismatch is recorded in `PAPERCUTS.md`; no prepare/execute fallback
+will be used for this release.
+
 ## Validation
 
-Every command below ran from a clean worktree at `4428ad10`.
+Every command below ran from a clean worktree at `7922a3a9`.
 
 Toolchain: `effigy v0.11.0+local.e37fcfd`, `bun 1.3.14`,
 `cargo 1.97.1 (c980f4866 2026-06-30)`, `node v22.23.2`.
@@ -257,7 +284,7 @@ Toolchain: `effigy v0.11.0+local.e37fcfd`, `bun 1.3.14`,
 | Command | Result |
 | --- | --- |
 | `effigy qa` | **pass** |
-| `effigy release gates` | **pass** — 1 configured, 1 executed, `[1] headless: pass (exit 0; 115321ms)`, fail-fast did not stop early |
+| `effigy release gates` | **pass** — 1 configured, 1 executed, `[1] headless: pass (exit 0; 229162ms)`, fail-fast did not stop early |
 | `effigy docs:check` | **pass** |
 | `effigy ir:check` | **pass** |
 | `effigy catalogue:check` | **pass** |
@@ -292,7 +319,7 @@ Named results inside the board:
 
 ## Packed Artifacts
 
-Reproduce from a clean checkout of `4428ad10`.
+Reproduce from a clean checkout of `7922a3a9`.
 
 ### `npm pack` — the publication path (`release.yml`)
 
@@ -304,8 +331,8 @@ done
 
 | Filename | Bytes | SHA-256 |
 | --- | ---: | --- |
-| `inflatable-cookie-poodle-core-0.2.0.tgz` | 268936 | `9e40f67ac55f4a4b1c92221f315fcaa45bca52a84fc64eb0f42710e3ab7d05fc` |
-| `inflatable-cookie-poodle-svelte-0.2.0.tgz` | 253565 | `e10af6ea1979266ab3fd336e3a984f0243cf99b8421c3f1777f894477c145fc7` |
+| `inflatable-cookie-poodle-core-0.2.0.tgz` | 268933 | `ad29b00869a8b00888f7cf4b7cae79f1f66f7839a63e3b37b3c80c3cbcad6aae` |
+| `inflatable-cookie-poodle-svelte-0.2.0.tgz` | 253569 | `8297efbd57e4032656adbdabb6104a98fe2ff08552794794a5e8efa7f262d5d6` |
 | `inflatable-cookie-poodle-react-0.2.0.tgz` | 250071 | `def4af15c7e64a3dd7c2a2e600d546abc1a1dccecbdecf53ab547f65118afb42` |
 
 Determinism: `packages/core` was packed twice into separate destinations and
@@ -330,25 +357,25 @@ React is packed and content-verified here as experimental evidence only. It is
 
 | Filename | Bytes | SHA-256 |
 | --- | ---: | --- |
-| `inflatable-cookie-poodle-core-0.2.0.tgz` | 262870 | `f53f4dc0b536427c143b9c11a98adf6e239fdff7aba8a5e7d698cf8fcc5816b4` |
-| `inflatable-cookie-poodle-svelte-0.2.0.tgz` | 253442 | `2784ed1527608d52476a0cc8126f78c0674393e484b3e0fd80afe8770d223834` |
+| `inflatable-cookie-poodle-core-0.2.0.tgz` | 262859 | `65e9e3400ed7f2a5a197b38966a62dd151d22e873ffc21f187b00c077caa296b` |
+| `inflatable-cookie-poodle-svelte-0.2.0.tgz` | 253438 | `997a43ff686dadc39c33ffc7ff81249f622967158e2b9a8173b3232067b5b3e2` |
 | `inflatable-cookie-poodle-react-0.2.0.tgz` | 249857 | `1e9c7b3e2ea35923bee9b776182e541e61a0e699b421e9f716d68585fc0c65be` |
 
 ### Digest movement across candidates
 
-Round 2 changed all three READMEs, so all six digests moved. Rounds 3 and 4
-changed only the core and Svelte READMEs, so **both React digests are unchanged
-across all three** — an independent check that each link correction reached
-exactly the two published READMEs the review named and nothing else.
+Round 2 changed all three READMEs, so all six digests moved. Rounds 3 and 4,
+then the `g15.013` history correction, changed only core and Svelte. **Both
+React digests remain unchanged** — independent evidence that each later
+correction reached exactly the two published READMEs and nothing else.
 
-| Artifact | `8fece26f` | `5f9dd91d` | `4428ad10` |
-| --- | --- | --- | --- |
-| core (`npm`) | `ad47bb4f…` | `0e3b03ca…` | `9e40f67a…` |
-| svelte (`npm`) | `5b9f39f1…` | `ce3f454b…` | `e10af6ea…` |
-| react (`npm`) | `def4af15…` | `def4af15…` | `def4af15…` unchanged |
-| core (`bun`) | `3f508227…` | `c1ffd8aa…` | `f53f4dc0…` |
-| svelte (`bun`) | `ce90e020…` | `d86213e4…` | `2784ed15…` |
-| react (`bun`) | `1e9c7b3e…` | `1e9c7b3e…` | `1e9c7b3e…` unchanged |
+| Artifact | `8fece26f` | `5f9dd91d` | `4428ad10` | `7922a3a9` |
+| --- | --- | --- | --- | --- |
+| core (`npm`) | `ad47bb4f…` | `0e3b03ca…` | `9e40f67a…` | `ad29b008…` |
+| svelte (`npm`) | `5b9f39f1…` | `ce3f454b…` | `e10af6ea…` | `8297efbd…` |
+| react (`npm`) | `def4af15…` | `def4af15…` | `def4af15…` | `def4af15…` unchanged |
+| core (`bun`) | `3f508227…` | `c1ffd8aa…` | `f53f4dc0…` | `65e9e340…` |
+| svelte (`bun`) | `ce90e020…` | `d86213e4…` | `2784ed15…` | `997a43ff…` |
+| react (`bun`) | `1e9c7b3e…` | `1e9c7b3e…` | `1e9c7b3e…` | `1e9c7b3e…` unchanged |
 
 ## Known Non-Blocking Warnings
 
@@ -379,16 +406,12 @@ exactly the two published READMEs the review named and nothing else.
 - No platform accessibility projection for GPUI.
 - No React runtime-behaviour denominator; its evidence is 175/175 import
   reachability plus a bounded 13-component mount set.
-- No publication. `g15.013` remains the separate operator gate for tag and
-  registry mutation, and it stays blocked until the orchestrator accepts this
-  evidence.
+- No `0.2.0` publication. `g15.013` remains the separate operator gate for its
+  tag and registry mutation.
 
 ## Continuation
 
-The PR stops for review. The orchestrator independently checks the manifest
-denominator, version and lock agreement, release-note truth, the two-commit
-boundary, the candidate SHA, this receipt, the changed files, and the board
-results. Any candidate-bearing review fix invalidates this receipt and requires
-a replacement candidate commit plus a complete rerun.
-
-Merge authorisation, the tag, and publication remain operator-owned.
+The replacement candidate and this receipt are on `main`. The next action is
+the explicit `g15.013` operator decision for tag and publication. Any further
+candidate-bearing change invalidates this receipt and requires another
+replacement candidate plus a complete rerun.
