@@ -4,8 +4,15 @@ Updated: 2026-08-23
 
 ## Active Track
 
-- None. `g15` is complete. The next active track begins only after an
-  operator-led planning checkpoint compiles the next generation.
+- `g16`
+  - Status: active — consumer inventory complete; three foundation lanes ready
+  - Posture: published-package adoption, no Poodle API or architecture changes
+  - Range: `001` to `004`; application cards compile after foundation evidence
+  - Evidence: 17 authoritative repositories consume Poodle through registry
+    `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
+    local Rust paths.
+  - Next: dispatch Longhorn `002`, Underlay `003`, and Soundcheck Library
+    `004` in parallel.
 
 ## Latest Completed Track
 
