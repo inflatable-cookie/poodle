@@ -1,6 +1,6 @@
 # g15.043 — UiPresentationProvider Native Cascade
 
-Status: **implemented — worker PR open for orchestrator review (2026-08-23)**;
+Status: **complete — merged in PR #70; explicit-size parity corrected in PR #71 (2026-08-23)**;
 execution log: `../logs/2026-08/20260823-g15-043-ui-presentation-provider-native-cascade.md`
 Found by: `g15.009`, retained by `g15.026`
 Depends on: `../../architecture/010-native-presentation-construction-context.md`
@@ -31,8 +31,8 @@ Implement architecture 010. Do not reopen it inside the worker lane.
   `&dyn ThemeProvider`.
 - Semantic component `size` and `density` inputs use `Option`; `None` inherits
   from the context and `Some` always wins.
-- Semantic-role mapping happens after choosing explicit or inherited base
-  size.
+- Explicit component size is final; semantic-role mapping applies only when
+  size is inherited from the presentation context.
 - A provider builds its child through a closure receiving a nested context and
   returns that child unchanged.
 - A composite that establishes an internal provider scope for host content

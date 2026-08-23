@@ -127,7 +127,7 @@ parity gap.
 
 - Resolver laws (`packages/render/src/context.rs` tests): root defaults,
   outer scope, nested scope, sibling restoration, explicit `md`, explicit
-  `default`, role-after-base ordering, provider build/return semantics.
+  `default`, inherited-only role mapping, provider build/return semantics.
 - Component cascade proofs (same module):
   `button_and_text_input_inherit_the_provider_scope` (inherited output equals
   the explicit xl/comfortable reference and differs from root: 52px vs 36px),

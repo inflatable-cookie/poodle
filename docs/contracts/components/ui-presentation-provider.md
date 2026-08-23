@@ -221,14 +221,16 @@ Example for `density="default"`, `sizeScale="md"`:
   target, or interaction state.
 - The CSS custom property mechanism does not apply in GPUI; instead, every
   public component renderer receives the `RenderContext` and resolves omitted
-  `Option<ControlSize>` / `Option<ControlDensity>` spec inputs from it:
-  explicit value first (an explicit `md` / `default` wins inside any scope),
-  then the context defaults, then the component's `sizeRole` mapping.
+  `Option<ControlSize>` / `Option<ControlDensity>` spec inputs from it. An
+  explicit size is the final component size and wins unchanged; an omitted
+  size maps the context scale through the component's `sizeRole`. Explicit
+  density likewise wins over the context default.
 - Root defaults are exactly `md` / `default`. Nested providers replace both
   defaults only for construction inside their closure; exiting the closure
   restores the parent context by ordinary borrowing.
-- Semantic size resolution matches the `resolveSemanticControlSize` table;
-  the role maps the explicit-or-inherited base size, never the reverse.
+- Semantic size resolution matches the web components: `sizeRole` maps an
+  inherited presentation scale, while an explicit component `size` bypasses
+  role mapping.
 - Composites whose web pair wraps host content in an internal provider
   (AppHeader, Field, FilterToolbar, MediaPreview, PageHeader, BlockEditor)
   take that content as immediate `SlotBuilder` closures invoked inside the

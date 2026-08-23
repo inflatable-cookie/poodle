@@ -7,6 +7,13 @@ pub struct BreadcrumbItem {
     pub label: String,
     pub href: Option<String>,
     pub is_current: bool,
+    /// Named icon rendered before the visible label, inside the same navigation
+    /// target. Named icons are the portable cross-runtime contract.
+    pub icon: Option<String>,
+    /// Hide the visible label while keeping [`Self::label`] as the item's
+    /// accessible name. Only ever valid together with [`Self::icon`]; construct
+    /// it atomically with [`BreadcrumbItem::with_icon_only`].
+    pub icon_only: bool,
 }
 
 impl BreadcrumbItem {
@@ -16,6 +23,8 @@ impl BreadcrumbItem {
             label: label.into(),
             href: None,
             is_current: false,
+            icon: None,
+            icon_only: false,
         }
     }
 
@@ -27,6 +36,30 @@ impl BreadcrumbItem {
     pub fn with_is_current(mut self, is_current: bool) -> Self {
         self.is_current = is_current;
         self
+    }
+
+    /// An icon before the visible label. The label still renders.
+    pub fn with_icon(mut self, icon: impl Into<String>) -> Self {
+        self.icon = Some(icon.into());
+        self
+    }
+
+    /// A visually icon-only crumb that keeps its label as the accessible name.
+    ///
+    /// The icon and the flag are set together, so normal construction cannot
+    /// produce the `icon_only` + no-icon state. A renderer handed that state
+    /// directly must fall back to the label rather than paint a blank crumb.
+    pub fn with_icon_only(mut self, icon: impl Into<String>) -> Self {
+        self.icon = Some(icon.into());
+        self.icon_only = true;
+        self
+    }
+
+    /// Whether the visible label renders. False only for a well-formed
+    /// icon-only crumb; a malformed `icon_only` item with no icon still shows
+    /// its label.
+    pub fn shows_label(&self) -> bool {
+        !self.icon_only || self.icon.is_none()
     }
 }
 
@@ -92,6 +125,10 @@ impl BreadcrumbsSpec {
                     label: "\u{2026}".to_string(),
                     href: None,
                     is_current: false,
+                    // The synthetic ellipsis never inherits icon presentation
+                    // from the authored items it replaces.
+                    icon: None,
+                    icon_only: false,
                 });
                 for item in self.items.iter().skip(self.items.len() - (max - 1)) {
                     visible.push(item.clone());
@@ -133,6 +170,12 @@ impl BreadcrumbsSpec {
         semantic::SPACE_INLINE_SM
     }
 
+    /// Spacing between an item's icon and its label, inside the crumb. Tighter
+    /// than the crumb/separator gap so glyph and text read as one target.
+    pub fn icon_gap_token(&self) -> &'static str {
+        semantic::SPACE_INLINE_XS
+    }
+
     pub fn with_size(mut self, size: ControlSize) -> Self {
         self.size = Some(size);
         self
@@ -146,5 +189,57 @@ impl BreadcrumbsSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = Some(density);
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn with_icon_keeps_the_label_visible() {
+        let item = BreadcrumbItem::new("home", "Home").with_icon("home");
+        assert_eq!(item.icon.as_deref(), Some("home"));
+        assert!(!item.icon_only);
+        assert!(item.shows_label());
+    }
+
+    #[test]
+    fn with_icon_only_sets_icon_and_flag_together() {
+        let item = BreadcrumbItem::new("home", "Home").with_icon_only("home");
+        assert_eq!(item.icon.as_deref(), Some("home"));
+        assert!(item.icon_only);
+        assert!(!item.shows_label());
+    }
+
+    #[test]
+    fn a_malformed_icon_only_item_still_shows_its_label() {
+        let mut item = BreadcrumbItem::new("home", "Home");
+        item.icon_only = true;
+        assert!(item.shows_label());
+    }
+
+    #[test]
+    fn the_synthetic_ellipsis_never_inherits_icon_presentation() {
+        let spec = BreadcrumbsSpec::new(vec![
+            BreadcrumbItem::new("home", "Home").with_icon_only("home"),
+            BreadcrumbItem::new("workspace", "Workspace").with_icon("folder"),
+            BreadcrumbItem::new("projects", "Projects").with_icon("folder"),
+            BreadcrumbItem::new("poodle", "Poodle").with_icon("package"),
+        ])
+        .with_max_visible_items(3);
+
+        let visible = spec.visible_items();
+        let ellipsis = visible
+            .iter()
+            .find(|item| item.value == ELLIPSIS_VALUE)
+            .expect("truncation synthesizes an ellipsis crumb");
+
+        assert!(ellipsis.icon.is_none());
+        assert!(!ellipsis.icon_only);
+        // Retained authored items keep theirs.
+        assert_eq!(visible[0].icon.as_deref(), Some("home"));
+        assert!(visible[0].icon_only);
+        assert_eq!(visible[3].icon.as_deref(), Some("package"));
     }
 }

@@ -38,6 +38,30 @@ export function Breadcrumbs({
         ]
       : items;
 
+  // Icon and label live inside the same anchor, button, or current span: one
+  // navigation target, one accessible name. An icon-only item hides the label
+  // visually instead of dropping it, so it is still announced.
+  function itemContent(item: BreadcrumbItem) {
+    if (!item.icon) {
+      return item.label;
+    }
+
+    return (
+      <span className="poodle-breadcrumbs__content">
+        <Icon icon={item.icon} size={resolvedSize} />
+        <span
+          className={
+            item.iconOnly
+              ? "poodle-breadcrumbs__label poodle-breadcrumbs__label--hidden"
+              : "poodle-breadcrumbs__label"
+          }
+        >
+          {item.label}
+        </span>
+      </span>
+    );
+  }
+
   function handleNavigate(item: BreadcrumbItem): void {
     if (item.current || item.value === "__ellipsis__") {
       return;
@@ -52,14 +76,14 @@ export function Breadcrumbs({
         {visibleItems.map((item, index) => (
           <li key={`${item.value}-${index}`} className="poodle-breadcrumbs__item">
             {item.current || (forceLastItemCurrent && index === visibleItems.length - 1) ? (
-              <span aria-current="page">{item.label}</span>
+              <span aria-current="page">{itemContent(item)}</span>
             ) : item.href ? (
-              <a href={item.href}>{item.label}</a>
+              <a href={item.href}>{itemContent(item)}</a>
             ) : item.value === "__ellipsis__" ? (
               <span aria-hidden="true">{item.label}</span>
             ) : (
               <button type="button" onClick={() => handleNavigate(item)}>
-                {item.label}
+                {itemContent(item)}
               </button>
             )}
             {index < visibleItems.length - 1 ? (

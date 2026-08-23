@@ -18,10 +18,11 @@ Shared Rust composition receives one explicit `RenderContext`. It carries:
 
 Every public component renderer in `poodle-render` receives that context.
 Component specs retain omission with `Option<ControlSize>` and
-`Option<ControlDensity>`. A renderer resolves an omitted input from the
-context, then applies the component's semantic size role. An explicit value
-always wins, including an explicit `md` or `default` inside a non-default
-scope.
+`Option<ControlDensity>`. A renderer resolves an omitted size from the context,
+then applies the component's semantic size role to that inherited scale. An
+explicit size is already the final component size and bypasses role mapping;
+an explicit value always wins, including an explicit `md` or `default` inside
+a non-default scope.
 
 `UiPresentationProvider` is a construction boundary, not a painted node. It
 creates a nested context, invokes a child-building closure with that context,
@@ -58,8 +59,8 @@ At the root:
 
 For a component:
 
-1. use an explicit `size` when present, otherwise the context size scale;
-2. map that base through the component's `sizeRole`;
+1. use an explicit `size` unchanged when present;
+2. otherwise map the context size scale through the component's `sizeRole`;
 3. use an explicit `density` when present, otherwise the context density.
 
 For a nested provider:

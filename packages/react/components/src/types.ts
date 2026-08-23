@@ -500,12 +500,20 @@ export interface NavigationMenuItem {
   description?: string;
 }
 
-export type BreadcrumbItem = {
+export type BreadcrumbItemBase = {
   value: string;
   label: string;
   href?: string;
   current?: boolean;
 };
+
+/**
+ * `label` is always the item's semantic identity. `icon` is optional beside a
+ * visible label; `iconOnly` hides the label visually, keeps it as the
+ * accessible name, and therefore requires an icon.
+ */
+export type BreadcrumbItem = BreadcrumbItemBase &
+  ({ icon?: IconProp; iconOnly?: false } | { icon: IconProp; iconOnly: true });
 
 export type SidebarNavItem = {
   value: string;
