@@ -1,18 +1,19 @@
-# g15.013 — v0.2.0 Release Certification
+# g15.013 — v0.2.1 Release Certification
 
-Status: **operator gate — replacement candidate `7922a3a9` is green with
-receipt `f9b5dcab`; awaiting explicit tag and publication authorisation**
+Status: **paused for `g15.054` — `v0.2.0` is immutable after a pre-publication
+workflow failure; awaiting a certified `0.2.1` replacement candidate**
 Depends on: every earlier g15 implementation/specimen/conformance card,
-`g15.042`–`g15.052` as sequenced by the runway, and one clean accepted v0.2.0
-candidate SHA
+`g15.042`–`g15.052` as sequenced by the runway, accepted `v0.2.0` candidate
+history, and one clean accepted `0.2.1` recovery candidate SHA
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../contracts/001-working-rules.md`
 
 ## Outcome
 
-Authorise the exact v0.2.0 candidate prepared by `g15.050`, then perform the
-human-owned tag/publication operation. This card contains no implementation
-batch and is never dispatched to a worker. The frozen Svelte roster remains
+Authorise the exact `v0.2.1` candidate prepared by `g15.054`, then perform the
+human-owned tag/publication operation. The failed `v0.2.0` tag remains in
+history and is never reused. This card contains no implementation batch and is
+never dispatched to a worker. The frozen Svelte roster remains
 the release denominator: 175 components with contract, implementation, export,
 specimen, and focused evidence. React, shared Rust, GPUI, visual evidence, and
 deferred Jetstream are reported independently and honestly.
@@ -42,6 +43,8 @@ deferred Jetstream are reported independently and honestly.
       channel, and Stepper accepts keyboard entry without a pointer prelude.
 - [x] `g15.050` landed: one clean v0.2.0 candidate, artifacts, notes, and QA
       receipt are pinned to an exact SHA.
+- [ ] `g15.054` landed: the failed npm bootstrap is repaired and one clean
+      `0.2.1` replacement candidate is pinned to an exact SHA.
 
 ## Compiled Release Children
 
@@ -51,6 +54,8 @@ deferred Jetstream are reported independently and honestly.
   edits.
 - [`g15.050`](050-v020-release-candidate.md) owns versions, notes, dry-run
   artifacts, full headless QA, and the exact candidate receipt.
+- [`g15.054`](054-v021-release-recovery.md) owns failed-release recovery, the
+  isolated npm bootstrap, `0.2.1` lockstep, and replacement evidence.
 - [`g15.052`](052-native-focus-ring-parity.md) owns the native focus-ring and
   Stepper keyboard-entry blocker found by `g15.042`/`g15.047`.
 
@@ -59,7 +64,7 @@ deferred Jetstream are reported independently and honestly.
 - [x] Every Svelte-denominator surface is complete and evidenced for all 175
       components.
 - [x] `effigy qa` passes on every lane, including `bun audit`.
-- [x] v0.2.0 package, changelog, and documentation reflect the honest state:
+- [x] v0.2.0 package, changelog, and documentation reflected the honest state:
       the full Svelte denominator and completed active-cohort evidence are
       named; experimental labels stay explicit; Jetstream is deferred.
 - [x] Register rows owned by `g15.002`–`g15.012` are closed; any remaining rows
@@ -67,9 +72,11 @@ deferred Jetstream are reported independently and honestly.
 
 ## Operator Gate
 
-- [ ] Operator reviews the `g15.050` receipt and exact SHA.
-- [ ] Operator explicitly authorises the tag and publication mutation.
-- [ ] The release is dispatched against that tag; no failed tag is reused.
+- [x] Operator reviewed the `g15.050` receipt and explicitly authorised
+      `v0.2.0`; run `32656225297` failed before gates or publication.
+- [ ] Operator reviews the `g15.054` receipt and exact `0.2.1` SHA.
+- [ ] Operator explicitly authorises the `v0.2.1` tag and publication mutation.
+- [ ] The release is dispatched against `v0.2.1`; `v0.2.0` is not reused.
 - [ ] Registry/GitHub results are checked and the generation closeout records
       the actual published set.
 
@@ -79,7 +86,7 @@ deferred Jetstream are reported independently and honestly.
 - [x] The release claim matches the roster and completed active-cohort cards;
       no runtime borrows another runtime's pass.
 - [x] The experimental React/Rust/GPUI package labels remain honest.
-- [ ] The operator has approved the release mutation explicitly.
+- [ ] The operator has approved the exact `v0.2.1` release mutation explicitly.
 
 ## Stop Conditions
 
@@ -92,6 +99,6 @@ deferred Jetstream are reported independently and honestly.
 
 ## Validation
 
-Use only the pinned `g15.050` evidence and the repaired release automation.
-Do not rerun a windowed local harness to manufacture late evidence. Release
-mutation remains operator-owned.
+Use the pinned `g15.050` evidence plus the complete `g15.054` replacement
+receipt and repaired release automation. Do not rerun a windowed local harness
+to manufacture late evidence. Release mutation remains operator-owned.

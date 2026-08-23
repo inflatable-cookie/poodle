@@ -16,7 +16,7 @@
   },
   "events": [],
   "generated": {
-    "generator": "poodle-codegen 0.2.0",
+    "generator": "poodle-codegen 0.2.1",
     "ir_schema_version": 1,
     "source": "packages/codegen/fixtures/synthetic-model.json"
   },

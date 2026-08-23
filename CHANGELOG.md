@@ -9,11 +9,22 @@ so minor releases may contain documented breaking changes.
 
 Nothing yet.
 
+## [0.2.1] - 2026-08-23
+
+### Fixed
+
+- Release automation installs the pinned npm trusted-publishing CLI into an
+  isolated runner prefix. The `0.2.0` workflow attempted to replace its own
+  global npm installation in place and failed before validation or
+  publication when the running CLI could no longer load `promise-retry`.
+  Version `0.2.1` carries the same product changes prepared for `0.2.0`.
+
 ## [0.2.0] - 2026-08-23
 
-The first release prepared against a frozen, measured denominator: 175 public
+The tagged candidate prepared against a frozen, measured denominator: 175 public
 Svelte components, each with a contract, implementation, export, specimen,
-focused tests, and packed-tarball import proof. See the
+focused tests, and packed-tarball import proof. Its release workflow failed
+before validation or npm publication; `0.2.1` is the replacement release. See the
 [full 0.2.0 release notes](docs/release-notes/0.2.0.md) for the publication
 set, per-runtime evidence posture, the visual-comparison boundary, and the
 complete migration checklist.
@@ -189,5 +200,6 @@ complete migration checklist.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.2.1]: docs/release-notes/0.2.1.md
 [0.2.0]: docs/release-notes/0.2.0.md
 [0.1.0]: docs/release-notes/0.1.0.md

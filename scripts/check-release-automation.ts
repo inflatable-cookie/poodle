@@ -146,6 +146,12 @@ assert(releaseActive.includes("default: true"), "release dry-run must default to
 assert(releaseActive.includes("id-token: write"), "release publishing must retain job-local OIDC permission");
 assert(releaseActive.includes('node-version: "22.22.2"'), "release Node version must be exact");
 assert(releaseActive.includes("npm@12.0.2"), "release npm CLI version must be exact");
+assert(
+  releaseActive.includes('npm install --prefix "$npm_cli" --no-save npm@12.0.2') &&
+    releaseActive.includes('echo "$npm_cli/node_modules/.bin" >> "$GITHUB_PATH"'),
+  "release must install the reviewed npm CLI into an isolated runner prefix",
+);
+assert(!releaseActive.includes("npm install --global npm@"), "release must not replace its running npm CLI in place");
 assert(!releaseActive.includes("run: effigy ci"), "release must not maintain the old partial CI gate");
 assert(
   releaseActive.includes("if: ${{ !startsWith(github.ref, 'refs/tags/v') }}") &&

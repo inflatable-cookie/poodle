@@ -3,11 +3,11 @@
 Unified Svelte component library for Poodle. All components in a single
 `@inflatable-cookie/poodle-svelte` package.
 
-`0.2.0` is a preview-channel npm release. Breaking changes may still ship in
+`0.2.1` is a preview-channel npm release. Breaking changes may still ship in
 `0.x` minor releases; no `stable` channel exists yet, so pin an exact version
-and read the [release notes](https://github.com/inflatable-cookie/poodle/blob/main/docs/release-notes/0.2.0.md) before
-upgrading. `0.1.0` was the first registry version; `0.2.0` supersedes it on
-the preview channel.
+and read the [release notes](https://github.com/inflatable-cookie/poodle/blob/main/docs/release-notes/0.2.1.md) before
+upgrading. `0.1.0` was the first registry version. The `0.2.0` workflow stopped
+before publication; `0.2.1` is its replacement on the preview channel.
 
 ## Setup
 
@@ -15,15 +15,15 @@ Install the package and its `@inflatable-cookie/poodle-core` peer, which
 carries tokens, styles, behavior, and icons:
 
 ```sh
-bun add @inflatable-cookie/poodle-svelte@0.2.0 @inflatable-cookie/poodle-core@0.2.0
-# or: npm install @inflatable-cookie/poodle-svelte@0.2.0 @inflatable-cookie/poodle-core@0.2.0
+bun add @inflatable-cookie/poodle-svelte@0.2.1 @inflatable-cookie/poodle-core@0.2.1
+# or: npm install @inflatable-cookie/poodle-svelte@0.2.1 @inflatable-cookie/poodle-core@0.2.1
 ```
 
 ```json
 {
   "dependencies": {
-    "@inflatable-cookie/poodle-core": "0.2.0",
-    "@inflatable-cookie/poodle-svelte": "0.2.0"
+    "@inflatable-cookie/poodle-core": "0.2.1",
+    "@inflatable-cookie/poodle-svelte": "0.2.1"
   }
 }
 ```

@@ -4,18 +4,18 @@
 contains shared component behavior, generated design tokens, component CSS,
 and icon infrastructure used by the Svelte and React packages.
 
-`0.2.0` is a preview-channel npm release. Breaking changes may still ship in
+`0.2.1` is a preview-channel npm release. Breaking changes may still ship in
 `0.x` minor releases; no `stable` channel exists yet, so pin an exact version
-and read the [release notes](https://github.com/inflatable-cookie/poodle/blob/main/docs/release-notes/0.2.0.md) before
+and read the [release notes](https://github.com/inflatable-cookie/poodle/blob/main/docs/release-notes/0.2.1.md) before
 upgrading.
 
 ```sh
-bun add @inflatable-cookie/poodle-core@0.2.0
-# or: npm install @inflatable-cookie/poodle-core@0.2.0
+bun add @inflatable-cookie/poodle-core@0.2.1
+# or: npm install @inflatable-cookie/poodle-core@0.2.1
 ```
 
-`0.1.0` was the first registry version. `0.2.0` supersedes it on the preview
-channel.
+`0.1.0` was the first registry version. The `0.2.0` workflow stopped before
+publication; `0.2.1` is its replacement on the preview channel.
 
 ## Public Surfaces
 

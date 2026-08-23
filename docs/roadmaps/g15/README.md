@@ -1,8 +1,10 @@
-# g15 — v0.2.0 Release Baseline
+# g15 — v0.2.1 Recovery Release Baseline
 
 Status: active — every implementation, specimen, conformance, packaging,
 automation, dependency-policy, and adopter card through `g15.053` is complete;
-`g15.050` is accepted and landed, leaving only the `g15.013` operator gate
+`v0.2.0` failed before publication and the replacement `0.2.1` candidate is
+green under `g15.054`, awaiting its exact commit/receipt pin before the
+`g15.013` operator gate
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -11,7 +13,9 @@ Governing refs: `../g14/022-generation-closeout.md`,
 
 ## Generation Goal
 
-Ship Poodle v0.2.0 on an honest, complete Svelte roster. The release
+Ship Poodle on an honest, complete Svelte roster. The original `v0.2.0` tag is
+retained after a pre-publication workflow failure; `0.2.1` is the recovery
+release. The release
 denominator is **every public Svelte component export** — frozen from
 `packages/svelte/components/src/index.ts` and the package `exports` map, not
 from a representative subset. React stays tightly paired through shared CSS
@@ -92,11 +96,12 @@ and status advance are the orchestrator's.
 36. [051 — GPUI/Zed dependency licence remediation](051-gpui-zed-dependency-licence-remediation.md) — complete; PR #67 removed GPL tracing from the resolved GPUI graph through a minimal exact-revision fork and hardened licence/source policy
 37. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — complete; registry preflight replaced the PR #72 candidate with `7922a3a9`, recorded by evidence-only receipt `f9b5dcab`
 38. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
-39. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final operator tag/publication gate after accepted `050`
-40. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
-41. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
-42. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
-43. [052 — Native focus-ring parity](052-native-focus-ring-parity.md) — complete; PR #69 landed one reusable node channel and closed the measured Button ring and Stepper keyboard-entry/focus gaps
+39. [054 — v0.2.1 release recovery](054-v021-release-recovery.md) — candidate green; isolated npm bootstrap and lockstep patch are complete, awaiting exact commit/receipt pin
+40. [013 — v0.2.1 release certification](013-v020-release-certification.md) — final operator tag/publication gate after accepted `054`
+41. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
+42. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
+43. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
+44. [052 — Native focus-ring parity](052-native-focus-ring-parity.md) — complete; PR #69 landed one reusable node channel and closed the measured Button ring and Stepper keyboard-entry/focus gaps
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
@@ -152,8 +157,11 @@ is final; `sizeRole` maps inherited presentation scale only.
 `g15.053` is complete in PR #71. Per-item icons and the accessible icon-only
 root are accepted across the active cohort.
 
-`g15.050` is complete. The `g15.013` registry preflight found and corrected a
+`g15.050` is complete. The first `g15.013` registry preflight found and corrected a
 false first-publication claim, then replaced the candidate with `7922a3a9` and
 reran the complete board. Evidence-only receipt `f9b5dcab` records the result.
-No `0.2.0` tag or publication occurred. `g15.013` is the sole remaining gate
-and requires explicit operator authorisation.
+The operator authorised `v0.2.0`, but run `32656225297` failed while replacing
+npm in place, before gates, packing, or publication. The tag stays immutable;
+`g15.054` owns the `0.2.1` recovery candidate. Its full headless board and
+release wrapper are green; the exact commit and receipt are the remaining
+non-mutating closeout before `g15.013` returns as the sole operator gate.

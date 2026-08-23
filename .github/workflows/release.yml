@@ -26,10 +26,10 @@ name: Release
 
 # Dispatch this workflow AGAINST THE TAG, not against main:
 #
-#     git tag v0.2.0 && git push origin v0.2.0
-#     gh workflow run release.yml --ref v0.2.0 -f dry-run=false
+#     git tag vX.Y.Z && git push origin vX.Y.Z
+#     gh workflow run release.yml --ref vX.Y.Z -f dry-run=false
 #
-# workflow_dispatch accepts a tag ref, so `github.ref` is `refs/tags/v0.2.0`
+# workflow_dispatch accepts a tag ref, so `github.ref` is `refs/tags/vX.Y.Z`
 # and the version-agrees-with-tag check below still fires. There is no
 # `push: tags` trigger: publication should be an act someone performs, not a
 # side effect of pushing a tag, and during first publication a tag push would
@@ -99,8 +99,10 @@ jobs:
       - name: Install the reviewed npm trusted-publishing CLI
         run: |
           set -euo pipefail
-          npm install --global npm@12.0.2
-          test "$(npm --version)" = "12.0.2"
+          npm_cli="$RUNNER_TEMP/npm-cli"
+          npm install --prefix "$npm_cli" --no-save npm@12.0.2
+          test "$("$npm_cli/node_modules/.bin/npm" --version)" = "12.0.2"
+          echo "$npm_cli/node_modules/.bin" >> "$GITHUB_PATH"
 
       - run: bun install --frozen-lockfile
 

@@ -1,6 +1,6 @@
 [package]
 name = "poodle-gpui-node-backend"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "MIT"
 rust-version = "1.95"
@@ -18,14 +18,14 @@ path = "src/lib.rs"
 # GPUI framework — Poodle's minimal Zed fork keeps the offscreen capture seam
 # while replacing the normal GPL tracing graph with standard tracing.
 gpui = { git = "https://github.com/inflatable-cookie/zed", rev = "87d9afbe71ef06ea0634499dc35d104bb29dc020" }
-poodle-node = { version = "0.2.0", path = "../../contracts/node" }
+poodle-node = { version = "0.2.1", path = "../../contracts/node" }
 # Undo coalescing only. The backend owns the history *storage* because history
 # is ephemeral per-field UI state and only the backend persists anything across
 # frames — but what counts as one undoable step is a text-editing rule, and a
 # rule duplicated per backend is the drift this layer exists to prevent.
 # `poodle-headless` is pure (no gpui, no engine), so this stays a contracts
 # dependency rather than a widening of the interpreter's surface.
-poodle-headless = { version = "0.2.0", path = "../../contracts/headless" }
+poodle-headless = { version = "0.2.1", path = "../../contracts/headless" }
 # The single-file pick capability (g15.007) holds the OS prompt's oneshot
 # receiver — the type `App::prompt_for_paths` hands back. Already resolved in
 # the graph as gpui's own dependency; named here to store the receiver.

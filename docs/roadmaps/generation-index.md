@@ -5,24 +5,20 @@ Updated: 2026-08-23
 ## Active Track
 
 - `g15`
-  - Status: active — `g15.001`–`g15.011`, `g15.014`–`g15.017`,
-    `g15.019`–`g15.042`, `g15.044`–`g15.049`, and `g15.051`–`g15.052`
-    complete; `g15.043` is the current implementation checkpoint and
-    `g15.053` is queued serially behind it;
-    `g15.013` is the final operator gate
-  - Posture: release-first v0.2.0 baseline
-  - Range: `001` to `053` plus final gate `013`
+  - Status: active — implementation cards through `g15.053` are complete;
+    `g15.054` has a green `0.2.1` replacement candidate after the
+    pre-publication `v0.2.0` workflow failure and is awaiting its exact
+    commit/receipt pin; `g15.013` is the final operator gate
+  - Posture: release-first v0.2.1 recovery baseline
+  - Range: `001` to `054` plus final gate `013`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
     release baseline, not a parity architecture
   - Evidence: the v0.2.0 denominator is every public Svelte component
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: accept the in-flight native presentation-context migration in
-    `g15.043`, then execute the adopter-driven Breadcrumbs icon surface in
-    `g15.053`. `g15.047` and its measured focus-ring follow-up `g15.052` are
-    complete in PRs #68 and #69. `g15.050` remains blocked until `g15.043` and
-    `g15.053` close; `g15.013` remains the final operator release gate.
+  - Next: certify the exact `g15.054` recovery candidate, then return
+    `g15.013` to the operator for the `v0.2.1` tag and publication decision.
 
 ## Latest Completed Track
 
