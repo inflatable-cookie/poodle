@@ -29,9 +29,9 @@ fn defaults_match_contract() {
     let spec = TreeSpec::default();
     assert!(spec.show_guides);
     assert!(spec.show_icons);
-    assert_eq!(spec.size, ControlSize::Md);
+    assert_eq!(spec.size, None);
     assert_eq!(spec.size_role, SemanticControlSizeRole::Chrome);
-    assert_eq!(spec.density, ControlDensity::Default);
+    assert_eq!(spec.density, None);
     assert!(spec.expanded_values.is_none());
 }
 

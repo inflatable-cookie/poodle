@@ -31,9 +31,9 @@ pub struct NumberInputSpec {
     /// both Rust targets.
     pub show_steppers: bool,
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for NumberInputSpec {
@@ -53,9 +53,9 @@ impl Default for NumberInputSpec {
             validation_state: ValidationState::None,
             show_steppers: false,
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -225,7 +225,7 @@ impl NumberInputSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -235,7 +235,7 @@ impl NumberInputSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

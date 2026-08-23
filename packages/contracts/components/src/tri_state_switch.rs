@@ -7,7 +7,8 @@ use crate::types::{
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TriStateSwitchSpec {
     pub state: CheckState,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub size: Option<ControlSize>,
     pub label: Option<String>,
     pub excluded_label: Option<String>,
     pub default_label: Option<String>,
@@ -17,7 +18,8 @@ pub struct TriStateSwitchSpec {
     pub included_color: Option<String>,
     pub is_disabled: bool,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub density: Option<ControlDensity>,
     /// Accessible name (contract §7). `None` falls back to the visible label.
     pub aria_label: Option<String>,
 }
@@ -26,7 +28,7 @@ impl Default for TriStateSwitchSpec {
     fn default() -> Self {
         Self {
             state: CheckState::Unchecked,
-            size: ControlSize::Md,
+            size: None,
             label: None,
             excluded_label: None,
             default_label: None,
@@ -36,7 +38,7 @@ impl Default for TriStateSwitchSpec {
             included_color: None,
             is_disabled: false,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             aria_label: None,
         }
     }
@@ -58,7 +60,7 @@ impl TriStateSwitchSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -191,7 +193,7 @@ impl TriStateSwitchSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

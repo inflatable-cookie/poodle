@@ -18,9 +18,9 @@ pub struct RangeSliderSpec {
     pub orientation: Orientation,
     pub is_disabled: bool,
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Human-readable value for the lower thumb (`aria-valuetext`). Without it
     /// a screen reader announces the raw number, which is meaningless for a
     /// scale like "Small / Medium / Large".
@@ -44,9 +44,9 @@ impl Default for RangeSliderSpec {
             orientation: Orientation::Horizontal,
             is_disabled: false,
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             lower_value_text: None,
             upper_value_text: None,
         }
@@ -146,7 +146,7 @@ impl RangeSliderSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -156,7 +156,7 @@ impl RangeSliderSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

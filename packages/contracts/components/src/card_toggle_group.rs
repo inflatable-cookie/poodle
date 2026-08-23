@@ -34,9 +34,9 @@ pub struct CardToggleGroupSpec {
     pub options: Vec<CardToggleOption>,
     pub values: Vec<String>,
     pub disabled: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Grid column upper bound (contract §3 `columns`, 1–4, default 2). The web target
     /// is a responsive auto-fit grid capped at this; the Rust targets render the options
     /// in rows of `column_count()` cards.
@@ -49,9 +49,9 @@ impl Default for CardToggleGroupSpec {
             options: Vec::new(),
             values: Vec::new(),
             disabled: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             columns: 2,
         }
     }
@@ -80,7 +80,7 @@ impl CardToggleGroupSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -90,7 +90,7 @@ impl CardToggleGroupSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

@@ -25,9 +25,9 @@ pub struct ColorPickerSpec {
     pub show_alpha: bool,
     pub show_input: bool,
     pub default_mode: ColorInputMode,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Accessible name (contract §7). `None` falls back to the visible label.
     pub aria_label: Option<String>,
 }
@@ -44,9 +44,9 @@ impl Default for ColorPickerSpec {
             show_alpha: false,
             show_input: true,
             default_mode: ColorInputMode::Hex,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             aria_label: None,
         }
     }
@@ -146,7 +146,7 @@ impl ColorPickerSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -156,7 +156,7 @@ impl ColorPickerSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

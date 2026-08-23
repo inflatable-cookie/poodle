@@ -40,9 +40,9 @@ pub struct ModelConnectionCardSpec {
     /// Disables the card's controls; content stays readable.
     pub is_disabled: bool,
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for ModelConnectionCardSpec {
@@ -61,9 +61,9 @@ impl Default for ModelConnectionCardSpec {
             is_enable_disabled: false,
             is_disabled: false,
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -133,7 +133,7 @@ impl ModelConnectionCardSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -143,7 +143,7 @@ impl ModelConnectionCardSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

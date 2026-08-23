@@ -19,9 +19,9 @@ pub struct ToastHostSpec {
     pub sticky_tones: Vec<ToastTone>,
     pub placement: ToastHostPlacement,
     pub aria_label: String,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for ToastHostSpec {
@@ -37,9 +37,9 @@ impl ToastHostSpec {
             sticky_tones: vec![ToastTone::Danger],
             placement: ToastHostPlacement::default(),
             aria_label: String::from("Notifications"),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -74,7 +74,7 @@ impl ToastHostSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -84,7 +84,7 @@ impl ToastHostSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

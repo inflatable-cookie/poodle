@@ -138,9 +138,11 @@ pub struct AgentChatInputSpec {
     pub context_warn_at: f64,
     pub context_label: String,
     pub toolbar_dividers: bool,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for AgentChatInputSpec {
@@ -175,9 +177,9 @@ impl AgentChatInputSpec {
             context_warn_at: 0.8,
             context_label: "Context used".to_string(),
             toolbar_dividers: true,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -284,7 +286,7 @@ impl AgentChatInputSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -294,7 +296,7 @@ impl AgentChatInputSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -486,9 +488,10 @@ impl AgentChatInputSpec {
     }
 
     /// Density scales only sibling spacing — never the field's vertical padding
-    /// or the action box (contract §8).
-    pub fn density_gap_scale(&self) -> f32 {
-        match self.density {
+    /// or the action box (contract §8). Takes the resolved density; omission is
+    /// resolved by the render context.
+    pub fn density_gap_scale(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.75,
             ControlDensity::Default => 1.0,
             ControlDensity::Comfortable => 1.25,

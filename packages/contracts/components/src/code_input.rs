@@ -55,9 +55,9 @@ pub struct CodeInputSpec {
     pub aria_label: Option<String>,
     pub autocomplete: String,
     pub validation_state: ValidationState,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for CodeInputSpec {
@@ -81,9 +81,9 @@ impl Default for CodeInputSpec {
             aria_label: None,
             autocomplete: String::from("one-time-code"),
             validation_state: ValidationState::None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -316,7 +316,7 @@ impl CodeInputSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -326,7 +326,7 @@ impl CodeInputSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

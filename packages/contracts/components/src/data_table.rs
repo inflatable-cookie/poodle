@@ -40,9 +40,13 @@ pub struct DataTableSpec {
     pub sticky_header: bool,
     pub empty_message: Option<String>,
     pub aria_label: String,
-    pub size: ControlSize,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl DataTableSpec {
@@ -67,9 +71,9 @@ impl DataTableSpec {
             sticky_header: false,
             empty_message: None,
             aria_label: String::from("Data table"),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -220,7 +224,7 @@ impl DataTableSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -230,7 +234,7 @@ impl DataTableSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

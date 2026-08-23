@@ -64,7 +64,7 @@ pub struct PasswordRequirementsSpec {
     /// Absolute size override. Combined with `size_role` to resolve the
     /// effective size that drives panel padding, title/body typography,
     /// list indent, and vertical rhythm (contract §7 ladder).
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
 }
 
@@ -80,7 +80,7 @@ impl Default for PasswordRequirementsSpec {
                 "Avoid common words, patterns, and personal information.",
             )),
             loading_label: String::from("Loading requirements..."),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
         }
     }
@@ -127,7 +127,7 @@ impl PasswordRequirementsSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 

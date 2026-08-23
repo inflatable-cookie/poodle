@@ -32,9 +32,9 @@ pub struct ModelConnectionPickerSpec {
     /// Disables search and every option; the selection is retained.
     pub is_disabled: bool,
     pub variant: PickerVariant,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for ModelConnectionPickerSpec {
@@ -50,9 +50,9 @@ impl Default for ModelConnectionPickerSpec {
             aria_label: None,
             is_disabled: false,
             variant: PickerVariant::Inline,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -118,7 +118,7 @@ impl ModelConnectionPickerSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -128,7 +128,7 @@ impl ModelConnectionPickerSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

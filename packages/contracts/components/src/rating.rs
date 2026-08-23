@@ -17,9 +17,9 @@ pub struct RatingSpec {
     pub step: f64,
     /// Whether clicking the current value deselects it (contract `allowClear`).
     pub allow_clear: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Accessible name (contract §7). `None` falls back to the visible label.
     pub aria_label: Option<String>,
 }
@@ -35,9 +35,9 @@ impl Default for RatingSpec {
             precision: 1.0,
             step: 1.0,
             allow_clear: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             aria_label: None,
         }
     }
@@ -154,7 +154,7 @@ impl RatingSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -164,7 +164,7 @@ impl RatingSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

@@ -9,7 +9,9 @@ pub enum DetailSectionGroupLayout {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DetailSectionGroupSpec {
-    pub density: ControlDensity,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub density: Option<ControlDensity>,
     pub layout: DetailSectionGroupLayout,
     pub min_column_width: String,
     pub item_min_column_width: String,
@@ -20,7 +22,7 @@ pub struct DetailSectionGroupSpec {
 impl Default for DetailSectionGroupSpec {
     fn default() -> Self {
         Self {
-            density: ControlDensity::Default,
+            density: None,
             layout: DetailSectionGroupLayout::Grid,
             min_column_width: String::from("14rem"),
             item_min_column_width: String::from("12rem"),
@@ -36,7 +38,7 @@ impl DetailSectionGroupSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -65,9 +67,9 @@ impl DetailSectionGroupSpec {
         self
     }
 
-    /// Inter-section gap in rem, driven by density (contract §7).
-    pub fn gap_rem(&self) -> f32 {
-        match self.density {
+    /// Inter-section gap in rem for the resolved density (contract §7).
+    pub fn gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.75,
             ControlDensity::Default => 1.0,
             ControlDensity::Comfortable => 1.25,

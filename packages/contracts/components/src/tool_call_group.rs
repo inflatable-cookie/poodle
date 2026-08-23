@@ -20,9 +20,11 @@ pub struct ToolCallGroupSpec {
     /// override; `None` uses the default phrasing. See the contract's deltas.
     pub more_label: Option<String>,
     pub fewer_label: String,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for ToolCallGroupSpec {
@@ -40,9 +42,9 @@ impl ToolCallGroupSpec {
             expanded_calls: Vec::new(),
             more_label: None,
             fewer_label: "Show fewer tool calls".to_string(),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -63,11 +65,11 @@ impl ToolCallGroupSpec {
         self
     }
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -149,8 +151,8 @@ impl ToolCallGroupSpec {
     }
 
     // ── Size ─────────────────────────────────────────────────
-    pub fn font_size_rem(&self) -> f32 {
-        match self.size {
+    pub fn font_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.75,
             ControlSize::Md => 0.8125,
@@ -158,8 +160,8 @@ impl ToolCallGroupSpec {
             ControlSize::Xl => 0.9375,
         }
     }
-    pub fn icon_size_rem(&self) -> f32 {
-        match self.size {
+    pub fn icon_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.75,
             ControlSize::Sm => 0.8125,
             ControlSize::Md => 0.875,
@@ -169,22 +171,22 @@ impl ToolCallGroupSpec {
     }
 
     // ── Density ──────────────────────────────────────────────
-    pub fn row_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn row_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.0,
             ControlDensity::Default => 0.125,
             ControlDensity::Comfortable => 0.25,
         }
     }
-    pub fn gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.375,
             ControlDensity::Default => 0.5,
             ControlDensity::Comfortable => 0.6875,
         }
     }
-    pub fn padding_inline_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_inline_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.375,
             ControlDensity::Default => 0.5,
             ControlDensity::Comfortable => 0.75,
@@ -192,8 +194,8 @@ impl ToolCallGroupSpec {
     }
     /// The container's own top / bottom inset. Inline inset is left to the rows,
     /// whose own padding provides it.
-    pub fn padding_block_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_block_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.125,
             ControlDensity::Default => 0.25,
             ControlDensity::Comfortable => 0.375,

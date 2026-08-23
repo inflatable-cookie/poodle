@@ -202,12 +202,12 @@ impl ButtonSpec {
         self.variant.text_token(self.effective_tone())
     }
 
-    pub fn control_height_token(&self) -> &'static str {
-        self.size.unwrap_or_default().control_height_token()
+    pub fn control_height_token(&self, size: crate::types::ControlSize) -> &'static str {
+        size.control_height_token()
     }
 
-    pub fn control_min_width_token(&self) -> &'static str {
-        self.size.unwrap_or_default().control_min_width_token()
+    pub fn control_min_width_token(&self, size: crate::types::ControlSize) -> &'static str {
+        size.control_min_width_token()
     }
 
     /// Icon size token — always sm in buttons per contract.

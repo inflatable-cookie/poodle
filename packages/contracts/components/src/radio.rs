@@ -18,9 +18,9 @@ pub struct RadioSpec {
     pub description_id: Option<String>,
     /// Custom color override for the checked border and dot (CSS hex string).
     pub selected_color: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for RadioSpec {
@@ -37,9 +37,9 @@ impl Default for RadioSpec {
             aria_label: None,
             description_id: None,
             selected_color: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -105,7 +105,7 @@ impl RadioSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -115,7 +115,7 @@ impl RadioSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

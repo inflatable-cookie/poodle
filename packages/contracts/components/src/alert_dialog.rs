@@ -24,9 +24,11 @@ pub struct AlertDialogSpec {
     pub confirm_label: String,
     pub cancel_label: String,
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     /// Confirm-button copy while the action is in flight.
     pub working_label: String,
 }
@@ -43,9 +45,9 @@ impl Default for AlertDialogSpec {
             confirm_label: "Confirm".to_string(),
             cancel_label: "Cancel".to_string(),
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             working_label: "Working…".to_string(),
         }
     }
@@ -172,7 +174,7 @@ impl AlertDialogSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -182,7 +184,7 @@ impl AlertDialogSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

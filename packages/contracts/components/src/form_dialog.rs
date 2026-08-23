@@ -29,9 +29,9 @@ pub struct FormDialogSpec {
     pub is_bare: bool,
     /// When true (default), render built-in Submit/Cancel row.
     pub show_default_actions: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for FormDialogSpec {
@@ -52,9 +52,9 @@ impl Default for FormDialogSpec {
             columns: 6,
             is_bare: false,
             show_default_actions: true,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -134,7 +134,7 @@ impl FormDialogSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
     pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
@@ -142,7 +142,7 @@ impl FormDialogSpec {
         self
     }
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

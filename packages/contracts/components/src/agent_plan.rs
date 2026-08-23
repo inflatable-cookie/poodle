@@ -27,9 +27,11 @@ pub struct AgentPlanSpec {
     pub dismiss_label: String,
     pub accept_label: String,
     pub revise_label: String,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl AgentPlanSpec {
@@ -41,9 +43,9 @@ impl AgentPlanSpec {
             dismiss_label: "Dismiss plan".to_string(),
             accept_label: "Accept plan".to_string(),
             revise_label: "Revise".to_string(),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -56,11 +58,11 @@ impl AgentPlanSpec {
         self
     }
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -102,8 +104,8 @@ impl AgentPlanSpec {
     }
 
     // ── Size ─────────────────────────────────────────────────
-    pub fn font_size_rem(&self) -> f32 {
-        match self.size {
+    pub fn font_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.75,
             ControlSize::Md => 0.8125,
@@ -113,15 +115,15 @@ impl AgentPlanSpec {
     }
 
     // ── Density ──────────────────────────────────────────────
-    pub fn gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.375,
             ControlDensity::Default => 0.5,
             ControlDensity::Comfortable => 0.75,
         }
     }
-    pub fn action_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn action_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.375,
             ControlDensity::Default => 0.5,
             ControlDensity::Comfortable => 0.625,
@@ -160,7 +162,13 @@ mod tests {
         let base = AgentPlanSpec::new("x");
         let dense = base.clone().with_density(ControlDensity::Compact);
 
-        assert_ne!(dense.gap_rem(), base.gap_rem());
-        assert_eq!(dense.font_size_rem(), base.font_size_rem());
+        assert_ne!(
+            dense.gap_rem(ControlDensity::Compact),
+            base.gap_rem(ControlDensity::Default)
+        );
+        assert_eq!(
+            dense.font_size_rem(ControlSize::Md),
+            base.font_size_rem(ControlSize::Md)
+        );
     }
 }

@@ -30,9 +30,11 @@ pub struct UpdateCenterSpec {
     pub title: String,
     pub aria_label: Option<String>,
     pub trigger_label: Option<String>,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub density: Option<ControlDensity>,
     pub install_label: String,
     pub defer_label: String,
     pub check_label: String,
@@ -60,9 +62,9 @@ impl Default for UpdateCenterSpec {
             title: "Updates".to_string(),
             aria_label: None,
             trigger_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
             install_label: "Install and restart".to_string(),
             defer_label: "Later".to_string(),
             check_label: "Check for updates".to_string(),
@@ -162,7 +164,7 @@ impl UpdateCenterSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -172,7 +174,7 @@ impl UpdateCenterSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

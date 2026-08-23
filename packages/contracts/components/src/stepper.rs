@@ -67,9 +67,9 @@ pub struct StepperSpec {
     /// costs, so it cannot be something a user does by clicking to look at a
     /// finished step. See `stepper.md` §2.
     pub show_rerun: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Axis the steps flow along; vertical stacks the same steps as rows.
     pub orientation: Orientation,
     /// Whether the stepper folds to a one-line summary.
@@ -93,9 +93,9 @@ impl Default for StepperSpec {
             aria_label: None,
             rerun_label: "Re-run step".to_string(),
             show_rerun: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             orientation: Orientation::Horizontal,
             collapsible: false,
             is_collapsed: None,
@@ -143,7 +143,7 @@ impl StepperSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -158,7 +158,7 @@ impl StepperSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -219,8 +219,8 @@ impl StepperSpec {
             .or_else(|| self.steps.first().map(|step| step.value.as_str()))
     }
 
-    pub fn resolved_size(&self) -> ControlSize {
-        crate::types::resolve_semantic_control_size(self.size, self.size_role)
+    pub fn resolved_size(&self, size: ControlSize) -> ControlSize {
+        crate::types::resolve_semantic_control_size(size, self.size_role)
     }
 
     // ── Token targets ──
@@ -298,8 +298,8 @@ impl StepperSpec {
 
     // ── Size ladder (rem), from `stepper.md` §8 ──
 
-    pub fn row_height_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn row_height_rem(&self, size: ControlSize) -> f32 {
+        match self.resolved_size(size) {
             ControlSize::Xs => 2.5,
             ControlSize::Sm => 2.875,
             ControlSize::Md => 3.25,
@@ -308,8 +308,8 @@ impl StepperSpec {
         }
     }
 
-    pub fn marker_size_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn marker_size_rem(&self, size: ControlSize) -> f32 {
+        match self.resolved_size(size) {
             ControlSize::Xs => 1.125,
             ControlSize::Sm => 1.25,
             ControlSize::Md => 1.35,
@@ -318,8 +318,8 @@ impl StepperSpec {
         }
     }
 
-    pub fn font_size_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn font_size_rem(&self, size: ControlSize) -> f32 {
+        match self.resolved_size(size) {
             ControlSize::Xs => 0.625,
             ControlSize::Sm => 0.6875,
             ControlSize::Md => 0.75,
@@ -328,8 +328,8 @@ impl StepperSpec {
         }
     }
 
-    pub fn marker_font_size_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn marker_font_size_rem(&self, size: ControlSize) -> f32 {
+        match self.resolved_size(size) {
             ControlSize::Xs => 0.5625,
             ControlSize::Sm => 0.5625,
             ControlSize::Md => 0.625,
@@ -338,8 +338,8 @@ impl StepperSpec {
         }
     }
 
-    pub fn padding_block_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn padding_block_rem(&self, size: ControlSize) -> f32 {
+        match self.resolved_size(size) {
             ControlSize::Xs => 0.5,
             ControlSize::Sm => 0.625,
             ControlSize::Md => 0.7,
@@ -355,8 +355,8 @@ impl StepperSpec {
     /// which is how the rail says *where you are* without spending a second
     /// colour on it: colour is already carrying status, and at dash size one
     /// mark cannot hold two colour codes legibly. Length is the free channel.
-    pub fn rail_segment_width_rem(&self, is_current: bool) -> f32 {
-        let full = match self.resolved_size() {
+    pub fn rail_segment_width_rem(&self, size: ControlSize, is_current: bool) -> f32 {
+        let full = match self.resolved_size(size) {
             ControlSize::Xs => 0.75,
             ControlSize::Sm => 0.875,
             ControlSize::Md => 1.0,
@@ -370,8 +370,8 @@ impl StepperSpec {
         }
     }
 
-    pub fn rail_thickness_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn rail_thickness_rem(&self, size: ControlSize) -> f32 {
+        match self.resolved_size(size) {
             ControlSize::Xs => 0.125,
             ControlSize::Sm => 0.125,
             ControlSize::Md => 0.1875,
@@ -382,16 +382,16 @@ impl StepperSpec {
 
     // ── Density: horizontal spacing only, never height ──
 
-    pub fn padding_inline_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_inline_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.625,
             ControlDensity::Default => 0.8,
             ControlDensity::Comfortable => 1.0,
         }
     }
 
-    pub fn gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.4375,
             ControlDensity::Default => 0.55,
             ControlDensity::Comfortable => 0.6875,
@@ -399,8 +399,8 @@ impl StepperSpec {
     }
 
     /// Space between dashes is spacing between siblings, so it is density.
-    pub fn rail_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn rail_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.1875,
             ControlDensity::Default => 0.25,
             ControlDensity::Comfortable => 0.3125,
@@ -445,21 +445,18 @@ mod tests {
         assert_eq!(spec.with_value("b").current_value(), Some("b"));
     }
 
-    /// Density must not change height — the size/density contract.
+    /// Density must not change height — the size/density contract. Height and
+    /// dash geometry key off size only (their helpers take no density), so the
+    /// assertions cover the density-keyed spacing tables.
     #[test]
     fn density_moves_only_horizontal_spacing() {
-        let base = StepperSpec::new(vec![StepperStep::new("a", "One")]);
-        let dense = base.clone().with_density(ControlDensity::Compact);
-        assert_eq!(dense.row_height_rem(), base.row_height_rem());
-        assert_eq!(dense.padding_block_rem(), base.padding_block_rem());
-        assert!(dense.padding_inline_rem() < base.padding_inline_rem());
-        // The dash keeps its intrinsic size; only the space between dashes moves.
-        assert_eq!(
-            dense.rail_segment_width_rem(true),
-            base.rail_segment_width_rem(true)
+        let spec = StepperSpec::new(vec![StepperStep::new("a", "One")]);
+        assert!(
+            spec.padding_inline_rem(ControlDensity::Compact)
+                < spec.padding_inline_rem(ControlDensity::Default)
         );
-        assert_eq!(dense.rail_thickness_rem(), base.rail_thickness_rem());
-        assert!(dense.rail_gap_rem() < base.rail_gap_rem());
+        // The dash keeps its intrinsic size; only the space between dashes moves.
+        assert!(spec.rail_gap_rem(ControlDensity::Compact) < spec.rail_gap_rem(ControlDensity::Default));
     }
 
     /// Collapse is vertical-only, and horizontal must not half-honour it.
@@ -509,8 +506,8 @@ mod tests {
     fn rail_length_carries_position() {
         let spec = StepperSpec::new(vec![StepperStep::new("a", "One")]);
         assert_eq!(
-            spec.rail_segment_width_rem(false) * 2.0,
-            spec.rail_segment_width_rem(true)
+            spec.rail_segment_width_rem(ControlSize::Md, false) * 2.0,
+            spec.rail_segment_width_rem(ControlSize::Md, true)
         );
     }
 }

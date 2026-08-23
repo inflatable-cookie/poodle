@@ -64,9 +64,13 @@ pub struct DockRegionSpec {
     /// the natives draw the drop zone and run no gesture. Recorded in
     /// `dock-region.md` §12.
     pub drag_zone_id: Option<String>,
-    pub size: ControlSize,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl DockRegionSpec {
@@ -85,9 +89,9 @@ impl DockRegionSpec {
             value: None,
             aria_label: None,
             drag_zone_id: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -151,7 +155,7 @@ impl DockRegionSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -161,7 +165,7 @@ impl DockRegionSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

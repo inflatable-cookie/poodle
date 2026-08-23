@@ -55,7 +55,9 @@ pub struct MetricTileSpec {
     pub sparkline_data: Vec<f32>,
     /// Presentation density — drives tile padding and internal gaps
     /// only (never typography or sparkline size). Contract §3/§8.
-    pub density: ControlDensity,
+    /// Omission (`None`) inherits from the presentation context; an
+    /// explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Eq for MetricTileSpec {}
@@ -69,12 +71,12 @@ impl MetricTileSpec {
             trend: None,
             trend_label: None,
             sparkline_data: Vec::new(),
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -204,39 +206,40 @@ impl MetricTileSpec {
     // Density drives root gap, root padding and body gap ONLY; it never
     // touches typography or sparkline dimensions.
 
-    /// Root gap in rem for the resolved density. Contract §8 density table.
-    pub fn root_gap_rem(&self) -> f32 {
-        match self.density {
+    /// Root gap in rem for a resolved density. Contract §8 density table.
+    /// Omission is resolved by the render context — pass the resolved density in.
+    pub fn root_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.375,
             ControlDensity::Default => 0.5, // space.inline.sm (8px)
             ControlDensity::Comfortable => 0.625,
         }
     }
 
-    /// Root vertical padding in rem for the resolved density.
+    /// Root vertical padding in rem for a resolved density.
     /// Contract §8 density table (default = `0.625rem`).
-    pub fn padding_y_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_y_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.625,
             ControlDensity::Comfortable => 0.75,
         }
     }
 
-    /// Root horizontal padding in rem for the resolved density.
+    /// Root horizontal padding in rem for a resolved density.
     /// Contract §8 density table (default = `space.panel.x`).
-    pub fn padding_x_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_x_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.75,
             ControlDensity::Default => 1.0, // space.panel.x (16px)
             ControlDensity::Comfortable => 1.25,
         }
     }
 
-    /// Body row gap in rem for the resolved density.
+    /// Body row gap in rem for a resolved density.
     /// Contract §8 density table (default = `space.inline.md`).
-    pub fn body_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn body_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.75, // space.inline.md (12px)
             ControlDensity::Comfortable => 0.875,

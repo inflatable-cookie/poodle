@@ -12,9 +12,9 @@ pub struct SelectionSummarySpec {
     /// "+N more" chip instead of a long wrapping row. Matches the
     /// Svelte `maxVisibleItems` prop.
     pub max_visible_items: Option<usize>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for SelectionSummarySpec {
@@ -23,9 +23,9 @@ impl Default for SelectionSummarySpec {
             items: Vec::new(),
             clear_action: None,
             max_visible_items: Some(4),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -141,7 +141,7 @@ impl SelectionSummarySpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -151,7 +151,7 @@ impl SelectionSummarySpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

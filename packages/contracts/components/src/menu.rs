@@ -14,9 +14,9 @@ pub struct MenuSpec {
     /// `dismissOnOutsideInteract` (default `true`).
     pub dismiss_on_outside_interact: bool,
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Accessible name for the trigger, distinct from the menu's own.
     pub trigger_aria_label: Option<String>,
 }
@@ -30,9 +30,9 @@ impl Default for MenuSpec {
             placement: OverlayPlacement::BottomStart,
             dismiss_on_outside_interact: true,
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
             trigger_aria_label: None,
         }
     }
@@ -119,7 +119,7 @@ impl MenuSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -129,7 +129,7 @@ impl MenuSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

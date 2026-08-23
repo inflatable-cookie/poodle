@@ -44,9 +44,9 @@ pub struct ModelCatalogueEditorSpec {
     pub hidden_open: bool,
     /// The live-region copy the host last received from an announcement.
     pub live_message: String,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for ModelCatalogueEditorSpec {
@@ -67,9 +67,9 @@ impl Default for ModelCatalogueEditorSpec {
             drop_target_id: None,
             hidden_open: false,
             live_message: String::new(),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -160,7 +160,7 @@ impl ModelCatalogueEditorSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -170,7 +170,7 @@ impl ModelCatalogueEditorSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

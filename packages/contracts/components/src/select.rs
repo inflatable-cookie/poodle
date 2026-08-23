@@ -41,9 +41,9 @@ pub struct SelectSpec {
     /// Refuses outside-interact dismissal when false. Matches Svelte
     /// `dismissOnOutsideInteract` (default `true`).
     pub dismiss_on_outside_interact: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Rendering mode: Auto, Native, or Custom.
     pub mode: SelectMode,
     /// When true, shows a filter/search input inside the dropdown.
@@ -95,9 +95,9 @@ impl Default for SelectSpec {
             open: None,
             default_open: false,
             dismiss_on_outside_interact: true,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             mode: SelectMode::default(),
             searchable: false,
             freeform: false,
@@ -195,7 +195,7 @@ impl SelectSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -205,7 +205,7 @@ impl SelectSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

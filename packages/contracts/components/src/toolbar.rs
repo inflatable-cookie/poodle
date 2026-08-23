@@ -11,9 +11,11 @@ pub struct ToolbarSpec {
     pub orientation: Orientation,
     pub has_separator: bool,
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for ToolbarSpec {
@@ -23,9 +25,9 @@ impl Default for ToolbarSpec {
             orientation: Orientation::Horizontal,
             has_separator: false,
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -77,7 +79,7 @@ impl ToolbarSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -87,7 +89,7 @@ impl ToolbarSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

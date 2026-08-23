@@ -9,7 +9,7 @@ pub struct FormActionsSpec {
     pub show_top_border: bool,
     /// Spacing density. Controls inline gap, top separation, and border
     /// gap per contract §8 (Density Variants + Divider Offset Variants).
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Overflow danger-action descriptors (contract `dangerItems`, §3). When
     /// non-empty (and inline danger content is present), these are the
     /// narrow-container overflow treatment shown behind the danger-menu
@@ -23,7 +23,7 @@ impl Default for FormActionsSpec {
             align: FormActionAlign::End,
             show_top_separation: true,
             show_top_border: false,
-            density: ControlDensity::Default,
+            density: None,
             danger_items: Vec::new(),
         }
     }
@@ -50,7 +50,7 @@ impl FormActionsSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -78,8 +78,8 @@ impl FormActionsSpec {
     /// token default. `None` means use [`Self::action_gap_token`]. Contract §8
     /// Density Variants: compact `0.5rem`, comfortable `0.875rem`;
     /// default inherits `--poodle-space-inline-md`.
-    pub fn gap_rem(&self) -> Option<f32> {
-        match self.density {
+    pub fn gap_rem(&self, density: ControlDensity) -> Option<f32> {
+        match density {
             ControlDensity::Compact => Some(0.5),
             ControlDensity::Default => None,
             ControlDensity::Comfortable => Some(0.875),
@@ -90,8 +90,8 @@ impl FormActionsSpec {
     /// token default. `None` means use [`Self::stack_separation_token`].
     /// Contract §8: compact `0.375rem`, comfortable `0.75rem`; default
     /// inherits `--poodle-space-stack-sm`.
-    pub fn top_separation_rem(&self) -> Option<f32> {
-        match self.density {
+    pub fn top_separation_rem(&self, density: ControlDensity) -> Option<f32> {
+        match density {
             ControlDensity::Compact => Some(0.375),
             ControlDensity::Default => None,
             ControlDensity::Comfortable => Some(0.75),
@@ -102,8 +102,8 @@ impl FormActionsSpec {
     /// Contract §8 Divider Offset Variants: compact `0.25rem`, default
     /// `0.5rem`, comfortable `0.625rem` (raw literals, matching Svelte
     /// `--poodle-form-actions-border-gap`).
-    pub fn border_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn border_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.25,
             ControlDensity::Default => 0.5,
             ControlDensity::Comfortable => 0.625,
@@ -133,8 +133,8 @@ impl FormActionsSpec {
     /// Inline danger group gap (contract §8 Danger Inline: `gap =
     /// var(--poodle-form-actions-gap)`), in rem, when density overrides the
     /// token default. Mirrors [`Self::gap_rem`] so the danger row tracks the root.
-    pub fn danger_inline_gap_rem(&self) -> Option<f32> {
-        self.gap_rem()
+    pub fn danger_inline_gap_rem(&self, density: ControlDensity) -> Option<f32> {
+        self.gap_rem(density)
     }
 
     /// Token backing the inline danger group gap when no density override

@@ -38,9 +38,13 @@ pub struct EditableLabelSpec {
     pub max_length: Option<usize>,
     /// Show pencil icon on hover/focus to signal editability.
     pub show_edit_icon: bool,
-    pub size: ControlSize,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub density: Option<ControlDensity>,
     /// Accessible name (contract §7). `None` falls back to the visible label.
     pub aria_label: Option<String>,
 }
@@ -58,9 +62,9 @@ impl Default for EditableLabelSpec {
             empty_text: None,
             max_length: None,
             show_edit_icon: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             aria_label: None,
         }
     }
@@ -172,7 +176,7 @@ impl EditableLabelSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -182,7 +186,7 @@ impl EditableLabelSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

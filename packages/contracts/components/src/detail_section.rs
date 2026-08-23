@@ -10,7 +10,9 @@ pub struct DetailSectionSpec {
     /// Number of columns for the detail rows (default 1).
     pub columns: u8,
     /// Density override for section spacing (gaps, separated top padding).
-    pub density: ControlDensity,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub density: Option<ControlDensity>,
     /// Minimum column width before the auto grid drops a column.
     pub item_min_column_width: Option<Dimension>,
     /// Column ceiling for the auto grid.
@@ -25,7 +27,7 @@ impl Default for DetailSectionSpec {
             is_separated: true,
             aria_label: None,
             columns: 1,
-            density: ControlDensity::Default,
+            density: None,
             item_min_column_width: None,
             max_auto_columns: 3,
         }
@@ -73,7 +75,7 @@ impl DetailSectionSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -82,51 +84,52 @@ impl DetailSectionSpec {
     // custom-property table. These are layout gaps between siblings, not
     // component height.
 
-    /// Root vertical gap (header↔body) in rem. Contract §8: compact 0.75,
-    /// default `stack.md + 0.125` (≈0.875), comfortable `stack.lg - 0.125`
-    /// (≈1.375).
-    pub fn root_gap_rem(&self) -> f32 {
-        match self.density {
+    /// Root vertical gap (header↔body) in rem for the resolved density.
+    /// Contract §8: compact 0.75, default `stack.md + 0.125` (≈0.875),
+    /// comfortable `stack.lg - 0.125` (≈1.375).
+    pub fn root_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.75,
             ControlDensity::Default => 0.875,
             ControlDensity::Comfortable => 1.375,
         }
     }
 
-    /// Header gap (title-block↔actions) in rem. Contract §8: compact
-    /// `space.inline.sm` (0.5), default 0.75, comfortable 0.875.
-    pub fn header_gap_rem(&self) -> f32 {
-        match self.density {
+    /// Header gap (title-block↔actions) in rem for the resolved density.
+    /// Contract §8: compact `space.inline.sm` (0.5), default 0.75,
+    /// comfortable 0.875.
+    pub fn header_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 0.875,
         }
     }
 
-    /// Title↔description gap in rem. Contract §8: compact 0.25, default
-    /// 0.375, comfortable 0.5.
-    pub fn title_gap_rem(&self) -> f32 {
-        match self.density {
+    /// Title↔description gap in rem for the resolved density. Contract §8:
+    /// compact 0.25, default 0.375, comfortable 0.5.
+    pub fn title_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.25,
             ControlDensity::Default => 0.375,
             ControlDensity::Comfortable => 0.5,
         }
     }
 
-    /// Body inter-row / inter-column gap in rem. Contract §8: compact 0.625,
-    /// default 0.75, comfortable 1.0.
-    pub fn body_gap_rem(&self) -> f32 {
-        match self.density {
+    /// Body inter-row / inter-column gap in rem for the resolved density.
+    /// Contract §8: compact 0.625, default 0.75, comfortable 1.0.
+    pub fn body_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.625,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 1.0,
         }
     }
 
-    /// Separated top-padding in rem. Contract §8: compact 0.875, default 1.0,
-    /// comfortable 1.125.
-    pub fn separated_gap_rem(&self) -> f32 {
-        match self.density {
+    /// Separated top-padding in rem for the resolved density. Contract §8:
+    /// compact 0.875, default 1.0, comfortable 1.125.
+    pub fn separated_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.875,
             ControlDensity::Default => 1.0,
             ControlDensity::Comfortable => 1.125,

@@ -19,9 +19,11 @@ pub struct ToolCallSpec {
     pub output: Option<String>,
     pub output_language: Option<String>,
     pub is_expanded: bool,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for ToolCallSpec {
@@ -41,9 +43,9 @@ impl ToolCallSpec {
             output: None,
             output_language: None,
             is_expanded: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -72,16 +74,12 @@ impl ToolCallSpec {
         self
     }
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
-    }
-
-    fn resolved_size(&self) -> ControlSize {
-        self.size
     }
 
     /// A row with no output is not interactive at all — not a disabled button,
@@ -178,8 +176,8 @@ impl ToolCallSpec {
     }
 
     // ── Size: intrinsic dimensions ───────────────────────────
-    pub fn row_height_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn row_height_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 1.375,
             ControlSize::Sm => 1.5,
             ControlSize::Md => 1.75,
@@ -187,8 +185,8 @@ impl ToolCallSpec {
             ControlSize::Xl => 2.25,
         }
     }
-    pub fn font_size_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn font_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.75,
             ControlSize::Md => 0.8125,
@@ -196,8 +194,8 @@ impl ToolCallSpec {
             ControlSize::Xl => 0.9375,
         }
     }
-    pub fn icon_size_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn icon_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.75,
             ControlSize::Sm => 0.8125,
             ControlSize::Md => 0.875,
@@ -205,8 +203,8 @@ impl ToolCallSpec {
             ControlSize::Xl => 1.125,
         }
     }
-    pub fn padding_block_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn padding_block_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.125,
             ControlSize::Sm => 0.1875,
             ControlSize::Md => 0.25,
@@ -216,15 +214,15 @@ impl ToolCallSpec {
     }
 
     // ── Density: spacing between siblings, never height ──────
-    pub fn gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.375,
             ControlDensity::Default => 0.5,
             ControlDensity::Comfortable => 0.6875,
         }
     }
-    pub fn padding_inline_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_inline_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.375,
             ControlDensity::Default => 0.5,
             ControlDensity::Comfortable => 0.75,
@@ -287,8 +285,8 @@ mod tests {
         let base = ToolCallSpec::new("a", "x");
         for density in [ControlDensity::Compact, ControlDensity::Comfortable] {
             assert_eq!(
-                base.clone().with_density(density).row_height_rem(),
-                base.row_height_rem()
+                base.clone().with_density(density).row_height_rem(ControlSize::Md),
+                base.row_height_rem(ControlSize::Md)
             );
         }
     }

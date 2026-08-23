@@ -589,9 +589,9 @@ pub struct ModelPickerSpec {
     pub show_model_descriptions: bool,
     pub variant: ModelPickerVariant,
     pub emphasis: ModelPickerEmphasis,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     pub is_open: bool,
     /// Refuses outside-interact dismissal when false. Matches Svelte
     /// `dismissOnOutsideInteract` (default `true`).
@@ -617,9 +617,9 @@ impl ModelPickerSpec {
             show_model_descriptions: true,
             variant: ModelPickerVariant::Bare,
             emphasis: ModelPickerEmphasis::Default,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             is_open: false,
             dismiss_on_outside_interact: true,
         }
@@ -692,7 +692,7 @@ impl ModelPickerSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -702,7 +702,7 @@ impl ModelPickerSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

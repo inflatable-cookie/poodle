@@ -92,9 +92,9 @@ pub struct OrderBySpec {
     pub active_sort: Option<ActiveSort>,
     pub aria_label: String,
     pub is_disabled: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     pub max_fields: Option<usize>,
     pub compact: bool,
     pub trigger_variant: OrderByTriggerVariant,
@@ -119,9 +119,9 @@ impl OrderBySpec {
             active_sort: None,
             aria_label: "Sort by".to_string(),
             is_disabled: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             max_fields: None,
             compact: false,
             trigger_variant: OrderByTriggerVariant::Summary,
@@ -341,7 +341,7 @@ impl OrderBySpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -351,7 +351,7 @@ impl OrderBySpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

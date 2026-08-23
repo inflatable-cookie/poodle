@@ -9,7 +9,7 @@ pub struct IconButtonSpec {
     /// Tone applied to the button fill/foreground. Mirrors
     /// `ButtonSpec.tone` — Default / Danger etc.
     pub tone: ButtonTone,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub icon: Option<String>,
     pub aria_label: Option<String>,
     pub is_expanded: Option<bool>,
@@ -24,7 +24,7 @@ pub struct IconButtonSpec {
     pub tooltip: Option<String>,
     pub tooltip_placement: OverlayPlacement,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Initial pressed state for an uncontrolled toggle button.
     pub default_pressed: Option<bool>,
 }
@@ -34,7 +34,7 @@ impl Default for IconButtonSpec {
         Self {
             variant: ButtonVariant::Ghost,
             tone: ButtonTone::Default,
-            size: ControlSize::Md,
+            size: None,
             icon: None,
             aria_label: None,
             is_expanded: None,
@@ -45,7 +45,7 @@ impl Default for IconButtonSpec {
             tooltip: None,
             tooltip_placement: OverlayPlacement::Bottom,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             default_pressed: None,
         }
     }
@@ -77,7 +77,7 @@ impl IconButtonSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -138,12 +138,12 @@ impl IconButtonSpec {
         self.is_pressed.is_some()
     }
 
-    pub fn icon_size_token(&self) -> &'static str {
-        self.size.icon_size_token()
+    pub fn icon_size_token(&self, size: ControlSize) -> &'static str {
+        size.icon_size_token()
     }
 
-    pub fn control_height_token(&self) -> &'static str {
-        self.size.control_height_token()
+    pub fn control_height_token(&self, size: ControlSize) -> &'static str {
+        size.control_height_token()
     }
 
     pub fn with_size_role(mut self, size_role: SemanticControlSizeRole) -> Self {
@@ -152,7 +152,7 @@ impl IconButtonSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

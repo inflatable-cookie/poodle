@@ -27,9 +27,11 @@ pub struct AgentPlanRecordSpec {
     pub is_expanded: bool,
     pub expand_label: String,
     pub collapse_label: String,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl AgentPlanRecordSpec {
@@ -43,9 +45,9 @@ impl AgentPlanRecordSpec {
             is_expanded: false,
             expand_label: "Show plan".to_string(),
             collapse_label: "Hide plan".to_string(),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -62,11 +64,11 @@ impl AgentPlanRecordSpec {
         self
     }
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -110,8 +112,8 @@ impl AgentPlanRecordSpec {
     }
 
     // ── Size ─────────────────────────────────────────────────
-    pub fn font_size_rem(&self) -> f32 {
-        match self.size {
+    pub fn font_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.75,
             ControlSize::Md => 0.8125,
@@ -121,15 +123,15 @@ impl AgentPlanRecordSpec {
     }
 
     // ── Density ──────────────────────────────────────────────
-    pub fn gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.25,
             ControlDensity::Default => 0.375,
             ControlDensity::Comfortable => 0.5,
         }
     }
-    pub fn padding_inset_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_inset_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 1.0,

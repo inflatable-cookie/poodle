@@ -99,9 +99,11 @@ pub struct BlockEditorSpec {
     pub allow_add: Option<bool>,
     pub allow_remove: Option<bool>,
     pub allow_type_change: Option<bool>,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for BlockEditorSpec {
@@ -122,9 +124,9 @@ impl BlockEditorSpec {
             allow_add: None,
             allow_remove: None,
             allow_type_change: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -199,7 +201,7 @@ impl BlockEditorSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -209,7 +211,7 @@ impl BlockEditorSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

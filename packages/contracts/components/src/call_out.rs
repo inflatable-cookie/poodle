@@ -46,9 +46,9 @@ pub struct CallOutSpec {
     pub fill: ToneFill,
     pub title: Option<String>,
     pub content: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Shows the dismiss (close) button when true (contract §3).
     pub dismissible: bool,
     /// Accessible label for the dismiss button (contract §3 default).
@@ -66,9 +66,9 @@ impl Default for CallOutSpec {
             fill: ToneFill::Tint,
             title: None,
             content: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             dismissible: false,
             dismiss_label: "Dismiss message".to_string(),
             announce_mode: CalloutAnnounceMode::None,
@@ -200,7 +200,7 @@ impl CallOutSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -210,7 +210,7 @@ impl CallOutSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

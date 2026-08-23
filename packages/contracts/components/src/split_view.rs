@@ -48,9 +48,9 @@ pub struct SplitViewSpec {
     /// borders read as the separator and the resize handle's grab area is an
     /// overlay with no layout footprint either way.
     pub divider: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Accessible name (contract §7). `None` falls back to the visible label.
     pub aria_label: Option<String>,
     /// Below this pane size (px) the primary pane collapses.
@@ -102,9 +102,9 @@ impl SplitViewSpec {
             show_collapse_secondary: false,
             toggle_visibility: SplitToggleVisibility::Always,
             divider: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             aria_label: None,
             collapse_primary_below_size: None,
             collapse_secondary_below_size: None,
@@ -199,7 +199,7 @@ impl SplitViewSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -209,7 +209,7 @@ impl SplitViewSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

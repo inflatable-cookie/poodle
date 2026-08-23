@@ -26,9 +26,9 @@ pub struct ShellStatusBarSpec {
     /// When true, renders an explicit border-top + 94% panel background.
     /// When false, the bar blends into its container (transparent).
     pub chrome: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Legacy shell counters — retained for back-compat, not used visually.
     pub leading_item_count: usize,
     /// Legacy shell counters — retained for back-compat, not used visually.
@@ -41,10 +41,10 @@ impl Default for ShellStatusBarSpec {
             summary: None,
             aria_label: None,
             chrome: false,
-            size: ControlSize::Md,
+            size: None,
             // Contract default: status bar resolves at the "chrome" role.
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
             leading_item_count: 0,
             trailing_item_count: 0,
         }
@@ -72,7 +72,7 @@ impl ShellStatusBarSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -82,7 +82,7 @@ impl ShellStatusBarSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -135,8 +135,8 @@ impl ShellStatusBarSpec {
 
     /// Root gap (between leading and trailing regions). Contract base
     /// `space.inline.md`; density `compact`/`comfortable` override below.
-    pub fn root_gap_token(&self) -> &'static str {
-        match self.density {
+    pub fn root_gap_token(&self, density: ControlDensity) -> &'static str {
+        match density {
             ControlDensity::Compact | ControlDensity::Comfortable => semantic::SPACE_INLINE_MD,
             ControlDensity::Default => semantic::SPACE_INLINE_MD,
         }
@@ -152,10 +152,10 @@ impl ShellStatusBarSpec {
     // Status-bar-specific size / density scales that have no shared token.
     // Returned as rem; the renderer converts via `rem_to_px`.
 
-    /// Root font-size in rem for the current size. Contract §8 size table:
+    /// Root font-size in rem for the resolved size. Contract §8 size table:
     /// xs 0.6875, sm 0.75, md 0.8125 (default), lg 0.875, xl 0.9375.
-    pub fn font_size_rem(&self) -> f32 {
-        match self.size {
+    pub fn font_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.75,
             ControlSize::Md => 0.8125,
@@ -164,10 +164,10 @@ impl ShellStatusBarSpec {
         }
     }
 
-    /// Root padding-block in rem for the current size. Contract §8: default
+    /// Root padding-block in rem for the resolved size. Contract §8: default
     /// `0.375rem`; xs 0.25, sm 0.3125, lg 0.4375, xl 0.5.
-    pub fn padding_block_rem(&self) -> f32 {
-        match self.size {
+    pub fn padding_block_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.25,
             ControlSize::Sm => 0.3125,
             ControlSize::Md => 0.375,
@@ -176,20 +176,21 @@ impl ShellStatusBarSpec {
         }
     }
 
-    /// Root padding-inline in rem for the current density. Contract §8:
+    /// Root padding-inline in rem for the resolved density. Contract §8:
     /// default `0.75rem`; compact 0.5, comfortable 1.125.
-    pub fn padding_inline_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_inline_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 1.125,
         }
     }
 
-    /// Root gap override in rem for density. Contract §8: compact `0.375rem`,
-    /// comfortable `1rem`. Default returns `None` (use `root_gap_token`).
-    pub fn density_gap_rem(&self) -> Option<f32> {
-        match self.density {
+    /// Root gap override in rem for the resolved density. Contract §8: compact
+    /// `0.375rem`, comfortable `1rem`. Default returns `None` (use
+    /// `root_gap_token`).
+    pub fn density_gap_rem(&self, density: ControlDensity) -> Option<f32> {
+        match density {
             ControlDensity::Compact => Some(0.375),
             ControlDensity::Comfortable => Some(1.0),
             ControlDensity::Default => None,

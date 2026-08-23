@@ -12,9 +12,11 @@ pub struct ActionDiscoveryPanelSpec {
     /// active-item accent treatment). Keyboard nav that mutates this lives in
     /// the consuming app's event loop; the spec only carries the resolved id.
     pub active_id: Option<String>,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for ActionDiscoveryPanelSpec {
@@ -24,9 +26,9 @@ impl Default for ActionDiscoveryPanelSpec {
             state: DiscoveryState::Ready,
             empty_message: None,
             active_id: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -79,7 +81,7 @@ impl ActionDiscoveryPanelSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -89,7 +91,7 @@ impl ActionDiscoveryPanelSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

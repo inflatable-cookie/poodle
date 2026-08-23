@@ -12,9 +12,11 @@ pub struct AudioPlayerSpec {
     pub show_speed_control: bool,
     /// Playback rate (e.g. 1.0 = 1x); drives the SpeedSelect display.
     pub rate: f64,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     /// Accessible name (contract §7). `None` falls back to the visible label.
     pub aria_label: Option<String>,
 }
@@ -35,9 +37,9 @@ impl AudioPlayerSpec {
             is_muted: false,
             show_speed_control: false,
             rate: 1.0,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             aria_label: None,
         }
     }
@@ -103,7 +105,7 @@ impl AudioPlayerSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -113,7 +115,7 @@ impl AudioPlayerSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

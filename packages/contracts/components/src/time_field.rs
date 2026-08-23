@@ -17,9 +17,9 @@ pub struct TimeFieldSpec {
     pub is_disabled: bool,
     pub aria_label: Option<String>,
     pub described_by: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for TimeFieldSpec {
@@ -33,9 +33,9 @@ impl Default for TimeFieldSpec {
             is_disabled: false,
             aria_label: None,
             described_by: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -99,7 +99,7 @@ impl TimeFieldSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -109,7 +109,7 @@ impl TimeFieldSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

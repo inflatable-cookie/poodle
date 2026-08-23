@@ -20,9 +20,9 @@ pub struct CommandPaletteSpec {
     /// Placeholder for the query field when empty. Matches Svelte
     /// `invocationHint` prop.
     pub invocation_hint: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for CommandPaletteSpec {
@@ -42,9 +42,9 @@ impl Default for CommandPaletteSpec {
             title: None,
             description: None,
             invocation_hint: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -109,7 +109,7 @@ impl CommandPaletteSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -119,7 +119,7 @@ impl CommandPaletteSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

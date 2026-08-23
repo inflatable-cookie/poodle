@@ -54,9 +54,9 @@ pub struct MediaPickerSpec {
     /// Message shown in the browse grid when no items are available.
     /// Defaults to `"No media items found."` when None.
     pub empty_message: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl MediaPickerSpec {
@@ -69,9 +69,9 @@ impl MediaPickerSpec {
             accept: None,
             max_file_size: None,
             empty_message: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -155,7 +155,7 @@ impl MediaPickerSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -165,7 +165,7 @@ impl MediaPickerSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

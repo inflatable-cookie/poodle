@@ -19,9 +19,9 @@ pub struct NavigationMenuSpec {
     /// Refuses outside-interact dismissal when false. Matches Svelte
     /// `dismissOnOutsideInteract` (default `true`).
     pub dismiss_on_outside_interact: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for NavigationMenuSpec {
@@ -34,9 +34,9 @@ impl Default for NavigationMenuSpec {
             active_edge: ActiveEdge::None,
             active_fill: ActiveFill::Tint,
             dismiss_on_outside_interact: true,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -115,7 +115,7 @@ impl NavigationMenuSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -125,7 +125,7 @@ impl NavigationMenuSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

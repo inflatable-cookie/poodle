@@ -61,13 +61,15 @@ pub struct TableSpec {
     pub empty_message: String,
     pub aria_label: Option<String>,
     /// Explicit control size for table typography and vertical cell padding
-    /// (contract §8 size adjustments). `Md` is the baseline.
-    pub size: ControlSize,
+    /// (contract §8 size adjustments). `None` inherits from the presentation
+    /// context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     /// Semantic size offset from inherited presentation (contract §3).
     pub size_role: SemanticControlSizeRole,
     /// Density for horizontal cell padding only (contract §8 density
-    /// adjustments). Never affects height/vertical padding.
-    pub density: ControlDensity,
+    /// adjustments). Never affects height/vertical padding. `None` inherits
+    /// from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for TableSpec {
@@ -78,9 +80,9 @@ impl Default for TableSpec {
             caption: None,
             empty_message: "No rows available.".to_string(),
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -118,7 +120,7 @@ impl TableSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -128,7 +130,7 @@ impl TableSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

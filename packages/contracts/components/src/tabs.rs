@@ -101,9 +101,9 @@ pub struct TabsSpec {
     /// host-set state during a reorder drag. Drives the drop-target visual
     /// (inset accent ring). Mirrors the tree's `drop_target_value` convention.
     pub drop_target_value: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Whether hovering a tab shows its label as a tooltip.
     pub shows_tooltips: bool,
     /// Whether the strip collapses into a menu when it overflows.
@@ -141,9 +141,9 @@ impl Default for TabsSpec {
             history_key: None,
             drag_value: None,
             drop_target_value: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
             shows_tooltips: false,
             collapse_when_overflow: false,
             overflow_strategy: TabsOverflowStrategy::Collapse,
@@ -337,7 +337,7 @@ impl TabsSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -347,7 +347,7 @@ impl TabsSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

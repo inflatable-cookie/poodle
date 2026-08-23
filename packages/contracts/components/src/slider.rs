@@ -26,9 +26,9 @@ pub struct SliderSpec {
     pub is_disabled: bool,
     pub aria_label: Option<String>,
     pub value_text: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for SliderSpec {
@@ -46,9 +46,9 @@ impl Default for SliderSpec {
             is_disabled: false,
             aria_label: None,
             value_text: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -108,7 +108,7 @@ impl SliderSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -118,7 +118,7 @@ impl SliderSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

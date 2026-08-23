@@ -8,9 +8,9 @@ pub struct ProgressSpec {
     pub is_indeterminate: bool,
     pub aria_label: Option<String>,
     pub value_text: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for ProgressSpec {
@@ -21,9 +21,9 @@ impl Default for ProgressSpec {
             is_indeterminate: false,
             aria_label: None,
             value_text: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -102,7 +102,7 @@ impl ProgressSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -112,7 +112,7 @@ impl ProgressSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }
