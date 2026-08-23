@@ -21,9 +21,9 @@ v0.2.1 recovery-release generation after `v0.2.0` stopped before publication.
   measured native focus-ring defect and Stepper keyboard-entry gap. PR #66
   closed `g15.049`; PR #67 closed the GPUI/Zed dependency-licence policy gap
   without admitting GPL code. Those lanes and the `0.2.0` candidate completed;
-  its workflow then failed before publication. Card `054` has a green `0.2.1`
-  recovery candidate awaiting its exact commit/receipt pin before operator
-  gate `013`.
+  its workflow then failed before publication. Card `054` is complete with
+  green `0.2.1` candidate `3d914261`; operator gate `013` is the only remaining
+  step.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
@@ -50,8 +50,8 @@ v0.2.1 recovery-release generation after `v0.2.0` stopped before publication.
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — active v0.2.1 recovery baseline; implementation cards through
-  `g15.053` are complete, `g15.054` has a green candidate awaiting its exact
-  commit/receipt pin, and `g15.013` is the final operator gate
+  `g15.054` are complete with candidate `3d914261`, and `g15.013` is the final
+  operator gate
 
 ## Rules
 

@@ -5,10 +5,9 @@ Updated: 2026-08-23
 ## Active Track
 
 - `g15`
-  - Status: active — implementation cards through `g15.053` are complete;
-    `g15.054` has a green `0.2.1` replacement candidate after the
-    pre-publication `v0.2.0` workflow failure and is awaiting its exact
-    commit/receipt pin; `g15.013` is the final operator gate
+  - Status: active — implementation cards through `g15.054` are complete;
+    `0.2.1` replacement candidate `3d914261` is green after the pre-publication
+    `v0.2.0` workflow failure; `g15.013` is the final operator gate
   - Posture: release-first v0.2.1 recovery baseline
   - Range: `001` to `054` plus final gate `013`
   - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
@@ -17,8 +16,8 @@ Updated: 2026-08-23
     export, not a representative subset. React mirror coverage, a certified
     GPUI subset, and deferred Jetstream are recorded separately; one runtime
     does not borrow another runtime's pass.
-  - Next: certify the exact `g15.054` recovery candidate, then return
-    `g15.013` to the operator for the `v0.2.1` tag and publication decision.
+  - Next: operator reviews candidate `3d914261` and explicitly decides the
+    `v0.2.1` tag and publication mutation under `g15.013`.
 
 ## Latest Completed Track
 

@@ -1,7 +1,7 @@
 # g15.054 — v0.2.1 Release Recovery
 
-Status: **candidate green — direct orchestrator recovery complete; awaiting
-exact commit and evidence-receipt pin**
+Status: **complete — candidate `3d914261` is green and pinned by
+`../../logs/2026-08/20260823-g15-054-v021-release-recovery.md`**
 Depends on: accepted `g15.050` candidate `7922a3a9`, immutable `v0.2.0` tag,
 and explicit operator approval to repair `release.yml`
 Governing refs: `013-v020-release-certification.md`,
@@ -42,8 +42,8 @@ all skipped. npm remained at `0.1.0` for core and Svelte.
       candidate.
 - [x] `npm pack` verifies the three expected tarballs; React remains outside
       the workflow publish set.
-- [ ] A receipt pins the exact candidate SHA and artifact digests.
-- [ ] `g15.013` returns to an explicit `v0.2.1` operator gate.
+- [x] A receipt pins the exact candidate SHA and artifact digests.
+- [x] `g15.013` returns to an explicit `v0.2.1` operator gate.
 
 ## Stop Conditions
 

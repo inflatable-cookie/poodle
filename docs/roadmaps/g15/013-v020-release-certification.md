@@ -1,7 +1,7 @@
 # g15.013 — v0.2.1 Release Certification
 
-Status: **paused for `g15.054` — `v0.2.0` is immutable after a pre-publication
-workflow failure; awaiting a certified `0.2.1` replacement candidate**
+Status: **operator gate — replacement candidate `3d914261` is green with
+`g15.054` receipt; awaiting explicit `v0.2.1` tag and publication authority**
 Depends on: every earlier g15 implementation/specimen/conformance card,
 `g15.042`–`g15.052` as sequenced by the runway, accepted `v0.2.0` candidate
 history, and one clean accepted `0.2.1` recovery candidate SHA
@@ -43,7 +43,7 @@ deferred Jetstream are reported independently and honestly.
       channel, and Stepper accepts keyboard entry without a pointer prelude.
 - [x] `g15.050` landed: one clean v0.2.0 candidate, artifacts, notes, and QA
       receipt are pinned to an exact SHA.
-- [ ] `g15.054` landed: the failed npm bootstrap is repaired and one clean
+- [x] `g15.054` landed: the failed npm bootstrap is repaired and one clean
       `0.2.1` replacement candidate is pinned to an exact SHA.
 
 ## Compiled Release Children
