@@ -25,6 +25,7 @@ use std::sync::{Arc, Mutex};
 use gpui::TestAppContext;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
+use poodle_render::context::RenderContext;
 use poodle_specs::{AgentTranscriptSpec, PopoverSpec, RangeSliderSpec};
 
 #[path = "../src/headless_driver.rs"]
@@ -65,7 +66,7 @@ fn button_node(
     spec: poodle_specs::ButtonSpec,
     handler: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
-    let mut node = poodle_render::button(&spec, &theme(), handler);
+    let mut node = poodle_render::button(&spec, &RenderContext::new(&theme()), handler);
     node.id = Some(FIXTURE_ID.to_owned());
     node
 }
@@ -208,7 +209,7 @@ fn a_scrub_reports_change_while_dragging_and_commits_once_at_release() {
 
         let mut node = poodle_render::range_slider(
             &spec,
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::RangeSliderHandlers {
                 on_change: Some(Arc::new(move |low, high| {
                     *change_value.lock().expect("value lock") = (low, high);
@@ -260,7 +261,7 @@ fn overlay_layers_survive_independent_conversions_within_one_frame() {
         let open_popover = |instance: &str, label: &str| {
             poodle_render::popover(
                 &PopoverSpec::new().with_open(true),
-                &theme(),
+                &RenderContext::new(&theme()),
                 &poodle_render::PopoverHandlers {
                     on_activate: None,
                     on_dismiss: Some(Arc::new(|_| {})),
@@ -313,14 +314,15 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
         let build_theme = theme();
         let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
             let spec = AgentTranscriptSpec::new(build_items.borrow().clone());
+            let ctx = RenderContext::new(&build_theme);
             let content = poodle_render::agent_transcript(
                 &spec,
-                &build_theme,
+                &ctx,
                 poodle_render::AgentTranscriptHandlers::default(),
             );
             let mut jump = poodle_render::agent_transcript::agent_transcript_jump(
                 &spec,
-                &build_theme,
+                &ctx,
                 Some(build_scroll.jump_handler()),
             );
             jump.id = Some("transcript-headless-jump-control".to_owned());
@@ -386,9 +388,11 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
 #[test]
 fn a_nested_popover_paints_without_nesting_deferred_draws() {
     run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let inner = poodle_render::popover(
             &PopoverSpec::new().with_open(true),
-            &theme(),
+            &ctx,
             &poodle_render::PopoverHandlers {
                 on_activate: None,
                 on_dismiss: Some(Arc::new(|_| {})),
@@ -399,7 +403,7 @@ fn a_nested_popover_paints_without_nesting_deferred_draws() {
         );
         let outer = poodle_render::popover(
             &PopoverSpec::new().with_open(true),
-            &theme(),
+            &ctx,
             &poodle_render::PopoverHandlers {
                 on_activate: None,
                 on_dismiss: Some(Arc::new(|_| {})),
@@ -456,7 +460,7 @@ fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
                 .with_groups([5, 5, 5, 5])
                 .with_separator("-")
                 .with_numbers_only(false),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::CodeInputHandlers {
                 on_value_change: Some(Arc::new(move |value: &str| {
                     changes_sink.lock().unwrap().push(value.to_string())
@@ -501,7 +505,7 @@ fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
                     .with_length(4)
                     .with_numbers_only(false)
                     .with_value(value),
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::CodeInputHandlers {
                     on_value_change: Some(Arc::new(move |next: &str| {
                         changes_sink.lock().unwrap().push(next.to_string())
@@ -583,12 +587,14 @@ fn a_stale_completion_result_cannot_render_in_a_mounted_window() {
     }
 
     run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let mut checked = poodle_render::code_input_with_handlers(
             &CodeInputSpec::new()
                 .with_length(6)
                 .with_value("123456")
                 .with_completion_result(CodeInputCompletion::Passed("123456".to_string())),
-            &theme(),
+            &ctx,
             poodle_render::CodeInputHandlers::default(),
         );
         checked.id = Some(FIXTURE_ID.to_owned());
@@ -604,7 +610,7 @@ fn a_stale_completion_result_cannot_render_in_a_mounted_window() {
                 .with_length(6)
                 .with_value("654321")
                 .with_completion_result(CodeInputCompletion::Passed("123456".to_string())),
-            &theme(),
+            &ctx,
             poodle_render::CodeInputHandlers::default(),
         );
         driver.draw_frame();
@@ -653,7 +659,7 @@ fn a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam() {
         };
         let mut node = poodle_render::file_upload_with_handlers(
             &poodle_specs::FileUploadSpec::new().with_accept(".lic"),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::FileUploadHandlers {
                 on_browse: Some(on_browse),
                 ..poodle_render::FileUploadHandlers::default()
@@ -727,7 +733,7 @@ fn a_dropzone_browse_reports_accept_rejection_honestly() {
         };
         let mut node = poodle_render::file_upload_with_handlers(
             &poodle_specs::FileUploadSpec::new().with_accept(".lic"),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::FileUploadHandlers {
                 on_browse: Some(on_browse),
                 ..poodle_render::FileUploadHandlers::default()
@@ -801,7 +807,7 @@ fn licence_activation_key_entry_types_and_emits_through_the_real_tree() {
                         LicenceKeyCodeInputOptions::new(20).with_groups([5, 5, 5, 5]),
                     )
                     .with_key_draft(key.clone()),
-                &theme(),
+                &RenderContext::new(&theme()),
                 None,
                 poodle_render::LicenceActivationHandlers {
                     on_key_change: Some({
@@ -913,7 +919,7 @@ fn licence_seats_release_flows_through_confirm_in_a_mounted_window() {
                     },
                 ])
                 .with_open_confirm(Some("id-b".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::LicenceSeatsHandlers {
                 on_release: Some(Arc::new(move |machine_id: &str| {
                     sink.lock().unwrap().push(machine_id.to_string())
@@ -969,7 +975,7 @@ fn licence_status_renders_state_and_authority_reads_in_a_mounted_window() {
                 .with_use_until(Some(now + 86_400))
                 .with_update_until(None)
                 .with_usable(true),
-            &theme(),
+            &RenderContext::new(&theme()),
         );
         node.id = Some(FIXTURE_ID.to_owned());
         let node = Arc::new(Mutex::new(node));
@@ -1011,7 +1017,7 @@ fn licence_activation_account_submit_fires_through_the_real_tree() {
             &LicenceActivationSpec::new()
                 .with_mode(LicenceActivationMode::Account)
                 .with_machine_label(Some("Studio Mac".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             Some(Node::text("host login form")),
             poodle_render::LicenceActivationHandlers {
                 on_submit: Some(Arc::new(move || {
@@ -1056,7 +1062,7 @@ fn key_validation_copy_clears_on_edit_in_a_mounted_window() {
                 &LicenceActivationSpec::new()
                     .with_mode(LicenceActivationMode::Key)
                     .with_key_message(message.map(str::to_string)),
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::LicenceActivationHandlers {
                     on_key_change: Some({
                         let sink = Arc::clone(&sink);
@@ -1121,7 +1127,7 @@ fn a_machine_name_escape_restores_the_original_in_a_mounted_window() {
                     .with_mode(LicenceActivationMode::Account)
                     .with_machine_label(Some(label.to_string()))
                     .with_machine_label_editing(editing),
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::LicenceActivationHandlers {
                     on_machine_label_change: Some({
                         let draft = Arc::clone(&draft);
@@ -1197,7 +1203,7 @@ fn model_connection_picker_roving_focus_moves_real_backend_focus() {
             &ModelConnectionPickerSpec::new()
                 .with_options(model_connection_picker_fixtures())
                 .with_value(Some("anthropic-messages".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::ModelConnectionPickerHandlers {
                 on_value_change: Some(Arc::new(move |id: &str| {
                     sink.lock().unwrap().push(id.to_string())
@@ -1258,7 +1264,7 @@ fn model_connection_picker_ignores_a_click_on_an_unsupported_route() {
         ];
         let mut node = poodle_render::model_connection_picker(
             &ModelConnectionPickerSpec::new().with_options(options),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::ModelConnectionPickerHandlers {
                 on_value_change: Some(Arc::new(move |id: &str| {
                     sink.lock().unwrap().push(id.to_string())
@@ -1313,7 +1319,7 @@ fn model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window() {
                 .with_options(options)
                 .with_value(Some("codex-app".to_string()))
                 .with_can_submit(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::ModelConnectionSetupHandlers {
                 on_submit: Some(Arc::new(move |id: &str| {
                     submit_sink.lock().unwrap().push(id.to_string())
@@ -1363,7 +1369,7 @@ fn model_connection_card_closes_and_returns_real_focus_to_the_disclosure() {
         let disclosure_id = spec.disclosure_id();
         let mut node = poodle_render::model_connection_card_with_slots(
             &spec,
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::ModelConnectionCardSlots {
                 details: Some(poodle_node::Node::text("Host details")),
                 ..poodle_render::ModelConnectionCardSlots::default()
@@ -1434,7 +1440,7 @@ fn model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window() {
                 &ModelCatalogueEditorSpec::new()
                     .with_items(model_catalogue_fixtures())
                     .with_grabbed(grabbed),
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::ModelCatalogueEditorHandlers {
                     on_order_change: Some(Arc::new(move |order: &[String]| {
                         orders.lock().unwrap().push(order.to_vec())
@@ -1522,7 +1528,7 @@ fn model_catalogue_editor_hide_moves_real_focus_to_the_next_shown_model() {
         ];
         let mut node = poodle_render::model_catalogue_editor(
             &ModelCatalogueEditorSpec::new().with_items(items),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::ModelCatalogueEditorHandlers {
                 on_visibility_change: Some(Arc::new(
                     move |change: &ModelCatalogueVisibilityChange| {
@@ -1596,7 +1602,7 @@ fn model_connection_setup_stage_focus_lands_on_real_handles() {
                     .with_options(model_connection_picker_fixtures())
                     .with_stage(stage)
                     .with_value(Some("openai-responses".to_string())),
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::ModelConnectionSetupHandlers {
                     on_stage_change: Some(Arc::new(move |next| {
                         let next_node = build(
@@ -1678,7 +1684,7 @@ fn model_catalogue_editor_hiding_the_last_row_focuses_the_hidden_disclosure() {
         ];
         let mut node = poodle_render::model_catalogue_editor(
             &ModelCatalogueEditorSpec::new().with_items(items),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::ModelCatalogueEditorHandlers {
                 on_visibility_change: Some(Arc::new(|_| {})),
                 on_hidden_open_change: Some(Arc::new(move |open| {
@@ -1723,7 +1729,7 @@ fn two_model_connection_pickers_do_not_share_backend_focus_handles() {
             poodle_render::model_connection_picker(
                 &ModelConnectionPickerSpec::new()
                     .with_options(model_connection_picker_fixtures()),
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::ModelConnectionPickerHandlers {
                     instance_id: Some(scope.to_string()),
                     ..poodle_render::ModelConnectionPickerHandlers::default()
@@ -1768,7 +1774,7 @@ fn radio_selects_on_activate_and_does_not_uncheck_itself() {
                 .with_name("shipping")
                 .with_value("standard")
                 .with_label("Standard shipping"),
-            &theme(),
+            &RenderContext::new(&theme()),
             Some(Arc::new(move |checked| {
                 sink.lock().unwrap().push(checked);
             })),
@@ -1795,7 +1801,7 @@ fn radio_selects_on_activate_and_does_not_uncheck_itself() {
                 .with_value("standard")
                 .with_label("Standard shipping")
                 .with_checked(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             Some(Arc::new(move |checked| {
                 sink.lock().unwrap().push(checked);
             })),
@@ -1843,7 +1849,7 @@ fn update_status_confirm_then_install_through_the_real_tree() {
                     .with_status(UpdateControllerStatus::Ready)
                     .with_availability(offer())
                     .with_confirm_open(confirm_open),
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::UpdateStatusHandlers {
                     instance_id: Some("mounted".to_string()),
                     on_install: Some(Arc::new(move || {
@@ -1914,7 +1920,7 @@ fn update_center_hidden_presence_mounts_nothing_and_open_shows_status() {
         let sink = Arc::clone(&opens);
         let mut closed = poodle_render::update_center(
             &UpdateCenterSpec::new(UpdatePresence::Quiet).with_open(false),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::UpdateCenterHandlers {
                 instance_id: Some("mounted-center".to_string()),
                 on_open_change: Some(Arc::new(move |open| {
@@ -1947,7 +1953,7 @@ fn update_center_hidden_presence_mounts_nothing_and_open_shows_status() {
                 .with_availability(UpdateAvailabilityProjection::WithheldByRollout {
                     version: "2.0.0".to_string(),
                 }),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::UpdateCenterHandlers::default(),
         );
         hidden.id = Some(FIXTURE_ID.to_owned());
@@ -1968,7 +1974,7 @@ fn update_center_hidden_presence_mounts_nothing_and_open_shows_status() {
                     notes: None,
                 })
                 .with_open(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::UpdateCenterHandlers::default(),
         );
         open.id = Some(FIXTURE_ID.to_owned());
@@ -2009,7 +2015,7 @@ fn settings_shell_navigates_and_refused_close_stays_open() {
                 .with_open(true)
                 .with_groups(groups())
                 .with_active_page_id("general"),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::SettingsShellHandlers {
                 on_navigate: Some(Arc::new(move |id| {
                     sink.lock().unwrap().push(id.to_string());
@@ -2041,7 +2047,7 @@ fn settings_shell_navigates_and_refused_close_stays_open() {
                 .with_groups(groups())
                 .with_active_page_id("general")
                 .with_close_refused_reason("Unsaved changes on this page."),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::SettingsShellHandlers {
                 on_request_close: Some(Arc::new(move || {
                     *close_sink.lock().unwrap() += 1;
@@ -2103,7 +2109,7 @@ fn a_focused_resize_handle_steps_the_pane_and_its_declared_value() {
                     .with_aria_value_now(width)
                     .with_aria_value_min(MIN_PX)
                     .with_aria_value_max(MAX_PX),
-                &theme(),
+                &RenderContext::new(&theme()),
                 Some(Arc::new(move |phase, delta| match phase {
                     ResizePhase::Start => {
                         *gesture.lock().expect("gesture lock") =
@@ -2191,7 +2197,7 @@ fn a_disabled_resize_handle_takes_no_focus_and_answers_no_key() {
         let sink = Arc::clone(&moves);
         let node = poodle_render::resize_handle(
             &spec,
-            &theme(),
+            &RenderContext::new(&theme()),
             Some(Arc::new(move |_phase, _delta| {
                 *sink.lock().expect("count lock") += 1;
             })),
@@ -2237,7 +2243,7 @@ fn two_composed_split_views_do_not_share_a_divider_focus_handle() {
         let build = |spec: &SplitViewSpec| {
             poodle_render::split_view(
                 spec,
-                &theme(),
+                &RenderContext::new(&theme()),
                 Some(Node::text("primary")),
                 Some(Node::text("secondary")),
                 poodle_render::SplitViewHandlers {
@@ -2295,7 +2301,7 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
                     .with_title("Dismissible callout")
                     .with_content("This callout can be dismissed by the user.")
                     .dismissible(true),
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::CalloutHandlers {
                     on_dismiss: Some(Arc::new(move || {
                         *flag.lock().unwrap() = true;
@@ -2363,7 +2369,7 @@ fn remediation_banner_action_and_dismiss_rebuild_the_host_spec() {
                         .with_variant(ButtonVariant::Primary),
                 )
                 .with_dismissible(true),
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::RemediationBannerHandlers {
                     on_action: Some(Arc::new({
                         let mount = Arc::clone(&mount);
@@ -2470,7 +2476,7 @@ fn action_discovery_selection_rebuilds_the_host_spec_through_mounted_input() {
             let mount = Arc::clone(&mounted);
             let panel = poodle_render::action_discovery_panel(
                 &spec,
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::ActionDiscoveryPanelHandlers {
                     on_select: Some(Arc::new(move |id| {
                         *mount.lock().unwrap() = build(id.to_string(), Arc::clone(&mount));
@@ -2525,7 +2531,7 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
             let collapsed_for_tab = collapsed;
             let dock = poodle_render::dock_region(
                 &spec,
-                &theme(),
+                &RenderContext::new(&theme()),
                 Some(Node::text(format!("Panel: {tab}"))),
                 poodle_render::DockRegionHandlers {
                     on_tab_change: Some(Arc::new(move |value| {
@@ -2614,7 +2620,7 @@ fn agent_plan_decisions_rebuild_the_host_spec_through_mounted_input() {
             let dismiss_mount = Arc::clone(&mounted);
             let plan = poodle_render::agent_plan(
                 &spec,
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::AgentPlanHandlers {
                     on_accept: Some(Arc::new(move || {
                         *accept_mount.lock().unwrap() =
@@ -2695,7 +2701,7 @@ fn agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input() {
             let mount = Arc::clone(&mounted);
             let record = poodle_render::agent_plan_record(
                 &spec,
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::AgentPlanRecordHandlers {
                     on_toggle: Some(Arc::new(move |next| {
                         *mount.lock().unwrap() = build(next, Arc::clone(&mount));
@@ -2759,7 +2765,7 @@ fn two_agent_plan_records_do_not_share_backend_focus_handles() {
             let scope_owned = scope.to_string();
             poodle_render::agent_plan_record(
                 &spec,
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::AgentPlanRecordHandlers {
                     on_toggle: Some(Arc::new(move |next| {
                         let (left, right) = if scope_owned == "left" {
@@ -2849,7 +2855,7 @@ fn agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input() {
             let mount = Arc::clone(&mounted);
             let node = poodle_render::agent_subagent(
                 &spec,
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::AgentSubagentHandlers {
                     on_toggle: Some(Arc::new(move |next| {
                         *mount.lock().unwrap() = build(next, Arc::clone(&mount));
@@ -2920,7 +2926,7 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
             let selected_for_toggle = selected.clone();
             let node = poodle_render::changed_files(
                 &spec,
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::ChangedFilesHandlers {
                     on_toggle: Some(Arc::new(move |_| {
                         *toggle_mount.lock().unwrap() = build(
@@ -2995,7 +3001,7 @@ fn tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input() {
             let mount = Arc::clone(&mounted);
             let node = poodle_render::tool_call(
                 &spec,
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::ToolCallHandlers {
                     on_toggle: Some(Arc::new(move |_| {
                         *mount.lock().unwrap() = build(!expanded, Arc::clone(&mount));
@@ -3053,7 +3059,7 @@ fn tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input() {
             let mount = Arc::clone(&mounted);
             let node = poodle_render::tool_call_group(
                 &spec,
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::ToolCallGroupHandlers {
                     on_toggle: Some(Arc::new(move |_| {
                         *mount.lock().unwrap() = build(!expanded, Arc::clone(&mount));
@@ -3291,10 +3297,11 @@ fn empty_state_compact_and_default_render_distinct_geometry() {
     }
 
     let theme = theme();
-    let default = empty_state(&EmptyStateSpec::new("No projects yet"), &theme);
+    let ctx = RenderContext::new(&theme);
+    let default = empty_state(&EmptyStateSpec::new("No projects yet"), &ctx);
     let compact = empty_state(
         &EmptyStateSpec::new("No projects yet").with_size(EmptyStateSize::Compact),
-        &theme,
+        &ctx,
     );
 
     let default_title = title_text_size(&default).expect("default title");
@@ -3359,7 +3366,7 @@ fn stepper_selection_and_rerun_reach_separate_mounted_controls() {
             ])
             .with_value("apply")
             .with_show_rerun(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::StepperHandlers {
                 on_change: Some(Arc::new(move |value: &str| {
                     change_sink.lock().unwrap().push(value.to_string())
@@ -3463,7 +3470,7 @@ fn stepper_collapse_stays_independent_in_a_mounted_window() {
                 .with_collapsed(collapsed)
                 .with_show_rerun(true)
                 .with_value("apply"),
-                &theme(),
+                &RenderContext::new(&theme()),
                 poodle_render::StepperHandlers {
                     on_change: Some(Arc::new(move |value: &str| {
                         change_sink.lock().unwrap().push(value.to_string())
@@ -3701,7 +3708,7 @@ fn stepper_keyboard_entry_focuses_and_activates_without_a_pointer_press() {
             ])
             .with_value("apply")
             .with_show_rerun(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::StepperHandlers {
                 on_change: Some(Arc::new(move |value: &str| {
                     change_sink.lock().unwrap().push(value.to_string())
@@ -3803,7 +3810,7 @@ fn stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring() {
             .with_collapsible(true)
             .with_collapsed(false)
             .with_value("apply"),
-            &theme(),
+            &RenderContext::new(&theme()),
             poodle_render::StepperHandlers {
                 on_change: None,
                 on_rerun: None,
@@ -3843,18 +3850,20 @@ fn two_unstamped_buttons_hold_independent_focus_identities() {
     run_headless(|cx| {
         let (handler_one, clicks_one) = counting_handler();
         let (handler_two, clicks_two) = counting_handler();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let one = poodle_render::button(
             &poodle_specs::ButtonSpec::new()
                 .with_label("One")
                 .with_size(poodle_specs::ControlSize::Sm),
-            &theme(),
+            &ctx,
             Some(handler_one),
         );
         let two = poodle_render::button(
             &poodle_specs::ButtonSpec::new()
                 .with_label("Two")
                 .with_size(poodle_specs::ControlSize::Sm),
-            &theme(),
+            &ctx,
             Some(handler_two),
         );
         assert!(

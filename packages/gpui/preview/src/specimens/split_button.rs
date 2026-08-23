@@ -1,7 +1,7 @@
 //! SplitButton specimen — migrated to the node tier (g12.019 Batch B).
 //!
 //! Every SplitButton below renders through the node tier:
-//! `poodle_render::split_button` (`Spec + Theme → Node`) interpreted by
+//! `poodle_render::split_button` (`Spec + Context → Node`) interpreted by
 //! `poodle_gpui_node_backend::to_gpui`. The old hand-written
 //! `poodle_gpui_components::SplitButton` no longer renders this specimen;
 //! everything around the split buttons (layout, Eyebrow headings, captions)
@@ -24,6 +24,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
+use poodle_render::context::RenderContext;
 use poodle_render::{split_button, SplitButtonHandlers};
 use poodle_specs::{ButtonTone, ButtonVariant, EyebrowSpec, SplitButtonSpec, SplitMenuItem};
 
@@ -33,7 +34,7 @@ fn node_split_button(
     state: &AppState,
     handlers: SplitButtonHandlers,
 ) -> AnyElement {
-    let node = split_button(&spec, &state.theme, handlers);
+    let node = split_button(&spec, &RenderContext::new(&state.theme), handlers);
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
@@ -252,7 +253,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             SplitMenuItem::action("a", "Action A"),
                             SplitMenuItem::action("b", "Action B"),
                         ]),
-                    theme,
+                    &RenderContext::new(theme),
                     SplitButtonHandlers::default(),
                 );
                 poodle_gpui_node_backend::to_gpui(&node)
@@ -267,7 +268,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             SplitMenuItem::action("b", "Action B"),
                         ])
                         .with_density(density),
-                    theme,
+                    &RenderContext::new(theme),
                     SplitButtonHandlers::default(),
                 );
                 poodle_gpui_node_backend::to_gpui(&node)

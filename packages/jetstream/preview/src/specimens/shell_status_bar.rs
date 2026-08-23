@@ -39,7 +39,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
     // Trailing metadata sized from the bar's resolved font (spec.font_size_rem),
     // matching the Svelte `font-size: inherit` on `.poodle-status-item`.
     let trailing = |spec: &ShellStatusBarSpec, items: &[&str]| -> Vec<El> {
-        let font = rem_to_px(spec.font_size_rem());
+        // No presentation context on this path: omission resolves against the
+        // root default (md), exactly what `RenderContext::new` would supply.
+        let font = rem_to_px(spec.font_size_rem(spec.size.unwrap_or_default()));
         items
             .iter()
             .map(|t| label(*t).text_color(secondary).text_size(font))

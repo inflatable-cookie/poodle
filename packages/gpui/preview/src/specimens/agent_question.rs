@@ -9,6 +9,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
+use poodle_render::context::RenderContext;
 use poodle_specs::{AgentChatInputSpec, AgentChatStatus, AgentQuestionSpec, EyebrowSpec};
 
 fn option(value: &str, label: &str, description: Option<&str>) -> AgentQuestionOption {
@@ -154,13 +155,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         col
     }
 
+    let ctx = RenderContext::new(theme);
     let hosted_question = poodle_render::agent_question(
         &AgentQuestionSpec::new(vec![placement()]).with_selections(if hosted_chosen.is_empty() {
             Vec::new()
         } else {
             vec![hosted_chosen.clone()]
         }),
-        theme,
+        &ctx,
         poodle_render::AgentQuestionHandlers {
             on_select: Some(select_handler(state, hosted_key)),
             ..Default::default()
@@ -171,7 +173,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let hosted_override = poodle_render::agent_question(
         &AgentQuestionSpec::new(vec![placement()])
             .with_override("Neither — put it in the sidebar."),
-        theme,
+        &ctx,
         poodle_render::AgentQuestionHandlers::default(),
     );
 

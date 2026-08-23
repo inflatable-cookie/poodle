@@ -1,7 +1,7 @@
 //! Select specimen — the g12.019 Batch A pilot.
 //!
 //! Every Select below renders through the node tier: `poodle_render::select`
-//! (`Spec + Theme → Node`) interpreted by `poodle_gpui_node_backend::to_gpui`.
+//! (`Spec + Context → Node`) interpreted by `poodle_gpui_node_backend::to_gpui`.
 //! The old hand-written `poodle_gpui_components::Select` no longer renders
 //! this specimen; everything around the selects (layout, Eyebrow headings,
 //! captions) is unchanged.
@@ -23,7 +23,7 @@ use poodle_adapter::ThemeProvider;
 use crate::specimens::specimen_axes::{density_key, size_key};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::{select, SelectHandlers};
+use poodle_render::{context::RenderContext, select, SelectHandlers};
 use poodle_specs::{ChoiceOption, EyebrowSpec, SelectMode, SelectSpec};
 
 /// Build a node-tier Select with the specimen's toggle/change/clear wiring.
@@ -72,13 +72,13 @@ fn node_select(id: &'static str, spec: SelectSpec, state: &AppState) -> AnyEleme
         change: Some(change),
         clear: Some(clear),
     };
-    let node = select(&spec, &state.theme, &handlers);
+    let node = select(&spec, &RenderContext::new(&state.theme), &handlers);
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
 /// A node-tier Select with no handlers (disabled / validation / sizes).
 fn node_select_static(spec: SelectSpec, state: &AppState) -> AnyElement {
-    let node = select(&spec, &state.theme, &SelectHandlers::default());
+    let node = select(&spec, &RenderContext::new(&state.theme), &SelectHandlers::default());
     poodle_gpui_node_backend::to_gpui(&node)
 }
 

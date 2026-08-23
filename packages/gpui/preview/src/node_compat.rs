@@ -14,6 +14,7 @@ use gpui::{
 };
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_render::context::RenderContext;
 use poodle_specs::{
     AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentMessageSpec,
     AgentPlanRecordSpec, AgentPlanSpec, AgentQuestionRecordSpec, AgentQuestionSpec,
@@ -56,7 +57,7 @@ pub(crate) struct Eyebrow;
 
 impl Eyebrow {
     pub(crate) fn from_spec(spec: EyebrowSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::eyebrow(&spec, theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::eyebrow(&spec, &RenderContext::new(theme)))
     }
 }
 
@@ -64,11 +65,11 @@ pub(crate) struct Text;
 
 impl Text {
     pub(crate) fn from_spec(spec: TextSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::text(&spec, theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::text(&spec, &RenderContext::new(theme)))
     }
 
     pub(crate) fn node_from_spec(spec: TextSpec, theme: &GpuiThemeProvider) -> poodle_node::Node {
-        poodle_render::text(&spec, theme)
+        poodle_render::text(&spec, &RenderContext::new(theme))
     }
 }
 
@@ -76,7 +77,7 @@ pub(crate) struct Skeleton;
 
 impl Skeleton {
     pub(crate) fn from_spec(spec: SkeletonSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::skeleton(&spec, theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::skeleton(&spec, &RenderContext::new(theme)))
     }
 }
 
@@ -84,7 +85,7 @@ pub(crate) struct Spinner;
 
 impl Spinner {
     pub(crate) fn from_spec(spec: SpinnerSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::spinner(&spec, theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::spinner(&spec, &RenderContext::new(theme)))
     }
 }
 
@@ -92,7 +93,7 @@ pub(crate) struct Avatar;
 
 impl Avatar {
     pub(crate) fn from_spec(spec: AvatarSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::avatar(&spec, theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::avatar(&spec, &RenderContext::new(theme)))
     }
 }
 
@@ -100,14 +101,14 @@ pub(crate) struct StatusIndicator;
 
 impl StatusIndicator {
     pub(crate) fn from_spec(spec: StatusIndicatorSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::status_indicator(&spec, theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::status_indicator(&spec, &RenderContext::new(theme)))
     }
 
     pub(crate) fn node_from_spec(
         spec: StatusIndicatorSpec,
         theme: &GpuiThemeProvider,
     ) -> poodle_node::Node {
-        poodle_render::status_indicator(&spec, theme)
+        poodle_render::status_indicator(&spec, &RenderContext::new(theme))
     }
 }
 
@@ -115,7 +116,7 @@ pub(crate) struct Meter;
 
 impl Meter {
     pub(crate) fn from_spec(spec: MeterSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::meter(&spec, theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::meter(&spec, &RenderContext::new(theme)))
     }
 }
 
@@ -123,7 +124,7 @@ pub(crate) struct Table;
 
 impl Table {
     pub(crate) fn from_spec(spec: TableSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::table(&spec, theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::table(&spec, &RenderContext::new(theme)))
     }
 }
 
@@ -161,17 +162,17 @@ impl CollapseToggle {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
     fn into_node(self) -> poodle_node::Node {
-        let mut node = poodle_render::collapse_toggle(&self.spec, &self.theme, self.on_toggle);
+        let mut node = poodle_render::collapse_toggle(&self.spec, &RenderContext::new(&self.theme), self.on_toggle);
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-collapse-toggle-{id}"));
         }
@@ -208,7 +209,7 @@ impl IntoElement for Rating {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::rating(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.on_change,
         ))
     }
@@ -240,7 +241,7 @@ impl MetaBar {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::meta_bar_sep(&self.spec, &self.theme, self.children)
+        poodle_render::meta_bar_sep(&self.spec, &RenderContext::new(&self.theme), self.children)
     }
 }
 
@@ -283,7 +284,7 @@ impl MetaItem {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::meta_item(&self.spec, &self.theme, self.value)
+        poodle_render::meta_item(&self.spec, &RenderContext::new(&self.theme), self.value)
     }
 }
 
@@ -334,17 +335,17 @@ impl Callout {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::callout(&self.spec, &self.theme, self.handlers)
+        poodle_render::callout(&self.spec, &RenderContext::new(&self.theme), self.handlers)
     }
 }
 
@@ -393,7 +394,7 @@ impl RemediationBanner {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::remediation_banner(&self.spec, &self.theme, self.handlers)
+        poodle_render::remediation_banner(&self.spec, &RenderContext::new(&self.theme), self.handlers)
     }
 }
 
@@ -468,7 +469,7 @@ impl AppHeader {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::app_header(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.identity,
             self.center,
             self.actions,
@@ -530,7 +531,7 @@ impl FilterToolbar {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::filter_toolbar(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.children,
             self.actions,
             self.secondary,
@@ -820,7 +821,7 @@ impl EmbedPreview {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::embed_preview(&self.spec, &self.theme)
+        poodle_render::embed_preview(&self.spec, &RenderContext::new(&self.theme))
     }
 }
 
@@ -847,7 +848,7 @@ impl MediaThumbnail {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::media_thumbnail(&self.spec, &self.theme)
+        poodle_render::media_thumbnail(&self.spec, &RenderContext::new(&self.theme))
     }
 }
 
@@ -880,7 +881,7 @@ impl MediaPreview {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::media_preview_with_content(&self.spec, &self.theme, self.media_content)
+        poodle_render::media_preview_with_content(&self.spec, &RenderContext::new(&self.theme), self.media_content)
     }
 }
 
@@ -913,17 +914,17 @@ impl CardRadioGroup {
     }
 
     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::card_radio_group(&self.spec, &self.theme, self.on_change)
+        poodle_render::card_radio_group(&self.spec, &RenderContext::new(&self.theme), self.on_change)
     }
 }
 
@@ -944,7 +945,7 @@ impl PageLoading {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::page_loading(&self.spec, &self.theme, None)
+        poodle_render::page_loading(&self.spec, &RenderContext::new(&self.theme), None)
     }
 }
 
@@ -972,7 +973,7 @@ impl MediaPicker {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::media_picker(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::MediaPickerHandlers::default(),
         )
     }
@@ -1019,7 +1020,7 @@ impl IntoElement for AgentQuestion {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::agent_question(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1038,7 +1039,7 @@ impl IntoElement for AgentMessage {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_message(&self.spec, &self.theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_message(&self.spec, &RenderContext::new(&self.theme)))
     }
 }
 
@@ -1072,7 +1073,7 @@ impl AgentPlan {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::agent_plan(&self.spec, &self.theme, self.handlers)
+        poodle_render::agent_plan(&self.spec, &RenderContext::new(&self.theme), self.handlers)
     }
 }
 
@@ -1116,7 +1117,7 @@ impl IntoElement for AgentPlanRecord {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::agent_plan_record(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1137,7 +1138,7 @@ impl IntoElement for AgentQuestionRecord {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::agent_question_record(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
         ))
     }
 }
@@ -1173,7 +1174,7 @@ impl IntoElement for AgentSubagent {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::agent_subagent(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1210,7 +1211,7 @@ impl IntoElement for ChangedFiles {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::changed_files(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1242,7 +1243,7 @@ impl IntoElement for ToolCall {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::tool_call(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1279,7 +1280,7 @@ impl IntoElement for ToolCallGroup {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::tool_call_group(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1324,7 +1325,7 @@ impl IntoElement for AgentTranscript {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::agent_transcript(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1346,7 +1347,7 @@ impl IntoElement for MediaBrowsePanel {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::media_browse_panel(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.on_select,
         ))
     }
@@ -1373,7 +1374,7 @@ impl IntoElement for SidebarNav {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::sidebar_nav(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.on_change,
         ))
     }
@@ -1389,12 +1390,12 @@ impl ToastStack {
     }
 
     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -1405,7 +1406,7 @@ impl IntoElement for ToastStack {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::toast_stack(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1433,7 +1434,7 @@ impl IntoElement for ToastHost {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::toast_host(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             &self.stack_spec,
             self.handlers,
         ))
@@ -1453,7 +1454,7 @@ impl IntoElement for DebugDialog {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::debug_dialog(&self.spec, &self.theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::debug_dialog(&self.spec, &RenderContext::new(&self.theme)))
     }
 }
 
@@ -1483,7 +1484,7 @@ impl IntoElement for ActionDiscoveryPanel {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::action_discovery_panel(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1505,7 +1506,7 @@ impl IntoElement for BulkActionBar {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::bulk_action_bar(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1545,12 +1546,12 @@ impl AgentChatInput {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -1561,7 +1562,7 @@ impl IntoElement for AgentChatInput {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::agent_chat_input(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.question_children,
             self.plan_children,
             self.toolbar_children,
@@ -1586,12 +1587,12 @@ impl FilterBuilder {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -1602,7 +1603,7 @@ impl IntoElement for FilterBuilder {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::filter_builder(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             &self.instance_id,
             &self.handlers,
         ))
@@ -1635,7 +1636,7 @@ impl IntoElement for MarkdownEditor {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::markdown_editor_with_handlers(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1727,12 +1728,12 @@ impl EditableList {
     }
 
     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -1743,7 +1744,7 @@ impl IntoElement for EditableList {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::editable_list(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1775,7 +1776,7 @@ impl IntoElement for RelationPicker {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::relation_picker(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1805,12 +1806,12 @@ impl EditableLabel {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -1821,7 +1822,7 @@ impl IntoElement for EditableLabel {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::editable_label_with_handlers(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1868,7 +1869,7 @@ impl Dialog {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::dialog_with_slots(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.children,
             self.actions,
             self.header,
@@ -1921,7 +1922,7 @@ impl Drawer {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::drawer(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.content,
             self.actions,
             self.on_request_close,
@@ -1949,7 +1950,7 @@ impl IntoElement for DataTable {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::data_table(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -1972,7 +1973,7 @@ impl Region {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::region(&self.spec, &self.theme)
+        poodle_render::region(&self.spec, &RenderContext::new(&self.theme))
     }
 }
 
@@ -2005,7 +2006,7 @@ impl ScrollShell {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::scroll_shell(&self.spec, &self.theme, self.children)
+        poodle_render::scroll_shell(&self.spec, &RenderContext::new(&self.theme), self.children)
     }
 }
 
@@ -2095,7 +2096,7 @@ impl FormDialog {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::form_dialog(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.children,
             self.actions,
             poodle_render::FormDialogHandlers::default(),
@@ -2156,7 +2157,7 @@ impl PickerShell {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::picker_shell(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.toolbar,
             self.selection,
             self.body,
@@ -2194,17 +2195,17 @@ impl ModelPicker {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::model_picker(&self.spec, &self.theme, &self.instance_id, None)
+        poodle_render::model_picker(&self.spec, &RenderContext::new(&self.theme), &self.instance_id, None)
     }
 }
 
@@ -2233,12 +2234,12 @@ impl ThemeSelect {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -2257,7 +2258,7 @@ impl ThemeSelect {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::theme_select_with_handlers(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::ThemeSelectHandlers {
                 on_change: self.on_change,
                 on_open_change: self.on_open_change,
@@ -2295,7 +2296,7 @@ impl FieldSet {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::field_set(&self.spec, &self.theme, self.children)
+        poodle_render::field_set(&self.spec, &RenderContext::new(&self.theme), self.children)
     }
 }
 
@@ -2367,7 +2368,7 @@ impl FormLayout {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::form_layout(&self.spec, &self.theme, self.children, self.actions)
+        poodle_render::form_layout(&self.spec, &RenderContext::new(&self.theme), self.children, self.actions)
     }
 }
 
@@ -2417,7 +2418,7 @@ impl FormShell {
                 self.theme.resolve_space("space.stack.sm");
             Some(self.actions.into_iter().fold(row, poodle_node::Node::child))
         };
-        poodle_render::form_shell(&self.spec, &self.theme, self.section_slots, actions)
+        poodle_render::form_shell(&self.spec, &RenderContext::new(&self.theme), self.section_slots, actions)
     }
 }
 
@@ -2464,7 +2465,7 @@ impl PageHeader {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::page_header(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.breadcrumbs,
             self.actions,
             self.meta,
@@ -2507,7 +2508,7 @@ impl Toolbar {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::toolbar(&self.spec, &self.theme, self.children)
+        poodle_render::toolbar(&self.spec, &RenderContext::new(&self.theme), self.children)
     }
 }
 
@@ -2543,19 +2544,19 @@ impl OrderBy {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
     fn into_node(self) -> poodle_node::Node {
         poodle_render::order_by(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::OrderByHandlers {
                 on_direction_toggle: self.on_direction_toggle,
                 on_remove: self.on_remove,
@@ -2612,7 +2613,7 @@ impl FormActions {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::form_actions_full(&self.spec, &self.theme, self.danger, self.actions)
+        poodle_render::form_actions_full(&self.spec, &RenderContext::new(&self.theme), self.danger, self.actions)
     }
 }
 
@@ -2640,17 +2641,17 @@ impl RefSelect {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::ref_select(&self.spec, &self.theme, self.on_change)
+        poodle_render::ref_select(&self.spec, &RenderContext::new(&self.theme), self.on_change)
     }
 }
 
@@ -2684,12 +2685,12 @@ impl StatusBar {
     }
 
     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -2704,7 +2705,7 @@ impl StatusBar {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::shell_status_bar(&self.spec, &self.theme, self.leading, self.trailing)
+        poodle_render::shell_status_bar(&self.spec, &RenderContext::new(&self.theme), self.leading, self.trailing)
     }
 }
 
@@ -2738,7 +2739,7 @@ impl NavCard {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::nav_card_with_icon(&self.spec, &self.theme, self.on_click, self.icon)
+        poodle_render::nav_card_with_icon(&self.spec, &RenderContext::new(&self.theme), self.on_click, self.icon)
     }
 }
 
@@ -2776,7 +2777,7 @@ impl IntoElement for PaginationSummary {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::pagination_summary(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
         ))
     }
 }
@@ -2801,7 +2802,7 @@ impl IntoElement for ValidationSummary {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::validation_summary(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
         ))
     }
 }
@@ -2820,7 +2821,7 @@ impl Progress {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 }
@@ -2829,7 +2830,7 @@ impl IntoElement for Progress {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::progress(&self.spec, &self.theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::progress(&self.spec, &RenderContext::new(&self.theme)))
     }
 }
 
@@ -2859,7 +2860,7 @@ impl ErrorBoundary {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::error_boundary(&self.spec, &self.theme, self.child)
+        poodle_render::error_boundary(&self.spec, &RenderContext::new(&self.theme), self.child)
     }
 }
 
@@ -2897,7 +2898,7 @@ impl IntoElement for PasswordRequirements {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::password_requirements(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
         ))
     }
 }
@@ -2915,7 +2916,7 @@ impl IntoElement for EmptyState {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::empty_state(&self.spec, &self.theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::empty_state(&self.spec, &RenderContext::new(&self.theme)))
     }
 }
 
@@ -2949,7 +2950,7 @@ impl IntoElement for ResizeHandle {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::resize_handle(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.on_resize,
         ))
     }
@@ -3043,7 +3044,7 @@ impl Box {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::bx(&self.spec, &self.theme, self.children)
+        poodle_render::bx(&self.spec, &RenderContext::new(&self.theme), self.children)
     }
 }
 
@@ -3082,7 +3083,7 @@ impl Grid {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::grid(&self.spec, &self.theme, self.children)
+        poodle_render::grid(&self.spec, &RenderContext::new(&self.theme), self.children)
     }
 }
 
@@ -3121,7 +3122,7 @@ impl Stack {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::stack(&self.spec, &self.theme, self.children)
+        poodle_render::stack(&self.spec, &RenderContext::new(&self.theme), self.children)
     }
 }
 
@@ -3177,7 +3178,7 @@ impl Separator {
 
 impl IntoCompatNode for Separator {
     fn into_compat_node(self) -> poodle_node::Node {
-        poodle_render::separator(&self.spec, &self.theme)
+        poodle_render::separator(&self.spec, &RenderContext::new(&self.theme))
     }
 }
 
@@ -3210,7 +3211,7 @@ impl Pill {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        let mut node = poodle_render::pill_with_remove(&self.spec, &self.theme, self.on_remove);
+        let mut node = poodle_render::pill_with_remove(&self.spec, &RenderContext::new(&self.theme), self.on_remove);
         // The old GPUI Pill made its root focusable even though the shared
         // contract treats Pill as display metadata. Keep that preview-local.
         node.interaction.focusable = true;
@@ -3254,7 +3255,7 @@ impl Icon {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        let mut node = poodle_render::icon(&self.spec, &self.theme);
+        let mut node = poodle_render::icon(&self.spec, &RenderContext::new(&self.theme));
         if let Some(color) = self.color {
             let rgba: Rgba = color.into();
             node.style.descriptor.text_color = Some(ColorValue(rgba.r, rgba.g, rgba.b, rgba.a));
@@ -3300,7 +3301,7 @@ impl ListCardCounter {
 
 impl IntoCompatNode for ListCardCounter {
     fn into_compat_node(self) -> poodle_node::Node {
-        poodle_render::list_card_counter(&self.spec, &self.theme, self.on_link_click)
+        poodle_render::list_card_counter(&self.spec, &RenderContext::new(&self.theme), self.on_link_click)
     }
 }
 
@@ -3330,7 +3331,7 @@ impl IntoElement for MetricTile {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::metric_tile(&self.spec, &self.theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::metric_tile(&self.spec, &RenderContext::new(&self.theme)))
     }
 }
 
@@ -3352,7 +3353,7 @@ impl IntoElement for StateTile {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::state_tile(&self.spec, &self.theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::state_tile(&self.spec, &RenderContext::new(&self.theme)))
     }
 }
 
@@ -3370,17 +3371,17 @@ impl Code {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::code(&self.spec, &self.theme)
+        poodle_render::code(&self.spec, &RenderContext::new(&self.theme))
     }
 }
 
@@ -3419,7 +3420,7 @@ impl Surface {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::surface(&self.spec, &self.theme, self.content.into_iter().collect())
+        poodle_render::surface(&self.spec, &RenderContext::new(&self.theme), self.content.into_iter().collect())
     }
 }
 
@@ -3465,7 +3466,7 @@ impl ListGrid {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::list_grid(&self.spec, &self.theme, self.header, self.children)
+        poodle_render::list_grid(&self.spec, &RenderContext::new(&self.theme), self.header, self.children)
     }
 }
 
@@ -3514,7 +3515,7 @@ impl IntoElement for ListContainer {
         };
         poodle_gpui_node_backend::to_gpui(&poodle_render::list_container(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             slots,
             None,
         ))
@@ -3549,7 +3550,7 @@ impl InlineListSection {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::inline_list_section(&self.spec, &self.theme, self.items, self.action)
+        poodle_render::inline_list_section(&self.spec, &RenderContext::new(&self.theme), self.items, self.action)
     }
 }
 
@@ -3622,7 +3623,7 @@ impl ListCard {
         let title = self.spec.title.clone();
         let mut node = poodle_render::list_card(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::ListCardSlots {
                 // The old GPUI tier always painted an empty leading shell when
                 // no slot was supplied; the shared renderer otherwise derives
@@ -3738,7 +3739,7 @@ impl TextInput {
     fn into_node(self) -> poodle_node::Node {
         let mut node = poodle_render::text_input_with_handlers(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::TextInputHandlers {
                 on_change: self.on_change,
                 on_selection_change: self.on_selection_change,
@@ -3796,7 +3797,7 @@ impl Select {
     fn into_node(self) -> poodle_node::Node {
         let mut node = poodle_render::select(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             &poodle_render::SelectHandlers {
                 toggle: self.on_toggle,
                 change: self.on_change,
@@ -3855,12 +3856,12 @@ impl ColorPicker {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -3877,7 +3878,7 @@ impl ColorPicker {
     fn into_node(self) -> poodle_node::Node {
         let mut node = poodle_render::color_picker(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             &self.instance_id,
             poodle_render::ColorPickerHandlers {
                 on_toggle: self.on_toggle,
@@ -3921,12 +3922,12 @@ impl CodeInput {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -3955,7 +3956,7 @@ impl CodeInput {
     fn into_node(self) -> poodle_node::Node {
         let mut node = poodle_render::code_input_with_handlers(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::CodeInputHandlers {
                 on_value_change: self.on_change,
                 on_complete: self.on_complete,
@@ -3993,7 +3994,7 @@ impl TokenInput {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::token_input(&self.spec, &self.theme, self.on_remove)
+        poodle_render::token_input(&self.spec, &RenderContext::new(&self.theme), self.on_remove)
     }
 }
 
@@ -4062,7 +4063,7 @@ impl FileUpload {
     fn into_node(self) -> poodle_node::Node {
         let mut node = poodle_render::file_upload_with_handlers(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::FileUploadHandlers {
                 on_browse: self.on_browse,
                 on_remove: self.on_remove,
@@ -4097,12 +4098,12 @@ impl LicenceStatus {
     }
 
     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -4111,7 +4112,7 @@ impl IntoElement for LicenceStatus {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::licence_status(&self.spec, &self.theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::licence_status(&self.spec, &RenderContext::new(&self.theme)))
     }
 }
 
@@ -4165,7 +4166,7 @@ impl IntoElement for LicenceSeats {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::licence_seats(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -4266,7 +4267,7 @@ impl LicenceActivation {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::licence_activation_with_slots(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.account_content,
             self.handlers,
         )
@@ -4341,7 +4342,7 @@ impl IntoElement for ModelConnectionPicker {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::model_connection_picker_with_slots(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.slots,
             self.handlers,
         ))
@@ -4435,7 +4436,7 @@ impl IntoElement for ModelConnectionSetup {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::model_connection_setup_with_slots(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.slots,
             self.handlers,
         ))
@@ -4515,7 +4516,7 @@ impl IntoElement for ModelConnectionCard {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::model_connection_card_with_slots(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.slots,
             self.handlers,
         ))
@@ -4627,7 +4628,7 @@ impl IntoElement for ModelCatalogueEditor {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::model_catalogue_editor_with_slots(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.slots,
             self.handlers,
         ))
@@ -4650,12 +4651,12 @@ impl Breadcrumbs {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -4666,7 +4667,7 @@ impl IntoElement for Breadcrumbs {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::breadcrumbs(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.on_navigate,
         ))
     }
@@ -4674,7 +4675,7 @@ impl IntoElement for Breadcrumbs {
 
 impl IntoCompatNode for Breadcrumbs {
     fn into_compat_node(self) -> poodle_node::Node {
-        poodle_render::breadcrumbs(&self.spec, &self.theme, self.on_navigate)
+        poodle_render::breadcrumbs(&self.spec, &RenderContext::new(&self.theme), self.on_navigate)
     }
 }
 
@@ -4712,12 +4713,12 @@ impl SelectionSummary {
     }
 
     pub(crate) fn with_size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -4738,7 +4739,7 @@ impl IntoElement for SelectionSummary {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::selection_summary(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::SelectionSummaryHandlers {
                 on_remove: self.on_remove,
                 on_clear: self.on_clear,
@@ -4753,7 +4754,7 @@ impl IntoElement for TextLink {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::text_link(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.on_click,
         ))
     }
@@ -4827,7 +4828,7 @@ impl Tabs {
         });
         let node = poodle_render::tabs_with_handlers(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::TabsHandlers {
                 on_change: self.on_change,
                 on_close: self.on_close,
@@ -4896,12 +4897,12 @@ impl TabStrip {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -4912,7 +4913,7 @@ impl IntoElement for TabStrip {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::tab_strip(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::TabStripHandlers {
                 on_select: self.on_change,
                 on_close: self.on_close,
@@ -4944,12 +4945,12 @@ impl DurationInput {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -4964,7 +4965,7 @@ impl DurationInput {
     fn into_node(self) -> poodle_node::Node {
         let mut node = poodle_render::duration_input_with_handlers(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::DurationInputHandlers {
                 on_change: self.on_change,
             },
@@ -5004,12 +5005,12 @@ impl NumberInput {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -5026,7 +5027,7 @@ impl NumberInput {
     fn into_node(self) -> poodle_node::Node {
         let mut node = poodle_render::number_input(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::NumberInputHandlers {
                 on_increment: self.on_increment,
                 on_decrement: self.on_decrement,
@@ -5076,12 +5077,12 @@ macro_rules! define_date_picker_compat {
             }
 
             pub(crate) fn size(mut self, size: ControlSize) -> Self {
-                self.spec.size = size;
+                self.spec.size = Some(size);
                 self
             }
 
             pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-                self.spec.density = density;
+                self.spec.density = Some(density);
                 self
             }
 
@@ -5096,7 +5097,7 @@ macro_rules! define_date_picker_compat {
                     on_select: self.on_select,
                     on_navigate: None,
                 };
-                let mut node = $render(&self.spec, &self.theme, handlers);
+                let mut node = $render(&self.spec, &RenderContext::new(&self.theme), handlers);
                 if let Some(id) = self.id_suffix {
                     node.id = Some(format!(concat!($id_prefix, "{}"), id));
                 }
@@ -5174,12 +5175,12 @@ impl Calendar {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -5204,7 +5205,7 @@ impl Calendar {
     fn into_node(self) -> poodle_node::Node {
         let mut node = poodle_render::calendar(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::CalendarHandlers {
                 on_select: self.on_select,
                 on_range_select: self.on_range_select,
@@ -5242,12 +5243,12 @@ impl DateTimeZonePicker {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -5259,7 +5260,7 @@ impl DateTimeZonePicker {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::date_time_zone_picker(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::DateTimeZonePickerHandlers {
                 on_toggle: self.on_toggle,
                 ..Default::default()
@@ -5299,12 +5300,12 @@ impl TimeField {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -5315,7 +5316,7 @@ impl TimeField {
 
     fn into_node(self) -> poodle_node::Node {
         let mut node =
-            poodle_render::time_field_with_change(&self.spec, &self.theme, self.on_change);
+            poodle_render::time_field_with_change(&self.spec, &RenderContext::new(&self.theme), self.on_change);
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-time-field-{id}"));
         }
@@ -5347,12 +5348,12 @@ impl TimeZoneSelect {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -5364,7 +5365,7 @@ impl TimeZoneSelect {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::time_zone_select(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::TimeZoneSelectHandlers {
                 on_toggle: self.on_toggle,
                 on_change: None,
@@ -5395,7 +5396,7 @@ impl EmbedInput {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::embed_input(&self.spec, &self.theme)
+        poodle_render::embed_input(&self.spec, &RenderContext::new(&self.theme))
     }
 }
 
@@ -5457,7 +5458,7 @@ impl IntoElement for Field {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::field(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.control,
         ))
     }
@@ -5465,7 +5466,7 @@ impl IntoElement for Field {
 
 impl IntoCompatNode for Field {
     fn into_compat_node(self) -> poodle_node::Node {
-        poodle_render::field(&self.spec, &self.theme, self.control)
+        poodle_render::field(&self.spec, &RenderContext::new(&self.theme), self.control)
     }
 }
 
@@ -5500,7 +5501,7 @@ impl Button {
         let id = self
             .id_suffix
             .unwrap_or_else(|| self.spec.label.clone().unwrap_or_default());
-        let mut node = poodle_render::button(&self.spec, &self.theme, self.on_click);
+        let mut node = poodle_render::button(&self.spec, &RenderContext::new(&self.theme), self.on_click);
         node.id = Some(format!("poodle-btn-{id}"));
         node
     }
@@ -5557,12 +5558,12 @@ impl Accordion {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -5573,7 +5574,7 @@ impl IntoElement for Accordion {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::accordion_with_content(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             &self.content,
             self.on_toggle,
         ))
@@ -5612,12 +5613,12 @@ impl Collapsible {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -5628,7 +5629,7 @@ impl IntoElement for Collapsible {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::collapsible(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.content,
             self.on_toggle,
         ))
@@ -5667,12 +5668,12 @@ impl Menubar {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -5683,7 +5684,7 @@ impl IntoElement for Menubar {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::menubar(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.on_trigger,
             self.on_select,
         ))
@@ -5715,12 +5716,12 @@ impl NavigationMenu {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -5731,7 +5732,7 @@ impl IntoElement for NavigationMenu {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::navigation_menu(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.on_change,
         ))
     }
@@ -5786,7 +5787,7 @@ impl IntoElement for AlertDialog {
     fn into_element(self) -> Self::Element {
         let mut node = poodle_render::alert_dialog(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.working,
             &self.working_label,
             poodle_render::AlertDialogHandlers::default(),
@@ -5848,7 +5849,7 @@ impl IntoElement for ConfirmAction {
     fn into_element(self) -> Self::Element {
         let mut node = poodle_render::confirm_action_with_slots(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.trigger,
             self.content,
             poodle_render::ConfirmActionHandlers {
@@ -6022,12 +6023,12 @@ impl Menu {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -6039,7 +6040,7 @@ impl Menu {
             wrapper = wrapper.child(trigger);
         }
         if self.spec.current_open() {
-            wrapper = wrapper.child(poodle_render::menu(&self.spec, &self.theme, self.on_select));
+            wrapper = wrapper.child(poodle_render::menu(&self.spec, &RenderContext::new(&self.theme), self.on_select));
         }
         wrapper
     }
@@ -6099,7 +6100,7 @@ impl IntoElement for CommandPalette {
         let close = self.on_close.clone();
         let mut node = poodle_render::command_palette_with_handlers(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             poodle_render::CommandPaletteHandlers {
                 select: self.on_select,
                 query_change: self.on_query_change,
@@ -6192,12 +6193,12 @@ impl ContextMenu {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -6207,7 +6208,7 @@ impl IntoElement for ContextMenu {
 
     fn into_element(self) -> Self::Element {
         let menu = self.spec.current_open().then(|| {
-            let node = poodle_render::context_menu(&self.spec, &self.theme, self.on_select);
+            let node = poodle_render::context_menu(&self.spec, &RenderContext::new(&self.theme), self.on_select);
             let menu = poodle_gpui_node_backend::to_gpui(&node);
             if let Some((x, y)) = self.spec.anchor_point {
                 div()
@@ -6288,7 +6289,7 @@ impl IntoElement for HoverCard {
         let surface = self.spec.current_open().then(|| {
             poodle_gpui_node_backend::to_gpui(&poodle_render::hover_card(
                 &self.spec,
-                &self.theme,
+                &RenderContext::new(&self.theme),
                 self.content,
             ))
         });
@@ -6343,7 +6344,7 @@ impl IntoElement for Tooltip {
             });
         }
         let bubble = (self.spec.current_open() && self.spec.has_content()).then(|| {
-            poodle_gpui_node_backend::to_gpui(&poodle_render::tooltip(&self.spec, &self.theme))
+            poodle_gpui_node_backend::to_gpui(&poodle_render::tooltip(&self.spec, &RenderContext::new(&self.theme)))
         });
         floating_overlay(trigger.into_any_element(), bubble, self.spec.placement)
     }
@@ -6514,7 +6515,7 @@ impl IntoElement for Popover {
         });
         let node = poodle_render::popover(
             &spec,
-            &theme,
+            &RenderContext::new(&theme),
             &poodle_render::PopoverHandlers {
                 on_activate,
                 on_dismiss,
@@ -6630,7 +6631,7 @@ impl DetailItem {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::detail_item_with_slots(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.value_content,
             self.action,
         )
@@ -6681,7 +6682,7 @@ impl DetailSection {
     fn into_node(self) -> poodle_node::Node {
         poodle_render::detail_section(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.body.into_iter().collect(),
             self.actions,
         )
@@ -6723,7 +6724,7 @@ impl DetailSectionGroup {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::detail_section_group(&self.spec, &self.theme, self.children)
+        poodle_render::detail_section_group(&self.spec, &RenderContext::new(&self.theme), self.children)
     }
 }
 
@@ -6781,7 +6782,7 @@ impl DetailShell {
             .unwrap_or_else(|| format!("{:?}", self.spec.state));
         let mut node = poodle_render::detail_shell(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.header,
             self.content,
             self.state_content,
@@ -6830,12 +6831,12 @@ impl Checkbox {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 
@@ -6846,7 +6847,7 @@ impl Checkbox {
                 .clone()
                 .unwrap_or_else(|| "anon".to_string())
         });
-        let mut node = poodle_render::checkbox(&self.spec, &self.theme, self.on_change);
+        let mut node = poodle_render::checkbox(&self.spec, &RenderContext::new(&self.theme), self.on_change);
         node.id = Some(format!("poodle-checkbox-{id}"));
         node
     }
@@ -6904,7 +6905,7 @@ impl IntoElement for Switch {
                 .clone()
                 .unwrap_or_else(|| "anon".to_string())
         });
-        let mut node = poodle_render::switch(&self.spec, &self.theme, self.on_change);
+        let mut node = poodle_render::switch(&self.spec, &RenderContext::new(&self.theme), self.on_change);
         node.id = Some(format!("poodle-switch-{id}"));
         poodle_gpui_node_backend::to_gpui(&node)
     }
@@ -6935,7 +6936,7 @@ impl IntoElement for TriStateSwitch {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let mut node = poodle_render::tri_state_switch(&self.spec, &self.theme, self.on_change);
+        let mut node = poodle_render::tri_state_switch(&self.spec, &RenderContext::new(&self.theme), self.on_change);
         node.id = Some("poodle-tri-state-switch".to_string());
         poodle_gpui_node_backend::to_gpui(&node)
     }
@@ -6982,7 +6983,7 @@ impl IntoElement for Slider {
             change: self.on_change,
             commit: None,
         };
-        let mut node = poodle_render::slider(&self.spec, &self.theme, &handlers);
+        let mut node = poodle_render::slider(&self.spec, &RenderContext::new(&self.theme), &handlers);
         if let Some(id) = self.id {
             node.id = Some(id);
         }
@@ -7018,12 +7019,12 @@ impl RangeSlider {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -7036,7 +7037,7 @@ impl IntoElement for RangeSlider {
             on_change: self.on_change,
             on_value_commit: None,
         };
-        let mut node = poodle_render::range_slider(&self.spec, &self.theme, handlers);
+        let mut node = poodle_render::range_slider(&self.spec, &RenderContext::new(&self.theme), handlers);
         if let Some(id) = self.id {
             node.id = Some(id);
         }
@@ -7076,7 +7077,7 @@ impl IntoElement for RadioGroup {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let mut node = poodle_render::radio_group(&self.spec, &self.theme, self.on_change);
+        let mut node = poodle_render::radio_group(&self.spec, &RenderContext::new(&self.theme), self.on_change);
         if let Some(id) = self.id {
             node.id = Some(id);
         }
@@ -7116,7 +7117,7 @@ impl IntoElement for Radio {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let mut node = poodle_render::radio(&self.spec, &self.theme, self.on_checked_change);
+        let mut node = poodle_render::radio(&self.spec, &RenderContext::new(&self.theme), self.on_checked_change);
         if let Some(id) = self.id {
             node.id = Some(id);
         }
@@ -7166,12 +7167,12 @@ impl Pagination {
     }
 
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
-        self.spec.size = size;
+        self.spec.size = Some(size);
         self
     }
 
     pub(crate) fn with_density(mut self, density: ControlDensity) -> Self {
-        self.spec.density = density;
+        self.spec.density = Some(density);
         self
     }
 }
@@ -7188,7 +7189,7 @@ impl IntoElement for Pagination {
         };
         poodle_gpui_node_backend::to_gpui(&poodle_render::pagination_with_handlers(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             &handlers,
         ))
     }
@@ -7235,7 +7236,7 @@ impl IntoElement for Stepper {
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&poodle_render::stepper(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.handlers,
         ))
     }
@@ -7265,7 +7266,7 @@ impl IconButton {
         let id = self
             .id_suffix
             .unwrap_or_else(|| self.spec.icon.clone().unwrap_or_default());
-        let mut node = poodle_render::icon_button(&self.spec, &self.theme, None);
+        let mut node = poodle_render::icon_button(&self.spec, &RenderContext::new(&self.theme), None);
         node.id = Some(format!("poodle-icon-btn-{id}"));
         node
     }
@@ -7296,7 +7297,7 @@ pub(crate) struct AudioPlayer;
 
 impl AudioPlayer {
     pub(crate) fn from_spec(spec: AudioPlayerSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::audio_player(&spec, theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::audio_player(&spec, &RenderContext::new(theme)))
     }
 }
 
@@ -7304,7 +7305,7 @@ pub(crate) struct VideoPlayer;
 
 impl VideoPlayer {
     pub(crate) fn from_spec(spec: VideoPlayerSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::video_player(&spec, theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::video_player(&spec, &RenderContext::new(theme)))
     }
 }
 
@@ -7312,7 +7313,7 @@ pub(crate) struct TimeAgo;
 
 impl TimeAgo {
     pub(crate) fn from_spec(spec: TimeAgoSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::time_ago(&spec, theme))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::time_ago(&spec, &RenderContext::new(theme)))
     }
 }
 
@@ -7408,7 +7409,7 @@ impl SplitView {
 
         poodle_render::split_view(
             &self.spec,
-            &self.theme,
+            &RenderContext::new(&self.theme),
             self.primary,
             self.secondary,
             handlers,
@@ -7479,7 +7480,7 @@ impl DockRegion {
             on_collapse_toggle: self.on_collapse_toggle,
             instance_id: self.instance_id,
         };
-        poodle_render::dock_region(&self.spec, &self.theme, self.content, handlers)
+        poodle_render::dock_region(&self.spec, &RenderContext::new(&self.theme), self.content, handlers)
     }
 }
 
@@ -7522,7 +7523,7 @@ impl BlockEditor {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::block_editor_with_children(&self.spec, &self.theme, self.children)
+        poodle_render::block_editor_with_children(&self.spec, &RenderContext::new(&self.theme), self.children)
     }
 }
 
@@ -7567,7 +7568,7 @@ impl LogList {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::log_list(&self.spec, &self.theme, self.on_clear_filters)
+        poodle_render::log_list(&self.spec, &RenderContext::new(&self.theme), self.on_clear_filters)
     }
 }
 
@@ -7663,7 +7664,7 @@ impl Tree {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::tree(&self.spec, &self.theme, self.handlers)
+        poodle_render::tree(&self.spec, &RenderContext::new(&self.theme), self.handlers)
     }
 }
 

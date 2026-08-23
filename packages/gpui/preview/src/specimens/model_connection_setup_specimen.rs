@@ -11,6 +11,7 @@ use poodle_headless::model_connection::{
     ModelConnectionAvailability, ModelConnectionOption, ModelConnectionSetupStage,
 };
 use poodle_node::Node;
+use poodle_render::context::RenderContext;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, EyebrowSpec, FieldSpec, ModelConnectionSetupSpec, TextInputSpec,
 };
@@ -75,29 +76,31 @@ fn missing_options() -> Vec<ModelConnectionOption> {
 /// Host configuration content. Poodle never sees these values: the field and
 /// its input are nodes the host built and handed over.
 fn api_key_field(theme: &GpuiThemeProvider, id: &str, value: &str) -> Node {
+    let ctx = RenderContext::new(theme);
     poodle_render::field(
         &FieldSpec::new(id, "API key"),
-        theme,
+        &ctx,
         Some(poodle_render::text_input(
             &TextInputSpec::new()
                 .with_value(value)
                 .with_type("password")
                 .with_placeholder("sk-demo-placeholder"),
-            theme,
+            &ctx,
             None,
         )),
     )
 }
 
 fn endpoint_field(theme: &GpuiThemeProvider, id: &str) -> Node {
+    let ctx = RenderContext::new(theme);
     poodle_render::field(
         &FieldSpec::new(id, "Endpoint URL"),
-        theme,
+        &ctx,
         Some(poodle_render::text_input(
             &TextInputSpec::new()
                 .with_value("http://127.0.0.1:11434")
                 .with_placeholder("http://127.0.0.1:11434"),
-            theme,
+            &ctx,
             None,
         )),
     )
@@ -108,7 +111,7 @@ fn browser_sign_in(theme: &GpuiThemeProvider) -> Node {
         &ButtonSpec::new()
             .with_label("Sign in with browser")
             .with_variant(ButtonVariant::Secondary),
-        theme,
+        &RenderContext::new(theme),
         None,
     )
 }

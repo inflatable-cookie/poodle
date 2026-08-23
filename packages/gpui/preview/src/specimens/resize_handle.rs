@@ -245,7 +245,7 @@ mod interaction_tests {
     use crate::app_state::NodeSpecimenEvent;
     use poodle_gpui::GpuiThemeProvider;
     use poodle_node::{NodeDragPhase, NodeKey, NodeModifiers};
-    use poodle_render::{resize_handle, ResizePhase};
+    use poodle_render::{context::RenderContext, resize_handle, ResizePhase};
     use poodle_specs::{Orientation, ResizeHandleSpec};
     use std::sync::{Arc, Mutex};
 
@@ -301,7 +301,7 @@ mod interaction_tests {
         );
         let node = resize_handle(
             &ResizeHandleSpec::new(HORIZONTAL_LEFT_KEY).with_orientation(Orientation::Horizontal),
-            &theme,
+            &RenderContext::new(&theme),
             Some(handler),
         );
         drag_move(&node, 8.0);
@@ -329,7 +329,7 @@ mod interaction_tests {
                 .with_aria_value_now(120.0)
                 .with_aria_value_min(MIN_HORIZONTAL_PX)
                 .with_aria_value_max(MAX_HORIZONTAL_PX),
-            &GpuiThemeProvider::new(),
+            &RenderContext::new(&GpuiThemeProvider::new()),
             Some(resize_delta_handler(
                 HORIZONTAL_LEFT_KEY,
                 Arc::clone(&events),
@@ -371,7 +371,7 @@ mod interaction_tests {
                 .with_aria_value_now(120.0)
                 .with_aria_value_min(MIN_HORIZONTAL_PX)
                 .with_aria_value_max(MAX_HORIZONTAL_PX),
-            &GpuiThemeProvider::new(),
+            &RenderContext::new(&GpuiThemeProvider::new()),
             None,
         );
         assert_eq!(node.a11y.value, Some(120.0));
@@ -388,7 +388,7 @@ mod interaction_tests {
         let build = |scope: &str, orientation| {
             resize_handle(
                 &ResizeHandleSpec::new(scope).with_orientation(orientation),
-                &GpuiThemeProvider::new(),
+                &RenderContext::new(&GpuiThemeProvider::new()),
                 None,
             )
             .runtime_id
@@ -413,7 +413,7 @@ mod interaction_tests {
                 .with_orientation(Orientation::Horizontal)
                 .with_disabled(true)
                 .with_aria_label("Disabled resize"),
-            &GpuiThemeProvider::new(),
+            &RenderContext::new(&GpuiThemeProvider::new()),
             None,
         );
         assert!(node.interaction.on_key.is_none());

@@ -8,6 +8,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
+use poodle_render::context::RenderContext;
 use poodle_specs::AppHeaderSpec;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, IconButtonSpec,
@@ -313,7 +314,7 @@ fn ladder_label(theme: &GpuiThemeProvider, label: &str) -> Div {
 /// A "My Application" header with New/Open ghost actions and a settings utility
 /// icon — the demo shape used by both ladders (matches the Svelte specimen).
 fn demo_header(spec: AppHeaderSpec, theme: &GpuiThemeProvider, id_suffix: &str) -> AppHeader {
-    let action_size = spec.effective_size();
+    let action_size = spec.effective_size(RenderContext::new(theme).base_size(spec.size));
     let new_id = format!("ah-new-{id_suffix}");
     let open_id = format!("ah-open-{id_suffix}");
     let settings_id = format!("ah-settings-{id_suffix}");

@@ -396,10 +396,13 @@ fn stepper_route_selection_and_rerun_run_through_the_preview_adapter() {
     );
 
     let sizing = StepperSpec::new(Vec::new());
-    let marker = rem_to_px(sizing.marker_size_rem());
+    let theme = poodle_gpui::GpuiThemeProvider::new();
+    let ctx = poodle_render::context::RenderContext::new(&theme);
+    let marker = rem_to_px(sizing.marker_size_rem(ctx.base_size(sizing.size)));
     // Trailing inset of a step's rerun control: the contract's inline padding
     // plus half the marker square it is sized by (`stepper.md` §8).
-    let inset = rem_to_px(sizing.padding_inline_rem()) + marker / 2.0;
+    let inset =
+        rem_to_px(sizing.padding_inline_rem(ctx.resolve_density(sizing.density))) + marker / 2.0;
 
     // Every click resets the virtualized page's measurements, so bounds are
     // re-read each time rather than carried across a repaint.

@@ -8,6 +8,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
+use poodle_render::context::RenderContext;
 use poodle_render::icon_button;
 use poodle_specs::PageHeaderSpec;
 use poodle_specs::{
@@ -44,7 +45,7 @@ fn icon_action(
             .with_icon(icon)
             .with_aria_label(aria_label)
             .with_variant(ButtonVariant::Secondary),
-        theme,
+        &RenderContext::new(theme),
         Some(Arc::new(move || {
             events.lock().unwrap().push(NodeSpecimenEvent::SetText {
                 key: action_key.to_string(),

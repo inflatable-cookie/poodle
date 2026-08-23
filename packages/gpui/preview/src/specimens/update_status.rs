@@ -10,7 +10,7 @@ use poodle_headless::update::{
     Channel, DeferralCause, InstallManager, OfferReason, UpdateAvailabilityProjection,
     UpdateControllerStatus, UpdateDeferral, UpdateProgressProjection, UpdateRejectionCode,
 };
-use poodle_render::{update_status, UpdateStatusHandlers};
+use poodle_render::{context::RenderContext, update_status, UpdateStatusHandlers};
 use poodle_specs::{EyebrowSpec, UpdateStatusSpec};
 
 fn group(theme: &GpuiThemeProvider, label: &str, child: impl IntoElement) -> Div {
@@ -38,7 +38,7 @@ fn status_element(
     theme: &GpuiThemeProvider,
     handlers: UpdateStatusHandlers,
 ) -> AnyElement {
-    poodle_gpui_node_backend::to_gpui(&update_status(&spec, theme, handlers))
+    poodle_gpui_node_backend::to_gpui(&update_status(&spec, &RenderContext::new(theme), handlers))
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {

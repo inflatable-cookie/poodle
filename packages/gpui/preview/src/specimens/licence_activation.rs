@@ -11,6 +11,7 @@ use poodle_headless::licence::{
     resolve_licence_submit, LicenceActivationMode, LicenceActivationRoute, LicenceKeyFormat,
     LicenceKeyProblem, LicenceKeyResult, LicenceSubmitDraft,
 };
+use poodle_render::context::RenderContext;
 use poodle_specs::{EyebrowSpec, FieldSpec, LicenceActivationSpec, TextInputSpec, ValidationState};
 
 /// Stand-in for the host's key parser (the web specimen's, ported). The real
@@ -309,17 +310,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("la-password")
         .cloned()
         .unwrap_or_default();
+    let ctx = RenderContext::new(theme);
     let email_field = poodle_render::field(
         &FieldSpec::new("la-email", "Email address"),
-        theme,
+        &ctx,
         Some(poodle_render::text_input_with_handlers(
             &TextInputSpec {
                 value: Some(email.clone()),
                 validation_state: ValidationState::None,
-                size: Some(poodle_specs::ControlSize::Md),
+                size: None,
                 ..TextInputSpec::default()
             },
-            theme,
+            &ctx,
             poodle_render::TextInputHandlers {
                 on_change: Some({
                     let queue = Arc::clone(&queue);
@@ -336,15 +338,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     );
     let password_field = poodle_render::field(
         &FieldSpec::new("la-password", "Password"),
-        theme,
+        &ctx,
         Some(poodle_render::text_input_with_handlers(
             &TextInputSpec {
                 value: Some(password.clone()),
                 validation_state: ValidationState::None,
-                size: Some(poodle_specs::ControlSize::Md),
+                size: None,
                 ..TextInputSpec::default()
             },
-            theme,
+            &ctx,
             poodle_render::TextInputHandlers {
                 on_change: Some({
                     let queue = Arc::clone(&queue);
