@@ -3,8 +3,9 @@
 Status: reference
 Updated: 2026-08-23
 
-Roadmaps record Poodle's executable milestone work. `g15` is the active
-v0.2.1 recovery-release generation after `v0.2.0` stopped before publication.
+Roadmaps record Poodle's executable milestone work. `g15` completed the
+v0.2.1 recovery release after `v0.2.0` stopped before publication. No new
+generation is active; the next move is an operator-led planning checkpoint.
 
 ## Current State
 
@@ -13,7 +14,7 @@ v0.2.1 recovery-release generation after `v0.2.0` stopped before publication.
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
   `g14.022` completed the closeout. The generation is complete.
-- `g15` is the release-first runway. The 175-component Svelte and React
+- `g15` was the release-first runway. The 175-component Svelte and React
   implementation/evidence rosters, measured native declaration/specimen
   baseline, specimen curation and review, native specimen probe, packed roster,
   the first primitive fixture inventory, and truthful release automation are
@@ -21,9 +22,10 @@ v0.2.1 recovery-release generation after `v0.2.0` stopped before publication.
   measured native focus-ring defect and Stepper keyboard-entry gap. PR #66
   closed `g15.049`; PR #67 closed the GPUI/Zed dependency-licence policy gap
   without admitting GPL code. Those lanes and the `0.2.0` candidate completed;
-  its workflow then failed before publication. Card `054` is complete with
-  green `0.2.1` candidate `3d914261`; operator gate `013` is the only remaining
-  step.
+  its workflow then failed before publication. Card `054` produced green
+  replacement candidate `3d914261`; completed gate `013` tagged and published
+  it as `v0.2.1` in run `32658293188`. Core and Svelte are on npm `latest` at
+  `0.2.1`; React remains source-only. The generation is complete.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
@@ -49,9 +51,8 @@ v0.2.1 recovery-release generation after `v0.2.0` stopped before publication.
 - `g12` — React parity, verification depth, native hardening, audio family
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
-- `g15` — active v0.2.1 recovery baseline; implementation cards through
-  `g15.054` are complete with candidate `3d914261`, and `g15.013` is the final
-  operator gate
+- `g15` — completed v0.2.1 recovery baseline; core and Svelte published from
+  candidate `3d914261`, with React retained as source-only
 
 ## Rules
 

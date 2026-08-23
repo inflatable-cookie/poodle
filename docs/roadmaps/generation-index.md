@@ -4,22 +4,23 @@ Updated: 2026-08-23
 
 ## Active Track
 
-- `g15`
-  - Status: active — implementation cards through `g15.054` are complete;
-    `0.2.1` replacement candidate `3d914261` is green after the pre-publication
-    `v0.2.0` workflow failure; `g15.013` is the final operator gate
-  - Posture: release-first v0.2.1 recovery baseline
-  - Range: `001` to `054` plus final gate `013`
-  - Verdict: `g15.001`–`g15.006` accepted — the generation is a measured
-    release baseline, not a parity architecture
-  - Evidence: the v0.2.0 denominator is every public Svelte component
-    export, not a representative subset. React mirror coverage, a certified
-    GPUI subset, and deferred Jetstream are recorded separately; one runtime
-    does not borrow another runtime's pass.
-  - Next: operator reviews candidate `3d914261` and explicitly decides the
-    `v0.2.1` tag and publication mutation under `g15.013`.
+- None. `g15` is complete. The next active track begins only after an
+  operator-led planning checkpoint compiles the next generation.
 
 ## Latest Completed Track
+
+- `g15`
+  - Status: complete (`g15.013`)
+  - Range: `001` to `054`, with final release gate `013`
+  - Verdict: the full 175-component Svelte denominator, paired React surface,
+    measured native cohort, human-centred specimens, headless native evidence,
+    primitive visual comparison, packed roots, and release automation were
+    closed without inventing a third parity architecture.
+  - Release: immutable `v0.2.0` failed before publication; replacement
+    `v0.2.1` points to `3d914261` and run `32658293188` published core and
+    Svelte `0.2.1` to npm `latest`. React remains source-only and Jetstream
+    remains deferred.
+  - Evidence: `docs/logs/2026-08/20260823-g15-013-v021-release-certification.md`.
 
 - `g14`
   - Status: complete (`g14.022`)

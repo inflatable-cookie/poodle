@@ -1,7 +1,7 @@
 # g15.013 — v0.2.1 Release Certification
 
-Status: **operator gate — replacement candidate `3d914261` is green with
-`g15.054` receipt; awaiting explicit `v0.2.1` tag and publication authority**
+Status: **complete — `v0.2.1` published from candidate `3d914261`; release run
+`32658293188` and registry/install evidence are green**
 Depends on: every earlier g15 implementation/specimen/conformance card,
 `g15.042`–`g15.052` as sequenced by the runway, accepted `v0.2.0` candidate
 history, and one clean accepted `0.2.1` recovery candidate SHA
@@ -74,10 +74,10 @@ deferred Jetstream are reported independently and honestly.
 
 - [x] Operator reviewed the `g15.050` receipt and explicitly authorised
       `v0.2.0`; run `32656225297` failed before gates or publication.
-- [ ] Operator reviews the `g15.054` receipt and exact `0.2.1` SHA.
-- [ ] Operator explicitly authorises the `v0.2.1` tag and publication mutation.
-- [ ] The release is dispatched against `v0.2.1`; `v0.2.0` is not reused.
-- [ ] Registry/GitHub results are checked and the generation closeout records
+- [x] Operator reviewed the `g15.054` receipt and exact `0.2.1` SHA.
+- [x] Operator explicitly authorised the `v0.2.1` tag and publication mutation.
+- [x] The release was dispatched against `v0.2.1`; `v0.2.0` was not reused.
+- [x] Registry/GitHub results were checked and the generation closeout records
       the actual published set.
 
 ## Acceptance
@@ -86,7 +86,7 @@ deferred Jetstream are reported independently and honestly.
 - [x] The release claim matches the roster and completed active-cohort cards;
       no runtime borrows another runtime's pass.
 - [x] The experimental React/Rust/GPUI package labels remain honest.
-- [ ] The operator has approved the exact `v0.2.1` release mutation explicitly.
+- [x] The operator approved the exact `v0.2.1` release mutation explicitly.
 
 ## Stop Conditions
 
@@ -99,6 +99,11 @@ deferred Jetstream are reported independently and honestly.
 
 ## Validation
 
-Use the pinned `g15.050` evidence plus the complete `g15.054` replacement
-receipt and repaired release automation. Do not rerun a windowed local harness
-to manufacture late evidence. Release mutation remains operator-owned.
+Tag `v0.2.1` points to `3d914261c621ef1184d42d7182f7530586c8b267`.
+[Release run `32658293188`](https://github.com/inflatable-cookie/poodle/actions/runs/32658293188)
+completed successfully: the headless release gate, version agreement, pack
+checks, npm publication, and artifact upload all passed. npm reports core and
+Svelte `0.2.1` on `latest`; React remains unpublished. A clean registry install
+resolved and imported both package roots and the representative icon, token,
+CSS, and types subpaths. Full evidence is recorded in
+`../../logs/2026-08/20260823-g15-013-v021-release-certification.md`.

@@ -1,9 +1,8 @@
 # g15 — v0.2.1 Recovery Release Baseline
 
-Status: active — every implementation, specimen, conformance, packaging,
-automation, dependency-policy, and adopter card through `g15.053` is complete;
-`v0.2.0` failed before publication; `g15.054` is complete with replacement
-candidate `3d914261`, leaving only the `g15.013` operator gate
+Status: complete — `v0.2.1` published from candidate `3d914261`; core and
+Svelte are on npm `latest`, React remains source-only, and `g15.013` records
+the green release and clean-install proof
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
 Governing refs: `../g14/022-generation-closeout.md`,
@@ -96,7 +95,7 @@ and status advance are the orchestrator's.
 37. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — complete; registry preflight replaced the PR #72 candidate with `7922a3a9`, recorded by evidence-only receipt `f9b5dcab`
 38. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 39. [054 — v0.2.1 release recovery](054-v021-release-recovery.md) — complete; candidate `3d914261` is green with an exact receipt
-40. [013 — v0.2.1 release certification](013-v020-release-certification.md) — final operator tag/publication gate after accepted `054`
+40. [013 — v0.2.1 release certification](013-v020-release-certification.md) — complete; run `32658293188` published core and Svelte from exact candidate `3d914261`
 41. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
 42. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
 43. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
@@ -127,7 +126,7 @@ Follows the [worker dispatch ledger](../dispatch.md) contract: the orchestrator
 dispatches one whole card to a fresh thread/worktree when its dependencies are
 met. Workers do not write `dispatch.md` or change roadmap status.
 
-## Current Task And Parallel Lanes
+## Generation Closeout
 
 `g15.012` and its exact children are complete. PR #68 landed `g15.047` after
 operator review of all 54 captures. The diagnostic mechanism worked: web is
@@ -163,4 +162,8 @@ The operator authorised `v0.2.0`, but run `32656225297` failed while replacing
 npm in place, before gates, packing, or publication. The tag stays immutable;
 `g15.054` is complete. Candidate `3d914261` carries the isolated npm bootstrap,
 `0.2.1` lockstep, honest failed-tag history, and a green full headless board
-plus release wrapper. `g15.013` is the sole remaining operator gate.
+plus release wrapper. The operator authorised the replacement, tag `v0.2.1`
+was created at that exact candidate, and run `32658293188` completed the gate,
+pack, publication, and artifact upload. npm `latest` now resolves core and
+Svelte `0.2.1`; React remains unpublished. Clean consumer installation and
+public-root/subpath imports passed. `g15.013` and the generation are complete.

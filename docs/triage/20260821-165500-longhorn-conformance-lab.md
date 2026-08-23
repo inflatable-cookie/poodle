@@ -1,7 +1,7 @@
 # Longhorn-Backed Poodle Conformance Lab
 
-Status: open — `g15.044`–`g15.046` are complete and Button-only `g15.047` is
-ready; full app remains a post-comparator decision, not a v0.2.0 prerequisite
+Status: open — the `g15.044`–`g15.047` Button comparator lane is complete;
+full app ownership and process lifecycle remain a post-release decision
 Captured: 2026-08-21
 Operator idea: build a small Longhorn-backed Tauri app that agents can control
 over MCP to compare Poodle runtimes without stealing focus or pointer control.
