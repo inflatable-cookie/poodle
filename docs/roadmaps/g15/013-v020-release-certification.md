@@ -1,7 +1,7 @@
 # g15.013 — v0.2.0 Release Certification
 
-Status: **operator gate — `g15.050` accepted and landed; awaiting explicit tag
-and publication authorisation**
+Status: **operator gate — replacement candidate `7922a3a9` is green with
+receipt `f9b5dcab`; awaiting explicit tag and publication authorisation**
 Depends on: every earlier g15 implementation/specimen/conformance card,
 `g15.042`–`g15.052` as sequenced by the runway, and one clean accepted v0.2.0
 candidate SHA
@@ -56,13 +56,13 @@ deferred Jetstream are reported independently and honestly.
 
 ## Goals
 
-- [ ] Every Svelte-denominator surface is complete and evidenced for all 175
+- [x] Every Svelte-denominator surface is complete and evidenced for all 175
       components.
-- [ ] `effigy qa` passes on every lane, including `bun audit`.
-- [ ] v0.2.0 package, changelog, and documentation reflect the honest state:
+- [x] `effigy qa` passes on every lane, including `bun audit`.
+- [x] v0.2.0 package, changelog, and documentation reflect the honest state:
       the full Svelte denominator and completed active-cohort evidence are
       named; experimental labels stay explicit; Jetstream is deferred.
-- [ ] Register rows owned by `g15.002`–`g15.012` are closed; any remaining rows
+- [x] Register rows owned by `g15.002`–`g15.012` are closed; any remaining rows
       are explicitly outside the active cohort or release denominator.
 
 ## Operator Gate
@@ -75,10 +75,10 @@ deferred Jetstream are reported independently and honestly.
 
 ## Acceptance
 
-- [ ] `effigy qa` passes fully green (every lane, including `bun audit`).
-- [ ] The release claim matches the roster and completed active-cohort cards;
+- [x] `effigy qa` passes fully green (every lane, including `bun audit`).
+- [x] The release claim matches the roster and completed active-cohort cards;
       no runtime borrows another runtime's pass.
-- [ ] The experimental React/Rust/GPUI package labels remain honest.
+- [x] The experimental React/Rust/GPUI package labels remain honest.
 - [ ] The operator has approved the release mutation explicitly.
 
 ## Stop Conditions

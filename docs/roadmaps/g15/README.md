@@ -90,7 +90,7 @@ and status advance are the orchestrator's.
 34. [048 — Packed roster reachability](048-packed-roster-reachability.md) — complete; PR #64 proves exact 175/175 packed-root reachability for both web runtimes
 35. [049 — Release automation truthfulness](049-release-automation-truthfulness.md) — complete; PR #66 made every retained workflow a pinned Effigy launcher and made the release board non-vacuous
 36. [051 — GPUI/Zed dependency licence remediation](051-gpui-zed-dependency-licence-remediation.md) — complete; PR #67 removed GPL tracing from the resolved GPUI graph through a minimal exact-revision fork and hardened licence/source policy
-37. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — complete; PR #72 landed candidate `4428ad10` and evidence-only receipt `42f46a9b`
+37. [050 — v0.2.0 release candidate](050-v020-release-candidate.md) — complete; registry preflight replaced the PR #72 candidate with `7922a3a9`, recorded by evidence-only receipt `f9b5dcab`
 38. [014 — Release-gate remediation: security advisory prerequisite](014-release-gate-remediation.md) — complete; PR #31 cleared the `bun audit` nanoid advisory
 39. [013 — v0.2.0 release certification](013-v020-release-certification.md) — final operator tag/publication gate after accepted `050`
 40. [035 — Solid tone surfaces](035-solid-status-surfaces.md) — complete; PR #44 landed shared solid treatments, with Pill's duplicate axis immediately superseded by `036`
@@ -152,7 +152,8 @@ is final; `sizeRole` maps inherited presentation scale only.
 `g15.053` is complete in PR #71. Per-item icons and the accessible icon-only
 root are accepted across the active cohort.
 
-`g15.050` is complete in PR #72. Candidate `4428ad10` and its evidence-only
-receipt `42f46a9b` are accepted and preserved under merge commit `c60abf6b`.
-No tag or publication occurred. `g15.013` is now the sole remaining gate and
-requires explicit operator authorisation.
+`g15.050` is complete. The `g15.013` registry preflight found and corrected a
+false first-publication claim, then replaced the candidate with `7922a3a9` and
+reran the complete board. Evidence-only receipt `f9b5dcab` records the result.
+No `0.2.0` tag or publication occurred. `g15.013` is the sole remaining gate
+and requires explicit operator authorisation.
