@@ -85,8 +85,9 @@ trees, and in-repository archived applications are excluded.
 
 ## Current Task And Parallel Lanes
 
-`g16.005` is the only executable lane. Longhorn `g16.002` must stop rather than
-propagate the GPUI fork. Underlay `g16.003` and Soundcheck Library `g16.004`
+`g16.005` is the only executable lane and is in flight. Longhorn `g16.002`
+stopped without a PR and its worktree was removed rather than propagate the
+GPUI fork. Underlay `g16.003` and Soundcheck Library `g16.004`
 remain valid evidence for removing local overrides, but each needs a small
 0.2.2 follow-up after certification. No product card advances on 0.2.1.
 
