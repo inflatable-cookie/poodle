@@ -1,7 +1,7 @@
 # 022 Packaging Versioning And Release Channel Rules
 
 Status: active
-Updated: 2026-08-22
+Updated: 2026-08-23
 Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`
 
 ## Purpose
@@ -117,6 +117,9 @@ Poodle therefore applies these rules to every GPUI release graph:
 - Remote Git sources are denied by default. An approved source must use a
   reviewed repository URL and an immutable full commit revision. Branches,
   tags, moving refs, and unreviewed repositories remain forbidden.
+- Public-intent Poodle packages must consume GPUI from its crates.io release.
+  A preview, capture harness, test helper, or other internal tool may not
+  choose a fork or Git source for the GPUI types exposed to consumers.
 - `cargo-deny` keeps `unknown-git = "deny"` and
   `required-git-spec = "rev"`. Repository security checks independently pin
   the expected URL and revision in manifests and lockfiles.
@@ -124,15 +127,19 @@ Poodle therefore applies these rules to every GPUI release graph:
   public-intent GPUI package contains no GPL dependency and that the licence,
   source, notice, and repository-security audits pass.
 
-The current Zed revision pulls its GPL tracing crates into GPUI's normal graph
-through `gpui` and `sum_tree`. Until upstream resolves
-[Zed issue #55470](https://github.com/zed-industries/zed/issues/55470), Poodle
-uses a narrow `inflatable-cookie/zed` fork based on exact upstream commit
-`1ea16c1ab9dd6d36649e002dc60995634da04daf`. The fork may only replace the
-normal `ztracing` use in `gpui` and `sum_tree` with the standard permissive
-`tracing` instrumentation already present in the workspace. Poodle pins the
-resulting fork commit exactly and records both base and patch revisions.
-Unrelated fork divergence requires a separate decision.
+`v0.2.1` temporarily used a narrow `inflatable-cookie/zed` fork to remove GPL
+tracing from a newer unpublished GPUI revision needed by the offscreen capture
+tool. Longhorn adoption proved that this changed the public GPUI crate identity
+and made Poodle's GPUI types incompatible with a consumer's crates.io GPUI
+types. That source shape is rejected for public packages and is removed by
+`g16.005`.
+
+Stock crates.io GPUI 0.2.2 has no true offscreen pixel-readback API. Poodle
+therefore keeps its default native evidence on GPUI's in-memory test platform
+and treats real pixel capture as an explicit, non-activating window-server
+diagnostic. The diagnostic stays outside default QA, CI, and release gates. A
+future true-offscreen route must arrive through a crates.io GPUI release or a
+new explicit public-dependency decision; it cannot silently reintroduce a fork.
 
 This is Poodle's distribution policy, not legal advice. Admitting a
 strong-copyleft dependency or changing the native distribution claim requires
@@ -153,3 +160,4 @@ an explicit operator decision before implementation.
 - [SPDX `bzip2-1.0.6`](https://spdx.org/licenses/bzip2-1.0.6.html)
 - [GNU GPL FAQ on linking and combined programs](https://www.gnu.org/licenses/gpl-faq.en.html)
 - [Zed issue #55470](https://github.com/zed-industries/zed/issues/55470)
+- `docs/research/gpui-cratesio-nonactivating-capture.md`

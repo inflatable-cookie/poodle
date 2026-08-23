@@ -4,16 +4,19 @@ Status: reference
 Updated: 2026-08-23
 
 Roadmaps record Poodle's executable milestone work. `g15` completed the
-v0.2.1 recovery release after `v0.2.0` stopped before publication. `g16` is
-the active adoption generation, moving authoritative consumers onto the
-published packages and matching Rust tag.
+v0.2.1 recovery release after `v0.2.0` stopped before publication. `g16`
+consumer adoption then exposed a GPUI source-identity defect in that Rust tag;
+the active lane is the bounded v0.2.2 crates.io-GPUI recovery before adoption
+resumes.
 
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
-- `g16` has frozen the 17-repository consumer estate and the exact `0.2.1`
-  adoption policy. Longhorn, Underlay, and Soundcheck Library are ready as
-  independent foundation lanes; application cards follow their results.
+- `g16` has frozen the 17-repository consumer estate. Underlay and Soundcheck
+  Library reached 0.2.1, while Longhorn proved that the released Rust graph
+  exposes an incompatible fork-sourced GPUI identity. `g16.005` restores
+  crates.io GPUI and prepares v0.2.2; all remaining adoption waits for its
+  operator-owned release gate.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -57,7 +60,7 @@ published packages and matching Rust tag.
 - `g14` — rejected executable-conformance pilot; generation complete
 - `g15` — completed v0.2.1 recovery baseline; core and Svelte published from
   candidate `3d914261`, with React retained as source-only
-- `g16` — active published-consumer adoption; foundation lanes ready
+- `g16` — active published-consumer adoption; v0.2.2 GPUI-source recovery ready
 
 ## Rules
 

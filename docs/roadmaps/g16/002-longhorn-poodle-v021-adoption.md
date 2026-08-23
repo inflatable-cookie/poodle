@@ -1,11 +1,21 @@
 # g16.002 — Longhorn Poodle 0.2.1 Adoption
 
-Status: **ready**
+Status: **paused — `v0.2.1` exposes a fork-sourced GPUI crate identity;
+superseded by a fresh `v0.2.2` adoption card after `g16.006`**
 Depends on: `g16.001`, published npm `0.2.1`, immutable tag `v0.2.1`
 Target repository: `/Users/tom/Dev/projects/longhorn`
 Governing refs: `README.md`, `../../../README.md`,
 `../../logs/2026-08/20260823-g15-013-v021-release-certification.md`,
 Longhorn `AGENTS.md`, Longhorn contract 012
+
+## Stop Receipt
+
+The adoption branch proved that Poodle `v0.2.1` and a consumer's direct
+crates.io `gpui = "0.2.2"` are different crate identities. Replacing the
+consumer's direct GPUI dependency with Poodle's fork would propagate the
+release defect, not complete adoption. Stop this card without merging that
+change. `g16.005` prepares the corrected Poodle release; a fresh Longhorn
+`v0.2.2` card follows `g16.006`.
 
 ## Outcome
 

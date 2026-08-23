@@ -5,14 +5,16 @@ Updated: 2026-08-23
 ## Active Track
 
 - `g16`
-  - Status: active — inventory complete; two foundations adopted; Longhorn ready
-  - Posture: published-package adoption, no Poodle API or architecture changes
-  - Range: `001` to `004`; application cards compile after foundation evidence
+  - Status: active — inventory complete; adoption exposed a released GPUI
+    source-identity defect; v0.2.2 recovery ready
+  - Posture: published-package adoption paused behind one dependency-source
+    recovery; no component or public API redesign
+  - Range: `001` to `006`; application cards compile after v0.2.2 and foundation evidence
   - Evidence: 17 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: finish Longhorn `002`; compile the Underlay-dependent application
-    lanes from `003`, then unlock the remaining Longhorn-backed applications.
+  - Next: execute `005`, review its exact candidate, then take `006` through
+    the explicit operator release gate before recompiling Longhorn adoption.
 
 ## Latest Completed Track
 
