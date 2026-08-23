@@ -3,15 +3,15 @@
 //! Contract: `docs/contracts/components/meta-item.md`
 //! Ported from: `packages/jetstream/components/src/meta_item.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
 use poodle_specs::MetaItemSpec;
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn meta_item(spec: &MetaItemSpec, theme: &dyn ThemeProvider, value: Option<Node>) -> Node {
-    let label_color = theme.resolve_color(spec.label_color_token());
-    let value_color = theme.resolve_color(spec.value_color_token());
+pub fn meta_item(spec: &MetaItemSpec, ctx: &RenderContext<'_>, value: Option<Node>) -> Node {
+    let label_color = ctx.theme().resolve_color(spec.label_color_token());
+    let value_color = ctx.theme().resolve_color(spec.value_color_token());
     let label_size = rem_to_px(spec.label_font_size_rem());
     let value_size = rem_to_px(spec.value_font_size_rem());
     let label_weight = spec.label_font_weight();

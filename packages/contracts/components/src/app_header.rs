@@ -133,22 +133,17 @@ impl AppHeaderSpec {
     // than referencing a per-target presentation module) so both Rust targets
     // resolve identical values from a single spec source of truth.
 
-    /// Effective control size after applying `size_role` to the base `size`
-    /// (defaults to `Md` when no explicit size is set).
-    pub fn effective_size(&self) -> ControlSize {
-        let base = self.size.unwrap_or(ControlSize::Md);
+    /// Effective control size after applying `size_role` to a resolved base
+    /// size. Omission is resolved by the render context, which supplies the
+    /// base; an explicit `md` under a non-default scope stays `md`-based.
+    pub fn effective_size(&self, base: ControlSize) -> ControlSize {
         resolve_semantic_size(base, self.size_role)
-    }
-
-    /// Effective density (defaults to `Default`).
-    pub fn effective_density(&self) -> ControlDensity {
-        self.density.unwrap_or(ControlDensity::Default)
     }
 
     /// Shell min-height in rem (Svelte `--poodle-app-header-min-height` ladder).
     /// Base (md) is `size.panel.header`; the ladder overrides per size.
-    pub fn min_height_rem(&self) -> f32 {
-        match self.effective_size() {
+    pub fn min_height_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 2.25,
             ControlSize::Sm => 2.5,
             ControlSize::Md => 2.75,
@@ -158,8 +153,8 @@ impl AppHeaderSpec {
     }
 
     /// Title font-size in rem (Svelte `--poodle-app-header-title-size` ladder).
-    pub fn title_size_rem(&self) -> f32 {
-        match self.effective_size() {
+    pub fn title_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.8125,
             ControlSize::Sm => 0.875,
             ControlSize::Md => 0.9375,
@@ -169,8 +164,8 @@ impl AppHeaderSpec {
     }
 
     /// Subtitle font-size in rem (Svelte `--poodle-app-header-subtitle-size` ladder).
-    pub fn subtitle_size_rem(&self) -> f32 {
-        match self.effective_size() {
+    pub fn subtitle_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.71875,
             ControlSize::Md => 0.75,
@@ -181,8 +176,8 @@ impl AppHeaderSpec {
 
     /// Inter-region grid gap in rem (Svelte `--poodle-app-header-gap`).
     /// Base is `space.inline.md` (1rem); density overrides per Svelte.
-    pub fn gap_rem(&self) -> f32 {
-        match self.effective_density() {
+    pub fn gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.625,
             ControlDensity::Default => 1.0,
             ControlDensity::Comfortable => 1.0,
@@ -191,8 +186,8 @@ impl AppHeaderSpec {
 
     /// Intra-region gap in rem (Svelte `--poodle-app-header-region-gap`).
     /// Base is `space.inline.sm` (0.5rem); density overrides per Svelte.
-    pub fn region_gap_rem(&self) -> f32 {
-        match self.effective_density() {
+    pub fn region_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.375,
             ControlDensity::Default => 0.5,
             ControlDensity::Comfortable => 0.625,
@@ -201,8 +196,8 @@ impl AppHeaderSpec {
 
     /// Vertical padding in rem (Svelte `--poodle-app-header-padding-block`).
     /// Base is `space.control.y` (0.375rem); density overrides per Svelte.
-    pub fn pad_y_rem(&self) -> f32 {
-        match self.effective_density() {
+    pub fn pad_y_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.25,
             ControlDensity::Default => 0.375,
             ControlDensity::Comfortable => 0.5,
@@ -211,8 +206,8 @@ impl AppHeaderSpec {
 
     /// Horizontal padding in rem (Svelte `--poodle-app-header-padding-inline`).
     /// Base is `space.panel.x` (1rem); density insets/expands by 0.125rem per Svelte.
-    pub fn pad_x_rem(&self) -> f32 {
-        match self.effective_density() {
+    pub fn pad_x_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.875,
             ControlDensity::Default => 1.0,
             ControlDensity::Comfortable => 1.125,

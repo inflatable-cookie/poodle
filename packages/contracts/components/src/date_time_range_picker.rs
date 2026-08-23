@@ -14,9 +14,13 @@ pub struct DateTimeRangePickerSpec {
     pub locale: String,
     pub is_disabled: bool,
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for DateTimeRangePickerSpec {
@@ -34,9 +38,9 @@ impl Default for DateTimeRangePickerSpec {
             locale: String::from("en-US"),
             is_disabled: false,
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -62,7 +66,7 @@ impl DateTimeRangePickerSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -72,7 +76,7 @@ impl DateTimeRangePickerSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

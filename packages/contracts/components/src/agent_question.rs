@@ -27,9 +27,11 @@ pub struct AgentQuestionSpec {
     pub progress_label: Option<String>,
     pub dismiss_label: String,
     pub show_shortcuts: bool,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl AgentQuestionSpec {
@@ -43,9 +45,9 @@ impl AgentQuestionSpec {
             progress_label: None,
             dismiss_label: "Skip this question".to_string(),
             show_shortcuts: true,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -74,11 +76,11 @@ impl AgentQuestionSpec {
         self
     }
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -166,8 +168,8 @@ impl AgentQuestionSpec {
     }
 
     // ── Size ─────────────────────────────────────────────────
-    pub fn font_size_rem(&self) -> f32 {
-        match self.size {
+    pub fn font_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.75,
             ControlSize::Md => 0.8125,
@@ -175,8 +177,8 @@ impl AgentQuestionSpec {
             ControlSize::Xl => 0.9375,
         }
     }
-    pub fn prompt_size_rem(&self) -> f32 {
-        match self.size {
+    pub fn prompt_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.8125,
             ControlSize::Sm => 0.875,
             ControlSize::Md => 0.9375,
@@ -184,8 +186,8 @@ impl AgentQuestionSpec {
             ControlSize::Xl => 1.125,
         }
     }
-    pub fn option_padding_block_rem(&self) -> f32 {
-        match self.size {
+    pub fn option_padding_block_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.375,
             ControlSize::Sm => 0.4375,
             ControlSize::Md => 0.5,
@@ -195,8 +197,8 @@ impl AgentQuestionSpec {
     }
 
     // ── Density ──────────────────────────────────────────────
-    pub fn gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.375,
             ControlDensity::Default => 0.5,
             ControlDensity::Comfortable => 0.75,
@@ -205,22 +207,22 @@ impl AgentQuestionSpec {
     /// The step between the question and its answers, larger than the gap that
     /// stacks progress, header and prompt — those are one unit, and the options
     /// answer them.
-    pub fn prompt_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn prompt_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.875,
             ControlDensity::Default => 1.125,
             ControlDensity::Comfortable => 1.5,
         }
     }
-    pub fn option_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn option_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.125,
             ControlDensity::Default => 0.25,
             ControlDensity::Comfortable => 0.375,
         }
     }
-    pub fn option_padding_inline_rem(&self) -> f32 {
-        match self.density {
+    pub fn option_padding_inline_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.625,
             ControlDensity::Comfortable => 0.875,
@@ -294,8 +296,17 @@ mod tests {
         let base = AgentQuestionSpec::new(vec![question(false)]);
         let dense = base.clone().with_density(ControlDensity::Compact);
 
-        assert_ne!(dense.gap_rem(), base.gap_rem());
-        assert_eq!(dense.font_size_rem(), base.font_size_rem());
-        assert_eq!(dense.prompt_size_rem(), base.prompt_size_rem());
+        assert_ne!(
+            dense.gap_rem(ControlDensity::Compact),
+            base.gap_rem(ControlDensity::Default)
+        );
+        assert_eq!(
+            dense.font_size_rem(ControlSize::Md),
+            base.font_size_rem(ControlSize::Md)
+        );
+        assert_eq!(
+            dense.prompt_size_rem(ControlSize::Md),
+            base.prompt_size_rem(ControlSize::Md)
+        );
     }
 }

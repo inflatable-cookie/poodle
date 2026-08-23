@@ -52,9 +52,9 @@ pub struct PaginationSpec {
     pub is_compact: bool,
     /// Loading state — dims the component and prevents interaction.
     pub is_loading: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Renders with container padding, a top border and a background — for a
     /// pager that sits directly on a page rather than inside a card.
     pub has_chrome: bool,
@@ -77,9 +77,9 @@ impl Default for PaginationSpec {
             limit_options: vec![30, 50, 100],
             is_compact: false,
             is_loading: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             has_chrome: false,
         }
     }
@@ -324,7 +324,7 @@ impl PaginationSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -334,7 +334,7 @@ impl PaginationSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

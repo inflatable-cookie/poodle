@@ -1,5 +1,5 @@
 use crate::app_state::AppState;
-use crate::node_compat::{AppHeader, Button, Eyebrow, IconButton, IntoCompatNode};
+use crate::node_compat::{AppHeader, Button, Eyebrow, IconButton};
 use crate::specimens::specimen_axes::{density_key, size_key};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
@@ -8,6 +8,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
+use poodle_render::{RenderContext, SlotBuilder};
 use poodle_specs::AppHeaderSpec;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, IconButtonSpec,
@@ -131,7 +132,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         AppHeaderSpec::new().with_aria_label("Custom identity header"),
                         theme,
                     )
-                    .with_leading(identity_slot(theme))
+                    .with_leading(identity_slot())
                     .with_utility_items(utility_row(
                         theme,
                         &[("ah-bell2", "bell"), ("ah-user2", "user")],
@@ -191,25 +192,32 @@ fn action_row(
     labels: &[(&str, &str)],
     size: ControlSize,
     gap: f32,
-) -> Node {
-    let mut row = Node::container();
-    row.style.descriptor.layout.direction = LayoutDirection::Row;
-    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-    row.style.descriptor.layout.spacing.gap = gap;
-    for (id, label) in labels {
-        row = row.child(
-            Button::from_spec(
-                ButtonSpec::new()
-                    .with_variant(ButtonVariant::Ghost)
-                    .with_label(*label)
-                    .with_size(size),
-                theme,
-            )
-            .with_id(*id)
-            .into_compat_node(),
-        );
-    }
-    row
+) -> SlotBuilder<'static> {
+    let theme = theme.clone();
+    let labels: Vec<(String, String)> = labels
+        .iter()
+        .map(|(id, label)| (id.to_string(), label.to_string()))
+        .collect();
+    Box::new(move |ctx| {
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        row.style.descriptor.layout.spacing.gap = gap;
+        for (id, label) in labels {
+            row = row.child(
+                Button::from_spec(
+                    ButtonSpec::new()
+                        .with_variant(ButtonVariant::Ghost)
+                        .with_label(label)
+                        .with_size(size),
+                    &theme,
+                )
+                .with_id(id)
+                .into_node_with(ctx),
+            );
+        }
+        row
+    })
 }
 
 fn utility_row(
@@ -217,65 +225,77 @@ fn utility_row(
     items: &[(&str, &str)],
     size: ControlSize,
     gap: f32,
-) -> Node {
-    let mut row = Node::container();
-    row.style.descriptor.layout.direction = LayoutDirection::Row;
-    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-    row.style.descriptor.layout.spacing.gap = gap;
-    for (id, icon) in items {
-        row = row.child(
-            IconButton::from_spec(
-                IconButtonSpec::new().with_icon(*icon).with_size(size),
-                theme,
-            )
-            .with_id(*id)
-            .into_compat_node(),
-        );
-    }
-    row
+) -> SlotBuilder<'static> {
+    let theme = theme.clone();
+    let items: Vec<(String, String)> = items
+        .iter()
+        .map(|(id, icon)| (id.to_string(), icon.to_string()))
+        .collect();
+    Box::new(move |ctx| {
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        row.style.descriptor.layout.spacing.gap = gap;
+        for (id, icon) in items {
+            row = row.child(
+                IconButton::from_spec(
+                    IconButtonSpec::new().with_icon(icon).with_size(size),
+                    &theme,
+                )
+                .with_id(id)
+                .into_node_with(ctx),
+            );
+        }
+        row
+    })
 }
 
-fn identity_slot(theme: &GpuiThemeProvider) -> Node {
-    let mut row = Node::container();
-    row.style.descriptor.layout.direction = LayoutDirection::Row;
-    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-    row.style.descriptor.layout.spacing.gap = 8.0;
+fn identity_slot() -> SlotBuilder<'static> {
+    Box::new(|ctx| {
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        row.style.descriptor.layout.spacing.gap = 8.0;
 
-    let mut mark = Node::container();
-    mark.style.descriptor.layout.direction = LayoutDirection::Row;
-    mark.style.descriptor.layout.width = LayoutSizing::Fixed(20.0);
-    mark.style.descriptor.layout.height = LayoutSizing::Fixed(20.0);
-    mark.style.descriptor.background = Some(theme.resolve_color("color.accent.base"));
-    for corner in [
-        &mut mark.style.descriptor.corner_radii.top_left,
-        &mut mark.style.descriptor.corner_radii.top_right,
-        &mut mark.style.descriptor.corner_radii.bottom_right,
-        &mut mark.style.descriptor.corner_radii.bottom_left,
-    ] {
-        *corner = 4.0;
-    }
+        let mut mark = Node::container();
+        mark.style.descriptor.layout.direction = LayoutDirection::Row;
+        mark.style.descriptor.layout.width = LayoutSizing::Fixed(20.0);
+        mark.style.descriptor.layout.height = LayoutSizing::Fixed(20.0);
+        mark.style.descriptor.background = Some(ctx.theme().resolve_color("color.accent.base"));
+        for corner in [
+            &mut mark.style.descriptor.corner_radii.top_left,
+            &mut mark.style.descriptor.corner_radii.top_right,
+            &mut mark.style.descriptor.corner_radii.bottom_right,
+            &mut mark.style.descriptor.corner_radii.bottom_left,
+        ] {
+            *corner = 4.0;
+        }
 
-    let mut title = Node::text("Poodle Studio");
-    title.style.text_size = Some(14.0);
-    title.style.text_weight = Some(600);
-    title.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
-    row.child(mark).child(title)
+        let mut title = Node::text("Poodle Studio");
+        title.style.text_size = Some(14.0);
+        title.style.text_weight = Some(600);
+        title.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
+        row.child(mark).child(title)
+    })
 }
 
 /// A destination-style centre region: three muted labels standing in for a
 /// tabs group (mirrors soundcheck's centred destinations).
-fn destination_row(theme: &GpuiThemeProvider) -> Node {
-    let mut row = Node::container();
-    row.style.descriptor.layout.direction = LayoutDirection::Row;
-    row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-    row.style.descriptor.layout.spacing.gap = 16.0;
-    for label in ["Editor", "Preview", "Terminal"] {
-        let mut t = Node::text(label);
-        t.style.text_size = Some(12.0);
-        t.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
-        row = row.child(t);
-    }
-    row
+fn destination_row() -> SlotBuilder<'static> {
+    Box::new(|ctx| {
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        row.style.descriptor.layout.spacing.gap = 16.0;
+        for label in ["Editor", "Preview", "Terminal"] {
+            let mut t = Node::text(label);
+            t.style.text_size = Some(12.0);
+            t.style.descriptor.text_color =
+                Some(ctx.theme().resolve_color("color.text.secondary"));
+            row = row.child(t);
+        }
+        row
+    })
 }
 
 /// The centred demo header shared by the centred and narrow groups: a
@@ -286,7 +306,7 @@ fn centered_header(theme: &GpuiThemeProvider, id_suffix: &str) -> AppHeader {
     let open_id = format!("ah-open-{id_suffix}");
     let settings_id = format!("ah-settings-{id_suffix}");
     AppHeader::from_spec(AppHeaderSpec::new().with_title("My Application"), theme)
-        .with_center(destination_row(theme))
+        .with_center(destination_row())
         .with_primary_actions(action_row(
             theme,
             &[(new_id.as_str(), "New"), (open_id.as_str(), "Open")],
@@ -313,7 +333,7 @@ fn ladder_label(theme: &GpuiThemeProvider, label: &str) -> Div {
 /// A "My Application" header with New/Open ghost actions and a settings utility
 /// icon — the demo shape used by both ladders (matches the Svelte specimen).
 fn demo_header(spec: AppHeaderSpec, theme: &GpuiThemeProvider, id_suffix: &str) -> AppHeader {
-    let action_size = spec.effective_size();
+    let action_size = spec.effective_size(RenderContext::new(theme).base_size(spec.size));
     let new_id = format!("ah-new-{id_suffix}");
     let open_id = format!("ah-open-{id_suffix}");
     let settings_id = format!("ah-settings-{id_suffix}");

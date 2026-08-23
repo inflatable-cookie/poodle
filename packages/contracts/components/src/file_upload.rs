@@ -140,9 +140,9 @@ pub struct FileUploadSpec {
     /// anatomy (File Item / Preview / Meta / Progress / Remove). Empty by
     /// default — the list is conditional on `files.len() > 0`.
     pub files: Vec<FileUploadItem>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for FileUploadSpec {
@@ -158,9 +158,9 @@ impl Default for FileUploadSpec {
             compress: false,
             validation_error: None,
             files: Vec::new(),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -313,7 +313,7 @@ impl FileUploadSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -323,7 +323,7 @@ impl FileUploadSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

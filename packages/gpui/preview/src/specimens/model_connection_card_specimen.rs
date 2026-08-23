@@ -7,6 +7,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::model_connection::{model_catalogue_fixtures, ModelConnectionReadiness};
 use poodle_node::Node;
+use poodle_render::RenderContext;
 use poodle_specs::{
     ButtonVariant, EyebrowSpec, IconButtonSpec, ModelCatalogueEditorSpec, ModelConnectionCardSpec,
     PillAppearance, PillSpec, PillTone, SemanticControlSizeRole,
@@ -84,6 +85,7 @@ fn plain(
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
+    let ctx = RenderContext::new(theme);
     let queue = Arc::clone(&state.node_events);
     let host = &state.model_connection;
     let _ = cx;
@@ -99,7 +101,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_instance_id("card-live")
         .with_details(poodle_render::model_catalogue_editor(
             &ModelCatalogueEditorSpec::new().with_items(model_catalogue_fixtures()),
-            theme,
+            &ctx,
             poodle_render::ModelCatalogueEditorHandlers {
                 instance_id: Some("card-live-details".to_string()),
                 ..poodle_render::ModelCatalogueEditorHandlers::default()
@@ -198,7 +200,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_label("Preview")
                                 .with_tone(PillTone::Info)
                                 .with_appearance(PillAppearance::Subtle),
-                            theme,
+                            &ctx,
                         ))
                         .with_actions(poodle_render::icon_button(
                             &IconButtonSpec::new()
@@ -206,7 +208,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_variant(ButtonVariant::Ghost)
                                 .with_size_role(SemanticControlSizeRole::Chrome)
                                 .with_aria_label("More actions for OpenAI · Work"),
-                            theme,
+                            &ctx,
                             None,
                         )),
                 )

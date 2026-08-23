@@ -11,12 +11,12 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole};
 use poodle_specs::{CalendarSpec, DateTimeZonePickerSpec, TimeFieldSpec, TimeZoneSelectSpec};
 
 use crate::calendar::{calendar, CalendarHandlers};
 use crate::color::{mix_linear, with_alpha};
+use crate::context::RenderContext;
 use crate::picker_trigger::{picker_trigger, PickerTrigger};
 use crate::presentation::rem_to_px;
 use crate::time_field::time_field;
@@ -35,9 +35,11 @@ pub struct DateTimeZonePickerHandlers {
 
 pub fn date_time_zone_picker(
     spec: &DateTimeZonePickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: DateTimeZonePickerHandlers,
 ) -> Node {
+    let base_size = ctx.base_size(spec.size);
+    let theme = ctx.theme();
     let inline_gap = theme.resolve_space("space.inline.sm");
     let elevated = theme.resolve_color(spec.overlay_fill_token());
     let border_color = theme.resolve_color(spec.border_token());
@@ -65,13 +67,13 @@ pub fn date_time_zone_picker(
         spec.placeholder.clone()
     };
     let trigger = picker_trigger(
-        theme,
+        ctx,
         PickerTrigger {
             display: &display,
             has_value,
             open: spec.current_open(),
             disabled: spec.is_disabled,
-            size: spec.size,
+            size: base_size,
             size_role: spec.size_role,
             indicator: "calendar",
             indicator_size: None,
@@ -140,14 +142,14 @@ pub fn date_time_zone_picker(
 
         // Time field — contract Field: "TIME" label above composed TimeInput.
         let time_field_group =
-            field_group(field_label("Time", muted), time_field(&time_spec, theme));
+            field_group(field_label("Time", muted), time_field(&time_spec, ctx));
 
         // Time zone field — "TIME ZONE" label above composed TimeZoneSelect.
         let tz_field_group = field_group(
             field_label("Time zone", muted),
             time_zone_select(
                 &tz_spec,
-                theme,
+                ctx,
                 TimeZoneSelectHandlers {
                     on_toggle: handlers.on_zone_toggle.clone(),
                     on_change: handlers.on_zone_change.clone(),
@@ -180,7 +182,7 @@ pub fn date_time_zone_picker(
         let body = body
             .child(calendar(
                 &cal_spec,
-                theme,
+                ctx,
                 CalendarHandlers {
                     on_select: handlers.on_select.clone(),
                     on_range_select: None,

@@ -1,7 +1,7 @@
 //! Button specimen — migrated to the node tier (g12.019 Batch B).
 //!
 //! Every Button below renders through the node tier: `poodle_render::button`
-//! (`Spec + Theme → Node`) interpreted by `poodle_gpui_node_backend::to_gpui`.
+//! (`Spec + Context → Node`) interpreted by `poodle_gpui_node_backend::to_gpui`.
 //! The old hand-written `poodle_gpui_components::Button` no longer renders
 //! this specimen; everything around the buttons (layout, Eyebrow headings,
 //! captions) is unchanged.
@@ -23,6 +23,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
 use poodle_render::button;
+use poodle_render::RenderContext;
 use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec};
 
 /// A node-tier Button with an optional click handler.
@@ -31,13 +32,13 @@ fn node_button(
     state: &AppState,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> AnyElement {
-    let node = button(&spec, &state.theme, on_click);
+    let node = button(&spec, &RenderContext::new(&state.theme), on_click);
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
 /// A node-tier Button with no handler (tones / icons / chevrons / states / sizes / densities).
 fn node_button_static(spec: ButtonSpec, theme: &GpuiThemeProvider) -> AnyElement {
-    let node = button(&spec, theme, None);
+    let node = button(&spec, &RenderContext::new(theme), None);
     poodle_gpui_node_backend::to_gpui(&node)
 }
 

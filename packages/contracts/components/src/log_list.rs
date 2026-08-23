@@ -295,9 +295,9 @@ pub struct LogListSpec {
     /// Total row count; enables pagination when greater than `page_size`
     /// (Svelte `total`). `None` disables pagination.
     pub total: Option<usize>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for LogListSpec {
@@ -322,9 +322,9 @@ impl LogListSpec {
             page: 1,
             page_size: 50,
             total: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -497,7 +497,7 @@ impl LogListSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -507,7 +507,7 @@ impl LogListSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }
@@ -532,9 +532,9 @@ mod tests {
         assert_eq!(spec.page, 1);
         assert_eq!(spec.page_size, 50);
         assert_eq!(spec.total, None);
-        assert_eq!(spec.size, ControlSize::Md);
+        assert_eq!(spec.size, None);
         assert_eq!(spec.size_role, SemanticControlSizeRole::Control);
-        assert_eq!(spec.density, ControlDensity::Default);
+        assert_eq!(spec.density, None);
     }
 
     #[test]

@@ -7,7 +7,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeRole, NodeToggled, StylePatch,
@@ -15,14 +14,16 @@ use poodle_node::{
 use poodle_specs::{ControlDensity, ControlSize, MenuItemKind, MenuSpec};
 
 use crate::color::{mix_srgb, with_alpha};
-use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::{control_height_rem, rem_to_px};
 
 pub fn menu(
     spec: &MenuSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_action: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(match effective_size {
         ControlSize::Xs => 0.6875,
         ControlSize::Sm => 0.75,
@@ -31,34 +32,34 @@ pub fn menu(
         ControlSize::Xl => 1.0,
     });
     let item_min_height = rem_to_px(control_height_rem(effective_size));
-    let meta_font_size = theme.resolve_space("typography.caption.size");
+    let meta_font_size = ctx.theme().resolve_space("typography.caption.size");
 
-    let item_px = rem_to_px(match spec.density {
+    let item_px = rem_to_px(match density {
         ControlDensity::Compact => 0.375,
         ControlDensity::Default | ControlDensity::Comfortable => 0.75,
     });
-    let item_py = theme.resolve_space("space.control.y");
+    let item_py = ctx.theme().resolve_space("space.control.y");
     let menu_py = rem_to_px(0.25);
-    let item_gap = theme.resolve_space("space.inline.sm");
+    let item_gap = ctx.theme().resolve_space("space.inline.sm");
     let separator_my = rem_to_px(0.25);
-    let item_radius = (theme
+    let item_radius = (ctx.theme()
         .resolve_radius(spec.overlay_radius_token())
-        .min(theme.resolve_radius("radius.control"))
+        .min(ctx.theme().resolve_radius("radius.control"))
         - rem_to_px(0.125))
     .max(0.0);
 
-    let elevated = theme.resolve_color(spec.surface_fill_token());
-    let panel = theme.resolve_color("color.background.panel");
+    let elevated = ctx.theme().resolve_color(spec.surface_fill_token());
+    let panel = ctx.theme().resolve_color("color.background.panel");
     let fill = mix_srgb(elevated, panel, 0.98);
-    let border_base = theme.resolve_color(spec.overlay_border_token());
+    let border_base = ctx.theme().resolve_color(spec.overlay_border_token());
     let border = with_alpha(border_base, border_base.3 * 0.72);
-    let radius = theme.resolve_radius(spec.overlay_radius_token());
-    let text_color = theme.resolve_color(spec.item_text_token());
-    let muted_color = theme.resolve_color("color.text.secondary");
-    let separator_base = theme.resolve_color(spec.separator_color_token());
-    let danger_color = theme.resolve_color("color.status.danger");
-    let accent_color = theme.resolve_color(spec.item_highlight_token());
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+    let radius = ctx.theme().resolve_radius(spec.overlay_radius_token());
+    let text_color = ctx.theme().resolve_color(spec.item_text_token());
+    let muted_color = ctx.theme().resolve_color("color.text.secondary");
+    let separator_base = ctx.theme().resolve_color(spec.separator_color_token());
+    let danger_color = ctx.theme().resolve_color("color.status.danger");
+    let accent_color = ctx.theme().resolve_color(spec.item_highlight_token());
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
 
     let hover_tint = with_alpha(accent_color, accent_color.3 * 0.16);
     let danger_hover_tint = with_alpha(danger_color, danger_color.3 * 0.14);
@@ -79,7 +80,7 @@ pub fn menu(
         s.descriptor.layout.spacing.padding.bottom = menu_py;
         s.descriptor.layout.spacing.padding.left = menu_py;
         s.descriptor.layout.spacing.padding.right = menu_py;
-        s.min_width = Some(theme.resolve_space("size.menu.minWidth"));
+        s.min_width = Some(ctx.theme().resolve_space("size.menu.minWidth"));
         // Token-accurate elevation.overlay, same mapping as select's panel.
         s.descriptor.shadow = Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY);
         s.overlay = true;
@@ -242,14 +243,16 @@ mod tests {
 
     #[test]
     fn outside_interact_refusal_marks_the_menu_surface() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         // Web default `true`: the surface carries no refusal marker.
-        let node = menu(&MenuSpec::default(), &theme(), None);
+        let node = menu(&MenuSpec::default(), &ctx, None);
         assert!(node.interaction.on_activate.is_none());
 
         // Refusal (`dismissOnOutsideInteract: false`): the surface carries
         // the inert activation marker a host keys outside-dismissal on.
         let refusing = MenuSpec::default().with_dismiss_on_outside_interact(false);
-        let node = menu(&refusing, &theme(), None);
+        let node = menu(&refusing, &ctx, None);
         assert!(node.interaction.on_activate.is_some());
     }
 }

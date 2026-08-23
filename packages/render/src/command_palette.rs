@@ -17,7 +17,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodePosition, NodeRole,
@@ -25,9 +24,8 @@ use poodle_node::{
 use poodle_specs::{CommandActionItem, CommandPaletteSpec, DiscoveryState, TextInputSpec};
 
 use crate::color::{mix_srgb, with_alpha};
-use crate::presentation::{
-    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
+use crate::context::RenderContext;
+use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, size_font_rem};
 use crate::text_input::text_input_with_change;
 
 #[derive(Default)]
@@ -39,12 +37,12 @@ pub struct CommandPaletteHandlers {
 
 pub fn command_palette(
     spec: &CommandPaletteSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     command_palette_with_handlers(
         spec,
-        theme,
+        ctx,
         CommandPaletteHandlers {
             select: on_select,
             ..Default::default()
@@ -54,7 +52,7 @@ pub fn command_palette(
 
 pub fn command_palette_with_handlers(
     spec: &CommandPaletteSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: CommandPaletteHandlers,
 ) -> Node {
     // Closed: render nothing. Consumers that never touched `is_open` still
@@ -63,11 +61,14 @@ pub fn command_palette_with_handlers(
         return Node::container();
     }
 
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let theme = ctx.theme();
     let font_size = rem_to_px(size_font_rem(effective_size));
     let icon_size = theme.resolve_space("size.icon.md");
-    let panel_px = rem_to_px(panel_space_x_rem(spec.density));
-    let panel_py = rem_to_px(panel_space_y_rem(spec.density));
+    let panel_px = rem_to_px(panel_space_x_rem(density));
+    let panel_py = rem_to_px(panel_space_y_rem(density));
 
     // ── Color / dimension tokens ──────────────────────────────────────
     // Modal surface fill = color.background.elevated (contract §9 mixes it
@@ -245,10 +246,10 @@ pub fn command_palette_with_handlers(
         .with_placeholder("Search commands, panels, and actions".to_string())
         .with_aria_label("Search commands")
         .with_show_clear_button(true)
-        .with_size(spec.size)
+        .with_size(base_size)
         .with_size_role(spec.size_role)
-        .with_density(spec.density);
-    let mut query = text_input_with_change(&query_spec, theme, handlers.query_change);
+        .with_density(density);
+    let mut query = text_input_with_change(&query_spec, ctx, handlers.query_change);
     query.style.fill_width = true;
     modal = modal.child(query);
 
@@ -472,9 +473,11 @@ mod tests {
         let select_seen = Arc::clone(&seen);
         let close_seen = Arc::clone(&seen);
         let spec = CommandPaletteSpec::new(vec![CommandActionItem::new("save", "Save")]);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = command_palette_with_handlers(
             &spec,
-            &theme(),
+            &ctx,
             CommandPaletteHandlers {
                 query_change: Some(Arc::new(move |value| {
                     query_seen.lock().unwrap().push(format!("query:{value}"));

@@ -50,9 +50,9 @@ pub struct PageHeaderSpec {
     /// semantics and visual sizing hierarchy — higher levels render
     /// at smaller text sizes. Defaults to 2 (matches Svelte/contract).
     pub level: u8,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Layout posture — an entity detail header sits tighter than a page one.
     pub posture: PageHeaderPosture,
     /// Whether the subtitle stays visible when breadcrumbs are present.
@@ -76,9 +76,9 @@ impl PageHeaderSpec {
             aria_label: None,
             entity_detail_posture: false,
             level: 2,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             posture: PageHeaderPosture::Default,
             shows_subtitle_with_breadcrumbs: false,
         }
@@ -301,7 +301,7 @@ impl PageHeaderSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -311,7 +311,7 @@ impl PageHeaderSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

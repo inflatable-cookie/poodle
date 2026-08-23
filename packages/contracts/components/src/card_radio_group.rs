@@ -7,9 +7,9 @@ pub struct CardRadioGroupSpec {
     pub default_value: Option<String>,
     pub value: Option<String>,
     pub is_disabled: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Grid column count for the card layout.
     pub columns: u8,
 }
@@ -26,9 +26,9 @@ impl CardRadioGroupSpec {
             default_value: None,
             value: None,
             is_disabled: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             columns: 2,
         }
     }
@@ -118,7 +118,7 @@ impl CardRadioGroupSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -128,7 +128,7 @@ impl CardRadioGroupSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

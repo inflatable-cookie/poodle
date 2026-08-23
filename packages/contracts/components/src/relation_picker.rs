@@ -242,9 +242,9 @@ pub struct RelationPickerSpec {
     /// Current drill-down navigation path — one entry per level the
     /// user has entered so far. Empty means the top-level items.
     pub drill_down_path: Vec<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl RelationPickerSpec {
@@ -269,9 +269,9 @@ impl RelationPickerSpec {
             show_selection_summary: true,
             drill_down: None,
             drill_down_path: Vec::new(),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -467,7 +467,7 @@ impl RelationPickerSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -477,7 +477,7 @@ impl RelationPickerSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

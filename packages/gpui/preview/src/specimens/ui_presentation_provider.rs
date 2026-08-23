@@ -1,55 +1,51 @@
 //! UiPresentationProvider — GPUI specimen.
 //!
 //! Contract: `docs/contracts/components/ui-presentation-provider.md`
+//! Architecture: `docs/architecture/010-native-presentation-construction-context.md`
 //!
-//! The provider renders no visual chrome of its own (contract §4/§12). Native
-//! ambient propagation is a declared capability absence, so this specimen
-//! shows the explicit child-spec values a host must currently supply. It does
-//! not claim the passthrough wrapper caused a cascade.
+//! The provider is a construction-time boundary, not a painted node
+//! (`poodle_render::ui_presentation_provider`): it derives a nested
+//! `RenderContext`, builds its child inside that scope, and returns the child
+//! unchanged. This specimen demonstrates the real cascade — every scoped
+//! control below OMITS size/density and inherits them from its provider
+//! scope. Nothing here copies provider values into child specs by hand.
 
 use crate::app_state::AppState;
-use crate::node_compat::{Button, Eyebrow, TextInput};
-use crate::providers::UiPresentationProvider;
+use crate::node_compat::Eyebrow;
 use crate::specimens::specimen_axes::density_key;
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_render::{ui_presentation_provider, RenderContext};
 use poodle_specs::{
     ButtonSpec, ControlDensity, ControlSize, EyebrowSpec, TextInputSpec, UiPresentationProviderSpec,
 };
 
-/// A row of real controls scoped by a presentation provider.
-fn scoped_controls(
-    density: ControlDensity,
-    size: ControlSize,
-    label: &str,
-    theme: &GpuiThemeProvider,
-) -> UiPresentationProvider {
-    UiPresentationProvider::from_spec(
-        UiPresentationProviderSpec::new()
-            .with_density(density)
-            .with_size_scale(size),
-    )
-    .with_child(
-        div()
-            .flex()
-            .gap(px(10.0))
-            .child(Button::from_spec(
-                ButtonSpec::new()
-                    .with_label(label.to_string())
-                    .with_size(size)
-                    .with_density(density),
-                theme,
-            ))
-            .child(TextInput::from_spec(
-                TextInputSpec::new()
-                    .with_default_value(label.to_string())
-                    .with_size(size)
-                    .with_density(density),
-                theme,
-            )),
-    )
+/// A button + text input row whose controls omit size/density and resolve
+/// them from whatever context they are built with.
+fn plain_row(ctx: &RenderContext<'_>, label: &str) -> Div {
+    div()
+        .flex()
+        .gap(px(10.0))
+        .child(poodle_gpui_node_backend::to_gpui(&poodle_render::button(
+            &ButtonSpec::new().with_label(label.to_string()),
+            ctx,
+            None,
+        )))
+        .child(poodle_gpui_node_backend::to_gpui(
+            &poodle_render::text_input(
+                &TextInputSpec::new().with_default_value(label.to_string()),
+                ctx,
+                None,
+            ),
+        ))
+}
+
+/// A button + text input row built INSIDE a provider scope: both controls
+/// omit size/density and inherit the provider's values.
+fn scoped_row(spec: &UiPresentationProviderSpec, ctx: &RenderContext<'_>, label: &str) -> Div {
+    ui_presentation_provider(spec, ctx, |scoped| plain_row(scoped, label))
 }
 
 /// An `Eyebrow`-labeled group wrapper.
@@ -67,74 +63,91 @@ fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
+    let ctx = RenderContext::new(theme);
+
+    // Root defaults: no provider; omitted inputs resolve to md/default.
+    let root_row = plain_row(&ctx, "Root md/default");
+
+    // Nested override: an lg/comfortable scope whose closure holds one
+    // inherited row and one nested sm/compact provider with its own
+    // inherited row.
+    let nested = ui_presentation_provider(
+        &UiPresentationProviderSpec::new()
+            .with_size_scale(ControlSize::Lg)
+            .with_density(ControlDensity::Comfortable),
+        &ctx,
+        |outer| {
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(12.0))
+                .child(plain_row(outer, "Outer lg/comfortable"))
+                .child(scoped_row(
+                    &UiPresentationProviderSpec::new()
+                        .with_size_scale(ControlSize::Sm)
+                        .with_density(ControlDensity::Compact),
+                    outer,
+                    "Nested sm/compact",
+                ))
+        },
+    );
+
+    // Explicit reset: inside an xl/comfortable scope, an explicit md/default
+    // button stays md/default beside an inherited xl/comfortable sibling.
+    let explicit_reset = ui_presentation_provider(
+        &UiPresentationProviderSpec::new()
+            .with_size_scale(ControlSize::Xl)
+            .with_density(ControlDensity::Comfortable),
+        &ctx,
+        |scoped| {
+            div()
+                .flex()
+                .gap(px(10.0))
+                .child(poodle_gpui_node_backend::to_gpui(&poodle_render::button(
+                    &ButtonSpec::new()
+                        .with_label("Explicit md/default")
+                        .with_size(ControlSize::Md)
+                        .with_density(ControlDensity::Default),
+                    scoped,
+                    None,
+                )))
+                .child(poodle_gpui_node_backend::to_gpui(&poodle_render::button(
+                    &ButtonSpec::new().with_label("Inherited xl/comfortable"),
+                    scoped,
+                    None,
+                )))
+        },
+    );
+
     let examples = div()
         .flex()
         .flex_col()
         .gap(px(24.0))
-        // Explicit host equivalent for compact / sm.
+        .child(group("Root defaults", theme, root_row))
         .child(group(
-            "Compact / sm region",
+            "Inherited scope (compact / sm)",
             theme,
-            scoped_controls(
-                ControlDensity::Compact,
-                ControlSize::Sm,
-                "Small scope",
-                theme,
+            scoped_row(
+                &UiPresentationProviderSpec::new()
+                    .with_size_scale(ControlSize::Sm)
+                    .with_density(ControlDensity::Compact),
+                &ctx,
+                "Scoped compact/sm",
             ),
         ))
-        // Explicit host equivalent for comfortable / lg.
         .child(group(
-            "Comfortable / lg region",
+            "Inherited scope (comfortable / lg)",
             theme,
-            scoped_controls(
-                ControlDensity::Comfortable,
-                ControlSize::Lg,
-                "Large scope",
-                theme,
+            scoped_row(
+                &UiPresentationProviderSpec::new()
+                    .with_size_scale(ControlSize::Lg)
+                    .with_density(ControlDensity::Comfortable),
+                &ctx,
+                "Scoped comfortable/lg",
             ),
         ))
-        // Explicit host equivalent for a nested override. The provider
-        // wrappers remain layout-neutral; the child specs carry the values.
-        .child(group(
-            "Nested override",
-            theme,
-            UiPresentationProvider::from_spec(
-                UiPresentationProviderSpec::new()
-                    .with_density(ControlDensity::Default)
-                    .with_size_scale(ControlSize::Md),
-            )
-            .with_child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap(px(12.0))
-                    .child(
-                        div()
-                            .flex()
-                            .gap(px(10.0))
-                            .child(Button::from_spec(
-                                ButtonSpec::new()
-                                    .with_label("Outer default/md")
-                                    .with_size(ControlSize::Md)
-                                    .with_density(ControlDensity::Default),
-                                theme,
-                            ))
-                            .child(TextInput::from_spec(
-                                TextInputSpec::new()
-                                    .with_default_value("Outer scope")
-                                    .with_size(ControlSize::Md)
-                                    .with_density(ControlDensity::Default),
-                                theme,
-                            )),
-                    )
-                    .child(scoped_controls(
-                        ControlDensity::Compact,
-                        ControlSize::Sm,
-                        "Inner compact/sm",
-                        theme,
-                    )),
-            ),
-        ))
+        .child(group("Nested override", theme, nested))
+        .child(group("Explicit reset inside a scope", theme, explicit_reset))
         .into_any_element();
 
     specimen_layout(
@@ -143,8 +156,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "ui-presentation-provider",
         examples,
         SpecimenAxes::examples_only().with_densities(|density, theme: &GpuiThemeProvider| {
-            scoped_controls(density, ControlSize::Md, density_key(density), theme)
-                .into_any_element()
+            scoped_row(
+                &UiPresentationProviderSpec::new()
+                    .with_size_scale(ControlSize::Md)
+                    .with_density(density),
+                &RenderContext::new(theme),
+                density_key(density),
+            )
+            .into_any_element()
         }),
     )
 }

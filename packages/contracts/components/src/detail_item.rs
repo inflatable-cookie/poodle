@@ -44,8 +44,10 @@ pub struct DetailItemSpec {
     pub presentation: DetailItemPresentation,
     /// Optional column span in a parent grid.
     pub span: Option<DetailItemSpan>,
-    /// Density override for layout spacing (gaps, surface padding).
-    pub density: ControlDensity,
+    /// Density override for layout spacing (gaps, surface padding). Omitted
+    /// (`None`) inherits from the presentation context; an explicit value
+    /// always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl DetailItemSpec {
@@ -61,7 +63,7 @@ impl DetailItemSpec {
             layout: DetailItemLayout::default(),
             presentation: DetailItemPresentation::default(),
             span: None,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -111,7 +113,7 @@ impl DetailItemSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -121,41 +123,41 @@ impl DetailItemSpec {
     // density-meaningful here (a surface card's internal padding), matching the
     // Svelte `--surface-padding-y` table.
 
-    /// Root row-gap in rem. Contract §7: compact 0.1875, default 0.25,
-    /// comfortable 0.3125.
-    pub fn row_gap_rem(&self) -> f32 {
-        match self.density {
+    /// Root row-gap in rem for the resolved density. Contract §7: compact
+    /// 0.1875, default 0.25, comfortable 0.3125.
+    pub fn row_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.1875,
             ControlDensity::Default => 0.25,
             ControlDensity::Comfortable => 0.3125,
         }
     }
 
-    /// Inline column-gap / surface gap in rem. Contract §7: compact
-    /// `space.inline.sm` (0.5), default `space.inline.md` (0.75),
-    /// comfortable 0.875.
-    pub fn inline_gap_rem(&self) -> f32 {
-        match self.density {
+    /// Inline column-gap / surface gap in rem for the resolved density.
+    /// Contract §7: compact `space.inline.sm` (0.5), default
+    /// `space.inline.md` (0.75), comfortable 0.875.
+    pub fn inline_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 0.875,
         }
     }
 
-    /// Surface horizontal padding in rem. Contract §7: compact 0.75,
-    /// default `space.panel.x` (1.0), comfortable 1.0.
-    pub fn surface_padding_x_rem(&self) -> f32 {
-        match self.density {
+    /// Surface horizontal padding in rem for the resolved density. Contract
+    /// §7: compact 0.75, default `space.panel.x` (1.0), comfortable 1.0.
+    pub fn surface_padding_x_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.75,
             ControlDensity::Default => 1.0,
             ControlDensity::Comfortable => 1.0,
         }
     }
 
-    /// Surface vertical padding in rem. Contract §7: compact 0.5, default
-    /// 0.625, comfortable 0.75.
-    pub fn surface_padding_y_rem(&self) -> f32 {
-        match self.density {
+    /// Surface vertical padding in rem for the resolved density. Contract §7:
+    /// compact 0.5, default 0.625, comfortable 0.75.
+    pub fn surface_padding_y_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.625,
             ControlDensity::Comfortable => 0.75,

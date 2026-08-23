@@ -3,20 +3,20 @@
 //! Contract: `docs/contracts/components/meta-bar.md`
 //! Ported from: `packages/jetstream/components/src/meta_bar.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::MetaBarSpec;
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Separator-dot alpha factor — a contract literal, named not inlined.
 const SEPARATOR_DOT_MIX: f32 = 0.72;
 
-pub fn meta_bar(spec: &MetaBarSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> Node {
+pub fn meta_bar(spec: &MetaBarSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
     meta_bar_sep(
         spec,
-        theme,
+        ctx,
         children.into_iter().map(|c| (c, true)).collect(),
     )
 }
@@ -24,14 +24,14 @@ pub fn meta_bar(spec: &MetaBarSpec, theme: &dyn ThemeProvider, children: Vec<Nod
 /// Children paired with their per-child separator opt-in.
 pub fn meta_bar_sep(
     spec: &MetaBarSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     children: Vec<(Node, bool)>,
 ) -> Node {
-    let gap = theme.resolve_space("space.inline.sm");
-    let separator_color = theme.resolve_color("color.text.secondary");
+    let gap = ctx.theme().resolve_space("space.inline.sm");
+    let separator_color = ctx.theme().resolve_color("color.text.secondary");
     let dot_color = with_alpha(separator_color, separator_color.3 * SEPARATOR_DOT_MIX);
     let dot_size = rem_to_px(0.25);
-    let dot_radius = theme.resolve_radius("radius.pill");
+    let dot_radius = ctx.theme().resolve_radius("radius.pill");
 
     let mut row = Node::container();
     {

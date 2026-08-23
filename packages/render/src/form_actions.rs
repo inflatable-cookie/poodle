@@ -3,22 +3,22 @@
 //! Contract: `docs/contracts/components/form-actions.md`
 //! Ported from: `packages/jetstream/components/src/form_actions.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{
     ButtonVariant, FormActionAlign, FormActionsSpec, IconButtonSpec, SemanticControlSizeRole,
 };
 
+use crate::context::RenderContext;
 use crate::icon_button::icon_button;
 use crate::presentation::rem_to_px;
 
 /// Render a form-actions row with no inline danger content (the common case).
 pub fn form_actions(
     spec: &FormActionsSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     children: Vec<Node>,
 ) -> Node {
-    form_actions_full(spec, theme, Vec::new(), children)
+    form_actions_full(spec, ctx, Vec::new(), children)
 }
 
 /// Render a form-actions row with optional inline danger content (contract
@@ -26,28 +26,29 @@ pub fn form_actions(
 /// menu trigger when `spec.danger_items` is non-empty (§8 Responsive Swap).
 pub fn form_actions_full(
     spec: &FormActionsSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     danger: Vec<Node>,
     children: Vec<Node>,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
     // Density-keyed gap: compact/comfortable use contract-exact rems,
     // default inherits the inline-md token (contract §8).
-    let gap = match spec.gap_rem() {
+    let gap = match spec.gap_rem(density) {
         Some(rem) => rem_to_px(rem),
-        None => theme.resolve_space(spec.action_gap_token()),
+        None => ctx.theme().resolve_space(spec.action_gap_token()),
     };
     // Density-keyed top separation; default inherits the stack-sm token.
     let separation = if spec.shows_top_separation() {
-        match spec.top_separation_rem() {
+        match spec.top_separation_rem(density) {
             Some(rem) => rem_to_px(rem),
-            None => theme.resolve_space(spec.stack_separation_token()),
+            None => ctx.theme().resolve_space(spec.stack_separation_token()),
         }
     } else {
         0.0
     };
     // Density-keyed divider offset (contract §8 Divider Offset Variants).
     let border_gap = if spec.shows_top_border() {
-        rem_to_px(spec.border_gap_rem())
+        rem_to_px(spec.border_gap_rem(density))
     } else {
         0.0
     };
@@ -64,7 +65,7 @@ pub fn form_actions_full(
 
         if spec.shows_top_border() {
             s.border_top_width = Some(1.0);
-            s.descriptor.border.color = theme.resolve_color(spec.border_token());
+            s.descriptor.border.color = ctx.theme().resolve_color(spec.border_token());
         }
 
         s.descriptor.layout.alignment.main = match spec.align {
@@ -102,7 +103,7 @@ pub fn form_actions_full(
                 .with_variant(ButtonVariant::Ghost)
                 .with_aria_label("More actions")
                 .with_size_role(SemanticControlSizeRole::Chrome),
-            theme,
+            ctx,
             None,
         );
         let mut slot = Node::container();

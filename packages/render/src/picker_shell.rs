@@ -3,7 +3,6 @@
 //! Contract: `docs/contracts/components/picker-shell.md`
 //! Ported from: `packages/jetstream/components/src/picker_shell.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
 };
@@ -12,33 +11,34 @@ use poodle_specs::{
 };
 
 use crate::color::{mix_srgb, TRANSPARENT};
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::spinner::spinner;
 
 pub fn picker_shell(
     spec: &PickerShellSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     toolbar: Option<Node>,
     selection: Option<Node>,
     body: Option<Node>,
     state_content: Option<Node>,
     footer: Option<Node>,
 ) -> Node {
-    let panel_x = theme.resolve_space("space.panel.x");
-    let panel_y = theme.resolve_space("space.panel.y");
-    let gap_sm = theme.resolve_space("space.inline.sm");
-    let gap_md = theme.resolve_space("space.inline.md");
-    let stack_sm = theme.resolve_space("space.stack.sm");
-    let stack_md = theme.resolve_space("space.stack.md");
-    let label_size = theme.resolve_space("typography.label.size");
-    let body_size = theme.resolve_space("typography.body.size");
-    let panel = theme.resolve_color("color.background.panel");
-    let elevated = theme.resolve_color("color.background.elevated");
-    let surface = theme.resolve_color("color.background.surface");
-    let border = theme.resolve_color("color.border.subtle");
-    let radius = theme.resolve_radius("radius.surface");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
+    let panel_x = ctx.theme().resolve_space("space.panel.x");
+    let panel_y = ctx.theme().resolve_space("space.panel.y");
+    let gap_sm = ctx.theme().resolve_space("space.inline.sm");
+    let gap_md = ctx.theme().resolve_space("space.inline.md");
+    let stack_sm = ctx.theme().resolve_space("space.stack.sm");
+    let stack_md = ctx.theme().resolve_space("space.stack.md");
+    let label_size = ctx.theme().resolve_space("typography.label.size");
+    let body_size = ctx.theme().resolve_space("typography.body.size");
+    let panel = ctx.theme().resolve_color("color.background.panel");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let border = ctx.theme().resolve_color("color.border.subtle");
+    let radius = ctx.theme().resolve_radius("radius.surface");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
     let title_size = rem_to_px(1.25); // contract §8 title 1.25rem (no token resolves to this)
     let border_width = rem_to_px(0.0625); // contract border 0.0625rem
 
@@ -185,7 +185,7 @@ pub fn picker_shell(
                     .with_variant(SpinnerVariant::Grid)
                     .with_size(SpinnerSize::Md)
                     .with_tone(SpinnerTone::Accent),
-                theme,
+                ctx,
             ));
         }
 
@@ -207,7 +207,7 @@ pub fn picker_shell(
         let mut bar = Node::container();
         bar.style.descriptor.layout.direction = LayoutDirection::Row;
         bar.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        bar.style.descriptor.layout.spacing.gap = theme.resolve_space(spec.footer_gap_token());
+        bar.style.descriptor.layout.spacing.gap = ctx.theme().resolve_space(spec.footer_gap_token());
         shell = shell.child(bar.child(footer));
     }
 

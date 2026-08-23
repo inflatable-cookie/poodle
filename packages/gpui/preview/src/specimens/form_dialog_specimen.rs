@@ -37,7 +37,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("Enter name"),
                                     theme,
                                 )
-                                .with_id("fd-name"),
+                                .with_id("fd-name").into_slot(),
                             ),
                         )
                         .with_child(
@@ -46,7 +46,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_placeholder("Select role"),
                                     theme,
                                 )
-                                .with_id("fd-role"),
+                                .with_id("fd-role").into_slot(),
                             ),
                         ),
                 ),
@@ -72,7 +72,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_value("existing@example.com"),
                                     theme,
                                 )
-                                .with_id("fd-email"),
+                                .with_id("fd-email").into_slot(),
                             ),
                         ),
                 ),
@@ -98,7 +98,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_value("Clay Tercek"),
                                     theme,
                                 )
-                                .with_id("fd-name-sub"),
+                                .with_id("fd-name-sub").into_slot(),
                             ),
                         ),
                 ),
@@ -124,7 +124,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_value("Northstar"),
                                     theme,
                                 )
-                                .with_id("fd-ws-name"),
+                                .with_id("fd-ws-name").into_slot(),
                             ),
                         )
                         .with_child(
@@ -133,7 +133,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                     TextInputSpec::new().with_value("editor"),
                                     theme,
                                 )
-                                .with_id("fd-ws-role"),
+                                .with_id("fd-ws-role").into_slot(),
                             ),
                         )
                         .with_actions(
@@ -222,7 +222,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             TextInputSpec::new().with_placeholder("Enter name"),
                             theme,
                         )
-                        .with_id("fd-axis-name"),
+                        .with_id("fd-axis-name").into_slot(),
                     ),
                 )
                 .into_any_element()
@@ -242,7 +242,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             TextInputSpec::new().with_placeholder("Enter name"),
                             theme,
                         )
-                        .with_id("fd-axis-name"),
+                        .with_id("fd-axis-name").into_slot(),
                     ),
                 )
                 .into_any_element()

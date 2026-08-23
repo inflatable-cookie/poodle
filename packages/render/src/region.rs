@@ -5,26 +5,26 @@
 //! Decorative, non-interactive: a dashed border with an optional centred,
 //! uppercase label. Per contract §3 it does NOT accept child content.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::RegionSpec;
 
 use crate::color::hex_color;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn region(spec: &RegionSpec, theme: &dyn ThemeProvider) -> Node {
-    let radius = theme.resolve_radius(spec.radius_token());
-    let padding = theme.resolve_space(spec.padding_token());
+pub fn region(spec: &RegionSpec, ctx: &RenderContext<'_>) -> Node {
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let padding = ctx.theme().resolve_space(spec.padding_token());
 
     // Custom color (contract §5) overrides both border and label; otherwise
     // resolve the default semantic tokens. Hex parses at the sRGB edge.
     let border_color = match &spec.color {
-        Some(hex) => hex_color(hex).unwrap_or_else(|| theme.resolve_color(hex)),
-        None => theme.resolve_color(spec.border_color_token()),
+        Some(hex) => hex_color(hex).unwrap_or_else(|| ctx.theme().resolve_color(hex)),
+        None => ctx.theme().resolve_color(spec.border_color_token()),
     };
     let label_color = match &spec.color {
-        Some(hex) => hex_color(hex).unwrap_or_else(|| theme.resolve_color(hex)),
-        None => theme.resolve_color(spec.label_color_token()),
+        Some(hex) => hex_color(hex).unwrap_or_else(|| ctx.theme().resolve_color(hex)),
+        None => ctx.theme().resolve_color(spec.label_color_token()),
     };
 
     // Contract §2/Svelte: dashed border at 0.125rem (2px).
@@ -50,7 +50,7 @@ pub fn region(spec: &RegionSpec, theme: &dyn ThemeProvider) -> Node {
     }
 
     if !spec.label.is_empty() {
-        let label_size = theme.resolve_space(spec.label_text_size_token());
+        let label_size = ctx.theme().resolve_space(spec.label_text_size_token());
         let mut label = Node::text(spec.label.to_uppercase());
         label.style.descriptor.text_color = Some(label_color);
         label.style.text_size = Some(label_size);

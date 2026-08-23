@@ -11,7 +11,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeAnimation, StylePatch,
@@ -19,9 +18,8 @@ use poodle_node::{
 use poodle_specs::{ButtonTone, ButtonVariant, IconButtonSpec, IconSize};
 
 use crate::color::{mix_srgb, BLACK, TRANSPARENT, WHITE};
-use crate::presentation::{
-    rem_to_px, resolve_semantic_size, resolve_supporting_visual_size, size_height_offset_rem,
-};
+use crate::context::RenderContext;
+use crate::presentation::{rem_to_px, resolve_supporting_visual_size, size_height_offset_rem};
 
 /// Loading-spinner diameter in px. The old GPUI tier renders a ring spinner
 /// at `SpinnerSize::Sm` (12px, fixed — it does not track the control size);
@@ -32,10 +30,10 @@ const LOADING_SPINNER_PX: f32 = 12.0;
 /// Build an icon-button node. `on_click` fires unless disabled or loading.
 pub fn icon_button(
     spec: &IconButtonSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let tone = spec.tone;
 
     // Axis-faithful square (g12.019 recipe correction): the axis-layered
@@ -44,29 +42,30 @@ pub fn icon_button(
     // `icon_button_size_delta_rem`), which ignore the theme's
     // density/control-size layering. At base tokens (the Jetstream provider,
     // no axes) md/default reproduces the old fixed 36px square.
-    let size_px = theme.resolve_space(spec.control_height_token())
+    let size_px = ctx.theme().resolve_space(spec.control_height_token(ctx.base_size(spec.size)))
         + rem_to_px(size_height_offset_rem(effective_size));
 
     // Glyph (contract §13): the old tier's
     // `IconSize::from(resolve_supporting_visual_size(..))` — one stop smaller
     // than the control, resolved through the `size.icon.*` tokens (the
     // IconSize ladder only has sm/md/lg stops) — not the per-size font ladder.
-    let icon_size = theme
+    let icon_size = ctx
+        .theme()
         .resolve_space(IconSize::from(resolve_supporting_visual_size(effective_size)).size_token());
 
-    let radius = theme.resolve_radius("radius.control");
+    let radius = ctx.theme().resolve_radius("radius.control");
     let is_pressed = spec.is_pressed.unwrap_or(false);
     let is_unavailable = spec.is_disabled || spec.is_loading;
 
-    let elevated = theme.resolve_color("color.background.elevated");
-    let accent = theme.resolve_color("color.accent.base");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_inverse = theme.resolve_color("color.text.inverse");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_inverse = ctx.theme().resolve_color("color.text.inverse");
 
     // ── Variant × tone (contract §8, the button-family recipes) ──
-    let base_fill = theme.resolve_color(spec.variant.fill_token(tone));
-    let base_border = theme.resolve_color(spec.variant.border_token(tone));
-    let text_color = theme.resolve_color(spec.variant.text_token(tone));
+    let base_fill = ctx.theme().resolve_color(spec.variant.fill_token(tone));
+    let base_border = ctx.theme().resolve_color(spec.variant.border_token(tone));
+    let text_color = ctx.theme().resolve_color(spec.variant.text_token(tone));
 
     let (fill, border) = match spec.variant {
         // Primary: the fill carries the tone; the border is that fill
@@ -84,9 +83,9 @@ pub fn icon_button(
                     ButtonTone::Warning => "color.status.warning",
                     _ => "color.status.danger",
                 };
-                let status = theme.resolve_color(status_token);
-                let surface = theme.resolve_color("color.background.surface");
-                let border_default = theme.resolve_color("color.border.default");
+                let status = ctx.theme().resolve_color(status_token);
+                let surface = ctx.theme().resolve_color("color.background.surface");
+                let border_default = ctx.theme().resolve_color("color.border.default");
                 (
                     mix_srgb(status, surface, 0.16),
                     mix_srgb(status, border_default, 0.46),
@@ -159,7 +158,7 @@ pub fn icon_button(
     }
 
     if is_unavailable {
-        el.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
         el.style.descriptor.cursor = CursorHint::NotAllowed;
         el.interaction.disabled = true;
     } else {
@@ -178,7 +177,7 @@ pub fn icon_button(
         });
         el.style.focus = Some(StylePatch {
             background: None,
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             text_color: None,
             opacity: None,
         });
@@ -218,6 +217,8 @@ mod tests {
     #[test]
     fn square_follows_the_axis_faithful_recipe() {
         // size = size.control.height token (36px at base) + per-size offset.
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let cases = [
             (ControlSize::Xs, 28.0),
             (ControlSize::Sm, 30.0),
@@ -227,7 +228,7 @@ mod tests {
         ];
         for (size, expected) in cases {
             let spec = IconButtonSpec::new().with_icon("plus").with_size(size);
-            let node = icon_button(&spec, &theme(), None);
+            let node = icon_button(&spec, &ctx, None);
             match (
                 node.style.descriptor.layout.width,
                 node.style.descriptor.layout.height,
@@ -246,6 +247,7 @@ mod tests {
         // Supporting visuals are one control stop smaller; IconSize maps 1:1
         // from that stop through the five icon tokens (no endpoint collapse).
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let cases = [
             (ControlSize::Xs, "size.icon.xs"),
             (ControlSize::Sm, "size.icon.sm"),
@@ -256,7 +258,7 @@ mod tests {
         for (size, token) in cases {
             let expected = poodle_adapter::ThemeProvider::resolve_space(&theme, token);
             let spec = IconButtonSpec::new().with_icon("plus").with_size(size);
-            let node = icon_button(&spec, &theme, None);
+            let node = icon_button(&spec, &ctx, None);
             let glyph = icon_child(&node).expect("glyph for a named icon");
             match &glyph.kind {
                 NodeKind::Icon { name, size } => {
@@ -271,7 +273,8 @@ mod tests {
     #[test]
     fn ghost_default_is_fully_transparent_with_primary_text() {
         let theme = theme();
-        let node = icon_button(&IconButtonSpec::new().with_icon("plus"), &theme, None);
+        let ctx = RenderContext::new(&theme);
+        let node = icon_button(&IconButtonSpec::new().with_icon("plus"), &ctx, None);
         assert_eq!(node.style.descriptor.background, Some(TRANSPARENT));
         assert_eq!(node.style.descriptor.border.color, TRANSPARENT);
         assert_eq!(
@@ -283,10 +286,11 @@ mod tests {
     #[test]
     fn ghost_toned_paints_the_tone_on_the_glyph_only() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = IconButtonSpec::new()
             .with_icon("plus")
             .with_tone(ButtonTone::Success);
-        let node = icon_button(&spec, &theme, None);
+        let node = icon_button(&spec, &ctx, None);
         assert_eq!(node.style.descriptor.background, Some(TRANSPARENT));
         assert_eq!(node.style.descriptor.border.color, TRANSPARENT);
         assert_eq!(
@@ -298,11 +302,12 @@ mod tests {
     #[test]
     fn primary_darkens_its_own_fill_for_the_border() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let accent = resolve_color(&theme, "color.accent.base");
         let spec = IconButtonSpec::new()
             .with_icon("plus")
             .with_variant(ButtonVariant::Primary);
-        let node = icon_button(&spec, &theme, None);
+        let node = icon_button(&spec, &ctx, None);
         assert_eq!(node.style.descriptor.background, Some(accent));
         assert_eq!(
             node.style.descriptor.border.color,
@@ -317,12 +322,13 @@ mod tests {
     #[test]
     fn primary_toned_fill_is_the_status_color_with_a_darkened_border() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let danger = resolve_color(&theme, "color.status.danger");
         let spec = IconButtonSpec::new()
             .with_icon("plus")
             .with_variant(ButtonVariant::Primary)
             .with_tone(ButtonTone::Danger);
-        let node = icon_button(&spec, &theme, None);
+        let node = icon_button(&spec, &ctx, None);
         assert_eq!(node.style.descriptor.background, Some(danger));
         assert_eq!(
             node.style.descriptor.border.color,
@@ -335,11 +341,12 @@ mod tests {
         // Unlike primary, the danger variant's border is the status token
         // itself — the old GPUI tier darkens primary borders only.
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let danger = resolve_color(&theme, "color.status.danger");
         let spec = IconButtonSpec::new()
             .with_icon("plus")
             .with_variant(ButtonVariant::Danger);
-        let node = icon_button(&spec, &theme, None);
+        let node = icon_button(&spec, &ctx, None);
         assert_eq!(node.style.descriptor.background, Some(danger));
         assert_eq!(node.style.descriptor.border.color, danger);
         assert_eq!(
@@ -351,10 +358,11 @@ mod tests {
     #[test]
     fn secondary_default_uses_the_token_values() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = IconButtonSpec::new()
             .with_icon("plus")
             .with_variant(ButtonVariant::Secondary);
-        let node = icon_button(&spec, &theme, None);
+        let node = icon_button(&spec, &ctx, None);
         assert_eq!(
             node.style.descriptor.background,
             Some(resolve_color(&theme, "color.background.surface"))
@@ -372,6 +380,7 @@ mod tests {
     #[test]
     fn secondary_toned_mixes_status_into_surface_and_border() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let danger = resolve_color(&theme, "color.status.danger");
         let surface = resolve_color(&theme, "color.background.surface");
         let border_default = resolve_color(&theme, "color.border.default");
@@ -379,7 +388,7 @@ mod tests {
             .with_icon("plus")
             .with_variant(ButtonVariant::Secondary)
             .with_tone(ButtonTone::Danger);
-        let node = icon_button(&spec, &theme, None);
+        let node = icon_button(&spec, &ctx, None);
         assert_eq!(
             node.style.descriptor.background,
             Some(mix_srgb(danger, surface, 0.16))
@@ -397,6 +406,7 @@ mod tests {
     #[test]
     fn hover_and_active_mix_the_fill_toward_elevated() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let surface = resolve_color(&theme, "color.background.surface");
         let elevated = resolve_color(&theme, "color.background.elevated");
         let border_default = resolve_color(&theme, "color.border.default");
@@ -404,7 +414,7 @@ mod tests {
         let spec = IconButtonSpec::new()
             .with_icon("plus")
             .with_variant(ButtonVariant::Secondary);
-        let node = icon_button(&spec, &theme, None);
+        let node = icon_button(&spec, &ctx, None);
         let hover = node.style.hover.expect("hover patch when enabled");
         assert_eq!(hover.background, Some(mix_srgb(surface, elevated, 0.76)));
         assert_eq!(
@@ -418,6 +428,7 @@ mod tests {
     #[test]
     fn pressed_non_primary_gets_the_solid_accent_treatment() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let accent = resolve_color(&theme, "color.accent.base");
         let text_primary = resolve_color(&theme, "color.text.primary");
         let elevated = resolve_color(&theme, "color.background.elevated");
@@ -426,7 +437,7 @@ mod tests {
             .with_icon("plus")
             .with_variant(ButtonVariant::Ghost)
             .with_pressed(true);
-        let node = icon_button(&spec, &theme, None);
+        let node = icon_button(&spec, &ctx, None);
         assert_eq!(node.style.descriptor.background, Some(accent));
         assert_eq!(node.style.descriptor.border.color, pressed_border);
         assert_eq!(
@@ -447,13 +458,14 @@ mod tests {
     #[test]
     fn pressed_primary_keeps_its_variant_styling() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let accent = resolve_color(&theme, "color.accent.base");
         let elevated = resolve_color(&theme, "color.background.elevated");
         let spec = IconButtonSpec::new()
             .with_icon("plus")
             .with_variant(ButtonVariant::Primary)
             .with_pressed(true);
-        let node = icon_button(&spec, &theme, None);
+        let node = icon_button(&spec, &ctx, None);
         assert_eq!(node.style.descriptor.background, Some(accent));
         assert_eq!(
             node.style.descriptor.border.color,
@@ -465,6 +477,8 @@ mod tests {
 
     #[test]
     fn no_shadow_in_any_state() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         for spec in [
             IconButtonSpec::new().with_icon("plus"),
             IconButtonSpec::new()
@@ -475,7 +489,7 @@ mod tests {
                 .with_variant(ButtonVariant::Secondary)
                 .with_pressed(true),
         ] {
-            let node = icon_button(&spec, &theme(), None);
+            let node = icon_button(&spec, &ctx, None);
             assert!(
                 node.style.shadow_layers.is_empty(),
                 "contract §8: shadow is none in every state"
@@ -486,10 +500,11 @@ mod tests {
     #[test]
     fn disabled_is_dimmed_not_allowed_and_inert() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = IconButtonSpec::new().with_icon("plus").with_disabled(true);
         let node = icon_button(
             &spec,
-            &theme,
+            &ctx,
             Some(Arc::new(|| panic!("disabled buttons do not fire"))),
         );
         assert!(node.interaction.disabled);
@@ -505,11 +520,12 @@ mod tests {
     #[test]
     fn loading_swaps_the_glyph_for_the_fixed_size_ring_spinner() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = IconButtonSpec::new()
             .with_icon("plus")
             .with_size(ControlSize::Xl)
             .with_loading(true);
-        let node = icon_button(&spec, &theme, None);
+        let node = icon_button(&spec, &ctx, None);
         assert!(node.interaction.disabled);
         let glyph = icon_child(&node).expect("the spinner stands in for the glyph");
         match &glyph.kind {
@@ -525,18 +541,22 @@ mod tests {
 
     #[test]
     fn an_unset_icon_renders_no_glyph() {
-        let node = icon_button(&IconButtonSpec::new(), &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = icon_button(&IconButtonSpec::new(), &ctx, None);
         assert!(icon_child(&node).is_none(), "no icon, no glyph child");
     }
 
     #[test]
     fn focus_and_disclosure_semantics_reach_the_node() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = icon_button(
             &IconButtonSpec::new()
                 .with_icon("chevron-down")
                 .with_expanded(true)
                 .with_controls("details"),
-            &theme(),
+            &ctx,
             None,
         );
         assert!(node.style.focus.is_some(), "keyboard focus has a visible patch");
@@ -550,9 +570,11 @@ mod tests {
         let fired: Arc<Mutex<u32>> = Arc::new(Mutex::new(0));
         let sink = Arc::clone(&fired);
         let spec = IconButtonSpec::new().with_icon("plus");
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = icon_button(
             &spec,
-            &theme(),
+            &ctx,
             Some(Arc::new(move || *sink.lock().unwrap() += 1)),
         );
         let activate = node.interaction.on_activate.expect("activatable");

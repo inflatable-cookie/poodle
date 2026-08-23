@@ -20,7 +20,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, Node, StylePatch,
     TextChangeHandler,
@@ -30,7 +29,8 @@ use poodle_specs::{
 };
 
 use crate::color::{mix_srgb, TRANSPARENT};
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
 /// Per-size font-size in rem. Contract §8: xs 0.75, sm/md base label-size
 /// (0.8125), lg 0.9375, xl 1.0.
@@ -102,12 +102,12 @@ pub struct EditableLabelHandlers {
 
 pub fn editable_label(
     spec: &EditableLabelSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_edit_start: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
     editable_label_with_handlers(
         spec,
-        theme,
+        ctx,
         EditableLabelHandlers {
             on_edit_start,
             ..EditableLabelHandlers::default()
@@ -117,27 +117,28 @@ pub fn editable_label(
 
 pub fn editable_label_with_handlers(
     spec: &EditableLabelSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: EditableLabelHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // ── Token-resolved geometry ──────────────────────────────────────────
-    let text_color = theme.resolve_color(spec.text_color_token());
-    let placeholder_color = theme.resolve_color(spec.placeholder_color_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+    let text_color = ctx.theme().resolve_color(spec.text_color_token());
+    let placeholder_color = ctx.theme().resolve_color(spec.placeholder_color_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
     let font_size = rem_to_px(font_rem(effective_size));
 
-    let base_pad_y = theme.resolve_space("space.control.y");
-    let base_pad_x = theme.resolve_space("space.control.x");
+    let base_pad_y = ctx.theme().resolve_space("space.control.y");
+    let base_pad_x = ctx.theme().resolve_space("space.control.x");
     let pad_y = base_pad_y + rem_to_px(pad_y_offset_rem(effective_size));
     let pad_x = base_pad_x
         + rem_to_px(pad_x_offset_rem(effective_size))
-        + rem_to_px(density_pad_x_offset_rem(spec.density));
+        + rem_to_px(density_pad_x_offset_rem(density));
 
     // Focus / editing border width = `border.width.focus` token.
-    let focus_width = theme.resolve_space("border.width.focus");
-    let display_gap = theme.resolve_space("space.inline.sm");
+    let focus_width = ctx.theme().resolve_space("border.width.focus");
+    let display_gap = ctx.theme().resolve_space("space.inline.sm");
 
     let is_flush = spec.variant == EditableLabelVariant::Flush;
     let is_empty = spec.value.is_empty();
@@ -146,8 +147,8 @@ pub fn editable_label_with_handlers(
         // ── Editing mode: input node seeded with value + placeholder ────
         // The native subset edits at the end of the controlled value. The
         // component owns max_length because the host sees only the result.
-        let edit_border = theme.resolve_color(spec.edit_border_token());
-        let surface_bg = theme.resolve_color(spec.fill_token());
+        let edit_border = ctx.theme().resolve_color(spec.edit_border_token());
+        let surface_bg = ctx.theme().resolve_color(spec.fill_token());
 
         let mut input = Node::input(
             spec.value.clone(),
@@ -202,7 +203,7 @@ pub fn editable_label_with_handlers(
             // which is also what lets the GPUI backend track its focus.
             input.style.focus = Some(StylePatch {
                 background: None,
-                border_color: Some(theme.resolve_color("color.accent.focusRing")),
+                border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
                 text_color: None,
                 opacity: None,
             });
@@ -304,8 +305,8 @@ pub fn editable_label_with_handlers(
             // Default display: padding + radius + transparent border, hover hint.
             // Svelte hover = color-mix(border-default 72%, transparent) border
             //              + color-mix(surface 52%, transparent) bg.
-            let border_default = theme.resolve_color("color.border.default");
-            let surface = theme.resolve_color(spec.fill_token());
+            let border_default = ctx.theme().resolve_color("color.border.default");
+            let surface = ctx.theme().resolve_color(spec.fill_token());
             let hover_border = mix_srgb(border_default, TRANSPARENT, 0.72);
             let hover_bg = mix_srgb(surface, TRANSPARENT, 0.52);
             let s = &mut row.style;
@@ -332,7 +333,7 @@ pub fn editable_label_with_handlers(
     };
 
     if spec.is_disabled {
-        el.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         el.interaction.disabled = true;
     }
 
@@ -370,9 +371,11 @@ mod tests {
     ) -> Vec<String> {
         let values = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&values);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = editable_label_with_handlers(
             &spec.with_editing(true),
-            &theme(),
+            &ctx,
             EditableLabelHandlers {
                 on_change: Some(Arc::new(move |value| {
                     sink.lock().unwrap().push(value.to_string());
@@ -388,9 +391,11 @@ mod tests {
     fn inserted_change(spec: EditableLabelSpec, inserted: &str) -> Vec<String> {
         let values = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&values);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = editable_label_with_handlers(
             &spec.with_editing(true),
-            &theme(),
+            &ctx,
             EditableLabelHandlers {
                 on_change: Some(Arc::new(move |value| {
                     sink.lock().unwrap().push(value.to_string());

@@ -16,7 +16,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::model_connection::{
     model_connection_setup_can_continue, model_connection_setup_can_submit,
     model_connection_setup_selected_option, model_connection_setup_transition,
@@ -34,11 +33,12 @@ use poodle_specs::{
 
 use crate::button::button;
 use crate::callout::{callout, CalloutHandlers};
+use crate::context::RenderContext;
 use crate::model_connection_picker::{
     model_connection_option_focus_id, model_connection_picker_with_slots,
     ModelConnectionPickerHandlers, ModelConnectionPickerSlots,
 };
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::presentation::rem_to_px;
 use crate::spinner::spinner;
 
 /// Contract §8: the label weight the workflow heading shares with the family.
@@ -102,12 +102,12 @@ pub struct ModelConnectionSetupSlots {
 
 pub fn model_connection_setup(
     spec: &ModelConnectionSetupSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: ModelConnectionSetupHandlers,
 ) -> Node {
     model_connection_setup_with_slots(
         spec,
-        theme,
+        ctx,
         ModelConnectionSetupSlots::default(),
         handlers,
     )
@@ -115,11 +115,13 @@ pub fn model_connection_setup(
 
 pub fn model_connection_setup_with_slots(
     spec: &ModelConnectionSetupSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     slots: ModelConnectionSetupSlots,
     handlers: ModelConnectionSetupHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
     let context = spec.behaviour_context();
     let selected = model_connection_setup_selected_option(&context).cloned();
     let requires_configuration = selected
@@ -203,9 +205,9 @@ pub fn model_connection_setup_with_slots(
     title.runtime_id = instance
         .as_deref()
         .map(|scope| model_connection_setup_title_focus_id(Some(scope)));
-    title.style.text_size = Some(theme.resolve_space("typography.body.size"));
+    title.style.text_size = Some(ctx.theme().resolve_space("typography.body.size"));
     title.style.text_weight = Some(LABEL_WEIGHT);
-    title.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
+    title.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
     // Programmatically focusable, sequentially skipped — the web heading's
     // `tabindex="-1"`, which exists so a stage change has somewhere to land.
     // The focus patch is not decoration: the GPUI backend creates a tracked
@@ -215,12 +217,12 @@ pub fn model_connection_setup_with_slots(
     title.interaction.focusable = true;
     title.a11y.tab_index = Some(-1);
     title.style.focus = Some(StylePatch {
-        border_color: Some(theme.resolve_color("color.accent.focusRing")),
+        border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
         ..StylePatch::default()
     });
     let mut header = header.child(title);
     if let Some(description) = spec.description.as_deref() {
-        header = header.child(secondary_text(theme, description));
+        header = header.child(secondary_text(ctx, description));
     }
 
     // ── Body ──
@@ -228,7 +230,7 @@ pub fn model_connection_setup_with_slots(
     {
         let s = &mut body.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.md");
         s.descriptor.layout.height = LayoutSizing::Grow;
         s.fill_width = true;
         s.min_width = Some(0.0);
@@ -242,12 +244,12 @@ pub fn model_connection_setup_with_slots(
             .with_query(spec.query.clone())
             .with_state(spec.picker_state)
             .with_disabled(spec.is_pending)
-            .with_size(spec.size)
+            .with_size(base_size)
             .with_size_role(spec.size_role)
-            .with_density(spec.density);
+            .with_density(density);
         let picker = model_connection_picker_with_slots(
             &picker_spec,
-            theme,
+            ctx,
             slots.picker,
             ModelConnectionPickerHandlers {
                 on_value_change: Some({
@@ -269,7 +271,7 @@ pub fn model_connection_setup_with_slots(
         );
         body = body.child(picker);
     } else if let Some(option) = selected.as_ref() {
-        body = body.child(selected_summary(theme, option, &slots.picker));
+        body = body.child(selected_summary(ctx, option, &slots.picker));
 
         if let Some(error) = spec.error.as_deref() {
             body = body.child(callout(
@@ -278,8 +280,8 @@ pub fn model_connection_setup_with_slots(
                     .with_content(error)
                     .with_announce_mode(CalloutAnnounceMode::Assertive)
                     .with_size(effective_size)
-                    .with_density(spec.density),
-                theme,
+                    .with_density(density),
+                ctx,
                 CalloutHandlers::default(),
             ));
         }
@@ -290,8 +292,8 @@ pub fn model_connection_setup_with_slots(
                     .with_content(success)
                     .with_announce_mode(CalloutAnnounceMode::Polite)
                     .with_size(effective_size)
-                    .with_density(spec.density),
-                theme,
+                    .with_density(density),
+                ctx,
                 CalloutHandlers::default(),
             ));
         }
@@ -301,19 +303,19 @@ pub fn model_connection_setup_with_slots(
             {
                 let s = &mut configuration.style;
                 s.descriptor.layout.direction = LayoutDirection::Column;
-                s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+                s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
                 let pad = &mut s.descriptor.layout.spacing.padding;
-                let inset = theme.resolve_space("space.stack.md");
+                let inset = ctx.theme().resolve_space("space.stack.md");
                 pad.top = inset;
                 pad.bottom = inset;
                 pad.left = inset;
                 pad.right = inset;
                 s.descriptor.border.width = rem_to_px(0.0625);
-                s.descriptor.border.color = theme.resolve_color("color.border.subtle");
-                s.descriptor.background = Some(theme.resolve_color("color.background.surface"));
+                s.descriptor.border.color = ctx.theme().resolve_color("color.border.subtle");
+                s.descriptor.background = Some(ctx.theme().resolve_color("color.background.surface"));
                 s.fill_width = true;
                 s.min_width = Some(0.0);
-                surface_radius(&mut configuration.style, theme);
+                surface_radius(&mut configuration.style, ctx);
             }
             let mut configuration = configuration;
             if let Some(content) = slots.configuration {
@@ -324,8 +326,8 @@ pub fn model_connection_setup_with_slots(
                 {
                     let s = &mut wrapper.style;
                     s.descriptor.layout.direction = LayoutDirection::Column;
-                    s.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
-                    s.text_size = Some(theme.resolve_space("typography.label.size"));
+                    s.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
+                    s.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
                     s.fill_width = true;
                 }
                 configuration = configuration.child(wrapper.child(aside));
@@ -339,7 +341,7 @@ pub fn model_connection_setup_with_slots(
                 let s = &mut pending.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+                s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
             }
             pending.a11y.role = Some(NodeRole::Status);
             pending.a11y.label = Some(spec.pending_label.clone());
@@ -349,9 +351,9 @@ pub fn model_connection_setup_with_slots(
                         .with_variant(SpinnerVariant::Grid)
                         .with_size(SpinnerSize::Sm)
                         .with_tone(SpinnerTone::Accent),
-                    theme,
+                    ctx,
                 ))
-                .child(secondary_text(theme, &spec.pending_label));
+                .child(secondary_text(ctx, &spec.pending_label));
             body = body.child(pending);
         }
     }
@@ -363,15 +365,15 @@ pub fn model_connection_setup_with_slots(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.main = MainAxisAlignment::End;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
-        s.descriptor.layout.spacing.padding.top = theme.resolve_space("space.stack.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.padding.top = ctx.theme().resolve_space("space.stack.sm");
         s.border_top_width = Some(rem_to_px(0.0625));
-        s.border_color_top = Some(theme.resolve_color("color.border.subtle"));
+        s.border_color_top = Some(ctx.theme().resolve_color("color.border.subtle"));
         s.flex_wrap = true;
         s.fill_width = true;
     }
     let cancel = action_button(
-        theme,
+        ctx,
         spec,
         instance.as_deref(),
         "cancel",
@@ -400,7 +402,7 @@ pub fn model_connection_setup_with_slots(
             )
         };
         let primary = action_button(
-            theme,
+            ctx,
             spec,
             instance.as_deref(),
             if requires_configuration { "continue" } else { "submit" },
@@ -416,7 +418,7 @@ pub fn model_connection_setup_with_slots(
         actions.child(cancel).child(primary)
     } else {
         let back = action_button(
-            theme,
+            ctx,
             spec,
             instance.as_deref(),
             "back",
@@ -430,7 +432,7 @@ pub fn model_connection_setup_with_slots(
             },
         );
         let submit = action_button(
-            theme,
+            ctx,
             spec,
             instance.as_deref(),
             "submit",
@@ -451,7 +453,7 @@ pub fn model_connection_setup_with_slots(
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.md");
         s.fill_width = true;
         s.min_width = Some(0.0);
     }
@@ -470,8 +472,8 @@ pub fn model_connection_setup_with_slots(
     root.child(header).child(body).child(actions)
 }
 
-fn surface_radius(style: &mut poodle_node::NodeStyle, theme: &dyn ThemeProvider) {
-    let radius = theme.resolve_radius("radius.surface");
+fn surface_radius(style: &mut poodle_node::NodeStyle, ctx: &RenderContext<'_>) {
+    let radius = ctx.theme().resolve_radius("radius.surface");
     let c = &mut style.descriptor.corner_radii;
     c.top_left = radius;
     c.top_right = radius;
@@ -479,16 +481,16 @@ fn surface_radius(style: &mut poodle_node::NodeStyle, theme: &dyn ThemeProvider)
     c.bottom_left = radius;
 }
 
-fn secondary_text(theme: &dyn ThemeProvider, content: &str) -> Node {
+fn secondary_text(ctx: &RenderContext<'_>, content: &str) -> Node {
     let mut node = Node::text(content);
-    node.style.text_size = Some(theme.resolve_space("typography.label.size"));
-    node.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+    node.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
+    node.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
     node
 }
 
 #[allow(clippy::too_many_arguments)]
 fn action_button(
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     spec: &ModelConnectionSetupSpec,
     instance_id: Option<&str>,
     action: &str,
@@ -498,14 +500,15 @@ fn action_button(
     disabled: bool,
     on_click: Arc<dyn Fn() + Send + Sync>,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
     let mut node = button(
         &ButtonSpec::new()
             .with_label(label)
             .with_variant(variant)
             .with_disabled(disabled)
             .with_size(effective_size)
-            .with_density(spec.density),
-        theme,
+            .with_density(density),
+        ctx,
         (!disabled).then_some(on_click),
     );
     node.id = Some(model_connection_setup_action_id(None, action));
@@ -515,7 +518,7 @@ fn action_button(
 
 /// The configure stage's selected-route header: supplied labels, repeated.
 fn selected_summary(
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     option: &ModelConnectionOption,
     picker_slots: &ModelConnectionPickerSlots,
 ) -> Node {
@@ -525,7 +528,7 @@ fn selected_summary(
         .cloned()
         .unwrap_or_else(|| Node::icon("package", rem_to_px(1.0)));
     if mark.style.descriptor.text_color.is_none() {
-        mark.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+        mark.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
     }
 
     let mut copy = Node::container();
@@ -537,12 +540,12 @@ fn selected_summary(
         s.min_width = Some(0.0);
     }
     let mut provider = Node::text(&option.provider_label);
-    provider.style.text_size = Some(theme.resolve_space("typography.body.size"));
+    provider.style.text_size = Some(ctx.theme().resolve_space("typography.body.size"));
     provider.style.text_weight = Some(LABEL_WEIGHT);
-    provider.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
+    provider.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
     let mut copy = copy.child(provider);
     if let Some(route) = option.route_label.as_deref() {
-        copy = copy.child(secondary_text(theme, route));
+        copy = copy.child(secondary_text(ctx, route));
     }
 
     let mut row = Node::container();
@@ -550,18 +553,18 @@ fn selected_summary(
         let s = &mut row.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.top = theme.resolve_space("space.stack.sm");
-        pad.bottom = theme.resolve_space("space.stack.sm");
-        pad.left = theme.resolve_space("space.inline.md");
-        pad.right = theme.resolve_space("space.inline.md");
+        pad.top = ctx.theme().resolve_space("space.stack.sm");
+        pad.bottom = ctx.theme().resolve_space("space.stack.sm");
+        pad.left = ctx.theme().resolve_space("space.inline.md");
+        pad.right = ctx.theme().resolve_space("space.inline.md");
         s.descriptor.border.width = rem_to_px(0.0625);
-        s.descriptor.border.color = theme.resolve_color("color.border.subtle");
-        s.descriptor.background = Some(theme.resolve_color("color.background.surface"));
+        s.descriptor.border.color = ctx.theme().resolve_color("color.border.subtle");
+        s.descriptor.background = Some(ctx.theme().resolve_color("color.background.surface"));
         s.fill_width = true;
         s.min_width = Some(0.0);
-        surface_radius(&mut row.style, theme);
+        surface_radius(&mut row.style, ctx);
     }
     row.child(mark).child(copy)
 }
@@ -656,7 +659,7 @@ mod tests {
         let recorder = Recorder::default();
         let node = model_connection_setup(
             &spec().with_value(Some("openai-responses".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             recorder.handlers(),
         );
 
@@ -681,7 +684,7 @@ mod tests {
             &direct_spec()
                 .with_value(Some("codex-app".to_string()))
                 .with_can_submit(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             recorder.handlers(),
         );
 
@@ -697,7 +700,7 @@ mod tests {
 
     #[test]
     fn continue_stays_disabled_until_a_selectable_route_is_chosen() {
-        let node = model_connection_setup(&spec(), &theme(), ModelConnectionSetupHandlers::default());
+        let node = model_connection_setup(&spec(), &RenderContext::new(&theme()), ModelConnectionSetupHandlers::default());
         let continue_button = button_labelled(&node, "Continue").expect("continue");
         assert!(continue_button.interaction.disabled);
         assert!(continue_button.interaction.on_activate.is_none());
@@ -706,7 +709,7 @@ mod tests {
         // action stays Continue and stays disabled.
         let node = model_connection_setup(
             &spec().with_value(Some("lmstudio-local".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionSetupHandlers::default(),
         );
         assert!(
@@ -724,7 +727,7 @@ mod tests {
             &spec()
                 .with_value(Some("codex-app".to_string()))
                 .with_can_submit(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionSetupHandlers::default(),
         );
         assert!(button_labelled(&node, "Continue").is_none());
@@ -744,7 +747,7 @@ mod tests {
             &spec()
                 .with_stage(ModelConnectionSetupStage::Configure)
                 .with_value(Some("openai-responses".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionSetupSlots {
                 configuration: Some(Node::text("HOST FIELDS")),
                 configure_aside: Some(Node::text("HOST ASIDE")),
@@ -771,7 +774,7 @@ mod tests {
                 .with_stage(ModelConnectionSetupStage::Configure)
                 .with_value(Some("openai-responses".to_string()))
                 .with_can_submit(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             recorder.handlers(),
         );
         press(&allowed, "Add connection");
@@ -788,7 +791,7 @@ mod tests {
             &spec()
                 .with_stage(ModelConnectionSetupStage::Configure)
                 .with_value(Some("openai-responses".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             recorder.handlers(),
         );
         press(&node, "Back");
@@ -811,7 +814,7 @@ mod tests {
                 .with_value(Some("openai-responses".to_string()))
                 .with_can_submit(true)
                 .with_pending(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionSetupHandlers {
                 on_submit: Some(Arc::new(|_| unreachable!("pending submits"))),
                 on_cancel: Some(Arc::new(|| unreachable!("pending cancels"))),
@@ -840,7 +843,7 @@ mod tests {
                 .with_value(Some("openai-responses".to_string()))
                 .with_error("That route refused the request.")
                 .with_success("Connection added."),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionSetupHandlers::default(),
         );
         assert!(node
@@ -852,7 +855,7 @@ mod tests {
     #[test]
     fn the_choose_stage_forwards_picker_selection_and_query_requests() {
         let recorder = Recorder::default();
-        let node = model_connection_setup(&spec(), &theme(), recorder.handlers());
+        let node = model_connection_setup(&spec(), &RenderContext::new(&theme()), recorder.handlers());
 
         let option = node
             .find(&|n| n.id.as_deref() == Some(model_connection_option_id("ollama-local").as_str()))
@@ -870,7 +873,7 @@ mod tests {
 
     #[test]
     fn the_configure_heading_can_actually_take_focus() {
-        let node = model_connection_setup(&spec(), &theme(), ModelConnectionSetupHandlers::default());
+        let node = model_connection_setup(&spec(), &RenderContext::new(&theme()), ModelConnectionSetupHandlers::default());
         let heading = node
             .find(&|n| n.id.as_deref() == Some(MODEL_CONNECTION_SETUP_TITLE_ID))
             .expect("the workflow heading");
@@ -888,8 +891,8 @@ mod tests {
             instance_id: Some(scope.to_string()),
             ..ModelConnectionSetupHandlers::default()
         };
-        let first = model_connection_setup(&spec(), &theme(), scoped("first"));
-        let second = model_connection_setup(&spec(), &theme(), scoped("second"));
+        let first = model_connection_setup(&spec(), &RenderContext::new(&theme()), scoped("first"));
+        let second = model_connection_setup(&spec(), &RenderContext::new(&theme()), scoped("second"));
 
         for (node, scope) in [(&first, "first"), (&second, "second")] {
             assert!(node
@@ -920,7 +923,7 @@ mod tests {
         handlers.instance_id = Some("second".to_string());
         let node = model_connection_setup(
             &spec().with_value(Some("openai-responses".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             handlers,
         );
         press(&node, "Continue");
@@ -936,7 +939,7 @@ mod tests {
             &spec()
                 .with_stage(ModelConnectionSetupStage::Configure)
                 .with_value(Some("openai-responses".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             handlers,
         );
         press(&node, "Back");
@@ -949,7 +952,7 @@ mod tests {
     #[test]
     fn cancel_requests_closure_and_the_root_is_a_region_not_a_dialog() {
         let recorder = Recorder::default();
-        let node = model_connection_setup(&spec(), &theme(), recorder.handlers());
+        let node = model_connection_setup(&spec(), &RenderContext::new(&theme()), recorder.handlers());
         press(&node, "Cancel");
         assert_eq!(*recorder.cancels.lock().unwrap(), 1);
         assert_eq!(node.a11y.role, Some(NodeRole::Region));

@@ -19,7 +19,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::history_center::{
     HistoryCenterRow, HistoryCenterRowId, HistoryCenterRowKind, HistoryContinuation,
 };
@@ -34,11 +33,12 @@ use poodle_specs::{
 };
 
 use crate::alert_dialog::{alert_dialog, AlertDialogHandlers, DEFAULT_WORKING_LABEL};
+use crate::context::RenderContext;
 use crate::empty_state::empty_state;
 use crate::floating_overlay::floating_overlay;
 use crate::icon_button::icon_button;
 use crate::popover::popover_surface;
-use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
+use crate::presentation::{control_height_rem, rem_to_px};
 use crate::separator::separator;
 use crate::spinner::spinner;
 
@@ -225,17 +225,17 @@ pub struct HistoryCenterHandlers {
 /// The full composition: trigger cluster plus the conditional surface.
 pub fn history_center(
     spec: &HistoryCenterSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     view: &HistoryCenterView,
     handlers: &HistoryCenterHandlers,
 ) -> Node {
     let instance = handlers.instance_id.as_deref();
-    let size = resolve_semantic_size(spec.size.unwrap_or(ControlSize::Md), spec.size_role);
-    let density = spec.density.unwrap_or(ControlDensity::Default);
+    let size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let anchor = rem_to_px(control_height_rem(size));
     let open = view.is_open;
 
-    let cluster = trigger_cluster(spec, theme, handlers, view, size, density, open, instance);
+    let cluster = trigger_cluster(spec, ctx, handlers, view, size, density, open, instance);
 
     let surface = open.then(|| {
         let popover_spec = PopoverSpec::new()
@@ -246,8 +246,8 @@ pub fn history_center(
             .with_surface_max_width(poodle_specs::Dimension::new("38rem"));
         let mut node = popover_surface(
             &popover_spec,
-            theme,
-            Some(surface_content(spec, theme, view, handlers, size, density)),
+            ctx,
+            Some(surface_content(spec, ctx, view, handlers, size, density)),
         );
         node.id = Some(HISTORY_CENTER_SURFACE_ID.to_owned());
         node.runtime_id = part_id(instance, HISTORY_CENTER_SURFACE_ID);
@@ -294,7 +294,7 @@ pub fn history_center(
                 .with_open(true)
                 .with_size(size)
                 .with_density(density),
-            theme,
+            ctx,
             false,
             DEFAULT_WORKING_LABEL,
             AlertDialogHandlers {
@@ -313,7 +313,7 @@ pub fn history_center(
 #[allow(clippy::too_many_arguments)]
 fn trigger_cluster(
     spec: &HistoryCenterSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &HistoryCenterHandlers,
     _view: &HistoryCenterView,
     size: ControlSize,
@@ -338,7 +338,7 @@ fn trigger_cluster(
             .with_disabled(spec.undo_is_disabled())
             .with_size(size)
             .with_density(density),
-        theme,
+        ctx,
         handlers.on_undo.clone(),
     );
     undo.id = Some(HISTORY_CENTER_UNDO_ID.to_owned());
@@ -350,7 +350,7 @@ fn trigger_cluster(
     // creates a focus handle only for a focusable node that carries a focus
     // patch, so a control without one can never be focused or activated by
     // keyboard. `icon_button` supplies neither today.
-    undo.style.focus = Some(focus_ring(theme));
+    undo.style.focus = Some(focus_ring(ctx));
 
     let mut redo = icon_button(
         &IconButtonSpec::new()
@@ -360,7 +360,7 @@ fn trigger_cluster(
             .with_disabled(spec.redo_is_disabled())
             .with_size(size)
             .with_density(density),
-        theme,
+        ctx,
         handlers.on_redo.clone(),
     );
     redo.id = Some(HISTORY_CENTER_REDO_ID.to_owned());
@@ -368,11 +368,11 @@ fn trigger_cluster(
     redo.a11y.role = Some(NodeRole::Button);
     redo.a11y.label = Some(spec.redo_label.clone());
     redo.interaction.disabled = spec.redo_is_disabled();
-    redo.style.focus = Some(focus_ring(theme));
+    redo.style.focus = Some(focus_ring(ctx));
 
     cluster
         .child(undo)
-        .child(list_trigger(spec, theme, handlers, size, open, instance))
+        .child(list_trigger(spec, ctx, handlers, size, open, instance))
         .child(redo)
 }
 
@@ -381,7 +381,7 @@ fn trigger_cluster(
 /// the keyboard and assistive tech still reach it — only the chrome goes away.
 fn list_trigger(
     spec: &HistoryCenterSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &HistoryCenterHandlers,
     size: ControlSize,
     open: bool,
@@ -411,18 +411,18 @@ fn list_trigger(
         s.descriptor.layout.height = LayoutSizing::Fixed(rem_to_px(control_height_rem(size)));
         s.min_width = Some(rem_to_px(1.0));
         s.focus = Some(StylePatch {
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             ..StylePatch::default()
         });
     }
-    node.child(icon_glyph("chevron-down", theme, size))
+    node.child(icon_glyph("chevron-down", ctx, size))
 }
 
 // ── Surface ────────────────────────────────────────────────────────────────
 
 fn surface_content(
     spec: &HistoryCenterSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     view: &HistoryCenterView,
     handlers: &HistoryCenterHandlers,
     size: ControlSize,
@@ -433,18 +433,18 @@ fn surface_content(
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
         s.fill_width = true;
     }
 
-    root = root.child(header(spec, theme, view));
+    root = root.child(header(spec, ctx, view));
 
     if let Some(message) = view.rejection.as_deref() {
-        root = root.child(rejection_notice(message, theme, instance));
+        root = root.child(rejection_notice(message, ctx, instance));
     }
 
     if let Some(line) = spec.status_line() {
-        root = root.child(status_row(line, theme, size, instance));
+        root = root.child(status_row(line, ctx, size, instance));
     }
 
     if view.rows.is_empty() {
@@ -455,7 +455,7 @@ fn surface_content(
                 .with_message(&spec.empty_message)
                 .with_size(EmptyStateSize::Compact)
                 .with_density(density),
-            theme,
+            ctx,
         );
         empty.id = Some(HISTORY_CENTER_EMPTY_ID.to_owned());
         empty.runtime_id = part_id(instance, HISTORY_CENTER_EMPTY_ID);
@@ -478,12 +478,12 @@ fn surface_content(
         s.fill_width = true;
     }
     for row in &view.rows {
-        list = list.child(row_node(row, theme, view, handlers, size, density));
+        list = list.child(row_node(row, ctx, view, handlers, size, density));
     }
     root.child(list)
 }
 
-fn header(spec: &HistoryCenterSpec, theme: &dyn ThemeProvider, view: &HistoryCenterView) -> Node {
+fn header(spec: &HistoryCenterSpec, ctx: &RenderContext<'_>, view: &HistoryCenterView) -> Node {
     let entry_rows = view
         .rows
         .iter()
@@ -495,19 +495,19 @@ fn header(spec: &HistoryCenterSpec, theme: &dyn ThemeProvider, view: &HistoryCen
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.md");
         s.fill_width = true;
     }
     let mut title = Node::text(spec.title.clone());
     title.style.text_weight = Some(600);
     let mut count = Node::text(entry_rows.to_string());
-    count.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+    count.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
     node.child(title).child(count)
 }
 
 /// A polite live region, never an alert: a rejection is information, not an
 /// interruption.
-fn rejection_notice(message: &str, theme: &dyn ThemeProvider, instance: Option<&str>) -> Node {
+fn rejection_notice(message: &str, ctx: &RenderContext<'_>, instance: Option<&str>) -> Node {
     let mut node = Node::container();
     node.id = Some(HISTORY_CENTER_REJECTION_ID.to_owned());
     node.runtime_id = part_id(instance, HISTORY_CENTER_REJECTION_ID);
@@ -516,15 +516,15 @@ fn rejection_notice(message: &str, theme: &dyn ThemeProvider, instance: Option<&
         let s = &mut node.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.left = theme.resolve_space("space.inline.sm");
-        pad.right = theme.resolve_space("space.inline.sm");
+        pad.left = ctx.theme().resolve_space("space.inline.sm");
+        pad.right = ctx.theme().resolve_space("space.inline.sm");
         pad.top = rem_to_px(0.25);
         pad.bottom = rem_to_px(0.25);
-        s.descriptor.border.width = theme.resolve_space("border.width.default");
-        s.descriptor.border.color = theme.resolve_color("color.status.danger");
-        s.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
+        s.descriptor.border.width = ctx.theme().resolve_space("border.width.default");
+        s.descriptor.border.color = ctx.theme().resolve_color("color.status.danger");
+        s.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
         s.fill_width = true;
     }
     node.child(Node::text(message.to_owned()))
@@ -532,7 +532,7 @@ fn rejection_notice(message: &str, theme: &dyn ThemeProvider, instance: Option<&
 
 fn status_row(
     line: &str,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     size: ControlSize,
     instance: Option<&str>,
 ) -> Node {
@@ -544,8 +544,8 @@ fn status_row(
         let s = &mut node.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
-        s.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
+        s.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
         s.fill_width = true;
     }
     node.child(spinner(
@@ -553,7 +553,7 @@ fn status_row(
             .with_variant(SpinnerVariant::Ring)
             .with_size(spinner_size(size))
             .with_tone(SpinnerTone::Muted),
-        theme,
+        ctx,
     ))
     .child(Node::text(line.to_owned()))
 }
@@ -563,7 +563,7 @@ fn status_row(
 #[allow(clippy::too_many_arguments)]
 fn row_node(
     row: &HistoryCenterRow,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     view: &HistoryCenterView,
     handlers: &HistoryCenterHandlers,
     size: ControlSize,
@@ -606,7 +606,7 @@ fn row_node(
                 entry.is_checkpoint,
                 is_open,
                 view.is_focused(row),
-                theme,
+                ctx,
                 handlers,
                 size,
                 instance,
@@ -617,7 +617,7 @@ fn row_node(
                     *fork_count,
                     is_open,
                     view.is_focused(row),
-                    theme,
+                    ctx,
                     handlers,
                     size,
                     instance,
@@ -636,7 +636,7 @@ fn row_node(
             continuations,
             picked_entry_id.as_deref(),
             *is_disabled,
-            theme,
+            ctx,
             view,
             handlers,
             size,
@@ -650,19 +650,19 @@ fn row_node(
                 let s = &mut body.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
-                s.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+                s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
+                s.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
             }
             node.a11y.tab_index = Some(if view.is_focused(row) { 0 } else { -1 });
             node.interaction.focusable = true;
-            node.style.focus = Some(focus_ring(theme));
+            node.style.focus = Some(focus_ring(ctx));
             node.child(
                 body.child(spinner(
                     &SpinnerSpec::new()
                         .with_variant(SpinnerVariant::Ring)
                         .with_size(SpinnerSize::Xs)
                         .with_tone(SpinnerTone::Muted),
-                    theme,
+                    ctx,
                 ))
                 .child(Node::text("Loading…")),
             )
@@ -678,7 +678,7 @@ fn entry_button(
     is_checkpoint: bool,
     is_open: bool,
     is_focused: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &HistoryCenterHandlers,
     size: ControlSize,
     instance: Option<&str>,
@@ -706,30 +706,30 @@ fn entry_button(
         let s = &mut node.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         s.descriptor.layout.spacing.padding.left = rem_to_px(0.25);
         s.descriptor.layout.spacing.padding.right = rem_to_px(0.25);
         if position == poodle_specs::HistoryEntryPosition::Current {
-            s.descriptor.background = Some(theme.resolve_color("color.accent.subtle"));
+            s.descriptor.background = Some(ctx.theme().resolve_color("color.accent.subtle"));
         }
         s.focus = Some(StylePatch {
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             ..StylePatch::default()
         });
         s.fill_width = true;
     }
     // The pin and the marker are decorative; the label carries the meaning.
     let marker = if is_checkpoint {
-        icon_glyph("git-commit-horizontal", theme, size)
+        icon_glyph("git-commit-horizontal", ctx, size)
     } else {
-        position_marker(position, theme)
+        position_marker(position, ctx)
     };
     node.child(marker).child(Node::text(label))
 }
 
 fn position_marker(
     position: poodle_specs::HistoryEntryPosition,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     let mut node = Node::container();
     let dot = rem_to_px(0.375);
@@ -745,9 +745,9 @@ fn position_marker(
         c.bottom_left = radius;
         s.descriptor.background = Some(match position {
             poodle_specs::HistoryEntryPosition::Current => {
-                theme.resolve_color("color.accent.base")
+                ctx.theme().resolve_color("color.accent.base")
             }
-            _ => theme.resolve_color("color.border.subtle"),
+            _ => ctx.theme().resolve_color("color.border.subtle"),
         });
     }
     node
@@ -762,7 +762,7 @@ fn disclosure_button(
     fork_count: usize,
     is_open: bool,
     is_focused: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &HistoryCenterHandlers,
     size: ControlSize,
     instance: Option<&str>,
@@ -792,18 +792,18 @@ fn disclosure_button(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.spacing.gap = rem_to_px(0.125);
-        s.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+        s.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
         s.focus = Some(StylePatch {
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             ..StylePatch::default()
         });
     }
-    let mut node = node.child(icon_glyph("git-branch", theme, size));
+    let mut node = node.child(icon_glyph("git-branch", ctx, size));
     if fork_count > 1 {
         // The badge is inside the button's label scope and reads as part of
         // its accessible name.
         let mut badge = Node::text(fork_count.to_string());
-        badge.style.descriptor.text_color = Some(theme.resolve_color("color.accent.base"));
+        badge.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.accent.base"));
         badge.style.text_size = Some(rem_to_px(0.625));
         node = node.child(badge);
     }
@@ -813,7 +813,7 @@ fn disclosure_button(
         } else {
             "chevron-right"
         },
-        theme,
+        ctx,
         size,
     ))
 }
@@ -829,7 +829,7 @@ fn picker(
     continuations: &[HistoryContinuation],
     picked_entry_id: Option<&str>,
     is_disabled: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     view: &HistoryCenterView,
     handlers: &HistoryCenterHandlers,
     size: ControlSize,
@@ -841,19 +841,19 @@ fn picker(
         let s = &mut controls.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         s.fill_width = true;
     }
 
     // While a rename is open the inline input takes the select's place.
     let controls = match view.renaming_at(anchor_entry_id) {
-        Some(rename) => controls.child(rename_input(rename, theme, handlers, instance)),
+        Some(rename) => controls.child(rename_input(rename, ctx, handlers, instance)),
         None => controls.child(picker_select(
             anchor_entry_id,
             continuations,
             picked_entry_id,
             is_disabled,
-            theme,
+            ctx,
             view,
             handlers,
             size,
@@ -865,7 +865,7 @@ fn picker(
         anchor_entry_id,
         continuations,
         picked_entry_id,
-        theme,
+        ctx,
         view,
         handlers,
         size,
@@ -880,7 +880,7 @@ fn picker_select(
     continuations: &[HistoryContinuation],
     picked_entry_id: Option<&str>,
     is_disabled: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     view: &HistoryCenterView,
     handlers: &HistoryCenterHandlers,
     size: ControlSize,
@@ -912,22 +912,22 @@ fn picker_select(
         let s = &mut trigger.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
-        s.descriptor.border.width = theme.resolve_space("border.width.default");
-        s.descriptor.border.color = theme.resolve_color("color.border.subtle");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
+        s.descriptor.border.width = ctx.theme().resolve_space("border.width.default");
+        s.descriptor.border.color = ctx.theme().resolve_color("color.border.subtle");
         s.descriptor.layout.spacing.padding.left = rem_to_px(0.375);
         s.descriptor.layout.spacing.padding.right = rem_to_px(0.375);
         s.descriptor.layout.height = LayoutSizing::Fixed(rem_to_px(control_height_rem(size)));
         s.descriptor.opacity = if is_disabled { 0.6 } else { 1.0 };
         s.focus = Some(StylePatch {
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             ..StylePatch::default()
         });
         s.fill_width = true;
     }
     // The trigger carries the fork's own facts: its label and the branch it
     // lands on.
-    let trigger = trigger.child(icon_glyph("git-branch", theme, ControlSize::Xs)).child(
+    let trigger = trigger.child(icon_glyph("git-branch", ctx, ControlSize::Xs)).child(
         Node::text(match picked {
             Some(fork) => format!("{} · {}", fork.label, fork.display_branch()),
             None => "Choose a fork…".to_owned(),
@@ -943,13 +943,13 @@ fn picker_select(
     {
         let s = &mut listbox.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.background = Some(theme.resolve_color("color.background.elevated"));
-        s.descriptor.border.width = theme.resolve_space("border.width.default");
-        s.descriptor.border.color = theme.resolve_color("color.border.subtle");
+        s.descriptor.background = Some(ctx.theme().resolve_color("color.background.elevated"));
+        s.descriptor.border.width = ctx.theme().resolve_space("border.width.default");
+        s.descriptor.border.color = ctx.theme().resolve_color("color.border.subtle");
         s.overlay = true;
     }
     for fork in continuations {
-        listbox = listbox.child(picker_option(fork, picked_entry_id, theme, handlers, instance));
+        listbox = listbox.child(picker_option(fork, picked_entry_id, ctx, handlers, instance));
     }
 
     let mut wrapper = Node::container();
@@ -961,7 +961,7 @@ fn picker_select(
 fn picker_option(
     fork: &HistoryContinuation,
     picked_entry_id: Option<&str>,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &HistoryCenterHandlers,
     instance: Option<&str>,
 ) -> Node {
@@ -983,11 +983,11 @@ fn picker_option(
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.padding.left = rem_to_px(0.375);
         s.descriptor.layout.spacing.padding.right = rem_to_px(0.375);
-        s.focus = Some(focus_ring(theme));
+        s.focus = Some(focus_ring(ctx));
         s.fill_width = true;
     }
     let mut branch = Node::text(fork.display_branch().to_owned());
-    branch.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+    branch.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
     branch.style.text_size = Some(rem_to_px(0.6875));
     node.child(Node::text(fork.label.clone())).child(branch)
 }
@@ -1000,7 +1000,7 @@ fn picker_actions(
     anchor_entry_id: &str,
     continuations: &[HistoryContinuation],
     picked_entry_id: Option<&str>,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     view: &HistoryCenterView,
     handlers: &HistoryCenterHandlers,
     size: ControlSize,
@@ -1019,7 +1019,7 @@ fn picker_actions(
             .with_aria_label("Fork actions")
             .with_size(size)
             .with_density(density),
-        theme,
+        ctx,
         handlers.on_actions_toggle.clone().map(|handler| {
             let anchor = anchor_entry_id.to_owned();
             Arc::new(move || handler(&anchor)) as Command
@@ -1030,7 +1030,7 @@ fn picker_actions(
     trigger.a11y.role = Some(NodeRole::Button);
     trigger.a11y.label = Some("Fork actions".to_owned());
     trigger.a11y.expanded = Some(is_open);
-    trigger.style.focus = Some(focus_ring(theme));
+    trigger.style.focus = Some(focus_ring(ctx));
 
     if !is_open {
         return trigger;
@@ -1041,9 +1041,9 @@ fn picker_actions(
     {
         let s = &mut menu.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.background = Some(theme.resolve_color("color.background.elevated"));
-        s.descriptor.border.width = theme.resolve_space("border.width.default");
-        s.descriptor.border.color = theme.resolve_color("color.border.subtle");
+        s.descriptor.background = Some(ctx.theme().resolve_color("color.background.elevated"));
+        s.descriptor.border.width = ctx.theme().resolve_space("border.width.default");
+        s.descriptor.border.color = ctx.theme().resolve_color("color.border.subtle");
         s.overlay = true;
     }
     menu = menu.child(menu_item(
@@ -1055,7 +1055,7 @@ fn picker_actions(
             Arc::new(move || handler(&anchor)) as Command
         }),
         false,
-        theme,
+        ctx,
         instance,
     ));
     menu = menu.child(menu_item(
@@ -1068,7 +1068,7 @@ fn picker_actions(
             Arc::new(move || handler(&anchor)) as Command
         }),
         false,
-        theme,
+        ctx,
         instance,
     ));
 
@@ -1078,7 +1078,7 @@ fn picker_actions(
     if delete_is_supported {
         menu = menu.child(separator(
             &SeparatorSpec::new().with_decorative(false),
-            theme,
+            ctx,
         ));
         menu = menu.child(menu_item(
             HISTORY_CENTER_ACTION_DELETE_ID,
@@ -1091,7 +1091,7 @@ fn picker_actions(
                 })
             }),
             true,
-            theme,
+            ctx,
             instance,
         ));
     }
@@ -1107,7 +1107,7 @@ fn menu_item(
     is_disabled: bool,
     on_activate: Option<Command>,
     is_danger: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     instance: Option<&str>,
 ) -> Node {
     let mut node = Node::container();
@@ -1128,12 +1128,12 @@ fn menu_item(
         s.descriptor.layout.spacing.padding.left = rem_to_px(0.5);
         s.descriptor.layout.spacing.padding.right = rem_to_px(0.5);
         s.descriptor.opacity = if is_disabled { 0.5 } else { 1.0 };
-        s.descriptor.text_color = Some(theme.resolve_color(if is_danger {
+        s.descriptor.text_color = Some(ctx.theme().resolve_color(if is_danger {
             "color.status.danger"
         } else {
             "color.text.primary"
         }));
-        s.focus = Some(focus_ring(theme));
+        s.focus = Some(focus_ring(ctx));
         s.fill_width = true;
     }
     node.child(Node::text(label.to_owned()))
@@ -1144,7 +1144,7 @@ fn menu_item(
 /// buffer as a client-side affordance; it enforces no protocol rule.
 fn rename_input(
     rename: &HistoryCenterRename,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &HistoryCenterHandlers,
     instance: Option<&str>,
 ) -> Node {
@@ -1177,12 +1177,12 @@ fn rename_input(
     }
     {
         let s = &mut node.style;
-        s.descriptor.border.width = theme.resolve_space("border.width.default");
-        s.descriptor.border.color = theme.resolve_color("color.border.strong");
+        s.descriptor.border.width = ctx.theme().resolve_space("border.width.default");
+        s.descriptor.border.color = ctx.theme().resolve_color("color.border.strong");
         s.descriptor.layout.spacing.padding.left = rem_to_px(0.375);
         s.descriptor.layout.spacing.padding.right = rem_to_px(0.375);
         s.focus = Some(StylePatch {
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             ..StylePatch::default()
         });
         s.fill_width = true;
@@ -1194,16 +1194,16 @@ fn rename_input(
 
 /// The accent focus ring every focusable part carries. It is not decoration:
 /// the backend keys its focus handle on the presence of this patch.
-fn focus_ring(theme: &dyn ThemeProvider) -> StylePatch {
+fn focus_ring(ctx: &RenderContext<'_>) -> StylePatch {
     StylePatch {
-        border_color: Some(theme.resolve_color("color.accent.focusRing")),
+        border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
         ..StylePatch::default()
     }
 }
 
-fn icon_glyph(name: &str, theme: &dyn ThemeProvider, size: ControlSize) -> Node {
+fn icon_glyph(name: &str, ctx: &RenderContext<'_>, size: ControlSize) -> Node {
     let mut node = Node::icon(name, rem_to_px(icon_rem(size)));
-    node.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+    node.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
     node
 }
 
@@ -1305,9 +1305,11 @@ mod tests {
     #[test]
     fn rows_carry_stable_identity_and_an_announced_level() {
         let pages = spine();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &view_for(&pages, &[]),
             &HistoryCenterHandlers::default(),
         );
@@ -1327,6 +1329,8 @@ mod tests {
     #[test]
     fn a_disclosed_run_nests_one_level_without_moving_the_spine() {
         let pages = spine();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let level = HistoryCenterOpenFork {
             anchor_entry_id: "e2".to_owned(),
             continuations: Some(vec![HistoryContinuation::new("f1", "Widen", "wide")]),
@@ -1337,7 +1341,7 @@ mod tests {
         };
         let node = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &view_for(&pages, &[level]),
             &HistoryCenterHandlers::default(),
         );
@@ -1360,9 +1364,11 @@ mod tests {
     #[test]
     fn the_disclosure_names_its_forks_and_its_direction() {
         let pages = spine();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let closed = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &view_for(&pages, &[]),
             &HistoryCenterHandlers::default(),
         );
@@ -1381,9 +1387,11 @@ mod tests {
     #[test]
     fn the_list_is_bounded_and_scrolls() {
         let pages = spine();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &view_for(&pages, &[]),
             &HistoryCenterHandlers::default(),
         );
@@ -1400,9 +1408,11 @@ mod tests {
     /// region pretending to be a history.
     #[test]
     fn no_rows_renders_the_empty_state_and_no_list() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &open_view(),
             &HistoryCenterHandlers::default(),
         );
@@ -1415,9 +1425,11 @@ mod tests {
     #[test]
     fn busy_makes_both_triggers_inert() {
         let spec = open_spec().with_can_undo(true).with_can_redo(true).with_busy(true);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = history_center(
             &spec,
-            &theme(),
+            &ctx,
             &open_view(),
             &HistoryCenterHandlers::default(),
         );
@@ -1443,6 +1455,8 @@ mod tests {
             entry("s2", "Trim tail", 2),
             entry("s1", "Import stems", 1),
         ])];
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let level = HistoryCenterOpenFork {
             anchor_entry_id: "s2".to_owned(),
             continuations: Some(vec![HistoryContinuation::new("g1", "Only", "only")]),
@@ -1453,7 +1467,7 @@ mod tests {
         };
         let node = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &view_for(&pages, &[level]),
             &HistoryCenterHandlers::default(),
         );
@@ -1469,6 +1483,8 @@ mod tests {
     #[test]
     fn an_open_rename_replaces_the_select() {
         let pages = spine();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let level = HistoryCenterOpenFork {
             anchor_entry_id: "e2".to_owned(),
             continuations: Some(vec![HistoryContinuation::new("f1", "Widen", "wide")]),
@@ -1485,7 +1501,7 @@ mod tests {
         });
         let node = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &view,
             &HistoryCenterHandlers::default(),
         );
@@ -1500,9 +1516,11 @@ mod tests {
     #[test]
     fn token_roles_project_onto_the_root() {
         let spec = open_spec().with_status(HistoryCenterStatus::Loading);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = history_center(
             &spec,
-            &theme(),
+            &ctx,
             &open_view(),
             &HistoryCenterHandlers::default(),
         );
@@ -1517,9 +1535,11 @@ mod tests {
     /// through `expanded`, and nothing of the history is in the tree.
     #[test]
     fn a_closed_centre_has_a_trigger_and_no_surface() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = history_center(
             &HistoryCenterSpec::new(),
-            &theme(),
+            &ctx,
             &HistoryCenterView::default(),
             &HistoryCenterHandlers::default(),
         );
@@ -1537,9 +1557,11 @@ mod tests {
     #[test]
     fn every_focusable_control_carries_the_ring_the_backend_keys_handles_on() {
         let pages = spine();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &view_for(&pages, &[]),
             &HistoryCenterHandlers::default(),
         );
@@ -1568,6 +1590,8 @@ mod tests {
     #[test]
     fn the_tab_stop_follows_the_machines_roving_focus() {
         let pages = spine();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let mut view = view_for(&pages, &[]);
         view.focus_row = Some(HistoryCenterRowId::new(
             HistoryCenterRowKind::Entry,
@@ -1576,7 +1600,7 @@ mod tests {
 
         let node = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &view,
             &HistoryCenterHandlers::default(),
         );
@@ -1604,6 +1628,8 @@ mod tests {
         let typed: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&typed);
         let pages = spine();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let level = HistoryCenterOpenFork {
             anchor_entry_id: "e2".to_owned(),
             continuations: Some(vec![HistoryContinuation::new("f1", "Widen", "wide")]),
@@ -1621,7 +1647,7 @@ mod tests {
 
         let node = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &view,
             &HistoryCenterHandlers {
                 on_rename_key: Some(Arc::new(move |key| {
@@ -1656,6 +1682,8 @@ mod tests {
         use std::sync::Mutex;
 
         let pages = spine();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let fork = HistoryContinuation::new("f1", "Widen", "wide");
         let level = HistoryCenterOpenFork {
             anchor_entry_id: "e2".to_owned(),
@@ -1668,7 +1696,7 @@ mod tests {
 
         let unsupported = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &view,
             &HistoryCenterHandlers::default(),
         );
@@ -1687,7 +1715,7 @@ mod tests {
             on_delete_cancel: Some(Arc::new(|| {})),
             ..HistoryCenterHandlers::default()
         };
-        let supported = history_center(&open_spec(), &theme(), &view, &handlers);
+        let supported = history_center(&open_spec(), &ctx, &view, &handlers);
         let delete = find(&supported, HISTORY_CENTER_ACTION_DELETE_ID)
             .expect("supported delete item renders");
         assert_eq!(delete.a11y.role, Some(NodeRole::MenuItem));
@@ -1710,6 +1738,8 @@ mod tests {
         let seen = Arc::new(Mutex::new(Vec::new()));
         let confirmed = Arc::clone(&seen);
         let cancelled = Arc::clone(&seen);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let mut view = open_view();
         view.delete_target = Some(HistoryCenterDelete {
             entry_id: "f1".to_owned(),
@@ -1717,7 +1747,7 @@ mod tests {
         });
         let node = history_center(
             &open_spec(),
-            &theme(),
+            &ctx,
             &view,
             &HistoryCenterHandlers {
                 on_delete_confirm: Some(Arc::new(move |entry_id| {

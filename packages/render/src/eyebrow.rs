@@ -3,14 +3,14 @@
 //! Ported from: `packages/jetstream/components/src/eyebrow.rs`. Uppercasing
 //! happens here (no CSS transform channel), matching both old tiers.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{FontFamily, Node};
 use poodle_specs::EyebrowSpec;
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn eyebrow(spec: &EyebrowSpec, theme: &dyn ThemeProvider) -> Node {
-    let text_color = theme.resolve_color(spec.text_color_token());
+pub fn eyebrow(spec: &EyebrowSpec, ctx: &RenderContext<'_>) -> Node {
+    let text_color = ctx.theme().resolve_color(spec.text_color_token());
     let font_size = rem_to_px(spec.font_size_rem());
     let text = spec.content.as_deref().unwrap_or("").to_uppercase();
 
@@ -42,8 +42,9 @@ mod tests {
     fn emits_the_old_gpui_typography_channels() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
         let spec = EyebrowSpec::new().with_content("Section");
-        let node = eyebrow(&spec, &theme);
+        let node = eyebrow(&spec, &ctx);
         assert_eq!(node.style.font_family, Some(FontFamily::Sans));
         assert_eq!(node.style.line_height, Some(1.5));
         assert_eq!(node.style.text_weight, Some(600));

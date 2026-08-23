@@ -213,26 +213,67 @@ Example for `density="default"`, `sizeScale="md"`:
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::components::ui_presentation_provider`
-- GPUI equivalent: a context provider that sets equivalent layout parameters
-  for descendant components
-- The CSS custom property mechanism does not apply in GPUI; instead, the
-  context store values are consumed directly by component specs
-- Semantic size resolution must match the `resolveSemanticControlSize` table
-- Nesting behavior must match: inner providers override outer ones
+- expected crate/module surface: `poodle_render::ui_presentation_provider`
+- The provider is a construction-time boundary, not a painted node. It derives
+  a nested `poodle_render::RenderContext` from its two values, invokes an
+  immediate child builder with that context, and returns the resulting child
+  unchanged — no wrapper node, layout, paint, accessibility entry, focus
+  target, or interaction state.
+- The CSS custom property mechanism does not apply in GPUI; instead, every
+  public component renderer receives the `RenderContext` and resolves omitted
+  `Option<ControlSize>` / `Option<ControlDensity>` spec inputs from it:
+  explicit value first (an explicit `md` / `default` wins inside any scope),
+  then the context defaults, then the component's `sizeRole` mapping.
+- Root defaults are exactly `md` / `default`. Nested providers replace both
+  defaults only for construction inside their closure; exiting the closure
+  restores the parent context by ordinary borrowing.
+- Semantic size resolution matches the `resolveSemanticControlSize` table;
+  the role maps the explicit-or-inherited base size, never the reverse.
+- Composites whose web pair wraps host content in an internal provider
+  (AppHeader, Field, FilterToolbar, MediaPreview, PageHeader, BlockEditor)
+  take that content as immediate `SlotBuilder` closures invoked inside the
+  scoped context; an already-built `Node` never crosses such a boundary.
 
-### Native Binding
+### Construction, Nesting, And Explicit Reset
 
-- Declared capability absence: `UiPresentationProviderSpec` exists at
-  `packages/contracts/components/src/ui_presentation_provider.rs`, but
-  `poodle-render` cannot yet propagate ambient presentation through an
-  already-built child Node tree. A metadata-only passthrough is not an
-  implementation of this contract and does not count as component completion.
-- Native hosts can produce the same values by setting `size`, `size_role`, and
-  `density` on descendant specs explicitly. That is a host workaround, not the
-  provider's automatic inheritance contract.
-- The existing GPUI specimen labels its controls as explicit host equivalents;
-  it does not claim that wrapping caused the size or density change.
+```rust
+use poodle_render::{ui_presentation_provider, RenderContext};
+
+let ctx = RenderContext::new(&theme); // root: md / default
+let subtree = ui_presentation_provider(&provider_spec, &ctx, |scoped| {
+    // Omitted inputs inherit the scope (e.g. xl / comfortable).
+    let inherited = poodle_render::button(&ButtonSpec::new().with_label("In"), scoped, None);
+    // An explicit reset always wins, even md / default inside xl / comfortable.
+    let reset = poodle_render::button(
+        &ButtonSpec::new()
+            .with_label("Reset")
+            .with_size(ControlSize::Md)
+            .with_density(ControlDensity::Default),
+        scoped,
+        None,
+    );
+    // Nesting replaces both defaults for the inner closure only.
+    let inner = ui_presentation_provider(&inner_spec, scoped, |inner_ctx| {
+        poodle_render::button(&ButtonSpec::new().with_label("Inner"), inner_ctx, None)
+    });
+    // ...compose inherited, reset, inner into one subtree; the provider
+    // returns it unchanged.
+    subtree_root.child(inherited).child(reset).child(inner)
+});
+```
+
+### Breaking Migration (g15.043, pre-v1)
+
+- Every public `poodle-render` component renderer takes `&RenderContext`
+  instead of `&dyn ThemeProvider`; build a root with
+  `RenderContext::new(&theme)` and read the token-only theme via `ctx.theme()`.
+- Semantic component `size` / `density` spec inputs are
+  `Option<ControlSize>` / `Option<ControlDensity>`; `None` inherits from the
+  context, `Some` always wins. `with_size` / `with_density` builders keep
+  their names and store `Some`.
+- There is no compatibility wrapper, alias, or default-value heuristic; the
+  standing `drift:presentation-cascade` audit rejects concrete semantic
+  fields, bare-`ThemeProvider` renderers, and preview passthrough providers.
 
 ## 11. Parity Checklist
 
@@ -264,9 +305,11 @@ with different `density` and `sizeScale` values.
 
 ### Integration Demonstration
 
-The table describes the web provider. Native currently shows the same visual
-values through explicit child specs and labels that workaround as such; it is
-not evidence of provider inheritance.
+The web provider scopes descendants through CSS custom properties and Svelte
+context; the native specimen demonstrates the same scopes through the real
+construction-time cascade — scoped controls omit size/density and inherit
+them from `ui_presentation_provider`, including the nested override and an
+explicit `md`/`default` reset inside a non-default scope.
 
 | Label | Config | Expected Visual |
 |-------|--------|-----------------|

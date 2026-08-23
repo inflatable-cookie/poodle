@@ -68,9 +68,9 @@ pub struct ThemeSelectSpec {
     pub value: String,
     pub aria_label: String,
     pub is_disabled: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     pub columns: usize,
     pub show_label: bool,
     pub is_open: bool,
@@ -86,9 +86,9 @@ impl ThemeSelectSpec {
             value: String::new(),
             aria_label: "Theme".to_string(),
             is_disabled: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             columns: 3,
             show_label: true,
             is_open: false,
@@ -117,7 +117,7 @@ impl ThemeSelectSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -127,7 +127,7 @@ impl ThemeSelectSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

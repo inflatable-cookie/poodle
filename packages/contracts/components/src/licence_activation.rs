@@ -79,9 +79,9 @@ pub struct LicenceActivationSpec {
     /// The read payload — bare base64, no data-URL prefix. Never rendered
     /// or logged.
     pub file_contents_base64: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for LicenceActivationSpec {
@@ -103,9 +103,9 @@ impl Default for LicenceActivationSpec {
             file_accept: None,
             file_name: None,
             file_contents_base64: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -245,7 +245,7 @@ impl LicenceActivationSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -255,7 +255,7 @@ impl LicenceActivationSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

@@ -13,9 +13,11 @@ pub struct VideoPlayerSpec {
     pub duration: f64,
     pub volume: f64,
     pub is_fullscreen: bool,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub density: Option<ControlDensity>,
     /// Accessible name (contract §7). `None` falls back to the visible label.
     pub aria_label: Option<String>,
     /// Caption track URL.
@@ -40,9 +42,9 @@ impl VideoPlayerSpec {
             duration: 0.0,
             volume: 1.0,
             is_fullscreen: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             aria_label: None,
             captions_src: None,
             shows_captions: false,
@@ -211,7 +213,7 @@ impl VideoPlayerSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -221,7 +223,7 @@ impl VideoPlayerSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

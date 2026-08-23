@@ -5,7 +5,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition,
     NodeRole, NodeToggled, ShadowLayer,
@@ -13,30 +12,32 @@ use poodle_node::{
 use poodle_specs::{ControlDensity, SwitchSpec};
 
 use crate::color::{hex_color, mix_srgb};
+use crate::context::RenderContext;
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, switch_label_font_rem, switch_thumb_rem, switch_track_h_rem,
-    switch_track_w_rem, switch_travel_rem,
+    rem_to_px, switch_label_font_rem, switch_thumb_rem, switch_track_h_rem, switch_track_w_rem,
+    switch_travel_rem,
 };
 
 /// Build a switch node. `on_change` fires with the state moving **to** unless
 /// disabled or read-only.
 pub fn switch(
     spec: &SwitchSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let is_checked = spec.current_checked();
 
-    let surface = theme.resolve_color("color.background.surface");
-    let border_default = theme.resolve_color("color.border.default");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let accent_base = theme.resolve_color("color.accent.base");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let border_default = ctx.theme().resolve_color("color.border.default");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let accent_base = ctx.theme().resolve_color("color.accent.base");
 
-    let gap = match spec.density {
-        ControlDensity::Compact => theme.resolve_space("space.inline.xs"),
-        ControlDensity::Default => theme.resolve_space("space.inline.sm"),
-        ControlDensity::Comfortable => theme.resolve_space("space.inline.md"),
+    let gap = match density {
+        ControlDensity::Compact => ctx.theme().resolve_space("space.inline.xs"),
+        ControlDensity::Default => ctx.theme().resolve_space("space.inline.sm"),
+        ControlDensity::Comfortable => ctx.theme().resolve_space("space.inline.md"),
     };
     let label_size = rem_to_px(switch_label_font_rem(effective_size));
 
@@ -44,22 +45,22 @@ pub fn switch(
     let off_track_color: ColorValue = spec
         .left_tone
         .color_token()
-        .map(|t| theme.resolve_color(t))
+        .map(|t| ctx.theme().resolve_color(t))
         .unwrap_or(text_primary);
     let on_track_color: ColorValue = spec
         .right_tone
         .color_token()
-        .map(|t| theme.resolve_color(t))
+        .map(|t| ctx.theme().resolve_color(t))
         .unwrap_or(accent_base);
     let off_tone_color = spec
         .left_tone
         .color_token()
-        .map(|token| theme.resolve_color(token))
+        .map(|token| ctx.theme().resolve_color(token))
         .unwrap_or(text_primary);
     let on_tone_color = spec
         .right_tone
         .color_token()
-        .map(|token| theme.resolve_color(token))
+        .map(|token| ctx.theme().resolve_color(token))
         .unwrap_or(accent_base);
 
     // Contract §8 mixes.
@@ -170,7 +171,7 @@ pub fn switch(
 
     if spec.is_dual_label() {
         // Both side labels rest at text-muted; the active side re-tints.
-        let mut inactive = theme.resolve_color("color.text.secondary");
+        let mut inactive = ctx.theme().resolve_color("color.text.secondary");
         inactive.3 *= 0.85;
         if let Some(ref left) = spec.left_label {
             let c = if is_checked { inactive } else { off_tone_color };
@@ -193,7 +194,7 @@ pub fn switch(
         root = root.child(track);
         if let Some(ref label) = spec.label {
             let mut l = Node::text(label);
-            l.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
+            l.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
             l.style.text_size = Some(label_size);
             l.style.text_weight = Some(500);
             root = root.child(l);
@@ -202,7 +203,7 @@ pub fn switch(
 
     // Contract §8 cursor/opacity states.
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
         root.interaction.disabled = true;
     } else if spec.is_read_only {
         root.style.descriptor.cursor = CursorHint::Default;

@@ -14,9 +14,13 @@ pub struct DurationInputSpec {
     pub min_total_seconds: u64,
     /// Maximum total duration in seconds. None means no maximum.
     pub max_total_seconds: Option<u64>,
-    pub size: ControlSize,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub density: Option<ControlDensity>,
     /// Accessible name (contract §7). `None` falls back to the visible label.
     pub aria_label: Option<String>,
     /// The three segments, which are what the host actually binds. `value` is
@@ -37,9 +41,9 @@ impl Default for DurationInputSpec {
             max_hours: 99,
             min_total_seconds: 0,
             max_total_seconds: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             aria_label: None,
             hours: 0,
             minutes: 0,
@@ -144,7 +148,7 @@ impl DurationInputSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -154,7 +158,7 @@ impl DurationInputSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

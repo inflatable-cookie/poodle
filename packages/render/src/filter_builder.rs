@@ -11,7 +11,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeRole,
@@ -26,9 +25,10 @@ use poodle_specs::{
 use crate::button::button;
 use crate::checkbox::checkbox;
 use crate::color::mix_srgb;
+use crate::context::RenderContext;
 use crate::icon_button::icon_button;
 use crate::number_input::{number_input, NumberInputHandlers};
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_padding_x_offset_rem};
+use crate::presentation::{rem_to_px, size_padding_x_offset_rem};
 use crate::segmented_control::segmented_control;
 use crate::select::{select, SelectHandlers};
 use crate::text_input::text_input;
@@ -71,7 +71,7 @@ fn row(gap: f32) -> Node {
     reason = "operand rendering keeps contract state and handlers explicit"
 )]
 fn operand_editor(
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     instance_id: &str,
     field: &FilterFieldDefinition,
     operand_kind: FilterOperandKind,
@@ -96,7 +96,7 @@ fn operand_editor(
             .with_density(density);
             s.value = Some(if on { "true" } else { "false" }.to_string());
             s.is_disabled = disabled;
-            segmented_control(&s, theme, handlers.on_operand_change.clone())
+            segmented_control(&s, ctx, handlers.on_operand_change.clone())
         }
         FilterOperandKind::Text => {
             let value = match operand {
@@ -112,7 +112,7 @@ fn operand_editor(
                     .with_size(size)
                     .with_density(density)
                     .with_disabled(disabled),
-                theme,
+                ctx,
                 None,
             )
         }
@@ -126,7 +126,7 @@ fn operand_editor(
                     .with_size(size)
                     .with_density(density)
                     .with_disabled(disabled),
-                theme,
+                ctx,
                 NumberInputHandlers::default(),
             )
         }
@@ -156,7 +156,7 @@ fn operand_editor(
                 });
                 select(
                     &s,
-                    theme,
+                    ctx,
                     &SelectHandlers {
                         toggle,
                         change: handlers.on_operand_change.clone(),
@@ -183,7 +183,7 @@ fn operand_editor(
                             .with_checked(selected.contains(&option.value))
                             .with_size(size)
                             .with_disabled(disabled || option.is_disabled),
-                        theme,
+                        ctx,
                         on_change,
                     ));
                 }
@@ -195,7 +195,7 @@ fn operand_editor(
                 FilterOperand::Range { min, max } => (*min, *max),
                 _ => (None, None),
             };
-            let sep_color = theme.resolve_color("color.text.secondary");
+            let sep_color = ctx.theme().resolve_color("color.text.secondary");
             let mut sep = Node::text("–");
             sep.style.descriptor.text_color = Some(sep_color);
             row(rem_to_px(0.375))
@@ -204,7 +204,7 @@ fn operand_editor(
                         .with_size(size)
                         .with_density(density)
                         .with_disabled(disabled),
-                    theme,
+                    ctx,
                     NumberInputHandlers::default(),
                 ))
                 .child(sep)
@@ -213,7 +213,7 @@ fn operand_editor(
                         .with_size(size)
                         .with_density(density)
                         .with_disabled(disabled),
-                    theme,
+                    ctx,
                     NumberInputHandlers::default(),
                 ))
         }
@@ -228,11 +228,12 @@ fn operand_editor(
 
 pub fn filter_builder(
     spec: &FilterBuilderSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     instance_id: &str,
     handlers: &FilterBuilderHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // ── Size table (contract §8) ──────────────────────────────────────────
     let trigger_h = rem_to_px(match effective_size {
@@ -262,7 +263,7 @@ pub fn filter_builder(
         ControlSize::Xl => 1.125,
         _ => 0.75 + size_padding_x_offset_rem(effective_size),
     });
-    let trigger_gap = rem_to_px(match spec.density {
+    let trigger_gap = rem_to_px(match density {
         ControlDensity::Compact => 0.375,
         ControlDensity::Default => 0.5,
         ControlDensity::Comfortable => 0.625,
@@ -272,17 +273,17 @@ pub fn filter_builder(
     let panel_gap = rem_to_px(0.5);
 
     // ── Colors ────────────────────────────────────────────────────────────
-    let text_primary = theme.resolve_color(spec.field_text_token());
-    let text_secondary = theme.resolve_color(spec.label_color_token());
-    let muted = theme.resolve_color(spec.muted_color_token());
-    let border = theme.resolve_color(spec.field_border_token());
-    let item_border = theme.resolve_color(spec.item_border_token());
-    let surface = theme.resolve_color(spec.field_fill_token());
-    let elevated = theme.resolve_color(spec.field_hover_fill_token());
-    let accent = theme.resolve_color(spec.count_fill_token());
-    let accent_text = theme.resolve_color(spec.count_text_token());
-    let radius = theme.resolve_radius(spec.radius_token());
-    let surface_radius = theme.resolve_radius(spec.surface_radius_token());
+    let text_primary = ctx.theme().resolve_color(spec.field_text_token());
+    let text_secondary = ctx.theme().resolve_color(spec.label_color_token());
+    let muted = ctx.theme().resolve_color(spec.muted_color_token());
+    let border = ctx.theme().resolve_color(spec.field_border_token());
+    let item_border = ctx.theme().resolve_color(spec.item_border_token());
+    let surface = ctx.theme().resolve_color(spec.field_fill_token());
+    let elevated = ctx.theme().resolve_color(spec.field_hover_fill_token());
+    let accent = ctx.theme().resolve_color(spec.count_fill_token());
+    let accent_text = ctx.theme().resolve_color(spec.count_text_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let surface_radius = ctx.theme().resolve_radius(spec.surface_radius_token());
     let item_bg = mix_srgb(surface, elevated, 0.90);
 
     // ── Single bordered field: opener + inline pills + reset ──────────────
@@ -413,7 +414,7 @@ pub fn filter_builder(
                     .with_variant(ButtonVariant::Ghost)
                     .with_size(effective_size)
                     .with_disabled(spec.is_disabled),
-                theme,
+                ctx,
                 handlers.on_reset.clone(),
             ));
         }
@@ -514,7 +515,7 @@ pub fn filter_builder(
                 let mut op_spec = SelectSpec::new(options)
                     .with_value(draft.operator.clone())
                     .with_size(effective_size)
-                    .with_density(spec.density);
+                    .with_density(density);
                 op_spec.is_disabled = spec.is_disabled;
                 op_spec =
                     op_spec.with_open(spec.open_picker == Some(FilterBuilderPicker::Operator));
@@ -524,7 +525,7 @@ pub fn filter_builder(
                 });
                 editor = editor.child(select(
                     &op_spec,
-                    theme,
+                    ctx,
                     &SelectHandlers {
                         toggle,
                         change: handlers.on_operator_change.clone(),
@@ -535,13 +536,13 @@ pub fn filter_builder(
 
             if let Some(op) = field.find_operator(&draft.operator) {
                 editor = editor.child(operand_editor(
-                    theme,
+                    ctx,
                     instance_id,
                     field,
                     op.operand_kind,
                     &draft.operand,
                     effective_size,
-                    spec.density,
+                    density,
                     spec.is_disabled,
                     spec.open_picker == Some(FilterBuilderPicker::Operand),
                     handlers,
@@ -559,7 +560,7 @@ pub fn filter_builder(
                     .with_label(commit_label)
                     .with_size(effective_size)
                     .with_disabled(spec.is_disabled || !spec.is_draft_valid()),
-                theme,
+                ctx,
                 handlers.on_commit.clone(),
             );
             let cancel = button(
@@ -568,7 +569,7 @@ pub fn filter_builder(
                     .with_label("Cancel")
                     .with_size(effective_size)
                     .with_disabled(spec.is_disabled),
-                theme,
+                ctx,
                 handlers.on_cancel.clone(),
             );
             editor = editor.child(row(rem_to_px(0.375)).child(commit).child(cancel));
@@ -585,7 +586,7 @@ pub fn filter_builder(
             let mut select_spec = SelectSpec::new(options)
                 .with_placeholder("+ Add filter")
                 .with_size(effective_size)
-                .with_density(spec.density);
+                .with_density(density);
             select_spec.aria_label = Some("Add filter field".to_string());
             select_spec.is_disabled = spec.is_disabled;
             select_spec =
@@ -596,7 +597,7 @@ pub fn filter_builder(
             });
             panel = panel.child(row(0.0).child(select(
                 &select_spec,
-                theme,
+                ctx,
                 &SelectHandlers {
                     toggle,
                     change: handlers.on_field_pick.clone(),
@@ -643,7 +644,7 @@ pub fn filter_builder(
     }
 
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
     }
 
     if !spec.aria_label.is_empty() {
@@ -664,7 +665,9 @@ mod tests {
     fn outside_interact_refusal_marks_the_open_surface() {
         // Web default `true` + open: no refusal marker anywhere in the tree.
         let spec = FilterBuilderSpec::new().with_open(true);
-        let node = filter_builder(&spec, &theme(), "test", &FilterBuilderHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = filter_builder(&spec, &ctx, "test", &FilterBuilderHandlers::default());
         assert!(node
             .find(&|n| n.interaction.on_activate.is_some())
             .is_none());
@@ -674,7 +677,7 @@ mod tests {
         let refusing = spec.with_dismiss_on_outside_interact(false);
         let node = filter_builder(
             &refusing,
-            &theme(),
+            &ctx,
             "test-refusing",
             &FilterBuilderHandlers::default(),
         );

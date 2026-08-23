@@ -10,8 +10,9 @@ pub struct NavCardSpec {
     pub is_disabled: bool,
     pub aria_label: Option<String>,
     /// Density override for card padding, icon box size, and internal spacing.
-    /// Contract §3/§8. Defaults to `Default`.
-    pub density: ControlDensity,
+    /// Contract §3/§8. Omission (`None`) inherits from the presentation
+    /// context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for NavCardSpec {
@@ -29,7 +30,7 @@ impl NavCardSpec {
             badge: None,
             is_disabled: false,
             aria_label: None,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -66,7 +67,7 @@ impl NavCardSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -159,9 +160,10 @@ impl NavCardSpec {
     // resolved value so a single code path covers all three densities. The
     // panel-x token is the authoritative source for the default — see NOTE.
 
-    /// Root gap between icon, content, and arrow. Contract §8.
-    pub fn root_gap_rem(&self) -> f32 {
-        match self.density {
+    /// Root gap between icon, content, and arrow. Contract §8. Omission is
+    /// resolved by the render context — pass the resolved density in.
+    pub fn root_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.625,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 0.875,
@@ -169,8 +171,8 @@ impl NavCardSpec {
     }
 
     /// Root padding-x. Contract §8 (default resolves `space.panel.x` == 1rem).
-    pub fn padding_x_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_x_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.75,
             ControlDensity::Default => 1.0,
             ControlDensity::Comfortable => 1.25,
@@ -178,8 +180,8 @@ impl NavCardSpec {
     }
 
     /// Root padding-y. Contract §8.
-    pub fn padding_y_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_y_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.625,
             ControlDensity::Comfortable => 0.75,
@@ -187,8 +189,8 @@ impl NavCardSpec {
     }
 
     /// Icon box edge length. Contract §8.
-    pub fn icon_size_rem(&self) -> f32 {
-        match self.density {
+    pub fn icon_size_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 1.75,
             ControlDensity::Default => 2.0,
             ControlDensity::Comfortable => 2.25,
@@ -196,8 +198,8 @@ impl NavCardSpec {
     }
 
     /// Gap between title row and description. Contract §8 Content Gap.
-    pub fn content_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn content_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.0625,
             ControlDensity::Default => 0.125,
             ControlDensity::Comfortable => 0.1875,
@@ -205,8 +207,8 @@ impl NavCardSpec {
     }
 
     /// Gap between title text and badge. Contract §8 Title Gap.
-    pub fn title_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn title_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.3125,
             ControlDensity::Default => 0.375,
             ControlDensity::Comfortable => 0.4375,

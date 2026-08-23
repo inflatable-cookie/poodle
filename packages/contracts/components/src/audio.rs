@@ -17,9 +17,11 @@ pub enum AudioMeterStyle {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct KnobSpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub visual_state: AudioControlVisualState,
     pub min: f64,
     pub max: f64,
@@ -30,9 +32,9 @@ pub struct KnobSpec {
 impl KnobSpec {
     pub fn new(value: f64, min: f64, max: f64, law: AudioValueLaw) -> Self {
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             visual_state: AudioControlVisualState::from_value(value, min, max, law, true),
             min,
             max,
@@ -45,9 +47,11 @@ impl KnobSpec {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct FaderSpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub visual_state: AudioControlVisualState,
     pub min: f64,
     pub max: f64,
@@ -62,9 +66,9 @@ pub struct FaderSpec {
 impl FaderSpec {
     pub fn new(value: f64, min: f64, max: f64, law: AudioValueLaw) -> Self {
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             visual_state: AudioControlVisualState::from_value(value, min, max, law, true),
             min,
             max,
@@ -79,9 +83,11 @@ impl FaderSpec {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AudioMeterSpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub channels: Vec<AudioMeterVisualState>,
     pub style: AudioMeterStyle,
     pub orientation: Orientation,
@@ -94,9 +100,9 @@ pub struct AudioMeterSpec {
 impl AudioMeterSpec {
     pub fn new(channel: AudioMeterVisualState) -> Self {
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             channels: vec![channel],
             style: AudioMeterStyle::Segments,
             orientation: Orientation::Vertical,
@@ -111,9 +117,11 @@ impl AudioMeterSpec {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ValueReadoutSpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub visual_state: AudioControlVisualState,
     pub text: String,
     pub aria_label: Option<String>,
@@ -121,9 +129,9 @@ pub struct ValueReadoutSpec {
 impl ValueReadoutSpec {
     pub fn new(visual_state: AudioControlVisualState, text: impl Into<String>) -> Self {
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             visual_state,
             text: text.into(),
             aria_label: None,
@@ -133,9 +141,11 @@ impl ValueReadoutSpec {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct DragNumberFieldSpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub visual_state: AudioControlVisualState,
     pub min: f64,
     pub max: f64,
@@ -146,9 +156,9 @@ pub struct DragNumberFieldSpec {
 impl DragNumberFieldSpec {
     pub fn new(value: f64, min: f64, max: f64, step: f64, text: impl Into<String>) -> Self {
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             visual_state: AudioControlVisualState::from_value(
                 value,
                 min,
@@ -170,18 +180,20 @@ impl DragNumberFieldSpec {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnvelopeEditorSpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub visual_state: EnvelopeVisualState,
     pub aria_label: String,
 }
 impl EnvelopeEditorSpec {
     pub fn new(visual_state: EnvelopeVisualState) -> Self {
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             visual_state,
             aria_label: "Envelope".into(),
         }
@@ -190,9 +202,11 @@ impl EnvelopeEditorSpec {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct XYPadSpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub visual_state: XYPadVisualState,
     pub aria_label: String,
     pub x_value_text: String,
@@ -203,9 +217,9 @@ impl XYPadSpec {
         let x = visual_state.raw_x.to_string();
         let y = visual_state.raw_y.to_string();
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             visual_state,
             aria_label: "XY position".into(),
             x_value_text: x,
@@ -216,9 +230,11 @@ impl XYPadSpec {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AudioSwitchSpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub visual_state: AudioSwitchVisualState,
     pub mode: AudioSwitchMode,
     pub aria_label: String,
@@ -226,9 +242,9 @@ pub struct AudioSwitchSpec {
 impl AudioSwitchSpec {
     pub fn new(visual_state: AudioSwitchVisualState, mode: AudioSwitchMode) -> Self {
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             visual_state,
             mode,
             aria_label: "Audio switch".into(),
@@ -238,9 +254,11 @@ impl AudioSwitchSpec {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct GainReductionMeterSpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub visual_state: GainReductionVisualState,
     pub style: AudioMeterStyle,
     pub orientation: Orientation,
@@ -253,9 +271,9 @@ impl GainReductionMeterSpec {
     pub fn new(visual_state: GainReductionVisualState, max_reduction_db: f64) -> Self {
         let value_text = format!("{} dB reduction", visual_state.reduction_db);
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             visual_state,
             style: AudioMeterStyle::Segments,
             orientation: Orientation::Vertical,
@@ -269,18 +287,20 @@ impl GainReductionMeterSpec {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct KeyboardSpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub visual_state: KeyboardVisualState,
     pub aria_label: String,
 }
 impl KeyboardSpec {
     pub fn new(visual_state: KeyboardVisualState) -> Self {
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             visual_state,
             aria_label: "Keyboard".into(),
         }
@@ -289,18 +309,20 @@ impl KeyboardSpec {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct WaveformDisplaySpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub visual_state: WaveformVisualState,
     pub aria_label: String,
 }
 impl WaveformDisplaySpec {
     pub fn new(visual_state: WaveformVisualState) -> Self {
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             visual_state,
             aria_label: "Waveform".into(),
         }
@@ -309,18 +331,20 @@ impl WaveformDisplaySpec {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ModMatrixGridSpec {
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     pub visual_state: ModMatrixVisualState,
     pub aria_label: String,
 }
 impl ModMatrixGridSpec {
     pub fn new(visual_state: ModMatrixVisualState) -> Self {
         Self {
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             visual_state,
             aria_label: "Modulation matrix".into(),
         }

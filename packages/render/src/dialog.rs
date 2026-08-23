@@ -7,13 +7,13 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodePosition, NodeRole,
 };
 use poodle_specs::{DialogSpec, SemanticControlSizeRole};
 
+use crate::context::RenderContext;
 use crate::presentation::{
     control_height_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
     size_font_rem,
@@ -21,12 +21,12 @@ use crate::presentation::{
 
 pub fn dialog(
     spec: &DialogSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     children: Vec<Node>,
     actions: Option<Node>,
     on_request_close: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
-    dialog_with_slots(spec, theme, children, actions, None, None, on_request_close)
+    dialog_with_slots(spec, ctx, children, actions, None, None, on_request_close)
 }
 
 /// Render a dialog with optional custom header and footer slots.
@@ -37,18 +37,20 @@ pub fn dialog(
 /// dismissal wiring.
 pub fn dialog_with_slots(
     spec: &DialogSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     children: Vec<Node>,
     actions: Option<Node>,
     header_override: Option<Node>,
     footer_override: Option<Node>,
     on_request_close: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
+    let theme = ctx.theme();
     let title_font = rem_to_px(1.0_f32.max(size_font_rem(effective_size) + 0.1875));
     let body_font = rem_to_px(size_font_rem(effective_size));
-    let space_x = rem_to_px(panel_space_x_rem(spec.density));
-    let space_y = rem_to_px(panel_space_y_rem(spec.density));
+    let space_x = rem_to_px(panel_space_x_rem(density));
+    let space_y = rem_to_px(panel_space_y_rem(density));
 
     let fill = theme.resolve_color(spec.surface_fill_token());
     let backdrop_fill = theme.resolve_color(spec.backdrop_fill_token());

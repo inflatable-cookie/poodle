@@ -21,9 +21,13 @@ pub struct DateTimeZonePickerSpec {
     /// hosts hold every piece of state, including this nested one.
     pub zone_open: bool,
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// Omitted (`None`) inherits from the presentation context; an explicit
+    /// value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for DateTimeZonePickerSpec {
@@ -40,9 +44,9 @@ impl Default for DateTimeZonePickerSpec {
             is_disabled: false,
             zone_open: false,
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -140,7 +144,7 @@ impl DateTimeZonePickerSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -150,7 +154,7 @@ impl DateTimeZonePickerSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

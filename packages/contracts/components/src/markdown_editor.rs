@@ -12,9 +12,9 @@ pub struct MarkdownEditorSpec {
     pub aria_label: String,
     pub min_height: Option<String>,
     pub render_html_label: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl MarkdownEditorSpec {
@@ -29,9 +29,9 @@ impl MarkdownEditorSpec {
             aria_label: String::from("Markdown editor"),
             min_height: None,
             render_html_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -128,16 +128,18 @@ impl MarkdownEditorSpec {
         semantic::COLOR_ACCENT_FOCUS_RING
     }
 
-    /// Effective control size after resolving the semantic size role.
-    /// Mirrors `presentation::resolve_semantic_size`; kept here as a pure
-    /// helper so size-driven contract tables can be unit-tested in poodle-specs.
-    pub fn effective_size(&self) -> ControlSize {
-        resolve_semantic_size(self.size, self.size_role)
+    /// Effective control size after resolving the semantic size role against
+    /// a resolved size. Mirrors `presentation::resolve_semantic_size`; kept
+    /// here as a pure helper so size-driven contract tables can be unit-tested
+    /// in poodle-specs. Omission is resolved by the render context — pass the
+    /// resolved size in.
+    pub fn effective_size(&self, size: ControlSize) -> ControlSize {
+        resolve_semantic_size(size, self.size_role)
     }
 
     /// Tool button width/height in rem, by effective size (contract §8 Size table).
-    pub fn tool_size_rem(&self) -> f32 {
-        match self.effective_size() {
+    pub fn tool_size_rem(&self, size: ControlSize) -> f32 {
+        match self.effective_size(size) {
             ControlSize::Xs => 1.5,
             ControlSize::Sm => 1.75,
             ControlSize::Md => 2.0,
@@ -147,8 +149,8 @@ impl MarkdownEditorSpec {
     }
 
     /// Mode-switcher horizontal padding in rem, by effective size (contract §8 "Mode X").
-    pub fn mode_x_rem(&self) -> f32 {
-        match self.effective_size() {
+    pub fn mode_x_rem(&self, size: ControlSize) -> f32 {
+        match self.effective_size(size) {
             ControlSize::Xs => 0.375,
             ControlSize::Sm => 0.5,
             ControlSize::Md => 0.5,
@@ -158,8 +160,8 @@ impl MarkdownEditorSpec {
     }
 
     /// Toolbar vertical padding in rem, by density (contract §8 "Toolbar Y").
-    pub fn toolbar_y_rem(&self) -> f32 {
-        match self.density {
+    pub fn toolbar_y_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.25,
             ControlDensity::Default => 0.375,
             ControlDensity::Comfortable => 0.5,
@@ -167,8 +169,8 @@ impl MarkdownEditorSpec {
     }
 
     /// Toolbar horizontal padding in rem, by density (contract §8 "Toolbar X").
-    pub fn toolbar_x_rem(&self) -> f32 {
-        match self.density {
+    pub fn toolbar_x_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.375,
             ControlDensity::Default => 0.5,
             ControlDensity::Comfortable => 0.625,
@@ -176,8 +178,8 @@ impl MarkdownEditorSpec {
     }
 
     /// Tool/mode gap in rem, by density (contract §8 "Tool gap").
-    pub fn tool_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn tool_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.0625,
             ControlDensity::Default => 0.125,
             ControlDensity::Comfortable => 0.1875,
@@ -185,8 +187,8 @@ impl MarkdownEditorSpec {
     }
 
     /// Mode-switcher vertical padding in rem, by density (contract §8 "Mode Y").
-    pub fn mode_y_rem(&self) -> f32 {
-        match self.density {
+    pub fn mode_y_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.125,
             ControlDensity::Default => 0.1875,
             ControlDensity::Comfortable => 0.25,
@@ -194,8 +196,8 @@ impl MarkdownEditorSpec {
     }
 
     /// Editor/preview pane padding in rem, by density (contract §8 "Pane X / Pane Y").
-    pub fn pane_pad_rem(&self) -> f32 {
-        match self.density {
+    pub fn pane_pad_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.625,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 0.875,
@@ -241,7 +243,7 @@ impl MarkdownEditorSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -251,7 +253,7 @@ impl MarkdownEditorSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }
@@ -278,6 +280,9 @@ mod tests {
         assert_eq!(s.mode, "edit");
         assert_eq!(s.aria_label, "Markdown editor");
         assert!(!s.is_disabled);
+        // Presentation omission: the render context resolves these.
+        assert_eq!(s.size, None);
+        assert_eq!(s.density, None);
         assert_eq!(s.min_height_rem(), 12.0); // contract default "12rem"
     }
 
@@ -285,18 +290,20 @@ mod tests {
     fn tool_size_tracks_size_table() {
         let xs = MarkdownEditorSpec::new().with_size(ControlSize::Xs);
         let xl = MarkdownEditorSpec::new().with_size(ControlSize::Xl);
-        assert_eq!(xs.tool_size_rem(), 1.5);
-        assert_eq!(xl.tool_size_rem(), 2.5);
+        assert_eq!(xs.size, Some(ControlSize::Xs));
+        assert_eq!(xs.tool_size_rem(ControlSize::Xs), 1.5);
+        assert_eq!(xl.tool_size_rem(ControlSize::Xl), 2.5);
     }
 
     #[test]
     fn density_spacing_tracks_table() {
         let compact = MarkdownEditorSpec::new().with_density(ControlDensity::Compact);
         let comfortable = MarkdownEditorSpec::new().with_density(ControlDensity::Comfortable);
-        assert_eq!(compact.toolbar_y_rem(), 0.25);
-        assert_eq!(compact.tool_gap_rem(), 0.0625);
-        assert_eq!(comfortable.pane_pad_rem(), 0.875);
-        assert_eq!(comfortable.tool_gap_rem(), 0.1875);
+        assert_eq!(compact.density, Some(ControlDensity::Compact));
+        assert_eq!(compact.toolbar_y_rem(ControlDensity::Compact), 0.25);
+        assert_eq!(compact.tool_gap_rem(ControlDensity::Compact), 0.0625);
+        assert_eq!(comfortable.pane_pad_rem(ControlDensity::Comfortable), 0.875);
+        assert_eq!(comfortable.tool_gap_rem(ControlDensity::Comfortable), 0.1875);
     }
 
     #[test]

@@ -10,7 +10,6 @@
 //! Actions, breadcrumbs, and meta are host-owned `Node` slots. Render-only:
 //! the back-link click and any action behaviour live in the host.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node,
@@ -20,10 +19,9 @@ use poodle_specs::{
 };
 
 use crate::color::mix_srgb;
+use crate::context::{RenderContext, SlotBuilder};
 use crate::pill::pill;
-use crate::presentation::{
-    rem_to_px, resolve_semantic_size, resolve_supporting_visual_size, size_font_rem,
-};
+use crate::presentation::{rem_to_px, resolve_supporting_visual_size, size_font_rem};
 
 /// Map the resolved control size to the supporting-visual `PillSize` the count
 /// badge renders at (matches Svelte `resolveSupportingVisualSize`).
@@ -56,18 +54,25 @@ fn styled_text(content: &str, color: ColorValue, size: f32) -> Node {
 
 pub fn page_header(
     spec: &PageHeaderSpec,
-    theme: &dyn ThemeProvider,
-    breadcrumbs: Option<Node>,
-    actions: Option<Node>,
-    meta: Option<Node>,
+    ctx: &RenderContext<'_>,
+    breadcrumbs: Option<SlotBuilder<'_>>,
+    actions: Option<SlotBuilder<'_>>,
+    meta: Option<SlotBuilder<'_>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    // The web pair wraps the whole header — breadcrumbs, actions, and meta
+    // included — in a UiPresentationProvider publishing the resolved values
+    // (PageHeader.svelte): host regions build inside that scope.
+    let host_scope = ctx.scoped(effective_size, ctx.resolve_density(spec.density));
+    let breadcrumbs = breadcrumbs.map(|build| build(&host_scope));
+    let actions = actions.map(|build| build(&host_scope));
+    let meta = meta.map(|build| build(&host_scope));
     let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
         effective_size,
     )));
 
     // ── Typography ────────────────────────────────────────────────────────────
-    let heading_base = theme.resolve_space(spec.heading_size_token());
+    let heading_base = ctx.theme().resolve_space(spec.heading_size_token());
     let title_size = heading_base * level_scale(spec.level);
     let subtitle_size = rem_to_px(size_font_rem(effective_size));
     let eyebrow_size = rem_to_px(0.6875);
@@ -76,23 +81,23 @@ pub fn page_header(
     let body_font = rem_to_px(size_font_rem(effective_size));
 
     // ── Spacing ───────────────────────────────────────────────────────────────
-    let gap = theme.resolve_space(spec.gap_token());
-    let header_gap = theme.resolve_space(spec.header_gap_token());
-    let title_block_gap = theme.resolve_space(spec.title_block_gap_token());
-    let title_gap = theme.resolve_space(spec.title_gap_token());
-    let actions_gap = theme.resolve_space(spec.actions_gap_token());
-    let pad_y = theme.resolve_space(spec.padding_y_token());
+    let gap = ctx.theme().resolve_space(spec.gap_token());
+    let header_gap = ctx.theme().resolve_space(spec.header_gap_token());
+    let title_block_gap = ctx.theme().resolve_space(spec.title_block_gap_token());
+    let title_gap = ctx.theme().resolve_space(spec.title_gap_token());
+    let actions_gap = ctx.theme().resolve_space(spec.actions_gap_token());
+    let pad_y = ctx.theme().resolve_space(spec.padding_y_token());
 
     // ── Colors ────────────────────────────────────────────────────────────────
-    let text_primary = theme.resolve_color(spec.title_color_token());
-    let text_secondary = theme.resolve_color(spec.subtitle_color_token());
-    let eyebrow_color = theme.resolve_color(spec.eyebrow_color_token());
-    let section_color = theme.resolve_color(spec.section_color_token());
-    let back_color = theme.resolve_color(spec.back_color_token());
-    let context_dot = theme.resolve_color(spec.context_dot_color_token());
-    let banner_color = theme.resolve_color(spec.banner_color_token());
-    let surface = theme.resolve_color("color.background.surface");
-    let banner_radius = theme.resolve_radius(spec.banner_radius_token());
+    let text_primary = ctx.theme().resolve_color(spec.title_color_token());
+    let text_secondary = ctx.theme().resolve_color(spec.subtitle_color_token());
+    let eyebrow_color = ctx.theme().resolve_color(spec.eyebrow_color_token());
+    let section_color = ctx.theme().resolve_color(spec.section_color_token());
+    let back_color = ctx.theme().resolve_color(spec.back_color_token());
+    let context_dot = ctx.theme().resolve_color(spec.context_dot_color_token());
+    let banner_color = ctx.theme().resolve_color(spec.banner_color_token());
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let banner_radius = ctx.theme().resolve_radius(spec.banner_radius_token());
 
     let primary_title = spec.primary_title();
     let resolved_subtitle = spec.resolved_subtitle();
@@ -154,7 +159,7 @@ pub fn page_header(
                 .with_tone(PillTone::Neutral)
                 .with_appearance(PillAppearance::Subtle)
                 .with_size(count_pill_size(effective_size)),
-            theme,
+            ctx,
         ));
     }
 

@@ -11,6 +11,7 @@ use poodle_headless::licence::{
     resolve_licence_submit, LicenceActivationMode, LicenceActivationRoute, LicenceKeyFormat,
     LicenceKeyProblem, LicenceKeyResult, LicenceSubmitDraft,
 };
+use poodle_render::RenderContext;
 use poodle_specs::{EyebrowSpec, FieldSpec, LicenceActivationSpec, TextInputSpec, ValidationState};
 
 /// Stand-in for the host's key parser (the web specimen's, ported). The real
@@ -309,55 +310,60 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("la-password")
         .cloned()
         .unwrap_or_default();
+    let ctx = RenderContext::new(theme);
     let email_field = poodle_render::field(
         &FieldSpec::new("la-email", "Email address"),
-        theme,
-        Some(poodle_render::text_input_with_handlers(
-            &TextInputSpec {
-                value: Some(email.clone()),
-                validation_state: ValidationState::None,
-                size: Some(poodle_specs::ControlSize::Md),
-                ..TextInputSpec::default()
-            },
-            theme,
-            poodle_render::TextInputHandlers {
-                on_change: Some({
-                    let queue = Arc::clone(&queue);
-                    Arc::new(move |value: &str| {
-                        queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                            key: "la-email".to_string(),
-                            value: value.to_string(),
-                        });
-                    })
-                }),
-                ..poodle_render::TextInputHandlers::default()
-            },
-        )),
+        &ctx,
+        Some(Box::new({
+            let queue = Arc::clone(&queue);
+            move |ctx: &RenderContext<'_>| {
+                poodle_render::text_input_with_handlers(
+                    &TextInputSpec {
+                        value: Some(email.clone()),
+                        validation_state: ValidationState::None,
+                        size: None,
+                        ..TextInputSpec::default()
+                    },
+                    ctx,
+                    poodle_render::TextInputHandlers {
+                        on_change: Some(Arc::new(move |value: &str| {
+                            queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                key: "la-email".to_string(),
+                                value: value.to_string(),
+                            });
+                        })),
+                        ..poodle_render::TextInputHandlers::default()
+                    },
+                )
+            }
+        })),
     );
     let password_field = poodle_render::field(
         &FieldSpec::new("la-password", "Password"),
-        theme,
-        Some(poodle_render::text_input_with_handlers(
-            &TextInputSpec {
-                value: Some(password.clone()),
-                validation_state: ValidationState::None,
-                size: Some(poodle_specs::ControlSize::Md),
-                ..TextInputSpec::default()
-            },
-            theme,
-            poodle_render::TextInputHandlers {
-                on_change: Some({
-                    let queue = Arc::clone(&queue);
-                    Arc::new(move |value: &str| {
-                        queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                            key: "la-password".to_string(),
-                            value: value.to_string(),
-                        });
-                    })
-                }),
-                ..poodle_render::TextInputHandlers::default()
-            },
-        )),
+        &ctx,
+        Some(Box::new({
+            let queue = Arc::clone(&queue);
+            move |ctx: &RenderContext<'_>| {
+                poodle_render::text_input_with_handlers(
+                    &TextInputSpec {
+                        value: Some(password.clone()),
+                        validation_state: ValidationState::None,
+                        size: None,
+                        ..TextInputSpec::default()
+                    },
+                    ctx,
+                    poodle_render::TextInputHandlers {
+                        on_change: Some(Arc::new(move |value: &str| {
+                            queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                key: "la-password".to_string(),
+                                value: value.to_string(),
+                            });
+                        })),
+                        ..poodle_render::TextInputHandlers::default()
+                    },
+                )
+            }
+        })),
     );
     let account_content = poodle_node::Node::container()
         .child(email_field)

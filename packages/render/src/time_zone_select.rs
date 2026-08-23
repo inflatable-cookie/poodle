@@ -10,13 +10,11 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutSizing, Node, NodeKind};
 use poodle_specs::TimeZoneSelectSpec;
 
-use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_height_offset_rem, size_padding_x_offset_rem,
-};
+use crate::context::RenderContext;
+use crate::presentation::{rem_to_px, size_height_offset_rem, size_padding_x_offset_rem};
 use crate::select::{select, SelectHandlers};
 
 /// Host callbacks: `on_toggle` (trigger) and `on_change` (chosen zone id),
@@ -29,7 +27,7 @@ pub struct TimeZoneSelectHandlers {
 
 pub fn time_zone_select(
     spec: &TimeZoneSelectSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: TimeZoneSelectHandlers,
 ) -> Node {
     // Build the searchable `SelectSpec` exactly as the Svelte wrapper does
@@ -38,7 +36,7 @@ pub fn time_zone_select(
     let select_spec = spec.to_select_spec();
     let mut root = select(
         &select_spec,
-        theme,
+        ctx,
         &SelectHandlers {
             toggle: handlers.on_toggle,
             change: handlers.on_change,
@@ -49,19 +47,19 @@ pub fn time_zone_select(
     // The standalone GPUI tier predates the generic Select's translucent
     // trigger recipe. Preserve its public TimeZoneSelect treatment while
     // retaining Select's option filtering and handler wiring.
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let height = theme.resolve_space("size.control.height")
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let height = ctx.theme().resolve_space("size.control.height")
         + rem_to_px(size_height_offset_rem(effective_size));
-    let pad_x = theme.resolve_space("space.inline.md")
+    let pad_x = ctx.theme().resolve_space("space.inline.md")
         + rem_to_px(size_padding_x_offset_rem(effective_size));
-    let inline_gap = theme.resolve_space("space.inline.sm");
-    let surface = theme.resolve_color("color.background.surface");
-    let elevated = theme.resolve_color(spec.overlay_fill_token());
-    let border = theme.resolve_color(spec.border_token());
-    let accent = theme.resolve_color("color.accent.base");
-    let icon_muted = theme.resolve_color("color.icon.muted");
-    let radius = theme.resolve_radius("radius.control");
-    let icon_size = theme.resolve_space("size.icon.sm");
+    let inline_gap = ctx.theme().resolve_space("space.inline.sm");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let elevated = ctx.theme().resolve_color(spec.overlay_fill_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let icon_muted = ctx.theme().resolve_color("color.icon.muted");
+    let radius = ctx.theme().resolve_radius("radius.control");
+    let icon_size = ctx.theme().resolve_space("size.icon.sm");
 
     let tune_trigger = |trigger: &mut Node| {
         let s = &mut trigger.style;

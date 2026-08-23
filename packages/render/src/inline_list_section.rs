@@ -6,41 +6,41 @@
 //! Uppercase title + optional count pill + optional action header, then
 //! either an empty message or the item list, optionally wrapped in a Card.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{CardSpec, InlineListSectionSpec};
 
 use crate::card::card;
 use crate::color::mix_srgb;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Build an inline-list-section from its spec + item rows + an optional
 /// action.
 pub fn inline_list_section(
     spec: &InlineListSectionSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     items: Vec<Node>,
     action: Option<Node>,
 ) -> Node {
     // Colors (contract Token Usage tables).
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let border = theme.resolve_color("color.border.default");
-    let elevated = theme.resolve_color("color.background.elevated");
-    let surface = theme.resolve_color("color.background.surface");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let border = ctx.theme().resolve_color("color.border.default");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
+    let surface = ctx.theme().resolve_color("color.background.surface");
     // Item chrome: color-mix(in srgb, surface 93%, text-primary).
     let row_bg = mix_srgb(surface, text_primary, 0.93);
 
     // Typography (contract Token Usage tables).
-    let label_size = theme.resolve_space("typography.label.size");
-    let body_size = theme.resolve_space("typography.body.size");
+    let label_size = ctx.theme().resolve_space("typography.label.size");
+    let body_size = ctx.theme().resolve_space("typography.body.size");
 
     // Spacing (token + contract-exact rem).
-    let root_gap = theme.resolve_space("space.stack.md");
-    let items_gap = theme.resolve_space("space.stack.sm");
+    let root_gap = ctx.theme().resolve_space("space.stack.md");
+    let items_gap = ctx.theme().resolve_space("space.stack.sm");
 
     // Item-row radius: calc(radius.surface − 0.1875rem).
-    let surface_radius = theme.resolve_radius("radius.surface");
+    let surface_radius = ctx.theme().resolve_radius("radius.surface");
     let item_radius = surface_radius - rem_to_px(0.1875);
 
     // Title cluster: uppercase title + optional count pill.
@@ -148,7 +148,7 @@ pub fn inline_list_section(
     }
 
     if spec.framed {
-        card(&CardSpec::new(), theme, vec![body])
+        card(&CardSpec::new(), ctx, vec![body])
     } else {
         body
     }

@@ -5,7 +5,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeRole,
@@ -13,7 +12,8 @@ use poodle_node::{
 use poodle_specs::{ControlDensity, ControlSize, Orientation, RadioGroupSpec};
 
 use crate::color::hex_color;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::context::RenderContext;
+use crate::presentation::{rem_to_px, size_font_rem};
 
 /// Indicator (outer circle) size — contract §8 table over the icon-md token.
 fn indicator_size_px(size: ControlSize, icon_md_px: f32) -> f32 {
@@ -50,23 +50,24 @@ fn circle(node: &mut Node, diameter: f32) {
 
 pub fn radio_group(
     spec: &RadioGroupSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let icon_md = theme.resolve_space("size.icon.md");
+    let icon_md = ctx.theme().resolve_space("size.icon.md");
     let indicator_size = indicator_size_px(effective_size, icon_md);
     let dot_size = dot_size_px(effective_size, icon_md);
     let border_width = rem_to_px(0.0625);
 
     // Density override wins over the orientation gap.
-    let group_gap = match spec.density {
-        ControlDensity::Compact => theme.resolve_space("space.stack.sm"),
-        ControlDensity::Comfortable => theme.resolve_space("space.stack.lg"),
-        ControlDensity::Default => theme.resolve_space(spec.option_gap_token()),
+    let group_gap = match density {
+        ControlDensity::Compact => ctx.theme().resolve_space("space.stack.sm"),
+        ControlDensity::Comfortable => ctx.theme().resolve_space("space.stack.lg"),
+        ControlDensity::Default => ctx.theme().resolve_space(spec.option_gap_token()),
     };
-    let item_gap = theme.resolve_space("space.inline.sm");
+    let item_gap = ctx.theme().resolve_space("space.inline.sm");
 
     // Custom hex wins over accent. Colour-space note as in checkbox: the hex
     // lands in sRGB and converts at the backend edge — the old tier passed it
@@ -75,11 +76,11 @@ pub fn radio_group(
         .selected_color
         .as_deref()
         .and_then(hex_color)
-        .unwrap_or_else(|| theme.resolve_color("color.accent.base"));
-    let border = theme.resolve_color("color.border.default");
-    let text_color = theme.resolve_color("color.text.primary");
+        .unwrap_or_else(|| ctx.theme().resolve_color("color.accent.base"));
+    let border = ctx.theme().resolve_color("color.border.default");
+    let text_color = ctx.theme().resolve_color("color.text.primary");
     let selected_value = spec.value.as_deref().or(spec.default_value.as_deref());
-    let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
+    let disabled_opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
 
     let mut el = Node::container();
     {
@@ -94,7 +95,7 @@ pub fn radio_group(
     for option in &spec.options {
         let is_selected = selected_value == Some(option.value.as_str());
         let indicator_color = if is_selected { accent } else { border };
-        let indicator_bg = theme.resolve_color("color.background.surface");
+        let indicator_bg = ctx.theme().resolve_color("color.background.surface");
 
         let mut indicator = Node::container();
         circle(&mut indicator, indicator_size);

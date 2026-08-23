@@ -4,27 +4,29 @@
 //! Contract: `docs/contracts/components/form-layout.md`
 //! Ported from: `packages/jetstream/components/src/form_layout.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{ColorValue, LayoutDirection, Node};
 use poodle_specs::{CallOutSpec, FormActionsSpec, FormLayoutSpec, StatusTone};
 
 use crate::callout::{callout, CalloutHandlers};
 use crate::color::mix_srgb;
+use crate::context::RenderContext;
 use crate::form_actions::form_actions;
 
 /// Accessible field-errors summary (contract §2 FieldErrors / §6
 /// `role="alert"`). Background `color-mix(status-danger 8%, transparent)`,
 /// border `color-mix(status-danger 40%, transparent)`, label-size body text.
-fn field_errors_summary(spec: &FormLayoutSpec, theme: &dyn ThemeProvider) -> Node {
-    let tone = theme.resolve_color(spec.field_errors_tone_token());
-    let radius = theme.resolve_radius(spec.field_errors_radius_token());
-    let border_width = theme.resolve_space(spec.field_errors_border_width_token());
-    let pad_x = theme.resolve_space(spec.field_errors_padding_x_token());
-    let pad_y = theme.resolve_space(spec.field_errors_padding_y_token());
-    let font_size = theme.resolve_space(spec.field_errors_font_size_token());
-    let text_color = theme.resolve_color(spec.field_errors_text_token());
-    let heading_gap = theme.resolve_space(spec.field_errors_stack_gap_token());
-    let item_gap = theme.resolve_space(spec.field_errors_stack_gap_token());
+fn field_errors_summary(spec: &FormLayoutSpec, ctx: &RenderContext<'_>) -> Node {
+    let tone = ctx.theme().resolve_color(spec.field_errors_tone_token());
+    let radius = ctx.theme().resolve_radius(spec.field_errors_radius_token());
+    let border_width = ctx
+        .theme()
+        .resolve_space(spec.field_errors_border_width_token());
+    let pad_x = ctx.theme().resolve_space(spec.field_errors_padding_x_token());
+    let pad_y = ctx.theme().resolve_space(spec.field_errors_padding_y_token());
+    let font_size = ctx.theme().resolve_space(spec.field_errors_font_size_token());
+    let text_color = ctx.theme().resolve_color(spec.field_errors_text_token());
+    let heading_gap = ctx.theme().resolve_space(spec.field_errors_stack_gap_token());
+    let item_gap = ctx.theme().resolve_space(spec.field_errors_stack_gap_token());
 
     // color-mix toward transparent: 8% fill, 40% border.
     let transparent = ColorValue(tone.0, tone.1, tone.2, 0.0);
@@ -80,15 +82,15 @@ fn field_errors_summary(spec: &FormLayoutSpec, theme: &dyn ThemeProvider) -> Nod
 /// ErrorCallout? → SuccessCallout? → FieldErrors? → Grid → Actions?.
 pub fn form_layout(
     spec: &FormLayoutSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     children: Vec<Node>,
     actions: Option<Node>,
 ) -> Node {
-    let text_secondary = theme.resolve_color(spec.description_color_token());
-    let row_gap = theme.resolve_space("space.stack.md");
-    let section_gap = theme.resolve_space(spec.section_gap_token());
-    let column_gap = theme.resolve_space(spec.column_gap_token());
-    let body_size = theme.resolve_space(spec.body_size_token());
+    let text_secondary = ctx.theme().resolve_color(spec.description_color_token());
+    let row_gap = ctx.theme().resolve_space("space.stack.md");
+    let section_gap = ctx.theme().resolve_space(spec.section_gap_token());
+    let column_gap = ctx.theme().resolve_space(spec.column_gap_token());
+    let body_size = ctx.theme().resolve_space(spec.body_size_token());
 
     let mut el = Node::container();
     {
@@ -112,7 +114,7 @@ pub fn form_layout(
             &CallOutSpec::new()
                 .with_tone(StatusTone::Danger)
                 .with_content(error),
-            theme,
+            ctx,
             CalloutHandlers::default(),
         ));
     }
@@ -122,14 +124,14 @@ pub fn form_layout(
             &CallOutSpec::new()
                 .with_tone(StatusTone::Success)
                 .with_content(success),
-            theme,
+            ctx,
             CalloutHandlers::default(),
         ));
     }
 
     // Accessible field-errors summary (contract §2 / §6).
     if spec.has_field_errors() {
-        el = el.child(field_errors_summary(spec, theme));
+        el = el.child(field_errors_summary(spec, ctx));
     }
 
     // Field grid — single-column flex-col, or wrapping flex-row for
@@ -147,7 +149,7 @@ pub fn form_layout(
         }
         el = el.child(fields);
     } else {
-        let min_w = theme.resolve_space(spec.column_min_width_token());
+        let min_w = ctx.theme().resolve_space(spec.column_min_width_token());
         let mut fields = Node::container();
         {
             let s = &mut fields.style;
@@ -180,7 +182,7 @@ pub fn form_layout(
     if let Some(actions_el) = actions {
         el = el.child(form_actions(
             &FormActionsSpec::new(),
-            theme,
+            ctx,
             vec![actions_el],
         ));
     }

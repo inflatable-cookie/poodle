@@ -8,7 +8,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole, StylePatch,
@@ -18,8 +17,9 @@ use poodle_specs::{
 };
 
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 use crate::presentation::{
-    control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
+    control_space_x_rem, panel_space_y_rem, rem_to_px, size_font_rem,
 };
 
 /// Handlers mirror the GPUI target's names.
@@ -56,25 +56,26 @@ fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
 
 pub fn dock_region(
     spec: &DockRegionSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     content: Option<Node>,
     handlers: DockRegionHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let tab_font = rem_to_px(size_font_rem(effective_size));
     // Density → spacing (contract: density controls horizontal padding / gaps).
-    let space_x = rem_to_px(control_space_x_rem(spec.density));
-    let space_y = rem_to_px(panel_space_y_rem(spec.density));
+    let density = ctx.resolve_density(spec.density);
+    let space_x = rem_to_px(control_space_x_rem(density));
+    let space_y = rem_to_px(panel_space_y_rem(density));
     let tab_gap = space_x * 0.5;
-    let border_w = theme.resolve_border_width("border.width.default");
+    let border_w = ctx.theme().resolve_border_width("border.width.default");
 
-    let fill = theme.resolve_color(spec.strip_fill_token());
-    let panel_fill = theme.resolve_color("color.background.panel");
-    let border_subtle = theme.resolve_color("color.border.subtle");
-    let radius_control = theme.resolve_radius("radius.control");
-    let text_muted = theme.resolve_color("color.text.secondary");
-    let accent = theme.resolve_color("color.accent.base");
-    let hover_bg = theme.resolve_color("color.background.hover");
+    let fill = ctx.theme().resolve_color(spec.strip_fill_token());
+    let panel_fill = ctx.theme().resolve_color("color.background.panel");
+    let border_subtle = ctx.theme().resolve_color("color.border.subtle");
+    let radius_control = ctx.theme().resolve_radius("radius.control");
+    let text_muted = ctx.theme().resolve_color("color.text.secondary");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let hover_bg = ctx.theme().resolve_color("color.background.hover");
     // Active-tab fill: accent mixed into the strip fill (matches GPUI's
     // `accent.opacity(0.10)` and the Svelte active-tab tint). TOKEN GAP: no
     // semantic opacity token for the selected-tab tint strength, so the ratio
@@ -519,8 +520,10 @@ mod tests {
             instance_id: Some(scope.to_string()),
             ..DockRegionHandlers::default()
         };
-        let first = dock_region(&spec(), &theme(), None, scoped("first"));
-        let second = dock_region(&spec(), &theme(), None, scoped("second"));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let first = dock_region(&spec(), &ctx, None, scoped("first"));
+        let second = dock_region(&spec(), &ctx, None, scoped("second"));
         let tab = dock_tab_focus_id(Some("first"), "search");
         let collapse = dock_collapse_focus_id(Some("first"));
         assert!(first

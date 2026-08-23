@@ -3,19 +3,19 @@
 //! Contract: `docs/contracts/components/field-set.md`
 //! Ported from: `packages/jetstream/components/src/field_set.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, LayoutSizing, Node};
 use poodle_specs::FieldSetSpec;
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn field_set(spec: &FieldSetSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> Node {
+pub fn field_set(spec: &FieldSetSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
     let col_gap = spec
         .column_gap_token()
-        .map(|t| theme.resolve_space(t))
+        .map(|t| ctx.theme().resolve_space(t))
         .unwrap_or(0.0);
     let row_gap = col_gap + rem_to_px(FieldSetSpec::ROW_GAP_EXTRA_REM);
-    let legend_color = theme.resolve_color(spec.legend_color_token());
+    let legend_color = ctx.theme().resolve_color(spec.legend_color_token());
     let legend_size = rem_to_px(FieldSetSpec::LEGEND_SIZE_REM);
 
     let mut root = Node::container();
@@ -30,16 +30,16 @@ pub fn field_set(spec: &FieldSetSpec, theme: &dyn ThemeProvider, children: Vec<N
         l.style.text_weight = Some(600);
         l.style.letter_spacing_em = Some(0.12);
         l.style.descriptor.layout.spacing.margin.bottom =
-            theme.resolve_space(spec.legend_margin_bottom_token());
+            ctx.theme().resolve_space(spec.legend_margin_bottom_token());
         root = root.child(l);
     }
 
     if let Some(ref description) = spec.description {
         let mut d = Node::text(description);
-        d.style.descriptor.text_color = Some(theme.resolve_color(spec.description_color_token()));
-        d.style.text_size = Some(theme.resolve_space(spec.description_size_token()));
+        d.style.descriptor.text_color = Some(ctx.theme().resolve_color(spec.description_color_token()));
+        d.style.text_size = Some(ctx.theme().resolve_space(spec.description_size_token()));
         d.style.descriptor.layout.spacing.margin.bottom =
-            theme.resolve_space(spec.description_margin_bottom_token());
+            ctx.theme().resolve_space(spec.description_margin_bottom_token());
         root = root.child(d);
     }
 

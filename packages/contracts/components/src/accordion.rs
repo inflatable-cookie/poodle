@@ -21,9 +21,11 @@ pub struct AccordionSpec {
     pub allow_multiple: bool,
     pub is_collapsible: bool,
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     /// Whether one panel opens at a time or several (contract §3).
     pub selection_mode: AccordionSelectionMode,
 }
@@ -37,9 +39,9 @@ impl Default for AccordionSpec {
             allow_multiple: false,
             is_collapsible: true,
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             selection_mode: AccordionSelectionMode::Single,
         }
     }
@@ -191,7 +193,7 @@ impl AccordionSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -201,7 +203,7 @@ impl AccordionSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

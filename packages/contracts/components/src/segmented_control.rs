@@ -98,9 +98,9 @@ pub struct SegmentedControlSpec {
     /// of sizing to its label content. Matches the Svelte
     /// `equalWidth` prop.
     pub equal_width: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Stable native instance scope, analogue of the web `name` prop.
     /// Shared render is stateless, so native callers provide the lifecycle
     /// identity explicitly rather than relying on render order.
@@ -116,9 +116,9 @@ impl SegmentedControlSpec {
             is_disabled: false,
             aria_label: None,
             equal_width: true,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             instance_id: instance_id.into(),
         }
     }
@@ -142,7 +142,7 @@ impl SegmentedControlSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -152,7 +152,7 @@ impl SegmentedControlSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

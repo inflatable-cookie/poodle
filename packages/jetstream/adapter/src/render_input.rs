@@ -69,11 +69,16 @@ impl RenderComponent<FieldSpec> for JetstreamAdapter {
     ) -> JetstreamNodeHandle {
         let mut mapped = map_style(style);
 
+        // Legacy direct-manifest proof: no presentation scope exists on this
+        // path, so omission resolves against the root defaults (md/default) —
+        // the same values `RenderContext::new` supplies in poodle-render.
+        let size = spec.size.unwrap_or_default();
+        let density = spec.density.unwrap_or_default();
         // Resolve label typography size (used as space value for proof)
-        let _label_size = theme.resolve_space(spec.label_typography_token());
+        let _label_size = theme.resolve_space(spec.label_typography_token(size));
 
         // Resolve supporting text typography size
-        let _supporting_size = theme.resolve_space(spec.supporting_text_typography_token());
+        let _supporting_size = theme.resolve_space(spec.supporting_text_typography_token(size));
 
         // Resolve error color
         let _error_color = theme.resolve_color(spec.error_color_token());
@@ -83,14 +88,14 @@ impl RenderComponent<FieldSpec> for JetstreamAdapter {
         mapped.visuals.text_color = Some(JetstreamColor::from(desc_color));
 
         // Resolve row gap (vertical spacing between label, input, description)
-        let gap = theme.resolve_space(spec.row_gap_token());
+        let gap = theme.resolve_space(spec.row_gap_token(density));
         mapped.layout.gap = taffy::Size {
             width: taffy::LengthPercentage::length(gap),
             height: taffy::LengthPercentage::length(gap),
         };
 
         // Resolve header gap (spacing between label and optional indicator)
-        let _header_gap = theme.resolve_space(spec.header_gap_token());
+        let _header_gap = theme.resolve_space(spec.header_gap_token(density));
 
         let node_id = format!("field-{}", spec.id);
         JetstreamNodeHandle::new(node_id, "FieldSpec", WidgetKind::Panel, mapped)

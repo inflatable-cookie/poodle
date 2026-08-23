@@ -24,7 +24,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_placeholder("Acme Inc.")
                                 .with_aria_label("Workspace name"),
                             theme,
-                        )),
+                        ).into_slot()),
                 ),
         )
         // --- Default with description (info icon) ---
@@ -45,7 +45,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("Display name"),
                             theme,
                         )
-                    )
+                    .into_slot())
                 )
         )
         // --- Required ---
@@ -66,7 +66,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("Email address"),
                             theme,
                         )
-                    )
+                    .into_slot())
                 )
         )
         // --- Optional ---
@@ -87,7 +87,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("Phone number"),
                             theme,
                         )
-                    )
+                    .into_slot())
                 )
         )
         // --- Optional with description (info icon + optional marker) ---
@@ -109,7 +109,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("Fax number"),
                             theme,
                         )
-                    )
+                    .into_slot())
                 )
         )
         // --- With error (invalid) ---
@@ -132,7 +132,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("Username"),
                             theme,
                         )
-                    )
+                    .into_slot())
                 )
         )
         // --- Pending ---
@@ -155,7 +155,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("Handle"),
                             theme,
                         )
-                    )
+                    .into_slot())
                 )
         )
         // --- Valid ---
@@ -178,7 +178,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("Password"),
                             theme,
                         )
-                    )
+                    .into_slot())
                 )
         )
         // --- With info icon (description + required) ---
@@ -200,7 +200,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_aria_label("API Key"),
                             theme,
                         )
-                    )
+                    .into_slot())
                 )
         )
         .into_any_element();
@@ -235,7 +235,7 @@ fn size_row(theme: &poodle_gpui::GpuiThemeProvider, size: ControlSize) -> Div {
                 .with_size(size)
                 .with_aria_label("Display name"),
             theme,
-        )),
+        ).into_slot()),
     )
 }
 
@@ -256,6 +256,6 @@ fn density_row(theme: &poodle_gpui::GpuiThemeProvider, density: ControlDensity) 
                 .with_density(density)
                 .with_aria_label("Display name"),
             theme,
-        )),
+        ).into_slot()),
     )
 }

@@ -74,11 +74,15 @@ impl RenderComponent<IconButtonSpec> for GpuiAdapter {
     ) -> GpuiElementHandle {
         let gpui_style = map_style(style);
 
+        // Legacy direct-manifest proof: no presentation scope exists on this
+        // path, so omission resolves against the root defaults (md/default) —
+        // the same values `RenderContext::new` supplies in poodle-render.
+        let size = spec.size.unwrap_or_default();
         // Resolve icon size token (used for width/height constraints)
-        let _icon_size = theme.resolve_space(spec.icon_size_token());
+        let _icon_size = theme.resolve_space(spec.icon_size_token(size));
 
         // Resolve control height token
-        let _control_height = theme.resolve_space(spec.control_height_token());
+        let _control_height = theme.resolve_space(spec.control_height_token(size));
 
         // gpui_style is constructed for proof of style mapping
         let _ = &gpui_style;
@@ -104,11 +108,16 @@ impl RenderComponent<FieldSpec> for GpuiAdapter {
     ) -> GpuiElementHandle {
         let mut gpui_style = map_style(style);
 
+        // Legacy direct-manifest proof: no presentation scope exists on this
+        // path, so omission resolves against the root defaults (md/default) —
+        // the same values `RenderContext::new` supplies in poodle-render.
+        let size = spec.size.unwrap_or_default();
+        let density = spec.density.unwrap_or_default();
         // Resolve label typography size (used as space value for proof)
-        let _label_size = theme.resolve_space(spec.label_typography_token());
+        let _label_size = theme.resolve_space(spec.label_typography_token(size));
 
         // Resolve supporting text typography size
-        let _supporting_size = theme.resolve_space(spec.supporting_text_typography_token());
+        let _supporting_size = theme.resolve_space(spec.supporting_text_typography_token(size));
 
         // Resolve error color
         let _error_color = theme.resolve_color(spec.error_color_token());
@@ -118,10 +127,10 @@ impl RenderComponent<FieldSpec> for GpuiAdapter {
         gpui_style.text_color = Some(desc_color.into());
 
         // Resolve row gap (vertical spacing between label, input, description)
-        gpui_style.gap = theme.resolve_space(spec.row_gap_token());
+        gpui_style.gap = theme.resolve_space(spec.row_gap_token(density));
 
         // Resolve header gap (spacing between label and optional indicator)
-        let _header_gap = theme.resolve_space(spec.header_gap_token());
+        let _header_gap = theme.resolve_space(spec.header_gap_token(density));
 
         GpuiElementHandle::new(format!("field-{}", spec.id), "FieldSpec")
     }

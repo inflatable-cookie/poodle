@@ -35,9 +35,9 @@ pub struct PageLoadingSpec {
     /// Rendering mode — overlay (default) or inline. Matches the
     /// Svelte `presentation` prop.
     pub presentation: PageLoadingPresentation,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Accessible name (contract §7). `None` falls back to the visible label.
     pub aria_label: Option<String>,
 }
@@ -62,9 +62,9 @@ impl PageLoadingSpec {
             message: None,
             can_cancel: false,
             presentation: PageLoadingPresentation::Overlay,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             aria_label: None,
         }
     }
@@ -112,7 +112,7 @@ impl PageLoadingSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -122,7 +122,7 @@ impl PageLoadingSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

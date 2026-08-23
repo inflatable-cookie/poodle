@@ -27,9 +27,11 @@ pub struct AgentTranscriptSpec {
     pub expanded_tool_calls: Vec<String>,
     pub expanded_changed_files: Vec<String>,
     pub expanded_subagent_groups: Vec<String>,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for AgentTranscriptSpec {
@@ -57,9 +59,9 @@ impl AgentTranscriptSpec {
             expanded_tool_calls: Vec::new(),
             expanded_changed_files: Vec::new(),
             expanded_subagent_groups: Vec::new(),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -104,11 +106,11 @@ impl AgentTranscriptSpec {
         self
     }
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -176,8 +178,8 @@ impl AgentTranscriptSpec {
     }
 
     // ── Size ─────────────────────────────────────────────────
-    pub fn font_size_rem(&self) -> f32 {
-        match self.size {
+    pub fn font_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.75,
             ControlSize::Md => 0.8125,
@@ -187,15 +189,15 @@ impl AgentTranscriptSpec {
     }
 
     // ── Density ──────────────────────────────────────────────
-    pub fn padding_inset_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_inset_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.75,
             ControlDensity::Default => 1.0,
             ControlDensity::Comfortable => 1.5,
         }
     }
-    pub fn block_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn block_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.875,
             ControlDensity::Default => 1.25,
             ControlDensity::Comfortable => 1.75,
@@ -261,7 +263,13 @@ mod tests {
         let base = AgentTranscriptSpec::default();
         let dense = base.clone().with_density(ControlDensity::Compact);
 
-        assert_ne!(dense.block_gap_rem(), base.block_gap_rem());
-        assert_eq!(dense.font_size_rem(), base.font_size_rem());
+        assert_ne!(
+            dense.block_gap_rem(ControlDensity::Compact),
+            base.block_gap_rem(ControlDensity::Default)
+        );
+        assert_eq!(
+            dense.font_size_rem(ControlSize::Md),
+            base.font_size_rem(ControlSize::Md)
+        );
     }
 }

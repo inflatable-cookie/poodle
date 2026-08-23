@@ -10,10 +10,12 @@ pub struct TabStripSpec {
     pub orientation: Orientation,
     pub is_reorderable: bool,
     pub aria_label: Option<String>,
-    /// Physical size of each tab item (height, font-size, padding). Defaults to Md.
-    pub size: ControlSize,
-    /// Horizontal density — controls padding-x and inline gap. Defaults to Default.
-    pub density: ControlDensity,
+    /// Physical size of each tab item (height, font-size, padding). `None`
+    /// inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
+    /// Horizontal density — controls padding-x and inline gap. `None`
+    /// inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for TabStripSpec {
@@ -25,8 +27,8 @@ impl Default for TabStripSpec {
             orientation: Orientation::Horizontal,
             is_reorderable: false,
             aria_label: None,
-            size: ControlSize::Md,
-            density: ControlDensity::Default,
+            size: None,
+            density: None,
         }
     }
 }
@@ -65,12 +67,12 @@ impl TabStripSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

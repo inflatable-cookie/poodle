@@ -8,7 +8,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{
     CallOutSpec, CalloutAnnounceMode, DialogSpec, DialogWidth, Direction, EmptyStateSize,
@@ -18,6 +17,7 @@ use poodle_specs::{
 };
 
 use crate::callout::{callout, CalloutHandlers};
+use crate::context::RenderContext;
 use crate::dialog::dialog_with_slots;
 use crate::empty_state::empty_state;
 use crate::presentation::rem_to_px;
@@ -36,7 +36,7 @@ pub struct SettingsShellHandlers {
 
 pub fn settings_shell(
     spec: &SettingsShellSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: SettingsShellHandlers,
     page: Option<Node>,
 ) -> Node {
@@ -66,12 +66,12 @@ pub fn settings_shell(
         .with_show_close_button(true)
         .with_close_label(&spec.close_label);
 
-    let header = header_bar(spec, theme, &handlers);
-    let body = shell_body(spec, theme, &handlers, page);
+    let header = header_bar(spec, ctx, &handlers);
+    let body = shell_body(spec, ctx, &handlers, page);
 
     dialog_with_slots(
         &dialog_spec,
-        theme,
+        ctx,
         vec![body],
         None,
         Some(header),
@@ -82,7 +82,7 @@ pub fn settings_shell(
 
 fn header_bar(
     spec: &SettingsShellSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &SettingsShellHandlers,
 ) -> Node {
     let mut row = Node::container();
@@ -90,14 +90,14 @@ fn header_bar(
         let s = &mut row.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.md");
         s.descriptor.layout.width = LayoutSizing::Grow;
     }
 
     let mut title = Node::text(&spec.title);
     title.style.text_size = Some(rem_to_px(1.0));
     title.style.text_weight = Some(600);
-    title.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
+    title.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
 
     let search_spec = TextInputSpec::new()
         .with_value(&spec.search_query)
@@ -108,7 +108,7 @@ fn header_bar(
     let on_search = handlers.on_search_query_change.clone();
     let mut search = text_input_with_change(
         &search_spec,
-        theme,
+        ctx,
         on_search.map(|handler| {
             Arc::new(move |value: &str| handler(value)) as poodle_node::TextChangeHandler
         }),
@@ -121,7 +121,7 @@ fn header_bar(
 
 fn shell_body(
     spec: &SettingsShellSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &SettingsShellHandlers,
     page: Option<Node>,
 ) -> Node {
@@ -130,18 +130,18 @@ fn shell_body(
         let s = &mut grid.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Stretch;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.md");
         s.min_height = Some(rem_to_px(24.0));
     }
 
-    let nav = nav_rail(spec, theme, handlers);
-    let page_col = page_column(spec, theme, page);
+    let nav = nav_rail(spec, ctx, handlers);
+    let page_col = page_column(spec, ctx, page);
     grid.child(nav).child(page_col)
 }
 
 fn nav_rail(
     spec: &SettingsShellSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &SettingsShellHandlers,
 ) -> Node {
     let inner = if spec.groups.is_empty() {
@@ -163,19 +163,19 @@ fn nav_rail(
                 .with_message(message)
                 .with_variant(variant)
                 .with_size(EmptyStateSize::Compact),
-            theme,
+            ctx,
         )
     } else {
         let mut nav_spec = SidebarNavSpec::new(spec.groups.clone()).with_aria_label("Settings pages");
         if let Some(id) = &spec.active_page_id {
             nav_spec = nav_spec.with_value(id);
         }
-        sidebar_nav(&nav_spec, theme, handlers.on_navigate.clone())
+        sidebar_nav(&nav_spec, ctx, handlers.on_navigate.clone())
     };
 
     let scroller = scroll_shell(
         &ScrollShellSpec::new().with_direction(Direction::Vertical),
-        theme,
+        ctx,
         vec![inner],
     );
     let surface_node = surface(
@@ -183,7 +183,7 @@ fn nav_rail(
             .with_tone(SurfaceTone::Panel)
             .with_border(SurfaceBorder::Subtle)
             .with_padding(PaddingScale::None),
-        theme,
+        ctx,
         vec![scroller],
     );
     let mut aside = Node::container();
@@ -197,14 +197,14 @@ fn nav_rail(
     aside.child(surface_node)
 }
 
-fn page_column(spec: &SettingsShellSpec, theme: &dyn ThemeProvider, page: Option<Node>) -> Node {
+fn page_column(spec: &SettingsShellSpec, ctx: &RenderContext<'_>, page: Option<Node>) -> Node {
     let mut col = Node::container();
     {
         let s = &mut col.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.width = LayoutSizing::Grow;
         s.min_width = Some(0.0);
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
     }
 
     if let Some(reason) = &spec.close_refused_reason {
@@ -213,7 +213,7 @@ fn page_column(spec: &SettingsShellSpec, theme: &dyn ThemeProvider, page: Option
                 .with_tone(StatusTone::Warning)
                 .with_content(reason)
                 .with_announce_mode(CalloutAnnounceMode::Polite),
-            theme,
+            ctx,
             CalloutHandlers::default(),
         );
         notice.a11y.role = Some(NodeRole::Status);
@@ -235,7 +235,7 @@ fn page_column(spec: &SettingsShellSpec, theme: &dyn ThemeProvider, page: Option
         &ScrollShellSpec::new()
             .with_direction(Direction::Vertical)
             .with_padding(PaddingScale::Md),
-        theme,
+        ctx,
         page.into_iter().collect(),
     );
     col.child(stack.child(scroller))
@@ -284,9 +284,11 @@ mod tests {
 
     #[test]
     fn closed_shell_renders_nothing() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = settings_shell(
             &SettingsShellSpec::new().with_open(false),
-            &theme(),
+            &ctx,
             SettingsShellHandlers::default(),
             Some(Node::text("Page content")),
         );
@@ -296,9 +298,11 @@ mod tests {
 
     #[test]
     fn page_stays_rendered_while_a_query_is_live() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = settings_shell(
             &open_spec().with_search_query("storage"),
-            &theme(),
+            &ctx,
             SettingsShellHandlers::default(),
             Some(Node::text("Page content")),
         );
@@ -309,11 +313,13 @@ mod tests {
 
     #[test]
     fn empty_groups_with_a_query_is_no_matches() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = settings_shell(
             &SettingsShellSpec::new()
                 .with_open(true)
                 .with_search_query("xyzzy"),
-            &theme(),
+            &ctx,
             SettingsShellHandlers::default(),
             Some(Node::text("Page content")),
         );
@@ -325,9 +331,11 @@ mod tests {
 
     #[test]
     fn empty_scope_is_no_settings_pages() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = settings_shell(
             &SettingsShellSpec::new().with_open(true),
-            &theme(),
+            &ctx,
             SettingsShellHandlers::default(),
             None,
         );
@@ -340,9 +348,11 @@ mod tests {
         let opens = Arc::new(Mutex::new(Vec::new()));
         let close_sink = Arc::clone(&closes);
         let open_sink = Arc::clone(&opens);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = settings_shell(
             &open_spec().with_close_refused_reason("Unsaved changes on this page."),
-            &theme(),
+            &ctx,
             SettingsShellHandlers {
                 on_request_close: Some(Arc::new(move || *close_sink.lock().unwrap() += 1)),
                 on_open_change: Some(Arc::new(move |open| open_sink.lock().unwrap().push(open))),
@@ -372,9 +382,11 @@ mod tests {
     fn navigate_fires_the_page_id() {
         let hits = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&hits);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = settings_shell(
             &open_spec(),
-            &theme(),
+            &ctx,
             SettingsShellHandlers {
                 on_navigate: Some(Arc::new(move |id| sink.lock().unwrap().push(id.to_string()))),
                 ..SettingsShellHandlers::default()

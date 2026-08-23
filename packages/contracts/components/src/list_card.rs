@@ -95,9 +95,9 @@ pub struct ListCardSpec {
     pub selection_indicator: SelectionIndicator,
     /// Presentation axes (contract §3): size is intrinsic, density is sibling
     /// spacing, size_role resolves size from the inherited presentation.
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Context-menu entries; empty means the card has no context menu.
     pub context_menu_items: Vec<MenuEntry>,
     /// What opens the context menu: a right-click, or the leading slot.
@@ -133,9 +133,9 @@ impl Default for ListCardSpec {
             layout: ListCardLayout::Default,
             is_highlighted: false,
             selection_indicator: SelectionIndicator::None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             context_menu_items: Vec::new(),
             context_menu_trigger: ListCardContextMenuTrigger::Context,
             context_menu_aria_label: None,
@@ -166,7 +166,7 @@ impl ListCardSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -176,7 +176,7 @@ impl ListCardSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -402,11 +402,12 @@ impl ListCardSpec {
 
     /// Leading square edge length in rem. Contract §7: circle 2rem,
     /// rounded-square 2.75rem. Compact layout shrinks one step.
-    /// The size ladder the leading box sits on: the resolved control size,
+    /// The size ladder the leading box sits on: the control size resolved by
+    /// the presentation context (omission and `size_role` already applied),
     /// shifted by `leading_size_offset` and clamped to the `xs`→`xl` span.
     ///
     /// Mirrors the Svelte `offsetControlSize(resolvedSize, leadingSizeOffset)`.
-    pub fn resolved_leading_size(&self) -> ControlSize {
+    pub fn resolved_leading_size(&self, size: ControlSize) -> ControlSize {
         const LADDER: [ControlSize; 5] = [
             ControlSize::Xs,
             ControlSize::Sm,
@@ -414,8 +415,7 @@ impl ListCardSpec {
             ControlSize::Lg,
             ControlSize::Xl,
         ];
-        let resolved = crate::types::resolve_semantic_control_size(self.size, self.size_role);
-        let base = LADDER.iter().position(|s| *s == resolved).unwrap_or(2) as i32;
+        let base = LADDER.iter().position(|s| *s == size).unwrap_or(2) as i32;
         let index = (base + self.leading_size_offset).clamp(0, LADDER.len() as i32 - 1);
         LADDER[index as usize]
     }
@@ -426,8 +426,8 @@ impl ListCardSpec {
     /// at the same box size whatever `size` the host asked for — the prop was
     /// carried and ignored. The ladder below is the `data-leading-size` table
     /// from `list-card.css`.
-    pub fn leading_size_rem(&self) -> f32 {
-        match self.resolved_leading_size() {
+    pub fn leading_size_rem(&self, size: ControlSize) -> f32 {
+        match self.resolved_leading_size(size) {
             ControlSize::Xs => 1.75,
             ControlSize::Sm => 2.0,
             ControlSize::Md => 2.25,
@@ -437,8 +437,8 @@ impl ListCardSpec {
     }
 
     /// Leading glyph size in rem — the same ladder's icon row.
-    pub fn leading_icon_size_rem(&self) -> f32 {
-        match self.resolved_leading_size() {
+    pub fn leading_icon_size_rem(&self, size: ControlSize) -> f32 {
+        match self.resolved_leading_size(size) {
             ControlSize::Xs => 0.875,
             ControlSize::Sm => 1.0,
             ControlSize::Md => 1.125,
@@ -449,8 +449,8 @@ impl ListCardSpec {
 
     /// Leading text font-size in rem — the ladder's font row. Was a flat
     /// `0.875rem`, which is the `md` cell.
-    pub fn leading_font_size_rem(&self) -> f32 {
-        match self.resolved_leading_size() {
+    pub fn leading_font_size_rem(&self, size: ControlSize) -> f32 {
+        match self.resolved_leading_size(size) {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.75,
             ControlSize::Md => 0.875,
@@ -509,12 +509,12 @@ mod leading_size_tests {
 
         for (size, box_rem, icon_rem, font_rem) in cases {
             let spec = ListCardSpec::new().with_size(size);
-            assert_eq!(spec.leading_size_rem(), box_rem, "{size:?} box");
+            assert_eq!(spec.leading_size_rem(size), box_rem, "{size:?} box");
             // `leading_icon_size_rem` has no in-repo caller — the leading slot
             // is host-provided — so the test is what keeps it from drifting
             // away from the stylesheet.
-            assert_eq!(spec.leading_icon_size_rem(), icon_rem, "{size:?} icon");
-            assert_eq!(spec.leading_font_size_rem(), font_rem, "{size:?} font");
+            assert_eq!(spec.leading_icon_size_rem(size), icon_rem, "{size:?} icon");
+            assert_eq!(spec.leading_font_size_rem(size), font_rem, "{size:?} font");
         }
     }
 
@@ -522,34 +522,32 @@ mod leading_size_tests {
     /// offset can never fall off the scale.
     #[test]
     fn the_offset_walks_and_clamps() {
-        let up = ListCardSpec::new()
-            .with_size(ControlSize::Md)
-            .with_leading_size_offset(1);
-        assert_eq!(up.resolved_leading_size(), ControlSize::Lg);
+        let up = ListCardSpec::new().with_leading_size_offset(1);
+        assert_eq!(up.resolved_leading_size(ControlSize::Md), ControlSize::Lg);
 
-        let down = ListCardSpec::new()
-            .with_size(ControlSize::Md)
-            .with_leading_size_offset(-1);
-        assert_eq!(down.resolved_leading_size(), ControlSize::Sm);
+        let down = ListCardSpec::new().with_leading_size_offset(-1);
+        assert_eq!(down.resolved_leading_size(ControlSize::Md), ControlSize::Sm);
 
-        let past_the_top = ListCardSpec::new()
-            .with_size(ControlSize::Xl)
-            .with_leading_size_offset(5);
-        assert_eq!(past_the_top.resolved_leading_size(), ControlSize::Xl);
+        let past_the_top = ListCardSpec::new().with_leading_size_offset(5);
+        assert_eq!(
+            past_the_top.resolved_leading_size(ControlSize::Xl),
+            ControlSize::Xl
+        );
 
-        let past_the_bottom = ListCardSpec::new()
-            .with_size(ControlSize::Xs)
-            .with_leading_size_offset(-5);
-        assert_eq!(past_the_bottom.resolved_leading_size(), ControlSize::Xs);
+        let past_the_bottom = ListCardSpec::new().with_leading_size_offset(-5);
+        assert_eq!(
+            past_the_bottom.resolved_leading_size(ControlSize::Xs),
+            ControlSize::Xs
+        );
     }
 
-    /// `size_role` shifts the base before the offset applies.
+    /// `size_role` shifts the base in the presentation context now, before the
+    /// helper runs — the helper takes the already-resolved size as its ladder
+    /// base (a Md control with the Chrome role resolves to Sm upstream).
     #[test]
-    fn the_size_role_shifts_the_base() {
-        let chrome = ListCardSpec::new()
-            .with_size(ControlSize::Md)
-            .with_size_role(SemanticControlSizeRole::Chrome);
-        assert_eq!(chrome.resolved_leading_size(), ControlSize::Sm);
+    fn the_resolved_size_is_the_ladder_base() {
+        let card = ListCardSpec::new().with_size_role(SemanticControlSizeRole::Chrome);
+        assert_eq!(card.resolved_leading_size(ControlSize::Sm), ControlSize::Sm);
     }
 }
 

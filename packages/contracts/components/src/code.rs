@@ -31,9 +31,9 @@ pub struct CodeSpec {
     pub inline_variant: CodeInlineVariant,
     /// Inline-only typography mode (contract §3).
     pub typography: CodeTypography,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Accessible name (contract §7). `None` falls back to the visible label.
     pub aria_label: Option<String>,
     /// Whether the copy-to-clipboard control renders.
@@ -52,9 +52,9 @@ impl Default for CodeSpec {
             is_inline: false,
             inline_variant: CodeInlineVariant::Default,
             typography: CodeTypography::Body,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
             aria_label: None,
             shows_copy_button: true,
         }
@@ -166,7 +166,7 @@ impl CodeSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -176,7 +176,7 @@ impl CodeSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

@@ -1,7 +1,7 @@
 //! Icon Button specimen — migrated to the node tier in g12.019 Batch B.
 //!
 //! Every IconButton below renders through the node tier:
-//! `poodle_render::icon_button` (`Spec + Theme → Node`) interpreted by
+//! `poodle_render::icon_button` (`Spec + Context → Node`) interpreted by
 //! `poodle_gpui_node_backend::to_gpui`. The old hand-written
 //! `poodle_gpui_components::IconButton` no longer renders this specimen;
 //! everything around the buttons (layout, Eyebrow headings, captions) is
@@ -23,6 +23,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
+use poodle_render::RenderContext;
 use poodle_render::icon_button;
 use poodle_specs::{ButtonTone, ButtonVariant, EyebrowSpec, IconButtonSpec};
 
@@ -34,7 +35,7 @@ fn node_icon_button(
     state: &AppState,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> AnyElement {
-    let node = icon_button(&spec, &state.theme, on_click);
+    let node = icon_button(&spec, &RenderContext::new(&state.theme), on_click);
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
@@ -383,7 +384,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_icon("star")
                         .with_size(size)
                         .with_aria_label("Star"),
-                    theme,
+                    &poodle_render::RenderContext::new(theme),
                     None,
                 );
                 poodle_gpui_node_backend::to_gpui(&node)
@@ -394,7 +395,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_icon("star")
                         .with_density(density)
                         .with_aria_label("Star"),
-                    theme,
+                    &poodle_render::RenderContext::new(theme),
                     None,
                 );
                 poodle_gpui_node_backend::to_gpui(&node)

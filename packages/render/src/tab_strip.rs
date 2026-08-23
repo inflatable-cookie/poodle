@@ -7,7 +7,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeRole,
@@ -15,8 +14,9 @@ use poodle_node::{
 use poodle_specs::{Orientation, SemanticControlSizeRole, TabStripSpec};
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::presentation::{
-    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_padding_x_offset_rem,
+    control_space_x_rem, rem_to_px, size_font_rem, size_padding_x_offset_rem,
 };
 
 /// Host callbacks: select (tab value) and close (tab value).
@@ -32,13 +32,13 @@ pub struct TabStripHandlers {
 /// `radius-control − 0.125rem`.
 fn build_close_button(
     spec: &TabStripSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     font_size: f32,
     on_press: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
-    let icon_color = theme.resolve_color("color.text.secondary");
+    let icon_color = ctx.theme().resolve_color("color.text.secondary");
     let box_sz = rem_to_px(spec.close_button_size_rem());
-    let radius = (theme.resolve_radius("radius.control")
+    let radius = (ctx.theme().resolve_radius("radius.control")
         - rem_to_px(spec.close_button_radius_inset_rem()))
     .max(0.0);
 
@@ -48,7 +48,7 @@ fn build_close_button(
         s.descriptor.layout.width = LayoutSizing::Fixed(box_sz);
         s.descriptor.layout.height = LayoutSizing::Fixed(box_sz);
         s.descriptor.layout.spacing.margin.left =
-            theme.resolve_space(spec.close_button_gap_token());
+            ctx.theme().resolve_space(spec.close_button_gap_token());
         let c = &mut s.descriptor.corner_radii;
         c.top_left = radius;
         c.top_right = radius;
@@ -70,24 +70,25 @@ fn build_close_button(
 
 pub fn tab_strip(
     spec: &TabStripSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: TabStripHandlers,
 ) -> Node {
     // ── Size / density resolution (contract §6 + size/density axes) ──────
-    let effective_size = resolve_semantic_size(spec.size, SemanticControlSizeRole::Control);
+    let effective_size = ctx.resolve_size(spec.size, SemanticControlSizeRole::Control);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
     // Tab inline padding = density control-x + per-size offset (mirrors Button).
     let pad_x =
-        rem_to_px(control_space_x_rem(spec.density) + size_padding_x_offset_rem(effective_size));
-    let control_y = theme.resolve_space("space.control.y");
-    let inline_gap = theme.resolve_space("space.inline.sm");
-    let item_gap = theme.resolve_space(spec.item_gap_token());
+        rem_to_px(control_space_x_rem(density) + size_padding_x_offset_rem(effective_size));
+    let control_y = ctx.theme().resolve_space("space.control.y");
+    let inline_gap = ctx.theme().resolve_space("space.inline.sm");
+    let item_gap = ctx.theme().resolve_space(spec.item_gap_token());
 
     // ── Colors ───────────────────────────────────────────────────────────
-    let accent = theme.resolve_color("color.accent.base");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let border = theme.resolve_color("color.border.subtle");
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let border = ctx.theme().resolve_color("color.border.subtle");
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
     // Vertical active-tab fill: accent tinted by the named multiplier.
     let vertical_active_bg = with_alpha(accent, accent.3 * spec.vertical_active_fill_opacity());
 
@@ -169,7 +170,7 @@ pub fn tab_strip(
                 let value = item.value.clone();
                 Arc::new(move || handler(&value)) as Arc<dyn Fn() + Send + Sync>
             });
-            tab = tab.child(build_close_button(spec, theme, font_size, on_close));
+            tab = tab.child(build_close_button(spec, ctx, font_size, on_close));
         }
 
         if is_disabled {

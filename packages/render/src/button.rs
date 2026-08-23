@@ -12,7 +12,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing,
     MainAxisAlignment, Node, NodeAnimation, StylePatch, TextAlign,
@@ -22,9 +21,9 @@ use poodle_specs::{
 };
 
 use crate::color::{mix_srgb, with_alpha, BLACK, TRANSPARENT, WHITE};
+use crate::context::RenderContext;
 use crate::presentation::{
-    control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_icon_inset_rem,
-    size_min_width_rem,
+    control_height_rem, rem_to_px, size_font_rem, size_icon_inset_rem, size_min_width_rem,
 };
 
 /// The old tier's `color_mix_black`: scales RGB toward black at `ratio` while
@@ -38,12 +37,13 @@ fn mix_black(c: ColorValue, ratio: f32) -> ColorValue {
 /// tab order, so it must not fire either.
 pub fn button(
     spec: &ButtonSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
+    let theme = ctx.theme();
     // Absent size follows the presentation default (md at the base tier) —
     // the same resolution the web pair performs for `size = null`.
-    let effective_size = resolve_semantic_size(spec.size.unwrap_or_default(), spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
     // ── Base tokens ──
     let base_fill = theme.resolve_color(spec.resolved_fill_token());
@@ -74,7 +74,7 @@ pub fn button(
     let height = rem_to_px(control_height_rem(effective_size));
     let min_width = rem_to_px(size_min_width_rem(effective_size));
     // Svelte: compact -0.125rem, comfortable +0.125rem density offset on padding.
-    let density = spec.density.unwrap_or_default();
+    let density = ctx.resolve_density(spec.density);
     let density_pad_offset = rem_to_px(match density {
         ControlDensity::Compact => -0.125,
         ControlDensity::Default => 0.0,
@@ -407,6 +407,7 @@ pub fn button(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_adapter::ThemeProvider;
     use poodle_specs::{ControlDensity, ControlSize};
 
     /// The real token resolver over the ECLIPSE theme. Pure — no backend.
@@ -437,6 +438,8 @@ mod tests {
     fn metrics_follow_the_web_css_ladder() {
         // The web CSS (the reference) hardcodes the per-size height ladder:
         // xs 1.5rem, sm 1.75rem, md 2.25rem, lg 2.75rem, xl 3.25rem.
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let cases = [
             (ControlSize::Xs, 24.0),
             (ControlSize::Sm, 28.0),
@@ -446,13 +449,12 @@ mod tests {
         ];
         for (size, expected) in cases {
             let spec = ButtonSpec::new().with_size(size);
-            let node = button(&spec, &theme(), None);
+            let node = button(&spec, &ctx, None);
             assert_eq!(fixed_height(&node), expected, "height for {size:?}");
         }
 
         // pad_x = space.control.x token + density offset only — the CSS has
         // no per-size padding offsets.
-        let theme = theme();
         let base = theme.resolve_space("space.control.x");
         let cases = [
             ((ControlSize::Md, ControlDensity::Default), base),
@@ -465,7 +467,7 @@ mod tests {
                 .with_label("Save")
                 .with_size(size)
                 .with_density(density);
-            let node = button(&spec, &theme, None);
+            let node = button(&spec, &ctx, None);
             let padding = node.style.descriptor.layout.spacing.padding;
             assert_eq!(padding.left, expected, "pad_x for {size:?}/{density:?}");
             assert_eq!(padding.right, expected, "pad_x for {size:?}/{density:?}");
@@ -475,6 +477,7 @@ mod tests {
     #[test]
     fn gap_ladders_on_density() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let cases = [
             (
                 ControlDensity::Compact,
@@ -491,7 +494,7 @@ mod tests {
         ];
         for (density, expected) in cases {
             let spec = ButtonSpec::new().with_density(density);
-            let node = button(&spec, &theme, None);
+            let node = button(&spec, &ctx, None);
             assert_eq!(
                 node.style.descriptor.layout.spacing.gap, expected,
                 "gap for {density:?}"
@@ -502,6 +505,7 @@ mod tests {
     #[test]
     fn secondary_status_tone_idle_has_tinted_fill_and_plain_border() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let danger = theme.resolve_color("color.status.danger");
         let surface = theme.resolve_color("color.background.surface");
         let border_default = theme.resolve_color("color.border.default");
@@ -509,7 +513,7 @@ mod tests {
 
         // Default variant is Secondary.
         let spec = ButtonSpec::new().with_tone(ButtonTone::Danger);
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         assert_eq!(
             node.style.descriptor.background,
             Some(mix_srgb(danger, surface, 0.16))
@@ -522,9 +526,10 @@ mod tests {
     #[test]
     fn primary_border_is_the_darkened_fill() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let accent = theme.resolve_color("color.accent.base");
         let spec = ButtonSpec::new().with_variant(ButtonVariant::Primary);
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         assert_eq!(node.style.descriptor.background, Some(accent));
         // Contract §8: color-mix(in srgb, accent-base 84%, black).
         assert_eq!(node.style.descriptor.border.color, mix_black(accent, 0.84));
@@ -536,11 +541,12 @@ mod tests {
         // g15.047 comparator measured the raw-surface fill drifting ~26/255
         // from the web reference; this pins the repaired formula.
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let surface = theme.resolve_color("color.background.surface");
         let text_primary = theme.resolve_color("color.text.primary");
         let border_default = theme.resolve_color("color.border.default");
 
-        let node = button(&ButtonSpec::new(), &theme, None);
+        let node = button(&ButtonSpec::new(), &ctx, None);
         assert_eq!(
             node.style.descriptor.background,
             Some(mix_srgb(surface, text_primary, 0.88))
@@ -552,11 +558,12 @@ mod tests {
     #[test]
     fn pressed_non_primary_toggle_takes_the_accent_treatment() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let accent = theme.resolve_color("color.accent.base");
         let inverse = theme.resolve_color("color.text.inverse");
 
         let spec = ButtonSpec::new().with_pressed(true);
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         assert_eq!(node.style.descriptor.background, Some(accent));
         // Contract §8 pressed: color-mix(accent-base 85%, black) border.
         assert_eq!(node.style.descriptor.border.color, mix_black(accent, 0.85));
@@ -568,13 +575,14 @@ mod tests {
             .with_variant(ButtonVariant::Primary)
             .with_tone(ButtonTone::Danger)
             .with_pressed(true);
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         assert_eq!(node.style.descriptor.background, Some(danger));
     }
 
     #[test]
     fn hover_active_recipes_follow_variant_and_tone() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let danger = theme.resolve_color("color.status.danger");
         let surface = theme.resolve_color("color.background.surface");
         let elevated = theme.resolve_color("color.background.elevated");
@@ -585,7 +593,7 @@ mod tests {
         let spec = ButtonSpec::new()
             .with_variant(ButtonVariant::Ghost)
             .with_tone(ButtonTone::Danger);
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         let hover = node.style.hover.expect("hover patch");
         let active = node.style.active.expect("active patch");
         assert_eq!(hover.background, Some(with_alpha(danger, 0.12)));
@@ -594,7 +602,7 @@ mod tests {
 
         // Secondary × status: mixes toward surface; border toward border-default.
         let spec = ButtonSpec::new().with_tone(ButtonTone::Danger);
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         let hover = node.style.hover.expect("hover patch");
         let active = node.style.active.expect("active patch");
         assert_eq!(hover.background, Some(mix_srgb(danger, surface, 0.24)));
@@ -609,7 +617,7 @@ mod tests {
         let spec = ButtonSpec::new()
             .with_variant(ButtonVariant::Primary)
             .with_tone(ButtonTone::Danger);
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         let hover = node.style.hover.expect("hover patch");
         let active = node.style.active.expect("active patch");
         let hover_fill = mix_srgb(danger, WHITE, 0.88);
@@ -622,7 +630,7 @@ mod tests {
         // the contract §8 text-primary stacking for these states is recorded
         // as a suspicion, not repaired here. The idle-fill repair means the
         // mix now starts from the stacked fill.
-        let node = button(&ButtonSpec::new(), &theme, None);
+        let node = button(&ButtonSpec::new(), &ctx, None);
         let hover = node.style.hover.expect("hover patch");
         let active = node.style.active.expect("active patch");
         let idle_fill = mix_srgb(surface, text_primary, 0.88);
@@ -636,7 +644,7 @@ mod tests {
         // Ghost default: idle border transparent, hover border mixes from
         // border-default (not from the transparent idle border).
         let spec = ButtonSpec::new().with_variant(ButtonVariant::Ghost);
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         assert_eq!(node.style.descriptor.border.color, TRANSPARENT);
         let hover = node.style.hover.expect("hover patch");
         assert_eq!(
@@ -648,8 +656,9 @@ mod tests {
     #[test]
     fn icon_only_button_is_square_with_no_min_width_or_padding() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = ButtonSpec::new().with_leading_icon("plus");
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         let height = fixed_height(&node);
         assert_eq!(
             node.style.descriptor.layout.width,
@@ -668,12 +677,13 @@ mod tests {
         // g15.047 comparator measured GPUI reserving only the 12px glyph box,
         // shifting the label 2px against the web layout.
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let wrapper_edge = theme.resolve_space("size.icon.md");
 
         let spec = ButtonSpec::new()
             .with_label("Run")
             .with_leading_icon("play");
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         let wrapper = node
             .children
             .iter()
@@ -695,7 +705,7 @@ mod tests {
         // The glyph itself keeps the sm icon token inside the wrapper.
         assert_eq!(icon_size_of(&node, "play"), theme.resolve_space("size.icon.sm"));
 
-        let loading = button(&ButtonSpec::new().with_loading(true), &theme, None);
+        let loading = button(&ButtonSpec::new().with_loading(true), &ctx, None);
         let spinner_wrapper = loading
             .children
             .iter()
@@ -714,11 +724,12 @@ mod tests {
     #[test]
     fn icons_use_the_sm_icon_token_not_the_font_ladder() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let icon_token = theme.resolve_space("size.icon.sm");
         let spec = ButtonSpec::new()
             .with_label("Save")
             .with_leading_icon("check");
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         assert_eq!(icon_size_of(&node, "check"), icon_token);
         // The font ladder stop for md (13px) would be the old behaviour.
         assert_ne!(icon_token, rem_to_px(size_font_rem(ControlSize::Md)));
@@ -727,8 +738,9 @@ mod tests {
     #[test]
     fn chevron_pulls_in_with_a_negative_left_margin() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = ButtonSpec::new().with_label("More").with_chevron(true);
-        let node = button(&spec, &theme, None);
+        let node = button(&spec, &ctx, None);
         let chevron = node
             .find(
                 &|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "chevron-down"),
@@ -744,10 +756,11 @@ mod tests {
     #[test]
     fn loading_disables_activation_and_shows_the_sm_spinner() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = ButtonSpec::new().with_label("Save").with_loading(true);
         let node = button(
             &spec,
-            &theme,
+            &ctx,
             Some(Arc::new(|| panic!("loading must not fire"))),
         );
         assert!(node.interaction.on_activate.is_none());
@@ -776,7 +789,9 @@ mod tests {
     /// omits `toggled` exactly as the web omits `aria-pressed`.
     #[test]
     fn toggle_disclosure_and_focus_state_reach_the_accessibility_channel() {
-        let plain = button(&ButtonSpec::new().with_label("Save"), &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let plain = button(&ButtonSpec::new().with_label("Save"), &ctx, None);
         assert_eq!(plain.a11y.toggled, None);
         assert_eq!(plain.a11y.expanded, None);
         assert_eq!(plain.a11y.role, Some(poodle_node::NodeRole::Button));
@@ -787,7 +802,7 @@ mod tests {
         let ring = plain.style.focus_ring.expect("an enabled button declares a ring");
         assert_eq!(
             ring.color,
-            theme().resolve_color(ButtonSpec::new().focus_ring_color_token()),
+            theme.resolve_color(ButtonSpec::new().focus_ring_color_token()),
         );
         assert_eq!(ring.width, 2.0);
         assert_eq!(ring.offset, 2.0);
@@ -796,21 +811,21 @@ mod tests {
 
         let pressed = button(
             &ButtonSpec::new().with_label("Mute").with_pressed(true),
-            &theme(),
+            &ctx,
             None,
         );
         assert_eq!(pressed.a11y.toggled, Some(poodle_node::NodeToggled::True));
 
         let unpressed = button(
             &ButtonSpec::new().with_label("Mute").with_pressed(false),
-            &theme(),
+            &ctx,
             None,
         );
         assert_eq!(unpressed.a11y.toggled, Some(poodle_node::NodeToggled::False));
 
         let disclosure = button(
             &ButtonSpec::new().with_label("Details").with_aria_expanded(true),
-            &theme(),
+            &ctx,
             None,
         );
         assert_eq!(disclosure.a11y.expanded, Some(true));
@@ -821,12 +836,14 @@ mod tests {
     /// a bare spec omits it, exactly like the web omits the attribute.
     #[test]
     fn controls_target_reaches_the_accessibility_channel() {
-        let plain = button(&ButtonSpec::new().with_label("Save"), &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let plain = button(&ButtonSpec::new().with_label("Save"), &ctx, None);
         assert_eq!(plain.a11y.controls, None);
 
         let node = button(
             &ButtonSpec::new().with_label("Details").with_controls("details"),
-            &theme(),
+            &ctx,
             None,
         );
         assert_eq!(node.a11y.controls.as_deref(), Some("details"));
@@ -842,7 +859,9 @@ mod tests {
             .with_variant(poodle_specs::ButtonVariant::Primary)
             .with_size(ControlSize::Lg)
             .with_density(ControlDensity::Compact);
-        let node = button(&spec, &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = button(&spec, &ctx, None);
 
         assert_eq!(node.roles.get("variant").map(String::as_str), Some("primary"));
         assert_eq!(node.roles.get("tone").map(String::as_str), Some("default"));
@@ -858,9 +877,11 @@ mod tests {
         let clicks: Arc<Mutex<u32>> = Arc::new(Mutex::new(0));
         let sink = Arc::clone(&clicks);
         let spec = ButtonSpec::new().with_label("Save");
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = button(
             &spec,
-            &theme(),
+            &ctx,
             Some(Arc::new(move || *sink.lock().unwrap() += 1)),
         );
         let activate = node.interaction.on_activate.expect("activatable");

@@ -10,7 +10,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{
     ButtonSpec, ButtonVariant, DialogSpec, FormActionAlign, FormActionsSpec, FormDialogSpec,
@@ -18,10 +17,11 @@ use poodle_specs::{
 };
 
 use crate::button::button;
+use crate::context::RenderContext;
 use crate::dialog::dialog;
 use crate::form_actions::form_actions;
 use crate::form_layout::form_layout;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{rem_to_px, size_font_rem};
 
 /// Handlers mirror the GPUI target's names. `on_cancel` also covers the
 /// dialog's dismissal routes. With `custom_actions` the host owns the buttons,
@@ -38,19 +38,21 @@ pub struct FormDialogHandlers {
 
 pub fn form_dialog(
     spec: &FormDialogSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     children: Vec<Node>,
     custom_actions: Option<Node>,
     handlers: FormDialogHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
     // FormDialog's body stack follows the shared stack-md contract. Using the
     // control font ladder here made subtitle/form and bare-body spacing drift
     // from the old GPUI composite.
-    let section_gap = theme.resolve_space("space.stack.md");
+    let section_gap = ctx.theme().resolve_space("space.stack.md");
 
-    let text_secondary = theme.resolve_color("color.text.secondary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
 
     let subtitle_label = |content: &str| -> Node {
         let mut t = Node::text(content);
@@ -85,7 +87,7 @@ pub fn form_dialog(
             description: None,
             ..FormLayoutSpec::default()
         };
-        let form = form_layout(&layout_spec, theme, children, None);
+        let form = form_layout(&layout_spec, ctx, children, None);
         if let Some(ref subtitle) = spec.subtitle {
             let mut col = Node::container();
             col.style.descriptor.layout.direction = LayoutDirection::Column;
@@ -115,11 +117,11 @@ pub fn form_dialog(
             &ButtonSpec::new()
                 .with_variant(ButtonVariant::Ghost)
                 .with_label(spec.cancel_label.clone())
-                .with_size(spec.size)
+                .with_size(base_size)
                 .with_size_role(spec.size_role)
-                .with_density(spec.density)
+                .with_density(density)
                 .with_disabled(spec.is_submitting),
-            theme,
+            ctx,
             handlers.on_cancel.as_ref().map(Arc::clone),
         );
 
@@ -134,20 +136,20 @@ pub fn form_dialog(
             &ButtonSpec::new()
                 .with_variant(ButtonVariant::Primary)
                 .with_label(submit_label)
-                .with_size(spec.size)
+                .with_size(base_size)
                 .with_size_role(spec.size_role)
-                .with_density(spec.density)
+                .with_density(density)
                 .with_disabled(submit_disabled),
-            theme,
+            ctx,
             handlers.on_submit.as_ref().map(Arc::clone),
         );
 
         let row_spec = FormActionsSpec::new()
             .with_align(FormActionAlign::End)
-            .with_density(spec.density)
+            .with_density(density)
             // Sit flush on the Dialog footer rail; the Dialog draws the divider.
             .with_top_separation(false);
-        Some(form_actions(&row_spec, theme, vec![cancel, submit]))
+        Some(form_actions(&row_spec, ctx, vec![cancel, submit]))
     } else {
         None
     };
@@ -159,9 +161,9 @@ pub fn form_dialog(
     let mut dialog_spec = DialogSpec::new()
         .with_default_open(true)
         .with_show_close_button(true)
-        .with_size(spec.size)
+        .with_size(base_size)
         .with_size_role(spec.size_role)
-        .with_density(spec.density)
+        .with_density(density)
         .with_dismiss_on_escape(!spec.is_submitting)
         .with_dismiss_on_backdrop(!spec.is_submitting);
 
@@ -185,5 +187,5 @@ pub fn form_dialog(
     // Dismiss routes (Escape/backdrop/close) are host-wired; the old tier does
     // not attach on_cancel to the shell either, so the close affordance stays
     // handler-free here for byte parity.
-    dialog(&dialog_spec, theme, vec![body], actions, None)
+    dialog(&dialog_spec, ctx, vec![body], actions, None)
 }

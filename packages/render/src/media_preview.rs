@@ -6,36 +6,45 @@
 //! Composes `card` (media slot) with `media_thumbnail`, header (eyebrow /
 //! title / description + pill metadata), and body caption per §3/§10.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{CardSpec, MediaPreviewSpec, MediaThumbnailSpec};
 
 use crate::card::card;
 use crate::color::with_alpha;
+use crate::context::{RenderContext, SlotBuilder};
 use crate::presentation::rem_to_px;
 
-pub fn media_preview(spec: &MediaPreviewSpec, theme: &dyn ThemeProvider) -> Node {
-    media_preview_with_content(spec, theme, None)
+pub fn media_preview(spec: &MediaPreviewSpec, ctx: &RenderContext<'_>) -> Node {
+    media_preview_with_content(spec, ctx, None)
 }
 
 /// Render a media preview with an optional caller-owned media slot.
+///
+/// The web pair renders the `mediaContent` snippet inside the component's
+/// UiPresentationProvider scope (MediaPreview.svelte): the slot arrives as an
+/// immediate child builder invoked with that scope, not a prebuilt node.
 pub fn media_preview_with_content(
     spec: &MediaPreviewSpec,
-    theme: &dyn ThemeProvider,
-    media_content: Option<Node>,
+    ctx: &RenderContext<'_>,
+    media_content: Option<SlotBuilder<'_>>,
 ) -> Node {
-    let text_primary = theme.resolve_color(spec.title_color_token());
-    let text_secondary = theme.resolve_color(spec.secondary_text_token());
-    let meta_fill_base = theme.resolve_color(spec.meta_fill_token());
+    let text_primary = ctx.theme().resolve_color(spec.title_color_token());
+    let text_secondary = ctx.theme().resolve_color(spec.secondary_text_token());
+    let meta_fill_base = ctx.theme().resolve_color(spec.meta_fill_token());
     let meta_fill = with_alpha(meta_fill_base, meta_fill_base.3 * 0.70);
-    let meta_radius = theme.resolve_radius(spec.meta_radius_token());
+    let meta_radius = ctx.theme().resolve_radius(spec.meta_radius_token());
+    let density = ctx.resolve_density(spec.density);
 
-    let eyebrow_size = rem_to_px(spec.eyebrow_size_rem());
-    let title_size = rem_to_px(spec.title_size_rem());
-    let body_size = rem_to_px(spec.body_size_rem());
-    let (meta_pad_y, meta_pad_x) = spec.meta_padding_rem();
-    let header_gap = rem_to_px(spec.header_gap_rem());
-    let section_gap = rem_to_px(spec.section_gap_rem());
+    let base_size = ctx.base_size(spec.size);
+    // The web provider publishes the role-resolved size and resolved density.
+    let host_scope = ctx.scoped(ctx.resolve_size(spec.size, spec.size_role), density);
+    let media_content = media_content.map(|build| build(&host_scope));
+    let eyebrow_size = rem_to_px(spec.eyebrow_size_rem(base_size));
+    let title_size = rem_to_px(spec.title_size_rem(base_size));
+    let body_size = rem_to_px(spec.body_size_rem(base_size));
+    let (meta_pad_y, meta_pad_x) = spec.meta_padding_rem(base_size);
+    let header_gap = rem_to_px(spec.header_gap_rem(density));
+    let section_gap = rem_to_px(spec.section_gap_rem(density));
     let inline_gap = rem_to_px(0.375);
 
     // ── Media slot: nested MediaThumbnail (contract §3/§10) ────
@@ -53,7 +62,7 @@ pub fn media_preview_with_content(
         thumb_spec = thumb_spec.with_state_message(state_message.clone());
     }
     let thumbnail =
-        crate::media_thumbnail::media_thumbnail_with_content(&thumb_spec, theme, media_content);
+        crate::media_thumbnail::media_thumbnail_with_content(&thumb_spec, ctx, media_content);
 
     // ── Header: heading block + pill metadata ──────────────────
     let mut heading = Node::container();
@@ -137,9 +146,9 @@ pub fn media_preview_with_content(
 
     let card_spec = CardSpec::new()
         .with_variant(spec.variant)
-        .with_density(spec.resolved_density())
+        .with_density(density)
         .with_media(true)
         .with_aria_label(spec.title.clone());
 
-    card(&card_spec, theme, children)
+    card(&card_spec, ctx, children)
 }

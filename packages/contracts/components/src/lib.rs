@@ -488,7 +488,8 @@ mod tests {
     use super::{
         AccordionItemSpec, AccordionSelectionValue, AccordionSpec, BadgeSpec, BadgeVariant,
         BoxSpec, ButtonSpec, ButtonVariant, CalendarMode, CalendarSpec, CalendarWeekStart,
-        CheckState, CheckboxSpec, ChoiceOption, CollapsibleSpec, ContextMenuSpec, ControlSize,
+        CheckState, CheckboxSpec, ChoiceOption, CollapsibleSpec, ContextMenuSpec, ControlDensity,
+        ControlSize,
         DatePickerSpec, DateRangePickerSpec, DateRangeValue, DateTimePickerSpec,
         DateTimeRangePickerSpec, DateTimeRangeValue, DateTimeValue, DialogKind, DialogSpec,
         Direction, DrawerEdge, DrawerSpec, FieldSpec, FormActionAlign, FormActionDangerItem,
@@ -606,7 +607,7 @@ mod tests {
         assert!(spec.uses_pressed_semantics());
         assert_eq!(spec.is_expanded, Some(true));
         assert_eq!(spec.controls.as_deref(), Some("panel"));
-        assert_eq!(spec.control_height_token(), semantic::SIZE_CONTROL_HEIGHT);
+        assert_eq!(spec.control_height_token(ControlSize::Md), semantic::SIZE_CONTROL_HEIGHT);
     }
 
     #[test]
@@ -721,7 +722,7 @@ mod tests {
         assert!(spec.danger_items[1].disabled);
         // Inline danger gap mirrors the root action gap.
         assert_eq!(spec.danger_inline_gap_token(), spec.action_gap_token());
-        assert_eq!(spec.danger_inline_gap_rem(), spec.gap_rem());
+        assert_eq!(spec.danger_inline_gap_rem(ControlDensity::Default), spec.gap_rem(ControlDensity::Default));
     }
 
     #[test]
@@ -1223,7 +1224,7 @@ mod tests {
         assert!(!detail.has_ready_content());
         assert_eq!(detail.body_fill_token(), semantic::COLOR_BACKGROUND_PANEL);
         assert_eq!(empty.action_count(), 1);
-        assert_eq!(empty.layout_gap_token(), semantic::SPACE_STACK_MD);
+        assert_eq!(empty.layout_gap_token(ControlDensity::Default), semantic::SPACE_STACK_MD);
     }
 
     #[test]
@@ -1237,7 +1238,7 @@ mod tests {
         assert!(toolbar.is_grid_visible());
         // Default density resolves the contract §8 density-table root gap
         // (space.inline.sm), not the un-scoped base (space.stack.sm).
-        assert_eq!(toolbar.gap_token(), semantic::SPACE_INLINE_SM);
+        assert_eq!(toolbar.gap_token(ControlDensity::Default), semantic::SPACE_INLINE_SM);
         assert_eq!(summary.start_index(), 26);
         assert_eq!(summary.end_index(), 50);
     }

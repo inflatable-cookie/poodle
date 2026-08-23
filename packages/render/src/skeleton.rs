@@ -6,7 +6,6 @@
 //! ping-pong opacity pulse stands in, keyed so backends persist the clock
 //! across immediate-mode rebuilds.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     AnimEasing, AnimKeyframe, AnimLoop, AnimProperty, ColorValue, CrossAxisAlignment,
     LayoutDirection, LayoutSizing, Node, NodeAnimation,
@@ -14,6 +13,7 @@ use poodle_node::{
 use poodle_specs::{SkeletonPreset, SkeletonSpec};
 
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Parse a CSS-style dimension ("2rem", "200px") to logical pixels.
@@ -29,10 +29,10 @@ fn parse_dim(s: &str) -> Option<f32> {
 
 /// Contract §8 shimmer fill: flat mid-tone between the base outer stop and
 /// the centre highlight — one flat tone standing in for the gradient.
-pub fn shimmer_fill(spec: &SkeletonSpec, theme: &dyn ThemeProvider) -> ColorValue {
-    let base = theme.resolve_color(spec.shimmer_base_token());
+pub fn shimmer_fill(spec: &SkeletonSpec, ctx: &RenderContext<'_>) -> ColorValue {
+    let base = ctx.theme().resolve_color(spec.shimmer_base_token());
     let base = with_alpha(base, base.3 * 0.88);
-    let surface = theme.resolve_color(spec.shimmer_highlight_token());
+    let surface = ctx.theme().resolve_color(spec.shimmer_highlight_token());
     let white = ColorValue(1.0, 1.0, 1.0, 1.0);
     let highlight = mix_srgb(surface, white, 0.92);
     mix_srgb(highlight, base, 0.5)
@@ -104,11 +104,11 @@ fn single_shape(fill: ColorValue, radius: f32, spec: &SkeletonSpec) -> Node {
     el
 }
 
-pub fn skeleton(spec: &SkeletonSpec, theme: &dyn ThemeProvider) -> Node {
-    let fill = shimmer_fill(spec, theme);
-    let radius = theme.resolve_radius(spec.radius_token());
-    let pill_radius = theme.resolve_radius("radius.pill");
-    let surface_radius = theme.resolve_radius("radius.surface");
+pub fn skeleton(spec: &SkeletonSpec, ctx: &RenderContext<'_>) -> Node {
+    let fill = shimmer_fill(spec, ctx);
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let pill_radius = ctx.theme().resolve_radius("radius.pill");
+    let surface_radius = ctx.theme().resolve_radius("radius.surface");
 
     let gap_075 = rem_to_px(0.75);
     let gap_0625 = rem_to_px(0.625);
@@ -270,15 +270,19 @@ mod tests {
 
     #[test]
     fn static_skeleton_has_no_animation() {
-        let node = skeleton(&SkeletonSpec::new().with_animated(false), &theme());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = skeleton(&SkeletonSpec::new().with_animated(false), &ctx);
         assert!(node.style.animation.is_none());
     }
 
     #[test]
     fn list_and_table_presets_keep_reference_padding() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let list = skeleton(
             &SkeletonSpec::new().with_preset(SkeletonPreset::ListItem),
-            &theme(),
+            &ctx,
         );
         assert_eq!(
             list.style.descriptor.layout.spacing.padding.top,
@@ -288,7 +292,7 @@ mod tests {
 
         let table = skeleton(
             &SkeletonSpec::new().with_preset(SkeletonPreset::TableRow),
-            &theme(),
+            &ctx,
         );
         assert_eq!(
             table.style.descriptor.layout.spacing.padding.top,

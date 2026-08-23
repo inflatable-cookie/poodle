@@ -340,9 +340,11 @@ pub struct TreeSpec {
     pub show_icons: bool,
     /// Render a leading checkbox per row (cascade selection).
     pub show_checkboxes: bool,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for TreeSpec {
@@ -366,9 +368,9 @@ impl Default for TreeSpec {
             show_guides: true,
             show_icons: true,
             show_checkboxes: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -477,7 +479,7 @@ impl TreeSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -487,7 +489,7 @@ impl TreeSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

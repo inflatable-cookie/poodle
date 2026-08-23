@@ -6,20 +6,20 @@
 //! the backend's job, keyed by the animation's stable key so immediate-mode
 //! rebuilds don't restart it.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     AnimEasing, AnimKeyframe, AnimLoop, AnimProperty, ColorValue, CrossAxisAlignment,
     LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeAnimation, NodeRole,
 };
 use poodle_specs::{SpinnerSpec, SpinnerTone, SpinnerVariant};
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn spinner(spec: &SpinnerSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn spinner(spec: &SpinnerSpec, ctx: &RenderContext<'_>) -> Node {
     let tone_color = match spec.tone {
-        SpinnerTone::Current => theme.resolve_color("color.text.primary"),
-        SpinnerTone::Accent => theme.resolve_color("color.accent.base"),
-        SpinnerTone::Muted => theme.resolve_color("color.text.secondary"),
+        SpinnerTone::Current => ctx.theme().resolve_color("color.text.primary"),
+        SpinnerTone::Accent => ctx.theme().resolve_color("color.accent.base"),
+        SpinnerTone::Muted => ctx.theme().resolve_color("color.text.secondary"),
     };
 
     let mut root = match spec.variant {
@@ -149,7 +149,8 @@ mod tests {
     fn ring_uses_the_reference_svg_asset_and_rotation() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
-        let node = spinner(&SpinnerSpec::new(), &theme);
+        let ctx = RenderContext::new(&theme);
+        let node = spinner(&SpinnerSpec::new(), &ctx);
         assert!(matches!(
             &node.kind,
             poodle_node::NodeKind::Icon { name, .. } if name == "spinner"

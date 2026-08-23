@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node, StylePatch,
@@ -8,9 +7,9 @@ use poodle_node::{
 use poodle_specs::{ControlSize, SemanticControlSizeRole};
 
 use crate::color::mix_srgb;
+use crate::context::RenderContext;
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
-    size_padding_x_offset_rem,
+    rem_to_px, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem,
 };
 
 pub(crate) struct PickerTrigger<'a> {
@@ -27,26 +26,26 @@ pub(crate) struct PickerTrigger<'a> {
     pub on_toggle: Option<&'a Arc<dyn Fn() + Send + Sync>>,
 }
 
-pub(crate) fn picker_trigger(theme: &dyn ThemeProvider, config: PickerTrigger<'_>) -> Node {
-    let effective_size = resolve_semantic_size(config.size, config.size_role);
-    let height = theme.resolve_space("size.control.height")
+pub(crate) fn picker_trigger(ctx: &RenderContext<'_>, config: PickerTrigger<'_>) -> Node {
+    let effective_size = ctx.resolve_size(Some(config.size), config.size_role);
+    let height = ctx.theme().resolve_space("size.control.height")
         + rem_to_px(size_height_offset_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = theme.resolve_space("space.inline.md")
+    let pad_x = ctx.theme().resolve_space("space.inline.md")
         + rem_to_px(size_padding_x_offset_rem(effective_size));
-    let inline_gap = theme.resolve_space("space.inline.sm");
+    let inline_gap = ctx.theme().resolve_space("space.inline.sm");
     let indicator_size = config
         .indicator_size
-        .unwrap_or_else(|| theme.resolve_space("size.icon.sm"));
-    let fill = theme.resolve_color("color.background.surface");
-    let accent = theme.resolve_color("color.accent.base");
-    let radius = theme.resolve_radius("radius.control");
-    let display_color = theme.resolve_color(if config.has_value {
+        .unwrap_or_else(|| ctx.theme().resolve_space("size.icon.sm"));
+    let fill = ctx.theme().resolve_color("color.background.surface");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let radius = ctx.theme().resolve_radius("radius.control");
+    let display_color = ctx.theme().resolve_color(if config.has_value {
         "color.text.primary"
     } else {
         "color.text.secondary"
     });
-    let icon_color = theme.resolve_color("color.icon.muted");
+    let icon_color = ctx.theme().resolve_color("color.icon.muted");
     let hover_bg = mix_srgb(fill, config.elevated, 0.14);
 
     let mut trigger = Node::container();
@@ -110,7 +109,7 @@ mod tests {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
-    fn config<'a>(theme: &dyn ThemeProvider, display: &'a str) -> PickerTrigger<'a> {
+    fn config<'a>(ctx: &RenderContext<'_>, display: &'a str) -> PickerTrigger<'a> {
         PickerTrigger {
             display,
             has_value: false,
@@ -120,8 +119,8 @@ mod tests {
             size_role: SemanticControlSizeRole::Control,
             indicator: "calendar",
             indicator_size: None,
-            elevated: theme.resolve_color("color.background.elevated"),
-            border_color: theme.resolve_color("color.border.default"),
+            elevated: ctx.theme().resolve_color("color.background.elevated"),
+            border_color: ctx.theme().resolve_color("color.border.default"),
             on_toggle: None,
         }
     }
@@ -129,9 +128,10 @@ mod tests {
     #[test]
     fn shared_trigger_preserves_metrics_and_indicator() {
         let theme = theme();
-        let mut trigger_config = config(&theme, "Choose a date");
+        let ctx = RenderContext::new(&theme);
+        let mut trigger_config = config(&ctx, "Choose a date");
         trigger_config.indicator_size = Some(13.0);
-        let trigger = picker_trigger(&theme, trigger_config);
+        let trigger = picker_trigger(&ctx, trigger_config);
 
         assert_eq!(
             trigger.style.descriptor.layout.height,
@@ -148,22 +148,23 @@ mod tests {
             .expect("value label");
         assert_eq!(
             label.style.descriptor.text_color,
-            Some(theme.resolve_color("color.text.secondary"))
+            Some(ctx.theme().resolve_color("color.text.secondary"))
         );
     }
 
     #[test]
     fn value_open_and_disabled_states_follow_the_contract() {
         let theme = theme();
-        let mut trigger_config = config(&theme, "2026-08-09 12:00");
+        let ctx = RenderContext::new(&theme);
+        let mut trigger_config = config(&ctx, "2026-08-09 12:00");
         trigger_config.has_value = true;
         trigger_config.open = true;
         trigger_config.disabled = true;
-        let trigger = picker_trigger(&theme, trigger_config);
+        let trigger = picker_trigger(&ctx, trigger_config);
 
         assert_eq!(
             trigger.style.descriptor.border.color,
-            theme.resolve_color("color.accent.base")
+            ctx.theme().resolve_color("color.accent.base")
         );
         let label = trigger
             .find(&|node| {
@@ -172,7 +173,7 @@ mod tests {
             .expect("value label");
         assert_eq!(
             label.style.descriptor.text_color,
-            Some(theme.resolve_color("color.text.primary"))
+            Some(ctx.theme().resolve_color("color.text.primary"))
         );
         assert!(trigger.interaction.on_activate.is_none());
         assert!(trigger.style.hover.is_none());

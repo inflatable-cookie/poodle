@@ -53,9 +53,9 @@ pub struct CollapseToggleSpec {
     pub is_disabled: bool,
     /// Custom accessible label. Defaults to "Collapse"/"Expand".
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for CollapseToggleSpec {
@@ -65,9 +65,9 @@ impl Default for CollapseToggleSpec {
             direction: CollapseDirection::Left,
             is_disabled: false,
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -133,10 +133,11 @@ impl CollapseToggleSpec {
     // than referencing a per-target presentation module) so both Rust targets
     // resolve identical geometry from a single spec source of truth.
 
-    /// Effective control size after applying `size_role` to the base `size`.
-    /// Defaults to `Md`; `Chrome` role (the default) shifts one stop smaller.
-    pub fn effective_size(&self) -> ControlSize {
-        match (self.size, self.size_role) {
+    /// Effective control size after applying `size_role` to the resolved
+    /// `size` (omission already inherited from the presentation context).
+    /// `Chrome` role (the default) shifts one stop smaller.
+    pub fn effective_size(&self, size: ControlSize) -> ControlSize {
+        match (size, self.size_role) {
             (s, SemanticControlSizeRole::Control) => s,
 
             (ControlSize::Xs, SemanticControlSizeRole::Chrome) => ControlSize::Xs,
@@ -155,8 +156,8 @@ impl CollapseToggleSpec {
 
     /// Full button padding in rem for the effective size (contract §8 size table:
     /// xs 0.0625, sm/md 0.125, lg 0.1875, xl 0.25).
-    pub fn padding_rem(&self) -> f32 {
-        match self.effective_size() {
+    pub fn padding_rem(&self, size: ControlSize) -> f32 {
+        match self.effective_size(size) {
             ControlSize::Xs => 0.0625,
             ControlSize::Sm => 0.125,
             ControlSize::Md => 0.125,
@@ -168,8 +169,8 @@ impl CollapseToggleSpec {
     /// Horizontal (inline) padding in rem for the density (contract §8 density
     /// table: comfortable 0.375, compact/default 0.125 = base). Density only
     /// overrides `padding-inline`; it never touches vertical padding or height.
-    pub fn padding_inline_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_inline_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Comfortable => 0.375,
             ControlDensity::Compact | ControlDensity::Default => 0.125,
         }
@@ -177,15 +178,15 @@ impl CollapseToggleSpec {
 
     /// The chevron icon size, scaling with the effective control size to match
     /// Svelte's `<Icon size={resolvedSize} />`.
-    pub fn effective_icon_size(&self) -> IconSize {
-        IconSize::from(self.effective_size())
+    pub fn effective_icon_size(&self, size: ControlSize) -> IconSize {
+        IconSize::from(self.effective_size(size))
     }
 
     // ── Token methods ────────────────────────────────────────
 
     /// Icon size token for the chevron, scaled by the effective control size.
-    pub fn icon_size_token(&self) -> &'static str {
-        self.effective_icon_size().size_token()
+    pub fn icon_size_token(&self, size: ControlSize) -> &'static str {
+        self.effective_icon_size(size).size_token()
     }
 
     /// Radius for the toggle button (small, like the Svelte radius-sm).
@@ -224,7 +225,7 @@ impl CollapseToggleSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -234,7 +235,7 @@ impl CollapseToggleSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

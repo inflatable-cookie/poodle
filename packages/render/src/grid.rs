@@ -12,13 +12,13 @@
 //! DELTAS vs CSS grid: explicit `rows` tracks are not honored (rows emerge
 //! from flex-wrap); `gap` is one value on both axes.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, LayoutSizing, Node};
 use poodle_specs::{GridColumns, GridSpec, GridTrack};
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn grid(spec: &GridSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> Node {
+pub fn grid(spec: &GridSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
     let padding = spec.resolved_padding();
     let columns = spec.parsed_columns();
     let fr_total = match &columns {
@@ -41,17 +41,17 @@ pub fn grid(spec: &GridSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> 
 
         // Single gap value on both axes (contract §8).
         if let Some(gap_token) = spec.resolved_column_gap() {
-            s.descriptor.layout.spacing.gap = theme.resolve_space(gap_token);
+            s.descriptor.layout.spacing.gap = ctx.theme().resolve_space(gap_token);
         }
 
         if let Some(h) = padding.horizontal {
-            let px_val = theme.resolve_space(h);
+            let px_val = ctx.theme().resolve_space(h);
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = px_val;
             pad.right = px_val;
         }
         if let Some(v) = padding.vertical {
-            let px_val = theme.resolve_space(v);
+            let px_val = ctx.theme().resolve_space(v);
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.top = px_val;
             pad.bottom = px_val;
@@ -110,9 +110,10 @@ mod tests {
     fn fractional_tracks_keep_their_declared_weight() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
         let node = grid(
             &GridSpec::new().with_columns("1fr 2fr"),
-            &theme,
+            &ctx,
             vec![Node::text("one"), Node::text("two")],
         );
 

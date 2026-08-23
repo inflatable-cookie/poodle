@@ -46,9 +46,9 @@ pub struct TimeZoneSelectSpec {
     pub options: Vec<TimeZoneOption>,
     pub is_open: bool,
     pub is_disabled: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     pub aria_label: Option<String>,
     pub described_by: Option<String>,
     /// Current search/filter query for the always-on searchable dropdown.
@@ -68,9 +68,9 @@ impl Default for TimeZoneSelectSpec {
             options: Vec::new(),
             is_open: false,
             is_disabled: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             aria_label: None,
             described_by: None,
             search_query: None,
@@ -176,10 +176,12 @@ impl TimeZoneSelectSpec {
             .with_searchable(true)
             .with_empty_message(TIME_ZONE_EMPTY_MESSAGE)
             .with_placeholder(self.effective_placeholder())
-            .with_size(self.size)
             .with_size_role(self.size_role)
-            .with_density(self.density)
             .with_open(self.is_open);
+        // Omission propagates unchanged: `None` still means "inherit from the
+        // presentation context" on the composed Select.
+        spec.size = self.size;
+        spec.density = self.density;
         spec.is_disabled = self.is_disabled;
         spec.id = self.id.clone();
         spec.name = self.name.clone();
@@ -218,7 +220,7 @@ impl TimeZoneSelectSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -228,7 +230,7 @@ impl TimeZoneSelectSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

@@ -83,9 +83,9 @@ pub struct BulkActionBarSpec {
     /// When true, the whole bar is disabled — action and clear/select-all
     /// controls are dimmed and non-interactive. Mirrors Svelte `disabled`.
     pub disabled: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Copy for the select-all control.
     pub select_all_label: String,
 }
@@ -100,9 +100,9 @@ impl Default for BulkActionBarSpec {
             all_selected: false,
             loading: false,
             disabled: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             select_all_label: "Select all".to_string(),
         }
     }
@@ -256,7 +256,7 @@ impl BulkActionBarSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -266,7 +266,7 @@ impl BulkActionBarSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

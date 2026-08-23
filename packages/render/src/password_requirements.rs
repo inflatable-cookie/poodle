@@ -3,11 +3,11 @@
 //! Contract: `docs/contracts/components/password-requirements.md`
 //! Ported from: `packages/jetstream/components/src/password_requirements.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{ColorValue, CrossAxisAlignment, LayoutDirection, Node, NodeRole};
 use poodle_specs::PasswordRequirementsSpec;
 
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
 /// Build a single requirement row with pass/fail indicator.
 fn requirement_item(
@@ -40,17 +40,17 @@ fn requirement_item(
     row.child(icon).child(label)
 }
 
-pub fn password_requirements(spec: &PasswordRequirementsSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn password_requirements(spec: &PasswordRequirementsSpec, ctx: &RenderContext<'_>) -> Node {
     // ── Token resolution ──
-    let fill = theme.resolve_color(spec.fill_token());
-    let border_color = theme.resolve_color(spec.border_token());
-    let title_color = theme.resolve_color(spec.title_color_token());
-    let text_color = theme.resolve_color(spec.text_color_token());
-    let met_color = theme.resolve_color(spec.met_color_token());
-    let error_color = theme.resolve_color(spec.error_color_token());
+    let fill = ctx.theme().resolve_color(spec.fill_token());
+    let border_color = ctx.theme().resolve_color(spec.border_token());
+    let title_color = ctx.theme().resolve_color(spec.title_color_token());
+    let text_color = ctx.theme().resolve_color(spec.text_color_token());
+    let met_color = ctx.theme().resolve_color(spec.met_color_token());
+    let error_color = ctx.theme().resolve_color(spec.error_color_token());
 
     // ── Sizing (contract §7 ladder, resolved via effective size) ──
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let title_size = rem_to_px(PasswordRequirementsSpec::title_size_rem(effective_size));
     let body_size = rem_to_px(PasswordRequirementsSpec::body_size_rem(effective_size));
     let icon_size = body_size; // indicator tracks body type size
@@ -61,8 +61,8 @@ pub fn password_requirements(spec: &PasswordRequirementsSpec, theme: &dyn ThemeP
     let hint_gap = rem_to_px(PasswordRequirementsSpec::hint_gap_rem(effective_size));
     let item_gap = rem_to_px(0.375); // indicator↔label gap
     let padding = rem_to_px(PasswordRequirementsSpec::padding_rem(effective_size));
-    let border_width = theme.resolve_space(spec.border_width_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+    let border_width = ctx.theme().resolve_space(spec.border_width_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
 
     // ── Root container ──
     let mut root = Node::container();

@@ -12,14 +12,14 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, Node, NodeRole};
 use poodle_specs::{CalendarSpec, DatePickerSpec};
 
 use crate::calendar::{calendar, CalendarHandlers};
 use crate::color::{mix_linear, with_alpha};
+use crate::context::RenderContext;
 use crate::picker_trigger::{picker_trigger, PickerTrigger};
-use crate::presentation::{date_picker_indicator_font_rem, rem_to_px, resolve_semantic_size};
+use crate::presentation::{date_picker_indicator_font_rem, rem_to_px};
 
 /// Host callbacks: `on_toggle` (trigger pressed; the spec owns open state),
 /// `on_select` (ISO day) and `on_navigate` ("prev"/"next"), the latter two
@@ -33,10 +33,12 @@ pub struct DatePickerHandlers {
 
 pub fn date_picker(
     spec: &DatePickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: DatePickerHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let base_size = ctx.base_size(spec.size);
+    let theme = ctx.theme();
 
     let elevated = theme.resolve_color("color.background.elevated");
     let border = theme.resolve_color("color.border.default");
@@ -48,13 +50,13 @@ pub fn date_picker(
         .map(|v| v.to_string())
         .unwrap_or_else(|| spec.placeholder.clone());
     let trigger = picker_trigger(
-        theme,
+        ctx,
         PickerTrigger {
             display: &display,
             has_value: spec.current_value().is_some(),
             open: spec.current_open(),
             disabled: spec.is_disabled,
-            size: spec.size,
+            size: base_size,
             size_role: spec.size_role,
             indicator: "chevron-down",
             indicator_size: Some(indicator_size),
@@ -113,7 +115,7 @@ pub fn date_picker(
         }
         let surface = surface.child(calendar(
             &cal_spec,
-            theme,
+            ctx,
             CalendarHandlers {
                 on_select: handlers.on_select.clone(),
                 on_range_select: None,

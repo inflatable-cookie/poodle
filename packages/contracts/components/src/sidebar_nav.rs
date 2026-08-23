@@ -60,9 +60,9 @@ pub struct SidebarNavSpec {
     pub groups: Vec<SidebarNavGroup>,
     pub value: Option<String>,
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl SidebarNavSpec {
@@ -71,9 +71,9 @@ impl SidebarNavSpec {
             groups,
             value: None,
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -138,18 +138,19 @@ impl SidebarNavSpec {
         "state.opacity.disabled"
     }
 
-    /// Effective control size after resolving the semantic size role. The
-    /// sidebar's own size table keys off the raw `data-size` (matching Svelte
-    /// CSS `[data-size]` overrides), so this is exposed for callers that need the
-    /// inherited presentation size for children, not the item geometry.
-    pub fn effective_size(&self) -> ControlSize {
-        resolve_semantic_size(self.size, self.size_role)
+    /// Effective control size after resolving the semantic size role against
+    /// the presentation-resolved `size`. The sidebar's own size table keys off
+    /// the raw size (matching Svelte CSS `[data-size]` overrides), so this is
+    /// exposed for callers that need the inherited presentation size for
+    /// children, not the item geometry.
+    pub fn effective_size(&self, size: ControlSize) -> ControlSize {
+        resolve_semantic_size(size, self.size_role)
     }
 
     /// Item min-height in rem, by raw size (contract §8 Size Variants). Keyed off
     /// the raw `data-size` like the Svelte CSS, not the chrome-resolved size.
-    pub fn item_height_rem(&self) -> f32 {
-        match self.size {
+    pub fn item_height_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 1.375,
             ControlSize::Sm => 1.625,
             ControlSize::Md => 1.875,
@@ -159,8 +160,8 @@ impl SidebarNavSpec {
     }
 
     /// Item font-size in rem, by raw size (contract §8 Size Variants).
-    pub fn item_font_rem(&self) -> f32 {
-        match self.size {
+    pub fn item_font_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.75,
             ControlSize::Md => 0.8125,
@@ -170,8 +171,8 @@ impl SidebarNavSpec {
     }
 
     /// Group-title font-size in rem, by raw size (contract §8 Size Variants).
-    pub fn title_font_rem(&self) -> f32 {
-        match self.size {
+    pub fn title_font_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.46875,
             ControlSize::Sm => 0.5,
             ControlSize::Md => 0.5625,
@@ -181,8 +182,8 @@ impl SidebarNavSpec {
     }
 
     /// Gap between groups in rem, by density (contract §8 Density Variants).
-    pub fn group_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn group_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.625,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 0.875,
@@ -190,8 +191,8 @@ impl SidebarNavSpec {
     }
 
     /// Item horizontal padding in rem, by density (contract §8 Density Variants).
-    pub fn item_pad_inline_rem(&self) -> f32 {
-        match self.density {
+    pub fn item_pad_inline_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 0.875,
@@ -199,8 +200,8 @@ impl SidebarNavSpec {
     }
 
     /// Item vertical padding in rem, by density (contract §8 Density Variants).
-    pub fn item_pad_block_rem(&self) -> f32 {
-        match self.density {
+    pub fn item_pad_block_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.3125,
             ControlDensity::Default => 0.375,
             ControlDensity::Comfortable => 0.4375,
@@ -208,8 +209,8 @@ impl SidebarNavSpec {
     }
 
     /// Gap between a group title and its list in rem, by density (contract §8).
-    pub fn title_gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn title_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.125,
             ControlDensity::Default => 0.1875,
             ControlDensity::Comfortable => 0.25,
@@ -217,7 +218,7 @@ impl SidebarNavSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -227,7 +228,7 @@ impl SidebarNavSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }
@@ -265,41 +266,24 @@ mod tests {
     #[test]
     fn item_height_tracks_size_table() {
         // sidebar table, NOT control-height (md = 1.875rem, not 2.25rem)
-        assert_eq!(
-            SidebarNavSpec::new(vec![])
-                .with_size(ControlSize::Md)
-                .item_height_rem(),
-            1.875
-        );
-        assert_eq!(
-            SidebarNavSpec::new(vec![])
-                .with_size(ControlSize::Xs)
-                .item_height_rem(),
-            1.375
-        );
-        assert_eq!(
-            SidebarNavSpec::new(vec![])
-                .with_size(ControlSize::Xl)
-                .item_height_rem(),
-            2.375
-        );
+        let spec = SidebarNavSpec::new(vec![]);
+        assert_eq!(spec.item_height_rem(ControlSize::Md), 1.875);
+        assert_eq!(spec.item_height_rem(ControlSize::Xs), 1.375);
+        assert_eq!(spec.item_height_rem(ControlSize::Xl), 2.375);
     }
 
     #[test]
     fn density_spacing_tracks_table() {
-        let compact = SidebarNavSpec::new(vec![]).with_density(ControlDensity::Compact);
-        let comfy = SidebarNavSpec::new(vec![]).with_density(ControlDensity::Comfortable);
-        assert_eq!(compact.group_gap_rem(), 0.625);
-        assert_eq!(compact.item_pad_block_rem(), 0.3125);
-        assert_eq!(comfy.item_pad_inline_rem(), 0.875);
-        assert_eq!(comfy.title_gap_rem(), 0.25);
+        let spec = SidebarNavSpec::new(vec![]);
+        assert_eq!(spec.group_gap_rem(ControlDensity::Compact), 0.625);
+        assert_eq!(spec.item_pad_block_rem(ControlDensity::Compact), 0.3125);
+        assert_eq!(spec.item_pad_inline_rem(ControlDensity::Comfortable), 0.875);
+        assert_eq!(spec.title_gap_rem(ControlDensity::Comfortable), 0.25);
     }
 
     #[test]
     fn chrome_role_resolves_one_stop_smaller() {
-        let spec = SidebarNavSpec::new(vec![])
-            .with_size(ControlSize::Md)
-            .with_size_role(SemanticControlSizeRole::Chrome);
-        assert_eq!(spec.effective_size(), ControlSize::Sm);
+        let spec = SidebarNavSpec::new(vec![]).with_size_role(SemanticControlSizeRole::Chrome);
+        assert_eq!(spec.effective_size(ControlSize::Md), ControlSize::Sm);
     }
 }

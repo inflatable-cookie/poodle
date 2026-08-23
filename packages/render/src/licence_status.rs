@@ -17,7 +17,6 @@
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::licence::{
     civil_from_days, format_time_date_parts, licence_status_view, LicenceStatusInput,
     LicenceStatusView,
@@ -25,6 +24,7 @@ use poodle_headless::licence::{
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};
 use poodle_specs::{LicenceStatusSpec, StatusIndicatorSpec, StatusTone, TimeAgoSpec};
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::status_indicator::status_indicator;
 
@@ -92,7 +92,7 @@ fn indicator_tone(view: &LicenceStatusView) -> StatusTone {
     }
 }
 
-pub fn licence_status(spec: &LicenceStatusSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn licence_status(spec: &LicenceStatusSpec, ctx: &RenderContext<'_>) -> Node {
     let view = licence_status_view(LicenceStatusInput {
         usability: spec.usability.clone(),
         trust_basis: spec.trust_basis.clone(),
@@ -102,14 +102,14 @@ pub fn licence_status(spec: &LicenceStatusSpec, theme: &dyn ThemeProvider) -> No
         attention: spec.attention,
     });
 
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_tertiary = theme.resolve_color("color.text.tertiary");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let text_tertiary = ctx.theme().resolve_color("color.text.tertiary");
 
     // ── Head: StatusIndicator + state title ──
     let indicator = status_indicator(
         &StatusIndicatorSpec::new().with_status(indicator_tone(&view)),
-        theme,
+        ctx,
     );
     let mut title = Node::text(&view.title);
     title.style.text_size = Some(rem_to_px(1.0));
@@ -120,7 +120,7 @@ pub fn licence_status(spec: &LicenceStatusSpec, theme: &dyn ThemeProvider) -> No
         let s = &mut head.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
     }
     let head = head.child(indicator).child(title);
 
@@ -131,7 +131,7 @@ pub fn licence_status(spec: &LicenceStatusSpec, theme: &dyn ThemeProvider) -> No
         body_text.push_str(&relative_row_text(timestamp_ms, "ends", "ended"));
     }
     let mut body = Node::text(&body_text);
-    body.style.text_size = Some(theme.resolve_space("typography.body.size"));
+    body.style.text_size = Some(ctx.theme().resolve_space("typography.body.size"));
     body.style.descriptor.text_color = Some(text_primary);
 
     // ── Definition list: coverage rows + trust basis ──
@@ -142,7 +142,7 @@ pub fn licence_status(spec: &LicenceStatusSpec, theme: &dyn ThemeProvider) -> No
     {
         let s = &mut dl.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.xs");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.xs");
     }
     for row in &view.coverage {
         let value = match row.timestamp_ms {
@@ -153,7 +153,7 @@ pub fn licence_status(spec: &LicenceStatusSpec, theme: &dyn ThemeProvider) -> No
             ),
             None => row.text.clone().unwrap_or_default(),
         };
-        dl = dl.child(dl_row(theme, &row.term, &value, text_primary, text_secondary));
+        dl = dl.child(dl_row(ctx, &row.term, &value, text_primary, text_secondary));
     }
     let trust_value = match view.trust.timestamp_ms {
         Some(timestamp_ms) => {
@@ -162,7 +162,7 @@ pub fn licence_status(spec: &LicenceStatusSpec, theme: &dyn ThemeProvider) -> No
         None => view.trust.text.clone(),
     };
     let dl = dl.child(dl_row(
-        theme,
+        ctx,
         &view.trust.term,
         &trust_value,
         text_primary,
@@ -175,7 +175,7 @@ pub fn licence_status(spec: &LicenceStatusSpec, theme: &dyn ThemeProvider) -> No
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
     }
     let mut root = root.child(head).child(body).child(dl);
     if let Some(detail) = &view.detail {
@@ -188,7 +188,7 @@ pub fn licence_status(spec: &LicenceStatusSpec, theme: &dyn ThemeProvider) -> No
             None => detail.text.clone(),
         };
         let mut quiet = Node::text(&detail_text);
-        quiet.style.text_size = Some(theme.resolve_space("typography.label.size"));
+        quiet.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
         quiet.style.descriptor.text_color = Some(text_tertiary);
         root = root.child(quiet);
     }
@@ -212,7 +212,7 @@ pub fn licence_status(spec: &LicenceStatusSpec, theme: &dyn ThemeProvider) -> No
 /// One `dt`/`dd` pair rendered as a labelled row (web §6: semantic
 /// definition list).
 fn dl_row(
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     term: &str,
     value: &str,
     term_color: poodle_node::ColorValue,
@@ -224,13 +224,13 @@ fn dl_row(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.md");
     }
     let mut term_node = Node::text(term);
-    term_node.style.text_size = Some(theme.resolve_space("typography.label.size"));
+    term_node.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
     term_node.style.descriptor.text_color = Some(term_color);
     let mut value_node = Node::text(value);
-    value_node.style.text_size = Some(theme.resolve_space("typography.label.size"));
+    value_node.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
     value_node.style.descriptor.text_color = Some(value_color);
     row.child(term_node).child(value_node)
 }
@@ -262,9 +262,11 @@ mod tests {
     /// One case per usability state, with the web's copy.
     #[test]
     fn every_state_renders_with_the_web_copy() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let active = licence_status(
             &spec().with_usability(LicenceUsability::Active),
-            &theme(),
+            &ctx,
         );
         let rendered = texts(&active);
         assert!(rendered.iter().any(|t| t == "Licence active"));
@@ -272,7 +274,7 @@ mod tests {
 
         let grace = licence_status(
             &spec().with_usability(LicenceUsability::InGrace { until: 1_799_999_100 }),
-            &theme(),
+            &ctx,
         );
         let rendered = texts(&grace);
         assert!(rendered.iter().any(|t| t == "Licence active"));
@@ -281,7 +283,7 @@ mod tests {
 
         let expired = licence_status(
             &spec().with_usability(LicenceUsability::UseWindowExpired { at: 1_799_999_100 }),
-            &theme(),
+            &ctx,
         );
         let rendered = texts(&expired);
         assert!(rendered.iter().any(|t| t == "Use coverage ended"));
@@ -289,14 +291,14 @@ mod tests {
 
         let lapsed = licence_status(
             &spec().with_usability(LicenceUsability::LeaseLapsed { at: 1_799_999_100 }),
-            &theme(),
+            &ctx,
         );
         let rendered = texts(&lapsed);
         assert!(rendered.iter().any(|t| t == "Licence confirmation required"));
 
         let clock = licence_status(
             &spec().with_usability(LicenceUsability::ClockRefused),
-            &theme(),
+            &ctx,
         );
         let rendered = texts(&clock);
         assert!(rendered.iter().any(|t| t == "Check this machine's clock"));
@@ -308,11 +310,13 @@ mod tests {
     /// combinations, plus the trust row.
     #[test]
     fn coverage_rows_cover_null_and_value_combinations() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = licence_status(
             &spec()
                 .with_use_until(None)
                 .with_update_until(Some(1_800_000_000)),
-            &theme(),
+            &ctx,
         );
         let rendered = texts(&node);
         assert!(rendered.iter().any(|t| t == "Use coverage"));
@@ -327,12 +331,14 @@ mod tests {
     /// gates on them.
     #[test]
     fn authority_reads_reach_the_tree_as_data_state_only() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = licence_status(
             &spec()
                 .with_usability(LicenceUsability::InGrace { until: 1_800_000_000 })
                 .with_attention(LicenceAttention::Informational)
                 .with_usable(true),
-            &theme(),
+            &ctx,
         );
         assert_eq!(node.roles.get("state").map(String::as_str), Some("inGrace"));
         assert_eq!(

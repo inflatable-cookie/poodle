@@ -10,7 +10,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole, StylePatch,
@@ -18,8 +17,9 @@ use poodle_node::{
 use poodle_specs::{ControlDensity, ControlSize, FileUploadSpec, MediaPickerItem, MediaPickerSpec};
 
 use crate::color::TRANSPARENT;
+use crate::context::RenderContext;
 use crate::file_upload::file_upload;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{rem_to_px, size_font_rem};
 
 /// Thumbnail square size in rem per size (contract §8 size table).
 fn thumb_size_rem(size: ControlSize) -> f32 {
@@ -52,21 +52,23 @@ pub struct MediaPickerHandlers {
 
 pub fn media_picker(
     spec: &MediaPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: MediaPickerHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let label_size = theme.resolve_space("typography.label.size");
+    let label_size = ctx.theme().resolve_space("typography.label.size");
 
-    let fill = theme.resolve_color(spec.fill_token());
-    let radius = theme.resolve_radius("radius.surface");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let accent = theme.resolve_color("color.accent.base");
-    let border = theme.resolve_color("color.border.default");
-    let ctrl_radius = theme.resolve_radius(spec.item_radius_token());
-    let gap = theme.resolve_space("space.stack.sm");
+    let fill = ctx.theme().resolve_color(spec.fill_token());
+    let radius = ctx.theme().resolve_radius("radius.surface");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let border = ctx.theme().resolve_color("color.border.default");
+    let ctrl_radius = ctx.theme().resolve_radius(spec.item_radius_token());
+    let gap = ctx.theme().resolve_space("space.stack.sm");
 
     let all_radius = |node: &mut Node, r: f32| {
         let c = &mut node.style.descriptor.corner_radii;
@@ -156,7 +158,7 @@ pub fn media_picker(
 
         // ── Grid OR empty state ──
         if spec.has_items() {
-            let (grid_gap, item_pad) = grid_gap_and_pad_rem(spec.density);
+            let (grid_gap, item_pad) = grid_gap_and_pad_rem(density);
             let thumb_size = rem_to_px(thumb_size_rem(effective_size));
             // Contract: the media grid is a `listbox` of selectable `option`s.
             let mut grid = Node::container();
@@ -171,7 +173,7 @@ pub fn media_picker(
                 s.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
             }
             for item in &spec.items {
-                let mut cell = grid_item(item, spec, theme, thumb_size, item_pad, label_size);
+                let mut cell = grid_item(item, spec, ctx, thumb_size, item_pad, label_size);
                 if let Some(handler) = &handlers.on_select {
                     let handler = Arc::clone(handler);
                     let id = item.id.clone();
@@ -203,9 +205,9 @@ pub fn media_picker(
         // ── Upload tab: compose the real FileUpload dropzone ──
         let mut upload_spec = FileUploadSpec::new()
             .with_multiple(true)
-            .with_size(spec.size)
+            .with_size(base_size)
             .with_size_role(spec.size_role)
-            .with_density(spec.density);
+            .with_density(density);
         if let Some(ref accept) = spec.accept {
             upload_spec = upload_spec.with_accept(accept.clone());
         }
@@ -217,7 +219,7 @@ pub fn media_picker(
         wrap.style.descriptor.layout.direction = LayoutDirection::Row;
         wrap.style.descriptor.layout.spacing.margin.top = rem_to_px(0.25);
         wrap.style.self_stretch = true;
-        root = root.child(wrap.child(file_upload(&upload_spec, theme, None)));
+        root = root.child(wrap.child(file_upload(&upload_spec, ctx, None)));
     }
 
     root
@@ -228,16 +230,16 @@ pub fn media_picker(
 fn grid_item(
     item: &MediaPickerItem,
     spec: &MediaPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     thumb_size: f32,
     item_pad: f32,
     label_size: f32,
 ) -> Node {
-    let item_radius = theme.resolve_radius(spec.item_radius_token());
-    let label_color = theme.resolve_color(spec.label_token());
-    let placeholder_color = theme.resolve_color(spec.placeholder_icon_token());
-    let hover_fill = theme.resolve_color(spec.item_hover_fill_token());
-    let hover_border = theme.resolve_color(spec.item_border_token());
+    let item_radius = ctx.theme().resolve_radius(spec.item_radius_token());
+    let label_color = ctx.theme().resolve_color(spec.label_token());
+    let placeholder_color = ctx.theme().resolve_color(spec.placeholder_icon_token());
+    let hover_fill = ctx.theme().resolve_color(spec.item_hover_fill_token());
+    let hover_border = ctx.theme().resolve_color(spec.item_border_token());
 
     let all_radius = |node: &mut Node, r: f32| {
         let c = &mut node.style.descriptor.corner_radii;

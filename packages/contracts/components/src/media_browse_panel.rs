@@ -42,9 +42,9 @@ pub struct MediaBrowsePanelSpec {
     pub has_more: bool,
     pub empty_message: String,
     pub load_more_label: String,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for MediaBrowsePanelSpec {
@@ -56,9 +56,9 @@ impl Default for MediaBrowsePanelSpec {
             has_more: false,
             empty_message: String::from("No media found"),
             load_more_label: String::from("Load more"),
-            size: ControlSize::default(),
+            size: None,
             size_role: SemanticControlSizeRole::default(),
-            density: ControlDensity::default(),
+            density: None,
         }
     }
 }
@@ -96,7 +96,7 @@ impl MediaBrowsePanelSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -106,7 +106,7 @@ impl MediaBrowsePanelSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

@@ -14,9 +14,9 @@ pub struct EmbedInputSpec {
     pub error: Option<String>,
     /// Presentation axes (contract §3): size is intrinsic, density is sibling
     /// spacing, size_role resolves size from the inherited presentation.
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for EmbedInputSpec {
@@ -27,7 +27,7 @@ impl Default for EmbedInputSpec {
 
 impl EmbedInputSpec {
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -37,7 +37,7 @@ impl EmbedInputSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -50,9 +50,9 @@ impl EmbedInputSpec {
             providers: Vec::new(),
             is_disabled: false,
             error: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 

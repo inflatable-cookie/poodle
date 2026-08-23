@@ -12,7 +12,6 @@
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicU8, Ordering};
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, NodeRole,
     ScrubPhase, ShadowValue, StylePatch,
@@ -20,7 +19,8 @@ use poodle_node::{
 use poodle_specs::{ControlSize, RangeSliderSpec, SliderVariant};
 
 use crate::color::with_alpha;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
 /// Host callbacks: continuous change + end-of-drag commit, both `(low, high)`.
 #[derive(Default)]
@@ -53,24 +53,25 @@ fn track_thickness_rem(size: ControlSize) -> f32 {
 
 pub fn range_slider(
     spec: &RangeSliderSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: RangeSliderHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // Contract §7/§8: thumb diameter, track thickness, and min-height share
     // the size axis.
     let thumb_size = rem_to_px(thumb_diameter_rem(effective_size));
     let track_h = rem_to_px(track_thickness_rem(effective_size));
     // Pill radius (contract: 999px full-pill) and thumb border (0.0625rem).
-    let pill = theme.resolve_radius("radius.pill");
+    let pill = ctx.theme().resolve_radius("radius.pill");
     let border_w = rem_to_px(0.0625);
 
-    let accent = theme.resolve_color(spec.range_fill_token());
-    let negative = theme.resolve_color("color.status.danger");
-    let surface = theme.resolve_color("color.background.surface");
-    let border_default = theme.resolve_color("color.border.default");
-    let elevated = theme.resolve_color("color.background.elevated");
+    let accent = ctx.theme().resolve_color(spec.range_fill_token());
+    let negative = ctx.theme().resolve_color("color.status.danger");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let border_default = ctx.theme().resolve_color("color.border.default");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
 
     // Contract §8 track bg = color-mix(surface 88%, transparent).
     let track_bg = with_alpha(surface, surface.3 * 0.88);
@@ -185,7 +186,7 @@ pub fn range_slider(
             // requires it (or on_focus_change) before a focus handle exists.
             thumb.style.focus = Some(StylePatch {
                 background: None,
-                border_color: Some(theme.resolve_color(spec.focus_ring_color_token())),
+                border_color: Some(ctx.theme().resolve_color(spec.focus_ring_color_token())),
                 text_color: None,
                 opacity: None,
             });
@@ -515,7 +516,7 @@ pub fn range_slider(
     );
     el.roles.insert(
         "density".to_owned(),
-        match spec.density {
+        match density {
             poodle_specs::ControlDensity::Compact => "compact",
             poodle_specs::ControlDensity::Default => "default",
             poodle_specs::ControlDensity::Comfortable => "comfortable",
@@ -544,7 +545,7 @@ pub fn range_slider(
     }
 
     if spec.is_disabled {
-        el.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         el.interaction.disabled = true;
     }
 
@@ -568,9 +569,11 @@ mod tests {
     fn armed() -> (Node, std::sync::Arc<std::sync::Mutex<Vec<(f64, f64)>>>) {
         let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let sink = std::sync::Arc::clone(&seen);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = range_slider(
             &spec(),
-            &theme(),
+            &ctx,
             RangeSliderHandlers {
                 on_change: Some(Arc::new(move |lo, hi| sink.lock().unwrap().push((lo, hi)))),
                 ..RangeSliderHandlers::default()
@@ -673,7 +676,9 @@ mod tests {
     #[test]
     fn each_thumb_exposes_the_slider_role() {
         let named = spec().with_aria_label("Price range");
-        let node = range_slider(&named, &theme(), RangeSliderHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = range_slider(&named, &ctx, RangeSliderHandlers::default());
         let lower = node
             .find(&|n| n.id.as_deref() == Some("range-slider-lower"))
             .expect("lower thumb");
@@ -697,6 +702,8 @@ mod tests {
     /// which embeds them; fixed where it belongs.
     #[test]
     fn embedded_thumbs_announce_their_orientation() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         for orientation in [
             poodle_specs::Orientation::Horizontal,
             poodle_specs::Orientation::Vertical,
@@ -704,7 +711,7 @@ mod tests {
             let embedded = spec()
                 .with_embedded_control(poodle_specs::SliderPolarity::Unipolar)
                 .with_orientation(orientation);
-            let node = range_slider(&embedded, &theme(), RangeSliderHandlers::default());
+            let node = range_slider(&embedded, &ctx, RangeSliderHandlers::default());
             let expected = format!("{orientation:?}").to_ascii_lowercase();
             for id in ["range-slider-lower", "range-slider-upper"] {
                 let thumb = node
@@ -717,7 +724,9 @@ mod tests {
 
     #[test]
     fn unnamed_controls_still_name_their_thumbs() {
-        let node = range_slider(&spec(), &theme(), RangeSliderHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = range_slider(&spec(), &ctx, RangeSliderHandlers::default());
         let lower = node
             .find(&|n| n.id.as_deref() == Some("range-slider-lower"))
             .expect("lower thumb");

@@ -12,7 +12,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node, NodeAnimation, NodeRole, StylePatch,
@@ -20,9 +19,10 @@ use poodle_node::{
 use poodle_specs::{ButtonVariant, SplitButtonSpec, SplitMenuItem};
 
 use crate::color::{mix_srgb, with_alpha, BLACK};
+use crate::context::RenderContext;
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
-    size_padding_x_offset_rem, split_button_chevron_size_rem, split_button_toggle_width_rem,
+    rem_to_px, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem,
+    split_button_chevron_size_rem, split_button_toggle_width_rem,
 };
 
 /// Host callbacks: primary half, chevron half, and menu-item value.
@@ -43,10 +43,10 @@ struct SplitColors {
     text: ColorValue,
 }
 
-fn resolve_split_colors(spec: &SplitButtonSpec, theme: &dyn ThemeProvider) -> SplitColors {
-    let base_fill = theme.resolve_color(spec.fill_token());
-    let base_border = theme.resolve_color(spec.border_token());
-    let text = theme.resolve_color(spec.text_token());
+fn resolve_split_colors(spec: &SplitButtonSpec, ctx: &RenderContext<'_>) -> SplitColors {
+    let base_fill = ctx.theme().resolve_color(spec.fill_token());
+    let base_border = ctx.theme().resolve_color(spec.border_token());
+    let text = ctx.theme().resolve_color(spec.text_token());
 
     match spec.variant {
         // Primary: border = fill mixed 84% toward black. The old tier's
@@ -61,8 +61,8 @@ fn resolve_split_colors(spec: &SplitButtonSpec, theme: &dyn ThemeProvider) -> Sp
         // Ghost: surface@42% fill, border-subtle@72% border whatever the
         // tone — the tone only recolors the text (via `text_token`).
         ButtonVariant::Ghost => {
-            let surface = theme.resolve_color("color.background.surface");
-            let border_subtle = theme.resolve_color("color.border.subtle");
+            let surface = ctx.theme().resolve_color("color.background.surface");
+            let border_subtle = ctx.theme().resolve_color("color.border.subtle");
             SplitColors {
                 fill: with_alpha(surface, surface.3 * 0.42),
                 border: with_alpha(border_subtle, border_subtle.3 * 0.72),
@@ -81,10 +81,10 @@ fn resolve_split_colors(spec: &SplitButtonSpec, theme: &dyn ThemeProvider) -> Sp
 
 pub fn split_button(
     spec: &SplitButtonSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: SplitButtonHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     // Axis-faithful metrics (g12.019 recipe correction): the axis-layered
     // token plus the per-size offset — the old GPUI tier's form — not the
     // fixed per-size/per-density tables (`control_height_rem` /
@@ -92,10 +92,10 @@ pub fn split_button(
     // layering. At base tokens (the Jetstream provider, no axes) md/default
     // reproduces the old fixed values; under a preview axis the control now
     // follows the axis like Svelte does.
-    let height = theme.resolve_space(spec.control_height_token())
+    let height = ctx.theme().resolve_space(spec.control_height_token(ctx.base_size(spec.size)))
         + rem_to_px(size_height_offset_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = theme.resolve_space("space.control.x")
+    let pad_x = ctx.theme().resolve_space("space.control.x")
         + rem_to_px(size_padding_x_offset_rem(effective_size));
     // Contract §8 Chevron / Toggle half: the old tier reads these two from
     // the per-size tables, not token+offset.
@@ -104,11 +104,11 @@ pub fn split_button(
     // Contract §8 Divider: 60% of control height, centered.
     let divider_h = height * 0.6;
     // Contract §8 Primary half: spinner↔label gap = space.inline.sm.
-    let primary_gap = theme.resolve_space("space.inline.sm");
+    let primary_gap = ctx.theme().resolve_space("space.inline.sm");
 
-    let colors = resolve_split_colors(spec, theme);
-    let elevated = theme.resolve_color("color.background.elevated");
-    let text_primary = theme.resolve_color("color.text.primary");
+    let colors = resolve_split_colors(spec, ctx);
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
     // The old tier's state recipes: hover/active mix the fill toward
     // elevated; hover also mixes the border toward text-primary (painted on
     // the primary half only).
@@ -118,8 +118,8 @@ pub fn split_button(
 
     // Contract §8 Divider: the spec's separator token (border-subtle, full
     // strength).
-    let divider_color = theme.resolve_color(spec.separator_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+    let divider_color = ctx.theme().resolve_color(spec.separator_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
 
     let is_unavailable = spec.is_unavailable();
     let label = spec.label.as_deref().unwrap_or("");
@@ -269,27 +269,27 @@ pub fn split_button(
 
     // ── Disabled / loading: dim the whole control, bar the cursor ──
     if is_unavailable {
-        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         root.style.descriptor.cursor = CursorHint::NotAllowed;
     }
 
     // ── Menu overlay (rendered when open) ──
     // Stacked below the row inside a column wrapper.
     if spec.is_open && !spec.items.is_empty() {
-        let menu_fill = theme.resolve_color(spec.overlay_fill_token());
-        let menu_border = theme.resolve_color("color.border.default");
-        let menu_radius = theme.resolve_radius("radius.surface");
-        let item_text = theme.resolve_color("color.text.primary");
-        let accent = theme.resolve_color("color.accent.base");
+        let menu_fill = ctx.theme().resolve_color(spec.overlay_fill_token());
+        let menu_border = ctx.theme().resolve_color("color.border.default");
+        let menu_radius = ctx.theme().resolve_radius("radius.surface");
+        let item_text = ctx.theme().resolve_color("color.text.primary");
+        let accent = ctx.theme().resolve_color("color.accent.base");
         // The old tier's menu chrome: vertical padding and the top offset
         // both read space.inline.sm; items read space.inline.md
         // horizontally, space.control.y vertically.
-        let menu_pad_y = theme.resolve_space("space.inline.sm");
-        let item_pad_x = theme.resolve_space("space.inline.md");
-        let item_pad_y = theme.resolve_space("space.control.y");
+        let menu_pad_y = ctx.theme().resolve_space("space.inline.sm");
+        let item_pad_x = ctx.theme().resolve_space("space.inline.md");
+        let item_pad_y = ctx.theme().resolve_space("space.control.y");
         // Items are full radius.control rounded and body-sized.
-        let item_radius = theme.resolve_radius("radius.control");
-        let item_font = theme.resolve_space("typography.body.size");
+        let item_radius = ctx.theme().resolve_radius("radius.control");
+        let item_font = ctx.theme().resolve_space("typography.body.size");
         // Item hover: accent at absolute 8% alpha.
         let item_hover = with_alpha(accent, 0.08);
 
@@ -346,7 +346,7 @@ pub fn split_button(
                     item_el.interaction.focusable = true;
                     if *is_disabled {
                         item_el.style.descriptor.opacity =
-                            theme.resolve_opacity(spec.disabled_opacity_token());
+                            ctx.theme().resolve_opacity(spec.disabled_opacity_token());
                         item_el.interaction.disabled = true;
                     } else {
                         item_el.style.hover = Some(StylePatch {
@@ -417,6 +417,7 @@ pub fn split_button(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_adapter::ThemeProvider;
     use poodle_specs::{ButtonTone, ControlSize};
 
     /// The real token resolver over the ECLIPSE theme. Pure — no backend.
@@ -468,7 +469,9 @@ mod tests {
         ];
         for ((size, expected_h), (_, expected_w)) in height_cases.iter().zip(toggle_cases.iter()) {
             let spec = spec().with_size(*size);
-            let node = split_button(&spec, &theme(), SplitButtonHandlers::default());
+            let theme = theme();
+            let ctx = RenderContext::new(&theme);
+            let node = split_button(&spec, &ctx, SplitButtonHandlers::default());
             match primary_half(&node).style.descriptor.layout.height {
                 LayoutSizing::Fixed(h) => assert_eq!(h, *expected_h, "height for {size:?}"),
                 ref other => panic!("expected fixed height, got {other:?}"),
@@ -486,15 +489,16 @@ mod tests {
 
         // pad_x = space.control.x token + per-size offset (0 at md).
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let base_pad = theme.resolve_space("space.control.x");
-        let node = split_button(&spec(), &theme, SplitButtonHandlers::default());
+        let node = split_button(&spec(), &ctx, SplitButtonHandlers::default());
         let pad = &primary_half(&node).style.descriptor.layout.spacing.padding;
         assert_eq!(pad.left, base_pad);
         assert_eq!(pad.right, base_pad);
         // sm sits one offset stop down (−0.125rem).
         let node = split_button(
             &spec().with_size(ControlSize::Sm),
-            &theme,
+            &ctx,
             SplitButtonHandlers::default(),
         );
         let pad = &primary_half(&node).style.descriptor.layout.spacing.padding;
@@ -512,7 +516,9 @@ mod tests {
         ];
         for (size, expected) in cases {
             let spec = spec().with_size(size);
-            let node = split_button(&spec, &theme(), SplitButtonHandlers::default());
+            let theme = theme();
+            let ctx = RenderContext::new(&theme);
+            let node = split_button(&spec, &ctx, SplitButtonHandlers::default());
             let chevron = node
                 .find(
                     &|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "chevron-down"),
@@ -530,6 +536,7 @@ mod tests {
     #[test]
     fn variant_colors_match_the_old_gpui_tier() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let accent = theme.resolve_color("color.accent.base");
         let surface = theme.resolve_color("color.background.surface");
         let border_subtle = theme.resolve_color("color.border.subtle");
@@ -540,7 +547,7 @@ mod tests {
         // Primary default: accent fill, fill↔black 84% border, inverse text.
         let node = split_button(
             &spec().with_variant(ButtonVariant::Primary),
-            &theme,
+            &ctx,
             SplitButtonHandlers::default(),
         );
         let d = &primary_half(&node).style.descriptor;
@@ -556,7 +563,7 @@ mod tests {
             &spec()
                 .with_variant(ButtonVariant::Ghost)
                 .with_tone(ButtonTone::Danger),
-            &theme,
+            &ctx,
             SplitButtonHandlers::default(),
         );
         let d = &primary_half(&node).style.descriptor;
@@ -571,7 +578,7 @@ mod tests {
         // status border, primary text (no status-tint mixes).
         let node = split_button(
             &spec().with_tone(ButtonTone::Danger),
-            &theme,
+            &ctx,
             SplitButtonHandlers::default(),
         );
         let d = &primary_half(&node).style.descriptor;
@@ -582,7 +589,7 @@ mod tests {
         // Legacy Danger variant: danger fill AND border, inverse text.
         let node = split_button(
             &spec().with_variant(ButtonVariant::Danger),
-            &theme,
+            &ctx,
             SplitButtonHandlers::default(),
         );
         let d = &primary_half(&node).style.descriptor;
@@ -594,12 +601,13 @@ mod tests {
     #[test]
     fn state_patches_match_the_old_tier() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let elevated = theme.resolve_color("color.background.elevated");
         let surface = theme.resolve_color("color.background.surface");
         let border_default = theme.resolve_color("color.border.default");
         let text_primary = theme.resolve_color("color.text.primary");
 
-        let node = split_button(&spec(), &theme, SplitButtonHandlers::default());
+        let node = split_button(&spec(), &ctx, SplitButtonHandlers::default());
         let hover_fill = mix_srgb(surface, elevated, 0.84);
         let active_fill = mix_srgb(surface, elevated, 0.72);
         let hover_border = mix_srgb(border_default, text_primary, 0.78);
@@ -623,8 +631,9 @@ mod tests {
     #[test]
     fn divider_reads_the_separator_token_at_full_strength() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let subtle = theme.resolve_color("color.border.subtle");
-        let node = split_button(&spec(), &theme, SplitButtonHandlers::default());
+        let node = split_button(&spec(), &ctx, SplitButtonHandlers::default());
         let divider = node
             .find(
                 &|n| matches!(n.style.descriptor.layout.width, LayoutSizing::Fixed(w) if w == 1.0),
@@ -656,7 +665,9 @@ mod tests {
             })),
         };
         let spec = spec().with_open(true);
-        let node = split_button(&spec, &theme(), handlers);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = split_button(&spec, &ctx, handlers);
 
         (primary_half(&node)
             .interaction
@@ -681,6 +692,7 @@ mod tests {
     #[test]
     fn unavailable_control_dims_and_drops_activation() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let handlers = SplitButtonHandlers {
             on_click: Some(Arc::new(|| {})),
             on_dropdown: Some(Arc::new(|| {})),
@@ -690,7 +702,7 @@ mod tests {
             is_disabled: true,
             ..spec()
         };
-        let node = split_button(&spec, &theme, handlers);
+        let node = split_button(&spec, &ctx, handlers);
         let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
         assert_eq!(node.style.descriptor.opacity, disabled_opacity);
         assert_eq!(node.style.descriptor.cursor, CursorHint::NotAllowed);
@@ -702,12 +714,13 @@ mod tests {
     #[test]
     fn loading_shows_the_old_tiers_spinner_glyph() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let text_primary = theme.resolve_color("color.text.primary");
         let spec = SplitButtonSpec {
             is_loading: true,
             ..spec()
         };
-        let node = split_button(&spec, &theme, SplitButtonHandlers::default());
+        let node = split_button(&spec, &ctx, SplitButtonHandlers::default());
         let spinner = node
             .find(
                 &|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "spinner"),
@@ -728,6 +741,7 @@ mod tests {
     #[test]
     fn open_menu_matches_the_old_tiers_anatomy() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let gap_sm = theme.resolve_space("space.inline.sm");
         let gap_md = theme.resolve_space("space.inline.md");
         let control_y = theme.resolve_space("space.control.y");
@@ -740,7 +754,7 @@ mod tests {
         let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
 
         let spec = spec().with_open(true);
-        let node = split_button(&spec, &theme, SplitButtonHandlers::default());
+        let node = split_button(&spec, &ctx, SplitButtonHandlers::default());
         let menu = node
             .find(&|n| n.a11y.role == Some(NodeRole::Menu))
             .expect("menu panel");
@@ -804,10 +818,12 @@ mod tests {
 
     #[test]
     fn outside_interact_refusal_marks_the_open_menu() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         // Web default `true` + open: the menu surface carries no marker.
         let node = split_button(
             &spec().with_open(true),
-            &theme(),
+            &ctx,
             SplitButtonHandlers::default(),
         );
         let menu_node = node
@@ -818,7 +834,7 @@ mod tests {
         // Refusal: the open menu surface carries the inert activation marker
         // a host keys outside-dismissal on.
         let refusing = spec().with_open(true).with_dismiss_on_outside_interact(false);
-        let node = split_button(&refusing, &theme(), SplitButtonHandlers::default());
+        let node = split_button(&refusing, &ctx, SplitButtonHandlers::default());
         let menu_node = node
             .find(&|n| n.a11y.role == Some(NodeRole::Menu))
             .expect("open menu");

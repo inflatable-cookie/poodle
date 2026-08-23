@@ -19,8 +19,9 @@ pub struct EmptyStateSpec {
     pub aria_label: Option<String>,
     pub actions: Vec<RemediationAction>,
     /// Density override for root gap + vertical padding (contract §8 density
-    /// adjustments). Orthogonal to `size` (which is the size axis).
-    pub density: ControlDensity,
+    /// adjustments). Orthogonal to `size` (which is the size axis). `None`
+    /// inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
     /// Visual and copy sizing, orthogonal to `variant`'s semantic posture.
     pub size: EmptyStateSize,
 }
@@ -33,13 +34,13 @@ impl EmptyStateSpec {
             variant: EmptyStateVariant::Neutral,
             aria_label: None,
             actions: Vec::new(),
-            density: ControlDensity::Default,
+            density: None,
             size: EmptyStateSize::Default,
         }
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -74,8 +75,10 @@ impl EmptyStateSpec {
 
     /// Root gap token, density-aware (contract §8 density adjustments):
     /// compact → stack.sm, default → stack.md, comfortable → stack.lg.
-    pub fn layout_gap_token(&self) -> &'static str {
-        match self.density {
+    /// The presentation context resolves omission; the resolved density
+    /// arrives as a parameter.
+    pub fn layout_gap_token(&self, density: ControlDensity) -> &'static str {
+        match density {
             ControlDensity::Compact => semantic::SPACE_STACK_SM,
             ControlDensity::Default => semantic::SPACE_STACK_MD,
             ControlDensity::Comfortable => semantic::SPACE_STACK_LG,

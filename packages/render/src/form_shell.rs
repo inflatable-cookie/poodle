@@ -8,32 +8,32 @@
 //! is host-driven by design (contract §3) — the shell renders no click
 //! handler; the actions region dims when submission is blocked.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{CallOutSpec, FormActionAlign, FormShellSpec, StatusTone};
 
 use crate::callout::{callout, CalloutHandlers};
+use crate::context::RenderContext;
 
 /// Semibold heading/label weight (typography constant, 600).
 const SEMIBOLD: u16 = 600;
 
 pub fn form_shell(
     spec: &FormShellSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     section_slots: Vec<Option<Node>>,
     actions_slot: Option<Node>,
 ) -> Node {
-    let stack_gap = theme.resolve_space(spec.stack_gap_token());
-    let section_gap = theme.resolve_space(spec.section_gap_token());
-    let header_gap = theme.resolve_space(spec.header_gap_token());
-    let section_inner_gap = theme.resolve_space(spec.section_internal_gap_token());
+    let stack_gap = ctx.theme().resolve_space(spec.stack_gap_token());
+    let section_gap = ctx.theme().resolve_space(spec.section_gap_token());
+    let header_gap = ctx.theme().resolve_space(spec.header_gap_token());
+    let section_inner_gap = ctx.theme().resolve_space(spec.section_internal_gap_token());
 
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
 
-    let title_size = theme.resolve_space(spec.title_size_token());
-    let desc_size = theme.resolve_space(spec.description_size_token());
-    let section_title_size = theme.resolve_space(spec.section_title_size_token());
+    let title_size = ctx.theme().resolve_space(spec.title_size_token());
+    let desc_size = ctx.theme().resolve_space(spec.description_size_token());
+    let section_title_size = ctx.theme().resolve_space(spec.section_title_size_token());
 
     let column = |gap: f32| -> Node {
         let mut n = Node::container();
@@ -70,7 +70,7 @@ pub fn form_shell(
             &CallOutSpec::new()
                 .with_tone(resolved_tone)
                 .with_content(message),
-            theme,
+            ctx,
             CalloutHandlers::default(),
         ));
     }
@@ -121,7 +121,7 @@ pub fn form_shell(
             // Dim the actions when submission is blocked (busy / disabled /
             // invalid); the host wires the actual disabled buttons.
             if spec.blocks_submission() {
-                s.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+                s.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
             }
         }
         el = el.child(row.child(actions));
@@ -129,7 +129,7 @@ pub fn form_shell(
 
     // ── Disabled: dim the whole shell (contract §4) ──────────
     if spec.is_disabled {
-        el.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
     }
 
     el

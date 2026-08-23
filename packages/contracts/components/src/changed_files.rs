@@ -24,9 +24,9 @@ pub struct ChangedFilesSpec {
     pub open_diff_label: String,
     pub show_files_label: String,
     pub hide_files_label: String,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for ChangedFilesSpec {
@@ -48,9 +48,9 @@ impl ChangedFilesSpec {
             open_diff_label: "Open diff".to_string(),
             show_files_label: "Show files".to_string(),
             hide_files_label: "Hide files".to_string(),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -75,11 +75,11 @@ impl ChangedFilesSpec {
         self
     }
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -153,8 +153,8 @@ impl ChangedFilesSpec {
     }
 
     // ── Size ─────────────────────────────────────────────────
-    pub fn font_size_rem(&self) -> f32 {
-        match self.size {
+    pub fn font_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.75,
             ControlSize::Md => 0.8125,
@@ -162,8 +162,8 @@ impl ChangedFilesSpec {
             ControlSize::Xl => 0.9375,
         }
     }
-    pub fn icon_size_rem(&self) -> f32 {
-        match self.size {
+    pub fn icon_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.75,
             ControlSize::Sm => 0.8125,
             ControlSize::Md => 0.875,
@@ -173,15 +173,15 @@ impl ChangedFilesSpec {
     }
 
     // ── Density ──────────────────────────────────────────────
-    pub fn padding_inset_rem(&self) -> f32 {
-        match self.density {
+    pub fn padding_inset_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 1.0,
         }
     }
-    pub fn gap_rem(&self) -> f32 {
-        match self.density {
+    pub fn gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 1.0,

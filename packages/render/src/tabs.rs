@@ -13,7 +13,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node, NodeKey, NodeRole, ShadowLayer, StylePatch,
@@ -21,9 +20,8 @@ use poodle_node::{
 use poodle_specs::{ActiveEdge, ActiveFill, Orientation, TabActivationMode, TabVariant, TabsSpec};
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
-use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
+use crate::context::RenderContext;
+use crate::presentation::{control_height_rem, control_space_x_rem, rem_to_px, size_font_rem};
 
 pub type TabHandler = Arc<dyn Fn(&str) + Send + Sync>;
 
@@ -82,19 +80,19 @@ fn apply_active_edge(
     is_active: bool,
     vertical: bool,
     spec: &TabsSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) {
     match spec.active_edge {
         ActiveEdge::None => {}
         ActiveEdge::Outline => {
-            let accent = theme.resolve_color(spec.indicator_token());
-            let border = theme.resolve_color(spec.list_border_token());
+            let accent = ctx.theme().resolve_color(spec.indicator_token());
+            let border = ctx.theme().resolve_color(spec.list_border_token());
             let selected = mix_srgb(accent, border, 0.32);
             node.style.descriptor.border.width = 1.0;
             node.style.descriptor.border.color = if is_active { selected } else { TRANSPARENT };
         }
         ActiveEdge::Underline => {
-            let accent = theme.resolve_color(spec.indicator_token());
+            let accent = ctx.theme().resolve_color(spec.indicator_token());
             let edge = if is_active { accent } else { TRANSPARENT };
             if vertical {
                 node.style.border_right_width = Some(rem_to_px(0.125));
@@ -110,7 +108,7 @@ fn apply_active_edge(
 /// Icon + label + count badge, the anatomy shared by all variants.
 fn build_tab_label(
     tab: &poodle_specs::TabDefinition,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     text_color: ColorValue,
     font_size: f32,
     icon_only: bool,
@@ -121,7 +119,7 @@ fn build_tab_label(
     // Vertical/icon-only: icon alone, label fallback so the tab is never empty.
     if icon_only {
         if let Some(ref icon_name) = tab.icon {
-            let mut i = Node::icon(icon_name.as_str(), theme.resolve_space("size.icon.sm"));
+            let mut i = Node::icon(icon_name.as_str(), ctx.theme().resolve_space("size.icon.sm"));
             i.style.descriptor.text_color = Some(text_color);
             return i;
         }
@@ -138,7 +136,7 @@ fn build_tab_label(
         return l;
     }
 
-    let gap = theme.resolve_space("space.inline.sm");
+    let gap = ctx.theme().resolve_space("space.inline.sm");
     let mut row = Node::container();
     {
         let s = &mut row.style;
@@ -148,7 +146,7 @@ fn build_tab_label(
     }
 
     if let Some(ref icon_name) = tab.icon {
-        let mut i = Node::icon(icon_name.as_str(), theme.resolve_space("size.icon.sm"));
+        let mut i = Node::icon(icon_name.as_str(), ctx.theme().resolve_space("size.icon.sm"));
         i.style.descriptor.text_color = Some(text_color);
         row = row.child(i);
     }
@@ -159,8 +157,8 @@ fn build_tab_label(
     row = row.child(l);
 
     if let Some(count) = tab.count {
-        let caption_size = theme.resolve_space("typography.caption.size");
-        let surface = theme.resolve_color("color.background.surface");
+        let caption_size = ctx.theme().resolve_space("typography.caption.size");
+        let surface = ctx.theme().resolve_color("color.background.surface");
         let badge_bg = mix_srgb(text_color, surface, 0.14);
         let mut badge = Node::text(format!("{count}"));
         {
@@ -181,9 +179,9 @@ fn build_tab_label(
 }
 
 /// The card variant's close button; interaction wires through `on_close`.
-fn build_close_button(theme: &dyn ThemeProvider, tab_label: &str) -> Node {
-    let icon_color = theme.resolve_color("color.icon.muted");
-    let icon_size = theme.resolve_space("size.icon.sm");
+fn build_close_button(ctx: &RenderContext<'_>, tab_label: &str) -> Node {
+    let icon_color = ctx.theme().resolve_color("color.icon.muted");
+    let icon_size = ctx.theme().resolve_space("size.icon.sm");
     let mut btn = Node::button("");
     btn.a11y.label = Some(format!("Close {tab_label}"));
     {
@@ -205,7 +203,7 @@ fn apply_drag_state(
     tab_value: &str,
     spec: &TabsSpec,
     handlers: &TabsHandlers,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) {
     node.id = Some(format!("tabs:{tab_value}"));
     node.runtime_id = handlers
@@ -216,8 +214,8 @@ fn apply_drag_state(
         node.style.descriptor.opacity = 0.4;
     }
     if spec.is_drop_target(tab_value) {
-        let accent = theme.resolve_color("color.accent.base");
-        rounded_all(node, theme.resolve_radius("radius.control"));
+        let accent = ctx.theme().resolve_color("color.accent.base");
+        rounded_all(node, ctx.theme().resolve_radius("radius.control"));
         node.style.shadow_layers = vec![ShadowLayer {
             offset_x: 0.0,
             offset_y: 0.0,
@@ -231,13 +229,13 @@ fn apply_drag_state(
 
 pub fn tabs(
     spec: &TabsSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<TabHandler>,
     on_close: Option<TabHandler>,
 ) -> Node {
     tabs_with_handlers(
         spec,
-        theme,
+        ctx,
         TabsHandlers {
             on_change,
             on_close,
@@ -248,14 +246,15 @@ pub fn tabs(
 
 pub fn tabs_with_handlers(
     spec: &TabsSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: TabsHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let tab_bar = match spec.variant {
-        TabVariant::Card => render_card(spec, theme, &handlers),
-        TabVariant::Pill => render_pill(spec, theme, &handlers),
-        TabVariant::Block => render_block(spec, theme, &handlers),
+        TabVariant::Card => render_card(spec, ctx, &handlers),
+        TabVariant::Pill => render_pill(spec, ctx, &handlers),
+        TabVariant::Block => render_block(spec, ctx, &handlers),
     };
 
     let mut root = Node::container();
@@ -274,7 +273,7 @@ pub fn tabs_with_handlers(
     );
     root.roles.insert(
         "density".to_owned(),
-        format!("{:?}", spec.density).to_ascii_lowercase(),
+        format!("{density:?}").to_ascii_lowercase(),
     );
     let root = root.child(tab_bar);
     root
@@ -282,16 +281,16 @@ pub fn tabs_with_handlers(
 
 pub fn tabs_with_panel(
     spec: &TabsSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     mut handlers: TabsHandlers,
     panel: Node,
 ) -> Node {
     handlers.has_panel = true;
     let Some(value) = spec.current_value() else {
-        return tabs_with_handlers(spec, theme, handlers);
+        return tabs_with_handlers(spec, ctx, handlers);
     };
     let panel_runtime_id = tab_panel_runtime_id(&handlers, value);
-    let mut root = tabs_with_handlers(spec, theme, handlers);
+    let mut root = tabs_with_handlers(spec, ctx, handlers);
     let mut panel = panel;
     panel.id = Some(format!("tabs-panel:{value}"));
     panel.runtime_id = panel_runtime_id;
@@ -316,7 +315,7 @@ fn wire_collection_semantics(
     spec: &TabsSpec,
     index: usize,
     handlers: &TabsHandlers,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) {
     let tab = &spec.tabs[index];
     let is_selected = spec.current_value() == Some(tab.value.as_str());
@@ -330,7 +329,7 @@ fn wire_collection_semantics(
     node.interaction.focusable = !tab.is_disabled;
     if !tab.is_disabled {
         node.style.focus = Some(StylePatch {
-            border_color: Some(theme.resolve_color(spec.focus_ring_color_token())),
+            border_color: Some(ctx.theme().resolve_color(spec.focus_ring_color_token())),
             ..StylePatch::default()
         });
     }
@@ -433,19 +432,20 @@ fn wire_collection_semantics(
     }));
 }
 
-fn render_card(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandlers) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+fn render_card(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let control_y = theme.resolve_space("space.control.y");
+    let pad_x = rem_to_px(control_space_x_rem(density));
+    let control_y = ctx.theme().resolve_space("space.control.y");
 
-    let accent = theme.resolve_color(spec.indicator_token());
-    let border = theme.resolve_color(spec.list_border_token());
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_inverse = theme.resolve_color("color.text.inverse");
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
-    let radius = theme.resolve_radius("radius.control");
+    let accent = ctx.theme().resolve_color(spec.indicator_token());
+    let border = ctx.theme().resolve_color(spec.list_border_token());
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let text_inverse = ctx.theme().resolve_color("color.text.inverse");
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
+    let radius = ctx.theme().resolve_radius("radius.control");
 
     // activeEdge: outline/underline borders on the selected tab, with a
     // transparent reserve border on every tab so the bar never shifts when
@@ -525,13 +525,13 @@ fn render_card(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandle
                 s.descriptor.opacity = disabled_opacity;
             }
         }
-        apply_active_edge(&mut tab_el, is_active, vertical, spec, theme);
+        apply_active_edge(&mut tab_el, is_active, vertical, spec, ctx);
         rounded_all(&mut tab_el, radius);
         tab_el.interaction.focusable = true;
-        let mut tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, vertical));
+        let mut tab_el = tab_el.child(build_tab_label(tab, ctx, text_color, font_size, vertical));
 
         if tab.is_closable {
-            let mut close = build_close_button(theme, &tab.label);
+            let mut close = build_close_button(ctx, &tab.label);
             close.interaction.on_activate = Some(match (is_disabled, handlers.on_close.as_ref()) {
                 (false, Some(handler)) => {
                     let handler = Arc::clone(handler);
@@ -545,32 +545,33 @@ fn render_card(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandle
             tab_el = tab_el.child(close);
         }
 
-        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, theme);
+        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, ctx);
         wire_select(
             &mut tab_el,
             is_disabled,
             &tab.value,
             handlers.on_change.as_ref(),
         );
-        wire_collection_semantics(&mut tab_el, spec, tab_bar.children.len(), handlers, theme);
+        wire_collection_semantics(&mut tab_el, spec, tab_bar.children.len(), handlers, ctx);
         tab_bar = tab_bar.child(tab_el);
     }
     tab_bar
 }
 
-fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandlers) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+fn render_pill(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let control_height = rem_to_px(control_height_rem(effective_size));
     let tab_height = control_height - rem_to_px(0.5);
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let pad_x = rem_to_px(control_space_x_rem(density));
 
-    let accent = theme.resolve_color(spec.indicator_token());
-    let border_subtle = theme.resolve_color(spec.list_border_token());
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
-    let pill_radius = theme.resolve_radius("radius.pill");
+    let accent = ctx.theme().resolve_color(spec.indicator_token());
+    let border_subtle = ctx.theme().resolve_color(spec.list_border_token());
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
+    let pill_radius = ctx.theme().resolve_radius("radius.pill");
 
     let container_border = with_alpha(border_subtle, border_subtle.3 * spec.pill_border_opacity());
     let active_bg = with_alpha(accent, accent.3 * spec.pill_active_bg_opacity());
@@ -626,38 +627,39 @@ fn render_pill(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandle
                 s.descriptor.opacity = disabled_opacity;
             }
         }
-        apply_active_edge(&mut tab_el, is_active, false, spec, theme);
+        apply_active_edge(&mut tab_el, is_active, false, spec, ctx);
         rounded_all(&mut tab_el, pill_radius);
         tab_el.interaction.focusable = true;
         // Pill is always horizontal.
-        let mut tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, false));
+        let mut tab_el = tab_el.child(build_tab_label(tab, ctx, text_color, font_size, false));
 
-        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, theme);
+        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, ctx);
         wire_select(
             &mut tab_el,
             is_disabled,
             &tab.value,
             handlers.on_change.as_ref(),
         );
-        wire_collection_semantics(&mut tab_el, spec, container.children.len(), handlers, theme);
+        wire_collection_semantics(&mut tab_el, spec, container.children.len(), handlers, ctx);
         container = container.child(tab_el);
     }
     container
 }
 
-fn render_block(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandlers) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+fn render_block(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let control_height = rem_to_px(control_height_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let pad_x = rem_to_px(control_space_x_rem(density));
 
-    let accent = theme.resolve_color(spec.indicator_token());
-    let border = theme.resolve_color(spec.list_border_token());
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let surface_bg = theme.resolve_color("color.background.surface");
-    let panel_bg = theme.resolve_color("color.background.panel");
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+    let accent = ctx.theme().resolve_color(spec.indicator_token());
+    let border = ctx.theme().resolve_color(spec.list_border_token());
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let surface_bg = ctx.theme().resolve_color("color.background.surface");
+    let panel_bg = ctx.theme().resolve_color("color.background.panel");
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
 
     let list_bg = with_alpha(panel_bg, panel_bg.3 * spec.block_list_bg_opacity());
     let separator = with_alpha(border, border.3 * spec.block_separator_opacity());
@@ -733,18 +735,18 @@ fn render_block(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandl
                 s.descriptor.opacity = disabled_opacity;
             }
         }
-        apply_active_edge(&mut tab_el, is_active, vertical, spec, theme);
+        apply_active_edge(&mut tab_el, is_active, vertical, spec, ctx);
         tab_el.interaction.focusable = true;
-        let mut tab_el = tab_el.child(build_tab_label(tab, theme, text_color, font_size, vertical));
+        let mut tab_el = tab_el.child(build_tab_label(tab, ctx, text_color, font_size, vertical));
 
-        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, theme);
+        apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, ctx);
         wire_select(
             &mut tab_el,
             is_disabled,
             &tab.value,
             handlers.on_change.as_ref(),
         );
-        wire_collection_semantics(&mut tab_el, spec, tab_bar.children.len(), handlers, theme);
+        wire_collection_semantics(&mut tab_el, spec, tab_bar.children.len(), handlers, ctx);
         tab_bar = tab_bar.child(tab_el);
     }
     tab_bar
@@ -753,6 +755,7 @@ fn render_block(spec: &TabsSpec, theme: &dyn ThemeProvider, handlers: &TabsHandl
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_adapter::ThemeProvider;
     use poodle_specs::{ActiveEdge, ActiveFill, TabDefinition};
     use std::sync::Mutex;
 
@@ -770,6 +773,7 @@ mod tests {
     #[test]
     fn card_renderer_renders_icon_count_and_close_wired_to_on_close() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let closed = Arc::new(Mutex::new(Vec::new()));
         let on_close: TabHandler = {
             let closed = Arc::clone(&closed);
@@ -784,7 +788,7 @@ mod tests {
         .with_variant(TabVariant::Card)
         .with_value("index.ts");
 
-        let root = tabs(&spec, &theme, None, Some(on_close));
+        let root = tabs(&spec, &ctx, None, Some(on_close));
 
         assert!(
             root.find(
@@ -811,6 +815,7 @@ mod tests {
     #[test]
     fn card_renderer_solid_fill_uses_accent_with_inverse_foreground() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = TabsSpec::new(vec![
             TabDefinition::new("a", "A"),
             TabDefinition::new("b", "B"),
@@ -819,7 +824,7 @@ mod tests {
         .with_active_fill(ActiveFill::Solid)
         .with_value("a");
 
-        let root = tabs(&spec, &theme, None, None);
+        let root = tabs(&spec, &ctx, None, None);
         let accent = theme.resolve_color(spec.indicator_token());
         let inverse = theme.resolve_color("color.text.inverse");
 
@@ -838,6 +843,7 @@ mod tests {
     #[test]
     fn card_renderer_active_edge_outline_borders_only_the_selected_tab() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = TabsSpec::new(vec![
             TabDefinition::new("a", "A"),
             TabDefinition::new("b", "B"),
@@ -846,7 +852,7 @@ mod tests {
         .with_active_edge(ActiveEdge::Outline)
         .with_value("a");
 
-        let root = tabs(&spec, &theme, None, None);
+        let root = tabs(&spec, &ctx, None, None);
         let accent = theme.resolve_color(spec.indicator_token());
         let border = theme.resolve_color(spec.list_border_token());
         let expected = mix_srgb(accent, border, 0.32);
@@ -868,6 +874,7 @@ mod tests {
     #[test]
     fn card_renderer_does_not_draw_outline_by_default() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = TabsSpec::new(vec![
             TabDefinition::new("a", "A"),
             TabDefinition::new("b", "B"),
@@ -875,7 +882,7 @@ mod tests {
         .with_variant(TabVariant::Card)
         .with_value("a");
 
-        let root = tabs(&spec, &theme, None, None);
+        let root = tabs(&spec, &ctx, None, None);
         assert_eq!(tab_of(&root, "a").style.descriptor.border.width, 0.0);
         assert_eq!(tab_of(&root, "b").style.descriptor.border.width, 0.0);
     }
@@ -883,6 +890,7 @@ mod tests {
     #[test]
     fn block_renderer_underline_edges_only_the_selected_tab() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = TabsSpec::new(vec![
             TabDefinition::new("a", "A"),
             TabDefinition::new("b", "B"),
@@ -891,7 +899,7 @@ mod tests {
         .with_active_edge(ActiveEdge::Underline)
         .with_value("a");
 
-        let root = tabs(&spec, &theme, None, None);
+        let root = tabs(&spec, &ctx, None, None);
         let accent = theme.resolve_color(spec.indicator_token());
 
         let active = tab_of(&root, "a");
@@ -908,6 +916,7 @@ mod tests {
     #[test]
     fn block_renderer_vertical_underline_uses_the_inline_end_edge() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = TabsSpec::new(vec![
             TabDefinition::new("a", "A"),
             TabDefinition::new("b", "B"),
@@ -917,7 +926,7 @@ mod tests {
         .with_active_edge(ActiveEdge::Underline)
         .with_value("a");
 
-        let root = tabs(&spec, &theme, None, None);
+        let root = tabs(&spec, &ctx, None, None);
         let accent = theme.resolve_color(spec.indicator_token());
 
         let active = tab_of(&root, "a");
@@ -928,6 +937,7 @@ mod tests {
     #[test]
     fn block_renderer_keeps_separators_under_outline() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = TabsSpec::new(vec![
             TabDefinition::new("a", "A"),
             TabDefinition::new("b", "B"),
@@ -936,7 +946,7 @@ mod tests {
         .with_active_edge(ActiveEdge::Outline)
         .with_value("a");
 
-        let root = tabs(&spec, &theme, None, None);
+        let root = tabs(&spec, &ctx, None, None);
         let separator = with_alpha(
             theme.resolve_color("color.border.subtle"),
             theme.resolve_color("color.border.subtle").3 * 0.72,
@@ -955,6 +965,7 @@ mod tests {
     #[test]
     fn none_fill_suppresses_selected_background_on_every_variant() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let text_primary = theme.resolve_color("color.text.primary");
         for variant in [TabVariant::Card, TabVariant::Pill, TabVariant::Block] {
             let spec = TabsSpec::new(vec![
@@ -965,7 +976,7 @@ mod tests {
             .with_active_fill(ActiveFill::None)
             .with_value("a");
 
-            let root = tabs(&spec, &theme, None, None);
+            let root = tabs(&spec, &ctx, None, None);
             let active = tab_of(&root, "a");
             assert_eq!(
                 active.style.descriptor.background, None,
@@ -986,6 +997,7 @@ mod tests {
     #[test]
     fn block_none_fill_keeps_underline_edge() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = TabsSpec::new(vec![
             TabDefinition::new("a", "A"),
             TabDefinition::new("b", "B"),
@@ -995,7 +1007,7 @@ mod tests {
         .with_active_edge(ActiveEdge::Underline)
         .with_value("a");
 
-        let root = tabs(&spec, &theme, None, None);
+        let root = tabs(&spec, &ctx, None, None);
         let accent = theme.resolve_color(spec.indicator_token());
 
         // The strip equivalent: underline and no fill.
@@ -1013,6 +1025,7 @@ mod tests {
     #[test]
     fn instance_scope_isolates_ids_relationships_and_focus_requests() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = TabsSpec::new(vec![
             TabDefinition::new("a", "A"),
             TabDefinition::new("b", "B"),
@@ -1026,7 +1039,7 @@ mod tests {
         };
         let root = tabs_with_panel(
             &spec,
-            &theme,
+            &ctx,
             TabsHandlers {
                 on_focus: Some(on_focus),
                 instance_id: Some("first".to_owned()),
@@ -1069,7 +1082,7 @@ mod tests {
 
         let second = tabs_with_handlers(
             &spec,
-            &theme,
+            &ctx,
             TabsHandlers {
                 instance_id: Some("second".to_owned()),
                 ..TabsHandlers::default()

@@ -4,7 +4,6 @@
 //! Ported from: `packages/jetstream/components/src/empty_state.rs`. Actions
 //! compose [`crate::button::button`].
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{
     ButtonSpec, ControlDensity, ControlSize, EmptyStateSize, EmptyStateSpec, EmptyStateVariant,
@@ -13,12 +12,14 @@ use poodle_specs::{
 
 use crate::button::button;
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let gap = theme.resolve_space(spec.layout_gap_token());
+pub fn empty_state(spec: &EmptyStateSpec, ctx: &RenderContext<'_>) -> Node {
+    let density = ctx.resolve_density(spec.density);
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let gap = ctx.theme().resolve_space(spec.layout_gap_token(density));
 
     let compact = spec.size == EmptyStateSize::Compact;
     let effective_size = if compact {
@@ -53,33 +54,33 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
         rem_to_px(1.125)
     };
 
-    let panel = theme.resolve_color("color.background.panel");
+    let panel = ctx.theme().resolve_color("color.background.panel");
     let icon_bg = with_alpha(panel, panel.3 * 0.90);
 
-    let border_default = theme.resolve_color("color.border.default");
-    let root_radius = (theme.resolve_radius("radius.surface") - rem_to_px(0.125)).max(0.0);
+    let border_default = ctx.theme().resolve_color("color.border.default");
+    let root_radius = (ctx.theme().resolve_radius("radius.surface") - rem_to_px(0.125)).max(0.0);
 
     let root_bg = match spec.variant {
         EmptyStateVariant::Neutral => {
-            let c = theme.resolve_color("color.background.surface");
+            let c = ctx.theme().resolve_color("color.background.surface");
             with_alpha(c, c.3 * 0.76)
         }
         EmptyStateVariant::Search => {
-            let c = theme.resolve_color("color.accent.base");
+            let c = ctx.theme().resolve_color("color.accent.base");
             with_alpha(c, c.3 * 0.07)
         }
         EmptyStateVariant::FirstRun => {
-            let c = theme.resolve_color("color.status.success");
+            let c = ctx.theme().resolve_color("color.status.success");
             with_alpha(c, c.3 * 0.07)
         }
     };
 
-    let vertical_padding = match spec.density {
-        ControlDensity::Compact => theme.resolve_space("space.stack.lg"),
-        ControlDensity::Default => theme.resolve_space("space.panel.y") * 1.5,
-        ControlDensity::Comfortable => theme.resolve_space("space.panel.y") * 2.0,
+    let vertical_padding = match density {
+        ControlDensity::Compact => ctx.theme().resolve_space("space.stack.lg"),
+        ControlDensity::Default => ctx.theme().resolve_space("space.panel.y") * 1.5,
+        ControlDensity::Comfortable => ctx.theme().resolve_space("space.panel.y") * 2.0,
     };
-    let horiz_padding = theme.resolve_space("space.panel.x");
+    let horiz_padding = ctx.theme().resolve_space("space.panel.x");
 
     // Circular visual affordance.
     let mut visual = Node::container();
@@ -129,7 +130,7 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
         let s = &mut copy.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
     }
     let mut title = Node::text(&spec.title);
     title.style.descriptor.text_color = Some(text_primary);
@@ -155,7 +156,7 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
             let s = &mut actions.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+            s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         }
         for action in &spec.actions {
             let btn_spec = ButtonSpec::new()
@@ -164,7 +165,7 @@ pub fn empty_state(spec: &EmptyStateSpec, theme: &dyn ThemeProvider) -> Node {
                 .with_disabled(action.is_disabled)
                 .with_size(effective_size)
                 .with_size_role(SemanticControlSizeRole::Control);
-            actions = actions.child(button(&btn_spec, theme, None));
+            actions = actions.child(button(&btn_spec, ctx, None));
         }
         el = el.child(actions);
     }
@@ -234,10 +235,11 @@ mod tests {
     fn compact_and_default_sizes_use_distinct_title_and_icon_geometry() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
-        let default = empty_state(&EmptyStateSpec::new("No projects yet"), &theme);
+        let ctx = RenderContext::new(&theme);
+        let default = empty_state(&EmptyStateSpec::new("No projects yet"), &ctx);
         let compact = empty_state(
             &EmptyStateSpec::new("No projects yet").with_size(EmptyStateSize::Compact),
-            &theme,
+            &ctx,
         );
 
         let default_title = title_text_size(&default).expect("default title size");

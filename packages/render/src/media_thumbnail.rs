@@ -7,7 +7,6 @@
 //! the token-resolved fallback icon. Height derives from the aspect ratio
 //! against a reference frame width (no CSS `aspect-ratio` downstream).
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
     NodePosition,
@@ -16,14 +15,15 @@ use poodle_specs::{MediaFrameWidth, MediaState, MediaThumbnailSpec};
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::spinner::spinner;
 
 const FRAME_FILL_REF_REM: f32 = 20.0;
 const FRAME_XL_REM: f32 = 24.0;
 
-pub fn media_thumbnail(spec: &MediaThumbnailSpec, theme: &dyn ThemeProvider) -> Node {
-    media_thumbnail_with_content(spec, theme, None)
+pub fn media_thumbnail(spec: &MediaThumbnailSpec, ctx: &RenderContext<'_>) -> Node {
+    media_thumbnail_with_content(spec, ctx, None)
 }
 
 /// Render a thumbnail with caller-provided media content in the ready frame.
@@ -33,23 +33,23 @@ pub fn media_thumbnail(spec: &MediaThumbnailSpec, theme: &dyn ThemeProvider) -> 
 /// slot without teaching the shared spec about backend elements.
 pub fn media_thumbnail_with_content(
     spec: &MediaThumbnailSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     media_content: Option<Node>,
 ) -> Node {
-    let panel = theme.resolve_color(spec.frame_panel_token());
-    let border = theme.resolve_color(spec.frame_border_token());
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let placeholder_color = theme.resolve_color(spec.placeholder_icon_token());
-    let surface = theme.resolve_color("color.background.surface");
-    let elevated = theme.resolve_color("color.background.elevated");
+    let panel = ctx.theme().resolve_color(spec.frame_panel_token());
+    let border = ctx.theme().resolve_color(spec.frame_border_token());
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let placeholder_color = ctx.theme().resolve_color(spec.placeholder_icon_token());
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
 
     // Frame radius: calc(radius.surface − 0.125rem).
-    let frame_radius = (theme.resolve_radius(spec.frame_radius_token())
+    let frame_radius = (ctx.theme().resolve_radius(spec.frame_radius_token())
         - rem_to_px(spec.frame_radius_inset_rem()))
     .max(0.0);
-    let badge_radius = theme.resolve_radius(spec.badge_radius_token());
-    let play_radius = theme.resolve_radius(spec.play_radius_token());
+    let badge_radius = ctx.theme().resolve_radius(spec.badge_radius_token());
+    let play_radius = ctx.theme().resolve_radius(spec.play_radius_token());
 
     let body_size = rem_to_px(0.875);
     let label_size = rem_to_px(0.8125);
@@ -139,7 +139,7 @@ pub fn media_thumbnail_with_content(
                         SpinnerSize::Md
                     })
                     .with_tone(SpinnerTone::Accent),
-                theme,
+                ctx,
             ));
         }
 
@@ -168,7 +168,7 @@ pub fn media_thumbnail_with_content(
 
     // ── Play indicator (audio/video, contract §3) ─────────
     if spec.shows_play_indicator() {
-        let play_color = theme.resolve_color(spec.play_color_token());
+        let play_color = ctx.theme().resolve_color(spec.play_color_token());
         let mut chip = Node::container();
         {
             let s = &mut chip.style;
@@ -193,7 +193,7 @@ pub fn media_thumbnail_with_content(
 
     // ── Badge overlay (contract §9) ────────────────────────────
     if let Some(ref badge_label) = spec.badge_label {
-        let badge_color = theme.resolve_color(spec.badge_text_token());
+        let badge_color = ctx.theme().resolve_color(spec.badge_text_token());
         let inset = if spec.is_compact() { 0.5 } else { 0.625 };
         let mut badge = Node::container();
         {

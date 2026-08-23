@@ -19,7 +19,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodePosition, StylePatch, TextAlign,
@@ -27,7 +26,8 @@ use poodle_node::{
 use poodle_specs::{ControlDensity, ControlSize, FileUploadItem, FileUploadSpec};
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
-use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px};
 
 /// Dropzone min-height in rem per size (contract section 8).
 fn dropzone_min_height_rem(size: ControlSize) -> f32 {
@@ -100,12 +100,12 @@ pub struct FileUploadHandlers {
 
 pub fn file_upload(
     spec: &FileUploadSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     file_upload_with_handlers(
         spec,
-        theme,
+        ctx,
         FileUploadHandlers {
             on_remove,
             ..FileUploadHandlers::default()
@@ -115,26 +115,27 @@ pub fn file_upload(
 
 pub fn file_upload_with_handlers(
     spec: &FileUploadSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: FileUploadHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // ── Token resolution ──
-    let border_color = theme.resolve_color(spec.border_token());
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_tertiary = theme.resolve_color("color.text.tertiary");
-    let accent = theme.resolve_color("color.accent.base");
-    let radius = theme.resolve_radius(spec.radius_token());
+    let border_color = ctx.theme().resolve_color(spec.border_token());
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let text_tertiary = ctx.theme().resolve_color("color.text.tertiary");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
 
     // ── Sizing (contract §8 size table) ──
     let min_height = rem_to_px(dropzone_min_height_rem(effective_size));
     let icon_sz = rem_to_px(icon_size_rem(effective_size));
     let label_font = rem_to_px(label_font_rem(effective_size));
     let hint_font = rem_to_px(hint_font_rem(effective_size));
-    let padding_x = rem_to_px(panel_space_x_rem(spec.density));
-    let padding_y = rem_to_px(panel_space_y_rem(spec.density));
-    let content_gap = theme.resolve_space("space.inline.sm");
+    let padding_x = rem_to_px(panel_space_x_rem(density));
+    let padding_y = rem_to_px(panel_space_y_rem(density));
+    let content_gap = ctx.theme().resolve_space("space.inline.sm");
     let root_gap = rem_to_px(0.5); // space.stack.sm
     let border_width = rem_to_px(0.125); // 0.125rem dashed
 
@@ -234,9 +235,9 @@ pub fn file_upload_with_handlers(
 
     // Hover: border-focus + panel mixed 50% with transparent.
     if !spec.is_disabled {
-        let panel = theme.resolve_color("color.background.panel");
+        let panel = ctx.theme().resolve_color("color.background.panel");
         let hover_bg = mix_srgb(panel, TRANSPARENT, 0.5);
-        let focus_border = theme.resolve_color(spec.focus_border_token());
+        let focus_border = ctx.theme().resolve_color(spec.focus_border_token());
         dropzone.style.hover = Some(StylePatch {
             background: Some(hover_bg),
             border_color: Some(focus_border),
@@ -259,7 +260,7 @@ pub fn file_upload_with_handlers(
 
     // ── Validation error line (below dropzone) ──
     if let Some(ref err) = spec.validation_error {
-        let danger = theme.resolve_color(spec.error_color_token());
+        let danger = ctx.theme().resolve_color(spec.error_color_token());
         let mut line = Node::text(err);
         line.style.text_size = Some(rem_to_px(0.75));
         line.style.descriptor.text_color = Some(danger);
@@ -275,14 +276,14 @@ pub fn file_upload_with_handlers(
             s.descriptor.layout.spacing.gap = rem_to_px(0.5);
         }
         for item in &spec.files {
-            list = list.child(file_item(spec, item, theme, handlers.on_remove.as_ref()));
+            list = list.child(file_item(spec, item, ctx, handlers.on_remove.as_ref()));
         }
         root = root.child(list);
     }
 
     // ── Disabled state ──
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         root.interaction.disabled = true;
     }
 
@@ -293,17 +294,17 @@ pub fn file_upload_with_handlers(
 fn file_item(
     spec: &FileUploadSpec,
     item: &FileUploadItem,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_remove: Option<&Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let item_radius = theme.resolve_radius(spec.item_radius_token());
-    let panel = theme.resolve_color(spec.item_fill_token());
-    let surface = theme.resolve_color(spec.item_surface_token());
-    let danger = theme.resolve_color(spec.item_error_token());
-    let icon_color = theme.resolve_color(spec.item_icon_token());
-    let name_color = theme.resolve_color(spec.item_name_token());
-    let size_color = theme.resolve_color(spec.item_size_token());
-    let accent = theme.resolve_color(spec.progress_fill_token());
+    let item_radius = ctx.theme().resolve_radius(spec.item_radius_token());
+    let panel = ctx.theme().resolve_color(spec.item_fill_token());
+    let surface = ctx.theme().resolve_color(spec.item_surface_token());
+    let danger = ctx.theme().resolve_color(spec.item_error_token());
+    let icon_color = ctx.theme().resolve_color(spec.item_icon_token());
+    let name_color = ctx.theme().resolve_color(spec.item_name_token());
+    let size_color = ctx.theme().resolve_color(spec.item_size_token());
+    let accent = ctx.theme().resolve_color(spec.progress_fill_token());
 
     // surface @ 82% for file-icon / progress-track backgrounds.
     let surface_mix = mix_srgb(surface, TRANSPARENT, 0.82);
@@ -423,7 +424,7 @@ fn file_item(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.spacing.gap = rem_to_px(0.75);
-        let p = rem_to_px(item_padding_rem(spec.density));
+        let p = rem_to_px(item_padding_rem(ctx.resolve_density(spec.density)));
         let pad = &mut s.descriptor.layout.spacing.padding;
         pad.left = p;
         pad.right = p;
@@ -534,9 +535,11 @@ mod tests {
     fn browse_intent_wires_the_dropzone_when_supplied() {
         let pressed = std::sync::Arc::new(std::sync::Mutex::new(0usize));
         let sink = std::sync::Arc::clone(&pressed);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = file_upload_with_handlers(
             &FileUploadSpec::new(),
-            &theme(),
+            &ctx,
             FileUploadHandlers {
                 on_browse: Some(std::sync::Arc::new(move || {
                     *sink.lock().unwrap() += 1;
@@ -554,12 +557,14 @@ mod tests {
     /// disabled zone never browses.
     #[test]
     fn no_browse_handler_and_disabled_keep_the_zone_inert() {
-        let node = file_upload(&FileUploadSpec::new(), &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = file_upload(&FileUploadSpec::new(), &ctx, None);
         assert!(activate_targets(&node).is_empty());
 
         let node = file_upload_with_handlers(
             &FileUploadSpec::new().with_disabled(true),
-            &theme(),
+            &ctx,
             FileUploadHandlers {
                 on_browse: Some(std::sync::Arc::new(|| {})),
                 ..FileUploadHandlers::default()
@@ -573,9 +578,11 @@ mod tests {
     fn remove_handlers_survive_beside_browse() {
         let removed = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let sink = std::sync::Arc::clone(&removed);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = file_upload_with_handlers(
             &FileUploadSpec::new().with_file(FileUploadItem::new("a", "x.lic", 1)),
-            &theme(),
+            &ctx,
             FileUploadHandlers {
                 on_remove: Some(std::sync::Arc::new(move |name: &str| {
                     sink.lock().unwrap().push(name.to_string())

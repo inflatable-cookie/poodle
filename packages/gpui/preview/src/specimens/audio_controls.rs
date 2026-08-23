@@ -22,14 +22,21 @@ pub(crate) fn render(
     state: &AppState,
     cx: &mut Context<PreviewRoot>,
 ) -> Div {
-    let examples = to_element(specimen.examples(&state.theme));
+    let examples = to_element(specimen.examples(&poodle_render::RenderContext::new(&state.theme)));
     specimen_layout(
         state,
         cx,
         name,
         examples,
         SpecimenAxes::examples_only()
-            .with_sizes(move |size, theme| to_element(specimen.size(size, theme)))
-            .with_densities(move |density, theme| to_element(specimen.density(density, theme))),
+            .with_sizes(move |size, theme| {
+                to_element(specimen.size(size, &poodle_render::RenderContext::new(theme)))
+            })
+            .with_densities(move |density, theme| {
+                to_element(specimen.density(
+                    density,
+                    &poodle_render::RenderContext::new(theme),
+                ))
+            }),
     )
 }

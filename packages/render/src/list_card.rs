@@ -15,7 +15,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, ShadowLayer,
     StylePatch,
@@ -23,6 +22,7 @@ use poodle_node::{
 use poodle_specs::{LeadingFill, LeadingShape, ListCardLayout, ListCardSpec, SelectionIndicator};
 
 use crate::color::{hex_color, mix_srgb, with_alpha};
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Host-composed slots (contract §2 / §3).
@@ -65,24 +65,24 @@ fn square(size: f32) -> Node {
 /// (`is_interactive` or an `href`, and not disabled).
 pub fn list_card(
     spec: &ListCardSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     slots: ListCardSlots,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
-    let surface = theme.resolve_color(spec.fill_token());
-    let text_primary = theme.resolve_color(spec.title_color_token());
-    let border_subtle = theme.resolve_color(spec.border_token());
-    let border_default = theme.resolve_color(spec.hover_border_token());
-    let radius = theme.resolve_radius(spec.radius_token());
-    let text_secondary = theme.resolve_color(spec.subtitle_color_token());
-    let meta_color = theme.resolve_color(spec.meta_color_token());
-    let theme_accent = theme.resolve_color(spec.accent_base_token());
+    let surface = ctx.theme().resolve_color(spec.fill_token());
+    let text_primary = ctx.theme().resolve_color(spec.title_color_token());
+    let border_subtle = ctx.theme().resolve_color(spec.border_token());
+    let border_default = ctx.theme().resolve_color(spec.hover_border_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let text_secondary = ctx.theme().resolve_color(spec.subtitle_color_token());
+    let meta_color = ctx.theme().resolve_color(spec.meta_color_token());
+    let theme_accent = ctx.theme().resolve_color(spec.accent_base_token());
     let accent = spec
         .accent_color
         .as_deref()
         .and_then(hex_color)
         .unwrap_or(theme_accent);
-    let on_accent = theme.resolve_color(spec.on_accent_color_token());
+    let on_accent = ctx.theme().resolve_color(spec.on_accent_color_token());
 
     // fill = color-mix(surface 88%, text-primary); hover = 82%.
     let fill = mix_srgb(surface, text_primary, 0.88);
@@ -92,23 +92,28 @@ pub fn list_card(
     let hover_border = with_alpha(border_default, border_default.3 * 0.52);
 
     // Spacing — contract §8 Root.
-    let pad_x = theme.resolve_space("space.inline.md"); // 0.75rem
+    let pad_x = ctx.theme().resolve_space("space.inline.md"); // 0.75rem
     let pad_y = rem_to_px(0.625);
-    let gap = theme.resolve_space("space.inline.md"); // 0.75rem
+    let gap = ctx.theme().resolve_space("space.inline.md"); // 0.75rem
 
     // Typography — title from label-size token; subtitle/meta small.
-    let title_font = theme.resolve_space("typography.label.size");
+    let title_font = ctx.theme().resolve_space("typography.label.size");
     let small_font = rem_to_px(spec.small_font_size_rem());
 
     let is_compact = spec.layout == ListCardLayout::Compact;
     let is_stacked = spec.layout == ListCardLayout::Stacked;
 
+    // The leading ladder sits on the semantic control size: omission resolved
+    // from the context, then the card's size role (the spec helpers shift that
+    // resolved stop by `leading_size_offset`, never the role a second time).
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+
     // ── Leading: shape-sized square, tint/solid fill (contract §7/§8) ───
-    let leading_size = rem_to_px(spec.leading_size_rem());
-    let leading_font = rem_to_px(spec.leading_font_size_rem());
+    let leading_size = rem_to_px(spec.leading_size_rem(effective_size));
+    let leading_font = rem_to_px(spec.leading_font_size_rem(effective_size));
     let leading_radius = match spec.leading_shape {
         LeadingShape::Circle => leading_size / 2.0,
-        LeadingShape::RoundedSquare => theme.resolve_radius(spec.leading_radius_token()),
+        LeadingShape::RoundedSquare => ctx.theme().resolve_radius(spec.leading_radius_token()),
     };
     let leading_bg = match spec.leading_fill {
         LeadingFill::Tint => with_alpha(accent, accent.3 * spec.leading_tint_ratio()),
@@ -183,7 +188,7 @@ pub fn list_card(
             s.flex_none = true;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.flex_wrap = true;
-            s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+            s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         }
 
         if !slots.badges.is_empty() {
@@ -192,7 +197,7 @@ pub fn list_card(
                 let s = &mut group.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.xs");
+                s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.xs");
             }
             let mut group = group;
             for badge in slots.badges {
@@ -203,13 +208,13 @@ pub fn list_card(
 
         if let Some(corner) = slots.corner {
             // Corner group — tertiary text color (contract §8).
-            let text_tertiary = theme.resolve_color("color.text.tertiary");
+            let text_tertiary = ctx.theme().resolve_color("color.text.tertiary");
             let mut group = Node::container();
             {
                 let s = &mut group.style;
                 s.descriptor.layout.direction = LayoutDirection::Row;
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-                s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.xs");
+                s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.xs");
                 s.descriptor.text_color = Some(text_tertiary);
             }
             accessories = accessories.child(group.child(corner));
@@ -260,7 +265,7 @@ pub fn list_card(
             meta
         });
 
-    let lane = |gap: Option<f32>, child: Node, theme: &dyn ThemeProvider| -> Node {
+    let lane = |gap: Option<f32>, child: Node, ctx: &RenderContext<'_>| -> Node {
         let mut l = Node::container();
         {
             let s = &mut l.style;
@@ -271,21 +276,21 @@ pub fn list_card(
                 s.descriptor.layout.spacing.gap = g;
             }
         }
-        let _ = theme;
+        let _ = ctx;
         l.child(child)
     };
     let actions_el = slots
         .actions
         .filter(|_| !has_trailing)
-        .map(|a| lane(Some(theme.resolve_space("space.inline.xs")), a, theme));
-    let trailing_el = slots.trailing.map(|t| lane(None, t, theme));
+        .map(|a| lane(Some(ctx.theme().resolve_space("space.inline.xs")), a, ctx));
+    let trailing_el = slots.trailing.map(|t| lane(None, t, ctx));
 
     // ── Selection indicator (checkbox box) — contract §3/§8 ─────────────
     let selection_el = (spec.is_selectable
         && spec.selection_indicator == SelectionIndicator::Checkbox)
         .then(|| {
-            let box_size = theme.resolve_space(spec.selection_indicator_size_token());
-            let pill = theme.resolve_radius(spec.leading_radius_token());
+            let box_size = ctx.theme().resolve_space(spec.selection_indicator_size_token());
+            let pill = ctx.theme().resolve_radius(spec.leading_radius_token());
             let (box_bg, box_border) = if spec.is_selected {
                 (accent, accent)
             } else {
@@ -342,7 +347,7 @@ pub fn list_card(
             .sash_color
             .as_ref()
             .and_then(|c| hex_color(c))
-            .unwrap_or_else(|| theme.resolve_color(spec.sash_bg_token()));
+            .unwrap_or_else(|| ctx.theme().resolve_color(spec.sash_bg_token()));
         let mut sash = Node::text(sash_text.to_uppercase());
         sash.position = NodePosition::Absolute {
             top: Some(rem_to_px(0.34375)),
@@ -457,7 +462,7 @@ pub fn list_card(
 
     // Disabled: token opacity.
     if spec.is_disabled {
-        el.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         el.style.descriptor.cursor = CursorHint::NotAllowed;
     }
 
@@ -509,6 +514,8 @@ mod tests {
 
     #[test]
     fn activation_only_reaches_available_interactive_cards() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let activations = Arc::new(Mutex::new(0));
         let sink = Arc::clone(&activations);
         let handler: Arc<dyn Fn() + Send + Sync> = Arc::new(move || {
@@ -522,7 +529,7 @@ mod tests {
         };
         let node = list_card(
             &live,
-            &theme(),
+            &ctx,
             ListCardSlots::default(),
             Some(Arc::clone(&handler)),
         );
@@ -533,21 +540,23 @@ mod tests {
             is_disabled: true,
             ..live
         };
-        let node = list_card(&disabled, &theme(), ListCardSlots::default(), Some(handler));
+        let node = list_card(&disabled, &ctx, ListCardSlots::default(), Some(handler));
         assert!(node.interaction.on_activate.is_none());
         assert_eq!(node.style.descriptor.cursor, CursorHint::NotAllowed);
     }
 
     #[test]
     fn outside_interact_refusal_marks_the_card_root() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         // Web default `true`: the card root carries no refusal marker.
-        let node = list_card(&ListCardSpec::default(), &theme(), ListCardSlots::default(), None);
+        let node = list_card(&ListCardSpec::default(), &ctx, ListCardSlots::default(), None);
         assert!(node.interaction.on_activate.is_none());
 
         // Refusal: the root — the surface a host hit-tests for the context
         // menu's outside clicks — carries the inert activation marker.
         let refusing = ListCardSpec::default().with_dismiss_on_outside_interact(false);
-        let node = list_card(&refusing, &theme(), ListCardSlots::default(), None);
+        let node = list_card(&refusing, &ctx, ListCardSlots::default(), None);
         assert!(node.interaction.on_activate.is_some());
 
         // An interactive card's click handler owns the single `on_activate`
@@ -563,7 +572,7 @@ mod tests {
         });
         let node = list_card(
             &interactive_click,
-            &theme(),
+            &ctx,
             ListCardSlots::default(),
             Some(handler),
         );

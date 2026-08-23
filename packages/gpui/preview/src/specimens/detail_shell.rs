@@ -10,6 +10,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
+use poodle_render::RenderContext;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlSize, DetailItemSpec, DetailSectionSpec, DetailShellSpec,
     DetailState, EyebrowSpec, PageHeaderSpec, PillAppearance, PillSpec, PillTone,
@@ -107,46 +108,49 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                         theme,
                                     )
                                     .with_actions({
-                                        let mut row = Node::container();
-                                        row.style.descriptor.layout.direction =
-                                            LayoutDirection::Row;
-                                        row.style.descriptor.layout.spacing.gap = 6.0;
-                                        row = row.child(
-                                            Pill::from_spec(
-                                                PillSpec::new()
-                                                    .with_label("Active")
-                                                    .with_tone(PillTone::Success)
-                                                    .with_appearance(PillAppearance::Badge),
-                                                theme,
+                                        let theme = theme.clone();
+                                        move |ctx: &RenderContext<'_>| {
+                                            let mut row = Node::container();
+                                            row.style.descriptor.layout.direction =
+                                                LayoutDirection::Row;
+                                            row.style.descriptor.layout.spacing.gap = 6.0;
+                                            row = row.child(
+                                                Pill::from_spec(
+                                                    PillSpec::new()
+                                                        .with_label("Active")
+                                                        .with_tone(PillTone::Success)
+                                                        .with_appearance(PillAppearance::Badge),
+                                                    &theme,
+                                                )
+                                                .into_node_with(ctx),
+                                            );
+                                            row.child(
+                                                Button::from_spec(
+                                                    ButtonSpec::new()
+                                                        .with_variant(ButtonVariant::Secondary)
+                                                        .with_label("Edit"),
+                                                    &theme,
+                                                )
+                                                .with_id("detail-shell-edit")
+                                                .on_click(Arc::new(move || {
+                                                    let next = if edit_theme == "Light" {
+                                                        "Dark"
+                                                    } else {
+                                                        "Light"
+                                                    };
+                                                    let mut queue = edit_events.lock().unwrap();
+                                                    queue.push(NodeSpecimenEvent::SetText {
+                                                        key: "detail-shell-theme".to_string(),
+                                                        value: next.to_string(),
+                                                    });
+                                                    queue.push(NodeSpecimenEvent::SetText {
+                                                        key: "detail-shell-action".to_string(),
+                                                        value: "Edit project".to_string(),
+                                                    });
+                                                }))
+                                                .into_node_with(ctx),
                                             )
-                                            .into_compat_node(),
-                                        );
-                                        row.child(
-                                            Button::from_spec(
-                                                ButtonSpec::new()
-                                                    .with_variant(ButtonVariant::Secondary)
-                                                    .with_label("Edit"),
-                                                theme,
-                                            )
-                                            .with_id("detail-shell-edit")
-                                            .on_click(Arc::new(move || {
-                                                let next = if edit_theme == "Light" {
-                                                    "Dark"
-                                                } else {
-                                                    "Light"
-                                                };
-                                                let mut queue = edit_events.lock().unwrap();
-                                                queue.push(NodeSpecimenEvent::SetText {
-                                                    key: "detail-shell-theme".to_string(),
-                                                    value: next.to_string(),
-                                                });
-                                                queue.push(NodeSpecimenEvent::SetText {
-                                                    key: "detail-shell-action".to_string(),
-                                                    value: "Edit project".to_string(),
-                                                });
-                                            }))
-                                            .into_compat_node(),
-                                        )
+                                        }
                                     })
                                     .into_compat_node(),
                                 )

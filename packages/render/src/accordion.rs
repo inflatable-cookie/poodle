@@ -7,32 +7,33 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, ShadowLayer,
 };
 use poodle_specs::{AccordionItemSpec, AccordionSpec, ControlDensity, ControlSize};
 
 use crate::color::{mix_srgb, with_alpha};
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::context::RenderContext;
+use crate::presentation::{rem_to_px, size_font_rem};
 
 pub fn accordion(
     spec: &AccordionSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    accordion_with_content(spec, theme, &[], on_change)
+    accordion_with_content(spec, ctx, &[], on_change)
 }
 
 /// Render with per-item content keyed by accordion item value.
 pub fn accordion_with_content(
     spec: &AccordionSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     content: &[(String, Node)],
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let root_gap = theme.resolve_space(spec.root_gap_token());
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
+    let root_gap = ctx.theme().resolve_space(spec.root_gap_token());
     let expanded = spec.expanded_values();
 
     let mut root = Node::container();
@@ -51,8 +52,8 @@ pub fn accordion_with_content(
             item,
             is_expanded,
             effective_size,
-            spec.density,
-            theme,
+            density,
+            ctx,
             content
                 .iter()
                 .find(|(value, _)| value == &item.value)
@@ -78,16 +79,16 @@ fn render_item(
     is_expanded: bool,
     effective_size: ControlSize,
     density: ControlDensity,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     content: Option<&Node>,
     on_change: Option<&Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let border_subtle = theme.resolve_color("color.border.subtle");
-    let elevated = theme.resolve_color(spec.item_bg_elevated_token());
-    let panel = theme.resolve_color(spec.item_bg_panel_token());
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let radius = theme.resolve_radius("radius.surface");
+    let border_subtle = ctx.theme().resolve_color("color.border.subtle");
+    let elevated = ctx.theme().resolve_color(spec.item_bg_elevated_token());
+    let panel = ctx.theme().resolve_color(spec.item_bg_panel_token());
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let radius = ctx.theme().resolve_radius("radius.surface");
 
     let item_border = with_alpha(border_subtle, border_subtle.3 * spec.border_subtle_alpha());
     let item_bg = mix_srgb(elevated, panel, spec.item_bg_elevated_ratio());
@@ -95,8 +96,8 @@ fn render_item(
     let pad_x = rem_to_px(spec.inline_padding_rem(density));
     let pad_y = rem_to_px(spec.block_padding_rem());
     let item_gap = rem_to_px(spec.item_internal_gap_rem());
-    let summary_gap = theme.resolve_space(spec.summary_gap_token());
-    let trigger_gap = theme.resolve_space(spec.trigger_grid_gap_token());
+    let summary_gap = ctx.theme().resolve_space(spec.summary_gap_token());
+    let trigger_gap = ctx.theme().resolve_space(spec.trigger_grid_gap_token());
 
     let title_font_size = rem_to_px(match effective_size {
         ControlSize::Xs => 0.8125,
@@ -162,7 +163,7 @@ fn render_item(
     }
 
     // Item shell: inset top highlight in inverse-text at 8%.
-    let text_inverse = theme.resolve_color("color.text.inverse");
+    let text_inverse = ctx.theme().resolve_color("color.text.inverse");
     let highlight = ColorValue(text_inverse.0, text_inverse.1, text_inverse.2, 0.08);
 
     let mut el = Node::container();
@@ -210,7 +211,7 @@ fn render_item(
     }
 
     if item.is_disabled {
-        el.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
         el.interaction.disabled = true;
     }
 
@@ -240,9 +241,11 @@ mod tests {
             ("first".to_string(), Node::text("Expanded body")),
             ("second".to_string(), Node::text("Hidden body")),
         ];
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = accordion_with_content(
             &spec,
-            &theme(),
+            &ctx,
             &content,
             Some(Arc::new(move |value| {
                 toggle_seen.lock().unwrap().push(value.to_string());

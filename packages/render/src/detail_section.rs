@@ -7,10 +7,10 @@
 //! density-driven spacing, and a multi-column body (flex-wrap approximation of
 //! the Svelte grid).
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::DetailSectionSpec;
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Render a titled detail section.
@@ -19,20 +19,22 @@ use crate::presentation::rem_to_px;
 /// - `actions`: optional trailing action slot in the header row (e.g. an edit button)
 pub fn detail_section(
     spec: &DetailSectionSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     content: Vec<Node>,
     actions: Option<Node>,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
+    let theme = ctx.theme();
     let text_primary = theme.resolve_color(spec.title_color_token());
     let text_secondary = theme.resolve_color(spec.description_color_token());
     let border = theme.resolve_color(spec.separator_color_token());
 
     // Density-aware spacing resolved from the spec (contract §8).
-    let root_gap = rem_to_px(spec.root_gap_rem());
-    let header_gap = rem_to_px(spec.header_gap_rem());
-    let title_gap = rem_to_px(spec.title_gap_rem());
-    let body_gap = rem_to_px(spec.body_gap_rem());
-    let separated_gap = rem_to_px(spec.separated_gap_rem());
+    let root_gap = rem_to_px(spec.root_gap_rem(density));
+    let header_gap = rem_to_px(spec.header_gap_rem(density));
+    let title_gap = rem_to_px(spec.title_gap_rem(density));
+    let body_gap = rem_to_px(spec.body_gap_rem(density));
+    let separated_gap = rem_to_px(spec.separated_gap_rem(density));
     // Contract §8: separator rule height 0.0625rem.
     let separator_h = rem_to_px(0.0625);
 

@@ -17,8 +17,8 @@ use poodle_headless::history_center::{
     HistoryEntryPosition, HistoryPathPage,
 };
 use poodle_render::{
-    history_center, HistoryCenterDelete, HistoryCenterHandlers, HistoryCenterRename,
-    HistoryCenterView,
+    RenderContext, history_center, HistoryCenterDelete, HistoryCenterHandlers,
+    HistoryCenterRename, HistoryCenterView,
 };
 use poodle_specs::{
     EyebrowSpec, HistoryCenterRejection, HistoryCenterSpec,
@@ -592,7 +592,12 @@ fn render_instance(
 ) -> AnyElement {
     let mut handlers = handlers;
     handlers.instance_id = Some(instance_id.to_string());
-    poodle_gpui_node_backend::to_gpui(&history_center(spec, theme, view, &handlers))
+    poodle_gpui_node_backend::to_gpui(&history_center(
+        spec,
+        &RenderContext::new(theme),
+        view,
+        &handlers,
+    ))
 }
 
 fn hint(theme: &GpuiThemeProvider, label: &str, value: &str) -> Div {

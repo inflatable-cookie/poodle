@@ -36,7 +36,7 @@ pub struct SpinnerSpec {
     /// Presentation axes (contract §3): size is intrinsic, density is sibling
     /// spacing, size_role resolves size from the inherited presentation.
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for SpinnerSpec {
@@ -47,7 +47,7 @@ impl Default for SpinnerSpec {
             tone: SpinnerTone::Current,
             aria_label: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -62,7 +62,7 @@ impl SpinnerSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

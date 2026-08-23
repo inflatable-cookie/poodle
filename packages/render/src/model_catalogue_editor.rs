@@ -18,7 +18,6 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::model_connection::{
     hidden_model_catalogue_items, model_catalogue_focus_after_hide,
     model_catalogue_grab_announcement, model_catalogue_reorder_announcement,
@@ -42,10 +41,11 @@ use poodle_specs::{
 
 use crate::callout::{callout, CalloutHandlers};
 use crate::collapsible::collapsible;
+use crate::context::RenderContext;
 use crate::empty_state::empty_state;
 use crate::icon_button::icon_button;
 use crate::pill::pill;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::presentation::rem_to_px;
 
 /// Contract §8: the label weight the header and row titles share.
 const LABEL_WEIGHT: u16 = 500;
@@ -112,12 +112,12 @@ pub struct ModelCatalogueEditorSlots {
 
 pub fn model_catalogue_editor(
     spec: &ModelCatalogueEditorSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: ModelCatalogueEditorHandlers,
 ) -> Node {
     model_catalogue_editor_with_slots(
         spec,
-        theme,
+        ctx,
         ModelCatalogueEditorSlots::default(),
         handlers,
     )
@@ -125,12 +125,13 @@ pub fn model_catalogue_editor(
 
 pub fn model_catalogue_editor_with_slots(
     spec: &ModelCatalogueEditorSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     slots: ModelCatalogueEditorSlots,
     handlers: ModelCatalogueEditorHandlers,
 ) -> Node {
     let mut slots = slots;
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let shown = shown_model_catalogue_items(&spec.items);
     let hidden = hidden_model_catalogue_items(&spec.items);
     let shown_ids: Vec<String> = shown.iter().map(|item| item.id.clone()).collect();
@@ -145,12 +146,12 @@ pub fn model_catalogue_editor_with_slots(
         s.min_width = Some(0.0);
     }
     let mut title = Node::text(&spec.title);
-    title.style.text_size = Some(theme.resolve_space("typography.body.size"));
+    title.style.text_size = Some(ctx.theme().resolve_space("typography.body.size"));
     title.style.text_weight = Some(LABEL_WEIGHT);
-    title.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
+    title.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
     let mut heading = heading.child(title);
     if spec.state == ModelCatalogueState::Ready {
-        heading = heading.child(secondary_text(theme, &count_line(shown.len(), hidden.len())));
+        heading = heading.child(secondary_text(ctx, &count_line(shown.len(), hidden.len())));
     }
 
     let mut header = Node::container();
@@ -159,7 +160,7 @@ pub fn model_catalogue_editor_with_slots(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.md");
         s.flex_wrap = true;
         s.fill_width = true;
     }
@@ -173,7 +174,7 @@ pub fn model_catalogue_editor_with_slots(
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.md");
         s.fill_width = true;
         s.min_width = Some(0.0);
     }
@@ -183,10 +184,10 @@ pub fn model_catalogue_editor_with_slots(
         .insert("state".to_string(), state_role(spec.state).to_string());
     root.roles
         .insert("pending".to_string(), spec.is_pending.to_string());
-    let mut root = root.child(header).child(live_region(theme, spec));
+    let mut root = root.child(header).child(live_region(ctx, spec));
 
     if spec.state != ModelCatalogueState::Ready {
-        return root.child(state_region(spec, theme, effective_size));
+        return root.child(state_region(spec, ctx, effective_size));
     }
 
     // ── Shown list ──
@@ -194,7 +195,7 @@ pub fn model_catalogue_editor_with_slots(
     {
         let s = &mut list.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
         s.fill_width = true;
     }
     list.a11y.role = Some(NodeRole::List);
@@ -203,7 +204,7 @@ pub fn model_catalogue_editor_with_slots(
     for (index, item) in shown.iter().enumerate() {
         list = list.child(shown_row(
             spec,
-            theme,
+            ctx,
             effective_size,
             item,
             index,
@@ -221,7 +222,7 @@ pub fn model_catalogue_editor_with_slots(
         {
             let s = &mut hidden_list.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
-            s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+            s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
             s.fill_width = true;
         }
         hidden_list.a11y.role = Some(NodeRole::List);
@@ -229,7 +230,7 @@ pub fn model_catalogue_editor_with_slots(
         let mut hidden_list = hidden_list;
         for item in &hidden {
             hidden_list =
-                hidden_list.child(hidden_row(spec, theme, effective_size, item, &handlers));
+                hidden_list.child(hidden_row(spec, ctx, effective_size, item, &handlers));
         }
 
         let on_open = handlers.on_hidden_open_change.clone().map(|handler| {
@@ -240,8 +241,8 @@ pub fn model_catalogue_editor_with_slots(
                 .with_title(spec.hidden_title.clone())
                 .with_open(spec.hidden_open)
                 .with_size(effective_size)
-                .with_density(spec.density),
-            theme,
+                .with_density(density),
+            ctx,
             Some(hidden_list),
             on_open,
         );
@@ -252,22 +253,22 @@ pub fn model_catalogue_editor_with_slots(
         mark_hidden_disclosure(
             &mut section,
             handlers.instance_id.as_deref(),
-            theme,
+            ctx,
         );
         let mut wrapper = Node::container();
         {
             let s = &mut wrapper.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
-            s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+            s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
             let pad = &mut s.descriptor.layout.spacing.padding;
-            let inset = theme.resolve_space("space.stack.sm");
+            let inset = ctx.theme().resolve_space("space.stack.sm");
             pad.top = inset;
             pad.bottom = inset;
             pad.left = inset;
             pad.right = inset;
-            s.descriptor.background = Some(theme.resolve_color("color.background.panel"));
+            s.descriptor.background = Some(ctx.theme().resolve_color("color.background.panel"));
             s.fill_width = true;
-            let radius = theme.resolve_radius("radius.surface");
+            let radius = ctx.theme().resolve_radius("radius.surface");
             let c = &mut s.descriptor.corner_radii;
             c.top_left = radius;
             c.top_right = radius;
@@ -288,20 +289,20 @@ pub fn model_catalogue_editor_with_slots(
 fn mark_hidden_disclosure(
     node: &mut Node,
     instance_id: Option<&str>,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> bool {
     if node.interaction.focusable {
         node.id = Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID.to_string());
         node.runtime_id = instance_id.map(|scope| model_catalogue_hidden_focus_id(Some(scope)));
         node.style.focus = Some(StylePatch {
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             ..StylePatch::default()
         });
         return true;
     }
     node.children
         .iter_mut()
-        .any(|child| mark_hidden_disclosure(child, instance_id, theme))
+        .any(|child| mark_hidden_disclosure(child, instance_id, ctx))
 }
 
 /// `icon_button` renders no focus patch, and the GPUI backend only creates a
@@ -309,9 +310,9 @@ fn mark_hidden_disclosure(
 /// would be unreachable by keyboard, and a keyboard reorder could not receive
 /// focus at all (PAPERCUTS: icon-button focus patch). Same workaround
 /// `poodle-render::history_center` already carries.
-fn focusable_chrome(mut node: Node, theme: &dyn ThemeProvider) -> Node {
+fn focusable_chrome(mut node: Node, ctx: &RenderContext<'_>) -> Node {
     node.style.focus = Some(StylePatch {
-        border_color: Some(theme.resolve_color("color.accent.focusRing")),
+        border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
         ..StylePatch::default()
     });
     node
@@ -346,16 +347,16 @@ fn badge_tone(tone: ModelConnectionBadgeTone) -> PillTone {
     }
 }
 
-fn secondary_text(theme: &dyn ThemeProvider, content: &str) -> Node {
+fn secondary_text(ctx: &RenderContext<'_>, content: &str) -> Node {
     let mut node = Node::text(content);
-    node.style.text_size = Some(theme.resolve_space("typography.label.size"));
-    node.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+    node.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
+    node.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
     node
 }
 
 /// The polite atomic live region. Its copy is host state: a callback asks for
 /// it, the host stores it, and the next render says it.
-fn live_region(theme: &dyn ThemeProvider, spec: &ModelCatalogueEditorSpec) -> Node {
+fn live_region(ctx: &RenderContext<'_>, spec: &ModelCatalogueEditorSpec) -> Node {
     let mut clip = Node::container();
     {
         let s = &mut clip.style;
@@ -367,17 +368,18 @@ fn live_region(theme: &dyn ThemeProvider, spec: &ModelCatalogueEditorSpec) -> No
     }
     clip.a11y.role = Some(NodeRole::Status);
     clip.a11y.label = Some(spec.live_message.clone());
-    clip.child(secondary_text(theme, &spec.live_message))
+    clip.child(secondary_text(ctx, &spec.live_message))
 }
 
 /// The non-ready postures. Each one is distinct: loading and the neutral
 /// postures use EmptyState, error uses a danger Callout.
 fn state_region(
     spec: &ModelCatalogueEditorSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     effective_size: ControlSize,
 ) -> Node {
     let defaults = model_catalogue_state_copy(spec.state);
+    let density = ctx.resolve_density(spec.density);
     let title = spec.state_title.clone().unwrap_or(defaults.title);
     let message = spec.state_message.clone().unwrap_or(defaults.message);
 
@@ -389,8 +391,8 @@ fn state_region(
                 .with_content(message)
                 .with_announce_mode(CalloutAnnounceMode::Assertive)
                 .with_size(effective_size)
-                .with_density(spec.density),
-            theme,
+                .with_density(density),
+            ctx,
             CalloutHandlers::default(),
         );
     }
@@ -401,17 +403,17 @@ fn state_region(
         } else {
             EmptyStateVariant::Neutral
         })
-        .with_density(spec.density);
+        .with_density(density);
     if !message.is_empty() {
         state_spec = state_spec.with_message(message);
     }
-    empty_state(&state_spec, theme)
+    empty_state(&state_spec, ctx)
 }
 
 #[allow(clippy::too_many_arguments)]
 fn shown_row(
     spec: &ModelCatalogueEditorSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     effective_size: ControlSize,
     item: &ModelCatalogueItem,
     index: usize,
@@ -420,10 +422,11 @@ fn shown_row(
     slots: &ModelCatalogueEditorSlots,
     handlers: &Arc<ModelCatalogueEditorHandlers>,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
     let locked = spec.is_locked();
     let row_locked = locked || item.is_disabled;
-    let accent = theme.resolve_color("color.accent.base");
-    let border = theme.resolve_color("color.border.subtle");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let border = ctx.theme().resolve_color("color.border.subtle");
     let is_grabbed = spec.grabbed_id.as_deref() == Some(item.id.as_str());
     let is_drop_target = spec.drop_target_id.as_deref() == Some(item.id.as_str());
 
@@ -436,7 +439,7 @@ fn shown_row(
             .with_variant(ButtonVariant::Ghost)
             .with_size_role(SemanticControlSizeRole::Chrome)
             .with_size(effective_size)
-            .with_density(spec.density)
+            .with_density(density)
             .with_aria_label(format!(
                 "{}, position {} of {}",
                 item.label,
@@ -445,7 +448,7 @@ fn shown_row(
             ))
             .with_pressed(is_grabbed)
             .with_disabled(row_locked),
-        theme,
+        ctx,
         (!row_locked).then(|| {
             let handlers = Arc::clone(handlers);
             let id = item.id.clone();
@@ -468,7 +471,7 @@ fn shown_row(
             }) as Arc<dyn Fn() + Send + Sync>
         }),
     );
-    let mut handle = focusable_chrome(handle, theme);
+    let mut handle = focusable_chrome(handle, ctx);
     handle.id = Some(spec.row_handle_id(&item.id));
     handle.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "handle");
     handle.a11y.toggled = Some(if is_grabbed {
@@ -528,7 +531,7 @@ fn shown_row(
         let s = &mut label_row.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.xs");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.xs");
         s.flex_wrap = true;
         s.min_width = Some(0.0);
     }
@@ -539,13 +542,13 @@ fn shown_row(
         label_row = label_row.child(mark);
     }
     let mut label = Node::text(&item.label);
-    label.style.text_size = Some(theme.resolve_space("typography.label.size"));
+    label.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
     label.style.text_weight = Some(LABEL_WEIGHT);
-    label.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
+    label.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
     label.style.text_ellipsis = true;
     let mut label_row = label_row.child(label);
     if let Some(provider) = item.provider_label.as_deref() {
-        label_row = label_row.child(secondary_text(theme, provider));
+        label_row = label_row.child(secondary_text(ctx, provider));
     }
 
     let mut identity = Node::container();
@@ -558,7 +561,7 @@ fn shown_row(
     }
     let mut identity = identity.child(label_row);
     if let Some(description) = item.description.as_deref() {
-        let mut node = secondary_text(theme, description);
+        let mut node = secondary_text(ctx, description);
         node.style.text_ellipsis = true;
         identity = identity.child(node);
     }
@@ -584,8 +587,8 @@ fn shown_row(
                 .with_label(badge.label.clone())
                 .with_tone(badge_tone(badge.tone))
                 .with_appearance(PillAppearance::Subtle)
-                .with_density(spec.density),
-            theme,
+                .with_density(density),
+            ctx,
         ));
     }
     if let Some(handler) = &handlers.on_info {
@@ -597,13 +600,13 @@ fn shown_row(
                 .with_variant(ButtonVariant::Ghost)
                 .with_size_role(SemanticControlSizeRole::Chrome)
                 .with_size(effective_size)
-                .with_density(spec.density)
+                .with_density(density)
                 .with_aria_label(format!("About {}", item.label))
                 .with_disabled(locked),
-            theme,
+            ctx,
             (!locked).then(|| Arc::new(move || handler(&id)) as Arc<dyn Fn() + Send + Sync>),
         );
-        let mut info = focusable_chrome(info, theme);
+        let mut info = focusable_chrome(info, ctx);
         info.id = Some(format!("model-catalogue-editor:{}:info", item.id));
         info.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "info");
         utilities = utilities.child(info);
@@ -616,10 +619,10 @@ fn shown_row(
                 .with_variant(ButtonVariant::Ghost)
                 .with_size_role(SemanticControlSizeRole::Chrome)
                 .with_size(effective_size)
-                .with_density(spec.density)
+                .with_density(density)
                 .with_aria_label(format!("Move {} up", item.label))
                 .with_disabled(up_disabled),
-            theme,
+            ctx,
             (!up_disabled).then(|| {
                 let move_to = move_to.clone();
                 Arc::new(move || {
@@ -627,7 +630,7 @@ fn shown_row(
                 }) as Arc<dyn Fn() + Send + Sync>
             }),
         );
-        let mut up = focusable_chrome(up, theme);
+        let mut up = focusable_chrome(up, ctx);
         up.id = Some(format!("model-catalogue-editor:{}:up", item.id));
         up.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "up");
 
@@ -638,10 +641,10 @@ fn shown_row(
                 .with_variant(ButtonVariant::Ghost)
                 .with_size_role(SemanticControlSizeRole::Chrome)
                 .with_size(effective_size)
-                .with_density(spec.density)
+                .with_density(density)
                 .with_aria_label(format!("Move {} down", item.label))
                 .with_disabled(down_disabled),
-            theme,
+            ctx,
             (!down_disabled).then(|| {
                 let move_to = move_to.clone();
                 Arc::new(move || {
@@ -649,7 +652,7 @@ fn shown_row(
                 }) as Arc<dyn Fn() + Send + Sync>
             }),
         );
-        let mut down = focusable_chrome(down, theme);
+        let mut down = focusable_chrome(down, ctx);
         down.id = Some(format!("model-catalogue-editor:{}:down", item.id));
         down.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "down");
         utilities = utilities.child(up).child(down);
@@ -660,10 +663,10 @@ fn shown_row(
             .with_variant(ButtonVariant::Ghost)
             .with_size_role(SemanticControlSizeRole::Chrome)
             .with_size(effective_size)
-            .with_density(spec.density)
+            .with_density(density)
             .with_aria_label(format!("Hide {}", item.label))
             .with_disabled(row_locked),
-        theme,
+        ctx,
         (!row_locked).then(|| {
             let handlers = Arc::clone(handlers);
             let shown_ids = shown_ids.to_vec();
@@ -698,7 +701,7 @@ fn shown_row(
             }) as Arc<dyn Fn() + Send + Sync>
         }),
     );
-    let mut hide = focusable_chrome(hide, theme);
+    let mut hide = focusable_chrome(hide, ctx);
     hide.id = Some(format!("model-catalogue-editor:{}:hide", item.id));
     hide.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "hide");
     let utilities = utilities.child(hide);
@@ -709,23 +712,23 @@ fn shown_row(
         let s = &mut row.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.top = theme.resolve_space("space.stack.sm");
-        pad.bottom = theme.resolve_space("space.stack.sm");
-        pad.left = theme.resolve_space("space.inline.md");
-        pad.right = theme.resolve_space("space.inline.md");
+        pad.top = ctx.theme().resolve_space("space.stack.sm");
+        pad.bottom = ctx.theme().resolve_space("space.stack.sm");
+        pad.left = ctx.theme().resolve_space("space.inline.md");
+        pad.right = ctx.theme().resolve_space("space.inline.md");
         s.descriptor.border.width = rem_to_px(0.0625);
         s.descriptor.border.color = if is_grabbed || is_drop_target {
             accent
         } else {
             border
         };
-        s.descriptor.background = Some(theme.resolve_color("color.background.surface"));
+        s.descriptor.background = Some(ctx.theme().resolve_color("color.background.surface"));
         s.flex_wrap = true;
         s.fill_width = true;
         s.min_width = Some(0.0);
-        let radius = theme.resolve_radius("radius.control");
+        let radius = ctx.theme().resolve_radius("radius.control");
         let c = &mut s.descriptor.corner_radii;
         c.top_left = radius;
         c.top_right = radius;
@@ -766,11 +769,12 @@ fn shown_row(
 
 fn hidden_row(
     spec: &ModelCatalogueEditorSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     effective_size: ControlSize,
     item: &ModelCatalogueItem,
     handlers: &Arc<ModelCatalogueEditorHandlers>,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
     let row_locked = spec.is_locked() || item.is_disabled;
 
     let mut label_row = Node::container();
@@ -778,17 +782,17 @@ fn hidden_row(
         let s = &mut label_row.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.xs");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.xs");
         s.descriptor.layout.width = LayoutSizing::Grow;
         s.min_width = Some(0.0);
     }
     let mut label = Node::text(&item.label);
-    label.style.text_size = Some(theme.resolve_space("typography.label.size"));
+    label.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
     label.style.text_weight = Some(LABEL_WEIGHT);
     label.style.text_ellipsis = true;
     let mut label_row = label_row.child(label);
     if let Some(provider) = item.provider_label.as_deref() {
-        label_row = label_row.child(secondary_text(theme, provider));
+        label_row = label_row.child(secondary_text(ctx, provider));
     }
 
     let restore = icon_button(
@@ -797,10 +801,10 @@ fn hidden_row(
             .with_variant(ButtonVariant::Ghost)
             .with_size_role(SemanticControlSizeRole::Chrome)
             .with_size(effective_size)
-            .with_density(spec.density)
+            .with_density(density)
             .with_aria_label(format!("Restore {}", item.label))
             .with_disabled(row_locked),
-        theme,
+        ctx,
         (!row_locked).then(|| {
             let handlers = Arc::clone(handlers);
             let item = item.clone();
@@ -815,7 +819,7 @@ fn hidden_row(
             }) as Arc<dyn Fn() + Send + Sync>
         }),
     );
-    let mut restore = focusable_chrome(restore, theme);
+    let mut restore = focusable_chrome(restore, ctx);
     restore.id = Some(format!("model-catalogue-editor:{}:restore", item.id));
     restore.runtime_id = scoped_row_id(handlers.instance_id.as_deref(), &item.id, "restore");
 
@@ -825,8 +829,8 @@ fn hidden_row(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
-        s.descriptor.text_color = Some(theme.resolve_color("color.text.tertiary"));
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
+        s.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.tertiary"));
         s.fill_width = true;
         s.min_width = Some(0.0);
     }
@@ -981,7 +985,7 @@ mod tests {
     #[test]
     fn explicit_moves_emit_the_complete_shown_order_and_follow_focus() {
         let recorder = Recorder::default();
-        let node = model_catalogue_editor(&spec(), &theme(), recorder.handlers());
+        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
 
         press(&node, "Move Frontier Alpha down");
         assert_eq!(
@@ -1005,7 +1009,7 @@ mod tests {
 
     #[test]
     fn move_actions_are_disabled_at_the_boundaries() {
-        let node = model_catalogue_editor(&spec(), &theme(), ModelCatalogueEditorHandlers::default());
+        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), ModelCatalogueEditorHandlers::default());
         assert!(named(&node, "Move Frontier Alpha up").interaction.disabled);
         assert!(!named(&node, "Move Frontier Alpha down").interaction.disabled);
         assert!(named(&node, "Move Shared Label down").interaction.disabled);
@@ -1015,7 +1019,7 @@ mod tests {
     #[test]
     fn the_handle_grabs_drops_and_moves_by_keyboard() {
         let recorder = Recorder::default();
-        let node = model_catalogue_editor(&spec(), &theme(), recorder.handlers());
+        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
 
         // Enter/Space and a pointer click all reach the same activation.
         press(&node, "Frontier Beta, position 2 of 4");
@@ -1031,7 +1035,7 @@ mod tests {
         // With the grab held, arrows move the grabbed row.
         let grabbed = model_catalogue_editor(
             &spec().with_grabbed(Some("model-beta".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             recorder.handlers(),
         );
         let handle = named(&grabbed, "Frontier Beta, position 2 of 4");
@@ -1075,7 +1079,7 @@ mod tests {
     #[test]
     fn arrow_keys_report_the_list_boundary_without_emitting_an_order() {
         let recorder = Recorder::default();
-        let node = model_catalogue_editor(&spec(), &theme(), recorder.handlers());
+        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
         let handle = named(&node, "Frontier Alpha, position 1 of 4");
         let keys = handle.interaction.on_key.as_ref().expect("arrow handler");
         assert_eq!(
@@ -1092,7 +1096,7 @@ mod tests {
     #[test]
     fn an_admitted_pointer_drag_moves_through_the_same_order_payload() {
         let recorder = Recorder::default();
-        let node = model_catalogue_editor(&spec(), &theme(), recorder.handlers());
+        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
 
         let handle = named(&node, "Frontier Alpha, position 1 of 4");
         assert_eq!(handle.interaction.drag_payload.as_deref(), Some("model-alpha"));
@@ -1127,7 +1131,7 @@ mod tests {
     fn drag_can_be_turned_off_while_keyboard_and_buttons_remain() {
         let node = model_catalogue_editor(
             &spec().with_drag_enabled(false),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelCatalogueEditorHandlers::default(),
         );
         let handle = named(&node, "Frontier Alpha, position 1 of 4");
@@ -1140,7 +1144,7 @@ mod tests {
     #[test]
     fn hiding_emits_only_visibility_and_moves_focus_to_the_next_shown_model() {
         let recorder = Recorder::default();
-        let node = model_catalogue_editor(&spec(), &theme(), recorder.handlers());
+        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
         press(&node, "Hide Frontier Beta");
 
         assert_eq!(
@@ -1168,7 +1172,7 @@ mod tests {
             ModelCatalogueItem::new("model-solo", "Solo"),
             ModelCatalogueItem::new("model-gone", "Gone").with_visible(false),
         ]);
-        let node = model_catalogue_editor(&only, &theme(), recorder.handlers());
+        let node = model_catalogue_editor(&only, &RenderContext::new(&theme()), recorder.handlers());
         press(&node, "Hide Solo");
 
         assert_eq!(recorder.hidden_open.lock().unwrap().as_slice(), [true]);
@@ -1183,7 +1187,7 @@ mod tests {
         let recorder = Recorder::default();
         let node = model_catalogue_editor(
             &spec().with_hidden_open(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             recorder.handlers(),
         );
         press(&node, "Restore Archive Delta");
@@ -1202,7 +1206,7 @@ mod tests {
     fn the_info_action_exists_only_when_the_host_wants_it() {
         let without = model_catalogue_editor(
             &spec(),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelCatalogueEditorHandlers::default(),
         );
         assert!(without
@@ -1210,7 +1214,7 @@ mod tests {
             .is_none());
 
         let recorder = Recorder::default();
-        let with = model_catalogue_editor(&spec(), &theme(), recorder.handlers());
+        let with = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
         press(&with, "About Frontier Alpha");
         assert_eq!(recorder.info.lock().unwrap().as_slice(), ["model-alpha"]);
     }
@@ -1220,7 +1224,7 @@ mod tests {
         for spec in [spec().with_disabled(true), spec().with_pending(true)] {
             let node = model_catalogue_editor(
                 &spec,
-                &theme(),
+                &RenderContext::new(&theme()),
                 ModelCatalogueEditorHandlers {
                     on_order_change: Some(Arc::new(|_| unreachable!("a locked editor reorders"))),
                     on_visibility_change: Some(Arc::new(|_| unreachable!("a locked editor hides"))),
@@ -1248,7 +1252,7 @@ mod tests {
         ];
         let node = model_catalogue_editor(
             &ModelCatalogueEditorSpec::new().with_items(items),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelCatalogueEditorHandlers::default(),
         );
         assert!(named(&node, "Hide Alpha").interaction.disabled);
@@ -1257,7 +1261,7 @@ mod tests {
 
     #[test]
     fn every_posture_renders_its_own_copy_and_no_rows() {
-        let ready = model_catalogue_editor(&spec(), &theme(), ModelCatalogueEditorHandlers::default());
+        let ready = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), ModelCatalogueEditorHandlers::default());
         assert!(ready.texts().contains(&"4 shown, 2 hidden"));
 
         for (state, title) in [
@@ -1269,7 +1273,7 @@ mod tests {
         ] {
             let node = model_catalogue_editor(
                 &spec().with_state(state),
-                &theme(),
+                &RenderContext::new(&theme()),
                 ModelCatalogueEditorHandlers::default(),
             );
             assert!(
@@ -1294,7 +1298,7 @@ mod tests {
                 .with_state(ModelCatalogueState::Unavailable)
                 .with_state_title("No catalogue route")
                 .with_state_message("This connection negotiates models per session."),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelCatalogueEditorHandlers::default(),
         );
         assert!(node.texts().contains(&"No catalogue route"));
@@ -1305,7 +1309,7 @@ mod tests {
     fn the_live_region_says_what_the_host_last_stored() {
         let node = model_catalogue_editor(
             &spec().with_live_message("Hid Frontier Beta."),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelCatalogueEditorHandlers::default(),
         );
         let live = node
@@ -1322,7 +1326,7 @@ mod tests {
         row_meta.insert("model-gamma".to_string(), Node::text("128k context"));
         let node = model_catalogue_editor_with_slots(
             &spec(),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelCatalogueEditorSlots {
                 leading,
                 row_meta,
@@ -1348,7 +1352,7 @@ mod tests {
         ];
         let node = model_catalogue_editor(
             &ModelCatalogueEditorSpec::new().with_items(items),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelCatalogueEditorHandlers::default(),
         );
         assert!(node.texts().contains(&"2 shown"));
@@ -1363,7 +1367,7 @@ mod tests {
         let recorder = Recorder::default();
         let node = model_catalogue_editor(
             &spec().with_hidden_open(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             recorder.handlers(),
         );
         let disclosure = node
@@ -1387,7 +1391,7 @@ mod tests {
             ModelCatalogueItem::new("model-solo", "Solo"),
             ModelCatalogueItem::new("model-gone", "Gone").with_visible(false),
         ]);
-        let node = model_catalogue_editor(&only, &theme(), recorder.handlers());
+        let node = model_catalogue_editor(&only, &RenderContext::new(&theme()), recorder.handlers());
         press(&node, "Hide Solo");
 
         let requested = recorder.focus.lock().unwrap().last().cloned().expect("a request");
@@ -1395,7 +1399,7 @@ mod tests {
         // resolves to something the backend can focus.
         let disclosed = model_catalogue_editor(
             &only.clone().with_hidden_open(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             recorder.handlers(),
         );
         let target = disclosed
@@ -1408,7 +1412,7 @@ mod tests {
     fn an_instance_scope_isolates_backend_state_ids() {
         let first = model_catalogue_editor(
             &spec().with_hidden_open(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelCatalogueEditorHandlers {
                 instance_id: Some("first".to_string()),
                 ..ModelCatalogueEditorHandlers::default()
@@ -1416,7 +1420,7 @@ mod tests {
         );
         let second = model_catalogue_editor(
             &spec().with_hidden_open(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelCatalogueEditorHandlers {
                 instance_id: Some("second".to_string()),
                 ..ModelCatalogueEditorHandlers::default()
@@ -1448,7 +1452,7 @@ mod tests {
         let recorder = Recorder::default();
         let mut handlers = recorder.handlers();
         handlers.instance_id = Some("second".to_string());
-        let node = model_catalogue_editor(&spec(), &theme(), handlers);
+        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), handlers);
         press(&node, "Move Frontier Alpha down");
         assert_eq!(
             recorder.focus.lock().unwrap().as_slice(),
@@ -1461,7 +1465,7 @@ mod tests {
         let recorder = Recorder::default();
         let node = model_catalogue_editor(
             &spec().with_hidden_open(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             recorder.handlers(),
         );
         // Two models share the label "Shared Label"; one is shown, one hidden.

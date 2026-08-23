@@ -5,7 +5,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole,
@@ -13,9 +12,10 @@ use poodle_node::{
 use poodle_specs::{NumberInputSpec, ValidationState};
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::presentation::{
-    control_height_rem, rem_to_px, resolve_semantic_size, resolve_supporting_visual_size,
-    size_font_rem, size_padding_x_offset_rem,
+    control_height_rem, rem_to_px, resolve_supporting_visual_size, size_font_rem,
+    size_padding_x_offset_rem,
 };
 
 /// Host callbacks: increment / decrement presses. Bounds- or state-disabled
@@ -68,39 +68,39 @@ fn affix_box(
 
 pub fn number_input(
     spec: &NumberInputSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: NumberInputHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let height = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
     // The old GPUI component resolves this token through the active theme
     // density (the visual axis), then applies the semantic size offset. The
     // spec density is for callers' standalone contracts and is not the
     // preview theme's density override.
-    let pad_x = theme.resolve_space(spec.horizontal_padding_token())
+    let pad_x = ctx.theme().resolve_space(spec.horizontal_padding_token())
         + rem_to_px(size_padding_x_offset_rem(effective_size));
     let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
         effective_size,
     )));
-    let border_width = theme.resolve_border_width(spec.border_width_token());
+    let border_width = ctx.theme().resolve_border_width(spec.border_width_token());
 
-    let border = theme.resolve_color(spec.border_token());
-    let radius = theme.resolve_radius(spec.radius_token());
-    let fill = theme.resolve_color(spec.fill_token());
-    let text_color = theme.resolve_color(spec.text_color_token());
-    let stepper_icon_color = theme.resolve_color(spec.stepper_icon_color_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let fill = ctx.theme().resolve_color(spec.fill_token());
+    let text_color = ctx.theme().resolve_color(spec.text_color_token());
+    let stepper_icon_color = ctx.theme().resolve_color(spec.stepper_icon_color_token());
     // Boxed-affix chrome (border-default box + surface bg + muted text).
-    let affix_text = theme.resolve_color(spec.affix_text_token());
-    let affix_bg = theme.resolve_color(spec.affix_fill_token());
-    let affix_border = theme.resolve_color(spec.affix_border_token());
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+    let affix_text = ctx.theme().resolve_color(spec.affix_text_token());
+    let affix_bg = ctx.theme().resolve_color(spec.affix_fill_token());
+    let affix_border = ctx.theme().resolve_color(spec.affix_border_token());
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
 
     // The field border recolors per validation state.
     let effective_border = match spec.validation_state {
-        ValidationState::Invalid => theme.resolve_color("color.status.danger"),
-        ValidationState::Valid => theme.resolve_color("color.status.success"),
-        ValidationState::Pending => theme.resolve_color("color.accent.base"),
+        ValidationState::Invalid => ctx.theme().resolve_color("color.status.danger"),
+        ValidationState::Valid => ctx.theme().resolve_color("color.status.success"),
+        ValidationState::Pending => ctx.theme().resolve_color("color.accent.base"),
         ValidationState::None => border,
     };
 
@@ -136,7 +136,7 @@ pub fn number_input(
         s.fill_width = true;
     }
 
-    let stepper_bg = theme.resolve_color(spec.stepper_fill_token());
+    let stepper_bg = ctx.theme().resolve_color(spec.stepper_fill_token());
     let stepper_bg = with_alpha(stepper_bg, stepper_bg.3 * 0.88);
     let stepper = |icon: &str,
                    label: &str,

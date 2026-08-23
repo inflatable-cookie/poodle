@@ -24,9 +24,9 @@ pub struct FieldSpec {
     pub optional_label: Option<String>,
     pub span: Option<String>,
     pub grid_area: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl FieldSpec {
@@ -43,9 +43,9 @@ impl FieldSpec {
             optional_label: None,
             span: None,
             grid_area: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -95,7 +95,7 @@ impl FieldSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -105,7 +105,7 @@ impl FieldSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 
@@ -169,8 +169,8 @@ impl FieldSpec {
                 .unwrap_or(false)
     }
 
-    pub fn label_typography_token(&self) -> &'static str {
-        match self.size {
+    pub fn label_typography_token(&self, size: ControlSize) -> &'static str {
+        match size {
             ControlSize::Xs => semantic::TYPOGRAPHY_CAPTION_SIZE,
             ControlSize::Sm => semantic::TYPOGRAPHY_COUNTER_SIZE,
             ControlSize::Md => semantic::TYPOGRAPHY_LABEL_SIZE,
@@ -180,8 +180,8 @@ impl FieldSpec {
     }
 
     /// Helper/optional/error/pending copy at the `md` size stop (contract §7: `0.75rem`).
-    pub fn supporting_text_typography_token(&self) -> &'static str {
-        match self.size {
+    pub fn supporting_text_typography_token(&self, size: ControlSize) -> &'static str {
+        match size {
             ControlSize::Xs => semantic::TYPOGRAPHY_CAPTION_SIZE,
             ControlSize::Sm => semantic::TYPOGRAPHY_CAPTION_SIZE,
             ControlSize::Md => semantic::TYPOGRAPHY_COUNTER_SIZE,
@@ -239,16 +239,16 @@ impl FieldSpec {
     /// Info-icon SVG edge in `em` of the label font (contract §7: `0.75em`).
     pub const INFO_ICON_SVG_EM: f32 = 0.75;
 
-    pub fn row_gap_token(&self) -> &'static str {
-        match self.density {
+    pub fn row_gap_token(&self, density: ControlDensity) -> &'static str {
+        match density {
             ControlDensity::Compact => semantic::SPACE_BUTTON_GAP,
             ControlDensity::Default => semantic::SPACE_STACK_SM,
             ControlDensity::Comfortable => semantic::SPACE_STACK_MD,
         }
     }
 
-    pub fn header_gap_token(&self) -> &'static str {
-        match self.density {
+    pub fn header_gap_token(&self, density: ControlDensity) -> &'static str {
+        match density {
             ControlDensity::Compact => semantic::SPACE_INLINE_SM,
             ControlDensity::Default => semantic::SPACE_INLINE_MD,
             ControlDensity::Comfortable => semantic::SPACE_INLINE_LG,
@@ -256,8 +256,8 @@ impl FieldSpec {
     }
 
     /// Inline gap inside the label row (contract §7: `0.375rem`).
-    pub fn label_row_gap_token(&self) -> &'static str {
-        match self.density {
+    pub fn label_row_gap_token(&self, density: ControlDensity) -> &'static str {
+        match density {
             ControlDensity::Compact => semantic::SPACE_INLINE_XS,
             ControlDensity::Default => semantic::SPACE_BUTTON_GAP,
             ControlDensity::Comfortable => semantic::SPACE_INLINE_SM,

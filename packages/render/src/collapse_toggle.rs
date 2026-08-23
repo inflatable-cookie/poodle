@@ -5,27 +5,32 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, MainAxisAlignment, Node, StylePatch,
 };
 use poodle_specs::CollapseToggleSpec;
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 pub fn collapse_toggle(
     spec: &CollapseToggleSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 ) -> Node {
-    let icon_size = theme.resolve_space(spec.icon_size_token());
+    let theme = ctx.theme();
+    // The spec helpers apply `size_role` internally, so they take the base
+    // size — never a role-resolved value.
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let icon_size = theme.resolve_space(spec.icon_size_token(base_size));
     let radius = theme.resolve_radius(spec.radius_token());
     let text_color = theme.resolve_color(spec.text_color_token());
     let hover_fill = theme.resolve_color(spec.hover_fill_token());
     let hover_text = theme.resolve_color(spec.text_color_hover_token());
 
-    let pad_y = rem_to_px(spec.padding_rem());
-    let pad_x = rem_to_px(spec.padding_inline_rem());
+    let pad_y = rem_to_px(spec.padding_rem(base_size));
+    let pad_x = rem_to_px(spec.padding_inline_rem(density));
 
     let mut el = Node::button("");
     // A bare chevron: the name says what pressing does, aria_expanded the state.

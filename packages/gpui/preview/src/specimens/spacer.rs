@@ -39,7 +39,7 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .items_center()
                         .gap(px(8.0))
                         .child(surface_item("Logo"))
-                        .child(Spacer::new())
+                        .child(Spacer::new(theme))
                         .child(surface_item("Sign in")),
                 ),
         )
@@ -59,9 +59,9 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                         .items_center()
                         .gap(px(8.0))
                         .child(surface_item("Left"))
-                        .child(Spacer::new())
+                        .child(Spacer::new(theme))
                         .child(surface_item("Center"))
-                        .child(Spacer::new())
+                        .child(Spacer::new(theme))
                         .child(surface_item("Right")),
                 ),
         )

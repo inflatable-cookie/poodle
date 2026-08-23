@@ -10,7 +10,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeDragEvent,
     NodeDragPhase, NodePosition, ShadowValue,
@@ -18,7 +17,8 @@ use poodle_node::{
 use poodle_specs::{ControlSize, SliderSpec, SliderVariant};
 
 use crate::color::with_alpha;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
 /// Fixed track length — 10 rem, matching the GPUI reference basis.
 fn track_w() -> f32 {
@@ -55,19 +55,19 @@ pub struct SliderHandlers {
     pub commit: Option<Arc<dyn Fn(f64) + Send + Sync>>,
 }
 
-pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHandlers) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandlers) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
     let thumb_size = rem_to_px(thumb_diameter_rem(effective_size));
     let track_h = rem_to_px(track_thickness_rem(effective_size));
-    let pill = theme.resolve_radius("radius.pill");
+    let pill = ctx.theme().resolve_radius("radius.pill");
     let border_w = rem_to_px(0.0625);
 
-    let accent = theme.resolve_color(spec.range_fill_token());
-    let negative = theme.resolve_color("color.status.danger");
-    let surface = theme.resolve_color("color.background.surface");
-    let border_default = theme.resolve_color("color.border.default");
-    let elevated = theme.resolve_color("color.background.elevated");
+    let accent = ctx.theme().resolve_color(spec.range_fill_token());
+    let negative = ctx.theme().resolve_color("color.status.danger");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let border_default = ctx.theme().resolve_color("color.border.default");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
 
     // Contract §8 track bg = color-mix(surface 88%, transparent): surface at
     // 88% of its own alpha.
@@ -364,7 +364,7 @@ pub fn slider(spec: &SliderSpec, theme: &dyn ThemeProvider, handlers: &SliderHan
     let mut el = el.child(track);
 
     if spec.is_disabled {
-        el.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         el.interaction.disabled = true;
     } else {
         el.interaction.focusable = true;
@@ -398,7 +398,9 @@ mod tests {
             commit: None,
         };
         let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
-        let node = slider(&spec, &theme(), &handlers);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = slider(&spec, &ctx, &handlers);
 
         let scrub = find_scrub(&node).expect("a node carries the scrub handler");
         assert!(
@@ -409,8 +411,10 @@ mod tests {
 
     #[test]
     fn no_change_handler_means_no_scrub() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
-        let node = slider(&spec, &theme(), &SliderHandlers::default());
+        let node = slider(&spec, &ctx, &SliderHandlers::default());
         assert!(find_scrub(&node).is_none());
     }
 

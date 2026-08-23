@@ -44,9 +44,11 @@ pub struct BreadcrumbsSpec {
     /// page (`aria-current="page"`) even without `is_current`. Set false to opt
     /// out. Mirrors the Svelte `forceLastItemCurrent` prop.
     pub force_last_item_current: bool,
-    pub size: ControlSize,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    /// `None` inherits from the presentation context; an explicit value always wins.
+    pub density: Option<ControlDensity>,
 }
 
 impl BreadcrumbsSpec {
@@ -56,9 +58,9 @@ impl BreadcrumbsSpec {
             aria_label: "Breadcrumb".to_string(),
             max_visible_items: None,
             force_last_item_current: true,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 
@@ -132,7 +134,7 @@ impl BreadcrumbsSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -142,7 +144,7 @@ impl BreadcrumbsSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

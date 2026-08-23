@@ -9,7 +9,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeKind, NodeRole,
     NodeToggled,
@@ -20,17 +19,19 @@ use poodle_specs::{
 };
 
 use crate::color::{mix_srgb, with_alpha};
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 use crate::segmented_control::segmented_control;
 use crate::switch::switch;
 
 pub fn model_picker(
     spec: &ModelPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     instance_id: &str,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // ── Size table (contract §8) ──────────────────────────────────────────────
     let trigger_h = rem_to_px(match effective_size {
@@ -47,23 +48,23 @@ pub fn model_picker(
         ControlSize::Lg => 0.9375,
         ControlSize::Xl => 1.0,
     });
-    let trigger_gap = rem_to_px(match spec.density {
+    let trigger_gap = rem_to_px(match density {
         ControlDensity::Compact => 0.25,
         ControlDensity::Default => 0.375,
         ControlDensity::Comfortable => 0.5,
     });
 
     // ── Colors ────────────────────────────────────────────────────────────────
-    let text_primary = theme.resolve_color(spec.label_color_token());
-    let text_secondary = theme.resolve_color(spec.secondary_color_token());
-    let muted = theme.resolve_color(spec.muted_color_token());
-    let border = theme.resolve_color(spec.trigger_border_token());
-    let item_border = theme.resolve_color(spec.item_border_token());
-    let surface = theme.resolve_color(spec.trigger_fill_token());
-    let elevated = theme.resolve_color(spec.surface_fill_token());
-    let accent = theme.resolve_color(spec.selected_color_token());
-    let radius = theme.resolve_radius(spec.radius_token());
-    let surface_radius = theme.resolve_radius(spec.surface_radius_token());
+    let text_primary = ctx.theme().resolve_color(spec.label_color_token());
+    let text_secondary = ctx.theme().resolve_color(spec.secondary_color_token());
+    let muted = ctx.theme().resolve_color(spec.muted_color_token());
+    let border = ctx.theme().resolve_color(spec.trigger_border_token());
+    let item_border = ctx.theme().resolve_color(spec.item_border_token());
+    let surface = ctx.theme().resolve_color(spec.trigger_fill_token());
+    let elevated = ctx.theme().resolve_color(spec.surface_fill_token());
+    let accent = ctx.theme().resolve_color(spec.selected_color_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let surface_radius = ctx.theme().resolve_radius(spec.surface_radius_token());
     let row_selected_bg = mix_srgb(elevated, accent, 0.86);
 
     let all_radius = |node: &mut Node, r: f32| {
@@ -119,12 +120,12 @@ pub fn model_picker(
     // Subdued emphasis dims the resting trigger so the picker recedes beside a
     // more important control; hover/focus restoration is web-only (§12).
     let label_color = if spec.has_selection() {
-        theme.resolve_color(spec.trigger_label_color_token())
+        ctx.theme().resolve_color(spec.trigger_label_color_token())
     } else {
         muted
     };
     let subdued_opacity = if spec.emphasis.is_subdued() {
-        theme.resolve_opacity(spec.trigger_subdued_opacity_token())
+        ctx.theme().resolve_opacity(spec.trigger_subdued_opacity_token())
     } else {
         1.0
     };
@@ -292,7 +293,7 @@ pub fn model_picker(
             }
 
             if model.is_disabled {
-                row.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+                row.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
             } else if let Some(handler) = &on_change {
                 let handler = Arc::clone(handler);
                 let id = model.value.clone();
@@ -383,7 +384,7 @@ pub fn model_picker(
                             pad.bottom = rem_to_px(0.25);
                             if option.is_disabled {
                                 s.descriptor.opacity =
-                                    theme.resolve_opacity(spec.disabled_opacity_token());
+                                    ctx.theme().resolve_opacity(spec.disabled_opacity_token());
                             }
                         }
                         all_radius(&mut row, radius);
@@ -425,10 +426,10 @@ pub fn model_picker(
                         options,
                     )
                     .with_size(effective_size)
-                    .with_density(spec.density);
+                    .with_density(density);
                     control.value = current.as_text().map(|value| value.to_string());
                     control.is_disabled = spec.is_disabled || axis.is_disabled;
-                    section.child(segmented_control(&control, theme, None))
+                    section.child(segmented_control(&control, ctx, None))
                 }
                 ModelAxisKind::Toggle => {
                     let mut control = SwitchSpec::new()
@@ -437,9 +438,9 @@ pub fn model_picker(
                         .with_aria_label(axis.label.clone())
                         .with_checked(matches!(current, ModelAxisValue::Flag(true)))
                         .with_size(effective_size)
-                        .with_density(spec.density);
+                        .with_density(density);
                     control.is_disabled = spec.is_disabled || axis.is_disabled;
-                    section.child(switch(&control, theme, None))
+                    section.child(switch(&control, ctx, None))
                 }
             };
 
@@ -492,7 +493,7 @@ pub fn model_picker(
     }
 
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
     }
 
     if !spec.aria_label.is_empty() {
@@ -511,9 +512,11 @@ mod tests {
 
     #[test]
     fn outside_interact_refusal_marks_the_open_surface() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         // Web default `true` + open: no refusal marker anywhere in the tree.
         let spec = ModelPickerSpec::new().with_open(true);
-        let node = model_picker(&spec, &theme(), "test", None);
+        let node = model_picker(&spec, &ctx, "test", None);
         assert!(node
             .find(&|n| n.interaction.on_activate.is_some())
             .is_none());
@@ -521,7 +524,7 @@ mod tests {
         // Refusal: the open surface carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = model_picker(&refusing, &theme(), "test-refusing", None);
+        let node = model_picker(&refusing, &ctx, "test-refusing", None);
         assert!(node
             .find(&|n| n.interaction.on_activate.is_some())
             .is_some());

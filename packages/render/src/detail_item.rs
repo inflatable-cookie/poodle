@@ -3,23 +3,25 @@
 //! Contract: `docs/contracts/components/detail-item.md`
 //! Ported from: `packages/jetstream/components/src/detail_item.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::{DetailItemLayout, DetailItemPresentation, DetailItemSpan, DetailItemSpec};
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn detail_item(spec: &DetailItemSpec, theme: &dyn ThemeProvider) -> Node {
-    detail_item_with_slots(spec, theme, None, None)
+pub fn detail_item(spec: &DetailItemSpec, ctx: &RenderContext<'_>) -> Node {
+    detail_item_with_slots(spec, ctx, None, None)
 }
 
 /// Variant exposing the value-content and trailing-action slots.
 pub fn detail_item_with_slots(
     spec: &DetailItemSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     value_content: Option<Node>,
     action: Option<Node>,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
+    let theme = ctx.theme();
     let label_color = theme.resolve_color(spec.label_color_token());
     let value_color = theme.resolve_color(spec.value_color_token());
     let desc_color = theme.resolve_color(spec.description_color_token());
@@ -31,10 +33,10 @@ pub fn detail_item_with_slots(
     let value_font = theme.resolve_space(spec.value_size_token());
     let desc_font = rem_to_px(0.75);
 
-    let row_gap = rem_to_px(spec.row_gap_rem());
-    let inline_gap = rem_to_px(spec.inline_gap_rem());
-    let pad_x = rem_to_px(spec.surface_padding_x_rem());
-    let pad_y = rem_to_px(spec.surface_padding_y_rem());
+    let row_gap = rem_to_px(spec.row_gap_rem(density));
+    let inline_gap = rem_to_px(spec.inline_gap_rem(density));
+    let pad_x = rem_to_px(spec.surface_padding_x_rem(density));
+    let pad_y = rem_to_px(spec.surface_padding_y_rem(density));
 
     let is_stacked = spec.layout == DetailItemLayout::Stacked;
     let is_surface = spec.presentation == DetailItemPresentation::Surface;

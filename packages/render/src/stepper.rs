@@ -10,7 +10,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing,
     MainAxisAlignment, Node, NodeRole, StylePatch,
@@ -18,6 +17,7 @@ use poodle_node::{
 use poodle_specs::{Orientation, StepStatus, StepperSpec};
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::presentation::{rem_to_px, resolve_supporting_visual_size, size_font_rem};
 
 /// The contracted focus ring (§4/§8): `border-width-focus` of
@@ -25,10 +25,10 @@ use crate::presentation::{rem_to_px, resolve_supporting_visual_size, size_font_r
 /// the border box; the summary draws it inset. Declaring it is also what
 /// gives each control a tracked native focus handle, so keyboard entry no
 /// longer depends on a prior pointer press.
-fn stepper_focus_ring(theme: &dyn ThemeProvider, offset: f32) -> FocusRing {
+fn stepper_focus_ring(ctx: &RenderContext<'_>, offset: f32) -> FocusRing {
     FocusRing {
-        color: theme.resolve_color("color.accent.focusRing"),
-        width: theme.resolve_border_width("border.width.focus"),
+        color: ctx.theme().resolve_color("color.accent.focusRing"),
+        width: ctx.theme().resolve_border_width("border.width.focus"),
         offset,
     }
 }
@@ -42,25 +42,30 @@ pub struct StepperHandlers {
     pub on_collapsed_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
-pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperHandlers) -> Node {
-    let row_height = rem_to_px(spec.row_height_rem());
-    let marker_size = rem_to_px(spec.marker_size_rem());
-    let font_size = rem_to_px(spec.font_size_rem());
-    let marker_font_size = rem_to_px(spec.marker_font_size_rem());
-    let pad_y = rem_to_px(spec.padding_block_rem());
-    let pad_x = rem_to_px(spec.padding_inline_rem());
-    let gap = rem_to_px(spec.gap_rem());
-    let radius = theme.resolve_radius(spec.radius_token());
+pub fn stepper(spec: &StepperSpec, ctx: &RenderContext<'_>, handlers: StepperHandlers) -> Node {
+    // The spec's size ladders apply the size role internally, so they take
+    // the context-resolved BASE size; the density ladders take the resolved
+    // density.
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let row_height = rem_to_px(spec.row_height_rem(base_size));
+    let marker_size = rem_to_px(spec.marker_size_rem(base_size));
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let marker_font_size = rem_to_px(spec.marker_font_size_rem(base_size));
+    let pad_y = rem_to_px(spec.padding_block_rem(base_size));
+    let pad_x = rem_to_px(spec.padding_inline_rem(density));
+    let gap = rem_to_px(spec.gap_rem(density));
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
     // Contract §8: a hairline divider, stated as an absolute.
     let hairline = rem_to_px(0.0625);
 
-    let border = theme.resolve_color(spec.border_token());
-    let panel = theme.resolve_color(spec.surface_token());
-    let label_color = theme.resolve_color(spec.label_token());
-    let active_label = theme.resolve_color(spec.active_label_token());
-    let accent = theme.resolve_color(spec.accent_token());
-    let danger = theme.resolve_color(spec.danger_token());
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let panel = ctx.theme().resolve_color(spec.surface_token());
+    let label_color = ctx.theme().resolve_color(spec.label_token());
+    let active_label = ctx.theme().resolve_color(spec.active_label_token());
+    let accent = ctx.theme().resolve_color(spec.accent_token());
+    let danger = ctx.theme().resolve_color(spec.danger_token());
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
 
     let current = spec.current_value().map(str::to_owned);
 
@@ -93,7 +98,7 @@ pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperH
     if spec.shows_summary() {
         root = root.child(summary_row(
             spec,
-            theme,
+            ctx,
             &handlers,
             SummaryColors {
                 border,
@@ -203,7 +208,7 @@ pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperH
             // render square inside the track's rounded corners. The resting
             // background is transparent, so the radius is invisible until the
             // ring draws.
-            let ring_radius = theme.resolve_radius("radius.control");
+            let ring_radius = ctx.theme().resolve_radius("radius.control");
             let c = &mut s.descriptor.corner_radii;
             c.top_left = ring_radius;
             c.top_right = ring_radius;
@@ -228,7 +233,7 @@ pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperH
             trigger.a11y.tab_index = Some(0);
             // Contract §8 trigger focus ring: `border-width-focus` of
             // `accent-focusRing`, 2px (0.125rem) outside the border box.
-            trigger.style.focus_ring = Some(stepper_focus_ring(theme, rem_to_px(0.125)));
+            trigger.style.focus_ring = Some(stepper_focus_ring(ctx, rem_to_px(0.125)));
             if let Some(handler) = &handlers.on_change {
                 let handler = Arc::clone(handler);
                 let value = step.value.clone();
@@ -300,7 +305,7 @@ pub fn stepper(spec: &StepperSpec, theme: &dyn ThemeProvider, handlers: StepperH
                 rerun.a11y.tab_index = Some(0);
                 // Contract §4: keyboard focus on the rerun control draws the
                 // same focus ring the trigger draws.
-                rerun.style.focus_ring = Some(stepper_focus_ring(theme, rem_to_px(0.125)));
+                rerun.style.focus_ring = Some(stepper_focus_ring(ctx, rem_to_px(0.125)));
                 // Its own handler, inert when unwired: clicks bubble to the
                 // nearest handler, so an unwired rerun would select the step.
                 if let Some(handler) = &handlers.on_rerun {
@@ -343,24 +348,26 @@ struct SummaryColors {
 /// The collapsed one-line form: chevron, rail, current step label, `n/m`.
 fn summary_row(
     spec: &StepperSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &StepperHandlers,
     colors: SummaryColors,
     hairline: f32,
     disabled_opacity: f32,
 ) -> Node {
-    let row_height = rem_to_px(spec.row_height_rem());
-    let font_size = rem_to_px(spec.font_size_rem());
-    let pad_y = rem_to_px(spec.padding_block_rem());
-    let pad_x = rem_to_px(spec.padding_inline_rem());
-    let gap = rem_to_px(spec.gap_rem());
-    let rail_gap = rem_to_px(spec.rail_gap_rem());
-    let segment_thickness = rem_to_px(spec.rail_thickness_rem());
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let row_height = rem_to_px(spec.row_height_rem(base_size));
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let pad_y = rem_to_px(spec.padding_block_rem(base_size));
+    let pad_x = rem_to_px(spec.padding_inline_rem(density));
+    let gap = rem_to_px(spec.gap_rem(density));
+    let rail_gap = rem_to_px(spec.rail_gap_rem(density));
+    let segment_thickness = rem_to_px(spec.rail_thickness_rem(base_size));
     let chevron_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
-        spec.resolved_size(),
+        spec.resolved_size(base_size),
     )));
-    let count_color = theme.resolve_color(spec.count_token());
-    let rail_pending = theme.resolve_color(spec.rail_pending_token());
+    let count_color = ctx.theme().resolve_color(spec.count_token());
+    let rail_pending = ctx.theme().resolve_color(spec.rail_pending_token());
 
     let is_collapsed = spec.is_collapsed_now();
     let completed = spec.completed_count();
@@ -401,7 +408,7 @@ fn summary_row(
         // Contract §8: the summary's resting `radius-control` rounds the
         // full-width row so the hover fill and the inset focus ring do not
         // render square inside the track's rounded corners.
-        let row_radius = theme.resolve_radius("radius.control");
+        let row_radius = ctx.theme().resolve_radius("radius.control");
         let c = &mut s.descriptor.corner_radii;
         c.top_left = row_radius;
         c.top_right = row_radius;
@@ -425,7 +432,7 @@ fn summary_row(
         // Contract §8 summary focus ring: the same ring, drawn 2px
         // (-0.125rem) INSIDE the border box — the row spans the track edge
         // to edge, so an outset ring would clip against the track.
-        summary.style.focus_ring = Some(stepper_focus_ring(theme, rem_to_px(-0.125)));
+        summary.style.focus_ring = Some(stepper_focus_ring(ctx, rem_to_px(-0.125)));
         summary.style.hover = Some(StylePatch {
             background: Some(with_alpha(
                 colors.active_label,
@@ -467,7 +474,7 @@ fn summary_row(
     }
     for step in &spec.steps {
         let is_current = current_value.as_deref() == Some(step.value.as_str());
-        let segment_width = rem_to_px(spec.rail_segment_width_rem(is_current));
+        let segment_width = rem_to_px(spec.rail_segment_width_rem(base_size, is_current));
         let fill = match step.status {
             StepStatus::Complete => colors.accent,
             // The same hue as complete, dimmer: running is on its way to it.
@@ -512,6 +519,7 @@ fn summary_row(
 mod tests {
     use std::sync::Mutex;
 
+    use poodle_adapter::ThemeProvider;
     use poodle_specs::StepperStep;
 
     use super::*;
@@ -595,12 +603,13 @@ mod tests {
     #[test]
     fn the_contracted_controls_declare_the_focus_ring_and_stable_identities() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let ring_color = theme.resolve_color("color.accent.focusRing");
         let root = stepper(
             &StepperSpec::new(steps())
                 .with_value("categories")
                 .with_show_rerun(true),
-            &theme,
+            &ctx,
             StepperHandlers::default(),
         );
         let cells = cells(&root);
@@ -635,7 +644,7 @@ mod tests {
                 .with_orientation(Orientation::Vertical)
                 .with_collapsible(true)
                 .with_value("categories"),
-            &theme,
+            &ctx,
             StepperHandlers::default(),
         );
         let summary = collapsible
@@ -649,10 +658,12 @@ mod tests {
 
     #[test]
     fn an_enabled_trigger_emits_its_own_value_and_a_disabled_one_emits_nothing() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let emissions = Emissions::default();
         let root = stepper(
             &StepperSpec::new(steps()).with_value("categories"),
-            &theme(),
+            &ctx,
             emissions.handlers(),
         );
         let cells = cells(&root);
@@ -674,12 +685,14 @@ mod tests {
 
     #[test]
     fn rerun_is_a_separate_control_that_never_selects_its_step() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let emissions = Emissions::default();
         let root = stepper(
             &StepperSpec::new(steps())
                 .with_value("categories")
                 .with_show_rerun(true),
-            &theme(),
+            &ctx,
             emissions.handlers(),
         );
         let cells = cells(&root);
@@ -705,9 +718,11 @@ mod tests {
 
     #[test]
     fn rerun_appears_only_for_a_completed_step_that_asked_for_it() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let without = stepper(
             &StepperSpec::new(steps()).with_value("categories"),
-            &theme(),
+            &ctx,
             StepperHandlers::default(),
         );
         for cell in cells(&without) {
@@ -721,7 +736,7 @@ mod tests {
             &StepperSpec::new(steps())
                 .with_value("categories")
                 .with_show_rerun(true),
-            &theme(),
+            &ctx,
             StepperHandlers::default(),
         );
         let cells = cells(&with);
@@ -732,6 +747,8 @@ mod tests {
 
     #[test]
     fn an_unwired_rerun_still_swallows_its_activation() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let emissions = Emissions::default();
         let mut handlers = emissions.handlers();
         handlers.on_rerun = None;
@@ -739,7 +756,7 @@ mod tests {
             &StepperSpec::new(steps())
                 .with_value("categories")
                 .with_show_rerun(true),
-            &theme(),
+            &ctx,
             handlers,
         );
         let cells = cells(&root);
@@ -755,6 +772,8 @@ mod tests {
 
     #[test]
     fn collapse_is_vertical_only_and_independent_of_the_other_two() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let emissions = Emissions::default();
         let collapsed = stepper(
             &StepperSpec::new(steps())
@@ -762,7 +781,7 @@ mod tests {
                 .with_collapsible(true)
                 .with_collapsed(true)
                 .with_value("categories"),
-            &theme(),
+            &ctx,
             emissions.handlers(),
         );
         let summary = collapsed
@@ -782,7 +801,7 @@ mod tests {
                 .with_collapsible(true)
                 .with_collapsed(true)
                 .with_value("categories"),
-            &theme(),
+            &ctx,
             StepperHandlers::default(),
         );
         assert!(

@@ -56,9 +56,9 @@ pub struct SwitchSpec {
     /// Tone applied to the right (on) track side. Only takes effect when
     /// `on_color` is not set.
     pub right_tone: SwitchTone,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for SwitchSpec {
@@ -78,9 +78,9 @@ impl Default for SwitchSpec {
             left_tone: SwitchTone::Default,
             // Right tone defaults to Primary to match the Svelte prop default.
             right_tone: SwitchTone::Primary,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -173,7 +173,7 @@ impl SwitchSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -183,7 +183,7 @@ impl SwitchSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

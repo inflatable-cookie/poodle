@@ -10,13 +10,14 @@
 //!
 //! Keyboard scroll is host-owned.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, LayoutOverflow, LayoutSizing, Node, NodeRole};
 use poodle_specs::{Direction, ScrollShellSpec};
 
+use crate::context::RenderContext;
+
 pub fn scroll_shell(
     spec: &ScrollShellSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     children: Vec<Node>,
 ) -> Node {
     let needs_horizontal = matches!(spec.direction, Direction::Horizontal | Direction::Both);
@@ -72,13 +73,13 @@ pub fn scroll_shell(
     // Token-resolved padding inset on the viewport (contract §8 padding scale).
     let inset = spec.resolved_padding();
     if let Some(h) = inset.horizontal {
-        let p = theme.resolve_space(h);
+        let p = ctx.theme().resolve_space(h);
         let pad = &mut viewport.style.descriptor.layout.spacing.padding;
         pad.left = p;
         pad.right = p;
     }
     if let Some(v) = inset.vertical {
-        let p = theme.resolve_space(v);
+        let p = ctx.theme().resolve_space(v);
         let pad = &mut viewport.style.descriptor.layout.spacing.padding;
         pad.top = p;
         pad.bottom = p;
@@ -99,7 +100,7 @@ pub fn scroll_shell(
         s.min_height = Some(0.0);
         s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
         s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
-        let r = theme.resolve_radius("radius.surface");
+        let r = ctx.theme().resolve_radius("radius.surface");
         s.descriptor.corner_radii.top_left = r;
         s.descriptor.corner_radii.top_right = r;
         s.descriptor.corner_radii.bottom_right = r;

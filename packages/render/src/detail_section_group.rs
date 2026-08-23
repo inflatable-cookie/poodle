@@ -9,19 +9,19 @@
 //! flex-basis here, so wrapping + `min_width` keeps columns legible but does
 //! not hard-cap their number.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{DetailSectionGroupLayout, DetailSectionGroupSpec};
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Build a detail-section-group from its spec + child sections.
 pub fn detail_section_group(
     spec: &DetailSectionGroupSpec,
-    _theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     children: Vec<Node>,
 ) -> Node {
-    let gap = rem_to_px(spec.gap_rem());
+    let gap = rem_to_px(spec.gap_rem(ctx.resolve_density(spec.density)));
 
     let mut root = Node::container();
     match spec.layout {
@@ -90,10 +90,11 @@ mod tests {
     fn max_columns_seeds_each_grid_cell_with_the_old_percentage_width() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
         let spec = DetailSectionGroupSpec::new().with_max_columns(2);
         let node = detail_section_group(
             &spec,
-            &theme,
+            &ctx,
             vec![Node::container(), Node::container(), Node::container()],
         );
 

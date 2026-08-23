@@ -5,7 +5,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
     NodeToggled,
@@ -13,7 +12,8 @@ use poodle_node::{
 use poodle_specs::{CheckState, CheckboxSpec, ControlDensity, ControlSize};
 
 use crate::color::hex_color;
-use crate::presentation::{icon_token, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::context::RenderContext;
+use crate::presentation::{icon_token, rem_to_px, size_font_rem};
 
 /// Indicator size = per-size icon token + 0.125rem (the Svelte formula).
 fn indicator_size_px(icon_px: f32) -> f32 {
@@ -41,11 +41,11 @@ fn indicator_radius_rem(size: ControlSize) -> f32 {
 }
 
 /// Root gap by density: compact literal, else inline-spacing tokens.
-fn root_gap_px(density: ControlDensity, theme: &dyn ThemeProvider) -> f32 {
+fn root_gap_px(density: ControlDensity, ctx: &RenderContext<'_>) -> f32 {
     match density {
         ControlDensity::Compact => rem_to_px(0.375),
-        ControlDensity::Default => theme.resolve_space("space.inline.sm"),
-        ControlDensity::Comfortable => theme.resolve_space("space.inline.md"),
+        ControlDensity::Default => ctx.theme().resolve_space("space.inline.sm"),
+        ControlDensity::Comfortable => ctx.theme().resolve_space("space.inline.md"),
     }
 }
 
@@ -54,10 +54,12 @@ fn root_gap_px(density: ControlDensity, theme: &dyn ThemeProvider) -> f32 {
 /// focusable and full strength but must not report a change.
 pub fn checkbox(
     spec: &CheckboxSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let theme = ctx.theme();
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // Custom `selected_color` hex wins over the spec's accent token.
     //
@@ -75,7 +77,7 @@ pub fn checkbox(
     let border_default = theme.resolve_color("color.border.default");
     let text_primary = theme.resolve_color("color.text.primary");
     let text_inverse = theme.resolve_color("color.text.inverse");
-    let gap = root_gap_px(spec.density, theme);
+    let gap = root_gap_px(density, ctx);
     let label_size = rem_to_px(size_font_rem(effective_size));
 
     let state = spec.current_state();

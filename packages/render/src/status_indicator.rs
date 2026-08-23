@@ -8,21 +8,20 @@
 //! glow and label line-height remain documented runtime deltas, as in the
 //! reference tier.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, ShadowLayer};
-use poodle_specs::{ControlDensity, ControlSize, StatusIndicatorSpec};
+use poodle_specs::StatusIndicatorSpec;
 
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
-pub fn status_indicator(spec: &StatusIndicatorSpec, theme: &dyn ThemeProvider) -> Node {
-    let status_color = theme.resolve_color(spec.status_color_token());
-    let text_primary = theme.resolve_color(spec.label_color_token());
+pub fn status_indicator(spec: &StatusIndicatorSpec, ctx: &RenderContext<'_>) -> Node {
+    let status_color = ctx.theme().resolve_color(spec.status_color_token());
+    let text_primary = ctx.theme().resolve_color(spec.label_color_token());
 
     // Contract §8: dot/gap/label metrics resolve from the effective size
     // (size override → size_role against the inherited scale) and density.
-    let effective_size =
-        resolve_semantic_size(spec.size.unwrap_or(ControlSize::Md), spec.size_role);
-    let effective_density = spec.density.unwrap_or(ControlDensity::Default);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let effective_density = ctx.resolve_density(spec.density);
 
     let dot_size = rem_to_px(spec.dot_size_rem_for(effective_size));
     let gap = rem_to_px(spec.gap_rem_for(effective_size, effective_density));
@@ -93,10 +92,11 @@ mod tests {
     fn dot_ring_and_label_line_height_match_the_old_gpui_tier() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
         let spec = StatusIndicatorSpec::new()
             .with_status(StatusTone::Success)
             .with_label("Ready");
-        let node = status_indicator(&spec, &theme);
+        let node = status_indicator(&spec, &ctx);
         assert_eq!(node.children[0].style.shadow_layers.len(), 1);
         assert_eq!(
             node.children[0].style.shadow_layers[0].spread,

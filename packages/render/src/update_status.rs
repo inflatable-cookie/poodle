@@ -9,7 +9,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::update::{
     update_status_view, UpdateStatusAction, UpdateStatusInput, UpdateStatusNoticeTone,
 };
@@ -21,6 +20,7 @@ use poodle_specs::{
 
 use crate::alert_dialog::{alert_dialog, AlertDialogHandlers};
 use crate::button::button;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::progress::progress;
 use crate::spinner::spinner;
@@ -83,9 +83,12 @@ fn action_suffix(action: UpdateStatusAction) -> &'static str {
 
 pub fn update_status(
     spec: &UpdateStatusSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: UpdateStatusHandlers,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
+    let base_size = ctx.base_size(spec.size);
+
     let view = update_status_view(UpdateStatusInput {
         status: spec.status.clone(),
         availability: spec.availability.clone(),
@@ -97,9 +100,9 @@ pub fn update_status(
         installed_version: spec.installed_version.clone(),
     });
 
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let danger = theme.resolve_color("color.text.danger");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let danger = ctx.theme().resolve_color("color.text.danger");
     let title_color = if matches!(view.tone, poodle_headless::update::UpdateStatusTone::Danger) {
         danger
     } else {
@@ -111,7 +114,7 @@ pub fn update_status(
         let s = &mut head.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
     }
     if view.busy {
         head = head.child(spinner(
@@ -119,7 +122,7 @@ pub fn update_status(
                 .with_variant(SpinnerVariant::Ring)
                 .with_size(SpinnerSize::Sm)
                 .with_tone(SpinnerTone::Muted),
-            theme,
+            ctx,
         ));
     }
     let mut title = Node::text(&view.title);
@@ -133,7 +136,7 @@ pub fn update_status(
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
     }
     root.roles
         .insert("state".to_owned(), view.state.as_str().to_string());
@@ -143,7 +146,7 @@ pub fn update_status(
 
     if let Some(body) = &view.body {
         let mut body_node = Node::text(body);
-        body_node.style.text_size = Some(theme.resolve_space("typography.body.size"));
+        body_node.style.text_size = Some(ctx.theme().resolve_space("typography.body.size"));
         body_node.style.descriptor.text_color = Some(text_secondary);
         root = root.child(body_node);
     }
@@ -151,14 +154,14 @@ pub fn update_status(
     if let Some(bar) = view.progress {
         let mut progress_spec = ProgressSpec::new()
             .with_size(ControlSize::Sm)
-            .with_density(spec.density);
+            .with_density(density);
         progress_spec.aria_label = Some("Download progress".to_string());
         if let Some(fraction) = bar.fraction {
             progress_spec = progress_spec.with_value((fraction * 100.0).round());
         } else {
             progress_spec = progress_spec.with_indeterminate(true);
         }
-        root = root.child(progress(&progress_spec, theme));
+        root = root.child(progress(&progress_spec, ctx));
     }
 
     if let Some(notice) = &view.notice {
@@ -167,7 +170,7 @@ pub fn update_status(
             let s = &mut notice_row.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+            s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         }
         notice_row.a11y.role = Some(NodeRole::Status);
         notice_row.roles.insert(
@@ -178,7 +181,7 @@ pub fn update_status(
             },
         );
         let mut message = Node::text(&notice.message);
-        message.style.text_size = Some(theme.resolve_space("typography.body.size"));
+        message.style.text_size = Some(ctx.theme().resolve_space("typography.body.size"));
         message.style.descriptor.text_color = Some(match notice.tone {
             UpdateStatusNoticeTone::Danger => danger,
             UpdateStatusNoticeTone::Neutral => text_primary,
@@ -189,7 +192,7 @@ pub fn update_status(
             let retry_spec = ButtonSpec::new()
                 .with_variant(ButtonVariant::Ghost)
                 .with_size(ControlSize::Xs)
-                .with_density(spec.density)
+                .with_density(density)
                 .with_label(spec.retry_label.clone())
                 .with_disabled(spec.pending);
             let handler = {
@@ -212,7 +215,7 @@ pub fn update_status(
                     );
                 }) as Arc<dyn Fn() + Send + Sync>)
             };
-            let mut retry_btn = button(&retry_spec, theme, handler);
+            let mut retry_btn = button(&retry_spec, ctx, handler);
             retry_btn.id = Some(action_id(&handlers, "retry"));
             notice_row = notice_row.child(retry_btn);
         }
@@ -224,7 +227,7 @@ pub fn update_status(
         {
             let s = &mut actions.style;
             s.descriptor.layout.direction = LayoutDirection::Row;
-            s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+            s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         }
         for action in view.actions {
             let variant = if matches!(action, UpdateStatusAction::Install) {
@@ -235,7 +238,7 @@ pub fn update_status(
             let action_spec = ButtonSpec::new()
                 .with_variant(variant)
                 .with_size(ControlSize::Sm)
-                .with_density(spec.density)
+                .with_density(density)
                 .with_label(action_label(action, spec).to_string())
                 .with_disabled(spec.pending);
             let handler = {
@@ -258,7 +261,7 @@ pub fn update_status(
                     );
                 }) as Arc<dyn Fn() + Send + Sync>)
             };
-            let mut btn = button(&action_spec, theme, handler);
+            let mut btn = button(&action_spec, ctx, handler);
             btn.id = Some(action_id(&handlers, action_suffix(action)));
             actions = actions.child(btn);
         }
@@ -271,16 +274,16 @@ pub fn update_status(
             .with_tone(AlertDialogTone::Warning)
             .with_confirm_label(spec.install_label.clone())
             .with_cancel_label("Cancel")
-            .with_size(spec.size)
+            .with_size(base_size)
             .with_size_role(spec.size_role)
-            .with_density(spec.density)
+            .with_density(density)
             .with_open(true);
         let on_install = handlers.on_install.clone();
         let on_confirm = handlers.on_confirm_open_change.clone();
         let on_cancel = handlers.on_confirm_open_change.clone();
         let dialog = alert_dialog(
             &confirm_spec,
-            theme,
+            ctx,
             false,
             spec.install_label.as_str(),
             AlertDialogHandlers {
@@ -353,7 +356,9 @@ mod tests {
 
     #[test]
     fn offer_renders_version_notes_and_both_actions() {
-        let node = update_status(&ready(), &theme(), UpdateStatusHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = update_status(&ready(), &ctx, UpdateStatusHandlers::default());
         let rendered = texts(&node);
         assert!(rendered.iter().any(|t| t == "Version 1.4.0 is available"));
         assert!(rendered.iter().any(|t| t == "Bug fixes and improvements."));
@@ -364,13 +369,15 @@ mod tests {
 
     #[test]
     fn up_to_date_has_no_actions() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = update_status(
             &UpdateStatusSpec::new()
                 .with_status(UpdateControllerStatus::Ready)
                 .with_availability(UpdateAvailabilityProjection::UpToDate)
                 .with_installed_version("1.3.0")
                 .with_channel(Channel::Production),
-            &theme(),
+            &ctx,
             UpdateStatusHandlers::default(),
         );
         let rendered = texts(&node);
@@ -383,6 +390,8 @@ mod tests {
 
     #[test]
     fn ahead_of_channel_is_not_up_to_date() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = update_status(
             &UpdateStatusSpec::new()
                 .with_status(UpdateControllerStatus::Ready)
@@ -390,7 +399,7 @@ mod tests {
                     installed: "1.3.0-nightly.4".to_string(),
                     channel: "1.2.9".to_string(),
                 }),
-            &theme(),
+            &ctx,
             UpdateStatusHandlers::default(),
         );
         let rendered = texts(&node);
@@ -403,6 +412,8 @@ mod tests {
 
     #[test]
     fn managed_elsewhere_is_information() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = update_status(
             &UpdateStatusSpec::new()
                 .with_status(UpdateControllerStatus::Ready)
@@ -410,7 +421,7 @@ mod tests {
                     version: "1.4.0".to_string(),
                     manager: InstallManager::HomebrewCask,
                 }),
-            &theme(),
+            &ctx,
             UpdateStatusHandlers::default(),
         );
         let rendered = texts(&node);
@@ -420,6 +431,8 @@ mod tests {
 
     #[test]
     fn deferral_notice_is_status_not_an_alert() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = update_status(
             &ready().with_deferral(UpdateDeferral {
                 version: "1.4.0".to_string(),
@@ -427,7 +440,7 @@ mod tests {
                     detail: "A transfer is running.".to_string(),
                 },
             }),
-            &theme(),
+            &ctx,
             UpdateStatusHandlers::default(),
         );
         let mut found = false;
@@ -446,11 +459,13 @@ mod tests {
 
     #[test]
     fn null_fraction_is_indeterminate_and_zero_is_a_zero_bar() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let null_node = update_status(
             &UpdateStatusSpec::new()
                 .with_status(UpdateControllerStatus::Ready)
                 .with_progress(UpdateProgressProjection::Downloading { fraction: None }),
-            &theme(),
+            &ctx,
             UpdateStatusHandlers::default(),
         );
         let mut null_progress = None;
@@ -470,7 +485,7 @@ mod tests {
                 .with_progress(UpdateProgressProjection::Downloading {
                     fraction: Some(0.0),
                 }),
-            &theme(),
+            &ctx,
             UpdateStatusHandlers::default(),
         );
         let mut zero_is_zero = false;
@@ -484,11 +499,13 @@ mod tests {
 
     #[test]
     fn signature_rejection_offers_no_retry() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = update_status(
             &UpdateStatusSpec::new()
                 .with_status(UpdateControllerStatus::Ready)
                 .with_last_rejection(UpdateRejectionCode::SignatureRejected),
-            &theme(),
+            &ctx,
             UpdateStatusHandlers::default(),
         );
         let rendered = texts(&node);
@@ -498,9 +515,11 @@ mod tests {
 
     #[test]
     fn pending_disables_actions() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = update_status(
             &ready().with_pending(true),
-            &theme(),
+            &ctx,
             UpdateStatusHandlers::default(),
         );
         let mut disabled = 0;
@@ -518,9 +537,11 @@ mod tests {
         let confirms = Arc::new(Mutex::new(Vec::new()));
         let install_sink = Arc::clone(&installs);
         let confirm_sink = Arc::clone(&confirms);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = update_status(
             &ready(),
-            &theme(),
+            &ctx,
             UpdateStatusHandlers {
                 on_install: Some(Arc::new(move || *install_sink.lock().unwrap() += 1)),
                 on_confirm_open_change: Some(Arc::new(move |open| {
@@ -542,7 +563,7 @@ mod tests {
         let direct_sink = Arc::clone(&installs);
         let direct = update_status(
             &ready().with_confirm_install(false),
-            &theme(),
+            &ctx,
             UpdateStatusHandlers {
                 on_install: Some(Arc::new(move || *direct_sink.lock().unwrap() += 1)),
                 ..UpdateStatusHandlers::default()
@@ -560,13 +581,15 @@ mod tests {
 
     #[test]
     fn confirmation_inherits_authored_presentation() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = update_status(
             &ready()
                 .with_confirm_open(true)
                 .with_size(ControlSize::Md)
                 .with_size_role(poodle_specs::SemanticControlSizeRole::Prominent)
                 .with_density(poodle_specs::ControlDensity::Compact),
-            &theme(),
+            &ctx,
             UpdateStatusHandlers::default(),
         );
         let confirm = node

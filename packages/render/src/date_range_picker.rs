@@ -8,22 +8,24 @@
 //! complete range joins with an en-dash, a partial range renders
 //! `"<start> – End date"`, and a missing start falls back to the placeholder.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, Node, NodeRole};
 use poodle_specs::{CalendarMode, CalendarSpec, DateRangePickerSpec};
 
 use crate::calendar::{calendar, CalendarHandlers};
 use crate::color::{mix_linear, with_alpha};
+use crate::context::RenderContext;
 use crate::date_picker::DatePickerHandlers;
 use crate::picker_trigger::{picker_trigger, PickerTrigger};
-use crate::presentation::{date_picker_indicator_font_rem, rem_to_px, resolve_semantic_size};
+use crate::presentation::{date_picker_indicator_font_rem, rem_to_px};
 
 pub fn date_range_picker(
     spec: &DateRangePickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: DatePickerHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let base_size = ctx.base_size(spec.size);
+    let theme = ctx.theme();
     // Disclosure chevron font-size — per-size indicator scale (contract §8),
     // shared with DatePicker. Distinct from the trigger value font.
     let indicator_size = rem_to_px(date_picker_indicator_font_rem(effective_size));
@@ -45,13 +47,13 @@ pub fn date_range_picker(
     };
     let has_start = range.start.is_some();
     let trigger = picker_trigger(
-        theme,
+        ctx,
         PickerTrigger {
             display: &display,
             has_value: has_start,
             open: spec.current_open(),
             disabled: spec.is_disabled,
-            size: spec.size,
+            size: base_size,
             size_role: spec.size_role,
             indicator: "chevron-down",
             indicator_size: Some(indicator_size),
@@ -109,7 +111,7 @@ pub fn date_range_picker(
         }
         let surface = surface.child(calendar(
             &cal_spec,
-            theme,
+            ctx,
             CalendarHandlers {
                 on_select: handlers.on_select.clone(),
                 on_range_select: None,

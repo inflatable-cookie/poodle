@@ -23,7 +23,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node, NodeRole, StylePatch,
@@ -31,9 +30,9 @@ use poodle_node::{
 use poodle_specs::{CalendarMode, CalendarSpec, CalendarWeekStart, DateRangeValue};
 
 use crate::color::{mix_linear, with_alpha, WHITE};
+use crate::context::RenderContext;
 use crate::presentation::{
-    calendar_cell_size_rem, calendar_day_font_rem, calendar_nav_size_rem, rem_to_px,
-    resolve_semantic_size, size_font_rem,
+    calendar_cell_size_rem, calendar_day_font_rem, calendar_nav_size_rem, rem_to_px, size_font_rem,
 };
 
 /// Weekday header labels, Sunday-first (rotated at render time based on spec).
@@ -181,10 +180,11 @@ fn compute_next_range(
 
 pub fn calendar(
     spec: &CalendarSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: CalendarHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let theme = ctx.theme();
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
     // Per-size calendar metrics — all from the contract §8 size table.
     let cell_size_px = rem_to_px(calendar_cell_size_rem(effective_size));

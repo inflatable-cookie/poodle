@@ -1,7 +1,7 @@
 //! ToggleGroup specimen — migrated to the node tier (g12.019 Batch B).
 //!
 //! Every ToggleGroup below renders through `poodle_render::toggle_group`
-//! (`Spec + Theme → Node`) interpreted by `poodle_gpui_node_backend::to_gpui`.
+//! (`Spec + Context → Node`) interpreted by `poodle_gpui_node_backend::to_gpui`.
 //! The old hand-written `poodle_gpui_components::ToggleGroup` no longer
 //! renders this specimen; everything around the groups (layout, Eyebrow
 //! headings, captions) is unchanged.
@@ -22,6 +22,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
+use poodle_render::RenderContext;
 use poodle_render::toggle_group;
 use poodle_specs::{EyebrowSpec, ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
 
@@ -37,13 +38,13 @@ fn node_toggle_group(spec: ToggleGroupSpec, key: &'static str, state: &AppState)
             value: value.to_string(),
         });
     });
-    let node = toggle_group(&spec, &state.theme, Some(on_change));
+    let node = toggle_group(&spec, &RenderContext::new(&state.theme), Some(on_change));
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
 /// A node-tier ToggleGroup with no handlers (disabled / sizes / densities).
 fn node_toggle_group_static(spec: ToggleGroupSpec, state: &AppState) -> AnyElement {
-    let node = toggle_group(&spec, &state.theme, None);
+    let node = toggle_group(&spec, &RenderContext::new(&state.theme), None);
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
@@ -82,7 +83,7 @@ fn multi_select_toggle_group_node(
             value: next.join(","),
         });
     });
-    toggle_group(&spec, theme, Some(on_change))
+    toggle_group(&spec, &RenderContext::new(theme), Some(on_change))
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -276,13 +277,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 let spec = ToggleGroupSpec::new(make_opts())
                     .with_default_value(vec!["grid".to_string()])
                     .with_size(size);
-                poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, theme, None))
+                poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, &RenderContext::new(theme), None))
             })
             .with_densities(move |density, theme: &GpuiThemeProvider| {
                 let spec = ToggleGroupSpec::new(make_opts())
                     .with_default_value(vec!["grid".to_string()])
                     .with_density(density);
-                poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, theme, None))
+                poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, &RenderContext::new(theme), None))
             }),
     )
 }

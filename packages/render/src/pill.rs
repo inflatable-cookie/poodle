@@ -5,7 +5,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutSizing,
     MainAxisAlignment, Node, NodeRole,
@@ -13,6 +12,7 @@ use poodle_node::{
 use poodle_specs::{InlineTypographyMode, PillAppearance, PillFont, PillSize, PillSpec, PillTone};
 
 use crate::color::{hex_color, mix_srgb, solid_tone_surface, with_alpha, WHITE};
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Per-size metrics in rem: `(min_w, min_h, pad_x, pad_y, font)`.
@@ -35,20 +35,23 @@ fn pill_metrics(size: PillSize, typography: InlineTypographyMode) -> (f32, f32, 
     }
 }
 
-fn pill_colors(spec: &PillSpec, theme: &dyn ThemeProvider) -> (ColorValue, ColorValue, ColorValue) {
-    let surface_bg = theme.resolve_color("color.background.surface");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let border_subtle = theme.resolve_color("color.border.subtle");
-    let accent_base = theme.resolve_color("color.accent.base");
-    let tone_color = theme.resolve_color(spec.tone_color_token());
+fn pill_colors(
+    spec: &PillSpec,
+    ctx: &RenderContext<'_>,
+) -> (ColorValue, ColorValue, ColorValue) {
+    let surface_bg = ctx.theme().resolve_color("color.background.surface");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let border_subtle = ctx.theme().resolve_color("color.border.subtle");
+    let accent_base = ctx.theme().resolve_color("color.accent.base");
+    let tone_color = ctx.theme().resolve_color(spec.tone_color_token());
     let custom_accent = spec.accent_color.as_deref().and_then(hex_color);
 
     if spec.is_solid_appearance() {
         let tone_base = custom_accent.unwrap_or(tone_color);
         let is_neutral = spec.tone == PillTone::Neutral && custom_accent.is_none();
         let tint_border_mix = if custom_accent.is_some() { 0.24 } else { 0.34 };
-        let surface = solid_tone_surface(theme, tone_base, is_neutral, tint_border_mix);
+        let surface = solid_tone_surface(ctx, tone_base, is_neutral, tint_border_mix);
         return (surface.background, surface.border, surface.foreground);
     }
 
@@ -88,7 +91,7 @@ fn pill_colors(spec: &PillSpec, theme: &dyn ThemeProvider) -> (ColorValue, Color
             PillTone::Neutral => text_secondary,
             _ => text_primary,
         },
-        _ => theme.resolve_color(spec.text_color_token()),
+        _ => ctx.theme().resolve_color(spec.text_color_token()),
     };
 
     // Custom accent (contract §8): a parseable hex overrides fill/border/text.
@@ -108,18 +111,18 @@ fn pill_colors(spec: &PillSpec, theme: &dyn ThemeProvider) -> (ColorValue, Color
     (fill, border, text)
 }
 
-pub fn pill(spec: &PillSpec, theme: &dyn ThemeProvider) -> Node {
-    pill_with_remove(spec, theme, None)
+pub fn pill(spec: &PillSpec, ctx: &RenderContext<'_>) -> Node {
+    pill_with_remove(spec, ctx, None)
 }
 
 pub fn pill_with_remove(
     spec: &PillSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_remove: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
     let (min_w, min_h, pad_x, pad_y, font_size) =
         pill_metrics(spec.resolved_size(), spec.typography);
-    let (fill, border, text_color) = pill_colors(spec, theme);
+    let (fill, border, text_color) = pill_colors(spec, ctx);
 
     let label = if spec.appearance == PillAppearance::Badge {
         spec.label.to_uppercase()
@@ -131,7 +134,7 @@ pub fn pill_with_remove(
     } else {
         600
     };
-    let radius = theme.resolve_radius("radius.pill");
+    let radius = ctx.theme().resolve_radius("radius.pill");
 
     let mut el = Node::text(label);
     {
@@ -166,14 +169,14 @@ pub fn pill_with_remove(
             s.descriptor.opacity = 0.72;
         }
         if spec.is_disabled {
-            s.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+            s.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
             s.descriptor.cursor = CursorHint::NotAllowed;
         }
 
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
     }
     if spec.has_dot {
         let dot_color = if spec.is_solid_appearance() {
@@ -182,7 +185,7 @@ pub fn pill_with_remove(
             spec.accent_color
                 .as_deref()
                 .and_then(hex_color)
-                .unwrap_or_else(|| theme.resolve_color(spec.tone_color_token()))
+                .unwrap_or_else(|| ctx.theme().resolve_color(spec.tone_color_token()))
         };
         let dot_size = rem_to_px(font_size * 0.5);
         let mut dot = Node::container();
@@ -206,11 +209,11 @@ pub fn pill_with_remove(
         remove.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         remove.style.descriptor.cursor = CursorHint::Pointer;
 
-        let mut icon = Node::icon("x", theme.resolve_space("size.icon.sm"));
+        let mut icon = Node::icon("x", ctx.theme().resolve_space("size.icon.sm"));
         icon.style.descriptor.text_color = Some(if spec.is_solid_appearance() {
             text_color
         } else {
-            theme.resolve_color("color.icon.muted")
+            ctx.theme().resolve_color("color.icon.muted")
         });
         let mut remove = remove.child(icon);
         if let Some(handler) = on_remove {
@@ -241,10 +244,12 @@ mod tests {
         let removes = Arc::new(Mutex::new(0));
         let sink = Arc::clone(&removes);
         let spec = PillSpec::new().with_label("Filter").with_removable(true);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
 
         let node = pill_with_remove(
             &spec,
-            &theme(),
+            &ctx,
             Some(Arc::new(move || *sink.lock().unwrap() += 1)),
         );
         let remove = node
@@ -264,14 +269,15 @@ mod tests {
     #[test]
     fn default_appearance_is_tint_and_matches_explicit_tint() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let default_spec = PillSpec::new().with_label("Neutral");
         assert_eq!(default_spec.appearance, PillAppearance::Tint);
         let explicit_tint = PillSpec::new()
             .with_label("Neutral")
             .with_appearance(PillAppearance::Tint);
         assert_eq!(
-            pill_colors(&default_spec, &theme),
-            pill_colors(&explicit_tint, &theme)
+            pill_colors(&default_spec, &ctx),
+            pill_colors(&explicit_tint, &ctx)
         );
 
         // Solid has its own exact recipe coverage below. Do not require every
@@ -282,14 +288,15 @@ mod tests {
     #[test]
     fn subtle_appearance_halves_the_tint_fill_opacity() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let tint = PillSpec::new()
             .with_tone(PillTone::Success)
             .with_appearance(PillAppearance::Tint);
         let subtle = PillSpec::new()
             .with_tone(PillTone::Success)
             .with_appearance(PillAppearance::Subtle);
-        let (tint_fill, tint_border, tint_text) = pill_colors(&tint, &theme);
-        let (subtle_fill, subtle_border, subtle_text) = pill_colors(&subtle, &theme);
+        let (tint_fill, tint_border, tint_text) = pill_colors(&tint, &ctx);
+        let (subtle_fill, subtle_border, subtle_text) = pill_colors(&subtle, &ctx);
         assert_eq!(
             subtle_fill,
             with_alpha(tint_fill, tint_fill.3 * 0.5),
@@ -302,17 +309,18 @@ mod tests {
     #[test]
     fn solid_appearance_uses_shared_opaque_recipe_and_custom_accent_base() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let success = PillSpec::new()
             .with_tone(PillTone::Success)
             .with_appearance(PillAppearance::Solid);
         let expected = solid_tone_surface(
-            &theme,
-            theme.resolve_color(success.tone_color_token()),
+            &ctx,
+            ctx.theme().resolve_color(success.tone_color_token()),
             false,
             0.34,
         );
         assert_eq!(
-            pill_colors(&success, &theme),
+            pill_colors(&success, &ctx),
             (expected.background, expected.border, expected.foreground)
         );
 
@@ -320,9 +328,9 @@ mod tests {
             .with_appearance(PillAppearance::Solid)
             .with_accent_color("#ff9900");
         let custom_base = hex_color("#ff9900").expect("custom accent");
-        let custom_expected = solid_tone_surface(&theme, custom_base, false, 0.24);
+        let custom_expected = solid_tone_surface(&ctx, custom_base, false, 0.24);
         assert_eq!(
-            pill_colors(&custom, &theme),
+            pill_colors(&custom, &ctx),
             (
                 custom_expected.background,
                 custom_expected.border,
@@ -332,13 +340,13 @@ mod tests {
 
         let neutral = PillSpec::new().with_appearance(PillAppearance::Solid);
         let neutral_expected = solid_tone_surface(
-            &theme,
-            theme.resolve_color(neutral.tone_color_token()),
+            &ctx,
+            ctx.theme().resolve_color(neutral.tone_color_token()),
             true,
             0.34,
         );
         assert_eq!(
-            pill_colors(&neutral, &theme),
+            pill_colors(&neutral, &ctx),
             (
                 neutral_expected.background,
                 neutral_expected.border,
@@ -350,18 +358,19 @@ mod tests {
     #[test]
     fn solid_dot_and_remove_affordance_use_primary_foreground() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let mut spec = PillSpec::new()
             .with_label("Filter")
             .with_appearance(PillAppearance::Solid)
             .with_removable(true);
         spec.has_dot = true;
         let expected = solid_tone_surface(
-            &theme,
-            theme.resolve_color(spec.tone_color_token()),
+            &ctx,
+            ctx.theme().resolve_color(spec.tone_color_token()),
             true,
             0.34,
         );
-        let node = pill_with_remove(&spec, &theme, None);
+        let node = pill_with_remove(&spec, &ctx, None);
 
         let dot = node.children.first().expect("solid dot");
         assert_eq!(dot.style.descriptor.background, Some(expected.foreground));

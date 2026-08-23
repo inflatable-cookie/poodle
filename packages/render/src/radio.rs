@@ -9,7 +9,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeRole, NodeToggled, StylePatch,
@@ -17,7 +16,8 @@ use poodle_node::{
 use poodle_specs::{ControlDensity, ControlSize, RadioSpec};
 
 use crate::color::hex_color;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::context::RenderContext;
+use crate::presentation::{rem_to_px, size_font_rem};
 
 fn indicator_size_px(size: ControlSize, icon_md_px: f32) -> f32 {
     match size {
@@ -55,31 +55,32 @@ fn circle(node: &mut Node, diameter: f32) {
 /// checked radio is a no-op — native radios do not uncheck themselves.
 pub fn radio(
     spec: &RadioSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_checked_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let icon_md = theme.resolve_space("size.icon.md");
+    let icon_md = ctx.theme().resolve_space("size.icon.md");
     let indicator_size = indicator_size_px(effective_size, icon_md);
     let dot_size = dot_size_px(effective_size, icon_md);
     let border_width = rem_to_px(0.0625);
-    let item_gap = match spec.density {
+    let item_gap = match density {
         ControlDensity::Compact => rem_to_px(0.375),
-        ControlDensity::Default => theme.resolve_space("space.inline.sm"),
-        ControlDensity::Comfortable => theme.resolve_space("space.inline.md"),
+        ControlDensity::Default => ctx.theme().resolve_space("space.inline.sm"),
+        ControlDensity::Comfortable => ctx.theme().resolve_space("space.inline.md"),
     };
 
     let accent = spec
         .selected_color
         .as_deref()
         .and_then(hex_color)
-        .unwrap_or_else(|| theme.resolve_color("color.accent.base"));
-    let border = theme.resolve_color("color.border.default");
-    let text_color = theme.resolve_color("color.text.primary");
+        .unwrap_or_else(|| ctx.theme().resolve_color("color.accent.base"));
+    let border = ctx.theme().resolve_color("color.border.default");
+    let text_color = ctx.theme().resolve_color("color.text.primary");
     let is_checked = spec.is_checked();
     let indicator_color = if is_checked { accent } else { border };
-    let indicator_bg = theme.resolve_color("color.background.surface");
+    let indicator_bg = ctx.theme().resolve_color("color.background.surface");
 
     let mut indicator = Node::container();
     circle(&mut indicator, indicator_size);
@@ -115,7 +116,7 @@ pub fn radio(
         root.interaction.focusable = true;
         root.style.focus = Some(StylePatch {
             background: None,
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             text_color: None,
             opacity: None,
         });
@@ -131,7 +132,7 @@ pub fn radio(
     }
 
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
         root.interaction.disabled = true;
     }
 
@@ -185,12 +186,14 @@ mod tests {
     fn unchecked_activate_fires_true_and_does_not_uncheck() {
         let hits = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&hits);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = radio(
             &RadioSpec::new()
                 .with_name("shipping")
                 .with_value("standard")
                 .with_label("Standard shipping"),
-            &theme(),
+            &ctx,
             Some(Arc::new(move |checked| sink.lock().unwrap().push(checked))),
         );
         assert_eq!(node.a11y.role, Some(NodeRole::RadioButton));
@@ -212,7 +215,7 @@ mod tests {
                 .with_name("shipping")
                 .with_value("standard")
                 .with_label("Standard shipping"),
-            &theme(),
+            &ctx,
             Some(Arc::new(|_| panic!("already-checked radio must not fire"))),
         );
         assert_eq!(checked.a11y.toggled, Some(NodeToggled::True));
@@ -234,11 +237,13 @@ mod tests {
 
     #[test]
     fn disabled_and_readonly_do_not_report_a_change() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let disabled = radio(
             &RadioSpec::new()
                 .with_disabled(true)
                 .with_label("Standard shipping"),
-            &theme(),
+            &ctx,
             Some(Arc::new(|_| panic!("disabled"))),
         );
         assert!(disabled.interaction.disabled);
@@ -249,7 +254,7 @@ mod tests {
             &RadioSpec::new()
                 .with_read_only(true)
                 .with_label("Standard shipping"),
-            &theme(),
+            &ctx,
             Some(Arc::new(|_| panic!("readonly"))),
         );
         assert!(readonly.interaction.focusable);
@@ -259,16 +264,18 @@ mod tests {
 
     #[test]
     fn accessible_name_comes_from_the_visible_label_or_aria_label() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let labelled = radio(
             &RadioSpec::new().with_label("Standard shipping"),
-            &theme(),
+            &ctx,
             None,
         );
         assert_eq!(labelled.a11y.label.as_deref(), Some("Standard shipping"));
 
         let unlabelled = radio(
             &RadioSpec::new().with_aria_label("Standard shipping"),
-            &theme(),
+            &ctx,
             None,
         );
         assert_eq!(unlabelled.a11y.label.as_deref(), Some("Standard shipping"));

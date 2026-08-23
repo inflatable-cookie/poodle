@@ -5,12 +5,12 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
 use poodle_specs::{ActiveEdge, ActiveFill, ControlDensity, NavigationMenuSpec};
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
-use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px};
 
 /// Trigger horizontal padding in rem per density (contract §8 Density table):
 /// compact 0.5, default/comfortable 0.75 — NOT the generic ladder.
@@ -32,35 +32,36 @@ fn all_corners(node: &mut Node, r: f32) {
 /// `on_change` fires with the value of the entry that was chosen.
 pub fn navigation_menu(
     spec: &NavigationMenuSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(match effective_size {
         poodle_specs::ControlSize::Xs => 0.6875,
         poodle_specs::ControlSize::Sm | poodle_specs::ControlSize::Md => 0.75,
         poodle_specs::ControlSize::Lg => 0.8125,
         poodle_specs::ControlSize::Xl => 0.875,
     });
-    let pad_x = rem_to_px(nav_trigger_pad_x_rem(spec.density));
+    let pad_x = rem_to_px(nav_trigger_pad_x_rem(density));
 
     // List gap = space-inline-sm (contract §7/§8).
-    let list_gap = theme.resolve_space("space.inline.sm");
+    let list_gap = ctx.theme().resolve_space("space.inline.sm");
 
     // Trigger pill geometry.
-    let radius = theme.resolve_radius(spec.trigger_radius_token());
+    let radius = ctx.theme().resolve_radius(spec.trigger_radius_token());
     // Border width = 0.0625rem (contract §8 trigger border).
     let border_w = rem_to_px(0.0625);
     // Trigger min-height = size-control-height (contract §8).
-    let control_height = theme.resolve_space("size.control.height");
+    let control_height = ctx.theme().resolve_space("size.control.height");
 
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_inverse = theme.resolve_color("color.text.inverse");
-    let accent = theme.resolve_color("color.accent.base");
-    let surface = theme.resolve_color("color.background.surface");
-    let border_subtle = theme.resolve_color("color.border.subtle");
-    let border_default = theme.resolve_color("color.border.default");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let text_inverse = ctx.theme().resolve_color("color.text.inverse");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let border_subtle = ctx.theme().resolve_color("color.border.subtle");
+    let border_default = ctx.theme().resolve_color("color.border.default");
 
     // Hover/focus trigger: background = color-mix(accent 12%, transparent).
     let hover_bg = with_alpha(accent, accent.3 * 0.12);
@@ -78,7 +79,7 @@ pub fn navigation_menu(
     // does not shift layout.
     let outline_selected_border = mix_srgb(accent, border_default, 0.42);
 
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
 
     let current = spec.current_value();
 
@@ -193,7 +194,7 @@ pub fn navigation_menu(
     }
 
     // Root: column of list + optional viewport, gap stack-md, min-width 0.
-    let root_gap = theme.resolve_space(spec.viewport_gap_token());
+    let root_gap = ctx.theme().resolve_space(spec.viewport_gap_token());
     let mut root = Node::container();
     {
         let s = &mut root.style;
@@ -207,10 +208,10 @@ pub fn navigation_menu(
     // Contract §8: panel padding, border-subtle@74% hairline, radius-surface,
     // panel@96% fill and elevation-overlay shadow.
     if let Some(active_item) = spec.current_item() {
-        let panel_x = rem_to_px(panel_space_x_rem(spec.density));
-        let panel_y = rem_to_px(panel_space_y_rem(spec.density));
-        let viewport_radius = theme.resolve_radius(spec.viewport_radius_token());
-        let panel = theme.resolve_color("color.background.panel");
+        let panel_x = rem_to_px(panel_space_x_rem(density));
+        let panel_y = rem_to_px(panel_space_y_rem(density));
+        let viewport_radius = ctx.theme().resolve_radius(spec.viewport_radius_token());
+        let panel = ctx.theme().resolve_color("color.background.panel");
         let panel_bg = with_alpha(panel, panel.3 * 0.96);
         let viewport_border = with_alpha(border_subtle, border_subtle.3 * 0.74);
 
@@ -237,7 +238,7 @@ pub fn navigation_menu(
         if let Some(description) = active_item.description.as_deref() {
             let mut d = Node::text(description);
             d.style.descriptor.text_color = Some(text_secondary);
-            d.style.text_size = Some(theme.resolve_space("typography.body.size"));
+            d.style.text_size = Some(ctx.theme().resolve_space("typography.body.size"));
             viewport = viewport.child(d);
         }
 
@@ -296,10 +297,11 @@ mod tests {
     #[test]
     fn default_trigger_is_borderless_with_tint_fill() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = NavigationMenuSpec::new(items()).with_value("a");
-        let accent = theme.resolve_color("color.accent.base");
+        let accent = ctx.theme().resolve_color("color.accent.base");
 
-        let root = navigation_menu(&spec, &theme, None);
+        let root = navigation_menu(&spec, &ctx, None);
         let open = trigger_of(&root, "A");
         assert_eq!(open.style.descriptor.border.width, 0.0);
         assert_eq!(
@@ -312,8 +314,8 @@ mod tests {
         assert_eq!(
             closed.style.descriptor.background,
             Some(with_alpha(
-                theme.resolve_color("color.background.surface"),
-                theme.resolve_color("color.background.surface").3 * 0.88
+                ctx.theme().resolve_color("color.background.surface"),
+                ctx.theme().resolve_color("color.background.surface").3 * 0.88
             ))
         );
     }
@@ -321,13 +323,14 @@ mod tests {
     #[test]
     fn active_edge_outline_reserves_transparent_border_and_marks_open_trigger() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = NavigationMenuSpec::new(items())
             .with_value("a")
             .with_active_edge(ActiveEdge::Outline);
-        let accent = theme.resolve_color("color.accent.base");
-        let border_default = theme.resolve_color("color.border.default");
+        let accent = ctx.theme().resolve_color("color.accent.base");
+        let border_default = ctx.theme().resolve_color("color.border.default");
 
-        let root = navigation_menu(&spec, &theme, None);
+        let root = navigation_menu(&spec, &ctx, None);
         let open = trigger_of(&root, "A");
         assert_eq!(open.style.descriptor.border.width, rem_to_px(0.0625));
         assert_eq!(
@@ -343,12 +346,13 @@ mod tests {
     #[test]
     fn active_underline_edges_only_the_open_trigger() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = NavigationMenuSpec::new(items())
             .with_value("a")
             .with_active_edge(ActiveEdge::Underline);
-        let accent = theme.resolve_color("color.accent.base");
+        let accent = ctx.theme().resolve_color("color.accent.base");
 
-        let root = navigation_menu(&spec, &theme, None);
+        let root = navigation_menu(&spec, &ctx, None);
         let open = trigger_of(&root, "A");
         assert_eq!(open.style.border_bottom_width, Some(rem_to_px(0.125)));
         assert_eq!(open.style.border_color_bottom, Some(accent));
@@ -363,13 +367,14 @@ mod tests {
     #[test]
     fn solid_fill_uses_accent_with_inverse_foreground() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = NavigationMenuSpec::new(items())
             .with_value("a")
             .with_active_fill(ActiveFill::Solid);
-        let accent = theme.resolve_color("color.accent.base");
-        let inverse = theme.resolve_color("color.text.inverse");
+        let accent = ctx.theme().resolve_color("color.accent.base");
+        let inverse = ctx.theme().resolve_color("color.text.inverse");
 
-        let root = navigation_menu(&spec, &theme, None);
+        let root = navigation_menu(&spec, &ctx, None);
         let open = trigger_of(&root, "A");
         assert_eq!(open.style.descriptor.background, Some(accent));
         assert_eq!(label_text(&root, "A").style.descriptor.text_color, Some(inverse));
@@ -378,25 +383,26 @@ mod tests {
         assert_eq!(
             closed.style.descriptor.background,
             Some(with_alpha(
-                theme.resolve_color("color.background.surface"),
-                theme.resolve_color("color.background.surface").3 * 0.88
+                ctx.theme().resolve_color("color.background.surface"),
+                ctx.theme().resolve_color("color.background.surface").3 * 0.88
             ))
         );
         assert_eq!(
             label_text(&root, "B").style.descriptor.text_color,
-            Some(theme.resolve_color("color.text.primary"))
+            Some(ctx.theme().resolve_color("color.text.primary"))
         );
     }
 
     #[test]
     fn solid_open_trigger_keeps_accent_on_hover() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = NavigationMenuSpec::new(items())
             .with_value("a")
             .with_active_fill(ActiveFill::Solid);
-        let accent = theme.resolve_color("color.accent.base");
+        let accent = ctx.theme().resolve_color("color.accent.base");
 
-        let root = navigation_menu(&spec, &theme, None);
+        let root = navigation_menu(&spec, &ctx, None);
         let open_hover = trigger_of(&root, "A").style.hover.as_ref().expect("hover patch");
         assert_eq!(open_hover.background, Some(accent));
 
@@ -410,15 +416,16 @@ mod tests {
     #[test]
     fn none_fill_keeps_idle_background_and_underline_still_marks_open_trigger() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = NavigationMenuSpec::new(items())
             .with_value("a")
             .with_active_fill(ActiveFill::None)
             .with_active_edge(ActiveEdge::Underline);
-        let accent = theme.resolve_color("color.accent.base");
-        let surface = theme.resolve_color("color.background.surface");
+        let accent = ctx.theme().resolve_color("color.accent.base");
+        let surface = ctx.theme().resolve_color("color.background.surface");
         let idle = with_alpha(surface, surface.3 * 0.88);
 
-        let root = navigation_menu(&spec, &theme, None);
+        let root = navigation_menu(&spec, &ctx, None);
         let open = trigger_of(&root, "A");
         // No selection fill: the open trigger keeps the idle trigger fill.
         assert_eq!(open.style.descriptor.background, Some(idle));
@@ -428,7 +435,7 @@ mod tests {
         // The selected text colour is unaffected (text-primary, not inverse).
         assert_eq!(
             label_text(&root, "A").style.descriptor.text_color,
-            Some(theme.resolve_color("color.text.primary"))
+            Some(ctx.theme().resolve_color("color.text.primary"))
         );
 
         let closed = trigger_of(&root, "B");
@@ -439,14 +446,16 @@ mod tests {
     #[test]
     fn outside_interact_refusal_marks_the_open_viewport() {
         // Web default `true` + active item: no refusal marker anywhere.
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = NavigationMenuSpec::new(items()).with_value("a");
-        let node = navigation_menu(&spec, &theme(), None);
+        let node = navigation_menu(&spec, &ctx, None);
         assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
 
         // Refusal: the open viewport carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = navigation_menu(&refusing, &theme(), None);
+        let node = navigation_menu(&refusing, &ctx, None);
         assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
     }
 }

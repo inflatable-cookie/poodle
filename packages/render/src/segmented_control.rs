@@ -8,7 +8,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeKey, NodeRole, NodeToggled, ShadowLayer, StylePatch,
@@ -16,18 +15,19 @@ use poodle_node::{
 use poodle_specs::{IconSize, SegmentedControlSpec};
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
+use crate::context::RenderContext;
 use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size,
-    resolve_supporting_visual_size,
+    control_height_rem, control_space_x_rem, rem_to_px, resolve_supporting_visual_size,
 };
 
 pub fn segmented_control(
     spec: &SegmentedControlSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     let instance_scope = spec.instance_id.as_str();
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     // Fixed per-size/per-density tables, transcribed from the old GPUI tier
     // (g12.019): unlike select/button, this component's old tier is
     // deliberately fixed-table — Svelte's `--poodle-segmented-control-height`
@@ -39,7 +39,7 @@ pub fn segmented_control(
     let font_size = rem_to_px(0.75);
     // Contract §8: segment padding-x is density-driven
     // (`--poodle-segmented-control-x`: 0.5/0.75/1rem), not size-offset.
-    let seg_px = rem_to_px(control_space_x_rem(spec.density));
+    let seg_px = rem_to_px(control_space_x_rem(density));
     let inner = rem_to_px(0.125);
     // Segment height = control height minus the container's 0.125rem
     // top+bottom padding. The old GPUI tier sets it explicitly so the
@@ -47,15 +47,15 @@ pub fn segmented_control(
     // flex instead of vertical padding.
     let segment_height = height - rem_to_px(0.25);
 
-    let selected_fill = theme.resolve_color(spec.selected_fill_token());
-    let surface = theme.resolve_color("color.background.surface");
-    let elevated = theme.resolve_color("color.background.elevated");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let border_subtle = theme.resolve_color("color.border.subtle");
-    let text_inverse = theme.resolve_color("color.text.inverse");
-    let text_muted = theme.resolve_color("color.text.secondary");
-    let control_radius = theme.resolve_radius("radius.control");
-    let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
+    let selected_fill = ctx.theme().resolve_color(spec.selected_fill_token());
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let border_subtle = ctx.theme().resolve_color("color.border.subtle");
+    let text_inverse = ctx.theme().resolve_color("color.text.inverse");
+    let text_muted = ctx.theme().resolve_color("color.text.secondary");
+    let control_radius = ctx.theme().resolve_radius("radius.control");
+    let disabled_opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
 
     // Contract: root bg = surface 93% mix with text-primary; root border =
     // border-subtle at 84% alpha.
@@ -72,7 +72,7 @@ pub fn segmented_control(
     let selected_highlight = with_alpha(text_inverse, text_inverse.3 * 0.12);
     // Contract §8 Label: inner radius = calc(radius-control - 0.125rem).
     let inner_radius = (control_radius - inner).max(0.0);
-    let focus_ring = theme.resolve_color("color.accent.focusRing");
+    let focus_ring = ctx.theme().resolve_color("color.accent.focusRing");
     let focus_ring_width = rem_to_px(0.125);
 
     let selected = spec.current_value();
@@ -99,7 +99,8 @@ pub fn segmented_control(
         // default main alignment, so silence is the faithful emission.
     }
 
-    let icon_size = theme
+    let icon_size = ctx
+        .theme()
         .resolve_space(IconSize::from(resolve_supporting_visual_size(effective_size)).size_token());
     // Contract §8 label gap between icon and visible text.
     let icon_text_gap = rem_to_px(0.375);
@@ -379,9 +380,11 @@ mod tests {
             (ControlSize::Lg, 44.0),
             (ControlSize::Xl, 52.0),
         ];
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         for (size, expected) in cases {
             let spec = test_spec(view_options()).with_size(size);
-            let node = segmented_control(&spec, &theme(), None);
+            let node = segmented_control(&spec, &ctx, None);
             match node.style.descriptor.layout.height {
                 LayoutSizing::Fixed(h) => assert_eq!(h, expected, "track height for {size:?}"),
                 ref other => panic!("expected fixed track height, got {other:?}"),
@@ -407,9 +410,11 @@ mod tests {
             (ControlDensity::Default, 12.0),
             (ControlDensity::Comfortable, 16.0),
         ];
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         for (density, expected) in cases {
             let spec = test_spec(view_options()).with_density(density);
-            let node = segmented_control(&spec, &theme(), None);
+            let node = segmented_control(&spec, &ctx, None);
             let seg = find_segment(&node, "List");
             assert_eq!(
                 seg.style.descriptor.layout.spacing.padding.left, expected,
@@ -422,12 +427,15 @@ mod tests {
     #[test]
     fn selected_segment_gets_accent_fill_and_top_highlight() {
         let theme = theme();
-        let accent = theme.resolve_color("color.accent.base");
-        let text_inverse = theme.resolve_color("color.text.inverse");
-        let text_secondary = theme.resolve_color("color.text.secondary");
+        let ctx = RenderContext::new(&theme);
+        let accent = poodle_adapter::ThemeProvider::resolve_color(&theme, "color.accent.base");
+        let text_inverse =
+            poodle_adapter::ThemeProvider::resolve_color(&theme, "color.text.inverse");
+        let text_secondary =
+            poodle_adapter::ThemeProvider::resolve_color(&theme, "color.text.secondary");
 
         let spec = test_spec(view_options()).with_default_value("list");
-        let node = segmented_control(&spec, &theme, None);
+        let node = segmented_control(&spec, &ctx, None);
 
         let selected_seg = find_segment(&node, "List");
         assert_eq!(selected_seg.style.descriptor.background, Some(accent));
@@ -459,13 +467,16 @@ mod tests {
     #[test]
     fn enabled_segments_show_pointer_cursor_and_hover_fill_without_a_handler() {
         let theme = theme();
-        let surface = theme.resolve_color("color.background.surface");
-        let elevated = theme.resolve_color("color.background.elevated");
+        let ctx = RenderContext::new(&theme);
+        let surface =
+            poodle_adapter::ThemeProvider::resolve_color(&theme, "color.background.surface");
+        let elevated =
+            poodle_adapter::ThemeProvider::resolve_color(&theme, "color.background.elevated");
         let hover_fill = mix_srgb(surface, elevated, 0.84);
 
         // No change handler wired: the old tier still shows the affordances.
         let spec = test_spec(view_options()).with_default_value("grid");
-        let node = segmented_control(&spec, &theme, None);
+        let node = segmented_control(&spec, &ctx, None);
         // "Grid" is the selected segment and is deliberately excluded below.
         for label in ["List", "Table"] {
             let seg = find_segment(&node, label);
@@ -492,10 +503,11 @@ mod tests {
         // so hovering the selected segment swapped its accent fill for the
         // neutral hover fill and the selection visually vanished.
         let theme = theme();
-        let accent = theme.resolve_color("color.accent.base");
+        let ctx = RenderContext::new(&theme);
+        let accent = poodle_adapter::ThemeProvider::resolve_color(&theme, "color.accent.base");
 
         let spec = test_spec(view_options()).with_default_value("grid");
-        let node = segmented_control(&spec, &theme, None);
+        let node = segmented_control(&spec, &ctx, None);
 
         let selected = find_segment(&node, "Grid");
         assert_eq!(selected.style.descriptor.background, Some(accent));
@@ -516,12 +528,14 @@ mod tests {
     #[test]
     fn disabled_option_is_out_of_traversal_and_dimmed() {
         let theme = theme();
-        let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
+        let ctx = RenderContext::new(&theme);
+        let disabled_opacity =
+            poodle_adapter::ThemeProvider::resolve_opacity(&theme, "state.opacity.disabled");
         let mut options = view_options();
         options.push(SegmentedControlOption::new("draft", "Draft").with_disabled(true));
         let handlers: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(|_| {});
         let spec = test_spec(options).with_default_value("grid");
-        let node = segmented_control(&spec, &theme, Some(handlers));
+        let node = segmented_control(&spec, &ctx, Some(handlers));
 
         let draft = find_segment(&node, "Draft");
         assert!(draft.interaction.on_activate.is_none());
@@ -543,13 +557,15 @@ mod tests {
     #[test]
     fn disabled_control_dims_the_track_and_shows_not_allowed() {
         let theme = theme();
-        let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
+        let ctx = RenderContext::new(&theme);
+        let disabled_opacity =
+            poodle_adapter::ThemeProvider::resolve_opacity(&theme, "state.opacity.disabled");
         let handlers: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(|_| {});
         let spec = SegmentedControlSpec {
             is_disabled: true,
             ..test_spec(view_options()).with_default_value("grid")
         };
-        let node = segmented_control(&spec, &theme, Some(handlers));
+        let node = segmented_control(&spec, &ctx, Some(handlers));
 
         assert_eq!(node.style.descriptor.opacity, disabled_opacity);
         assert_eq!(node.style.descriptor.cursor, CursorHint::NotAllowed);
@@ -567,12 +583,14 @@ mod tests {
     #[test]
     fn choosing_a_segment_reports_its_value_through_the_node_handler() {
         use std::sync::Mutex;
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&seen);
         let on_change: Arc<dyn Fn(&str) + Send + Sync> =
             Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()));
         let spec = test_spec(view_options()).with_default_value("grid");
-        let node = segmented_control(&spec, &theme(), Some(on_change));
+        let node = segmented_control(&spec, &ctx, Some(on_change));
 
         let list = find_segment(&node, "List");
         (list.interaction.on_activate.as_ref().unwrap())();
@@ -581,23 +599,27 @@ mod tests {
 
     #[test]
     fn equal_width_grows_segments_content_fit_leaves_them_alone() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = test_spec(view_options());
-        let node = segmented_control(&spec, &theme(), None);
+        let node = segmented_control(&spec, &ctx, None);
         let seg = find_segment(&node, "List");
         assert_eq!(seg.style.descriptor.layout.width, LayoutSizing::Grow);
 
         let spec = test_spec(view_options()).with_equal_width(false);
-        let node = segmented_control(&spec, &theme(), None);
+        let node = segmented_control(&spec, &ctx, None);
         let seg = find_segment(&node, "List");
         assert_ne!(seg.style.descriptor.layout.width, LayoutSizing::Grow);
     }
 
     #[test]
     fn radiogroup_role_and_aria_label_ride_the_root() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = test_spec(view_options());
         let mut spec_with_label = spec.clone();
         spec_with_label.aria_label = Some("View mode".to_string());
-        let node = segmented_control(&spec_with_label, &theme(), None);
+        let node = segmented_control(&spec_with_label, &ctx, None);
         assert_eq!(node.a11y.role, Some(NodeRole::RadioGroup));
         assert_eq!(node.a11y.label.as_deref(), Some("View mode"));
         let grid = find_segment(&node, "Grid");
@@ -612,8 +634,10 @@ mod tests {
 
     #[test]
     fn selected_option_is_the_roving_tab_stop() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = test_spec(view_options()).with_default_value("list");
-        let node = segmented_control(&spec, &theme(), None);
+        let node = segmented_control(&spec, &ctx, None);
         assert_eq!(find_segment(&node, "Grid").a11y.tab_index, Some(-1));
         let list = find_segment(&node, "List");
         assert_eq!(list.a11y.tab_index, Some(0));
@@ -638,7 +662,9 @@ mod tests {
             ],
         )
         .with_default_value("grid");
-        let node = segmented_control(&spec, &theme(), Some(on_change));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = segmented_control(&spec, &ctx, Some(on_change));
         let keys = find_segment(&node, "Grid")
             .interaction
             .on_key
@@ -655,13 +681,18 @@ mod tests {
 
     #[test]
     fn enabled_segments_carry_a_focus_patch_so_gpui_tracks_handles() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = test_spec(view_options()).with_default_value("grid");
-        let node = segmented_control(&spec, &theme(), None);
+        let node = segmented_control(&spec, &ctx, None);
         let grid = find_segment(&node, "Grid");
         assert!(grid.style.focus.is_some());
         assert_eq!(
             grid.style.focus.and_then(|patch| patch.border_color),
-            Some(theme().resolve_color("color.accent.focusRing"))
+            Some(poodle_adapter::ThemeProvider::resolve_color(
+                &theme,
+                "color.accent.focusRing"
+            ))
         );
     }
 
@@ -672,14 +703,16 @@ mod tests {
         let sink = Arc::clone(&seen);
         let on_change: Arc<dyn Fn(&str) + Send + Sync> =
             Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let a = segmented_control(
             &SegmentedControlSpec::new("a", view_options()).with_default_value("grid"),
-            &theme(),
+            &ctx,
             Some(Arc::clone(&on_change)),
         );
         let b = segmented_control(
             &SegmentedControlSpec::new("b", view_options()).with_default_value("grid"),
-            &theme(),
+            &ctx,
             Some(on_change),
         );
         let a_grid = find_segment(&a, "Grid");
@@ -710,12 +743,14 @@ mod tests {
 
     #[test]
     fn explicit_scope_is_stable_when_a_preceding_control_disappears() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let preceding = SegmentedControlSpec::new("preceding", view_options());
         let persistent = SegmentedControlSpec::new("persistent", view_options());
         let before = Node::container()
-            .child(segmented_control(&preceding, &theme(), None))
-            .child(segmented_control(&persistent, &theme(), None));
-        let after = segmented_control(&persistent, &theme(), None);
+            .child(segmented_control(&preceding, &ctx, None))
+            .child(segmented_control(&persistent, &ctx, None));
+        let after = segmented_control(&persistent, &ctx, None);
         assert_eq!(
             collect_runtime_ids(&before, "segmented:grid")[1],
             find_segment(&after, "Grid").runtime_id.as_deref().unwrap()
@@ -744,16 +779,18 @@ mod tests {
 
     fn two_open_color_pickers() -> Node {
         let spec = poodle_specs::ColorPickerSpec::new().with_open(true);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         Node::container()
             .child(crate::color_picker(
                 &spec,
-                &theme(),
+                &ctx,
                 "picker-a",
                 crate::ColorPickerHandlers::default(),
             ))
             .child(crate::color_picker(
                 &spec,
-                &theme(),
+                &ctx,
                 "picker-b",
                 crate::ColorPickerHandlers::default(),
             ))
@@ -773,16 +810,18 @@ mod tests {
 
     fn two_open_filter_builders() -> Node {
         let spec = boolean_filter_builder();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         Node::container()
             .child(crate::filter_builder(
                 &spec,
-                &theme(),
+                &ctx,
                 "filter-a",
                 &crate::FilterBuilderHandlers::default(),
             ))
             .child(crate::filter_builder(
                 &spec,
-                &theme(),
+                &ctx,
                 "filter-b",
                 &crate::FilterBuilderHandlers::default(),
             ))
@@ -810,9 +849,11 @@ mod tests {
 
     fn two_open_model_pickers() -> Node {
         let spec = segmented_axis_model_picker();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         Node::container()
-            .child(crate::model_picker(&spec, &theme(), "model-a", None))
-            .child(crate::model_picker(&spec, &theme(), "model-b", None))
+            .child(crate::model_picker(&spec, &ctx, "model-a", None))
+            .child(crate::model_picker(&spec, &ctx, "model-b", None))
     }
 
     #[test]
@@ -846,10 +887,12 @@ mod tests {
 
     #[test]
     fn custom_option_icon_names_are_preserved() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = test_spec(vec![SegmentedControlOption::new("grid", "Grid")
             .with_icon("company-logo")
             .with_icon_only(true)]);
-        let node = segmented_control(&spec, &theme(), None);
+        let node = segmented_control(&spec, &ctx, None);
         assert!(find_icon_segment(&node, "company-logo")
             .find(
                 &|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "company-logo")
@@ -893,10 +936,12 @@ mod tests {
 
     #[test]
     fn icon_only_hides_visible_label_and_falls_back_for_name_and_tooltip() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = test_spec(plugin_kind_options())
             .with_default_value("effects")
             .with_equal_width(false);
-        let node = segmented_control(&spec, &theme(), None);
+        let node = segmented_control(&spec, &ctx, None);
 
         let effects = find_icon_segment(&node, "audio-waveform");
         assert!(
@@ -935,10 +980,12 @@ mod tests {
 
     #[test]
     fn icon_only_without_an_icon_keeps_the_visible_label() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = test_spec(vec![
             SegmentedControlOption::new("grid", "Grid").with_icon_only(true)
         ]);
-        let node = segmented_control(&spec, &theme(), None);
+        let node = segmented_control(&spec, &ctx, None);
         assert!(node.has_text("Grid"));
         let seg = find_segment(&node, "Grid");
         assert!(seg.a11y.label.is_none());
@@ -951,7 +998,9 @@ mod tests {
     #[test]
     fn labelled_icon_renders_before_text_with_supporting_visual_size_and_gap() {
         let theme = theme();
-        let expected = theme.resolve_space(
+        let ctx = RenderContext::new(&theme);
+        let expected = poodle_adapter::ThemeProvider::resolve_space(
+            &theme,
             poodle_specs::IconSize::from(crate::presentation::resolve_supporting_visual_size(
                 ControlSize::Md,
             ))
@@ -960,7 +1009,7 @@ mod tests {
         let spec = test_spec(vec![
             SegmentedControlOption::new("grid", "Grid").with_icon("list")
         ]);
-        let node = segmented_control(&spec, &theme, None);
+        let node = segmented_control(&spec, &ctx, None);
         let seg = find_icon_segment(&node, "list");
         assert!(node.has_text("Grid"));
         assert_eq!(icon_size_of(&node, "list"), expected);
@@ -980,10 +1029,12 @@ mod tests {
 
     #[test]
     fn icon_only_content_fit_is_square_with_no_inline_padding() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = test_spec(plugin_kind_options())
             .with_default_value("effects")
             .with_equal_width(false);
-        let node = segmented_control(&spec, &theme(), None);
+        let node = segmented_control(&spec, &ctx, None);
         let effects = find_icon_segment(&node, "audio-waveform");
         assert_eq!(
             effects.style.descriptor.layout.width,
@@ -1000,12 +1051,14 @@ mod tests {
 
     #[test]
     fn explicit_aria_label_and_title_win_over_the_required_label() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = test_spec(vec![SegmentedControlOption::new("fx", "FX")
             .with_icon("audio-waveform")
             .with_icon_only(true)
             .with_aria_label("Audio effects")
             .with_title("Effects plugins")]);
-        let node = segmented_control(&spec, &theme(), None);
+        let node = segmented_control(&spec, &ctx, None);
         let seg = find_icon_segment(&node, "audio-waveform");
         assert_eq!(seg.a11y.label.as_deref(), Some("Audio effects"));
         assert_eq!(seg.tooltip.as_deref(), Some("Effects plugins"));
@@ -1022,7 +1075,9 @@ mod tests {
         let spec = test_spec(plugin_kind_options())
             .with_default_value("effects")
             .with_equal_width(false);
-        let node = segmented_control(&spec, &theme(), Some(on_change));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = segmented_control(&spec, &ctx, Some(on_change));
         let instruments = find_icon_segment(&node, "piano");
         (instruments.interaction.on_activate.as_ref().unwrap())();
         assert_eq!(seen.lock().unwrap().as_slice(), ["instruments"]);

@@ -13,7 +13,6 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::model_connection::{
     filter_model_connection_options, group_model_connection_options,
     model_connection_availability_label, model_connection_availability_tone,
@@ -31,8 +30,9 @@ use poodle_specs::{
     StatusTone, TextInputSpec,
 };
 
+use crate::context::RenderContext;
 use crate::picker_shell::picker_shell;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::presentation::rem_to_px;
 use crate::status_indicator::status_indicator;
 use crate::text_input::text_input_with_change;
 
@@ -91,12 +91,12 @@ pub fn model_connection_picker_search_id(instance_id: Option<&str>) -> String {
 
 pub fn model_connection_picker(
     spec: &ModelConnectionPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: ModelConnectionPickerHandlers,
 ) -> Node {
     model_connection_picker_with_slots(
         spec,
-        theme,
+        ctx,
         ModelConnectionPickerSlots::default(),
         handlers,
     )
@@ -104,11 +104,12 @@ pub fn model_connection_picker(
 
 pub fn model_connection_picker_with_slots(
     spec: &ModelConnectionPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     slots: ModelConnectionPickerSlots,
     handlers: ModelConnectionPickerHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     let filtered = filter_model_connection_options(&spec.options, &spec.query);
     let groups = group_model_connection_options(&filtered);
@@ -145,25 +146,25 @@ pub fn model_connection_picker_with_slots(
         .with_aria_label(spec.search_placeholder.clone())
         .with_disabled(spec.is_disabled)
         .with_size(effective_size)
-        .with_density(spec.density);
+        .with_density(density);
     search_spec.id = Some(model_connection_picker_search_id(
         handlers.instance_id.as_deref(),
     ));
-    let search = text_input_with_change(&search_spec, theme, handlers.on_query_change.clone());
+    let search = text_input_with_change(&search_spec, ctx, handlers.on_query_change.clone());
 
     // ── Body: the grouped radio cards ──
     let mut body = Node::container();
     {
         let s = &mut body.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.md");
         s.fill_width = true;
     }
     let mut body = body;
     for group in &groups {
         body = body.child(group_node(
             spec,
-            theme,
+            ctx,
             group.group.as_str(),
             &group.options,
             &roving_ids,
@@ -198,7 +199,7 @@ pub fn model_connection_picker_with_slots(
 
     let mut root = picker_shell(
         &shell_spec,
-        theme,
+        ctx,
         Some(search),
         None,
         Some(body),
@@ -242,7 +243,7 @@ fn availability_role(availability: ModelConnectionAvailability) -> &'static str 
 #[allow(clippy::too_many_arguments)]
 fn group_node(
     spec: &ModelConnectionPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     group_label: &str,
     options: &[ModelConnectionOption],
     roving_ids: &[String],
@@ -251,10 +252,10 @@ fn group_node(
     handlers: &ModelConnectionPickerHandlers,
     effective_size: poodle_specs::ControlSize,
 ) -> Node {
-    let text_secondary = theme.resolve_color("color.text.secondary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
 
     let mut title = Node::text(group_label);
-    title.style.text_size = Some(theme.resolve_space("typography.label.size"));
+    title.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
     title.style.text_weight = Some(LABEL_WEIGHT);
     title.style.descriptor.text_color = Some(text_secondary);
 
@@ -264,7 +265,7 @@ fn group_node(
     {
         let s = &mut radiogroup.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
         s.fill_width = true;
     }
     radiogroup.a11y.role = Some(NodeRole::RadioGroup);
@@ -273,7 +274,7 @@ fn group_node(
     for option in options {
         radiogroup = radiogroup.child(option_node(
             spec,
-            theme,
+            ctx,
             option,
             roving_ids,
             has_visible_selection,
@@ -287,7 +288,7 @@ fn group_node(
     {
         let s = &mut group.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
         s.fill_width = true;
     }
     group.a11y.role = Some(NodeRole::Group);
@@ -313,7 +314,7 @@ fn option_accessible_name(option: &ModelConnectionOption) -> String {
 #[allow(clippy::too_many_arguments)]
 fn option_node(
     spec: &ModelConnectionPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     option: &ModelConnectionOption,
     roving_ids: &[String],
     has_visible_selection: bool,
@@ -322,31 +323,32 @@ fn option_node(
     effective_size: poodle_specs::ControlSize,
 ) -> Node {
     let selectable = model_connection_option_selectable(option);
+    let density = ctx.resolve_density(spec.density);
     let is_selected = spec.value.as_deref() == Some(option.id.as_str());
     let is_option_disabled = spec.is_disabled || !selectable;
 
-    let accent = theme.resolve_color("color.accent.base");
-    let focus_ring = theme.resolve_color("color.accent.focusRing");
-    let border = theme.resolve_color("color.border.subtle");
-    let surface = theme.resolve_color("color.background.surface");
-    let panel = theme.resolve_color("color.background.panel");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_inverse = theme.resolve_color("color.text.inverse");
-    let label_size = theme.resolve_space("typography.label.size");
-    let body_size = theme.resolve_space("typography.body.size");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let focus_ring = ctx.theme().resolve_color("color.accent.focusRing");
+    let border = ctx.theme().resolve_color("color.border.subtle");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let panel = ctx.theme().resolve_color("color.background.panel");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let text_inverse = ctx.theme().resolve_color("color.text.inverse");
+    let label_size = ctx.theme().resolve_space("typography.label.size");
+    let body_size = ctx.theme().resolve_space("typography.body.size");
 
     // ── Leading: the selected check replaces the mark; it never adds a
     // second trailing indicator. ──
     let leading = if is_selected {
-        selected_mark(theme, accent, text_inverse)
+        selected_mark(ctx, accent, text_inverse)
     } else {
         let mark = slots
             .leading
             .get(&option.id)
             .cloned()
-            .unwrap_or_else(|| generic_mark(theme, text_secondary));
-        leading_lane(theme, panel, mark)
+            .unwrap_or_else(|| generic_mark(ctx, text_secondary));
+        leading_lane(ctx, panel, mark)
     };
 
     // ── Copy: provider, route; the description stays in the accessible name ──
@@ -381,8 +383,8 @@ fn option_node(
             .with_label(model_connection_availability_label(option.availability))
             .with_aria_label(option.availability_label.clone())
             .with_size(effective_size)
-            .with_density(spec.density),
-        theme,
+            .with_density(density),
+        ctx,
     );
 
     let mut node = Node::container();
@@ -391,19 +393,19 @@ fn option_node(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.top = theme.resolve_space("space.stack.sm");
-        pad.bottom = theme.resolve_space("space.stack.sm");
-        pad.left = theme.resolve_space("space.inline.md");
-        pad.right = theme.resolve_space("space.inline.md");
+        pad.top = ctx.theme().resolve_space("space.stack.sm");
+        pad.bottom = ctx.theme().resolve_space("space.stack.sm");
+        pad.left = ctx.theme().resolve_space("space.inline.md");
+        pad.right = ctx.theme().resolve_space("space.inline.md");
         s.descriptor.border.width = rem_to_px(0.0625);
         s.descriptor.border.color = if is_selected { accent } else { border };
         s.descriptor.background = Some(surface);
         s.fill_width = true;
         s.min_width = Some(0.0);
         let c = &mut s.descriptor.corner_radii;
-        let radius = theme.resolve_radius("radius.surface");
+        let radius = ctx.theme().resolve_radius("radius.surface");
         c.top_left = radius;
         c.top_right = radius;
         c.bottom_right = radius;
@@ -526,7 +528,7 @@ fn roving_key_handler(
     }))
 }
 
-fn leading_lane(theme: &dyn ThemeProvider, panel: ColorValue, mark: Node) -> Node {
+fn leading_lane(ctx: &RenderContext<'_>, panel: ColorValue, mark: Node) -> Node {
     let size = rem_to_px(1.75); // contract §8 `size.icon.lg` lane
     let mut lane = Node::container();
     {
@@ -539,7 +541,7 @@ fn leading_lane(theme: &dyn ThemeProvider, panel: ColorValue, mark: Node) -> Nod
         s.descriptor.background = Some(panel);
         s.flex_none = true;
         let c = &mut s.descriptor.corner_radii;
-        let radius = theme.resolve_radius("radius.control");
+        let radius = ctx.theme().resolve_radius("radius.control");
         c.top_left = radius;
         c.top_right = radius;
         c.bottom_right = radius;
@@ -550,13 +552,13 @@ fn leading_lane(theme: &dyn ThemeProvider, panel: ColorValue, mark: Node) -> Nod
 
 /// The specimen fallback mark. It is not a provider catalogue: a host that
 /// wants a brand mark supplies one for that option id.
-fn generic_mark(_theme: &dyn ThemeProvider, tint: ColorValue) -> Node {
+fn generic_mark(_ctx: &RenderContext<'_>, tint: ColorValue) -> Node {
     let mut icon = Node::icon("package", rem_to_px(1.0));
     icon.style.descriptor.text_color = Some(tint);
     icon
 }
 
-fn selected_mark(theme: &dyn ThemeProvider, accent: ColorValue, tint: ColorValue) -> Node {
+fn selected_mark(ctx: &RenderContext<'_>, accent: ColorValue, tint: ColorValue) -> Node {
     let size = rem_to_px(1.25); // contract §8 `size.icon.md`
     let mut lane = Node::container();
     {
@@ -569,7 +571,7 @@ fn selected_mark(theme: &dyn ThemeProvider, accent: ColorValue, tint: ColorValue
         s.descriptor.background = Some(accent);
         s.flex_none = true;
         let c = &mut s.descriptor.corner_radii;
-        let radius = theme.resolve_radius("radius.pill");
+        let radius = ctx.theme().resolve_radius("radius.pill");
         c.top_left = radius;
         c.top_right = radius;
         c.bottom_right = radius;
@@ -636,7 +638,7 @@ mod tests {
     fn filtering_preserves_source_order_and_group_order() {
         let node = model_connection_picker(
             &spec().with_query("local"),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
         assert_eq!(
@@ -654,7 +656,7 @@ mod tests {
     fn options_carry_radio_semantics_and_the_supplied_reason() {
         let node = model_connection_picker(
             &spec().with_value(Some("openai-responses".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
 
@@ -686,7 +688,7 @@ mod tests {
     fn selection_replaces_the_leading_mark_without_a_second_indicator() {
         let unselected = model_connection_picker(
             &spec(),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
         let row = option_node(&unselected, "openai-responses");
@@ -699,7 +701,7 @@ mod tests {
 
         let selected = model_connection_picker(
             &spec().with_value(Some("openai-responses".to_string())),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
         let row = option_node(&selected, "openai-responses");
@@ -729,7 +731,7 @@ mod tests {
         let sink = Arc::clone(&chosen);
         let node = model_connection_picker(
             &spec(),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers {
                 on_value_change: Some(Arc::new(move |id: &str| {
                     sink.lock().unwrap().push(id.to_string())
@@ -757,7 +759,7 @@ mod tests {
         let sink = Arc::clone(&chosen);
         let node = model_connection_picker(
             &spec(),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers {
                 on_value_change: Some(Arc::new(move |id: &str| {
                     sink.lock().unwrap().push(id.to_string())
@@ -808,7 +810,7 @@ mod tests {
         let sink = Arc::clone(&typed);
         let node = model_connection_picker(
             &spec().with_query("local"),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers {
                 on_query_change: Some(Arc::new(move |next: &str| {
                     sink.lock().unwrap().push(next.to_string())
@@ -835,7 +837,7 @@ mod tests {
 
         let loading = model_connection_picker(
             &spec().with_state(ModelConnectionPickerState::Loading),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
         assert!(loading
@@ -844,7 +846,7 @@ mod tests {
 
         let error = model_connection_picker(
             &spec().with_state(ModelConnectionPickerState::Error),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
         assert!(error
@@ -853,7 +855,7 @@ mod tests {
 
         let empty = model_connection_picker(
             &ModelConnectionPickerSpec::new(),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
         assert!(empty
@@ -861,7 +863,7 @@ mod tests {
 
         let no_results = model_connection_picker(
             &spec().with_query("zzz"),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers::default(),
         );
         assert!(no_results
@@ -875,7 +877,7 @@ mod tests {
         leading.insert("ollama-local".to_string(), Node::text("OLLAMA MARK"));
         let node = model_connection_picker_with_slots(
             &spec(),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerSlots {
                 leading,
                 footer: Some(Node::text("Host footer")),
@@ -896,8 +898,8 @@ mod tests {
             instance_id: Some(scope.to_string()),
             ..ModelConnectionPickerHandlers::default()
         };
-        let first = model_connection_picker(&spec(), &theme(), scoped("first"));
-        let second = model_connection_picker(&spec(), &theme(), scoped("second"));
+        let first = model_connection_picker(&spec(), &RenderContext::new(&theme()), scoped("first"));
+        let second = model_connection_picker(&spec(), &RenderContext::new(&theme()), scoped("second"));
 
         for (node, scope) in [(&first, "first"), (&second, "second")] {
             assert!(node
@@ -931,7 +933,7 @@ mod tests {
     fn a_scoped_picker_roves_to_scoped_destinations() {
         let node = model_connection_picker(
             &spec(),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers {
                 instance_id: Some("second".to_string()),
                 ..ModelConnectionPickerHandlers::default()
@@ -954,7 +956,7 @@ mod tests {
             &spec()
                 .with_value(Some("openai-responses".to_string()))
                 .with_disabled(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionPickerHandlers {
                 on_value_change: Some(Arc::new(|_| unreachable!("a disabled picker selects"))),
                 ..ModelConnectionPickerHandlers::default()

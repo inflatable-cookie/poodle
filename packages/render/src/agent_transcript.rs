@@ -10,7 +10,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_transcript::TranscriptBlock;
 use poodle_node::{LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{
@@ -21,6 +20,7 @@ use poodle_specs::{
 use crate::agent_message::agent_message;
 use crate::agent_question_record::agent_question_record;
 use crate::changed_files::{changed_files, ChangedFilesHandlers};
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::tool_call_group::{tool_call_group, ToolCallGroupHandlers};
 
@@ -30,19 +30,21 @@ use crate::tool_call_group::{tool_call_group, ToolCallGroupHandlers};
 /// component recipe stays shared so native runtimes do not invent host chrome.
 pub fn agent_transcript_jump(
     spec: &AgentTranscriptSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_activate: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
     let button_spec = ButtonSpec::new()
         .with_label(spec.jump_label.clone())
         .with_leading_icon("arrow-down")
-        .with_size(spec.size)
-        .with_density(spec.density);
-    let mut jump = crate::button::button(&button_spec, theme, on_activate);
-    let fill = theme.resolve_color(spec.jump_fill_token());
-    let border = theme.resolve_color(spec.jump_border_token());
-    let text = theme.resolve_color(spec.jump_text_token());
-    let radius = theme.resolve_radius(spec.jump_radius_token());
+        .with_size(base_size)
+        .with_density(density);
+    let mut jump = crate::button::button(&button_spec, ctx, on_activate);
+    let fill = ctx.theme().resolve_color(spec.jump_fill_token());
+    let border = ctx.theme().resolve_color(spec.jump_border_token());
+    let text = ctx.theme().resolve_color(spec.jump_text_token());
+    let radius = ctx.theme().resolve_radius(spec.jump_radius_token());
     {
         let style = &mut jump.style;
         style.descriptor.layout.height = LayoutSizing::Fit;
@@ -56,7 +58,7 @@ pub fn agent_transcript_jump(
         style.descriptor.border.width = 1.0;
         style.descriptor.border.color = border;
         style.descriptor.text_color = Some(text);
-        style.text_size = Some(rem_to_px(spec.font_size_rem()));
+        style.text_size = Some(rem_to_px(spec.font_size_rem(base_size)));
         style.descriptor.corner_radii.top_left = radius;
         style.descriptor.corner_radii.top_right = radius;
         style.descriptor.corner_radii.bottom_right = radius;
@@ -92,13 +94,15 @@ pub struct AgentTranscriptHandlers {
 
 pub fn agent_transcript(
     spec: &AgentTranscriptSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: AgentTranscriptHandlers,
 ) -> Node {
-    let activity_color = theme.resolve_color(spec.activity_token());
-    let font_size = rem_to_px(spec.font_size_rem());
-    let inset = rem_to_px(spec.padding_inset_rem());
-    let block_gap = rem_to_px(spec.block_gap_rem());
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let activity_color = ctx.theme().resolve_color(spec.activity_token());
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let inset = rem_to_px(spec.padding_inset_rem(density));
+    let block_gap = rem_to_px(spec.block_gap_rem(density));
 
     let mut root = Node::container();
     {
@@ -132,46 +136,46 @@ pub fn agent_transcript(
             TranscriptBlock::Message(message) => {
                 let mut message_spec = AgentMessageSpec::new(message.markdown.clone())
                     .with_streaming(message.is_streaming)
-                    .with_size(spec.size)
-                    .with_density(spec.density);
+                    .with_size(base_size)
+                    .with_density(density);
                 if let Some(role) = message.role {
                     message_spec = message_spec.with_role(role);
                 }
-                root = root.child(agent_message(&message_spec, theme));
+                root = root.child(agent_message(&message_spec, ctx));
             }
             TranscriptBlock::ToolRun(run) => {
                 let group = ToolCallGroupSpec::new(run.id.clone(), run.calls.clone())
                     .with_expanded(spec.expanded_tool_runs.contains(&run.id))
                     .with_expanded_calls(spec.expanded_tool_calls.clone())
-                    .with_size(spec.size)
-                    .with_density(spec.density);
+                    .with_size(base_size)
+                    .with_density(density);
 
                 let group_handlers = ToolCallGroupHandlers {
                     on_toggle: handlers.on_tool_run_toggle.as_ref().map(Arc::clone),
                     on_call_toggle: handlers.on_tool_call_toggle.as_ref().map(Arc::clone),
                     instance_id: None,
                 };
-                root = root.child(tool_call_group(&group, theme, group_handlers));
+                root = root.child(tool_call_group(&group, ctx, group_handlers));
             }
             TranscriptBlock::ChangedFiles(changed) => {
                 let card = ChangedFilesSpec::new(changed.id.clone(), changed.files.clone())
                     .with_expanded(spec.expanded_changed_files.contains(&changed.id))
-                    .with_size(spec.size)
-                    .with_density(spec.density);
+                    .with_size(base_size)
+                    .with_density(density);
 
                 let card_handlers = ChangedFilesHandlers {
                     on_toggle: handlers.on_changed_files_toggle.as_ref().map(Arc::clone),
                     on_file_select: handlers.on_file_select.as_ref().map(Arc::clone),
                     instance_id: None,
                 };
-                root = root.child(changed_files(&card, theme, card_handlers));
+                root = root.child(changed_files(&card, ctx, card_handlers));
             }
             TranscriptBlock::AnsweredQuestion(record) => {
                 if let Some(answer) = record.answer.clone() {
                     let card = AgentQuestionRecordSpec::new(record.question.clone(), answer)
-                        .with_size(spec.size)
-                        .with_density(spec.density);
-                    root = root.child(agent_question_record(&card, theme));
+                        .with_size(base_size)
+                        .with_density(density);
+                    root = root.child(agent_question_record(&card, ctx));
                 }
             }
             // A provider-owned child's work renders live in the transcript —
@@ -181,8 +185,8 @@ pub fn agent_transcript(
                 let card = poodle_specs::AgentSubagentSpec::new(group.subagent.clone())
                     .with_expanded(spec.expanded_subagent_groups.contains(&group.id))
                     .with_detail_lines(group.detail_lines.clone().unwrap_or_default())
-                    .with_size(spec.size)
-                    .with_density(spec.density);
+                    .with_size(base_size)
+                    .with_density(density);
 
                 let group_id = group.id.clone();
                 let group_handlers = crate::agent_subagent::AgentSubagentHandlers {
@@ -200,7 +204,7 @@ pub fn agent_transcript(
                 };
                 root = root.child(crate::agent_subagent::agent_subagent(
                     &card,
-                    theme,
+                    ctx,
                     group_handlers,
                 ));
             }
@@ -226,17 +230,19 @@ mod tests {
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     use super::*;
+    use poodle_adapter::ThemeProvider;
 
     #[test]
     fn jump_control_uses_the_transcript_recipe_and_real_activation() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
         let spec = AgentTranscriptSpec::default();
         let activations = Arc::new(AtomicUsize::new(0));
         let sink = Arc::clone(&activations);
         let jump = agent_transcript_jump(
             &spec,
-            &theme,
+            &ctx,
             Some(Arc::new(move || {
                 sink.fetch_add(1, Ordering::Relaxed);
             })),

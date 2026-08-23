@@ -1,7 +1,7 @@
 //! Card Toggle Group specimen — g12.019 node-tier migration.
 //!
 //! Every CardToggleGroup below renders through the node tier:
-//! `poodle_render::card_toggle_group` (`Spec + Theme → Node`) interpreted by
+//! `poodle_render::card_toggle_group` (`Spec + Context → Node`) interpreted by
 //! `poodle_gpui_node_backend::to_gpui`. The old hand-written
 //! `poodle_gpui_components::CardToggleGroup` no longer renders this specimen;
 //! everything around the groups (layout, Eyebrow headings) is unchanged.
@@ -16,6 +16,7 @@ use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
+use poodle_render::RenderContext;
 use poodle_specs::{
     CardToggleGroupSpec, CardToggleOption, ControlDensity, ControlSize, EyebrowSpec,
 };
@@ -32,7 +33,7 @@ fn view_options() -> Vec<CardToggleOption> {
 
 /// A node-tier CardToggleGroup with no handlers (this specimen is fully static).
 fn node_card_toggle_group(spec: CardToggleGroupSpec, theme: &GpuiThemeProvider) -> AnyElement {
-    let node = poodle_render::card_toggle_group(&spec, theme, None);
+    let node = poodle_render::card_toggle_group(&spec, &RenderContext::new(theme), None);
     poodle_gpui_node_backend::to_gpui(&node)
 }
 

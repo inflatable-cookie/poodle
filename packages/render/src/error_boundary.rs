@@ -7,17 +7,17 @@
 //! (title + message + retry action); otherwise render the wrapped child. The
 //! actual error *catching* is the host app's job — this renders the fallback.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::Node;
 use poodle_specs::{EmptyStateSpec, ErrorBoundarySpec, RemediationAction};
 
+use crate::context::RenderContext;
 use crate::empty_state::empty_state;
 
 /// Build an error-boundary element. `child` is the normal content shown when
 /// there is no error.
 pub fn error_boundary(
     spec: &ErrorBoundarySpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     child: Option<Node>,
 ) -> Node {
     if let Some(message) = &spec.error_message {
@@ -28,7 +28,7 @@ pub fn error_boundary(
                     "retry",
                     spec.retry_label.as_str(),
                 )]),
-            theme,
+            ctx,
         );
     }
     child.unwrap_or_else(Node::container)

@@ -339,9 +339,9 @@ pub struct FilterBuilderSpec {
     pub value: FilterExpression,
     pub aria_label: String,
     pub is_disabled: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     pub max_clauses: Option<usize>,
     pub is_compact: bool,
     pub show_clear_button: bool,
@@ -379,9 +379,9 @@ impl FilterBuilderSpec {
             value: FilterExpression::default(),
             aria_label: "Filter".to_string(),
             is_disabled: false,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             max_clauses: None,
             is_compact: false,
             show_clear_button: true,
@@ -415,7 +415,7 @@ impl FilterBuilderSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -425,7 +425,7 @@ impl FilterBuilderSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

@@ -3,11 +3,12 @@
 //! Contract: `docs/contracts/components/stack.md`
 //! Ported from: `packages/jetstream/components/src/stack.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{Alignment, LayoutJustify, StackDirection, StackSpec};
 
-pub fn stack(spec: &StackSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> Node {
+use crate::context::RenderContext;
+
+pub fn stack(spec: &StackSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
     let padding = spec.resolved_padding();
 
     let mut el = Node::container();
@@ -23,7 +24,7 @@ pub fn stack(spec: &StackSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -
         }
 
         if let Some(gap_token) = spec.resolved_gap() {
-            s.descriptor.layout.spacing.gap = theme.resolve_space(gap_token);
+            s.descriptor.layout.spacing.gap = ctx.theme().resolve_space(gap_token);
         }
 
         // Cross-axis alignment (direction-aware default when unset:
@@ -45,13 +46,13 @@ pub fn stack(spec: &StackSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -
         }
 
         if let Some(h) = padding.horizontal {
-            let px_val = theme.resolve_space(h);
+            let px_val = ctx.theme().resolve_space(h);
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = px_val;
             pad.right = px_val;
         }
         if let Some(v) = padding.vertical {
-            let px_val = theme.resolve_space(v);
+            let px_val = ctx.theme().resolve_space(v);
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.top = px_val;
             pad.bottom = px_val;

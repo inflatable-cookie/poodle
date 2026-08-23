@@ -2,9 +2,10 @@
 //!
 //! Contract: `docs/contracts/components/box.md`
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, LayoutOverflow, LayoutSizing, Node};
 use poodle_specs::{BoxSpec, Dimension, Overflow};
+
+use crate::context::RenderContext;
 
 fn parse_dimension_px(dimension: &Dimension) -> Option<f32> {
     let value = dimension.as_str().trim();
@@ -17,7 +18,8 @@ fn parse_dimension_px(dimension: &Dimension) -> Option<f32> {
     }
 }
 
-pub fn bx(spec: &BoxSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> Node {
+pub fn bx(spec: &BoxSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
+    let theme = ctx.theme();
     let padding = spec.resolved_padding();
     let mut node = Node::container();
     // Preserve the neutral div default used by the existing Rust backends.
@@ -86,7 +88,9 @@ mod tests {
             .with_width("12rem")
             .with_height("96px")
             .with_overflow(Overflow::Hidden);
-        let node = bx(&spec, &theme(), vec![Node::text("content")]);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = bx(&spec, &ctx, vec![Node::text("content")]);
 
         assert_eq!(
             node.style.descriptor.layout.width,

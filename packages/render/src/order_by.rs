@@ -12,7 +12,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
 };
@@ -22,8 +21,9 @@ use poodle_specs::{
 };
 
 use crate::color::mix_srgb;
+use crate::context::RenderContext;
 use crate::icon_button::icon_button;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_padding_x_offset_rem};
+use crate::presentation::{rem_to_px, size_padding_x_offset_rem};
 use crate::select::{select, SelectHandlers};
 
 /// Handlers mirror the GPUI target's names.
@@ -35,8 +35,12 @@ pub struct OrderByHandlers {
     pub on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
-pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderByHandlers) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+pub fn order_by(
+    spec: &OrderBySpec,
+    ctx: &RenderContext<'_>,
+    handlers: OrderByHandlers,
+) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
     // ── Size table (matches corrected contract §8) ────────────────────────────
     let trigger_h = rem_to_px(match effective_size {
@@ -68,7 +72,8 @@ pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderBy
     });
 
     // ── Density (trigger gap only) ────────────────────────────────────────────
-    let trigger_gap = rem_to_px(match spec.density {
+    let density = ctx.resolve_density(spec.density);
+    let trigger_gap = rem_to_px(match density {
         ControlDensity::Compact => 0.375,
         ControlDensity::Default => 0.5,
         ControlDensity::Comfortable => 0.625,
@@ -84,15 +89,15 @@ pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderBy
     let item_label_font = rem_to_px(0.8125);
 
     // ── Colors ────────────────────────────────────────────────────────────────
-    let text_primary = theme.resolve_color(spec.field_text_token());
-    let text_secondary = theme.resolve_color(spec.label_color_token());
-    let muted = theme.resolve_color(spec.muted_color_token());
-    let border = theme.resolve_color(spec.field_border_token());
-    let item_border = theme.resolve_color(spec.item_border_token());
-    let surface = theme.resolve_color(spec.field_fill_token());
-    let elevated = theme.resolve_color(spec.field_hover_fill_token());
-    let radius = theme.resolve_radius(spec.radius_token());
-    let surface_radius = theme.resolve_radius(spec.surface_radius_token());
+    let text_primary = ctx.theme().resolve_color(spec.field_text_token());
+    let text_secondary = ctx.theme().resolve_color(spec.label_color_token());
+    let muted = ctx.theme().resolve_color(spec.muted_color_token());
+    let border = ctx.theme().resolve_color(spec.field_border_token());
+    let item_border = ctx.theme().resolve_color(spec.item_border_token());
+    let surface = ctx.theme().resolve_color(spec.field_fill_token());
+    let elevated = ctx.theme().resolve_color(spec.field_hover_fill_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let surface_radius = ctx.theme().resolve_radius(spec.surface_radius_token());
     // Item bg: color-mix(surface 90%, elevated) per contract.
     let item_bg = mix_srgb(surface, elevated, 0.90);
 
@@ -123,7 +128,7 @@ pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderBy
                     .with_expanded(spec.is_open)
                     .with_controls("order-by-surface")
                     .with_disabled(spec.is_disabled),
-                theme,
+                ctx,
                 None,
             ));
         }
@@ -184,7 +189,7 @@ pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderBy
                         .with_variant(ButtonVariant::Ghost)
                         .with_size(effective_size)
                         .with_disabled(spec.is_disabled),
-                    theme,
+                    ctx,
                     None,
                 ));
             }
@@ -230,7 +235,7 @@ pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderBy
                         .with_variant(ButtonVariant::Ghost)
                         .with_size(ControlSize::Xs)
                         .with_disabled(spec.is_disabled),
-                    theme,
+                    ctx,
                     None,
                 ));
             }
@@ -308,7 +313,7 @@ pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderBy
                         .with_variant(ButtonVariant::Ghost)
                         .with_size(ControlSize::Xs)
                         .with_disabled(spec.is_disabled),
-                    theme,
+                    ctx,
                     handlers.on_direction_toggle.as_ref().map(|handler| {
                         let handler = Arc::clone(handler);
                         let field = item.key.clone();
@@ -325,7 +330,7 @@ pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderBy
                         .with_variant(ButtonVariant::Ghost)
                         .with_size(ControlSize::Xs)
                         .with_disabled(spec.is_disabled),
-                    theme,
+                    ctx,
                     handlers.on_remove.as_ref().map(|handler| {
                         let handler = Arc::clone(handler);
                         let field = item.key.clone();
@@ -359,14 +364,14 @@ pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderBy
             let mut select_spec = SelectSpec::new(options)
                 .with_placeholder("+ Add field")
                 .with_size(effective_size)
-                .with_density(spec.density);
+                .with_density(density);
             select_spec.aria_label = Some("Add sort field".to_string());
             select_spec.is_disabled = spec.is_disabled;
 
             let mut row = Node::container();
             row.style.descriptor.layout.direction = LayoutDirection::Row;
             row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            panel = panel.child(row.child(select(&select_spec, theme, &SelectHandlers::default())));
+            panel = panel.child(row.child(select(&select_spec, ctx, &SelectHandlers::default())));
         }
 
         // Dialog surface chrome.
@@ -401,7 +406,7 @@ pub fn order_by(spec: &OrderBySpec, theme: &dyn ThemeProvider, handlers: OrderBy
     }
 
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
     }
 
     if !spec.aria_label.is_empty() {
@@ -421,14 +426,16 @@ mod tests {
     #[test]
     fn outside_interact_refusal_marks_the_open_surface() {
         // Web default `true` + open: no refusal marker anywhere in the tree.
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = OrderBySpec::new().with_open(true);
-        let node = order_by(&spec, &theme(), OrderByHandlers::default());
+        let node = order_by(&spec, &ctx, OrderByHandlers::default());
         assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
 
         // Refusal: the open surface carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = order_by(&refusing, &theme(), OrderByHandlers::default());
+        let node = order_by(&refusing, &ctx, OrderByHandlers::default());
         assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
     }
 }

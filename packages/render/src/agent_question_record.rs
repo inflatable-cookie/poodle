@@ -6,24 +6,26 @@
 //! No handlers, and that is the component: an answer the agent already has
 //! cannot be changed from the transcript, so there is nothing to click.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::AgentQuestionRecordSpec;
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn agent_question_record(spec: &AgentQuestionRecordSpec, theme: &dyn ThemeProvider) -> Node {
-    let surface = theme.resolve_color(spec.surface_token());
-    let border = theme.resolve_color(spec.border_token());
-    let prompt_color = theme.resolve_color(spec.prompt_token());
-    let chosen_color = theme.resolve_color(spec.chosen_token());
-    let unchosen_color = theme.resolve_color(spec.unchosen_token());
-    let mark_color = theme.resolve_color(spec.mark_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+pub fn agent_question_record(spec: &AgentQuestionRecordSpec, ctx: &RenderContext<'_>) -> Node {
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let surface = ctx.theme().resolve_color(spec.surface_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let prompt_color = ctx.theme().resolve_color(spec.prompt_token());
+    let chosen_color = ctx.theme().resolve_color(spec.chosen_token());
+    let unchosen_color = ctx.theme().resolve_color(spec.unchosen_token());
+    let mark_color = ctx.theme().resolve_color(spec.mark_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
 
-    let font_size = rem_to_px(spec.font_size_rem());
-    let gap = rem_to_px(spec.gap_rem());
-    let inset = rem_to_px(spec.padding_inset_rem());
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let gap = rem_to_px(spec.gap_rem(density));
+    let inset = rem_to_px(spec.padding_inset_rem(density));
     let hairline = rem_to_px(0.0625);
 
     let mut root = Node::container();

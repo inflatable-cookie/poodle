@@ -6,7 +6,6 @@
 //! Seek and volume are Progress nodes (true proportional fills); transport
 //! and mute are icon circles. Click/drag wiring is host-owned.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, FontFamily, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeKind, StylePatch, TextAlign,
@@ -14,7 +13,8 @@ use poodle_node::{
 use poodle_specs::{AudioPlayerSpec, ControlDensity, ControlSize};
 
 use crate::color::mix_srgb;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
 /// Format seconds as m:ss.
 fn format_time(seconds: f64) -> String {
@@ -22,11 +22,11 @@ fn format_time(seconds: f64) -> String {
     format!("{}:{:02}", total / 60, total % 60)
 }
 
-pub fn audio_player(spec: &AudioPlayerSpec, theme: &dyn ThemeProvider) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+pub fn audio_player(spec: &AudioPlayerSpec, ctx: &RenderContext<'_>) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     // Contract §"CurrentTime/TotalTime": the time labels are label-size type,
     // not the control's own size ladder.
-    let font_size = theme.resolve_space("typography.label.size");
+    let font_size = ctx.theme().resolve_space("typography.label.size");
 
     // Size-driven dimensions from contract.
     let button_size = rem_to_px(match effective_size {
@@ -58,32 +58,33 @@ pub fn audio_player(spec: &AudioPlayerSpec, theme: &dyn ThemeProvider) -> Node {
     // Density-driven spacing (contract §"Density Overrides"). `gap` and `pad-y`
     // share one ladder; `pad-x` has its own and is NOT the generic
     // `control_space_x_rem` — comfortable is 0.875rem here, not 1rem.
-    let gap = rem_to_px(match spec.density {
+    let density = ctx.resolve_density(spec.density);
+    let gap = rem_to_px(match density {
         ControlDensity::Compact => 0.375,
         ControlDensity::Default => 0.5,
         ControlDensity::Comfortable => 0.625,
     });
     let pad_y = gap;
-    let pad_x = rem_to_px(match spec.density {
+    let pad_x = rem_to_px(match density {
         ControlDensity::Compact => 0.5,
         ControlDensity::Default => 0.75,
         ControlDensity::Comfortable => 0.875,
     });
 
-    let fill = theme.resolve_color(spec.fill_token());
-    let border = theme.resolve_color("color.border.default");
-    let radius = theme.resolve_radius("radius.surface");
-    let text_primary = theme.resolve_color(spec.control_color_token());
-    let text_secondary = theme.resolve_color("color.text.secondary");
+    let fill = ctx.theme().resolve_color(spec.fill_token());
+    let border = ctx.theme().resolve_color("color.border.default");
+    let radius = ctx.theme().resolve_radius("radius.surface");
+    let text_primary = ctx.theme().resolve_color(spec.control_color_token());
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
 
     // Contract §"SeekSlider track"/"VolumeSlider track": both tracks are
     // 0.25rem tall with a 0.125rem radius — a contract-exact geometry, not the
     // pill radius the surrounding controls use.
     let track_height = rem_to_px(0.25);
     let track_radius = rem_to_px(0.125);
-    let pill = theme.resolve_radius("radius.pill");
+    let pill = ctx.theme().resolve_radius("radius.pill");
     let border_w = rem_to_px(0.0625);
-    let accent = theme.resolve_color("color.accent.base");
+    let accent = ctx.theme().resolve_color("color.accent.base");
     // Transport hover tint, matching the other controls' accent-into-surface
     // hover treatment.
     let hover_fill = mix_srgb(accent, fill, 0.12);

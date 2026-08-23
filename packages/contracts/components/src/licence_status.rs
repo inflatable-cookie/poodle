@@ -27,9 +27,9 @@ pub struct LicenceStatusSpec {
     /// Authority emphasis; not re-derived.
     pub attention: LicenceAttention,
     pub title: String,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for LicenceStatusSpec {
@@ -42,9 +42,9 @@ impl Default for LicenceStatusSpec {
             usable: true,
             attention: LicenceAttention::None,
             title: "Licence".to_string(),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -90,7 +90,7 @@ impl LicenceStatusSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -100,7 +100,7 @@ impl LicenceStatusSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

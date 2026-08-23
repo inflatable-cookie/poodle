@@ -7,7 +7,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole,
     StylePatch,
@@ -19,6 +18,7 @@ use poodle_specs::{
 
 use crate::button::button;
 use crate::color::{mix_srgb, solid_tone_surface, with_alpha};
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::spinner::spinner;
 
@@ -55,24 +55,25 @@ fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
 
 pub fn remediation_banner(
     spec: &RemediationBannerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: RemediationBannerHandlers,
 ) -> Node {
     let instance_id = handlers.instance_id.clone();
     // ── Colors (all token-resolved) ──
-    let tone_color = theme.resolve_color(spec.border_token());
-    let panel = theme.resolve_color(spec.background_token());
-    let icon_color = theme.resolve_color(spec.icon_color_token());
-    let text_primary = theme.resolve_color(spec.title_color_token());
-    let text_secondary = theme.resolve_color(spec.message_color_token());
+    let tone_color = ctx.theme().resolve_color(spec.border_token());
+    let panel = ctx.theme().resolve_color(spec.background_token());
+    let icon_color = ctx.theme().resolve_color(spec.icon_color_token());
+    let text_primary = ctx.theme().resolve_color(spec.title_color_token());
+    let text_secondary = ctx.theme().resolve_color(spec.message_color_token());
     let solid = spec.is_solid_fill();
     let tint_border_mix = if spec.tone == StatusTone::Pending {
         0.24
     } else {
         0.34
     };
-    let solid_surface = solid
-        .then(|| solid_tone_surface(theme, tone_color, spec.is_neutral_tone(), tint_border_mix));
+    let solid_surface = solid.then(|| {
+        solid_tone_surface(ctx, tone_color, spec.is_neutral_tone(), tint_border_mix)
+    });
 
     // Surface fill = color-mix(tone, panel) at the spec's tone ratio; border = tone.
     let fill = solid_surface
@@ -80,7 +81,7 @@ pub fn remediation_banner(
         .unwrap_or_else(|| mix_srgb(tone_color, panel, spec.fill_tone_ratio()));
     let border = solid_surface
         .map(|surface| surface.border)
-        .unwrap_or_else(|| theme.resolve_color(spec.border_token()));
+        .unwrap_or_else(|| ctx.theme().resolve_color(spec.border_token()));
     let foreground = solid_surface
         .map(|surface| surface.foreground)
         .unwrap_or(text_primary);
@@ -89,17 +90,17 @@ pub fn remediation_banner(
     // ── Dimensions ──
     // Radius / border-width resolve from tokens; the rest are contract-exact
     // rem values (no semantic token exists for them).
-    let radius = theme.resolve_radius(spec.radius_token());
-    let border_width = theme.resolve_border_width(spec.border_width_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let border_width = ctx.theme().resolve_border_width(spec.border_width_token());
     // Typography: title at body size, message at label size (contract §2).
-    let title_size = theme.resolve_space("typography.body.size");
-    let message_size = theme.resolve_space("typography.label.size");
+    let title_size = ctx.theme().resolve_space("typography.body.size");
+    let message_size = ctx.theme().resolve_space("typography.label.size");
     let icon_size = rem_to_px(1.25); // note: contract icon size, no token
-    let pad_x = theme.resolve_space("space.panel.x");
-    let pad_y = theme.resolve_space("space.panel.y");
-    let gap = theme.resolve_space("space.inline.md"); // root row gap (note: approx)
-    let content_gap = theme.resolve_space("space.inline.xs"); // title↔message↔actions
-    let action_gap = theme.resolve_space("space.inline.sm"); // between action buttons
+    let pad_x = ctx.theme().resolve_space("space.panel.x");
+    let pad_y = ctx.theme().resolve_space("space.panel.y");
+    let gap = ctx.theme().resolve_space("space.inline.md"); // root row gap (note: approx)
+    let content_gap = ctx.theme().resolve_space("space.inline.xs"); // title↔message↔actions
+    let action_gap = ctx.theme().resolve_space("space.inline.sm"); // between action buttons
     let dismiss_size = rem_to_px(1.0); // note: contract dismiss size, no token
 
     let mut el = Node::container();
@@ -136,7 +137,7 @@ pub fn remediation_banner(
                 } else {
                     SpinnerTone::Accent
                 }),
-            theme,
+            ctx,
         );
         if let Some(surface) = solid_surface {
             pending_spinner.style.descriptor.text_color = Some(surface.foreground);
@@ -184,7 +185,7 @@ pub fn remediation_banner(
         if let Some(ref primary) = spec.primary_action {
             actions_row = actions_row.child(action_button(
                 primary,
-                theme,
+                ctx,
                 handlers.on_action.as_ref(),
                 instance_id.as_deref(),
                 solid,
@@ -194,7 +195,7 @@ pub fn remediation_banner(
         if let Some(ref secondary) = spec.secondary_action {
             actions_row = actions_row.child(action_button(
                 secondary,
-                theme,
+                ctx,
                 handlers.on_action.as_ref(),
                 handlers.instance_id.as_deref(),
                 solid,
@@ -218,7 +219,7 @@ pub fn remediation_banner(
         dismiss.interaction.focusable = true;
         dismiss.style.focus = Some(StylePatch {
             background: None,
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             text_color: None,
             opacity: None,
         });
@@ -237,7 +238,7 @@ pub fn remediation_banner(
 /// `button` already applies the disabled-opacity token.
 fn action_button(
     action: &RemediationAction,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_action: Option<&Arc<dyn Fn(&str) + Send + Sync>>,
     instance_id: Option<&str>,
     solid: bool,
@@ -253,7 +254,7 @@ fn action_button(
             .with_variant(action.variant)
             .with_label(action.label.clone())
             .with_disabled(action.is_disabled),
-        theme,
+        ctx,
         on_click,
     );
     b.id = Some(format!("remediation-action-{}", action.id));
@@ -293,6 +294,8 @@ mod tests {
 
     #[test]
     fn action_and_dismiss_controls_reach_host_handlers() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let seen = Arc::new(Mutex::new(Vec::new()));
         let action_seen = Arc::clone(&seen);
         let dismiss_seen = Arc::clone(&seen);
@@ -303,7 +306,7 @@ mod tests {
             .with_dismissible(true);
         let node = remediation_banner(
             &spec,
-            &theme(),
+            &ctx,
             RemediationBannerHandlers {
                 on_action: Some(Arc::new(move |id| {
                     action_seen.lock().unwrap().push(id.to_string())
@@ -332,6 +335,8 @@ mod tests {
 
     #[test]
     fn an_instance_scope_isolates_backend_state_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = RemediationBannerSpec::new("Save failed", "Try again.")
             .with_primary_action(
                 RemediationAction::new("retry", "Retry").with_variant(ButtonVariant::Primary),
@@ -341,8 +346,8 @@ mod tests {
             instance_id: Some(scope.to_string()),
             ..RemediationBannerHandlers::default()
         };
-        let first = remediation_banner(&spec, &theme(), scoped_handlers("first"));
-        let second = remediation_banner(&spec, &theme(), scoped_handlers("second"));
+        let first = remediation_banner(&spec, &ctx, scoped_handlers("first"));
+        let second = remediation_banner(&spec, &ctx, scoped_handlers("second"));
         let action = remediation_banner_action_focus_id(Some("first"), "retry");
         let dismiss = remediation_banner_dismiss_focus_id(Some("first"));
         assert!(first
@@ -367,17 +372,18 @@ mod tests {
     #[test]
     fn solid_pending_banner_uses_primary_spinner_and_local_secondary_recipe() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = RemediationBannerSpec::new("Reconnecting", "Please wait.")
             .with_tone(StatusTone::Pending)
             .with_fill(ToneFill::Solid)
             .with_secondary_action(RemediationAction::new("details", "View details"));
         let expected = solid_tone_surface(
-            &theme,
-            theme.resolve_color(spec.border_token()),
+            &ctx,
+            poodle_adapter::ThemeProvider::resolve_color(&theme, spec.border_token()),
             false,
             0.24,
         );
-        let node = remediation_banner(&spec, &theme, RemediationBannerHandlers::default());
+        let node = remediation_banner(&spec, &ctx, RemediationBannerHandlers::default());
 
         assert_eq!(node.style.descriptor.background, Some(expected.background));
         assert_eq!(node.style.descriptor.border.color, expected.border);

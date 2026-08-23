@@ -3,7 +3,6 @@
 //! Contract: `docs/contracts/components/avatar.md`
 //! Ported from: `packages/jetstream/components/src/avatar.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
     NodeRole,
@@ -11,23 +10,24 @@ use poodle_node::{
 use poodle_specs::AvatarSpec;
 
 use crate::color::mix_srgb;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn avatar(spec: &AvatarSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn avatar(spec: &AvatarSpec, ctx: &RenderContext<'_>) -> Node {
     let size = rem_to_px(spec.size_rem());
     let font_size = rem_to_px(spec.font_size_rem());
 
     // Tone colours via the spec token targets + mix ratio (contract §3). The
     // old tier's color_mix works in sRGB space, same as every state recipe.
-    let base = theme.resolve_color(spec.background_base_token());
-    let mix = theme.resolve_color(spec.background_mix_token());
+    let base = ctx.theme().resolve_color(spec.background_base_token());
+    let mix = ctx.theme().resolve_color(spec.background_mix_token());
     let bg = mix_srgb(base, mix, spec.background_mix_ratio());
-    let fg = theme.resolve_color(spec.color_token());
+    let fg = ctx.theme().resolve_color(spec.color_token());
 
     let radius = if spec.is_circle() {
         rem_to_px(spec.circle_radius_rem())
     } else {
-        theme.resolve_radius(spec.radius_token())
+        ctx.theme().resolve_radius(spec.radius_token())
     };
 
     let mut root = Node::container();

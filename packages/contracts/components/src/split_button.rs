@@ -44,7 +44,7 @@ impl SplitMenuItem {
 pub struct SplitButtonSpec {
     pub variant: ButtonVariant,
     pub tone: ButtonTone,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub label: Option<String>,
     pub items: Vec<SplitMenuItem>,
     pub is_disabled: bool,
@@ -56,7 +56,7 @@ pub struct SplitButtonSpec {
     pub aria_label: Option<String>,
     pub menu_aria_label: String,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for SplitButtonSpec {
@@ -64,7 +64,7 @@ impl Default for SplitButtonSpec {
         Self {
             variant: ButtonVariant::Secondary,
             tone: ButtonTone::Default,
-            size: ControlSize::Md,
+            size: None,
             label: None,
             items: Vec::new(),
             is_disabled: false,
@@ -74,7 +74,7 @@ impl Default for SplitButtonSpec {
             aria_label: None,
             menu_aria_label: "More actions".to_string(),
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -95,7 +95,7 @@ impl SplitButtonSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -167,8 +167,8 @@ impl SplitButtonSpec {
         semantic::ELEVATION_OVERLAY
     }
 
-    pub fn control_height_token(&self) -> &'static str {
-        self.size.control_height_token()
+    pub fn control_height_token(&self, size: ControlSize) -> &'static str {
+        size.control_height_token()
     }
 
     pub fn radius_token(&self) -> &'static str {
@@ -185,7 +185,7 @@ impl SplitButtonSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

@@ -5,13 +5,13 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodePosition, StylePatch,
 };
 use poodle_specs::SidebarNavSpec;
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 // ── Active-state alpha factors (contract color-mix percentages) ──
@@ -23,39 +23,43 @@ const SEPARATOR_ALPHA: f32 = 0.54; // border-subtle @ 54%
 /// `on_change` fires with the value of the item that was chosen.
 pub fn sidebar_nav(
     spec: &SidebarNavSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     // ── Size / density geometry (contract §8 tables, token-resolved rem) ──
-    let item_height = rem_to_px(spec.item_height_rem());
-    let item_font = rem_to_px(spec.item_font_rem());
-    let title_font = rem_to_px(spec.title_font_rem());
+    // The sidebar's size tables key off the raw (base) size, not the
+    // chrome-role-resolved size — matching Svelte's `[data-size]` CSS.
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let item_height = rem_to_px(spec.item_height_rem(base_size));
+    let item_font = rem_to_px(spec.item_font_rem(base_size));
+    let title_font = rem_to_px(spec.title_font_rem(base_size));
 
-    let group_gap = rem_to_px(spec.group_gap_rem());
-    let item_px = rem_to_px(spec.item_pad_inline_rem());
-    let title_gap = rem_to_px(spec.title_gap_rem());
+    let group_gap = rem_to_px(spec.group_gap_rem(density));
+    let item_px = rem_to_px(spec.item_pad_inline_rem(density));
+    let title_gap = rem_to_px(spec.title_gap_rem(density));
     let group_internal_gap = rem_to_px(0.3125); // contract group `gap`
     let list_gap = rem_to_px(0.125); // contract list `gap`
     let separator_mt = rem_to_px(0.125); // contract separator margin-top
     let rail_w = rem_to_px(0.1875); // contract left border 3px
     let nav_pad_x = rem_to_px(0.375); // contract root horizontal padding
                                       // Root vertical padding = space-panel-y (density-driven).
-    let panel_y = rem_to_px(match spec.density {
+    let panel_y = rem_to_px(match density {
         poodle_specs::ControlDensity::Compact => 0.5,
         poodle_specs::ControlDensity::Default => 0.75,
         poodle_specs::ControlDensity::Comfortable => 1.0,
     });
 
     // ── Token resolution ──────────────────────────────────────
-    let item_color = theme.resolve_color(spec.item_color_token());
-    let item_active_color = theme.resolve_color(spec.item_active_color_token());
-    let group_title_color = theme.resolve_color(spec.group_title_color_token());
-    let separator_color = theme.resolve_color(spec.separator_color_token());
-    let accent = theme.resolve_color(spec.active_indicator_color_token());
-    let hover_fill = theme.resolve_color(spec.hover_fill_token());
-    let focus_ring = theme.resolve_color(spec.focus_ring_color_token());
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
-    let ctrl_radius = theme.resolve_radius("radius.control");
+    let item_color = ctx.theme().resolve_color(spec.item_color_token());
+    let item_active_color = ctx.theme().resolve_color(spec.item_active_color_token());
+    let group_title_color = ctx.theme().resolve_color(spec.group_title_color_token());
+    let separator_color = ctx.theme().resolve_color(spec.separator_color_token());
+    let accent = ctx.theme().resolve_color(spec.active_indicator_color_token());
+    let hover_fill = ctx.theme().resolve_color(spec.hover_fill_token());
+    let focus_ring = ctx.theme().resolve_color(spec.focus_ring_color_token());
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
+    let ctrl_radius = ctx.theme().resolve_radius("radius.control");
     let item_radius = (ctrl_radius - rem_to_px(0.125)).max(0.0);
 
     let active_bg = with_alpha(accent, accent.3 * ACTIVE_BG_ALPHA);

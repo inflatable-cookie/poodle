@@ -12,12 +12,12 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CursorHint, LayoutDirection, Node};
 use poodle_specs::{CardSpec, CardToggleGroupSpec};
 
 use crate::card::card;
-use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::{control_space_x_rem, rem_to_px};
 
 fn flex1_cell() -> Node {
     let mut n = Node::container();
@@ -31,17 +31,19 @@ fn flex1_cell() -> Node {
 
 pub fn card_toggle_group(
     spec: &CardToggleGroupSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let theme = ctx.theme();
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // Contract §7 size scale — via the spec helpers.
     let title_font = rem_to_px(CardToggleGroupSpec::title_font_rem(effective_size));
     let description_font = rem_to_px(CardToggleGroupSpec::description_font_rem(effective_size));
 
     // Density-driven grid gap (contract §7 density table) + Card body rhythm.
-    let grid_gap = rem_to_px(control_space_x_rem(spec.density));
+    let grid_gap = rem_to_px(control_space_x_rem(density));
     let body_gap = rem_to_px(0.25);
 
     let text_primary = theme.resolve_color("color.text.primary");
@@ -85,7 +87,7 @@ pub fn card_toggle_group(
         let mut body_slot = Node::container();
         body_slot.style.descriptor.layout.direction = LayoutDirection::Row;
         body_slot.style.flex_grow = Some(1.0);
-        let option_card = card(&card_spec, theme, vec![body_slot.child(body)]);
+        let option_card = card(&card_spec, ctx, vec![body_slot.child(body)]);
 
         // Wrap each Card so it can grow within the grid. The cell is the
         // focusable activation target; a disabled option dims and shows the
@@ -148,6 +150,7 @@ pub fn card_toggle_group(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_adapter::ThemeProvider;
     use poodle_specs::CardToggleOption;
 
     /// The real token resolver over the ECLIPSE theme. Pure — no backend.
@@ -187,9 +190,11 @@ mod tests {
             (poodle_specs::ControlDensity::Default, 12.0),
             (poodle_specs::ControlDensity::Comfortable, 16.0),
         ];
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         for (density, expected) in cases {
             let spec = CardToggleGroupSpec::new(options()).with_density(density);
-            let node = card_toggle_group(&spec, &theme(), None);
+            let node = card_toggle_group(&spec, &ctx, None);
             assert_eq!(
                 node.style.descriptor.layout.spacing.gap, expected,
                 "root gap for {density:?}"
@@ -214,11 +219,12 @@ mod tests {
             (poodle_specs::ControlSize::Xl, 18.0, 15.0),
         ];
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let text_primary = theme.resolve_color("color.text.primary");
         let text_secondary = theme.resolve_color("color.text.secondary");
         for (size, expected_title, expected_description) in cases {
             let spec = CardToggleGroupSpec::new(options()).with_size(size);
-            let node = card_toggle_group(&spec, &theme, None);
+            let node = card_toggle_group(&spec, &ctx, None);
 
             let title = node
                 .find(
@@ -253,9 +259,10 @@ mod tests {
     #[test]
     fn selected_card_carries_the_accent_border_and_option_label() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let accent = theme.resolve_color("color.accent.base");
         let spec = CardToggleGroupSpec::new(options()).with_values(vec!["alpha".to_string()]);
-        let node = card_toggle_group(&spec, &theme, None);
+        let node = card_toggle_group(&spec, &ctx, None);
 
         // Each card is labelled with its option title; selection owns the
         // border through the composed Card primitive.
@@ -277,7 +284,9 @@ mod tests {
         let on_change: Arc<dyn Fn(&str) + Send + Sync> =
             Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()));
         let spec = CardToggleGroupSpec::new(options());
-        let node = card_toggle_group(&spec, &theme(), Some(on_change));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = card_toggle_group(&spec, &ctx, Some(on_change));
 
         let cells = cells(&node);
         assert_eq!(cells.len(), 3, "one focusable cell per option");
@@ -295,7 +304,9 @@ mod tests {
 
     #[test]
     fn enabled_options_keep_the_old_tiers_pointer_without_a_handler() {
-        let node = card_toggle_group(&CardToggleGroupSpec::new(options()), &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = card_toggle_group(&CardToggleGroupSpec::new(options()), &ctx, None);
         assert!(cells(&node)
             .iter()
             .all(|cell| cell.style.descriptor.cursor == CursorHint::Pointer));
@@ -304,11 +315,12 @@ mod tests {
     #[test]
     fn a_disabled_option_dims_and_shows_the_not_allowed_cursor() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
         let mut opts = options();
         opts[2] = opts[2].clone().with_disabled(true);
         let spec = CardToggleGroupSpec::new(opts);
-        let node = card_toggle_group(&spec, &theme, Some(Arc::new(|_: &str| {})));
+        let node = card_toggle_group(&spec, &ctx, Some(Arc::new(|_: &str| {})));
 
         let cells = cells(&node);
         let gamma = cells
@@ -333,9 +345,10 @@ mod tests {
     #[test]
     fn a_disabled_group_dims_the_root_and_wires_nothing() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
         let spec = CardToggleGroupSpec::new(options()).with_disabled(true);
-        let node = card_toggle_group(&spec, &theme, Some(Arc::new(|_: &str| {})));
+        let node = card_toggle_group(&spec, &ctx, Some(Arc::new(|_: &str| {})));
         assert_eq!(node.style.descriptor.opacity, disabled_opacity);
         assert!(cells(&node)
             .iter()
@@ -347,7 +360,9 @@ mod tests {
         // 3 options in 2 columns: rows of 2 and 1, the short row padded so
         // card widths stay aligned across rows.
         let spec = CardToggleGroupSpec::new(options()).with_columns(2);
-        let node = card_toggle_group(&spec, &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = card_toggle_group(&spec, &ctx, None);
         assert_eq!(node.children.len(), 2, "two rows");
         assert_eq!(node.children[0].children.len(), 2, "full first row");
         assert_eq!(node.children[1].children.len(), 2, "padded second row");

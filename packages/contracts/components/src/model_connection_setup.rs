@@ -44,9 +44,9 @@ pub struct ModelConnectionSetupSpec {
     pub back_label: String,
     pub cancel_label: String,
     pub aria_label: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for ModelConnectionSetupSpec {
@@ -69,9 +69,9 @@ impl Default for ModelConnectionSetupSpec {
             back_label: "Back".to_string(),
             cancel_label: "Cancel".to_string(),
             aria_label: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -167,7 +167,7 @@ impl ModelConnectionSetupSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -177,7 +177,7 @@ impl ModelConnectionSetupSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

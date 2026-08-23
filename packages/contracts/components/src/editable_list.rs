@@ -63,9 +63,9 @@ pub struct EditableListSpec {
     pub submit_label: String,
     /// Cancel button label when workflow chrome is shown.
     pub cancel_label: String,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// The rows themselves. The spec used to carry only `item_count`, which is
     /// enough to size a list and not enough to draw one — a native target had
     /// no way to reach the labels.
@@ -121,9 +121,9 @@ impl EditableListSpec {
             window_size: None,
             submit_label: String::from("Save Order"),
             cancel_label: String::from("Cancel"),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
             items: Vec::new(),
             has_embedded_handle: false,
             shows_workflow_chrome: true,
@@ -282,7 +282,7 @@ impl EditableListSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -292,7 +292,7 @@ impl EditableListSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

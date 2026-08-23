@@ -1,7 +1,7 @@
 # g15.043 — UiPresentationProvider Native Cascade
 
-Status: **ready — operator approved the atomic pre-v1 Rust API migration on
-2026-08-23**
+Status: **implemented — worker PR open for orchestrator review (2026-08-23)**;
+execution log: `../logs/2026-08/20260823-g15-043-ui-presentation-provider-native-cascade.md`
 Found by: `g15.009`, retained by `g15.026`
 Depends on: `../../architecture/010-native-presentation-construction-context.md`
 Unblocks: `g15.050`, then `g15.013`
@@ -161,29 +161,29 @@ conformance lab, or unrelated triage work.
 
 ## Acceptance
 
-- [ ] Every public shared component renderer receives `RenderContext`; one
+- [x] Every public shared component renderer receives `RenderContext`; one
       token-only `ThemeProvider` remains behind it.
-- [ ] Every native semantic component size/density input preserves omission;
+- [x] Every native semantic component size/density input preserves omission;
       explicit `md` / `default` wins under non-default providers.
-- [ ] Root, outer, nested, sibling-restoration, and explicit-reset resolver
+- [x] Root, outer, nested, sibling-restoration, and explicit-reset resolver
       laws have focused tests.
-- [ ] Real shared output proves inherited size and density on Button and
+- [x] Real shared output proves inherited size and density on Button and
       TextInput plus one descendant-building composite and one scoped host
       slot.
-- [ ] The 14 internal-provider owners have an evidence-backed native audit;
+- [x] The 14 internal-provider owners have an evidence-backed native audit;
       every real native boundary passes context during construction.
-- [ ] UiPresentationProvider returns its exact child with no wrapper Node,
+- [x] UiPresentationProvider returns its exact child with no wrapper Node,
       layout delta, paint, role, focus target, tab stop, or accessibility
       group.
-- [ ] The GPUI specimen demonstrates real cascade rather than manually copying
+- [x] The GPUI specimen demonstrates real cascade rather than manually copying
       provider values into child specs.
-- [ ] Mounted headless GPUI evidence observes the expected geometry and
+- [x] Mounted headless GPUI evidence observes the expected geometry and
       unchanged accessibility surface without opening or focusing a window.
-- [ ] The standing source audit catches planted concrete-field, bare-renderer,
+- [x] The standing source audit catches planted concrete-field, bare-renderer,
       and preview-passthrough regressions, and runs in the native board.
-- [ ] Current Rust callers compile on the new API with no compatibility twin;
+- [x] Current Rust callers compile on the new API with no compatibility twin;
       any Jetstream change is mechanical and makes no parity claim.
-- [ ] Contract, architecture, GPUI guide, gap register, card, and execution log
+- [x] Contract, architecture, GPUI guide, gap register, card, and execution log
       agree.
 
 ## Validation

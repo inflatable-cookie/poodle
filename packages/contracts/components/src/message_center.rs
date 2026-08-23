@@ -148,9 +148,9 @@ pub struct MessageCenterSpec {
     pub placement: OverlayPlacement,
     pub empty_title: String,
     pub empty_message: String,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for MessageCenterSpec {
@@ -166,9 +166,9 @@ impl Default for MessageCenterSpec {
             placement: OverlayPlacement::BottomEnd,
             empty_title: "No messages".into(),
             empty_message: "New messages will appear here.".into(),
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -217,7 +217,7 @@ impl MessageCenterSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -227,7 +227,7 @@ impl MessageCenterSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 

@@ -5,6 +5,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use poodle_render::RenderContext;
 use poodle_specs::ShellStatusBarSpec;
 use poodle_specs::{EyebrowSpec, StatusIndicatorSpec, StatusTone};
 
@@ -17,10 +18,11 @@ fn leading_items(theme: &GpuiThemeProvider) -> CompatRow {
     let diagnostics = StatusIndicatorSpec::new()
         .with_status(StatusTone::Success)
         .with_label("0 errors");
+    let ctx = RenderContext::new(theme);
     CompatRow::new()
         .gap(8.0)
-        .child(poodle_render::status_indicator(&branch, theme))
-        .child(poodle_render::status_indicator(&diagnostics, theme))
+        .child(poodle_render::status_indicator(&branch, &ctx))
+        .child(poodle_render::status_indicator(&diagnostics, &ctx))
 }
 
 /// Trailing cursor/encoding/language metadata. Plain text children that inherit

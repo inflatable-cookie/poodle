@@ -10,7 +10,6 @@
 //! the shared grid spinner. Root + region stacking gap = `space.stack.lg`.
 //! Scroll ownership is expressed with overflow-scroll on the chosen region.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
 };
@@ -18,6 +17,7 @@ use poodle_specs::{DetailShellSpec, DetailState, ScrollOwner};
 use poodle_specs::{SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::color::mix_srgb;
+use crate::context::RenderContext;
 use crate::spinner::spinner;
 
 /// Build the DetailShell.
@@ -26,11 +26,12 @@ use crate::spinner::spinner;
 /// is an optional custom state-region slot (overrides the default state copy).
 pub fn detail_shell(
     spec: &DetailShellSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     header: Option<Node>,
     content: Option<Node>,
     state_content: Option<Node>,
 ) -> Node {
+    let theme = ctx.theme();
     let bg = theme.resolve_color(spec.body_fill_token());
     // Contract §9: root + region stacking gap = space.stack.lg.
     let stack_gap = theme.resolve_space(spec.stack_gap_token());
@@ -165,7 +166,7 @@ pub fn detail_shell(
                         .with_variant(SpinnerVariant::Grid)
                         .with_size(SpinnerSize::Md)
                         .with_tone(SpinnerTone::Accent),
-                    theme,
+                    ctx,
                 ));
                 region = region.child(loading);
             }
@@ -197,15 +198,17 @@ pub fn detail_shell(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_adapter::ThemeProvider;
 
     #[test]
     fn loading_shell_keeps_the_header_rule_and_grid_spinner_row() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
         let spec = DetailShellSpec::new()
             .with_title("Loading")
             .with_state(DetailState::Loading);
-        let node = detail_shell(&spec, &theme, None, None, None);
+        let node = detail_shell(&spec, &ctx, None, None, None);
 
         let header = &node.children[0];
         assert_eq!(header.style.border_bottom_width, Some(1.0));

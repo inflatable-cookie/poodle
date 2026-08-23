@@ -8,7 +8,6 @@
 //! that renders each block by its type. Block payloads are consumer-owned.
 //! Interactivity is host-bound; the controls render at the current spec state.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node,
@@ -19,7 +18,8 @@ use poodle_specs::{
 };
 
 use crate::color::with_alpha;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::{RenderContext, SlotBuilder};
+use crate::presentation::rem_to_px;
 use crate::select::{select, SelectHandlers};
 
 /// Contract `--poodle-block-editor-control-size` per size (rem).
@@ -87,7 +87,7 @@ fn build_type_select(
     spec: &BlockEditorSpec,
     value: Option<&str>,
     disabled: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     let options: Vec<ChoiceOption> = spec
         .block_types
@@ -100,16 +100,16 @@ fn build_type_select(
         variant: SelectVariant::Ghost,
         menu_min_width: Some(String::from("10rem")),
         is_disabled: disabled,
-        size: spec.size,
+        size: Some(ctx.base_size(spec.size)),
         size_role: spec.size_role,
-        density: spec.density,
+        density: Some(ctx.resolve_density(spec.density)),
         ..SelectSpec::default()
     };
     if let Some(v) = value {
         sel.value = Some(v.to_string());
     }
 
-    select(&sel, theme, &SelectHandlers::default())
+    select(&sel, ctx, &SelectHandlers::default())
 }
 
 /// Render a single block's content by its type. Unknown types fall back to
@@ -209,24 +209,33 @@ fn render_block_content(
     }
 }
 
-pub fn block_editor(spec: &BlockEditorSpec, theme: &dyn ThemeProvider) -> Node {
-    block_editor_with_children(spec, theme, Vec::new())
+pub fn block_editor(spec: &BlockEditorSpec, ctx: &RenderContext<'_>) -> Node {
+    block_editor_with_children(spec, ctx, Vec::new())
 }
 
 /// Block editor with caller-owned block bodies.
 ///
 /// The spec drives blocks whenever `spec.blocks` is non-empty; `children` is
-/// the escape hatch for consumers that own their block vocabulary and hand
-/// over already-rendered bodies. Each child is wrapped in the same block shell
-/// so spacing and background stay contract-consistent, but without a toolbar —
-/// there is no block-type metadata to drive the selects. Ignored when the spec
-/// carries blocks.
+/// the escape hatch for consumers that own their block vocabulary. The web
+/// pair renders the `block` snippet inside the component's
+/// UiPresentationProvider scope (BlockEditor.svelte), so each child arrives as
+/// an immediate builder invoked with that scope — never a prebuilt node.
+/// Each built child is wrapped in the same block shell so spacing and
+/// background stay contract-consistent, but without a toolbar — there is no
+/// block-type metadata to drive the selects. Ignored when the spec carries
+/// blocks.
 pub fn block_editor_with_children(
     spec: &BlockEditorSpec,
-    theme: &dyn ThemeProvider,
-    children: Vec<Node>,
+    ctx: &RenderContext<'_>,
+    children: Vec<SlotBuilder<'_>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let theme = ctx.theme();
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
+    // The web provider publishes the role-resolved size and resolved density;
+    // host block bodies build inside that scope.
+    let host_scope = ctx.scoped(effective_size, density);
+    let children: Vec<Node> = children.into_iter().map(|build| build(&host_scope)).collect();
 
     // ── Resolve chrome from tokens / contract recipe rems ───────────────────
     let fill = theme.resolve_color(spec.fill_token());
@@ -238,8 +247,7 @@ pub fn block_editor_with_children(
     let accent = theme.resolve_color("color.accent.base");
 
     let control_size = rem_to_px(control_size_rem(effective_size));
-    let (toolbar_y, toolbar_x, content_x, content_y, stack_gap, input_x) =
-        density_recipe(spec.density);
+    let (toolbar_y, toolbar_x, content_x, content_y, stack_gap, input_x) = density_recipe(density);
     let toolbar_y = rem_to_px(toolbar_y);
     let toolbar_x = rem_to_px(toolbar_x);
     let content_x = rem_to_px(content_x);
@@ -317,7 +325,7 @@ pub fn block_editor_with_children(
                 spec,
                 Some(&block.block_type),
                 disabled,
-                theme,
+                ctx,
             )));
         }
 
@@ -366,7 +374,7 @@ pub fn block_editor_with_children(
                     radius_control,
                     disabled,
                 ))
-                .child(add_wrap.child(build_type_select(spec, None, disabled, theme)));
+                .child(add_wrap.child(build_type_select(spec, None, disabled, ctx)));
         }
 
         if can_remove && block_count > 1 {

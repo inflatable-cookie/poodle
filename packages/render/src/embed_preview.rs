@@ -7,33 +7,33 @@
 //! fallback. Live iframes are a host gap; the parsed-media state renders a
 //! contract-sanctioned placeholder panel honoring the effective aspect ratio.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
 };
 use poodle_specs::{EmbedPreviewSpec, SkeletonSpec, TextLinkSpec};
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::skeleton::skeleton;
 use crate::text_link::text_link;
 
-pub fn embed_preview(spec: &EmbedPreviewSpec, theme: &dyn ThemeProvider) -> Node {
-    let panel_bg = theme.resolve_color(spec.fill_token()); // background-panel
-    let radius = theme.resolve_radius("radius.surface");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_tertiary = theme.resolve_color("color.text.tertiary");
-    let danger_color = theme.resolve_color("color.status.danger");
+pub fn embed_preview(spec: &EmbedPreviewSpec, ctx: &RenderContext<'_>) -> Node {
+    let panel_bg = ctx.theme().resolve_color(spec.fill_token()); // background-panel
+    let radius = ctx.theme().resolve_radius("radius.surface");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let text_tertiary = ctx.theme().resolve_color("color.text.tertiary");
+    let danger_color = ctx.theme().resolve_color("color.status.danger");
 
     // Contract §7 sizing. gap 0.5rem → space.inline.sm; text 0.8125rem →
     // typography.label.size; fallback padding 0.75rem/1rem → space.panel.y / .x.
     // min-h 8rem, padding 1.5rem, icon 2rem have no exact named token — exact rem.
-    let state_gap = theme.resolve_space("space.inline.sm");
-    let text_size = theme.resolve_space("typography.label.size");
+    let state_gap = ctx.theme().resolve_space("space.inline.sm");
+    let text_size = ctx.theme().resolve_space("typography.label.size");
     let state_min_h = rem_to_px(8.0);
     let state_pad = rem_to_px(1.5);
     let icon_2rem = rem_to_px(2.0);
-    let fallback_pad_y = theme.resolve_space("space.panel.y");
-    let fallback_pad_x = theme.resolve_space("space.panel.x");
+    let fallback_pad_y = ctx.theme().resolve_space("space.panel.y");
+    let fallback_pad_x = ctx.theme().resolve_space("space.panel.x");
 
     let all_radius = |node: &mut Node, r: f32| {
         let c = &mut node.style.descriptor.corner_radii;
@@ -87,7 +87,7 @@ pub fn embed_preview(spec: &EmbedPreviewSpec, theme: &dyn ThemeProvider) -> Node
     if spec.is_loading {
         return root().child(
             state_column()
-                .child(skeleton(&SkeletonSpec::new().with_shape("block"), theme))
+                .child(skeleton(&SkeletonSpec::new().with_shape("block"), ctx))
                 .child(label("Loading preview...".to_string(), text_secondary)),
         );
     }
@@ -224,7 +224,7 @@ pub fn embed_preview(spec: &EmbedPreviewSpec, theme: &dyn ThemeProvider) -> Node
     all_radius(&mut fallback, radius);
     root().child(fallback.child(text_link(
         &TextLinkSpec::new(href.clone()).with_href(href),
-        theme,
+        ctx,
         None,
     )))
 }

@@ -8,22 +8,22 @@
 //! Content [Title?, Message] → optional Action (Button). No leading icon part
 //! exists in the contract.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::{ButtonSpec, InlineRemediationSpec};
 
 use crate::button::button;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn inline_remediation(spec: &InlineRemediationSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn inline_remediation(spec: &InlineRemediationSpec, ctx: &RenderContext<'_>) -> Node {
     // Contract §6 Border: tone → color.status.* (from border_token()).
-    let border = theme.resolve_color(spec.border_token());
-    let text_primary = theme.resolve_color("color.text.primary");
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
     // Contract §2 Message → text-secondary.
-    let text_secondary = theme.resolve_color("color.text.secondary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
 
     // Contract §6 Root gap: title-to-message vertical gap = space.stack.sm.
-    let content_gap = theme.resolve_space(spec.gap_token());
+    let content_gap = ctx.theme().resolve_space(spec.gap_token());
     // Title (typography-label) / message (typography-body) / hint sizes.
     let title_size = rem_to_px(0.8125);
     let message_size = rem_to_px(0.8125);
@@ -32,7 +32,7 @@ pub fn inline_remediation(spec: &InlineRemediationSpec, theme: &dyn ThemeProvide
     let accent_border_w = rem_to_px(0.125);
     let pad_x = rem_to_px(0.75);
     let pad_y = rem_to_px(0.5);
-    let row_gap = theme.resolve_space(spec.gap_token());
+    let row_gap = ctx.theme().resolve_space(spec.gap_token());
 
     // Root <aside>: tone-colored LEFT border only (contract §2), no fill tint
     // (contract §6 lists no background-fill token).
@@ -97,7 +97,7 @@ pub fn inline_remediation(spec: &InlineRemediationSpec, theme: &dyn ThemeProvide
                 .with_variant(action.variant)
                 .with_label(action.label.clone())
                 .with_disabled(action.is_disabled),
-            theme,
+            ctx,
             None,
         );
         btn.id = Some(format!("inline-remediation-action:{}", action.id));

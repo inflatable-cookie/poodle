@@ -7,8 +7,9 @@
 //! same recipe is a plain componentwise lerp — bit-equivalent, asserted by
 //! the Jetstream adapter's draw-command parity suite.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::ColorValue;
+
+use crate::context::RenderContext;
 
 /// Resolved colors for the shared solid tone surface recipe.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -21,11 +22,12 @@ pub struct SolidToneSurface {
 /// Resolve the shared solid treatment by promoting the tint border colour to
 /// one continuous fill-and-border surface.
 pub fn solid_tone_surface(
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     tone_base: ColorValue,
     is_neutral: bool,
     tint_border_mix: f32,
 ) -> SolidToneSurface {
+    let theme = ctx.theme();
     let text_primary = theme.resolve_color("color.text.primary");
     let background = if is_neutral {
         with_alpha(
@@ -181,8 +183,9 @@ mod tests {
 
         for definition in themes {
             let provider = JetstreamThemeProvider::from_theme(definition);
+            let ctx = RenderContext::new(&provider);
             let neutral = solid_tone_surface(
-                &provider,
+                &ctx,
                 provider.resolve_color("color.text.secondary"),
                 true,
                 0.34,
@@ -201,7 +204,7 @@ mod tests {
 
             for token in tone_tokens {
                 let surface =
-                    solid_tone_surface(&provider, provider.resolve_color(token), false, 0.34);
+                    solid_tone_surface(&ctx, provider.resolve_color(token), false, 0.34);
                 assert_eq!(surface.border, surface.background);
                 let effective_background = composite_over(
                     surface.background,
@@ -220,7 +223,7 @@ mod tests {
             }
 
             let accent = solid_tone_surface(
-                &provider,
+                &ctx,
                 provider.resolve_color("color.accent.base"),
                 false,
                 0.24,

@@ -270,7 +270,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         TextInputSpec::new().with_placeholder("My project"),
                         theme,
                     )
-                    .with_id("dialog-form-name"),
+                    .with_id("dialog-form-name")
+                    .into_slot(),
                 )
                 .into_compat_node(),
             column(
@@ -296,7 +297,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         TextInputSpec::new().with_placeholder("What is this project for?"),
                         theme,
                     )
-                    .with_id("dialog-form-description"),
+                    .with_id("dialog-form-description")
+                    .into_slot(),
                 )
                 .into_compat_node(),
             Checkbox::from_spec(

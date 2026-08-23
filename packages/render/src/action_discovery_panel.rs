@@ -10,7 +10,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, MainAxisAlignment, Node, NodeRole,
     ShadowLayer, StylePatch,
@@ -22,9 +21,10 @@ use poodle_specs::{
 };
 
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 use crate::empty_state::empty_state;
 use crate::eyebrow::eyebrow;
-use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{control_space_x_rem, rem_to_px, size_font_rem};
 use crate::skeleton::skeleton;
 
 /// Per-size chip dimensions (`chip-height`, `chip-x`, `chip-font-size`) for
@@ -91,32 +91,33 @@ fn scoped(instance_id: Option<&str>, action_id: &str) -> Option<String> {
 
 pub fn action_discovery_panel(
     spec: &ActionDiscoveryPanelSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: ActionDiscoveryPanelHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let item_gap = rem_to_px(control_space_x_rem(spec.density));
+    let item_gap = rem_to_px(control_space_x_rem(density));
     let (row_x_rem, row_y_rem) = row_pad_rem(effective_size);
     let row_x = rem_to_px(row_x_rem);
     let row_y = rem_to_px(row_y_rem);
     let (chip_h, chip_x, chip_font) = chip_dims(effective_size);
-    let chip_gap = rem_to_px(chip_gap_rem(spec.density));
-    let skeleton_pad = rem_to_px(skeleton_pad_rem(spec.density));
+    let chip_gap = rem_to_px(chip_gap_rem(density));
+    let skeleton_pad = rem_to_px(skeleton_pad_rem(density));
     let group_gap = rem_to_px(0.375);
     let list_gap = rem_to_px(0.25);
 
-    let gap = theme.resolve_space(spec.gap_token());
-    let radius_control = theme.resolve_radius("radius.control");
+    let gap = ctx.theme().resolve_space(spec.gap_token());
+    let radius_control = ctx.theme().resolve_radius("radius.control");
 
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let accent = theme.resolve_color("color.accent.base");
-    let elevated = theme.resolve_color("color.background.elevated");
-    let surface = theme.resolve_color("color.background.surface");
-    let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
-    let label_size = theme.resolve_space("typography.label.size");
-    let caption_size = theme.resolve_space("typography.caption.size");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let disabled_opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
+    let label_size = ctx.theme().resolve_space("typography.label.size");
+    let caption_size = ctx.theme().resolve_space("typography.caption.size");
 
     // Active-item accent treatment (contract §9):
     //   bg   = accent 18% over background-elevated
@@ -157,11 +158,11 @@ pub fn action_discovery_panel(
             for _ in 0..5 {
                 let wide = skeleton(
                     &SkeletonSpec::new().with_width("48%").with_animated(true),
-                    theme,
+                    ctx,
                 );
                 let narrow = skeleton(
                     &SkeletonSpec::new().with_width("20%").with_animated(true),
-                    theme,
+                    ctx,
                 );
                 // Skeleton width strings like "48%" aren't parsed by skeleton
                 // (rem/px only); express the proportions via flex sizing.
@@ -202,7 +203,7 @@ pub fn action_discovery_panel(
                 &EmptyStateSpec::new("Could not load actions")
                     .with_message("Actions could not be loaded. Try again.")
                     .with_size(EmptyStateSize::Compact),
-                theme,
+                ctx,
             ));
         }
         DiscoveryState::Empty => {
@@ -214,7 +215,7 @@ pub fn action_discovery_panel(
                 &EmptyStateSpec::new(title)
                     .with_message("No actions are available in this context.")
                     .with_size(EmptyStateSize::Compact),
-                theme,
+                ctx,
             ));
         }
         DiscoveryState::NoResults => {
@@ -223,7 +224,7 @@ pub fn action_discovery_panel(
                     .with_message("No actions match the current search.")
                     .with_variant(EmptyStateVariant::Search)
                     .with_size(EmptyStateSize::Compact),
-                theme,
+                ctx,
             ));
         }
         DiscoveryState::Ready => {}
@@ -239,7 +240,7 @@ pub fn action_discovery_panel(
         // Section heading via the Eyebrow primitive.
         section_el = section_el.child(eyebrow(
             &EyebrowSpec::new().with_content(&section.title),
-            theme,
+            ctx,
         ));
 
         // Optional section description.
@@ -435,9 +436,11 @@ mod tests {
 
     #[test]
     fn an_instance_scope_isolates_backend_state_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let first = action_discovery_panel(
             &spec(),
-            &theme(),
+            &ctx,
             ActionDiscoveryPanelHandlers {
                 instance_id: Some("first".to_string()),
                 ..ActionDiscoveryPanelHandlers::default()
@@ -445,7 +448,7 @@ mod tests {
         );
         let second = action_discovery_panel(
             &spec(),
-            &theme(),
+            &ctx,
             ActionDiscoveryPanelHandlers {
                 instance_id: Some("second".to_string()),
                 ..ActionDiscoveryPanelHandlers::default()

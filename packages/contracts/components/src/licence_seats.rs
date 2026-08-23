@@ -26,9 +26,9 @@ pub struct LicenceSeatsSpec {
     pub open_confirm_machine_id: Option<String>,
     /// Host state for the composed per-row EditableLabel.
     pub editing_machine_id: Option<String>,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
 }
 
 impl Default for LicenceSeatsSpec {
@@ -41,9 +41,9 @@ impl Default for LicenceSeatsSpec {
             confirm_release: true,
             open_confirm_machine_id: None,
             editing_machine_id: None,
-            size: ControlSize::Md,
+            size: None,
             size_role: SemanticControlSizeRole::Control,
-            density: ControlDensity::Default,
+            density: None,
         }
     }
 }
@@ -94,7 +94,7 @@ impl LicenceSeatsSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -104,7 +104,7 @@ impl LicenceSeatsSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }

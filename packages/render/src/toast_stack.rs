@@ -10,7 +10,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     AnimEasing, AnimKeyframe, AnimLoop, AnimProperty, CrossAxisAlignment, CursorHint,
     LayoutDirection, LayoutSizing, Node, NodeAnimation, NodePosition, NodeRole, TextAlign,
@@ -18,7 +17,8 @@ use poodle_node::{
 use poodle_specs::{ControlDensity, ControlSize, ToastPosition, ToastStackSpec};
 
 use crate::color::{mix_srgb, WHITE};
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
 /// Host callbacks: dismiss and action, each carrying the toast's id.
 #[derive(Default)]
@@ -104,29 +104,30 @@ fn toast_enter(key: String) -> NodeAnimation {
 
 pub fn toast_stack(
     spec: &ToastStackSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: ToastStackHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let title_px = rem_to_px(title_font_rem(effective_size));
     let message_px = rem_to_px(message_font_rem(effective_size));
     let dismiss_px = rem_to_px(dismiss_size_rem(effective_size));
 
     // Contract §8 toast padding = space-panel-x scaled by density.
-    let base_pad = theme.resolve_space(spec.padding_token());
-    let pad = base_pad * density_pad_scale(spec.density);
+    let base_pad = ctx.theme().resolve_space(spec.padding_token());
+    let pad = base_pad * density_pad_scale(density);
     // Contract §7 stack gap + toast internal gap = space-stack-sm token.
-    let stack_gap = theme.resolve_space(spec.gap_token());
-    let item_gap = theme.resolve_space(spec.gap_token());
+    let stack_gap = ctx.theme().resolve_space(spec.gap_token());
+    let item_gap = ctx.theme().resolve_space(spec.gap_token());
 
-    let elevated = theme.resolve_color(spec.fill_token());
-    let border_default = theme.resolve_color(spec.border_token());
-    let radius_base = theme.resolve_radius(spec.radius_token());
+    let elevated = ctx.theme().resolve_color(spec.fill_token());
+    let border_default = ctx.theme().resolve_color(spec.border_token());
+    let radius_base = ctx.theme().resolve_radius(spec.radius_token());
     // Contract §8: border-radius = calc(radius-surface - 0.125rem).
     let radius = (radius_base - rem_to_px(0.125)).max(0.0);
-    let title_color = theme.resolve_color(spec.title_color_token());
-    let message_color = theme.resolve_color(spec.message_color_token());
-    let dismiss_color = theme.resolve_color(spec.dismiss_color_token());
+    let title_color = ctx.theme().resolve_color(spec.title_color_token());
+    let message_color = ctx.theme().resolve_color(spec.message_color_token());
+    let dismiss_color = ctx.theme().resolve_color(spec.dismiss_color_token());
 
     let mut el = Node::container();
     {
@@ -165,7 +166,7 @@ pub fn toast_stack(
     };
 
     for toast in &spec.toasts {
-        let tone_color = theme.resolve_color(spec.tone_color(&toast.tone));
+        let tone_color = ctx.theme().resolve_color(spec.tone_color(&toast.tone));
 
         // Contract §8 tone treatments:
         //   accent bar = color-mix(tone 94%, white)

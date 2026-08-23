@@ -10,6 +10,7 @@ use poodle_headless::agent_transcript::{
     ChangedFile, ToolCallStatus, TranscriptActivity, TranscriptChangedFiles, TranscriptItem,
     TranscriptMessage, TranscriptToolCall,
 };
+use poodle_render::RenderContext;
 use poodle_specs::{AgentTranscriptSpec, EyebrowSpec};
 
 fn call(id: &str, detail: &str, status: ToolCallStatus) -> TranscriptItem {
@@ -170,14 +171,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     };
 
     let detached_spec = AgentTranscriptSpec::new(long.clone());
+    let ctx = RenderContext::new(theme);
     let detached_content = poodle_render::agent_transcript(
         &detached_spec,
-        theme,
+        &ctx,
         poodle_render::AgentTranscriptHandlers::default(),
     );
     let mut jump_control = poodle_render::agent_transcript::agent_transcript_jump(
         &detached_spec,
-        theme,
+        &ctx,
         Some(state.agent_transcript_scroll.jump_handler()),
     );
     jump_control.id = Some("agent-transcript-jump-control".to_string());

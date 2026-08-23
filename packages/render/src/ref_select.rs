@@ -10,20 +10,21 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::{ControlDensity, ControlSize, RefSelectSpec, RefSelectVariant, TextInputSpec};
 
 use crate::color::with_alpha;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 use crate::text_input::text_input;
 
 pub fn ref_select(
     spec: &RefSelectSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // ── Size table (contract §8) ──────────────────────────────────────────────
     let trigger_h = rem_to_px(match effective_size {
@@ -40,34 +41,34 @@ pub fn ref_select(
         ControlSize::Lg => 0.9375,
         ControlSize::Xl => 1.0,
     });
-    let trigger_gap = rem_to_px(match spec.density {
+    let trigger_gap = rem_to_px(match density {
         ControlDensity::Compact => 0.25,
         ControlDensity::Default => 0.375,
         ControlDensity::Comfortable => 0.5,
     });
 
     // ── Colors ────────────────────────────────────────────────────────────────
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color(spec.secondary_color_token());
-    let muted = theme.resolve_color(spec.muted_color_token());
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color(spec.secondary_color_token());
+    let muted = ctx.theme().resolve_color(spec.muted_color_token());
     let label_color = if spec.has_selection() {
-        theme.resolve_color(spec.label_color_token())
+        ctx.theme().resolve_color(spec.label_color_token())
     } else {
         muted
     };
     // Subdued dims the resting trigger; hover/focus restoration is web-only
     // (contract §12).
     let subdued_opacity = if spec.emphasis.is_subdued() {
-        theme.resolve_opacity(spec.subdued_opacity_token())
+        ctx.theme().resolve_opacity(spec.subdued_opacity_token())
     } else {
         1.0
     };
-    let border = theme.resolve_color(spec.trigger_border_token());
-    let item_border = theme.resolve_color(spec.item_border_token());
-    let surface = theme.resolve_color(spec.trigger_fill_token());
-    let elevated = theme.resolve_color(spec.surface_fill_token());
-    let radius = theme.resolve_radius(spec.radius_token());
-    let surface_radius = theme.resolve_radius(spec.surface_radius_token());
+    let border = ctx.theme().resolve_color(spec.trigger_border_token());
+    let item_border = ctx.theme().resolve_color(spec.item_border_token());
+    let surface = ctx.theme().resolve_color(spec.trigger_fill_token());
+    let elevated = ctx.theme().resolve_color(spec.surface_fill_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let surface_radius = ctx.theme().resolve_radius(spec.surface_radius_token());
 
     let all_radius = |node: &mut Node, r: f32| {
         let c = &mut node.style.descriptor.corner_radii;
@@ -130,7 +131,7 @@ pub fn ref_select(
         if spec.is_searchable {
             let mut search = TextInputSpec::new()
                 .with_size(effective_size)
-                .with_density(spec.density)
+                .with_density(density)
                 .with_disabled(spec.is_disabled);
             if let Some(query) = &spec.search_value {
                 search = search.with_value(query.clone());
@@ -138,7 +139,7 @@ pub fn ref_select(
             search.placeholder = Some(spec.search_placeholder.clone());
             // A search field inside a panel has no visible label of its own.
             search.aria_label = Some("Search references".to_string());
-            panel = panel.child(text_input(&search, theme, None));
+            panel = panel.child(text_input(&search, ctx, None));
         }
 
         let rows = spec.rows();
@@ -226,7 +227,8 @@ pub fn ref_select(
             }
 
             if option.is_disabled {
-                row.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+                row.style.descriptor.opacity =
+                    ctx.theme().resolve_opacity(spec.disabled_opacity_token());
             } else if let Some(handler) = &on_change {
                 let handler = Arc::clone(handler);
                 let id = option.value.clone();
@@ -286,7 +288,9 @@ pub fn ref_select(
     }
 
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx
+            .theme()
+            .resolve_opacity(spec.disabled_opacity_token());
     }
 
     if !spec.aria_label.is_empty() {
@@ -305,15 +309,17 @@ mod tests {
 
     #[test]
     fn outside_interact_refusal_marks_the_open_surface() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         // Web default `true` + open: no refusal marker anywhere in the tree.
         let spec = RefSelectSpec::new().with_open(true);
-        let node = ref_select(&spec, &theme(), None);
+        let node = ref_select(&spec, &ctx, None);
         assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
 
         // Refusal: the open surface carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = ref_select(&refusing, &theme(), None);
+        let node = ref_select(&refusing, &ctx, None);
         assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
     }
 }

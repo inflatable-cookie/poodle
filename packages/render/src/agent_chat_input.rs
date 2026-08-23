@@ -8,7 +8,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeKind,
@@ -16,8 +15,9 @@ use poodle_node::{
 use poodle_specs::{AgentChatInputSpec, AgentChatStatus, MeterShape, MeterSpec};
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::meter::meter;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::presentation::rem_to_px;
 
 /// Handlers mirror the GPUI target's names.
 #[derive(Default)]
@@ -32,14 +32,15 @@ pub struct AgentChatInputHandlers {
 
 pub fn agent_chat_input(
     spec: &AgentChatInputSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     question_children: Vec<Node>,
     plan_children: Vec<Node>,
     toolbar_children: Vec<Node>,
     footer_children: Vec<Node>,
     handlers: AgentChatInputHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // ── Size table (contract §8) ──────────────────────────────────────────────
     let (pad_y_rem, pad_x_rem) = spec.field_padding_rem(effective_size);
@@ -47,31 +48,31 @@ pub fn agent_chat_input(
     let pad_x = rem_to_px(pad_x_rem);
     let editor_font = rem_to_px(spec.editor_font_rem(effective_size));
     let action_box = rem_to_px(spec.action_size_rem(effective_size));
-    let gap = rem_to_px(spec.toolbar_gap_rem(effective_size)) * spec.density_gap_scale();
+    let gap = rem_to_px(spec.toolbar_gap_rem(effective_size)) * spec.density_gap_scale(density);
     let line_height = editor_font * 1.5;
     let divider_height = rem_to_px(spec.toolbar_divider_height_rem(effective_size));
 
     // ── Colors ────────────────────────────────────────────────────────────────
-    let text_primary = theme.resolve_color(spec.text_token());
-    let text_secondary = theme.resolve_color(spec.secondary_token());
+    let text_primary = ctx.theme().resolve_color(spec.text_token());
+    let text_secondary = ctx.theme().resolve_color(spec.secondary_token());
     // Secondary text held below the muted opacity — a standing hint, not a
     // value (contract §8).
-    let placeholder_base = theme.resolve_color(spec.placeholder_token());
+    let placeholder_base = ctx.theme().resolve_color(spec.placeholder_token());
     let placeholder = with_alpha(
         placeholder_base,
         placeholder_base.3
-            * theme.resolve_opacity(spec.placeholder_opacity_token())
+            * ctx.theme().resolve_opacity(spec.placeholder_opacity_token())
             * spec.placeholder_opacity_ratio(),
     );
-    let border = theme.resolve_color(spec.field_border_token());
-    let divider = theme.resolve_color(spec.divider_token());
-    let surface = theme.resolve_color(spec.field_fill_token());
-    let elevated = theme.resolve_color(spec.attachment_fill_token());
-    let action_fill = theme.resolve_color(spec.action_fill_token());
-    let action_text = theme.resolve_color(spec.action_text_token());
-    let field_radius = theme.resolve_radius(spec.field_radius_token()) * 1.5;
-    let chip_radius = theme.resolve_radius(spec.attachment_radius_token());
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+    let border = ctx.theme().resolve_color(spec.field_border_token());
+    let divider = ctx.theme().resolve_color(spec.divider_token());
+    let surface = ctx.theme().resolve_color(spec.field_fill_token());
+    let elevated = ctx.theme().resolve_color(spec.attachment_fill_token());
+    let action_fill = ctx.theme().resolve_color(spec.action_fill_token());
+    let action_text = ctx.theme().resolve_color(spec.action_text_token());
+    let field_radius = ctx.theme().resolve_radius(spec.field_radius_token()) * 1.5;
+    let chip_radius = ctx.theme().resolve_radius(spec.attachment_radius_token());
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
 
     let all_radius = |node: &mut Node, r: f32| {
         let c = &mut node.style.descriptor.corner_radii;
@@ -266,7 +267,7 @@ pub fn agent_chat_input(
         if let Some(high) = spec.context_high() {
             context = context.with_high(high);
         }
-        trailing = trailing.child(meter(&context, theme));
+        trailing = trailing.child(meter(&context, ctx));
     }
 
     let mut action = Node::container();
@@ -363,9 +364,11 @@ mod tests {
     }
 
     fn render_with_status(status: AgentChatStatus) -> Node {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         agent_chat_input(
             &AgentChatInputSpec::new().with_status(status),
-            &theme(),
+            &ctx,
             vec![Node::text("question region")],
             vec![Node::text("plan region")],
             Vec::new(),

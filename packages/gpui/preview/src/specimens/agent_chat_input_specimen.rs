@@ -8,6 +8,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::agent_plan::AgentPlanStatus;
 use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
 use poodle_node::Node;
+use poodle_render::RenderContext;
 use poodle_specs::{
     AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, AgentPlanSpec, AgentQuestionSpec,
     ControlSize, EyebrowSpec, ModelAxisOption, ModelAxisValue, ModelCapabilityAxis, ModelOption,
@@ -77,7 +78,7 @@ fn question_node(theme: &GpuiThemeProvider) -> Node {
     };
     poodle_render::agent_question(
         &AgentQuestionSpec::new(vec![item]).with_selections(vec!["composer".to_string()]),
-        theme,
+        &RenderContext::new(theme),
         poodle_render::AgentQuestionHandlers::default(),
     )
 }
@@ -86,7 +87,7 @@ fn plan_node(theme: &GpuiThemeProvider) -> Node {
     poodle_render::agent_plan(
         &AgentPlanSpec::new("1. Inspect the contract.\n2. Apply the bounded change.")
             .with_status(AgentPlanStatus::Pending),
-        theme,
+        &RenderContext::new(theme),
         poodle_render::AgentPlanHandlers::default(),
     )
 }

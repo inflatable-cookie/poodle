@@ -8,7 +8,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{
     AspectRatio, ButtonSpec, ButtonVariant, CallOutSpec, ControlDensity, ControlSize,
@@ -18,19 +17,22 @@ use poodle_specs::{
 use crate::button::button;
 use crate::callout::{callout, CalloutHandlers};
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::media_thumbnail::media_thumbnail;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{rem_to_px, size_font_rem};
 
 pub fn media_browse_panel(
     spec: &MediaBrowsePanelSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
     let body_font = rem_to_px(size_font_rem(effective_size));
     // Contract §8 Meta / State `p` font-size — resolved from the label
     // typography token rather than a literal.
-    let label_font = theme.resolve_space(spec.meta_font_token());
+    let label_font = ctx.theme().resolve_space(spec.meta_font_token());
     // Contract §8 Size Adjustments: xs 8.5 / sm 10 / md 11 / lg 12 / xl 13.
     let min_column = rem_to_px(match effective_size {
         ControlSize::Xs => 8.5,
@@ -41,17 +43,17 @@ pub fn media_browse_panel(
     });
 
     // Density-driven spacing from contract
-    let (grid_gap, item_gap, item_pad) = match spec.density {
+    let (grid_gap, item_gap, item_pad) = match density {
         ControlDensity::Compact => (0.375, 0.25, 0.5),
         ControlDensity::Default => (0.5, 0.375, 0.75),
         ControlDensity::Comfortable => (0.75, 0.5, 0.875),
     };
 
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let border_subtle = theme.resolve_color(spec.item_border_token());
-    let radius = theme.resolve_radius(spec.item_radius_token());
-    let panel_bg = theme.resolve_color(spec.item_bg_token());
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let border_subtle = ctx.theme().resolve_color(spec.item_border_token());
+    let radius = ctx.theme().resolve_radius(spec.item_radius_token());
+    let panel_bg = ctx.theme().resolve_color(spec.item_bg_token());
 
     // Root
     let mut el = Node::container();
@@ -90,10 +92,10 @@ pub fn media_browse_panel(
             &CallOutSpec::new()
                 .with_tone(StatusTone::Danger)
                 .with_content(error)
-                .with_size(spec.size)
+                .with_size(base_size)
                 .with_size_role(spec.size_role)
-                .with_density(spec.density),
-            theme,
+                .with_density(density),
+            ctx,
             CalloutHandlers::default(),
         );
         return el.child(centered_state(alert, true));
@@ -152,7 +154,7 @@ pub fn media_browse_panel(
             })
             .with_aspect_ratio(AspectRatio::Square)
             .with_show_caption(false),
-            theme,
+            ctx,
         ));
 
         // Label
@@ -202,12 +204,12 @@ pub fn media_browse_panel(
         actions = actions.child(button(
             &ButtonSpec::new()
                 .with_variant(ButtonVariant::Secondary)
-                .with_size(spec.size)
+                .with_size(base_size)
                 .with_size_role(spec.size_role)
-                .with_density(spec.density)
+                .with_density(density)
                 .with_label(load_label)
                 .with_disabled(spec.loading),
-            theme,
+            ctx,
             None,
         ));
         el = el.child(actions);

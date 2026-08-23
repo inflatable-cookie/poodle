@@ -7,15 +7,15 @@
 //! open/close dialog behaviour is host-owned). Nothing renders without a
 //! value.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, Node};
 use poodle_specs::{ButtonSpec, CodeSpec, DebugDialogSpec, DialogSpec, DialogWidth};
 
 use crate::button::button;
 use crate::code::code;
+use crate::context::RenderContext;
 use crate::dialog::dialog;
 
-pub fn debug_dialog(spec: &DebugDialogSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn debug_dialog(spec: &DebugDialogSpec, ctx: &RenderContext<'_>) -> Node {
     if !spec.has_value() {
         return Node::container();
     }
@@ -46,12 +46,12 @@ pub fn debug_dialog(spec: &DebugDialogSpec, theme: &dyn ThemeProvider) -> Node {
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.md");
     }
-    root.child(button(&button_spec, theme, None)).child(dialog(
+    root.child(button(&button_spec, ctx, None)).child(dialog(
         &dialog_spec,
-        theme,
-        vec![code(&code_spec, theme)],
+        ctx,
+        vec![code(&code_spec, ctx)],
         None,
         None,
     ))

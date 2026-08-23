@@ -31,9 +31,9 @@ pub struct FilterToolbarSpec {
     /// When true the toolbar renders an elevation shadow and is expected
     /// to stick to the top of its scroll container (specimen-side CSS).
     pub sticky: bool,
-    pub size: ControlSize,
+    pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
-    pub density: ControlDensity,
+    pub density: Option<ControlDensity>,
     /// Minimum width of a filter control before the row wraps.
     pub min_item_width: Option<Dimension>,
 }
@@ -48,10 +48,10 @@ impl Default for FilterToolbarSpec {
             columns: 4,
             min_item_width_rem: 10.0,
             sticky: false,
-            size: ControlSize::Md,
+            size: None,
             // Svelte FilterToolbar defaults to "chrome" role.
             size_role: SemanticControlSizeRole::Chrome,
-            density: ControlDensity::Default,
+            density: None,
             min_item_width: None,
         }
     }
@@ -125,12 +125,13 @@ impl FilterToolbarSpec {
         semantic::RADIUS_SURFACE
     }
 
-    /// Base root gap token. Density `compact`/`comfortable` override this via
-    /// `density_gap_rem` / `density_controls_gap` below; `default` density
-    /// uses `space.inline.sm` (contract §8 density table), the un-scoped base
+    /// Base root gap token for the resolved density. Density
+    /// `compact`/`comfortable` override this via `density_gap_rem` /
+    /// `density_controls_gap_rem` below; `default` density uses
+    /// `space.inline.sm` (contract §8 density table), the un-scoped base
     /// rule uses `space.stack.sm`.
-    pub fn gap_token(&self) -> &'static str {
-        match self.density {
+    pub fn gap_token(&self, density: ControlDensity) -> &'static str {
+        match density {
             ControlDensity::Default => semantic::SPACE_INLINE_SM,
             // Compact/comfortable resolve a literal rem via `density_gap_rem`;
             // this token is the fallback only.
@@ -138,8 +139,8 @@ impl FilterToolbarSpec {
         }
     }
 
-    pub fn controls_gap_token(&self) -> &'static str {
-        match self.density {
+    pub fn controls_gap_token(&self, density: ControlDensity) -> &'static str {
+        match density {
             ControlDensity::Comfortable => semantic::SPACE_INLINE_MD,
             // Compact resolves a literal rem via `density_controls_gap_rem`.
             _ => semantic::SPACE_INLINE_SM,
@@ -188,49 +189,49 @@ impl FilterToolbarSpec {
     // altering vertical padding here is the documented compositional
     // exception (panel-internal padding).
 
-    /// Root gap in rem for the current density. Compact 0.25, comfortable
+    /// Root gap in rem for the resolved density. Compact 0.25, comfortable
     /// resolves `space.inline.md`; default resolves `gap_token`.
-    pub fn density_gap_rem(&self) -> Option<f32> {
-        match self.density {
+    pub fn density_gap_rem(&self, density: ControlDensity) -> Option<f32> {
+        match density {
             ControlDensity::Compact => Some(0.25),
             _ => None,
         }
     }
 
-    /// Controls-grid gap in rem for the current density. Compact 0.25;
+    /// Controls-grid gap in rem for the resolved density. Compact 0.25;
     /// otherwise resolves `controls_gap_token`.
-    pub fn density_controls_gap_rem(&self) -> Option<f32> {
-        match self.density {
+    pub fn density_controls_gap_rem(&self, density: ControlDensity) -> Option<f32> {
+        match density {
             ControlDensity::Compact => Some(0.25),
             _ => None,
         }
     }
 
-    /// Root padding-block in rem. Contract §8: compact 0.5, default 0.75,
-    /// comfortable 1.0.
-    pub fn padding_block_rem(&self) -> f32 {
-        match self.density {
+    /// Root padding-block in rem for the resolved density. Contract §8:
+    /// compact 0.5, default 0.75, comfortable 1.0.
+    pub fn padding_block_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.5,
             ControlDensity::Default => 0.75,
             ControlDensity::Comfortable => 1.0,
         }
     }
 
-    /// Root padding-inline in rem. Contract §8: compact 0.75, default 1.0,
-    /// comfortable 1.25.
-    pub fn padding_inline_rem(&self) -> f32 {
-        match self.density {
+    /// Root padding-inline in rem for the resolved density. Contract §8:
+    /// compact 0.75, default 1.0, comfortable 1.25.
+    pub fn padding_inline_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             ControlDensity::Compact => 0.75,
             ControlDensity::Default => 1.0,
             ControlDensity::Comfortable => 1.25,
         }
     }
 
-    /// Summary font-size in rem for the current size. Contract §8 size table:
-    /// xs 0.6875, sm 0.71875, md (default label-size 0.8125), lg 0.8125,
-    /// xl 0.875.
-    pub fn summary_font_size_rem(&self) -> f32 {
-        match self.size {
+    /// Summary font-size in rem for the resolved size. Contract §8 size
+    /// table: xs 0.6875, sm 0.71875, md (default label-size 0.8125),
+    /// lg 0.8125, xl 0.875.
+    pub fn summary_font_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.6875,
             ControlSize::Sm => 0.71875,
             ControlSize::Md => 0.8125,
@@ -240,7 +241,7 @@ impl FilterToolbarSpec {
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
-        self.size = size;
+        self.size = Some(size);
         self
     }
 
@@ -250,7 +251,7 @@ impl FilterToolbarSpec {
     }
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
-        self.density = density;
+        self.density = Some(density);
         self
     }
 }
