@@ -14,7 +14,7 @@ use gpui::{
 };
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::context::{RenderContext, SlotBuilder};
+use poodle_render::{RenderContext, SlotBuilder};
 use poodle_specs::{
     AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentMessageSpec,
     AgentPlanRecordSpec, AgentPlanSpec, AgentQuestionRecordSpec, AgentQuestionSpec,
@@ -3176,17 +3176,21 @@ impl IntoElement for Stack {
     }
 }
 
-pub(crate) struct Spacer;
+pub(crate) struct Spacer {
+    theme: GpuiThemeProvider,
+}
 
 impl Spacer {
-    pub(crate) fn new() -> Self {
-        Self
+    pub(crate) fn new(theme: &GpuiThemeProvider) -> Self {
+        Self {
+            theme: theme.clone(),
+        }
     }
 }
 
 impl IntoCompatNode for Spacer {
     fn into_compat_node(self) -> poodle_node::Node {
-        poodle_render::spacer(&SpacerSpec::new())
+        poodle_render::spacer(&SpacerSpec::new(), &RenderContext::new(&self.theme))
     }
 }
 

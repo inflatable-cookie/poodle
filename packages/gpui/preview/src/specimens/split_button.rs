@@ -24,7 +24,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_render::{split_button, SplitButtonHandlers};
 use poodle_specs::{ButtonTone, ButtonVariant, EyebrowSpec, SplitButtonSpec, SplitMenuItem};
 

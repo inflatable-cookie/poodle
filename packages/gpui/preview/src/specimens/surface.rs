@@ -3,7 +3,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{PaddingScale, SurfaceBorder, SurfaceRole, SurfaceSpec, SurfaceTone};
 
 fn node_surface(spec: SurfaceSpec, theme: &GpuiThemeProvider, content: Node) -> AnyElement {

@@ -6,7 +6,12 @@
 use poodle_node::{LayoutDirection, Node};
 use poodle_specs::SpacerSpec;
 
-pub fn spacer(spec: &SpacerSpec) -> Node {
+use crate::context::RenderContext;
+
+/// Every public component renderer receives the construction context
+/// (architecture 010); Spacer has no presentation-dependent output, so the
+/// context is accepted and unused.
+pub fn spacer(spec: &SpacerSpec, _ctx: &RenderContext<'_>) -> Node {
     let mut el = Node::container();
     // Explicit Row (see switch.rs).
     el.style.descriptor.layout.direction = LayoutDirection::Row;

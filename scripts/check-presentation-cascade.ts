@@ -19,10 +19,17 @@
  * C. The GPUI preview never reintroduces a passthrough or manual-equivalent
  *    UiPresentationProvider: no preview-local provider facade, and the
  *    specimen must route scoped content through
- *    `poodle_render::context::ui_presentation_provider` without copying the
+ *    `poodle_render::ui_presentation_provider` without copying the
  *    provider's own scope variables into child specs (an explicit literal
  *    reset like `.with_size(ControlSize::Md)` remains legal — that is the
  *    explicit-reset case, not a manual copy).
+ *
+ * D. Every public component renderer receives the context. A `pub fn` taking
+ *    a component spec (`&…Spec`) and returning `Node` must accept
+ *    `&RenderContext`, even when its output is not currently
+ *    presentation-dependent. Spec-free geometry helpers (e.g.
+ *    `floating_overlay`) carry no component inputs and are out of scope by
+ *    construction.
  */
 
 const ROOT = new URL("..", import.meta.url).pathname;
@@ -48,6 +55,12 @@ const BARE_THEME = /&dyn (poodle_adapter::)?ThemeProvider/;
 // variable (UiPresentationProviderSpec::new().with_density(density)) is
 // legitimate — that is how a scope is declared, not a copy into a child.
 const MANUAL_COPY = /\.with_(size|density)\((size|density)\)/;
+
+// D. A spec-driven public renderer signature that returns Node but never
+// mentions RenderContext. The signature block runs from `pub fn` to the
+// opening brace; ctx always precedes any handler/closure parameter types, so
+// truncation inside a closure type cannot hide a missing context.
+const PUB_FN_SIGNATURE = /pub fn \w+[^{]*\{/gs;
 
 const failures: string[] = [];
 let checked = 0;
@@ -75,6 +88,29 @@ async function scan(
 
 await scan(SPEC_DIR, PROVIDER_SPEC, CONCRETE_FIELD, "concrete semantic presentation field");
 await scan(RENDER_DIR, CONTEXT_MODULE, BARE_THEME, "renderer bypasses RenderContext");
+
+// D. Every spec-driven public renderer takes RenderContext.
+{
+  const glob = new Bun.Glob("**/*.rs");
+  for await (const path of glob.scan({ cwd: `${ROOT}/${RENDER_DIR}`, onlyFiles: true })) {
+    const full = `${RENDER_DIR}/${path}`;
+    checked += 1;
+    const source = await Bun.file(`${ROOT}/${full}`).text();
+    for (const match of source.matchAll(PUB_FN_SIGNATURE)) {
+      const signature = match[0];
+      if (
+        /&\w*Spec\b/.test(signature) &&
+        /->\s*[^\{]*Node/.test(signature) &&
+        !signature.includes("RenderContext")
+      ) {
+        const line = source.slice(0, match.index).split("\n").length;
+        failures.push(
+          `context-free component renderer: ${full}:${line}: ${signature.split("\n")[0]}…`,
+        );
+      }
+    }
+  }
+}
 
 // C1. No preview-local UiPresentationProvider facade. Doc comments (`//!`,
 // `///`) may mention the provider by name; code may not.

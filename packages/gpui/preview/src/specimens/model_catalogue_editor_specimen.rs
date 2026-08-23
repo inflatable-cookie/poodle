@@ -7,7 +7,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::model_connection::{ModelCatalogueState, ModelCatalogueVisibilityChange};
 use poodle_node::Node;
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{ButtonSpec, ButtonVariant, ControlSize, EyebrowSpec, ModelCatalogueEditorSpec};
 
 fn group(theme: &GpuiThemeProvider, label: &str, specimen: impl IntoElement) -> Div {

@@ -22,7 +22,7 @@ pub(crate) fn render(
     state: &AppState,
     cx: &mut Context<PreviewRoot>,
 ) -> Div {
-    let examples = to_element(specimen.examples(&poodle_render::context::RenderContext::new(&state.theme)));
+    let examples = to_element(specimen.examples(&poodle_render::RenderContext::new(&state.theme)));
     specimen_layout(
         state,
         cx,
@@ -30,12 +30,12 @@ pub(crate) fn render(
         examples,
         SpecimenAxes::examples_only()
             .with_sizes(move |size, theme| {
-                to_element(specimen.size(size, &poodle_render::context::RenderContext::new(theme)))
+                to_element(specimen.size(size, &poodle_render::RenderContext::new(theme)))
             })
             .with_densities(move |density, theme| {
                 to_element(specimen.density(
                     density,
-                    &poodle_render::context::RenderContext::new(theme),
+                    &poodle_render::RenderContext::new(theme),
                 ))
             }),
     )

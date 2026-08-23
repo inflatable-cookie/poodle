@@ -12,7 +12,7 @@
 //!
 //! `UiPresentationProvider` is NOT here: since g15.043 (architecture 010) the
 //! presentation cascade is construction-time and shared — see
-//! `poodle_render::context::ui_presentation_provider`, which builds a child
+//! `poodle_render::ui_presentation_provider`, which builds a child
 //! inside a scoped `RenderContext` and returns it unchanged. A preview-local
 //! facade could only wrap an already-built element, which is exactly the
 //! manual-equivalent passthrough the architecture forbids.

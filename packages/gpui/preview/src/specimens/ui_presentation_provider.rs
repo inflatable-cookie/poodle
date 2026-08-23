@@ -4,7 +4,7 @@
 //! Architecture: `docs/architecture/010-native-presentation-construction-context.md`
 //!
 //! The provider is a construction-time boundary, not a painted node
-//! (`poodle_render::context::ui_presentation_provider`): it derives a nested
+//! (`poodle_render::ui_presentation_provider`): it derives a nested
 //! `RenderContext`, builds its child inside that scope, and returns the child
 //! unchanged. This specimen demonstrates the real cascade — every scoped
 //! control below OMITS size/density and inherits them from its provider
@@ -17,7 +17,7 @@ use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::context::{ui_presentation_provider, RenderContext};
+use poodle_render::{ui_presentation_provider, RenderContext};
 use poodle_specs::{
     ButtonSpec, ControlDensity, ControlSize, EyebrowSpec, TextInputSpec, UiPresentationProviderSpec,
 };

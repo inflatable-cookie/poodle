@@ -8,7 +8,7 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::agent_plan::AgentPlanStatus;
 use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
 use poodle_node::Node;
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{
     AgentChatAttachment, AgentChatInputSpec, AgentChatStatus, AgentPlanSpec, AgentQuestionSpec,
     ControlSize, EyebrowSpec, ModelAxisOption, ModelAxisValue, ModelCapabilityAxis, ModelOption,

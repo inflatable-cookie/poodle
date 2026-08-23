@@ -6,7 +6,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
-use poodle_render::context::SlotBuilder;
+use poodle_render::SlotBuilder;
 use poodle_specs::{
     AspectRatio, ControlDensity, ControlSize, EyebrowSpec, MediaKind, MediaPreviewSpec, MediaState,
     SurfaceSpec, SurfaceTone,

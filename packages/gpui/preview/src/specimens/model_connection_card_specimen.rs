@@ -7,7 +7,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::model_connection::{model_catalogue_fixtures, ModelConnectionReadiness};
 use poodle_node::Node;
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{
     ButtonVariant, EyebrowSpec, IconButtonSpec, ModelCatalogueEditorSpec, ModelConnectionCardSpec,
     PillAppearance, PillSpec, PillTone, SemanticControlSizeRole,

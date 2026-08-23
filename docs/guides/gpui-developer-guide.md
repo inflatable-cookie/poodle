@@ -29,7 +29,7 @@ GPUI boundary:
 ```rust
 use gpui::IntoElement;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant};
 
 let theme = GpuiThemeProvider::new()
@@ -124,7 +124,7 @@ back into shared rendering.
 ## Presentation Scopes (UiPresentationProvider)
 
 `UiPresentationProvider` is a construction-time boundary, not a painted node.
-`poodle_render::context::ui_presentation_provider` derives a nested
+`poodle_render::ui_presentation_provider` derives a nested
 `RenderContext`, builds its child through an immediate closure, and returns
 that child unchanged — no wrapper layout, paint, focus target, or
 accessibility entry.
@@ -137,7 +137,7 @@ Root defaults are `md` / `default`; nested providers replace both defaults
 only for construction inside their closure.
 
 ```rust
-use poodle_render::context::ui_presentation_provider;
+use poodle_render::ui_presentation_provider;
 use poodle_specs::{ControlDensity, ControlSize, UiPresentationProviderSpec};
 
 let scope = UiPresentationProviderSpec::new()

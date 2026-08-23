@@ -5,7 +5,7 @@ use crate::node_compat::Eyebrow;
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_node::Node;
-use poodle_render::{context::RenderContext, settings_shell, SettingsShellHandlers};
+use poodle_render::{RenderContext, settings_shell, SettingsShellHandlers};
 use poodle_specs::{EyebrowSpec, SettingsShellSpec, SidebarNavGroup, SidebarNavItem};
 
 fn groups() -> Vec<SidebarNavGroup> {

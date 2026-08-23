@@ -16,7 +16,7 @@ use poodle_gpui::GpuiThemeProvider;
 use crate::app_state::AppState;
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{
     CardToggleGroupSpec, CardToggleOption, ControlDensity, ControlSize, EyebrowSpec,
 };

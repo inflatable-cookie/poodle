@@ -45,11 +45,13 @@ audit's):
   missed and the standing guard then caught).
 - Concrete semantic density surfaces: **0** outside the provider spec (117 at
   start).
-- Files already retaining optional presentation inputs at start: 7 (button,
-  history_center, text_input, number_input, app_header, media_preview, meter,
-  status_indicator cohort — of which app_header and media_preview still
+- Files already retaining optional presentation inputs at the accepted base:
+  7 — `button`, `history_center`, `text_input`, `app_header`,
+  `media_preview`, `meter`, `status_indicator`. (`number_input` was concrete
+  at the base; an earlier draft of this inventory listed it after seeing the
+  in-flight migration state. Of the seven, app_header and media_preview still
   resolved omission internally against root defaults; both now take resolved
-  values like the rest).
+  values like the rest.)
 - `poodle-render` modules referencing `RenderContext`: **169** (168 accepted
   `ThemeProvider` directly; +1 is `context.rs` itself).
 - Bare `&dyn ThemeProvider` in `packages/render/src/` outside `context.rs`:
@@ -63,15 +65,18 @@ audit's):
 
 ## Public API Changes (atomic pre-v1 break)
 
-- `poodle_render::context::RenderContext<'a>`: `new(&'a dyn ThemeProvider)`
+- `poodle_render::RenderContext<'a>`: `new(&'a dyn ThemeProvider)`
   (root defaults `md`/`default`), `scoped(size_scale, density)`, `theme()`,
   `size_scale()`, `density()`, `base_size(Option<ControlSize>)`,
   `resolve_size(Option<ControlSize>, SemanticControlSizeRole)`,
   `resolve_density(Option<ControlDensity>)`.
-- `poodle_render::context::ui_presentation_provider(&spec, &ctx, FnOnce(&RenderContext) -> R) -> R`:
+- `poodle_render::ui_presentation_provider(&spec, &ctx, FnOnce(&RenderContext) -> R) -> R`:
   the provider construction boundary; returns the built child unchanged.
-- `poodle_render::context::SlotBuilder<'a> = Box<dyn FnOnce(&RenderContext<'_>) -> Node + 'a>`:
+- `poodle_render::SlotBuilder<'a> = Box<dyn FnOnce(&RenderContext<'_>) -> Node + 'a>`:
   the bounded immediate child builder for scoped host slots.
+- All three are re-exported at the crate root — the fixed public path per
+  architecture 010. The `context` module itself remains public; consumers
+  and documentation use the crate-root path.
 - Every public component renderer: `theme: &dyn ThemeProvider` →
   `ctx: &RenderContext<'_>`. Theme-only internal helpers reach the theme via
   `ctx.theme()`.
@@ -150,7 +155,13 @@ parity gap.
     from scope variables) → FAIL;
   - preview passthrough facade (`struct UiPresentationProvider` in
     `providers.rs`) → FAIL (this plant exposed and fixed a doc-comment
-    suppression bug in the guard's first draft).
+    suppression bug in the guard's first draft);
+  - context-free component renderer (`pub fn spacer(spec: &SpacerSpec) -> Node`
+    without `&RenderContext`) → FAIL (added in review round 1, when
+    `icon_provider` and `spacer` — the two renderers with no
+    presentation-dependent output — were migrated onto the context and the
+    guard gained its fourth rule: a spec-driven public renderer returning
+    `Node` must accept `&RenderContext`).
 
 ## Jetstream Adaptation (compile-only, no parity claim)
 

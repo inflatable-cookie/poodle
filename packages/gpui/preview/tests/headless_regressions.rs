@@ -25,7 +25,7 @@ use std::sync::{Arc, Mutex};
 use gpui::TestAppContext;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
-use poodle_render::context::{ui_presentation_provider, RenderContext};
+use poodle_render::{ui_presentation_provider, RenderContext};
 use poodle_specs::{
     AgentTranscriptSpec, ControlDensity, ControlSize, PopoverSpec, RangeSliderSpec,
     UiPresentationProviderSpec,

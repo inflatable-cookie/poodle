@@ -23,7 +23,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_render::segmented_control;
 use poodle_specs::{ControlSize, EyebrowSpec, SegmentedControlOption, SegmentedControlSpec};
 
@@ -283,7 +283,7 @@ mod icon_only_tests {
     use super::segmented_control;
     use crate::app_state::NodeSpecimenEvent;
     use poodle_gpui::GpuiThemeProvider;
-    use poodle_render::context::RenderContext;
+    use poodle_render::RenderContext;
     use poodle_specs::{ControlSize, SegmentedControlOption, SegmentedControlSpec};
     use std::sync::{Arc, Mutex};
 

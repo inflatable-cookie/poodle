@@ -10,7 +10,7 @@ use poodle_headless::agent_transcript::{
     ChangedFile, ToolCallStatus, TranscriptActivity, TranscriptChangedFiles, TranscriptItem,
     TranscriptMessage, TranscriptToolCall,
 };
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{AgentTranscriptSpec, EyebrowSpec};
 
 fn call(id: &str, detail: &str, status: ToolCallStatus) -> TranscriptItem {

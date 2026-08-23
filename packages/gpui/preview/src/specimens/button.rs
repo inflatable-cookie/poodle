@@ -23,7 +23,7 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
 use poodle_render::button;
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{ButtonSpec, ButtonTone, ButtonVariant, EyebrowSpec};
 
 /// A node-tier Button with an optional click handler.

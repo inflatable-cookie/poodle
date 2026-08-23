@@ -8,7 +8,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
-use poodle_render::context::{RenderContext, SlotBuilder};
+use poodle_render::{RenderContext, SlotBuilder};
 use poodle_specs::AppHeaderSpec;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlDensity, ControlSize, EyebrowSpec, IconButtonSpec,

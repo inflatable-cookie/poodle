@@ -11,7 +11,7 @@ use poodle_headless::model_connection::{
     ModelConnectionAvailability, ModelConnectionOption, ModelConnectionSetupStage,
 };
 use poodle_node::Node;
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, EyebrowSpec, FieldSpec, ModelConnectionSetupSpec, TextInputSpec,
 };

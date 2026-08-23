@@ -10,7 +10,7 @@ use poodle_headless::update::{
     OfferReason, UpdateAvailabilityProjection, UpdateControllerStatus, UpdatePresence,
     UpdateProgressProjection,
 };
-use poodle_render::{context::RenderContext, update_center, UpdateCenterHandlers};
+use poodle_render::{RenderContext, update_center, UpdateCenterHandlers};
 use poodle_specs::{EyebrowSpec, UpdateCenterSpec};
 
 fn group(theme: &GpuiThemeProvider, label: &str, child: impl IntoElement) -> Div {

@@ -5,7 +5,7 @@ use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::ShellStatusBarSpec;
 use poodle_specs::{EyebrowSpec, StatusIndicatorSpec, StatusTone};
 

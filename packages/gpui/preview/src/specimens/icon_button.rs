@@ -23,7 +23,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_render::icon_button;
 use poodle_specs::{ButtonTone, ButtonVariant, EyebrowSpec, IconButtonSpec};
 
@@ -384,7 +384,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_icon("star")
                         .with_size(size)
                         .with_aria_label("Star"),
-                    &poodle_render::context::RenderContext::new(theme),
+                    &poodle_render::RenderContext::new(theme),
                     None,
                 );
                 poodle_gpui_node_backend::to_gpui(&node)
@@ -395,7 +395,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_icon("star")
                         .with_density(density)
                         .with_aria_label("Star"),
-                    &poodle_render::context::RenderContext::new(theme),
+                    &poodle_render::RenderContext::new(theme),
                     None,
                 );
                 poodle_gpui_node_backend::to_gpui(&node)

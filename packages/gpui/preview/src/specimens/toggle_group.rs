@@ -22,7 +22,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_render::toggle_group;
 use poodle_specs::{EyebrowSpec, ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
 

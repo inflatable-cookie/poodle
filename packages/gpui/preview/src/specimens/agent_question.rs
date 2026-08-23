@@ -9,7 +9,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::agent_question::{AgentQuestionItem, AgentQuestionOption};
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{AgentChatInputSpec, AgentChatStatus, AgentQuestionSpec, EyebrowSpec};
 
 fn option(value: &str, label: &str, description: Option<&str>) -> AgentQuestionOption {

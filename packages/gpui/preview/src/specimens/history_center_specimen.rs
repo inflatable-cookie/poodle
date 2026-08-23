@@ -17,7 +17,7 @@ use poodle_headless::history_center::{
     HistoryEntryPosition, HistoryPathPage,
 };
 use poodle_render::{
-    context::RenderContext, history_center, HistoryCenterDelete, HistoryCenterHandlers,
+    RenderContext, history_center, HistoryCenterDelete, HistoryCenterHandlers,
     HistoryCenterRename, HistoryCenterView,
 };
 use poodle_specs::{

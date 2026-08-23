@@ -213,7 +213,7 @@ Example for `density="default"`, `sizeScale="md"`:
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_render::context::ui_presentation_provider`
+- expected crate/module surface: `poodle_render::ui_presentation_provider`
 - The provider is a construction-time boundary, not a painted node. It derives
   a nested `poodle_render::RenderContext` from its two values, invokes an
   immediate child builder with that context, and returns the resulting child
@@ -237,7 +237,7 @@ Example for `density="default"`, `sizeScale="md"`:
 ### Construction, Nesting, And Explicit Reset
 
 ```rust
-use poodle_render::context::{ui_presentation_provider, RenderContext};
+use poodle_render::{ui_presentation_provider, RenderContext};
 
 let ctx = RenderContext::new(&theme); // root: md / default
 let subtree = ui_presentation_provider(&provider_spec, &ctx, |scoped| {

@@ -5,7 +5,7 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{FontFamily, LayoutDirection, Node};
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::EyebrowSpec;
 use poodle_specs::{BlockEditorMode, BlockEditorSpec, BlockTypeDefinition, EditorBlock};
 use poodle_tokens::typed::ColorValue;

@@ -23,7 +23,7 @@ use poodle_adapter::ThemeProvider;
 use crate::specimens::specimen_axes::{density_key, size_key};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::{context::RenderContext, select, SelectHandlers};
+use poodle_render::{RenderContext, select, SelectHandlers};
 use poodle_specs::{ChoiceOption, EyebrowSpec, SelectMode, SelectSpec};
 
 /// Build a node-tier Select with the specimen's toggle/change/clear wiring.

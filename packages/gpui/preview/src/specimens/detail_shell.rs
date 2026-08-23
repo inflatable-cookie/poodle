@@ -10,7 +10,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{
     ButtonSpec, ButtonVariant, ControlSize, DetailItemSpec, DetailSectionSpec, DetailShellSpec,
     DetailState, EyebrowSpec, PageHeaderSpec, PillAppearance, PillSpec, PillTone,

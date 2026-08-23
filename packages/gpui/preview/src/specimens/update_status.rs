@@ -10,7 +10,7 @@ use poodle_headless::update::{
     Channel, DeferralCause, InstallManager, OfferReason, UpdateAvailabilityProjection,
     UpdateControllerStatus, UpdateDeferral, UpdateProgressProjection, UpdateRejectionCode,
 };
-use poodle_render::{context::RenderContext, update_status, UpdateStatusHandlers};
+use poodle_render::{RenderContext, update_status, UpdateStatusHandlers};
 use poodle_specs::{EyebrowSpec, UpdateStatusSpec};
 
 fn group(theme: &GpuiThemeProvider, label: &str, child: impl IntoElement) -> Div {

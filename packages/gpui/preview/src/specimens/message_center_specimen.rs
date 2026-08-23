@@ -6,7 +6,7 @@ use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::{context::RenderContext, message_center, MessageCenterHandlers};
+use poodle_render::{RenderContext, message_center, MessageCenterHandlers};
 use poodle_specs::{
     EyebrowSpec, MessageCenterItem, MessageCenterItemProgress, MessageCenterSpec, OverlayPlacement,
     StatusTone,

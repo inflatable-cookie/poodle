@@ -245,7 +245,7 @@ mod interaction_tests {
     use crate::app_state::NodeSpecimenEvent;
     use poodle_gpui::GpuiThemeProvider;
     use poodle_node::{NodeDragPhase, NodeKey, NodeModifiers};
-    use poodle_render::{context::RenderContext, resize_handle, ResizePhase};
+    use poodle_render::{RenderContext, resize_handle, ResizePhase};
     use poodle_specs::{Orientation, ResizeHandleSpec};
     use std::sync::{Arc, Mutex};
 

@@ -13,7 +13,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{ColorValue, LayoutDirection, Node};
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_render::presentation::rem_to_px;
 use poodle_specs::{CardSpec, CardVariant, ControlDensity, EyebrowSpec};
 

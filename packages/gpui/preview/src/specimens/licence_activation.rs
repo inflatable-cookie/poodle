@@ -11,7 +11,7 @@ use poodle_headless::licence::{
     resolve_licence_submit, LicenceActivationMode, LicenceActivationRoute, LicenceKeyFormat,
     LicenceKeyProblem, LicenceKeyResult, LicenceSubmitDraft,
 };
-use poodle_render::context::RenderContext;
+use poodle_render::RenderContext;
 use poodle_specs::{EyebrowSpec, FieldSpec, LicenceActivationSpec, TextInputSpec, ValidationState};
 
 /// Stand-in for the host's key parser (the web specimen's, ported). The real

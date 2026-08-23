@@ -8,7 +8,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
-use poodle_render::context::{RenderContext, SlotBuilder};
+use poodle_render::{RenderContext, SlotBuilder};
 use poodle_render::icon_button;
 use poodle_specs::PageHeaderSpec;
 use poodle_specs::{
