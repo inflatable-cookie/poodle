@@ -9,6 +9,14 @@
     { value: "poodle", label: "Poodle", current: true },
   ];
 
+  // Icon presentation is per item: a named glyph beside the label, or a
+  // visually icon-only root that is still announced as "Home".
+  const iconItems: BreadcrumbItem[] = [
+    { value: "home", label: "Home", icon: "home", iconOnly: true },
+    { value: "projects", label: "Projects", icon: "folder" },
+    { value: "poodle", label: "Poodle", icon: "package", current: true },
+  ];
+
   const deepItems: BreadcrumbItem[] = [
     { value: "home", label: "Home" },
     { value: "workspace", label: "Workspace" },
@@ -30,6 +38,10 @@
     {#if lastNav}
       <p>Navigated to: <strong>{lastNav}</strong></p>
     {/if}
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Icons">
+    <Breadcrumbs items={iconItems} />
   </SpecimenGroup>
 
   <SpecimenGroup label="Deep path">

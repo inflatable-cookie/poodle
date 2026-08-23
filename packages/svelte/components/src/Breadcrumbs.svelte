@@ -44,18 +44,32 @@
   }
 </script>
 
+<!-- Icon and label live inside the same anchor, button, or current span: one
+     navigation target, one accessible name. An icon-only item hides the label
+     visually instead of dropping it, so it is still announced. -->
+{#snippet itemContent(item: BreadcrumbItem)}
+  {#if item.icon}
+    <span class="poodle-breadcrumbs__content">
+      <Icon icon={item.icon} size={resolvedSize} />
+      <span class="poodle-breadcrumbs__label" class:poodle-breadcrumbs__label--hidden={item.iconOnly}>{item.label}</span>
+    </span>
+  {:else}
+    {item.label}
+  {/if}
+{/snippet}
+
 <nav class="poodle-breadcrumbs" aria-label={ariaLabel} data-size={resolvedSize} data-density={resolvedDensity}>
   <ol class="poodle-breadcrumbs__list">
     {#each visibleItems as item, index}
       <li class="poodle-breadcrumbs__item">
         {#if item.current || (forceLastItemCurrent && index === visibleItems.length - 1)}
-          <span aria-current="page">{item.label}</span>
+          <span aria-current="page">{@render itemContent(item)}</span>
         {:else if item.href}
-          <a href={item.href}>{item.label}</a>
+          <a href={item.href}>{@render itemContent(item)}</a>
         {:else if item.value === "__ellipsis__"}
           <span aria-hidden="true">{item.label}</span>
         {:else}
-          <button type="button" onclick={() => handleNavigate(item)}>{item.label}</button>
+          <button type="button" onclick={() => handleNavigate(item)}>{@render itemContent(item)}</button>
         {/if}
         {#if index < visibleItems.length - 1}
           <span class="poodle-breadcrumbs__separator" aria-hidden="true"><Icon name="chevron-right" /></span>
@@ -64,4 +78,3 @@
     {/each}
   </ol>
 </nav>
-

@@ -37,6 +37,29 @@
     border-radius: 0.125rem;
   }
 
+  /* An item's icon and label sit in one inline row inside the anchor, button,
+     or current span. The gap is deliberately tighter than the crumb/separator
+     gap, and does not track size or density. */
+  .poodle-breadcrumbs__content {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--poodle-space-inline-xs);
+  }
+
+  /* Icon-only items keep the label in the accessibility tree. */
+  .poodle-breadcrumbs__label--hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+  }
+
   .poodle-breadcrumbs__separator {
     display: inline-flex;
     opacity: 0.4;

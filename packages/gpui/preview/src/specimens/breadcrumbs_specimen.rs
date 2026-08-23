@@ -32,6 +32,28 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 )),
         )
+        // --- Icons ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Icons"),
+                    theme,
+                ))
+                .child(Breadcrumbs::from_spec(
+                    BreadcrumbsSpec::new(vec![
+                        // Icon-only root: no visible text, still named "Home".
+                        BreadcrumbItem::new("home", "Home").with_icon_only("home"),
+                        BreadcrumbItem::new("projects", "Projects").with_icon("folder"),
+                        BreadcrumbItem::new("poodle", "Poodle")
+                            .with_icon("package")
+                            .with_is_current(true),
+                    ]),
+                    theme,
+                )),
+        )
         // --- Deep path ---
         .child(
             div()
