@@ -12,7 +12,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodePosition, NodeRole, NodeToggled, ShadowLayer,
@@ -20,9 +19,8 @@ use poodle_node::{
 use poodle_specs::{ControlSize, TriStateSwitchSpec, TriStateValue};
 
 use crate::color::{hex_color, mix_srgb, BLACK};
-use crate::presentation::{
-    control_height_rem, control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
+use crate::context::RenderContext;
+use crate::presentation::{control_height_rem, control_space_x_rem, rem_to_px, size_font_rem};
 
 /// Track inset in rem, derived from density (contract §8).
 fn track_inset_rem(density: poodle_specs::ControlDensity) -> f32 {
@@ -46,7 +44,7 @@ fn tri_state_min_content_width_rem(size: ControlSize) -> f32 {
 
 /// Resolve a per-state color, preferring an instance hex override (sRGB).
 fn override_or(
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     token: &str,
     override_hex: &Option<String>,
 ) -> ColorValue {
@@ -55,34 +53,35 @@ fn override_or(
             return c;
         }
     }
-    theme.resolve_color(token)
+    ctx.theme().resolve_color(token)
 }
 
 pub fn tri_state_switch(
     spec: &TriStateSwitchSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(TriStateValue) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // ── Semantic color tokens ──
-    let text_secondary = theme.resolve_color(spec.unselected_text_token());
-    let border_default = theme.resolve_color(spec.border_token());
+    let text_secondary = ctx.theme().resolve_color(spec.unselected_text_token());
+    let border_default = ctx.theme().resolve_color(spec.border_token());
 
     // Per-state colors (with optional hex overrides).
-    let excluded_color = override_or(theme, spec.excluded_color_token(), &spec.excluded_color);
-    let default_color = override_or(theme, spec.default_color_token(), &spec.default_color);
-    let included_color = override_or(theme, spec.included_color_token(), &spec.included_color);
+    let excluded_color = override_or(ctx, spec.excluded_color_token(), &spec.excluded_color);
+    let default_color = override_or(ctx, spec.default_color_token(), &spec.default_color);
+    let included_color = override_or(ctx, spec.included_color_token(), &spec.included_color);
 
     // ── Track base: color-mix(canvas 70%, black); root = canvas 75% black ──
-    let canvas = theme.resolve_color(spec.track_base_token());
+    let canvas = ctx.theme().resolve_color(spec.track_base_token());
     let track_base = mix_srgb(canvas, BLACK, 0.70);
     let root_bg = mix_srgb(canvas, BLACK, 0.75);
 
     // ── Sizing ──
     let height = rem_to_px(control_height_rem(effective_size));
-    let x = rem_to_px(control_space_x_rem(spec.density));
-    let inset = rem_to_px(track_inset_rem(spec.density));
+    let x = rem_to_px(control_space_x_rem(density));
+    let inset = rem_to_px(track_inset_rem(density));
     // Contract: segment min-width = min-content-width + x*2.
     let min_segment_width = rem_to_px(tri_state_min_content_width_rem(effective_size)) + x * 2.0;
     let track_width = min_segment_width * 3.0 + inset * 2.0;
@@ -250,7 +249,7 @@ pub fn tri_state_switch(
 
     // ── Disabled state ──
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         root.interaction.disabled = true;
     }
 

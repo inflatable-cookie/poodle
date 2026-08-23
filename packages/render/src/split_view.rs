@@ -13,7 +13,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
     StylePatch,
@@ -24,6 +23,7 @@ use poodle_specs::{
 };
 
 use crate::collapse_toggle::collapse_toggle;
+use crate::context::RenderContext;
 use crate::resize_handle::{resize_handle, ResizePhase};
 
 /// Handlers mirror the GPUI target's names. Collapse handlers fire with the
@@ -40,7 +40,7 @@ pub struct SplitViewHandlers {
 
 pub fn split_view(
     spec: &SplitViewSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     primary: Option<Node>,
     secondary: Option<Node>,
     handlers: SplitViewHandlers,
@@ -153,7 +153,7 @@ pub fn split_view(
         .with_disabled(spec.is_disabled);
     let handle = resize_handle(
         &handle_spec,
-        theme,
+        ctx,
         handlers.on_resize.as_ref().map(Arc::clone),
     );
 
@@ -200,7 +200,7 @@ pub fn split_view(
                     .with_direction(primary_dir)
                     .with_collapsed(spec.is_primary_collapsed)
                     .with_disabled(spec.is_disabled),
-                theme,
+                ctx,
                 handlers.on_primary_collapse.as_ref().map(Arc::clone),
             ));
         }
@@ -210,7 +210,7 @@ pub fn split_view(
                     .with_direction(secondary_dir)
                     .with_collapsed(spec.is_secondary_collapsed)
                     .with_disabled(spec.is_disabled),
-                theme,
+                ctx,
                 handlers.on_secondary_collapse.as_ref().map(Arc::clone),
             ));
         }
@@ -255,7 +255,7 @@ pub fn split_view(
         // Old tier dims the whole split when disabled; the divider's own
         // disabled treatment is separate.
         if spec.is_disabled {
-            s.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+            s.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
         }
     }
 
@@ -291,7 +291,9 @@ mod tests {
     }
 
     fn render(spec: &SplitViewSpec) -> Node {
-        split_view(spec, &theme(), None, None, SplitViewHandlers::default())
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        split_view(spec, &ctx, None, None, SplitViewHandlers::default())
     }
 
     #[test]

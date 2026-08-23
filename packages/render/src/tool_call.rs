@@ -8,13 +8,13 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_transcript::ToolCallStatus;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole, StylePatch,
 };
 use poodle_specs::ToolCallSpec;
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Fires with the row id when it is opened or closed. A row with no output is
@@ -41,22 +41,25 @@ fn scoped(instance_id: Option<&str>, spec_id: &str) -> Option<String> {
 
 pub fn tool_call(
     spec: &ToolCallSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: ToolCallHandlers,
 ) -> Node {
-    let label_color = theme.resolve_color(spec.label_token());
-    let detail_color = theme.resolve_color(spec.detail_token());
-    let icon_color = theme.resolve_color(spec.icon_token());
-    let success = theme.resolve_color(spec.success_token());
-    let danger = theme.resolve_color(spec.danger_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
 
-    let font_size = rem_to_px(spec.font_size_rem());
-    let icon_size = rem_to_px(spec.icon_size_rem());
-    let row_height = rem_to_px(spec.row_height_rem());
-    let pad_y = rem_to_px(spec.padding_block_rem());
-    let pad_x = rem_to_px(spec.padding_inline_rem());
-    let gap = rem_to_px(spec.gap_rem());
+    let label_color = ctx.theme().resolve_color(spec.label_token());
+    let detail_color = ctx.theme().resolve_color(spec.detail_token());
+    let icon_color = ctx.theme().resolve_color(spec.icon_token());
+    let success = ctx.theme().resolve_color(spec.success_token());
+    let danger = ctx.theme().resolve_color(spec.danger_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let icon_size = rem_to_px(spec.icon_size_rem(base_size));
+    let row_height = rem_to_px(spec.row_height_rem(base_size));
+    let pad_y = rem_to_px(spec.padding_block_rem(base_size));
+    let pad_x = rem_to_px(spec.padding_inline_rem(density));
+    let gap = rem_to_px(spec.gap_rem(density));
 
     // Only the label takes the danger colour, never the detail. The detail is
     // already the dimmest thing in the row, and colouring it red as well makes a
@@ -109,7 +112,7 @@ pub fn tool_call(
             let s = &mut d.style;
             s.text_size = Some(font_size);
             s.descriptor.text_color = Some(detail_color);
-            s.descriptor.opacity = theme.resolve_opacity(spec.detail_opacity_token());
+            s.descriptor.opacity = ctx.theme().resolve_opacity(spec.detail_opacity_token());
             s.descriptor.layout.width = LayoutSizing::Grow;
             s.min_width = Some(0.0);
         }
@@ -162,7 +165,7 @@ pub fn tool_call(
         root.interaction.focusable = true;
         root.style.focus = Some(StylePatch {
             background: None,
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             text_color: None,
             opacity: None,
         });
@@ -190,9 +193,11 @@ mod tests {
 
     #[test]
     fn an_instance_scope_isolates_backend_state_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let first = tool_call(
             &spec(),
-            &theme(),
+            &ctx,
             ToolCallHandlers {
                 instance_id: Some("first".to_string()),
                 ..ToolCallHandlers::default()
@@ -200,7 +205,7 @@ mod tests {
         );
         let second = tool_call(
             &spec(),
-            &theme(),
+            &ctx,
             ToolCallHandlers {
                 instance_id: Some("second".to_string()),
                 ..ToolCallHandlers::default()

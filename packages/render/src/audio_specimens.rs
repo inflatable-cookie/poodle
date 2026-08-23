@@ -9,7 +9,6 @@
 //! requested density — and never a combined page. Whichever of those parts a
 //! preview shows, and in what layout, is the shell's decision.
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::audio::{
     format_value, switch_visual_state, AudioControlVisualState, AudioMeterVisualState,
     AudioSwitchMode, AudioValueFormat, AudioValueLaw, AutomationState, DragState,
@@ -24,6 +23,8 @@ use poodle_specs::{
     KnobSpec, ModMatrixGridSpec, Orientation, ValueReadoutSpec, WaveformDisplaySpec, XYPadSpec,
 };
 
+use crate::context::RenderContext;
+
 trait AudioPresentationSpec: Clone {
     fn set_size(&mut self, size: ControlSize);
     fn set_density(&mut self, density: ControlDensity);
@@ -32,8 +33,8 @@ trait AudioPresentationSpec: Clone {
 macro_rules! impl_audio_presentation_spec {
     ($($type:ty),+ $(,)?) => {$(
         impl AudioPresentationSpec for $type {
-            fn set_size(&mut self, size: ControlSize) { self.size = size; }
-            fn set_density(&mut self, density: ControlDensity) { self.density = density; }
+            fn set_size(&mut self, size: ControlSize) { self.size = Some(size); }
+            fn set_density(&mut self, density: ControlDensity) { self.density = Some(density); }
         }
     )+};
 }
@@ -77,104 +78,104 @@ pub enum AudioSpecimen {
 
 impl AudioSpecimen {
     /// The curated Examples pane: the states this control has to teach.
-    pub fn examples(self, theme: &dyn ThemeProvider) -> Node {
+    pub fn examples(self, ctx: &RenderContext<'_>) -> Node {
         match self {
-            Self::AudioMeter => audio_meter_examples(theme),
-            Self::AudioSwitch => audio_switch_examples(theme),
-            Self::DragNumberField => drag_number_field_examples(theme),
-            Self::EnvelopeEditor => envelope_editor_examples(theme),
-            Self::Fader => fader_examples(theme),
-            Self::GainReductionMeter => gain_reduction_meter_examples(theme),
-            Self::Keyboard => keyboard_examples(theme),
-            Self::Knob => knob_examples(theme),
-            Self::ModMatrixGrid => mod_matrix_grid_examples(theme),
-            Self::ValueReadout => value_readout_examples(theme),
-            Self::WaveformDisplay => waveform_display_examples(theme),
-            Self::XyPad => xy_pad_examples(theme),
+            Self::AudioMeter => audio_meter_examples(ctx),
+            Self::AudioSwitch => audio_switch_examples(ctx),
+            Self::DragNumberField => drag_number_field_examples(ctx),
+            Self::EnvelopeEditor => envelope_editor_examples(ctx),
+            Self::Fader => fader_examples(ctx),
+            Self::GainReductionMeter => gain_reduction_meter_examples(ctx),
+            Self::Keyboard => keyboard_examples(ctx),
+            Self::Knob => knob_examples(ctx),
+            Self::ModMatrixGrid => mod_matrix_grid_examples(ctx),
+            Self::ValueReadout => value_readout_examples(ctx),
+            Self::WaveformDisplay => waveform_display_examples(ctx),
+            Self::XyPad => xy_pad_examples(ctx),
         }
     }
 
     /// One ordinary representative at `size`. Nothing else varies.
-    pub fn size(self, size: ControlSize, theme: &dyn ThemeProvider) -> Node {
+    pub fn size(self, size: ControlSize, ctx: &RenderContext<'_>) -> Node {
         match self {
-            Self::AudioMeter => at_size(audio_meter_base(), size, super::audio_meter, theme),
-            Self::AudioSwitch => at_size(audio_switch_base(), size, super::audio_switch, theme),
+            Self::AudioMeter => at_size(audio_meter_base(), size, super::audio_meter, ctx),
+            Self::AudioSwitch => at_size(audio_switch_base(), size, super::audio_switch, ctx),
             Self::DragNumberField => at_size(
                 drag_number_field_base(),
                 size,
                 super::drag_number_field,
-                theme,
+                ctx,
             ),
             Self::EnvelopeEditor => {
-                at_size(envelope_editor_base(), size, super::envelope_editor, theme)
+                at_size(envelope_editor_base(), size, super::envelope_editor, ctx)
             }
-            Self::Fader => at_size(fader_base(), size, super::fader, theme),
+            Self::Fader => at_size(fader_base(), size, super::fader, ctx),
             Self::GainReductionMeter => at_size(
                 gain_reduction_meter_base(),
                 size,
                 super::gain_reduction_meter,
-                theme,
+                ctx,
             ),
-            Self::Keyboard => at_size(keyboard_base(), size, super::keyboard, theme),
-            Self::Knob => at_size(knob_base(), size, super::knob, theme),
+            Self::Keyboard => at_size(keyboard_base(), size, super::keyboard, ctx),
+            Self::Knob => at_size(knob_base(), size, super::knob, ctx),
             Self::ModMatrixGrid => {
-                at_size(mod_matrix_grid_base(), size, super::mod_matrix_grid, theme)
+                at_size(mod_matrix_grid_base(), size, super::mod_matrix_grid, ctx)
             }
-            Self::ValueReadout => at_size(value_readout_base(), size, super::value_readout, theme),
+            Self::ValueReadout => at_size(value_readout_base(), size, super::value_readout, ctx),
             Self::WaveformDisplay => at_size(
                 waveform_display_base(),
                 size,
                 super::waveform_display,
-                theme,
+                ctx,
             ),
-            Self::XyPad => at_size(xy_pad_base(), size, super::xy_pad, theme),
+            Self::XyPad => at_size(xy_pad_base(), size, super::xy_pad, ctx),
         }
     }
 
     /// One ordinary representative at `density`. Nothing else varies.
-    pub fn density(self, density: ControlDensity, theme: &dyn ThemeProvider) -> Node {
+    pub fn density(self, density: ControlDensity, ctx: &RenderContext<'_>) -> Node {
         match self {
-            Self::AudioMeter => at_density(audio_meter_base(), density, super::audio_meter, theme),
+            Self::AudioMeter => at_density(audio_meter_base(), density, super::audio_meter, ctx),
             Self::AudioSwitch => {
-                at_density(audio_switch_base(), density, super::audio_switch, theme)
+                at_density(audio_switch_base(), density, super::audio_switch, ctx)
             }
             Self::DragNumberField => at_density(
                 drag_number_field_base(),
                 density,
                 super::drag_number_field,
-                theme,
+                ctx,
             ),
             Self::EnvelopeEditor => at_density(
                 envelope_editor_base(),
                 density,
                 super::envelope_editor,
-                theme,
+                ctx,
             ),
-            Self::Fader => at_density(fader_base(), density, super::fader, theme),
+            Self::Fader => at_density(fader_base(), density, super::fader, ctx),
             Self::GainReductionMeter => at_density(
                 gain_reduction_meter_base(),
                 density,
                 super::gain_reduction_meter,
-                theme,
+                ctx,
             ),
-            Self::Keyboard => at_density(keyboard_base(), density, super::keyboard, theme),
-            Self::Knob => at_density(knob_base(), density, super::knob, theme),
+            Self::Keyboard => at_density(keyboard_base(), density, super::keyboard, ctx),
+            Self::Knob => at_density(knob_base(), density, super::knob, ctx),
             Self::ModMatrixGrid => at_density(
                 mod_matrix_grid_base(),
                 density,
                 super::mod_matrix_grid,
-                theme,
+                ctx,
             ),
             Self::ValueReadout => {
-                at_density(value_readout_base(), density, super::value_readout, theme)
+                at_density(value_readout_base(), density, super::value_readout, ctx)
             }
             Self::WaveformDisplay => at_density(
                 waveform_display_base(),
                 density,
                 super::waveform_display,
-                theme,
+                ctx,
             ),
-            Self::XyPad => at_density(xy_pad_base(), density, super::xy_pad, theme),
+            Self::XyPad => at_density(xy_pad_base(), density, super::xy_pad, ctx),
         }
     }
 }
@@ -239,25 +240,25 @@ fn mod_matrix_grid_base() -> ModMatrixGridSpec {
 fn at_size<S: AudioPresentationSpec>(
     mut base: S,
     size: ControlSize,
-    render: fn(&S, &dyn ThemeProvider) -> Node,
-    theme: &dyn ThemeProvider,
+    render: fn(&S, &RenderContext<'_>) -> Node,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     base.set_size(size);
-    render(&base, theme)
+    render(&base, ctx)
 }
 
 /// One ordinary representative of `base` at `density`. Only the density varies.
 fn at_density<S: AudioPresentationSpec>(
     mut base: S,
     density: ControlDensity,
-    render: fn(&S, &dyn ThemeProvider) -> Node,
-    theme: &dyn ThemeProvider,
+    render: fn(&S, &RenderContext<'_>) -> Node,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     base.set_density(density);
-    render(&base, theme)
+    render(&base, ctx)
 }
 
-fn page(groups: Vec<(&str, Vec<Node>)>, theme: &dyn ThemeProvider) -> Node {
+fn page(groups: Vec<(&str, Vec<Node>)>, ctx: &RenderContext<'_>) -> Node {
     let mut root = Node::container();
     root.style.descriptor.layout.spacing.gap = 24.0;
     for (title, children) in groups {
@@ -266,7 +267,8 @@ fn page(groups: Vec<(&str, Vec<Node>)>, theme: &dyn ThemeProvider) -> Node {
         let mut heading = Node::text(title);
         heading.style.text_size = Some(11.0);
         heading.style.text_weight = Some(600);
-        heading.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+        heading.style.descriptor.text_color =
+            Some(ctx.theme().resolve_color("color.text.secondary"));
         let mut row = Node::container();
         row.style.descriptor.layout.direction = LayoutDirection::Row;
         row.style.descriptor.layout.spacing.gap = 16.0;
@@ -288,15 +290,15 @@ fn knob_node(
     max: f64,
     law: AudioValueLaw,
     label: &str,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     let mut spec = KnobSpec::new(value, min, max, law);
     spec.aria_label = label.into();
     spec.value_text = format_value(value, AudioValueFormat::Number { decimals: 2 });
-    super::knob(&spec, theme)
+    super::knob(&spec, ctx)
 }
 
-fn knob_examples(theme: &dyn ThemeProvider) -> Node {
+fn knob_examples(ctx: &RenderContext<'_>) -> Node {
     let bipolar = AudioValueLaw::BipolarCenter { center: 0.0 };
     let mut fine = KnobSpec::new(0.42, 0.0, 1.0, AudioValueLaw::Linear);
     fine.visual_state.drag = DragState::Fine;
@@ -314,7 +316,7 @@ fn knob_examples(theme: &dyn ThemeProvider) -> Node {
                     1.0,
                     AudioValueLaw::Linear,
                     "Linear knob",
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -325,12 +327,12 @@ fn knob_examples(theme: &dyn ThemeProvider) -> Node {
                     20_000.0,
                     AudioValueLaw::Logarithmic,
                     "Frequency",
-                    theme,
+                    ctx,
                 )],
             ),
             (
                 "Bipolar center",
-                vec![knob_node(0.0, -1.0, 1.0, bipolar, "Pan", theme)],
+                vec![knob_node(0.0, -1.0, 1.0, bipolar, "Pan", ctx)],
             ),
             (
                 "Stepped values",
@@ -343,10 +345,10 @@ fn knob_examples(theme: &dyn ThemeProvider) -> Node {
                         law: Default::default(),
                     },
                     "Stepped knob",
-                    theme,
+                    ctx,
                 )],
             ),
-            ("Fine drag", vec![super::knob(&fine, theme)]),
+            ("Fine drag", vec![super::knob(&fine, ctx)]),
             (
                 "Circular mode",
                 vec![knob_node(
@@ -355,10 +357,10 @@ fn knob_examples(theme: &dyn ThemeProvider) -> Node {
                     1.0,
                     AudioValueLaw::Linear,
                     "Circular drag",
-                    theme,
+                    ctx,
                 )],
             ),
-            ("Automation state", vec![super::knob(&automated, theme)]),
+            ("Automation state", vec![super::knob(&automated, ctx)]),
             (
                 "Type-in and keyboard bounds",
                 vec![
@@ -368,15 +370,15 @@ fn knob_examples(theme: &dyn ThemeProvider) -> Node {
                         1.0,
                         AudioValueLaw::Linear,
                         "Type-in value",
-                        theme,
+                        ctx,
                     ),
-                    knob_node(0.0, 0.0, 1.0, AudioValueLaw::Linear, "Minimum", theme),
-                    knob_node(1.0, 0.0, 1.0, AudioValueLaw::Linear, "Maximum", theme),
+                    knob_node(0.0, 0.0, 1.0, AudioValueLaw::Linear, "Minimum", ctx),
+                    knob_node(1.0, 0.0, 1.0, AudioValueLaw::Linear, "Maximum", ctx),
                 ],
             ),
-            ("Disabled", vec![super::knob(&disabled, theme)]),
+            ("Disabled", vec![super::knob(&disabled, ctx)]),
         ],
-        theme,
+        ctx,
     )
 }
 
@@ -384,7 +386,7 @@ fn fader_node(
     value: f64,
     orientation: Orientation,
     law: AudioValueLaw,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     let (min, max) = if matches!(law, AudioValueLaw::Logarithmic) {
         (20.0, 20_000.0)
@@ -396,10 +398,10 @@ fn fader_node(
     let mut spec = FaderSpec::new(value, min, max, law);
     spec.orientation = orientation;
     spec.value_text = format_value(value, AudioValueFormat::Number { decimals: 2 });
-    super::fader(&spec, theme)
+    super::fader(&spec, ctx)
 }
 
-fn fader_examples(theme: &dyn ThemeProvider) -> Node {
+fn fader_examples(ctx: &RenderContext<'_>) -> Node {
     let mut detents = FaderSpec::new(0.5, 0.0, 1.0, AudioValueLaw::Linear);
     detents.detents = vec![0.25, 0.5, 0.75];
     let mut fine = FaderSpec::new(0.4, 0.0, 1.0, AudioValueLaw::Linear);
@@ -413,56 +415,56 @@ fn fader_examples(theme: &dyn ThemeProvider) -> Node {
             (
                 "Vertical and horizontal",
                 vec![
-                    fader_node(0.65, Orientation::Vertical, AudioValueLaw::Linear, theme),
-                    fader_node(0.65, Orientation::Horizontal, AudioValueLaw::Linear, theme),
+                    fader_node(0.65, Orientation::Vertical, AudioValueLaw::Linear, ctx),
+                    fader_node(0.65, Orientation::Horizontal, AudioValueLaw::Linear, ctx),
                 ],
             ),
             (
                 "Linear / log / bipolar laws",
                 vec![
-                    fader_node(0.4, Orientation::Vertical, AudioValueLaw::Linear, theme),
+                    fader_node(0.4, Orientation::Vertical, AudioValueLaw::Linear, ctx),
                     fader_node(
                         1000.0,
                         Orientation::Vertical,
                         AudioValueLaw::Logarithmic,
-                        theme,
+                        ctx,
                     ),
                     fader_node(
                         0.0,
                         Orientation::Vertical,
                         AudioValueLaw::BipolarCenter { center: 0.0 },
-                        theme,
+                        ctx,
                     ),
                 ],
             ),
-            ("Detents", vec![super::fader(&detents, theme)]),
+            ("Detents", vec![super::fader(&detents, ctx)]),
             (
                 "Coarse / fine drag",
                 vec![
-                    fader_node(0.4, Orientation::Vertical, AudioValueLaw::Linear, theme),
-                    super::fader(&fine, theme),
+                    fader_node(0.4, Orientation::Vertical, AudioValueLaw::Linear, ctx),
+                    super::fader(&fine, ctx),
                 ],
             ),
-            ("Automation touch", vec![super::fader(&automation, theme)]),
+            ("Automation touch", vec![super::fader(&automation, ctx)]),
             (
                 "Type-in",
                 vec![fader_node(
                     0.25,
                     Orientation::Vertical,
                     AudioValueLaw::Linear,
-                    theme,
+                    ctx,
                 )],
             ),
             (
                 "Keyboard bounds",
                 vec![
-                    fader_node(0.0, Orientation::Vertical, AudioValueLaw::Linear, theme),
-                    fader_node(1.0, Orientation::Vertical, AudioValueLaw::Linear, theme),
+                    fader_node(0.0, Orientation::Vertical, AudioValueLaw::Linear, ctx),
+                    fader_node(1.0, Orientation::Vertical, AudioValueLaw::Linear, ctx),
                 ],
             ),
-            ("Disabled", vec![super::fader(&disabled, theme)]),
+            ("Disabled", vec![super::fader(&disabled, ctx)]),
         ],
-        theme,
+        ctx,
     )
 }
 
@@ -490,7 +492,7 @@ fn meter_node(
     orientation: Orientation,
     stereo: bool,
     clip: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     let visual = meter_visual(value, Some((value + 0.08).min(1.0)), clip, true);
     let mut spec = AudioMeterSpec::new(visual.clone());
@@ -505,10 +507,10 @@ fn meter_node(
     spec.style = style;
     spec.orientation = orientation;
     spec.value_text = format_value(-60.0 + value * 60.0, AudioValueFormat::Db { decimals: 1 });
-    super::audio_meter(&spec, theme)
+    super::audio_meter(&spec, ctx)
 }
 
-fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
+fn audio_meter_examples(ctx: &RenderContext<'_>) -> Node {
     page(
         vec![
             (
@@ -519,7 +521,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                     Orientation::Vertical,
                     false,
                     false,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -530,7 +532,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                     Orientation::Vertical,
                     false,
                     false,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -541,7 +543,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                     Orientation::Vertical,
                     false,
                     false,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -552,7 +554,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                     Orientation::Vertical,
                     false,
                     false,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -564,7 +566,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                         Orientation::Horizontal,
                         false,
                         false,
-                        theme,
+                        ctx,
                     ),
                     meter_node(
                         0.66,
@@ -572,7 +574,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                         Orientation::Horizontal,
                         false,
                         false,
-                        theme,
+                        ctx,
                     ),
                 ],
             ),
@@ -585,7 +587,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                         Orientation::Vertical,
                         false,
                         false,
-                        theme,
+                        ctx,
                     ),
                     meter_node(
                         0.7,
@@ -593,7 +595,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                         Orientation::Vertical,
                         true,
                         false,
-                        theme,
+                        ctx,
                     ),
                 ],
             ),
@@ -606,7 +608,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                         Orientation::Vertical,
                         false,
                         false,
-                        theme,
+                        ctx,
                     ),
                     meter_node(
                         0.62,
@@ -614,7 +616,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                         Orientation::Horizontal,
                         false,
                         false,
-                        theme,
+                        ctx,
                     ),
                 ],
             ),
@@ -626,7 +628,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                     Orientation::Vertical,
                     false,
                     false,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -638,7 +640,7 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                         Orientation::Vertical,
                         false,
                         true,
-                        theme,
+                        ctx,
                     ),
                     meter_node(
                         0.2,
@@ -646,16 +648,16 @@ fn audio_meter_examples(theme: &dyn ThemeProvider) -> Node {
                         Orientation::Vertical,
                         false,
                         false,
-                        theme,
+                        ctx,
                     ),
                 ],
             ),
         ],
-        theme,
+        ctx,
     )
 }
 
-fn value_readout_examples(theme: &dyn ThemeProvider) -> Node {
+fn value_readout_examples(ctx: &RenderContext<'_>) -> Node {
     let values = [
         ("Number", 12.345, AudioValueFormat::Number { decimals: 2 }),
         ("dB", -12.4, AudioValueFormat::Db { decimals: 1 }),
@@ -679,7 +681,7 @@ fn value_readout_examples(theme: &dyn ThemeProvider) -> Node {
         .map(|(title, value, format)| {
             let visual = control(value, -20_000.0, 20_000.0, AudioValueLaw::Linear);
             let spec = ValueReadoutSpec::new(visual, format_value(value, format));
-            (title, vec![super::value_readout(&spec, theme)])
+            (title, vec![super::value_readout(&spec, ctx)])
         })
         .collect::<Vec<_>>();
     let mut disabled =
@@ -690,16 +692,16 @@ fn value_readout_examples(theme: &dyn ThemeProvider) -> Node {
         vec![
             super::value_readout(
                 &ValueReadoutSpec::new(control(-1.0, -1.0, 1.0, AudioValueLaw::Linear), "-1"),
-                theme,
+                ctx,
             ),
             super::value_readout(
                 &ValueReadoutSpec::new(control(1.0, -1.0, 1.0, AudioValueLaw::Linear), "+1"),
-                theme,
+                ctx,
             ),
-            super::value_readout(&disabled, theme),
+            super::value_readout(&disabled, ctx),
         ],
     ));
-    page(groups, theme)
+    page(groups, ctx)
 }
 
 fn drag_field(
@@ -708,15 +710,15 @@ fn drag_field(
     max: f64,
     step: f64,
     text: &str,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     super::drag_number_field(
         &DragNumberFieldSpec::new(value, min, max, step, text),
-        theme,
+        ctx,
     )
 }
 
-fn drag_number_field_examples(theme: &dyn ThemeProvider) -> Node {
+fn drag_number_field_examples(ctx: &RenderContext<'_>) -> Node {
     let mut fine = DragNumberFieldSpec::new(0.4, 0.0, 1.0, 0.01, "0.4");
     fine.visual_state.drag = DragState::Fine;
     let mut direct = DragNumberFieldSpec::new(-12.0, -60.0, 12.0, 0.1, "-12 dB");
@@ -727,50 +729,50 @@ fn drag_number_field_examples(theme: &dyn ThemeProvider) -> Node {
         vec![
             (
                 "Default",
-                vec![drag_field(0.5, 0.0, 1.0, 0.01, "0.5", theme)],
+                vec![drag_field(0.5, 0.0, 1.0, 0.01, "0.5", ctx)],
             ),
             (
                 "Integer step",
-                vec![drag_field(4.0, 0.0, 10.0, 1.0, "4", theme)],
+                vec![drag_field(4.0, 0.0, 10.0, 1.0, "4", ctx)],
             ),
             (
                 "Formatted dB",
-                vec![drag_field(-12.4, -60.0, 12.0, 0.1, "-12.4 dB", theme)],
+                vec![drag_field(-12.4, -60.0, 12.0, 0.1, "-12.4 dB", ctx)],
             ),
             (
                 "Coarse / fine drag",
                 vec![
-                    drag_field(0.4, 0.0, 1.0, 0.01, "0.4", theme),
-                    super::drag_number_field(&fine, theme),
+                    drag_field(0.4, 0.0, 1.0, 0.01, "0.4", ctx),
+                    super::drag_number_field(&fine, ctx),
                 ],
             ),
             (
                 "Direct entry",
-                vec![super::drag_number_field(&direct, theme)],
+                vec![super::drag_number_field(&direct, ctx)],
             ),
             (
                 "Keyboard bounds",
                 vec![
-                    drag_field(0.0, 0.0, 1.0, 0.1, "0", theme),
-                    drag_field(1.0, 0.0, 1.0, 0.1, "1", theme),
+                    drag_field(0.0, 0.0, 1.0, 0.1, "0", ctx),
+                    drag_field(1.0, 0.0, 1.0, 0.1, "1", ctx),
                 ],
             ),
             (
                 "Negative range",
-                vec![drag_field(-7.0, -24.0, 24.0, 1.0, "-7", theme)],
+                vec![drag_field(-7.0, -24.0, 24.0, 1.0, "-7", ctx)],
             ),
-            ("Disabled", vec![super::drag_number_field(&disabled, theme)]),
+            ("Disabled", vec![super::drag_number_field(&disabled, ctx)]),
         ],
-        theme,
+        ctx,
     )
 }
 
 fn envelope(
     points: &[(f64, f64, f64, bool, bool)],
     enabled: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
-    super::envelope_editor(&envelope_spec(points, enabled), theme)
+    super::envelope_editor(&envelope_spec(points, enabled), ctx)
 }
 
 fn envelope_spec(points: &[(f64, f64, f64, bool, bool)], enabled: bool) -> EnvelopeEditorSpec {
@@ -805,11 +807,11 @@ const ADSR: [(f64, f64, f64, bool, bool); 5] = [
     (1.0, 0.0, 0.0, false, false),
 ];
 
-fn envelope_editor_examples(theme: &dyn ThemeProvider) -> Node {
+fn envelope_editor_examples(ctx: &RenderContext<'_>) -> Node {
     let adsr = ADSR;
     page(
         vec![
-            ("ADSR-like default", vec![envelope(&adsr, true, theme)]),
+            ("ADSR-like default", vec![envelope(&adsr, true, ctx)]),
             (
                 "Positive / negative curves",
                 vec![envelope(
@@ -819,7 +821,7 @@ fn envelope_editor_examples(theme: &dyn ThemeProvider) -> Node {
                         (1.0, 0.0, 0.0, false, false),
                     ],
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -831,14 +833,14 @@ fn envelope_editor_examples(theme: &dyn ThemeProvider) -> Node {
                         (1.0, 0.0, 0.0, false, false),
                     ],
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
                 "Add / remove",
                 vec![
-                    envelope(&adsr[..3], true, theme),
-                    envelope(&adsr[..2], true, theme),
+                    envelope(&adsr[..3], true, ctx),
+                    envelope(&adsr[..2], true, ctx),
                 ],
             ),
             (
@@ -850,16 +852,16 @@ fn envelope_editor_examples(theme: &dyn ThemeProvider) -> Node {
                         (1.0, 0.0, 0.0, false, false),
                     ],
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
-            ("Keyboard nudges", vec![envelope(&adsr, true, theme)]),
+            ("Keyboard nudges", vec![envelope(&adsr, true, ctx)]),
             (
                 "Curve nudges",
                 vec![envelope(
                     &[(0.0, 0.0, 0.5, true, false), (1.0, 1.0, 0.0, false, false)],
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -867,12 +869,12 @@ fn envelope_editor_examples(theme: &dyn ThemeProvider) -> Node {
                 vec![envelope(
                     &[(0.0, 0.5, 0.8, false, false), (1.0, 0.5, 0.0, false, false)],
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
-            ("Disabled", vec![envelope(&adsr, false, theme)]),
+            ("Disabled", vec![envelope(&adsr, false, ctx)]),
         ],
-        theme,
+        ctx,
     )
 }
 
@@ -882,9 +884,9 @@ fn xy(
     drag: DragState,
     automation: AutomationState,
     enabled: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
-    super::xy_pad(&xy_spec(x, y, drag, automation, enabled), theme)
+    super::xy_pad(&xy_spec(x, y, drag, automation, enabled), ctx)
 }
 
 fn xy_spec(
@@ -907,7 +909,7 @@ fn xy_spec(
     })
 }
 
-fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
+fn xy_pad_examples(ctx: &RenderContext<'_>) -> Node {
     page(
         vec![
             (
@@ -918,7 +920,7 @@ fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
                     DragState::None,
                     AutomationState::None,
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -930,7 +932,7 @@ fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
                         DragState::None,
                         AutomationState::None,
                         true,
-                        theme,
+                        ctx,
                     ),
                     xy(
                         1.0,
@@ -938,7 +940,7 @@ fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
                         DragState::None,
                         AutomationState::None,
                         true,
-                        theme,
+                        ctx,
                     ),
                 ],
             ),
@@ -950,7 +952,7 @@ fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
                     DragState::None,
                     AutomationState::None,
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -962,7 +964,7 @@ fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
                         DragState::Coarse,
                         AutomationState::None,
                         true,
-                        theme,
+                        ctx,
                     ),
                     xy(
                         0.4,
@@ -970,7 +972,7 @@ fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
                         DragState::Fine,
                         AutomationState::None,
                         true,
-                        theme,
+                        ctx,
                     ),
                 ],
             ),
@@ -982,7 +984,7 @@ fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
                     DragState::None,
                     AutomationState::None,
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -993,7 +995,7 @@ fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
                     DragState::None,
                     AutomationState::Writing,
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -1004,7 +1006,7 @@ fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
                     DragState::None,
                     AutomationState::None,
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -1015,11 +1017,11 @@ fn xy_pad_examples(theme: &dyn ThemeProvider) -> Node {
                     DragState::None,
                     AutomationState::None,
                     false,
-                    theme,
+                    ctx,
                 )],
             ),
         ],
-        theme,
+        ctx,
     )
 }
 
@@ -1030,11 +1032,11 @@ fn switch(
     lamp: Option<bool>,
     enabled: bool,
     mode: AudioSwitchMode,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     super::audio_switch(
         &switch_spec(state, count, pressed, lamp, enabled, mode),
-        theme,
+        ctx,
     )
 }
 
@@ -1052,35 +1054,35 @@ fn switch_spec(
     )
 }
 
-fn audio_switch_examples(theme: &dyn ThemeProvider) -> Node {
+fn audio_switch_examples(ctx: &RenderContext<'_>) -> Node {
     page(
         vec![
             (
                 "Off / on latch",
                 vec![
-                    switch(0, 2, false, None, true, AudioSwitchMode::Latch, theme),
-                    switch(1, 2, false, None, true, AudioSwitchMode::Latch, theme),
+                    switch(0, 2, false, None, true, AudioSwitchMode::Latch, ctx),
+                    switch(1, 2, false, None, true, AudioSwitchMode::Latch, ctx),
                 ],
             ),
             (
                 "Held / released momentary",
                 vec![
-                    switch(1, 2, true, None, true, AudioSwitchMode::Momentary, theme),
-                    switch(0, 2, false, None, true, AudioSwitchMode::Momentary, theme),
+                    switch(1, 2, true, None, true, AudioSwitchMode::Momentary, ctx),
+                    switch(0, 2, false, None, true, AudioSwitchMode::Momentary, ctx),
                 ],
             ),
             (
                 "Three-state cycle",
                 vec![
-                    switch(0, 3, false, None, true, AudioSwitchMode::Multi, theme),
-                    switch(1, 3, false, None, true, AudioSwitchMode::Multi, theme),
-                    switch(2, 3, false, None, true, AudioSwitchMode::Multi, theme),
+                    switch(0, 3, false, None, true, AudioSwitchMode::Multi, ctx),
+                    switch(1, 3, false, None, true, AudioSwitchMode::Multi, ctx),
+                    switch(2, 3, false, None, true, AudioSwitchMode::Multi, ctx),
                 ],
             ),
             (
                 "Lamp override",
                 vec![
-                    switch(0, 2, false, Some(true), true, AudioSwitchMode::Latch, theme),
+                    switch(0, 2, false, Some(true), true, AudioSwitchMode::Latch, ctx),
                     switch(
                         1,
                         2,
@@ -1088,7 +1090,7 @@ fn audio_switch_examples(theme: &dyn ThemeProvider) -> Node {
                         Some(false),
                         true,
                         AudioSwitchMode::Latch,
-                        theme,
+                        ctx,
                     ),
                 ],
             ),
@@ -1101,7 +1103,7 @@ fn audio_switch_examples(theme: &dyn ThemeProvider) -> Node {
                     None,
                     true,
                     AudioSwitchMode::Latch,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -1113,11 +1115,11 @@ fn audio_switch_examples(theme: &dyn ThemeProvider) -> Node {
                     None,
                     false,
                     AudioSwitchMode::Latch,
-                    theme,
+                    ctx,
                 )],
             ),
         ],
-        theme,
+        ctx,
     )
 }
 
@@ -1126,12 +1128,12 @@ fn reduction(
     style: AudioMeterStyle,
     orientation: Orientation,
     enabled: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     let mut spec = reduction_spec(value, enabled);
     spec.style = style;
     spec.orientation = orientation;
-    super::gain_reduction_meter(&spec, theme)
+    super::gain_reduction_meter(&spec, ctx)
 }
 
 fn reduction_spec(value: f64, enabled: bool) -> GainReductionMeterSpec {
@@ -1142,7 +1144,7 @@ fn reduction_spec(value: f64, enabled: bool) -> GainReductionMeterSpec {
     GainReductionMeterSpec::new(visual, 30.0)
 }
 
-fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
+fn gain_reduction_meter_examples(ctx: &RenderContext<'_>) -> Node {
     page(
         vec![
             (
@@ -1152,7 +1154,7 @@ fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
                     AudioMeterStyle::Segments,
                     Orientation::Vertical,
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -1162,7 +1164,7 @@ fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
                     AudioMeterStyle::Segments,
                     Orientation::Vertical,
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -1172,7 +1174,7 @@ fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
                     AudioMeterStyle::Segments,
                     Orientation::Vertical,
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -1182,7 +1184,7 @@ fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
                     AudioMeterStyle::Segments,
                     Orientation::Vertical,
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -1193,14 +1195,14 @@ fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
                         AudioMeterStyle::Bar,
                         Orientation::Horizontal,
                         true,
-                        theme,
+                        ctx,
                     ),
                     reduction(
                         12.0,
                         AudioMeterStyle::Segments,
                         Orientation::Horizontal,
                         true,
-                        theme,
+                        ctx,
                     ),
                 ],
             ),
@@ -1212,14 +1214,14 @@ fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
                         AudioMeterStyle::Segments,
                         Orientation::Vertical,
                         true,
-                        theme,
+                        ctx,
                     ),
                     reduction(
                         12.0,
                         AudioMeterStyle::Segments,
                         Orientation::Horizontal,
                         true,
-                        theme,
+                        ctx,
                     ),
                 ],
             ),
@@ -1230,7 +1232,7 @@ fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
                     AudioMeterStyle::Segments,
                     Orientation::Vertical,
                     true,
-                    theme,
+                    ctx,
                 )],
             ),
             (
@@ -1240,11 +1242,11 @@ fn gain_reduction_meter_examples(theme: &dyn ThemeProvider) -> Node {
                     AudioMeterStyle::Segments,
                     Orientation::Vertical,
                     false,
-                    theme,
+                    ctx,
                 )],
             ),
         ],
-        theme,
+        ctx,
     )
 }
 
@@ -1262,39 +1264,39 @@ fn keyboard_spec(orientation: KeyboardOrientation, enabled: bool) -> KeyboardSpe
     KeyboardSpec::new(poodle_headless::audio::keyboard_visual_state(&context))
 }
 
-fn keyboard_examples(theme: &dyn ThemeProvider) -> Node {
+fn keyboard_examples(ctx: &RenderContext<'_>) -> Node {
     let base = keyboard_spec(KeyboardOrientation::Horizontal, true);
     page(
         vec![
             (
                 "Horizontal input / local chord",
-                vec![super::keyboard(&base, theme)],
+                vec![super::keyboard(&base, ctx)],
             ),
             (
                 "Vertical piano-roll gutter",
                 vec![super::keyboard(
                     &keyboard_spec(KeyboardOrientation::Vertical, true),
-                    theme,
+                    ctx,
                 )],
             ),
-            ("Velocity depth", vec![super::keyboard(&base, theme)]),
+            ("Velocity depth", vec![super::keyboard(&base, ctx)]),
             (
                 "Computer keys / octave shift",
-                vec![super::keyboard(&base, theme)],
+                vec![super::keyboard(&base, ctx)],
             ),
             (
                 "External playback highlight",
-                vec![super::keyboard(&base, theme)],
+                vec![super::keyboard(&base, ctx)],
             ),
             (
                 "Disabled",
                 vec![super::keyboard(
                     &keyboard_spec(KeyboardOrientation::Horizontal, false),
-                    theme,
+                    ctx,
                 )],
             ),
         ],
-        theme,
+        ctx,
     )
 }
 
@@ -1343,7 +1345,7 @@ fn waveform_spec(enabled: bool) -> WaveformDisplaySpec {
     )
 }
 
-fn waveform_display_examples(theme: &dyn ThemeProvider) -> Node {
+fn waveform_display_examples(ctx: &RenderContext<'_>) -> Node {
     let base = waveform_spec(true);
     page(
         vec![
@@ -1351,19 +1353,19 @@ fn waveform_display_examples(theme: &dyn ThemeProvider) -> Node {
                 "Peak pyramid / cursor",
                 vec![super::waveform_display(
                     &waveform_spec_view(true, 0, 64, None),
-                    theme,
+                    ctx,
                 )],
             ),
             (
                 "Zoomed viewport",
                 vec![super::waveform_display(
                     &waveform_spec_view(true, 16, 48, None),
-                    theme,
+                    ctx,
                 )],
             ),
             (
                 "Forward and ordered selection",
-                vec![super::waveform_display(&base, theme)],
+                vec![super::waveform_display(&base, ctx)],
             ),
             (
                 "Empty",
@@ -1386,19 +1388,19 @@ fn waveform_display_examples(theme: &dyn ThemeProvider) -> Node {
                         }
                         .visual_state(),
                     ),
-                    theme,
+                    ctx,
                 )],
             ),
             (
                 "Disabled",
-                vec![super::waveform_display(&waveform_spec(false), theme)],
+                vec![super::waveform_display(&waveform_spec(false), ctx)],
             ),
             (
                 "Inspector ceiling",
-                vec![super::waveform_display(&base, theme)],
+                vec![super::waveform_display(&base, ctx)],
             ),
         ],
-        theme,
+        ctx,
     )
 }
 
@@ -1469,21 +1471,21 @@ fn matrix_spec(enabled: bool) -> ModMatrixGridSpec {
     ModMatrixGridSpec::new(context.visual_state())
 }
 
-fn mod_matrix_grid_examples(theme: &dyn ThemeProvider) -> Node {
+fn mod_matrix_grid_examples(ctx: &RenderContext<'_>) -> Node {
     let base = matrix_spec(true);
     page(
         vec![
             (
                 "Sparse generic matrix",
-                vec![super::mod_matrix_grid(&base, theme)],
+                vec![super::mod_matrix_grid(&base, ctx)],
             ),
             (
                 "Bipolar / negative / unipolar",
-                vec![super::mod_matrix_grid(&base, theme)],
+                vec![super::mod_matrix_grid(&base, ctx)],
             ),
             (
                 "Keyboard navigation and toggle",
-                vec![super::mod_matrix_grid(&base, theme)],
+                vec![super::mod_matrix_grid(&base, ctx)],
             ),
             (
                 "Empty axes",
@@ -1491,15 +1493,15 @@ fn mod_matrix_grid_examples(theme: &dyn ThemeProvider) -> Node {
                     &ModMatrixGridSpec::new(
                         ModMatrixContext::new(vec![], vec![], vec![]).visual_state(),
                     ),
-                    theme,
+                    ctx,
                 )],
             ),
             (
                 "Disabled",
-                vec![super::mod_matrix_grid(&matrix_spec(false), theme)],
+                vec![super::mod_matrix_grid(&matrix_spec(false), ctx)],
             ),
         ],
-        theme,
+        ctx,
     )
 }
 
@@ -1546,8 +1548,10 @@ mod tests {
     /// sweeps, so a consumer cannot show a size matrix inside Examples.
     #[test]
     fn examples_pane_carries_no_axis_matrix() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         for specimen in ALL {
-            let captions = text_of(&specimen.examples(&theme()));
+            let captions = text_of(&specimen.examples(&ctx));
             assert!(
                 !captions.iter().any(|line| line.starts_with("Sizes —")),
                 "{specimen:?} still lists a size sweep in Examples"
@@ -1562,8 +1566,10 @@ mod tests {
     /// One requested step, one representative — not a page, and not a matrix.
     #[test]
     fn each_axis_step_returns_one_representative() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         for specimen in ALL {
-            let examples = node_count(&specimen.examples(&theme()));
+            let examples = node_count(&specimen.examples(&ctx));
             for size in [
                 ControlSize::Xs,
                 ControlSize::Sm,
@@ -1572,7 +1578,7 @@ mod tests {
                 ControlSize::Xl,
             ] {
                 assert!(
-                    node_count(&specimen.size(size, &theme())) < examples,
+                    node_count(&specimen.size(size, &ctx)) < examples,
                     "{specimen:?} at {size:?} returned more than one representative"
                 );
             }
@@ -1582,7 +1588,7 @@ mod tests {
                 ControlDensity::Comfortable,
             ] {
                 assert!(
-                    node_count(&specimen.density(density, &theme())) < examples,
+                    node_count(&specimen.density(density, &ctx)) < examples,
                     "{specimen:?} at {density:?} returned more than one representative"
                 );
             }
@@ -1593,6 +1599,8 @@ mod tests {
     /// grows monotonically across the five control sizes.
     #[test]
     fn the_requested_size_reaches_the_control() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let widths: Vec<f32> = [
             ControlSize::Xs,
             ControlSize::Sm,
@@ -1603,7 +1611,7 @@ mod tests {
         .into_iter()
         .map(|size| {
             match AudioSpecimen::Knob
-                .size(size, &theme())
+                .size(size, &ctx)
                 .style
                 .descriptor
                 .layout
@@ -1630,12 +1638,14 @@ mod tests {
     /// that ordering changes this fails loudly rather than silently weakening.
     #[test]
     fn the_requested_density_reaches_the_control() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         for (density, expected) in [
             (ControlDensity::Compact, 4.0_f32),
             (ControlDensity::Default, 6.0),
             (ControlDensity::Comfortable, 8.0),
         ] {
-            let fader = AudioSpecimen::Fader.density(density, &theme());
+            let fader = AudioSpecimen::Fader.density(density, &ctx);
             assert_eq!(fader.id.as_deref(), Some("fader-root"));
 
             let rail = fader.children.first().expect("fader rail");

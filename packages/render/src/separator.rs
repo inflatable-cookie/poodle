@@ -3,18 +3,18 @@
 //! Contract: `docs/contracts/components/separator.md`
 //! Ported from: `packages/jetstream/components/src/separator.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutSizing, Node, NodeRole};
 use poodle_specs::{SeparatorOrientation, SeparatorSpec};
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 
-pub fn separator(spec: &SeparatorSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn separator(spec: &SeparatorSpec, ctx: &RenderContext<'_>) -> Node {
     // Subtle tone: base colour at the spec's mix ratio of its own alpha;
     // default resolves ratio 1.0.
-    let base = theme.resolve_color(spec.resolved_color());
+    let base = ctx.theme().resolve_color(spec.resolved_color());
     let color = with_alpha(base, base.3 * spec.subtle_mix_ratio());
-    let stroke = theme.resolve_space(spec.resolved_stroke_width());
+    let stroke = ctx.theme().resolve_space(spec.resolved_stroke_width());
 
     let mut el = Node::container();
     {
@@ -46,10 +46,11 @@ mod tests {
     fn exposes_separator_semantics_only_when_requested() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
 
-        assert_eq!(separator(&SeparatorSpec::new(), &theme).a11y.role, None);
+        assert_eq!(separator(&SeparatorSpec::new(), &ctx).a11y.role, None);
         assert_eq!(
-            separator(&SeparatorSpec::new().with_decorative(false), &theme)
+            separator(&SeparatorSpec::new().with_decorative(false), &ctx)
                 .a11y
                 .role,
             Some(NodeRole::Splitter)

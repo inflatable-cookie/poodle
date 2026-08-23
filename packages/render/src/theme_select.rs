@@ -8,14 +8,14 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition,
 };
 use poodle_specs::{ControlSize, ThemeOption, ThemeSelectSpec};
 
 use crate::color::hex_color;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
 fn all_corners(node: &mut Node, r: f32) {
     let c = &mut node.style.descriptor.corner_radii;
@@ -41,11 +41,11 @@ fn abs_block(position: NodePosition, w: f32, h: f32, radius: f32, bg: ColorValue
 }
 
 /// Mini theme preview: canvas fill + surface card + accent dot + text bar.
-fn swatch(option: &ThemeOption, theme: &dyn ThemeProvider, w: f32, h: f32, selected: bool) -> Node {
-    let fallback = theme.resolve_color("color.background.surface");
+fn swatch(option: &ThemeOption, ctx: &RenderContext<'_>, w: f32, h: f32, selected: bool) -> Node {
+    let fallback = ctx.theme().resolve_color("color.background.surface");
     let color = |hex: &str| hex_color(hex).unwrap_or(fallback);
-    let border = theme.resolve_color("color.border.subtle");
-    let accent = theme.resolve_color("color.accent.base");
+    let border = ctx.theme().resolve_color("color.border.subtle");
+    let accent = ctx.theme().resolve_color("color.accent.base");
 
     let mut root = Node::container();
     root.position = NodePosition::Relative;
@@ -110,12 +110,12 @@ pub struct ThemeSelectHandlers {
 
 pub fn theme_select(
     spec: &ThemeSelectSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     theme_select_with_handlers(
         spec,
-        theme,
+        ctx,
         ThemeSelectHandlers {
             on_change,
             ..ThemeSelectHandlers::default()
@@ -125,11 +125,11 @@ pub fn theme_select(
 
 pub fn theme_select_with_handlers(
     spec: &ThemeSelectSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: ThemeSelectHandlers,
 ) -> Node {
     let on_change = handlers.on_change;
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let trigger_h = rem_to_px(match effective_size {
         ControlSize::Xs => 1.5,
         ControlSize::Sm => 1.75,
@@ -138,15 +138,15 @@ pub fn theme_select_with_handlers(
         ControlSize::Xl => 3.25,
     });
 
-    let text_primary = theme.resolve_color(spec.field_text_token());
-    let text_secondary = theme.resolve_color(spec.label_color_token());
-    let border = theme.resolve_color(spec.field_border_token());
-    let surface = theme.resolve_color(spec.field_fill_token());
-    let elevated = theme.resolve_color(spec.surface_fill_token());
-    let item_border = theme.resolve_color(spec.item_border_token());
-    let accent = theme.resolve_color(spec.accent_token());
-    let radius = theme.resolve_radius(spec.radius_token());
-    let surface_radius = theme.resolve_radius(spec.surface_radius_token());
+    let text_primary = ctx.theme().resolve_color(spec.field_text_token());
+    let text_secondary = ctx.theme().resolve_color(spec.label_color_token());
+    let border = ctx.theme().resolve_color(spec.field_border_token());
+    let surface = ctx.theme().resolve_color(spec.field_fill_token());
+    let elevated = ctx.theme().resolve_color(spec.surface_fill_token());
+    let item_border = ctx.theme().resolve_color(spec.item_border_token());
+    let accent = ctx.theme().resolve_color(spec.accent_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let surface_radius = ctx.theme().resolve_radius(spec.surface_radius_token());
 
     // ── Trigger ─────────────────────────────────────────────────────────
     let mut trigger = Node::container();
@@ -180,7 +180,7 @@ pub fn theme_select_with_handlers(
 
     let mut trigger = trigger;
     if let Some(current) = spec.current_option() {
-        trigger = trigger.child(swatch(current, theme, 1.25, 1.25, false));
+        trigger = trigger.child(swatch(current, ctx, 1.25, 1.25, false));
     }
     if spec.show_label {
         let mut label = Node::text(spec.trigger_label());
@@ -245,7 +245,7 @@ pub fn theme_select_with_handlers(
             label.style.descriptor.text_color = Some(text_primary);
             label.style.text_size = Some(rem_to_px(0.71875));
             let mut tile = tile
-                .child(swatch(option, theme, 2.75, 2.0, selected))
+                .child(swatch(option, ctx, 2.75, 2.0, selected))
                 .child(label);
 
             if let Some(handler) = &on_change {
@@ -298,7 +298,7 @@ pub fn theme_select_with_handlers(
     }
 
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
     }
 
     if !spec.aria_label.is_empty() {
@@ -317,15 +317,17 @@ mod tests {
 
     #[test]
     fn outside_interact_refusal_marks_the_open_panel() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         // Web default `true` + open: no refusal marker anywhere in the tree.
         let spec = ThemeSelectSpec::new().with_open(true);
-        let node = theme_select(&spec, &theme(), None);
+        let node = theme_select(&spec, &ctx, None);
         assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
 
         // Refusal: the open panel carries the inert activation marker a host
         // keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = theme_select(&refusing, &theme(), None);
+        let node = theme_select(&refusing, &ctx, None);
         assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
     }
 }

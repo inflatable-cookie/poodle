@@ -22,7 +22,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node, NodeRole,
@@ -30,9 +29,9 @@ use poodle_node::{
 use poodle_specs::{ChoiceOption, PageItem, PaginationSpec, PaginationVariant, SelectSpec};
 
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
-    size_padding_x_offset_rem,
+    rem_to_px, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem,
 };
 
 #[derive(Default, Clone)]
@@ -45,12 +44,12 @@ pub struct PaginationHandlers {
 
 pub fn pagination(
     spec: &PaginationSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_page_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
 ) -> Node {
     pagination_with_handlers(
         spec,
-        theme,
+        ctx,
         &PaginationHandlers {
             page_change: on_page_change,
             ..PaginationHandlers::default()
@@ -60,29 +59,29 @@ pub fn pagination(
 
 pub fn pagination_with_handlers(
     spec: &PaginationSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &PaginationHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
-    let base_height = theme.resolve_space("size.control.height");
+    let base_height = ctx.theme().resolve_space("size.control.height");
     let height = base_height + rem_to_px(size_height_offset_rem(effective_size)) - rem_to_px(0.125);
     let button_min_width = base_height + rem_to_px(size_height_offset_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = theme.resolve_space("space.control.x")
+    let pad_x = ctx.theme().resolve_space("space.control.x")
         + rem_to_px(size_padding_x_offset_rem(effective_size));
-    let gap_sm = theme.resolve_space("space.inline.sm");
-    let gap_md = theme.resolve_space("space.inline.md");
+    let gap_sm = ctx.theme().resolve_space("space.inline.sm");
+    let gap_md = ctx.theme().resolve_space("space.inline.md");
     let root_gap = if spec.is_compact { gap_sm } else { gap_md };
-    let label_size = theme.resolve_space("typography.label.size");
-    let icon_size = theme.resolve_space("size.icon.sm");
-    let radius = theme.resolve_radius(spec.radius_token());
+    let label_size = ctx.theme().resolve_space("typography.label.size");
+    let icon_size = ctx.theme().resolve_space("size.icon.sm");
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
 
-    let text_primary = theme.resolve_color(spec.button_text_token());
-    let text_secondary = theme.resolve_color(spec.ellipsis_color_token());
-    let border_color = theme.resolve_color(spec.button_border_token());
-    let surface = theme.resolve_color(spec.button_fill_token());
-    let accent = theme.resolve_color(spec.current_fill_token());
+    let text_primary = ctx.theme().resolve_color(spec.button_text_token());
+    let text_secondary = ctx.theme().resolve_color(spec.ellipsis_color_token());
+    let border_color = ctx.theme().resolve_color(spec.button_border_token());
+    let surface = ctx.theme().resolve_color(spec.button_fill_token());
+    let accent = ctx.theme().resolve_color(spec.current_fill_token());
 
     // Current-page button: 18% accent bg, border at 42% accent / 58% default.
     let current_bg = with_alpha(accent, accent.3 * 0.18);
@@ -91,7 +90,7 @@ pub fn pagination_with_handlers(
     // Border at 78% opacity (matches Svelte `color-mix … 78%`).
     let button_border = with_alpha(border_color, border_color.3 * 0.78);
 
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
 
     // One wrapping row: info, optional limit selector and navigation controls.
     let mut root = Node::container();
@@ -107,9 +106,9 @@ pub fn pagination_with_handlers(
     // `resolved_chrome` applies the contract's precedence — `standalone` only
     // overrides when the host set it, otherwise `chrome` decides.
     if spec.resolved_chrome() {
-        let surface_bg = theme.resolve_color("color.background.surface");
-        let border_subtle = theme.resolve_color("color.border.subtle");
-        let chrome_radius = theme.resolve_radius("radius.control");
+        let surface_bg = ctx.theme().resolve_color("color.background.surface");
+        let border_subtle = ctx.theme().resolve_color("color.border.subtle");
+        let chrome_radius = ctx.theme().resolve_radius("radius.control");
         let s = &mut root.style;
         s.descriptor.background = Some(surface_bg);
         s.descriptor.border.width = 1.0;
@@ -123,7 +122,7 @@ pub fn pagination_with_handlers(
         pad.left = if spec.is_compact { gap_sm } else { gap_md };
         pad.right = pad.left;
         pad.top = if spec.is_compact {
-            theme.resolve_space("space.inline.xs")
+            ctx.theme().resolve_space("space.inline.xs")
         } else {
             gap_sm
         };
@@ -147,7 +146,7 @@ pub fn pagination_with_handlers(
     // Limit selector (all variants per contract §2 — "Show [n] per page").
     if spec.show_limit_selector && !spec.limit_options.is_empty() {
         root = root.child(build_limit_selector(
-            spec, theme, handlers, height, label_size, pad_x, radius, gap_sm,
+            spec, ctx, handlers, height, label_size, pad_x, radius, gap_sm,
         ));
     }
 
@@ -428,7 +427,7 @@ fn arrow_button(
 )]
 fn build_limit_selector(
     spec: &PaginationSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &PaginationHandlers,
     height: f32,
     font_size: f32,
@@ -436,11 +435,11 @@ fn build_limit_selector(
     radius: f32,
     gap: f32,
 ) -> Node {
-    let text_secondary = theme.resolve_color(spec.ellipsis_color_token());
-    let text_primary = theme.resolve_color(spec.button_text_token());
-    let raw_border = theme.resolve_color(spec.button_border_token());
+    let text_secondary = ctx.theme().resolve_color(spec.ellipsis_color_token());
+    let text_primary = ctx.theme().resolve_color(spec.button_text_token());
+    let raw_border = ctx.theme().resolve_color(spec.button_border_token());
     let border_color = with_alpha(raw_border, raw_border.3 * 0.78);
-    let surface = theme.resolve_color(spec.button_fill_token());
+    let surface = ctx.theme().resolve_color(spec.button_fill_token());
 
     let page_size_label = spec
         .page_size
@@ -464,9 +463,9 @@ fn build_limit_selector(
         let select_spec = SelectSpec::new(options)
             .with_value(page_size_label.clone())
             .with_open(handlers.limit_open)
-            .with_size(spec.size)
+            .with_size(ctx.base_size(spec.size))
             .with_size_role(spec.size_role)
-            .with_density(spec.density)
+            .with_density(ctx.resolve_density(spec.density))
             .with_aria_label("Items per page");
 
         let toggle = handlers.limit_open_change.as_ref().map(|handler| {
@@ -487,7 +486,7 @@ fn build_limit_selector(
             change,
             clear: None,
         };
-        let select_box = crate::select(&select_spec, theme, &select_handlers);
+        let select_box = crate::select(&select_spec, ctx, &select_handlers);
 
         let mut row = Node::container();
         {

@@ -8,7 +8,6 @@
 //! concerns. This builder renders the slot grid, the distributed value, the
 //! active-slot highlight, and the error label.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, ShadowLayer,
     TextAlign,
@@ -16,9 +15,8 @@ use poodle_node::{
 use poodle_specs::{CodeInputCompletion, CodeInputSpec, ControlDensity, ValidationState};
 
 use crate::color::with_alpha;
-use crate::presentation::{
-    code_input_slot_font_rem, code_input_slot_size_rem, rem_to_px, resolve_semantic_size,
-};
+use crate::context::RenderContext;
+use crate::presentation::{code_input_slot_font_rem, code_input_slot_size_rem, rem_to_px};
 
 /// Host callbacks.
 ///
@@ -34,8 +32,8 @@ pub struct CodeInputHandlers {
     pub on_selection_change: Option<std::sync::Arc<dyn Fn(usize, usize) + Send + Sync>>,
 }
 
-pub fn code_input(spec: &CodeInputSpec, theme: &dyn ThemeProvider) -> Node {
-    code_input_with_handlers(spec, theme, CodeInputHandlers::default())
+pub fn code_input(spec: &CodeInputSpec, ctx: &RenderContext<'_>) -> Node {
+    code_input_with_handlers(spec, ctx, CodeInputHandlers::default())
 }
 
 /// Render a code input that can actually be typed into.
@@ -46,10 +44,12 @@ pub fn code_input(spec: &CodeInputSpec, theme: &dyn ThemeProvider) -> Node {
 /// division, reached differently.
 pub fn code_input_with_handlers(
     spec: &CodeInputSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: CodeInputHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let theme = ctx.theme();
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let validation = spec.effective_validation_state();
     let is_invalid = validation == ValidationState::Invalid;
 
@@ -76,7 +76,7 @@ pub fn code_input_with_handlers(
     let border_width = rem_to_px(0.0625); // 1px = 0.0625rem, contract border width
                                           // Inter-slot gap: compact space.inline.xs, default space.inline.sm,
                                           // comfortable space.inline.md.
-    let gap = match spec.density {
+    let gap = match density {
         ControlDensity::Compact => theme.resolve_space("space.inline.xs"),
         ControlDensity::Default => theme.resolve_space("space.inline.sm"),
         ControlDensity::Comfortable => theme.resolve_space("space.inline.md"),
@@ -338,9 +338,11 @@ mod tests {
         let completes = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let c = std::sync::Arc::clone(&changes);
         let k = std::sync::Arc::clone(&completes);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = code_input_with_handlers(
             spec,
-            &theme(),
+            &ctx,
             CodeInputHandlers {
                 on_value_change: Some(std::sync::Arc::new(move |v: &str| {
                     c.lock().unwrap().push(v.to_string())
@@ -364,9 +366,11 @@ mod tests {
     /// slot would mean six focus stops for one value.
     #[test]
     fn the_slot_row_takes_the_keys_and_no_slot_does() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = code_input_with_handlers(
             &CodeInputSpec::new().with_length(4),
-            &theme(),
+            &ctx,
             CodeInputHandlers {
                 on_value_change: Some(std::sync::Arc::new(|_| {})),
                 ..CodeInputHandlers::default()
@@ -426,9 +430,11 @@ mod tests {
     fn clicking_a_filled_slot_selects_its_character() {
         let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let sink = std::sync::Arc::clone(&seen);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = code_input_with_handlers(
             &CodeInputSpec::new().with_length(4).with_value("12"),
-            &theme(),
+            &ctx,
             CodeInputHandlers {
                 on_selection_change: Some(std::sync::Arc::new(move |a, b| {
                     sink.lock().unwrap().push((a, b))
@@ -460,9 +466,11 @@ mod tests {
 
     #[test]
     fn a_disabled_code_input_takes_no_keys() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = code_input_with_handlers(
             &CodeInputSpec::new().with_length(4).with_disabled(true),
-            &theme(),
+            &ctx,
             CodeInputHandlers {
                 on_value_change: Some(std::sync::Arc::new(|_| {})),
                 ..CodeInputHandlers::default()
@@ -478,9 +486,11 @@ mod tests {
     fn pasting_a_code_fills_it_and_completes() {
         let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let sink = std::sync::Arc::clone(&seen);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = code_input_with_handlers(
             &CodeInputSpec::new().with_length(6),
-            &theme(),
+            &ctx,
             CodeInputHandlers {
                 on_complete: Some(std::sync::Arc::new(move |v: &str| {
                     sink.lock().unwrap().push(v.to_string())
@@ -500,7 +510,9 @@ mod tests {
     #[test]
     fn group_margins_follow_explicit_partitions_only() {
         fn margin_rights(spec: &CodeInputSpec) -> Vec<usize> {
-            let node = code_input_with_handlers(spec, &theme(), CodeInputHandlers::default());
+            let theme = theme();
+            let ctx = RenderContext::new(&theme);
+            let node = code_input_with_handlers(spec, &ctx, CodeInputHandlers::default());
             let row = node
                 .find(&|n| n.interaction.on_edit_key.is_some() || n.interaction.focusable)
                 .expect("slot row");
@@ -534,7 +546,9 @@ mod tests {
     #[test]
     fn separators_follow_valid_group_boundaries() {
         fn separator_count(spec: &CodeInputSpec) -> usize {
-            let node = code_input_with_handlers(spec, &theme(), CodeInputHandlers::default());
+            let theme = theme();
+            let ctx = RenderContext::new(&theme);
+            let node = code_input_with_handlers(spec, &ctx, CodeInputHandlers::default());
             fn count(n: &Node, out: &mut usize) {
                 if matches!(&n.kind, poodle_node::NodeKind::Text { content } if content == "-") {
                     *out += 1;
@@ -572,6 +586,8 @@ mod tests {
         );
         // A separator never enters the value: the slots still distribute the
         // joined code (a licence key is arbitrary text, not digits).
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = code_input_with_handlers(
             &CodeInputSpec::new()
                 .with_length(20)
@@ -579,7 +595,7 @@ mod tests {
                 .with_separator("-")
                 .with_numbers_only(false)
                 .with_value("ABCDEFGHIJKLMNOPQRST"),
-            &theme(),
+            &ctx,
             CodeInputHandlers::default(),
         );
         let row = node
@@ -620,23 +636,25 @@ mod tests {
             .with_length(6)
             .with_value("123456")
             .with_completion_result(CodeInputCompletion::Passed("123456".to_string()));
-        let node = code_input_with_handlers(&checked, &theme(), CodeInputHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = code_input_with_handlers(&checked, &ctx, CodeInputHandlers::default());
         assert_eq!(indicator(&node), Some(("check", "Code check passed")));
 
         let failed = checked.clone().with_completion_result(
             CodeInputCompletion::Failed("123456".to_string()),
         );
-        let node = code_input_with_handlers(&failed, &theme(), CodeInputHandlers::default());
+        let node = code_input_with_handlers(&failed, &ctx, CodeInputHandlers::default());
         assert_eq!(indicator(&node), Some(("x", "Code check failed")));
 
         // The value changed: the result no longer belongs to it.
         let edited = checked.clone().with_value("654321");
-        let node = code_input_with_handlers(&edited, &theme(), CodeInputHandlers::default());
+        let node = code_input_with_handlers(&edited, &ctx, CodeInputHandlers::default());
         assert_eq!(indicator(&node), None);
 
         // A short code has no indicator either.
         let partial = checked.clone().with_value("123");
-        let node = code_input_with_handlers(&partial, &theme(), CodeInputHandlers::default());
+        let node = code_input_with_handlers(&partial, &ctx, CodeInputHandlers::default());
         assert_eq!(indicator(&node), None);
     }
 }

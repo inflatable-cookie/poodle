@@ -3,28 +3,28 @@
 //! Contract: `docs/contracts/components/tooltip.md` §8.
 //! Ported from: `packages/jetstream/components/src/tooltip.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, Node, NodeRole, ShadowValue};
 use poodle_specs::TooltipSpec;
 
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn tooltip(spec: &TooltipSpec, theme: &dyn ThemeProvider) -> Node {
-    let text_color = theme.resolve_color("color.text.primary");
+pub fn tooltip(spec: &TooltipSpec, ctx: &RenderContext<'_>) -> Node {
+    let text_color = ctx.theme().resolve_color("color.text.primary");
 
     // Contract §8 background = color-mix(elevated 98%, panel).
-    let elevated = theme.resolve_color("color.background.elevated");
-    let panel = theme.resolve_color("color.background.panel");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
+    let panel = ctx.theme().resolve_color("color.background.panel");
     let fill = mix_srgb(elevated, panel, 0.98);
 
     // Contract §8 border = border-default at 72% of its own alpha.
-    let border_default = theme.resolve_color("color.border.default");
+    let border_default = ctx.theme().resolve_color("color.border.default");
     let border_color = with_alpha(border_default, border_default.3 * 0.72);
     let border_width = rem_to_px(0.0625);
 
     // Contract §8 radius = radius.control − the spec's inset.
-    let radius = theme.resolve_radius("radius.control") - rem_to_px(spec.radius_inset_rem());
+    let radius = ctx.theme().resolve_radius("radius.control") - rem_to_px(spec.radius_inset_rem());
 
     let content = spec.content.as_deref().unwrap_or("");
     let pad_x = rem_to_px(spec.padding_x_rem());

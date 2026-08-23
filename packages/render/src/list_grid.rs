@@ -5,28 +5,28 @@
 //! `flex_wrap` with per-cell min-width + flex:1 approximates CSS
 //! `auto-fill` / `minmax`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{ListGridSpec, ListGridVariant};
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// List grid layout: optional header row, then a responsive grid or stacked
 /// column.
 pub fn list_grid(
     spec: &ListGridSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     header: Option<Node>,
     children: Vec<Node>,
 ) -> Node {
-    let gap = theme.resolve_space(spec.gap_token());
+    let gap = ctx.theme().resolve_space(spec.gap_token());
     let min_w = if let Some(em) = spec.min_item_width_em {
         rem_to_px(em)
     } else {
-        theme.resolve_space(spec.min_item_width_token())
+        ctx.theme().resolve_space(spec.min_item_width_token())
     };
-    let header_gap = theme.resolve_space(ListGridSpec::header_actions_gap_token());
-    let header_after = theme.resolve_space(spec.header_margin_bottom_token());
+    let header_gap = ctx.theme().resolve_space(ListGridSpec::header_actions_gap_token());
+    let header_after = ctx.theme().resolve_space(spec.header_margin_bottom_token());
 
     let mut root = Node::container();
     {

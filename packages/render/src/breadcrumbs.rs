@@ -5,25 +5,26 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node};
 use poodle_specs::{BreadcrumbsSpec, IconSize, IconSpec};
 
+use crate::context::RenderContext;
 use crate::icon::icon;
 use crate::presentation::{
     breadcrumbs_density_gap_rem, breadcrumbs_font_rem, breadcrumbs_gap_rem, rem_to_px,
-    resolve_semantic_size,
 };
 
 pub fn breadcrumbs(
     spec: &BreadcrumbsSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_navigate: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let theme = ctx.theme();
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(breadcrumbs_font_rem(effective_size));
-    let gap_rem = breadcrumbs_density_gap_rem(spec.density)
-        .unwrap_or_else(|| breadcrumbs_gap_rem(effective_size));
+    let gap_rem =
+        breadcrumbs_density_gap_rem(density).unwrap_or_else(|| breadcrumbs_gap_rem(effective_size));
     let gap = rem_to_px(gap_rem);
 
     let text_color = theme.resolve_color("color.text.secondary");
@@ -56,7 +57,7 @@ pub fn breadcrumbs(
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
                 s.descriptor.text_color = Some(sep_color);
             }
-            let mut sep_icon = icon(&sep_icon_spec, theme);
+            let mut sep_icon = icon(&sep_icon_spec, ctx);
             // The native primitive overrides the icon tint to the separator
             // tier; the node backend does not inherit text color from a
             // parent container, so carry that override on the icon itself.

@@ -5,12 +5,12 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_transcript::ToolCallStatus;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
 use poodle_specs::{ToolCallGroupSpec, ToolCallSpec};
 
 use crate::color::TRANSPARENT;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::tool_call::tool_call;
 
@@ -32,22 +32,25 @@ fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
 
 pub fn tool_call_group(
     spec: &ToolCallGroupSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: ToolCallGroupHandlers,
 ) -> Node {
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+
     // A collapsed run whose failure is not its newest call is the whole reason
     // run status exists: without this the failure is invisible until someone
     // expands.
     let toggle_color = match spec.status() {
-        ToolCallStatus::Error => theme.resolve_color(spec.danger_token()),
-        _ => theme.resolve_color(spec.toggle_token()),
+        ToolCallStatus::Error => ctx.theme().resolve_color(spec.danger_token()),
+        _ => ctx.theme().resolve_color(spec.toggle_token()),
     };
 
-    let font_size = rem_to_px(spec.font_size_rem());
-    let icon_size = rem_to_px(spec.icon_size_rem());
-    let row_gap = rem_to_px(spec.row_gap_rem());
-    let gap = rem_to_px(spec.gap_rem());
-    let pad_x = rem_to_px(spec.padding_inline_rem());
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let icon_size = rem_to_px(spec.icon_size_rem(base_size));
+    let row_gap = rem_to_px(spec.row_gap_rem(density));
+    let gap = rem_to_px(spec.gap_rem(density));
+    let pad_x = rem_to_px(spec.padding_inline_rem(density));
 
     let mut list = Node::container();
     list.style.descriptor.layout.direction = LayoutDirection::Column;
@@ -59,8 +62,8 @@ pub fn tool_call_group(
         let mut call_spec = ToolCallSpec::new(call.id.clone(), call.label.clone())
             .with_status(call.status)
             .with_expanded(spec.expanded_calls.contains(&call.id))
-            .with_size(spec.size)
-            .with_density(spec.density);
+            .with_size(base_size)
+            .with_density(density);
         if let Some(detail) = &call.detail {
             call_spec = call_spec.with_detail(detail.clone());
         }
@@ -77,7 +80,7 @@ pub fn tool_call_group(
             .unwrap_or_else(|| spec.id.clone());
         list = list.child(tool_call(
             &call_spec,
-            theme,
+            ctx,
             crate::tool_call::ToolCallHandlers {
                 on_toggle: handlers.on_call_toggle.as_ref().map(Arc::clone),
                 instance_id: Some(child_scope),
@@ -87,10 +90,10 @@ pub fn tool_call_group(
 
     // The container is on the run, not the row: a thirty-call run has to read as
     // one box you can skim past, and thirty boxes is a cage.
-    let surface = theme.resolve_color(spec.surface_token());
-    let border = theme.resolve_color(spec.border_token());
+    let surface = ctx.theme().resolve_color(spec.surface_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
     let hairline = rem_to_px(0.0625);
-    let radius = theme.resolve_radius(spec.radius_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
 
     let mut root = Node::container();
     {
@@ -99,8 +102,8 @@ pub fn tool_call_group(
         s.fill_width = true;
         s.descriptor.layout.spacing.gap = row_gap;
         let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.top = rem_to_px(spec.padding_block_rem());
-        pad.bottom = rem_to_px(spec.padding_block_rem());
+        pad.top = rem_to_px(spec.padding_block_rem(density));
+        pad.bottom = rem_to_px(spec.padding_block_rem(density));
         s.descriptor.border.width = hairline;
         s.descriptor.border.color = border;
         let c = &mut s.descriptor.corner_radii;
@@ -144,7 +147,7 @@ pub fn tool_call_group(
         toggle.interaction.focusable = true;
         toggle.style.focus = Some(StylePatch {
             background: None,
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             text_color: None,
             opacity: None,
         });
@@ -207,8 +210,12 @@ mod tests {
             instance_id: Some(scope.to_string()),
             ..ToolCallGroupHandlers::default()
         };
-        let first = tool_call_group(&spec(), &theme(), scoped("first"));
-        let second = tool_call_group(&spec(), &theme(), scoped("second"));
+        let first_theme = theme();
+        let first_ctx = RenderContext::new(&first_theme);
+        let second_theme = theme();
+        let second_ctx = RenderContext::new(&second_theme);
+        let first = tool_call_group(&spec(), &first_ctx, scoped("first"));
+        let second = tool_call_group(&spec(), &second_ctx, scoped("second"));
         assert!(first
             .find(&|n| n.runtime_id.as_deref() == Some("tool-call-group:first:toggle:three"))
             .is_some());

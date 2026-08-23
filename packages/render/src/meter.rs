@@ -10,37 +10,36 @@
 //! contract §12 accepted delta: no conic-gradient primitive, so a circular
 //! track stroked in the level-resolved fill colour with the value readout.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
 };
 use poodle_specs::{ControlSize, MeterShape, MeterSpec};
 
 use crate::color::mix_srgb;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
-pub fn meter(spec: &MeterSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn meter(spec: &MeterSpec, ctx: &RenderContext<'_>) -> Node {
     // Contract §8: track bg = color-mix(in srgb, surface 96%, text-primary).
-    let surface = theme.resolve_color(spec.track_fill_token());
-    let text_primary = theme.resolve_color(spec.track_mix_token());
+    let surface = ctx.theme().resolve_color(spec.track_fill_token());
+    let text_primary = ctx.theme().resolve_color(spec.track_mix_token());
     let track_bg = mix_srgb(surface, text_primary, spec.track_mix_ratio());
 
     // Contract §8: pill radius from the radius.pill token (not a 999 literal).
-    let radius = theme.resolve_radius("radius.pill");
+    let radius = ctx.theme().resolve_radius("radius.pill");
 
     // Contract §8 Size Variants: track thickness resolves from the effective
     // size (size override → size_role against the inherited scale).
-    let effective_size =
-        resolve_semantic_size(spec.size.unwrap_or(ControlSize::Md), spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let track_height = rem_to_px(spec.track_thickness_rem(effective_size));
 
     let fraction = spec.normalized_progress() as f32;
-    let fill = theme.resolve_color(spec.fill_token());
+    let fill = ctx.theme().resolve_color(spec.fill_token());
 
     if spec.shape == MeterShape::Ring {
         // Contract §8 ring shape: the track mixes at 88%, not the bar's 96%.
         let ring_track = mix_srgb(surface, text_primary, spec.ring_track_mix_ratio());
-        return ring(spec, theme, effective_size, ring_track);
+        return ring(spec, ctx, effective_size, ring_track);
     }
 
     // The Progress node draws a proportional fill of `fraction` over a
@@ -75,14 +74,14 @@ pub fn meter(spec: &MeterSpec, theme: &dyn ThemeProvider) -> Node {
 /// with the value readout carrying the proportion.
 fn ring(
     spec: &MeterSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     size: ControlSize,
     track_bg: ColorValue,
 ) -> Node {
     // The stroke colour already carries the `high` escalation from the spec.
     let diameter = rem_to_px(spec.ring_size_rem(size));
     let thickness = rem_to_px(spec.ring_thickness_rem(size));
-    let fill = theme.resolve_color(spec.fill_token());
+    let fill = ctx.theme().resolve_color(spec.fill_token());
 
     let mut el = Node::container();
     {
@@ -107,7 +106,7 @@ fn ring(
 
     if spec.show_value {
         let mut readout = Node::text(spec.value_display_text());
-        readout.style.descriptor.text_color = Some(theme.resolve_color(spec.value_color_token()));
+        readout.style.descriptor.text_color = Some(ctx.theme().resolve_color(spec.value_color_token()));
         readout.style.text_size = Some(diameter * 0.34);
         el = el.child(readout);
     }

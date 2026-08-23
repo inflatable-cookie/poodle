@@ -11,10 +11,10 @@
 //! the host does the parsing, and the spec arrives with the result already
 //! resolved.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node};
 use poodle_specs::{EmbedInputSpec, PillSize, PillSpec, PillTone, TextInputSpec};
 
+use crate::context::RenderContext;
 use crate::pill::pill;
 use crate::presentation::rem_to_px;
 use crate::text_input::text_input_with_change;
@@ -25,26 +25,26 @@ pub struct EmbedInputHandlers {
     pub on_value_change: Option<poodle_node::TextChangeHandler>,
 }
 
-pub fn embed_input(spec: &EmbedInputSpec, theme: &dyn ThemeProvider) -> Node {
-    embed_input_with_handlers(spec, theme, EmbedInputHandlers::default())
+pub fn embed_input(spec: &EmbedInputSpec, ctx: &RenderContext<'_>) -> Node {
+    embed_input_with_handlers(spec, ctx, EmbedInputHandlers::default())
 }
 
 /// Render an embed input whose field reports what is typed into it.
 pub fn embed_input_with_handlers(
     spec: &EmbedInputSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: EmbedInputHandlers,
 ) -> Node {
     // Status colors split per contract: error = text-danger, success = text-success.
-    let danger_color = theme.resolve_color("color.status.danger");
-    let success_color = theme.resolve_color("color.status.success");
-    let status_font = theme.resolve_space("typography.label.size");
+    let danger_color = ctx.theme().resolve_color("color.status.danger");
+    let success_color = ctx.theme().resolve_color("color.status.success");
+    let status_font = ctx.theme().resolve_space("typography.label.size");
 
     // Contract §7 spacing. Root gap 0.25rem → space.inline.xs; status
     // min-height 1.25rem → space.stack.lg. Status gap 0.375rem has no exact
     // named token — exact rem.
-    let root_gap = theme.resolve_space("space.inline.xs");
-    let status_min_h = theme.resolve_space("space.stack.lg");
+    let root_gap = ctx.theme().resolve_space("space.inline.xs");
+    let status_min_h = ctx.theme().resolve_space("space.stack.lg");
     let status_gap = rem_to_px(0.375);
 
     let (parsed, error) = spec.resolved_parse_state();
@@ -68,12 +68,9 @@ pub fn embed_input_with_handlers(
             .with_disabled(spec.is_disabled)
             // The nested field inherits the composite's axes; without this it
             // always rendered at the default size whatever the host asked for.
-            .with_size(poodle_specs::resolve_semantic_control_size(
-                spec.size,
-                spec.size_role,
-            ))
-            .with_density(spec.density),
-        theme,
+            .with_size(ctx.resolve_size(spec.size, spec.size_role))
+            .with_density(ctx.resolve_density(spec.density)),
+        ctx,
         handlers.on_value_change,
     );
 
@@ -112,7 +109,7 @@ pub fn embed_input_with_handlers(
                         .with_label(parsed.provider.clone())
                         .with_tone(PillTone::Success)
                         .with_size(PillSize::Sm),
-                    theme,
+                    ctx,
                 ))
                 .child(success);
         }

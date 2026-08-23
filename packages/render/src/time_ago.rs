@@ -9,12 +9,13 @@
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::Node;
 use poodle_specs::TimeAgoSpec;
 
-pub fn time_ago(spec: &TimeAgoSpec, theme: &dyn ThemeProvider) -> Node {
-    let text_color = theme.resolve_color(spec.text_color_token());
+use crate::context::RenderContext;
+
+pub fn time_ago(spec: &TimeAgoSpec, ctx: &RenderContext<'_>) -> Node {
+    let text_color = ctx.theme().resolve_color(spec.text_color_token());
 
     let display = if spec.timestamp.is_empty() {
         spec.format_relative(0)
@@ -27,7 +28,7 @@ pub fn time_ago(spec: &TimeAgoSpec, theme: &dyn ThemeProvider) -> Node {
 
     if !spec.inherits_typography() {
         // Contract §8: font-size = typography.body.size. Token-resolved.
-        label.style.text_size = Some(theme.resolve_space(spec.font_size_token()));
+        label.style.text_size = Some(ctx.theme().resolve_space(spec.font_size_token()));
     }
     if let Some(aria) = spec.aria_label.as_deref() {
         if !aria.is_empty() {

@@ -4,13 +4,14 @@
 //! Ported from: `packages/jetstream/components/src/icon.rs`. Rasterisation and
 //! tinting are backend concerns; the node names the glyph and its box.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::IconSpec;
 
-pub fn icon(spec: &IconSpec, theme: &dyn ThemeProvider) -> Node {
-    let size = theme.resolve_space(spec.size_token());
-    let color = theme.resolve_color("color.icon.primary");
+use crate::context::RenderContext;
+
+pub fn icon(spec: &IconSpec, ctx: &RenderContext<'_>) -> Node {
+    let size = ctx.theme().resolve_space(spec.size_token());
+    let color = ctx.theme().resolve_color("color.icon.primary");
 
     let mut el = Node::icon(&spec.name, size);
     {
@@ -36,10 +37,14 @@ mod tests {
     fn emits_the_explicit_gpui_svg_tint() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
-        let node = icon(&IconSpec::new("plus"), &theme);
+        let ctx = RenderContext::new(&theme);
+        let node = icon(&IconSpec::new("plus"), &ctx);
         assert_eq!(
             node.style.descriptor.text_color,
-            Some(theme.resolve_color("color.icon.primary"))
+            Some(poodle_adapter::ThemeProvider::resolve_color(
+                &theme,
+                "color.icon.primary"
+            ))
         );
     }
 
@@ -61,7 +66,8 @@ mod tests {
     fn custom_icon_names_pass_through() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
-        let node = icon(&IconSpec::new("company-logo"), &theme);
+        let ctx = RenderContext::new(&theme);
+        let node = icon(&IconSpec::new("company-logo"), &ctx);
         assert!(matches!(
             &node.kind,
             poodle_node::NodeKind::Icon { name, .. } if name == "company-logo"

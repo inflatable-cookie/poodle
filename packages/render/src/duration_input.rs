@@ -13,7 +13,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::duration::{
     adjust_duration_segment, duration_total_seconds, type_duration_digit, DurationSegment,
     DurationValue,
@@ -24,7 +23,8 @@ use poodle_node::{
 use poodle_specs::{ControlSize, DurationInputSpec};
 
 use crate::color::with_alpha;
-use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::{control_space_x_rem, rem_to_px};
 
 /// Root vertical padding in rem per size (contract section 8). This is a SIZE
 /// axis — density must not touch vertical padding.
@@ -74,8 +74,8 @@ pub struct DurationInputHandlers {
     pub on_change: Option<Arc<dyn Fn(u32, u32, u32, u32) + Send + Sync>>,
 }
 
-pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> Node {
-    duration_input_with_handlers(spec, theme, DurationInputHandlers::default())
+pub fn duration_input(spec: &DurationInputSpec, ctx: &RenderContext<'_>) -> Node {
+    duration_input_with_handlers(spec, ctx, DurationInputHandlers::default())
 }
 
 /// Render a duration input whose segments take keys.
@@ -87,26 +87,27 @@ pub fn duration_input(spec: &DurationInputSpec, theme: &dyn ThemeProvider) -> No
 /// uses, so a keystroke cannot mean two different things on two targets.
 pub fn duration_input_with_handlers(
     spec: &DurationInputSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: DurationInputHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // ── Token resolution ──
-    let fill = theme.resolve_color(spec.fill_token());
+    let fill = ctx.theme().resolve_color(spec.fill_token());
     // Border resolves through the spec: ValidationState::Invalid →
     // color.status.danger, otherwise color.border.default (contract §4/§8).
-    let border_color = theme.resolve_color(spec.border_token());
-    let text_primary = theme.resolve_color(spec.text_color_token());
-    let text_secondary = theme.resolve_color(spec.text_secondary_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+    let border_color = ctx.theme().resolve_color(spec.border_token());
+    let text_primary = ctx.theme().resolve_color(spec.text_color_token());
+    let text_secondary = ctx.theme().resolve_color(spec.text_secondary_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
     // Segment-focus highlight = color-mix(accent-base 12%, transparent).
-    let accent = theme.resolve_color("color.accent.base");
+    let accent = ctx.theme().resolve_color("color.accent.base");
     let segment_focus_bg = with_alpha(accent, accent.3 * 0.12);
 
     // ── Sizing (contract section 8) ──
     let pad_y = rem_to_px(root_pad_y_rem(effective_size));
-    let base_pad_x = rem_to_px(control_space_x_rem(spec.density)) - 3.0;
+    let base_pad_x = rem_to_px(control_space_x_rem(density)) - 3.0;
     let pad_x = base_pad_x + rem_to_px(root_pad_x_offset_rem(effective_size));
     let field_w = rem_to_px(field_width_rem(effective_size));
     let field_font = match effective_size {
@@ -331,7 +332,9 @@ pub fn duration_input_with_handlers(
 
     // ── Disabled state ──
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx
+            .theme()
+            .resolve_opacity(spec.disabled_opacity_token());
         root.interaction.disabled = true;
     } else {
         // Segment-focus highlight on hover (focus tracking is host-owned;
@@ -389,9 +392,11 @@ mod tests {
     fn armed(spec: &DurationInputSpec) -> (Node, Reports) {
         let seen: Reports = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let sink = std::sync::Arc::clone(&seen);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = duration_input_with_handlers(
             spec,
-            &theme(),
+            &ctx,
             DurationInputHandlers {
                 on_change: Some(Arc::new(move |h, m, s, total| {
                     sink.lock().unwrap().push((h, m, s, total))

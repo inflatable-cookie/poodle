@@ -8,10 +8,10 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
 use poodle_specs::{AgentMessageSpec, AgentPlanRecordSpec};
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Handlers mirror the GPUI target's names.
@@ -41,19 +41,21 @@ fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
 
 pub fn agent_plan_record(
     spec: &AgentPlanRecordSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: AgentPlanRecordHandlers,
 ) -> Node {
-    let surface = theme.resolve_color(spec.surface_token());
-    let border = theme.resolve_color(spec.border_token());
-    let badge_color = theme.resolve_color(spec.badge_token());
-    let summary_color = theme.resolve_color(spec.summary_token());
-    let meta_color = theme.resolve_color(spec.meta_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let surface = ctx.theme().resolve_color(spec.surface_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let badge_color = ctx.theme().resolve_color(spec.badge_token());
+    let summary_color = ctx.theme().resolve_color(spec.summary_token());
+    let meta_color = ctx.theme().resolve_color(spec.meta_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
 
-    let font_size = rem_to_px(spec.font_size_rem());
-    let gap = rem_to_px(spec.gap_rem());
-    let inset = rem_to_px(spec.padding_inset_rem());
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let gap = rem_to_px(spec.gap_rem(density));
+    let inset = rem_to_px(spec.padding_inset_rem(density));
     let hairline = rem_to_px(0.0625);
 
     let mut root = Node::container();
@@ -107,9 +109,9 @@ pub fn agent_plan_record(
     } else {
         let body = crate::agent_message::agent_message(
             &AgentMessageSpec::new(spec.plan.clone())
-                .with_size(spec.size)
-                .with_density(spec.density),
-            theme,
+                .with_size(base_size)
+                .with_density(density),
+            ctx,
         );
         root = root.child(body);
     }
@@ -132,7 +134,7 @@ pub fn agent_plan_record(
     toggle.interaction.focusable = true;
     toggle.style.focus = Some(StylePatch {
         background: None,
-        border_color: Some(theme.resolve_color("color.accent.focusRing")),
+        border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
         text_color: None,
         opacity: None,
     });
@@ -166,8 +168,10 @@ mod tests {
 
     #[test]
     fn toggle_identity_does_not_include_expanded_state() {
-        let shut = agent_plan_record(&spec(false), &theme(), AgentPlanRecordHandlers::default());
-        let open = agent_plan_record(&spec(true), &theme(), AgentPlanRecordHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let shut = agent_plan_record(&spec(false), &ctx, AgentPlanRecordHandlers::default());
+        let open = agent_plan_record(&spec(true), &ctx, AgentPlanRecordHandlers::default());
         let shut_toggle = shut
             .find(&|n| n.id.as_deref() == Some(AGENT_PLAN_RECORD_TOGGLE_ID))
             .expect("shut toggle");
@@ -181,9 +185,11 @@ mod tests {
 
     #[test]
     fn an_instance_scope_isolates_backend_state_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let first = agent_plan_record(
             &spec(false),
-            &theme(),
+            &ctx,
             AgentPlanRecordHandlers {
                 instance_id: Some("first".to_string()),
                 ..AgentPlanRecordHandlers::default()
@@ -191,7 +197,7 @@ mod tests {
         );
         let second = agent_plan_record(
             &spec(false),
-            &theme(),
+            &ctx,
             AgentPlanRecordHandlers {
                 instance_id: Some("second".to_string()),
                 ..AgentPlanRecordHandlers::default()
@@ -210,7 +216,7 @@ mod tests {
             .is_some());
         let open_first = agent_plan_record(
             &spec(true),
-            &theme(),
+            &ctx,
             AgentPlanRecordHandlers {
                 instance_id: Some("first".to_string()),
                 ..AgentPlanRecordHandlers::default()

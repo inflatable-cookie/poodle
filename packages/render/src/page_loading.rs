@@ -5,7 +5,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeRole,
@@ -14,16 +13,16 @@ use poodle_specs::{
     PageLoadingSpec, ProgressSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
 };
 
+use crate::context::RenderContext;
 use crate::presentation::{
-    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
+    control_space_x_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, size_font_rem,
 };
 use crate::progress::progress;
 use crate::spinner::spinner;
 
 pub fn page_loading(
     spec: &PageLoadingSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
     if !spec.is_visible {
@@ -33,20 +32,21 @@ pub fn page_loading(
         return empty;
     }
 
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(panel_space_x_rem(spec.density));
-    let pad_y = rem_to_px(panel_space_y_rem(spec.density));
-    let item_gap = rem_to_px(control_space_x_rem(spec.density));
+    let pad_x = rem_to_px(panel_space_x_rem(density));
+    let pad_y = rem_to_px(panel_space_y_rem(density));
+    let item_gap = rem_to_px(control_space_x_rem(density));
 
-    let backdrop = theme.resolve_color(spec.backdrop_fill_token());
-    let text_color = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let surface_bg = theme.resolve_color("color.background.elevated");
-    let border = theme.resolve_color("color.border.default");
-    let border_width = theme.resolve_space("border.width.default");
-    let radius = theme.resolve_radius("radius.surface");
-    let control_radius = theme.resolve_radius("radius.control");
+    let backdrop = ctx.theme().resolve_color(spec.backdrop_fill_token());
+    let text_color = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let surface_bg = ctx.theme().resolve_color("color.background.elevated");
+    let border = ctx.theme().resolve_color("color.border.default");
+    let border_width = ctx.theme().resolve_space("border.width.default");
+    let radius = ctx.theme().resolve_radius("radius.surface");
+    let control_radius = ctx.theme().resolve_radius("radius.control");
 
     let is_inline = spec.presentation.is_inline();
 
@@ -83,7 +83,7 @@ pub fn page_loading(
             .with_variant(SpinnerVariant::Ring)
             .with_size(SpinnerSize::Lg)
             .with_tone(SpinnerTone::Accent),
-        theme,
+        ctx,
     ));
 
     // Progress bar (determinate) — shared Progress primitive, full card width.
@@ -97,7 +97,7 @@ pub fn page_loading(
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.self_stretch = true;
         }
-        card = card.child(wrap.child(progress(&progress_spec, theme)));
+        card = card.child(wrap.child(progress(&progress_spec, ctx)));
     }
 
     // Message

@@ -8,15 +8,15 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::{PillAppearance, PillSpec, PillTone, TextInputSpec, TokenInputSpec};
 
 use crate::color::{mix_srgb, TRANSPARENT};
+use crate::context::RenderContext;
 use crate::pill::pill_with_remove;
 use crate::presentation::{
-    control_space_x_rem, rem_to_px, resolve_semantic_size, token_input_gap_rem,
-    token_input_pad_x_offset_rem, token_input_pad_y_offset_rem,
+    control_space_x_rem, rem_to_px, token_input_gap_rem, token_input_pad_x_offset_rem,
+    token_input_pad_y_offset_rem,
 };
 use crate::text_input::text_input;
 
@@ -34,27 +34,28 @@ fn pill_size(size: poodle_specs::ControlSize) -> poodle_specs::PillSize {
 
 pub fn token_input(
     spec: &TokenInputSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
-    let surface = theme.resolve_color("color.background.surface");
-    let border = theme.resolve_color("color.border.subtle");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let border = ctx.theme().resolve_color("color.border.subtle");
     // Field family matches TextInput's field appearance: a
     // surface-mix fill behind a subtle border.
     let fill = mix_srgb(surface, TRANSPARENT, 0.96);
-    let radius = theme.resolve_radius("radius.control");
+    let radius = ctx.theme().resolve_radius("radius.control");
 
     // Size-driven font + density-driven wrap gap (contract §8).
-    let gap = rem_to_px(token_input_gap_rem(spec.density));
+    let gap = rem_to_px(token_input_gap_rem(density));
 
     // Padding-block from control.y + per-size offset; padding-inline from
     // control.x (density) + per-size offset.
-    let pad_y = (theme.resolve_space("space.control.y")
+    let pad_y = (ctx.theme().resolve_space("space.control.y")
         + rem_to_px(token_input_pad_y_offset_rem(effective_size)))
     .max(0.0);
-    let pad_x = (rem_to_px(control_space_x_rem(spec.density))
+    let pad_x = (rem_to_px(control_space_x_rem(density))
         + rem_to_px(token_input_pad_x_offset_rem(effective_size)))
     .max(0.0);
 
@@ -93,7 +94,7 @@ pub fn token_input(
             .with_appearance(PillAppearance::Subtle)
             .with_size(pill_size(effective_size))
             .with_removable(can_edit);
-        row = row.child(pill_with_remove(&token_pill, theme, remove));
+        row = row.child(pill_with_remove(&token_pill, ctx, remove));
     }
 
     // Live draft control — a real composed text input. Inherits size,
@@ -101,7 +102,7 @@ pub fn token_input(
     let mut draft = TextInputSpec::new()
         .with_size(effective_size)
         .with_size_role(spec.size_role)
-        .with_density(spec.density)
+        .with_density(density)
         .with_disabled(spec.disabled)
         .with_read_only(spec.read_only);
     if !spec.id.is_empty() {
@@ -134,7 +135,7 @@ pub fn token_input(
         s.flex_basis = Some(rem_to_px(8.0));
         s.min_width = Some(rem_to_px(6.0));
     }
-    row = row.child(draft_slot.child(text_input(&draft, theme, None)));
+    row = row.child(draft_slot.child(text_input(&draft, ctx, None)));
 
     let mut el = Node::container();
     {
@@ -154,7 +155,7 @@ pub fn token_input(
     let mut el = el.child(row);
 
     if spec.disabled {
-        el.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
     }
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {

@@ -14,7 +14,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeRole,
@@ -26,37 +25,37 @@ use poodle_specs::{
 
 use crate::callout::{callout, CalloutHandlers};
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 use crate::pagination::pagination;
-use crate::presentation::{
-    control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
+use crate::presentation::{control_space_x_rem, panel_space_y_rem, rem_to_px, size_font_rem};
 use crate::spinner::spinner;
 
 pub fn log_list(
     spec: &LogListSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_clear_filters: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let label_font = rem_to_px(size_font_rem(effective_size) - 0.0625);
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
-    let pad_y = rem_to_px(panel_space_y_rem(spec.density));
-    let entry_gap = theme.resolve_space(spec.entry_gap_token());
-    let caption_size = theme.resolve_space("typography.caption.size");
-    let label_token_size = theme.resolve_space("typography.label.size");
-    let radius_control = theme.resolve_radius("radius.control");
+    let pad_x = rem_to_px(control_space_x_rem(density));
+    let pad_y = rem_to_px(panel_space_y_rem(density));
+    let entry_gap = ctx.theme().resolve_space(spec.entry_gap_token());
+    let caption_size = ctx.theme().resolve_space("typography.caption.size");
+    let label_token_size = ctx.theme().resolve_space("typography.label.size");
+    let radius_control = ctx.theme().resolve_radius("radius.control");
 
-    let fill = theme.resolve_color(spec.fill_token());
-    let border = theme.resolve_color("color.border.subtle");
-    let border_default = theme.resolve_color("color.border.default");
-    let radius = theme.resolve_radius("radius.surface");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
+    let fill = ctx.theme().resolve_color(spec.fill_token());
+    let border = ctx.theme().resolve_color("color.border.subtle");
+    let border_default = ctx.theme().resolve_color("color.border.default");
+    let radius = ctx.theme().resolve_radius("radius.surface");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
 
     // Token colors for log levels
-    let info_color = theme.resolve_color("color.accent.base");
-    let warn_color = theme.resolve_color("color.status.warning");
-    let error_color = theme.resolve_color("color.status.danger");
+    let info_color = ctx.theme().resolve_color("color.accent.base");
+    let warn_color = ctx.theme().resolve_color("color.status.warning");
+    let error_color = ctx.theme().resolve_color("color.status.danger");
 
     // Audit mode is entered when the spec carries audit-only state, matching
     // the GPUI/Svelte audit branch which owns those surfaces.
@@ -201,7 +200,7 @@ pub fn log_list(
                 state
                     .child(spinner(
                         &SpinnerSpec::new().with_size(SpinnerSize::Md),
-                        theme,
+                        ctx,
                     ))
                     .child(text(
                         "Loading log entries\u{2026}".to_string(),
@@ -223,7 +222,7 @@ pub fn log_list(
                     &CallOutSpec::new()
                         .with_tone(StatusTone::Danger)
                         .with_content(error.clone()),
-                    theme,
+                    ctx,
                     CalloutHandlers::default(),
                 )),
             );
@@ -272,7 +271,7 @@ pub fn log_list(
                         .with_page_size(spec.page_size)
                         .with_standalone(true)
                         .with_aria_label("Log pagination"),
-                    theme,
+                    ctx,
                     None,
                 ));
             el = el.child(footer);
@@ -481,7 +480,9 @@ mod tests {
 
     #[test]
     fn stream_rows_render_timestamp_level_and_message() {
-        let node = log_list(&stream_spec(), &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = log_list(&stream_spec(), &ctx, None);
         let runs = texts(&node);
         for expected in [
             "10:23:01",
@@ -503,7 +504,9 @@ mod tests {
 
     #[test]
     fn level_filter_drops_non_matching_rows() {
-        let node = log_list(&stream_spec().with_filter_level("error"), &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = log_list(&stream_spec().with_filter_level("error"), &ctx, None);
         let runs = texts(&node);
         assert!(runs.iter().any(|run| run == "Timeout"));
         assert!(!runs.iter().any(|run| run == "Server started"));
@@ -511,7 +514,9 @@ mod tests {
 
     #[test]
     fn text_filter_matches_the_message_case_insensitively() {
-        let node = log_list(&stream_spec().with_filter_text("CACHE"), &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = log_list(&stream_spec().with_filter_text("CACHE"), &ctx, None);
         let runs = texts(&node);
         assert!(runs.iter().any(|run| run == "Cache miss"));
         assert!(!runs.iter().any(|run| run == "Timeout"));
@@ -519,7 +524,9 @@ mod tests {
 
     #[test]
     fn max_entries_caps_the_rendered_rows() {
-        let node = log_list(&stream_spec().with_max_entries(1), &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = log_list(&stream_spec().with_max_entries(1), &ctx, None);
         let runs = texts(&node);
         assert!(runs.iter().any(|run| run == "Server started"));
         assert!(!runs.iter().any(|run| run == "Cache miss"));
@@ -527,7 +534,9 @@ mod tests {
 
     #[test]
     fn an_empty_stream_renders_the_empty_surface() {
-        let node = log_list(&LogListSpec::new(), &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = log_list(&LogListSpec::new(), &ctx, None);
         assert!(texts(&node).iter().any(|run| run == "No log entries"));
     }
 

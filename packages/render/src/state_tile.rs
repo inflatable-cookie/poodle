@@ -6,30 +6,30 @@
 //! Anatomy (contract §2): Root → Label, Value, optional Trend (glyph +
 //! label), optional reserved Sparkline slot (the host renders the chart).
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::StateTileSpec;
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn state_tile(spec: &StateTileSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn state_tile(spec: &StateTileSpec, ctx: &RenderContext<'_>) -> Node {
     // ── Colors (token-resolved via spec) ──
-    let fill = theme.resolve_color(spec.fill_token());
-    let border = theme.resolve_color(spec.border_token());
-    let label_color = theme.resolve_color(spec.label_color_token());
-    let value_color = theme.resolve_color(spec.value_color_token());
-    let trend_color = theme.resolve_color(spec.trend_color_token());
+    let fill = ctx.theme().resolve_color(spec.fill_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let label_color = ctx.theme().resolve_color(spec.label_color_token());
+    let value_color = ctx.theme().resolve_color(spec.value_color_token());
+    let trend_color = ctx.theme().resolve_color(spec.trend_color_token());
 
     // ── Dimensions ──
-    let radius = theme.resolve_radius(spec.radius_token());
-    let border_width = theme.resolve_space(spec.border_width_token());
-    let pad_x = theme.resolve_space("space.panel.x");
-    let pad_y = theme.resolve_space("space.panel.y");
-    let gap = theme.resolve_space("space.stack.sm"); // label↔value↔trend↔sparkline
-    let trend_gap = theme.resolve_space("space.inline.xs"); // glyph↔label
-    let label_size = theme.resolve_space(spec.label_font_size_token());
-    let value_size = theme.resolve_space(spec.value_font_size_token());
-    let trend_size = theme.resolve_space(spec.trend_font_size_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let border_width = ctx.theme().resolve_space(spec.border_width_token());
+    let pad_x = ctx.theme().resolve_space("space.panel.x");
+    let pad_y = ctx.theme().resolve_space("space.panel.y");
+    let gap = ctx.theme().resolve_space("space.stack.sm"); // label↔value↔trend↔sparkline
+    let trend_gap = ctx.theme().resolve_space("space.inline.xs"); // glyph↔label
+    let label_size = ctx.theme().resolve_space(spec.label_font_size_token());
+    let value_size = ctx.theme().resolve_space(spec.value_font_size_token());
+    let trend_size = ctx.theme().resolve_space(spec.trend_font_size_token());
 
     let mut el = Node::container();
     {
@@ -99,7 +99,7 @@ pub fn state_tile(spec: &StateTileSpec, theme: &dyn ThemeProvider) -> Node {
     // slot. Render an empty reserved area (no synthetic chart data).
     if spec.has_sparkline {
         let sparkline_h = rem_to_px(2.0); // contract slot height, no token
-        let slot_bg = theme.resolve_color(spec.sparkline_slot_token());
+        let slot_bg = ctx.theme().resolve_color(spec.sparkline_slot_token());
 
         let mut slot = Node::container();
         slot.id = Some("state-tile-sparkline".to_string());

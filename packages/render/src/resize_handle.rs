@@ -16,13 +16,13 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeDragEvent, NodeDragPhase, NodeKey, NodeModifiers, NodePosition, NodeRole, StylePatch,
 };
 use poodle_specs::{Orientation, ResizeHandleSpec};
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Where in the gesture a resize event sits.
@@ -71,13 +71,13 @@ fn key_step(orientation: Orientation, key: NodeKey) -> Option<f32> {
 
 pub fn resize_handle(
     spec: &ResizeHandleSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_resize: Option<Arc<dyn Fn(ResizePhase, f32) + Send + Sync>>,
 ) -> Node {
-    let handle_color = theme.resolve_color(spec.border_color_token());
+    let handle_color = ctx.theme().resolve_color(spec.border_color_token());
     // Contract §8 hover/dragging: line recolors to accent-base.
-    let hover_color = theme.resolve_color(spec.hover_color_token());
-    let focus_color = theme.resolve_color(spec.focus_ring_color_token());
+    let hover_color = ctx.theme().resolve_color(spec.hover_color_token());
+    let focus_color = ctx.theme().resolve_color(spec.focus_ring_color_token());
     let is_disabled = spec.is_disabled;
 
     // Contract §7: the root is only as thick as the line (0.125rem), so the
@@ -230,7 +230,7 @@ pub fn resize_handle(
     if is_disabled {
         // Contract §8 disabled: default cursor + 0.4 opacity, no interaction,
         // and out of the focus order entirely.
-        el.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         el.style.descriptor.cursor = CursorHint::Default;
         el.interaction.disabled = true;
     } else {
@@ -286,7 +286,9 @@ mod tests {
         let sink = Arc::clone(&trace);
         let handler: Arc<dyn Fn(ResizePhase, f32) + Send + Sync> =
             Arc::new(move |phase, delta| sink.lock().expect("trace lock").push((phase, delta)));
-        (resize_handle(spec, &theme(), Some(handler)), trace)
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        (resize_handle(spec, &ctx, Some(handler)), trace)
     }
 
     fn press(node: &Node, key: NodeKey) {
@@ -347,7 +349,10 @@ mod tests {
             .background
             .expect("focus repaints the hairline");
         assert_ne!(idle, focus);
-        assert_eq!(focus, theme().resolve_color("color.accent.focusRing"));
+        assert_eq!(
+            focus,
+            poodle_adapter::ThemeProvider::resolve_color(&theme(), "color.accent.focusRing")
+        );
     }
 
     /// Contract §6 exactly: axis arrows step ±8, Home/End saturate, and a

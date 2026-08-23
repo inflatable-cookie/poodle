@@ -3,28 +3,38 @@
 //! Contract: `docs/contracts/components/field.md`
 //! Ported from: `packages/jetstream/components/src/field.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
 };
 use poodle_specs::{FieldSpec, ValidationState};
 
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 
-pub fn field(spec: &FieldSpec, theme: &dyn ThemeProvider, control: Option<Node>) -> Node {
-    let label_size = theme.resolve_space(spec.label_typography_token());
-    let desc_color = theme.resolve_color(spec.description_color_token());
-    let error_color = theme.resolve_color(spec.error_color_token());
+pub fn field(spec: &FieldSpec, ctx: &RenderContext<'_>, control: Option<Node>) -> Node {
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let label_size = ctx
+        .theme()
+        .resolve_space(spec.label_typography_token(base_size));
+    let desc_color = ctx.theme().resolve_color(spec.description_color_token());
+    let error_color = ctx.theme().resolve_color(spec.error_color_token());
     // Contract §8: label = color-mix(text-primary 45%, text-secondary).
-    let label_primary = theme.resolve_color(spec.label_color_primary_token());
-    let label_secondary = theme.resolve_color(spec.label_color_secondary_token());
+    let label_primary = ctx
+        .theme()
+        .resolve_color(spec.label_color_primary_token());
+    let label_secondary = ctx
+        .theme()
+        .resolve_color(spec.label_color_secondary_token());
     let label_color = mix_srgb(
         label_primary,
         label_secondary,
         FieldSpec::LABEL_COLOR_PRIMARY_RATIO,
     );
-    let row_gap = theme.resolve_space(spec.row_gap_token());
-    let supporting_size = theme.resolve_space(spec.supporting_text_typography_token());
+    let row_gap = ctx.theme().resolve_space(spec.row_gap_token(density));
+    let supporting_size = ctx
+        .theme()
+        .resolve_space(spec.supporting_text_typography_token(base_size));
 
     let mut el = Node::container();
     el.style.descriptor.layout.direction = LayoutDirection::Column;
@@ -37,7 +47,9 @@ pub fn field(spec: &FieldSpec, theme: &dyn ThemeProvider, control: Option<Node>)
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
-        s.descriptor.layout.spacing.gap = theme.resolve_space(spec.header_gap_token());
+        s.descriptor.layout.spacing.gap = ctx
+            .theme()
+            .resolve_space(spec.header_gap_token(density));
     }
 
     // Label row — label + required marker + info icon.
@@ -46,7 +58,9 @@ pub fn field(spec: &FieldSpec, theme: &dyn ThemeProvider, control: Option<Node>)
         let s = &mut label_row.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space(spec.label_row_gap_token());
+        s.descriptor.layout.spacing.gap = ctx
+            .theme()
+            .resolve_space(spec.label_row_gap_token(density));
     }
 
     let mut label = Node::text(&spec.label);
@@ -66,10 +80,10 @@ pub fn field(spec: &FieldSpec, theme: &dyn ThemeProvider, control: Option<Node>)
     if spec.info_text().is_some() {
         let icon_box = label_size * FieldSpec::INFO_ICON_EM;
         let icon_glyph = label_size * FieldSpec::INFO_ICON_SVG_EM;
-        let info_base = theme.resolve_color(spec.info_icon_bg_token());
+        let info_base = ctx.theme().resolve_color(spec.info_icon_bg_token());
         let info_bg = with_alpha(info_base, info_base.3 * FieldSpec::INFO_ICON_BG_ALPHA);
-        let info_color = theme.resolve_color(spec.info_icon_color_token());
-        let info_radius = theme.resolve_radius(spec.info_icon_radius_token());
+        let info_color = ctx.theme().resolve_color(spec.info_icon_color_token());
+        let info_radius = ctx.theme().resolve_radius(spec.info_icon_radius_token());
 
         let mut pill = Node::container();
         {

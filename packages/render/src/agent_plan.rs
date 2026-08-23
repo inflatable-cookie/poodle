@@ -9,11 +9,11 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
 use poodle_specs::{AgentMessageSpec, AgentPlanSpec};
 
 use crate::color::TRANSPARENT;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Handlers mirror the GPUI target's names.
@@ -46,18 +46,20 @@ fn scoped(instance_id: Option<&str>, action: &str) -> Option<String> {
 
 pub fn agent_plan(
     spec: &AgentPlanSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: AgentPlanHandlers,
 ) -> Node {
-    let accent = theme.resolve_color(spec.accent_token());
-    let border = theme.resolve_color(spec.border_token());
-    let action_color = theme.resolve_color(spec.action_token());
-    let badge_color = theme.resolve_color(spec.badge_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let accent = ctx.theme().resolve_color(spec.accent_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let action_color = ctx.theme().resolve_color(spec.action_token());
+    let badge_color = ctx.theme().resolve_color(spec.badge_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
 
-    let font_size = rem_to_px(spec.font_size_rem());
-    let gap = rem_to_px(spec.gap_rem());
-    let action_gap = rem_to_px(spec.action_gap_rem());
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let gap = rem_to_px(spec.gap_rem(density));
+    let action_gap = rem_to_px(spec.action_gap_rem(density));
     let hairline = rem_to_px(0.0625);
 
     let mut root = Node::container();
@@ -68,9 +70,9 @@ pub fn agent_plan(
     // The plan is markdown, rendered by the same path as the turn's prose.
     let body = crate::agent_message::agent_message(
         &AgentMessageSpec::new(spec.plan.clone())
-            .with_size(spec.size)
-            .with_density(spec.density),
-        theme,
+            .with_size(base_size)
+            .with_density(density),
+        ctx,
     );
     let mut root = root.child(body);
 
@@ -110,7 +112,7 @@ pub fn agent_plan(
             button.interaction.focusable = true;
             button.style.focus = Some(StylePatch {
                 background: None,
-                border_color: Some(theme.resolve_color("color.accent.focusRing")),
+                border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
                 text_color: None,
                 opacity: None,
             });
@@ -118,7 +120,7 @@ pub fn agent_plan(
             let mut text = Node::text(label);
             text.style.text_size = Some(font_size);
             text.style.descriptor.text_color = Some(if primary {
-                theme.resolve_color(spec.primary_action_token())
+                ctx.theme().resolve_color(spec.primary_action_token())
             } else {
                 action_color
             });
@@ -177,13 +179,15 @@ mod tests {
 
     #[test]
     fn an_instance_scope_isolates_backend_state_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = AgentPlanSpec::new("1. Inspect.").with_status(AgentPlanStatus::Pending);
         let scoped = |scope: &str| AgentPlanHandlers {
             instance_id: Some(scope.to_string()),
             ..AgentPlanHandlers::default()
         };
-        let first = agent_plan(&spec, &theme(), scoped("first"));
-        let second = agent_plan(&spec, &theme(), scoped("second"));
+        let first = agent_plan(&spec, &ctx, scoped("first"));
+        let second = agent_plan(&spec, &ctx, scoped("second"));
         let accept = agent_plan_action_focus_id(Some("first"), "accept");
         assert!(first
             .find(&|n| n.runtime_id.as_deref() == Some(accept.as_str()))

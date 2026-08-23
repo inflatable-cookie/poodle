@@ -2,13 +2,14 @@
 //!
 //! Ported from: `packages/jetstream/components/src/pagination_summary.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::Node;
 use poodle_specs::PaginationSummarySpec;
 
-pub fn pagination_summary(spec: &PaginationSummarySpec, theme: &dyn ThemeProvider) -> Node {
-    let text_color = theme.resolve_color("color.text.secondary");
-    let font_size = theme.resolve_space("typography.body.size");
+use crate::context::RenderContext;
+
+pub fn pagination_summary(spec: &PaginationSummarySpec, ctx: &RenderContext<'_>) -> Node {
+    let text_color = ctx.theme().resolve_color("color.text.secondary");
+    let font_size = ctx.theme().resolve_space("typography.body.size");
 
     // Built in the spec so all three targets say the same thing (contract §7).
     let mut label = Node::text(spec.summary_text());

@@ -8,15 +8,16 @@
 //! is carried as an interaction id on each entry so the host can emulate
 //! focus imperatively.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::ValidationSummarySpec;
+
+use crate::context::RenderContext;
 
 /// Semibold label weight (typography constant; see form_shell).
 const SEMIBOLD: u16 = 600;
 const MEDIUM: u16 = 500;
 
-pub fn validation_summary(spec: &ValidationSummarySpec, theme: &dyn ThemeProvider) -> Node {
+pub fn validation_summary(spec: &ValidationSummarySpec, ctx: &RenderContext<'_>) -> Node {
     let entries = spec.active_entries();
     if entries.is_empty() {
         // Contract §4 empty state — a well-formed but visually empty node.
@@ -26,21 +27,21 @@ pub fn validation_summary(spec: &ValidationSummarySpec, theme: &dyn ThemeProvide
         return empty;
     }
 
-    let border = theme.resolve_color(spec.border_token());
-    let fill = theme.resolve_color(spec.fill_token());
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let danger_color = theme.resolve_color("color.status.danger");
-    let accent_color = theme.resolve_color("color.accent.base");
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let fill = ctx.theme().resolve_color(spec.fill_token());
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let danger_color = ctx.theme().resolve_color("color.status.danger");
+    let accent_color = ctx.theme().resolve_color("color.accent.base");
 
-    let title_size = theme.resolve_space(spec.title_size_token());
-    let entry_size = theme.resolve_space(spec.entry_text_size_token());
-    let pad_x = theme.resolve_space(spec.padding_x_token());
-    let pad_y = theme.resolve_space(spec.padding_y_token());
-    let radius = theme.resolve_radius(spec.radius_token());
-    let list_gap = theme.resolve_space(spec.list_gap_token());
-    let entry_gap = theme.resolve_space(spec.entry_gap_token());
-    let entry_text_gap = theme.resolve_space(spec.entry_text_gap_token());
+    let title_size = ctx.theme().resolve_space(spec.title_size_token());
+    let entry_size = ctx.theme().resolve_space(spec.entry_text_size_token());
+    let pad_x = ctx.theme().resolve_space(spec.padding_x_token());
+    let pad_y = ctx.theme().resolve_space(spec.padding_y_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let list_gap = ctx.theme().resolve_space(spec.list_gap_token());
+    let entry_gap = ctx.theme().resolve_space(spec.entry_gap_token());
+    let entry_text_gap = ctx.theme().resolve_space(spec.entry_text_gap_token());
 
     // Tone indicator dot sizing derives from the entry text size (a leading
     // bullet, not a contract-anatomy part). Half-text size.

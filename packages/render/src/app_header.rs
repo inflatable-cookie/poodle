@@ -19,11 +19,11 @@
 //! min-width 0 for truncation), actions/utility hold intrinsic width
 //! (shrink 0), utility justifies to the end.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::AppHeaderSpec;
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// A region container: row, centered cross-axis, region gap, never shrinking
@@ -48,29 +48,32 @@ fn region_container(region_gap: f32, justify_end: bool) -> Node {
 
 pub fn app_header(
     spec: &AppHeaderSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     identity: Option<Node>,
     center: Option<Node>,
     actions: Option<Node>,
     utility: Option<Node>,
 ) -> Node {
     // ── Token / contract-rem resolution ──────────────────────────
-    let panel = theme.resolve_color(spec.background_token());
+    let panel = ctx.theme().resolve_color(spec.background_token());
     // Contract §9: color-mix(background-panel 94%, transparent) → panel @ 94% alpha.
     let bg = with_alpha(panel, panel.3 * 0.94);
-    let border = theme.resolve_color(spec.border_token());
-    let title_color = theme.resolve_color(spec.title_color_token());
-    let subtitle_color = theme.resolve_color(spec.subtitle_color_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let title_color = ctx.theme().resolve_color(spec.title_color_token());
+    let subtitle_color = ctx.theme().resolve_color(spec.subtitle_color_token());
 
     // Size ladder (height + title/subtitle font) and density ladder
-    // (region gaps + padding) all carried on the spec.
-    let min_height = rem_to_px(spec.min_height_rem());
-    let title_font = rem_to_px(spec.title_size_rem());
-    let subtitle_font = rem_to_px(spec.subtitle_size_rem());
-    let grid_gap = rem_to_px(spec.gap_rem());
-    let region_gap = rem_to_px(spec.region_gap_rem());
-    let pad_y = rem_to_px(spec.pad_y_rem());
-    let pad_x = rem_to_px(spec.pad_x_rem());
+    // (region gaps + padding) resolve through the context: omission inherits
+    // the scope, then the spec ladders key off the resolved values.
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
+    let min_height = rem_to_px(spec.min_height_rem(effective_size));
+    let title_font = rem_to_px(spec.title_size_rem(effective_size));
+    let subtitle_font = rem_to_px(spec.subtitle_size_rem(effective_size));
+    let grid_gap = rem_to_px(spec.gap_rem(density));
+    let region_gap = rem_to_px(spec.region_gap_rem(density));
+    let pad_y = rem_to_px(spec.pad_y_rem(density));
+    let pad_x = rem_to_px(spec.pad_x_rem(density));
 
     // ── Identity region (grid column 1: minmax(0, 1fr)) ──────────
     // Grows to fill; min-width 0 so the subtitle can truncate.
@@ -207,7 +210,7 @@ pub fn app_header(
 mod tests {
     use super::*;
     use poodle_node::NodeKind;
-    use poodle_specs::ControlSize;
+    use poodle_specs::{ControlDensity, ControlSize};
 
     /// The real token resolver over the ECLIPSE theme. Pure — no backend.
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
@@ -219,11 +222,13 @@ mod tests {
         actions: bool,
         utility: bool,
     ) -> Node {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         app_header(
             &AppHeaderSpec::new()
                 .with_title("Finch")
                 .with_center(center),
-            &theme(),
+            &ctx,
             None,
             center.then(|| Node::text("centre")),
             actions.then(|| Node::text("action")),
@@ -252,7 +257,7 @@ mod tests {
         );
         assert_eq!(
             utility_region.style.descriptor.layout.spacing.gap,
-            rem_to_px(AppHeaderSpec::new().region_gap_rem())
+            rem_to_px(AppHeaderSpec::new().region_gap_rem(ControlDensity::Default))
         );
         assert_eq!(utility_region.children.len(), 1);
         assert!(matches!(
@@ -294,7 +299,7 @@ mod tests {
         // The inter-region gap is preserved inside the group.
         assert_eq!(
             trailing.style.descriptor.layout.spacing.gap,
-            rem_to_px(AppHeaderSpec::new().gap_rem())
+            rem_to_px(AppHeaderSpec::new().gap_rem(ControlDensity::Default))
         );
         assert_eq!(trailing.children.len(), 2, "actions + utility inside");
         assert!(matches!(
@@ -329,15 +334,20 @@ mod tests {
             .with_title("Finch")
             .with_size(ControlSize::Lg)
             .with_center(true);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = app_header(
             &spec,
-            &theme(),
+            &ctx,
             None,
             Some(Node::text("centre")),
             None,
             None,
         );
-        assert_eq!(node.style.min_height, Some(rem_to_px(spec.min_height_rem())));
+        assert_eq!(
+            node.style.min_height,
+            Some(rem_to_px(spec.min_height_rem(ControlSize::Lg)))
+        );
         assert_eq!(node.a11y.label.as_deref(), Some("Finch"));
     }
 }

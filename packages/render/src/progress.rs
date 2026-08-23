@@ -3,25 +3,25 @@
 //! Contract: `docs/contracts/components/progress.md`
 //! Ported from: `packages/jetstream/components/src/progress.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, Node, NodeKind, NodeRole};
 use poodle_specs::ProgressSpec;
 
 use crate::color::{mix_srgb, WHITE};
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
 /// Indeterminate bar width as a fraction of the track (contract §8: 40%),
 /// expressed as flex-grow against a trailing spacer.
 const INDETERMINATE_BAR_WIDTH_FRAC: f32 = 0.4;
 
-pub fn progress(spec: &ProgressSpec, theme: &dyn ThemeProvider) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let accent = theme.resolve_color(spec.indicator_fill_token());
+pub fn progress(spec: &ProgressSpec, ctx: &RenderContext<'_>) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let accent = ctx.theme().resolve_color(spec.indicator_fill_token());
 
     // Contract §8 Root: track bg = color-mix(surface 96%, text-primary) —
     // sRGB-space, like every other recipe.
-    let surface = theme.resolve_color(spec.track_fill_token());
-    let track_mix = theme.resolve_color(spec.track_mix_token());
+    let surface = ctx.theme().resolve_color(spec.track_fill_token());
+    let track_mix = ctx.theme().resolve_color(spec.track_mix_token());
     let track_bg = mix_srgb(surface, track_mix, spec.track_mix_ratio());
 
     // Contract §8 Indicator gradient: color-mix(accent 88%, white) → accent.

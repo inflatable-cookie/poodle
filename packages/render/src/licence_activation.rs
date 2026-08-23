@@ -13,7 +13,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::licence::{LicenceActivationRoute, LicenceKeyResult};
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole, TextChangeHandler,
@@ -26,10 +25,11 @@ use poodle_specs::{
 
 use crate::button::button;
 use crate::code_input::{code_input_with_handlers, CodeInputHandlers};
+use crate::context::RenderContext;
 use crate::editable_label::{editable_label_with_handlers, EditableLabelHandlers};
 use crate::field::field;
 use crate::file_upload::{file_upload_with_handlers, FileUploadHandlers};
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::presentation::rem_to_px;
 use crate::text_input::text_input_with_handlers;
 
 /// Host callbacks. Everything that decides or acts on a credential stays in
@@ -66,25 +66,27 @@ pub struct LicenceActivationHandlers {
 
 pub fn licence_activation(
     spec: &LicenceActivationSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: LicenceActivationHandlers,
 ) -> Node {
-    licence_activation_with_slots(spec, theme, None, handlers)
+    licence_activation_with_slots(spec, ctx, None, handlers)
 }
 
 /// Render with optional host-owned account content beside the spec.
 pub fn licence_activation_with_slots(
     spec: &LicenceActivationSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     account_content: Option<Node>,
     handlers: LicenceActivationHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
     let frozen = spec.interaction_frozen();
 
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let danger = theme.resolve_color("color.status.danger");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let danger = ctx.theme().resolve_color("color.status.danger");
 
     let route = spec.effective_route();
 
@@ -112,9 +114,9 @@ pub fn licence_activation_with_slots(
                 "Use account activation"
             })
             .with_disabled(frozen)
-            .with_size(spec.size)
-            .with_density(spec.density);
-        let switch = button(&switch_spec, theme, {
+            .with_size(base_size)
+            .with_density(density);
+        let switch = button(&switch_spec, ctx, {
             let on_view_change = handlers.on_view_change.clone();
             let target = if offline {
                 LicenceActivationRoute::LicenceFile
@@ -133,15 +135,15 @@ pub fn licence_activation_with_slots(
     // ── Route view ──
     let view = match route {
         LicenceActivationRoute::Key => match &spec.key_code_input {
-            Some(options) => key_code_input_view(spec, options, theme, &handlers, frozen),
-            None => free_form_key_view(spec, theme, &handlers, frozen),
+            Some(options) => key_code_input_view(spec, options, ctx, &handlers, frozen),
+            None => free_form_key_view(spec, ctx, &handlers, frozen),
         },
         LicenceActivationRoute::AccountToken => {
             let mut view = Node::container();
             {
                 let s = &mut view.style;
                 s.descriptor.layout.direction = LayoutDirection::Column;
-                s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+                s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
             }
             match account_content {
                 Some(content) => {
@@ -164,7 +166,7 @@ pub fn licence_activation_with_slots(
             {
                 let s = &mut view.style;
                 s.descriptor.layout.direction = LayoutDirection::Column;
-                s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+                s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
             }
             let mut upload = file_upload_with_handlers(
                 &FileUploadSpec::new()
@@ -172,9 +174,9 @@ pub fn licence_activation_with_slots(
                     .with_multiple(false)
                     .with_show_preview(false)
                     .with_disabled(frozen)
-                    .with_size(spec.size)
-                    .with_density(spec.density),
-                theme,
+                    .with_size(base_size)
+                    .with_density(density),
+                ctx,
                 FileUploadHandlers {
                     on_browse: handlers.on_file_browse.clone(),
                     on_remove: handlers.on_file_remove.as_ref().map(|handler| {
@@ -196,9 +198,9 @@ pub fn licence_activation_with_slots(
                         .with_show_preview(false)
                         .with_disabled(frozen)
                         .with_file(item)
-                        .with_size(spec.size)
-                        .with_density(spec.density),
-                    theme,
+                        .with_size(base_size)
+                        .with_density(density),
+                    ctx,
                     FileUploadHandlers {
                         on_browse: handlers.on_file_browse.clone(),
                         on_remove: handlers.on_file_remove.as_ref().map(|handler| {
@@ -220,7 +222,7 @@ pub fn licence_activation_with_slots(
         _ => {
             if let Some(message) = &spec.route_message {
                 let mut status = Node::text(message);
-                status.style.text_size = Some(theme.resolve_space("typography.label.size"));
+                status.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
                 status.style.descriptor.text_color = Some(danger);
                 status.a11y.role = Some(NodeRole::Status);
                 view.child(status)
@@ -237,18 +239,18 @@ pub fn licence_activation_with_slots(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::End;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.md");
     }
     if spec.machine_label.is_some() {
-        actions = actions.child(machine_name(spec, theme, &handlers, frozen));
+        actions = actions.child(machine_name(spec, ctx, &handlers, frozen));
     }
     let submit_spec = ButtonSpec::new()
         .with_label(spec.submit_label())
         .with_loading(spec.pending)
         .with_disabled(frozen)
-        .with_size(spec.size)
-        .with_density(spec.density);
-    let submit = button(&submit_spec, theme, handlers.on_submit.clone());
+        .with_size(base_size)
+        .with_density(density);
+    let submit = button(&submit_spec, ctx, handlers.on_submit.clone());
     let actions = actions.child(submit);
 
     // ── Root form ──
@@ -256,7 +258,7 @@ pub fn licence_activation_with_slots(
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.md");
     }
     root = root
         .child(header)
@@ -279,7 +281,7 @@ pub fn licence_activation_with_slots(
     );
     root.roles.insert(
         "density".to_owned(),
-        format!("{:?}", spec.density).to_ascii_lowercase(),
+        format!("{density:?}").to_ascii_lowercase(),
     );
     root
 }
@@ -287,7 +289,7 @@ pub fn licence_activation_with_slots(
 /// The machine-name EditableLabel, only when naming is opted in.
 fn machine_name(
     spec: &LicenceActivationSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &LicenceActivationHandlers,
     frozen: bool,
 ) -> Node {
@@ -295,11 +297,11 @@ fn machine_name(
     {
         let s = &mut boxed.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.xs");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.xs");
     }
     let mut caption = Node::text("Machine name");
-    caption.style.text_size = Some(theme.resolve_space("typography.label.size"));
-    caption.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
+    caption.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
+    caption.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
     let label = editable_label_with_handlers(
         &EditableLabelSpec::new()
             .with_value(spec.machine_label.clone().unwrap_or_default())
@@ -311,9 +313,9 @@ fn machine_name(
             .with_show_edit_icon(true)
             .with_aria_label("Edit machine name")
             .with_disabled(frozen)
-            .with_size(spec.size)
-            .with_density(spec.density),
-        theme,
+            .with_size(ctx.base_size(spec.size))
+            .with_density(ctx.resolve_density(spec.density)),
+        ctx,
         EditableLabelHandlers {
             on_edit_start: handlers.on_machine_label_edit.clone(),
             // Typing updates the controlled draft; commit and cancel are
@@ -332,7 +334,7 @@ fn machine_name(
 fn key_code_input_view(
     spec: &LicenceActivationSpec,
     options: &LicenceKeyCodeInputOptions,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &LicenceActivationHandlers,
     frozen: bool,
 ) -> Node {
@@ -357,8 +359,8 @@ fn key_code_input_view(
         .with_value(spec.key_draft.clone())
         .with_selection(spec.key_selection.0, spec.key_selection.1)
         .with_disabled(frozen)
-        .with_size(spec.size)
-        .with_density(spec.density);
+        .with_size(ctx.base_size(spec.size))
+        .with_density(ctx.resolve_density(spec.density));
     if let Some(groups) = &options.groups {
         code_spec = code_spec.with_groups(groups.iter().copied());
     }
@@ -374,7 +376,7 @@ fn key_code_input_view(
 
     code_input_with_handlers(
         &code_spec,
-        theme,
+        ctx,
         CodeInputHandlers {
             on_value_change: handlers.on_key_change.clone(),
             on_selection_change: handlers.on_key_selection_change.clone(),
@@ -386,7 +388,7 @@ fn key_code_input_view(
 /// Free-form licence-key entry (default when `keyCodeInput` is omitted).
 fn free_form_key_view(
     spec: &LicenceActivationSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &LicenceActivationHandlers,
     frozen: bool,
 ) -> Node {
@@ -397,8 +399,8 @@ fn free_form_key_view(
         } else {
             ValidationState::None
         })
-        .with_size(spec.size)
-        .with_density(spec.density);
+        .with_size(ctx.base_size(spec.size))
+        .with_density(ctx.resolve_density(spec.density));
     if let Some(message) = &spec.key_message {
         field_spec = field_spec.with_error(message.clone());
     }
@@ -411,20 +413,20 @@ fn free_form_key_view(
         } else {
             ValidationState::None
         },
-        size: Some(spec.size),
-        density: Some(spec.density),
+        size: Some(ctx.base_size(spec.size)),
+        density: Some(ctx.resolve_density(spec.density)),
         ..TextInputSpec::default()
     };
     let control = text_input_with_handlers(
         &text_spec,
-        theme,
+        ctx,
         crate::text_input::TextInputHandlers {
             on_change: handlers.on_key_change.clone(),
             on_selection_change: handlers.on_key_selection_change.clone(),
             ..crate::text_input::TextInputHandlers::default()
         },
     );
-    field(&field_spec, theme, Some(control))
+    field(&field_spec, ctx, Some(control))
 }
 
 #[cfg(test)]
@@ -443,7 +445,9 @@ mod tests {
         let spec = LicenceActivationSpec::new()
             .with_mode(LicenceActivationMode::Key)
             .with_key_draft("abc");
-        let node = licence_activation(&spec, &theme(), LicenceActivationHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = licence_activation(&spec, &ctx, LicenceActivationHandlers::default());
         assert!(node.has_text("Licence key"));
         assert!(!node.has_text("Activate offline"));
         assert!(!node.has_text("Use account activation"));
@@ -455,7 +459,9 @@ mod tests {
     #[test]
     fn account_mode_opens_on_account_and_switches_offline() {
         let spec = LicenceActivationSpec::new();
-        let node = licence_activation(&spec, &theme(), LicenceActivationHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = licence_activation(&spec, &ctx, LicenceActivationHandlers::default());
         assert!(node.has_text("Activate offline"));
         assert!(node.has_text("Continue with your account to authorise this machine."));
         assert_eq!(
@@ -466,7 +472,7 @@ mod tests {
         let offline = LicenceActivationSpec::new()
             .with_route(LicenceActivationRoute::LicenceFile)
             .with_file_accept(".lic");
-        let node = licence_activation(&offline, &theme(), LicenceActivationHandlers::default());
+        let node = licence_activation(&offline, &ctx, LicenceActivationHandlers::default());
         assert!(node.has_text("Use account activation"));
         assert_eq!(
             node.roles.get("route").map(String::as_str),
@@ -479,14 +485,16 @@ mod tests {
     #[test]
     fn machine_naming_is_opt_in_and_blank_emits_null() {
         let spec = LicenceActivationSpec::new().with_mode(LicenceActivationMode::Key);
-        let node = licence_activation(&spec, &theme(), LicenceActivationHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = licence_activation(&spec, &ctx, LicenceActivationHandlers::default());
         assert!(!node.has_text("Machine name"));
         assert_eq!(spec.committed_label(), None);
 
         let spec = LicenceActivationSpec::new()
             .with_mode(LicenceActivationMode::Key)
             .with_machine_label(Some(String::new()));
-        let node = licence_activation(&spec, &theme(), LicenceActivationHandlers::default());
+        let node = licence_activation(&spec, &ctx, LicenceActivationHandlers::default());
         assert!(node.has_text("Machine name"));
         assert!(node.has_text("unnamed machine"));
         assert_eq!(spec.committed_label(), None);
@@ -505,9 +513,11 @@ mod tests {
                     .with_separator("-"),
             )
             .with_key_draft("ABCDEFGHIJKLMNOPQRST");
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = licence_activation(
             &spec,
-            &theme(),
+            &ctx,
             LicenceActivationHandlers {
                 on_key_check: Some(Arc::new(|key: &str| {
                     if key == "ABCDEFGHIJKLMNOPQRST" {
@@ -535,7 +545,7 @@ mod tests {
         let edited = spec.clone().with_key_draft("ABCDEFGHIJKLMNOPQRSU");
         let node = licence_activation(
             &edited,
-            &theme(),
+            &ctx,
             LicenceActivationHandlers {
                 on_key_check: Some(Arc::new(|_key: &str| {
                     LicenceKeyResult::Err(LicenceKeyProblem::CheckFailed)
@@ -557,9 +567,11 @@ mod tests {
         let spec = LicenceActivationSpec::new()
             .with_route(LicenceActivationRoute::LicenceFile)
             .with_file_accept(".lic");
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = licence_activation(
             &spec,
-            &theme(),
+            &ctx,
             LicenceActivationHandlers {
                 on_file_browse: Some(Arc::new(move || {
                     *sink.lock().unwrap() += 1;
@@ -584,9 +596,11 @@ mod tests {
         let spec = LicenceActivationSpec::new()
             .with_mode(LicenceActivationMode::Key)
             .with_pending(true);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = licence_activation(
             &spec,
-            &theme(),
+            &ctx,
             LicenceActivationHandlers {
                 on_submit: Some(Arc::new(|| {})),
                 ..LicenceActivationHandlers::default()
@@ -615,9 +629,11 @@ mod tests {
         let account = LicenceActivationSpec::new()
             .with_mode(LicenceActivationMode::Account)
             .with_machine_label(Some("Studio Mac".to_string()));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = licence_activation_with_slots(
             &account,
-            &theme(),
+            &ctx,
             Some(Node::text("host login form")),
             LicenceActivationHandlers {
                 on_submit: Some(Arc::new(move || {
@@ -642,7 +658,7 @@ mod tests {
             .with_file("machine.lic", "c3R1ZmY=");
         let node = licence_activation(
             &offline,
-            &theme(),
+            &ctx,
             LicenceActivationHandlers {
                 on_submit: Some(Arc::new(move || {
                     *sink.lock().unwrap() += 1;
@@ -669,9 +685,11 @@ mod tests {
             .with_mode(LicenceActivationMode::Key)
             .with_machine_label(Some("rig".to_string()))
             .with_machine_label_editing(true);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = licence_activation(
             &spec,
-            &theme(),
+            &ctx,
             LicenceActivationHandlers {
                 on_machine_label_change: Some({
                     let sink = Arc::clone(&events);
@@ -704,7 +722,7 @@ mod tests {
         // with that value — distinct from the change channel.
         let node = licence_activation(
             &spec.clone().with_machine_label(Some("rig-2".to_string())),
-            &theme(),
+            &ctx,
             LicenceActivationHandlers {
                 on_machine_label_change: Some({
                     let sink = Arc::clone(&events);
@@ -736,7 +754,7 @@ mod tests {
         let sink = Arc::clone(&events);
         let node = licence_activation(
             &spec,
-            &theme(),
+            &ctx,
             LicenceActivationHandlers {
                 on_machine_label_cancel: Some(Arc::new(move || {
                     sink.lock().unwrap().push("cancel".to_string())

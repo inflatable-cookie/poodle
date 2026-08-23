@@ -10,7 +10,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeRole, NodeToggled,
@@ -18,14 +17,17 @@ use poodle_node::{
 use poodle_specs::{CardRadioGroupSpec, CardSpec};
 
 use crate::card::card;
-use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::{control_space_x_rem, rem_to_px};
 
 pub fn card_radio_group(
     spec: &CardRadioGroupSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let theme = ctx.theme();
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // Contract §7/§8 size scale — resolved through the spec helpers.
     let indicator_size = rem_to_px(CardRadioGroupSpec::indicator_size_rem(effective_size));
@@ -35,7 +37,7 @@ pub fn card_radio_group(
     let description_font = rem_to_px(CardRadioGroupSpec::description_font_rem(effective_size));
 
     // Density-driven grid gap; header gap density-fixed 0.5rem; body rhythm.
-    let grid_gap = rem_to_px(control_space_x_rem(spec.density));
+    let grid_gap = rem_to_px(control_space_x_rem(density));
     let header_gap = rem_to_px(0.5);
     let body_gap = rem_to_px(0.25);
 
@@ -148,7 +150,7 @@ pub fn card_radio_group(
 
         // These are mutually exclusive choices, so each card is a `radio`
         // carrying its own checked state (overriding Card's `button`).
-        let mut option_card = card(&card_spec, theme, vec![body]);
+        let mut option_card = card(&card_spec, ctx, vec![body]);
         option_card.a11y.role = Some(NodeRole::RadioButton);
         option_card.a11y.toggled = Some(if is_selected {
             NodeToggled::True

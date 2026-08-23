@@ -5,7 +5,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_transcript::ChangedFileNode;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole, StylePatch,
@@ -13,6 +12,7 @@ use poodle_node::{
 use poodle_specs::ChangedFilesSpec;
 
 use crate::color::TRANSPARENT;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Handlers mirror the GPUI target's names.
@@ -37,9 +37,14 @@ fn path_token(path: &str) -> String {
 
 pub fn changed_files(
     spec: &ChangedFilesSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: ChangedFilesHandlers,
 ) -> Node {
+    let theme = ctx.theme();
+    // The size helpers are pure ladders over the old raw-field dataflow, so
+    // they take the context-resolved base size.
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
     // An empty card renders nothing rather than an empty state. A turn that
     // changed no files should not have a box saying so.
     if !spec.renders() {
@@ -59,10 +64,10 @@ pub fn changed_files(
     let radius = theme.resolve_radius(spec.radius_token());
     let chip_radius = theme.resolve_radius(spec.chip_radius_token());
 
-    let font_size = rem_to_px(spec.font_size_rem());
-    let icon_size = rem_to_px(spec.icon_size_rem());
-    let inset = rem_to_px(spec.padding_inset_rem());
-    let gap = rem_to_px(spec.gap_rem());
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let icon_size = rem_to_px(spec.icon_size_rem(base_size));
+    let inset = rem_to_px(spec.padding_inset_rem(density));
+    let gap = rem_to_px(spec.gap_rem(density));
     // Contract §8: a hairline, stated as an absolute because no border-width
     // token is finer than 1px.
     let hairline = rem_to_px(0.0625);
@@ -373,8 +378,10 @@ mod tests {
             instance_id: Some(scope.to_string()),
             ..ChangedFilesHandlers::default()
         };
-        let first = changed_files(&spec(), &theme(), scoped("first"));
-        let second = changed_files(&spec(), &theme(), scoped("second"));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let first = changed_files(&spec(), &ctx, scoped("first"));
+        let second = changed_files(&spec(), &ctx, scoped("second"));
         let toggle = "changed-files:first:toggle:worked";
         assert!(first
             .find(&|n| n.runtime_id.as_deref() == Some(toggle))

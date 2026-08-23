@@ -12,13 +12,13 @@
 //! (the spec's `open`/`defaultOpen`); the host rebuilds the tree when it
 //! changes.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     DismissReason, LayoutDirection, LayoutSizing, Node, NodeRole, ShadowLayer,
 };
 use poodle_specs::PopoverSpec;
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::floating_overlay::floating_overlay;
 use crate::presentation::rem_to_px;
 
@@ -58,21 +58,21 @@ pub struct PopoverHandlers {
 /// The popover surface only — used by hosts that compose their own trigger
 /// (message centre, Jetstream compat). The full overlay profile lives in
 /// [`popover`].
-pub fn popover_surface(spec: &PopoverSpec, theme: &dyn ThemeProvider, content: Option<Node>) -> Node {
+pub fn popover_surface(spec: &PopoverSpec, ctx: &RenderContext<'_>, content: Option<Node>) -> Node {
     // Contract §8 surface: background = background-elevated, border =
     // border-subtle at 74%, radius = radius-surface.
-    let fill = theme.resolve_color(spec.surface_fill_token());
-    let border_base = theme.resolve_color(spec.surface_border_token());
+    let fill = ctx.theme().resolve_color(spec.surface_fill_token());
+    let border_base = ctx.theme().resolve_color(spec.surface_border_token());
     let border = with_alpha(border_base, border_base.3 * spec.surface_border_alpha());
-    let border_width = theme.resolve_space("border.width.default");
-    let radius = theme.resolve_radius("radius.surface");
+    let border_width = ctx.theme().resolve_space("border.width.default");
+    let radius = ctx.theme().resolve_radius("radius.surface");
 
     // Contract §8 padding = space.panel.y / space.panel.x. The padding lives
     // on an inner content wrapper so the surface node's own box stays the
     // bounds target (the backend records its rendered box for containment
     // and relative geometry).
-    let pad_x = theme.resolve_space("space.panel.x");
-    let pad_y = theme.resolve_space("space.panel.y");
+    let pad_x = ctx.theme().resolve_space("space.panel.x");
+    let pad_y = ctx.theme().resolve_space("space.panel.y");
 
     // Contract §7: min-width 14rem, max-width min(24rem, 90vw) — the 24rem
     // arm; both overridable via surfaceMinWidth/surfaceMaxWidth.
@@ -140,7 +140,7 @@ pub fn popover_surface(spec: &PopoverSpec, theme: &dyn ThemeProvider, content: O
 /// generic backend path executes.
 pub fn popover(
     spec: &PopoverSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &PopoverHandlers,
     trigger: Option<Node>,
     content: Option<Node>,
@@ -178,7 +178,7 @@ pub fn popover(
         // backend applies this patch while the trigger holds focus, which
         // also makes the focus-visible state observable.
         s.focus = Some(poodle_node::StylePatch {
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             ..poodle_node::StylePatch::default()
         });
         if spec.block {
@@ -191,7 +191,7 @@ pub fn popover(
 
     // ── Surface (conditional) ──────────────────────────────────────────────
     let surface = open.then(|| {
-        let mut node = popover_surface(spec, theme, content);
+        let mut node = popover_surface(spec, ctx, content);
         node.runtime_id = instance.as_ref().map(|scope| format!("{scope}:{POPOVER_SURFACE_ID}"));
         node.interaction.focusable = spec.initial_focus == poodle_specs::PopoverInitialFocus::Content;
         node.a11y.tab_index = Some(if spec.initial_focus == poodle_specs::PopoverInitialFocus::Content { 0 } else { -1 });
@@ -199,7 +199,7 @@ pub fn popover(
             // The surface itself is the focus target in content mode; the
             // focus patch also makes the focused state backend-observable.
             node.style.focus = Some(poodle_node::StylePatch {
-                border_color: Some(theme.resolve_color("color.accent.focusRing")),
+                border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
                 ..poodle_node::StylePatch::default()
             });
         }

@@ -14,7 +14,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::disclosure::{
     disclosure_transition, DisclosureContext, DisclosureEffect, DisclosureEvent,
 };
@@ -31,8 +30,9 @@ use poodle_specs::{
     StatusIndicatorSpec, StatusTone, SwitchSpec,
 };
 
+use crate::context::RenderContext;
 use crate::icon_button::icon_button;
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::presentation::rem_to_px;
 use crate::status_indicator::status_indicator;
 use crate::switch::switch;
 
@@ -79,24 +79,25 @@ pub struct ModelConnectionCardSlots {
 
 pub fn model_connection_card(
     spec: &ModelConnectionCardSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: ModelConnectionCardHandlers,
 ) -> Node {
-    model_connection_card_with_slots(spec, theme, ModelConnectionCardSlots::default(), handlers)
+    model_connection_card_with_slots(spec, ctx, ModelConnectionCardSlots::default(), handlers)
 }
 
 pub fn model_connection_card_with_slots(
     spec: &ModelConnectionCardSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     slots: ModelConnectionCardSlots,
     handlers: ModelConnectionCardHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let border = theme.resolve_color("color.border.subtle");
-    let label_size = theme.resolve_space("typography.label.size");
-    let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let border = ctx.theme().resolve_color("color.border.subtle");
+    let label_size = ctx.theme().resolve_space("typography.label.size");
+    let disabled_opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
 
     // ── Identity ──
     let mut title_row = Node::container();
@@ -104,7 +105,7 @@ pub fn model_connection_card_with_slots(
         let s = &mut title_row.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.xs");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.xs");
         s.flex_wrap = true;
         s.min_width = Some(0.0);
     }
@@ -118,7 +119,7 @@ pub fn model_connection_card_with_slots(
     }
     mark.style.flex_none = true;
     let mut title = Node::text(&spec.title);
-    title.style.text_size = Some(theme.resolve_space("typography.body.size"));
+    title.style.text_size = Some(ctx.theme().resolve_space("typography.body.size"));
     title.style.text_weight = Some(LABEL_WEIGHT);
     title.style.descriptor.text_color = Some(text_primary);
     title.style.text_ellipsis = true;
@@ -163,8 +164,8 @@ pub fn model_connection_card_with_slots(
                 &spec.readiness_label,
             ))
             .with_size(effective_size)
-            .with_density(spec.density),
-        theme,
+            .with_density(density),
+        ctx,
     );
 
     let mut controls = Node::container();
@@ -173,7 +174,7 @@ pub fn model_connection_card_with_slots(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.main = MainAxisAlignment::End;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.xs");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.xs");
         s.flex_wrap = true;
         s.flex_none = true;
     }
@@ -184,7 +185,7 @@ pub fn model_connection_card_with_slots(
         let s = &mut dimmable.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.xs");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.xs");
         if !spec.is_enabled {
             s.descriptor.opacity = disabled_opacity;
         }
@@ -198,7 +199,7 @@ pub fn model_connection_card_with_slots(
     if let Some(actions) = slots.actions {
         dimmable = dimmable.child(actions);
     }
-    dimmable = dimmable.child(disclosure_button(spec, theme, effective_size, &handlers));
+    dimmable = dimmable.child(disclosure_button(spec, ctx, effective_size, &handlers));
 
     let switch_node = switch(
         &SwitchSpec::new()
@@ -206,8 +207,8 @@ pub fn model_connection_card_with_slots(
             .with_disabled(spec.is_disabled || spec.is_enable_disabled)
             .with_aria_label(spec.enable_label())
             .with_size(effective_size)
-            .with_density(spec.density),
-        theme,
+            .with_density(density),
+        ctx,
         (!(spec.is_disabled || spec.is_enable_disabled))
             .then(|| {
                 handlers.on_enabled_change.clone().map(|handler| {
@@ -224,12 +225,12 @@ pub fn model_connection_card_with_slots(
         let s = &mut summary.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         let pad = &mut s.descriptor.layout.spacing.padding;
-        pad.top = theme.resolve_space("space.stack.sm");
-        pad.bottom = theme.resolve_space("space.stack.sm");
-        pad.left = theme.resolve_space("space.inline.md");
-        pad.right = theme.resolve_space("space.inline.md");
+        pad.top = ctx.theme().resolve_space("space.stack.sm");
+        pad.bottom = ctx.theme().resolve_space("space.stack.sm");
+        pad.left = ctx.theme().resolve_space("space.inline.md");
+        pad.right = ctx.theme().resolve_space("space.inline.md");
         s.flex_wrap = true;
         s.fill_width = true;
         s.min_width = Some(0.0);
@@ -244,13 +245,13 @@ pub fn model_connection_card_with_slots(
         s.descriptor.border.width = rem_to_px(0.0625);
         s.descriptor.border.color = border;
         s.descriptor.background = Some(if spec.is_enabled {
-            theme.resolve_color("color.background.panel")
+            ctx.theme().resolve_color("color.background.panel")
         } else {
-            theme.resolve_color("color.background.surface")
+            ctx.theme().resolve_color("color.background.surface")
         });
         s.fill_width = true;
         s.min_width = Some(0.0);
-        let radius = theme.resolve_radius("radius.surface");
+        let radius = ctx.theme().resolve_radius("radius.surface");
         let c = &mut s.descriptor.corner_radii;
         c.top_left = radius;
         c.top_right = radius;
@@ -272,8 +273,8 @@ pub fn model_connection_card_with_slots(
         {
             let s = &mut details.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
-            s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.md");
-            let inset = theme.resolve_space("space.stack.md");
+            s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.md");
+            let inset = ctx.theme().resolve_space("space.stack.md");
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.top = inset;
             pad.bottom = inset;
@@ -320,11 +321,12 @@ fn readiness_role(readiness: ModelConnectionReadiness) -> &'static str {
 
 fn disclosure_button(
     spec: &ModelConnectionCardSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     effective_size: ControlSize,
     handlers: &ModelConnectionCardHandlers,
 ) -> Node {
     let on_open = handlers.on_open_change.clone();
+    let density = ctx.resolve_density(spec.density);
     let on_focus = handlers.on_focus_request.clone();
     let is_open = spec.is_open;
     let is_disabled = spec.is_disabled;
@@ -365,12 +367,12 @@ fn disclosure_button(
             .with_variant(ButtonVariant::Ghost)
             .with_size_role(SemanticControlSizeRole::Chrome)
             .with_size(effective_size)
-            .with_density(spec.density)
+            .with_density(density)
             .with_aria_label(spec.disclosure_label())
             .with_expanded(is_open)
             .with_controls(spec.details_id())
             .with_disabled(is_disabled),
-        theme,
+        ctx,
         activate,
     );
     node.runtime_id = scoped(handlers.instance_id.as_deref(), disclosure_id.clone());
@@ -381,7 +383,7 @@ fn disclosure_button(
     // to it (PAPERCUTS: icon-button focus patch). Same workaround
     // `poodle-render::history_center` already carries.
     node.style.focus = Some(StylePatch {
-        border_color: Some(theme.resolve_color("color.accent.focusRing")),
+        border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
         ..StylePatch::default()
     });
     // `IconButtonSpec`'s expanded/controls flags do not reach `Node.a11y`
@@ -429,7 +431,7 @@ mod tests {
         let spec = spec();
         let node = model_connection_card(
             &spec,
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionCardHandlers {
                 on_open_change: Some(Arc::new(move |open| open_sink.lock().unwrap().push(open))),
                 on_enabled_change: Some(Arc::new(move |enabled| {
@@ -466,7 +468,7 @@ mod tests {
 
     #[test]
     fn ready_shows_the_access_summary_and_other_postures_show_readiness() {
-        let ready = model_connection_card(&spec(), &theme(), ModelConnectionCardHandlers::default());
+        let ready = model_connection_card(&spec(), &RenderContext::new(&theme()), ModelConnectionCardHandlers::default());
         assert!(ready
             .texts().contains(&"API key on file"));
         assert!(!ready.texts().contains(&"Ready"));
@@ -475,7 +477,7 @@ mod tests {
             &spec()
                 .with_readiness(ModelConnectionReadiness::Checking, "Checking install")
                 .with_access_summary("Signed in"),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionCardHandlers::default(),
         );
         assert!(checking
@@ -491,7 +493,7 @@ mod tests {
     fn the_closed_accessory_is_mounted_only_while_closed() {
         let closed = model_connection_card_with_slots(
             &spec(),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionCardSlots {
                 closed_accessory: Some(Node::text("UPDATE CENTER")),
                 actions: Some(Node::text("HOST ACTIONS")),
@@ -506,7 +508,7 @@ mod tests {
 
         let open = model_connection_card_with_slots(
             &spec().with_open(true),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionCardSlots {
                 closed_accessory: Some(Node::text("UPDATE CENTER")),
                 actions: Some(Node::text("HOST ACTIONS")),
@@ -525,7 +527,7 @@ mod tests {
         let spec = spec().with_open(true);
         let node = model_connection_card_with_slots(
             &spec,
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionCardSlots {
                 details: Some(Node::text("HOST DETAILS")),
                 ..ModelConnectionCardSlots::default()
@@ -558,7 +560,7 @@ mod tests {
         let spec = spec().with_open(true);
         let node = model_connection_card(
             &spec,
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionCardHandlers {
                 on_open_change: Some(Arc::new(|_| {})),
                 on_focus_request: Some(Arc::new(move |id: &str| {
@@ -580,7 +582,7 @@ mod tests {
         let closed_spec = self::spec();
         let node = model_connection_card(
             &closed_spec,
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionCardHandlers {
                 on_open_change: Some(Arc::new(|_| {})),
                 on_focus_request: Some(Arc::new(move |id: &str| {
@@ -600,7 +602,7 @@ mod tests {
     #[test]
     fn an_off_card_dims_its_copy_but_never_its_switch() {
         let spec = spec().with_enabled(false);
-        let node = model_connection_card(&spec, &theme(), ModelConnectionCardHandlers::default());
+        let node = model_connection_card(&spec, &RenderContext::new(&theme()), ModelConnectionCardHandlers::default());
         assert_eq!(node.roles.get("enabled").map(String::as_str), Some("false"));
 
         let switch = switch_node(&node, &spec);
@@ -621,7 +623,7 @@ mod tests {
         let spec = spec().with_disabled(true);
         let node = model_connection_card(
             &spec,
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionCardHandlers {
                 on_open_change: Some(Arc::new(|_| unreachable!("a disabled card discloses"))),
                 on_enabled_change: Some(Arc::new(|_| unreachable!("a disabled card toggles"))),
@@ -640,7 +642,7 @@ mod tests {
         let spec = spec().with_enable_disabled(true);
         let node = model_connection_card(
             &spec,
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionCardHandlers {
                 on_open_change: Some(Arc::new(|_| {})),
                 on_enabled_change: Some(Arc::new(|_| unreachable!("the switch is disabled"))),
@@ -661,7 +663,7 @@ mod tests {
         assert_ne!(first.details_id(), second.details_id());
         assert_ne!(first.disclosure_id(), second.disclosure_id());
 
-        let node = model_connection_card(&first, &theme(), ModelConnectionCardHandlers::default());
+        let node = model_connection_card(&first, &RenderContext::new(&theme()), ModelConnectionCardHandlers::default());
         assert!(node
             .find(&|n| n.id.as_deref() == Some(second.details_id().as_str()))
             .is_none());
@@ -674,8 +676,8 @@ mod tests {
             ..ModelConnectionCardHandlers::default()
         };
         let spec = spec().with_open(true);
-        let first = model_connection_card(&spec, &theme(), scoped("first"));
-        let second = model_connection_card(&spec, &theme(), scoped("second"));
+        let first = model_connection_card(&spec, &RenderContext::new(&theme()), scoped("first"));
+        let second = model_connection_card(&spec, &RenderContext::new(&theme()), scoped("second"));
 
         for (node, scope) in [(&first, "first"), (&second, "second")] {
             let expected = format!("model-connection-card:{scope}:{}", spec.disclosure_id());
@@ -699,7 +701,7 @@ mod tests {
         let spec = spec().with_open(true);
         let node = model_connection_card(
             &spec,
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionCardHandlers {
                 on_open_change: Some(Arc::new(|_| {})),
                 on_focus_request: Some(Arc::new(move |id: &str| {
@@ -724,7 +726,7 @@ mod tests {
     fn the_provider_mark_precedes_the_name_without_indenting_the_summary() {
         let node = model_connection_card_with_slots(
             &spec(),
-            &theme(),
+            &RenderContext::new(&theme()),
             ModelConnectionCardSlots {
                 leading: Some(Node::text("MARK")),
                 ..ModelConnectionCardSlots::default()

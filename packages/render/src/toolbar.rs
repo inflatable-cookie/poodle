@@ -3,33 +3,34 @@
 //! Contract: `docs/contracts/components/toolbar.md`
 //! Ported from: `packages/jetstream/components/src/toolbar.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
 };
 use poodle_specs::{Alignment, Orientation, ToolbarSpec};
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, toolbar_density_gap_rem, toolbar_density_pad_inline_rem,
-    toolbar_gap_rem, toolbar_pad_block_rem, toolbar_pad_inline_rem,
+    rem_to_px, toolbar_density_gap_rem, toolbar_density_pad_inline_rem, toolbar_gap_rem,
+    toolbar_pad_block_rem, toolbar_pad_inline_rem,
 };
 
-pub fn toolbar(spec: &ToolbarSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> Node {
-    let panel_raw = theme.resolve_color(spec.bg_token());
+pub fn toolbar(spec: &ToolbarSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
+    let panel_raw = ctx.theme().resolve_color(spec.bg_token());
     let bg = with_alpha(panel_raw, panel_raw.3 * 0.94);
-    let border_raw = theme.resolve_color(spec.border_token());
+    let border_raw = ctx.theme().resolve_color(spec.border_token());
     let border = with_alpha(border_raw, border_raw.3 * 0.78);
-    let radius = theme.resolve_radius(spec.radius_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
 
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let pad_v = rem_to_px(toolbar_pad_block_rem(effective_size));
     let pad_h = rem_to_px(
-        toolbar_density_pad_inline_rem(spec.density)
+        toolbar_density_pad_inline_rem(density)
             .unwrap_or_else(|| toolbar_pad_inline_rem(effective_size)),
     );
     let gap = rem_to_px(
-        toolbar_density_gap_rem(spec.density).unwrap_or_else(|| toolbar_gap_rem(effective_size)),
+        toolbar_density_gap_rem(density).unwrap_or_else(|| toolbar_gap_rem(effective_size)),
     );
 
     let is_vertical = spec.orientation == Orientation::Vertical;

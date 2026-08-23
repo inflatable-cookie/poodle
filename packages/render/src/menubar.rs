@@ -7,14 +7,14 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
 use poodle_specs::{MenuSpec, MenubarSpec};
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::menu::menu as render_menu;
 use crate::presentation::{
-    control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem, size_height_offset_rem,
+    control_space_x_rem, rem_to_px, size_font_rem, size_height_offset_rem,
 };
 
 const LABEL_WEIGHT: u16 = 600;
@@ -29,32 +29,33 @@ fn rounded_all(node: &mut Node, r: f32) {
 
 pub fn menubar(
     spec: &MenubarSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_trigger: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = rem_to_px(control_space_x_rem(spec.density));
+    let pad_x = rem_to_px(control_space_x_rem(density));
 
-    let control_height = theme.resolve_space("size.control.height")
+    let control_height = ctx.theme().resolve_space("size.control.height")
         + rem_to_px(size_height_offset_rem(effective_size));
-    let control_radius = theme.resolve_radius("radius.control");
-    let list_radius = theme.resolve_radius(spec.list_radius_token());
+    let control_radius = ctx.theme().resolve_radius("radius.control");
+    let list_radius = ctx.theme().resolve_radius(spec.list_radius_token());
     let border_w = rem_to_px(0.0625);
     let list_gap = rem_to_px(0.125);
     let list_pad = rem_to_px(0.1875);
 
-    let text_primary = theme.resolve_color("color.text.primary");
-    let accent = theme.resolve_color("color.accent.base");
-    let panel = theme.resolve_color("color.background.panel");
-    let border_subtle = theme.resolve_color(spec.list_border_token());
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let panel = ctx.theme().resolve_color("color.background.panel");
+    let border_subtle = ctx.theme().resolve_color(spec.list_border_token());
 
     let list_border = with_alpha(border_subtle, border_subtle.3 * 0.72);
     let list_bg = with_alpha(panel, panel.3 * 0.96);
     let open_bg = with_alpha(accent, accent.3 * 0.14);
 
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
     let open_value = spec.current_value();
 
     // ── Trigger strip ──
@@ -132,7 +133,7 @@ pub fn menubar(
             // composed spec's dismissal from its own spec state).
             let menu_spec = MenuSpec::new(open_menu.items.clone())
                 .with_dismiss_on_outside_interact(spec.dismiss_on_outside_interact);
-            root = root.child(render_menu(&menu_spec, theme, on_select));
+            root = root.child(render_menu(&menu_spec, ctx, on_select));
         }
     }
 
@@ -162,8 +163,10 @@ mod tests {
 
     #[test]
     fn refusal_forwarded_into_open_overlay_surface() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         // Default `true`: the open menu surface stays marker-free.
-        let node = menubar(&open_spec(), &theme(), None, None);
+        let node = menubar(&open_spec(), &ctx, None, None);
         assert!(node
             .find(&|n| n.a11y.role == Some(NodeRole::Menu))
             .and_then(|n| n.interaction.on_activate.as_ref())
@@ -172,7 +175,7 @@ mod tests {
         // Menubar's own refusal wins over the composed MenuSpec default and
         // reaches the rendered open overlay.
         let refusing = open_spec().with_dismiss_on_outside_interact(false);
-        let node = menubar(&refusing, &theme(), None, None);
+        let node = menubar(&refusing, &ctx, None, None);
         let menu_node = node
             .find(&|n| n.a11y.role == Some(NodeRole::Menu))
             .expect("open menu overlay");

@@ -8,7 +8,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node, NodeRole};
 use poodle_specs::{
     AlertDialogSpec, AlertDialogTone, ButtonSpec, ButtonTone, ButtonVariant, DialogKind,
@@ -16,8 +15,9 @@ use poodle_specs::{
 };
 
 use crate::button::button;
+use crate::context::RenderContext;
 use crate::dialog::dialog;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{rem_to_px, size_font_rem};
 
 /// Contract default confirm label while working.
 pub const DEFAULT_WORKING_LABEL: &str = "Working\u{2026}";
@@ -39,12 +39,12 @@ pub struct AlertDialogHandlers {
 
 pub fn alert_dialog(
     spec: &AlertDialogSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     working: bool,
     working_label: &str,
     handlers: AlertDialogHandlers,
 ) -> Node {
-    alert_dialog_with_content(spec, theme, working, working_label, Vec::new(), handlers)
+    alert_dialog_with_content(spec, ctx, working, working_label, Vec::new(), handlers)
 }
 
 /// Render an alert dialog with caller-supplied body nodes between the optional
@@ -52,25 +52,25 @@ pub fn alert_dialog(
 /// Svelte/legacy GPUI default content slot.
 pub fn alert_dialog_with_content(
     spec: &AlertDialogSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     working: bool,
     working_label: &str,
     content: Vec<Node>,
     handlers: AlertDialogHandlers,
 ) -> Node {
-    let size = spec.size;
+    let base_size = ctx.base_size(spec.size);
     let size_role = spec.size_role;
-    let density = spec.density;
+    let density = ctx.resolve_density(spec.density);
 
     // Cancel (ghost).
     let cancel_spec = ButtonSpec::new()
         .with_variant(ButtonVariant::Ghost)
-        .with_size(size)
+        .with_size(base_size)
         .with_size_role(size_role)
         .with_density(density)
         .with_label(spec.cancel_label.clone())
         .with_disabled(working);
-    let cancel_btn = button(&cancel_spec, theme, handlers.cancel.clone());
+    let cancel_btn = button(&cancel_spec, ctx, handlers.cancel.clone());
 
     // Confirm (primary, tone-driven; working swaps the label).
     let confirm_text = if working {
@@ -81,15 +81,15 @@ pub fn alert_dialog_with_content(
     let confirm_spec = ButtonSpec::new()
         .with_variant(ButtonVariant::Primary)
         .with_tone(confirm_button_tone(spec.tone))
-        .with_size(size)
+        .with_size(base_size)
         .with_size_role(size_role)
         .with_density(density)
         .with_label(confirm_text)
         .with_disabled(working);
-    let confirm_btn = button(&confirm_spec, theme, handlers.confirm.clone());
+    let confirm_btn = button(&confirm_spec, ctx, handlers.confirm.clone());
 
     // Actions row: cancel left, confirm right.
-    let actions_gap = theme.resolve_space(spec.actions_gap_token());
+    let actions_gap = ctx.theme().resolve_space(spec.actions_gap_token());
     let mut actions = Node::container();
     {
         let s = &mut actions.style;
@@ -104,11 +104,11 @@ pub fn alert_dialog_with_content(
     // Optional item-detail row.
     let mut children: Vec<Node> = Vec::new();
     if let (Some(label), Some(value)) = (spec.item_label.as_ref(), spec.item_value.as_ref()) {
-        let effective_size = resolve_semantic_size(size, size_role);
+        let effective_size = ctx.resolve_size(spec.size, size_role);
         let body_font = rem_to_px(size_font_rem(effective_size));
-        let text_secondary = theme.resolve_color(spec.description_color_token());
-        let text_primary = theme.resolve_color(spec.title_color_token());
-        let detail_gap = theme.resolve_space(spec.actions_gap_token());
+        let text_secondary = ctx.theme().resolve_color(spec.description_color_token());
+        let text_primary = ctx.theme().resolve_color(spec.title_color_token());
+        let detail_gap = ctx.theme().resolve_space(spec.actions_gap_token());
 
         let mut row = Node::container();
         {
@@ -133,7 +133,7 @@ pub fn alert_dialog_with_content(
         .with_role(DialogKind::AlertDialog)
         .with_width(DialogWidth::Sm)
         .with_open(true)
-        .with_size(size)
+        .with_size(base_size)
         .with_size_role(size_role)
         .with_density(density)
         .with_dismiss_on_escape(!working)
@@ -152,7 +152,7 @@ pub fn alert_dialog_with_content(
 
     let mut root = dialog(
         &dialog_spec,
-        theme,
+        ctx,
         children,
         Some(actions),
         handlers.cancel,

@@ -12,7 +12,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node,
@@ -25,11 +24,12 @@ use poodle_specs::{
 use crate::button::button;
 use crate::checkbox::checkbox;
 use crate::color::{mix_srgb, TRANSPARENT};
+use crate::context::RenderContext;
 use crate::picker_shell::picker_shell;
 use crate::presentation::{
     control_space_x_rem, relation_picker_desc_size_rem, relation_picker_item_gap_rem,
     relation_picker_item_x_rem, relation_picker_item_y_rem, relation_picker_list_gap_rem,
-    relation_picker_title_size_rem, rem_to_px, resolve_semantic_size,
+    relation_picker_title_size_rem, rem_to_px,
 };
 use crate::select::{select, SelectHandlers};
 use crate::selection_summary::{selection_summary, SelectionSummaryHandlers};
@@ -73,30 +73,31 @@ fn label_node(content: &str, color: ColorValue, size: f32, weight: Option<u16>) 
 
 pub fn relation_picker(
     spec: &RelationPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: RelationPickerHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let border = theme.resolve_color("color.border.subtle");
-    let accent = theme.resolve_color("color.accent.base");
-    let surface = theme.resolve_color("color.background.surface");
-    let radius = theme.resolve_radius("radius.control");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let border = ctx.theme().resolve_color("color.border.subtle");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let radius = ctx.theme().resolve_radius("radius.control");
 
     // Density-driven inter-row gap (contract §8 density table).
-    let list_gap = rem_to_px(relation_picker_list_gap_rem(spec.density));
+    let list_gap = rem_to_px(relation_picker_list_gap_rem(density));
     let title_font = rem_to_px(relation_picker_title_size_rem(effective_size));
     let desc_font = rem_to_px(relation_picker_desc_size_rem(effective_size));
     let item_gap = rem_to_px(relation_picker_item_gap_rem(effective_size));
     let item_x = rem_to_px(relation_picker_item_x_rem(effective_size));
     let item_y = rem_to_px(relation_picker_item_y_rem(effective_size));
-    let label_size = theme.resolve_space("typography.label.size");
+    let label_size = ctx.theme().resolve_space("typography.label.size");
 
     let search = build_search(
         spec,
-        theme,
+        ctx,
         effective_size,
         text_secondary,
         accent,
@@ -109,10 +110,10 @@ pub fn relation_picker(
         Some(selection_summary(
             &poodle_specs::SelectionSummarySpec::new(selection_items)
                 .with_clear_action(poodle_specs::RemediationAction::new("clear", "Clear"))
-                .with_size(spec.size)
+                .with_size(ctx.base_size(spec.size))
                 .with_size_role(spec.size_role)
-                .with_density(spec.density),
-            theme,
+                .with_density(density),
+            ctx,
             SelectionSummaryHandlers::default(),
         ))
     } else {
@@ -187,7 +188,7 @@ pub fn relation_picker(
                     &item,
                     is_selected,
                     spec.selection_mode,
-                    theme,
+                    ctx,
                     text_primary,
                     text_secondary,
                     border,
@@ -216,7 +217,7 @@ pub fn relation_picker(
     // Footer (FormActions): optional footer note (Svelte `footerNote`) plus
     // the cancel/confirm action row. Gated on `show_footer`.
     let footer = if spec.show_footer {
-        let inline_gap = rem_to_px(control_space_x_rem(spec.density));
+        let inline_gap = rem_to_px(control_space_x_rem(density));
         let mut actions = Node::container();
         {
             let s = &mut actions.style;
@@ -231,7 +232,7 @@ pub fn relation_picker(
                     .with_variant(ButtonVariant::Ghost)
                     .with_size(ControlSize::Sm)
                     .with_label(&spec.cancel_label),
-                theme,
+                ctx,
                 handlers.on_cancel.as_ref().map(Arc::clone),
             ))
             .child(button(
@@ -239,7 +240,7 @@ pub fn relation_picker(
                     .with_variant(ButtonVariant::Primary)
                     .with_size(ControlSize::Sm)
                     .with_label(&spec.confirm_label),
-                theme,
+                ctx,
                 handlers.on_confirm.as_ref().map(Arc::clone),
             ));
 
@@ -276,7 +277,7 @@ pub fn relation_picker(
 
     let mut root = picker_shell(
         &spec.as_picker_shell(),
-        theme,
+        ctx,
         Some(search),
         selection,
         body,
@@ -293,13 +294,14 @@ pub fn relation_picker(
 
 fn build_search(
     spec: &RelationPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     effective_size: ControlSize,
     text_secondary: ColorValue,
     accent: ColorValue,
     label_size: f32,
     handlers: &RelationPickerHandlers,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
     let mut col = Node::container();
     col.style.descriptor.layout.direction = LayoutDirection::Column;
     col.style.descriptor.layout.spacing.gap = rem_to_px(0.5);
@@ -371,7 +373,7 @@ fn build_search(
         .with_leading_icon("search")
         .with_size(effective_size)
         .with_size_role(spec.size_role)
-        .with_density(spec.density)
+        .with_density(density)
         .with_placeholder(spec.search_placeholder.clone())
         // The panel's search field carries no visible label.
         .with_aria_label("Search relations")
@@ -379,7 +381,7 @@ fn build_search(
     if !spec.query.is_empty() {
         search_spec = search_spec.with_value(spec.query.clone());
     }
-    col = col.child(text_input(&search_spec, theme, None));
+    col = col.child(text_input(&search_spec, ctx, None));
 
     // Toolbar filter controls — one labeled Select per `filters` entry.
     if !spec.filters.is_empty() {
@@ -387,7 +389,7 @@ fn build_search(
         filters_row.style.descriptor.layout.direction = LayoutDirection::Row;
         filters_row.style.flex_wrap = true;
         filters_row.style.descriptor.layout.spacing.gap =
-            rem_to_px(control_space_x_rem(spec.density));
+            rem_to_px(control_space_x_rem(density));
         let mut filters_row = filters_row;
         for filter in &spec.filters {
             let options = filter
@@ -399,10 +401,10 @@ fn build_search(
                 .with_value(spec.filter_value(&filter.key).to_string())
                 .with_size(effective_size)
                 .with_size_role(spec.size_role)
-                .with_density(spec.density);
+                .with_density(density);
             select_spec.aria_label = Some(format!("{} filter", filter.label));
             filters_row =
-                filters_row.child(select(&select_spec, theme, &SelectHandlers::default()));
+                filters_row.child(select(&select_spec, ctx, &SelectHandlers::default()));
         }
         col = col.child(filters_row);
     }
@@ -488,7 +490,7 @@ fn candidate_row(
     item: &PickerItemSpec,
     is_selected: bool,
     selection_mode: SelectionMode,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     text_primary: ColorValue,
     text_secondary: ColorValue,
     border: ColorValue,
@@ -543,10 +545,10 @@ fn candidate_row(
                 // announced as an unnamed checkbox in a list of identical ones.
                 .with_aria_label(format!("Select {}", item.label))
                 .with_checked(is_selected)
-                .with_size(spec.size)
+                .with_size(ctx.base_size(spec.size))
                 .with_size_role(spec.size_role)
-                .with_density(spec.density),
-            theme,
+                .with_density(ctx.resolve_density(spec.density)),
+            ctx,
             None,
         ));
     }

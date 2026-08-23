@@ -10,28 +10,32 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, StylePatch,
 };
 use poodle_specs::{IconSpec, ListCardCounterSpec};
 
+use crate::context::RenderContext;
 use crate::icon::icon;
 use crate::presentation::rem_to_px;
 
 pub fn list_card_counter(
     spec: &ListCardCounterSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_link_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
     let gap = rem_to_px(spec.gap_rem());
     let font_size = rem_to_px(spec.font_size_rem());
-    let secondary = theme.resolve_color(ListCardCounterSpec::text_secondary_token());
-    let primary = theme.resolve_color(ListCardCounterSpec::text_primary_token());
+    let secondary = ctx
+        .theme()
+        .resolve_color(ListCardCounterSpec::text_secondary_token());
+    let primary = ctx
+        .theme()
+        .resolve_color(ListCardCounterSpec::text_primary_token());
 
     let mut icon_el = icon(
         &IconSpec::new(spec.icon.clone()).with_size(ListCardCounterSpec::icon_size()),
-        theme,
+        ctx,
     );
     let dim = rem_to_px(spec.icon_size_rem());
     icon_el.style.descriptor.layout.width = LayoutSizing::Fixed(dim);
@@ -80,9 +84,13 @@ mod tests {
     fn icon_and_count_share_the_secondary_tone() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
         let spec = ListCardCounterSpec::new("file-text", 24);
-        let node = list_card_counter(&spec, &theme, None);
-        let secondary = theme.resolve_color(ListCardCounterSpec::text_secondary_token());
+        let node = list_card_counter(&spec, &ctx, None);
+        let secondary = poodle_adapter::ThemeProvider::resolve_color(
+            &theme,
+            ListCardCounterSpec::text_secondary_token(),
+        );
 
         assert_eq!(node.style.descriptor.text_color, Some(secondary));
         assert_eq!(

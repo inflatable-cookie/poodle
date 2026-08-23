@@ -11,11 +11,11 @@
 //! a handler for a link that is not drawn is exactly the dead-handler pattern
 //! this shape exists to prevent.
 
-use poodle_adapter::ThemeProvider;
 use poodle_markdown::{parse_markdown, MdBlock, MdInline};
 use poodle_node::{ColorValue, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::AgentMessageSpec;
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Flatten inline nodes to text.
@@ -169,7 +169,7 @@ fn render_blocks(blocks: &[MdBlock], s: &Style) -> Node {
     body
 }
 
-pub fn agent_message(spec: &AgentMessageSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn agent_message(spec: &AgentMessageSpec, ctx: &RenderContext<'_>) -> Node {
     // An empty message contributes no box: a turn with nothing in it should not
     // reserve space in the transcript.
     if !spec.renders() {
@@ -179,29 +179,31 @@ pub fn agent_message(spec: &AgentMessageSpec, theme: &dyn ThemeProvider) -> Node
         return empty;
     }
 
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
     let style = Style {
-        font_size: rem_to_px(spec.font_size_rem()),
-        block_gap: rem_to_px(spec.block_gap_rem()),
-        indent: rem_to_px(spec.list_indent_rem()),
-        text: theme.resolve_color(spec.text_token()),
-        quote_text: theme.resolve_color(spec.quote_text_token()),
-        quote_rule: theme.resolve_color(spec.quote_rule_token()),
-        code_fill: theme.resolve_color(spec.code_span_fill_token()),
+        font_size: rem_to_px(spec.font_size_rem(base_size)),
+        block_gap: rem_to_px(spec.block_gap_rem(density)),
+        indent: rem_to_px(spec.list_indent_rem(density)),
+        text: ctx.theme().resolve_color(spec.text_token()),
+        quote_text: ctx.theme().resolve_color(spec.quote_text_token()),
+        quote_rule: ctx.theme().resolve_color(spec.quote_rule_token()),
+        code_fill: ctx.theme().resolve_color(spec.code_span_fill_token()),
     };
 
     let blocks = parse_markdown(&spec.markdown);
     let mut root = render_blocks(&blocks, &style);
 
     if spec.is_user() {
-        let surface = theme.resolve_color(spec.user_surface_token());
-        let radius = theme.resolve_radius(spec.radius_token());
+        let surface = ctx.theme().resolve_color(spec.user_surface_token());
+        let radius = ctx.theme().resolve_radius(spec.radius_token());
         let mut bubble = Node::container();
         {
             let s = &mut bubble.style;
             s.descriptor.layout.direction = LayoutDirection::Column;
             s.fill_width = true;
             let pad = &mut s.descriptor.layout.spacing.padding;
-            let inset = rem_to_px(spec.padding_inset_rem());
+            let inset = rem_to_px(spec.padding_inset_rem(density));
             pad.left = inset;
             pad.right = inset;
             pad.top = inset;

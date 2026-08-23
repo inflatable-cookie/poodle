@@ -11,12 +11,12 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_subagent::{is_terminal_subagent_status, subagent_status_spins};
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, StylePatch};
 use poodle_specs::{AgentSubagentSpec, SpinnerSpec, SpinnerTone, SpinnerVariant};
 
 use crate::color::TRANSPARENT;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::spinner::spinner;
 
@@ -50,20 +50,22 @@ fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
 
 pub fn agent_subagent(
     spec: &AgentSubagentSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: AgentSubagentHandlers,
 ) -> Node {
-    let surface = theme.resolve_color(spec.surface_token());
-    let border = theme.resolve_color(spec.border_token());
-    let label_color = theme.resolve_color(spec.label_token());
-    let activity_color = theme.resolve_color(spec.activity_token());
-    let meta_color = theme.resolve_color(spec.meta_token());
-    let badge_color = theme.resolve_color(spec.badge_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let surface = ctx.theme().resolve_color(spec.surface_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let label_color = ctx.theme().resolve_color(spec.label_token());
+    let activity_color = ctx.theme().resolve_color(spec.activity_token());
+    let meta_color = ctx.theme().resolve_color(spec.meta_token());
+    let badge_color = ctx.theme().resolve_color(spec.badge_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
 
-    let font_size = rem_to_px(spec.font_size_rem());
-    let gap = rem_to_px(spec.gap_rem());
-    let inset = rem_to_px(spec.inset_rem());
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let gap = rem_to_px(spec.gap_rem(density));
+    let inset = rem_to_px(spec.inset_rem(density));
     let hairline = rem_to_px(0.0625);
 
     let mut root = Node::container();
@@ -128,7 +130,7 @@ pub fn agent_subagent(
                 &SpinnerSpec::new()
                     .with_variant(SpinnerVariant::Dots)
                     .with_tone(SpinnerTone::Muted),
-                theme,
+                ctx,
             );
             activity = activity.child(dots);
         }
@@ -180,7 +182,7 @@ pub fn agent_subagent(
         button.interaction.focusable = true;
         button.style.focus = Some(StylePatch {
             background: None,
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             text_color: None,
             opacity: None,
         });
@@ -249,12 +251,14 @@ mod tests {
 
     #[test]
     fn an_instance_scope_isolates_backend_state_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let scoped = |scope: &str| AgentSubagentHandlers {
             instance_id: Some(scope.to_string()),
             ..AgentSubagentHandlers::default()
         };
-        let first = agent_subagent(&spec(), &theme(), scoped("first"));
-        let second = agent_subagent(&spec(), &theme(), scoped("second"));
+        let first = agent_subagent(&spec(), &ctx, scoped("first"));
+        let second = agent_subagent(&spec(), &ctx, scoped("second"));
         let toggle = agent_subagent_action_focus_id(Some("first"), "toggle", "scout");
         assert!(first
             .find(&|n| n.runtime_id.as_deref() == Some(toggle.as_str()))

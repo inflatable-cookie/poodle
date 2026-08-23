@@ -8,12 +8,12 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node};
 use poodle_specs::{ControlDensity, SelectionSummarySpec};
 
 use crate::color::with_alpha;
-use crate::presentation::{control_space_x_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::context::RenderContext;
+use crate::presentation::{control_space_x_rem, rem_to_px, size_font_rem};
 
 /// Host callbacks: per-chip remove (item id) + clear-all.
 #[derive(Default)]
@@ -32,47 +32,48 @@ fn all_corners(node: &mut Node, r: f32) {
 
 pub fn selection_summary(
     spec: &SelectionSummarySpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: SelectionSummaryHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let chip_font = rem_to_px(SelectionSummarySpec::chip_font_rem(effective_size));
     // Overflow badge carries its own font-size per size, distinct from chips.
     let overflow_font = rem_to_px(SelectionSummarySpec::overflow_font_rem(effective_size));
     let overflow_line_height = SelectionSummarySpec::overflow_line_height_rem(effective_size)
         / SelectionSummarySpec::overflow_font_rem(effective_size);
-    let gap = rem_to_px(match spec.density {
+    let gap = rem_to_px(match density {
         ControlDensity::Compact => 0.375,
-        ControlDensity::Default => control_space_x_rem(spec.density),
+        ControlDensity::Default => control_space_x_rem(density),
         ControlDensity::Comfortable => 0.75,
     });
-    let chip_radius = theme.resolve_radius(spec.radius_token());
-    let chip_border_width = theme.resolve_space(spec.border_width_token());
+    let chip_radius = ctx.theme().resolve_radius(spec.radius_token());
+    let chip_border_width = ctx.theme().resolve_space(spec.border_width_token());
 
-    let text_color = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_tertiary = theme.resolve_color("color.text.tertiary");
-    let elevated = theme.resolve_color("color.background.elevated");
+    let text_color = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let text_tertiary = ctx.theme().resolve_color("color.text.tertiary");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
     // The old GPUI tier keeps the elevated hue and only uses the surface
     // alpha in its Hsla construction. Both source fills are opaque, so the
     // effective fill is elevated. Borders are stacked at 70% alpha.
     let chip_bg = elevated;
     let overflow_bg = elevated;
-    let chip_border_base = theme.resolve_color("color.border.subtle");
+    let chip_border_base = ctx.theme().resolve_color("color.border.subtle");
     let chip_border = with_alpha(chip_border_base, chip_border_base.3 * 0.7);
-    let accent = theme.resolve_color("color.accent.base");
-    let bottom_pad = rem_to_px(match spec.density {
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let bottom_pad = rem_to_px(match density {
         ControlDensity::Compact => 0.5,
         ControlDensity::Default => 0.625,
         ControlDensity::Comfortable => 0.75,
     });
-    let chip_px = rem_to_px(match spec.density {
+    let chip_px = rem_to_px(match density {
         ControlDensity::Compact => 0.625,
         ControlDensity::Default => 0.75,
         ControlDensity::Comfortable => 0.875,
     });
-    let overflow_px = rem_to_px(match spec.density {
+    let overflow_px = rem_to_px(match density {
         ControlDensity::Compact => 0.5,
         ControlDensity::Default => 0.625,
         ControlDensity::Comfortable => 0.75,

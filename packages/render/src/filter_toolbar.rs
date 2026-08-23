@@ -9,49 +9,51 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeRole,
 };
 use poodle_specs::FilterToolbarSpec;
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// `on_toggle` fires with the expanded state the toolbar is moving **to**.
 pub fn filter_toolbar(
     spec: &FilterToolbarSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     children: Vec<Node>,
     actions: Option<Node>,
     secondary: Option<Node>,
     on_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 ) -> Node {
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
     // Contract §8 summary size table (size-scaled label-size).
-    let font_size = rem_to_px(spec.summary_font_size_rem());
+    let font_size = rem_to_px(spec.summary_font_size_rem(base_size));
 
     // Contract §8 density table: distinct root padding-block / padding-inline,
     // root gap, and controls-grid gap per density.
-    let pad_block = rem_to_px(spec.padding_block_rem());
-    let pad_inline = rem_to_px(spec.padding_inline_rem());
-    let root_gap = match spec.density_gap_rem() {
+    let pad_block = rem_to_px(spec.padding_block_rem(density));
+    let pad_inline = rem_to_px(spec.padding_inline_rem(density));
+    let root_gap = match spec.density_gap_rem(density) {
         Some(rem) => rem_to_px(rem),
-        None => theme.resolve_space(spec.gap_token()),
+        None => ctx.theme().resolve_space(spec.gap_token(density)),
     };
-    let header_gap = theme.resolve_space("space.inline.sm");
-    let controls_gap = match spec.density_controls_gap_rem() {
+    let header_gap = ctx.theme().resolve_space("space.inline.sm");
+    let controls_gap = match spec.density_controls_gap_rem(density) {
         Some(rem) => rem_to_px(rem),
-        None => theme.resolve_space(spec.controls_gap_token()),
+        None => ctx.theme().resolve_space(spec.controls_gap_token(density)),
     };
-    let actions_gap = theme.resolve_space(spec.actions_gap_token());
+    let actions_gap = ctx.theme().resolve_space(spec.actions_gap_token());
 
-    let bg = theme.resolve_color(spec.background_token());
-    let border = theme.resolve_color(spec.border_token());
-    let radius = theme.resolve_radius(spec.radius_token());
-    let summary_color = theme.resolve_color(spec.summary_color_token());
-    let icon_muted = theme.resolve_color("color.icon.muted");
-    let toggle_size = theme.resolve_space(spec.toggle_size_token());
-    let toggle_radius = theme.resolve_radius(spec.toggle_radius_token());
+    let bg = ctx.theme().resolve_color(spec.background_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let summary_color = ctx.theme().resolve_color(spec.summary_color_token());
+    let icon_muted = ctx.theme().resolve_color("color.icon.muted");
+    let toggle_size = ctx.theme().resolve_space(spec.toggle_size_token());
+    let toggle_radius = ctx.theme().resolve_radius(spec.toggle_radius_token());
 
     let is_expanded = spec.is_grid_visible();
     let had_children = !children.is_empty();

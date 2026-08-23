@@ -4,7 +4,6 @@
 //! Ported from: `packages/jetstream/components/src/code.rs`. The copy button
 //! renders inert here — clipboard and the 2s check swap are host interactions.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, TextAlign,
@@ -12,9 +11,8 @@ use poodle_node::{
 use poodle_specs::{CodeInlineVariant, CodeSpec, CodeTypography};
 
 use crate::color::{mix_srgb, with_alpha, BLACK};
-use crate::presentation::{
-    panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
+use crate::context::RenderContext;
+use crate::presentation::{panel_space_x_rem, panel_space_y_rem, rem_to_px, size_font_rem};
 
 fn rounded_all(node: &mut Node, r: f32) {
     let c = &mut node.style.descriptor.corner_radii;
@@ -24,8 +22,10 @@ fn rounded_all(node: &mut Node, r: f32) {
     c.bottom_left = r;
 }
 
-pub fn code(spec: &CodeSpec, theme: &dyn ThemeProvider) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+pub fn code(spec: &CodeSpec, ctx: &RenderContext<'_>) -> Node {
+    let theme = ctx.theme();
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     let text_color = theme.resolve_color(spec.text_color_token());
     let text_secondary = theme.resolve_color(spec.text_secondary_token());
@@ -66,8 +66,8 @@ pub fn code(spec: &CodeSpec, theme: &dyn ThemeProvider) -> Node {
     }
 
     // ── Block mode ──
-    let pre_pad_x = rem_to_px(panel_space_x_rem(spec.density));
-    let pre_pad_y = rem_to_px(panel_space_y_rem(spec.density));
+    let pre_pad_x = rem_to_px(panel_space_x_rem(density));
+    let pre_pad_y = rem_to_px(panel_space_y_rem(density));
     let source_font = rem_to_px(size_font_rem(effective_size));
 
     let border = theme.resolve_color(spec.border_token());
@@ -225,7 +225,8 @@ mod tests {
     fn block_source_uses_contract_relative_line_height() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
-        let node = code(&CodeSpec::new().with_content("let value = 1;"), &theme);
+        let ctx = RenderContext::new(&theme);
+        let node = code(&CodeSpec::new().with_content("let value = 1;"), &ctx);
         let scroll = node
             .children
             .last()

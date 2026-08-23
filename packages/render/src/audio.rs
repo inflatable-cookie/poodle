@@ -3,7 +3,6 @@
 //! Contract: `docs/architecture/008-audio-control-family.md` and the twelve
 //! component contracts under `docs/contracts/components/`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeKind,
     NodePosition, NodeRole, NodeToggled,
@@ -14,7 +13,8 @@ use poodle_specs::{
     KnobSpec, ModMatrixGridSpec, Orientation, ValueReadoutSpec, WaveformDisplaySpec, XYPadSpec,
 };
 
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::context::RenderContext;
+use crate::presentation::{rem_to_px, size_font_rem};
 
 fn audio_size_rem(size: ControlSize, values: [f32; 5]) -> f32 {
     values[match size {
@@ -58,14 +58,15 @@ fn a11y_value(node: &mut Node, role: NodeRole, label: &str, value_text: &str) {
     node.a11y.label = Some(format!("{label}: {value_text}"));
 }
 
-pub fn knob(spec: &KnobSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn knob(spec: &KnobSpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let size = rem_to_px(audio_size_rem(effective_size, [2.0, 2.5, 3.0, 3.5, 4.0]));
     let center = size / 2.0;
-    let accent = theme.resolve_color("color.accent.base");
-    let muted = theme.resolve_color("color.border.default");
-    let surface = theme.resolve_color("color.background.elevated");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let muted = ctx.theme().resolve_color("color.border.default");
+    let surface = ctx.theme().resolve_color("color.background.elevated");
     let mut root = Node::container();
     root.id = Some("knob-root".into());
     root.style.descriptor.layout.width = LayoutSizing::Fixed(size);
@@ -80,7 +81,7 @@ pub fn knob(spec: &KnobSpec, theme: &dyn ThemeProvider) -> Node {
         &spec.value_text,
     );
 
-    let segment_count = match spec.density {
+    let segment_count = match density {
         ControlDensity::Compact => 20,
         ControlDensity::Default => 28,
         ControlDensity::Comfortable => 36,
@@ -123,9 +124,10 @@ pub fn knob(spec: &KnobSpec, theme: &dyn ThemeProvider) -> Node {
     root.child(indicator)
 }
 
-pub fn fader(spec: &FaderSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn fader(spec: &FaderSpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let vertical = spec.orientation == Orientation::Vertical;
     let cross = rem_to_px(audio_size_rem(effective_size, [1.5, 1.75, 2.0, 2.25, 2.5]));
     let length = rem_to_px(audio_size_rem(effective_size, [7.0, 8.5, 10.0, 11.5, 13.0]));
@@ -134,9 +136,9 @@ pub fn fader(spec: &FaderSpec, theme: &dyn ThemeProvider) -> Node {
     } else {
         (length, cross)
     };
-    let track = theme.resolve_color("color.border.default");
-    let accent = theme.resolve_color("color.accent.base");
-    let thumb_color = theme.resolve_color("color.background.elevated");
+    let track = ctx.theme().resolve_color("color.border.default");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let thumb_color = ctx.theme().resolve_color("color.background.elevated");
     let mut root = Node::container();
     root.id = Some("fader-root".into());
     root.style.descriptor.layout.width = LayoutSizing::Fixed(width);
@@ -152,7 +154,7 @@ pub fn fader(spec: &FaderSpec, theme: &dyn ThemeProvider) -> Node {
     );
 
     let mut rail = Node::container();
-    let rail_cross = density_metric(spec.density, [4.0, 6.0, 8.0]);
+    let rail_cross = density_metric(density, [4.0, 6.0, 8.0]);
     let rail_w = if vertical { rail_cross } else { width };
     let rail_h = if vertical { height } else { rail_cross };
     rail.style.descriptor.layout.width = LayoutSizing::Fixed(rail_w);
@@ -230,12 +232,12 @@ fn meter_channel(
     size: ControlSize,
     density: ControlDensity,
     gain_reduction: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
-    let accent = theme.resolve_color("color.status.success");
-    let warning = theme.resolve_color("color.status.warning");
-    let danger = theme.resolve_color("color.status.danger");
-    let idle = theme.resolve_color("color.border.subtle");
+    let accent = ctx.theme().resolve_color("color.status.success");
+    let warning = ctx.theme().resolve_color("color.status.warning");
+    let danger = ctx.theme().resolve_color("color.status.danger");
+    let idle = ctx.theme().resolve_color("color.border.subtle");
     let length = rem_to_px(audio_size_rem(
         size,
         if gain_reduction {
@@ -301,9 +303,10 @@ fn meter_channel(
     root
 }
 
-pub fn audio_meter(spec: &AudioMeterSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn audio_meter(spec: &AudioMeterSpec, ctx: &RenderContext<'_>) -> Node {
     let vertical = spec.orientation == Orientation::Vertical;
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let mut root = Node::container();
     root.id = Some("audio-meter-root".into());
     root.style.descriptor.layout.direction = if vertical {
@@ -311,7 +314,7 @@ pub fn audio_meter(spec: &AudioMeterSpec, theme: &dyn ThemeProvider) -> Node {
     } else {
         LayoutDirection::Column
     };
-    root.style.descriptor.layout.spacing.gap = density_metric(spec.density, [2.0, 4.0, 6.0]);
+    root.style.descriptor.layout.spacing.gap = density_metric(density, [2.0, 4.0, 6.0]);
     a11y_value(
         &mut root,
         NodeRole::ProgressIndicator,
@@ -325,9 +328,9 @@ pub fn audio_meter(spec: &AudioMeterSpec, theme: &dyn ThemeProvider) -> Node {
             spec.style,
             vertical,
             effective_size,
-            spec.density,
+            density,
             false,
-            theme,
+            ctx,
         ));
     }
     root
@@ -340,13 +343,13 @@ fn readout(
     enabled: bool,
     size: ControlSize,
     density: ControlDensity,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     let mut root = Node::text(text);
-    root.style.descriptor.background = Some(theme.resolve_color("color.background.surface"));
-    root.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
+    root.style.descriptor.background = Some(ctx.theme().resolve_color("color.background.surface"));
+    root.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
     root.style.descriptor.border.width = 1.0;
-    root.style.descriptor.border.color = theme.resolve_color(if editing {
+    root.style.descriptor.border.color = ctx.theme().resolve_color(if editing {
         "color.accent.base"
     } else {
         "color.border.default"
@@ -366,29 +369,31 @@ fn readout(
     root
 }
 
-pub fn value_readout(spec: &ValueReadoutSpec, theme: &dyn ThemeProvider) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+pub fn value_readout(spec: &ValueReadoutSpec, ctx: &RenderContext<'_>) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     readout(
         &spec.text,
         spec.aria_label.as_deref(),
         false,
         spec.visual_state.enabled,
         effective_size,
-        spec.density,
-        theme,
+        density,
+        ctx,
     )
 }
 
-pub fn drag_number_field(spec: &DragNumberFieldSpec, theme: &dyn ThemeProvider) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+pub fn drag_number_field(spec: &DragNumberFieldSpec, ctx: &RenderContext<'_>) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let mut root = readout(
         &spec.text,
         Some(&spec.aria_label),
         spec.visual_state.focus,
         spec.visual_state.enabled,
         effective_size,
-        spec.density,
-        theme,
+        density,
+        ctx,
     );
     root.id = Some("drag-number-field-root".into());
     root.a11y.role = Some(NodeRole::SpinButton);
@@ -397,23 +402,24 @@ pub fn drag_number_field(spec: &DragNumberFieldSpec, theme: &dyn ThemeProvider) 
     root
 }
 
-pub fn envelope_editor(spec: &EnvelopeEditorSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn envelope_editor(spec: &EnvelopeEditorSpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let width = rem_to_px(audio_size_rem(
         effective_size,
         [8.0, 10.0, 12.0, 14.0, 16.0],
     ));
     let height = rem_to_px(audio_size_rem(effective_size, [6.0, 8.0, 10.0, 12.0, 14.0]));
-    let point_size = density_metric(spec.density, [6.0, 8.0, 10.0]);
-    let accent = theme.resolve_color("color.accent.base");
+    let point_size = density_metric(density, [6.0, 8.0, 10.0]);
+    let accent = ctx.theme().resolve_color("color.accent.base");
     let mut root = Node::container();
     root.id = Some("envelope-editor-root".into());
     root.style.descriptor.layout.width = LayoutSizing::Fixed(width);
     root.style.descriptor.layout.height = LayoutSizing::Fixed(height);
-    root.style.descriptor.background = Some(theme.resolve_color("color.background.surface"));
+    root.style.descriptor.background = Some(ctx.theme().resolve_color("color.background.surface"));
     root.style.descriptor.border.width = 1.0;
-    root.style.descriptor.border.color = theme.resolve_color("color.border.default");
+    root.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
     root.style.descriptor.opacity = if state.enabled { 1.0 } else { 0.48 };
     root.a11y.role = Some(NodeRole::Group);
     root.a11y.label = Some(spec.aria_label.clone());
@@ -453,7 +459,7 @@ pub fn envelope_editor(spec: &EnvelopeEditorSpec, theme: &dyn ThemeProvider) -> 
                 point_size
             },
         );
-        handle.style.descriptor.background = Some(theme.resolve_color("color.background.elevated"));
+        handle.style.descriptor.background = Some(ctx.theme().resolve_color("color.background.elevated"));
         handle.style.descriptor.border.width = 2.0;
         handle.style.descriptor.border.color = accent;
         handle.a11y.role = Some(NodeRole::Slider);
@@ -469,19 +475,20 @@ pub fn envelope_editor(spec: &EnvelopeEditorSpec, theme: &dyn ThemeProvider) -> 
     root
 }
 
-pub fn xy_pad(spec: &XYPadSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn xy_pad(spec: &XYPadSpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let size = rem_to_px(audio_size_rem(effective_size, [6.0, 8.0, 10.0, 12.0, 14.0]));
-    let thumb_size = density_metric(spec.density, [10.0, 12.0, 16.0]);
-    let accent = theme.resolve_color("color.accent.base");
+    let thumb_size = density_metric(density, [10.0, 12.0, 16.0]);
+    let accent = ctx.theme().resolve_color("color.accent.base");
     let mut root = Node::container();
     root.id = Some("xy-pad-root".into());
     root.style.descriptor.layout.width = LayoutSizing::Fixed(size);
     root.style.descriptor.layout.height = LayoutSizing::Fixed(size);
-    root.style.descriptor.background = Some(theme.resolve_color("color.background.surface"));
+    root.style.descriptor.background = Some(ctx.theme().resolve_color("color.background.surface"));
     root.style.descriptor.border.width = 1.0;
-    root.style.descriptor.border.color = theme.resolve_color("color.border.default");
+    root.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
     root.interaction.focusable = state.enabled;
     root.interaction.disabled = !state.enabled;
     root.a11y.role = Some(NodeRole::Group);
@@ -503,7 +510,7 @@ pub fn xy_pad(spec: &XYPadSpec, theme: &dyn ThemeProvider) -> Node {
     root = root.child(y_trace);
     let mut thumb = Node::container();
     circle(&mut thumb, thumb_size);
-    thumb.style.descriptor.background = Some(theme.resolve_color("color.background.elevated"));
+    thumb.style.descriptor.background = Some(ctx.theme().resolve_color("color.background.elevated"));
     thumb.style.descriptor.border.width = 2.0;
     thumb.style.descriptor.border.color = accent;
     absolute(
@@ -514,15 +521,16 @@ pub fn xy_pad(spec: &XYPadSpec, theme: &dyn ThemeProvider) -> Node {
     root.child(thumb)
 }
 
-pub fn audio_switch(spec: &AudioSwitchSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn audio_switch(spec: &AudioSwitchSpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let mut root = Node::container();
     root.id = Some("audio-switch-root".into());
     root.style.descriptor.layout.direction = LayoutDirection::Row;
     root.style.descriptor.layout.alignment.main = MainAxisAlignment::Center;
     root.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-    root.style.descriptor.layout.spacing.gap = density_metric(spec.density, [4.0, 8.0, 12.0]);
+    root.style.descriptor.layout.spacing.gap = density_metric(density, [4.0, 8.0, 12.0]);
     root.style.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(audio_size_rem(
         effective_size,
         [2.25, 2.625, 3.0, 3.375, 3.75],
@@ -531,13 +539,13 @@ pub fn audio_switch(spec: &AudioSwitchSpec, theme: &dyn ThemeProvider) -> Node {
         effective_size,
         [1.5, 1.75, 2.0, 2.25, 2.5],
     )));
-    root.style.descriptor.background = Some(theme.resolve_color(if state.state > 0 {
+    root.style.descriptor.background = Some(ctx.theme().resolve_color(if state.state > 0 {
         "color.accent.base"
     } else {
         "color.background.surface"
     }));
     root.style.descriptor.border.width = 1.0;
-    root.style.descriptor.border.color = theme.resolve_color("color.border.default");
+    root.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
     root.interaction.focusable = state.enabled;
     root.interaction.disabled = !state.enabled;
     root.a11y.role = Some(NodeRole::Switch);
@@ -549,7 +557,7 @@ pub fn audio_switch(spec: &AudioSwitchSpec, theme: &dyn ThemeProvider) -> Node {
     });
     let mut lamp = Node::container();
     circle(&mut lamp, 10.0);
-    lamp.style.descriptor.background = Some(theme.resolve_color(if state.lamp_on {
+    lamp.style.descriptor.background = Some(ctx.theme().resolve_color(if state.lamp_on {
         "color.status.success"
     } else {
         "color.border.subtle"
@@ -558,17 +566,18 @@ pub fn audio_switch(spec: &AudioSwitchSpec, theme: &dyn ThemeProvider) -> Node {
     root.child(lamp).child(label)
 }
 
-pub fn gain_reduction_meter(spec: &GainReductionMeterSpec, theme: &dyn ThemeProvider) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+pub fn gain_reduction_meter(spec: &GainReductionMeterSpec, ctx: &RenderContext<'_>) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let mut root = meter_channel(
         spec.visual_state.meter.ballistic_value,
         spec.segments,
         spec.style,
         spec.orientation == Orientation::Vertical,
         effective_size,
-        spec.density,
+        density,
         true,
-        theme,
+        ctx,
     );
     root.id = Some("gain-reduction-meter-root".into());
     a11y_value(
@@ -580,9 +589,10 @@ pub fn gain_reduction_meter(spec: &GainReductionMeterSpec, theme: &dyn ThemeProv
     root
 }
 
-pub fn keyboard(spec: &KeyboardSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn keyboard(spec: &KeyboardSpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
-    let size = resolve_semantic_size(spec.size, spec.size_role);
+    let size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let horizontal = state.orientation == poodle_headless::audio::KeyboardOrientation::Horizontal;
     let long = rem_to_px(audio_size_rem(size, [14.0, 18.0, 22.0, 26.0, 30.0]));
     let short = rem_to_px(audio_size_rem(size, [4.0, 5.5, 7.0, 8.5, 10.0]));
@@ -595,24 +605,24 @@ pub fn keyboard(spec: &KeyboardSpec, theme: &dyn ThemeProvider) -> Node {
     root.id = Some("keyboard-root".into());
     root.style.descriptor.layout.width = LayoutSizing::Fixed(width);
     root.style.descriptor.layout.height = LayoutSizing::Fixed(height);
-    root.style.descriptor.background = Some(theme.resolve_color("color.background.surface"));
-    root.style.descriptor.border.width = density_metric(spec.density, [0.5, 1.0, 2.0]);
-    root.style.descriptor.border.color = theme.resolve_color("color.border.default");
+    root.style.descriptor.background = Some(ctx.theme().resolve_color("color.background.surface"));
+    root.style.descriptor.border.width = density_metric(density, [0.5, 1.0, 2.0]);
+    root.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
     root.a11y.role = Some(NodeRole::Toolbar);
     root.a11y.label = Some(spec.aria_label.clone());
     root.interaction.disabled = !state.enabled;
     for key in &state.keys {
         let mut node = Node::container();
         let held = key.held || key.externally_held;
-        node.style.descriptor.background = Some(theme.resolve_color(if held {
+        node.style.descriptor.background = Some(ctx.theme().resolve_color(if held {
             "color.accent.base"
         } else if key.black {
             "#131a22"
         } else {
             "#f7fafd"
         }));
-        node.style.descriptor.border.width = density_metric(spec.density, [0.0, 1.0, 2.0]);
-        node.style.descriptor.border.color = theme.resolve_color("color.border.default");
+        node.style.descriptor.border.width = density_metric(density, [0.0, 1.0, 2.0]);
+        node.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
         node.a11y.role = Some(NodeRole::Button);
         node.a11y.label = Some(format!("MIDI note {}", key.note));
         node.interaction.focusable = state.enabled;
@@ -634,18 +644,19 @@ pub fn keyboard(spec: &KeyboardSpec, theme: &dyn ThemeProvider) -> Node {
     root
 }
 
-pub fn waveform_display(spec: &WaveformDisplaySpec, theme: &dyn ThemeProvider) -> Node {
+pub fn waveform_display(spec: &WaveformDisplaySpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
-    let size = resolve_semantic_size(spec.size, spec.size_role);
+    let size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let width = rem_to_px(audio_size_rem(size, [12.0, 17.0, 22.0, 27.0, 32.0]));
     let height = rem_to_px(audio_size_rem(size, [3.0, 5.0, 7.0, 9.0, 11.0]));
     let mut root = Node::container();
     root.id = Some("waveform-display-root".into());
     root.style.descriptor.layout.width = LayoutSizing::Fixed(width);
     root.style.descriptor.layout.height = LayoutSizing::Fixed(height);
-    root.style.descriptor.background = Some(theme.resolve_color("color.background.surface"));
+    root.style.descriptor.background = Some(ctx.theme().resolve_color("color.background.surface"));
     root.style.descriptor.border.width = 1.0;
-    root.style.descriptor.border.color = theme.resolve_color("color.border.default");
+    root.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
     root.a11y.role = Some(NodeRole::Slider);
     root.a11y.label = Some(format!(
         "{}: cursor {:?}, selection {:?}",
@@ -653,7 +664,7 @@ pub fn waveform_display(spec: &WaveformDisplaySpec, theme: &dyn ThemeProvider) -
     ));
     root.interaction.focusable = state.enabled;
     root.interaction.disabled = !state.enabled;
-    let gap = density_metric(spec.density, [0.0, 0.5, 1.0]);
+    let gap = density_metric(density, [0.0, 0.5, 1.0]);
     let column_width = (width / state.columns.len().max(1) as f32 - gap).max(1.0);
     for (index, peak) in state.columns.iter().enumerate() {
         let mut column = Node::container();
@@ -661,7 +672,7 @@ pub fn waveform_display(spec: &WaveformDisplaySpec, theme: &dyn ThemeProvider) -
         column.style.descriptor.layout.width = LayoutSizing::Fixed(column_width);
         column.style.descriptor.layout.height =
             LayoutSizing::Fixed((amplitude * height / 2.0).max(1.0));
-        column.style.descriptor.background = Some(theme.resolve_color("color.accent.base"));
+        column.style.descriptor.background = Some(ctx.theme().resolve_color("color.accent.base"));
         absolute(
             &mut column,
             index as f32 * (column_width + gap),
@@ -677,7 +688,7 @@ pub fn waveform_display(spec: &WaveformDisplaySpec, theme: &dyn ThemeProvider) -
                 .max(1.0),
         );
         overlay.style.descriptor.layout.height = LayoutSizing::Fixed(height);
-        overlay.style.descriptor.background = Some(theme.resolve_color("color.accent.base"));
+        overlay.style.descriptor.background = Some(ctx.theme().resolve_color("color.accent.base"));
         overlay.style.descriptor.opacity = 0.22;
         absolute(
             &mut overlay,
@@ -690,7 +701,7 @@ pub fn waveform_display(spec: &WaveformDisplaySpec, theme: &dyn ThemeProvider) -
         let mut line = Node::container();
         line.style.descriptor.layout.width = LayoutSizing::Fixed(2.0);
         line.style.descriptor.layout.height = LayoutSizing::Fixed(height);
-        line.style.descriptor.background = Some(theme.resolve_color("color.accent.base"));
+        line.style.descriptor.background = Some(ctx.theme().resolve_color("color.accent.base"));
         absolute(
             &mut line,
             cursor.saturating_sub(state.visible_start) as f32 / sample_span * width,
@@ -701,18 +712,19 @@ pub fn waveform_display(spec: &WaveformDisplaySpec, theme: &dyn ThemeProvider) -
     root
 }
 
-pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, ctx: &RenderContext<'_>) -> Node {
     let state = &spec.visual_state;
-    let size = resolve_semantic_size(spec.size, spec.size_role);
+    let size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let cell_width = rem_to_px(audio_size_rem(size, [2.5, 3.0, 3.5, 4.0, 4.5]));
     let cell_height = rem_to_px(audio_size_rem(size, [1.25, 1.5, 1.75, 2.0, 2.25]));
-    let gap = density_metric(spec.density, [2.0, 4.0, 8.0]);
+    let gap = density_metric(density, [2.0, 4.0, 8.0]);
     let mut root = Node::container();
     root.id = Some("mod-matrix-grid-root".into());
     root.style.descriptor.layout.spacing.gap = gap;
-    root.style.descriptor.background = Some(theme.resolve_color("color.background.surface"));
+    root.style.descriptor.background = Some(ctx.theme().resolve_color("color.background.surface"));
     root.style.descriptor.border.width = 1.0;
-    root.style.descriptor.border.color = theme.resolve_color("color.border.default");
+    root.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
     root.a11y.role = Some(NodeRole::Grid);
     root.a11y.label = Some(spec.aria_label.clone());
     root.interaction.disabled = !state.enabled;
@@ -751,13 +763,13 @@ pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, theme: &dyn ThemeProvider) -> N
             let mut node = Node::container();
             node.style.descriptor.layout.width = LayoutSizing::Fixed(cell_width);
             node.style.descriptor.layout.height = LayoutSizing::Fixed(cell_height);
-            node.style.descriptor.background = Some(theme.resolve_color(if cell.cell.enabled {
+            node.style.descriptor.background = Some(ctx.theme().resolve_color(if cell.cell.enabled {
                 "color.background.elevated"
             } else {
                 "color.background.canvas"
             }));
             node.style.descriptor.border.width = if cell.focused { 2.0 } else { 1.0 };
-            node.style.descriptor.border.color = theme.resolve_color("color.border.default");
+            node.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
             node.a11y.role = Some(NodeRole::Cell);
             node.a11y.label = Some(format!(
                 "{} to {}, {}, range {} to {}",
@@ -771,7 +783,7 @@ pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, theme: &dyn ThemeProvider) -> N
             let mut zero = Node::container();
             zero.style.descriptor.layout.width = LayoutSizing::Fixed(1.0);
             zero.style.descriptor.layout.height = LayoutSizing::Fixed(cell_height * 0.64);
-            zero.style.descriptor.background = Some(theme.resolve_color("color.border.default"));
+            zero.style.descriptor.background = Some(ctx.theme().resolve_color("color.border.default"));
             absolute(
                 &mut zero,
                 cell.zero_norm as f32 * cell_width,
@@ -783,9 +795,9 @@ pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, theme: &dyn ThemeProvider) -> N
                 let mut amount = Node::container();
                 amount.style.descriptor.layout.width = LayoutSizing::Fixed(amount_width);
                 amount.style.descriptor.layout.height =
-                    LayoutSizing::Fixed(density_metric(spec.density, [2.0, 4.0, 6.0]));
+                    LayoutSizing::Fixed(density_metric(density, [2.0, 4.0, 6.0]));
                 amount.style.descriptor.background =
-                    Some(theme.resolve_color(if cell.amount_norm < cell.zero_norm {
+                    Some(ctx.theme().resolve_color(if cell.amount_norm < cell.zero_norm {
                         "color.status.danger"
                     } else {
                         "color.accent.base"
@@ -813,7 +825,7 @@ mod tests {
     };
 
     struct Theme;
-    impl ThemeProvider for Theme {
+    impl poodle_adapter::ThemeProvider for Theme {
         fn resolve_color(&self, _: &str) -> poodle_node::ColorValue {
             poodle_node::ColorValue(0.5, 0.5, 0.5, 1.0)
         }
@@ -833,7 +845,9 @@ mod tests {
 
     #[test]
     fn controls_expose_native_roles_and_value_text() {
-        let knob = knob(&KnobSpec::new(0.5, 0.0, 1.0, AudioValueLaw::Linear), &Theme);
+        let theme = Theme;
+        let ctx = RenderContext::new(&theme);
+        let knob = knob(&KnobSpec::new(0.5, 0.0, 1.0, AudioValueLaw::Linear), &ctx);
         assert_eq!(knob.a11y.role, Some(NodeRole::Slider));
         assert!(knob.a11y.label.as_deref().unwrap().contains("0.5"));
         let switch = audio_switch(
@@ -841,25 +855,29 @@ mod tests {
                 switch_visual_state(AudioSwitchMode::Latch, 1, 2, false, None, true),
                 AudioSwitchMode::Latch,
             ),
-            &Theme,
+            &ctx,
         );
         assert_eq!(switch.a11y.toggled, Some(NodeToggled::True));
     }
 
     #[test]
     fn stereo_meter_has_two_visual_channels() {
+        let theme = Theme;
+        let ctx = RenderContext::new(&theme);
         let visual = AudioMeterContext::default().visual_state();
         let mut spec = AudioMeterSpec::new(visual.clone());
         spec.channels.push(visual);
-        assert_eq!(audio_meter(&spec, &Theme).children.len(), 2);
+        assert_eq!(audio_meter(&spec, &ctx).children.len(), 2);
     }
 
     #[test]
     fn phase_three_renderers_expose_visual_state_semantics() {
+        let theme = Theme;
+        let ctx = RenderContext::new(&theme);
         let keyboard_state = poodle_headless::audio::keyboard_visual_state(
             &poodle_headless::audio::KeyboardContext::default(),
         );
-        let keyboard_node = keyboard(&KeyboardSpec::new(keyboard_state), &Theme);
+        let keyboard_node = keyboard(&KeyboardSpec::new(keyboard_state), &ctx);
         assert_eq!(keyboard_node.a11y.role, Some(NodeRole::Toolbar));
         assert!(keyboard_node
             .children
@@ -889,7 +907,7 @@ mod tests {
         }
         .visual_state();
         assert_eq!(
-            waveform_display(&WaveformDisplaySpec::new(waveform_state), &Theme)
+            waveform_display(&WaveformDisplaySpec::new(waveform_state), &ctx)
                 .a11y
                 .role,
             Some(NodeRole::Slider)
@@ -908,7 +926,7 @@ mod tests {
         )
         .visual_state();
         assert_eq!(
-            mod_matrix_grid(&ModMatrixGridSpec::new(matrix_state), &Theme)
+            mod_matrix_grid(&ModMatrixGridSpec::new(matrix_state), &ctx)
                 .a11y
                 .role,
             Some(NodeRole::Grid)
@@ -917,6 +935,8 @@ mod tests {
 
     #[test]
     fn envelope_points_keep_independent_slider_semantics() {
+        let theme = Theme;
+        let ctx = RenderContext::new(&theme);
         let visual = EnvelopeVisualState {
             points: vec![EnvelopeVisualPoint {
                 id: "attack".into(),
@@ -930,7 +950,7 @@ mod tests {
             focus: true,
             enabled: true,
         };
-        let node = envelope_editor(&EnvelopeEditorSpec::new(visual), &Theme);
+        let node = envelope_editor(&EnvelopeEditorSpec::new(visual), &ctx);
         assert!(node
             .children
             .iter()
@@ -939,29 +959,31 @@ mod tests {
 
     #[test]
     fn presentation_axes_change_geometry_without_changing_visual_state() {
+        let theme = Theme;
+        let ctx = RenderContext::new(&theme);
         let mut small = KnobSpec::new(0.5, 0.0, 1.0, AudioValueLaw::Linear);
-        small.size = ControlSize::Xs;
+        small.size = Some(ControlSize::Xs);
         let mut large = small.clone();
-        large.size = ControlSize::Xl;
+        large.size = Some(ControlSize::Xl);
         assert_eq!(small.visual_state, large.visual_state);
         assert_ne!(
-            knob(&small, &Theme).style.descriptor.layout.width,
-            knob(&large, &Theme).style.descriptor.layout.width,
+            knob(&small, &ctx).style.descriptor.layout.width,
+            knob(&large, &ctx).style.descriptor.layout.width,
         );
 
         let mut compact = AudioMeterSpec::new(AudioMeterContext::default().visual_state());
-        compact.density = ControlDensity::Compact;
+        compact.density = Some(ControlDensity::Compact);
         let mut comfortable = compact.clone();
-        comfortable.density = ControlDensity::Comfortable;
+        comfortable.density = Some(ControlDensity::Comfortable);
         assert_eq!(compact.channels, comfortable.channels);
         assert_ne!(
-            audio_meter(&compact, &Theme)
+            audio_meter(&compact, &ctx)
                 .style
                 .descriptor
                 .layout
                 .spacing
                 .gap,
-            audio_meter(&comfortable, &Theme)
+            audio_meter(&comfortable, &ctx)
                 .style
                 .descriptor
                 .layout

@@ -7,7 +7,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodePosition, NodeRole, NodeToggled,
@@ -15,7 +14,8 @@ use poodle_node::{
 use poodle_specs::{ControlDensity, ControlSize, RatingSpec};
 
 use crate::color::with_alpha;
-use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::{control_height_rem, rem_to_px};
 
 /// Per-size glyph font-size in rem (contract §8 size table).
 fn glyph_font_rem(size: ControlSize) -> f32 {
@@ -39,21 +39,22 @@ fn item_gap_rem(density: ControlDensity) -> f32 {
 
 pub fn rating(
     spec: &RatingSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(u32) + Send + Sync>>,
 ) -> Node {
-    let active = theme.resolve_color(spec.active_color_token());
+    let active = ctx.theme().resolve_color(spec.active_color_token());
     // Contract §8: unfilled color = color-mix(text-secondary 48%, transparent).
-    let inactive_base = theme.resolve_color(spec.inactive_color_token());
+    let inactive_base = ctx.theme().resolve_color(spec.inactive_color_token());
     let inactive = with_alpha(inactive_base, inactive_base.3 * spec.inactive_color_alpha());
 
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     // Contract §8 glyph font-size; the reference renders the SVG at 1.125em.
     let glyph_px = rem_to_px(glyph_font_rem(effective_size)) * 1.125;
     // Contract §7/§8: each item is a size-scaled square touch target.
     let item_px = rem_to_px(control_height_rem(effective_size));
     // Gap between stars: density-driven (contract §8).
-    let gap = rem_to_px(item_gap_rem(spec.density));
+    let gap = rem_to_px(item_gap_rem(density));
 
     let mut el = Node::container();
     {
@@ -140,7 +141,7 @@ pub fn rating(
     }
 
     if spec.is_disabled {
-        el.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
     }
 
     if let Some(label) = spec.aria_label.as_deref() {

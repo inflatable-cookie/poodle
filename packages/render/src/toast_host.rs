@@ -3,16 +3,16 @@
 //!
 //! Ported from: `packages/jetstream/components/src/toast_host.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, LayoutSizing, Node, NodePosition, NodeRole};
 use poodle_specs::{ToastHostPlacement, ToastHostSpec, ToastStackSpec};
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::toast_stack::{toast_stack, ToastStackHandlers};
 
 pub fn toast_host(
     spec: &ToastHostSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     stack_spec: &ToastStackSpec,
     handlers: ToastStackHandlers,
 ) -> Node {
@@ -68,7 +68,7 @@ pub fn toast_host(
         },
     };
 
-    let mut container = container.child(toast_stack(stack_spec, theme, handlers));
+    let mut container = container.child(toast_stack(stack_spec, ctx, handlers));
     if !spec.aria_label.is_empty() {
         container.a11y.label = Some(spec.aria_label.clone());
     }

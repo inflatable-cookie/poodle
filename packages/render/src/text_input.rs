@@ -7,7 +7,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole, StylePatch,
     TextChangeHandler,
@@ -18,21 +17,20 @@ use poodle_specs::{
 };
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::icon::icon;
-use crate::presentation::{
-    rem_to_px, resolve_semantic_size, size_height_offset_rem, size_padding_x_offset_rem,
-};
+use crate::presentation::{rem_to_px, size_height_offset_rem, size_padding_x_offset_rem};
 use crate::spinner::spinner;
 
 /// Render a text input without an editing callback.
 pub fn text_input(
     spec: &TextInputSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_clear: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
     text_input_with_handlers(
         spec,
-        theme,
+        ctx,
         TextInputHandlers {
             on_clear,
             ..TextInputHandlers::default()
@@ -64,12 +62,12 @@ pub struct TextInputHandlers {
 /// Render a text input with host-owned replacement-text updates.
 pub fn text_input_with_change(
     spec: &TextInputSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<TextChangeHandler>,
 ) -> Node {
     text_input_with_handlers(
         spec,
-        theme,
+        ctx,
         TextInputHandlers {
             on_change,
             ..TextInputHandlers::default()
@@ -81,23 +79,23 @@ pub fn text_input_with_change(
 /// insert where it is, and selections replace.
 pub fn text_input_with_handlers(
     spec: &TextInputSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: TextInputHandlers,
 ) -> Node {
     let on_change = handlers.on_change.clone();
-    let effective_size = resolve_semantic_size(spec.size.unwrap_or_default(), spec.size_role);
-    let control_height = theme.resolve_space(spec.control_height_token())
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let control_height = ctx.theme().resolve_space(spec.control_height_token())
         + rem_to_px(size_height_offset_rem(effective_size));
-    let density = spec.density.unwrap_or_default();
+    let density = ctx.resolve_density(spec.density);
     let density_offset_rem = match density {
         ControlDensity::Compact => -0.125,
         ControlDensity::Default => 0.0,
         ControlDensity::Comfortable => 0.125,
     };
-    let inline_padding = theme.resolve_space(spec.horizontal_padding_token())
+    let inline_padding = ctx.theme().resolve_space(spec.horizontal_padding_token())
         + rem_to_px(size_padding_x_offset_rem(effective_size) + density_offset_rem);
-    let inline_gap = theme.resolve_space(spec.inline_gap_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+    let inline_gap = ctx.theme().resolve_space(spec.inline_gap_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
     let body_size = rem_to_px(match effective_size {
         ControlSize::Xs => 0.75,
         ControlSize::Sm => 0.8125,
@@ -105,23 +103,23 @@ pub fn text_input_with_handlers(
         ControlSize::Lg => 0.9375,
         ControlSize::Xl => 1.0,
     });
-    let body_line_height = theme.resolve_space(spec.body_line_height_token()) / body_size;
-    let selection_fill = theme.resolve_color("color.accent.base");
+    let body_line_height = ctx.theme().resolve_space(spec.body_line_height_token()) / body_size;
+    let selection_fill = ctx.theme().resolve_color("color.accent.base");
 
-    let border_default = theme.resolve_color(spec.border_token());
-    let surface_raw = theme.resolve_color(spec.fill_token());
+    let border_default = ctx.theme().resolve_color(spec.border_token());
+    let surface_raw = ctx.theme().resolve_color(spec.fill_token());
     let surface_bg = with_alpha(surface_raw, surface_raw.3 * 0.82);
     let border = with_alpha(border_default, border_default.3 * 0.72);
     let hover_border = with_alpha(border_default, border_default.3 * 0.92);
     let effective_border = match spec.validation_state {
-        ValidationState::Invalid => theme.resolve_color("color.status.danger"),
-        ValidationState::Valid => theme.resolve_color("color.status.success"),
-        ValidationState::Pending => theme.resolve_color("color.accent.base"),
+        ValidationState::Invalid => ctx.theme().resolve_color("color.status.danger"),
+        ValidationState::Valid => ctx.theme().resolve_color("color.status.success"),
+        ValidationState::Pending => ctx.theme().resolve_color("color.accent.base"),
         ValidationState::None => border,
     };
-    let text_primary = theme.resolve_color(spec.text_color_token());
-    let text_secondary = theme.resolve_color(spec.placeholder_color_token());
-    let icon_color = theme.resolve_color(spec.icon_color_token());
+    let text_primary = ctx.theme().resolve_color(spec.text_color_token());
+    let text_secondary = ctx.theme().resolve_color(spec.placeholder_color_token());
+    let icon_color = ctx.theme().resolve_color(spec.icon_color_token());
 
     let current_value = spec.current_value();
     let display_color = if current_value.is_empty() {
@@ -141,7 +139,7 @@ pub fn text_input_with_handlers(
     }
 
     if let Some(prefix) = &spec.prefix {
-        let mut el = affix(prefix, true, inline_gap, spec, theme);
+        let mut el = affix(prefix, true, inline_gap, spec, ctx);
         if let Some(text) = el.children.first_mut() {
             text.id = Some("text-input-prefix".to_owned());
         }
@@ -152,7 +150,7 @@ pub fn text_input_with_handlers(
         (spec.input_type == "search").then(|| "search".to_owned())
     });
     if let Some(name) = &leading_name {
-        let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
+        let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), ctx);
         glyph.id = Some("text-input-leading".to_owned());
         glyph.style.descriptor.text_color = Some(icon_color);
         inner = inner.child(glyph);
@@ -295,7 +293,7 @@ pub fn text_input_with_handlers(
     inner = inner.child(value);
 
     if let Some(name) = &spec.trailing_icon {
-        let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
+        let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), ctx);
         glyph.id = Some("text-input-trailing".to_owned());
         glyph.style.descriptor.text_color = Some(icon_color);
         inner = inner.child(glyph);
@@ -314,8 +312,8 @@ pub fn text_input_with_handlers(
         clear.interaction.focusable = true;
         {
             let s = &mut clear.style;
-            s.descriptor.layout.width = LayoutSizing::Fixed(theme.resolve_space("size.icon.sm"));
-            s.descriptor.layout.height = LayoutSizing::Fixed(theme.resolve_space("size.icon.sm"));
+            s.descriptor.layout.width = LayoutSizing::Fixed(ctx.theme().resolve_space("size.icon.sm"));
+            s.descriptor.layout.height = LayoutSizing::Fixed(ctx.theme().resolve_space("size.icon.sm"));
         }
         let change = on_change.clone();
         let on_clear = handlers.on_clear.clone();
@@ -327,7 +325,7 @@ pub fn text_input_with_handlers(
                 on_clear();
             }
         }));
-        let mut glyph = icon(&IconSpec::new("x").with_size(IconSize::Sm), theme);
+        let mut glyph = icon(&IconSpec::new("x").with_size(IconSize::Sm), ctx);
         glyph.style.descriptor.text_color = Some(icon_color);
         inner = inner.child(clear.child(glyph));
     }
@@ -340,10 +338,10 @@ pub fn text_input_with_handlers(
                 } else {
                     "x"
                 };
-                let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), theme);
+                let mut glyph = icon(&IconSpec::new(name).with_size(IconSize::Sm), ctx);
                 glyph.id = Some("text-input-validation".to_owned());
                 glyph.style.descriptor.text_color =
-                    Some(theme.resolve_color(spec.validation_indicator_color_token()));
+                    Some(ctx.theme().resolve_color(spec.validation_indicator_color_token()));
                 inner = inner.child(glyph);
             }
             ValidationState::Pending => {
@@ -352,11 +350,11 @@ pub fn text_input_with_handlers(
                         .with_variant(SpinnerVariant::Ring)
                         .with_size(SpinnerSize::Sm)
                         .with_tone(SpinnerTone::Accent),
-                    theme,
+                    ctx,
                 );
                 pending.id = Some("text-input-validation".to_owned());
                 pending.style.descriptor.text_color =
-                    Some(theme.resolve_color(spec.validation_indicator_color_token()));
+                    Some(ctx.theme().resolve_color(spec.validation_indicator_color_token()));
                 inner = inner.child(pending);
             }
             ValidationState::None => {}
@@ -371,18 +369,18 @@ pub fn text_input_with_handlers(
             None => len.to_string(),
         });
         count.id = Some("text-input-char-count".to_owned());
-        count.style.descriptor.text_color = Some(theme.resolve_color(if over {
+        count.style.descriptor.text_color = Some(ctx.theme().resolve_color(if over {
             spec.char_count_over_color_token()
         } else {
             spec.char_count_color_token()
         }));
-        count.style.text_size = Some(theme.resolve_space(spec.char_count_font_size_token()));
+        count.style.text_size = Some(ctx.theme().resolve_space(spec.char_count_font_size_token()));
         count.style.no_wrap = true;
         inner = inner.child(count);
     }
 
     if let Some(suffix) = &spec.suffix {
-        let mut el = affix(suffix, false, inline_gap, spec, theme);
+        let mut el = affix(suffix, false, inline_gap, spec, ctx);
         if let Some(text) = el.children.first_mut() {
             text.id = Some("text-input-suffix".to_owned());
         }
@@ -425,7 +423,7 @@ pub fn text_input_with_handlers(
     if !spec.is_disabled {
         root.style.focus = Some(StylePatch {
             background: None,
-            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             text_color: None,
             opacity: None,
         });
@@ -504,7 +502,7 @@ pub fn text_input_with_handlers(
         root.interaction.on_cancel = handlers.on_cancel.clone();
     }
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         root.style.descriptor.cursor = CursorHint::NotAllowed;
         root.interaction.disabled = true;
     }
@@ -533,16 +531,16 @@ fn affix(
     prefix: bool,
     inline_gap: f32,
     spec: &TextInputSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
-    let separator_base = theme.resolve_color(spec.affix_separator_color_token());
+    let separator_base = ctx.theme().resolve_color(spec.affix_separator_color_token());
     let separator = with_alpha(separator_base, separator_base.3 * 0.52);
     let mut el = Node::container();
     {
         let s = &mut el.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.text_color = Some(theme.resolve_color(spec.affix_color_token()));
+        s.descriptor.text_color = Some(ctx.theme().resolve_color(spec.affix_color_token()));
         s.no_wrap = true;
         if prefix {
             s.descriptor.layout.spacing.padding.right = inline_gap;
@@ -569,12 +567,13 @@ mod tests {
     #[test]
     fn the_value_is_one_text_node_carrying_the_caret_and_its_colors() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = text_input_with_handlers(
             &TextInputSpec::new()
                 .with_id("stock")
                 .with_value("hello")
                 .with_selection(1, 4),
-            &theme,
+            &ctx,
             TextInputHandlers::default(),
         );
         let value = node
@@ -600,11 +599,12 @@ mod tests {
     #[test]
     fn pointer_selection_is_reported_from_the_value_node_only() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let sink = std::sync::Arc::clone(&seen);
         let node = text_input_with_handlers(
             &TextInputSpec::new().with_id("stock").with_value("hello"),
-            &theme,
+            &ctx,
             TextInputHandlers {
                 on_selection_change: Some(Arc::new(move |a, b| sink.lock().unwrap().push((a, b)))),
                 ..TextInputHandlers::default()
@@ -646,12 +646,13 @@ mod tests {
     #[test]
     fn a_disabled_field_carries_no_caret() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = text_input_with_handlers(
             &TextInputSpec::new()
                 .with_id("stock")
                 .with_value("hello")
                 .with_disabled(true),
-            &theme,
+            &ctx,
             TextInputHandlers::default(),
         );
         let value = node
@@ -676,7 +677,9 @@ mod tests {
             .with_max_length(12)
             .with_show_char_count(true)
             .with_validation_state(ValidationState::Invalid);
-        let node = text_input(&spec, &theme(), None);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = text_input(&spec, &ctx, None);
 
         assert!(matches!(node.kind, NodeKind::Input { .. }));
         assert_eq!(node.id.as_deref(), Some("poodle-input-email"));
@@ -686,20 +689,22 @@ mod tests {
         assert_eq!(node.children[0].children.len(), 3, "value + count + status");
         assert_eq!(
             node.style.descriptor.border.color,
-            theme().resolve_color("color.status.danger")
+            theme.resolve_color("color.status.danger")
         );
     }
 
     #[test]
     fn editable_callback_lives_on_the_input_but_read_only_suppresses_it() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let callback: TextChangeHandler = Arc::new(|_| {});
         let editable =
-            text_input_with_change(&TextInputSpec::new(), &theme(), Some(callback.clone()));
+            text_input_with_change(&TextInputSpec::new(), &ctx, Some(callback.clone()));
         assert!(editable.interaction.on_text_change.is_some());
 
         let read_only = text_input_with_change(
             &TextInputSpec::new().with_read_only(true),
-            &theme(),
+            &ctx,
             Some(callback),
         );
         assert!(read_only.interaction.on_text_change.is_none());
@@ -707,9 +712,11 @@ mod tests {
 
     #[test]
     fn affixes_keep_separator_inside_the_inline_row() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = text_input(
             &TextInputSpec::new().with_prefix("$").with_suffix("/mo"),
-            &theme(),
+            &ctx,
             None,
         );
         let children = &node.children[0].children;

@@ -24,7 +24,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node, NodeRole, StylePatch,
@@ -35,6 +34,7 @@ use poodle_specs::{
 };
 
 use crate::color::mix_srgb;
+use crate::context::RenderContext;
 use crate::icon_button::icon_button;
 use crate::presentation::{
     control_height_rem, panel_space_x_rem, rem_to_px, resolve_semantic_size,
@@ -64,10 +64,10 @@ fn summary_font_rem(size: ControlSize) -> f32 {
 
 /// Actions-row gap per density (contract §8: compact 0.125rem, default
 /// space.inline.sm, comfortable 0.5rem).
-fn actions_gap_px(spec: &BulkActionBarSpec, theme: &dyn ThemeProvider) -> f32 {
-    match spec.density {
+fn actions_gap_px(spec: &BulkActionBarSpec, density: ControlDensity, ctx: &RenderContext<'_>) -> f32 {
+    match density {
         ControlDensity::Compact => rem_to_px(0.125),
-        ControlDensity::Default => theme.resolve_space(spec.gap_token()),
+        ControlDensity::Default => ctx.theme().resolve_space(spec.gap_token()),
         ControlDensity::Comfortable => rem_to_px(0.5),
     }
 }
@@ -80,9 +80,10 @@ fn toned_icon_button(
     size: ControlSize,
     icon_color: ColorValue,
     disabled: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_press: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
+    let theme = ctx.theme();
     let effective_size = resolve_semantic_size(size, SemanticControlSizeRole::Control);
     let height = rem_to_px(control_height_rem(effective_size));
     let icon_size = rem_to_px(size_font_rem(resolve_supporting_visual_size(
@@ -135,24 +136,27 @@ fn toned_icon_button(
 
 pub fn bulk_action_bar(
     spec: &BulkActionBarSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: BulkActionBarHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let theme = ctx.theme();
+    let base_size = ctx.base_size(spec.size);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let summary_font = rem_to_px(summary_font_rem(effective_size));
 
     // Padding: horizontal density-driven, vertical flat 0.5rem (contract §8).
-    let pad_x = rem_to_px(panel_space_x_rem(spec.density));
+    let pad_x = rem_to_px(panel_space_x_rem(density));
     let pad_y = rem_to_px(0.5);
 
     // Gaps: root/summary gap = space.inline.md (root), summary inner & actions per spec.
-    let root_gap = match spec.density {
+    let root_gap = match density {
         ControlDensity::Compact => rem_to_px(0.375),
         ControlDensity::Default => theme.resolve_space("space.inline.md"),
         ControlDensity::Comfortable => rem_to_px(1.0),
     };
     let summary_gap = theme.resolve_space(spec.gap_token());
-    let actions_gap = actions_gap_px(spec, theme);
+    let actions_gap = actions_gap_px(spec, density, ctx);
 
     // ── Colors ──────────────────────────────────────────────────
     let panel_bg = theme.resolve_color("color.background.panel");
@@ -197,14 +201,14 @@ pub fn bulk_action_bar(
         let mut select_spec = IconButtonSpec::new()
             .with_aria_label("Select all")
             .with_icon("check-check")
-            .with_size(spec.size)
+            .with_size(base_size)
             .with_size_role(SemanticControlSizeRole::Chrome);
         if is_unavailable {
             select_spec = select_spec.with_disabled(true);
         }
         summary = summary.child(icon_button(
             &select_spec,
-            theme,
+            ctx,
             handlers.on_select_all.clone(),
         ));
     }
@@ -234,20 +238,20 @@ pub fn bulk_action_bar(
             BulkActionTone::Danger => {
                 actions = actions.child(toned_icon_button(
                     action,
-                    spec.size,
+                    base_size,
                     danger_color,
                     disabled,
-                    theme,
+                    ctx,
                     on_press,
                 ));
             }
             BulkActionTone::Warning => {
                 actions = actions.child(toned_icon_button(
                     action,
-                    spec.size,
+                    base_size,
                     warning_color,
                     disabled,
-                    theme,
+                    ctx,
                     on_press,
                 ));
             }
@@ -259,12 +263,12 @@ pub fn bulk_action_bar(
                     // unnamed buttons.
                     .with_aria_label(action.label.clone())
                     .with_icon(action.resolved_icon())
-                    .with_size(spec.size)
+                    .with_size(base_size)
                     .with_size_role(spec.size_role);
                 if disabled {
                     a_spec = a_spec.with_disabled(true);
                 }
-                actions = actions.child(icon_button(&a_spec, theme, on_press));
+                actions = actions.child(icon_button(&a_spec, ctx, on_press));
             }
         }
     }
@@ -273,12 +277,12 @@ pub fn bulk_action_bar(
     let mut clear_spec = IconButtonSpec::new()
         .with_aria_label("Clear selection")
         .with_icon("x")
-        .with_size(spec.size)
+        .with_size(base_size)
         .with_size_role(spec.size_role);
     if is_unavailable {
         clear_spec = clear_spec.with_disabled(true);
     }
-    actions = actions.child(icon_button(&clear_spec, theme, handlers.on_clear.clone()));
+    actions = actions.child(icon_button(&clear_spec, ctx, handlers.on_clear.clone()));
 
     // ── Root ────────────────────────────────────────────────────
     let mut root = Node::container();

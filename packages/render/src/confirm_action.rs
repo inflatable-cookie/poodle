@@ -15,7 +15,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::Node;
 use poodle_specs::{
     AlertDialogSpec, AlertDialogTone, ButtonSpec, ButtonTone, ButtonVariant, ConfirmActionSpec,
@@ -24,6 +23,7 @@ use poodle_specs::{
 
 use crate::alert_dialog::{alert_dialog_with_content, AlertDialogHandlers};
 use crate::button::button;
+use crate::context::RenderContext;
 
 /// Host callbacks: trigger (closed state), confirm and cancel (open state).
 #[derive(Default)]
@@ -56,21 +56,23 @@ fn alert_tone(spec: &ConfirmActionSpec) -> AlertDialogTone {
 
 pub fn confirm_action(
     spec: &ConfirmActionSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: ConfirmActionHandlers,
 ) -> Node {
-    confirm_action_with_slots(spec, theme, None, None, handlers)
+    confirm_action_with_slots(spec, ctx, None, None, handlers)
 }
 
 /// Render with optional trigger and dialog-body slots. The slots remain nodes,
 /// so every backend sees the same composed structure.
 pub fn confirm_action_with_slots(
     spec: &ConfirmActionSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     trigger: Option<Node>,
     content: Option<Node>,
     handlers: ConfirmActionHandlers,
 ) -> Node {
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
     if !spec.is_open {
         if let Some(trigger) = trigger {
             return trigger;
@@ -81,11 +83,11 @@ pub fn confirm_action_with_slots(
         let trigger_spec = ButtonSpec::new()
             .with_variant(ButtonVariant::Secondary)
             .with_tone(trigger_button_tone(spec))
-            .with_size(spec.size)
+            .with_size(base_size)
             .with_size_role(spec.size_role)
-            .with_density(spec.density)
+            .with_density(density)
             .with_label(spec.trigger_label.clone());
-        return button(&trigger_spec, theme, handlers.on_trigger);
+        return button(&trigger_spec, ctx, handlers.on_trigger);
     }
 
     // Open: delegate to the composed alert_dialog primitive (dialog + buttons).
@@ -95,13 +97,13 @@ pub fn confirm_action_with_slots(
         .with_confirm_label(spec.confirm_label.clone())
         .with_cancel_label(spec.cancel_label.clone())
         .with_open(true)
-        .with_size(spec.size)
+        .with_size(base_size)
         .with_size_role(spec.size_role)
-        .with_density(spec.density);
+        .with_density(density);
 
     let dialog = alert_dialog_with_content(
         &alert_spec,
-        theme,
+        ctx,
         false,
         "Working\u{2026}",
         content.into_iter().collect(),
@@ -134,9 +136,11 @@ mod tests {
         let cancel_seen = Arc::clone(&seen);
         let spec =
             ConfirmActionSpec::new("Delete?", "Permanent.", "Delete", "Cancel").with_open(true);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = confirm_action_with_slots(
             &spec,
-            &theme(),
+            &ctx,
             Some(Node::button("Custom trigger")),
             Some(Node::text("Typed confirmation")),
             ConfirmActionHandlers {

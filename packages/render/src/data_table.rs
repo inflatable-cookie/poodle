@@ -16,7 +16,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, StylePatch, TextAlign,
@@ -25,9 +24,8 @@ use poodle_specs::{CheckState, CheckboxSpec, DataTableSpec, StatusTone, TableSor
 
 use crate::checkbox::checkbox;
 use crate::color::{mix_srgb, with_alpha};
-use crate::presentation::{
-    control_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size, size_font_rem,
-};
+use crate::context::RenderContext;
+use crate::presentation::{control_space_x_rem, panel_space_y_rem, rem_to_px, size_font_rem};
 use crate::skeleton::skeleton;
 
 /// Selection-column width in rem per size (contract §11 size table).
@@ -73,14 +71,16 @@ fn row_shell(direction: LayoutDirection) -> Node {
 
 pub fn data_table(
     spec: &DataTableSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: DataTableHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
+    let theme = ctx.theme();
     let header_font = rem_to_px(size_font_rem(effective_size) - 0.0625);
     let body_font = rem_to_px(size_font_rem(effective_size));
     let label_size = theme.resolve_space("typography.label.size");
-    let cell_px = rem_to_px(control_space_x_rem(spec.density));
+    let cell_px = rem_to_px(control_space_x_rem(density));
     // Svelte uses the effective control size for both header and body cell
     // padding. Keep the two rows on one metric ladder so size variants do
     // not drift vertically between backends.
@@ -209,7 +209,7 @@ pub fn data_table(
             s.descriptor.layout.width = LayoutSizing::Fixed(selection_width);
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         }
-        let mut cell = cell.child(checkbox(&cb_spec, theme, None));
+        let mut cell = cell.child(checkbox(&cb_spec, ctx, None));
         if let Some(handler) = &handlers.on_select_all {
             let handler = Arc::clone(handler);
             cell.style.descriptor.cursor = CursorHint::Pointer;
@@ -388,7 +388,7 @@ pub fn data_table(
                     s.descriptor.layout.width = LayoutSizing::Fixed(selection_width);
                     s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
                 }
-                let mut cell = cell.child(checkbox(&cb_spec, theme, None));
+                let mut cell = cell.child(checkbox(&cb_spec, ctx, None));
 
                 // Its own handler, always: selecting a row and opening it are
                 // different intents, and an unwired checkbox that bubbled
@@ -597,14 +597,16 @@ pub fn data_table(
 /// visible column.
 pub fn data_table_loading(
     spec: &DataTableSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     row_count: usize,
 ) -> Node {
     use poodle_specs::SkeletonSpec;
 
+    let density = ctx.resolve_density(spec.density);
+    let theme = ctx.theme();
     let cell_gap = rem_to_px(0.5);
-    let cell_px = rem_to_px(control_space_x_rem(spec.density));
-    let row_py = rem_to_px(panel_space_y_rem(spec.density) - 0.125);
+    let cell_px = rem_to_px(control_space_x_rem(density));
+    let row_py = rem_to_px(panel_space_y_rem(density) - 0.125);
     let border = theme.resolve_color("color.border.subtle");
     let skel_spec = SkeletonSpec::new();
 
@@ -627,10 +629,10 @@ pub fn data_table_loading(
         }
 
         if spec.selectable {
-            row_el = row_el.child(skeleton(&skel_spec, theme));
+            row_el = row_el.child(skeleton(&skel_spec, ctx));
         }
         for _ in spec.visible_columns() {
-            let mut cell = skeleton(&skel_spec, theme);
+            let mut cell = skeleton(&skel_spec, ctx);
             cell.style.descriptor.layout.width = LayoutSizing::Grow;
             row_el = row_el.child(cell);
         }

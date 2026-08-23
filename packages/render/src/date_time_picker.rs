@@ -8,12 +8,12 @@
 //! Display text (contract §4): complete value → "date time"; partial → the
 //! prompt for the missing part; empty → placeholder.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole};
 use poodle_specs::{CalendarSpec, DateTimePickerSpec, TimeFieldSpec};
 
 use crate::calendar::{calendar, CalendarHandlers};
 use crate::color::{mix_linear, with_alpha};
+use crate::context::RenderContext;
 use crate::date_picker::DatePickerHandlers;
 use crate::picker_trigger::{picker_trigger, PickerTrigger};
 use crate::presentation::rem_to_px;
@@ -21,9 +21,11 @@ use crate::time_field::time_field;
 
 pub fn date_time_picker(
     spec: &DateTimePickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: DatePickerHandlers,
 ) -> Node {
+    let base_size = ctx.base_size(spec.size);
+    let theme = ctx.theme();
     let inline_gap = theme.resolve_space("space.inline.sm");
     let elevated = theme.resolve_color("color.background.elevated");
     let border_color = theme.resolve_color("color.border.default");
@@ -39,13 +41,13 @@ pub fn date_time_picker(
         (None, None) => spec.placeholder.clone(),
     };
     let trigger = picker_trigger(
-        theme,
+        ctx,
         PickerTrigger {
             display: &display,
             has_value,
             open: spec.current_open(),
             disabled: spec.is_disabled,
-            size: spec.size,
+            size: base_size,
             size_role: spec.size_role,
             indicator: "chevron-down",
             indicator_size: None,
@@ -99,7 +101,7 @@ pub fn date_time_picker(
         }
         let time_section = time_section
             .child(time_label)
-            .child(time_field(&time_spec, theme));
+            .child(time_field(&time_spec, ctx));
 
         // Body — vertical stack of Calendar + Time Section; gap 0.875rem.
         let mut body = Node::container();
@@ -113,7 +115,7 @@ pub fn date_time_picker(
         let body = body
             .child(calendar(
                 &cal_spec,
-                theme,
+                ctx,
                 CalendarHandlers {
                     on_select: handlers.on_select.clone(),
                     on_range_select: None,

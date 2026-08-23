@@ -7,39 +7,39 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
 };
 use poodle_specs::{DrawerEdge, DrawerSpec};
 
+use crate::context::RenderContext;
 use crate::presentation::{
-    drawer_title_font_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, resolve_semantic_size,
-    size_font_rem,
+    drawer_title_font_rem, panel_space_x_rem, panel_space_y_rem, rem_to_px, size_font_rem,
 };
 
 pub fn drawer(
     spec: &DrawerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     content: Option<Node>,
     actions: Option<Node>,
     on_request_close: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let title_font = rem_to_px(drawer_title_font_rem(effective_size));
     let body_font = rem_to_px(size_font_rem(effective_size));
-    let space_x = rem_to_px(panel_space_x_rem(spec.density));
-    let space_y = rem_to_px(panel_space_y_rem(spec.density));
+    let space_x = rem_to_px(panel_space_x_rem(density));
+    let space_y = rem_to_px(panel_space_y_rem(density));
     let header_gap = rem_to_px(0.375);
-    let panel_gap = theme.resolve_space("space.stack.sm");
-    let stack_md = theme.resolve_space("space.stack.md");
-    let actions_gap = theme.resolve_space("space.inline.sm");
+    let panel_gap = ctx.theme().resolve_space("space.stack.sm");
+    let stack_md = ctx.theme().resolve_space("space.stack.md");
+    let actions_gap = ctx.theme().resolve_space("space.inline.sm");
 
-    let fill = theme.resolve_color(spec.surface_fill_token());
-    let backdrop = theme.resolve_color(spec.backdrop_fill_token());
-    let border = theme.resolve_color("color.border.default");
-    let title_color = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
+    let fill = ctx.theme().resolve_color(spec.surface_fill_token());
+    let backdrop = ctx.theme().resolve_color(spec.backdrop_fill_token());
+    let border = ctx.theme().resolve_color("color.border.default");
+    let title_color = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
 
     let side_width = rem_to_px(28.0);
     let edge_height = rem_to_px(24.0);

@@ -4,33 +4,35 @@
 //!
 //! Ported from: `packages/jetstream/components/src/shell_status_bar.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::ShellStatusBarSpec;
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 pub fn shell_status_bar(
     spec: &ShellStatusBarSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     leading: Vec<Node>,
     trailing: Vec<Node>,
 ) -> Node {
-    let text_color = theme.resolve_color(spec.text_color_token());
+    let text_color = ctx.theme().resolve_color(spec.text_color_token());
 
     // Contract §8: font-size scales by size; padding 0.375rem 0.75rem scaled
     // by size (block) / density (inline); root gap = space.inline.md
     // overridden by density; inner gap = space.inline.sm. No fixed height —
     // content + padding drive it.
-    let font_size = rem_to_px(spec.font_size_rem());
-    let pad_block = rem_to_px(spec.padding_block_rem());
-    let pad_inline = rem_to_px(spec.padding_inline_rem());
-    let root_gap = match spec.density_gap_rem() {
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let pad_block = rem_to_px(spec.padding_block_rem(base_size));
+    let pad_inline = rem_to_px(spec.padding_inline_rem(density));
+    let root_gap = match spec.density_gap_rem(density) {
         Some(rem) => rem_to_px(rem),
-        None => theme.resolve_space(spec.root_gap_token()),
+        None => ctx.theme().resolve_space(spec.root_gap_token(density)),
     };
-    let inner_gap = theme.resolve_space(spec.inner_gap_token());
+    let inner_gap = ctx.theme().resolve_space(spec.inner_gap_token());
 
     let mut el = Node::container();
     {
@@ -50,10 +52,10 @@ pub fn shell_status_bar(
     // Chrome modifier: 94% panel background + border-top. Without chrome the
     // bar is transparent and blends into its container.
     if spec.chrome {
-        let panel = theme.resolve_color(spec.chrome_background_token());
+        let panel = ctx.theme().resolve_color(spec.chrome_background_token());
         // color-mix toward same-rgb transparent = alpha scale only.
         let chrome_bg = with_alpha(panel, panel.3 * spec.chrome_background_opacity());
-        let border = theme.resolve_color(spec.chrome_border_token());
+        let border = ctx.theme().resolve_color(spec.chrome_border_token());
         // Border width token resolves to 0.0625rem (1px at 16px base); the
         // runtime exposes a fixed 1px top border, so width is approximated at
         // 1px with the per-side top color set explicitly.

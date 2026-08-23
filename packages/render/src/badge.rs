@@ -3,14 +3,14 @@
 //! Contract: `docs/contracts/components/badge.md`
 //! Ported from: `packages/jetstream/components/src/badge.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, MainAxisAlignment, Node};
 use poodle_specs::{BadgeSpec, BadgeVariant};
 
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn badge(spec: &BadgeSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn badge(spec: &BadgeSpec, ctx: &RenderContext<'_>) -> Node {
     let content = spec.content.clone().unwrap_or_default();
 
     // Contract colour rules per variant:
@@ -18,14 +18,14 @@ pub fn badge(spec: &BadgeSpec, theme: &dyn ThemeProvider) -> Node {
     // - muted: bg = color-mix(surface 78%, elevated), text = text-secondary
     let (bg, text_color) = match spec.variant {
         BadgeVariant::Accent => {
-            let accent = theme.resolve_color("color.accent.base");
-            let text = theme.resolve_color("color.text.primary");
+            let accent = ctx.theme().resolve_color("color.accent.base");
+            let text = ctx.theme().resolve_color("color.text.primary");
             (with_alpha(accent, accent.3 * 0.18), text)
         }
         BadgeVariant::Muted => {
-            let surface = theme.resolve_color("color.background.surface");
-            let elevated = theme.resolve_color("color.background.elevated");
-            let text = theme.resolve_color("color.text.secondary");
+            let surface = ctx.theme().resolve_color("color.background.surface");
+            let elevated = ctx.theme().resolve_color("color.background.elevated");
+            let text = ctx.theme().resolve_color("color.text.secondary");
             (mix_srgb(surface, elevated, 0.78), text)
         }
     };

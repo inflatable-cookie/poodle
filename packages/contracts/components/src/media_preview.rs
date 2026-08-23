@@ -140,16 +140,6 @@ impl MediaPreviewSpec {
         self.state != MediaState::Ready
     }
 
-    /// Resolved size; falls back to `md` when unset (contract §9 size table).
-    pub fn resolved_size(&self) -> ControlSize {
-        self.size.unwrap_or(ControlSize::Md)
-    }
-
-    /// Resolved density; falls back to `default` when unset (contract §9).
-    pub fn resolved_density(&self) -> ControlDensity {
-        self.density.unwrap_or(ControlDensity::Default)
-    }
-
     // ── Card composition tokens (contract §10) ────────────────
 
     pub fn title_color_token(&self) -> &'static str {
@@ -171,8 +161,8 @@ impl MediaPreviewSpec {
 
     // ── Size variants (contract §9 Size Variants, values in rem) ──
 
-    pub fn eyebrow_size_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn eyebrow_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.625,
             ControlSize::Sm => 0.65625,
             ControlSize::Md => 0.6875,
@@ -181,8 +171,8 @@ impl MediaPreviewSpec {
         }
     }
 
-    pub fn title_size_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn title_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.9375,
             ControlSize::Sm => 1.0,
             ControlSize::Md => 1.125,
@@ -191,8 +181,8 @@ impl MediaPreviewSpec {
         }
     }
 
-    pub fn body_size_rem(&self) -> f32 {
-        match self.resolved_size() {
+    pub fn body_size_rem(&self, size: ControlSize) -> f32 {
+        match size {
             ControlSize::Xs => 0.75,
             ControlSize::Sm => 0.78125,
             ControlSize::Md => 0.8125,
@@ -202,8 +192,8 @@ impl MediaPreviewSpec {
     }
 
     /// Meta-chip padding `(y, x)` in rem (contract §9 Size Variants).
-    pub fn meta_padding_rem(&self) -> (f32, f32) {
-        match self.resolved_size() {
+    pub fn meta_padding_rem(&self, size: ControlSize) -> (f32, f32) {
+        match size {
             ControlSize::Xs => (0.25, 0.5),
             ControlSize::Sm => (0.3125, 0.5625),
             ControlSize::Md => (0.375, 0.625),
@@ -214,8 +204,8 @@ impl MediaPreviewSpec {
 
     // ── Density variants (contract §9 Density Variants, rem) ──
 
-    pub fn header_gap_rem(&self) -> f32 {
-        match self.resolved_density() {
+    pub fn header_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             // default → space.stack.md (0.75rem)
             ControlDensity::Default => 0.75,
             ControlDensity::Compact => 0.625,
@@ -223,8 +213,8 @@ impl MediaPreviewSpec {
         }
     }
 
-    pub fn section_gap_rem(&self) -> f32 {
-        match self.resolved_density() {
+    pub fn section_gap_rem(&self, density: ControlDensity) -> f32 {
+        match density {
             // default → space.stack.sm (0.5rem)
             ControlDensity::Default => 0.5,
             ControlDensity::Compact => 0.375,

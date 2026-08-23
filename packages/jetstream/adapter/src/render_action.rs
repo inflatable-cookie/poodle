@@ -63,11 +63,15 @@ impl RenderComponent<IconButtonSpec> for JetstreamAdapter {
     ) -> JetstreamNodeHandle {
         let mapped = map_style(style);
 
+        // Legacy direct-manifest proof: no presentation scope exists on this
+        // path, so omission resolves against the root defaults (md/default) —
+        // the same values `RenderContext::new` supplies in poodle-render.
+        let size = spec.size.unwrap_or_default();
         // Resolve icon size token (used for width/height constraints)
-        let _icon_size = theme.resolve_space(spec.icon_size_token());
+        let _icon_size = theme.resolve_space(spec.icon_size_token(size));
 
         // Resolve control height token
-        let _control_height = theme.resolve_space(spec.control_height_token());
+        let _control_height = theme.resolve_space(spec.control_height_token(size));
 
         let node_id = match &spec.icon {
             Some(icon) if !icon.is_empty() => format!("icon-button-{}", icon),

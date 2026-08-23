@@ -7,28 +7,29 @@
 //! rendering substitution — no raw polyline primitive); dimensions and colour
 //! match the contract.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing, Node,
 };
 use poodle_specs::{MetricTileSpec, MetricTrend};
 
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn metric_tile(spec: &MetricTileSpec, theme: &dyn ThemeProvider) -> Node {
-    let fill = theme.resolve_color(spec.fill_token());
+pub fn metric_tile(spec: &MetricTileSpec, ctx: &RenderContext<'_>) -> Node {
+    let fill = ctx.theme().resolve_color(spec.fill_token());
     // Contract §8: border is `0.0625rem solid transparent` (invisible — keeps
     // box geometry stable).
     let border_w = rem_to_px(spec.border_width_rem());
-    let radius = theme.resolve_radius(spec.radius_token());
-    let label_color = theme.resolve_color(spec.label_color_token());
-    let value_color = theme.resolve_color(spec.value_color_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let label_color = ctx.theme().resolve_color(spec.label_color_token());
+    let value_color = ctx.theme().resolve_color(spec.value_color_token());
 
     // Density-resolved spacing (contract §8 density table).
-    let pad_x = rem_to_px(spec.padding_x_rem());
-    let pad_y = rem_to_px(spec.padding_y_rem());
-    let root_gap = rem_to_px(spec.root_gap_rem());
-    let body_gap = rem_to_px(spec.body_gap_rem());
+    let density = ctx.resolve_density(spec.density);
+    let pad_x = rem_to_px(spec.padding_x_rem(density));
+    let pad_y = rem_to_px(spec.padding_y_rem(density));
+    let root_gap = rem_to_px(spec.root_gap_rem(density));
+    let body_gap = rem_to_px(spec.body_gap_rem(density));
 
     // Typography (contract §8): label 0.75rem, value 1rem, trend 0.75rem.
     let label_font = rem_to_px(spec.label_font_size_rem());
@@ -85,7 +86,7 @@ pub fn metric_tile(spec: &MetricTileSpec, theme: &dyn ThemeProvider) -> Node {
 
         let chart_w = rem_to_px(spec.sparkline_width_rem());
         let chart_h = rem_to_px(spec.sparkline_height_rem());
-        let spark_color = theme.resolve_color(spec.sparkline_color_token());
+        let spark_color = ctx.theme().resolve_color(spec.sparkline_color_token());
         let bar_gap = rem_to_px(0.0625);
 
         let mut sparkline = Node::container();
@@ -132,7 +133,7 @@ pub fn metric_tile(spec: &MetricTileSpec, theme: &dyn ThemeProvider) -> Node {
     if let Some(trend) = spec.trend {
         let trend_color = spec
             .trend_color_token()
-            .map(|t| theme.resolve_color(t))
+            .map(|t| ctx.theme().resolve_color(t))
             .unwrap_or(value_color);
 
         let trend_icon = match trend {

@@ -17,7 +17,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeRole,
@@ -29,11 +28,11 @@ use poodle_specs::{
 
 use crate::button::button;
 use crate::color::{mix_srgb, TRANSPARENT};
+use crate::context::RenderContext;
 use crate::icon_button::icon_button;
 use crate::presentation::{
     editable_list_font_rem, editable_list_handle_size_rem, editable_list_item_gap_rem,
     editable_list_item_x_rem, editable_list_item_y_rem, editable_list_list_gap_rem, rem_to_px,
-    resolve_semantic_size,
 };
 use crate::text_input::text_input;
 
@@ -48,11 +47,11 @@ pub struct EditableListHandlers {
 
 pub fn editable_list(
     spec: &EditableListSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: EditableListHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let density = spec.density;
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let is_unavailable = spec.is_disabled || spec.is_submitting;
     let show_remove = spec.is_editable || spec.is_removable;
 
@@ -72,12 +71,12 @@ pub fn editable_list(
     let item_border = rem_to_px(0.0625);
 
     // ── Token-resolved colors ──
-    let text_primary = theme.resolve_color("color.text.primary");
-    let handle_color = theme.resolve_color(spec.remove_color_token());
-    let counter_color = theme.resolve_color(spec.counter_color_token());
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let handle_color = ctx.theme().resolve_color(spec.remove_color_token());
+    let counter_color = ctx.theme().resolve_color(spec.counter_color_token());
     let label_px = rem_to_px(0.8125); // typography.label.size = 0.8125rem
-    let control_radius = theme.resolve_radius("radius.control");
-    let surface_radius = theme.resolve_radius("radius.surface");
+    let control_radius = ctx.theme().resolve_radius("radius.control");
+    let surface_radius = ctx.theme().resolve_radius("radius.surface");
 
     // ── Root container (session) ──
     let mut root = Node::container();
@@ -99,7 +98,7 @@ pub fn editable_list(
                 .with_density(density)
                 .with_label(spec.cancel_label.clone())
                 .with_disabled(is_unavailable),
-            theme,
+            ctx,
             handlers.on_cancel.clone(),
         );
 
@@ -116,7 +115,7 @@ pub fn editable_list(
                 .with_label(submit_label)
                 // Svelte: disabled unless dirty (or while submitting).
                 .with_disabled(is_unavailable || !spec.is_dirty),
-            theme,
+            ctx,
             handlers.on_submit.clone(),
         );
 
@@ -135,7 +134,7 @@ pub fn editable_list(
     //
     // Both panels carry a tinted border + tinted background per contract,
     // resolved via color-mix over the danger/accent tokens (no flat fills).
-    let surface = theme.resolve_color("color.background.surface");
+    let surface = ctx.theme().resolve_color("color.background.surface");
     let panel_border_w = rem_to_px(0.0625);
     let panel = |border_color: ColorValue, bg: ColorValue, text: &str, text_color: ColorValue| {
         let mut p = Node::container();
@@ -162,7 +161,7 @@ pub fn editable_list(
         p.child(msg)
     };
     if let Some(ref error) = spec.error_message {
-        let danger = theme.resolve_color(spec.error_color_token());
+        let danger = ctx.theme().resolve_color(spec.error_color_token());
         // border color-mix(danger 40%, transparent); bg color-mix(danger 8%, surface).
         root = root.child(panel(
             mix_srgb(danger, TRANSPARENT, 0.40),
@@ -171,8 +170,8 @@ pub fn editable_list(
             danger,
         ));
     } else if let Some(ref info) = spec.info_message {
-        let info_color = theme.resolve_color(spec.info_color_token());
-        let accent = theme.resolve_color("color.accent.base");
+        let info_color = ctx.theme().resolve_color(spec.info_color_token());
+        let accent = ctx.theme().resolve_color("color.accent.base");
         // border color-mix(accent 22%, transparent); bg color-mix(accent 6%, surface).
         root = root.child(panel(
             mix_srgb(accent, TRANSPARENT, 0.22),
@@ -281,7 +280,7 @@ pub fn editable_list(
                         .with_density(density)
                         .with_disabled(is_unavailable)
                         .with_aria_label("Remove item"),
-                    theme,
+                    ctx,
                     on_click,
                 );
                 let mut slot = Node::container();
@@ -314,7 +313,7 @@ pub fn editable_list(
                 .with_size(effective_size)
                 .with_density(density)
                 .with_disabled(is_unavailable),
-            theme,
+            ctx,
             None,
         );
 
@@ -327,7 +326,7 @@ pub fn editable_list(
                 // Svelte: add button disabled when input empty/whitespace. No
                 // live input value here → render disabled (empty).
                 .with_disabled(true),
-            theme,
+            ctx,
             None,
         );
 
@@ -377,7 +376,7 @@ pub fn editable_list(
 
     // ── Disabled state: list opacity via token (contract §8) ──
     if is_unavailable {
-        root.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
     }
 
     if !spec.aria_label.is_empty() {

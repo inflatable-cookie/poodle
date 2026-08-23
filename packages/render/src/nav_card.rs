@@ -9,7 +9,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     StylePatch,
@@ -17,60 +16,62 @@ use poodle_node::{
 use poodle_specs::NavCardSpec;
 
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 pub fn nav_card(
     spec: &NavCardSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
-    nav_card_inner(spec, theme, on_click, None, true)
+    nav_card_inner(spec, ctx, on_click, None, true)
 }
 
 pub fn nav_card_with_icon(
     spec: &NavCardSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
     icon: Option<Node>,
 ) -> Node {
-    nav_card_inner(spec, theme, on_click, icon, false)
+    nav_card_inner(spec, ctx, on_click, icon, false)
 }
 
 fn nav_card_inner(
     spec: &NavCardSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
     icon: Option<Node>,
     use_placeholder: bool,
 ) -> Node {
-    let fill = theme.resolve_color(spec.fill_token());
-    let border = theme.resolve_color(spec.border_token());
-    let radius = theme.resolve_radius(spec.radius_token());
-    let icon_radius = theme.resolve_radius(spec.icon_radius_token());
-    let badge_radius = theme.resolve_radius(spec.badge_radius_token());
-    let text_primary = theme.resolve_color(spec.title_color_token());
-    let text_secondary = theme.resolve_color(spec.description_color_token());
-    let accent = theme.resolve_color(spec.icon_bg_token());
+    let fill = ctx.theme().resolve_color(spec.fill_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
+    let icon_radius = ctx.theme().resolve_radius(spec.icon_radius_token());
+    let badge_radius = ctx.theme().resolve_radius(spec.badge_radius_token());
+    let text_primary = ctx.theme().resolve_color(spec.title_color_token());
+    let text_secondary = ctx.theme().resolve_color(spec.description_color_token());
+    let accent = ctx.theme().resolve_color(spec.icon_bg_token());
 
     // Typography — title from label-size token; description/badge/icon-glyph
     // from contract-exact rem.
-    let title_font = theme.resolve_space(spec.title_typography_token());
+    let title_font = ctx.theme().resolve_space(spec.title_typography_token());
     let desc_font = rem_to_px(spec.description_font_size_rem());
     let badge_font = rem_to_px(spec.badge_font_size_rem());
     let icon_font = rem_to_px(spec.icon_font_size_rem());
 
     // Density-aware geometry (contract §8 Density Overrides table).
-    let root_gap = rem_to_px(spec.root_gap_rem());
-    let pad_x = rem_to_px(spec.padding_x_rem());
-    let pad_y = rem_to_px(spec.padding_y_rem());
-    let content_gap = rem_to_px(spec.content_gap_rem());
-    let title_gap = rem_to_px(spec.title_gap_rem());
-    let icon_size = rem_to_px(spec.icon_size_rem());
+    let density = ctx.resolve_density(spec.density);
+    let root_gap = rem_to_px(spec.root_gap_rem(density));
+    let pad_x = rem_to_px(spec.padding_x_rem(density));
+    let pad_y = rem_to_px(spec.padding_y_rem(density));
+    let content_gap = rem_to_px(spec.content_gap_rem(density));
+    let title_gap = rem_to_px(spec.title_gap_rem(density));
+    let icon_size = rem_to_px(spec.icon_size_rem(density));
     let arrow_size = rem_to_px(1.0); // contract §8 Arrow: 1rem square
 
     // Hover: bg = color-mix(elevated 52%, surface);
     // border = color-mix(accent 28%, border-subtle).
-    let elevated = theme.resolve_color(spec.hover_fill_token());
+    let elevated = ctx.theme().resolve_color(spec.hover_fill_token());
     let hover_fill = mix_srgb(elevated, fill, 0.52);
     let hover_border = mix_srgb(accent, border, 0.28);
 
@@ -126,8 +127,8 @@ fn nav_card_inner(
     let mut title_row = title_row.child(title);
 
     if let Some(ref badge_text) = spec.badge {
-        let badge_bg = theme.resolve_color(spec.badge_bg_token());
-        let badge_color = theme.resolve_color(spec.badge_color_token());
+        let badge_bg = ctx.theme().resolve_color(spec.badge_bg_token());
+        let badge_color = ctx.theme().resolve_color(spec.badge_color_token());
         let mut badge = Node::text(badge_text);
         {
             let s = &mut badge.style;
@@ -208,7 +209,7 @@ fn nav_card_inner(
     let mut el = el.child(icon_slot).child(content).child(arrow);
 
     if spec.is_disabled {
-        el.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         el.interaction.disabled = true;
     } else {
         // Hover: elevated fill + accent-tinted border. The focus ring colour

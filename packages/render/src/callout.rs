@@ -6,7 +6,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
     NodeRole, StylePatch,
@@ -16,9 +15,9 @@ use poodle_specs::{
 };
 
 use crate::color::{mix_srgb, solid_tone_surface, with_alpha};
+use crate::context::RenderContext;
 use crate::presentation::{
-    panel_space_x_rem, rem_to_px, resolve_semantic_size, resolve_supporting_visual_size,
-    size_font_rem,
+    panel_space_x_rem, rem_to_px, resolve_supporting_visual_size, size_font_rem,
 };
 use crate::spinner::spinner;
 
@@ -58,16 +57,18 @@ fn tone_icon(tone: StatusTone) -> &'static str {
     }
 }
 
-pub fn callout(spec: &CallOutSpec, theme: &dyn ThemeProvider, handlers: CalloutHandlers) -> Node {
+pub fn callout(spec: &CallOutSpec, ctx: &RenderContext<'_>, handlers: CalloutHandlers) -> Node {
+    let theme = ctx.theme();
     let on_dismiss = handlers.on_dismiss;
     let instance_id = handlers.instance_id;
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let font_size = rem_to_px(size_font_rem(effective_size));
     let icon_glyph = rem_to_px(size_font_rem(resolve_supporting_visual_size(
         effective_size,
     )));
 
-    let pad_x = rem_to_px(panel_space_x_rem(spec.density));
+    let pad_x = rem_to_px(panel_space_x_rem(density));
     let pad_y = rem_to_px(0.625);
     let gap = theme.resolve_space("space.inline.md");
     let content_gap = theme.resolve_space("space.inline.sm");
@@ -88,7 +89,7 @@ pub fn callout(spec: &CallOutSpec, theme: &dyn ThemeProvider, handlers: CalloutH
     let solid = spec.is_solid_fill();
     let tint_border_mix = if is_pending { 0.24 } else { 0.34 };
     let solid_surface =
-        solid.then(|| solid_tone_surface(theme, tone_color, is_neutral, tint_border_mix));
+        solid.then(|| solid_tone_surface(ctx, tone_color, is_neutral, tint_border_mix));
     let fill = if let Some(surface) = solid_surface {
         surface.background
     } else if is_neutral {
@@ -180,7 +181,7 @@ pub fn callout(spec: &CallOutSpec, theme: &dyn ThemeProvider, handlers: CalloutH
                 } else {
                     SpinnerTone::Accent
                 }),
-            theme,
+            ctx,
         );
         if let Some(surface) = solid_surface {
             pending_spinner.style.descriptor.text_color = Some(surface.foreground);
@@ -285,6 +286,7 @@ pub fn callout(spec: &CallOutSpec, theme: &dyn ThemeProvider, handlers: CalloutH
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_adapter::ThemeProvider;
     use poodle_node::NodeKind;
     use poodle_specs::ToneFill;
 
@@ -294,12 +296,14 @@ mod tests {
 
     #[test]
     fn dismiss_control_is_a_named_focusable_button() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = callout(
             &CallOutSpec::new()
                 .with_title("Dismissible callout")
                 .with_content("This callout can be dismissed by the user.")
                 .dismissible(true),
-            &theme(),
+            &ctx,
             CalloutHandlers {
                 on_dismiss: Some(Arc::new(|| {})),
                 ..CalloutHandlers::default()
@@ -321,9 +325,11 @@ mod tests {
         let spec = CallOutSpec::new()
             .with_title("Dismissible callout")
             .dismissible(true);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let first = callout(
             &spec,
-            &theme(),
+            &ctx,
             CalloutHandlers {
                 instance_id: Some("first".to_string()),
                 ..CalloutHandlers::default()
@@ -331,7 +337,7 @@ mod tests {
         );
         let second = callout(
             &spec,
-            &theme(),
+            &ctx,
             CalloutHandlers {
                 instance_id: Some("second".to_string()),
                 ..CalloutHandlers::default()
@@ -356,18 +362,19 @@ mod tests {
     #[test]
     fn solid_surface_stamps_primary_foreground_on_content_and_pending_spinner() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let warning = CallOutSpec::new()
             .with_tone(StatusTone::Warning)
             .with_fill(ToneFill::Solid)
             .with_title("Warning")
             .with_content("Read this");
         let expected = solid_tone_surface(
-            &theme,
+            &ctx,
             theme.resolve_color(warning.tone_color_token()),
             false,
             0.34,
         );
-        let node = callout(&warning, &theme, CalloutHandlers::default());
+        let node = callout(&warning, &ctx, CalloutHandlers::default());
 
         assert_eq!(node.style.descriptor.background, Some(expected.background));
         assert_eq!(node.style.descriptor.border.color, expected.border);
@@ -381,12 +388,12 @@ mod tests {
             .with_tone(StatusTone::Pending)
             .with_fill(ToneFill::Solid);
         let pending_expected = solid_tone_surface(
-            &theme,
+            &ctx,
             theme.resolve_color(pending.tone_color_token()),
             false,
             0.24,
         );
-        let pending_node = callout(&pending, &theme, CalloutHandlers::default());
+        let pending_node = callout(&pending, &ctx, CalloutHandlers::default());
         let spinner = pending_node
             .find(&|n| matches!(&n.kind, NodeKind::Icon { name, .. } if name == "spinner"))
             .expect("pending spinner");

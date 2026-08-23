@@ -24,7 +24,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow,
     LayoutSizing, Node, NodePosition, NodeRole, ShadowLayer,
@@ -37,8 +36,9 @@ use crate::color::{
     hex_to_rgb255, hsv_to_hsl, pure_hue_color, rgb255_to_color, rgb_to_hsv, with_alpha, Hsv,
     Rgb255, BLACK, TRANSPARENT, WHITE,
 };
+use crate::context::RenderContext;
 use crate::number_input::number_input;
-use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::presentation::{control_height_rem, rem_to_px, size_font_rem};
 use crate::segmented_control::segmented_control;
 
 /// Default fallback color when the spec value is missing/malformed (#6366f1).
@@ -83,33 +83,33 @@ fn inset_overlay() -> Node {
 
 pub fn color_picker(
     spec: &ColorPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     instance_id: &str,
     handlers: ColorPickerHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let trigger_size = rem_to_px(control_height_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
     // The preview theme's density is the active visual axis; the old GPUI
     // tier resolves the control padding from that theme rather than the
     // standalone spec density.
-    let pad_x = theme.resolve_space("space.control.x");
+    let pad_x = ctx.theme().resolve_space("space.control.x");
 
     // ── Resolved chrome tokens ────────────────────────────────────
-    let border = theme.resolve_color(spec.border_token());
-    let trigger_radius = theme.resolve_radius(spec.trigger_radius_token());
-    let surface_radius = theme.resolve_radius(spec.surface_radius_token());
-    let radius_control = theme.resolve_radius("radius.control");
-    let surface_bg = theme.resolve_color("color.background.surface");
-    let elevated_bg = theme.resolve_color(spec.overlay_fill_token());
-    let border_subtle = theme.resolve_color("color.border.subtle");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let disabled_opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let trigger_radius = ctx.theme().resolve_radius(spec.trigger_radius_token());
+    let surface_radius = ctx.theme().resolve_radius(spec.surface_radius_token());
+    let radius_control = ctx.theme().resolve_radius("radius.control");
+    let surface_bg = ctx.theme().resolve_color("color.background.surface");
+    let elevated_bg = ctx.theme().resolve_color(spec.overlay_fill_token());
+    let border_subtle = ctx.theme().resolve_color("color.border.subtle");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
 
     // Stack gap (controls row → surface) and surface internal gaps.
-    let stack_gap = theme.resolve_space("space.stack.sm");
-    let surface_gap = theme.resolve_space("space.stack.md");
+    let stack_gap = ctx.theme().resolve_space("space.stack.sm");
+    let surface_gap = ctx.theme().resolve_space("space.stack.md");
 
     // Trigger border is 62% opacity of border-default per contract.
     let trigger_border = with_alpha(border, border.3 * 0.62);
@@ -215,7 +215,7 @@ pub fn color_picker(
         let gradient_pad = build_gradient_pad(hsv, current_color, radius_control);
         let controls_panel = build_controls_panel(
             spec,
-            theme,
+            ctx,
             instance_id,
             &current,
             rgb,
@@ -228,7 +228,8 @@ pub fn color_picker(
         picker_area.style.descriptor.layout.direction = LayoutDirection::Row;
         // GPUI uses the inline-md token for the pad↔controls gap (12px on
         // this axis), not the surface stack approximation.
-        picker_area.style.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.md");
+        picker_area.style.descriptor.layout.spacing.gap =
+            ctx.theme().resolve_space("space.inline.md");
         picker_area.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
         let mut surface = surface.child(picker_area.child(gradient_pad).child(controls_panel));
 
@@ -335,7 +336,7 @@ fn build_gradient_pad(hsv: Hsv, current_color: ColorValue, radius_control: f32) 
 /// mode toggle (SegmentedControl), channel inputs.
 fn build_controls_panel(
     spec: &ColorPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     instance_id: &str,
     current: &str,
     rgb: Rgb255,
@@ -343,7 +344,9 @@ fn build_controls_panel(
     alpha: f32,
     current_color: ColorValue,
 ) -> Node {
-    let surface_bg = theme.resolve_color("color.background.surface");
+    let surface_bg = ctx.theme().resolve_color("color.background.surface");
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
 
     let mut panel = Node::container();
     {
@@ -357,11 +360,11 @@ fn build_controls_panel(
     let mut panel = panel;
 
     // Hue slider — full rainbow track + thumb at current hue.
-    panel = panel.child(build_hue_strip(theme, hsv.h));
+    panel = panel.child(build_hue_strip(ctx, hsv.h));
 
     // Alpha slider (opt-in) — checkerboard stand-in + color overlay + thumb.
     if spec.show_alpha {
-        panel = panel.child(build_alpha_strip(theme, alpha, current_color, surface_bg));
+        panel = panel.child(build_alpha_strip(ctx, alpha, current_color, surface_bg));
     }
 
     // Mode toggle (SegmentedControl: Hex / RGB / HSL).
@@ -379,13 +382,13 @@ fn build_controls_panel(
         ],
     )
     .with_default_value(mode_value)
-    .with_size(spec.size)
-    .with_density(spec.density);
+    .with_size(base_size)
+    .with_density(density);
     // The old GPUI SegmentedControl uses `.flex_1()` for equal-width mode
     // buttons. The shared renderer's generic Grow sizing preserves its
     // content-sized behavior for the standalone specimen, so apply the
     // zero-basis form at this fractional ColorPicker call site.
-    let mut mode = segmented_control(&mode_spec, theme, None);
+    let mut mode = segmented_control(&mode_spec, ctx, None);
     for segment in &mut mode.children {
         segment.style.flex_grow = Some(1.0);
         segment.style.flex_basis = Some(0.0);
@@ -394,18 +397,18 @@ fn build_controls_panel(
     panel = panel.child(mode);
 
     // Channel inputs for the current mode.
-    panel.child(build_channel_inputs(spec, theme, current, rgb, hsv, alpha))
+    panel.child(build_channel_inputs(spec, ctx, current, rgb, hsv, alpha))
 }
 
 /// Hue slider with a full rainbow track. A gradient packs only its first +
 /// last stop downstream, so the multi-stop rainbow renders as one 2-stop
 /// segment per adjacent pair, each flex-grown to its stop spacing — visually
 /// identical to a single 7-stop gradient.
-fn build_hue_strip(theme: &dyn ThemeProvider, hue: f32) -> Node {
+fn build_hue_strip(ctx: &RenderContext<'_>, hue: f32) -> Node {
     let track_h = rem_to_px(0.375);
-    let thumb_d = theme.resolve_space("size.icon.md");
-    let elevated = theme.resolve_color("color.background.elevated");
-    let border = theme.resolve_color("color.border.default");
+    let thumb_d = ctx.theme().resolve_space("size.icon.md");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
+    let border = ctx.theme().resolve_color("color.border.default");
 
     // Seven CSS rainbow stops (#f00 0%, #ff0 17%, #0f0 33%, #0ff 50%,
     // #00f 67%, #f0f 83%, #f00 100%).
@@ -461,15 +464,15 @@ fn build_hue_strip(theme: &dyn ThemeProvider, hue: f32) -> Node {
 /// no repeating-conic-gradient channel exists, so the checkerboard is a
 /// neutral surface base with a transparent→color overlay.
 fn build_alpha_strip(
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     alpha: f32,
     color: ColorValue,
     surface_bg: ColorValue,
 ) -> Node {
     let track_h = rem_to_px(0.375);
-    let thumb_d = theme.resolve_space("size.icon.md");
-    let elevated = theme.resolve_color("color.background.elevated");
-    let border = theme.resolve_color("color.border.default");
+    let thumb_d = ctx.theme().resolve_space("size.icon.md");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
+    let border = ctx.theme().resolve_color("color.border.default");
 
     let opaque = with_alpha(color, 1.0);
     let transparent = with_alpha(color, 0.0);
@@ -564,20 +567,22 @@ fn slider_wrap(
 /// optional alpha channel appends when `show_alpha`.
 fn build_channel_inputs(
     spec: &ColorPickerSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     current: &str,
     rgb: Rgb255,
     hsv: Hsv,
     alpha: f32,
 ) -> Node {
-    let surface_bg = theme.resolve_color("color.background.surface");
-    let border = theme.resolve_color(spec.border_token());
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let radius_control = theme.resolve_radius("radius.control");
+    let surface_bg = ctx.theme().resolve_color("color.background.surface");
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let radius_control = ctx.theme().resolve_radius("radius.control");
     // The old GPUI channel captions use the active typography label token
     // (13px on the eclipse axis), not the compact 0.625rem CSS annotation.
-    let label_size = theme.resolve_space("typography.label.size");
+    let label_size = ctx.theme().resolve_space("typography.label.size");
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
 
     let mut row = Node::container();
     row.style.descriptor.layout.direction = LayoutDirection::Row;
@@ -608,11 +613,11 @@ fn build_channel_inputs(
             .with_max(max)
             .with_step(1.0)
             .with_aria_label(aria)
-            .with_size(spec.size)
-            .with_density(spec.density);
+            .with_size(base_size)
+            .with_density(density);
         let mut input = number_input(
             &n,
-            theme,
+            ctx,
             crate::number_input::NumberInputHandlers::default(),
         );
         input.id = Some(id.to_string());

@@ -13,7 +13,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::licence::{
     licence_machine_label, licence_seat_rows, LICENCE_RELEASE_CONFIRM_TITLE, LICENCE_THIS_MACHINE,
 };
@@ -26,6 +25,7 @@ use poodle_specs::{
 };
 
 use crate::confirm_action::{confirm_action_with_slots, ConfirmActionHandlers};
+use crate::context::RenderContext;
 use crate::editable_label::{editable_label_with_handlers, EditableLabelHandlers};
 use crate::icon_button::icon_button;
 use crate::presentation::rem_to_px;
@@ -48,7 +48,7 @@ pub struct LicenceSeatsHandlers {
 
 pub fn licence_seats(
     spec: &LicenceSeatsSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: LicenceSeatsHandlers,
 ) -> Node {
     // Empty authority renders nothing at all — a synthetic seat count would
@@ -57,9 +57,9 @@ pub fn licence_seats(
         return Node::container();
     }
 
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
-    let text_tertiary = theme.resolve_color("color.text.tertiary");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
+    let text_tertiary = ctx.theme().resolve_color("color.text.tertiary");
     let monitor_size = rem_to_px(1.25);
 
     let rows =
@@ -70,13 +70,13 @@ pub fn licence_seats(
     {
         let s = &mut list.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.xs");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.xs");
     }
     for row in &rows {
         list = list.child(seat_row(
             spec,
             row,
-            theme,
+            ctx,
             &handlers,
             text_secondary,
             text_tertiary,
@@ -89,7 +89,7 @@ pub fn licence_seats(
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.sm");
     }
     let mut title = Node::text(&spec.title);
     title.style.text_size = Some(rem_to_px(1.0));
@@ -106,7 +106,7 @@ pub fn licence_seats(
 fn seat_row(
     spec: &LicenceSeatsSpec,
     row: &poodle_headless::licence::LicenceSeatRow,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &LicenceSeatsHandlers,
     text_secondary: poodle_node::ColorValue,
     text_tertiary: poodle_node::ColorValue,
@@ -147,9 +147,9 @@ fn seat_row(
             } else {
                 "Rename unnamed machine".to_string()
             })
-            .with_size(spec.size)
-            .with_density(spec.density),
-        theme,
+            .with_size(ctx.base_size(spec.size))
+            .with_density(ctx.resolve_density(spec.density)),
+        ctx,
         EditableLabelHandlers {
             on_edit_start: edit_start,
             on_commit: commit,
@@ -163,19 +163,19 @@ fn seat_row(
         let s = &mut identity.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
     }
     let mut identity = identity.child(machine_icon).child(editable);
     if row.this_machine {
         let mut marker = Node::text(LICENCE_THIS_MACHINE);
-        marker.style.text_size = Some(theme.resolve_space("typography.label.size"));
+        marker.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
         marker.style.descriptor.text_color = Some(text_tertiary);
         identity = identity.child(marker);
     }
 
     // ── Release action ──
     let action = if row.releasable {
-        let trigger = release_icon_button(spec, row, theme);
+        let trigger = release_icon_button(spec, row, ctx);
         if spec.confirm_release {
             let confirm_spec = ConfirmActionSpec::new(
                 LICENCE_RELEASE_CONFIRM_TITLE,
@@ -185,11 +185,11 @@ fn seat_row(
             )
             .with_tone(StatusTone::Warning)
             .with_open(spec.open_confirm_machine_id.as_deref() == Some(row.machine_id.as_str()))
-            .with_size(spec.size)
-            .with_density(spec.density);
+            .with_size(ctx.base_size(spec.size))
+            .with_density(ctx.resolve_density(spec.density));
             confirm_action_with_slots(
                 &confirm_spec,
-                theme,
+                ctx,
                 Some(trigger),
                 None,
                 ConfirmActionHandlers {
@@ -242,7 +242,7 @@ fn seat_row(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.md");
     }
     row_node.a11y.role = Some(NodeRole::ListItem);
     row_node.child(identity).child(action)
@@ -254,7 +254,7 @@ fn seat_row(
 fn release_icon_button(
     spec: &LicenceSeatsSpec,
     row: &poodle_headless::licence::LicenceSeatRow,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
 ) -> Node {
     let mut button = icon_button(
         &IconButtonSpec::new()
@@ -264,9 +264,9 @@ fn release_icon_button(
             .with_aria_label(row.release_name.clone())
             .with_disabled(row.pending)
             .with_loading(row.pending)
-            .with_size(spec.size)
-            .with_density(spec.density),
-        theme,
+            .with_size(ctx.base_size(spec.size))
+            .with_density(ctx.resolve_density(spec.density)),
+        ctx,
         None,
     );
     button.style.descriptor.cursor = CursorHint::Pointer;
@@ -293,9 +293,11 @@ mod tests {
 
     #[test]
     fn empty_seats_render_nothing() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = licence_seats(
             &LicenceSeatsSpec::new(),
-            &theme(),
+            &ctx,
             LicenceSeatsHandlers::default(),
         );
         assert!(node.children.is_empty());
@@ -308,7 +310,9 @@ mod tests {
             seat("id-a", Some("Studio rig"), true),
             seat("id-b", None, false),
         ]);
-        let node = licence_seats(&spec, &theme(), LicenceSeatsHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = licence_seats(&spec, &ctx, LicenceSeatsHandlers::default());
         let texts = node
             .texts()
             .into_iter()
@@ -329,7 +333,9 @@ mod tests {
             seat("id-a", Some("Studio rig"), true),
             seat("id-b", None, false),
         ]);
-        let node = licence_seats(&spec, &theme(), LicenceSeatsHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = licence_seats(&spec, &ctx, LicenceSeatsHandlers::default());
         // The only release affordance names the other seat.
         assert!(node
             .find(&|n| n.a11y.label.as_deref() == Some("Release unnamed machine"))
@@ -354,9 +360,11 @@ mod tests {
         let spec = LicenceSeatsSpec::new()
             .with_seats(vec![seat("id-b", Some("  work-mac  "), false)])
             .with_editing_machine(Some("id-b".to_string()));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = licence_seats(
             &spec,
-            &theme(),
+            &ctx,
             LicenceSeatsHandlers {
                 on_rename: Some(Arc::clone(&on_rename)),
                 ..LicenceSeatsHandlers::default()
@@ -378,7 +386,7 @@ mod tests {
             .with_editing_machine(Some("id-b".to_string()));
         let node = licence_seats(
             &spec,
-            &theme(),
+            &ctx,
             LicenceSeatsHandlers {
                 on_rename: Some(Arc::clone(&on_rename)),
                 ..LicenceSeatsHandlers::default()
@@ -405,9 +413,11 @@ mod tests {
         let spec = LicenceSeatsSpec::new()
             .with_seats(vec![seat("id-b", None, false)])
             .with_open_confirm(Some("id-b".to_string()));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = licence_seats(
             &spec,
-            &theme(),
+            &ctx,
             LicenceSeatsHandlers {
                 on_release: Some(Arc::new(move |machine_id: &str| {
                     sink.lock().unwrap().push(machine_id.to_string())
@@ -439,7 +449,9 @@ mod tests {
         assert!(!rows[1].pending);
         // The pending row's release affordance is loading/disabled; the
         // other row still carries its action.
-        let node = licence_seats(&spec, &theme(), LicenceSeatsHandlers::default());
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = licence_seats(&spec, &ctx, LicenceSeatsHandlers::default());
         assert!(node
             .find(&|n| n.a11y.label.as_deref() == Some("Release unnamed machine"))
             .is_some());

@@ -5,7 +5,6 @@
 //! to the old GPUI tier in g12.019 so composed card families keep their native
 //! border and shadow recipes.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CursorHint, LayoutDirection, LayoutOverflow, Node, NodeRole, ShadowLayer,
     StylePatch,
@@ -13,15 +12,18 @@ use poodle_node::{
 use poodle_specs::{CardLayout, CardSpec, CardVariant};
 
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
-pub fn card(spec: &CardSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> Node {
+pub fn card(spec: &CardSpec, ctx: &RenderContext<'_>, children: Vec<Node>) -> Node {
+    let theme = ctx.theme();
+    let density = ctx.resolve_density(spec.density);
     let radius = theme.resolve_radius(spec.radius_token());
     let border_width = theme.resolve_space(spec.border_width_token());
 
-    let gap = rem_to_px(spec.gap_rem());
-    let padding_x = rem_to_px(spec.padding_x_rem());
-    let padding_y = rem_to_px(spec.padding_y_rem());
+    let gap = rem_to_px(spec.gap_rem(density));
+    let padding_x = rem_to_px(spec.padding_x_rem(density));
+    let padding_y = rem_to_px(spec.padding_y_rem(density));
 
     let panel = theme.resolve_color("color.background.panel");
     let elevated = theme.resolve_color("color.background.elevated");
@@ -236,6 +238,7 @@ pub fn card(spec: &CardSpec, theme: &dyn ThemeProvider, children: Vec<Node>) -> 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_adapter::ThemeProvider;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -244,8 +247,9 @@ mod tests {
     #[test]
     fn default_card_matches_the_old_tiers_border_and_ring() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let subtle = theme.resolve_color("color.border.subtle");
-        let node = card(&CardSpec::new(), &theme, vec![]);
+        let node = card(&CardSpec::new(), &ctx, vec![]);
         assert_eq!(node.style.descriptor.border.width, 1.0);
         assert_eq!(
             node.style.descriptor.border.color,
@@ -259,8 +263,9 @@ mod tests {
     #[test]
     fn selected_card_keeps_a_one_pixel_border_and_two_accent_rings() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let accent = theme.resolve_color("color.accent.base");
-        let node = card(&CardSpec::new().interactive().selected(), &theme, vec![]);
+        let node = card(&CardSpec::new().interactive().selected(), &ctx, vec![]);
         assert_eq!(node.style.descriptor.border.width, 1.0);
         assert_eq!(node.style.descriptor.border.color, accent);
         assert_eq!(node.style.shadow_layers.len(), 2);

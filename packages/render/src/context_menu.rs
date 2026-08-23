@@ -6,15 +6,15 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::Node;
 use poodle_specs::ContextMenuSpec;
 
+use crate::context::RenderContext;
 use crate::menu::menu;
 
 pub fn context_menu(
     spec: &ContextMenuSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_action: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
     let mut menu_spec = spec.menu.clone();
@@ -25,7 +25,7 @@ pub fn context_menu(
     // menu's (the alert_dialog pattern: the renderer resolves the composed
     // spec's dismissal from its own spec state).
     menu_spec.dismiss_on_outside_interact = spec.dismiss_on_outside_interact;
-    menu(&menu_spec, theme, on_action)
+    menu(&menu_spec, ctx, on_action)
 }
 
 #[cfg(test)]
@@ -38,14 +38,16 @@ mod tests {
 
     #[test]
     fn refusal_forwarded_into_composed_menu_surface() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         // Default `true`: the composed menu surface stays marker-free.
-        let node = context_menu(&ContextMenuSpec::default(), &theme(), None);
+        let node = context_menu(&ContextMenuSpec::default(), &ctx, None);
         assert!(node.interaction.on_activate.is_none());
 
         // ContextMenu's own refusal wins over the composed MenuSpec default
         // and reaches the rendered surface.
         let refusing = ContextMenuSpec::default().with_dismiss_on_outside_interact(false);
-        let node = context_menu(&refusing, &theme(), None);
+        let node = context_menu(&refusing, &ctx, None);
         assert!(node.interaction.on_activate.is_some());
     }
 }

@@ -9,7 +9,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, TextChangeHandler,
@@ -17,6 +16,7 @@ use poodle_node::{
 use poodle_specs::{ButtonVariant, IconButtonSpec, MarkdownEditorSpec};
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::icon_button::icon_button;
 use crate::presentation::rem_to_px;
 
@@ -38,23 +38,28 @@ pub struct MarkdownEditorHandlers {
     pub on_mode_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
-pub fn markdown_editor(spec: &MarkdownEditorSpec, theme: &dyn ThemeProvider) -> Node {
-    markdown_editor_with_handlers(spec, theme, MarkdownEditorHandlers::default())
+pub fn markdown_editor(spec: &MarkdownEditorSpec, ctx: &RenderContext<'_>) -> Node {
+    markdown_editor_with_handlers(spec, ctx, MarkdownEditorHandlers::default())
 }
 
 pub fn markdown_editor_with_handlers(
     spec: &MarkdownEditorSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: MarkdownEditorHandlers,
 ) -> Node {
     // ── Size / density geometry (contract §8 tables, token-resolved rem) ──
-    let tool_size = rem_to_px(spec.tool_size_rem());
-    let toolbar_y = rem_to_px(spec.toolbar_y_rem());
-    let toolbar_x = rem_to_px(spec.toolbar_x_rem());
-    let tool_gap = rem_to_px(spec.tool_gap_rem());
-    let pane_pad = rem_to_px(spec.pane_pad_rem());
-    let mode_x = rem_to_px(spec.mode_x_rem());
-    let mode_y = rem_to_px(spec.mode_y_rem());
+    // `tool_size_rem`/`mode_x_rem` apply the size role internally, so they
+    // take the base (pre-role) size; the density tables take the resolved
+    // density.
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let tool_size = rem_to_px(spec.tool_size_rem(base_size));
+    let toolbar_y = rem_to_px(spec.toolbar_y_rem(density));
+    let toolbar_x = rem_to_px(spec.toolbar_x_rem(density));
+    let tool_gap = rem_to_px(spec.tool_gap_rem(density));
+    let pane_pad = rem_to_px(spec.pane_pad_rem(density));
+    let mode_x = rem_to_px(spec.mode_x_rem(base_size));
+    let mode_y = rem_to_px(spec.mode_y_rem(density));
     let toolbar_gap = rem_to_px(0.5); // contract toolbar `gap: 0.5rem`
     let tool_font = rem_to_px(0.75); // contract tool font-size
     let textarea_font = rem_to_px(0.8125); // contract textarea font-size
@@ -62,20 +67,20 @@ pub fn markdown_editor_with_handlers(
     let min_h = rem_to_px(spec.min_height_rem());
 
     // ── Token resolution ──────────────────────────────────────
-    let fill = theme.resolve_color(spec.fill_token());
-    let border = theme.resolve_color(spec.border_token());
-    let toolbar_border = theme.resolve_color(spec.toolbar_border_token());
-    let split_divider = theme.resolve_color(spec.split_divider_color_token());
-    let text_primary = theme.resolve_color(spec.textarea_color_token());
-    let tool_color = theme.resolve_color(spec.tool_color_token());
-    let placeholder_color = theme.resolve_color(spec.placeholder_color_token());
-    let preview_empty_color = theme.resolve_color(spec.preview_empty_color_token());
-    let radius = theme.resolve_radius("radius.surface");
-    let ctrl_radius = theme.resolve_radius("radius.control");
-    let disabled_opacity = theme.resolve_opacity("state.opacity.disabled");
+    let fill = ctx.theme().resolve_color(spec.fill_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let toolbar_border = ctx.theme().resolve_color(spec.toolbar_border_token());
+    let split_divider = ctx.theme().resolve_color(spec.split_divider_color_token());
+    let text_primary = ctx.theme().resolve_color(spec.textarea_color_token());
+    let tool_color = ctx.theme().resolve_color(spec.tool_color_token());
+    let placeholder_color = ctx.theme().resolve_color(spec.placeholder_color_token());
+    let preview_empty_color = ctx.theme().resolve_color(spec.preview_empty_color_token());
+    let radius = ctx.theme().resolve_radius("radius.surface");
+    let ctrl_radius = ctx.theme().resolve_radius("radius.control");
+    let disabled_opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
 
     // Toolbar bg: `color-mix(elevated 72%, transparent)` (alpha reduction).
-    let elevated = theme.resolve_color("color.background.elevated");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
     let toolbar_bg = with_alpha(elevated, elevated.3 * 0.72);
 
     let is_edit = spec.shows_editor();
@@ -175,10 +180,10 @@ pub fn markdown_editor_with_handlers(
                 } else {
                     ButtonVariant::Ghost
                 })
-                .with_size(spec.size)
+                .with_size(base_size)
                 .with_size_role(spec.size_role)
-                .with_density(spec.density),
-            theme,
+                .with_density(density),
+            ctx,
             on_activate,
         )
     };

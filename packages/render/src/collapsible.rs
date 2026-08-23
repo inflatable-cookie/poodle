@@ -5,20 +5,22 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node, NodeRole, ShadowLayer};
 use poodle_specs::{CollapsibleSpec, ControlDensity, ControlSize};
 
 use crate::color::{mix_srgb, with_alpha};
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::context::RenderContext;
+use crate::presentation::{rem_to_px, size_font_rem};
 
 pub fn collapsible(
     spec: &CollapsibleSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     content: Option<Node>,
     on_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let theme = ctx.theme();
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let is_open = spec.current_open();
 
     let open_gap = theme.resolve_space("space.stack.md");
@@ -49,7 +51,7 @@ pub fn collapsible(
     let highlight_halo = with_alpha(accent_base, accent_base.3 * spec.highlight_halo_alpha());
 
     let pad_y = rem_to_px(0.625);
-    let pad_x = rem_to_px(match spec.density {
+    let pad_x = rem_to_px(match density {
         ControlDensity::Compact => 0.5,
         ControlDensity::Default => 1.0,
         ControlDensity::Comfortable => 1.0,

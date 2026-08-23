@@ -7,31 +7,31 @@
 //! clamping are host-owned (contract §12 Known Delta); this renders the
 //! surface at its current open state.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, Node, NodeRole};
 use poodle_specs::HoverCardSpec;
 
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 
-pub fn hover_card(spec: &HoverCardSpec, theme: &dyn ThemeProvider, content: Option<Node>) -> Node {
+pub fn hover_card(spec: &HoverCardSpec, ctx: &RenderContext<'_>, content: Option<Node>) -> Node {
     // Contract §8 background: color-mix(elevated 98%, panel).
-    let elevated = theme.resolve_color(spec.fill_token());
-    let panel = theme.resolve_color("color.background.panel");
+    let elevated = ctx.theme().resolve_color(spec.fill_token());
+    let panel = ctx.theme().resolve_color("color.background.panel");
     let fill = mix_srgb(elevated, panel, 0.98);
 
     // Contract §8 border: color-mix(border-default 72%, transparent).
-    let border_base = theme.resolve_color("color.border.default");
+    let border_base = ctx.theme().resolve_color("color.border.default");
     let border = with_alpha(border_base, border_base.3 * 0.72);
-    let radius = theme.resolve_radius("radius.surface");
+    let radius = ctx.theme().resolve_radius("radius.surface");
 
     // Contract §8 padding: space-panel-y / space-panel-x.
-    let pad_x = theme.resolve_space("space.panel.x");
-    let pad_y = theme.resolve_space("space.panel.y");
+    let pad_x = ctx.theme().resolve_space("space.panel.x");
+    let pad_y = ctx.theme().resolve_space("space.panel.y");
 
     // Contract §7 sizing: min-width 14rem, max-width min(22rem, 90vw) — the
     // token bounds; the 90vw clamp is host-driven.
-    let min_w = theme.resolve_space("size.menu.minWidth");
-    let max_w = theme.resolve_space("size.hoverCard.maxWidth");
+    let min_w = ctx.theme().resolve_space("size.menu.minWidth");
+    let max_w = ctx.theme().resolve_space("size.hoverCard.maxWidth");
 
     let mut el = Node::container();
     // Contract: the hover card surface is a `dialog`.

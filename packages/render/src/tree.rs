@@ -14,7 +14,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, DropEdge, LayoutDirection, LayoutSizing,
     MainAxisAlignment, Node, NodeKey, NodeModifiers, NodePoint, NodePosition, NodeRole,
@@ -26,7 +25,8 @@ use poodle_specs::{
 
 use crate::checkbox::checkbox;
 use crate::color::with_alpha;
-use crate::presentation::{rem_to_px, resolve_semantic_size, size_font_rem};
+use crate::context::RenderContext;
+use crate::presentation::{rem_to_px, size_font_rem};
 use crate::spinner::spinner;
 
 /// Host callback for keyboard commands on a focused tree row.
@@ -126,11 +126,12 @@ struct TreeMetrics {
     reorderable: bool,
 }
 
-pub fn tree(spec: &TreeSpec, theme: &dyn ThemeProvider, handlers: TreeHandlers) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+pub fn tree(spec: &TreeSpec, ctx: &RenderContext<'_>, handlers: TreeHandlers) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     let row_font = rem_to_px(size_font_rem(effective_size));
-    let ctrl_radius = theme.resolve_radius("radius.control");
+    let ctrl_radius = ctx.theme().resolve_radius("radius.control");
 
     let m = TreeMetrics {
         row_height: rem_to_px(row_height_rem(effective_size)),
@@ -140,32 +141,32 @@ pub fn tree(spec: &TreeSpec, theme: &dyn ThemeProvider, handlers: TreeHandlers) 
         twisty_size: if spec.is_flat() { 0.0 } else { row_font * 1.5 },
         chevron_font: row_font * 0.85,
         icon_font: row_font,
-        indent: rem_to_px(indent_rem(spec.density)),
-        row_gap: rem_to_px(row_gap_rem(spec.density)),
-        row_pad_inline: rem_to_px(row_pad_inline_rem(spec.density)),
+        indent: rem_to_px(indent_rem(density)),
+        row_gap: rem_to_px(row_gap_rem(density)),
+        row_pad_inline: rem_to_px(row_pad_inline_rem(density)),
         // Row radius is slightly tighter than the panel control radius.
         row_radius: (ctrl_radius - rem_to_px(0.125)).max(0.0),
         show_guides: spec.show_guides,
         show_icons: spec.show_icons,
-        row_color: theme.resolve_color(spec.row_color_token()),
-        selected_color: theme.resolve_color(spec.row_selected_color_token()),
-        selected_fill: theme.resolve_color(spec.selected_fill_token()),
-        guide_color: theme.resolve_color(spec.guide_color_token()),
-        twisty_color: theme.resolve_color(spec.twisty_color_token()),
-        icon_color: theme.resolve_color(spec.icon_color_token()),
-        focus_ring: theme.resolve_color(spec.focus_ring_color_token()),
-        disabled_opacity: theme.resolve_opacity(spec.disabled_opacity_token()),
+        row_color: ctx.theme().resolve_color(spec.row_color_token()),
+        selected_color: ctx.theme().resolve_color(spec.row_selected_color_token()),
+        selected_fill: ctx.theme().resolve_color(spec.selected_fill_token()),
+        guide_color: ctx.theme().resolve_color(spec.guide_color_token()),
+        twisty_color: ctx.theme().resolve_color(spec.twisty_color_token()),
+        icon_color: ctx.theme().resolve_color(spec.icon_color_token()),
+        focus_ring: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+        disabled_opacity: ctx.theme().resolve_opacity(spec.disabled_opacity_token()),
         focused: spec.focused_value.clone(),
-        drag_accent: theme.resolve_color(spec.selected_fill_token()),
+        drag_accent: ctx.theme().resolve_color(spec.selected_fill_token()),
         drop_target: spec.drop_target_value.clone(),
         drop_position: spec.drop_position,
         reorderable: spec.reorderable,
     };
 
-    let pad_y = theme.resolve_space("space.panel.y");
+    let pad_y = ctx.theme().resolve_space("space.panel.y");
 
     let mut rows: Vec<Node> = Vec::new();
-    push_rows(&mut rows, spec, &m, theme, &spec.nodes, 0, &handlers);
+    push_rows(&mut rows, spec, &m, ctx, &spec.nodes, 0, &handlers);
 
     let mut root = Node::container();
     {
@@ -196,21 +197,21 @@ fn push_rows(
     out: &mut Vec<Node>,
     spec: &TreeSpec,
     m: &TreeMetrics,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     nodes: &[TreeNode],
     depth: usize,
     handlers: &TreeHandlers,
 ) {
     for node in nodes {
-        out.push(render_row(spec, m, theme, node, depth, handlers));
+        out.push(render_row(spec, m, ctx, node, depth, handlers));
         if spec.is_branch(node) && spec.is_expanded(&node.value) {
             if node.children.is_empty() {
                 // Lazy branch: show a loading row while its children load.
                 if spec.is_loading(&node.value) {
-                    out.push(render_loading_row(m, theme, depth + 1));
+                    out.push(render_loading_row(m, ctx, depth + 1));
                 }
             } else {
-                push_rows(out, spec, m, theme, &node.children, depth + 1, handlers);
+                push_rows(out, spec, m, ctx, &node.children, depth + 1, handlers);
             }
         }
     }
@@ -228,7 +229,7 @@ fn indent_cell(m: &TreeMetrics) -> Node {
 }
 
 /// A non-interactive "Loading…" row with a spinner, shown under a lazy branch.
-fn render_loading_row(m: &TreeMetrics, theme: &dyn ThemeProvider, depth: usize) -> Node {
+fn render_loading_row(m: &TreeMetrics, ctx: &RenderContext<'_>, depth: usize) -> Node {
     let mut row = Node::container();
     {
         let s = &mut row.style;
@@ -255,7 +256,7 @@ fn render_loading_row(m: &TreeMetrics, theme: &dyn ThemeProvider, depth: usize) 
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
     }
-    let spinner_box = spinner_box.child(spinner(&SpinnerSpec::new(), theme));
+    let spinner_box = spinner_box.child(spinner(&SpinnerSpec::new(), ctx));
     let mut label = Node::text("Loading…");
     label.style.descriptor.text_color = Some(m.row_color);
     label.style.text_size = Some(m.row_font);
@@ -265,7 +266,7 @@ fn render_loading_row(m: &TreeMetrics, theme: &dyn ThemeProvider, depth: usize) 
 fn render_row(
     spec: &TreeSpec,
     m: &TreeMetrics,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     node: &TreeNode,
     depth: usize,
     handlers: &TreeHandlers,
@@ -404,7 +405,7 @@ fn render_row(
                 .with_mixed(matches!(cs, CheckState::Mixed))
                 .with_disabled(node.is_disabled)
                 .with_size(ControlSize::Xs),
-            theme,
+            ctx,
             None,
         );
         let mut cell = Node::container();
@@ -452,7 +453,7 @@ fn render_row(
 
     // Label, or an inline-rename editor box (with caret) when editing.
     if spec.is_editing(&node.value) {
-        let surface = theme.resolve_color("color.background.surface");
+        let surface = ctx.theme().resolve_color("color.background.surface");
         let mut editor = Node::container();
         {
             let s = &mut editor.style;

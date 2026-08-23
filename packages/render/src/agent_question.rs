@@ -5,12 +5,12 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_headless::agent_question::QuestionProgressState;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeRole};
 use poodle_specs::AgentQuestionSpec;
 
 use crate::color::{mix_srgb, TRANSPARENT};
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 /// Handlers mirror the GPUI target's names.
@@ -27,7 +27,7 @@ pub struct AgentQuestionHandlers {
 
 pub fn agent_question(
     spec: &AgentQuestionSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: AgentQuestionHandlers,
 ) -> Node {
     let Some(question) = spec.active_question() else {
@@ -37,26 +37,28 @@ pub fn agent_question(
         return empty;
     };
 
-    let prompt_color = theme.resolve_color(spec.prompt_token());
-    let label_color = theme.resolve_color(spec.option_label_token());
-    let description_color = theme.resolve_color(spec.option_description_token());
-    let option_fill = theme.resolve_color(spec.option_fill_token());
-    let accent = theme.resolve_color(spec.accent_token());
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
+    let prompt_color = ctx.theme().resolve_color(spec.prompt_token());
+    let label_color = ctx.theme().resolve_color(spec.option_label_token());
+    let description_color = ctx.theme().resolve_color(spec.option_description_token());
+    let option_fill = ctx.theme().resolve_color(spec.option_fill_token());
+    let accent = ctx.theme().resolve_color(spec.accent_token());
     // Contract §10: a selected option carries the accent at 10% over its own
     // fill, not the border alone.
     let selected_fill = mix_srgb(accent, option_fill, 0.1);
-    let border = theme.resolve_color(spec.border_token());
-    let shortcut_color = theme.resolve_color(spec.shortcut_token());
-    let progress_color = theme.resolve_color(spec.progress_token());
-    let dismiss_color = theme.resolve_color(spec.dismiss_token());
-    let radius = theme.resolve_radius(spec.radius_token());
+    let border = ctx.theme().resolve_color(spec.border_token());
+    let shortcut_color = ctx.theme().resolve_color(spec.shortcut_token());
+    let progress_color = ctx.theme().resolve_color(spec.progress_token());
+    let dismiss_color = ctx.theme().resolve_color(spec.dismiss_token());
+    let radius = ctx.theme().resolve_radius(spec.radius_token());
 
-    let font_size = rem_to_px(spec.font_size_rem());
-    let prompt_size = rem_to_px(spec.prompt_size_rem());
-    let gap = rem_to_px(spec.gap_rem());
-    let option_gap = rem_to_px(spec.option_gap_rem());
-    let pad_block = rem_to_px(spec.option_padding_block_rem());
-    let pad_inline = rem_to_px(spec.option_padding_inline_rem());
+    let font_size = rem_to_px(spec.font_size_rem(base_size));
+    let prompt_size = rem_to_px(spec.prompt_size_rem(base_size));
+    let gap = rem_to_px(spec.gap_rem(density));
+    let option_gap = rem_to_px(spec.option_gap_rem(density));
+    let pad_block = rem_to_px(spec.option_padding_block_rem(base_size));
+    let pad_inline = rem_to_px(spec.option_padding_inline_rem(density));
     let hairline = rem_to_px(0.0625);
 
     let all_radius = |node: &mut Node, r: f32| {
@@ -131,7 +133,8 @@ pub fn agent_question(
     options.style.descriptor.layout.direction = LayoutDirection::Column;
     options.style.fill_width = true;
     options.style.descriptor.layout.spacing.gap = option_gap;
-    options.style.descriptor.layout.spacing.padding.top = rem_to_px(spec.prompt_gap_rem()) - gap;
+    options.style.descriptor.layout.spacing.padding.top =
+        rem_to_px(spec.prompt_gap_rem(density)) - gap;
     options.a11y.role = Some(if spec.is_multi_select() {
         NodeRole::Group
     } else {

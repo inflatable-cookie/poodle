@@ -2,11 +2,11 @@
 //!
 //! Ported from: `packages/jetstream/components/src/banner.rs`.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node};
 use poodle_specs::{BannerSpec, StatusTone};
 
 use crate::color::mix_srgb;
+use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
 fn tone_icon(tone: StatusTone) -> &'static str {
@@ -19,7 +19,8 @@ fn tone_icon(tone: StatusTone) -> &'static str {
     }
 }
 
-pub fn banner(spec: &BannerSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn banner(spec: &BannerSpec, ctx: &RenderContext<'_>) -> Node {
+    let theme = ctx.theme();
     let tone_color = theme.resolve_color(spec.fill_token());
     let icon_color = theme.resolve_color(spec.icon_color_token());
     let border_color = theme.resolve_color(spec.border_token());

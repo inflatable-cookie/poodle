@@ -6,14 +6,14 @@
 //! Fixed white-on-black chrome regardless of theme (contract §8); the seek
 //! bar is a Progress node relying on the widget's default accent fill.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, FontFamily, LayoutDirection, LayoutOverflow,
     LayoutSizing, MainAxisAlignment, Node, NodeKind,
 };
 use poodle_specs::VideoPlayerSpec;
 
-use crate::presentation::{rem_to_px, resolve_semantic_size};
+use crate::context::RenderContext;
+use crate::presentation::rem_to_px;
 
 /// Format seconds as m:ss (contract `.video-player__time`).
 fn format_time(seconds: f64) -> String {
@@ -21,9 +21,10 @@ fn format_time(seconds: f64) -> String {
     format!("{}:{:02}", total / 60, total % 60)
 }
 
-pub fn video_player(spec: &VideoPlayerSpec, theme: &dyn ThemeProvider) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
-    let radius = theme.resolve_radius("radius.surface");
+pub fn video_player(spec: &VideoPlayerSpec, ctx: &RenderContext<'_>) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
+    let radius = ctx.theme().resolve_radius("radius.surface");
 
     // ── Size/density geometry (contract §7/§8 rem ladders via spec helpers) ─
     let btn_size = rem_to_px(VideoPlayerSpec::button_size_rem(effective_size));
@@ -33,7 +34,7 @@ pub fn video_player(spec: &VideoPlayerSpec, theme: &dyn ThemeProvider) -> Node {
     let big_play_size = rem_to_px(VideoPlayerSpec::big_play_size_rem(effective_size));
     let track_height = rem_to_px(VideoPlayerSpec::track_height_rem());
     let volume_thumb = rem_to_px(VideoPlayerSpec::volume_thumb_rem());
-    let bar_gap = rem_to_px(VideoPlayerSpec::bar_gap_rem(spec.density));
+    let bar_gap = rem_to_px(VideoPlayerSpec::bar_gap_rem(density));
     let pill = VideoPlayerSpec::pill_radius_rem();
 
     // ── Fixed colors (contract §8: white-on-black regardless of theme) ──────
@@ -174,7 +175,7 @@ pub fn video_player(spec: &VideoPlayerSpec, theme: &dyn ThemeProvider) -> Node {
         // `text_color` is the channel the backend reads for a Progress node's
         // filled portion; without it the played region renders white on a white
         // track and the seek position is invisible.
-        s.descriptor.text_color = Some(theme.resolve_color("color.accent.base"));
+        s.descriptor.text_color = Some(ctx.theme().resolve_color("color.accent.base"));
         s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
     }
     all_pill(&mut progress_bar, pill);

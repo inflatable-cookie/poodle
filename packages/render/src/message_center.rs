@@ -4,7 +4,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodePosition, NodeRole,
@@ -17,11 +16,12 @@ use poodle_specs::{
 
 use crate::button::button;
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::empty_state::empty_state;
 use crate::floating_overlay::floating_overlay;
 use crate::icon_button::icon_button;
 use crate::popover::popover_surface;
-use crate::presentation::{control_height_rem, rem_to_px, resolve_semantic_size};
+use crate::presentation::{control_height_rem, rem_to_px};
 use crate::progress::progress;
 use crate::status_indicator::status_indicator;
 use crate::time_ago::time_ago;
@@ -37,10 +37,12 @@ pub struct MessageCenterHandlers {
 
 pub fn message_center(
     spec: &MessageCenterSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: MessageCenterHandlers,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let base_size = ctx.base_size(spec.size);
+    let density = ctx.resolve_density(spec.density);
     let anchor_size = rem_to_px(control_height_rem(effective_size));
     let unread = spec.unread_count();
     let open = spec.current_open();
@@ -55,21 +57,21 @@ pub fn message_center(
         .with_aria_label(spec.effective_trigger_label())
         .with_tooltip(&spec.title)
         .with_expanded(open)
-        .with_size(spec.size)
+        .with_size(base_size)
         .with_size_role(spec.size_role)
-        .with_density(spec.density);
-    let trigger_button = icon_button(&trigger_spec, theme, open_handler);
-    let trigger = trigger_with_indicator(trigger_button, unread, theme);
+        .with_density(density);
+    let trigger_button = icon_button(&trigger_spec, ctx, open_handler);
+    let trigger = trigger_with_indicator(trigger_button, unread, ctx);
 
     let surface = open.then(|| {
-        let content = center_content(spec, theme, &handlers);
+        let content = center_content(spec, ctx, &handlers);
         let popover_spec = PopoverSpec::new()
             .with_open(true)
             .with_placement(spec.placement)
             .with_aria_label(spec.effective_aria_label())
             .with_surface_min_width(poodle_specs::Dimension::new("24rem"))
             .with_surface_max_width(poodle_specs::Dimension::new("30rem"));
-        popover_surface(&popover_spec, theme, Some(content))
+        popover_surface(&popover_spec, ctx, Some(content))
     });
 
     floating_overlay(
@@ -82,7 +84,7 @@ pub fn message_center(
     )
 }
 
-fn trigger_with_indicator(trigger: Node, unread: usize, theme: &dyn ThemeProvider) -> Node {
+fn trigger_with_indicator(trigger: Node, unread: usize, ctx: &RenderContext<'_>) -> Node {
     let mut wrapper = Node::container();
     wrapper.position = NodePosition::Relative;
     wrapper.style.descriptor.layout.direction = LayoutDirection::Row;
@@ -113,10 +115,10 @@ fn trigger_with_indicator(trigger: Node, unread: usize, theme: &dyn ThemeProvide
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
-        s.descriptor.background = Some(theme.resolve_color("color.status.danger"));
-        s.descriptor.text_color = Some(theme.resolve_color("color.text.inverse"));
+        s.descriptor.background = Some(ctx.theme().resolve_color("color.status.danger"));
+        s.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.inverse"));
         s.descriptor.border.width = rem_to_px(0.125);
-        s.descriptor.border.color = theme.resolve_color("color.background.elevated");
+        s.descriptor.border.color = ctx.theme().resolve_color("color.background.elevated");
         s.descriptor.corner_radii.top_left = 999.0;
         s.descriptor.corner_radii.top_right = 999.0;
         s.descriptor.corner_radii.bottom_left = 999.0;
@@ -133,27 +135,28 @@ fn trigger_with_indicator(trigger: Node, unread: usize, theme: &dyn ThemeProvide
 
 fn center_content(
     spec: &MessageCenterSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &MessageCenterHandlers,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
     let mut root = Node::container();
     root.a11y.role = Some(NodeRole::Region);
     root.a11y.label = Some(spec.effective_aria_label().to_string());
     {
         let s = &mut root.style;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.stack.md");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.md");
         s.descriptor.layout.width = LayoutSizing::Fixed(rem_to_px(28.0));
         s.fill_width = true;
     }
-    root = root.child(center_header(spec, theme, handlers));
+    root = root.child(center_header(spec, ctx, handlers));
 
     if spec.items.is_empty() {
         let empty_spec = EmptyStateSpec::new(&spec.empty_title)
             .with_message(&spec.empty_message)
             .with_size(EmptyStateSize::Compact)
-            .with_density(spec.density);
-        return root.child(empty_state(&empty_spec, theme));
+            .with_density(density);
+        return root.child(empty_state(&empty_spec, ctx));
     }
 
     let mut list = Node::container();
@@ -167,16 +170,17 @@ fn center_content(
         s.fill_width = true;
     }
     for item in &spec.items {
-        list = list.child(message_row(item, spec, theme, handlers));
+        list = list.child(message_row(item, spec, ctx, handlers));
     }
     root.child(list)
 }
 
 fn center_header(
     spec: &MessageCenterSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &MessageCenterHandlers,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
     let unread = spec.unread_count();
     let mut header = Node::container();
     {
@@ -184,10 +188,10 @@ fn center_header(
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.md");
-        s.descriptor.layout.spacing.padding.bottom = theme.resolve_space("space.stack.md");
-        s.border_bottom_width = Some(theme.resolve_space("border.width.default"));
-        s.border_color_bottom = Some(theme.resolve_color("color.border.subtle"));
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.md");
+        s.descriptor.layout.spacing.padding.bottom = ctx.theme().resolve_space("space.stack.md");
+        s.border_bottom_width = Some(ctx.theme().resolve_space("border.width.default"));
+        s.border_color_bottom = Some(ctx.theme().resolve_color("color.border.subtle"));
         s.fill_width = true;
     }
 
@@ -195,14 +199,14 @@ fn center_header(
     copy.style.descriptor.layout.direction = LayoutDirection::Column;
     copy.style.descriptor.layout.spacing.gap = rem_to_px(0.125);
     let mut title = Node::text(&spec.title);
-    title.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
-    title.style.text_size = Some(theme.resolve_space("typography.heading.size"));
+    title.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
+    title.style.text_size = Some(ctx.theme().resolve_space("typography.heading.size"));
     title.style.text_weight = Some(650);
     copy = copy.child(title);
     if unread > 0 {
         let mut summary = Node::text(format!("{unread} unread"));
-        summary.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
-        summary.style.text_size = Some(theme.resolve_space("typography.caption.size"));
+        summary.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
+        summary.style.text_size = Some(ctx.theme().resolve_space("typography.caption.size"));
         copy = copy.child(summary);
     }
     header = header.child(copy);
@@ -214,8 +218,8 @@ fn center_header(
                 .with_variant(ButtonVariant::Ghost)
                 .with_fit(ButtonFit::Content)
                 .with_size(ControlSize::Xs)
-                .with_density(spec.density);
-            header = header.child(button(&button_spec, theme, Some(handler)));
+                .with_density(density);
+            header = header.child(button(&button_spec, ctx, Some(handler)));
         }
     }
     header
@@ -224,29 +228,30 @@ fn center_header(
 fn message_row(
     item: &MessageCenterItem,
     spec: &MessageCenterSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &MessageCenterHandlers,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
     let mut row = Node::container();
     row.a11y.role = Some(NodeRole::ListItem);
     {
         let s = &mut row.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         let pad = &mut s.descriptor.layout.spacing.padding;
         pad.top = rem_to_px(0.625);
         pad.bottom = rem_to_px(0.625);
         pad.left = rem_to_px(0.625);
         pad.right = rem_to_px(0.5);
-        let radius = theme.resolve_radius("radius.control");
+        let radius = ctx.theme().resolve_radius("radius.control");
         s.descriptor.corner_radii.top_left = radius;
         s.descriptor.corner_radii.top_right = radius;
         s.descriptor.corner_radii.bottom_left = radius;
         s.descriptor.corner_radii.bottom_right = radius;
         s.fill_width = true;
         if !item.read {
-            let accent = theme.resolve_color(item.tone.color_token());
+            let accent = ctx.theme().resolve_color(item.tone.color_token());
             s.descriptor.background = Some(with_alpha(accent, accent.3 * 0.08));
         }
     }
@@ -254,7 +259,7 @@ fn message_row(
     let content = message_content(
         item,
         spec,
-        theme,
+        ctx,
         handlers.on_item_select.clone().filter(|_| item.selectable),
     );
     row = row.child(content);
@@ -283,10 +288,10 @@ fn message_row(
                     "Mark read"
                 })
                 .with_size(ControlSize::Xs)
-                .with_density(spec.density);
+                .with_density(density);
             actions = actions.child(icon_button(
                 &control,
-                theme,
+                ctx,
                 Some(Arc::new(move || handler(&id, next_read))),
             ));
             has_actions = true;
@@ -302,10 +307,10 @@ fn message_row(
                 .with_tooltip("Remove")
                 .with_tone(ButtonTone::Danger)
                 .with_size(ControlSize::Xs)
-                .with_density(spec.density);
+                .with_density(density);
             actions = actions.child(icon_button(
                 &control,
-                theme,
+                ctx,
                 Some(Arc::new(move || handler(&id))),
             ));
             has_actions = true;
@@ -321,9 +326,10 @@ fn message_row(
 fn message_content(
     item: &MessageCenterItem,
     spec: &MessageCenterSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
+    let density = ctx.resolve_density(spec.density);
     let mut content = if on_select.is_some() {
         Node::button("")
     } else {
@@ -333,7 +339,7 @@ fn message_content(
         let s = &mut content.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
-        s.descriptor.layout.spacing.gap = theme.resolve_space("space.inline.sm");
+        s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.inline.sm");
         s.flex_fill = true;
         s.fill_width = true;
         s.descriptor.background = None;
@@ -349,7 +355,7 @@ fn message_content(
 
     let leading = if let Some(icon) = item.icon.as_deref() {
         let mut icon = Node::icon(icon, rem_to_px(1.0));
-        icon.style.descriptor.text_color = Some(theme.resolve_color(item.tone.color_token()));
+        icon.style.descriptor.text_color = Some(ctx.theme().resolve_color(item.tone.color_token()));
         icon
     } else {
         let indicator = StatusIndicatorSpec::new()
@@ -361,8 +367,8 @@ fn message_content(
             .with_aria_label(if item.read { "Read" } else { "Unread" })
             .with_size(ControlSize::Xs)
             .with_size_role(SemanticControlSizeRole::Control)
-            .with_density(spec.density);
-        status_indicator(&indicator, theme)
+            .with_density(density);
+        status_indicator(&indicator, ctx)
     };
     content = content.child(leading);
 
@@ -371,15 +377,15 @@ fn message_content(
     copy.style.descriptor.layout.spacing.gap = rem_to_px(0.1875);
     copy.style.flex_fill = true;
     let mut title = Node::text(&item.title);
-    title.style.descriptor.text_color = Some(theme.resolve_color("color.text.primary"));
-    title.style.text_size = Some(theme.resolve_space("typography.label.size"));
+    title.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.primary"));
+    title.style.text_size = Some(ctx.theme().resolve_space("typography.label.size"));
     title.style.text_weight = Some(if item.read { 500 } else { 650 });
     copy = copy.child(title);
 
     if let Some(message) = item.message.as_deref() {
         let mut body = Node::text(message);
-        body.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
-        body.style.text_size = Some(theme.resolve_space("typography.body.size"));
+        body.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
+        body.style.text_size = Some(ctx.theme().resolve_space("typography.body.size"));
         body.style.text_wrap = true;
         body.style.line_height = Some(1.35);
         copy = copy.child(body);
@@ -392,14 +398,14 @@ fn message_content(
         meta.style.descriptor.layout.spacing.gap = rem_to_px(0.25);
         if let Some(value) = item.meta.as_deref() {
             let mut label = Node::text(value);
-            label.style.descriptor.text_color = Some(theme.resolve_color("color.text.secondary"));
-            label.style.text_size = Some(theme.resolve_space("typography.caption.size"));
+            label.style.descriptor.text_color = Some(ctx.theme().resolve_color("color.text.secondary"));
+            label.style.text_size = Some(ctx.theme().resolve_space("typography.caption.size"));
             meta = meta.child(label);
         }
         if item.meta.is_some() && item.timestamp.is_some() {
             let mut separator = Node::text("·");
             separator.style.descriptor.text_color =
-                Some(theme.resolve_color("color.text.secondary"));
+                Some(ctx.theme().resolve_color("color.text.secondary"));
             meta = meta.child(separator);
         }
         if let Some(timestamp) = item.timestamp.as_deref() {
@@ -407,7 +413,7 @@ fn message_content(
                 .with_timestamp(timestamp)
                 .with_short(true)
                 .with_typography(InlineTypographyMode::Inherit);
-            meta = meta.child(time_ago(&time_spec, theme));
+            meta = meta.child(time_ago(&time_spec, ctx));
         }
         copy = copy.child(meta);
     }
@@ -417,7 +423,7 @@ fn message_content(
             let mut spec = ProgressSpec::new()
                 .with_size(ControlSize::Xs)
                 .with_size_role(SemanticControlSizeRole::Control)
-                .with_density(spec.density);
+                .with_density(density);
             if item_progress.indeterminate {
                 spec = spec.with_indeterminate(true);
             } else if let Some(value) = item_progress.value {
@@ -429,7 +435,7 @@ fn message_content(
             spec.aria_label = Some(format!("{} progress", item.title));
             spec
         };
-        copy = copy.child(progress(&progress_spec, theme));
+        copy = copy.child(progress(&progress_spec, ctx));
     }
     content.child(copy)
 }
@@ -444,9 +450,11 @@ mod tests {
 
     #[test]
     fn closed_center_only_renders_trigger_and_unread_indicator() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let node = message_center(
             &MessageCenterSpec::new(vec![MessageCenterItem::new("one", "Build complete")]),
-            &theme(),
+            &ctx,
             MessageCenterHandlers::default(),
         );
         assert_eq!(node.children.len(), 1);
@@ -469,6 +477,8 @@ mod tests {
 
     #[test]
     fn open_center_renders_dialog_list_and_item_controls() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = MessageCenterSpec::new(vec![MessageCenterItem::new("one", "Build complete")])
             .with_open(true);
         let handlers = MessageCenterHandlers {
@@ -476,7 +486,7 @@ mod tests {
             on_remove: Some(Arc::new(|_| {})),
             ..Default::default()
         };
-        let node = message_center(&spec, &theme(), handlers);
+        let node = message_center(&spec, &ctx, handlers);
         assert_eq!(node.children.len(), 2);
         assert_eq!(
             node.children[1].children[0].a11y.role,
@@ -497,6 +507,8 @@ mod tests {
         use poodle_node::NodeKind;
         use poodle_specs::MessageCenterItemProgress;
 
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = MessageCenterSpec::new(vec![
             MessageCenterItem::new("job", "Mix preview")
                 .with_meta("Rendering")
@@ -515,7 +527,7 @@ mod tests {
             on_remove: Some(Arc::new(|_| {})),
             ..Default::default()
         };
-        let node = message_center(&spec, &theme(), handlers);
+        let node = message_center(&spec, &ctx, handlers);
 
             // The surface's inner padded wrapper carries the panel spacing;
             // the message centre content sits inside it.
@@ -571,6 +583,8 @@ mod tests {
         use poodle_node::NodeKind;
         use poodle_specs::MessageCenterItemProgress;
 
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec_at = |value: f64| {
             MessageCenterSpec::new(vec![MessageCenterItem::new("job", "Mix preview")
                 .with_progress(MessageCenterItemProgress::determinate(value))
@@ -578,8 +592,8 @@ mod tests {
             .with_open(true)
         };
 
-        let early = message_center(&spec_at(20.0), &theme(), MessageCenterHandlers::default());
-        let late = message_center(&spec_at(80.0), &theme(), MessageCenterHandlers::default());
+        let early = message_center(&spec_at(20.0), &ctx, MessageCenterHandlers::default());
+        let late = message_center(&spec_at(80.0), &ctx, MessageCenterHandlers::default());
 
         let fraction = |node: &Node| {
             node.children[1].children[0].children[0].children[0].children[1].children[0].children[0].children[1]

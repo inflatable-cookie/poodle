@@ -9,7 +9,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, MainAxisAlignment, Node, NodeRole,
     NodeToggled, StylePatch,
@@ -17,30 +16,30 @@ use poodle_node::{
 use poodle_specs::ToggleGroupSpec;
 
 use crate::color::{mix_srgb, with_alpha};
-use crate::presentation::{
-    control_height_rem, rem_to_px, resolve_semantic_size, size_font_rem, toggle_group_gap_rem,
-};
+use crate::context::RenderContext;
+use crate::presentation::{control_height_rem, rem_to_px, size_font_rem, toggle_group_gap_rem};
 
 pub fn toggle_group(
     spec: &ToggleGroupSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 ) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
 
     // ── Token resolution ──
-    let accent = theme.resolve_color("color.accent.base");
-    let border_subtle = theme.resolve_color("color.border.subtle");
-    let border_default = theme.resolve_color("color.border.default");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let surface = theme.resolve_color("color.background.surface");
-    let elevated = theme.resolve_color("color.background.elevated");
-    let radius = theme.resolve_radius("radius.control");
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let border_subtle = ctx.theme().resolve_color("color.border.subtle");
+    let border_default = ctx.theme().resolve_color("color.border.default");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
+    let radius = ctx.theme().resolve_radius("radius.control");
 
     // Contract §8 Root: gap is density-driven — the old GPUI tier's ladder
     // (compact 0.1875 / default 0.25 / comfortable 0.375rem), which
     // `toggle_group_gap_rem` transcribes exactly.
-    let gap = rem_to_px(toggle_group_gap_rem(spec.density));
+    let gap = rem_to_px(toggle_group_gap_rem(density));
 
     // Contract: min-height = calc(control-height − 0.25rem). Unlike
     // select/button, this component's old GPUI tier is deliberately
@@ -52,7 +51,7 @@ pub fn toggle_group(
     // Contract §8 Item: padding `0 toggle-group-x`. The old GPUI tier
     // resolves the `space.control.x` token directly — density-only, no
     // per-size offset — so the density axis carries through the theme.
-    let item_pad_x = theme.resolve_space("space.control.x");
+    let item_pad_x = ctx.theme().resolve_space("space.control.x");
 
     // Contract: item border-color = color-mix(border-subtle 82%, transparent).
     let item_border_color = with_alpha(border_subtle, border_subtle.3 * 0.82);
@@ -151,7 +150,7 @@ pub fn toggle_group(
                 item.interaction.on_activate = Some(Arc::new(move || handler(&value)));
             }
         } else {
-            item.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+            item.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
             // The old GPUI tier's `CursorStyle::OperationNotAllowed`.
             item.style.descriptor.cursor = CursorHint::NotAllowed;
             item.interaction.disabled = true;
@@ -162,7 +161,7 @@ pub fn toggle_group(
 
     // ── Group-level disabled ──
     if spec.is_disabled {
-        root.style.descriptor.opacity = theme.resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
     }
 
     if let Some(label) = spec.aria_label.as_deref() {
@@ -216,7 +215,9 @@ mod tests {
         ];
         for (size, expected) in cases {
             let spec = ToggleGroupSpec::new(view_options()).with_size(size);
-            let node = toggle_group(&spec, &theme(), None);
+            let theme = theme();
+            let ctx = RenderContext::new(&theme);
+            let node = toggle_group(&spec, &ctx, None);
             assert_eq!(
                 item(&node, "grid").style.min_height,
                 Some(expected),
@@ -227,10 +228,11 @@ mod tests {
         // Horizontal padding is the `space.control.x` token, density-only —
         // no per-size offset (the old GPUI tier's `resolve_px`).
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let pad_x = poodle_adapter::ThemeProvider::resolve_space(&theme, "space.control.x");
         for size in [ControlSize::Xs, ControlSize::Md, ControlSize::Xl] {
             let spec = ToggleGroupSpec::new(view_options()).with_size(size);
-            let node = toggle_group(&spec, &theme, None);
+            let node = toggle_group(&spec, &ctx, None);
             let pad = &item(&node, "grid").style.descriptor.layout.spacing.padding;
             assert_eq!(pad.left, pad_x, "pad-left for {size:?}");
             assert_eq!(pad.right, pad_x, "pad-right for {size:?}");
@@ -247,7 +249,9 @@ mod tests {
         ];
         for (density, expected) in gap_cases {
             let spec = ToggleGroupSpec::new(view_options()).with_density(density);
-            let node = toggle_group(&spec, &theme(), None);
+            let theme = theme();
+            let ctx = RenderContext::new(&theme);
+            let node = toggle_group(&spec, &ctx, None);
             assert_eq!(
                 node.style.descriptor.layout.spacing.gap, expected,
                 "gap for {density:?}"
@@ -265,7 +269,9 @@ mod tests {
         ];
         for (size, expected) in font_cases {
             let spec = ToggleGroupSpec::new(view_options()).with_size(size);
-            let node = toggle_group(&spec, &theme(), None);
+            let theme = theme();
+            let ctx = RenderContext::new(&theme);
+            let node = toggle_group(&spec, &ctx, None);
             assert_eq!(
                 item(&node, "grid").style.text_size,
                 Some(expected),
@@ -277,14 +283,19 @@ mod tests {
     #[test]
     fn unselected_and_selected_items_use_the_old_tiers_recipes() {
         let theme = theme();
-        use poodle_adapter::ThemeProvider as _;
-        let surface = theme.resolve_color("color.background.surface");
-        let elevated = theme.resolve_color("color.background.elevated");
-        let text_primary = theme.resolve_color("color.text.primary");
-        let border_subtle = theme.resolve_color("color.border.subtle");
-        let border_default = theme.resolve_color("color.border.default");
-        let accent = theme.resolve_color("color.accent.base");
-        let radius = theme.resolve_radius("radius.control");
+        let ctx = RenderContext::new(&theme);
+        let surface =
+            poodle_adapter::ThemeProvider::resolve_color(&theme, "color.background.surface");
+        let elevated =
+            poodle_adapter::ThemeProvider::resolve_color(&theme, "color.background.elevated");
+        let text_primary =
+            poodle_adapter::ThemeProvider::resolve_color(&theme, "color.text.primary");
+        let border_subtle =
+            poodle_adapter::ThemeProvider::resolve_color(&theme, "color.border.subtle");
+        let border_default =
+            poodle_adapter::ThemeProvider::resolve_color(&theme, "color.border.default");
+        let accent = poodle_adapter::ThemeProvider::resolve_color(&theme, "color.accent.base");
+        let radius = poodle_adapter::ThemeProvider::resolve_radius(&theme, "radius.control");
 
         let item_fill = mix_srgb(surface, text_primary, 0.93);
         let item_border = with_alpha(border_subtle, border_subtle.3 * 0.82);
@@ -292,7 +303,7 @@ mod tests {
         let selected_border = mix_srgb(accent, border_default, 0.42);
 
         let spec = ToggleGroupSpec::new(view_options()).with_value(vec!["list".into()]);
-        let node = toggle_group(&spec, &theme, None);
+        let node = toggle_group(&spec, &ctx, None);
 
         let unselected = item(&node, "grid");
         assert_eq!(unselected.style.descriptor.background, Some(item_fill));
@@ -328,7 +339,9 @@ mod tests {
 
         // Single-select: radiogroup of radios.
         let spec = ToggleGroupSpec::new(view_options());
-        let node = toggle_group(&spec, &theme(), Some(Arc::clone(&on_change)));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = toggle_group(&spec, &ctx, Some(Arc::clone(&on_change)));
         assert_eq!(node.a11y.role, Some(NodeRole::RadioGroup));
         let list = item(&node, "list");
         assert_eq!(list.a11y.role, Some(NodeRole::RadioButton));
@@ -338,7 +351,7 @@ mod tests {
         // Multi-select: a group of toggling buttons.
         let spec = ToggleGroupSpec::new(view_options())
             .with_selection_mode(ToggleGroupSelectionMode::Multiple);
-        let node = toggle_group(&spec, &theme(), None);
+        let node = toggle_group(&spec, &ctx, None);
         assert_eq!(node.a11y.role, Some(NodeRole::Group));
         assert_eq!(item(&node, "grid").a11y.role, Some(NodeRole::Button));
     }
@@ -346,6 +359,7 @@ mod tests {
     #[test]
     fn disabled_items_paint_the_disabled_recipe_and_do_not_activate() {
         let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let disabled_opacity =
             poodle_adapter::ThemeProvider::resolve_opacity(&theme, "state.opacity.disabled");
 
@@ -356,7 +370,7 @@ mod tests {
         .with_aria_label("View");
         let node = toggle_group(
             &spec,
-            &theme,
+            &ctx,
             Some(Arc::new(|_: &str| panic!("disabled items never fire"))),
         );
         assert_eq!(node.a11y.label.as_deref(), Some("View"));
@@ -375,7 +389,7 @@ mod tests {
         // Group-level disabled dims the whole root too (the old GPUI tier
         // applies both, item and root).
         let spec = ToggleGroupSpec::new(view_options()).with_disabled(true);
-        let node = toggle_group(&spec, &theme, None);
+        let node = toggle_group(&spec, &ctx, None);
         assert_eq!(node.style.descriptor.opacity, disabled_opacity);
         let grid = item(&node, "grid");
         assert!(grid.interaction.disabled);

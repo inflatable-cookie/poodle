@@ -13,7 +13,6 @@
 
 use std::sync::Arc;
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodePosition, NodeRole, StylePatch,
@@ -21,9 +20,10 @@ use poodle_node::{
 use poodle_specs::{SelectSpec, ValidationState};
 
 use crate::color::with_alpha;
+use crate::context::RenderContext;
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, resolve_supporting_visual_size, size_font_rem,
-    size_height_offset_rem, size_padding_x_offset_rem,
+    rem_to_px, resolve_supporting_visual_size, size_font_rem, size_height_offset_rem,
+    size_padding_x_offset_rem,
 };
 
 /// Handlers a host wires to a select. The component does not own open state —
@@ -36,8 +36,8 @@ pub struct SelectHandlers {
     pub clear: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
-pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHandlers) -> Node {
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+pub fn select(spec: &SelectSpec, ctx: &RenderContext<'_>, handlers: &SelectHandlers) -> Node {
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     // Axis-faithful metrics (g12.019 recipe correction): the axis-layered
     // token plus the per-size offset — the old GPUI tier's form, matching
     // Svelte's `--poodle-select-control-height` / inline-padding CSS vars —
@@ -46,29 +46,29 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
     // layering. At base tokens (the Jetstream provider, no axes) md/default
     // reproduces the old fixed values; under a preview axis the select now
     // follows the axis like Svelte does.
-    let height = theme.resolve_space("size.control.height")
+    let height = ctx.theme().resolve_space("size.control.height")
         + rem_to_px(size_height_offset_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
-    let pad_x = theme.resolve_space("space.control.x")
+    let pad_x = ctx.theme().resolve_space("space.control.x")
         + rem_to_px(size_padding_x_offset_rem(effective_size));
     // The indicator is always the sm icon token (the old GPUI tier's
     // `IconSize::Sm`), not a per-control-size ladder stop.
-    let icon_size = theme.resolve_space("size.icon.sm");
-    let item_gap = theme.resolve_space("space.inline.sm");
+    let icon_size = ctx.theme().resolve_space("size.icon.sm");
+    let item_gap = ctx.theme().resolve_space("space.inline.sm");
 
-    let surface = theme.resolve_color("color.background.surface");
-    let border_default = theme.resolve_color("color.border.default");
-    let radius = theme.resolve_radius("radius.control");
-    let surface_radius = theme.resolve_radius("radius.surface");
-    let text_primary = theme.resolve_color("color.text.primary");
-    let text_secondary = theme.resolve_color("color.text.secondary");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let border_default = ctx.theme().resolve_color("color.border.default");
+    let radius = ctx.theme().resolve_radius("radius.control");
+    let surface_radius = ctx.theme().resolve_radius("radius.surface");
+    let text_primary = ctx.theme().resolve_color("color.text.primary");
+    let text_secondary = ctx.theme().resolve_color("color.text.secondary");
     // Svelte paints the placeholder in text-secondary
     // (`select.css`: `--poodle-recipe-select-placeholder-control-text` falls
     // back to `--poodle-color-text-secondary`). `color.text.placeholder` is
     // not a token — no provider resolves it (it fell back to black).
     let text_placeholder = text_secondary;
-    let icon_muted = theme.resolve_color("color.icon.muted");
-    let panel_fill = theme.resolve_color(spec.overlay_fill_token());
+    let icon_muted = ctx.theme().resolve_color("color.icon.muted");
+    let panel_fill = ctx.theme().resolve_color(spec.overlay_fill_token());
 
     // Trigger appearance follows the shared Select recipe defaults:
     // surface/border at reduced alpha over the page, not the full-strength
@@ -77,9 +77,9 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
     let base_border = with_alpha(border_default, border_default.3 * 0.72);
 
     let validation_border = match spec.validation_state {
-        ValidationState::Invalid => Some(theme.resolve_color("color.status.danger")),
-        ValidationState::Valid => Some(theme.resolve_color("color.status.success")),
-        ValidationState::Pending => Some(theme.resolve_color("color.accent.base")),
+        ValidationState::Invalid => Some(ctx.theme().resolve_color("color.status.danger")),
+        ValidationState::Valid => Some(ctx.theme().resolve_color("color.status.success")),
+        ValidationState::Pending => Some(ctx.theme().resolve_color("color.accent.base")),
         ValidationState::None => None,
     };
     let border_color = validation_border.unwrap_or(base_border);
@@ -123,13 +123,13 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
         hover_fill,
         show_clear,
         spec.is_disabled,
-        theme,
+        ctx,
         handlers,
     );
 
     // The old GPUI tier wraps the select in a `min_w(size.select.minWidth)`
     // container in both states; carry that floor on the returned root.
-    let root_min_width = theme.resolve_space("size.select.minWidth");
+    let root_min_width = ctx.theme().resolve_space("size.select.minWidth");
 
     if !spec.current_open() {
         let mut trigger = trigger;
@@ -137,11 +137,11 @@ pub fn select(spec: &SelectSpec, theme: &dyn ThemeProvider, handlers: &SelectHan
         return trigger;
     }
 
-    let panel_top = height + theme.resolve_space("space.stack.sm");
+    let panel_top = height + ctx.theme().resolve_space("space.stack.sm");
 
     let mut panel = build_panel(
         spec,
-        theme,
+        ctx,
         effective_size,
         font_size,
         icon_size,
@@ -201,7 +201,7 @@ fn build_trigger(
     hover_fill: ColorValue,
     show_clear: bool,
     is_disabled: bool,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     handlers: &SelectHandlers,
 ) -> Node {
     let mut el = Node::container();
@@ -247,7 +247,7 @@ fn build_trigger(
     // Clear pill — its own handler always: it sits inside the trigger and an
     // unwired clear would bubble to toggle, opening the panel it was clearing.
     if show_clear {
-        let radius_pill = theme.resolve_radius("radius.pill");
+        let radius_pill = ctx.theme().resolve_radius("radius.pill");
         let clear_pill = with_alpha(text_secondary, 0.18);
         let mut clear = Node::container();
         {
@@ -282,7 +282,7 @@ fn build_trigger(
     el = el.child(chevron);
 
     if is_disabled {
-        el.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
         el.interaction.disabled = true;
     }
 
@@ -295,7 +295,7 @@ fn build_trigger(
 )]
 fn build_panel(
     spec: &SelectSpec,
-    theme: &dyn ThemeProvider,
+    ctx: &RenderContext<'_>,
     effective_size: poodle_specs::ControlSize,
     font_size: f32,
     icon_size: f32,
@@ -313,14 +313,14 @@ fn build_panel(
     handlers: &SelectHandlers,
 ) -> Node {
     let panel_py = rem_to_px(0.25);
-    let token_min_width = theme.resolve_space("size.select.minWidth");
+    let token_min_width = ctx.theme().resolve_space("size.select.minWidth");
     let min_width = spec
         .menu_min_width
         .as_deref()
         .map(parse_css_length_to_px)
         .filter(|w| *w > 0.0)
         .unwrap_or(token_min_width);
-    let max_height = theme.resolve_space("size.menu.maxHeight");
+    let max_height = ctx.theme().resolve_space("size.menu.maxHeight");
 
     let mut panel = Node::container();
     {
@@ -506,7 +506,8 @@ fn build_panel(
                 }
 
                 if opt.is_disabled {
-                    row.style.descriptor.opacity = theme.resolve_opacity("state.opacity.disabled");
+                    row.style.descriptor.opacity =
+                        ctx.theme().resolve_opacity("state.opacity.disabled");
                     row.interaction.disabled = true;
                 }
 
@@ -556,8 +557,10 @@ mod tests {
 
     #[test]
     fn closed_trigger_shows_placeholder_and_chevron_only() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = SelectSpec::new(fruit_options()).with_placeholder("Choose a fruit");
-        let node = select(&spec, &theme(), &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::default());
         assert!(node.has_text("Choose a fruit"), "{:?}", node.texts());
         assert!(node.has_text("chevron-down"), "{:?}", node.texts());
         assert!(!node.has_text("Apple"), "options leaked when closed");
@@ -573,9 +576,11 @@ mod tests {
             (poodle_specs::ControlSize::Lg, 42.0),
             (poodle_specs::ControlSize::Xl, 44.0),
         ];
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         for (size, expected) in cases {
             let spec = SelectSpec::new(fruit_options()).with_size(size);
-            let node = select(&spec, &theme(), &SelectHandlers::default());
+            let node = select(&spec, &ctx, &SelectHandlers::default());
             match node.style.descriptor.layout.height {
                 LayoutSizing::Fixed(h) => {
                     assert_eq!(h, expected, "height for {size:?}");
@@ -585,11 +590,10 @@ mod tests {
         }
         // The placeholder paints in text.secondary (Svelte's recipe), not the
         // nonexistent `color.text.placeholder` token.
-        let theme = theme();
         let secondary =
             poodle_adapter::ThemeProvider::resolve_color(&theme, "color.text.secondary");
         let spec = SelectSpec::new(fruit_options()).with_placeholder("Choose a fruit");
-        let node = select(&spec, &theme, &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::default());
         let label = node
             .find(
                 &|n| matches!(&n.kind, poodle_node::NodeKind::Text { content } if content == "Choose a fruit"),
@@ -600,8 +604,10 @@ mod tests {
 
     #[test]
     fn open_renders_options_in_an_absolute_overlay_listbox() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = SelectSpec::new(fruit_options()).with_open(true);
-        let node = select(&spec, &theme(), &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::default());
         assert!(node.has_text("Apple") && node.has_text("Banana") && node.has_text("Cherry"));
 
         let panel = node
@@ -625,7 +631,9 @@ mod tests {
             ..Default::default()
         };
         let spec = SelectSpec::new(fruit_options()).with_open(true);
-        let node = select(&spec, &theme(), &handlers);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = select(&spec, &ctx, &handlers);
 
         let banana_row = node
             .find(&|n| {
@@ -646,18 +654,22 @@ mod tests {
             is_disabled: true,
             ..SelectSpec::new(fruit_options())
         };
-        let node = select(&spec, &theme(), &handlers);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = select(&spec, &ctx, &handlers);
         assert!(node.interaction.on_activate.is_none());
         assert!(node.interaction.disabled);
     }
 
     #[test]
     fn search_filters_and_empty_query_shows_message() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         let spec = SelectSpec::new(fruit_options())
             .with_searchable(true)
             .with_search_query("ban")
             .with_open(true);
-        let node = select(&spec, &theme(), &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::default());
         assert!(node.has_text("Banana") && !node.has_text("Apple"));
 
         let spec = SelectSpec::new(fruit_options())
@@ -665,15 +677,17 @@ mod tests {
             .with_search_query("zzz")
             .with_empty_message("No matches")
             .with_open(true);
-        let node = select(&spec, &theme(), &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::default());
         assert!(node.has_text("No matches"));
     }
 
     #[test]
     fn outside_interact_refusal_marks_the_open_panel() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
         // Web default `true` + open: the panel carries no refusal marker.
         let spec = SelectSpec::new(fruit_options()).with_open(true);
-        let node = select(&spec, &theme(), &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::default());
         let panel = node
             .find(&|n| n.a11y.role == Some(poodle_node::NodeRole::ListBox))
             .expect("open panel");
@@ -682,7 +696,7 @@ mod tests {
         // Refusal: the open panel carries the inert activation marker a host
         // keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = select(&refusing, &theme(), &SelectHandlers::default());
+        let node = select(&refusing, &ctx, &SelectHandlers::default());
         let panel = node
             .find(&|n| n.a11y.role == Some(poodle_node::NodeRole::ListBox))
             .expect("open panel");

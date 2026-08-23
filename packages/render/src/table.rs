@@ -6,45 +6,46 @@
 //! All visual properties resolve from tokens; size scales typography +
 //! vertical padding, density scales horizontal padding.
 
-use poodle_adapter::ThemeProvider;
 use poodle_node::{LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node};
 use poodle_specs::{ColumnAlign, TableSpec};
 
 use crate::color::{mix_srgb, with_alpha};
+use crate::context::RenderContext;
 use crate::presentation::{
-    rem_to_px, resolve_semantic_size, table_cell_pad_block_rem, table_cell_pad_inline_rem,
-    table_font_rem, table_header_font_rem,
+    rem_to_px, table_cell_pad_block_rem, table_cell_pad_inline_rem, table_font_rem,
+    table_header_font_rem,
 };
 
-pub fn table(spec: &TableSpec, theme: &dyn ThemeProvider) -> Node {
+pub fn table(spec: &TableSpec, ctx: &RenderContext<'_>) -> Node {
     // Token resolution
-    let shell_border_raw = theme.resolve_color(spec.shell_border_token());
+    let shell_border_raw = ctx.theme().resolve_color(spec.shell_border_token());
     let shell_border = with_alpha(shell_border_raw, shell_border_raw.3 * 0.78); // contract §8: border-subtle 78%
-    let shell_fill_raw = theme.resolve_color(spec.shell_fill_token());
+    let shell_fill_raw = ctx.theme().resolve_color(spec.shell_fill_token());
     let shell_fill = with_alpha(shell_fill_raw, shell_fill_raw.3 * 0.96); // contract §8: panel 96%
-    let shell_radius = theme.resolve_radius(spec.shell_radius_token());
+    let shell_radius = ctx.theme().resolve_radius(spec.shell_radius_token());
 
     // Contract §8: header bg = color-mix(surface 91%, text-primary).
-    let surface = theme.resolve_color(spec.header_surface_token());
-    let text_primary = theme.resolve_color(spec.header_mix_text_token());
+    let surface = ctx.theme().resolve_color(spec.header_surface_token());
+    let text_primary = ctx.theme().resolve_color(spec.header_mix_text_token());
     let header_fill = mix_srgb(surface, text_primary, 0.91);
 
-    let header_text = theme.resolve_color(spec.header_text_token());
-    let header_border_raw = theme.resolve_color(spec.header_border_token());
+    let header_text = ctx.theme().resolve_color(spec.header_text_token());
+    let header_border_raw = ctx.theme().resolve_color(spec.header_border_token());
     let header_border = with_alpha(header_border_raw, header_border_raw.3 * 0.72); // contract §8: 72%
 
-    let cell_text = theme.resolve_color(spec.cell_text_token());
-    let cell_border_raw = theme.resolve_color(spec.cell_border_token());
+    let cell_text = ctx.theme().resolve_color(spec.cell_text_token());
+    let cell_border_raw = ctx.theme().resolve_color(spec.cell_border_token());
     let cell_border = with_alpha(cell_border_raw, cell_border_raw.3 * 0.72);
 
-    let caption_text = theme.resolve_color(spec.caption_text_token());
-    let empty_text = theme.resolve_color(spec.empty_text_token());
+    let caption_text = ctx.theme().resolve_color(spec.caption_text_token());
+    let empty_text = ctx.theme().resolve_color(spec.empty_text_token());
 
     // Contract §8: size scales font + vertical padding-block; density scales
     // horizontal padding-inline only. Caption padding/font are fixed rules.
-    let effective_size = resolve_semantic_size(spec.size, spec.size_role);
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
     let cell_py = rem_to_px(table_cell_pad_block_rem(effective_size));
-    let cell_px = rem_to_px(table_cell_pad_inline_rem(spec.density));
+    let cell_px = rem_to_px(table_cell_pad_inline_rem(density));
     let table_font = rem_to_px(table_font_rem(effective_size));
     let header_font = rem_to_px(table_header_font_rem(effective_size));
     let caption_px = rem_to_px(0.75);
