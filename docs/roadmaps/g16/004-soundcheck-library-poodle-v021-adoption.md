@@ -1,6 +1,6 @@
 # g16.004 — Soundcheck Library Poodle 0.2.1 Adoption
 
-Status: **ready**
+Status: **complete — Soundcheck Library PR 5 merged at `a720f22`**
 Depends on: `g16.001`, published npm `0.2.1`
 Target repository: `/Users/tom/Dev/projects/soundcheck-library`
 Governing refs: `README.md`, `../../../README.md`,
@@ -49,3 +49,17 @@ while advertising the compatible `0.2.x` peer line to its consumers.
 
 Record resolved versions/sources, changed manifests/locks, exact validation,
 and any bounded migration in the Soundcheck Library PR. Do not merge.
+
+## Closeout
+
+Soundcheck Library PR
+[#5](https://github.com/inflatable-cookie/soundcheck-library/pull/5)
+merged on 2026-08-23 at `a720f22`. The workspace installs exact Poodle
+Svelte `0.2.1`, both library peers advertise `^0.2.1`, committed sibling
+overrides are gone, and both locks resolve Poodle core/Svelte from npm.
+
+No package compatibility migration was required. Orchestrator review restored
+ten unrelated platform `libc` constraints removed by npm lock regeneration;
+`npm ci` accepted the corrected lock. The repository's 18 type errors and one
+failing test were reproduced on `main` by the worker and are not adoption
+regressions; 179 tests pass.
