@@ -3,7 +3,7 @@
 Status: **planned — blocked on all implementation, specimen, conformance,
 packaging, and automation children**
 Depends on: `g15.011`, `g15.012`, `g15.042`, `g15.043`, `g15.048`, `g15.049`,
-`g15.051`, `g15.052`
+`g15.051`, `g15.052`, `g15.053`
 Unblocks: `g15.013` operator certification gate
 Governing refs: `release-baseline-roster.md`, `release-gap-register.md`,
 `../../specs/022-packaging-versioning-and-release-channel-rules.md`,

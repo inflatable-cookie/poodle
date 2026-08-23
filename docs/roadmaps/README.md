@@ -21,8 +21,9 @@ v0.2.0 release-baseline generation.
   measured native focus-ring defect and Stepper keyboard-entry gap. PR #66
   closed `g15.049`; PR #67 closed the GPUI/Zed dependency-licence policy gap
   without admitting GPL code. The remaining release path is explicit: resolve
-  and execute the native presentation blocker (`043`), build one exact
-  candidate (`050`), then run operator gate `013`.
+  and execute the native presentation blocker (`043`), land the adopter-driven
+  Breadcrumbs icon surface (`053`), build one exact candidate (`050`), then run
+  operator gate `013`.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
@@ -51,7 +52,8 @@ v0.2.0 release-baseline generation.
 - `g15` — active v0.2.0 release baseline; `g15.001`–`g15.010`,
   `g15.014`–`g15.017`, `g15.019`–`g15.026`, `g15.028`–`g15.032`, and
   `g15.034`–`g15.042`, `g15.044`–`g15.049`, and `g15.051`–`g15.052`
-  complete; `g15.043` is the current planning checkpoint;
+  complete; `g15.043` is the current implementation checkpoint and `g15.053`
+  is queued serially behind it;
   `g15.013` final operator gate
 
 ## Rules

@@ -1,13 +1,13 @@
 # g15 — Release Gap Register
 
 Status: active release register — compiled by `g15.001`, updated by review
-Date: 2026-08-22
+Date: 2026-08-23
 Card: `docs/roadmaps/g15/001-release-baseline-roster-inventory.md`
 Source: `docs/roadmaps/g15/release-baseline-roster.md` (frozen 175-component denominator)
 
 Every incomplete surface below was measured from the tree; nothing is inferred
 from another runtime's pass. Owners are the roadmap cards compiled from these
-gaps (`g15.002`–`g15.051`). Absence of downstream use is recorded as context
+gaps (`g15.002`–`g15.053`). Absence of downstream use is recorded as context
 but is **not** a gap — see the note at the end.
 
 ## Svelte Release Blocker Class
@@ -122,6 +122,7 @@ measured from the mounted tree, not inferred from a contract read.
 | Native pre-tag workflow | closed by PR #66: the pinned manual workflow installs Bun 1.3.14 and Rust 1.95, then executes the supported `effigy ci:native` board | `g15.049` complete |
 | Read-only release-gate claim | closed by PR #66: `effigy release gates` executes exactly one configured `headless` gate backed by the complete `effigy qa` board | `g15.049` complete |
 | GPUI/Zed dependency licence policy | closed by PR #67: exact fork `inflatable-cookie/zed@87d9afbe` removes GPL tracing from both normal GPUI graphs; `libbz2-rs` terms and attribution ship on both notice surfaces; five immutable Git sources are admitted fail-closed | `g15.051` complete; merge `30e2aae3` |
+| Breadcrumb item icons | active downstream use requires an icon-only home root and optional icons on every authored crumb; the current text-only item model cannot express either shape. The fixed upgrade keeps a required semantic label, adds icon-plus-label and icon-only presentation, and remains serial behind the overlapping native presentation migration | `g15.053`, after `g15.043` |
 | v0.2.0 candidate | manifests remain 0.1.0 and no 0.2.0 release note exists | `g15.050`, then operator gate `g15.013` |
 
 ## Carried Requirements (recorded, not implemented)
