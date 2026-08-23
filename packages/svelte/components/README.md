@@ -6,8 +6,8 @@ Unified Svelte component library for Poodle. All components in a single
 `0.2.0` is a preview-channel npm release. Breaking changes may still ship in
 `0.x` minor releases; no `stable` channel exists yet, so pin an exact version
 and read the [release notes](https://github.com/inflatable-cookie/poodle/blob/main/docs/release-notes/0.2.0.md) before
-upgrading. `0.2.0` is the first published version — earlier versions were
-source baselines and are not on the registry.
+upgrading. `0.1.0` was the first registry version; `0.2.0` supersedes it on
+the preview channel.
 
 ## Setup
 

@@ -14,8 +14,8 @@ bun add @inflatable-cookie/poodle-core@0.2.0
 # or: npm install @inflatable-cookie/poodle-core@0.2.0
 ```
 
-`0.2.0` is the first published version — earlier versions were source
-baselines and are not on the registry.
+`0.1.0` was the first registry version. `0.2.0` supersedes it on the preview
+channel.
 
 ## Public Surfaces
 

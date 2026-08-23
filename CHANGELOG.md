@@ -178,8 +178,9 @@ complete migration checklist.
 - Established the first documented preview baseline: framework-free core,
   Svelte and experimental React component packages, shared tokens and themes,
   Rust contracts, the shared render tree, and GPUI and Jetstream adapters.
-  This was a source/version baseline, not a registry publication or GitHub
-  release tag.
+  It was initially documented as a source/version baseline, then tagged as
+  `v0.1.0`; core and Svelte were published to npm on 2026-08-10 while React
+  remained source-only.
 
 ### Changed
 

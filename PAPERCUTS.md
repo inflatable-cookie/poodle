@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-23 — `effigy release simulate` cannot parse Poodle's accepted
+  `CHANGELOG.md`: it rejects the prose under both `Unreleased` and `0.2.0` as
+  unexpected content. The repository's documented tag-plus-workflow release
+  path does not consume this parser, but the generic Effigy release simulation
+  and prepare/execute protocol is unusable until the changelog dialect or
+  parser is aligned. Found during `g15.013` read-only certification.
+
 - 2026-08-23 — Bumping a workspace package version leaves `bun.lock` stale and
   there is no supported way to refresh only that. `bun install`,
   `bun install --force`, and `bun install --lockfile-only` all leave the
