@@ -1,9 +1,15 @@
 /**
- * g15.047 — GPUI capture driver. Builds the `poodle-offscreen-capture`
- * one-shot target once, then invokes it twice per fixture: the pair must be
+ * g15.047 — GPUI capture driver. Builds the `poodle-window-capture` one-shot
+ * target once, then invokes it twice per fixture: the pair must be
  * byte-identical, the receipt must verify against its PNG, and only then is
  * the pair retained. A failed invocation writes nothing and stops the batch
  * — there is no retry and no frame picking.
+ *
+ * WINDOWED (g16.005). Each invocation opens one real GPUI window with
+ * `focus: false` and captures it by window id; there is no offscreen path on
+ * crates.io GPUI 0.2.2. This driver therefore needs a macOS window server and
+ * Screen Recording permission, and the comparison selector that calls it is
+ * operator-approved rather than part of any default board.
  */
 
 import { spawnSync } from "node:child_process";
@@ -19,7 +25,7 @@ import {
 } from "./receipt.ts";
 
 const PREVIEW_MANIFEST = "packages/gpui/preview/Cargo.toml";
-const BIN = "packages/gpui/preview/target/debug/poodle-offscreen-capture";
+const BIN = "packages/gpui/preview/target/debug/poodle-window-capture";
 
 export type GpuiCaptureRecord = {
   fixture: string;
@@ -42,7 +48,7 @@ function captureOnce(fixture: string, pngPath: string, receiptPath: string): voi
   );
   if (result.status !== 0) {
     throw new Error(
-      `poodle-offscreen-capture failed for ${fixture} (exit ${result.status}): ${result.stderr.trim()}`,
+      `poodle-window-capture failed for ${fixture} (exit ${result.status}): ${result.stderr.trim()}`,
     );
   }
 }
@@ -50,7 +56,7 @@ function captureOnce(fixture: string, pngPath: string, receiptPath: string): voi
 export function captureGpuiBatch(fixtures: ButtonFixture[], outDir: string): GpuiCaptureRecord[] {
   const build = spawnSync(
     "cargo",
-    ["build", "--quiet", "--manifest-path", PREVIEW_MANIFEST, "--bin", "poodle-offscreen-capture", "--features", "capture"],
+    ["build", "--quiet", "--manifest-path", PREVIEW_MANIFEST, "--bin", "poodle-window-capture", "--features", "window-capture"],
     { encoding: "utf8" },
   );
   if (build.status !== 0) {

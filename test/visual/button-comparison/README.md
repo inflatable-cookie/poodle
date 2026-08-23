@@ -6,14 +6,21 @@ and GPUI. This is a **diagnostic mechanism proof**, not component authority,
 not a completion gate, and not a baseline system.
 
 ```sh
-effigy test:visual-button-comparison        # focused tests + full batch, disposable output
-bun test/visual/button-comparison/run.ts    # the batch alone
-bun test/visual/button-comparison/run.ts --out=<dir>          # explicit evidence directory
+effigy test:visual-comparator                          # comparator unit tests, headless
+effigy test:visual-button-comparison-windowed          # comparator tests + full batch (WINDOWED)
+bun test/visual/button-comparison/run.ts               # the batch alone
+bun test/visual/button-comparison/run.ts --out=<dir>   # explicit evidence directory
 ```
+
+The batch selector carries the `-windowed` suffix since g16.005: crates.io
+GPUI 0.2.2 exposes no scene readback, so the GPUI leg opens one real
+non-activating window per capture and needs a macOS window server plus Screen
+Recording permission. It is operator-approved, never part of a default board.
+The comparator's own unit tests stay pure and headless.
 
 The batch is always the fixed 18 fixtures — there is deliberately no subset
 mode, so a partial run can never masquerade as the complete closed batch.
-(`--fixture` exists only on the `poodle-offscreen-capture` one-shot target.)
+(`--fixture` exists only on the `poodle-window-capture` one-shot target.)
 
 ## What happens in one run
 
@@ -23,13 +30,16 @@ mode, so a partial run can never masquerade as the complete closed batch.
    - Svelte/React: private capture-only fixture hosts in the two previews
      (`packages/{svelte,react}/preview/src/fixture-host/`), driven by pinned
      headless Chromium at device scale 2 (`capture-web.ts`).
-   - GPUI: `poodle-offscreen-capture --fixture <name>` on the adopted Metal
-     `HeadlessAppContext` seam (`capture-gpui.ts` drives it).
+   - GPUI: `poodle-window-capture --fixture <name>`, which renders into one
+     real GPUI window opened with `focus: false` and captures that window by
+     its own window id (`capture-gpui.ts` drives it). The application is never
+     activated and the window is never raised; each receipt carries the
+     capture process's own frontmost-application samples as proof.
 2. Every runtime captures every fixture **twice**; the pair must be
    byte-identical or the batch stops. No averaging, no retrying away, no frame
    picking.
 3. Every PNG is verified against its own typed receipt
-   (`poodle.button-visual-capture.v1`, `receipt.ts`) before any comparison:
+   (`poodle.button-visual-capture.v2`, `receipt.ts`) before any comparison:
    schema, closed key sets, exact landmark set, device dimensions, SHA-256.
    Missing, stale, aliased, or hash-mismatched pairs fail closed.
 4. Comparisons (`compare.ts`, policy constants in `policy.ts` — the card's

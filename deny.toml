@@ -32,15 +32,16 @@ allow = [
 confidence-threshold = 0.8
 
 [sources]
-# Only the reviewed immutable Git repositories used by the GPUI graphs are
-# admitted. Every dependency must still declare a full `rev` below.
-allow-git = [
-  "https://github.com/inflatable-cookie/zed",
-  "https://github.com/zed-industries/font-kit",
-  "https://github.com/zed-industries/scap",
-  "https://github.com/zed-industries/wasm_thread",
-  "https://github.com/proptest-rs/proptest",
-]
+# No Git source is admitted (g16.005). The five entries that used to live here
+# existed only to carry the GPUI fork; Poodle's Rust graphs now resolve
+# entirely from crates.io, and `gpui` in particular MUST, because the node
+# backend is public-intent and a forked crate identity is not interchangeable
+# with the registry one for a consumer.
+#
+# Kept in sync with `scripts/repository-security-policy.ts`, which additionally
+# rejects Git-sourced `gpui`/`gpui_platform` by name even if a repository is
+# ever re-admitted here.
+allow-git = []
 unknown-registry = "deny"
 unknown-git = "deny"
 required-git-spec = "rev"

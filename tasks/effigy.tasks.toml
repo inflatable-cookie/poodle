@@ -103,6 +103,20 @@
 # through real pointer input. Construction evidence only — no visual,
 # interaction, or cross-runtime parity claim.
 "probe:gpui-specimens" = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --bin poodle-preview specimen_probe"
+# g16.005 window capture smoke — HEADLESS. Builds the `poodle-window-capture`
+# target, runs its own unit tests (the activation-boundary source check, the
+# device-size policy, the frontmost-application rule, publish atomicity), and
+# proves every negative invocation is rejected during argument validation,
+# before any window exists. Opens no window, takes no focus, needs no Screen
+# Recording permission. Safe in an ordinary worker; not in `qa`, because
+# building the target is not cheap and it proves nothing about the web board.
+"smoke:gpui-window-capture" = "bun packages/gpui/preview/scripts/window-capture-smoke.ts"
+# The capture itself — WINDOWED, operator-approved only (AGENTS.md). Opens
+# real GPUI windows with `focus: false`, captures each by its own window id,
+# and asserts repeat byte-identity, receipt verification, and that the
+# frontmost application never changed. Needs a macOS window server and Screen
+# Recording permission. Never in qa, ci, or a release gate.
+"capture:gpui-windowed" = "bun packages/gpui/preview/scripts/window-capture-diagnostic.ts"
 # Preview (documentation site)
 "svelte:build" = "bun run --cwd packages/svelte/preview build"
 "svelte:run" = "bun run --cwd packages/svelte/preview dev"
@@ -142,6 +156,13 @@
 # CI gates — light, ubuntu-only. No native (gpui/jetstream) crates, no vite
 # preview builds. The GitHub workflows bootstrap their pinned runtimes and
 # Effigy before launching the named selectors; `effigy ci` is the local gate.
+# g16.005 downstream consumer proof. Compiles a throwaway crate that declares
+# crates.io `gpui = "0.2.2"` for itself AND depends on Poodle's GPUI node
+# backend, passing GPUI values across the boundary both ways. A forked or
+# patched GPUI source in Poodle gives the two crates different identities and
+# this stops compiling — which is exactly what published v0.2.1 did to
+# Longhorn. Includes a negative control. Headless; no window, no permission.
+"drift:gpui-consumer-identity" = "bun test/consumer-dual-dependency/run.ts"
 "check:release-automation" = "bun scripts/check-release-automation.ts"
 "test:core" = "bun run --cwd packages/core test"
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
@@ -207,15 +228,24 @@
   { run = "cargo test --quiet --manifest-path packages/gpui/preview/Cargo.toml --test visual_fixture_inventory" },
 ]
 
-# g15.047 Button visual comparison. Headless same-run capture of the accepted
-# 18 Button fixtures through Svelte, React (pinned Chromium), and GPUI (Metal
-# headless one-shot), each captured twice for byte-identity, verified against
-# typed receipts, then compared: Svelte↔React exact, Svelte↔GPUI under the
-# card's fixed renderer-aware policy. Diagnostic only — no baselines, no
-# refresh mode, no completion claim. Output goes to the disposable
-# test/visual/button-comparison/out directory.
-"test:visual-button-comparison" = [
-  { run = "bun test test/visual/button-comparison/compare.test.ts" },
+# g15.047 Button visual comparison. Same-run capture of the accepted 18 Button
+# fixtures through Svelte, React (pinned Chromium), and GPUI, each captured
+# twice for byte-identity, verified against typed receipts, then compared:
+# Svelte↔React exact, Svelte↔GPUI under the card's fixed renderer-aware
+# policy. Diagnostic only — no baselines, no refresh mode, no completion
+# claim. Output goes to the disposable test/visual/button-comparison/out
+# directory.
+#
+# WINDOWED since g16.005: the GPUI leg opens one real non-activating window
+# per capture, because crates.io GPUI 0.2.2 has no scene readback. The whole
+# selector therefore carries the `-windowed` suffix and is operator-approved,
+# never part of a default board.
+#
+# The comparator's own unit tests are pure and stay reachable headlessly as
+# `test:visual-comparator`.
+"test:visual-comparator" = "bun test test/visual/button-comparison/compare.test.ts"
+"test:visual-button-comparison-windowed" = [
+  { task = "test:visual-comparator" },
   { run = "bun test/visual/button-comparison/run.ts" },
 ]
 
@@ -446,6 +476,14 @@
   # Native specimen construction probe (g15.026): same in-memory platform,
   # page tier rather than component tier.
   { task = "probe:gpui-specimens" },
+  # The public GPUI source boundary (g16.005): an ordinary crates.io consumer
+  # must still be able to depend on `gpui` and on Poodle's node backend at
+  # once. Warm it is a few seconds; cold it builds GPUI once into a cached
+  # target directory outside the checkout.
+  { task = "drift:gpui-consumer-identity" },
+  # The capture target's own headless surface: the activation boundary, the
+  # device-size policy, and every rejected-before-a-window negative case.
+  { task = "smoke:gpui-window-capture" },
 ]
 
 # Paired-repository Jetstream admission board. The preview, accessibility

@@ -81,7 +81,19 @@ const WHITE: Srgb = [1, 1, 1, 1];
 
 function environmentFor(runtime: RuntimeName): ButtonCaptureReceipt["environment"] {
   return runtime === "gpui"
-    ? { kind: "metal-headless", os: "macos", arch: "arm64", gpuiRevision: "0".repeat(40) }
+    ? {
+        kind: "macos-window-server-nonactivating",
+        os: "macos",
+        arch: "arm64",
+        gpuiSource: "crates.io",
+        gpuiVersion: "0.2.2",
+        foreground: {
+          baseline: "com.example.editor",
+          observed: ["com.example.editor"],
+          samples: 24,
+          changed: false,
+        },
+      }
     : { kind: "chromium", version: "test-chromium" };
 }
 
@@ -102,7 +114,7 @@ function makeReceipt(
     landmarks.spinner = { x: 28, y: 28, width: 12, height: 12 };
   }
   const raw: Record<string, unknown> = {
-    schema: "poodle.button-visual-capture.v1",
+    schema: "poodle.button-visual-capture.v2",
     fixture: target.name,
     runtime,
     logicalViewport: { width: 240, height: 80 },

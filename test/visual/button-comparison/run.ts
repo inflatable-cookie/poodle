@@ -269,8 +269,8 @@ async function main(): Promise<void> {
   const environments = [
     `chromium ${(JSON.parse(readFileSync(join(capturesDir, "svelte", `${fixtureFileStem(fixtures[0].name)}.json`), "utf8")) as { environment: { version: string } }).environment.version}`,
     (() => {
-      const env = (JSON.parse(readFileSync(join(capturesDir, "gpui", `${fixtureFileStem(fixtures[0].name)}.json`), "utf8")) as { environment: { os: string; arch: string; gpuiRevision: string } }).environment;
-      return `gpui ${env.gpuiRevision} (${env.os}/${env.arch}, metal-headless)`;
+      const env = (JSON.parse(readFileSync(join(capturesDir, "gpui", `${fixtureFileStem(fixtures[0].name)}.json`), "utf8")) as { environment: { os: string; arch: string; gpuiSource: string; gpuiVersion: string; kind: string } }).environment;
+      return `gpui ${env.gpuiSource} ${env.gpuiVersion} (${env.os}/${env.arch}, ${env.kind})`;
     })(),
   ];
 
