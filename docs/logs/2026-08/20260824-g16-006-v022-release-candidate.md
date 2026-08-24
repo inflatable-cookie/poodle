@@ -407,3 +407,15 @@ explicit `g16.007` operator decision for the windowed diagnostic, tag, and
 publication. Any further candidate-bearing review fix invalidates this receipt
 and requires another replacement candidate commit plus a complete rerun of the
 board above.
+
+## Orchestrator Closeout
+
+PR 74 merged to `main` at
+`6ea561be8c45ec7fbdbab4ebeaba4f31284e2596`. Independent review accepted the
+exact candidate and receipt named above. A first independent `effigy release
+gates` run failed transiently in the headless GPUI capture selector; the
+isolated selector and a complete gate retry passed. The execution friction is
+recorded in `PAPERCUTS.md`; it did not change the accepted candidate.
+
+No tag, workflow dispatch, publication, or registry mutation occurred. The
+next state is the explicit `g16.007` operator gate.

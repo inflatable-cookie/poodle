@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-24 — An exact-candidate review ran green `effigy qa`, then
+  `effigy release gates` failed once in `smoke:gpui-window-capture` after about
+  2.6 seconds. The isolated selector passed immediately and a complete release
+  gate retry passed 1/1. Effigy's task report retained only exit 1 rather than
+  the child stderr, leaving the transient cause opaque. Preserve child stderr
+  and investigate repeated headless-board warm-state races. Found while
+  reviewing `g16.006`.
+
 - 2026-08-23 — `effigy release simulate` cannot parse Poodle's accepted
   `CHANGELOG.md`: it rejects the prose under both `Unreleased` and `0.2.0` as
   unexpected content. The repository's documented tag-plus-workflow release

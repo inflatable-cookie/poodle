@@ -1,6 +1,6 @@
 # g16.006 — v0.2.2 release candidate
 
-Status: **ready — `g16.005` accepted and merged**
+Status: **complete — PR 74 merged at `6ea561be`**
 Depends on: `g16.005`
 Blocks: `g16.007` and all consumer adoption
 Governing refs: `005-gpui-cratesio-recovery.md`,
@@ -85,19 +85,19 @@ candidate is not ready: stop and report it.
 
 ## Acceptance
 
-- [ ] All release-bearing manifests, generated version stamps, and lockfiles
+- [x] All release-bearing manifests, generated version stamps, and lockfiles
       agree on `0.2.2` without unrelated upgrades.
-- [ ] Release notes state the `v0.2.1` defect and the windowed diagnostic
+- [x] Release notes state the `v0.2.1` defect and the windowed diagnostic
       limitation without claiming true headless GPUI pixels.
-- [ ] The final GPUI graphs and every active notice, licence-policy, and audit
+- [x] The final GPUI graphs and every active notice, licence-policy, and audit
       surface agree that `bzip2` / `libbz2-rs-sys` are absent.
-- [ ] `effigy qa`, `effigy release gates`, `effigy docs:check`,
+- [x] `effigy qa`, `effigy release gates`, `effigy docs:check`,
       `effigy ir:check`, and `effigy catalogue:check` pass from the exact
       candidate.
-- [ ] Core, Svelte, and React pack checks and clean-install proof pass; only
+- [x] Core, Svelte, and React pack checks and clean-install proof pass; only
       core and Svelte remain publishable.
-- [ ] The candidate receipt pins one clean SHA and expected artifact digests.
-- [ ] No tag, workflow dispatch, GitHub release, npm publish, registry
+- [x] The candidate receipt pins one clean SHA and expected artifact digests.
+- [x] No tag, workflow dispatch, GitHub release, npm publish, registry
       mutation, or windowed/native-visual selector runs in the worker.
 
 ## Required Validation
@@ -138,3 +138,15 @@ required board and produce the external tarballs. Then add only the execution
 receipt in a second commit, naming the candidate SHA, versions, artifact
 digests, command results, known non-blocking warnings, and absence of release
 mutations. Push one worker branch and open one PR against `main`; do not merge.
+
+## Closeout
+
+PR 74 merged at `6ea561be8c45ec7fbdbab4ebeaba4f31284e2596` after independent
+review of candidate `d5607def24c6833913df1b5dcfa06372fcd5dd81` and its
+evidence-only receipt `2202f0942d56e3aebc9963e18262f367867e081f`. The
+orchestrator reproduced the package artifacts, ran `effigy qa`, and obtained a
+green complete `effigy release gates` retry after one transient headless GPUI
+capture failure. That diagnostic friction is recorded in `PAPERCUTS.md`.
+
+No release mutation occurred. `g16.007` remains the separate operator-owned
+certification, tag, and publication gate.

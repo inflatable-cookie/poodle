@@ -1,8 +1,8 @@
 # g16 — Published Consumer Adoption
 
-Status: active — GPUI source identity recovered; `g16.006` PR 74 is in review
-with one notice-policy truthfulness correction required; Longhorn remains
-paused until certification
+Status: active — GPUI source identity recovered and the exact `v0.2.2`
+candidate accepted; `g16.007` waits at the explicit operator gate and Longhorn
+remains paused until certification
 Posture: adoption-first with one Poodle patch release gate
 Opened: 2026-08-23
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -26,7 +26,7 @@ component work or add a compatibility shim.
 ## Adoption Policy
 
 - Applications pin `@inflatable-cookie/poodle-core` and
-  `@inflatable-cookie/poodle-svelte` to exact `0.2.2` after `g16.006`. Poodle is pre-1.0;
+  `@inflatable-cookie/poodle-svelte` to exact `0.2.2` after `g16.007`. Poodle is pre-1.0;
   `latest` is resolved and recorded, not left as a moving range.
 - Libraries move their peer requirement to the narrow `0.2.x` shape already
   used by that library: exact peers stay exact; caret peers become `^0.2.2`.
@@ -54,7 +54,7 @@ trees, and in-repository archived applications are excluded.
 
 | Lane | Repositories | State |
 | --- | --- | --- |
-| Release recovery | Poodle | crates.io GPUI recovery merged; v0.2.2 candidate ready |
+| Release recovery | Poodle | crates.io GPUI recovery merged; exact v0.2.2 candidate accepted; operator certification pending |
 | Foundation | Longhorn, Underlay, Soundcheck Library | Underlay and Soundcheck Library reached 0.2.1; Longhorn paused; all need final 0.2.2 state |
 | Adapter follow-up | Jetstream | waits for Longhorn |
 | Product applications | Acowtancy, Bovine Accelerator Desktop, Compli Me, Composer, Contact Patch, Figmatic, Finch, Loophole, Nucleus, Songsprout, Soundcheck, Underlay Reference | waits for the foundation it consumes |
@@ -74,10 +74,10 @@ trees, and in-repository archived applications are excluded.
 5. [005 — GPUI crates.io recovery](005-gpui-cratesio-recovery.md) —
    complete; PR 73 merged at `8dfdfa3c`
 6. [006 — v0.2.2 release candidate](006-v022-release-candidate.md) —
-   changes requested on PR 74; remove stale bzip2 notice/policy claims, repin,
-   and re-prove the exact candidate without release mutation
+   complete; candidate `d5607def` accepted and PR 74 merged at `6ea561be`
 7. [007 — v0.2.2 release certification](007-v022-release-certification.md) —
-   blocked; human-owned gate after the exact `006` candidate
+   operator gate; waits for explicit approval of the non-activating window
+   diagnostic and, separately, the exact release mutation
 8. `008` — fresh Longhorn v0.2.2 adoption — compile after `007`
 9. `009` — Underlay 0.2.2 follow-up — compile after `007`
 10. `010` — Soundcheck Library 0.2.2 follow-up — compile after `007`
@@ -87,13 +87,15 @@ trees, and in-repository archived applications are excluded.
 
 ## Current Task And Parallel Lanes
 
-`g16.006` is the only executable lane. PR 74's first review found that the
-accepted GPUI graph no longer contains `bzip2` / `libbz2-rs-sys` while the
-public notices, licence allowlist, spec, and audit expectations still claim it
-does. That bounded candidate correction is approved; it invalidates the first
-candidate SHA and requires the complete board to rerun. The crates.io GPUI
-boundary and non-activating evidence transport are accepted and merged in
-`g16.005`.
+`g16.007` is the single current task and is not a worker lane. Candidate
+`d5607def` and its headless evidence are accepted; no tag or publication has
+occurred. The next action requires explicit operator approval for the
+non-activating window diagnostic. Tagging and publication remain a distinct
+exact-SHA authorisation inside that card.
+
+The crates.io GPUI boundary and non-activating evidence transport are accepted
+and merged in `g16.005`. PR 74 removed the stale `bzip2` / `libbz2-rs-sys`
+notice-policy claims, re-pinned the candidate, and reran the complete board.
 Longhorn `g16.002` stopped without a PR and its worktree was removed rather
 than propagate the GPUI fork. Underlay `g16.003` and Soundcheck Library
 `g16.004` remain valid evidence for removing local overrides, but each needs

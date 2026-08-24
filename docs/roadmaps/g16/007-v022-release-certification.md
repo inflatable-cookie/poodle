@@ -1,6 +1,6 @@
 # g16.007 — v0.2.2 release certification
 
-Status: **blocked — waits for an accepted `g16.006` candidate and explicit
+Status: **operator gate — candidate `d5607def` accepted; waits for explicit
 operator approval**
 Depends on: `g16.006`
 Governing refs: `006-v022-release-candidate.md`,
@@ -14,9 +14,21 @@ publication operation only after the operator authorises that exact SHA.
 
 This card is never dispatched to a worker.
 
+## Accepted Candidate
+
+- Candidate: `d5607def24c6833913df1b5dcfa06372fcd5dd81`
+- Evidence receipt: `2202f0942d56e3aebc9963e18262f367867e081f`
+- Integration merge: PR 74 at
+  `6ea561be8c45ec7fbdbab4ebeaba4f31284e2596`
+- Review record: [PR 74 acceptance](https://github.com/inflatable-cookie/poodle/pull/74#issuecomment-5394209096)
+
+The candidate and headless release evidence are accepted. This does not
+authorise the windowed diagnostic, tag, workflow dispatch, publication, or
+registry mutation.
+
 ## Acceptance
 
-- [ ] The candidate receipt pins one clean SHA with green headless release
+- [x] The candidate receipt pins one clean SHA with green headless release
       evidence and expected artifact digests.
 - [ ] The operator-reviewed window diagnostic captures all retained Button
       fixtures without changing the foreground application.
