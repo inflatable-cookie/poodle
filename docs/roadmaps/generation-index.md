@@ -1,21 +1,20 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-23
+Updated: 2026-08-24
 
 ## Active Track
 
 - `g16`
-  - Status: active — inventory complete; adoption exposed a released GPUI
-    source-identity defect; v0.2.2 recovery ready
-  - Posture: published-package adoption paused behind one dependency-source
-    recovery; no component or public API redesign
-  - Range: `001` to `007`; application cards compile after v0.2.2 and foundation evidence
+  - Status: active — inventory and v0.2.2 release recovery complete; consumer
+    adoption resumes with Longhorn
+  - Posture: published-package adoption from exact npm 0.2.2 and Rust tag
+    `v0.2.2`; no component or public API redesign
+  - Range: `001` to `007` complete; `008+` compile in dependency order
   - Evidence: 17 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: execute and review `005`, prepare the exact candidate through `006`,
-    then take `007` through the explicit operator release gate before
-    recompiling Longhorn adoption.
+  - Next: compile and dispatch a fresh Longhorn v0.2.2 adoption card, then the
+    Underlay and Soundcheck Library 0.2.2 follow-ups.
 
 ## Latest Completed Track
 

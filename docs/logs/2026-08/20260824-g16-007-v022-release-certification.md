@@ -1,4 +1,4 @@
-# g16.007 v0.2.2 Release Certification — Window Diagnostic
+# g16.007 — v0.2.2 Release Certification
 
 Date: 2026-08-24
 Card: `../../roadmaps/g16/007-v022-release-certification.md`
@@ -11,6 +11,10 @@ Candidate merge: PR 74 at
 The operator explicitly authorised the non-activating window diagnostic after
 the candidate was accepted. This did not authorise tag creation, workflow
 dispatch, publication, registry mutation, or release-workflow editing.
+
+After reviewing the diagnostic, the operator separately authorised tag
+`v0.2.2` and publication from exact candidate `d5607def`. The release workflow
+was not edited.
 
 The diagnostic ran from a clean detached worktree at the exact candidate SHA:
 
@@ -62,8 +66,44 @@ The generated evidence stayed outside the tracked tree:
 
 No baseline was updated and no diagnostic artifact is release input.
 
-## Continuation
+## Release
 
-The window diagnostic is accepted. `g16.007` remains at the operator gate.
-The next action is a separate explicit instruction to create tag `v0.2.2` and
-run the repository's publication path from the accepted exact candidate.
+Lightweight tag `v0.2.2` was created and pushed at
+`d5607def24c6833913df1b5dcfa06372fcd5dd81`. Remote tag verification returned
+the same SHA. Existing tags were not moved, deleted, or reused.
+
+[GitHub Actions run `32756610293`](https://github.com/inflatable-cookie/poodle/actions/runs/32756610293)
+completed successfully in 30 minutes with the exact candidate as its head.
+
+| Workflow step | Result |
+| --- | --- |
+| complete headless Effigy release gate | pass |
+| manifest/tag version agreement | pass |
+| tarball pack and content verification | pass |
+| npm trusted publication | pass |
+| packed artifact upload | pass |
+
+The run retains `packed-tarballs` (523,094 bytes), digest
+`sha256:0b83427da8fac0ac068f53bd47759be2716edfd5afe9a7419caa6b555ab96740`.
+The configured workflow does not create a GitHub Release, and none exists for
+`v0.2.2`.
+
+## Registry And Consumer Proof
+
+| Package | Published | npm `latest` |
+| --- | --- | --- |
+| `@inflatable-cookie/poodle-core` | `0.2.2` | `0.2.2` |
+| `@inflatable-cookie/poodle-svelte` | `0.2.2` | `0.2.2` |
+| `@inflatable-cookie/poodle-react` | no | absent; source-only by policy |
+
+Svelte retains peer range `>=5.38.6 <6`. A new temporary npm project installed
+exact core and Svelte 0.2.2 plus Svelte 5.38.6 from the public registry. Runtime
+imports succeeded for 398 core exports, 111 icon exports, 13 token exports,
+and 207 Svelte exports. Representative token CSS, theme CSS, and Svelte types
+subpaths resolved from the installed packages.
+
+## Closeout
+
+`g16.007` is complete. Poodle release recovery is closed; the next move is a
+fresh Longhorn v0.2.2 adoption card, followed by the bounded Underlay and
+Soundcheck Library 0.2.2 updates.

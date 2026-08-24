@@ -1,8 +1,7 @@
 # g16 — Published Consumer Adoption
 
-Status: active — GPUI source identity recovered and the exact `v0.2.2`
-candidate plus window diagnostic accepted; `g16.007` waits for explicit
-release approval and Longhorn remains paused until certification
+Status: active — `v0.2.2` published from the accepted crates.io-GPUI
+candidate; consumer adoption resumes with a fresh Longhorn lane
 Posture: adoption-first with one Poodle patch release gate
 Opened: 2026-08-23
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -54,7 +53,7 @@ trees, and in-repository archived applications are excluded.
 
 | Lane | Repositories | State |
 | --- | --- | --- |
-| Release recovery | Poodle | crates.io GPUI recovery merged; exact v0.2.2 candidate accepted; operator certification pending |
+| Release recovery | Poodle | complete; `v0.2.2` published from exact candidate `d5607def` |
 | Foundation | Longhorn, Underlay, Soundcheck Library | Underlay and Soundcheck Library reached 0.2.1; Longhorn paused; all need final 0.2.2 state |
 | Adapter follow-up | Jetstream | waits for Longhorn |
 | Product applications | Acowtancy, Bovine Accelerator Desktop, Compli Me, Composer, Contact Patch, Figmatic, Finch, Loophole, Nucleus, Songsprout, Soundcheck, Underlay Reference | waits for the foundation it consumes |
@@ -76,8 +75,8 @@ trees, and in-repository archived applications are excluded.
 6. [006 — v0.2.2 release candidate](006-v022-release-candidate.md) —
    complete; candidate `d5607def` accepted and PR 74 merged at `6ea561be`
 7. [007 — v0.2.2 release certification](007-v022-release-certification.md) —
-   operator gate; non-activating window diagnostic accepted, exact release
-   mutation still requires explicit approval
+   complete; tag `v0.2.2`, npm core/Svelte publication, artifact, and clean
+   public-registry consumer install verified
 8. `008` — fresh Longhorn v0.2.2 adoption — compile after `007`
 9. `009` — Underlay 0.2.2 follow-up — compile after `007`
 10. `010` — Soundcheck Library 0.2.2 follow-up — compile after `007`
@@ -87,11 +86,12 @@ trees, and in-repository archived applications are excluded.
 
 ## Current Task And Parallel Lanes
 
-`g16.007` is the single current task and is not a worker lane. Candidate
-`d5607def`, its headless evidence, and the non-activating 18-fixture Button
-diagnostic are accepted; no tag or publication has occurred. The next action
-requires explicit operator approval for tag `v0.2.2` and publication from that
-exact candidate. Workflow mutation remains separately forbidden.
+The release-recovery lane is complete. Tag `v0.2.2` points to exact candidate
+`d5607def`; run `32756610293` published core and Svelte 0.2.2 to npm `latest`,
+retained React as source-only, and uploaded the packed artifacts. A clean
+public-registry consumer install passed. The current orchestrator task is to
+compile `g16.008` as a fresh Longhorn 0.2.2 adoption card; Longhorn must not
+resume the stopped 0.2.1 worktree.
 
 The crates.io GPUI boundary and non-activating evidence transport are accepted
 and merged in `g16.005`. PR 74 removed the stale `bzip2` / `libbz2-rs-sys`
