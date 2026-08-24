@@ -26,6 +26,8 @@
 //!   application, one window at a time, rather than one launch per fixture;
 //! - `--focus-evidence <scene> --out <png> --receipt <json>` renders one
 //!   focused-state scene (`window_capture/focus_evidence.rs`);
+//! - `--inset-evidence <scene|all> --out-dir <dir>` renders the inset-shadow
+//!   scene set (`window_capture/inset_evidence.rs`);
 //! - without either, the single-Button smoke contract below applies.
 //!
 //! One-shot contract: every invocation captures once and writes a PNG plus a
@@ -75,6 +77,13 @@ mod fixture_capture;
 // for operator review. Point-in-time evidence, never a baseline.
 #[path = "window_capture/focus_evidence.rs"]
 mod focus_evidence;
+
+// g16.005 inset-shadow evidence: the scene set that actually exercises the
+// backend's own inset painter, through real components. The Button visual
+// comparison cannot — its inventory is Button-only, and Button emits no
+// shadow layers at all.
+#[path = "window_capture/inset_evidence.rs"]
+mod inset_evidence;
 
 use presentation_axes::{ControlSize, ThemePreset};
 
@@ -135,6 +144,7 @@ manifest: {\"captures\":[{\"fixture\":\"<exact-name>\",\"out\":\"<png>\",\"recei
 enum CaptureMode {
     Smoke(CaptureArgs),
     Fixture(fixture_capture::FixtureArgs),
+    InsetEvidence(inset_evidence::InsetEvidenceArgs),
     /// Many fixtures, ONE process. The whole point of this mode is that a
     /// batch is one application launch and one window at a time, not a
     /// focus-capable application per fixture.
@@ -145,6 +155,8 @@ enum CaptureMode {
 fn parse_cli(argv: &[String]) -> Result<CaptureMode> {
     if argv.iter().any(|arg| arg == "--batch") {
         parse_batch_args(argv).map(CaptureMode::Batch)
+    } else if argv.iter().any(|arg| arg == "--inset-evidence") {
+        inset_evidence::parse_args(argv).map(CaptureMode::InsetEvidence)
     } else if argv.iter().any(|arg| arg == "--fixture") {
         parse_fixture_args(argv).map(CaptureMode::Fixture)
     } else if argv.iter().any(|arg| arg == "--focus-evidence") {
@@ -583,6 +595,7 @@ fn main() -> ! {
         CaptureMode::Smoke(args) => run(&args),
         CaptureMode::Fixture(args) => fixture_capture::run(&args),
         CaptureMode::Batch(batch) => fixture_capture::run_batch(&batch),
+        CaptureMode::InsetEvidence(args) => inset_evidence::run(&args),
         CaptureMode::FocusEvidence(args) => focus_evidence::run(&args),
     }
 }

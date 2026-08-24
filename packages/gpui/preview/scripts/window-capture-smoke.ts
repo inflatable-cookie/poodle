@@ -143,6 +143,19 @@ try {
     ["batch mode with any other flag", ["--batch", writeManifest("ok", JSON.stringify({ captures: [
       { fixture: "button/rest-secondary", out: join(work, "b6.png"), receipt: join(work, "b6.json") },
     ] })), "--scale", "2.0"]],
+    [
+      "unknown inset-evidence scene",
+      ["--inset-evidence", "button", "--out-dir", work],
+    ],
+    [
+      "inset-evidence output directory that does not exist",
+      ["--inset-evidence", "all", "--out-dir", join(work, "missing-dir")],
+    ],
+    ["inset-evidence with no output directory", ["--inset-evidence", "all"]],
+    [
+      "inset-evidence with any other flag",
+      ["--inset-evidence", "all", "--out-dir", work, "--scale", "2.0"],
+    ],
   ];
 
   for (const [label, args] of negatives) {

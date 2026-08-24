@@ -297,7 +297,8 @@ resolved: gpui 0.2.2 from registry+https://github.com/rust-lang/crates.io-index
 | --- | --- | --- |
 | `smoke:gpui-offscreen-capture` | — | **removed**; the transport it drove cannot exist on stock 0.2.2 |
 | `smoke:gpui-window-capture` | no | new; headless. Builds the target, runs its unit tests (activation boundary, device-size policy, foreground rule, publish atomicity), and proves 19 negative invocations — CLI and batch manifest alike — are rejected during argument validation. In `ci:native`. |
-| `capture:gpui-windowed` | **yes** | new; the capture itself. Repeat byte-identity, receipt verification, foreground evidence. Operator-approved only. |
+| `capture:gpui-windowed` | **yes** | new; the transport itself. Repeat byte-identity, receipt verification, foreground evidence. Operator-approved only. |
+| `capture:gpui-inset-shadows-windowed` | **yes** | new; the ONLY run that exercises the inset painter. Accordion, ListCard, Tabs, Popover — both band shapes, the stacked case, and the deferred overlay surface — in one non-activating process. Operator-approved only. |
 | `drift:gpui-consumer-identity` | no | new; the proof above. In `ci:native`. |
 | `test:visual-comparator` | no | new; the comparator's own 26 unit tests, split out so they stay headless |
 | `test:visual-button-comparison` | — | **renamed** to `test:visual-button-comparison-windowed`; its GPUI leg now opens windows |
@@ -322,8 +323,8 @@ preview/QA, release, workflow, tag, or publication command was run.
 | `regressions:native` (headless GPUI test platform) | 70/70 |
 | `probe:gpui-specimens` | 8/8 |
 | `catalogue` / `visual_fixture_inventory` | 7/7, 15/15 |
-| `cargo test --bin poodle-window-capture --features window-capture` | 42/42 |
-| `effigy smoke:gpui-window-capture` | 24/24 checks pass |
+| `cargo test --bin poodle-window-capture --features window-capture` | 50/50 |
+| `effigy smoke:gpui-window-capture` | 28/28 checks pass |
 | `effigy drift:gpui-consumer-identity` | 8/8 checks pass, negative control fails as required |
 | `bun test scripts/audit-repository-security.test.ts` | 12/12 |
 | `bun test test/visual/button-comparison/compare.test.ts` | 35/35 |
@@ -346,19 +347,42 @@ with explicit operator approval. Exact commands, in order:
 #    verified, frontmost application unchanged across all three.
 effigy capture:gpui-windowed
 
-# 2. The retained 18-fixture Button runner and the cross-runtime comparison.
+# 2. The inset-shadow painter, through real components. This is the ONLY run
+#    that exercises it — see the note below.
+effigy capture:gpui-inset-shadows-windowed
+
+# 3. The retained 18-fixture Button runner and the cross-runtime comparison.
 effigy test:visual-button-comparison-windowed
 ```
 
-Both need a macOS window server and Screen Recording permission for the
-terminal's parent process. Neither writes into the repository: `(1)` works in
-a temp directory, `(2)` writes to the disposable
-`test/visual/button-comparison/out`. `(2)` exits non-zero by design on
+All three need a macOS window server and Screen Recording permission for the
+terminal's parent process. None writes into the repository: `(1)` works in a
+temp directory, `(2)` writes to the gitignored
+`test/visual/inset-shadow-evidence/out`, `(3)` to the disposable
+`test/visual/button-comparison/out`. `(3)` exits non-zero by design on
 blocking findings — that was already true at `g15.047` and `g15.052`.
 
-Watch for, in `(1)`'s output: `transport:
-macos-window-server-nonactivating`, `device: 480x160`, and `foreground:
-baseline=<your app> observed=["<your app>"] changed=false`.
+**`(3)` cannot check inset shadows.** Its inventory is the closed 18-case
+Button set, and `poodle_render::button` emits no shadow layers at all, so it
+never touches the painter. An earlier revision of this log pointed the
+operator there; that instruction was wrong. `(2)` is the run that exercises
+the path, through Accordion (offset edge band), ListCard (spread ring AND
+leading bar, stacked on one surface), Tabs (spread ring on a drop target),
+and Popover (edge band on a DEFERRED overlay surface). All four render in one
+non-activating process, and each receipt carries the bands the paint pass
+recorded, so the PNG arrives with the geometry it should be showing. A scene
+that painted no bands fails rather than publishing a blank capture.
+
+Watch for:
+
+- in `(1)`: `transport: macos-window-server-nonactivating`,
+  `device: 480x160`, and `foreground: baseline=<your app>
+  observed=["<your app>"] verdict=proved`;
+- in `(2)`: every scene reporting at least one painted band, `list-card`
+  reporting at least two, and then — by eye, in the PNGs — ring thickness and
+  corner clipping on `tabs` and `list-card`, the 1px top highlight on
+  `accordion` and `popover`, the leading bar on `list-card`, and that the
+  popover panel's highlight painted at all.
 
 ## What The Worker Could Not Verify
 
@@ -376,19 +400,27 @@ Stated plainly, because the review run is the thing that settles them:
 - **`NSWorkspace.frontmostApplication` off the main thread.** The objc2
   bindings do not mark it main-thread-only and the accepted prototype sampled
   the same way, but this run did not execute it.
-- **Corner/shadow effects on the Svelte↔GPUI comparison.** If `(2)` shows new
+- **Corner/shadow effects on the Svelte↔GPUI comparison.** If `(3)` shows new
   corner-region deltas that `g15.047` did not have, that is a finding for a
   follow-up card, not something this branch could have measured.
 - **Inset shadow PIXELS.** The band geometry is unit-tested, and the paint
   pass is asserted headlessly through a real `poodle_render::accordion`
   composition, so the bands provably reach `paint_quad` with the right widths,
-  colour, and padding box. What the worker cannot check is how those quads
-  rasterise. Run `(2)` and look at ListCard, Tabs, Accordion, and Popover.
-- **The deferred-overlay case.** Popover's panel is an overlay surface, so
-  observing its paint headlessly needs an overlay host the current regression
-  harness does not stand up. That is a pre-existing harness limit, not
-  something this branch introduced; the real-composition paint test uses
-  Accordion, which reaches the same `apply_shared` seam.
+  colour, and padding box. How those quads RASTERISE is what `(2)` answers.
+  What the worker could do is guarantee `(2)` will actually exercise the path:
+  `every_scene_declares_at_least_one_inset_layer` and
+  `the_scene_set_covers_both_band_shapes_and_the_stacked_case` run headlessly
+  over the real component output, so a scene that stopped producing the thing
+  it is evidence for fails the ordinary board rather than producing a
+  reassuring blank PNG.
+- **The deferred-overlay case, headlessly.** Popover's panel is an overlay
+  surface, so observing its paint headlessly needs an overlay host the current
+  regression harness does not stand up — a pre-existing harness limit, not
+  something this branch introduced. The headless real-composition test
+  therefore uses Accordion. The `popover` scene in `(2)` covers the deferred
+  path instead: its root mounts a real `attach_overlay_host`, and the scene
+  waits until every stamped surface has painted before capturing, so a
+  deferred panel that never painted fails rather than capturing without it.
 
 ## Follow-ups (not in scope here)
 
