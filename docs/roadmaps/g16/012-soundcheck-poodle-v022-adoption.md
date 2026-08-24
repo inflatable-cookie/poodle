@@ -1,6 +1,6 @@
 # g16.012 — Soundcheck Poodle 0.2.2 adoption
 
-Status: **ready — independent first-wave product lane**
+Status: **complete — Soundcheck PR 11 merged at `b1c5937d`**
 Depends on: `g16.007`, `g16.008`, `g16.010`, published npm `0.2.2`
 Target repository: `/Users/tom/Dev/projects/soundcheck`
 Target base: `ddec155b0963d8dc0a6aba2ed9774c826cdc375c`
@@ -67,3 +67,23 @@ Record resolved versions/integrities, peer convergence, changed files,
 compatibility edits, baseline comparison, lock review, and exact validation in
 the Soundcheck PR. Do not merge. Once this lane lands, Soundcheck is complete
 for g16 and its three-layer evidence informs the remaining Longhorn products.
+
+## Closeout
+
+Soundcheck PR [#11](https://github.com/inflatable-cookie/soundcheck/pull/11)
+merged on 2026-08-24 at
+`b1c5937dd774e711b78d4d5eef7b274e8d47b41d`. The app now pins public Poodle
+core/Svelte 0.2.2 exactly, carries no committed sibling Poodle override or Vite
+alias, and preserves its intentional local Longhorn and Soundcheck Library
+links. Their peers converge on the same Svelte 0.2.2 identity. Registry
+integrities match the published npm records and the lock refresh contains no
+unrelated upgrade.
+
+Independent review passed the Rust workspace build, the headless docs/Northstar
+board, frozen install, dependency and lock inspection, and `git diff --check`.
+The existing frontend baseline reproduced unchanged on target base and PR head:
+three failed and nine passed Vitest files with 46 passing tests, 90 Svelte
+errors, and the same Vite failure resolving local Longhorn command sources.
+Doctor's generated-source and god-file scan baseline also reproduced on both
+heads. The canonical verdict is
+[recorded on PR 11](https://github.com/inflatable-cookie/soundcheck/pull/11#issuecomment-5402418314).

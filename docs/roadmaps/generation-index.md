@@ -9,12 +9,12 @@ Updated: 2026-08-24
     adoption complete; first product wave ready
   - Posture: published-package adoption from exact npm 0.2.2 and Rust tag
     `v0.2.2`; no component or public API redesign
-  - Range: `001` to `010` complete; `011`-`013` ready in parallel
+  - Range: `001` to `010` and `012` complete; `011` and `013` remain active
   - Evidence: 17 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: dispatch Nucleus `011`, Soundcheck `012`, and Underlay Reference
-    `013`; use their evidence to compile the remaining product wave. Jetstream
+  - Next: complete Nucleus `011` and Underlay Reference `013`, then use all
+    three first-wave results to compile the remaining products. Jetstream
     remains deferred unless product adoption exposes a dependency on it.
 
 ## Latest Completed Track
