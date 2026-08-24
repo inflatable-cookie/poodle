@@ -1,7 +1,7 @@
 //! Generic headless GPUI test driver (g14.023, retained by g14.021).
 //!
 //! Reusable mount, frame, focus, pointer, drag, and keyboard machinery for
-//! native regressions on GPUI's in-memory test platform
+//! native regressions on GPUI 0.2.2's in-memory test platform
 //! (`TestAppContext`, `VisualTestContext`, `TestWindow`). No component
 //! identifier, part list, or fixture corpus lives here.
 //!
@@ -201,9 +201,9 @@ impl<'a> HeadlessDriver<'a> {
 
     /// Focus the element through the real backend focus registry.
     pub fn focus_element(&mut self, element_id: &str) {
-        self.cx.update(|window, cx| {
+        self.cx.update(|window, _cx| {
             if let Some(handle) = poodle_gpui_node_backend::focus_handle_for(element_id) {
-                handle.focus(window, cx);
+                handle.focus(window);
             }
         });
         self.draw_frame();
@@ -212,8 +212,8 @@ impl<'a> HeadlessDriver<'a> {
     /// Move focus to the next tab stop through the window's real traversal —
     /// the native counterpart of pressing Tab, with no pointer involved.
     pub fn focus_next_tab_stop(&mut self) {
-        self.cx.update(|window, cx| {
-            window.focus_next(cx);
+        self.cx.update(|window, _cx| {
+            window.focus_next();
         });
         self.draw_frame();
     }
@@ -359,9 +359,9 @@ impl<'a> HeadlessDriver<'a> {
     /// overlay dismissal) would never fire. The mount host is focused first;
     /// the same guarantee a document-level key listener has on the web.
     pub fn dispatch_key(&mut self, key: &str) {
-        self.cx.update(|window, cx| {
+        self.cx.update(|window, _cx| {
             let handle = self.root_focus.clone();
-            handle.focus(window, cx);
+            handle.focus(window);
         });
         self.dispatch_key_raw(key);
     }
@@ -374,7 +374,6 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
             is_held: false,
-            prefer_character_input: false,
         });
         self.cx.simulate_event(KeyUpEvent { keystroke });
         self.cx.run_until_parked();

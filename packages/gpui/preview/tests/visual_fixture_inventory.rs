@@ -1,7 +1,7 @@
 //! g15.046 — Button visual fixture inventory: Rust loader and validator tests.
 //!
 //! The parser/validator itself moved in g15.047 to
-//! `src/bin/offscreen_capture/inventory.rs`, included here by path, so this
+//! `src/bin/window_capture/inventory.rs`, included here by path, so this
 //! test target and the offscreen capture target consume the same code — there
 //! is no third parser. It parses the same checked-in bytes as its TypeScript
 //! sibling, `test/visual/fixtures/button-visual-inventory.ts`. Neither language
@@ -35,7 +35,7 @@ mod presentation_axes;
 // capture target needs but these tests do not (the typed decode layer) stay
 // reachable without per-item allows.
 #[allow(dead_code)]
-#[path = "../src/bin/offscreen_capture/inventory.rs"]
+#[path = "../src/bin/window_capture/inventory.rs"]
 mod inventory;
 
 use inventory::{

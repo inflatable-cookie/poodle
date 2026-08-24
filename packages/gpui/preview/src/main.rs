@@ -2248,7 +2248,7 @@ fn main() {
         base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
     };
 
-    gpui_platform::application().with_assets(assets).run(move |cx: &mut App| {
+    Application::new().with_assets(assets).run(move |cx: &mut App| {
         // Taken before the window closure consumes `cli`.
         let driver_screenshot = cli.screenshot.clone();
         let has_driver_actions = !cli.clicks.is_empty();

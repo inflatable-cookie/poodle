@@ -39,6 +39,7 @@ use poodle_node::{
     NodePoint, NodePosition, NodeRole, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
 };
 
+mod inset_shadow;
 mod interaction;
 mod layers;
 mod style;
@@ -580,6 +581,10 @@ where
     let el = apply_text(el, node);
     let el = apply_cursor(el, node);
     let el = apply_state_patches(el, node, id);
+    // Inset shadow bands paint under the node's own children, so the painter
+    // goes in before them (g16.005: crates.io `BoxShadow` has no inset flag,
+    // so the backend paints these layers itself).
+    let el = inset_shadow::apply(el, node, id);
     apply_children(el, node, id)
 }
 
@@ -607,6 +612,46 @@ thread_local! {
     // the real paint pass; absent means no ring is on screen.
     static PAINTED_RINGS: RefCell<std::collections::HashMap<String, PaintedRing>> =
         RefCell::new(std::collections::HashMap::new());
+    // What the inset-shadow paint pass last painted per element id, in
+    // declaration order. Same discipline as PAINTED_RINGS: written only from
+    // the real paint pass, so an assertion against it is evidence that pixels
+    // were emitted rather than that a style was declared.
+    static PAINTED_INSET_SHADOWS: RefCell<std::collections::HashMap<String, Vec<PaintedInsetShadow>>> =
+        RefCell::new(std::collections::HashMap::new());
+}
+
+/// One inset shadow band as the paint pass actually drew it: the per-side
+/// widths and the padding box they were clipped to, in logical pixels.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PaintedInsetShadow {
+    pub left: f32,
+    pub right: f32,
+    pub top: f32,
+    pub bottom: f32,
+    pub color: ColorValue,
+    /// The padding box the band was painted inside: `[x, y, width, height]`.
+    pub bounds: [f32; 4],
+}
+
+/// The inset shadow bands painted for this element id as of the last paint
+/// pass. Empty or absent means nothing was drawn.
+pub fn painted_inset_shadows_for(id: &str) -> Vec<PaintedInsetShadow> {
+    PAINTED_INSET_SHADOWS.with(|r| r.borrow().get(id).cloned().unwrap_or_default())
+}
+
+pub(crate) fn record_painted_inset_shadows(id: &str, painted: Vec<PaintedInsetShadow>) {
+    PAINTED_INSET_SHADOWS.with(|r| {
+        if painted.is_empty() {
+            r.borrow_mut().remove(id);
+        } else {
+            r.borrow_mut().insert(id.to_owned(), painted);
+        }
+    });
+}
+
+/// Frame boundary for the inset-shadow registry, called beside the ring one.
+pub(crate) fn clear_painted_inset_shadows() {
+    PAINTED_INSET_SHADOWS.with(|r| r.borrow_mut().clear());
 }
 
 /// What the focus-ring paint pass last painted for one tracked element: the

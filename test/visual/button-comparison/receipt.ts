@@ -9,7 +9,7 @@
  * landmark, an arbitrary role, or a free-form property bag.
  *
  * Three producers write this schema (the Svelte/React capture harness and the
- * Rust `poodle-offscreen-capture --fixture` target); this verifier is the one
+ * Rust `poodle-window-capture --fixture` target); this verifier is the one
  * reader. Cross-language duplication of the key sets is recorded in the
  * g15.047 log, the same posture as the inventory loaders.
  */
@@ -25,7 +25,11 @@ import {
   type Landmark,
 } from "../fixtures/button-visual-inventory.ts";
 
-export const RECEIPT_SCHEMA = "poodle.button-visual-capture.v1";
+// v2 (g16.005): the GPUI environment changed shape when the fork-only
+// offscreen readback was replaced by a real non-activating window. It now
+// names a published crate rather than a Git revision, says what the transport
+// actually is, and carries the run's own frontmost-application evidence.
+export const RECEIPT_SCHEMA = "poodle.button-visual-capture.v2";
 
 export const RUNTIMES = ["svelte", "react", "gpui"] as const;
 export type RuntimeName = (typeof RUNTIMES)[number];
@@ -60,11 +64,40 @@ export type RoleEvidence = {
 };
 
 export type WebEnvironment = { kind: "chromium"; version: string };
+/**
+ * What the capture process observed about the frontmost application for the
+ * whole of its own run.
+ *
+ * `verdict` is three-valued on purpose: "did not change" and "could not tell"
+ * are different answers, and only `proved` supports the capture contract's
+ * claim. The capture binary refuses to publish anything else, and this
+ * verifier refuses to accept anything else — a receipt is read on machines
+ * and at times far removed from the run that wrote it, so the reader does not
+ * take the writer's word for it.
+ */
+export type ForegroundVerdict = "proved" | "changed" | "unprovable";
+
+export type ForegroundEvidence = {
+  baseline: string;
+  observed: string[];
+  samples: number;
+  verdict: "proved";
+};
+
+/**
+ * Fewest successful frontmost-application readings a receipt must carry.
+ * Mirrors `MIN_FOREGROUND_SAMPLES` in `window_capture/transport.rs`; the
+ * cross-language duplication is the same posture as the inventory loaders.
+ */
+export const MIN_FOREGROUND_SAMPLES = 8;
+
 export type GpuiEnvironment = {
-  kind: "metal-headless";
+  kind: "macos-window-server-nonactivating";
   os: string;
   arch: string;
-  gpuiRevision: string;
+  gpuiSource: "crates.io";
+  gpuiVersion: string;
+  foreground: ForegroundEvidence;
 };
 export type CaptureEnvironment = WebEnvironment | GpuiEnvironment;
 
@@ -108,7 +141,9 @@ const BOUNDS_KEYS = ["x", "y", "width", "height"] as const;
 const ROLE_KEYS = ["fill", "border", "text", "shadow", "focus-ring"] as const;
 const SHADOW_LAYER_KEYS = ["inset", "offsetX", "offsetY", "blur", "spread", "color"] as const;
 const WEB_ENV_KEYS = ["kind", "version"] as const;
-const GPUI_ENV_KEYS = ["kind", "os", "arch", "gpuiRevision"] as const;
+const GPUI_ENV_KEYS = ["kind", "os", "arch", "gpuiSource", "gpuiVersion", "foreground"] as const;
+const FOREGROUND_KEYS = ["baseline", "observed", "samples", "verdict"] as const;
+export const GPUI_TRANSPORT = "macos-window-server-nonactivating";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -248,6 +283,50 @@ function checkRoles(problems: string[], value: unknown): void {
   }
 }
 
+function checkForeground(problems: string[], where: string, value: unknown): void {
+  if (!isPlainObject(value)) {
+    problems.push(`${where} must be an object, got ${JSON.stringify(value)}`);
+    return;
+  }
+  keyProblems(problems, where, value, FOREGROUND_KEYS);
+
+  // A null baseline means the run never read a frontmost application, so it
+  // watched nothing. That is not a weaker proof, it is no proof.
+  if (typeof value.baseline !== "string" || value.baseline.length === 0) {
+    problems.push(
+      `${where}.baseline must name the application that was frontmost before the capture window existed`,
+    );
+  }
+  if (
+    !Array.isArray(value.observed) ||
+    value.observed.length === 0 ||
+    value.observed.some((app) => typeof app !== "string")
+  ) {
+    problems.push(`${where}.observed must be a non-empty array of strings`);
+  } else if (typeof value.baseline === "string") {
+    const strayed = value.observed.filter((app) => app !== value.baseline);
+    if (strayed.length > 0) {
+      problems.push(
+        `${where}.observed must contain only the baseline, got ${JSON.stringify(strayed)}`,
+      );
+    }
+  }
+  if (
+    typeof value.samples !== "number" ||
+    !Number.isInteger(value.samples) ||
+    value.samples < MIN_FOREGROUND_SAMPLES
+  ) {
+    problems.push(
+      `${where}.samples must be at least ${MIN_FOREGROUND_SAMPLES}; fewer readings cannot support the claim`,
+    );
+  }
+  if (value.verdict !== "proved") {
+    problems.push(
+      `${where}.verdict must be 'proved', got ${JSON.stringify(value.verdict)} — only a run that read a baseline, watched long enough, and never saw another application is evidence`,
+    );
+  }
+}
+
 function checkEnvironment(problems: string[], runtime: RuntimeName, value: unknown): void {
   const where = "receipt environment";
   if (!isPlainObject(value)) {
@@ -256,8 +335,8 @@ function checkEnvironment(problems: string[], runtime: RuntimeName, value: unkno
   }
   if (runtime === "gpui") {
     keyProblems(problems, where, value, GPUI_ENV_KEYS);
-    if (value.kind !== "metal-headless") {
-      problems.push(`${where}.kind must be 'metal-headless' for gpui, got ${JSON.stringify(value.kind)}`);
+    if (value.kind !== GPUI_TRANSPORT) {
+      problems.push(`${where}.kind must be '${GPUI_TRANSPORT}' for gpui, got ${JSON.stringify(value.kind)}`);
     }
     if (typeof value.os !== "string" || value.os.length === 0) {
       problems.push(`${where}.os must be a non-empty string`);
@@ -265,9 +344,15 @@ function checkEnvironment(problems: string[], runtime: RuntimeName, value: unkno
     if (typeof value.arch !== "string" || value.arch.length === 0) {
       problems.push(`${where}.arch must be a non-empty string`);
     }
-    if (typeof value.gpuiRevision !== "string" || !/^[0-9a-f]{40}$/.test(value.gpuiRevision)) {
-      problems.push(`${where}.gpuiRevision must be a 40-character hex revision`);
+    // The public source boundary, asserted rather than assumed: a receipt
+    // produced against a forked GPUI is not evidence about what consumers get.
+    if (value.gpuiSource !== "crates.io") {
+      problems.push(`${where}.gpuiSource must be 'crates.io', got ${JSON.stringify(value.gpuiSource)}`);
     }
+    if (typeof value.gpuiVersion !== "string" || !/^\d+\.\d+\.\d+$/.test(value.gpuiVersion)) {
+      problems.push(`${where}.gpuiVersion must be a published semver version`);
+    }
+    checkForeground(problems, `${where}.foreground`, value.foreground);
   } else {
     keyProblems(problems, where, value, WEB_ENV_KEYS);
     if (value.kind !== "chromium") {

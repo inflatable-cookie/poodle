@@ -1,7 +1,7 @@
 /**
  * g15.047 — Svelte/React capture driver. Boots the two vite previews, drives
  * each Button fixture through its capture-only fixture host, and retains a
- * PNG plus a `poodle.button-visual-capture.v1` receipt per runtime.
+ * PNG plus a `poodle.button-visual-capture.v2` receipt per runtime.
  *
  * Determinism is a precondition, not a metric: every fixture/runtime pair is
  * captured twice with a fresh navigation between, and the pair must be

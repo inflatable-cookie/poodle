@@ -76,7 +76,10 @@ for (const path of paths) {
     if (pattern.test(source)) errors.push(`${path}: contains a ${label} pattern`);
   }
 
-  if (basename(path) === "Cargo.toml") {
+  // `Cargo.toml.template` is the dual-dependency proof's manifest with one
+  // placeholder path; it declares a real `gpui` requirement and must obey the
+  // same source policy, or the proof could be quietly overridden.
+  if (basename(path) === "Cargo.toml" || basename(path) === "Cargo.toml.template") {
     errors.push(...validateCargoManifestSources(path, source));
   }
 

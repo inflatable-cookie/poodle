@@ -32,6 +32,7 @@ import {
 } from "./compare.ts";
 import { classifyKnownDelta } from "./policy.ts";
 import {
+  MIN_FOREGROUND_SAMPLES,
   parseButtonCaptureReceipt,
   ReceiptError,
   sha256Hex,
@@ -81,7 +82,19 @@ const WHITE: Srgb = [1, 1, 1, 1];
 
 function environmentFor(runtime: RuntimeName): ButtonCaptureReceipt["environment"] {
   return runtime === "gpui"
-    ? { kind: "metal-headless", os: "macos", arch: "arm64", gpuiRevision: "0".repeat(40) }
+    ? {
+        kind: "macos-window-server-nonactivating",
+        os: "macos",
+        arch: "arm64",
+        gpuiSource: "crates.io",
+        gpuiVersion: "0.2.2",
+        foreground: {
+          baseline: "com.example.editor",
+          observed: ["com.example.editor"],
+          samples: 24,
+          verdict: "proved",
+        },
+      }
     : { kind: "chromium", version: "test-chromium" };
 }
 
@@ -102,7 +115,7 @@ function makeReceipt(
     landmarks.spinner = { x: 28, y: 28, width: 12, height: 12 };
   }
   const raw: Record<string, unknown> = {
-    schema: "poodle.button-visual-capture.v1",
+    schema: "poodle.button-visual-capture.v2",
     fixture: target.name,
     runtime,
     logicalViewport: { width: 240, height: 80 },
@@ -196,6 +209,78 @@ describe("receipt verification", () => {
     });
     const problems = verifyReceiptAgainstPng(receipt, small);
     expect(problems.some((problem) => problem.includes("receipt declares 480x160"))).toBe(true);
+  });
+});
+
+// ── g16.005: foreground evidence is read, not trusted ────────────────
+//
+// The GPUI capture is windowed, so every receipt carries the run's own proof
+// that it left the foreground alone. A receipt is read on machines and at
+// times far removed from the run that wrote it, so the verifier applies the
+// same fail-closed rule the producer does rather than taking its word.
+
+describe("foreground evidence (gpui)", () => {
+  const mutateForeground = (
+    change: (foreground: Record<string, unknown>) => void,
+  ): (() => ButtonCaptureReceipt) => {
+    return () =>
+      makeReceipt(fixture("button/rest-secondary"), "gpui", (raw) => {
+        change((raw.environment as Record<string, unknown>).foreground as Record<string, unknown>);
+      });
+  };
+
+  test("a proved receipt round-trips", () => {
+    const receipt = makeReceipt(fixture("button/rest-secondary"), "gpui");
+    const foreground = (receipt.environment as { foreground: { verdict: string } }).foreground;
+    expect(foreground.verdict).toBe("proved");
+  });
+
+  test("a null baseline is rejected — watching nothing is not proof", () => {
+    expect(mutateForeground((f) => { f.baseline = null; })).toThrow(/baseline must name/);
+  });
+
+  test("an empty baseline is rejected", () => {
+    expect(mutateForeground((f) => { f.baseline = ""; })).toThrow(/baseline must name/);
+  });
+
+  test("no observations is rejected", () => {
+    expect(mutateForeground((f) => { f.observed = []; })).toThrow(/non-empty array/);
+  });
+
+  test("an observation other than the baseline is rejected", () => {
+    expect(
+      mutateForeground((f) => { f.observed = ["com.example.editor", "com.example.other"]; }),
+    ).toThrow(/only the baseline/);
+  });
+
+  test("too few samples is rejected", () => {
+    for (const samples of [0, 1, MIN_FOREGROUND_SAMPLES - 1]) {
+      expect(mutateForeground((f) => { f.samples = samples; })).toThrow(/at least/);
+    }
+    expect(mutateForeground((f) => { f.samples = MIN_FOREGROUND_SAMPLES; })).not.toThrow();
+  });
+
+  test("any verdict but 'proved' is rejected", () => {
+    for (const verdict of ["changed", "unprovable", "ok", true, null, undefined]) {
+      expect(mutateForeground((f) => { f.verdict = verdict; })).toThrow(/verdict must be 'proved'/);
+    }
+  });
+
+  test("the old boolean 'changed' shape no longer validates", () => {
+    expect(
+      mutateForeground((f) => {
+        delete f.verdict;
+        f.changed = false;
+      }),
+    ).toThrow();
+  });
+
+  test("a receipt with no foreground evidence at all is rejected", () => {
+    expect(() =>
+      makeReceipt(fixture("button/rest-secondary"), "gpui", (raw) => {
+        delete (raw.environment as Record<string, unknown>).foreground;
+      }),
+    ).toThrow(ReceiptError);
   });
 });
 

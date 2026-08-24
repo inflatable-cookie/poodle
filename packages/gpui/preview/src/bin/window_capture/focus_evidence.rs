@@ -1,12 +1,18 @@
-//! g15.052 — focused-state evidence mode for the offscreen capture target.
+//! g15.052 focused-state evidence, on the g16.005 non-activating window
+//! transport.
 //!
 //! One invocation renders one closed evidence scene through the production
-//! path (`poodle_render` → `poodle_gpui_node_backend::to_gpui`) into GPUI's
-//! `HeadlessAppContext`, moves REAL focus to the scene's target control
-//! through the backend's focus registry (no pointer, no OS window), and
-//! writes the rasterized PNG plus a typed receipt. The receipt carries the
-//! paint pass's own record of the ring (`painted_ring_for`); an invocation
-//! where the ring never painted is a hard failure, never a green skip.
+//! path (`poodle_render` → `poodle_gpui_node_backend::to_gpui`) into one real
+//! GPUI window opened with `focus: false`, moves REAL focus to the scene's
+//! target control through the backend's focus registry (no pointer, no
+//! activation), and writes the captured PNG plus a typed receipt. The receipt
+//! carries the paint pass's own record of the ring (`painted_ring_for`); an
+//! invocation where the ring never painted is a hard failure, never a green
+//! skip.
+//!
+//! Element focus inside the capture window is not application focus: the
+//! window is never made key by this process, and the run's own
+//! frontmost-application samples ride on the receipt.
 //!
 //! This is point-in-time operator review evidence for the native focus-ring
 //! channel, not a baseline: nothing reads these files back, and no fixture
@@ -20,12 +26,12 @@
 //!   INSET (-2px) ring.
 
 use std::path::PathBuf;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use anyhow::{bail, Context as _, Result};
 use gpui::{
-    div, px, size, AnyElement, App, Context, HeadlessAppContext, IntoElement, ParentElement,
-    Render, Styled, Window,
+    div, px, AnyElement, App, AppContext as _, Context, IntoElement, ParentElement, Render, Styled,
+    Window,
 };
 use poodle_adapter::ThemeProvider;
 use poodle_node::{CrossAxisAlignment, LayoutDirection, LayoutSizing, Node};
@@ -35,10 +41,12 @@ use sha2::{Digest, Sha256};
 
 use crate::fixture_capture::{inter_fonts, FixtureAssets};
 use crate::presentation_axes::ThemePreset;
-use crate::{ACCEPTED_SCALE, GPUI_REVISION, publish_pair};
+use crate::publish_pair;
+use crate::transport::{self, GPUI_SOURCE, GPUI_VERSION, TRANSPORT};
 
-/// Versioned evidence receipt schema identity.
-const EVIDENCE_RECEIPT_SCHEMA: &str = "poodle.gpui-focus-evidence.v1";
+/// Versioned evidence receipt schema identity. `v2` is the windowed,
+/// non-activating transport; `v1` claimed a fork-only offscreen readback.
+const EVIDENCE_RECEIPT_SCHEMA: &str = "poodle.gpui-focus-evidence.v2";
 
 /// The closed scene set.
 const SCENES: &[&str] = &["button", "stepper-trigger", "stepper-summary"];
@@ -53,7 +61,7 @@ pub struct FocusEvidenceArgs {
 /// The evidence scenes are a closed contract: exactly `--focus-evidence`,
 /// `--out`, and `--receipt`, all required, every other flag rejected.
 pub fn parse_args(argv: &[String]) -> Result<FocusEvidenceArgs> {
-    const USAGE: &str = "usage: poodle-offscreen-capture --focus-evidence \
+    const USAGE: &str = "usage: poodle-window-capture --focus-evidence \
 <button|stepper-trigger|stepper-summary> --out <png> --receipt <json>";
     let mut scene: Option<String> = None;
     let mut out_png: Option<PathBuf> = None;
@@ -94,7 +102,7 @@ struct EvidenceScene {
     logical_height: f32,
 }
 
-fn build_scene(scene: &str, theme: &poodle_gpui::GpuiThemeProvider) -> EvidenceScene {
+fn build_scene(scene: &str, ctx: &poodle_render::RenderContext<'_>) -> EvidenceScene {
     match scene {
         "button" => {
             // Two bordered secondary Buttons at rest; the right one takes
@@ -102,13 +110,13 @@ fn build_scene(scene: &str, theme: &poodle_gpui::GpuiThemeProvider) -> EvidenceS
             // and keep the resting twin observable.
             let mut rest = poodle_render::button(
                 &ButtonSpec::new().with_label("Save"),
-                theme,
+                ctx,
                 None,
             );
             rest.id = Some("evidence:button:rest".to_owned());
             let mut focused = poodle_render::button(
                 &ButtonSpec::new().with_label("Save"),
-                theme,
+                ctx,
                 None,
             );
             focused.id = Some("evidence:button:focus".to_owned());
@@ -136,7 +144,7 @@ fn build_scene(scene: &str, theme: &poodle_gpui::GpuiThemeProvider) -> EvidenceS
             .with_show_rerun(true)
             .with_value("apply");
             let mut node =
-                poodle_render::stepper(&spec, theme, poodle_render::StepperHandlers::default());
+                poodle_render::stepper(&spec, ctx, poodle_render::StepperHandlers::default());
             // Evidence-host presentation: a fixed width so the full-width
             // rows (and the summary's inset ring) read as they do in product.
             node.style.descriptor.layout.width = LayoutSizing::Fixed(320.0);
@@ -193,160 +201,165 @@ struct FocusEvidenceReceipt {
     focused_element: String,
     backend_focused: bool,
     painted_ring: PaintedRingEvidence,
-    gpui_revision: &'static str,
-    renderer: &'static str,
+    gpui_source: &'static str,
+    gpui_version: &'static str,
+    transport: &'static str,
     platform: &'static str,
     theme: &'static str,
     logical_viewport: [f32; 2],
     scale: f32,
     png_sha256: String,
+    foreground: transport::ForegroundEvidence,
 }
 
-pub fn run(args: &FocusEvidenceArgs) -> Result<()> {
-    if !cfg!(target_os = "macos") {
-        bail!("offscreen capture requires macOS: the Metal headless renderer exists nowhere else");
+pub fn run(args: &FocusEvidenceArgs) -> ! {
+    match prepare(args) {
+        Ok(shot) => transport::capture(
+            FixtureAssets {
+                base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
+            },
+            match inter_fonts() {
+                Ok(fonts) => fonts,
+                Err(error) => {
+                    eprintln!("poodle-window-capture: {error:#}");
+                    std::process::exit(1)
+                }
+            },
+            shot,
+        ),
+        Err(error) => {
+            eprintln!("poodle-window-capture: {error:#}");
+            std::process::exit(1)
+        }
     }
-    if gpui_platform::current_headless_renderer().is_none() {
-        bail!("no GPUI headless renderer available: this machine exposes no compatible Metal device");
-    }
+}
 
+/// What the settled frame recorded, carried from the main thread to the
+/// capture thread.
+struct RingEvidence {
+    backend_focused: bool,
+    painted: PaintedRingEvidence,
+}
+
+fn prepare(args: &FocusEvidenceArgs) -> Result<transport::Shot<EvidenceRoot>> {
     let theme = ThemePreset::Eclipse.build_theme();
     let canvas = theme.resolve_color("color.background.canvas");
-    let scene = build_scene(&args.scene, &theme);
+    let ctx = poodle_render::RenderContext::new(&theme);
+    let scene = build_scene(&args.scene, &ctx);
     let focus_id = scene.focus_id;
     let logical_width = scene.logical_width;
     let logical_height = scene.logical_height;
+    let node = scene.node;
 
-    let platform = gpui_platform::current_platform(true);
-    let text_system = platform.text_system();
-    let assets = FixtureAssets {
-        base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
-    };
-    let mut cx = HeadlessAppContext::with_platform(text_system, Arc::new(assets), || {
-        gpui_platform::current_headless_renderer()
-    });
-    cx.text_system()
-        .add_fonts(inter_fonts()?)
-        .with_context(|| "load the fixture Inter fonts")?;
-    cx.update(|cx: &mut App| cx.set_reduce_motion(true));
+    let evidence: Arc<Mutex<Option<RingEvidence>>> = Arc::new(Mutex::new(None));
+    let frame_evidence = Arc::clone(&evidence);
 
-    let window = cx.open_window(
-        size(px(logical_width), px(logical_height)),
-        |_, cx: &mut App| {
-            <App as gpui::AppContext>::new(cx, |_| EvidenceRoot {
-                node: scene.node,
-                canvas: poodle_gpui_node_backend::color(canvas),
-            })
-        },
-    )?;
-    cx.run_until_parked();
+    let scene_name = args.scene.clone();
+    let out_png = args.out_png.clone();
+    let out_receipt = args.out_receipt.clone();
 
-    // Pump frames until the backend owns a focus handle for the target: the
-    // handle is created in the paint pass and attached from the next build.
-    let mut handle_ready = false;
-    for _ in 0..16 {
-        cx.update_window(window.into(), |_, window, cx| {
-            window.refresh();
-            let _ = window.draw(cx);
-        })?;
-        cx.run_until_parked();
-        if poodle_gpui_node_backend::focus_handle_for(focus_id).is_some() {
-            handle_ready = true;
-            break;
-        }
-    }
-    if !handle_ready {
-        bail!("focus handle for '{focus_id}' never appeared — the ring declaration did not register one");
-    }
+    // The focus handle is created in the paint pass and attached from the
+    // next build, so the scene waits for it rather than assuming a frame
+    // count. `focused` records that focus was already requested.
+    let mut focused = false;
 
-    // Real focus through the backend registry — no pointer anywhere — then
-    // one more frame so the ring canvas paints with focus held.
-    cx.update_window(window.into(), |_, window, cx| {
-        if let Some(handle) = poodle_gpui_node_backend::focus_handle_for(focus_id) {
-            handle.focus(window, cx);
-        }
-        window.refresh();
-        let _ = window.draw(cx);
-    })?;
-    cx.run_until_parked();
-    cx.update_window(window.into(), |_, window, cx| {
-        window.refresh();
-        let _ = window.draw(cx);
-    })?;
-    cx.run_until_parked();
-
-    let backend_focused =
-        poodle_gpui_node_backend::focus_state_for(focus_id).unwrap_or(false);
-    let painted = poodle_gpui_node_backend::painted_ring_for(focus_id).with_context(|| {
-        format!("the focus ring for '{focus_id}' never painted — capture would not be evidence")
-    })?;
-    if !backend_focused {
-        bail!("the backend never reported '{focus_id}' focused");
-    }
-
-    // Real offscreen readback: the rasterized focused frame.
-    let image = cx.capture_screenshot(window.into())?;
-    let expected_w = (logical_width * ACCEPTED_SCALE).round() as u32;
-    let expected_h = (logical_height * ACCEPTED_SCALE).round() as u32;
-    if image.width() != expected_w || image.height() != expected_h {
-        bail!(
-            "device dimensions {}x{} do not equal logical {}x{} × {ACCEPTED_SCALE}",
-            image.width(),
-            image.height(),
-            logical_width,
-            logical_height
-        );
-    }
-
-    let mut png_bytes: Vec<u8> = Vec::new();
-    image.write_to(
-        &mut std::io::Cursor::new(&mut png_bytes),
-        image::ImageFormat::Png,
-    )?;
-    if png_bytes.is_empty() {
-        bail!("capture produced an empty PNG encoding");
-    }
-    let png_sha256 = format!("{:x}", Sha256::digest(&png_bytes));
-
-    let receipt = FocusEvidenceReceipt {
-        schema: EVIDENCE_RECEIPT_SCHEMA,
-        scene: args.scene.clone(),
-        focused_element: focus_id.to_owned(),
-        backend_focused,
-        painted_ring: PaintedRingEvidence {
-            color: [
-                painted.ring.color.0,
-                painted.ring.color.1,
-                painted.ring.color.2,
-                painted.ring.color.3,
-            ],
-            width: painted.ring.width,
-            offset: painted.ring.offset,
-            bounds: painted.bounds,
-        },
-        gpui_revision: GPUI_REVISION,
-        renderer: "metal-headless",
-        platform: "macos",
-        theme: ThemePreset::Eclipse.label(),
-        logical_viewport: [logical_width, logical_height],
-        scale: ACCEPTED_SCALE,
-        png_sha256,
-    };
-    let receipt_json = serde_json::to_vec_pretty(&receipt)?;
-    publish_pair(&args.out_png, &png_bytes, &args.out_receipt, &receipt_json)?;
-
-    eprintln!(
-        "captured focus-evidence {} ({}x{} logical @ {}x) focused={} ring=({}px @{}px) sha256={}",
-        args.scene,
+    Ok(transport::Shot {
+        label: format!("focus-evidence/{}", args.scene),
         logical_width,
         logical_height,
-        ACCEPTED_SCALE,
-        focus_id,
-        painted.ring.width,
-        painted.ring.offset,
-        receipt.png_sha256
-    );
-    Ok(())
+        build: Box::new(move |_window, cx: &mut App| {
+            cx.new(|_| EvidenceRoot {
+                node,
+                canvas: poodle_gpui_node_backend::color(canvas),
+            })
+        }),
+        on_frame: Box::new(move |window, _cx, _frame| {
+            let Some(handle) = poodle_gpui_node_backend::focus_handle_for(focus_id) else {
+                return Ok(transport::Settled::Wait);
+            };
+            if !focused {
+                // Real focus through the backend registry — no pointer, and
+                // no window or application activation anywhere.
+                handle.focus(window);
+                focused = true;
+                return Ok(transport::Settled::Wait);
+            }
+
+            let backend_focused =
+                poodle_gpui_node_backend::focus_state_for(focus_id).unwrap_or(false);
+            if !backend_focused {
+                return Ok(transport::Settled::Wait);
+            }
+            let Some(painted) = poodle_gpui_node_backend::painted_ring_for(focus_id) else {
+                return Ok(transport::Settled::Wait);
+            };
+
+            *frame_evidence.lock().expect("ring slot") = Some(RingEvidence {
+                backend_focused,
+                painted: PaintedRingEvidence {
+                    color: [
+                        painted.ring.color.0,
+                        painted.ring.color.1,
+                        painted.ring.color.2,
+                        painted.ring.color.3,
+                    ],
+                    width: painted.ring.width,
+                    offset: painted.ring.offset,
+                    bounds: painted.bounds,
+                },
+            });
+            Ok(transport::Settled::Ready)
+        }),
+        finish: Box::new(move |facts: &transport::CaptureFacts| {
+            let recorded = evidence
+                .lock()
+                .expect("ring slot")
+                .take()
+                .with_context(|| {
+                    format!(
+                        "the focus ring for '{focus_id}' never painted — capture would not be \
+                         evidence"
+                    )
+                })?;
+            if !recorded.backend_focused {
+                bail!("the backend never reported '{focus_id}' focused");
+            }
+            let png_sha256 = format!("{:x}", Sha256::digest(&facts.png));
+
+            let receipt = FocusEvidenceReceipt {
+                schema: EVIDENCE_RECEIPT_SCHEMA,
+                scene: scene_name.clone(),
+                focused_element: focus_id.to_owned(),
+                backend_focused: recorded.backend_focused,
+                painted_ring: recorded.painted,
+                gpui_source: GPUI_SOURCE,
+                gpui_version: GPUI_VERSION,
+                transport: TRANSPORT,
+                platform: "macos",
+                theme: ThemePreset::Eclipse.label(),
+                logical_viewport: [logical_width, logical_height],
+                scale: facts.scale,
+                png_sha256,
+                foreground: facts.foreground.clone(),
+            };
+            let receipt_json = serde_json::to_vec_pretty(&receipt)?;
+            publish_pair(&out_png, &facts.png, &out_receipt, &receipt_json)?;
+
+            eprintln!(
+                "captured focus-evidence {} ({}x{} logical @ {}x) focused={} ring=({}px @{}px) \
+                 sha256={}",
+                scene_name,
+                logical_width,
+                logical_height,
+                facts.scale,
+                focus_id,
+                receipt.painted_ring.width,
+                receipt.painted_ring.offset,
+                receipt.png_sha256
+            );
+            Ok(())
+        }),
+    })
 }
 
 #[cfg(test)]

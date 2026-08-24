@@ -1,30 +1,35 @@
-//! g15.047 — fixture mode for the offscreen capture target.
+//! g15.047 fixture mode, on the g16.005 non-activating window transport.
 //!
 //! One invocation renders one accepted Button fixture from the canonical
 //! inventory (`--fixture <exact-name> --out <png> --receipt <json>`) through
 //! the production path — `ButtonSpec` → `poodle_render::button` →
-//! `poodle_gpui_node_backend::to_gpui` into GPUI's `HeadlessAppContext` — and
-//! writes the rasterized PNG plus a typed `poodle.button-visual-capture.v1`
-//! receipt. The receipt carries the declared landmark bounds (read back from
-//! the real paint pass, never recomputed from spec data) and the five visual
-//! roles as resolved on the node tree.
+//! `poodle_gpui_node_backend::to_gpui` — into one real GPUI window opened
+//! with `focus: false`, and writes the captured PNG plus a typed
+//! `poodle.button-visual-capture.v2` receipt. The receipt carries the declared
+//! landmark bounds (read back from the real paint pass, never recomputed from
+//! spec data) and the five visual roles as resolved on the node tree.
 //!
 //! Determinism rules (the comparison README's scene contract): the fixture's
 //! own theme supplies the canvas background, the repo's Inter TTFs are loaded
-//! before the window opens, reduce motion is on so the loading spinner paints
-//! its declared initial frame, and icons come from the real
+//! before the window opens, declared node animations are frozen so the loading
+//! spinner paints its initial frame statically, and icons come from the real
 //! `packages/render/assets/icons` files. Every input is validated before any
-//! renderer is constructed; a missing icon file, a missing font, or a landmark
-//! the paint pass never recorded is a hard failure, never a green skip.
+//! window is opened; a missing icon file, a missing font, or a landmark the
+//! paint pass never recorded is a hard failure, never a green skip.
+//!
+//! The v1 receipt claimed an offscreen Metal readback through a fork-only
+//! GPUI API. Those pixels came from a source no consumer could depend on, so
+//! the transport and the schema both changed rather than the name staying
+//! over new facts.
 
 use std::borrow::Cow;
 use std::path::PathBuf;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use anyhow::{Context as _, Result, bail};
 use gpui::{
-    AnyElement, App, AssetSource, Context, HeadlessAppContext, IntoElement, ParentElement, Render,
-    SharedString, Styled, TextRun, Window, div, px, size,
+    AnyElement, App, AppContext as _, AssetSource, Context, IntoElement, ParentElement, Render,
+    SharedString, Styled, TextRun, Window, div, px,
 };
 use poodle_adapter::ThemeProvider;
 use poodle_gpui_node_backend::bounds_for;
@@ -35,11 +40,13 @@ use sha2::{Digest, Sha256};
 
 use crate::inventory::{self, ButtonFixture, FixtureContent, FixtureState};
 use crate::presentation_axes::ControlSize;
-use crate::{ACCEPTED_SCALE, GPUI_REVISION, publish_pair};
+use crate::transport::{self, GPUI_SOURCE, GPUI_VERSION, TRANSPORT};
+use crate::publish_pair;
 
 /// Versioned fixture receipt schema identity, shared with the TypeScript
-/// verifier (`test/visual/button-comparison/receipt.ts`).
-const FIXTURE_RECEIPT_SCHEMA: &str = "poodle.button-visual-capture.v1";
+/// verifier (`test/visual/button-comparison/receipt.ts`). `v2` is the
+/// windowed, non-activating transport; `v1` was the fork-only readback.
+const FIXTURE_RECEIPT_SCHEMA: &str = "poodle.button-visual-capture.v2";
 
 /// The scene's uniform padding: the Button's border-box origin lands at
 /// logical (16, 16), the same placement the web fixture hosts use.
@@ -54,6 +61,7 @@ const ICON_ELEMENT_ID: &str = "fixture-icon";
 const SPINNER_ELEMENT_ID: &str = "fixture-spinner";
 
 /// Parsed and validated fixture-mode command line.
+#[derive(Debug)]
 pub struct FixtureArgs {
     pub fixture: String,
     pub out_png: PathBuf,
@@ -278,7 +286,7 @@ fn painted_bounds(element_id: &str, landmark: &str) -> Result<LandmarkBounds> {
 /// ascent/descent ink box: the cross-runtime definition of the `content`
 /// landmark is the layout box.
 fn label_content_bounds(
-    cx: &HeadlessAppContext,
+    window: &Window,
     label: &str,
     label_size: f32,
     line_height: f32,
@@ -293,18 +301,20 @@ fn label_content_bounds(
             weight: gpui::FontWeight(500.0),
             style: gpui::FontStyle::Normal,
         },
-        ..Default::default()
+        color: gpui::black(),
+        background_color: None,
+        underline: None,
+        strikethrough: None,
     };
-    // Shaping goes through a WindowTextSystem (the line-layout-cached view of
-    // the shared text system); a throwaway cache measures identically.
-    let text_system = gpui::WindowTextSystem::new(cx.text_system().clone());
-    let line = text_system.shape_line(
+    // Shaping goes through the capture window's own text system — the same
+    // shaper that produced the glyphs in the captured frame.
+    let line = window.text_system().shape_line(
         SharedString::from(label.to_string()),
         px(label_size),
         &[run],
         None,
     );
-    let width = f32::from(line.width());
+    let width = f32::from(line.width);
     let height = label_size * line_height;
     if width <= 0.0 || height <= 0.0 {
         bail!("label '{label}' shaped to non-positive metrics ({width}x{height})");
@@ -347,7 +357,7 @@ fn root_border_box(node: &Node) -> Result<LandmarkBounds> {
 fn collect_landmarks(
     fixture: &ButtonFixture,
     node: &Node,
-    cx: &HeadlessAppContext,
+    window: &Window,
     label_size: f32,
     label_line_height: f32,
     stamped: &StampedContent,
@@ -369,7 +379,7 @@ fn collect_landmarks(
                     } else {
                         root.center()
                     };
-                    label_content_bounds(cx, label, label_size, label_line_height, center)?
+                    label_content_bounds(window, label, label_size, label_line_height, center)?
                 }
             },
             other => bail!("inventory declared an unknown landmark '{other}'"),
@@ -465,11 +475,17 @@ struct DeviceDimensions {
 
 #[derive(Serialize)]
 struct CaptureEnvironment {
+    /// What produced the pixels, named for what it is.
     kind: &'static str,
     os: &'static str,
     arch: &'static str,
-    #[serde(rename = "gpuiRevision")]
-    gpui_revision: &'static str,
+    /// The published GPUI identity, not a Git revision.
+    #[serde(rename = "gpuiSource")]
+    gpui_source: &'static str,
+    #[serde(rename = "gpuiVersion")]
+    gpui_version: &'static str,
+    /// The run's own proof that capturing this fixture did not take focus.
+    foreground: transport::ForegroundEvidence,
 }
 
 /// The typed fixture receipt. CamelCase, closed key sets — the TypeScript
@@ -491,23 +507,66 @@ struct FixtureReceipt {
     roles: RolesEvidence,
 }
 
-/// Render one accepted fixture and write its PNG + typed receipt.
-pub fn run(args: &FixtureArgs) -> Result<()> {
-    if !cfg!(target_os = "macos") {
-        bail!("offscreen capture requires macOS: the Metal headless renderer exists nowhere else");
+/// Freeze every declared animation on the tree.
+///
+/// The fork-only path called `App::set_reduce_motion(true)`, which stock
+/// crates.io GPUI 0.2.2 does not have. Clearing the node tree's own animation
+/// declarations reaches the same end state through Poodle's own vocabulary:
+/// `to_gpui` builds an un-animated element, which paints the declared initial
+/// frame statically and schedules nothing. The loading spinner is the only
+/// fixture content this applies to, and a moving spinner would make repeat
+/// captures differ.
+fn freeze_node_animations(node: &mut Node) {
+    node.style.animation = None;
+    for child in &mut node.children {
+        freeze_node_animations(child);
     }
-    // A missing headless renderer (no Metal device) is an explicit failure,
-    // checked before any capture is attempted — never a green skip.
-    if gpui_platform::current_headless_renderer().is_none() {
-        bail!("no GPUI headless renderer available: this machine exposes no compatible Metal device");
-    }
+}
 
+/// Render one accepted fixture in a non-activating window and write its PNG
+/// plus typed receipt.
+pub fn run(args: &FixtureArgs) -> ! {
+    run_batch(std::slice::from_ref(args))
+}
+
+/// Render a whole set of fixtures in ONE process.
+///
+/// Every shot is prepared — inventory lookup, icon preflight, font load —
+/// BEFORE the application starts, so a bad entry anywhere in the batch fails
+/// without a single window having opened. The transport then opens, captures,
+/// and closes one window per shot in turn.
+pub fn run_batch(batch: &[FixtureArgs]) -> ! {
+    let prepared: Result<Vec<transport::Shot<FixtureRoot>>> =
+        batch.iter().map(prepare).collect();
+    let fonts = prepared.as_ref().ok().and(inter_fonts().ok());
+    match (prepared, fonts) {
+        (Ok(shots), Some(fonts)) => transport::capture_batch(
+            FixtureAssets {
+                base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
+            },
+            fonts,
+            shots,
+        ),
+        (Err(error), _) => {
+            eprintln!("poodle-window-capture: {error:#}");
+            std::process::exit(1)
+        }
+        (Ok(_), None) => {
+            eprintln!("poodle-window-capture: the fixture Inter fonts could not be loaded");
+            std::process::exit(1)
+        }
+    }
+}
+
+/// Everything that can fail before a window exists happens here.
+fn prepare(args: &FixtureArgs) -> Result<transport::Shot<FixtureRoot>> {
     let fixtures = inventory::load_inventory()?;
     let fixture = fixtures
         .iter()
         .find(|fixture| fixture.name == args.fixture)
-        .with_context(|| format!("fixture '{}' is not in the canonical inventory", args.fixture))?;
-    preflight_icon_assets(fixture)?;
+        .with_context(|| format!("fixture '{}' is not in the canonical inventory", args.fixture))?
+        .clone();
+    preflight_icon_assets(&fixture)?;
 
     let theme = fixture
         .theme
@@ -515,8 +574,9 @@ pub fn run(args: &FixtureArgs) -> Result<()> {
         .with_control_size(fixture.size.token_definition());
     let canvas = theme.resolve_color("color.background.canvas");
 
-    let spec = build_spec(fixture);
-    let mut node = poodle_render::button(&spec, &theme, None);
+    let spec = build_spec(&fixture);
+    let ctx = poodle_render::RenderContext::new(&theme);
+    let mut node = poodle_render::button(&spec, &ctx, None);
     let roles = roles_evidence(&node)?;
     let label_size = node
         .style
@@ -526,107 +586,99 @@ pub fn run(args: &FixtureArgs) -> Result<()> {
         .style
         .line_height
         .with_context(|| "rendered button declares no label line height")?;
+    freeze_node_animations(&mut node);
     let stamped = stamp_landmark_ids(&mut node);
     let view_node = node.clone();
 
-    let platform = gpui_platform::current_platform(true);
-    let text_system = platform.text_system();
-    let assets = FixtureAssets {
-        base: PathBuf::from(env!("CARGO_MANIFEST_DIR")),
-    };
-    let mut cx = HeadlessAppContext::with_platform(text_system, Arc::new(assets), || {
-        gpui_platform::current_headless_renderer()
-    });
-    cx.text_system()
-        .add_fonts(inter_fonts()?)
-        .with_context(|| "load the fixture Inter fonts")?;
-    // Reduce motion freezes the loading spinner at its declared initial frame:
-    // the animation paints its start state statically and schedules no frames.
-    cx.update(|cx: &mut App| cx.set_reduce_motion(true));
-
     let logical_width = fixture.viewport.width as f32;
     let logical_height = fixture.viewport.height as f32;
-    let window = cx.open_window(
-        size(px(logical_width), px(logical_height)),
-        |_, cx: &mut App| {
-            <App as gpui::AppContext>::new(cx, |_| FixtureRoot {
+
+    // Filled on the main thread once the frame has settled, read on the
+    // capture thread when the receipt is written.
+    let landmarks: Arc<Mutex<Option<serde_json::Map<String, serde_json::Value>>>> =
+        Arc::new(Mutex::new(None));
+
+    let read_fixture = fixture.clone();
+    let read_landmarks = Arc::clone(&landmarks);
+    let read_node = node;
+
+    let receipt_fixture = fixture;
+    let out_png = args.out_png.clone();
+    let out_receipt = args.out_receipt.clone();
+
+    Ok(transport::Shot {
+        label: receipt_fixture.name.clone(),
+        logical_width,
+        logical_height,
+        build: Box::new(move |_window, cx: &mut App| {
+            cx.new(|_| FixtureRoot {
                 node: view_node,
                 canvas: poodle_gpui_node_backend::color(canvas),
             })
-        },
-    )?;
-    cx.run_until_parked();
+        }),
+        // Nothing here waits on state the paint pass has to create: the
+        // landmarks exist as soon as the tree has painted. Read them on the
+        // same settled frame the capture will take.
+        on_frame: Box::new(move |window: &mut Window, _cx: &mut App, frame| {
+            if frame < transport::FRAMES_BEFORE_CAPTURE {
+                return Ok(transport::Settled::Wait);
+            }
+            let collected = collect_landmarks(
+                &read_fixture,
+                &read_node,
+                window,
+                label_size,
+                label_line_height,
+                &stamped,
+            )?;
+            *read_landmarks.lock().expect("landmark slot") = Some(collected);
+            Ok(transport::Settled::Ready)
+        }),
+        finish: Box::new(move |facts: &transport::CaptureFacts| {
+            let landmarks = landmarks
+                .lock()
+                .expect("landmark slot")
+                .take()
+                .with_context(|| "the settled frame recorded no landmarks")?;
+            let png_sha256 = format!("{:x}", Sha256::digest(&facts.png));
 
-    // Force one full explicit frame so every bounds canvas has painted before
-    // the landmark readback; the test platform never requests frames on its
-    // own schedule.
-    cx.update_window(window.into(), |_, window, cx| {
-        window.refresh();
-        let _ = window.draw(cx);
-    })?;
-    cx.run_until_parked();
+            let receipt = FixtureReceipt {
+                schema: FIXTURE_RECEIPT_SCHEMA,
+                fixture: receipt_fixture.name.clone(),
+                runtime: "gpui",
+                logical_viewport: LogicalViewport {
+                    width: receipt_fixture.viewport.width,
+                    height: receipt_fixture.viewport.height,
+                },
+                scale: receipt_fixture.scale,
+                device_dimensions: DeviceDimensions {
+                    width: facts.device_width,
+                    height: facts.device_height,
+                },
+                png_sha256,
+                environment: CaptureEnvironment {
+                    kind: TRANSPORT,
+                    os: std::env::consts::OS,
+                    arch: std::env::consts::ARCH,
+                    gpui_source: GPUI_SOURCE,
+                    gpui_version: GPUI_VERSION,
+                    foreground: facts.foreground.clone(),
+                },
+                landmarks,
+                roles,
+            };
+            let receipt_json = serde_json::to_vec_pretty(&receipt)?;
+            publish_pair(&out_png, &facts.png, &out_receipt, &receipt_json)?;
 
-    let landmarks = collect_landmarks(fixture, &node, &cx, label_size, label_line_height, &stamped)?;
-
-    // Real offscreen readback. A blank image, a synthetic PNG, or a node-tree
-    // serialization would not be evidence; this is the rasterized frame.
-    let image = cx.capture_screenshot(window.into())?;
-
-    let expected_w = (logical_width * ACCEPTED_SCALE).round() as u32;
-    let expected_h = (logical_height * ACCEPTED_SCALE).round() as u32;
-    if image.width() != expected_w || image.height() != expected_h {
-        bail!(
-            "device dimensions {}x{} do not equal logical {}x{} × {ACCEPTED_SCALE}",
-            image.width(),
-            image.height(),
-            logical_width,
-            logical_height
-        );
-    }
-
-    let mut png_bytes: Vec<u8> = Vec::new();
-    image.write_to(
-        &mut std::io::Cursor::new(&mut png_bytes),
-        image::ImageFormat::Png,
-    )?;
-    if png_bytes.is_empty() {
-        bail!("capture produced an empty PNG encoding");
-    }
-    let png_sha256 = format!("{:x}", Sha256::digest(&png_bytes));
-
-    let receipt = FixtureReceipt {
-        schema: FIXTURE_RECEIPT_SCHEMA,
-        fixture: fixture.name.clone(),
-        runtime: "gpui",
-        logical_viewport: LogicalViewport {
-            width: fixture.viewport.width,
-            height: fixture.viewport.height,
-        },
-        scale: fixture.scale,
-        device_dimensions: DeviceDimensions {
-            width: image.width(),
-            height: image.height(),
-        },
-        png_sha256,
-        environment: CaptureEnvironment {
-            kind: "metal-headless",
-            os: std::env::consts::OS,
-            arch: std::env::consts::ARCH,
-            gpui_revision: GPUI_REVISION,
-        },
-        landmarks,
-        roles,
-    };
-    let receipt_json = serde_json::to_vec_pretty(&receipt)?;
-    publish_pair(&args.out_png, &png_bytes, &args.out_receipt, &receipt_json)?;
-
-    eprintln!(
-        "captured {} ({}x{} logical @ {}x) sha256={}",
-        fixture.name,
-        fixture.viewport.width,
-        fixture.viewport.height,
-        fixture.scale,
-        receipt.png_sha256
-    );
-    Ok(())
+            eprintln!(
+                "captured {} ({}x{} logical @ {}x) sha256={}",
+                receipt_fixture.name,
+                receipt_fixture.viewport.width,
+                receipt_fixture.viewport.height,
+                receipt_fixture.scale,
+                receipt.png_sha256
+            );
+            Ok(())
+        }),
+    })
 }

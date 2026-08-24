@@ -18,9 +18,9 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
     };
     record_probe_channel("layout.intent.direction");
     match d.layout.width {
-        // `.flex_grow_1()` is a flex property, not a width — matching the
+        // `.flex_grow()` is a flex property, not a width — matching the
         // Jetstream `el.grow()` mapping, which is also a flex property.
-        LayoutSizing::Grow => el = el.flex_grow_1(),
+        LayoutSizing::Grow => el = el.flex_grow(),
         LayoutSizing::Fixed(w) => el = el.w(px(w)),
         LayoutSizing::Fit => {}
         LayoutSizing::Constrained { min, max } => {
@@ -60,15 +60,15 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
         el.style().align_self = Some(gpui::AlignSelf::Stretch);
     }
     if let Some(grow) = style.flex_grow {
-        // Raw factor (fractional splits); `.flex_grow_1()` is the 1.0 case.
+        // Raw factor (fractional splits); `.flex_grow()` is the 1.0 case.
         el.style().flex_grow = Some(grow);
         record_probe_channel("layout.geometry.flex-grow");
     }
     if style.flex_fill {
         // Jetstream maps flex_fill to its grow() — grow + shrink, no stretch.
-        // gpui's `.flex_grow_1()` leaves shrink at its 1.0 default and does not
+        // gpui's `.flex_grow()` leaves shrink at its 1.0 default and does not
         // touch align-self, which is exactly that.
-        el = el.flex_grow_1();
+        el = el.flex_grow();
     }
     if style.flex_shrink_zero {
         el = el.flex_shrink_0();
@@ -297,28 +297,30 @@ pub(super) fn apply_paint<E: Styled>(mut el: E, node: &Node) -> E {
     }
 
     if !style.shadow_layers.is_empty() {
-        // The adopted GPUI revision's `BoxShadow` carries a real `inset`
-        // flag, so inset (highlight) layers project faithfully instead of
-        // being dropped as they were under gpui 0.2.2.
+        // Drop layers only. crates.io gpui 0.2.2 `BoxShadow` has no inset
+        // flag, so inset (highlight) layers cannot ride this refinement —
+        // `inset_shadow::apply` paints them instead, and the two halves are
+        // complementary, not a filter that loses one of them.
         let shadows = style
             .shadow_layers
             .iter()
+            .filter(|l| !l.inset)
             .map(|l| gpui::BoxShadow {
                 color: color(l.color),
                 offset: point(px(l.offset_x), px(l.offset_y)),
                 blur_radius: px(l.blur),
                 spread_radius: px(l.spread),
-                inset: l.inset,
             })
             .collect::<Vec<_>>();
-        el = el.shadow(shadows);
+        if !shadows.is_empty() {
+            el = el.shadow(shadows);
+        }
     } else if let Some(shadow) = &d.shadow {
         el = el.shadow(vec![gpui::BoxShadow {
             color: color(shadow.color),
             offset: point(px(shadow.offset_x), px(shadow.offset_y)),
             blur_radius: px(shadow.blur),
             spread_radius: px(0.0),
-            inset: false,
         }]);
         record_probe_channel("surface.extended.shadow");
     }
