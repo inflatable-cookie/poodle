@@ -20,6 +20,9 @@ exists yet.
 
 ## Versions
 
+- [0.2.2](0.2.2.md) — 2026-08-24 — corrects the `0.2.1` public GPUI
+  dependency-identity defect; restores crates.io GPUI 0.2.2 and replaces
+  fork-only offscreen capture with a non-activating window diagnostic
 - [0.2.1](0.2.1.md) — 2026-08-23 — registry-release replacement for the
   unpublished `0.2.0` tag; same product payload, repaired npm bootstrap
 - [0.2.0](0.2.0.md) — 2026-08-23 — tagged candidate on the frozen 175-component

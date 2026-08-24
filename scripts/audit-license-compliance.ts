@@ -73,30 +73,63 @@ const requiredNotices = [
     markers: ["The Inter Project Authors", "SIL OPEN FONT LICENSE Version 1.1"],
   },
   {
+    // `bzip2`/`libbz2-rs-sys` left every graph with the GPUI fork (g16.005), so
+    // their notice and the separate node-backend notice surface were removed
+    // in g16.006. A notice surface describes the CURRENT graph: keeping the
+    // text would have been a false claim about what Poodle distributes. The
+    // sweep below is what stops it drifting back in either direction.
     path: "THIRD_PARTY_NOTICES.md",
-    markers: [
-      "Lucide 1.31.0",
-      "canonical Poodle manifest",
-      "Inter 4.001",
-      "bzip2 and libbzip2 License v1.0.6",
-      "Copyright (C) 2019-2020 Federico Mena Quintero",
-      "Copyright (C) 2021 Micah Snyder",
-      "Copyright (C) 2024-2025 Trifecta Tech Foundation and contributors",
-      "bzip2/libbzip2 version 1.1.0",
-    ],
-  },
-  {
-    path: "packages/gpui/node-backend/THIRD_PARTY_NOTICES.md",
-    markers: [
-      "bzip2 and libbzip2 License v1.0.6",
-      "Copyright (C) 2019-2020 Federico Mena Quintero",
-      "Copyright (C) 2021 Micah Snyder",
-      "Copyright (C) 2024-2025 Trifecta Tech Foundation and contributors",
-      "Redistribution and use in source and binary forms",
-      "bzip2/libbzip2 version 1.1.0",
-    ],
+    markers: ["Lucide 1.31.0", "canonical Poodle manifest", "Inter 4.001"],
   },
 ];
+
+// Notice truth is bidirectional. A marker list only catches a notice that went
+// missing; it cannot catch a notice for a crate that left the graph, which is
+// exactly the drift g16.006 had to repair. So derive the claim from the locks:
+// if no lockfile resolves the crate, no tracked source may still name it.
+const retiredNoticeCrates = [
+  { crate: "bzip2", lockNames: ["bzip2", "libbz2-rs-sys"], claim: /bzip2|libbz2/i },
+];
+const lockPaths = paths.filter((path) => basename(path) === "Cargo.lock");
+const noticeSweepPaths = paths.filter(
+  (path) =>
+    basename(path) === "THIRD_PARTY_NOTICES.md" ||
+    path === "deny.toml" ||
+    path === "docs/specs/022-packaging-versioning-and-release-channel-rules.md",
+);
+
+for (const retired of retiredNoticeCrates) {
+  const resolvedIn = lockPaths.filter((lockPath) => {
+    const lock = readFileSync(lockPath, "utf8");
+    return retired.lockNames.some((name) => lock.includes(`name = "${name}"`));
+  });
+
+  if (resolvedIn.length > 0) {
+    // The crate came back. Re-adding the notice is the correct response, but it
+    // is a deliberate licence decision, so fail rather than pass silently.
+    errors.push(
+      `${retired.crate} is resolved again in ${resolvedIn.join(", ")}: restore its notice, licence allow entry, and spec text, then remove it from retiredNoticeCrates.`,
+    );
+    continue;
+  }
+
+  for (const path of noticeSweepPaths) {
+    // A tracked path can be absent from the working tree mid-change. A file
+    // that does not exist cannot claim anything, and `requiredNotices` below
+    // is what reports a notice that was supposed to be there.
+    let source: string;
+    try {
+      source = readFileSync(path, "utf8");
+    } catch {
+      continue;
+    }
+    if (retired.claim.test(source)) {
+      errors.push(
+        `${path}: still claims ${retired.crate}, which no lockfile resolves.`,
+      );
+    }
+  }
+}
 
 for (const notice of requiredNotices) {
   try {

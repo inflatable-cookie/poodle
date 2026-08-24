@@ -1,6 +1,6 @@
 {
   "generated": {
-    "generator": "poodle-codegen 0.2.1",
+    "generator": "poodle-codegen 0.2.2",
     "ir_schema_version": 1,
     "source": "packages/codegen/fixtures/synthetic-model.json"
   },
