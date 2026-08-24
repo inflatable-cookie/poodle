@@ -28,8 +28,10 @@ required-features = ["window-capture"]
 # the fork-era coupling between capture and test-only APIs is gone.
 window-capture = [
     "dep:sha2",
+    "dep:raw-window-handle",
     "objc2-app-kit/NSWorkspace",
     "objc2-app-kit/NSRunningApplication",
+    "objc2-app-kit/NSView",
 ]
 
 [dependencies]
@@ -69,6 +71,10 @@ serde_json = "1"
 # The captured PNG is published exactly as the window server wrote it, so no
 # image codec is needed — only the IHDR header is read.
 sha2 = { version = "0.10", optional = true }
+# Window capture only: obtain the exact AppKit window backing the GPUI
+# `Window`, so a batch never mistakes a just-closed sibling window for the
+# current scene.
+raw-window-handle = { version = "0.6", optional = true }
 # The completion-driven file pick (g15.007) awaits the OS prompt's oneshot
 # receiver in a task. Already in the graph as gpui's own dependency.
 futures = "0.3"

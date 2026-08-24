@@ -156,7 +156,7 @@ async function main(): Promise<void> {
 
   console.log(`g15.047 button visual comparison: ${fixtures.length} fixtures × 3 runtimes → ${outDir}`);
 
-  console.log("## capture: gpui (Metal headless, one-shot per fixture, twice)");
+  console.log("## capture: gpui (non-activating window batches, twice)");
   const gpuiRecords = captureGpuiBatch(fixtures, capturesDir);
 
   console.log("## capture: svelte + react (pinned headless Chromium, twice each)");

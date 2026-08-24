@@ -296,7 +296,7 @@ resolved: gpui 0.2.2 from registry+https://github.com/rust-lang/crates.io-index
 | Selector | Windowed? | Change |
 | --- | --- | --- |
 | `smoke:gpui-offscreen-capture` | — | **removed**; the transport it drove cannot exist on stock 0.2.2 |
-| `smoke:gpui-window-capture` | no | new; headless. Builds the target, runs its unit tests (activation boundary, device-size policy, foreground rule, publish atomicity), and proves 19 negative invocations — CLI and batch manifest alike — are rejected during argument validation. In `ci:native`. |
+| `smoke:gpui-window-capture` | no | new; headless. Builds the target, runs its unit tests (activation boundary, device-size policy, foreground rule, publish atomicity), and proves 23 negative invocations — CLI and batch manifest alike — are rejected during argument validation. In `ci:native`. |
 | `capture:gpui-windowed` | **yes** | new; the transport itself. Repeat byte-identity, receipt verification, foreground evidence. Operator-approved only. |
 | `capture:gpui-inset-shadows-windowed` | **yes** | new; the ONLY run that exercises the inset painter. Accordion, ListCard, Tabs, Popover — both band shapes, the stacked case, and the deferred overlay surface — in one non-activating process. Operator-approved only. |
 | `drift:gpui-consumer-identity` | no | new; the proof above. In `ci:native`. |
@@ -383,6 +383,31 @@ Watch for:
   corner clipping on `tabs` and `list-card`, the 1px top highlight on
   `accordion` and `popover`, the leading bar on `list-card`, and that the
   popover panel's highlight painted at all.
+
+### Operator result — 2026-08-24
+
+Run with explicit operator approval after code review:
+
+- `(1)` passed: three byte-identical captures, verified receipts, 480×160
+  device size, and 36 foreground samples all remained T3 Code
+  (`verdict=proved`).
+- `(2)` exposed two real evidence-lane defects before it passed. The batch
+  initially selected the largest process-owned window and could capture a
+  just-closed larger scene; capture now resolves the exact AppKit window id
+  from the current GPUI `Window`. Popover then painted under its scoped
+  runtime id while the receipt waited on its semantic id; evidence stamping
+  now pins both identities. The clean rerun produced all four receipts and
+  PNGs, every foreground verdict was proved, and ListCard recorded both
+  stacked bands. Visual review confirmed the spread rings, clipped corners,
+  leading bar, top highlights, and deferred Popover surface.
+- One intervening retry observed Spark become frontmost and rejected the run
+  without publishing the remaining scenes. This was external to the capture
+  path, but confirms the monitor fails closed rather than guessing.
+- `(3)` produced the complete 54-capture set and all 36 comparisons with zero
+  repeat mismatch. Every Svelte↔React channel passed. Svelte↔GPUI geometry,
+  colours, and pixel policy passed; 16 Button shadow-role omissions remained
+  the cited `gpui-omits-box-shadow` known delta and therefore also remained
+  blocking under the fixed policy. The selector exited non-zero as designed.
 
 ## What The Worker Could Not Verify
 

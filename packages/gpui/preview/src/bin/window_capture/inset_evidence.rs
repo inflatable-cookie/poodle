@@ -193,6 +193,12 @@ fn stamp_inset_nodes(node: &mut Node, scene: &str, next: &mut usize, ids: &mut V
     if node.style.shadow_layers.iter().any(|layer| layer.inset) {
         let id = format!("inset-evidence:{scene}:{next}");
         node.id = Some(id.clone());
+        // The backend keys painted observations by runtime identity when a
+        // composition provides one. Popover scopes its surface that way, so
+        // stamp both identities or the deferred panel paints under its old
+        // runtime id while this evidence lane waits forever on the semantic
+        // id above.
+        node.runtime_id = Some(id.clone());
         ids.push(id);
         *next += 1;
     }
@@ -207,6 +213,7 @@ fn stamp_inset_nodes(node: &mut Node, scene: &str, next: &mut usize, ids: &mut V
 struct InsetEvidenceRoot {
     node: Node,
     canvas: gpui::Hsla,
+    text: gpui::Hsla,
 }
 
 impl Render for InsetEvidenceRoot {
@@ -225,6 +232,7 @@ impl Render for InsetEvidenceRoot {
                 .flex_col()
                 .items_start()
                 .bg(self.canvas)
+                .text_color(self.text)
                 .font_family("Inter")
                 .child(element),
         )
@@ -292,6 +300,7 @@ pub fn run(args: &InsetEvidenceArgs) -> ! {
 fn prepare(scene: &str, out_dir: &Path) -> Result<transport::Shot<InsetEvidenceRoot>> {
     let theme = ThemePreset::Eclipse.build_theme();
     let canvas = theme.resolve_color("color.background.canvas");
+    let text = theme.resolve_color("color.text.primary");
     let ctx = poodle_render::RenderContext::new(&theme);
     let built = build_scene(scene, &ctx);
 
@@ -323,6 +332,7 @@ fn prepare(scene: &str, out_dir: &Path) -> Result<transport::Shot<InsetEvidenceR
             cx.new(|_| InsetEvidenceRoot {
                 node,
                 canvas: poodle_gpui_node_backend::color(canvas),
+                text: poodle_gpui_node_backend::color(text),
             })
         }),
         on_frame: Box::new(move |_window, _cx, _frame| {

@@ -38,6 +38,7 @@ use gpui::{
     px, size, App, AppContext as _, Application, AssetSource, AsyncApp, Bounds, Entity, Point,
     Render, VisualContext as _, Window, WindowBounds, WindowOptions,
 };
+use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use serde::Serialize;
 
 /// The only scale this lane accepts. The fixture inventory is 2×-only, so a
@@ -425,11 +426,20 @@ async fn capture_one<V: Render>(
         cx.background_executor().timer(SETTLE_POLL).await;
     }
 
+    // Resolve the exact Window Server id from this GPUI window. Looking up
+    // "the largest window owned by this pid" is racy in a batch: AppKit can
+    // retain the just-closed previous window briefly, and a larger previous
+    // scene then wins the lookup. The raw handle is GPUI's current NSView, so
+    // its NSWindow number cannot name a sibling scene.
+    let window_id = cx
+        .update_window(window.into(), |_, window, _cx| window_server_id(window))
+        .with_context(|| format!("read the AppKit window id for {label}"))??;
+
     // `screencapture` blocks; run it off the main thread so the run loop
     // keeps drawing and the foreground monitor keeps sampling.
     let png = cx
         .background_executor()
-        .spawn(async move { capture_own_window() })
+        .spawn(async move { capture_window(window_id) })
         .await
         .with_context(|| format!("capture {label}"))?;
 
@@ -554,13 +564,37 @@ pub fn png_dimensions(bytes: &[u8]) -> Result<(u32, u32)> {
     Ok((width, height))
 }
 
-/// Find this process's own window through the window server and capture it by
-/// id. Nothing here can reach another application's window, the desktop, or a
-/// screen region: `screencapture -l` takes exactly one window id, and the id
-/// is filtered to this pid.
-fn capture_own_window() -> Result<Vec<u8>> {
+/// Read the Window Server id from the AppKit window backing this exact GPUI
+/// window. The raw handle is an NSView pointer on macOS; following its
+/// documented `window` relationship keeps capture bound to the current scene
+/// even while an earlier batch window is still disappearing from the Window
+/// Server.
+fn window_server_id(window: &Window) -> Result<u64> {
+    let handle = HasWindowHandle::window_handle(window)
+        .map_err(|error| anyhow::anyhow!("read GPUI's raw window handle: {error:?}"))?;
+    let RawWindowHandle::AppKit(appkit) = handle.as_raw() else {
+        bail!("window capture expected an AppKit window handle on macOS");
+    };
+    let view_ptr = appkit.ns_view.as_ptr().cast::<objc2_app_kit::NSView>();
+    // SAFETY: raw-window-handle's AppKit contract says `ns_view` points to
+    // the live NSView backing this window. The borrowed GPUI Window keeps it
+    // alive for the duration of this lookup.
+    let view = unsafe { &*view_ptr };
+    let ns_window = view
+        .window()
+        .with_context(|| "GPUI's NSView is not attached to an NSWindow")?;
+    let id = ns_window.windowNumber();
+    if id <= 0 {
+        bail!("AppKit returned an invalid Window Server id {id}");
+    }
+    Ok(id as u64)
+}
+
+/// Capture one already-resolved Window Server id. Nothing here can fall back
+/// to the desktop or a screen region: `screencapture -l` takes exactly one
+/// window id.
+fn capture_window(window_id: u64) -> Result<Vec<u8>> {
     let pid = std::process::id();
-    let window_id = own_window_id(pid)?;
 
     let directory = std::env::temp_dir().join(format!("poodle-window-capture-{pid}"));
     std::fs::create_dir_all(&directory)
@@ -600,53 +634,6 @@ fn capture_own_window() -> Result<Vec<u8>> {
         bail!("screencapture wrote an empty file");
     }
     Ok(bytes)
-}
-
-/// The largest on-screen window owned by this pid.
-fn own_window_id(pid: u32) -> Result<u64> {
-    let script = format!(
-        concat!(
-            "import CoreGraphics\n",
-            "let list = CGWindowListCopyWindowInfo(.optionAll, kCGNullWindowID) as! [[String: Any]]\n",
-            "var best = 0; var bestArea = 0\n",
-            "for entry in list {{\n",
-            "  guard let owner = entry[\"kCGWindowOwnerPID\"] as? Int, owner == {pid} else {{ continue }}\n",
-            "  let bounds = entry[\"kCGWindowBounds\"] as? [String: Any] ?? [:]\n",
-            "  let height = bounds[\"Height\"] as? Int ?? 0\n",
-            "  let width = bounds[\"Width\"] as? Int ?? 0\n",
-            "  if height * width > bestArea {{\n",
-            "    bestArea = height * width\n",
-            "    best = entry[\"kCGWindowNumber\"] as? Int ?? 0\n",
-            "  }}\n",
-            "}}\n",
-            "print(best)",
-        ),
-        pid = pid
-    );
-    let output = std::process::Command::new("swift")
-        .arg("-e")
-        .arg(script)
-        .output()
-        .with_context(|| "look this process's own window up in the window server")?;
-    if !output.status.success() {
-        bail!(
-            "window lookup failed: {}",
-            String::from_utf8_lossy(&output.stderr).trim()
-        );
-    }
-    let text = String::from_utf8_lossy(&output.stdout);
-    let id: u64 = text
-        .trim()
-        .parse()
-        .with_context(|| format!("window lookup returned {text:?}"))?;
-    if id == 0 {
-        bail!(
-            "no on-screen window is owned by this process (pid {pid}). A macOS window server \
-             is required: crates.io GPUI {GPUI_VERSION} exposes no scene readback, so there is \
-             no windowless capture path to fall back to."
-        );
-    }
-    Ok(id)
 }
 
 fn fail(error: anyhow::Error) -> ! {
