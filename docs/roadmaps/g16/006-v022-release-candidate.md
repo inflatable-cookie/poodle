@@ -49,6 +49,9 @@ This card must not create a tag, publish a package, or edit a release workflow.
 - Add `0.2.2` release notes and changelog history naming the GPUI
   source-identity defect, restored crates.io boundary, and explicit
   non-activating window diagnostic.
+- Re-derive the native licence and notice surface from the corrected final
+  graph. Remove the obsolete `bzip2` / `libbz2-rs-sys` claims and licence
+  allow-list entry when neither crate resolves in either GPUI lockfile.
 - Preserve the existing publish set: core and Svelte publish; React remains
   source-only.
 - Run the complete headless release board and package the same three web
@@ -69,6 +72,9 @@ This card must not create a tag, publish a package, or edit a release workflow.
 - `CHANGELOG.md`, `docs/release-notes/0.2.2.md`, package READMEs and
   release-facing front doors only where existing `0.2.1` wording would
   contradict the candidate;
+- the root and GPUI node-backend third-party notices, `deny.toml`, spec 022,
+  and `scripts/audit-license-compliance.ts`, only for the bounded removal of
+  stale `bzip2` / `libbz2-rs-sys` claims proved absent from the final graph;
 - one August `g16.006` execution log/receipt and `PAPERCUTS.md` for new
   execution friction.
 
@@ -83,6 +89,8 @@ candidate is not ready: stop and report it.
       agree on `0.2.2` without unrelated upgrades.
 - [ ] Release notes state the `v0.2.1` defect and the windowed diagnostic
       limitation without claiming true headless GPUI pixels.
+- [ ] The final GPUI graphs and every active notice, licence-policy, and audit
+      surface agree that `bzip2` / `libbz2-rs-sys` are absent.
 - [ ] `effigy qa`, `effigy release gates`, `effigy docs:check`,
       `effigy ir:check`, and `effigy catalogue:check` pass from the exact
       candidate.
@@ -102,6 +110,8 @@ From the clean candidate commit:
   React, with filenames, sizes, and SHA-256 digests recorded;
 - `effigy check:release-automation`;
 - `effigy audit:licenses` and `effigy audit:security`;
+- an exact source/lock sweep proving no active release or notice surface still
+  claims `bzip2` / `libbz2-rs-sys` as a current dependency;
 - `effigy drift:gpui-consumer-identity`;
 - `effigy qa`;
 - read-only `effigy release gates`, with evidence that its configured headless

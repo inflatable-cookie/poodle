@@ -1,7 +1,8 @@
 # g16 — Published Consumer Adoption
 
-Status: active — GPUI source identity recovered; `g16.006` is the ready
-v0.2.2 candidate and Longhorn remains paused until certification
+Status: active — GPUI source identity recovered; `g16.006` PR 74 is in review
+with one notice-policy truthfulness correction required; Longhorn remains
+paused until certification
 Posture: adoption-first with one Poodle patch release gate
 Opened: 2026-08-23
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -73,7 +74,8 @@ trees, and in-repository archived applications are excluded.
 5. [005 — GPUI crates.io recovery](005-gpui-cratesio-recovery.md) —
    complete; PR 73 merged at `8dfdfa3c`
 6. [006 — v0.2.2 release candidate](006-v022-release-candidate.md) —
-   ready; prepare and prove the exact candidate without release mutation
+   changes requested on PR 74; remove stale bzip2 notice/policy claims, repin,
+   and re-prove the exact candidate without release mutation
 7. [007 — v0.2.2 release certification](007-v022-release-certification.md) —
    blocked; human-owned gate after the exact `006` candidate
 8. `008` — fresh Longhorn v0.2.2 adoption — compile after `007`
@@ -85,8 +87,13 @@ trees, and in-repository archived applications are excluded.
 
 ## Current Task And Parallel Lanes
 
-`g16.006` is the only executable lane. The crates.io GPUI boundary and
-non-activating evidence transport are accepted and merged in `g16.005`.
+`g16.006` is the only executable lane. PR 74's first review found that the
+accepted GPUI graph no longer contains `bzip2` / `libbz2-rs-sys` while the
+public notices, licence allowlist, spec, and audit expectations still claim it
+does. That bounded candidate correction is approved; it invalidates the first
+candidate SHA and requires the complete board to rerun. The crates.io GPUI
+boundary and non-activating evidence transport are accepted and merged in
+`g16.005`.
 Longhorn `g16.002` stopped without a PR and its worktree was removed rather
 than propagate the GPUI fork. Underlay `g16.003` and Soundcheck Library
 `g16.004` remain valid evidence for removing local overrides, but each needs
