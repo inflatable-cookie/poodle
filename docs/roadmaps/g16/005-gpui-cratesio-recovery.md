@@ -1,6 +1,6 @@
 # g16.005 — GPUI crates.io recovery
 
-Status: **ready**
+Status: **complete — PR 73 merged at `8dfdfa3c`**
 Depends on: `g16.001`, completed crates.io non-activating capture prototype
 Blocks: `g16.006` and every remaining `g16` adoption lane
 Governing refs: `../../research/gpui-cratesio-nonactivating-capture.md`,
@@ -70,22 +70,30 @@ public package boundary.
 
 ## Acceptance
 
-- [ ] Active Poodle manifests and locks contain one crates.io GPUI 0.2.2
+- [x] Active Poodle manifests and locks contain one crates.io GPUI 0.2.2
       identity and no Git-sourced GPUI platform crates.
-- [ ] A clean downstream proof can depend directly on crates.io GPUI 0.2.2 and
+- [x] A clean downstream proof can depend directly on crates.io GPUI 0.2.2 and
       Poodle's GPUI node backend without type-identity conflicts.
-- [ ] Existing headless GPUI construction, specimen, interaction, focus-ring,
+- [x] Existing headless GPUI construction, specimen, interaction, focus-ring,
       and shared Rust tests remain green.
-- [ ] The retained Button visual runner still produces its exact 18 GPUI
+- [x] The retained Button visual runner still produces its exact 18 GPUI
       fixtures and typed receipts when the operator explicitly runs the
       windowed diagnostic.
-- [ ] A foreground-application monitor proves that diagnostic never takes
+- [x] A foreground-application monitor proves that diagnostic never takes
       focus. This one visual check is orchestrator/operator-owned; workers do
       not run a `*-windowed` selector without renewed approval.
-- [ ] Default `effigy qa` and release gates open no window and require no
+- [x] Default `effigy qa` and release gates open no window and require no
       Screen Recording permission.
-- [ ] Full headless QA and a clean downstream dual-dependency compile proof
+- [x] Full headless QA and a clean downstream dual-dependency compile proof
       pass without version or release mutation.
+
+## Closeout
+
+PR 73 merged at `8dfdfa3c` after independent code review, full headless
+validation, and the explicitly approved windowed evidence run. The operator
+run exposed and fixed exact-window selection and deferred Popover observation
+defects before acceptance. Execution evidence is in
+`../../logs/2026-08/20260823-g16-005-gpui-cratesio-recovery.md`.
 
 ## Stop Conditions
 

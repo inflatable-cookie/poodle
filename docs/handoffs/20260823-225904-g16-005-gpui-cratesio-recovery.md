@@ -5,10 +5,10 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: ready-to-launch
+status: complete
 owner: Poodle native runtime
 created: 2026-08-23
-updated: 2026-08-23
+updated: 2026-08-24
 handoff_path: /Users/tom/Dev/projects/poodle/docs/handoffs/20260823-225904-g16-005-gpui-cratesio-recovery.md
 base_required: pushed-main
 tags: [coordination, handoff, worker, pr, g16, gpui, cratesio]
@@ -214,4 +214,3 @@ canonical review record.
 After explicit operator merge authority and a green review gate, the
 orchestrator merges, closes `g16.005`, and advances only `g16.006`. The release
 candidate and publication remain separate work.
-

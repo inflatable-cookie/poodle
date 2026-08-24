@@ -1,6 +1,6 @@
 # g16.006 — v0.2.2 release candidate
 
-Status: **blocked — waits for accepted `g16.005` recovery**
+Status: **ready — `g16.005` accepted and merged**
 Depends on: `g16.005`
 Blocks: `g16.007` and all consumer adoption
 Governing refs: `005-gpui-cratesio-recovery.md`,
@@ -53,4 +53,3 @@ This card must not create a tag, publish a package, or edit a release workflow.
 - A release gate is weakened, bypassed, or moved to a windowed path.
 - Tag creation, publication, or workflow editing becomes necessary. Stop at
   the candidate and return to `g16.007`.
-

@@ -1,8 +1,8 @@
 # g16 — Published Consumer Adoption
 
-Status: active — consumer adoption exposed a released GPUI source-identity
-defect; `g16.005` is the ready crates.io recovery and Longhorn is paused
-Posture: adoption-first with one blocking Poodle dependency-source recovery
+Status: active — GPUI source identity recovered; `g16.006` is the ready
+v0.2.2 candidate and Longhorn remains paused until certification
+Posture: adoption-first with one Poodle patch release gate
 Opened: 2026-08-23
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`,
@@ -53,7 +53,7 @@ trees, and in-repository archived applications are excluded.
 
 | Lane | Repositories | State |
 | --- | --- | --- |
-| Release recovery | Poodle | crates.io GPUI implementation ready; candidate and certification blocked |
+| Release recovery | Poodle | crates.io GPUI recovery merged; v0.2.2 candidate ready |
 | Foundation | Longhorn, Underlay, Soundcheck Library | Underlay and Soundcheck Library reached 0.2.1; Longhorn paused; all need final 0.2.2 state |
 | Adapter follow-up | Jetstream | waits for Longhorn |
 | Product applications | Acowtancy, Bovine Accelerator Desktop, Compli Me, Composer, Contact Patch, Figmatic, Finch, Loophole, Nucleus, Songsprout, Soundcheck, Underlay Reference | waits for the foundation it consumes |
@@ -71,9 +71,9 @@ trees, and in-repository archived applications are excluded.
 4. [004 — Soundcheck Library Poodle 0.2.1 adoption](004-soundcheck-library-poodle-v021-adoption.md) —
    complete; PR 5 merged at `a720f22`
 5. [005 — GPUI crates.io recovery](005-gpui-cratesio-recovery.md) —
-   ready; restores and proves the public dependency boundary
+   complete; PR 73 merged at `8dfdfa3c`
 6. [006 — v0.2.2 release candidate](006-v022-release-candidate.md) —
-   blocked behind accepted `005`
+   ready; prepare and prove the exact candidate without release mutation
 7. [007 — v0.2.2 release certification](007-v022-release-certification.md) —
    blocked; human-owned gate after the exact `006` candidate
 8. `008` — fresh Longhorn v0.2.2 adoption — compile after `007`
@@ -85,11 +85,13 @@ trees, and in-repository archived applications are excluded.
 
 ## Current Task And Parallel Lanes
 
-`g16.005` is the only executable lane and is in flight. Longhorn `g16.002`
-stopped without a PR and its worktree was removed rather than propagate the
-GPUI fork. Underlay `g16.003` and Soundcheck Library `g16.004`
-remain valid evidence for removing local overrides, but each needs a small
-0.2.2 follow-up after certification. No product card advances on 0.2.1.
+`g16.006` is the only executable lane. The crates.io GPUI boundary and
+non-activating evidence transport are accepted and merged in `g16.005`.
+Longhorn `g16.002` stopped without a PR and its worktree was removed rather
+than propagate the GPUI fork. Underlay `g16.003` and Soundcheck Library
+`g16.004` remain valid evidence for removing local overrides, but each needs
+a small 0.2.2 follow-up after certification. No product card advances on
+0.2.1.
 
 ## Completion
 
