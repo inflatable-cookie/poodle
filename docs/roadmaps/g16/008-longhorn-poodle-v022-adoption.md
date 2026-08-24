@@ -1,6 +1,6 @@
 # g16.008 — Longhorn Poodle 0.2.2 adoption
 
-Status: **ready — fresh worker lane; do not resume the stopped 0.2.1 branch**
+Status: **complete — Longhorn PR 9 merged at `c94f72e9`**
 Depends on: `g16.001`, `g16.005`, `g16.007`, published npm `0.2.2`,
 immutable tag `v0.2.2`
 Target repository: `/Users/tom/Dev/projects/longhorn`
@@ -92,3 +92,25 @@ Record changed manifests and locks, exact resolved package/tag/SHA/source
 identity, compatibility edits, and exact validation in the Longhorn PR. Do not
 merge. Once this PR lands, the orchestrator may compile Jetstream plus the
 Longhorn-dependent product cards.
+
+## Closeout
+
+Longhorn PR [#9](https://github.com/inflatable-cookie/longhorn/pull/9)
+merged on 2026-08-24 at
+`c94f72e9d361175c61a97fe867ba7b63f58a2db8`. Every active web dependency
+resolves public Poodle core/Svelte 0.2.2; the Rust adapter and both prototypes
+resolve Poodle tag `v0.2.2` at
+`d5607def24c6833913df1b5dcfa06372fcd5dd81`. Each Rust graph contains one
+crates.io `gpui` 0.2.2 identity. No Poodle path, patch, fork, alias, or
+duplicate-type conversion was introduced.
+
+The adoption also removed Longhorn's temporary linked-Poodle proof exemption
+after registry 0.2.2 supplied the required settings components. Card 218 was
+reconciled honestly: its deletion step landed, its flag gate became obsolete,
+and its remaining registry-integrity work stays open for recompilation as
+release hardening.
+
+Independent review passed frozen registry installation, every Poodle proof,
+the complete headless `effigy qa` board, focused docs checks after the final
+roadmap-only update, and `git diff --check`. The canonical verdict is
+[recorded on PR 9](https://github.com/inflatable-cookie/longhorn/pull/9#issuecomment-5401974646).

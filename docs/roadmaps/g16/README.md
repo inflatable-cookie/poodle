@@ -1,7 +1,7 @@
 # g16 — Published Consumer Adoption
 
-Status: active — `v0.2.2` published from the accepted crates.io-GPUI
-candidate; consumer adoption resumes with a fresh Longhorn lane
+Status: active — `v0.2.2` foundation adoption complete; first product wave
+ready across Nucleus, Soundcheck, and Underlay Reference
 Posture: adoption-first with one Poodle patch release gate
 Opened: 2026-08-23
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -54,9 +54,9 @@ trees, and in-repository archived applications are excluded.
 | Lane | Repositories | State |
 | --- | --- | --- |
 | Release recovery | Poodle | complete; `v0.2.2` published from exact candidate `d5607def` |
-| Foundation | Longhorn, Underlay, Soundcheck Library | Underlay and Soundcheck Library complete at 0.2.2; `008` remains active |
-| Adapter follow-up | Jetstream | waits for Longhorn |
-| Product applications | Acowtancy, Bovine Accelerator Desktop, Compli Me, Composer, Contact Patch, Figmatic, Finch, Loophole, Nucleus, Songsprout, Soundcheck, Underlay Reference | Underlay-dependent cards may compile; Longhorn-dependent apps still wait |
+| Foundation | Longhorn, Underlay, Soundcheck Library | complete at 0.2.2 |
+| Adapter follow-up | Jetstream | deferred behind product adoption; paired Rust integration remains local |
+| Product applications | Acowtancy, Bovine Accelerator Desktop, Compli Me, Composer, Contact Patch, Figmatic, Finch, Loophole, Nucleus, Songsprout, Soundcheck, Underlay Reference | first independent wave `011`-`013` ready |
 | Legacy product | Loophole Legacy | final wave; verify that it remains supported before merge |
 
 ## Runway
@@ -78,15 +78,23 @@ trees, and in-repository archived applications are excluded.
    complete; tag `v0.2.2`, npm core/Svelte publication, artifact, and clean
    public-registry consumer install verified
 8. [008 — fresh Longhorn v0.2.2 adoption](008-longhorn-poodle-v022-adoption.md) —
-   ready; web registry, Rust tag, and single crates.io-GPUI identity proof
+   complete; PR 9 merged at `c94f72e9`, with public web packages, Rust tag,
+   and one crates.io-GPUI identity proved
 9. [009 — Underlay 0.2.2 follow-up](009-underlay-poodle-v022-follow-up.md) —
    complete; PR 5 merged at `d6fe7b9b`, exact registry bump with no migration
 10. [010 — Soundcheck Library 0.2.2 follow-up](010-soundcheck-library-poodle-v022-follow-up.md) —
     complete; PR 6 merged at `7f5ff0b9`, exact development pin, peer-line bump,
     and dual-lock validation
-11. `011` — Jetstream adoption — compile after Longhorn lands
-12. `012+` — exact product-repository cards — compile after their foundation
-    dependencies land and expose any migration requirements
+11. [011 — Nucleus Poodle 0.2.2 adoption](011-nucleus-poodle-v022-adoption.md) —
+    ready; direct application lane over local Longhorn packages
+12. [012 — Soundcheck Poodle 0.2.2 adoption](012-soundcheck-poodle-v022-adoption.md) —
+    ready; Longhorn plus Soundcheck Library integration lane
+13. [013 — Underlay Reference Poodle 0.2.2 adoption](013-underlay-reference-poodle-v022-adoption.md) —
+    ready; canonical three-app Underlay consumer lane
+14. `014+` — remaining exact product-repository cards, compiled from the first
+    wave's migration evidence
+15. Jetstream adoption — final adapter wave unless a product exposes a reason
+    to admit it earlier
 
 ## Current Task And Parallel Lanes
 
@@ -95,11 +103,17 @@ The release-recovery lane is complete. Tag `v0.2.2` points to exact candidate
 retained React as source-only, and uploaded the packed artifacts. A clean
 public-registry consumer install passed.
 
-Underlay `009` and Soundcheck Library `010` are complete. Longhorn `008` is the
-remaining active foundation lane and must stay on its fresh 0.2.2 branch rather
-than recover the stopped 0.2.1 worktree. Underlay-dependent product cards can
-compile in parallel; Jetstream, Soundcheck, and other Longhorn-dependent
-products still wait for `008`.
+The foundation is complete: Longhorn `008`, Underlay `009`, and Soundcheck
+Library `010` are merged at 0.2.2. The first product wave is three independent
+repositories: Nucleus `011`, Soundcheck `012`, and Underlay Reference `013`.
+They run in parallel and share no mutable files. Their evidence establishes the
+direct-app, Longhorn-plus-library, and Underlay-reference migration shapes
+before the remaining product estate is compiled.
+
+Jetstream is not on the critical path. Its local paired Rust integration stays
+deferred while product applications adopt the public web packages; compile its
+adapter card in the final wave unless consumer evidence makes it necessary
+sooner.
 
 The crates.io GPUI boundary and non-activating evidence transport are accepted
 and merged in `g16.005`. PR 74 removed the stale `bzip2` / `libbz2-rs-sys`

@@ -5,16 +5,17 @@ Updated: 2026-08-24
 ## Active Track
 
 - `g16`
-  - Status: active — inventory and v0.2.2 release recovery complete; consumer
-    adoption resumes with Longhorn
+  - Status: active — inventory, v0.2.2 release recovery, and foundation
+    adoption complete; first product wave ready
   - Posture: published-package adoption from exact npm 0.2.2 and Rust tag
     `v0.2.2`; no component or public API redesign
-  - Range: `001` to `007` complete; `008+` compile in dependency order
+  - Range: `001` to `010` complete; `011`-`013` ready in parallel
   - Evidence: 17 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: compile and dispatch a fresh Longhorn v0.2.2 adoption card, then the
-    Underlay and Soundcheck Library 0.2.2 follow-ups.
+  - Next: dispatch Nucleus `011`, Soundcheck `012`, and Underlay Reference
+    `013`; use their evidence to compile the remaining product wave. Jetstream
+    remains deferred unless product adoption exposes a dependency on it.
 
 ## Latest Completed Track
 

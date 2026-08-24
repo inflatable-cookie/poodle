@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-24 — Required Northstar orientation through `effigy doctor` now
+  fails on three broad repository scans (`generated-in-src`, `god-files`, and
+  `stale-suppressions`: 41 error findings total) even though none is connected
+  to the active consumer-adoption lane. Baseline or intentionally configure
+  these scans so doctor distinguishes new health drift from accepted source
+  shape. Affects every worker and orchestrator startup in Poodle.
+
 - 2026-08-24 — The exact-candidate Button visual diagnostic recovered three
   Svelte captures only after separate 60-second `waitForSelector` timeouts,
   despite all retained captures verifying and repeating byte-identically. Add
