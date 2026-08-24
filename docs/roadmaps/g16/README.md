@@ -54,7 +54,7 @@ trees, and in-repository archived applications are excluded.
 | Lane | Repositories | State |
 | --- | --- | --- |
 | Release recovery | Poodle | complete; `v0.2.2` published from exact candidate `d5607def` |
-| Foundation | Longhorn, Underlay, Soundcheck Library | Underlay and Soundcheck Library reached 0.2.1; Longhorn paused; all need final 0.2.2 state |
+| Foundation | Longhorn, Underlay, Soundcheck Library | `008`, `009`, and `010` ready as independent 0.2.2 worker lanes |
 | Adapter follow-up | Jetstream | waits for Longhorn |
 | Product applications | Acowtancy, Bovine Accelerator Desktop, Compli Me, Composer, Contact Patch, Figmatic, Finch, Loophole, Nucleus, Songsprout, Soundcheck, Underlay Reference | waits for the foundation it consumes |
 | Legacy product | Loophole Legacy | final wave; verify that it remains supported before merge |
@@ -77,9 +77,12 @@ trees, and in-repository archived applications are excluded.
 7. [007 — v0.2.2 release certification](007-v022-release-certification.md) —
    complete; tag `v0.2.2`, npm core/Svelte publication, artifact, and clean
    public-registry consumer install verified
-8. `008` — fresh Longhorn v0.2.2 adoption — compile after `007`
-9. `009` — Underlay 0.2.2 follow-up — compile after `007`
-10. `010` — Soundcheck Library 0.2.2 follow-up — compile after `007`
+8. [008 — fresh Longhorn v0.2.2 adoption](008-longhorn-poodle-v022-adoption.md) —
+   ready; web registry, Rust tag, and single crates.io-GPUI identity proof
+9. [009 — Underlay 0.2.2 follow-up](009-underlay-poodle-v022-follow-up.md) —
+   ready; exact registry bump and adapter/template validation
+10. [010 — Soundcheck Library 0.2.2 follow-up](010-soundcheck-library-poodle-v022-follow-up.md) —
+    ready; exact development pin, peer-line bump, and dual-lock validation
 11. `011` — Jetstream adoption — compile after Longhorn lands
 12. `012+` — exact product-repository cards — compile after their foundation
     dependencies land and expose any migration requirements
@@ -89,9 +92,13 @@ trees, and in-repository archived applications are excluded.
 The release-recovery lane is complete. Tag `v0.2.2` points to exact candidate
 `d5607def`; run `32756610293` published core and Svelte 0.2.2 to npm `latest`,
 retained React as source-only, and uploaded the packed artifacts. A clean
-public-registry consumer install passed. The current orchestrator task is to
-compile `g16.008` as a fresh Longhorn 0.2.2 adoption card; Longhorn must not
-resume the stopped 0.2.1 worktree.
+public-registry consumer install passed.
+
+Cards `008`, `009`, and `010` are independent ready foundation lanes and may
+run in parallel in separate target-repository worktrees. Longhorn must start
+fresh rather than resume the stopped 0.2.1 branch. Product and Jetstream cards
+remain uncompiled until their named foundation PRs land and expose the actual
+migration surface.
 
 The crates.io GPUI boundary and non-activating evidence transport are accepted
 and merged in `g16.005`. PR 74 removed the stale `bzip2` / `libbz2-rs-sys`
