@@ -1,6 +1,6 @@
 # g16.010 — Soundcheck Library Poodle 0.2.2 follow-up
 
-Status: **ready — independent foundation lane**
+Status: **complete — PR 6 merged at `7f5ff0b9`**
 Depends on: `g16.004`, `g16.007`, published npm `0.2.2`
 Target repository: `/Users/tom/Dev/projects/soundcheck-library`
 Target base: `a720f22f5bb08ae465ba3dd46873855fec9b7c72`
@@ -62,3 +62,17 @@ while proving the corrected registry packages introduce no new failure.
 Record resolved versions/sources, changed manifests/locks, baseline comparison,
 and exact validation in the Soundcheck Library PR. Do not merge. Once this PR
 lands, Soundcheck itself still waits for both this lane and Longhorn.
+
+## Closeout
+
+Soundcheck Library PR 6 merged at `7f5ff0b9`. The root development dependency
+now installs exact Poodle Svelte 0.2.2, both published peer lines require
+`^0.2.2`, and the Bun and npm locks resolve the published Poodle core/Svelte
+0.2.2 packages with matching registry integrity values. All ten npm platform
+`libc` constraints remain unchanged and no stale 0.2.1 or sibling-path Poodle
+reference remains.
+
+Independent review passed `npm ci`, frozen Bun resolution, dependency-tree
+inspection, and `git diff --check`. `npm test` reproduced the existing
+179-pass/one-failure taxonomy baseline; `npm run check` reproduced the existing
+18-error/one-warning baseline. The adoption introduced no new failure.

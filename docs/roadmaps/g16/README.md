@@ -54,7 +54,7 @@ trees, and in-repository archived applications are excluded.
 | Lane | Repositories | State |
 | --- | --- | --- |
 | Release recovery | Poodle | complete; `v0.2.2` published from exact candidate `d5607def` |
-| Foundation | Longhorn, Underlay, Soundcheck Library | Underlay complete at 0.2.2; `008` and `010` remain active |
+| Foundation | Longhorn, Underlay, Soundcheck Library | Underlay and Soundcheck Library complete at 0.2.2; `008` remains active |
 | Adapter follow-up | Jetstream | waits for Longhorn |
 | Product applications | Acowtancy, Bovine Accelerator Desktop, Compli Me, Composer, Contact Patch, Figmatic, Finch, Loophole, Nucleus, Songsprout, Soundcheck, Underlay Reference | Underlay-dependent cards may compile; Longhorn-dependent apps still wait |
 | Legacy product | Loophole Legacy | final wave; verify that it remains supported before merge |
@@ -82,7 +82,8 @@ trees, and in-repository archived applications are excluded.
 9. [009 — Underlay 0.2.2 follow-up](009-underlay-poodle-v022-follow-up.md) —
    complete; PR 5 merged at `d6fe7b9b`, exact registry bump with no migration
 10. [010 — Soundcheck Library 0.2.2 follow-up](010-soundcheck-library-poodle-v022-follow-up.md) —
-    ready; exact development pin, peer-line bump, and dual-lock validation
+    complete; PR 6 merged at `7f5ff0b9`, exact development pin, peer-line bump,
+    and dual-lock validation
 11. `011` — Jetstream adoption — compile after Longhorn lands
 12. `012+` — exact product-repository cards — compile after their foundation
     dependencies land and expose any migration requirements
@@ -94,21 +95,19 @@ The release-recovery lane is complete. Tag `v0.2.2` points to exact candidate
 retained React as source-only, and uploaded the packed artifacts. A clean
 public-registry consumer install passed.
 
-Underlay `009` is complete. Longhorn `008` and Soundcheck Library `010` remain
-the active foundation lanes in separate target-repository worktrees. Longhorn
-must stay on its fresh 0.2.2 branch rather than recover the stopped 0.2.1
-worktree. Underlay-dependent product cards can now compile in parallel;
-Jetstream and Longhorn-dependent products still wait for `008`, while
-Soundcheck also waits for `010`.
+Underlay `009` and Soundcheck Library `010` are complete. Longhorn `008` is the
+remaining active foundation lane and must stay on its fresh 0.2.2 branch rather
+than recover the stopped 0.2.1 worktree. Underlay-dependent product cards can
+compile in parallel; Jetstream, Soundcheck, and other Longhorn-dependent
+products still wait for `008`.
 
 The crates.io GPUI boundary and non-activating evidence transport are accepted
 and merged in `g16.005`. PR 74 removed the stale `bzip2` / `libbz2-rs-sys`
 notice-policy claims, re-pinned the candidate, and reran the complete board.
 Longhorn `g16.002` stopped without a PR and its worktree was removed rather
 than propagate the GPUI fork. Underlay `g16.003` and Soundcheck Library
-`g16.004` remain valid evidence for removing local overrides; Underlay's 0.2.2
-follow-up is now merged, while Soundcheck Library's remains in `010`. No
-product card advances on 0.2.1.
+`g16.004` remain valid evidence for removing local overrides. Their 0.2.2
+follow-ups are now both merged. No product card advances on 0.2.1.
 
 ## Completion
 
