@@ -16,6 +16,31 @@ SHA to the operator gate.
 
 This card must not create a tag, publish a package, or edit a release workflow.
 
+## Fixed Decisions
+
+- Version the same fixed denominator as `v0.2.1`: the three public-intent
+  TypeScript packages and all 17 Rust crates under `packages/`. Private
+  TypeScript tooling manifests and the private repository root keep their
+  current versions.
+- Preserve the publication set: core and Svelte publish; React is packed and
+  certified but remains source-only; Rust remains source/tag distribution.
+- Use two commits for exact-SHA evidence:
+  1. one candidate commit containing every version, requirement, lockfile,
+     generated stamp, changelog, release-note, and release-facing metadata
+     change;
+  2. one evidence-only commit adding the execution receipt for that candidate
+     SHA.
+- Run every candidate gate from a clean checkout of the candidate commit. Any
+  later candidate-bearing edit replaces that SHA and requires a complete
+  rerun; the evidence-only receipt does not repin the candidate.
+- Keep tarballs outside the tracked tree. Record filenames, byte sizes, and
+  SHA-256 digests in the receipt.
+- `effigy release gates` is read-only and allowed. Do not run `effigy release
+  simulate`: its accepted changelog-parser mismatch is recorded in
+  `PAPERCUTS.md` and it is not the configured release path. `release prepare`,
+  `release execute`, workflow dispatch, tag creation/push, GitHub release
+  creation, `npm publish`, and registry mutation remain forbidden.
+
 ## Scope
 
 - Advance all release-bearing TypeScript and Rust manifests,
@@ -33,6 +58,25 @@ This card must not create a tag, publish a package, or edit a release workflow.
 - Record one exact candidate SHA, package versions, artifact digests, and
   validation receipt.
 
+## Writable Scope
+
+- the three public-intent TypeScript manifests and relevant minimal `bun.lock`
+  workspace entries;
+- every Rust crate manifest below `packages/`, intra-repository version
+  requirements, and Cargo lockfiles;
+- generated IR/catalogue artifacts whose only candidate change is the
+  `poodle-codegen 0.2.2` generator stamp;
+- `CHANGELOG.md`, `docs/release-notes/0.2.2.md`, package READMEs and
+  release-facing front doors only where existing `0.2.1` wording would
+  contradict the candidate;
+- one August `g16.006` execution log/receipt and `PAPERCUTS.md` for new
+  execution friction.
+
+Do not edit component contracts or implementations, specimens, visual
+baselines, Effigy tasks, dependency policy, release workflow files, downstream
+repositories, or Jetstream admission state. A required change there means the
+candidate is not ready: stop and report it.
+
 ## Acceptance
 
 - [ ] All release-bearing manifests, generated version stamps, and lockfiles
@@ -45,6 +89,29 @@ This card must not create a tag, publish a package, or edit a release workflow.
 - [ ] Core, Svelte, and React pack checks and clean-install proof pass; only
       core and Svelte remain publishable.
 - [ ] The candidate receipt pins one clean SHA and expected artifact digests.
+- [ ] No tag, workflow dispatch, GitHub release, npm publish, registry
+      mutation, or windowed/native-visual selector runs in the worker.
+
+## Required Validation
+
+From the clean candidate commit:
+
+- exact manifest, intra-repository requirement, and lockfile agreement across
+  the fixed release denominator;
+- `effigy test:web-pack-install` plus clean local packs for core, Svelte, and
+  React, with filenames, sizes, and SHA-256 digests recorded;
+- `effigy check:release-automation`;
+- `effigy audit:licenses` and `effigy audit:security`;
+- `effigy drift:gpui-consumer-identity`;
+- `effigy qa`;
+- read-only `effigy release gates`, with evidence that its configured headless
+  gate ran;
+- `effigy docs:check`, `effigy ir:check`, and `effigy catalogue:check`;
+- `git diff --check` before the candidate commit and
+  `git diff --check origin/main...HEAD` before PR handoff.
+
+Use only supported headless selectors. Do not run `*-windowed`, native-visual,
+Jetstream preview/QA, or any release mutation.
 
 ## Stop Conditions
 
@@ -53,3 +120,11 @@ This card must not create a tag, publish a package, or edit a release workflow.
 - A release gate is weakened, bypassed, or moved to a windowed path.
 - Tag creation, publication, or workflow editing becomes necessary. Stop at
   the candidate and return to `g16.007`.
+
+## Completion
+
+Commit the complete candidate tree first. From that clean commit, run the full
+required board and produce the external tarballs. Then add only the execution
+receipt in a second commit, naming the candidate SHA, versions, artifact
+digests, command results, known non-blocking warnings, and absence of release
+mutations. Push one worker branch and open one PR against `main`; do not merge.
