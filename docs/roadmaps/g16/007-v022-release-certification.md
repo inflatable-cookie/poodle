@@ -1,7 +1,7 @@
 # g16.007 — v0.2.2 release certification
 
-Status: **operator gate — candidate `d5607def` accepted; waits for explicit
-operator approval**
+Status: **operator gate — exact-candidate window diagnostic accepted; waits
+for explicit release approval**
 Depends on: `g16.006`
 Governing refs: `006-v022-release-candidate.md`,
 `../../contracts/001-working-rules.md`
@@ -30,7 +30,7 @@ registry mutation.
 
 - [x] The candidate receipt pins one clean SHA with green headless release
       evidence and expected artifact digests.
-- [ ] The operator-reviewed window diagnostic captures all retained Button
+- [x] The operator-reviewed window diagnostic captures all retained Button
       fixtures without changing the foreground application.
 - [ ] The operator explicitly authorises tag `v0.2.2` and publication from
       the reviewed SHA.
@@ -47,3 +47,23 @@ registry mutation.
   or package-install failure.
 - Do not mutate a release workflow without separate explicit operator
   approval.
+
+## Diagnostic Result
+
+The operator authorised the non-activating window diagnostic on 2026-08-24.
+It ran from a detached checkout of exact candidate `d5607def` and produced 54
+verified captures across the retained 18-fixture Button inventory, with zero
+repeat mismatches. All 18 GPUI receipts named
+`macos-window-server-nonactivating`, proved T3 Code remained foreground, and
+recorded no foreground change.
+
+All 18 Svelte-to-React comparisons passed every channel exactly. The GPUI
+comparisons passed dimensions, geometry, and pixels; 16 reported only the
+already-contracted `gpui-omits-box-shadow` role finding. The diagnostic exits
+non-zero on those classified findings by design, so the result is recorded as
+reviewed evidence rather than a green release gate. The visual contact sheet
+showed no additional discrepancy.
+
+No tag, workflow dispatch, publication, or registry mutation occurred. The
+remaining card work requires a new explicit operator instruction naming the
+`v0.2.2` release action.

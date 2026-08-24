@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-24 — The exact-candidate Button visual diagnostic recovered three
+  Svelte captures only after separate 60-second `waitForSelector` timeouts,
+  despite all retained captures verifying and repeating byte-identically. Add
+  an early preview-health probe or shorter bounded navigation timeout so a
+  healthy recovery does not add three opaque minutes. Affects
+  `test:visual-button-comparison-windowed`; found during `g16.007`.
+
 - 2026-08-24 — An exact-candidate review ran green `effigy qa`, then
   `effigy release gates` failed once in `smoke:gpui-window-capture` after about
   2.6 seconds. The isolated selector passed immediately and a complete release

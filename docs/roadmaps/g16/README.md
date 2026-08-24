@@ -1,8 +1,8 @@
 # g16 — Published Consumer Adoption
 
 Status: active — GPUI source identity recovered and the exact `v0.2.2`
-candidate accepted; `g16.007` waits at the explicit operator gate and Longhorn
-remains paused until certification
+candidate plus window diagnostic accepted; `g16.007` waits for explicit
+release approval and Longhorn remains paused until certification
 Posture: adoption-first with one Poodle patch release gate
 Opened: 2026-08-23
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -76,8 +76,8 @@ trees, and in-repository archived applications are excluded.
 6. [006 — v0.2.2 release candidate](006-v022-release-candidate.md) —
    complete; candidate `d5607def` accepted and PR 74 merged at `6ea561be`
 7. [007 — v0.2.2 release certification](007-v022-release-certification.md) —
-   operator gate; waits for explicit approval of the non-activating window
-   diagnostic and, separately, the exact release mutation
+   operator gate; non-activating window diagnostic accepted, exact release
+   mutation still requires explicit approval
 8. `008` — fresh Longhorn v0.2.2 adoption — compile after `007`
 9. `009` — Underlay 0.2.2 follow-up — compile after `007`
 10. `010` — Soundcheck Library 0.2.2 follow-up — compile after `007`
@@ -88,10 +88,10 @@ trees, and in-repository archived applications are excluded.
 ## Current Task And Parallel Lanes
 
 `g16.007` is the single current task and is not a worker lane. Candidate
-`d5607def` and its headless evidence are accepted; no tag or publication has
-occurred. The next action requires explicit operator approval for the
-non-activating window diagnostic. Tagging and publication remain a distinct
-exact-SHA authorisation inside that card.
+`d5607def`, its headless evidence, and the non-activating 18-fixture Button
+diagnostic are accepted; no tag or publication has occurred. The next action
+requires explicit operator approval for tag `v0.2.2` and publication from that
+exact candidate. Workflow mutation remains separately forbidden.
 
 The crates.io GPUI boundary and non-activating evidence transport are accepted
 and merged in `g16.005`. PR 74 removed the stale `bzip2` / `libbz2-rs-sys`
