@@ -9,6 +9,52 @@ so minor releases may contain documented breaking changes.
 
 Nothing yet.
 
+## [0.2.2] - 2026-08-24
+
+### Fixed
+
+- **Breaking for Rust consumers — the public GPUI dependency identity.**
+  `0.2.1` resolved `gpui` from an `inflatable-cookie/zed` Git fork instead of
+  crates.io. A forked `gpui` is a different crate identity, so a consumer
+  declaring `gpui = "0.2.2"` for itself could not pass GPUI values across
+  Poodle's node-backend boundary at all. `poodle-gpui-node-backend` and
+  `poodle-gpui-preview` now resolve `gpui = "0.2.2"` from crates.io; the fork
+  and `gpui_platform` are gone from every active manifest and lockfile, and
+  both Rust graphs resolve zero Git sources. `effigy
+  drift:gpui-consumer-identity` proves a clean dual-dependency consumer
+  compiles, with a negative control that must fail.
+- **Inset box shadows are painted, not dropped.** crates.io GPUI 0.2.2 has no
+  `BoxShadow::inset` field. The node backend paints the declared band itself,
+  so Accordion, ActionDiscoveryPanel, ListCard, Popover, and Tabs keep the
+  inset layers they declare. Renderer-internal; no contract or API change.
+
+- **Licence and notice surfaces match the final GPUI graph.** `bzip2` and
+  `libbz2-rs-sys` left both graphs with the fork while the third-party
+  notices, the `deny.toml` allow entry, and spec 022 still claimed them. The
+  stale claims are removed, `packages/gpui/node-backend/THIRD_PARTY_NOTICES.md`
+  is deleted with the last claim it carried, and `audit:licenses` now checks
+  notice truth in both directions against the lockfiles.
+
+### Changed
+
+- **GPUI pixel capture is a non-activating window diagnostic, not offscreen
+  rendering.** Stock GPUI 0.2.2 publishes no offscreen readback API, so
+  `poodle-offscreen-capture` is removed with no alias.
+  `poodle-window-capture` opens one real GPUI window with `focus: false`,
+  never activates the application, and refuses to publish if the frontmost
+  application changed. Default native evidence stays on GPUI's in-memory test
+  platform; the diagnostic sits outside `qa`, CI, and every release gate
+  behind `-windowed` selectors that need operator approval. Receipt schemas
+  were renamed rather than reused, and now assert `gpuiSource: "crates.io"`.
+- Source policy is fail-closed: the approved-Git-revision allowlist is empty,
+  `gpui` and `gpui_platform` are rejected from any Git source, and
+  `deny.toml` carries `allow-git = []`.
+
+The web packages carry no code change in this patch. `@inflatable-cookie/poodle-core`
+and `@inflatable-cookie/poodle-svelte` move to `0.2.2` so the ecosystem
+version set stays aligned across one tag. See the
+[0.2.2 release notes](docs/release-notes/0.2.2.md).
+
 ## [0.2.1] - 2026-08-23
 
 ### Fixed
@@ -200,6 +246,7 @@ complete migration checklist.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.2.2]: docs/release-notes/0.2.2.md
 [0.2.1]: docs/release-notes/0.2.1.md
 [0.2.0]: docs/release-notes/0.2.0.md
 [0.1.0]: docs/release-notes/0.1.0.md

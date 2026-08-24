@@ -1,6 +1,6 @@
 [package]
 name = "poodle-style"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 license = "MIT"
 rust-version = "1.95"
@@ -15,8 +15,8 @@ publish = false
 path = "src/lib.rs"
 
 [dependencies]
-poodle-tokens = { version = "0.2.1", path = "../tokens" }
-poodle-layout = { version = "0.2.1", path = "../layout" }
+poodle-tokens = { version = "0.2.2", path = "../tokens" }
+poodle-layout = { version = "0.2.2", path = "../layout" }
 
 [package.metadata.poodle]
 public-intent = true

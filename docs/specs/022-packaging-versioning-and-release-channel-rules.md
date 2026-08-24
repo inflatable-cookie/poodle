@@ -112,8 +112,12 @@ Poodle therefore applies these rules to every GPUI release graph:
 - GPL-3.0-or-later dependencies are not admitted. Do not make a release gate
   green by adding a crate exception for `zlog`, `ztracing`,
   `ztracing_macro`, or another strong-copyleft dependency.
-- `bzip2-1.0.6` is an accepted permissive licence. Preserve its copyright,
-  licence conditions, and disclaimer in the distributed notice surface.
+- A notice-bearing licence is carried in the distributed notice surface for
+  exactly as long as its crate is in the resolved graph. The notice surface
+  describes the current graph; it is not an append-only archive, and a notice
+  for a crate that has left is a false claim about what Poodle distributes.
+  `audit:licenses` enforces both directions against the lockfiles: a missing
+  notice fails, and so does a retained claim no lockfile resolves.
 - Remote Git sources are denied by default. An approved source must use a
   reviewed repository URL and an immutable full commit revision. Branches,
   tags, moving refs, and unreviewed repositories remain forbidden.
@@ -157,7 +161,6 @@ an explicit operator decision before implementation.
 - `packages/render/Cargo.toml`
 - `packages/gpui/*/Cargo.toml`
 - `packages/jetstream/*/Cargo.toml`
-- [SPDX `bzip2-1.0.6`](https://spdx.org/licenses/bzip2-1.0.6.html)
 - [GNU GPL FAQ on linking and combined programs](https://www.gnu.org/licenses/gpl-faq.en.html)
 - [Zed issue #55470](https://github.com/zed-industries/zed/issues/55470)
 - `docs/research/gpui-cratesio-nonactivating-capture.md`
