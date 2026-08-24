@@ -1,6 +1,6 @@
 # g16.009 — Underlay Poodle 0.2.2 follow-up
 
-Status: **ready — independent foundation lane**
+Status: **complete — Underlay PR 5 merged at `d6fe7b9b`**
 Depends on: `g16.003`, `g16.007`, published npm `0.2.2`
 Target repository: `/Users/tom/Dev/projects/underlay`
 Target base: `750005eb3c2b42df1d4152214abc8178e3cc0dda`
@@ -55,3 +55,17 @@ release without exposing Poodle through application-owned APIs.
 Record registry resolution, changed files, compatibility edits, and exact
 validation in the Underlay PR. Do not merge. Once this PR lands, the
 orchestrator may compile the Underlay-dependent product cards.
+
+## Closeout
+
+Underlay PR [#5](https://github.com/inflatable-cookie/underlay/pull/5)
+merged on 2026-08-24 at
+`d6fe7b9bac5e43002b458731aa4b6a0641ca89cd`. The root dependency and
+`bun.lock` resolve Poodle core/Svelte 0.2.2 from npm with registry integrity
+matching the published packages. No adapter, template, API, or source migration
+was required and no unrelated lock entry changed.
+
+Orchestrator validation passed a frozen Bun install, `effigy validate` (770
+unit tests and 49 component tests), Svelte diagnostics, TypeScript, docs, and
+Northstar checks. `git diff --check` was clean. The canonical review verdict is
+[recorded on PR 5](https://github.com/inflatable-cookie/underlay/pull/5#issuecomment-5400712847).
