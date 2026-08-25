@@ -1,6 +1,6 @@
 # g16.020 — Figmatic Poodle 0.2.2 adoption
 
-Status: **review approved — awaiting operator merge**
+Status: **complete — PR 17 merged**
 Depends on: `g16.007`, `g16.008`, `g16.011`
 Target repository: `/Users/tom/Dev/projects/figmatic`
 Target base: `775312c9ec9579ce4cac9d627c45cc21bdeb77fd`
@@ -56,7 +56,7 @@ other product cards.
 
 ## Review Result
 
-PR [#17](https://github.com/inflatable-cookie/figmatic/pull/17) is approved.
-Studio resolves one registry Poodle 0.2.2 identity, the local Longhorn peer
-converges, lock churn is bounded, and the requested headless validation board
-passes. Await operator merge authority.
+PR [#17](https://github.com/inflatable-cookie/figmatic/pull/17) merged at
+`a6286e88`. Studio resolves one registry Poodle 0.2.2 identity, the local
+Longhorn peer converges, lock churn is bounded, and the requested headless
+validation board passes.

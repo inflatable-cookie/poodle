@@ -73,7 +73,7 @@ trees, and in-repository archived applications are excluded.
 | First product wave | Nucleus, Soundcheck, Underlay Reference | Poodle 0.2.2 complete |
 | Coupled Underlay product wave | Acowtancy, Compli Me, Composer, Contact Patch, Songsprout | complete |
 | Underlay Reference follow-up | Underlay Reference | `025` changes requested; preserve main's newer Underlay v0.9.4 |
-| Longhorn product wave | Finch, Figmatic, Bovine Accelerator Desktop, Loophole | Figmatic and Loophole approved; Finch changes requested; Bovine lane remains in flight |
+| Longhorn product wave | Finch, Figmatic, Bovine Accelerator Desktop, Loophole | Figmatic and Loophole complete; Finch changes requested; Bovine lane remains in flight |
 | Adapter follow-up | Jetstream | `023` ready; dispatch after product lanes |
 | Legacy product | Loophole Legacy | `024` ready as final authoritative product lane |
 
@@ -131,11 +131,13 @@ trees, and in-repository archived applications are excluded.
     changes requested on PR 1; refresh the stale Longhorn Poodle 0.1.0 peer
     metadata in the Bun lock
 20. [020 — Figmatic Poodle 0.2.2 adoption](020-figmatic-poodle-v022-adoption.md) —
-    PR 17 approved for operator merge; Studio
+    complete; PR 17 merged at `a6286e88`, with one registry Poodle identity
+    and converged Longhorn peer
 21. [021 — Bovine Accelerator Desktop Poodle 0.2.2 adoption](021-bovine-accelerator-desktop-poodle-v022-adoption.md) —
     handoff ready; isolated worktree required from refreshed target base
 22. [022 — Loophole Poodle 0.2.2 adoption](022-loophole-poodle-v022-adoption.md) —
-    PR 8 approved for operator merge; Desktop
+    complete; PR 8 merged at `92e01577`, with one registry Poodle identity and
+    the renderer-test baseline kept separate
 23. [023 — Jetstream Poodle 0.2.2 adoption](023-jetstream-poodle-v022-adoption.md) —
     ready after product dispatch; registry web plus retained paired Rust paths
 24. [024 — Loophole Legacy Poodle 0.2.2 adoption](024-loophole-legacy-poodle-v022-adoption.md) —
@@ -155,9 +157,9 @@ Cards `014`-`018` cover five independent coupled Underlay/Poodle repositories;
 all are complete. `025` is the equivalent Underlay-only follow-up for the
 already-migrated Underlay Reference and is in changes-requested state after its
 base advanced to Underlay v0.9.4. Cards `019`-`022` cover four independent
-Longhorn-shaped products. Figmatic `020` and Loophole `022` are approved for
-operator merge; Finch `019` needs a bounded lock refresh. `021` must not use
-Bovine Accelerator Desktop's operator checkout.
+Longhorn-shaped products. Figmatic `020` and Loophole `022` are complete;
+Finch `019` needs a bounded lock refresh. `021` must not use Bovine Accelerator
+Desktop's operator checkout.
 
 Jetstream remains off the critical path. Card `023` upgrades its public web
 surface but preserves the paired local Rust contract. Dispatch it after product
@@ -188,6 +190,5 @@ The generation closes only when every authoritative repository has:
 
 ## Next Task
 
-Review the bounded updates to `g16.019` and `g16.025`. Merge approved Figmatic
-`g16.020` and Loophole `g16.022` only with operator authority. Continue the
-in-flight Bovine `g16.021` lane; hold `023` and `024` for the final wave.
+Review the bounded updates to `g16.019` and `g16.025`. Continue the in-flight
+Bovine `g16.021` lane; hold `023` and `024` for the final wave.
