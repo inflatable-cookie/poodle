@@ -1,6 +1,6 @@
 # g16.017 — Contact Patch Underlay 0.9.2 and Poodle 0.2.2 adoption
 
-Status: **ready — independent Underlay-product lane**
+Status: **complete — Contact Patch PR 1 merged at `c497547b`**
 Depends on: `g16.007`, `g16.009`, `g16.013`, Underlay tag `v0.9.2`
 Target repository: `/Users/tom/Dev/projects/contact-patch`
 Target base: `a6d2316f5c5248c1d27f7f595bfbf2b0de91127e`
@@ -76,3 +76,22 @@ sibling overrides to public 0.2.2. Keep its UI architecture unchanged.
 Record the exact Underlay tag/commit, Poodle identities, lock review,
 compatibility edits, and validation in the Contact Patch PR. Do not merge.
 Independent of the other product cards.
+
+## Closeout
+
+Contact Patch PR [#1](https://github.com/contact-patch/contact-patch/pull/1)
+merged on 2026-08-25 at
+`c497547bfb244f53b1f68f2f16e292103e9e756f`. Admin, Front, UI, and client now
+resolve Underlay tag `v0.9.2` at
+`ddba26400f480638829917cf72eecc62be4b978d`; Admin and Front resolve registry
+Poodle 0.2.2. All 26 Rust Underlay packages resolve the same tagged revision.
+The sibling TypeScript path map, config-stack source import, Poodle overrides,
+and active sibling package paths are gone.
+
+Independent review passed `effigy health`, `effigy cp-admin/validate`,
+`effigy cp-front/validate`, `effigy cp-ui/validate`, and `git diff --check`.
+Database-backed API tests still require Postgres. A pre-existing Admin contract
+test searches the wrong client types file. Both baselines are recorded honestly
+in the consumer PR and `PAPERCUTS.md`; neither was hidden with an application
+exception. The canonical acceptance verdict is
+[recorded on PR 1](https://github.com/contact-patch/contact-patch/pull/1#issuecomment-5411781380).

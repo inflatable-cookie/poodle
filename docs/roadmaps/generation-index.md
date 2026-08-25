@@ -6,16 +6,16 @@ Updated: 2026-08-25
 
 - `g16`
   - Status: active — inventory, v0.2.2 release recovery, foundation adoption,
-    and all three first-wave products complete
+    all three first-wave products, and Contact Patch complete
   - Posture: published-package adoption from exact npm 0.2.2 and Rust tag
     `v0.2.2`; no component or public API redesign
   - Range: `001` to `013` complete except superseded `002`; `014`-`025` compiled
   - Evidence: 17 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: review reported-complete `014`, monitor `015`, and dispatch coupled
-    Underlay/Poodle cards `016`-`018` plus Underlay Reference follow-up `025`;
-    Longhorn products `019`-`022` remain parallel-ready before final `023`-`024`.
+  - Next: review reported-complete `014`, monitor `015`, and re-review lock
+    repairs for `016` and `018`; `025` and Longhorn products `019`-`022` remain
+    parallel-ready before final `023`-`024`.
 
 ## Latest Completed Track
 

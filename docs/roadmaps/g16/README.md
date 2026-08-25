@@ -64,7 +64,7 @@ trees, and in-repository archived applications are excluded.
 | Foundation | Longhorn, Underlay, Soundcheck Library | complete at 0.2.2 |
 | Adapter follow-up | Jetstream | deferred behind product adoption; paired Rust integration remains local |
 | First product wave | Nucleus, Soundcheck, Underlay Reference | Poodle 0.2.2 complete |
-| Coupled Underlay product wave | Acowtancy, Compli Me, Composer, Contact Patch, Songsprout | `014`-`018`; Underlay v0.9.2 plus Poodle 0.2.2 |
+| Coupled Underlay product wave | Acowtancy, Compli Me, Composer, Contact Patch, Songsprout | Contact Patch complete; `014`-`016` and `018` remain open |
 | Underlay Reference follow-up | Underlay Reference | `025` ready; replace sibling Underlay after completed Poodle adoption |
 | Longhorn product wave | Finch, Figmatic, Bovine Accelerator Desktop, Loophole | `019`-`022` ready and independent |
 | Adapter follow-up | Jetstream | `023` ready; dispatch after product lanes |
@@ -112,7 +112,8 @@ trees, and in-repository archived applications are excluded.
 16. [016 — Composer Underlay 0.9.2 and Poodle 0.2.2 adoption](016-composer-poodle-v022-adoption.md) —
     ready; complete web and Rust dependency graph
 17. [017 — Contact Patch Underlay 0.9.2 and Poodle 0.2.2 adoption](017-contact-patch-poodle-v022-adoption.md) —
-    ready; complete web and Rust dependency graph
+    complete; PR 1 merged at `c497547b`, with one tagged Underlay revision and
+    registry Poodle 0.2.2 proved across the web and Rust graph
 18. [018 — Songsprout Underlay 0.9.2 and Poodle 0.2.2 adoption](018-songsprout-poodle-v022-adoption.md) —
     ready; complete web and Rust dependency graph
 19. [019 — Finch Poodle 0.2.2 adoption](019-finch-poodle-v022-adoption.md) —
@@ -140,10 +141,10 @@ Svelte to npm `latest`. Longhorn `008`, Underlay `009`, Soundcheck Library
 Cards `014`-`018` cover five independent coupled Underlay/Poodle repositories;
 `025` is the equivalent Underlay-only follow-up for the already-migrated
 Underlay Reference. The operator reports `014` implemented and `015` is in
-flight. Cards `016`-`018` and `025` may run in parallel. Cards `019`-`022`
-cover four independent Longhorn-shaped products. All lanes use one worktree and
-PR per repository. `021` must not use Bovine Accelerator Desktop's operator
-checkout.
+flight. Contact Patch `017` is merged. Composer `016` and Songsprout `018` are
+in review repair; `025` remains parallel-ready. Cards `019`-`022` cover four
+independent Longhorn-shaped products. All lanes use one worktree and PR per
+repository. `021` must not use Bovine Accelerator Desktop's operator checkout.
 
 Jetstream remains off the critical path. Card `023` upgrades its public web
 surface but preserves the paired local Rust contract. Dispatch it after product
@@ -172,6 +173,6 @@ The generation closes only when every authoritative repository has:
 
 ## Next Task
 
-Review `g16.014` when its PR arrives and monitor in-flight `g16.015`. Dispatch
-`g16.016`-`018` and `g16.025` as independent coupled Underlay/Poodle lanes;
+Review `g16.014` when its PR arrives and monitor in-flight `g16.015`. Re-review
+the requested lock repairs for `g16.016` and `g16.018`; `g16.025` and
 `019`-`022` remain parallel-ready. Hold `023` and `024` for the final wave.
