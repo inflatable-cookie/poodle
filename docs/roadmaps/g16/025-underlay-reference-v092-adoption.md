@@ -1,6 +1,6 @@
 # g16.025 — Underlay Reference tagged Underlay adoption
 
-Status: **review approved — correct stale PR metadata before merge**
+Status: **complete — PR 2 merged**
 Depends on: `g16.013`, Underlay tag `v0.9.4`
 Target repository: `/Users/tom/Dev/projects/underlay-reference`
 Target base: `f5ea7d72eee278e8838ba16f8f43eb2b662406d0`
@@ -75,11 +75,10 @@ wave.
 
 ## Review Result
 
-PR [#2](https://github.com/inflatable-cookie/underlay-reference/pull/2) has two
-reviewed implementation head `25818824`. It rebases on current `main`, aligns
+PR [#2](https://github.com/inflatable-cookie/underlay-reference/pull/2) merged
+reviewed implementation head `25818824` at merge commit `3354803e`. It aligns
 all active web and Rust dependencies with Underlay v0.9.4 at `7004af5b`, keeps
 Poodle on registry 0.2.2, and repairs the canonical README. Empty-directory
 frozen installs and fresh tag resolution pass; Admin, Front, UI, Client, API
-build, and docs QA are green. Before merge, update the PR title/body/test plan,
-which still describe the superseded v0.9.2 boundary. No implementation change
-or further code review is needed if the head remains unchanged.
+build, and docs QA are green. The stale v0.9.2 PR title, body, dependency table,
+and test plan were corrected before merge without changing the approved head.
