@@ -72,7 +72,7 @@ trees, and in-repository archived applications are excluded.
 | Adapter follow-up | Jetstream | deferred behind product adoption; paired Rust integration remains local |
 | First product wave | Nucleus, Soundcheck, Underlay Reference | Poodle 0.2.2 complete |
 | Coupled Underlay product wave | Acowtancy, Compli Me, Composer, Contact Patch, Songsprout | complete |
-| Underlay Reference follow-up | Underlay Reference | `025` changes requested; preserve main's newer Underlay v0.9.4 |
+| Underlay Reference follow-up | Underlay Reference | `025` implementation approved; stale PR metadata must be corrected before merge |
 | Longhorn product wave | Finch, Figmatic, Bovine Accelerator Desktop, Loophole | Figmatic and Loophole complete; Finch changes requested for stale sibling bootstrap/authority; Bovine lane remains in flight |
 | Adapter follow-up | Jetstream | `023` ready; dispatch after product lanes |
 | Legacy product | Loophole Legacy | `024` ready as final authoritative product lane |
@@ -143,8 +143,8 @@ trees, and in-repository archived applications are excluded.
 24. [024 — Loophole Legacy Poodle 0.2.2 adoption](024-loophole-legacy-poodle-v022-adoption.md) —
     ready as final authoritative product lane; active Aura only
 25. [025 — Underlay Reference tagged Underlay adoption](025-underlay-reference-v092-adoption.md) —
-    changes requested on PR 2; rebase, preserve main's Underlay v0.9.4, repair
-    active dependency instructions, and retain merged Poodle 0.2.2
+    implementation approved on PR 2 at `25818824`; correct stale v0.9.2 PR
+    metadata before merge
 
 ## Current Task And Parallel Lanes
 
@@ -155,8 +155,9 @@ Svelte to npm `latest`. Longhorn `008`, Underlay `009`, Soundcheck Library
 
 Cards `014`-`018` cover five independent coupled Underlay/Poodle repositories;
 all are complete. `025` is the equivalent Underlay-only follow-up for the
-already-migrated Underlay Reference and is in changes-requested state after its
-base advanced to Underlay v0.9.4. Cards `019`-`022` cover four independent
+already-migrated Underlay Reference; its implementation is approved at
+Underlay v0.9.4, with only stale PR metadata left to correct. Cards `019`-`022`
+cover four independent
 Longhorn-shaped products. Figmatic `020` and Loophole `022` are complete;
 Finch `019` needs a bounded bootstrap and current-authority correction. `021`
 must not use Bovine Accelerator Desktop's operator checkout.
@@ -190,5 +191,7 @@ The generation closes only when every authoritative repository has:
 
 ## Next Task
 
-Review the bounded updates to `g16.019` and `g16.025`. Continue the in-flight
-Bovine `g16.021` lane; hold `023` and `024` for the final wave.
+Review the bounded Finch `g16.019` update and merge Underlay Reference
+`g16.025` after its PR metadata correction and explicit operator authority.
+Continue the in-flight Bovine `g16.021` lane; hold `023` and `024` for the final
+wave.

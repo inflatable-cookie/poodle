@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-25 — Underlay Reference's `effigy doctor` cannot provide a clean
+  consumer-review baseline: container health lacks `cargo-fmt`, root
+  `test.exclude_catalogs` is unsupported, and `acme-docs` references built-in
+  `docs` commands that the effective catalog cannot resolve. Repair the
+  container toolchain and Effigy manifest/task routing. Affects review
+  `g16.025`.
+
 - 2026-08-25 — Finch's `effigy doctor` cannot provide a clean consumer-review
   baseline: `effigy.toml` still uses unsupported `test.exclude_catalogs`, while
   Cargo link-health inspection fails because the committed lock wants a Signal
