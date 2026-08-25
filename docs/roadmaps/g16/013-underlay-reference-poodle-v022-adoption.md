@@ -1,6 +1,6 @@
 # g16.013 — Underlay Reference Poodle 0.2.2 adoption
 
-Status: **ready — independent first-wave product lane**
+Status: **complete — Underlay Reference PR 1 merged at `f5ea7d72`**
 Depends on: `g16.007`, `g16.009`, published npm `0.2.2`
 Target repository: `/Users/tom/Dev/projects/underlay-reference`
 Target base: `8885661e10813bb9d8a3f6782c87a840b26bd0be`
@@ -71,3 +71,21 @@ Underlay sources, compatibility edits, and exact validation in the Underlay
 Reference PR. Do not merge. Once this lane lands, the canonical Underlay
 consumer shape is complete and the remaining Underlay-product cards can reuse
 its measured migration pattern.
+
+## Closeout
+
+Underlay Reference PR [#1](https://github.com/inflatable-cookie/underlay-reference/pull/1)
+merged on 2026-08-25 at
+`f5ea7d72eee278e8838ba16f8f43eb2b662406d0`. Admin, Front, and UI now pin
+public Poodle core/Svelte 0.2.2 exactly. All four Bun locks resolve the
+published npm integrity values. No old Poodle version, sibling Poodle path, or
+committed Poodle override remains. Local Underlay links stay intact.
+
+The worker initially added `passWithNoTests` exceptions to manufacture a green
+aggregate board. Review removed them. Package checks, docs QA, and
+`git diff --check` pass. `effigy validate` and `effigy qa` now expose the
+pre-existing test-routing baseline: Front tests live under `tests/**` while its
+Vitest include selects `src/**`; UI has no tests but Effigy auto-selects a
+transitive Vitest binary. The gap is recorded in Underlay Reference
+`PAPERCUTS.md`, not hidden in application policy. The canonical acceptance
+verdict is [recorded on PR 1](https://github.com/inflatable-cookie/underlay-reference/pull/1#issuecomment-5409053744).

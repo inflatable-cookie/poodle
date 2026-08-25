@@ -5,17 +5,16 @@ Updated: 2026-08-25
 ## Active Track
 
 - `g16`
-  - Status: active — inventory, v0.2.2 release recovery, and foundation
-    adoption complete; two of three first-wave products merged
+  - Status: active — inventory, v0.2.2 release recovery, foundation adoption,
+    and all three first-wave products complete
   - Posture: published-package adoption from exact npm 0.2.2 and Rust tag
     `v0.2.2`; no component or public API redesign
-  - Range: `001` to `012` complete except superseded `002`; `013` remains active
+  - Range: `001` to `013` complete except superseded `002`; `014`-`024` compiled
   - Evidence: 17 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: resolve Underlay Reference `013`, then use all three first-wave
-    results to compile the remaining products. Jetstream remains deferred
-    unless product adoption exposes a dependency on it.
+  - Next: dispatch independent product cards `014`-`022`, then final adapter and
+    legacy cards `023`-`024`.
 
 ## Latest Completed Track
 

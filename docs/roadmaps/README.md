@@ -7,18 +7,18 @@ Roadmaps record Poodle's executable milestone work. `g15` completed the
 v0.2.1 recovery release after `v0.2.0` stopped before publication. `g16`
 consumer adoption then exposed a GPUI source-identity defect in that Rust tag.
 The corrected crates.io-GPUI candidate is now published as `v0.2.2`; foundation
-adoption is complete, Nucleus and Soundcheck have landed, and Underlay Reference
-is the remaining first-wave review.
+adoption and the three first-wave products have landed. Remaining product cards
+`g16.014`-`022` are ready; Jetstream and Loophole Legacy close the rollout.
 
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
 - `g16` has frozen the 17-repository consumer estate. Longhorn exposed the
   fork-sourced GPUI defect in 0.2.1; `g16.005` restored crates.io GPUI and
-  `006`-`007` published v0.2.2. Longhorn, Underlay, and Soundcheck Library now
-  consume 0.2.2. Nucleus and Soundcheck have completed the first product wave;
-  Underlay Reference remains in changes-requested review. Jetstream stays
-  deferred behind product adoption.
+  `006`-`007` published v0.2.2. Longhorn, Underlay, Soundcheck Library, Nucleus,
+  Soundcheck, and Underlay Reference now consume 0.2.2. Nine independent active
+  product cards are ready. Jetstream stays behind their dispatch; Loophole
+  Legacy is the final product lane.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;

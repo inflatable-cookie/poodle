@@ -1,7 +1,7 @@
 # g16 — Published Consumer Adoption
 
-Status: active — `v0.2.2` foundation adoption complete; Nucleus and Soundcheck
-product lanes merged, Underlay Reference in review
+Status: active — `v0.2.2` foundation and first product wave complete; remaining
+product cards `014`-`022` ready
 Posture: adoption-first with one Poodle patch release gate
 Opened: 2026-08-23
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -56,8 +56,11 @@ trees, and in-repository archived applications are excluded.
 | Release recovery | Poodle | complete; `v0.2.2` published from exact candidate `d5607def` |
 | Foundation | Longhorn, Underlay, Soundcheck Library | complete at 0.2.2 |
 | Adapter follow-up | Jetstream | deferred behind product adoption; paired Rust integration remains local |
-| Product applications | Acowtancy, Bovine Accelerator Desktop, Compli Me, Composer, Contact Patch, Figmatic, Finch, Loophole, Nucleus, Songsprout, Soundcheck, Underlay Reference | first independent wave `011`-`013` ready |
-| Legacy product | Loophole Legacy | final wave; verify that it remains supported before merge |
+| First product wave | Nucleus, Soundcheck, Underlay Reference | complete at 0.2.2 |
+| Underlay product wave | Acowtancy, Compli Me, Composer, Contact Patch, Songsprout | `014`-`018` ready and independent |
+| Longhorn product wave | Finch, Figmatic, Bovine Accelerator Desktop, Loophole | `019`-`022` ready and independent |
+| Adapter follow-up | Jetstream | `023` ready; dispatch after product lanes |
+| Legacy product | Loophole Legacy | `024` ready as final authoritative product lane |
 
 ## Runway
 
@@ -92,31 +95,47 @@ trees, and in-repository archived applications are excluded.
     complete; PR 11 merged at `b1c5937d`, with one public Poodle identity
     across the app, Longhorn adapter, and Soundcheck Library
 13. [013 — Underlay Reference Poodle 0.2.2 adoption](013-underlay-reference-poodle-v022-adoption.md) —
-    changes requested on PR 1; canonical three-app Underlay consumer lane
-14. `014+` — remaining exact product-repository cards, compiled from the first
-    wave's migration evidence
-15. Jetstream adoption — final adapter wave unless a product exposes a reason
-    to admit it earlier
+    complete; PR 1 merged at `f5ea7d72`, with registry adoption clean and the
+    pre-existing Effigy test-routing baseline exposed rather than hidden
+14. [014 — Acowtancy Poodle 0.2.2 adoption](014-acowtancy-poodle-v022-adoption.md) —
+    ready; Cream, Dairy, and Froyo
+15. [015 — Compli Me Poodle 0.2.2 adoption](015-compli-me-poodle-v022-adoption.md) —
+    ready; Admin and Front
+16. [016 — Composer Poodle 0.2.2 adoption](016-composer-poodle-v022-adoption.md) —
+    ready; Admin and Front
+17. [017 — Contact Patch Poodle 0.2.2 adoption](017-contact-patch-poodle-v022-adoption.md) —
+    ready; Admin and Front
+18. [018 — Songsprout Poodle 0.2.2 adoption](018-songsprout-poodle-v022-adoption.md) —
+    ready; Bloom and Greenhouse
+19. [019 — Finch Poodle 0.2.2 adoption](019-finch-poodle-v022-adoption.md) —
+    ready; active Tauri app only
+20. [020 — Figmatic Poodle 0.2.2 adoption](020-figmatic-poodle-v022-adoption.md) —
+    ready; Studio
+21. [021 — Bovine Accelerator Desktop Poodle 0.2.2 adoption](021-bovine-accelerator-desktop-poodle-v022-adoption.md) —
+    ready; isolated worktree required
+22. [022 — Loophole Poodle 0.2.2 adoption](022-loophole-poodle-v022-adoption.md) —
+    ready; Desktop
+23. [023 — Jetstream Poodle 0.2.2 adoption](023-jetstream-poodle-v022-adoption.md) —
+    ready after product dispatch; registry web plus retained paired Rust paths
+24. [024 — Loophole Legacy Poodle 0.2.2 adoption](024-loophole-legacy-poodle-v022-adoption.md) —
+    ready as final authoritative product lane; active Aura only
 
 ## Current Task And Parallel Lanes
 
-The release-recovery lane is complete. Tag `v0.2.2` points to exact candidate
-`d5607def`; run `32756610293` published core and Svelte 0.2.2 to npm `latest`,
-retained React as source-only, and uploaded the packed artifacts. A clean
-public-registry consumer install passed.
+The release-recovery, foundation, and first product wave are complete. Tag
+`v0.2.2` points to candidate `d5607def`; run `32756610293` published core and
+Svelte to npm `latest`. Longhorn `008`, Underlay `009`, Soundcheck Library
+`010`, Nucleus `011`, Soundcheck `012`, and Underlay Reference `013` are merged.
 
-The foundation is complete: Longhorn `008`, Underlay `009`, and Soundcheck
-Library `010` are merged at 0.2.2. Soundcheck `012` has completed the first
-product wave's three-layer adoption proof, and Nucleus `011` has completed the
-direct-app proof over local Longhorn packages. Underlay Reference `013` is the
-only remaining first-wave lane; its PR is in changes-requested review. Once it
-lands, the three migration shapes are sufficient to compile the remaining
-product estate.
+Cards `014`-`018` cover five independent Underlay-shaped repositories. Cards
+`019`-`022` cover four independent Longhorn-shaped products. They share no
+target repositories or mutable files and may run in parallel, one worktree and
+PR per card. `021` must not use Bovine Accelerator Desktop's operator checkout.
 
-Jetstream is not on the critical path. Its local paired Rust integration stays
-deferred while product applications adopt the public web packages; compile its
-adapter card in the final wave unless consumer evidence makes it necessary
-sooner.
+Jetstream remains off the critical path. Card `023` upgrades its public web
+surface but preserves the paired local Rust contract. Dispatch it after product
+lanes are in flight. Loophole Legacy `024` is the final active product lane and
+must not touch its reference archives.
 
 The crates.io GPUI boundary and non-activating evidence transport are accepted
 and merged in `g16.005`. PR 74 removed the stale `bzip2` / `libbz2-rs-sys`
@@ -135,3 +154,9 @@ The generation closes only when every authoritative repository has:
 - exact npm 0.2.2 or Rust tag `v0.2.2`, with crates.io GPUI identity;
 - a clean install from its declared sources;
 - its own relevant headless QA evidence and merged PR.
+
+## Next Task
+
+Dispatch `g16.014` in its own Acowtancy worktree. Cards `015`-`022` are
+parallel-ready under the same one-repository-per-PR rule. Hold `023` and `024`
+for the final wave.
