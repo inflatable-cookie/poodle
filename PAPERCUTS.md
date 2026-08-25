@@ -7,6 +7,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-25 — Figmatic's headless `effigy build` rewrites committed Studio
+  `dist/`, mutates tracked `node_modules` contents, and refreshes root
+  `Cargo.lock`, leaving hundreds of dirty paths after a read-only PR validation
+  run. Keep generated/dependency output untracked or make the validation task
+  restore/compare it explicitly. Affects Figmatic consumer review `g16.020`.
+
+- 2026-08-25 — Loophole's `effigy test:workspace` refreshes 22 sibling Signal
+  package versions in the committed root `Cargo.lock` even when the tested PR
+  does not touch Rust dependencies. Isolate sibling lock resolution or add a
+  no-write/check mode so headless validation stays read-only. Affects Loophole
+  consumer review `g16.022`.
+
 - 2026-08-25 — Underlay tag `v0.9.2` correctly stamps the Rust workspace as
   0.9.2 and pins Poodle Svelte 0.2.2, but its root JavaScript `package.json`
   still declares version `0.9.1`. Git-tag consumers resolve the right commit,

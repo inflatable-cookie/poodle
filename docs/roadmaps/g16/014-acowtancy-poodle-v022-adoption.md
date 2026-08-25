@@ -1,6 +1,6 @@
 # g16.014 — Acowtancy Underlay 0.9.2 and Poodle 0.2.2 adoption
 
-Status: **corrective follow-up ready — merged graph still bypasses tagged web package**
+Status: **complete — PRs 54, 55, and 56 merged**
 Depends on: `g16.007`, `g16.009`, `g16.013`, Underlay tag `v0.9.2`
 Target repository: `/Users/tom/Dev/projects/acowtancy`
 Target base: `a535969bab2a1b919d382e3e129d8eb95043b2b8`
@@ -83,3 +83,10 @@ mappings. Keep explicit sibling mounts and scripts used solely by workspace
 conformance or template QA. Regenerate the root lock only if supported tooling
 changes it, and reject unrelated churn. Prove Cream, Dairy, Froyo, and Cattle
 Grid validate against the installed `v0.9.2` package before closing this card.
+
+PR [#56](https://github.com/acowtancy/market/pull/56) removed the final eight
+application-source bypasses and merged at `1ab977f8`. Cream, Dairy, Froyo, and
+Cattle Grid now resolve Underlay through the installed `v0.9.2` package at
+`ddba2640`; explicit sibling paths survive only in conformance and guardrail QA.
+The root lock did not change. Direct Poodle remains registry 0.2.2 with one
+Svelte identity.

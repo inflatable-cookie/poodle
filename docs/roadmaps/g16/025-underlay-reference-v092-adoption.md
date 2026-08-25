@@ -1,7 +1,7 @@
-# g16.025 — Underlay Reference 0.9.2 adoption
+# g16.025 — Underlay Reference tagged Underlay adoption
 
-Status: **handoff ready — independent Underlay follow-up lane**
-Depends on: `g16.013`, Underlay tag `v0.9.2`
+Status: **changes requested — rebase on main, preserve v0.9.4, repair README**
+Depends on: `g16.013`, Underlay tag `v0.9.4`
 Target repository: `/Users/tom/Dev/projects/underlay-reference`
 Target base: `f5ea7d72eee278e8838ba16f8f43eb2b662406d0`
 Governing refs: `001-consumer-adoption-inventory.md`,
@@ -12,15 +12,15 @@ adapter/template contracts
 ## Outcome
 
 Move every active Underlay Reference web and Rust dependency from sibling paths
-to Underlay tag `v0.9.2`, while preserving the exact public Poodle 0.2.2 result
+to Underlay tag `v0.9.4`, while preserving the exact public Poodle 0.2.2 result
 already merged through `g16.013`.
 
 ## Scope
 
 - Move Admin, Front, UI, and client Underlay dependencies to
-  `git+ssh://git@github.com/inflatable-cookie/underlay.git#v0.9.2`.
+  `git+ssh://git@github.com/inflatable-cookie/underlay.git#v0.9.4`.
 - Move every active API Underlay crate from sibling paths to
-  `ssh://git@github.com/inflatable-cookie/underlay.git`, tag `v0.9.2`, retaining
+  `ssh://git@github.com/inflatable-cookie/underlay.git`, tag `v0.9.4`, retaining
   its existing features.
 - Regenerate all four Bun locks and Rust locks narrowly. Preserve exact Poodle
   0.2.2 registry identities and review the complete dependency-source diff.
@@ -37,8 +37,8 @@ already merged through `g16.013`.
 
 ## Acceptance
 
-- Every active Underlay web and Rust dependency resolves tag `v0.9.2`
-  (`ddba26400f480638829917cf72eecc62be4b978d`), with no sibling Underlay path.
+- Every active Underlay web and Rust dependency resolves tag `v0.9.4`
+  (`7004af5b3461b6c89a7faa646575ff69576c73b8`), with no sibling Underlay path.
 - Admin, Front, and UI still resolve exact public Poodle core/Svelte 0.2.2 with
   registry integrity and no duplicate runtime.
 - Bun and Cargo lock churn is limited to the Underlay source migration and
@@ -72,3 +72,11 @@ manifest and lock review, compatibility edits, and validation in the Underlay
 Reference PR. Do not merge. This lane is independent of `014`-`024` and closes
 the fourth remaining Underlay consumer identified after the Poodle-only first
 wave.
+
+## Review Result
+
+PR [#2](https://github.com/inflatable-cookie/underlay-reference/pull/2) has two
+bounded blockers. Rebase on current `main` and preserve its Underlay v0.9.4
+lock update instead of restoring v0.9.2. Update the canonical README dependency
+and bootstrap instructions, which still tell consumers to use sibling Underlay
+paths. The existing package-level validation evidence is otherwise green.

@@ -1,6 +1,6 @@
 # g16.022 — Loophole Poodle 0.2.2 adoption
 
-Status: **handoff ready — independent Longhorn-product lane**
+Status: **review approved — awaiting operator merge**
 Depends on: `g16.007`, `g16.008`, `g16.012`
 Target repository: `/Users/tom/Dev/projects/loophole`
 Target base: `6f770f59c3a83a0da8ccd9ebcc03f15e7c5b88a2`
@@ -54,3 +54,10 @@ Move Loophole Desktop from committed sibling Poodle sources to exact public
 Record exact identities, peer convergence, lock review, compatibility edits,
 and validation in the Loophole PR. Do not merge. Independent of the other
 product cards.
+
+## Review Result
+
+PR [#8](https://github.com/inflatable-cookie/loophole/pull/8) is approved. The
+desktop graph resolves one registry Poodle 0.2.2 identity and the Longhorn peer
+converges. Build, workspace tests, and QA pass. The single renderer-test failure
+reproduces unchanged on `main`. Await operator merge authority.
