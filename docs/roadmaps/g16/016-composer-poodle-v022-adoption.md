@@ -21,11 +21,21 @@ overrides to public 0.2.2.
   Svelte dependency merely because the override existed.
 - Move Composer Admin, Front, and API-client Underlay dependencies to
   `git+ssh://git@github.com/inflatable-cookie/underlay.git#v0.9.2`.
+- Remove Composer Admin's SvelteKit/Vite aliases to the sibling Underlay source
+  tree so the installed tagged package is the code under validation.
+- Move both public-config generators from the sibling source-file import to
+  Underlay's published `@inflatable-cookie/underlay/server/config-stack`
+  subpath. Remove Front's stale `ensure-local-js-links.sh` Effigy calls; the
+  script is absent and a tagged dependency must not be relinked locally.
 - Move every active Composer API Underlay crate from sibling paths to
   `ssh://git@github.com/inflatable-cookie/underlay.git`, tag `v0.9.2`, retaining
   existing features.
 - Regenerate web and Rust locks narrowly; prove transitive Svelte converges on
   0.2.2 through Underlay `v0.9.2`.
+- Update Composer-owned dependency-resolution documentation that still says the
+  frontends load Underlay/Poodle from sibling source. Preserve sibling mounts
+  used only by the workspace's explicit cross-repository QA; they must not
+  override package resolution.
 - Repair only Composer-owned compatibility failures caused by the bump.
 
 ## Out Of Scope
@@ -41,6 +51,8 @@ overrides to public 0.2.2.
 - All active Composer Poodle identities resolve from the registry at 0.2.2.
 - Every active Underlay dependency resolves tag `v0.9.2`
   (`ddba26400f480638829917cf72eecc62be4b978d`), with no sibling path.
+- No SvelteKit/Vite alias, generator import, or local-link helper bypasses the
+  tagged Underlay package or registry Poodle packages.
 - No old Poodle version, sibling Poodle source, or committed override remains.
 - Web and Rust lock diffs are bounded to the coupled dependency upgrade.
 - Admin/Front and root validation pass or a reproduced baseline is isolated.
@@ -49,9 +61,9 @@ overrides to public 0.2.2.
 
 - Use Composer's Effigy-owned install path; inspect all web/Rust manifests and
   locks.
-- Run `effigy composer-admin/validate`, `effigy composer-front/validate`,
-  the API validation selected by `effigy tasks`, `effigy validate`, and
-  `effigy qa`.
+- Run `effigy composer-api-client/validate`, `effigy composer-admin/validate`,
+  `effigy composer-front/validate`, `effigy composer-api/validate`,
+  `effigy validate`, and `effigy qa`.
 - Run `git diff --check`.
 
 ## Stop Conditions
