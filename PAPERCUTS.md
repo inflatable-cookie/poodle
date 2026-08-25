@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-25 — Finch's `effigy doctor` cannot provide a clean consumer-review
+  baseline: `effigy.toml` still uses unsupported `test.exclude_catalogs`, while
+  Cargo link-health inspection fails because the committed lock wants a Signal
+  refresh under `--locked`. Repair the manifest key and make dependency health
+  inspection read-only against the accepted lock. Affects Finch review
+  `g16.019`.
+
 - 2026-08-25 — Figmatic's headless `effigy build` rewrites committed Studio
   `dist/`, mutates tracked `node_modules` contents, and refreshes root
   `Cargo.lock`, leaving hundreds of dirty paths after a read-only PR validation

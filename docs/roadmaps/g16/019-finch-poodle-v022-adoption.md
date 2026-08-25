@@ -1,6 +1,6 @@
 # g16.019 — Finch Poodle 0.2.2 adoption
 
-Status: **changes requested — refresh stale Longhorn peer metadata in lock**
+Status: **changes requested — remove stale Poodle sibling bootstrap and authority**
 Depends on: `g16.007`, `g16.008`, `g16.011`
 Target repository: `/Users/tom/Dev/projects/finch`
 Target base: `ab4f5a6072ee70391ed6d2b8513c8d035dbc7609`
@@ -58,6 +58,10 @@ edits, and validation in the Finch PR. Do not merge. Independent of `020`-`022`.
 ## Review Result
 
 PR [#1](https://github.com/inflatable-cookie/finch/pull/1) correctly pins the
-active app to Poodle 0.2.2 and passes `effigy tauri:check`, but its Bun lock
-still records Longhorn's adapter peer as Poodle Svelte 0.1.0. Refresh the local
-Longhorn package metadata, prove one 0.2.2 identity, and update the PR.
+active app to Poodle 0.2.2 and passes `effigy tauri:check`. Commit `e8889ec2`
+fixed the stale Longhorn adapter peer metadata and proves one registry Poodle
+0.2.2 identity. A second review found that Finch still clones `../poodle` in
+`bootstrap:deps`, while its README, architecture, and active Tauri shell
+contract still claim sibling `file:` consumption. Remove that unused bootstrap
+dependency and align the three current authority surfaces; preserve completed
+g05 specs, roadmaps, and logs as historical evidence.
