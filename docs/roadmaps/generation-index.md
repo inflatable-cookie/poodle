@@ -5,10 +5,12 @@ Updated: 2026-08-25
 ## Active Track
 
 - `g16`
-  - Status: planning checkpoint; no runway compiled
-  - Range: none
-  - Next move: agree the generation aim and completion boundary from current
-    authority, carry-forward gaps, and open triage before creating a card
+  - Status: active; `001` ready
+  - Range: `001` compiled; later cards blocked on its evidence review
+  - Aim: replace stale and contradictory parity status with one current
+    active-cohort evidence ledger before choosing a new conformance lane
+  - Next move: dispatch `g16.001`, then review its measured semantic,
+    behavioural, accessibility, and visual evidence classes
 
 ## Latest Completed Track
 

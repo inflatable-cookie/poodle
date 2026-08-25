@@ -6,14 +6,16 @@ Updated: 2026-08-25
 Roadmaps record Poodle's executable milestone work. `g15` completed the full
 v0.2.x release programme: the roster and parity baseline, failed v0.2.0
 publication, v0.2.1 recovery, crates.io-GPUI correction, v0.2.2 publication,
-and adoption by all 16 authoritative consumers. `g16` is the clean next-work
-slate and has no compiled runway yet.
+and adoption by all 16 authoritative consumers. `g16` begins with a current
+active-cohort parity evidence ledger before any new conformance runway is
+chosen.
 
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
-- `g16` is open at an operator-led planning checkpoint. It has no ready cards;
-  do not infer its programme from g15 closeout.
+- `g16.001` is ready. It repairs stale parity reporting and produces one
+  component-level evidence ledger. Later cards remain blocked on operator
+  review of that ledger; do not infer a conformance programme from g15.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -63,7 +65,8 @@ slate and has no compiled runway yet.
 - `g15` — completed v0.2.x release and adoption programme; corrected v0.2.2
   published from candidate `d5607def`, with all 16 authoritative consumers
   adopted and React retained as source-only
-- `g16` — open clean slate; operator-led planning has not compiled a runway
+- `g16` — active evidence-recovery checkpoint; `001` ready, later runway
+  uncompiled
 
 ## Rules
 
