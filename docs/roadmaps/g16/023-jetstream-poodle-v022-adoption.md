@@ -1,6 +1,6 @@
 # g16.023 — Jetstream Poodle 0.2.2 adoption
 
-Status: **handoff published — final authoritative consumer lane**
+Status: **complete — Jetstream PR 1 merged at `be969259`**
 Depends on: `g16.007`, `g16.008`, completed `014`-`022` and `025`
 Target repository: `/Users/tom/Dev/projects/jetstream`
 Target base: `2106faec624973607c16a52985c9d1044e830261`
@@ -60,6 +60,16 @@ public 0.2.2 while preserving its explicitly paired local Rust integration.
 
 ## Evidence And Continuation
 
-Record the web registry identity, retained Rust path boundary, lock review,
-compatibility edits, and validation in the Jetstream PR. Do not merge. Once
-this PR merges, the authoritative 16-repository rollout can close.
+Jetstream PR 1 merged reviewed head `3efd9dde` at `be969259`. Editor core and
+Svelte now resolve exact public 0.2.2 with published integrity; the retained
+local Longhorn adapter converges on Poodle Svelte 0.2.2. The paired Rust paths
+and Rust lock stayed unchanged. Adapter compatibility added the new TabPanel
+role, the deferred ProgressRing fallback, and current RenderContext-based smoke
+probes.
+
+Independent review reproduced the two pre-existing `jetstream-benchmark`
+milestone-metadata failures only after docs, formatting, compilation, boundary
+checks, demo registry, single-stack checks, Clippy, adapter tests, and 478 broad
+tests passed. No visible runtime was launched. This closes the final
+authoritative consumer lane; see
+`../../logs/2026-08/20260825-g16-023-jetstream-v022-adoption.md`.

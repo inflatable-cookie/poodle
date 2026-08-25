@@ -1,9 +1,9 @@
 # g16 — Published Consumer Adoption
 
-Status: active — `v0.2.2` foundation, first product wave, and coupled Underlay
-product wave complete; remaining consumer lanes in review
-Posture: adoption-first with one Poodle patch release gate
+Status: complete — all 16 authoritative consumers adopted Poodle 0.2.2
+Posture: closed; one cancelled repository is retained as historical planning
 Opened: 2026-08-23
+Closed: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`,
 `../../logs/2026-08/20260823-g15-013-v021-release-certification.md`
@@ -73,7 +73,7 @@ trees, and in-repository archived applications are excluded.
 | Coupled Underlay product wave | Acowtancy, Compli Me, Composer, Contact Patch, Songsprout | complete |
 | Underlay Reference follow-up | Underlay Reference | complete at Underlay v0.9.4 and Poodle 0.2.2 |
 | Longhorn product wave | Finch, Figmatic, Bovine Accelerator Desktop, Loophole | complete |
-| Adapter follow-up | Jetstream | `023` handoff published as final authoritative consumer lane |
+| Adapter follow-up | Jetstream | complete; PR 1 merged at `be969259` |
 | Retired product | Loophole Legacy | `024` cancelled; repository removed by operator |
 
 ## Runway
@@ -138,15 +138,15 @@ trees, and in-repository archived applications are excluded.
     complete; PR 8 merged at `92e01577`, with one registry Poodle identity and
     the renderer-test baseline kept separate
 23. [023 — Jetstream Poodle 0.2.2 adoption](023-jetstream-poodle-v022-adoption.md) —
-    handoff published as the final authoritative consumer; registry web plus
-    retained paired Rust paths
+    complete; PR 1 merged reviewed head `3efd9dde` at `be969259`, with registry
+    web packages and retained paired Rust paths
 24. [024 — Loophole Legacy Poodle 0.2.2 adoption](024-loophole-legacy-poodle-v022-adoption.md) —
     cancelled; repository removed by operator on 2026-08-25
 25. [025 — Underlay Reference tagged Underlay adoption](025-underlay-reference-v092-adoption.md) —
     complete; corrected stale PR metadata and merged reviewed head `25818824`
     at `3354803e`
 
-## Current Task And Parallel Lanes
+## Closeout
 
 The release-recovery, foundation, and first product wave are complete. Tag
 `v0.2.2` points to candidate `d5607def`; run `32756610293` published core and
@@ -160,11 +160,10 @@ cover four independent
 Longhorn-shaped products. Figmatic `020` and Loophole `022` are complete;
 Finch `019` and Bovine Accelerator Desktop `021` are also complete.
 
-Jetstream `023` is the only remaining authoritative consumer lane. Its
-published worker handoff upgrades the public web surface while preserving the
-paired local Rust contract.
-Loophole Legacy `024` is cancelled because the operator removed the repository;
-it is not a generation-close requirement.
+Jetstream `023` merged as the final authoritative consumer lane. Its public web
+surface now resolves exact Poodle 0.2.2 while the paired local Rust contract
+remains explicit. Loophole Legacy `024` is cancelled because the operator
+removed the repository; it is not a generation-close requirement.
 
 The crates.io GPUI boundary and non-activating evidence transport are accepted
 and merged in `g16.005`. PR 74 removed the stale `bzip2` / `libbz2-rs-sys`
@@ -174,9 +173,15 @@ than propagate the GPUI fork. Underlay `g16.003` and Soundcheck Library
 `g16.004` remain valid evidence for removing local overrides. Their 0.2.2
 follow-ups are now both merged. No product card advances on 0.2.1.
 
-## Completion
+Every one of the 16 authoritative repositories now satisfies the generation's
+declared source, version, lock-review, and repository-owned evidence boundary.
+The rollout is complete. Open motion-system and conformance-lab triage notes
+remain deliberately outside this generation and return at the next planning
+checkpoint.
 
-The generation closes only when every authoritative repository has:
+## Completion Evidence
+
+The generation closed after every authoritative repository had:
 
 - no active Poodle `0.1.0` or `0.2.1` manifest or lockfile resolution;
 - no committed active Poodle `file:` override;
@@ -190,5 +195,6 @@ The generation closes only when every authoritative repository has:
 
 ## Next Task
 
-Launch `docs/handoffs/20260825-181552-g16-023-jetstream-v022-adoption.md` as the
-final adoption lane.
+Return to an operator-led planning checkpoint. Re-read current vision,
+architecture, carry-forward gaps, and open triage before compiling a new
+generation; do not infer the next programme from release closeout alone.

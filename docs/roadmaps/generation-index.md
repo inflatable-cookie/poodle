@@ -4,20 +4,20 @@ Updated: 2026-08-25
 
 ## Active Track
 
-- `g16`
-  - Status: active — release recovery, foundation, and every product lane
-    complete; Jetstream is the sole remaining authoritative consumer
-  - Posture: published-package adoption from exact npm 0.2.2 and Rust tag
-    `v0.2.2`; no component or public API redesign
-  - Range: `001` to `013` complete except superseded `002`; `014`-`025` compiled
-  - Evidence: 16 authoritative repositories consume Poodle through registry
-    `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
-    local Rust paths.
-  - Next: launch the published handoff for final Jetstream card `023`; card
-    `024` is cancelled because the operator removed the Loophole Legacy
-    repository.
+- None. The repository is at an operator-led planning checkpoint after the
+  `g16` closeout. Do not open the next generation without recompiling direction
+  from current authority and open triage.
 
 ## Latest Completed Track
+
+- `g16`
+  - Status: complete (2026-08-25)
+  - Range: `001`–`025`; `002` superseded, `024` cancelled after repository
+    removal, every other adoption lane complete
+  - Verdict: crates.io GPUI restored, Poodle 0.2.2 published, and all 16
+    authoritative consumers moved to the declared released boundary with their
+    own validation and merged PR
+  - Evidence: `docs/logs/2026-08/20260825-g16-023-jetstream-v022-adoption.md`
 
 - `g15`
   - Status: complete (`g15.013`)
