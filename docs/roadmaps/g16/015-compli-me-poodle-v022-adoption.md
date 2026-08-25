@@ -1,6 +1,6 @@
-# g16.015 — Compli Me Underlay 0.9.2 and Poodle 0.2.2 adoption
+# g16.015 — Compli Me tagged Underlay and Poodle 0.2.2 adoption
 
-Status: **corrective follow-up ready — merged web manifests need tag syntax**
+Status: **complete — PRs 1, 2, and 3 merged**
 Depends on: `g16.007`, `g16.009`, `g16.013`, Underlay tag `v0.9.2`
 Target repository: `/Users/tom/Dev/projects/compli-me`
 Target base: `ee27d84964c61d406f90a5b9f8d4ed96e059d5b7`
@@ -86,3 +86,12 @@ the narrow lock refresh required by Bun. The resolved commit must remain
 resolve, stop with the exact command/output and compare the environment with
 the already-working Acowtancy, Composer, Contact Patch, and Songsprout tag
 consumers rather than silently restoring the commit syntax.
+
+While that correction was under review, Compli Me main advanced to Underlay
+`v0.9.4` at `7004af5b3461b6c89a7faa646575ff69576c73b8`. Rust used the new tag,
+but the four web manifests again named its peeled commit. PR
+[#3](https://github.com/double-dip/compli-me/pull/3) was therefore rebased as
+the same boundary correction at the newer release: all four web manifests now
+declare `#v0.9.4`, their locks retain `7004af5b`, and direct Poodle dependencies
+remain exact registry 0.2.2. It merged at `db5741f6` after all four frozen
+installs, package validation selectors, and `git diff --check` passed.
