@@ -1,7 +1,7 @@
 # g16 — Published Consumer Adoption
 
-Status: active — `v0.2.2` foundation and first product wave complete; remaining
-product cards `014`-`022` ready
+Status: active — `v0.2.2` foundation and first product wave complete; coupled
+Underlay/Poodle product cards and remaining Longhorn products ready
 Posture: adoption-first with one Poodle patch release gate
 Opened: 2026-08-23
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -43,6 +43,13 @@ component work or add a compatibility shim.
   `acowtancy-consolidation.*` and `finch/archive/app-electron`. The
   `loophole-legacy` repository is authoritative enough to receive its own
   final-wave upgrade unless its owner explicitly retires it.
+- Acowtancy, Compli Me, Composer, Contact Patch, Songsprout, and Underlay
+  Reference move every active web and Rust Underlay dependency to tag `v0.9.2`
+  (`ddba26400f480638829917cf72eecc62be4b978d`). Web packages use the tagged
+  Git source; Rust crates use the same Git repository and tag while preserving
+  their feature sets. Active sibling Underlay `file:`/`path` sources are
+  removed. Underlay `v0.9.2` pins Poodle Svelte 0.2.2, while application-owned
+  direct Poodle dependencies remain exact 0.2.2.
 
 ## Inventory
 
@@ -56,8 +63,9 @@ trees, and in-repository archived applications are excluded.
 | Release recovery | Poodle | complete; `v0.2.2` published from exact candidate `d5607def` |
 | Foundation | Longhorn, Underlay, Soundcheck Library | complete at 0.2.2 |
 | Adapter follow-up | Jetstream | deferred behind product adoption; paired Rust integration remains local |
-| First product wave | Nucleus, Soundcheck, Underlay Reference | complete at 0.2.2 |
-| Underlay product wave | Acowtancy, Compli Me, Composer, Contact Patch, Songsprout | `014`-`018` ready and independent |
+| First product wave | Nucleus, Soundcheck, Underlay Reference | Poodle 0.2.2 complete |
+| Coupled Underlay product wave | Acowtancy, Compli Me, Composer, Contact Patch, Songsprout | `014`-`018`; Underlay v0.9.2 plus Poodle 0.2.2 |
+| Underlay Reference follow-up | Underlay Reference | `025` ready; replace sibling Underlay after completed Poodle adoption |
 | Longhorn product wave | Finch, Figmatic, Bovine Accelerator Desktop, Loophole | `019`-`022` ready and independent |
 | Adapter follow-up | Jetstream | `023` ready; dispatch after product lanes |
 | Legacy product | Loophole Legacy | `024` ready as final authoritative product lane |
@@ -97,16 +105,16 @@ trees, and in-repository archived applications are excluded.
 13. [013 — Underlay Reference Poodle 0.2.2 adoption](013-underlay-reference-poodle-v022-adoption.md) —
     complete; PR 1 merged at `f5ea7d72`, with registry adoption clean and the
     pre-existing Effigy test-routing baseline exposed rather than hidden
-14. [014 — Acowtancy Poodle 0.2.2 adoption](014-acowtancy-poodle-v022-adoption.md) —
-    ready; Cream, Dairy, and Froyo
-15. [015 — Compli Me Poodle 0.2.2 adoption](015-compli-me-poodle-v022-adoption.md) —
-    ready; Admin and Front
-16. [016 — Composer Poodle 0.2.2 adoption](016-composer-poodle-v022-adoption.md) —
-    ready; Admin and Front
-17. [017 — Contact Patch Poodle 0.2.2 adoption](017-contact-patch-poodle-v022-adoption.md) —
-    ready; Admin and Front
-18. [018 — Songsprout Poodle 0.2.2 adoption](018-songsprout-poodle-v022-adoption.md) —
-    ready; Bloom and Greenhouse
+14. [014 — Acowtancy Underlay 0.9.2 and Poodle 0.2.2 adoption](014-acowtancy-poodle-v022-adoption.md) —
+    operator reports implementation complete; PR evidence pending
+15. [015 — Compli Me Underlay 0.9.2 and Poodle 0.2.2 adoption](015-compli-me-poodle-v022-adoption.md) —
+    worker in flight; Admin, Front, UI, API-client, and API
+16. [016 — Composer Underlay 0.9.2 and Poodle 0.2.2 adoption](016-composer-poodle-v022-adoption.md) —
+    ready; complete web and Rust dependency graph
+17. [017 — Contact Patch Underlay 0.9.2 and Poodle 0.2.2 adoption](017-contact-patch-poodle-v022-adoption.md) —
+    ready; complete web and Rust dependency graph
+18. [018 — Songsprout Underlay 0.9.2 and Poodle 0.2.2 adoption](018-songsprout-poodle-v022-adoption.md) —
+    ready; complete web and Rust dependency graph
 19. [019 — Finch Poodle 0.2.2 adoption](019-finch-poodle-v022-adoption.md) —
     ready; active Tauri app only
 20. [020 — Figmatic Poodle 0.2.2 adoption](020-figmatic-poodle-v022-adoption.md) —
@@ -119,6 +127,8 @@ trees, and in-repository archived applications are excluded.
     ready after product dispatch; registry web plus retained paired Rust paths
 24. [024 — Loophole Legacy Poodle 0.2.2 adoption](024-loophole-legacy-poodle-v022-adoption.md) —
     ready as final authoritative product lane; active Aura only
+25. [025 — Underlay Reference 0.9.2 adoption](025-underlay-reference-v092-adoption.md) —
+    ready; preserve merged Poodle 0.2.2 while replacing sibling Underlay paths
 
 ## Current Task And Parallel Lanes
 
@@ -127,10 +137,13 @@ The release-recovery, foundation, and first product wave are complete. Tag
 Svelte to npm `latest`. Longhorn `008`, Underlay `009`, Soundcheck Library
 `010`, Nucleus `011`, Soundcheck `012`, and Underlay Reference `013` are merged.
 
-Cards `014`-`018` cover five independent Underlay-shaped repositories. Cards
-`019`-`022` cover four independent Longhorn-shaped products. They share no
-target repositories or mutable files and may run in parallel, one worktree and
-PR per card. `021` must not use Bovine Accelerator Desktop's operator checkout.
+Cards `014`-`018` cover five independent coupled Underlay/Poodle repositories;
+`025` is the equivalent Underlay-only follow-up for the already-migrated
+Underlay Reference. The operator reports `014` implemented and `015` is in
+flight. Cards `016`-`018` and `025` may run in parallel. Cards `019`-`022`
+cover four independent Longhorn-shaped products. All lanes use one worktree and
+PR per repository. `021` must not use Bovine Accelerator Desktop's operator
+checkout.
 
 Jetstream remains off the critical path. Card `023` upgrades its public web
 surface but preserves the paired local Rust contract. Dispatch it after product
@@ -152,11 +165,13 @@ The generation closes only when every authoritative repository has:
 - no active Poodle `0.1.0` or `0.2.1` manifest or lockfile resolution;
 - no committed active Poodle `file:` override;
 - exact npm 0.2.2 or Rust tag `v0.2.2`, with crates.io GPUI identity;
+- for the six Underlay consumer repositories, exact Underlay tag `v0.9.2`
+  across web and Rust with no active sibling Underlay source;
 - a clean install from its declared sources;
 - its own relevant headless QA evidence and merged PR.
 
 ## Next Task
 
-Dispatch `g16.014` in its own Acowtancy worktree. Cards `015`-`022` are
-parallel-ready under the same one-repository-per-PR rule. Hold `023` and `024`
-for the final wave.
+Review `g16.014` when its PR arrives and monitor in-flight `g16.015`. Dispatch
+`g16.016`-`018` and `g16.025` as independent coupled Underlay/Poodle lanes;
+`019`-`022` remain parallel-ready. Hold `023` and `024` for the final wave.

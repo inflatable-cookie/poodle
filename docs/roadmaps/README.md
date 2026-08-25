@@ -1,14 +1,15 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-24
+Updated: 2026-08-25
 
 Roadmaps record Poodle's executable milestone work. `g15` completed the
 v0.2.1 recovery release after `v0.2.0` stopped before publication. `g16`
 consumer adoption then exposed a GPUI source-identity defect in that Rust tag.
 The corrected crates.io-GPUI candidate is now published as `v0.2.2`; foundation
-adoption and the three first-wave products have landed. Remaining product cards
-`g16.014`-`022` are ready; Jetstream and Loophole Legacy close the rollout.
+adoption and the three first-wave Poodle products have landed. Underlay
+`v0.9.2` now couples the remaining Underlay consumers to Poodle 0.2.2; product
+cards `g16.014`-`022` plus Underlay Reference follow-up `025` own the rollout.
 
 ## Current State
 
@@ -16,9 +17,10 @@ adoption and the three first-wave products have landed. Remaining product cards
 - `g16` has frozen the 17-repository consumer estate. Longhorn exposed the
   fork-sourced GPUI defect in 0.2.1; `g16.005` restored crates.io GPUI and
   `006`-`007` published v0.2.2. Longhorn, Underlay, Soundcheck Library, Nucleus,
-  Soundcheck, and Underlay Reference now consume 0.2.2. Nine independent active
-  product cards are ready. Jetstream stays behind their dispatch; Loophole
-  Legacy is the final product lane.
+  Soundcheck, and Underlay Reference now consume 0.2.2. Acowtancy through
+  Songsprout additionally adopt Underlay `v0.9.2` in `014`-`018`; `025` applies
+  the same released-Underlay boundary to Underlay Reference. Jetstream stays
+  behind product dispatch; Loophole Legacy is the final product lane.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -33,8 +35,10 @@ adoption and the three first-wave products have landed. Remaining product cards
   without admitting GPL code. Those lanes and the `0.2.0` candidate completed;
   its workflow then failed before publication. Card `054` produced green
   replacement candidate `3d914261`; completed gate `013` tagged and published
-  it as `v0.2.1` in run `32658293188`. Core and Svelte are on npm `latest` at
-  `0.2.1`; React remains source-only. The generation is complete.
+  it as `v0.2.1` in run `32658293188`. The broken Git tag was later retracted
+  after v0.2.2 replaced its fork-sourced GPUI graph; npm retains 0.2.1 for
+  install stability while `latest` is 0.2.2. React remains source-only. The
+  generation is complete.
   Jetstream remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.

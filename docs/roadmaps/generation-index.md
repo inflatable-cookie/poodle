@@ -9,12 +9,13 @@ Updated: 2026-08-25
     and all three first-wave products complete
   - Posture: published-package adoption from exact npm 0.2.2 and Rust tag
     `v0.2.2`; no component or public API redesign
-  - Range: `001` to `013` complete except superseded `002`; `014`-`024` compiled
+  - Range: `001` to `013` complete except superseded `002`; `014`-`025` compiled
   - Evidence: 17 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: dispatch independent product cards `014`-`022`, then final adapter and
-    legacy cards `023`-`024`.
+  - Next: review reported-complete `014`, monitor `015`, and dispatch coupled
+    Underlay/Poodle cards `016`-`018` plus Underlay Reference follow-up `025`;
+    Longhorn products `019`-`022` remain parallel-ready before final `023`-`024`.
 
 ## Latest Completed Track
 
@@ -26,9 +27,10 @@ Updated: 2026-08-25
     primitive visual comparison, packed roots, and release automation were
     closed without inventing a third parity architecture.
   - Release: immutable `v0.2.0` failed before publication; replacement
-    `v0.2.1` points to `3d914261` and run `32658293188` published core and
-    Svelte `0.2.1` to npm `latest`. React remains source-only and Jetstream
-    remains deferred.
+    `v0.2.1` pointed to `3d914261` and run `32658293188` published core and
+    Svelte 0.2.1. The broken Git tag was later retracted after v0.2.2 replaced
+    it; npm keeps 0.2.1 while `latest` is 0.2.2. React remains source-only and
+    Jetstream remains deferred.
   - Evidence: `docs/logs/2026-08/20260823-g15-013-v021-release-certification.md`.
 
 - `g14`

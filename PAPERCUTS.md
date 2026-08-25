@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-25 — Underlay tag `v0.9.2` correctly stamps the Rust workspace as
+  0.9.2 and pins Poodle Svelte 0.2.2, but its root JavaScript `package.json`
+  still declares version `0.9.1`. Git-tag consumers resolve the right commit,
+  yet package/lock diagnostics can report a misleading Underlay version. Align
+  the JS package version before the next Underlay tag. Found while widening
+  Poodle `g16.014`-`018` and `025`.
+
 - 2026-08-24 — Required Northstar orientation through `effigy doctor` now
   fails on three broad repository scans (`generated-in-src`, `god-files`, and
   `stale-suppressions`: 41 error findings total) even though none is connected
