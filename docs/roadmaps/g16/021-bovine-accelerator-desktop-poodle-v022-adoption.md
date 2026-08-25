@@ -1,9 +1,9 @@
 # g16.021 — Bovine Accelerator Desktop Poodle 0.2.2 adoption
 
-Status: **ready — isolated Longhorn-product lane**
+Status: **handoff ready — isolated Longhorn-product lane**
 Depends on: `g16.007`, `g16.008`, `g16.011`
 Target repository: `/Users/tom/Dev/projects/bovine-accelerator-desktop`
-Target base: `0c32fbe84defce37443941f8ccd7523f1c540983`
+Target base: `ac7487fd82e9792b14f1c499f4342182914501da`
 Governing refs: `001-consumer-adoption-inventory.md`,
 `011-nucleus-poodle-v022-adoption.md`, Bovine Accelerator Desktop `AGENTS.md`,
 working rules, and dependency-release checks
@@ -22,8 +22,8 @@ public 0.2.2 while preserving its Rust-owned domain and local Longhorn bridge.
 
 ## Out Of Scope
 
-- Do not use or alter the dirty/stale operator checkout; start from target base
-  in an isolated worker worktree.
+- Do not use or alter the operator checkout or existing product worktrees;
+  start from target base in a fresh isolated worker worktree.
 - Do not edit Longhorn/Poodle, Rust domain behavior, Tauri commands, or content.
 - Do not add aliases or launch visible proof/dev applications.
 

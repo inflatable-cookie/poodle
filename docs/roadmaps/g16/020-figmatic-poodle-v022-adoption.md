@@ -1,6 +1,6 @@
 # g16.020 — Figmatic Poodle 0.2.2 adoption
 
-Status: **ready — independent Longhorn-product lane**
+Status: **handoff ready — independent Longhorn-product lane**
 Depends on: `g16.007`, `g16.008`, `g16.011`
 Target repository: `/Users/tom/Dev/projects/figmatic`
 Target base: `775312c9ec9579ce4cac9d627c45cc21bdeb77fd`

@@ -1,6 +1,6 @@
 # g16.025 — Underlay Reference 0.9.2 adoption
 
-Status: **ready — independent Underlay follow-up lane**
+Status: **handoff ready — independent Underlay follow-up lane**
 Depends on: `g16.013`, Underlay tag `v0.9.2`
 Target repository: `/Users/tom/Dev/projects/underlay-reference`
 Target base: `f5ea7d72eee278e8838ba16f8f43eb2b662406d0`

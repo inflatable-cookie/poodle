@@ -121,19 +121,20 @@ trees, and in-repository archived applications are excluded.
     complete; PR 1 merged at `22f8ae78`, with tagged Underlay and registry
     Poodle identities proved across Bloom, Greenhouse, Stem, and Nursery
 19. [019 — Finch Poodle 0.2.2 adoption](019-finch-poodle-v022-adoption.md) —
-    ready; active Tauri app only
+    handoff ready; active Tauri app only
 20. [020 — Figmatic Poodle 0.2.2 adoption](020-figmatic-poodle-v022-adoption.md) —
-    ready; Studio
+    handoff ready; Studio
 21. [021 — Bovine Accelerator Desktop Poodle 0.2.2 adoption](021-bovine-accelerator-desktop-poodle-v022-adoption.md) —
-    ready; isolated worktree required
+    handoff ready; isolated worktree required from refreshed target base
 22. [022 — Loophole Poodle 0.2.2 adoption](022-loophole-poodle-v022-adoption.md) —
-    ready; Desktop
+    handoff ready; Desktop
 23. [023 — Jetstream Poodle 0.2.2 adoption](023-jetstream-poodle-v022-adoption.md) —
     ready after product dispatch; registry web plus retained paired Rust paths
 24. [024 — Loophole Legacy Poodle 0.2.2 adoption](024-loophole-legacy-poodle-v022-adoption.md) —
     ready as final authoritative product lane; active Aura only
 25. [025 — Underlay Reference 0.9.2 adoption](025-underlay-reference-v092-adoption.md) —
-    ready; preserve merged Poodle 0.2.2 while replacing sibling Underlay paths
+    handoff ready; preserve merged Poodle 0.2.2 while replacing sibling
+    Underlay paths
 
 ## Current Task And Parallel Lanes
 
@@ -178,6 +179,6 @@ The generation closes only when every authoritative repository has:
 
 ## Next Task
 
-Run the bounded `g16.014` and `g16.015` corrective follow-ups in parallel.
-Cards `g16.025` and `019`-`022` remain parallel-ready. Hold `023` and `024` for
-the final wave.
+Monitor the bounded `g16.014` and `g16.015` corrective follow-ups. Dispatch the
+published handoffs for `g16.025` and `019`-`022` in parallel. Hold `023` and
+`024` for the final wave.

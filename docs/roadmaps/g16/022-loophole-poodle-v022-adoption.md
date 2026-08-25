@@ -1,6 +1,6 @@
 # g16.022 — Loophole Poodle 0.2.2 adoption
 
-Status: **ready — independent Longhorn-product lane**
+Status: **handoff ready — independent Longhorn-product lane**
 Depends on: `g16.007`, `g16.008`, `g16.012`
 Target repository: `/Users/tom/Dev/projects/loophole`
 Target base: `6f770f59c3a83a0da8ccd9ebcc03f15e7c5b88a2`

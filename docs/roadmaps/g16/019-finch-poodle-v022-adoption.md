@@ -1,6 +1,6 @@
 # g16.019 — Finch Poodle 0.2.2 adoption
 
-Status: **ready — independent Longhorn-product lane**
+Status: **handoff ready — independent Longhorn-product lane**
 Depends on: `g16.007`, `g16.008`, `g16.011`
 Target repository: `/Users/tom/Dev/projects/finch`
 Target base: `ab4f5a6072ee70391ed6d2b8513c8d035dbc7609`
