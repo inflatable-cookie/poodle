@@ -1,4 +1,4 @@
-# g16.015 — Compli Me Tagged Underlay and Poodle 0.2.2 Closeout
+# g15.069 — Compli Me Tagged Underlay and Poodle 0.2.2 Closeout
 
 Date: 2026-08-25
 Status: complete
@@ -37,5 +37,5 @@ visible but do not fail the package boards and were not introduced here.
 ## Continuation
 
 Compli Me is complete. Continue the coupled Underlay wave only through
-Acowtancy's bounded `g16.014` correction; the remaining published handoffs are
-`g16.025` and product cards `019`-`024`.
+Acowtancy's bounded `g15.068` correction; the remaining published handoffs are
+`g15.079` and product cards `073`–`078`.

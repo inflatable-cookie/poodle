@@ -1,4 +1,4 @@
-# g16.020 / g16.022 — Longhorn Product Adoption
+# g15.074 / g15.076 — Longhorn Product Adoption
 
 Date: 2026-08-25
 Status: complete
@@ -24,6 +24,6 @@ QA, and diff checks. Its single renderer-test failure reproduced unchanged on
 
 ## Continuation
 
-Finch `g16.019` remains changes-requested for stale Longhorn peer metadata.
-Bovine Accelerator Desktop `g16.021` remains the other active Longhorn product
-lane. Underlay Reference `g16.025` remains changes-requested independently.
+Finch `g15.073` remains changes-requested for stale Longhorn peer metadata.
+Bovine Accelerator Desktop `g15.075` remains the other active Longhorn product
+lane. Underlay Reference `g15.079` remains changes-requested independently.

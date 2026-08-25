@@ -44,13 +44,13 @@ predictable.
   `t3code/g16-015-compli-me-tag-boundary`
 - **Worker worktree:** use the launcher's clean registered worktree; none was
   created by the orchestrator
-- **Roadmap:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g16/README.md`
-- **Ready card:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g16/015-compli-me-poodle-v022-adoption.md`
-- **Allowed runway:** the `g16.015` post-merge correction only
+- **Roadmap:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/README.md`
+- **Ready card:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/069-compli-me-poodle-v022-adoption.md`
+- **Allowed runway:** the `g15.069` post-merge correction only
 - **Remaining budget:** one repository and one corrective PR
 - **Parallel safety:** independent of Acowtancy; stop if another Compli Me lane
   owns the four package manifests or Bun locks
-- **Canonical refs:** Poodle `g16.001`, `g16.015`, Compli Me root/scoped
+- **Canonical refs:** Poodle `g15.055`, `g15.069`, Compli Me root/scoped
   `AGENTS.md`, working rules, and repo-local Effigy skill
 - **Required validation:** frozen/supported install plus
   `effigy admin/validate`, `effigy front/validate`, `effigy ui/validate`,
@@ -128,7 +128,7 @@ repo-owned install path, prove the same release commit, then open the PR.
    Underlay/Poodle identities, lock review, validation, actual worktree, and
    branch in the PR.
 3. Push the worker branch and open one PR against Compli Me `main`.
-4. Link `g16.015`, report the PR URL, and do not merge or edit Poodle planning.
+4. Link `g15.069`, report the PR URL, and do not merge or edit Poodle planning.
 
 ### Review and merge path
 

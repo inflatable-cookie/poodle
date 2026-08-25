@@ -1,8 +1,8 @@
-# g16.005 GPUI crates.io Recovery
+# g15.059 GPUI crates.io Recovery
 
 Date: 2026-08-23
-Card: `../../roadmaps/g16/005-gpui-cratesio-recovery.md`
-Generation: `../../roadmaps/g16/README.md`
+Card: `../../roadmaps/g15/059-gpui-cratesio-recovery.md`
+Generation: `../../roadmaps/g15/README.md`
 Policy: `../../specs/022-packaging-versioning-and-release-channel-rules.md`
 Decision prototype: `../../research/gpui-cratesio-nonactivating-capture.md`
 Superseded proof: `../../research/gpui-offscreen-capture-feasibility.md` (g15.044, still valid for the forked graph)
@@ -27,7 +27,7 @@ that window by its own window id, and refuses to publish anything if the
 frontmost application changed during the run.
 
 No version, release-note, candidate, tag, workflow, or publication change is
-in this branch. `g16.006` and `g16.007` own those.
+in this branch. `g15.060` and `g15.061` own those.
 
 ## Dependency And Source Boundary
 
@@ -462,5 +462,5 @@ Stated plainly, because the review run is the thing that settles them:
   have. `audit:licenses` still passes (the markers are present and
   `unused-allowed-license = "allow"`), and over-attribution harms nobody, so
   this was left alone rather than widened into a licence change. It should be
-  re-derived from the final graph in `g16.006`, where notices are already part
+  re-derived from the final graph in `g15.060`, where notices are already part
   of candidate preparation.

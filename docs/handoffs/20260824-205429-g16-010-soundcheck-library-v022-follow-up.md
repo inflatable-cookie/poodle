@@ -37,8 +37,8 @@ Longhorn, while preserving honest peer and lock evidence for library consumers.
   `t3code/g16-010-soundcheck-library-v022`
 - **Worker worktree:** launcher-managed; no manual worktree pre-created
 - **Roadmap card:**
-  `/Users/tom/Dev/projects/poodle/docs/roadmaps/g16/010-soundcheck-library-poodle-v022-follow-up.md`
-- **Allowed runway:** g16.010 only
+  `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/064-soundcheck-library-poodle-v022-follow-up.md`
+- **Allowed runway:** g15.064 only
 - **Parallel topology:** independent of Longhorn and Underlay
 - **Required validation:** `npm ci`, `npm test`, `npm run check`, focused
   package compilation as needed, dual-lock review, `git diff --check`
@@ -67,7 +67,7 @@ Longhorn, while preserving honest peer and lock evidence for library consumers.
 
 ## Suggested Next Move
 
-Read g16.010, inspect the existing npm and Bun lock entries, then change all
+Read g15.064, inspect the existing npm and Bun lock entries, then change all
 three manifest declarations together. Regenerate locks with the narrowest
 supported command and review them before running tests. If platform constraints
 drop or unrelated packages move, restore the unaffected entries rather than
@@ -87,7 +87,7 @@ accepting lock churn.
 4. Fetch and confirm `HEAD == origin/main == a720f22`. Confirm the absolute
    Poodle handoff exists and planning base `3434a32d` is an ancestor of Poodle
    `origin/main`; the handoff is not expected in Soundcheck Library `HEAD`.
-5. Read g16.010, the package READMEs, root README, and `PAPERCUTS.md`. The repo
+5. Read g15.064, the package READMEs, root README, and `PAPERCUTS.md`. The repo
    currently has no root `AGENTS.md`; do not invent one in this lane.
 
 ### While you work
@@ -99,7 +99,7 @@ accepting lock churn.
 
 ### When the assigned runway is complete
 
-1. Run all g16.010 validation, inspect both locks, and run `git diff --check`.
+1. Run all g15.064 validation, inspect both locks, and run `git diff --check`.
 2. Push the worker branch and open a PR against Soundcheck Library `main`.
    Record exact resolved versions, baseline comparison, changed files, and
    validation in the PR body.

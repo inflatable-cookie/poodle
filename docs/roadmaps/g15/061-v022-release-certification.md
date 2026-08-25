@@ -1,8 +1,8 @@
-# g16.007 — v0.2.2 release certification
+# g15.061 — v0.2.2 release certification
 
 Status: **complete — `v0.2.2` published from the accepted exact candidate**
-Depends on: `g16.006`
-Governing refs: `006-v022-release-candidate.md`,
+Depends on: `g15.060`
+Governing refs: `060-v022-release-candidate.md`,
 `../../contracts/001-working-rules.md`
 
 ## Outcome

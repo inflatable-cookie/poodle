@@ -1,7 +1,7 @@
-# g16.007 — v0.2.2 Release Certification
+# g15.061 — v0.2.2 Release Certification
 
 Date: 2026-08-24
-Card: `../../roadmaps/g16/007-v022-release-certification.md`
+Card: `../../roadmaps/g15/061-v022-release-certification.md`
 Candidate: `d5607def24c6833913df1b5dcfa06372fcd5dd81`
 Candidate merge: PR 74 at
 `6ea561be8c45ec7fbdbab4ebeaba4f31284e2596`
@@ -37,7 +37,7 @@ effigy test:visual-button-comparison-windowed
 
 The selector exited 1 because its fixed policy deliberately keeps a classified
 known delta blocking. This is diagnostic evidence, not a waived release gate;
-the headless release board was already accepted under `g16.006`.
+the headless release board was already accepted under `g15.060`.
 
 Three Svelte navigations used the runner's bounded recovery path after a
 60-second selector timeout. Every retained capture and repeat still verified.
@@ -104,6 +104,6 @@ subpaths resolved from the installed packages.
 
 ## Closeout
 
-`g16.007` is complete. Poodle release recovery is closed; the next move is a
+`g15.061` is complete. Poodle release recovery is closed; the next move is a
 fresh Longhorn v0.2.2 adoption card, followed by the bounded Underlay and
 Soundcheck Library 0.2.2 updates.

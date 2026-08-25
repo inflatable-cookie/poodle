@@ -41,9 +41,9 @@ about Poodle or hiding registry drift behind the mounted sibling checkout.
 - **Worker worktree:** use the launcher-provided registered worktree; no manual
   worktree has been pre-created
 - **Roadmap card:**
-  `/Users/tom/Dev/projects/poodle/docs/roadmaps/g16/013-underlay-reference-poodle-v022-adoption.md`
+  `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/067-underlay-reference-poodle-v022-adoption.md`
 - **Allowed runway:** that one card only
-- **Parallel topology:** runs beside Nucleus `011` and Soundcheck `012`; no
+- **Parallel topology:** runs beside Nucleus `065` and Soundcheck `066`; no
   shared mutable repository files
 - **Required validation:** card validation through Underlay Reference's
   Effigy-owned headless/container flow
@@ -73,7 +73,7 @@ about Poodle or hiding registry drift behind the mounted sibling checkout.
 
 ## Suggested Next Move
 
-Read `g16.013`, inventory the three manifests and four locks, then use the
+Read `g15.067`, inventory the three manifests and four locks, then use the
 supported Effigy flow to pin exact 0.2.2 and remove only Poodle overrides.
 Prove the effective package source before compatibility work. Stop if the
 mounted Poodle checkout still controls resolution.
@@ -94,7 +94,7 @@ mounted Poodle checkout still controls resolution.
 4. Run `git fetch origin`; confirm target `HEAD == origin/main == 8885661e`.
    Confirm this handoff exists at the absolute Poodle path and planning base
    `a7293ecd` is an ancestor of Poodle `origin/main`.
-5. Read Underlay Reference `AGENTS.md`, reference notes, `g16.013`, and the
+5. Read Underlay Reference `AGENTS.md`, reference notes, `g15.067`, and the
    governing Poodle/Underlay refs. Run `effigy tasks` as orientation.
 
 ### While you work
@@ -109,7 +109,7 @@ mounted Poodle checkout still controls resolution.
    `effigy qa:docs`, any missing package-local checks, and `git diff --check`.
 2. Push the worker branch and open a reviewable PR against Underlay Reference
    `main`.
-3. Link `g16.013`; record registry resolution, retained Underlay sources,
+3. Link `g15.067`; record registry resolution, retained Underlay sources,
    changed files, compatibility edits, lock review, validation, and unresolved
    items.
 4. Report the PR URL and evidence to the operator. Do not merge or edit Poodle

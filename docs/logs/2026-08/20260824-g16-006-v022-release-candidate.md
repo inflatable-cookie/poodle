@@ -1,7 +1,7 @@
-# g16.006 v0.2.2 Release Candidate — Execution Receipt
+# g15.060 v0.2.2 Release Candidate — Execution Receipt
 
 Date: 2026-08-24
-Card: `../../roadmaps/g16/006-v022-release-candidate.md`
+Card: `../../roadmaps/g15/060-v022-release-candidate.md`
 Handoff: `../../handoffs/20260824-095901-g16-006-v022-release-candidate.md`
 Spec lane: `../../specs/022-packaging-versioning-and-release-channel-rules.md`
 Release notes: `../../release-notes/0.2.2.md`
@@ -51,7 +51,7 @@ receipt records how to reproduce them; it is not an artifact store.
 
 ## Version Denominator
 
-The mechanical inventory was built before any edit and matched `g16.006`'s
+The mechanical inventory was built before any edit and matched `g15.060`'s
 fixed decision and `packages/release-manifest.json` exactly — 3 public-intent
 TypeScript manifests and 17 Rust crates under `packages/`. There was no
 conflict to report.
@@ -103,9 +103,9 @@ surface, itemised below.
 
 ## The Licence-Surface Correction (review round 1)
 
-`g16.005` recorded that `bzip2` and `libbz2-rs-sys` left both GPUI graphs with
-the fork, and assigned re-derivation of the notice surface to `g16.006`. The
-first `g16.006` card revision did not make those files writable, so the first
+`g15.059` recorded that `bzip2` and `libbz2-rs-sys` left both GPUI graphs with
+the fork, and assigned re-derivation of the notice surface to `g15.060`. The
+first `g15.060` card revision did not make those files writable, so the first
 candidate reported the contradiction instead of widening its own scope. The
 orchestrator repaired the card and handoff on `main` at `a98b924c`; this
 replacement candidate performs the correction.
@@ -156,7 +156,7 @@ from the lockfiles instead of from a hand-maintained list:
 
 Spec 022's rule was generalised to match: a notice-bearing licence is carried
 for exactly as long as its crate is in the resolved graph. The bzip2 history
-lives in the release notes, the `g16.005` log, and this receipt — not in the
+lives in the release notes, the `g15.059` log, and this receipt — not in the
 durable policy, and not inside the surface the sweep scans.
 
 All three directions were negative-tested by planting a violation and
@@ -233,7 +233,7 @@ selectors pass from the candidate.
 ### 3. `unmatched-source` warnings are gone
 
 `g15.050` recorded five `cargo deny` `unmatched-source` warnings as an accepted
-non-blocking shape. `g16.005` emptied the allowed-source list, so this
+non-blocking shape. `g15.059` emptied the allowed-source list, so this
 candidate produces **none**. All four manifests report `advisories ok, sources
 ok` with no warning output.
 
@@ -247,7 +247,7 @@ recorded below.
 The `npm pack` run here used the machine-default npm `10.9.8`, not the
 workflow's isolated npm `12.0.2`. `g15.054` measured those two producing
 identical bytes and digests for this package set; that equality was not
-re-measured here and is the operator's to confirm at `g16.007` if it matters.
+re-measured here and is the operator's to confirm at `g15.061` if it matters.
 
 ### 5. All six web digests are unchanged from the replaced candidate
 
@@ -375,7 +375,7 @@ changed one character.
   Pre-existing, unrelated to the candidate, and the task exits 0.
 - **Visual comparator.** `test:visual-button-comparison-windowed` still exits
   non-zero on its annotated, contract-cited `gpui-omits-box-shadow` findings,
-  as `g15.047`, `g15.052`, and the `g16.005` operator review all recorded. It
+  as `g15.047`, `g15.052`, and the `g15.059` operator review all recorded. It
   is windowed, it is not on the release board, and it was not run here.
   `docs/release-notes/0.2.2.md` claims no visual parity.
 
@@ -386,24 +386,24 @@ changed one character.
   non-activating window and is explicitly outside QA, CI, and every release
   gate. The release note says this in its own section.
 - **No new component behavior.** The only implementation change this release
-  carries is the GPUI dependency and capture boundary accepted in `g16.005`.
+  carries is the GPUI dependency and capture boundary accepted in `g15.059`.
   The web packages move for version-set alignment and carry no code change.
 - **No re-derivation of any licence surface beyond bzip2.** The sweep and the
   spec rule are general, but only `bzip2`/`libbz2-rs-sys` were proved absent
   and corrected here. Other notice surfaces were left exactly as they were.
-- **No windowed evidence from this worker.** The `g16.005` operator review
+- **No windowed evidence from this worker.** The `g15.059` operator review
   already ran the three approved windowed selectors; nothing was re-run here
   and nothing new is claimed about them.
 - No Jetstream parity; it remains program-deferred.
 - No React runtime-behaviour denominator; its evidence is 175/175 import
   reachability plus a bounded 13-component mount set.
-- No `0.2.2` publication and no tag. `g16.007` remains the separate operator
+- No `0.2.2` publication and no tag. `g15.061` remains the separate operator
   gate for certification, tag, and registry mutation.
 
 ## Continuation
 
 The next action is orchestrator review of this PR against `d5607def`, then the
-explicit `g16.007` operator decision for the windowed diagnostic, tag, and
+explicit `g15.061` operator decision for the windowed diagnostic, tag, and
 publication. Any further candidate-bearing review fix invalidates this receipt
 and requires another replacement candidate commit plus a complete rerun of the
 board above.
@@ -418,4 +418,4 @@ isolated selector and a complete gate retry passed. The execution friction is
 recorded in `PAPERCUTS.md`; it did not change the accepted candidate.
 
 No tag, workflow dispatch, publication, or registry mutation occurred. The
-next state is the explicit `g16.007` operator gate.
+next state is the explicit `g15.061` operator gate.

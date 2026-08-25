@@ -1,11 +1,11 @@
-# g16.020 — Figmatic Poodle 0.2.2 adoption
+# g15.074 — Figmatic Poodle 0.2.2 adoption
 
 Status: **complete — PR 17 merged**
-Depends on: `g16.007`, `g16.008`, `g16.011`
+Depends on: `g15.061`, `g15.062`, `g15.065`
 Target repository: `/Users/tom/Dev/projects/figmatic`
 Target base: `775312c9ec9579ce4cac9d627c45cc21bdeb77fd`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`011-nucleus-poodle-v022-adoption.md`, Figmatic `AGENTS.md`, working rules, and
+Governing refs: `055-consumer-adoption-inventory.md`,
+`065-nucleus-poodle-v022-adoption.md`, Figmatic `AGENTS.md`, working rules, and
 Studio package authority
 
 ## Outcome

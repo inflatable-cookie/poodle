@@ -1,11 +1,11 @@
-# g16.015 — Compli Me tagged Underlay and Poodle 0.2.2 adoption
+# g15.069 — Compli Me tagged Underlay and Poodle 0.2.2 adoption
 
 Status: **complete — PRs 1, 2, and 3 merged**
-Depends on: `g16.007`, `g16.009`, `g16.013`, Underlay tag `v0.9.2`
+Depends on: `g15.061`, `g15.063`, `g15.067`, Underlay tag `v0.9.2`
 Target repository: `/Users/tom/Dev/projects/compli-me`
 Target base: `ee27d84964c61d406f90a5b9f8d4ed96e059d5b7`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`013-underlay-reference-poodle-v022-adoption.md`, Compli Me root/admin/front/UI
+Governing refs: `055-consumer-adoption-inventory.md`,
+`067-underlay-reference-poodle-v022-adoption.md`, Compli Me root/admin/front/UI
 `AGENTS.md`, and Compli Me working rules
 
 ## Outcome
@@ -66,7 +66,7 @@ to public 0.2.2. Keep the Underlay-owned application shape unchanged.
 
 Record the exact Underlay tag/commit, Poodle registry identities, lock review,
 compatibility edits, and validation in the Compli Me PR. Do not merge.
-Independent of `014`, `016`-`022`, and `025`.
+Independent of `068`, `070`–`076`, and `079`.
 
 ## Post-Merge Correction
 

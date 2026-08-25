@@ -1,4 +1,4 @@
-# g16.011 — Nucleus Poodle 0.2.2 Adoption
+# g15.065 — Nucleus Poodle 0.2.2 Adoption
 
 Date: 2026-08-25
 Verdict: **complete — public-registry adoption over local Longhorn packages**
@@ -29,6 +29,6 @@ Independent orchestrator validation passed:
 
 GitHub exposed no hosted checks. The
 [canonical review comment](https://github.com/inflatable-cookie/nucleus/pull/1#issuecomment-5408030177)
-and local headless evidence formed the merge gate. Underlay Reference `013` is
+and local headless evidence formed the merge gate. Underlay Reference `067` is
 now the only remaining first-wave lane before compilation of the rest of the
 product estate.

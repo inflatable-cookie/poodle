@@ -13,7 +13,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   `prepare:longhorn-private-candidate` now derives candidate `741bd287` and
   stops on receipt drift, so the source-independent proof cannot be recreated
   from current `main` until the receipt is refreshed or candidate proof is
-  decoupled from unrelated source movement. Affects g16.021 post-merge
+  decoupled from unrelated source movement. Affects g15.075 post-merge
   revalidation; the committed Poodle manifest and lock graph remain correct.
 
 - 2026-08-25 — Underlay Reference's `effigy doctor` cannot provide a clean
@@ -21,33 +21,33 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   `test.exclude_catalogs` is unsupported, and `acme-docs` references built-in
   `docs` commands that the effective catalog cannot resolve. Repair the
   container toolchain and Effigy manifest/task routing. Affects review
-  `g16.025`.
+  `g15.079`.
 
 - 2026-08-25 — Finch's `effigy doctor` cannot provide a clean consumer-review
   baseline: `effigy.toml` still uses unsupported `test.exclude_catalogs`, while
   Cargo link-health inspection fails because the committed lock wants a Signal
   refresh under `--locked`. Repair the manifest key and make dependency health
   inspection read-only against the accepted lock. Affects Finch review
-  `g16.019`.
+  `g15.073`.
 
 - 2026-08-25 — Figmatic's headless `effigy build` rewrites committed Studio
   `dist/`, mutates tracked `node_modules` contents, and refreshes root
   `Cargo.lock`, leaving hundreds of dirty paths after a read-only PR validation
   run. Keep generated/dependency output untracked or make the validation task
-  restore/compare it explicitly. Affects Figmatic consumer review `g16.020`.
+  restore/compare it explicitly. Affects Figmatic consumer review `g15.074`.
 
 - 2026-08-25 — Loophole's `effigy test:workspace` refreshes 22 sibling Signal
   package versions in the committed root `Cargo.lock` even when the tested PR
   does not touch Rust dependencies. Isolate sibling lock resolution or add a
   no-write/check mode so headless validation stays read-only. Affects Loophole
-  consumer review `g16.022`.
+  consumer review `g15.076`.
 
 - 2026-08-25 — Underlay tag `v0.9.2` correctly stamps the Rust workspace as
   0.9.2 and pins Poodle Svelte 0.2.2, but its root JavaScript `package.json`
   still declares version `0.9.1`. Git-tag consumers resolve the right commit,
   yet package/lock diagnostics can report a misleading Underlay version. Align
   the JS package version before the next Underlay tag. Found while widening
-  Poodle `g16.014`-`018` and `025`.
+  Poodle `g15.068`–`072` and `079`.
 
 - 2026-08-24 — Required Northstar orientation through `effigy doctor` now
   fails on three broad repository scans (`generated-in-src`, `god-files`, and
@@ -61,7 +61,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   despite all retained captures verifying and repeating byte-identically. Add
   an early preview-health probe or shorter bounded navigation timeout so a
   healthy recovery does not add three opaque minutes. Affects
-  `test:visual-button-comparison-windowed`; found during `g16.007`.
+  `test:visual-button-comparison-windowed`; found during `g15.061`.
 
 - 2026-08-24 — An exact-candidate review ran green `effigy qa`, then
   `effigy release gates` failed once in `smoke:gpui-window-capture` after about
@@ -69,7 +69,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   gate retry passed 1/1. Effigy's task report retained only exit 1 rather than
   the child stderr, leaving the transient cause opaque. Preserve child stderr
   and investigate repeated headless-board warm-state races. Found while
-  reviewing `g16.006`.
+  reviewing `g15.060`.
 
 - 2026-08-23 — `effigy release simulate` cannot parse Poodle's accepted
   `CHANGELOG.md`: it rejects the prose under both `Unreleased` and `0.2.0` as

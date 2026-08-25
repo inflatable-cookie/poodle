@@ -1,11 +1,11 @@
-# g16.009 — Underlay Poodle 0.2.2 follow-up
+# g15.063 — Underlay Poodle 0.2.2 follow-up
 
 Status: **complete — Underlay PR 5 merged at `d6fe7b9b`**
-Depends on: `g16.003`, `g16.007`, published npm `0.2.2`
+Depends on: `g15.057`, `g15.061`, published npm `0.2.2`
 Target repository: `/Users/tom/Dev/projects/underlay`
 Target base: `750005eb3c2b42df1d4152214abc8178e3cc0dda`
-Governing refs: `003-underlay-poodle-v021-adoption.md`,
-`007-v022-release-certification.md`, Underlay `AGENTS.md`, adapter and token
+Governing refs: `057-underlay-poodle-v021-adoption.md`,
+`061-v022-release-certification.md`, Underlay `AGENTS.md`, adapter and token
 bridge contracts
 
 ## Outcome

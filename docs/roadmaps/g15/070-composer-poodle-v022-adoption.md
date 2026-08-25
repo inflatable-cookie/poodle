@@ -1,11 +1,11 @@
-# g16.016 — Composer Underlay 0.9.2 and Poodle 0.2.2 adoption
+# g15.070 — Composer Underlay 0.9.2 and Poodle 0.2.2 adoption
 
 Status: **complete — PR 1 merged at `74e5a7a7`**
-Depends on: `g16.007`, `g16.009`, `g16.013`, Underlay tag `v0.9.2`
+Depends on: `g15.061`, `g15.063`, `g15.067`, Underlay tag `v0.9.2`
 Target repository: `/Users/tom/Dev/projects/composer`
 Target base: `29a32c17d4a5e6f75da311c09776db08f118244a`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`013-underlay-reference-poodle-v022-adoption.md`, Composer root/admin/front
+Governing refs: `055-consumer-adoption-inventory.md`,
+`067-underlay-reference-poodle-v022-adoption.md`, Composer root/admin/front
 `AGENTS.md`, and Composer workspace authority
 
 ## Outcome

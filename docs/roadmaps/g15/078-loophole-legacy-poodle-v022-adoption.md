@@ -1,17 +1,17 @@
-# g16.024 — Loophole Legacy Poodle 0.2.2 adoption
+# g15.078 — Loophole Legacy Poodle 0.2.2 adoption
 
 Status: **cancelled — repository removed by operator on 2026-08-25**
-Depends on: `g16.007`, `g16.008`; schedule after active product lanes
+Depends on: `g15.061`, `g15.062`; schedule after active product lanes
 Target repository: `/Users/tom/Dev/projects/loophole-legacy`
 Target base: `2047e81c81b25c3dbc8db4b72de5960e305f6aea`
-Governing refs: `001-consumer-adoption-inventory.md`, Loophole Legacy root and
+Governing refs: `055-consumer-adoption-inventory.md`, Loophole Legacy root and
 Aura `AGENTS.md`, Chorus authority, and active Aura package contracts
 
 ## Disposition
 
 The target repository no longer exists and is no longer an authoritative
 Poodle consumer. Do not dispatch this card, recreate the repository, or require
-its adoption for `g16` completion. The remaining content is preserved as the
+its adoption for `g15` completion. The remaining content is preserved as the
 cancelled plan and historical scope record.
 
 ## Outcome
@@ -56,5 +56,5 @@ reference archives and other Loophole Legacy components untouched.
 
 ## Evidence And Continuation
 
-No worker or PR is required. Jetstream `g16.023` is the sole remaining
+No worker or PR is required. Jetstream `g15.077` is the sole remaining
 authoritative consumer lane.

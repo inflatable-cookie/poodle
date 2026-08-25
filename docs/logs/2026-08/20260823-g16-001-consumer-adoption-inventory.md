@@ -1,4 +1,4 @@
-# g16.001 — Consumer Adoption Inventory
+# g15.055 — Consumer Adoption Inventory
 
 Date: 2026-08-23
 Verdict: **17 authoritative consumers; foundation-first rollout**

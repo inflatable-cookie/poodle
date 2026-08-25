@@ -4,34 +4,31 @@ Updated: 2026-08-25
 
 ## Active Track
 
-- None. The repository is at an operator-led planning checkpoint after the
-  `g16` closeout. Do not open the next generation without recompiling direction
-  from current authority and open triage.
+- `g16`
+  - Status: planning checkpoint; no runway compiled
+  - Range: none
+  - Next move: agree the generation aim and completion boundary from current
+    authority, carry-forward gaps, and open triage before creating a card
 
 ## Latest Completed Track
 
-- `g16`
-  - Status: complete (2026-08-25)
-  - Range: `001`–`025`; `002` superseded, `024` cancelled after repository
-    removal, every other adoption lane complete
-  - Verdict: crates.io GPUI restored, Poodle 0.2.2 published, and all 16
-    authoritative consumers moved to the declared released boundary with their
-    own validation and merged PR
-  - Evidence: `docs/logs/2026-08/20260825-g16-023-jetstream-v022-adoption.md`
-
 - `g15`
-  - Status: complete (`g15.013`)
-  - Range: `001` to `054`, with final release gate `013`
+  - Status: complete (2026-08-25)
+  - Range: `001`–`079`; `056` superseded, `078` cancelled after repository
+    removal, every other lane complete
   - Verdict: the full 175-component Svelte denominator, paired React surface,
     measured native cohort, human-centred specimens, headless native evidence,
-    primitive visual comparison, packed roots, and release automation were
-    closed without inventing a third parity architecture.
+    primitive visual comparison, packed roots, release automation, corrected
+    crates.io-GPUI release, and 16-consumer adoption were closed without
+    inventing a third parity architecture.
   - Release: immutable `v0.2.0` failed before publication; replacement
     `v0.2.1` pointed to `3d914261` and run `32658293188` published core and
     Svelte 0.2.1. The broken Git tag was later retracted after v0.2.2 replaced
-    it; npm keeps 0.2.1 while `latest` is 0.2.2. React remains source-only and
-    Jetstream remains deferred.
-  - Evidence: `docs/logs/2026-08/20260823-g15-013-v021-release-certification.md`.
+    it with corrected candidate `d5607def`; npm keeps 0.2.1 while `latest` is
+    0.2.2. React remains source-only and Jetstream backend admission remains
+    deferred.
+  - Evidence:
+    `docs/logs/2026-08/20260825-g15-g16-generation-boundary-consolidation.md`
 
 - `g14`
   - Status: complete (`g14.022`)

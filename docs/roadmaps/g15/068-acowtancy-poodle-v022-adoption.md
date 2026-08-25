@@ -1,11 +1,11 @@
-# g16.014 — Acowtancy Underlay 0.9.2 and Poodle 0.2.2 adoption
+# g15.068 — Acowtancy Underlay 0.9.2 and Poodle 0.2.2 adoption
 
 Status: **complete — PRs 54, 55, and 56 merged**
-Depends on: `g16.007`, `g16.009`, `g16.013`, Underlay tag `v0.9.2`
+Depends on: `g15.061`, `g15.063`, `g15.067`, Underlay tag `v0.9.2`
 Target repository: `/Users/tom/Dev/projects/acowtancy`
 Target base: `a535969bab2a1b919d382e3e129d8eb95043b2b8`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`013-underlay-reference-poodle-v022-adoption.md`, Acowtancy root and scoped
+Governing refs: `055-consumer-adoption-inventory.md`,
+`067-underlay-reference-poodle-v022-adoption.md`, Acowtancy root and scoped
 `AGENTS.md`, Acowtancy working rules, and Froyo package contract
 
 ## Outcome
@@ -65,7 +65,7 @@ Preserve shared-package boundaries and the single root web lock.
 
 Record the exact Underlay tag/commit, Poodle versions, peer convergence, lock
 review, compatibility edits, and validation in the Acowtancy PR. Do not merge.
-This lane is independent of `015`-`022` and `025`.
+This lane is independent of `069`–`076` and `079`.
 
 ## Post-Merge Correction
 

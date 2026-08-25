@@ -136,7 +136,7 @@ tracing from a newer unpublished GPUI revision needed by the offscreen capture
 tool. Longhorn adoption proved that this changed the public GPUI crate identity
 and made Poodle's GPUI types incompatible with a consumer's crates.io GPUI
 types. That source shape is rejected for public packages and is removed by
-`g16.005`.
+`g15.059`.
 
 Stock crates.io GPUI 0.2.2 has no true offscreen pixel-readback API. Poodle
 therefore keeps its default native evidence on GPUI's in-memory test platform

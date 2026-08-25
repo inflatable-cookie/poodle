@@ -1,8 +1,8 @@
-# g16.005 — GPUI crates.io recovery
+# g15.059 — GPUI crates.io recovery
 
 Status: **complete — PR 73 merged at `8dfdfa3c`**
-Depends on: `g16.001`, completed crates.io non-activating capture prototype
-Blocks: `g16.006` and every remaining `g16` adoption lane
+Depends on: `g15.055`, completed crates.io non-activating capture prototype
+Blocks: `g15.060` and every remaining consumer-adoption lane
 Governing refs: `../../research/gpui-cratesio-nonactivating-capture.md`,
 `../../research/gpui-offscreen-capture-feasibility.md`,
 `../../contracts/001-working-rules.md`,
@@ -17,7 +17,7 @@ window capture tool, without changing component behaviour or admitting visible
 capture to default QA.
 
 This card proves the corrected source and capture boundary at the current
-version. `g16.006` owns versioning and candidate preparation; `g16.007` is the
+version. `g15.060` owns versioning and candidate preparation; `g15.061` is the
 operator release gate.
 
 ## Failure Boundary
@@ -25,7 +25,7 @@ operator release gate.
 Published tag `v0.2.1` makes `poodle-gpui-node-backend` expose the
 `inflatable-cookie/zed` GPUI crate identity. A consumer that also depends on
 crates.io `gpui = "0.2.2"` receives two incompatible GPUI types. Longhorn's
-GPUI prototypes proved the failure during `g16.002` adoption. The source
+GPUI prototypes proved the failure during `g15.056` adoption. The source
 choice was made for an internal capture tool and must not remain part of the
 public package boundary.
 
@@ -107,7 +107,7 @@ defects before acceptance. Execution evidence is in
 - Lockfile regeneration introduces unrelated dependency upgrades.
 - Version mutation, release notes, candidate preparation, tag creation,
   publication, or workflow editing becomes necessary. Stop and return to
-  `g16.006`.
+  `g15.060`.
 
 ## Validation
 

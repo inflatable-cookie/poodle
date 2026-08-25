@@ -1,12 +1,12 @@
-# g16.012 — Soundcheck Poodle 0.2.2 adoption
+# g15.066 — Soundcheck Poodle 0.2.2 adoption
 
 Status: **complete — Soundcheck PR 11 merged at `b1c5937d`**
-Depends on: `g16.007`, `g16.008`, `g16.010`, published npm `0.2.2`
+Depends on: `g15.061`, `g15.062`, `g15.064`, published npm `0.2.2`
 Target repository: `/Users/tom/Dev/projects/soundcheck`
 Target base: `ddec155b0963d8dc0a6aba2ed9774c826cdc375c`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`008-longhorn-poodle-v022-adoption.md`,
-`010-soundcheck-library-poodle-v022-follow-up.md`, Soundcheck `AGENTS.md` and
+Governing refs: `055-consumer-adoption-inventory.md`,
+`062-longhorn-poodle-v022-adoption.md`,
+`064-soundcheck-library-poodle-v022-follow-up.md`, Soundcheck `AGENTS.md` and
 working rules
 
 ## Outcome
@@ -66,7 +66,7 @@ on the corrected Poodle release.
 Record resolved versions/integrities, peer convergence, changed files,
 compatibility edits, baseline comparison, lock review, and exact validation in
 the Soundcheck PR. Do not merge. Once this lane lands, Soundcheck is complete
-for g16 and its three-layer evidence informs the remaining Longhorn products.
+for g15 and its three-layer evidence informs the remaining Longhorn products.
 
 ## Closeout
 

@@ -1,4 +1,4 @@
-# g16.004 — Soundcheck Library Poodle 0.2.1 Adoption
+# g15.058 — Soundcheck Library Poodle 0.2.1 Adoption
 
 Date: 2026-08-23
 Verdict: **complete — registry adoption and peer-line update**

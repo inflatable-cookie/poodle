@@ -1,4 +1,4 @@
-# g16.003 — Underlay Poodle 0.2.1 Adoption
+# g15.057 — Underlay Poodle 0.2.1 Adoption
 
 Date: 2026-08-23
 Verdict: **complete — public registry adoption, no compatibility migration**

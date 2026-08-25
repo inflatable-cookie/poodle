@@ -1,11 +1,11 @@
-# g16.019 — Finch Poodle 0.2.2 adoption
+# g15.073 — Finch Poodle 0.2.2 adoption
 
 Status: **complete — PR 1 merged**
-Depends on: `g16.007`, `g16.008`, `g16.011`
+Depends on: `g15.061`, `g15.062`, `g15.065`
 Target repository: `/Users/tom/Dev/projects/finch`
 Target base: `ab4f5a6072ee70391ed6d2b8513c8d035dbc7609`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`011-nucleus-poodle-v022-adoption.md`, Finch `AGENTS.md`, active Tauri app
+Governing refs: `055-consumer-adoption-inventory.md`,
+`065-nucleus-poodle-v022-adoption.md`, Finch `AGENTS.md`, active Tauri app
 contracts, and Finch planning authority
 
 ## Outcome
@@ -53,7 +53,7 @@ while retaining its intentional local Longhorn packages.
 ## Evidence And Continuation
 
 Record exact identities, Longhorn peer convergence, lock review, compatibility
-edits, and validation in the Finch PR. Do not merge. Independent of `020`-`022`.
+edits, and validation in the Finch PR. Do not merge. Independent of `074`–`076`.
 
 ## Review Result
 

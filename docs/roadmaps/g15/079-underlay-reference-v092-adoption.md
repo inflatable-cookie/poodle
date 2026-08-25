@@ -1,11 +1,11 @@
-# g16.025 — Underlay Reference tagged Underlay adoption
+# g15.079 — Underlay Reference tagged Underlay adoption
 
 Status: **complete — PR 2 merged**
-Depends on: `g16.013`, Underlay tag `v0.9.4`
+Depends on: `g15.067`, Underlay tag `v0.9.4`
 Target repository: `/Users/tom/Dev/projects/underlay-reference`
 Target base: `f5ea7d72eee278e8838ba16f8f43eb2b662406d0`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`013-underlay-reference-poodle-v022-adoption.md`, Underlay Reference root and
+Governing refs: `055-consumer-adoption-inventory.md`,
+`067-underlay-reference-poodle-v022-adoption.md`, Underlay Reference root and
 scoped `AGENTS.md`, reference implementation notes, and Underlay
 adapter/template contracts
 
@@ -13,7 +13,7 @@ adapter/template contracts
 
 Move every active Underlay Reference web and Rust dependency from sibling paths
 to Underlay tag `v0.9.4`, while preserving the exact public Poodle 0.2.2 result
-already merged through `g16.013`.
+already merged through `g15.067`.
 
 ## Scope
 
@@ -44,7 +44,7 @@ already merged through `g16.013`.
 - Bun and Cargo lock churn is limited to the Underlay source migration and
   mechanically required metadata.
 - Package checks, root validation, docs QA, and broad headless QA pass, or the
-  pre-existing test-routing baseline recorded by `g16.013` is reproduced and
+  pre-existing test-routing baseline recorded by `g15.067` is reproduced and
   kept separate from this adoption result.
 
 ## Validation
@@ -69,7 +69,7 @@ already merged through `g16.013`.
 
 Record the exact Underlay tag/commit, preserved Poodle registry identities,
 manifest and lock review, compatibility edits, and validation in the Underlay
-Reference PR. Do not merge. This lane is independent of `014`-`024` and closes
+Reference PR. Do not merge. This lane is independent of `068`–`078` and closes
 the fourth remaining Underlay consumer identified after the Poodle-only first
 wave.
 

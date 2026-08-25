@@ -3,7 +3,7 @@
 Status: decision prototype complete — **go for non-activating window capture;
 no-go for true offscreen capture on stock GPUI 0.2.2**
 Created: 2026-08-23
-Promotes to: `../roadmaps/g16/005-gpui-cratesio-recovery.md`
+Promotes to: `../roadmaps/g15/059-gpui-cratesio-recovery.md`
 Corrects: `gpui-offscreen-capture-feasibility.md` as a public-dependency
 decision; that earlier proof remains technically valid for the forked graph
 

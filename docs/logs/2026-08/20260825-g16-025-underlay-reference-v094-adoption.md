@@ -1,4 +1,4 @@
-# g16.025 — Underlay Reference v0.9.4 Adoption
+# g15.079 — Underlay Reference v0.9.4 Adoption
 
 Date: 2026-08-25
 Status: complete
@@ -34,7 +34,7 @@ Passed:
 - `git diff --check`
 
 The pre-existing `effigy validate` and `effigy qa` test-routing baseline from
-g16.013 remains separate: Effigy auto-selects Vitest for packages whose tests
+g15.067 remains separate: Effigy auto-selects Vitest for packages whose tests
 are absent or outside the configured include. No local exception was added.
 
 ## Continuation

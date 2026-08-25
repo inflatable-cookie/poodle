@@ -1,5 +1,5 @@
 ---
-title: g16.005 GPUI crates.io recovery worker handoff
+title: g15.059 GPUI crates.io recovery worker handoff
 kind: northstar-handoff
 handoff_mode: worker-pr-loop
 worker_mode: implementation
@@ -57,14 +57,14 @@ adoption lane.
   operator-selected `AGENTS_WORKTREE_CONTAINER_DIR` only.
 - **Active policy:**
   `docs/specs/022-packaging-versioning-and-release-channel-rules.md`.
-- **Roadmap milestone:** `docs/roadmaps/g16/README.md`.
-- **Ready card:** `docs/roadmaps/g16/005-gpui-cratesio-recovery.md`.
-- **Allowed runway:** `g16.005` only.
-- **Remaining card budget:** one card. Do not start `g16.006`.
+- **Roadmap milestone:** `docs/roadmaps/g15/README.md`.
+- **Ready card:** `docs/roadmaps/g15/059-gpui-cratesio-recovery.md`.
+- **Allowed runway:** `g15.059` only.
+- **Remaining card budget:** one card. Do not start `g15.060`.
 - **Dispatch topology:** serial. Release preparation and consumer adoption wait
   for review of this boundary.
 - **Canonical refs:** `AGENTS.md`, `docs/contracts/001-working-rules.md`,
-  spec 022, the g16 runway, and
+  spec 022, the g15 runway, and
   `docs/research/gpui-cratesio-nonactivating-capture.md`.
 - **Historical evidence:**
   `docs/research/gpui-offscreen-capture-feasibility.md`, g15 cards `044`–`047`
@@ -84,7 +84,7 @@ adoption lane.
 
 ## Boundaries
 
-Implement exactly `g16.005`: restore crates.io GPUI 0.2.2 in the active node
+Implement exactly `g15.059`: restore crates.io GPUI 0.2.2 in the active node
 backend and preview graphs, mechanically reverse the newer API migration,
 replace the fork-only capture transport with a clearly named non-activating
 window-server transport, and add deterministic source and consumer-compatibility
@@ -98,7 +98,7 @@ revert whole files to their pre-`g15.045` forms.
 Out of scope:
 
 - version changes, `0.2.2` release notes, candidate preparation, tags, or
-  publication — `g16.006` and `007` own those;
+  publication — `g15.060` and `g15.061` own those;
 - `.github/workflows/` changes;
 - a GPUI fork, Git patch, local Cargo override, compatibility alias, or second
   GPUI crate identity;
@@ -108,7 +108,7 @@ Out of scope:
   explicitly approved review run.
 
 Do not edit the dispatch ledger or active-roadmap status. Record implementation
-evidence in the `g16.005` log; the orchestrator closes planning after review.
+evidence in the `g15.059` log; the orchestrator closes planning after review.
 Do not merge the PR.
 
 ## Important Context
@@ -163,7 +163,7 @@ change.
 3. Fetch `origin`; require `HEAD == origin/main`; require planning base
    `b118b317401a47d13f8f6b8e93e03caac0d64efc` to be an ancestor; confirm this
    handoff exists in `HEAD`.
-4. Read `AGENTS.md`, the repo-local Effigy skill, `g16.005`, the g16 README,
+4. Read `AGENTS.md`, the repo-local Effigy skill, `g15.059`, the g15 README,
    spec 022, both GPUI capture research records, and the exact current source
    files the card names.
 5. Run `effigy tasks` and the smallest clean dependency/native starting checks.
@@ -175,7 +175,7 @@ Ask if the key is absent. Never use `/tmp`, `TMPDIR`, or a guessed path.
 
 ### While working
 
-- Execute only `g16.005`; keep commits aligned with the dependency/API batch
+- Execute only `g15.059`; keep commits aligned with the dependency/API batch
   and the capture/policy/evidence batch.
 - Report meaningful chunks through the operator with changed files, validation
   actually run, remaining work, and blockers.
@@ -212,5 +212,5 @@ self-approval may be unavailable; the orchestrator's PR comment is the
 canonical review record.
 
 After explicit operator merge authority and a green review gate, the
-orchestrator merges, closes `g16.005`, and advances only `g16.006`. The release
+orchestrator merges, closes `g15.059`, and advances only `g15.060`. The release
 candidate and publication remain separate work.

@@ -1,7 +1,7 @@
-# g16.003 — Underlay Poodle 0.2.1 Adoption
+# g15.057 — Underlay Poodle 0.2.1 Adoption
 
 Status: **complete — Underlay PR 4 merged at `750005eb`**
-Depends on: `g16.001`, published npm `0.2.1`
+Depends on: `g15.055`, published npm `0.2.1`
 Target repository: `/Users/tom/Dev/projects/underlay`
 Governing refs: `README.md`, `../../../README.md`,
 `../../logs/2026-08/20260823-g15-013-v021-release-certification.md`,

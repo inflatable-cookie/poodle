@@ -42,13 +42,13 @@ substitutes `../underlay/ts/src` during the supported build.
   `t3code/g16-014-acowtancy-release-boundary`
 - **Worker worktree:** use the launcher's clean registered worktree; none was
   created by the orchestrator
-- **Roadmap:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g16/README.md`
-- **Ready card:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g16/014-acowtancy-poodle-v022-adoption.md`
-- **Allowed runway:** the `g16.014` post-merge correction only
+- **Roadmap:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/README.md`
+- **Ready card:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/068-acowtancy-poodle-v022-adoption.md`
+- **Allowed runway:** the `g15.068` post-merge correction only
 - **Remaining budget:** one repository and one corrective PR
 - **Parallel safety:** independent of Compli Me; stop if another Acowtancy lane
   owns the same Svelte/Vite/TypeScript configuration files
-- **Canonical refs:** Poodle `g16.001`, `g16.014`, Acowtancy root/scoped
+- **Canonical refs:** Poodle `g15.055`, `g15.068`, Acowtancy root/scoped
   `AGENTS.md`, working rules, and repo-local Effigy skill
 - **Required validation:** `effigy workspace:js:prepare`,
   `effigy cream/validate`, `effigy dairy/validate`, `effigy froyo/check`,
@@ -126,7 +126,7 @@ the four web consumers against the installed tag, and open the corrective PR.
 2. Record removed bypasses, resolved Underlay commit, Poodle identities, lock
    review, validation, actual worktree, and branch in the PR.
 3. Push the worker branch and open one PR against Acowtancy `main`.
-4. Link `g16.014`, report the PR URL, and do not merge or edit Poodle planning.
+4. Link `g15.068`, report the PR URL, and do not merge or edit Poodle planning.
 
 ### Review and merge path
 

@@ -1,12 +1,12 @@
-# g16.008 — Longhorn Poodle 0.2.2 adoption
+# g15.062 — Longhorn Poodle 0.2.2 adoption
 
 Status: **complete — Longhorn PR 9 merged at `c94f72e9`**
-Depends on: `g16.001`, `g16.005`, `g16.007`, published npm `0.2.2`,
+Depends on: `g15.055`, `g15.059`, `g15.061`, published npm `0.2.2`,
 immutable tag `v0.2.2`
 Target repository: `/Users/tom/Dev/projects/longhorn`
 Target base: `4780e7fadbeae40fc88b31a02146a0e83cac8677`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`005-gpui-cratesio-recovery.md`, `007-v022-release-certification.md`,
+Governing refs: `055-consumer-adoption-inventory.md`,
+`059-gpui-cratesio-recovery.md`, `061-v022-release-certification.md`,
 Longhorn `AGENTS.md`, Longhorn contracts 012 and 013
 
 ## Outcome

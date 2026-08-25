@@ -1,11 +1,11 @@
-# g16.021 — Bovine Accelerator Desktop Poodle 0.2.2 adoption
+# g15.075 — Bovine Accelerator Desktop Poodle 0.2.2 adoption
 
 Status: **complete — PR 25 merged**
-Depends on: `g16.007`, `g16.008`, `g16.011`
+Depends on: `g15.061`, `g15.062`, `g15.065`
 Target repository: `/Users/tom/Dev/projects/bovine-accelerator-desktop`
 Target base: `ac7487fd82e9792b14f1c499f4342182914501da`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`011-nucleus-poodle-v022-adoption.md`, Bovine Accelerator Desktop `AGENTS.md`,
+Governing refs: `055-consumer-adoption-inventory.md`,
+`065-nucleus-poodle-v022-adoption.md`, Bovine Accelerator Desktop `AGENTS.md`,
 working rules, and dependency-release checks
 
 ## Outcome

@@ -1,20 +1,24 @@
-# g15 — v0.2.1 Recovery Release Baseline
+# g15 — v0.2.x Release and Consumer Adoption
 
-Status: complete — `v0.2.1` published from candidate `3d914261`; core and
-Svelte are on npm `latest`, React remains source-only, and `g15.013` records
-the green release and clean-install proof
+Status: complete — corrected `v0.2.2` published from candidate `d5607def`;
+all 16 authoritative consumers adopted the released boundary, React remains
+source-only, and Jetstream backend admission remains deferred
 Posture: release-first; no new parity architecture
 Opened: 2026-08-16
+Closed: 2026-08-25
 Governing refs: `../g14/022-generation-closeout.md`,
 `../g14/conformance-estate.md`, `../../contracts/001-working-rules.md`,
 `../../logs/2026-08/16-g14-022-generation-closeout.md`
 
 ## Generation Goal
 
-Ship Poodle on an honest, complete Svelte roster. The original `v0.2.0` tag is
-retained after a pre-publication workflow failure; `0.2.1` is the recovery
-release. The release
-denominator is **every public Svelte component export** — frozen from
+Ship Poodle on an honest, complete Svelte roster, publish the resulting
+release, and move the authoritative consumer estate onto that public boundary.
+The original `v0.2.0` tag stopped before publication. `v0.2.1` recovered the
+release but exposed a fork-sourced GPUI identity in downstream Rust graphs.
+`v0.2.2` restored crates.io GPUI, republished the corrected packages, and became
+the adopted release. The release denominator is **every public Svelte component
+export** — frozen from
 `packages/svelte/components/src/index.ts` and the package `exports` map, not
 from a representative subset. React stays tightly paired through shared CSS
 and framework-free web behaviour; the measured shared Rust and GPUI gaps close
@@ -36,19 +40,20 @@ program-deferred, and no runtime borrows another runtime's pass.
 
 ## Why It Matters
 
-Longhorn and most projects under `~/Dev/projects` depend on Poodle. v0.2.0
-cannot wait for another speculative cross-runtime architecture. The release
-baseline must record what is actually certified per component, what remains
-unproved, and what each runtime's evidence is — then ship.
+Longhorn and most projects under `~/Dev/projects` depend on Poodle. The release
+could not wait for another speculative cross-runtime architecture, and it was
+not complete while consumers still resolved local or incompatible identities.
+The generation therefore records what was certified, publishes the corrected
+boundary, and proves that boundary in every authoritative consumer.
 
 ## Sequence
 
-`001` and `002` are executed; the inventory froze the denominator and the
-first evidence tranche closed 29 paired gaps. Later cards are listed in
-dependency order and are not dispatched until the orchestrator reviews and
-advances them. `g15.014` was an urgent prerequisite remediation executed out
-of numeric order; `g15.013` remains the final operator gate after the compiled
-release children through `g15.051`.
+Cards `001`–`054` built and published the release baseline. Cards `055`–`079`
+continue the same programme through the downstream defect discovery, corrected
+`v0.2.2` release, and consumer rollout. They were provisionally numbered as
+g16 during execution and consolidated here on 2026-08-25 because no new
+strategic programme began. Historical branch, handoff, and log filenames keep
+their original labels as provenance.
 
 ## Runway
 
@@ -100,9 +105,50 @@ and status advance are the orchestrator's.
 42. [036 — Pill appearance semantics](036-pill-appearance-semantics.md) — complete; PR #45 removed Pill's temporary `fill`, added tint appearance, and made existing solid appearance truthful
 43. [037 — AgentTranscript native scroll and jump parity](037-agent-transcript-native-scroll-parity.md) — complete in PR #48; real GPUI viewport unblocked `024`
 44. [052 — Native focus-ring parity](052-native-focus-ring-parity.md) — complete; PR #69 landed one reusable node channel and closed the measured Button ring and Stepper keyboard-entry/focus gaps
+45. [055 — Consumer adoption inventory](055-consumer-adoption-inventory.md) — complete; froze 16 authoritative repositories, source policy, exclusions, and dependency order
+46. [056 — Longhorn Poodle 0.2.1 adoption](056-longhorn-poodle-v021-adoption.md) — stopped and superseded after exposing the fork-sourced GPUI identity
+47. [057 — Underlay Poodle 0.2.1 adoption](057-underlay-poodle-v021-adoption.md) — complete; PR 4 removed the local override before the corrected patch
+48. [058 — Soundcheck Library Poodle 0.2.1 adoption](058-soundcheck-library-poodle-v021-adoption.md) — complete; PR 5 established the public package shape before the corrected patch
+49. [059 — GPUI crates.io recovery](059-gpui-cratesio-recovery.md) — complete; PR 73 restored one crates.io GPUI identity and retained headless evidence
+50. [060 — v0.2.2 release candidate](060-v022-release-candidate.md) — complete; accepted exact candidate `d5607def`
+51. [061 — v0.2.2 release certification](061-v022-release-certification.md) — complete; run `32756610293` published core and Svelte 0.2.2 and verified a clean registry consumer
+52. [062 — Longhorn Poodle 0.2.2 adoption](062-longhorn-poodle-v022-adoption.md) — complete; PR 9 proved public web packages, the Rust tag, and one crates.io GPUI identity
+53. [063 — Underlay Poodle 0.2.2 follow-up](063-underlay-poodle-v022-follow-up.md) — complete; PR 5 moved the foundation to the corrected patch
+54. [064 — Soundcheck Library Poodle 0.2.2 follow-up](064-soundcheck-library-poodle-v022-follow-up.md) — complete; PR 6 aligned development and peer ranges
+55. [065 — Nucleus Poodle 0.2.2 adoption](065-nucleus-poodle-v022-adoption.md) — complete; PR 1 proved one public Poodle identity
+56. [066 — Soundcheck Poodle 0.2.2 adoption](066-soundcheck-poodle-v022-adoption.md) — complete; PR 11 aligned the app, Longhorn adapter, and Soundcheck Library
+57. [067 — Underlay Reference Poodle 0.2.2 adoption](067-underlay-reference-poodle-v022-adoption.md) — complete; PR 1 removed Poodle sibling overrides
+58. [068 — Acowtancy adoption](068-acowtancy-poodle-v022-adoption.md) — complete; tagged Underlay and public Poodle landed through PR 56
+59. [069 — Compli Me adoption](069-compli-me-poodle-v022-adoption.md) — complete; PR 3 preserved the newer Underlay v0.9.4 boundary
+60. [070 — Composer adoption](070-composer-poodle-v022-adoption.md) — complete; PR 1 aligned tagged Underlay and public Poodle
+61. [071 — Contact Patch adoption](071-contact-patch-poodle-v022-adoption.md) — complete; PR 1 aligned web and Rust dependency sources
+62. [072 — Songsprout adoption](072-songsprout-poodle-v022-adoption.md) — complete; PR 1 aligned Bloom, Greenhouse, Stem, and Nursery
+63. [073 — Finch adoption](073-finch-poodle-v022-adoption.md) — complete; PR 1 merged the reviewed public-package boundary
+64. [074 — Figmatic adoption](074-figmatic-poodle-v022-adoption.md) — complete; PR 17 removed Poodle sibling sources
+65. [075 — Bovine Accelerator Desktop adoption](075-bovine-accelerator-desktop-poodle-v022-adoption.md) — complete; PR 25 merged the reviewed boundary
+66. [076 — Loophole adoption](076-loophole-poodle-v022-adoption.md) — complete; PR 8 proved one registry Poodle identity
+67. [077 — Jetstream adoption](077-jetstream-poodle-v022-adoption.md) — complete; PR 1 moved the web surface while retaining explicit paired Rust paths
+68. [078 — Loophole Legacy adoption](078-loophole-legacy-poodle-v022-adoption.md) — cancelled after the operator removed the repository
+69. [079 — Underlay Reference tagged Underlay adoption](079-underlay-reference-v092-adoption.md) — complete; PR 2 preserved Poodle 0.2.2 while moving all active Underlay sources to v0.9.4
 
 Supporting evidence: [release-baseline-roster.md](release-baseline-roster.md),
 [release-gap-register.md](release-gap-register.md)
+
+## Consumer Adoption Boundary
+
+The 16-repository rollout was complete only when each authoritative consumer
+resolved exact npm 0.2.2 or Rust tag `v0.2.2`, carried no active committed
+Poodle `file:` override, installed cleanly from its declared sources, and had
+its own relevant headless validation plus merged PR. Longhorn-shaped Rust
+consumers proved one crates.io GPUI identity. The six Underlay consumer estates
+also converged web and Rust on one released Underlay tag with no active sibling
+Underlay source; Compli Me and Underlay Reference legitimately advanced from
+the v0.9.2 baseline to v0.9.4.
+
+Historical snapshots were never consumers. Loophole Legacy left the estate
+when the operator removed its repository. Jetstream's public web packages moved
+to 0.2.2 while its explicitly paired local Rust paths remained local under the
+deferred backend-integration contract.
 
 ## Carry-Forward Envelope (recorded, not implemented)
 
@@ -140,9 +186,10 @@ the accepted `g15.050` candidate.
 launchers, branch publication fails closed, and `effigy release gates` now
 executes the complete headless board.
 
-`g15.051` is complete in PR #67. GPUI's normal GPL tracing graph is gone,
-the exact Poodle-owned Zed fork is pinned, the permissive bzip2 licence carries
-its dependency-specific notice, and exact Git-source policy fails closed.
+`g15.051` is complete in PR #67. It removed GPUI's normal GPL tracing graph and
+made exact Git-source policy fail closed. That bounded fork was later rejected
+as a public dependency after Longhorn exposed its source-identity cost;
+`g15.059` restored crates.io GPUI without reopening component work.
 
 `g15.052` is complete in PR #69. Its reusable focus-ring channel closed both
 the Button defect measured by `g15.047` and the Stepper keyboard-entry/focus
@@ -159,11 +206,16 @@ root are accepted across the active cohort.
 false first-publication claim, then replaced the candidate with `7922a3a9` and
 reran the complete board. Evidence-only receipt `f9b5dcab` records the result.
 The operator authorised `v0.2.0`, but run `32656225297` failed while replacing
-npm in place, before gates, packing, or publication. The tag stays immutable;
-`g15.054` is complete. Candidate `3d914261` carries the isolated npm bootstrap,
-`0.2.1` lockstep, honest failed-tag history, and a green full headless board
-plus release wrapper. The operator authorised the replacement, tag `v0.2.1`
-was created at that exact candidate, and run `32658293188` completed the gate,
-pack, publication, and artifact upload. npm `latest` now resolves core and
-Svelte `0.2.1`; React remains unpublished. Clean consumer installation and
-public-root/subpath imports passed. `g15.013` and the generation are complete.
+npm in place, before gates, packing, or publication. `g15.054` recovered the
+release as `v0.2.1` from candidate `3d914261`; run `32658293188` completed the
+gate, pack, publication, and artifact upload. Longhorn then proved that the tag
+leaked a fork-sourced GPUI identity into downstream Rust graphs. The broken Git
+tag was retracted after replacement; npm retains 0.2.1 for install stability.
+
+`g15.059`–`061` produced and published corrected candidate `d5607def` as
+`v0.2.2`. Run `32756610293` published core and Svelte to npm `latest`, retained
+React as source-only, and passed clean public-registry installation. Cards
+`055`–`079` then moved all 16 authoritative consumers to the declared release
+and their own repository-owned evidence boundaries. Loophole Legacy `078` was
+cancelled because the repository was removed; it is not a completion gap.
+Jetstream `077` closed the final active lane. The generation is complete.

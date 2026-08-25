@@ -1,11 +1,11 @@
-# g16.010 — Soundcheck Library Poodle 0.2.2 follow-up
+# g15.064 — Soundcheck Library Poodle 0.2.2 follow-up
 
 Status: **complete — PR 6 merged at `7f5ff0b9`**
-Depends on: `g16.004`, `g16.007`, published npm `0.2.2`
+Depends on: `g15.058`, `g15.061`, published npm `0.2.2`
 Target repository: `/Users/tom/Dev/projects/soundcheck-library`
 Target base: `a720f22f5bb08ae465ba3dd46873855fec9b7c72`
-Governing refs: `004-soundcheck-library-poodle-v021-adoption.md`,
-`007-v022-release-certification.md`, Soundcheck Library package READMEs and
+Governing refs: `058-soundcheck-library-poodle-v021-adoption.md`,
+`061-v022-release-certification.md`, Soundcheck Library package READMEs and
 public peer contracts
 
 ## Outcome
@@ -19,7 +19,7 @@ while proving the corrected registry packages introduce no new failure.
 - Pin the root Poodle Svelte dependency to exact `0.2.2`.
 - Move both published library peer requirements from `^0.2.1` to `^0.2.2`.
 - Regenerate both Bun and npm locks without unrelated upgrades; preserve the
-  platform-specific lock constraints restored during `g16.004` review.
+  platform-specific lock constraints restored during `g15.058` review.
 - Repair only compatibility failures caused by Poodle 0.2.2. Update package
   docs/tests only when their peer or import guidance is stale.
 

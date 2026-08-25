@@ -1,7 +1,7 @@
-# g16.004 — Soundcheck Library Poodle 0.2.1 Adoption
+# g15.058 — Soundcheck Library Poodle 0.2.1 Adoption
 
 Status: **complete — Soundcheck Library PR 5 merged at `a720f22`**
-Depends on: `g16.001`, published npm `0.2.1`
+Depends on: `g15.055`, published npm `0.2.1`
 Target repository: `/Users/tom/Dev/projects/soundcheck-library`
 Governing refs: `README.md`, `../../../README.md`,
 `../../logs/2026-08/20260823-g15-013-v021-release-certification.md`,

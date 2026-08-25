@@ -3,20 +3,17 @@
 Status: reference
 Updated: 2026-08-25
 
-Roadmaps record Poodle's executable milestone work. `g15` completed the
-v0.2.1 recovery release after `v0.2.0` stopped before publication. `g16`
-consumer adoption then exposed a GPUI source-identity defect in that Rust tag.
-The corrected crates.io-GPUI candidate is published as `v0.2.2`; `g16` then
-moved all 16 authoritative consumers to the released boundary and closed.
+Roadmaps record Poodle's executable milestone work. `g15` completed the full
+v0.2.x release programme: the roster and parity baseline, failed v0.2.0
+publication, v0.2.1 recovery, crates.io-GPUI correction, v0.2.2 publication,
+and adoption by all 16 authoritative consumers. `g16` is the clean next-work
+slate and has no compiled runway yet.
 
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
-- `g16` is complete. Longhorn exposed the fork-sourced GPUI defect in 0.2.1;
-  `g16.005` restored crates.io GPUI and `006`-`007` published v0.2.2. Foundation,
-  Underlay, product, and final Jetstream adoption lanes all merged. The operator
-  removed Loophole Legacy, so its cancelled card is historical evidence rather
-  than a release obligation.
+- `g16` is open at an operator-led planning checkpoint. It has no ready cards;
+  do not infer its programme from g15 closeout.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -34,8 +31,11 @@ moved all 16 authoritative consumers to the released boundary and closed.
   it as `v0.2.1` in run `32658293188`. The broken Git tag was later retracted
   after v0.2.2 replaced its fork-sourced GPUI graph; npm retains 0.2.1 for
   install stability while `latest` is 0.2.2. React remains source-only. The
-  generation is complete.
-  Jetstream remains deferred.
+  corrected v0.2.2 candidate then restored crates.io GPUI and all 16
+  authoritative consumers moved to the public boundary. The operator removed
+  Loophole Legacy, so its cancelled card is historical evidence rather than a
+  release obligation. The generation is complete through `g15.079`.
+  Jetstream backend admission remains deferred.
 - `g13` is complete. Its Rust-authored component IR pilot recorded **revise**,
   then retired and unwound component generation. It remains evidence for g14.
 - The first g14 machine-pinning/scene runway was reset after five merged
@@ -60,16 +60,16 @@ moved all 16 authoritative consumers to the released boundary and closed.
 - `g12` — React parity, verification depth, native hardening, audio family
 - `g13` — retired Rust-authored component/scene IR pilot
 - `g14` — rejected executable-conformance pilot; generation complete
-- `g15` — completed v0.2.1 recovery baseline; core and Svelte published from
-  candidate `3d914261`, with React retained as source-only
-- `g16` — completed published-consumer adoption; corrected v0.2.2 release and
-  16-repository rollout complete
+- `g15` — completed v0.2.x release and adoption programme; corrected v0.2.2
+  published from candidate `d5607def`, with all 16 authoritative consumers
+  adopted and React retained as source-only
+- `g16` — open clean slate; operator-led planning has not compiled a runway
 
 ## Rules
 
-- Active milestone files live in generation folders such as `g14/`.
-- File names use `NNN-slug.md`; roadmap IDs use forms such as `g14.001`.
-- A g14 roadmap file is a complete worker handoff. Do not add a batch-card
+- Active milestone files live in generation folders such as `g16/`.
+- File names use `NNN-slug.md`; roadmap IDs use forms such as `g16.001`.
+- A roadmap file is a complete worker handoff. Do not add a batch-card
   layer.
 - Backlog items belong in `backlog/`.
 - Architecture belongs in `../architecture/`, not here.

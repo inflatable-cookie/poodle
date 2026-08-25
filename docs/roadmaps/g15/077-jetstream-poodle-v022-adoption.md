@@ -1,11 +1,11 @@
-# g16.023 — Jetstream Poodle 0.2.2 adoption
+# g15.077 — Jetstream Poodle 0.2.2 adoption
 
 Status: **complete — Jetstream PR 1 merged at `be969259`**
-Depends on: `g16.007`, `g16.008`, completed `014`-`022` and `025`
+Depends on: `g15.061`, `g15.062`, completed `068`–`076` and `079`
 Target repository: `/Users/tom/Dev/projects/jetstream`
 Target base: `2106faec624973607c16a52985c9d1044e830261`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`008-longhorn-poodle-v022-adoption.md`, Jetstream `AGENTS.md`, working rules,
+Governing refs: `055-consumer-adoption-inventory.md`,
+`062-longhorn-poodle-v022-adoption.md`, Jetstream `AGENTS.md`, working rules,
 active generation, and paired-runtime contracts
 
 ## Outcome

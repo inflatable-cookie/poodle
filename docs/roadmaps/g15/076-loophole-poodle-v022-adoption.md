@@ -1,11 +1,11 @@
-# g16.022 — Loophole Poodle 0.2.2 adoption
+# g15.076 — Loophole Poodle 0.2.2 adoption
 
 Status: **complete — PR 8 merged**
-Depends on: `g16.007`, `g16.008`, `g16.012`
+Depends on: `g15.061`, `g15.062`, `g15.066`
 Target repository: `/Users/tom/Dev/projects/loophole`
 Target base: `6f770f59c3a83a0da8ccd9ebcc03f15e7c5b88a2`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`012-soundcheck-poodle-v022-adoption.md`, Loophole `AGENTS.md`, working rules,
+Governing refs: `055-consumer-adoption-inventory.md`,
+`066-soundcheck-poodle-v022-adoption.md`, Loophole `AGENTS.md`, working rules,
 and strict product guardrails
 
 ## Outcome

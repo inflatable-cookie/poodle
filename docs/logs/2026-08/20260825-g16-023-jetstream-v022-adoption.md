@@ -1,4 +1,4 @@
-# g16.023 — Jetstream Poodle 0.2.2 Adoption
+# g15.077 — Jetstream Poodle 0.2.2 Adoption
 
 Date: 2026-08-25
 Status: complete
@@ -52,7 +52,7 @@ No visible editor, demo, or native window ran.
 ## Generation Closeout
 
 Jetstream was the last of 16 authoritative Poodle consumers. Its merge closes
-`g16`. Loophole Legacy `g16.024` remains cancelled because the operator removed
+`g15`. Loophole Legacy `g15.078` remains cancelled because the operator removed
 that repository; no recreation or adoption evidence is required.
 
 The transitions.dev motion research and Longhorn-backed conformance-lab notes

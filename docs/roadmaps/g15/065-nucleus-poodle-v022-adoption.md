@@ -1,11 +1,11 @@
-# g16.011 — Nucleus Poodle 0.2.2 adoption
+# g15.065 — Nucleus Poodle 0.2.2 adoption
 
 Status: **complete — Nucleus PR 1 merged at `9b3f67c9`**
-Depends on: `g16.007`, `g16.008`, published npm `0.2.2`
+Depends on: `g15.061`, `g15.062`, published npm `0.2.2`
 Target repository: `/Users/tom/Dev/projects/nucleus`
 Target base: `91316dbe3068e4cb6cebd4cf6a2c14f55a7a4601`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`008-longhorn-poodle-v022-adoption.md`, Nucleus `AGENTS.md`, Nucleus working
+Governing refs: `055-consumer-adoption-inventory.md`,
+`062-longhorn-poodle-v022-adoption.md`, Nucleus `AGENTS.md`, Nucleus working
 rules and Longhorn-consumer boundary
 
 ## Outcome
@@ -61,7 +61,7 @@ desktop checks, and broad headless board.
 
 Record changed files, exact registry versions/integrities, effective peer
 resolution, compatibility edits, lock review, and exact validation in the
-Nucleus PR. Do not merge. Once this lane lands, Nucleus is complete for g16;
+Nucleus PR. Do not merge. Once this lane lands, Nucleus is complete for g15;
 its migration findings feed compilation of the remaining direct-app cards.
 
 ## Closeout

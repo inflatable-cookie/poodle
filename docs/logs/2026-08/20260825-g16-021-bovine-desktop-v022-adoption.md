@@ -1,4 +1,4 @@
-# g16.021 — Bovine Accelerator Desktop Poodle 0.2.2 Adoption
+# g15.075 — Bovine Accelerator Desktop Poodle 0.2.2 Adoption
 
 Date: 2026-08-25
 Status: complete

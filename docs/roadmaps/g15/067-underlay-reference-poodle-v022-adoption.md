@@ -1,11 +1,11 @@
-# g16.013 — Underlay Reference Poodle 0.2.2 adoption
+# g15.067 — Underlay Reference Poodle 0.2.2 adoption
 
 Status: **complete — Underlay Reference PR 1 merged at `f5ea7d72`**
-Depends on: `g16.007`, `g16.009`, published npm `0.2.2`
+Depends on: `g15.061`, `g15.063`, published npm `0.2.2`
 Target repository: `/Users/tom/Dev/projects/underlay-reference`
 Target base: `8885661e10813bb9d8a3f6782c87a840b26bd0be`
-Governing refs: `001-consumer-adoption-inventory.md`,
-`009-underlay-poodle-v022-follow-up.md`, Underlay Reference `AGENTS.md`,
+Governing refs: `055-consumer-adoption-inventory.md`,
+`063-underlay-poodle-v022-follow-up.md`, Underlay Reference `AGENTS.md`,
 reference implementation notes, and Underlay adapter/template contracts
 
 ## Outcome

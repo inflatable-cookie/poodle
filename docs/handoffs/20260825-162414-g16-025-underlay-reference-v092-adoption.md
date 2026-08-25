@@ -38,13 +38,13 @@ tree—supplies every active web package and Rust crate.
 - **Worker branch:** launcher-generated non-`main`; suggested
   `t3code/g16-025-underlay-reference-v092`
 - **Worker worktree:** use a fresh clean launcher worktree
-- **Ready card:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g16/025-underlay-reference-v092-adoption.md`
-- **Allowed runway:** `g16.025` only; one repository and one PR
+- **Ready card:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/079-underlay-reference-v092-adoption.md`
+- **Allowed runway:** `g15.079` only; one repository and one PR
 - **Parallel safety:** no open PR exists. A stale dirty worktree remains at
   `/Users/tom/.t3/worktrees/underlay-reference/t3code-4e9fc1d9` on a gone
   branch. Preserve it; never use, clean, reset, or delete it. Stop if the
   operator says it is active.
-- **Canonical refs:** Poodle `g16.001`, `g16.013`, `g16.025`; Underlay Reference
+- **Canonical refs:** Poodle `g15.055`, `g15.067`, `g15.079`; Underlay Reference
   root/scoped `AGENTS.md`, reference notes, template/adapter contracts, and
   repo-local Effigy skill
 - **Required validation:** supported prepare/install, package-local checks
@@ -70,7 +70,7 @@ tree—supplies every active web package and Rust crate.
 
 ## Important Context
 
-- `g16.013` already proved public Poodle 0.2.2; this card preserves that result.
+- `g15.067` already proved public Poodle 0.2.2; this card preserves that result.
 - Current web manifests use `file:../../underlay`; API workspace crates and
   direct `underlay-config` use sibling paths.
 - The stale dirty worktree contains broad deletions and old adoption changes.
@@ -83,7 +83,7 @@ tree—supplies every active web package and Rust crate.
 ## Suggested Next Move
 
 Run the worker preflight, select only the fresh launcher worktree, and read
-`g16.025` plus Underlay Reference authority. Inventory all manifests, locks,
+`g15.079` plus Underlay Reference authority. Inventory all manifests, locks,
 aliases, and generator imports before changing the graph as one coherent batch.
 
 ## Completion Protocol
@@ -113,7 +113,7 @@ Poodle, unrelated churn, app exceptions, or visible proof.
 Run all required checks and `git diff --check`. Record exact tag/commit,
 preserved Poodle identities, complete manifest/lock/source-bypass review,
 compatibility edits, worktree, and branch in one PR against current `main`.
-Link `g16.025`, report the URL, and do not merge.
+Link `g15.079`, report the URL, and do not merge.
 
 ### Review and merge path
 

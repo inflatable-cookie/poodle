@@ -37,12 +37,12 @@ result proves the package, not merely its component imports.
 - **Worker branch:** launcher-generated non-`main`; suggested
   `t3code/g16-021-bovine-desktop-v022`
 - **Worker worktree:** use a fresh isolated launcher worktree
-- **Ready card:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g16/021-bovine-accelerator-desktop-poodle-v022-adoption.md`
-- **Allowed runway:** `g16.021` only; one repository and one PR
+- **Ready card:** `/Users/tom/Dev/projects/poodle/docs/roadmaps/g15/075-bovine-accelerator-desktop-poodle-v022-adoption.md`
+- **Allowed runway:** `g15.075` only; one repository and one PR
 - **Parallel safety:** two existing product worktrees are registered but no PR
   is open. Preserve them and stop if either now owns `package.json`, `bun.lock`,
   or icon-generation files.
-- **Canonical refs:** Poodle `g16.001`, `g16.011`, `g16.021`; Bovine Desktop
+- **Canonical refs:** Poodle `g15.055`, `g15.065`, `g15.075`; Bovine Desktop
   root/scoped `AGENTS.md`, working rules, dependency-release checks, and local
   Effigy skill
 - **Required validation:** supported dependency preparation,
@@ -104,7 +104,7 @@ assets, shared scope, unrelated updates, or product/API decisions.
 
 Run the card validation and `git diff --check`. Record registry/integrity,
 source-independent and icon evidence, peer convergence, lock review, worktree,
-and branch in one PR against current `main`. Link `g16.021`, report, do not merge.
+and branch in one PR against current `main`. Link `g15.075`, report, do not merge.
 
 ### Review and merge path
 

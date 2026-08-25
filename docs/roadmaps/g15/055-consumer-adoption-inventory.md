@@ -1,4 +1,4 @@
-# g16.001 — Consumer Adoption Inventory
+# g15.055 — Consumer Adoption Inventory
 
 Status: **complete — 16 authoritative consumer repositories frozen**
 Depends on: published `v0.2.1` and completed `g15.013`

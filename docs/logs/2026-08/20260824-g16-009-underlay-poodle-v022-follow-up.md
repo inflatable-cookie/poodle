@@ -1,4 +1,4 @@
-# g16.009 — Underlay Poodle 0.2.2 Follow-up
+# g15.063 — Underlay Poodle 0.2.2 Follow-up
 
 Date: 2026-08-24
 Verdict: **complete — exact public-registry adoption, no migration**

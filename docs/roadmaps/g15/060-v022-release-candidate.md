@@ -1,9 +1,9 @@
-# g16.006 — v0.2.2 release candidate
+# g15.060 — v0.2.2 release candidate
 
 Status: **complete — PR 74 merged at `6ea561be`**
-Depends on: `g16.005`
-Blocks: `g16.007` and all consumer adoption
-Governing refs: `005-gpui-cratesio-recovery.md`,
+Depends on: `g15.059`
+Blocks: `g15.061` and all consumer adoption
+Governing refs: `059-gpui-cratesio-recovery.md`,
 `../../specs/022-packaging-versioning-and-release-channel-rules.md`,
 `../../contracts/001-working-rules.md`
 
@@ -75,7 +75,7 @@ This card must not create a tag, publish a package, or edit a release workflow.
 - the root and GPUI node-backend third-party notices, `deny.toml`, spec 022,
   and `scripts/audit-license-compliance.ts`, only for the bounded removal of
   stale `bzip2` / `libbz2-rs-sys` claims proved absent from the final graph;
-- one August `g16.006` execution log/receipt and `PAPERCUTS.md` for new
+- one August `g15.060` execution log/receipt and `PAPERCUTS.md` for new
   execution friction.
 
 Do not edit component contracts or implementations, specimens, visual
@@ -125,11 +125,11 @@ Jetstream preview/QA, or any release mutation.
 
 ## Stop Conditions
 
-- Any source or capture defect remains open from `g16.005`.
+- Any source or capture defect remains open from `g15.059`.
 - Version or lockfile regeneration introduces unrelated dependency upgrades.
 - A release gate is weakened, bypassed, or moved to a windowed path.
 - Tag creation, publication, or workflow editing becomes necessary. Stop at
-  the candidate and return to `g16.007`.
+  the candidate and return to `g15.061`.
 
 ## Completion
 
@@ -148,5 +148,5 @@ orchestrator reproduced the package artifacts, ran `effigy qa`, and obtained a
 green complete `effigy release gates` retry after one transient headless GPUI
 capture failure. That diagnostic friction is recorded in `PAPERCUTS.md`.
 
-No release mutation occurred. `g16.007` remains the separate operator-owned
+No release mutation occurred. `g15.061` remains the separate operator-owned
 certification, tag, and publication gate.
