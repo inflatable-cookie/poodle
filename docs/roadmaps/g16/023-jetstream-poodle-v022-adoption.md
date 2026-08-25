@@ -1,7 +1,7 @@
 # g16.023 — Jetstream Poodle 0.2.2 adoption
 
-Status: **ready — final adapter lane after product dispatch**
-Depends on: `g16.007`, `g16.008`; schedule after `014`-`022` dispatch
+Status: **ready — final authoritative consumer lane**
+Depends on: `g16.007`, `g16.008`, completed `014`-`022` and `025`
 Target repository: `/Users/tom/Dev/projects/jetstream`
 Target base: `2106faec624973607c16a52985c9d1044e830261`
 Governing refs: `001-consumer-adoption-inventory.md`,
@@ -15,12 +15,16 @@ public 0.2.2 while preserving its explicitly paired local Rust integration.
 
 ## Scope
 
-- Pin editor UI core/Svelte dependencies to exact registry `0.2.2`.
-- Remove editor UI Poodle web overrides; retain local Longhorn packages.
+- Pin the editor UI's two Poodle dependencies, core and Svelte, to exact
+  registry `0.2.2`.
+- Remove only the two Poodle web overrides; retain the three local Longhorn
+  package dependencies and overrides.
 - Keep `crates/jetstream-poodle` Rust Poodle paths local under the existing
   paired-runtime contract.
-- Regenerate editor locks narrowly; repair only Jetstream-owned compatibility
-  fallout.
+- Regenerate `editor-ui/bun.lock` narrowly; repair only Jetstream-owned
+  compatibility fallout.
+- Update Jetstream's `g06.014` evidence only as needed to record the completed
+  Poodle npm half; do not claim the retained Longhorn `file:` lane is complete.
 
 ## Out Of Scope
 
@@ -38,11 +42,13 @@ public 0.2.2 while preserving its explicitly paired local Rust integration.
 
 ## Validation
 
-- Use Jetstream's Effigy-owned install path; inspect both editor lockfiles and
-  the Rust dependency diff.
-- Run `effigy check`, `effigy check:sibling-boundaries`,
-  `effigy check:single-ui-stack`, `effigy test:cargo`, `effigy validate`, and
-  `effigy qa`.
+- Run `bun install` in `editor-ui`; inspect the full Bun lock diff and prove the
+  two Poodle packages resolve from the registry at 0.2.2 while the retained
+  Longhorn packages converge on that Svelte peer.
+- Prove `crates/jetstream-poodle/Cargo.toml` and the Rust lock are unchanged.
+- Run `effigy editor:test`, `effigy check`,
+  `effigy check:sibling-boundaries`, `effigy check:single-ui-stack`,
+  `effigy test:cargo`, `effigy validate`, and `effigy qa`.
 - Run `git diff --check`. Do not run demo/window selectors.
 
 ## Stop Conditions
@@ -55,6 +61,5 @@ public 0.2.2 while preserving its explicitly paired local Rust integration.
 ## Evidence And Continuation
 
 Record the web registry identity, retained Rust path boundary, lock review,
-compatibility edits, and validation in the Jetstream PR. Do not merge. This
-lane stays serial after product dispatch to avoid pulling Jetstream back onto
-the critical path.
+compatibility edits, and validation in the Jetstream PR. Do not merge. Once
+this PR merges, the authoritative 16-repository rollout can close.

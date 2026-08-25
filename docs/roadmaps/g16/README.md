@@ -40,9 +40,9 @@ component work or add a compatibility shim.
 - Each repository gets its own branch, validation evidence, and PR. Workers do
   not make cross-repository commits from one branch.
 - Historical snapshots are not consumers: exclude
-  `acowtancy-consolidation.*` and `finch/archive/app-electron`. The
-  `loophole-legacy` repository is authoritative enough to receive its own
-  final-wave upgrade unless its owner explicitly retires it.
+  `acowtancy-consolidation.*` and `finch/archive/app-electron`. The operator
+  removed the Loophole Legacy repository on 2026-08-25; it is retired from the
+  authoritative estate and its cancelled card remains historical evidence.
 - Acowtancy, Composer, Contact Patch, and Songsprout move
   every active web and Rust Underlay dependency to tag `v0.9.2`
   (`ddba26400f480638829917cf72eecc62be4b978d`). Web packages use the tagged
@@ -61,7 +61,7 @@ component work or add a compatibility shim.
 ## Inventory
 
 The frozen baseline is recorded in
-[g16.001](001-consumer-adoption-inventory.md). Seventeen authoritative
+[g16.001](001-consumer-adoption-inventory.md). Sixteen authoritative
 repositories consume Poodle directly. Poodle itself, temporary consolidation
 trees, and in-repository archived applications are excluded.
 
@@ -69,13 +69,12 @@ trees, and in-repository archived applications are excluded.
 | --- | --- | --- |
 | Release recovery | Poodle | complete; `v0.2.2` published from exact candidate `d5607def` |
 | Foundation | Longhorn, Underlay, Soundcheck Library | complete at 0.2.2 |
-| Adapter follow-up | Jetstream | deferred behind product adoption; paired Rust integration remains local |
 | First product wave | Nucleus, Soundcheck, Underlay Reference | Poodle 0.2.2 complete |
 | Coupled Underlay product wave | Acowtancy, Compli Me, Composer, Contact Patch, Songsprout | complete |
 | Underlay Reference follow-up | Underlay Reference | complete at Underlay v0.9.4 and Poodle 0.2.2 |
 | Longhorn product wave | Finch, Figmatic, Bovine Accelerator Desktop, Loophole | complete |
-| Adapter follow-up | Jetstream | `023` ready; dispatch after product lanes |
-| Legacy product | Loophole Legacy | `024` ready as final authoritative product lane |
+| Adapter follow-up | Jetstream | `023` ready as final authoritative consumer lane |
+| Retired product | Loophole Legacy | `024` cancelled; repository removed by operator |
 
 ## Runway
 
@@ -139,9 +138,10 @@ trees, and in-repository archived applications are excluded.
     complete; PR 8 merged at `92e01577`, with one registry Poodle identity and
     the renderer-test baseline kept separate
 23. [023 — Jetstream Poodle 0.2.2 adoption](023-jetstream-poodle-v022-adoption.md) —
-    ready after product dispatch; registry web plus retained paired Rust paths
+    ready as the final authoritative consumer; registry web plus retained
+    paired Rust paths
 24. [024 — Loophole Legacy Poodle 0.2.2 adoption](024-loophole-legacy-poodle-v022-adoption.md) —
-    ready as final authoritative product lane; active Aura only
+    cancelled; repository removed by operator on 2026-08-25
 25. [025 — Underlay Reference tagged Underlay adoption](025-underlay-reference-v092-adoption.md) —
     complete; corrected stale PR metadata and merged reviewed head `25818824`
     at `3354803e`
@@ -160,10 +160,10 @@ cover four independent
 Longhorn-shaped products. Figmatic `020` and Loophole `022` are complete;
 Finch `019` and Bovine Accelerator Desktop `021` are also complete.
 
-Jetstream remains off the critical path. Card `023` upgrades its public web
-surface but preserves the paired local Rust contract. Dispatch it after product
-lanes are in flight. Loophole Legacy `024` is the final active product lane and
-must not touch its reference archives.
+Jetstream `023` is the only remaining authoritative consumer lane. It upgrades
+the public web surface while preserving the paired local Rust contract.
+Loophole Legacy `024` is cancelled because the operator removed the repository;
+it is not a generation-close requirement.
 
 The crates.io GPUI boundary and non-activating evidence transport are accepted
 and merged in `g16.005`. PR 74 removed the stale `bzip2` / `libbz2-rs-sys`
@@ -189,5 +189,4 @@ The generation closes only when every authoritative repository has:
 
 ## Next Task
 
-Prepare and dispatch independent worker handoffs for Jetstream `g16.023` and
-Loophole Legacy `g16.024` as the final adoption wave.
+Dispatch the Jetstream `g16.023` worker handoff as the final adoption lane.

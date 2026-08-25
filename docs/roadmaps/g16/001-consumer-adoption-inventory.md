@@ -1,6 +1,6 @@
 # g16.001 — Consumer Adoption Inventory
 
-Status: **complete — 17 authoritative consumer repositories frozen**
+Status: **complete — 16 authoritative consumer repositories frozen**
 Depends on: published `v0.2.1` and completed `g15.013`
 Governing refs: `README.md`,
 `../../../README.md`, `../../README.md`,
@@ -26,7 +26,6 @@ dependency order before changing consumer manifests.
 | Jetstream | core + Svelte web; paired Rust paths | `^0.1.0` plus `file:` overrides | after Longhorn |
 | Longhorn | core/Svelte workspace and examples; Svelte peer; Rust git tags | registry/tag `0.1.0` | foundation |
 | Loophole | core + Svelte | committed `file:` links/overrides | after Longhorn |
-| Loophole Legacy | Svelte | registry `^0.1.0` | final wave |
 | Nucleus | core + Svelte | registry `^0.1.0` | after Longhorn |
 | Songsprout | core + Svelte in Bloom/Greenhouse | `^0.1.0` plus `file:` overrides | after Underlay |
 | Soundcheck | core + Svelte | `^0.1.0` plus `file:` overrides | after Longhorn and Soundcheck Library |
@@ -40,6 +39,8 @@ dependency order before changing consumer manifests.
 - `acowtancy-consolidation.*` contains temporary imports/worktrees that
   duplicate Acowtancy's authoritative manifests.
 - `finch/archive/app-electron` is a frozen historical application.
+- The operator removed the Loophole Legacy repository on 2026-08-25. It is no
+  longer an authoritative consumer; its historical references remain evidence.
 - Historical docs, fixtures that record an old release claim, generated
   artifacts, and vendored trees are evidence rather than active declarations.
 

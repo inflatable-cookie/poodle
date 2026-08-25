@@ -5,18 +5,16 @@ Updated: 2026-08-25
 ## Active Track
 
 - `g16`
-  - Status: active — inventory, v0.2.2 release recovery, foundation adoption,
-    all three first-wave products, Composer, Contact Patch, and Songsprout
-    complete
+  - Status: active — release recovery, foundation, and every product lane
+    complete; Jetstream is the sole remaining authoritative consumer
   - Posture: published-package adoption from exact npm 0.2.2 and Rust tag
     `v0.2.2`; no component or public API redesign
   - Range: `001` to `013` complete except superseded `002`; `014`-`025` compiled
-  - Evidence: 17 authoritative repositories consume Poodle through registry
+  - Evidence: 16 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: monitor the bounded `014`/`015` corrections and dispatch published
-    handoffs for `025` and Longhorn products `019`-`022` in parallel before
-    final `023`-`024`.
+  - Next: dispatch final Jetstream card `023`; card `024` is cancelled because
+    the operator removed the Loophole Legacy repository.
 
 ## Latest Completed Track
 
