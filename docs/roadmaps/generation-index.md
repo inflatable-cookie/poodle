@@ -13,8 +13,9 @@ Updated: 2026-08-25
   - Evidence: 16 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: dispatch final Jetstream card `023`; card `024` is cancelled because
-    the operator removed the Loophole Legacy repository.
+  - Next: launch the published handoff for final Jetstream card `023`; card
+    `024` is cancelled because the operator removed the Loophole Legacy
+    repository.
 
 ## Latest Completed Track
 

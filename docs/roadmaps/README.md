@@ -21,7 +21,8 @@ cards `g16.014`-`022` plus Underlay Reference follow-up `025` own the rollout.
   Soundcheck, and Underlay Reference now consume 0.2.2. Acowtancy through
   Songsprout additionally adopt Underlay `v0.9.2` in `014`-`018`; `025` applies
   the same released-Underlay boundary to Underlay Reference. Jetstream is the
-  sole remaining authoritative consumer lane.
+  sole remaining authoritative consumer lane and its worker handoff is
+  published.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;

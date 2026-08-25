@@ -1,6 +1,6 @@
 # g16.023 — Jetstream Poodle 0.2.2 adoption
 
-Status: **ready — final authoritative consumer lane**
+Status: **handoff published — final authoritative consumer lane**
 Depends on: `g16.007`, `g16.008`, completed `014`-`022` and `025`
 Target repository: `/Users/tom/Dev/projects/jetstream`
 Target base: `2106faec624973607c16a52985c9d1044e830261`

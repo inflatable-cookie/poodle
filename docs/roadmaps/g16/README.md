@@ -73,7 +73,7 @@ trees, and in-repository archived applications are excluded.
 | Coupled Underlay product wave | Acowtancy, Compli Me, Composer, Contact Patch, Songsprout | complete |
 | Underlay Reference follow-up | Underlay Reference | complete at Underlay v0.9.4 and Poodle 0.2.2 |
 | Longhorn product wave | Finch, Figmatic, Bovine Accelerator Desktop, Loophole | complete |
-| Adapter follow-up | Jetstream | `023` ready as final authoritative consumer lane |
+| Adapter follow-up | Jetstream | `023` handoff published as final authoritative consumer lane |
 | Retired product | Loophole Legacy | `024` cancelled; repository removed by operator |
 
 ## Runway
@@ -138,8 +138,8 @@ trees, and in-repository archived applications are excluded.
     complete; PR 8 merged at `92e01577`, with one registry Poodle identity and
     the renderer-test baseline kept separate
 23. [023 — Jetstream Poodle 0.2.2 adoption](023-jetstream-poodle-v022-adoption.md) —
-    ready as the final authoritative consumer; registry web plus retained
-    paired Rust paths
+    handoff published as the final authoritative consumer; registry web plus
+    retained paired Rust paths
 24. [024 — Loophole Legacy Poodle 0.2.2 adoption](024-loophole-legacy-poodle-v022-adoption.md) —
     cancelled; repository removed by operator on 2026-08-25
 25. [025 — Underlay Reference tagged Underlay adoption](025-underlay-reference-v092-adoption.md) —
@@ -160,8 +160,9 @@ cover four independent
 Longhorn-shaped products. Figmatic `020` and Loophole `022` are complete;
 Finch `019` and Bovine Accelerator Desktop `021` are also complete.
 
-Jetstream `023` is the only remaining authoritative consumer lane. It upgrades
-the public web surface while preserving the paired local Rust contract.
+Jetstream `023` is the only remaining authoritative consumer lane. Its
+published worker handoff upgrades the public web surface while preserving the
+paired local Rust contract.
 Loophole Legacy `024` is cancelled because the operator removed the repository;
 it is not a generation-close requirement.
 
@@ -189,4 +190,5 @@ The generation closes only when every authoritative repository has:
 
 ## Next Task
 
-Dispatch the Jetstream `g16.023` worker handoff as the final adoption lane.
+Launch `docs/handoffs/20260825-181552-g16-023-jetstream-v022-adoption.md` as the
+final adoption lane.
