@@ -106,9 +106,11 @@ trees, and in-repository archived applications are excluded.
     complete; PR 1 merged at `f5ea7d72`, with registry adoption clean and the
     pre-existing Effigy test-routing baseline exposed rather than hidden
 14. [014 — Acowtancy Underlay 0.9.2 and Poodle 0.2.2 adoption](014-acowtancy-poodle-v022-adoption.md) —
-    operator reports implementation complete; PR evidence pending
+    corrective follow-up ready after PRs 54/55; remove active sibling Underlay
+    compilation aliases while retaining explicit cross-repository QA
 15. [015 — Compli Me Underlay 0.9.2 and Poodle 0.2.2 adoption](015-compli-me-poodle-v022-adoption.md) —
-    worker in flight; Admin, Front, UI, API-client, and API
+    corrective follow-up ready after PRs 1/2; use canonical `#v0.9.2` syntax in
+    the four web manifests while retaining release commit `ddba2640`
 16. [016 — Composer Underlay 0.9.2 and Poodle 0.2.2 adoption](016-composer-poodle-v022-adoption.md) —
     complete; PR 1 merged at `74e5a7a7`, with tagged Underlay, registry Poodle
     0.2.2, and bounded web and Rust lock changes
@@ -142,9 +144,10 @@ Svelte to npm `latest`. Longhorn `008`, Underlay `009`, Soundcheck Library
 
 Cards `014`-`018` cover five independent coupled Underlay/Poodle repositories;
 `025` is the equivalent Underlay-only follow-up for the already-migrated
-Underlay Reference. The operator reports `014` implemented and `015` is in
-flight. Composer `016`, Contact Patch `017`, and Songsprout `018` are merged;
-`025` remains parallel-ready. Cards `019`-`022` cover four independent
+Underlay Reference. Acowtancy `014` and Compli Me `015` have merged their main
+dependency updates, but each has one bounded release-boundary correction ready.
+Composer `016`, Contact Patch `017`, and Songsprout `018` are complete; `025`
+remains parallel-ready. Cards `019`-`022` cover four independent
 Longhorn-shaped products. All lanes use one worktree and PR per repository.
 `021` must not use Bovine Accelerator Desktop's operator checkout.
 
@@ -175,6 +178,6 @@ The generation closes only when every authoritative repository has:
 
 ## Next Task
 
-Review `g16.014` when its PR arrives and monitor in-flight `g16.015`. Cards
-`g16.025` and `019`-`022` remain parallel-ready. Hold `023` and `024` for the
-final wave.
+Run the bounded `g16.014` and `g16.015` corrective follow-ups in parallel.
+Cards `g16.025` and `019`-`022` remain parallel-ready. Hold `023` and `024` for
+the final wave.

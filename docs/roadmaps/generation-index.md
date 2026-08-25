@@ -14,8 +14,9 @@ Updated: 2026-08-25
   - Evidence: 17 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: review reported-complete `014` and monitor `015`; `025` and Longhorn
-    products `019`-`022` remain parallel-ready before final `023`-`024`.
+  - Next: close the bounded post-merge source corrections for `014` and `015`;
+    `025` and Longhorn products `019`-`022` remain parallel-ready before final
+    `023`-`024`.
 
 ## Latest Completed Track
 

@@ -1,6 +1,6 @@
 # g16.014 — Acowtancy Underlay 0.9.2 and Poodle 0.2.2 adoption
 
-Status: **implementation reported complete — awaiting PR evidence**
+Status: **corrective follow-up ready — merged graph still bypasses tagged web package**
 Depends on: `g16.007`, `g16.009`, `g16.013`, Underlay tag `v0.9.2`
 Target repository: `/Users/tom/Dev/projects/acowtancy`
 Target base: `a535969bab2a1b919d382e3e129d8eb95043b2b8`
@@ -66,3 +66,20 @@ Preserve shared-package boundaries and the single root web lock.
 Record the exact Underlay tag/commit, Poodle versions, peer convergence, lock
 review, compatibility edits, and validation in the Acowtancy PR. Do not merge.
 This lane is independent of `015`-`022` and `025`.
+
+## Post-Merge Correction
+
+Acowtancy PR [#54](https://github.com/acowtancy/market/pull/54) merged the web
+Poodle/Underlay manifests at `6e76b943`; PR
+[#55](https://github.com/acowtancy/market/pull/55) merged the Rust Underlay tag
+at `03ef5736`. The declared versions and locks are correct, but Cream and Dairy
+still alias Underlay imports to `../underlay/ts/src` through SvelteKit and Vite,
+while Froyo and Cattle Grid retain equivalent TypeScript paths. Those mappings
+are active application sources, so the tagged web package is not yet the code
+under validation.
+
+The corrective PR removes only those application compilation aliases and path
+mappings. Keep explicit sibling mounts and scripts used solely by workspace
+conformance or template QA. Regenerate the root lock only if supported tooling
+changes it, and reject unrelated churn. Prove Cream, Dairy, Froyo, and Cattle
+Grid validate against the installed `v0.9.2` package before closing this card.

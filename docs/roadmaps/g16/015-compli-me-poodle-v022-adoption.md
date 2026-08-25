@@ -1,6 +1,6 @@
 # g16.015 — Compli Me Underlay 0.9.2 and Poodle 0.2.2 adoption
 
-Status: **worker in flight — coupled Underlay/Poodle lane**
+Status: **corrective follow-up ready — merged web manifests need tag syntax**
 Depends on: `g16.007`, `g16.009`, `g16.013`, Underlay tag `v0.9.2`
 Target repository: `/Users/tom/Dev/projects/compli-me`
 Target base: `ee27d84964c61d406f90a5b9f8d4ed96e059d5b7`
@@ -67,3 +67,22 @@ to public 0.2.2. Keep the Underlay-owned application shape unchanged.
 Record the exact Underlay tag/commit, Poodle registry identities, lock review,
 compatibility edits, and validation in the Compli Me PR. Do not merge.
 Independent of `014`, `016`-`022`, and `025`.
+
+## Post-Merge Correction
+
+Compli Me PR [#1](https://github.com/double-dip/compli-me/pull/1) merged the
+direct Poodle 0.2.2 adoption at `2d38493e`; PR
+[#2](https://github.com/double-dip/compli-me/pull/2) merged the released
+Underlay graph at `e2744629`. Rust correctly declares tag `v0.9.2`, and all web
+locks resolve its release commit
+`ddba26400f480638829917cf72eecc62be4b978d`. The four web manifests instead
+declare that peeled commit directly rather than the generation's canonical
+`#v0.9.2` source.
+
+The corrective PR changes only Admin, Front, UI, and API-client manifest refs
+to `git+ssh://git@github.com/inflatable-cookie/underlay.git#v0.9.2` and performs
+the narrow lock refresh required by Bun. The resolved commit must remain
+`ddba2640`; Rust and application source stay untouched. If the tag still cannot
+resolve, stop with the exact command/output and compare the environment with
+the already-working Acowtancy, Composer, Contact Patch, and Songsprout tag
+consumers rather than silently restoring the commit syntax.
