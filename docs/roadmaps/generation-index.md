@@ -1,21 +1,21 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-24
+Updated: 2026-08-25
 
 ## Active Track
 
 - `g16`
   - Status: active — inventory, v0.2.2 release recovery, and foundation
-    adoption complete; first product wave ready
+    adoption complete; two of three first-wave products merged
   - Posture: published-package adoption from exact npm 0.2.2 and Rust tag
     `v0.2.2`; no component or public API redesign
-  - Range: `001` to `010` and `012` complete; `011` and `013` remain active
+  - Range: `001` to `012` complete except superseded `002`; `013` remains active
   - Evidence: 17 authoritative repositories consume Poodle through registry
     `0.1.0`, committed `file:` overrides, Rust tag `v0.1.0`, or paired
     local Rust paths.
-  - Next: complete Nucleus `011` and Underlay Reference `013`, then use all
-    three first-wave results to compile the remaining products. Jetstream
-    remains deferred unless product adoption exposes a dependency on it.
+  - Next: resolve Underlay Reference `013`, then use all three first-wave
+    results to compile the remaining products. Jetstream remains deferred
+    unless product adoption exposes a dependency on it.
 
 ## Latest Completed Track
 

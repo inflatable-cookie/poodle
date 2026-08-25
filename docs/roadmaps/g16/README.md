@@ -1,7 +1,7 @@
 # g16 — Published Consumer Adoption
 
-Status: active — `v0.2.2` foundation adoption complete; first product wave
-ready across Nucleus, Soundcheck, and Underlay Reference
+Status: active — `v0.2.2` foundation adoption complete; Nucleus and Soundcheck
+product lanes merged, Underlay Reference in review
 Posture: adoption-first with one Poodle patch release gate
 Opened: 2026-08-23
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -86,12 +86,13 @@ trees, and in-repository archived applications are excluded.
     complete; PR 6 merged at `7f5ff0b9`, exact development pin, peer-line bump,
     and dual-lock validation
 11. [011 — Nucleus Poodle 0.2.2 adoption](011-nucleus-poodle-v022-adoption.md) —
-    ready; direct application lane over local Longhorn packages
+    complete; PR 1 merged at `9b3f67c9`, with one public Poodle identity over
+    the retained local Longhorn packages
 12. [012 — Soundcheck Poodle 0.2.2 adoption](012-soundcheck-poodle-v022-adoption.md) —
     complete; PR 11 merged at `b1c5937d`, with one public Poodle identity
     across the app, Longhorn adapter, and Soundcheck Library
 13. [013 — Underlay Reference Poodle 0.2.2 adoption](013-underlay-reference-poodle-v022-adoption.md) —
-    ready; canonical three-app Underlay consumer lane
+    changes requested on PR 1; canonical three-app Underlay consumer lane
 14. `014+` — remaining exact product-repository cards, compiled from the first
     wave's migration evidence
 15. Jetstream adoption — final adapter wave unless a product exposes a reason
@@ -106,10 +107,11 @@ public-registry consumer install passed.
 
 The foundation is complete: Longhorn `008`, Underlay `009`, and Soundcheck
 Library `010` are merged at 0.2.2. Soundcheck `012` has completed the first
-product wave's three-layer adoption proof. Nucleus `011` and Underlay Reference
-`013` remain independent active lanes. Together their evidence establishes the
-direct-app, Longhorn-plus-library, and Underlay-reference migration shapes
-before the remaining product estate is compiled.
+product wave's three-layer adoption proof, and Nucleus `011` has completed the
+direct-app proof over local Longhorn packages. Underlay Reference `013` is the
+only remaining first-wave lane; its PR is in changes-requested review. Once it
+lands, the three migration shapes are sufficient to compile the remaining
+product estate.
 
 Jetstream is not on the critical path. Its local paired Rust integration stays
 deferred while product applications adopt the public web packages; compile its

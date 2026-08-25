@@ -1,6 +1,6 @@
 # g16.011 — Nucleus Poodle 0.2.2 adoption
 
-Status: **ready — independent first-wave product lane**
+Status: **complete — Nucleus PR 1 merged at `9b3f67c9`**
 Depends on: `g16.007`, `g16.008`, published npm `0.2.2`
 Target repository: `/Users/tom/Dev/projects/nucleus`
 Target base: `91316dbe3068e4cb6cebd4cf6a2c14f55a7a4601`
@@ -63,3 +63,20 @@ Record changed files, exact registry versions/integrities, effective peer
 resolution, compatibility edits, lock review, and exact validation in the
 Nucleus PR. Do not merge. Once this lane lands, Nucleus is complete for g16;
 its migration findings feed compilation of the remaining direct-app cards.
+
+## Closeout
+
+Nucleus PR [#1](https://github.com/inflatable-cookie/nucleus/pull/1) merged on
+2026-08-25 at `9b3f67c9c7d57700449ef26b5124d1b092093925`. Nucleus Desktop now pins
+public Poodle core and Svelte 0.2.2 exactly while retaining its three intended
+local Longhorn packages. The Bun lock contains the published npm integrity
+values, no older or sibling Poodle source, and one Poodle/Svelte runtime. The
+Longhorn Poodle adapter peer converges on the same exact 0.2.2 identity.
+
+The bounded compatibility tail aligned the settings test with Poodle 0.2.2 and
+the consumer verifier with Longhorn's post-Card-179 layout package shape. The
+verifier still forbids hosted-Surface renderer imports and transfer/windowing
+crates. Independent review passed `effigy check:longhorn-consumer`, desktop
+check/build/test, the broad headless `effigy qa` board, registry-integrity and
+lock inspection, and `git diff --check`. The canonical verdict is
+[recorded on PR 1](https://github.com/inflatable-cookie/nucleus/pull/1#issuecomment-5408030177).
