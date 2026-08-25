@@ -7,6 +7,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-25 — Bovine Accelerator Desktop PR 26 changed the current source set
+  after the Poodle 0.2.2 adoption merged, but its frozen private-candidate
+  receipt still names candidate `54bc1634` and Bovine source `9098a98`.
+  `prepare:longhorn-private-candidate` now derives candidate `741bd287` and
+  stops on receipt drift, so the source-independent proof cannot be recreated
+  from current `main` until the receipt is refreshed or candidate proof is
+  decoupled from unrelated source movement. Affects g16.021 post-merge
+  revalidation; the committed Poodle manifest and lock graph remain correct.
+
 - 2026-08-25 — Underlay Reference's `effigy doctor` cannot provide a clean
   consumer-review baseline: container health lacks `cargo-fmt`, root
   `test.exclude_catalogs` is unsupported, and `acme-docs` references built-in

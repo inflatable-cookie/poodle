@@ -73,7 +73,7 @@ trees, and in-repository archived applications are excluded.
 | First product wave | Nucleus, Soundcheck, Underlay Reference | Poodle 0.2.2 complete |
 | Coupled Underlay product wave | Acowtancy, Compli Me, Composer, Contact Patch, Songsprout | complete |
 | Underlay Reference follow-up | Underlay Reference | complete at Underlay v0.9.4 and Poodle 0.2.2 |
-| Longhorn product wave | Finch, Figmatic, Bovine Accelerator Desktop, Loophole | Finch, Figmatic, and Loophole complete; Bovine lane remains in flight |
+| Longhorn product wave | Finch, Figmatic, Bovine Accelerator Desktop, Loophole | complete |
 | Adapter follow-up | Jetstream | `023` ready; dispatch after product lanes |
 | Legacy product | Loophole Legacy | `024` ready as final authoritative product lane |
 
@@ -134,7 +134,7 @@ trees, and in-repository archived applications are excluded.
     complete; PR 17 merged at `a6286e88`, with one registry Poodle identity
     and converged Longhorn peer
 21. [021 — Bovine Accelerator Desktop Poodle 0.2.2 adoption](021-bovine-accelerator-desktop-poodle-v022-adoption.md) —
-    handoff ready; isolated worktree required from refreshed target base
+    complete; PR 25 merged reviewed head `fc779cf6` at `3e071692`
 22. [022 — Loophole Poodle 0.2.2 adoption](022-loophole-poodle-v022-adoption.md) —
     complete; PR 8 merged at `92e01577`, with one registry Poodle identity and
     the renderer-test baseline kept separate
@@ -158,8 +158,7 @@ all are complete. `025` completes the equivalent Underlay-only follow-up for
 the already-migrated Underlay Reference at Underlay v0.9.4. Cards `019`-`022`
 cover four independent
 Longhorn-shaped products. Figmatic `020` and Loophole `022` are complete;
-Finch `019` is also complete. `021` must not use Bovine Accelerator Desktop's
-operator checkout.
+Finch `019` and Bovine Accelerator Desktop `021` are also complete.
 
 Jetstream remains off the critical path. Card `023` upgrades its public web
 surface but preserves the paired local Rust contract. Dispatch it after product
@@ -190,5 +189,5 @@ The generation closes only when every authoritative repository has:
 
 ## Next Task
 
-Continue the in-flight Bovine `g16.021` lane. Hold Jetstream `023` and Loophole
-Legacy `024` for the final wave.
+Prepare and dispatch independent worker handoffs for Jetstream `g16.023` and
+Loophole Legacy `g16.024` as the final adoption wave.

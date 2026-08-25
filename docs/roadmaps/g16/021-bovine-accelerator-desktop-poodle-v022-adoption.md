@@ -1,6 +1,6 @@
 # g16.021 — Bovine Accelerator Desktop Poodle 0.2.2 adoption
 
-Status: **handoff ready — isolated Longhorn-product lane**
+Status: **complete — PR 25 merged**
 Depends on: `g16.007`, `g16.008`, `g16.011`
 Target repository: `/Users/tom/Dev/projects/bovine-accelerator-desktop`
 Target base: `ac7487fd82e9792b14f1c499f4342182914501da`
@@ -55,3 +55,19 @@ public 0.2.2 while preserving its Rust-owned domain and local Longhorn bridge.
 Record source-independent registry proof, icon generation, peer convergence,
 lock review, compatibility edits, and validation in the Bovine PR. Do not
 merge. Independent of the other product cards.
+
+## Review Result
+
+PR [#25](https://github.com/acowtancy/bovine-accelerator-desktop/pull/25)
+merged reviewed head `fc779cf6` at merge commit `3e071692`. Exact registry
+Poodle core/Svelte 0.2.2, published icon generation, one Svelte/Poodle runtime,
+and source-independent release proof passed before merge. The Acowtancy-side
+review caught and removed an older Froyo-nested Poodle 0.1.x identity before
+approval. Current Bovine `main` still carries the correct manifest and lock
+graph and passes the development dependency proof.
+
+A later PR 26 changed the current Bovine source set without refreshing the
+frozen private-candidate receipt, so reconstructing the old source-independent
+candidate now stops on receipt drift. That post-merge currentness issue is
+separate from the reviewed and merged adoption result and is recorded in
+Poodle `PAPERCUTS.md`.
