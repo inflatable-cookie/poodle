@@ -5,7 +5,11 @@
     "@inflatable-cookie/poodle-react",
     "@inflatable-cookie/poodle-svelte"
   ],
-  "sharedContractNote": "@inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same component contracts as @inflatable-cookie/poodle-svelte. Suite-level accessibility audit data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
+  "sharedContractNote": "@inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same component contracts as @inflatable-cookie/poodle-svelte. The Svelte preview owns the current axe sweep; Svelte axe evidence does not transfer to React, and no React axe sweep is currently recorded.",
+  "runtimeEvidence": {
+    "svelteAxe": "test/a11y/component-a11y.test.ts",
+    "reactAxe": "missing"
+  },
   "automatedBoundary": [
     "Every docs section must have a machine-readable accessibility audit target.",
     "Each target must list audit-area status, automated checks, manual checks, and stable review routes.",

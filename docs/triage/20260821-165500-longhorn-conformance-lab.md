@@ -1,6 +1,7 @@
 # Longhorn-Backed Poodle Conformance Lab
 
 Status: open — the `g15.044`–`g15.047` Button comparator lane is complete;
+webview control is bounded and the native capture boundary is now explicit;
 full app ownership and process lifecycle remain a post-release decision
 Captured: 2026-08-21
 Operator idea: build a small Longhorn-backed Tauri app that agents can control
@@ -17,14 +18,16 @@ Longhorn contract 022 already supplies the useful web control plane:
 - explicit window sizing and targeting.
 
 That makes one Tauri window with separately labelled Svelte and React child
-webviews credible. Both web implementations should ship as precompiled static
-assets. Bun is a build tool here, not a runtime to bundle.
+webviews credible: Longhorn can control them while unfocused and compose their
+screenshots while occluded or minimized. Both web implementations should ship
+as precompiled static assets. Bun is a build tool here, not a runtime to bundle.
 
 Tauri can package an external binary, so a GPUI companion process is also a
 credible distribution shape. It is not the solved part: Longhorn explicitly
 does not capture genuinely native surfaces, and GPUI cannot render inside a
-webview. A sidecar still needs its own headless pixel readback and control
-provider.
+webview. Stock crates.io GPUI 0.2.2 offers a real non-activating windowed
+diagnostic, not true headless/offscreen pixels. A sidecar therefore still needs
+an explicit capture/control provider and operator permission for that diagnostic.
 
 ## Recommended Shape
 
@@ -32,7 +35,7 @@ provider.
 Conformance Lab controller (Tauri + Longhorn dev agent control)
   ├─ Svelte webview — precompiled assets, semantic target
   ├─ React webview  — precompiled assets, semantic target
-  └─ GPUI sidecar   — bundled process, local IPC, returns pixels/receipts
+  └─ GPUI sidecar   — bundled process, local IPC, returns windowed pixels/receipts
 ```
 
 The controller selects a named fixture, theme, viewport, size/density, and
@@ -49,16 +52,19 @@ behavior, or completion.
 - The lab is internal tooling outside Poodle's published package graph.
 - Poodle packages do not depend on Longhorn. Preferred ownership is a small
   dedicated internal lab repository; a Longhorn example is the second choice.
-- The GPUI sidecar is accepted only if it returns deterministic pixels without
-  a visible/focused window.
+- The stock GPUI sidecar does not claim true headless pixels. Its current
+  diagnostic is operator-approved, non-activating, and windowed; default QA/CI
+  does not capture GPUI pixels.
 - The app consumes the comparator after the first primitive batch works; it is
   not required to invent or validate the comparator.
 
 ## Open Decisions
 
 - Dedicated `poodle-conformance-lab` repository or Longhorn-owned example?
-- Does the GPUI offscreen seam proved by `g15.044` support a long-running
-  sidecar, or should the controller invoke one capture process per fixture?
+- Can a long-running sidecar own the operator-approved non-activating windowed
+  diagnostic without focus theft, or should the controller invoke one capture
+  process per fixture? The `g15.044` fork/offscreen seam is historical, not the
+  current stock-GPUI transport.
 - Is MCP control needed inside GPUI, or is typed local IPC plus returned
   screenshot/geometry evidence enough?
 - Should the first UI show three captures or Svelte↔React and web↔GPUI
@@ -70,3 +76,6 @@ behavior, or completion.
 2. Land the first named fixture/comparison batch through `g15.046`–`g15.047`.
 3. Decide ownership and process lifecycle from measured use, then write a
    separate lab architecture/card. Do not block v0.2.0 on the full app.
+
+The lab remains open. Longhorn's unfocused webview control does not close the
+native sidecar ownership, lifecycle, or capture decision.

@@ -133,20 +133,7 @@ export function writeParityReport(options: ReportOptions): void {
   );
   const gpuiCrossRuntimeParity = JSON.parse(fs.readFileSync(gpuiCrossRuntimeParityPath, "utf8")) as {
     generation: string;
-    summary: Record<string, number>;
-    sectionReports: Array<{
-      sectionId: string;
-      sideBySideReview: boolean;
-      parityMode: string;
-      intentionalDeltaIds: string[];
-    }>;
-    deltaRegister: Array<{ id: string; status: string; sectionIds: string[] }>;
-    acceptanceHarness: {
-      suiteId: string;
-      status: string;
-      coveredPackages: string[];
-      evidenceArtifacts: string[];
-    };
+    [key: string]: unknown;
   };
 
   const report = {
@@ -165,23 +152,7 @@ export function writeParityReport(options: ReportOptions): void {
       visualCoverage: countCoverageKind("visual"),
       interactionCoverage: countCoverageKind("interaction"),
     },
-    crossRuntime: {
-      generation: gpuiCrossRuntimeParity.generation,
-      summary: gpuiCrossRuntimeParity.summary,
-      sideBySideSections: gpuiCrossRuntimeParity.sectionReports
-        .filter((entry) => entry.sideBySideReview)
-        .map((entry) => ({
-          sectionId: entry.sectionId,
-          parityMode: entry.parityMode,
-          deltaIds: entry.intentionalDeltaIds,
-        })),
-      deltaRegister: gpuiCrossRuntimeParity.deltaRegister.map((entry) => ({
-        id: entry.id,
-        status: entry.status,
-        sectionIds: entry.sectionIds,
-      })),
-      acceptanceHarness: gpuiCrossRuntimeParity.acceptanceHarness,
-    },
+    crossRuntime: gpuiCrossRuntimeParity,
     packageSurfaceCoverage: {
       summary: ["@inflatable-cookie/poodle-svelte"].map((packageName) => {
         const entries = packageSurfaceCoverage.filter((entry) => entry.packageName === packageName);

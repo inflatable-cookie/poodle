@@ -2140,6 +2140,17 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
 } {
   const proof = JSON.parse(fs.readFileSync(gpuiNativeAccessibilityProofPath, "utf8")) as {
     generation: string;
+    sourceLedger: string;
+    currentPosture: {
+      publicSvelteComponents: number;
+      portableNativeComponents: number;
+      nativeNotApplicable: string[];
+      status: string;
+      specEvidence: string;
+      mountedEvidence: string[];
+      assistiveTechnologyEvidence: string;
+      limitation: string;
+    };
     comparisonSource: string;
     sectionIds: string[];
     layerProof: Array<{
@@ -2238,8 +2249,28 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
   );
 
   expect(
-    proof.generation === "g04.010",
-    "packages/gpui/native-accessibility-proof.json must target g04.010.",
+    proof.generation === "g16.001",
+    "packages/gpui/native-accessibility-proof.json must target g16.001.",
+    errors,
+  );
+  expect(
+    proof.sourceLedger === "docs/roadmaps/g16/parity-evidence-ledger.md",
+    "packages/gpui/native-accessibility-proof.json must point at the g16 evidence ledger.",
+    errors,
+  );
+  expect(
+    proof.currentPosture.publicSvelteComponents === 175 &&
+      proof.currentPosture.portableNativeComponents === 174 &&
+      proof.currentPosture.nativeNotApplicable.length === 1 &&
+      proof.currentPosture.nativeNotApplicable[0] === "MeterSurface",
+    "packages/gpui/native-accessibility-proof.json must record the 175/174 native boundary.",
+    errors,
+  );
+  expect(
+    proof.currentPosture.status === "manual" &&
+      proof.currentPosture.assistiveTechnologyEvidence === "missing" &&
+      proof.currentPosture.limitation.includes("does not prove broad native"),
+    "packages/gpui/native-accessibility-proof.json must keep broad native accessibility proof manual and missing.",
     errors,
   );
   expect(
@@ -2436,347 +2467,146 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
 }
 
 function validateGpuiCrossRuntimeParityReport(errors: string[]): {
-  gpuiCrossRuntimeSectionCount: number;
+  gpuiCrossRuntimeRouteCount: number;
   gpuiCrossRuntimeDeltaCount: number;
 } {
   const report = JSON.parse(fs.readFileSync(gpuiCrossRuntimeParityReportPath, "utf8")) as {
+    artifact: string;
     generation: string;
-    comparisonArtifacts: string[];
-    acceptanceHarness: {
-      suiteId: string;
-      status: string;
-      coveredPackages: string[];
-      evidenceArtifacts: string[];
-      requiredChecks: string[];
-      blockers: string[];
+    sourceLedger: string;
+    runtime: string;
+    status: string;
+    denominator: {
+      publicSvelteComponents: number;
+      portableNativeComponents: number;
+      notApplicable: string[];
     };
-    summary: {
-      sectionCount: number;
-      directParityCount: number;
-      nativeAdaptationCount: number;
-      deferredCount: number;
-      sideBySideSectionCount: number;
-      manualGpuiProofCount: number;
-      blockedGpuiProofCount: number;
+    construction: {
+      status: string;
+      routeCount: number;
+      routeDenominator: number;
+      claim: string;
+      evidence: string[];
     };
-    sectionReports: Array<{
-      sectionId: string;
-      parityMode: string;
-      owningLayer: string;
-      sideBySideReview: boolean;
-      svelteRouteIds: string[];
-      gpuiEvidenceArtifacts: string[];
-      gpuiStatuses: {
-        gpui: string;
-        focus: string;
-        keyboard: string;
-        announcements: string;
-      };
-      comparisonPosture: string;
-      intentionalDeltaIds: string[];
-    }>;
-    deltaRegister: Array<{
-      id: string;
-      title: string;
+    mountedBehaviour: {
       status: string;
-      sectionIds: string[];
-      runtimeReason: string;
-      followUp: string;
-      evidenceArtifacts: string[];
-    }>;
-    automatedBoundary: string[];
-    manualBoundary: string[];
-    nonGoals: string[];
-  };
-  const accessibilityProof = JSON.parse(fs.readFileSync(gpuiNativeAccessibilityProofPath, "utf8")) as {
-    sectionProof: Array<{
-      sectionId: string;
-      gpuiStatus: string;
-      focusStatus: string;
-      keyboardStatus: string;
-      announcementsStatus: string;
-      sideBySideReview: boolean;
-    }>;
-  };
-  const gpuiPriorityMatrix = JSON.parse(fs.readFileSync(gpuiParityPriorityPath, "utf8")) as {
-    sectionTargets: Array<{
-      sectionId: string;
-      parityMode: string;
-      gpuiLayer: string;
-      sideBySideReview: boolean;
-    }>;
-  };
-  const ecosystemAcceptance = JSON.parse(fs.readFileSync(ecosystemAcceptancePath, "utf8")) as {
-    suites: Array<{
-      id: string;
+      scope: string;
+      testFile: string;
+      namedTests: string[];
+    };
+    accessibility: {
       status: string;
-      coveredPackages: string[];
-      evidenceArtifacts: string[];
-      requiredChecks: string[];
-      blockers: string[];
-    }>;
+      scope: string;
+      evidence: string[];
+    };
+    visual: {
+      status: string;
+      scope: string;
+      evidence: string[];
+      capturePosture: string;
+    };
+    knownDeltas: string[];
   };
-  const parityTargetRoutes = new Map(
-    parityTargets.map((target) => [target.sectionId, new Set(target.reviewRoutes.map((route) => route.id))]),
-  );
-  const accessibilitySections = new Map(
-    accessibilityProof.sectionProof.map((entry) => [entry.sectionId, entry]),
-  );
-  const prioritySections = new Map(
-    gpuiPriorityMatrix.sectionTargets.map((entry) => [entry.sectionId, entry]),
-  );
-  const gpuiAcceptanceSuite = ecosystemAcceptance.suites.find((entry) => entry.id === report.acceptanceHarness.suiteId);
-  const allowedDeltaStatuses = new Set(["pending", "allowed", "revisit", "rejected"]);
-  const reportSectionIds = report.sectionReports.map((entry) => entry.sectionId).sort();
-  const deltaIds = new Set(report.deltaRegister.map((entry) => entry.id));
 
+  const expectEvidence = (label: string, evidence: string[]): void => {
+    expect(evidence.length > 0, `packages/gpui/cross-runtime-parity-report.json ${label} must record evidence.`, errors);
+    for (const entry of evidence) {
+      const [reference, fragment] = entry.split("#");
+      if (/^(?:packages|docs|test|scripts)\//.test(reference)) {
+        expect(
+          fs.existsSync(path.join(repoRoot, reference)),
+          `packages/gpui/cross-runtime-parity-report.json ${label} references missing evidence "${reference}".`,
+          errors,
+        );
+        if (fragment !== undefined && fs.existsSync(path.join(repoRoot, reference))) {
+          const source = fs.readFileSync(path.join(repoRoot, reference), "utf8");
+          expect(
+            source.includes(fragment),
+            `packages/gpui/cross-runtime-parity-report.json ${label} references unresolved evidence "${entry}".`,
+            errors,
+          );
+        }
+      }
+    }
+  };
+
+  expect(report.artifact === "packages/gpui/cross-runtime-parity-report.json", "GPUI parity report artifact path is stale.", errors);
+  expect(report.generation === "g16.001", "packages/gpui/cross-runtime-parity-report.json must target g16.001.", errors);
+  expect(report.sourceLedger === "docs/roadmaps/g16/parity-evidence-ledger.md", "GPUI parity report must point at the g16 evidence ledger.", errors);
+  expect(report.runtime === "gpui" && report.status === "current", "GPUI parity report must identify the current GPUI posture.", errors);
   expect(
-    report.generation === "g09.018",
-    "packages/gpui/cross-runtime-parity-report.json must target g09.018.",
-    errors,
-  );
-  expect(
-    report.comparisonArtifacts.length >= 3,
-    "packages/gpui/cross-runtime-parity-report.json must record comparison artifacts.",
-    errors,
-  );
-  compareLists(
-    "packages/gpui/cross-runtime-parity-report.json section ids",
-    reportSectionIds,
-    Array.from(accessibilitySections.keys()).sort(),
-    errors,
-  );
-  expect(
-    report.summary.sectionCount === report.sectionReports.length,
-    "packages/gpui/cross-runtime-parity-report.json summary.sectionCount must match sectionReports length.",
-    errors,
-  );
-  expect(
-    report.summary.directParityCount + report.summary.nativeAdaptationCount + report.summary.deferredCount ===
-      report.summary.sectionCount,
-    "packages/gpui/cross-runtime-parity-report.json parity summary counts must add up to the section count.",
-    errors,
-  );
-  expect(
-    report.summary.sideBySideSectionCount === report.sectionReports.filter((entry) => entry.sideBySideReview).length,
-    "packages/gpui/cross-runtime-parity-report.json sideBySideSectionCount must match the side-by-side section set.",
-    errors,
-  );
-  expect(
-    report.summary.manualGpuiProofCount ===
-      report.sectionReports.filter((entry) => entry.gpuiStatuses.gpui === "manual").length,
-    "packages/gpui/cross-runtime-parity-report.json manualGpuiProofCount must match section proof status.",
-    errors,
-  );
-  expect(
-    report.summary.blockedGpuiProofCount ===
-      report.sectionReports.filter((entry) => entry.gpuiStatuses.gpui === "blocked").length,
-    "packages/gpui/cross-runtime-parity-report.json blockedGpuiProofCount must match section proof status.",
-    errors,
-  );
-  expect(
-    report.automatedBoundary.length > 0,
-    "packages/gpui/cross-runtime-parity-report.json must record automated boundaries.",
-    errors,
-  );
-  expect(
-    report.manualBoundary.length > 0,
-    "packages/gpui/cross-runtime-parity-report.json must record manual boundaries.",
-    errors,
-  );
-  expect(
-    report.nonGoals.length >= 2,
-    "packages/gpui/cross-runtime-parity-report.json must record explicit non-goals.",
+    report.denominator.publicSvelteComponents === 175 &&
+      report.denominator.portableNativeComponents === 174 &&
+      report.denominator.notApplicable.length === 1 &&
+      report.denominator.notApplicable[0] === "MeterSurface",
+    "GPUI parity report must record the 175/174 native boundary.",
     errors,
   );
 
-  for (const artifactPath of report.comparisonArtifacts) {
+  expect(
+    report.construction.status === "focused" &&
+      report.construction.routeCount === 174 &&
+      report.construction.routeDenominator === 174 &&
+      report.construction.claim.includes("headless GPUI specimen probe"),
+    "GPUI parity report must claim exactly 174/174 headless construction.",
+    errors,
+  );
+  expectEvidence("construction", report.construction.evidence);
+
+  expect(
+    report.mountedBehaviour.status === "mounted" &&
+      report.mountedBehaviour.scope.includes("bounded") &&
+      report.mountedBehaviour.scope.includes("not a 174-component behaviour pass"),
+    "GPUI parity report must bound mounted behaviour rather than promote it to roster coverage.",
+    errors,
+  );
+  expect(
+    fs.existsSync(path.join(repoRoot, report.mountedBehaviour.testFile)),
+    "GPUI parity report mounted behaviour test file is missing.",
+    errors,
+  );
+  expect(
+    report.mountedBehaviour.namedTests.length > 0,
+    "GPUI parity report must name the bounded mounted regression set.",
+    errors,
+  );
+  const mountedSource = fs.readFileSync(path.join(repoRoot, report.mountedBehaviour.testFile), "utf8");
+  for (const testName of report.mountedBehaviour.namedTests) {
     expect(
-      fs.existsSync(path.join(repoRoot, artifactPath)),
-      `packages/gpui/cross-runtime-parity-report.json references missing comparison artifact "${artifactPath}".`,
+      mountedSource.includes(testName),
+      `GPUI mounted regression is unresolved: ${testName}.`,
       errors,
     );
   }
 
-  for (const section of report.sectionReports) {
-    const accessibilitySection = accessibilitySections.get(section.sectionId);
-    const prioritySection = prioritySections.get(section.sectionId);
-    const routeIds = parityTargetRoutes.get(section.sectionId);
-
-    expect(
-      Boolean(accessibilitySection),
-      `packages/gpui/cross-runtime-parity-report.json references unknown section "${section.sectionId}".`,
-      errors,
-    );
-    expect(
-      Boolean(prioritySection),
-      `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" is missing from the GPUI priority matrix.`,
-      errors,
-    );
-    expect(
-      section.comparisonPosture.trim().length > 0,
-      `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" must record comparison posture.`,
-      errors,
-    );
-    expect(
-      section.svelteRouteIds.length > 0,
-      `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" must record Svelte route ids.`,
-      errors,
-    );
-    expect(
-      section.gpuiEvidenceArtifacts.length > 0,
-      `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" must record GPUI evidence artifacts.`,
-      errors,
-    );
-
-    if (accessibilitySection) {
-      expect(
-        section.gpuiStatuses.gpui === accessibilitySection.gpuiStatus,
-        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" GPUI status must match the accessibility proof.`,
-        errors,
-      );
-      expect(
-        section.gpuiStatuses.focus === accessibilitySection.focusStatus,
-        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" focus status must match the accessibility proof.`,
-        errors,
-      );
-      expect(
-        section.gpuiStatuses.keyboard === accessibilitySection.keyboardStatus,
-        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" keyboard status must match the accessibility proof.`,
-        errors,
-      );
-      expect(
-        section.gpuiStatuses.announcements === accessibilitySection.announcementsStatus,
-        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" announcement status must match the accessibility proof.`,
-        errors,
-      );
-    }
-
-    if (prioritySection) {
-      expect(
-        section.parityMode === prioritySection.parityMode,
-        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" parity mode must match the GPUI priority matrix.`,
-        errors,
-      );
-      expect(
-        section.sideBySideReview === prioritySection.sideBySideReview,
-        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" side-by-side flag must match the GPUI priority matrix.`,
-        errors,
-      );
-      expect(
-        section.owningLayer === prioritySection.gpuiLayer,
-        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" owning layer must match the GPUI priority matrix.`,
-        errors,
-      );
-    }
-
-    for (const routeId of section.svelteRouteIds) {
-      expect(
-        routeIds?.has(routeId) ?? false,
-        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" references unknown Svelte route "${routeId}".`,
-        errors,
-      );
-    }
-
-    for (const artifactPath of section.gpuiEvidenceArtifacts) {
-      expect(
-        fs.existsSync(path.join(repoRoot, artifactPath)),
-        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" references missing GPUI evidence artifact "${artifactPath}".`,
-        errors,
-      );
-    }
-
-    for (const deltaId of section.intentionalDeltaIds) {
-      expect(
-        deltaIds.has(deltaId),
-        `packages/gpui/cross-runtime-parity-report.json section "${section.sectionId}" references unknown delta "${deltaId}".`,
-        errors,
-      );
-    }
-  }
-
-  for (const delta of report.deltaRegister) {
-    expect(delta.title.trim().length > 0, `Cross-runtime delta "${delta.id}" is missing a title.`, errors);
-    expect(
-      allowedDeltaStatuses.has(delta.status),
-      `Cross-runtime delta "${delta.id}" uses unsupported status "${delta.status}".`,
-      errors,
-    );
-    expect(delta.sectionIds.length > 0, `Cross-runtime delta "${delta.id}" is missing section coverage.`, errors);
-    expect(
-      delta.runtimeReason.trim().length > 0,
-      `Cross-runtime delta "${delta.id}" is missing a runtime reason.`,
-      errors,
-    );
-    expect(
-      delta.followUp.trim().length > 0,
-      `Cross-runtime delta "${delta.id}" is missing follow-up guidance.`,
-      errors,
-    );
-    expect(
-      delta.evidenceArtifacts.length > 0,
-      `Cross-runtime delta "${delta.id}" is missing evidence artifacts.`,
-      errors,
-    );
-
-    for (const sectionId of delta.sectionIds) {
-      expect(
-        reportSectionIds.includes(sectionId),
-        `Cross-runtime delta "${delta.id}" references unknown section "${sectionId}".`,
-        errors,
-      );
-    }
-
-    for (const artifactPath of delta.evidenceArtifacts) {
-      expect(
-        fs.existsSync(path.join(repoRoot, artifactPath)),
-        `Cross-runtime delta "${delta.id}" references missing evidence artifact "${artifactPath}".`,
-        errors,
-      );
-    }
-  }
-
   expect(
-    Boolean(gpuiAcceptanceSuite),
-    `packages/gpui/cross-runtime-parity-report.json references missing acceptance suite "${report.acceptanceHarness.suiteId}".`,
+    report.accessibility.status === "manual" &&
+      report.accessibility.scope.includes("not proved") &&
+      report.accessibility.scope.includes("assistive-technology"),
+    "GPUI parity report must keep broad native accessibility proof manual and unproved.",
     errors,
   );
+  expectEvidence("accessibility", report.accessibility.evidence);
 
-  if (gpuiAcceptanceSuite) {
-    expect(
-      report.acceptanceHarness.status === gpuiAcceptanceSuite.status,
-      "packages/gpui/cross-runtime-parity-report.json acceptance harness status must match packages/ecosystem-acceptance.json.",
-      errors,
-    );
-    compareLists(
-      "packages/gpui/cross-runtime-parity-report.json acceptance harness covered packages",
-      [...report.acceptanceHarness.coveredPackages].sort(),
-      [...gpuiAcceptanceSuite.coveredPackages].sort(),
-      errors,
-    );
-    compareLists(
-      "packages/gpui/cross-runtime-parity-report.json acceptance harness evidence artifacts",
-      [...report.acceptanceHarness.evidenceArtifacts].sort(),
-      [...gpuiAcceptanceSuite.evidenceArtifacts].sort(),
-      errors,
-    );
-    compareLists(
-      "packages/gpui/cross-runtime-parity-report.json acceptance harness required checks",
-      [...report.acceptanceHarness.requiredChecks].sort(),
-      [...gpuiAcceptanceSuite.requiredChecks].sort(),
-      errors,
-    );
-    compareLists(
-      "packages/gpui/cross-runtime-parity-report.json acceptance harness blockers",
-      [...report.acceptanceHarness.blockers].sort(),
-      [...gpuiAcceptanceSuite.blockers].sort(),
-      errors,
-    );
-  }
+  expect(
+    report.visual.status === "compared" &&
+      report.visual.scope.includes("Button-only") &&
+      report.visual.scope.includes("18-case"),
+    "GPUI parity report must keep visual comparison Button-only.",
+    errors,
+  );
+  expect(
+    report.visual.capturePosture.includes("non-activating windowed") &&
+      report.visual.capturePosture.includes("absent from default QA/CI"),
+    "GPUI parity report must record the operator-approved windowed capture boundary.",
+    errors,
+  );
+  expectEvidence("visual", report.visual.evidence);
+  expect(report.knownDeltas.length >= 3, "GPUI parity report must record current known deltas.", errors);
 
   return {
-    gpuiCrossRuntimeSectionCount: report.sectionReports.length,
-    gpuiCrossRuntimeDeltaCount: report.deltaRegister.length,
+    gpuiCrossRuntimeRouteCount: report.construction.routeCount,
+    gpuiCrossRuntimeDeltaCount: report.knownDeltas.length,
   };
 }
 
@@ -3254,7 +3084,7 @@ const gpuiOverlayNavigationMenuCounts = validateGpuiOverlayNavigationMenuBaselin
 const gpuiFormValidationRemediationCounts = validateGpuiFormValidationRemediationBaseline(errors);
 const gpuiDataBrowseDetailPickerMediaCounts = validateGpuiDataBrowseDetailPickerMediaBaseline(errors);
 const gpuiNativeAccessibilityCounts = validateGpuiNativeAccessibilityProof(errors);
-const gpuiCrossRuntimeParityCounts = validateGpuiCrossRuntimeParityReport(errors);
+const gpuiCrossRuntimeRouteCounts = validateGpuiCrossRuntimeParityReport(errors);
 const sharedDemoAppAuditCounts = validateSharedDemoAppAudit(errors);
 const sharedDemoAppContractCounts = validateSharedDemoAppContract(errors);
 
@@ -3307,5 +3137,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `Validated ${componentContractCount} component contracts, ${operatorGuideCount} operator guides, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${g03CloseoutCounts.stableSurfaceCount} closeout surfaces, ${g03CloseoutCounts.carryForwardCount} carry-forward gaps, ${gpuiPriorityCounts.waveCount} GPUI implementation waves, ${gpuiPriorityCounts.targetCount} GPUI section targets, ${gpuiPreviewCounts.previewSectionCount} GPUI preview baseline sections, ${gpuiStructuralCounts.structuralExportCount} GPUI structural exports, ${gpuiActionFieldCounts.actionFieldExportCount} GPUI action or field exports, ${gpuiSelectionFeedbackDateCounts.selectionFeedbackDateExportCount} GPUI selection/feedback/date exports, ${gpuiOverlayNavigationMenuCounts.overlayNavigationMenuExportCount} GPUI overlay/disclosure/navigation/menu exports, ${gpuiFormValidationRemediationCounts.gpuiCompositeExportCount} GPUI form/validation/remediation composite exports, ${gpuiDataBrowseDetailPickerMediaCounts.gpuiDataCompositeExportCount} GPUI data/browse/detail/picker/media composite exports, ${gpuiNativeAccessibilityCounts.gpuiAccessibilityLayerCount} GPUI accessibility-proof layers, ${gpuiNativeAccessibilityCounts.gpuiAccessibilitySectionCount} GPUI accessibility-proof sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeSectionCount} GPUI cross-runtime parity sections, ${gpuiCrossRuntimeParityCounts.gpuiCrossRuntimeDeltaCount} GPUI intentional deltas, ${sharedDemoAppAuditCounts.demoAuditFindingCount} shared demo-app audit findings, ${sharedDemoAppAuditCounts.demoAuditScreenCount} shared demo target screens, ${sharedDemoAppContractCounts.demoContractScreenCount} shared demo contract screens, ${sharedDemoAppContractCounts.demoContractRegionCount} shared demo shell regions, ${contractDriftResult.checked} contract<->Svelte prop surfaces, ${callbackDriftResult.checked} contract<->Svelte callback surfaces, and ${specDriftResult.checked} contract<->spec prop surfaces.`,
+  `Validated ${componentContractCount} component contracts, ${operatorGuideCount} operator guides, ${docsSections.length} docs sections, ${docsFamilies.length} docs families, ${parityTargets.length} parity targets, ${accessibilityAuditTargets.length} accessibility audit targets, ${ecosystemAcceptanceCounts.suiteCount} ecosystem acceptance suites, ${ecosystemAcceptanceCounts.regressionClassCount} regression classes, ${referenceAppsCounts.shapeCount} reference shapes, ${referenceAppsCounts.laneCount} onboarding lanes, ${g03CloseoutCounts.stableSurfaceCount} closeout surfaces, ${g03CloseoutCounts.carryForwardCount} carry-forward gaps, ${gpuiPriorityCounts.waveCount} GPUI implementation waves, ${gpuiPriorityCounts.targetCount} GPUI section targets, ${gpuiPreviewCounts.previewSectionCount} GPUI preview baseline sections, ${gpuiStructuralCounts.structuralExportCount} GPUI structural exports, ${gpuiActionFieldCounts.actionFieldExportCount} GPUI action or field exports, ${gpuiSelectionFeedbackDateCounts.selectionFeedbackDateExportCount} GPUI selection/feedback/date exports, ${gpuiOverlayNavigationMenuCounts.overlayNavigationMenuExportCount} GPUI overlay/disclosure/navigation/menu exports, ${gpuiFormValidationRemediationCounts.gpuiCompositeExportCount} GPUI form/validation/remediation composite exports, ${gpuiDataBrowseDetailPickerMediaCounts.gpuiDataCompositeExportCount} GPUI data/browse/detail/picker/media composite exports, ${gpuiNativeAccessibilityCounts.gpuiAccessibilityLayerCount} GPUI accessibility-proof layers, ${gpuiNativeAccessibilityCounts.gpuiAccessibilitySectionCount} GPUI accessibility-proof sections, ${gpuiCrossRuntimeRouteCounts.gpuiCrossRuntimeRouteCount} GPUI headless construction routes, ${gpuiCrossRuntimeRouteCounts.gpuiCrossRuntimeDeltaCount} GPUI current known deltas, ${sharedDemoAppAuditCounts.demoAuditFindingCount} shared demo-app audit findings, ${sharedDemoAppAuditCounts.demoAuditScreenCount} shared demo target screens, ${sharedDemoAppContractCounts.demoContractScreenCount} shared demo contract screens, ${sharedDemoAppContractCounts.demoContractRegionCount} shared demo shell regions, ${contractDriftResult.checked} contract<->Svelte prop surfaces, ${callbackDriftResult.checked} contract<->Svelte callback surfaces, and ${specDriftResult.checked} contract<->spec prop surfaces.`,
 );

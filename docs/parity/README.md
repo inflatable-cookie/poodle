@@ -16,14 +16,20 @@ Use these sources instead:
 
 1. [Component contracts](../contracts/components/README.md) define the public
    inputs, behavior, accessibility, composition, and token use.
-2. The Svelte and React component catalogues provide live web specimens and
-   generated API documentation.
-3. `packages/gpui/cross-runtime-parity-report.json` records current native
-   cross-runtime results.
-4. `packages/svelte/preview/scripts/parity-report.ts` generates the current
+2. The g16.001 [active-cohort evidence ledger](../roadmaps/g16/parity-evidence-ledger.md)
+   is the current component-level denominator and evidence authority: 175
+   public Svelte components, 174 portable native routes, and one web-only
+   MeterSurface exclusion.
+3. The Svelte and React component catalogues provide live web specimens and
+   generated API documentation; Svelte axe evidence does not transfer to
+   React.
+4. `packages/gpui/cross-runtime-parity-report.json` records the current GPUI
+   construction, bounded mounted, manual accessibility, and Button-only visual
+   posture.
+5. `packages/svelte/preview/scripts/parity-report.ts` generates the current
    parity report from repository evidence.
-5. `effigy parity:check`, `effigy test:components`, and `effigy docs:check`
-   enforce the release gates.
+6. `effigy check:parity-evidence-ledger`, `effigy parity:check`,
+   `effigy test:components`, and `effigy docs:check` enforce the release gates.
 
 ## Why These Files Remain
 
