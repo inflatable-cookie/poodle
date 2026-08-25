@@ -1,6 +1,6 @@
 # g16.019 — Finch Poodle 0.2.2 adoption
 
-Status: **review approved — correct stale PR metadata before merge**
+Status: **complete — PR 1 merged**
 Depends on: `g16.007`, `g16.008`, `g16.011`
 Target repository: `/Users/tom/Dev/projects/finch`
 Target base: `ab4f5a6072ee70391ed6d2b8513c8d035dbc7609`
@@ -57,13 +57,11 @@ edits, and validation in the Finch PR. Do not merge. Independent of `020`-`022`.
 
 ## Review Result
 
-PR [#1](https://github.com/inflatable-cookie/finch/pull/1) is implementation-
-approved at `1d50f344`. The active app resolves one registry Poodle 0.2.2
-identity, the Longhorn adapter peer converges on it, and the unused Poodle
-sibling is gone from `bootstrap:deps`. README, architecture, and the active
-Tauri shell contract now agree on registry consumption plus the optional
+PR [#1](https://github.com/inflatable-cookie/finch/pull/1) merged reviewed head
+`1d50f344` at merge commit `a9f768bb`. The active app resolves one registry
+Poodle 0.2.2 identity, the Longhorn adapter peer converges on it, and the unused
+Poodle sibling is gone from `bootstrap:deps`. README, architecture, and the
+active Tauri shell contract agree on registry consumption plus the optional
 Effigy link path. Independent `tauri:check`, docs QA, Northstar QA, installed-
-graph, and diff checks pass. Before merge, update the PR summary and test plan,
-which still omit the bootstrap/authority correction and overstate what the
-`tauri:check` selector runs. No implementation change is needed if the head
-remains unchanged.
+graph, and diff checks pass. The stale PR summary and test plan were corrected
+before merge without changing the approved head.
