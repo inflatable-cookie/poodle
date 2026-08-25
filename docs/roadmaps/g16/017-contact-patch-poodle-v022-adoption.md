@@ -20,11 +20,20 @@ sibling overrides to public 0.2.2. Keep its UI architecture unchanged.
 - Remove committed Poodle core/Svelte overrides.
 - Move Admin, Front, UI, and client Underlay dependencies to
   `git+ssh://git@github.com/inflatable-cookie/underlay.git#v0.9.2`.
+- Remove `cp-client`'s TypeScript path mapping to the sibling Underlay source so
+  client validation resolves the installed tagged package.
+- Move the shared public-config generator from its sibling source-file import
+  to Underlay's published
+  `@inflatable-cookie/underlay/server/config-stack` subpath.
 - Move every active Contact Patch API Underlay crate from sibling paths to
   `ssh://git@github.com/inflatable-cookie/underlay.git`, tag `v0.9.2`, retaining
   existing features.
 - Regenerate web and Rust locks narrowly and prove one Poodle and Underlay
   identity.
+- Update Contact Patch-owned dependency-resolution documentation that still
+  describes sibling Underlay/Poodle packages as application dependencies.
+  Preserve sibling mounts used only by explicit cross-repository QA; they must
+  not override installed package resolution.
 - Repair only Contact Patch-owned compatibility failures caused by the bump.
 
 ## Out Of Scope
@@ -40,6 +49,8 @@ sibling overrides to public 0.2.2. Keep its UI architecture unchanged.
 - Active Admin/Front Poodle dependencies resolve registry 0.2.2.
 - Every active Underlay dependency resolves tag `v0.9.2`
   (`ddba26400f480638829917cf72eecc62be4b978d`), with no sibling path.
+- No TypeScript path mapping, generator import, or other source bypass loads
+  Underlay/Poodle from a sibling checkout during application validation.
 - No old Poodle version, sibling Poodle source, or committed override remains.
 - Web and Rust lock changes are bounded to the coupled dependency upgrade.
 - Admin, Front, UI, root validation, and QA pass or a baseline is reproduced.
@@ -48,9 +59,9 @@ sibling overrides to public 0.2.2. Keep its UI architecture unchanged.
 
 - Use the Effigy-owned prepare/install flow; inspect all Bun/Cargo manifests and
   locks.
-- Run `effigy cp-admin/validate`, `effigy cp-front/validate`,
-  `effigy cp-ui/validate`, the API validation selected by `effigy tasks`,
-  `effigy validate`, and `effigy qa`.
+- Run `effigy cp-client/validate`, `effigy cp-admin/validate`,
+  `effigy cp-front/validate`, `effigy cp-ui/validate`,
+  `effigy cp-api/validate`, `effigy validate`, and `effigy qa`.
 - Run `git diff --check`.
 
 ## Stop Conditions
