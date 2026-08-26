@@ -270,6 +270,10 @@ pub fn text_input_with_handlers(
             let (start, end) = spec.selection_range();
             let on_selection = handlers.on_selection_change.clone();
             let change = on_change.clone();
+            // `maxLength` is spent here, before the host is told anything: the
+            // shared transition owns the rule, so GPUI and Jetstream cannot
+            // drift from `<input maxlength>` and from each other.
+            let limit = spec.max_length;
             value.interaction.on_edit_insert = Some(Arc::new(move |inserted: &str| {
                 let outcome = poodle_headless::text_input::insert_transition(
                     &text,
@@ -278,6 +282,7 @@ pub fn text_input_with_handlers(
                         head: end,
                     },
                     inserted,
+                    limit,
                 );
                 if let Some(next) = outcome.value {
                     if let Some(change) = &change {
@@ -306,7 +311,11 @@ pub fn text_input_with_handlers(
         && !current_value.is_empty();
     if can_clear {
         let mut clear = Node::button("");
-        clear.id = Some("text-input-clear".to_owned());
+        // Derived from the field id for the same reason the value node is:
+        // the clear button is focusable, and the backend keys focus handles
+        // and paint bounds by element id. A constant would have made two
+        // search fields share one button identity.
+        clear.id = Some(format!("{field_id}-clear"));
         clear.a11y.role = Some(NodeRole::Button);
         clear.a11y.label = Some("Clear search query".to_owned());
         clear.interaction.focusable = true;
@@ -436,13 +445,14 @@ pub fn text_input_with_handlers(
         let (start, end) = spec.selection_range();
         let on_selection = handlers.on_selection_change.clone();
         let change = on_change.clone();
+        let limit = spec.max_length;
         root.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
             let state = poodle_headless::text_input::EditState {
                 anchor: start,
                 head: end,
             };
             let Some(outcome) = poodle_headless::text_input::edit_transition(
-                &value, state, key, mods.shift, mods.accel,
+                &value, state, key, mods.shift, mods.accel, limit,
             ) else {
                 return;
             };
@@ -462,6 +472,7 @@ pub fn text_input_with_handlers(
             let (start, end) = spec.selection_range();
             let on_selection = handlers.on_selection_change.clone();
             let change = on_change.clone();
+            let limit = spec.max_length;
             root.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
                 let outcome = poodle_headless::text_input::insert_transition(
                     &value,
@@ -470,6 +481,7 @@ pub fn text_input_with_handlers(
                         head: end,
                     },
                     text,
+                    limit,
                 );
                 if let Some(next) = outcome.value {
                     if let Some(change) = &change {
@@ -708,6 +720,97 @@ mod tests {
             Some(callback),
         );
         assert!(read_only.interaction.on_text_change.is_none());
+    }
+
+    /// `maxLength` is spent before the host hears anything. The rule lives in
+    /// the shared transition; the component only hands it over, so a backend
+    /// never gets the chance to enforce a different one.
+    #[test]
+    fn max_length_is_enforced_before_the_host_sees_a_new_value() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let seen = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
+        let sink = Arc::clone(&seen);
+        let node = text_input_with_handlers(
+            &TextInputSpec::new()
+                .with_id("limited")
+                .with_value("abcd")
+                .with_max_length(4)
+                .with_selection(1, 1),
+            &ctx,
+            TextInputHandlers {
+                on_change: Some(Arc::new(move |next: &str| {
+                    sink.lock().unwrap().push(next.to_string())
+                })),
+                ..TextInputHandlers::default()
+            },
+        );
+
+        let edit_key = node
+            .interaction
+            .on_edit_key
+            .as_ref()
+            .expect("an editable field answers keys");
+        edit_key("X", poodle_node::NodeModifiers::default());
+        assert!(
+            seen.lock().unwrap().is_empty(),
+            "a full field reports no new value at all"
+        );
+
+        // A paste is truncated to what fits rather than rejected.
+        let insert = node
+            .interaction
+            .on_edit_insert
+            .as_ref()
+            .expect("an editable field takes inserted content");
+        insert("XY");
+        assert_eq!(seen.lock().unwrap().as_slice(), &["abcd".to_string()]);
+
+        let seen = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
+        let sink = Arc::clone(&seen);
+        let room = text_input_with_handlers(
+            &TextInputSpec::new()
+                .with_id("limited")
+                .with_value("ab")
+                .with_max_length(4)
+                .with_selection(2, 2),
+            &ctx,
+            TextInputHandlers {
+                on_change: Some(Arc::new(move |next: &str| {
+                    sink.lock().unwrap().push(next.to_string())
+                })),
+                ..TextInputHandlers::default()
+            },
+        );
+        room.interaction.on_edit_insert.as_ref().expect("insert")("cdef");
+        assert_eq!(seen.lock().unwrap().as_slice(), &["abcd".to_string()]);
+    }
+
+    /// Two search fields must not share their clear button. The backend keys
+    /// focus handles and paint bounds by element id, so a constant id made one
+    /// field's clear control answer for the other's.
+    #[test]
+    fn each_search_field_owns_its_clear_control_identity() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let field = |id: &str| {
+            text_input(
+                &TextInputSpec::new()
+                    .with_id(id)
+                    .with_type("search")
+                    .with_value("kick"),
+                &ctx,
+                None,
+            )
+        };
+        let a = field("one");
+        let b = field("two");
+        assert!(a
+            .find(&|n| n.id.as_deref() == Some("poodle-input-one-clear"))
+            .is_some());
+        assert!(b
+            .find(&|n| n.id.as_deref() == Some("poodle-input-two-clear"))
+            .is_some());
     }
 
     #[test]

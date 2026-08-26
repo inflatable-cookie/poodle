@@ -71,3 +71,87 @@ describe("TextInput (react) search clear", () => {
     expect(order).toEqual(["valueChange:", "clear"]);
   });
 });
+
+/**
+ * g16.007: the portable command and suppression rules, asserted beside the
+ * native mounted proof so the two cannot drift. Enter submits the current
+ * value and Escape cancels — neither is allowed to edit the field on its own,
+ * because a controlled host owns the value and only `valueChange` may move it.
+ */
+describe("TextInput (react) submit and cancel", () => {
+  it("submits the current value on Enter without changing it", () => {
+    const submitted: string[] = [];
+    const changed: string[] = [];
+    const { container } = render(
+      <TextInput
+        id="command"
+        value="kick"
+        onSubmit={(value) => submitted.push(value)}
+        onValueChange={(value) => changed.push(value)}
+      />,
+    );
+
+    fireEvent.keyDown(container.querySelector("input")!, { key: "Enter" });
+
+    expect(submitted).toEqual(["kick"]);
+    expect(changed).toEqual([]);
+    expect(container.querySelector("input")!.value).toBe("kick");
+  });
+
+  it("cancels on Escape without changing the value", () => {
+    const cancelled: string[] = [];
+    const changed: string[] = [];
+    const { container } = render(
+      <TextInput
+        id="command"
+        value="kick"
+        onCancel={() => cancelled.push("cancel")}
+        onValueChange={(value) => changed.push(value)}
+      />,
+    );
+
+    fireEvent.keyDown(container.querySelector("input")!, { key: "Escape" });
+
+    expect(cancelled).toEqual(["cancel"]);
+    expect(changed).toEqual([]);
+    expect(container.querySelector("input")!.value).toBe("kick");
+  });
+});
+
+/**
+ * g16.007: disabled is inert; read-only stays a real field that can be read
+ * from and commanded but never edited. The clear control is the one part of a
+ * search field a pointer can reach, so its absence is what "cannot mutate"
+ * looks like from outside.
+ */
+describe("TextInput (react) disabled and read-only", () => {
+  it("disables the control and renders no clear button", () => {
+    const { container } = render(<TextInput id="search" type="search" value="kick" disabled />);
+    expect(container.querySelector("input")!.disabled).toBe(true);
+    expect(container.querySelector(".poodle-text-input__clear")).toBeNull();
+  });
+
+  it("marks a read-only control readonly and renders no clear button", () => {
+    const { container } = render(<TextInput id="search" type="search" value="kick" readOnly />);
+    const input = container.querySelector("input")!;
+    expect(input.readOnly).toBe(true);
+    expect(input.disabled).toBe(false);
+    expect(container.querySelector(".poodle-text-input__clear")).toBeNull();
+  });
+
+  it("still submits from a read-only control", () => {
+    const submitted: string[] = [];
+    const { container } = render(
+      <TextInput id="search" value="kick" readOnly onSubmit={(value) => submitted.push(value)} />,
+    );
+
+    fireEvent.keyDown(container.querySelector("input")!, { key: "Enter" });
+
+    expect(submitted).toEqual(["kick"]);
+  });
+
+  it("forwards maxLength to the native limit", () => {
+    const { container } = render(<TextInput id="t1" maxLength={4} />);
+    expect(container.querySelector("input")!.getAttribute("maxlength")).toBe("4");
+  });
+});

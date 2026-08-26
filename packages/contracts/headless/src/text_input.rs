@@ -51,9 +51,25 @@ fn splice(value: &str, from: usize, to: usize, insert: &str) -> String {
     format!("{head}{insert}{tail}")
 }
 
+/// How many characters `limit` still allows to be inserted over the range
+/// `start..end`, which the insertion replaces. `None` is unlimited.
+///
+/// `maxLength` is a text rule, so it lives beside the other text rules rather
+/// than in each renderer: a backend that clamped the *result* would delete the
+/// tail of a full field when you typed at its start, which is not what an
+/// `<input maxlength>` does.
+fn budget(value: &str, start: usize, end: usize, limit: Option<usize>) -> Option<usize> {
+    let limit = limit?;
+    let kept = value.chars().count().saturating_sub(end.saturating_sub(start));
+    Some(limit.saturating_sub(kept))
+}
+
 /// Apply one keystroke to `value` at `state`. `None` means the key is not ours
 /// — the caller leaves it for other handlers (Enter, Tab, Escape, shortcuts we
 /// do not implement).
+///
+/// `limit` is the field's `maxLength`, enforced here so the host never sees an
+/// over-long value in the first place.
 ///
 /// Pure, so the whole editing model is testable without a window.
 pub fn edit_transition(
@@ -62,6 +78,7 @@ pub fn edit_transition(
     key: &str,
     shift: bool,
     accel: bool,
+    limit: Option<usize>,
 ) -> Option<EditOutcome> {
     let state = state.clamped(value);
     let len = value.chars().count();
@@ -141,6 +158,13 @@ pub fn edit_transition(
         _ => {
             // A single printable character replaces the selection.
             if key.chars().count() == 1 && !accel {
+                if budget(value, start, end, limit) == Some(0) {
+                    // A full field swallows the key rather than letting it
+                    // fall through to another handler, and leaves the caret
+                    // where it was — `<input maxlength>` rejects the
+                    // keystroke, it does not shuffle the value.
+                    return Some(EditOutcome { value: None, state });
+                }
                 let next = splice(value, start, end, key);
                 Some(EditOutcome {
                     value: Some(next),
@@ -158,11 +182,23 @@ pub fn edit_transition(
 /// The paste primitive, and the same shape IME commit will need: the caller
 /// supplies text from somewhere the edit model cannot reach (a clipboard, a
 /// composition buffer, a drop) and the model owns where it lands.
-pub fn insert_transition(value: &str, state: EditState, text: &str) -> EditOutcome {
+///
+/// `limit` truncates the insertion to what still fits rather than rejecting
+/// it, which is what a browser does with an over-long paste.
+pub fn insert_transition(
+    value: &str,
+    state: EditState,
+    text: &str,
+    limit: Option<usize>,
+) -> EditOutcome {
     let state = state.clamped(value);
     let (start, end) = state.range();
+    let text: String = match budget(value, start, end, limit) {
+        Some(budget) => text.chars().take(budget).collect(),
+        None => text.to_string(),
+    };
     EditOutcome {
-        value: Some(splice(value, start, end, text)),
+        value: Some(splice(value, start, end, &text)),
         state: EditState::collapsed(start + text.chars().count()),
     }
 }
@@ -438,14 +474,14 @@ mod tests {
 
     #[test]
     fn insert_replaces_the_selection_and_leaves_the_caret_after_the_text() {
-        let outcome = insert_transition("hello", EditState { anchor: 1, head: 4 }, "EY");
+        let outcome = insert_transition("hello", EditState { anchor: 1, head: 4 }, "EY", None);
         assert_eq!(outcome.value.as_deref(), Some("hEYo"));
         assert_eq!(outcome.state, EditState::collapsed(3));
     }
 
     #[test]
     fn insert_at_a_collapsed_caret_adds_without_removing() {
-        let outcome = insert_transition("ac", EditState::collapsed(1), "b");
+        let outcome = insert_transition("ac", EditState::collapsed(1), "b", None);
         assert_eq!(outcome.value.as_deref(), Some("abc"));
         assert_eq!(outcome.state, EditState::collapsed(2));
     }
@@ -492,7 +528,7 @@ mod tests {
             head: value.chars().count(),
         };
         for (key, shift, accel) in keys {
-            if let Some(outcome) = edit_transition(&value, state, key, *shift, *accel) {
+            if let Some(outcome) = edit_transition(&value, state, key, *shift, *accel, None) {
                 state = outcome.state;
                 if let Some(next) = outcome.value {
                     value = next;
@@ -530,23 +566,11 @@ mod tests {
     fn backspace_at_the_start_and_delete_at_the_end_are_inert_but_consumed() {
         // Consumed matters: an unhandled key would fall through to another
         // handler. `Some` with no value change is the contract.
-        let outcome = edit_transition(
-            "abc",
-            EditState { anchor: 0, head: 0 },
-            "backspace",
-            false,
-            false,
-        )
+        let outcome = edit_transition("abc", EditState { anchor: 0, head: 0 }, "backspace", false, false, None)
         .expect("backspace is ours even with nothing to delete");
         assert!(outcome.value.is_none());
 
-        let outcome = edit_transition(
-            "abc",
-            EditState { anchor: 3, head: 3 },
-            "delete",
-            false,
-            false,
-        )
+        let outcome = edit_transition("abc", EditState { anchor: 3, head: 3 }, "delete", false, false, None)
         .expect("delete is ours even at the end");
         assert!(outcome.value.is_none());
     }
@@ -555,7 +579,7 @@ mod tests {
     fn arrows_home_and_end_move_without_changing_the_value() {
         for key in ["left", "right", "home", "end"] {
             let outcome =
-                edit_transition("abc", EditState { anchor: 1, head: 1 }, key, false, false)
+                edit_transition("abc", EditState { anchor: 1, head: 1 }, key, false, false, None)
                     .unwrap_or_else(|| panic!("{key} moves the caret"));
             assert!(outcome.value.is_none(), "{key} must not edit");
         }
@@ -592,9 +616,9 @@ mod tests {
     #[test]
     fn a_plain_arrow_collapses_a_selection_to_its_edge() {
         let state = EditState { anchor: 1, head: 3 };
-        let left = edit_transition("abcd", state, "left", false, false).unwrap();
+        let left = edit_transition("abcd", state, "left", false, false, None).unwrap();
         assert_eq!(left.state, EditState { anchor: 1, head: 1 });
-        let right = edit_transition("abcd", state, "right", false, false).unwrap();
+        let right = edit_transition("abcd", state, "right", false, false, None).unwrap();
         assert_eq!(right.state, EditState { anchor: 3, head: 3 });
     }
 
@@ -622,7 +646,7 @@ mod tests {
             ("c", true),
         ] {
             assert!(
-                edit_transition("abc", EditState { anchor: 3, head: 3 }, key, false, accel)
+                edit_transition("abc", EditState { anchor: 3, head: 3 }, key, false, accel, None)
                     .is_none(),
                 "{key} must fall through"
             );
@@ -632,15 +656,73 @@ mod tests {
     #[test]
     fn a_cursor_past_a_shortened_value_is_clamped() {
         // The host owns the value and can rewrite it between frames.
+        let outcome = edit_transition("ab", EditState { anchor: 9, head: 9 }, "backspace", false, false, None)
+        .unwrap();
+        assert_eq!(outcome.value.as_deref(), Some("a"));
+    }
+
+    /// `maxLength` is a text rule, so it is enforced here and nowhere else.
+    /// A full field rejects the keystroke outright — value untouched, caret
+    /// untouched — rather than clamping the result, which would have deleted
+    /// the tail when you typed at the start.
+    #[test]
+    fn a_full_field_swallows_a_printable_key_and_changes_nothing() {
+        let state = EditState { anchor: 1, head: 1 };
+        let outcome = edit_transition("abc", state, "X", false, false, Some(3))
+            .expect("the key is still ours: a full field must not let it fall through");
+        assert!(outcome.value.is_none());
+        assert_eq!(outcome.state, state);
+    }
+
+    /// The budget counts what the insertion *replaces*: a selection frees the
+    /// characters it covers, so typing over one in a full field still lands.
+    #[test]
+    fn typing_over_a_selection_spends_the_characters_it_replaces() {
         let outcome = edit_transition(
-            "ab",
-            EditState { anchor: 9, head: 9 },
+            "abcd",
+            EditState { anchor: 1, head: 3 },
+            "X",
+            false,
+            false,
+            Some(4),
+        )
+        .expect("ours");
+        assert_eq!(outcome.value.as_deref(), Some("aXd"));
+        assert_eq!(outcome.state, EditState::collapsed(2));
+    }
+
+    /// A host may hand down a value longer than the limit. Editing it must
+    /// still be possible — the limit gates growth, not the field.
+    #[test]
+    fn an_over_long_value_can_still_be_deleted_from() {
+        let outcome = edit_transition(
+            "abcdef",
+            EditState { anchor: 6, head: 6 },
             "backspace",
             false,
             false,
+            Some(3),
         )
-        .unwrap();
-        assert_eq!(outcome.value.as_deref(), Some("a"));
+        .expect("ours");
+        assert_eq!(outcome.value.as_deref(), Some("abcde"));
+    }
+
+    /// A paste truncates to fit rather than being rejected, and the caret
+    /// lands after what actually went in — the same as a browser input.
+    #[test]
+    fn an_over_long_insertion_is_truncated_to_what_fits() {
+        let outcome = insert_transition("ab", EditState::collapsed(2), "cdef", Some(4));
+        assert_eq!(outcome.value.as_deref(), Some("abcd"));
+        assert_eq!(outcome.state, EditState::collapsed(4));
+
+        // Replacing a selection frees its characters for the paste.
+        let outcome = insert_transition("abcd", EditState { anchor: 0, head: 2 }, "XYZ", Some(4));
+        assert_eq!(outcome.value.as_deref(), Some("XYcd"));
+        assert_eq!(outcome.state, EditState::collapsed(2));
+
+        // A cut is an empty insertion: the limit must never block a deletion.
+        let outcome = insert_transition("abcd", EditState { anchor: 0, head: 2 }, "", Some(2));
+        assert_eq!(outcome.value.as_deref(), Some("cd"));
     }
 
     #[test]
