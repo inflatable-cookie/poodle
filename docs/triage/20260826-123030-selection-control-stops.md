@@ -1,7 +1,7 @@
 # Selection-Control Stops After g16.002
 
-Status: open — RadioGroup landed in PR #77; ToggleGroup is ready for contract
-promotion and separate card compilation
+Status: resolved — RadioGroup landed in PR #77; ToggleGroup semantics are
+promoted into its contract and `g16.004`
 Captured: 2026-08-26
 Source: `g16.002` partial close and PR #76 review
 
@@ -61,6 +61,8 @@ as an explicit product decision.
 
 Decision: the operator accepted the recommendation on 2026-08-26. Promotion
 and execution remain sequenced after the RadioGroup identity pattern lands.
+The orchestrator promoted it into the ToggleGroup contract and compiled
+`g16.004` on 2026-08-26.
 
 ## Sequencing
 
@@ -74,3 +76,5 @@ After the accepted decisions:
 2. promote the accepted ToggleGroup decision into its contract;
 3. compile a separate ToggleGroup semantic/API/mounted-parity card using the
    landed identity pattern.
+
+All three steps are complete. Implementation now belongs to `g16.004`.

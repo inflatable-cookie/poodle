@@ -3,7 +3,7 @@
 > **Surface elevation**: ToggleGroup is a surface consumer (93% surface / text-primary mix) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-26
 
 ## 1. Purpose
 
@@ -97,14 +97,24 @@ Behavior classification: machine-backed (`toggleGroupTransition` in
   mode without deactivation, matching pre-machine behavior).
 - Selection predicate `toggleGroupIsSelected` is shared so rendering and
   machine agree on membership semantics.
-- Machinery dependencies: none (buttons provide focus; no roving tabindex in
-  the current contract).
+- The resulting selection is the callback authority in every runtime. Hosts do
+  not reconstruct multiple-selection membership from an activated option.
+- Single mode also has one roving tab stop over enabled options. The selected
+  enabled option is the entry target; otherwise the first enabled option is.
+  Left/Right movement wraps, skips disabled options, focuses the target, and
+  selects it through the same transition. If there is no other enabled target,
+  movement is inert.
+- Multiple mode keeps ordinary toggle-button focus: every enabled item remains
+  a tab stop and Left/Right does not move or change selection.
+- Machinery dependencies: the shared selection transition plus pure enabled-
+  option order, tab-stop, and single-mode movement helpers. Framework and
+  native adapters own the focus request itself.
 
 ## 5. Callbacks
 
 | Callback | When It Fires | Payload | Notes |
 |----------|---------------|---------|-------|
-| `onValueChange` | selection changes | `string \| string[] \| null` | payload type matches selectionMode; single mode may emit `null` when deactivation is enabled |
+| `onValueChange` | an enabled known item is accepted by pointer, Space/Enter, or single-mode arrow movement | `string \| string[] \| null` | payload is the resulting selection and matches selectionMode; single mode may emit `null` when deactivation is enabled |
 
 In single mode with `allowDeactivation=true`, `onValueChange` may receive
 `null`.
@@ -125,14 +135,17 @@ In single mode with `allowDeactivation=true`, `onValueChange` may receive
 
 | Key | Behavior |
 |-----|----------|
-| `Tab` | enters group (focuses first or selected item) then exits |
-| `Arrow Left/Right` | moves focus between items (single mode, roving focus) |
+| `Tab` | single mode enters at the selected enabled item or first enabled item, then exits; multiple mode visits each enabled item normally |
+| `Arrow Left/Right` | single mode wraps across enabled items, moves focus, and selects the target; multiple mode is inert |
 | `Space` | toggles selection on focused item |
 | `Enter` | toggles selection on focused item |
 
 ### Focus And Announcement
 
-- focus entry: first or currently selected item receives focus
+- single-mode focus entry: the currently selected enabled item receives focus,
+  otherwise the first enabled item does; exactly one enabled item has
+  `tabindex=0`
+- multiple-mode focus entry: enabled items use ordinary button tab order
 - focus exit: focus leaves group entirely
 - live-region behavior: none; state changes announced through role semantics
 - GPUI-native accessibility mapping notes: GPUI must expose radiogroup/group
@@ -218,6 +231,11 @@ The selected fill layers a flat accent tint **over** the unselected item fill (t
   hooks with semantic-token formulas as fallbacks. Radius resolves from
   `--poodle-radius-control`.
 - Selection state managed internally when `value` is `undefined` (uncontrolled mode); single mode seeds `null`, multiple mode seeds `[]`
+- Single mode projects one roving tab stop and handles Left/Right within the
+  mounted component instance. Arrow movement uses the shared transition before
+  requesting DOM focus; disabled options are skipped.
+- Multiple mode leaves enabled native buttons in ordinary tab order and does
+  not intercept Left/Right.
 - Transition uses explicit `180ms ease` timing
 
 ## 10. GPUI Notes
@@ -225,6 +243,20 @@ The selected fill layers a flat accent tint **over** the unselected item fill (t
 - expected crate/module surface: `poodle_gpui::primitives::toggle_group`
 - GPUI must switch between radiogroup and group semantics based on selectionMode
 - Per-item checked/pressed state must be exposed in the accessibility tree
+- Native construction supplies a required, lifetime-stable interaction scope
+  through `ToggleGroupHandlers::new(instance_id)`. It is renderer construction
+  data, not a semantic option value or component prop. Runtime focus ids derive
+  from this scope plus option value; readable semantic ids remain separate.
+- `ToggleGroupHandlers::on_value_change` carries the owned headless
+  `ToggleGroupValue`: `Single(Option<String>)` or `Multiple(Vec<String>)`.
+  Shared rendering derives that result through `toggle_group_transition`; it
+  never emits only the activated option and never delegates membership logic
+  to the host.
+- Single mode exposes one roving tab stop, contracted Left/Right movement, and
+  the standard focus ring through existing node focus/key vocabulary. Multiple
+  mode keeps every enabled item focusable and does not install arrow movement.
+- The host remains authoritative for controlled state: it receives the result
+  and rebuilds the spec.
 - The accent-tinted selected state layers a flat `accent-base 22%` tint over the
   unselected item fill (`surface 93% / text-primary`); GPUI must replicate both
   the base fill mix and the accent tint over it, not accent over transparent
@@ -232,10 +264,12 @@ The selected fill layers a flat accent tint **over** the unselected item fill (t
 
 ## 10a. Jetstream Notes
 
-- `ToggleGroup::from_spec(spec, theme).on_change(...)`.
-- The payload is the option that was activated, not the resulting selection. In
-  multi-select the host owns the set, and returning a whole set would make the
-  component the thing that decides whether a click adds or removes.
+- Jetstream backend admission remains program-deferred. In-repo compatibility
+  callers still supply stable native interaction scopes and compile against the
+  shared renderer contract.
+- When the backend is admitted, it must consume the same resulting-selection
+  payload and focus semantics. Activated-option payloads are not an approved
+  runtime delta.
 
 ## 11. Parity Checklist
 
@@ -260,7 +294,8 @@ The selected fill layers a flat accent tint **over** the unselected item fill (t
 
 ### Tier 3: Implementation Freedom
 
-- [ ] roving focus implementation details are platform-owned
+- [ ] focus-request mechanism is platform-owned; the observable tab-stop and
+      movement result are not
 - [ ] transition timing is platform-owned
 - [ ] data attribute naming is platform-owned
 
@@ -268,7 +303,6 @@ The selected fill layers a flat accent tint **over** the unselected item fill (t
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| Focus management details may differ | grouped utility controls may evolve roving focus | allowed | tighten during parity review |
 | Transition timing (180ms ease) | GPUI may not support CSS-style transitions | allowed | match where possible |
 | Flex-wrap behavior | GPUI wrapping may differ slightly from CSS flexbox | allowed | items must wrap and remain cohesive |
 

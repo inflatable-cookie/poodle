@@ -1,8 +1,8 @@
 # g16 — Next Work
 
-Status: active — `g16.003` merged in PR #77
-Posture: strict-ready; RadioGroup native identity and mounted evidence closed;
-ToggleGroup semantic/API promotion is next
+Status: active — `g16.004` ready for worker dispatch
+Posture: strict-ready; ToggleGroup semantics are promoted and the bounded
+web/native/mounted parity lane is compiled
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -35,6 +35,7 @@ stay maintained; backend admission is not part of the first card.
 1. [001 — Active-cohort parity evidence ledger](001-active-cohort-parity-evidence-ledger.md) — complete; operator-reviewed in PR #75
 2. [002 — Selection controls mounted parity](002-selection-controls-mounted-parity.md) — closed — partial outcome
 3. [003 — RadioGroup native identity and mounted parity](003-radio-group-native-identity-and-mounted-parity.md) — complete
+4. [004 — ToggleGroup semantic API and mounted parity](004-toggle-group-semantic-api-and-mounted-parity.md) — ready
 
 ## Measured Selection
 
@@ -60,13 +61,13 @@ breadth, accessibility, and visual comparison.
 
 The operator accepted the split-lane recommendation on 2026-08-26. RadioGroup
 keeps its web form-name behavior and receives required host-owned native
-interaction scope through a handler bundle. ToggleGroup will keep resulting-
-selection payloads and single-mode radiogroup semantics, but its contract and
-execution card wait on orchestrator review of this landed pattern.
+interaction scope through a handler bundle. ToggleGroup keeps resulting-
+selection payloads and single-mode radiogroup semantics. Those decisions are
+now promoted into the component contract and compiled as `g16.004` using the
+landed RadioGroup identity pattern.
 
 ## Next Task
 
-Promote the accepted ToggleGroup semantic/API decision into its component
-contract, then compile a separate `g16.004` mounted-parity card from the landed
-RadioGroup identity pattern. Do not implement ToggleGroup before that card is
-ready and dispatched through its own worker handoff.
+Dispatch `g16.004` through its dedicated worker handoff. Review the resulting
+web/native semantic alignment, mounted GPUI proof, and exact ledger movement
+before choosing another parity lane.
