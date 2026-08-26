@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — `g16.001` complete and operator-reviewed
-Posture: evidence snapshot accepted; next conformance lane remains uncompiled
+Status: active — `g16.001` complete; `g16.002` ready
+Posture: strict-ready; selection-controls mounted parity is the active lane
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -32,12 +32,29 @@ stay maintained; backend admission is not part of the first card.
 ## Runway
 
 1. [001 — Active-cohort parity evidence ledger](001-active-cohort-parity-evidence-ledger.md) — complete; operator-reviewed in PR #75
+2. [002 — Selection controls mounted parity](002-selection-controls-mounted-parity.md) — ready; exact five-component headless batch
 
-`g16.001` is the only compiled card and is complete. Its measured evidence
-classes now inform the next primitive family and proof layer. No `g16.002` is
-implied yet.
+## Measured Selection
+
+`g16.001` separates the next gaps rather than promoting structural presence to
+parity:
+
+- semantic/interface structure is present across the active cohort, but broad
+  cross-runtime behavioural proof is not;
+- GPUI mounted behaviour is missing for 145 components;
+- React has no equivalent whole-roster axe sweep, while GPUI accessibility
+  remains manual;
+- web visual evidence is a route sweep for 169 components, manual for five,
+  and a fixed comparison for Button only;
+- GPUI visual comparison is missing for 173 non-Button portable components.
+
+The first candidate family is `Checkbox`, `Switch`, `RadioGroup`,
+`SegmentedControl`, and `ToggleGroup`. Every member has contract-backed
+selection rules and a missing mounted GPUI cell. The batch exercises binary,
+exclusive, multiple, disabled, readonly, and roving-focus behaviour without
+text/IME, overlay, window, or pixel-capture dependencies.
 
 ## Next Task
 
-Choose the first bounded evidence lane from the accepted `g16.001` ledger, then
-compile `g16.002`. No implementation card is ready before that decision.
+Dispatch `g16.002` as one serial worker lane. Review its five mounted proofs and
+ledger delta before deciding whether the family proceeds to visual fixtures.

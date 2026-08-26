@@ -5,8 +5,8 @@ Updated: 2026-08-25
 ## Active Track
 
 - `g16`
-  - Status: active; `001` complete and operator-reviewed, next lane uncompiled
-  - Range: `001` closed; later cards remain uncompiled pending evidence review
+  - Status: active; strict-ready
+  - Range: `001` closed; `002` ready; later cards uncompiled pending review
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
   - Next move: review `g16.001`'s measured semantic, behavioural,

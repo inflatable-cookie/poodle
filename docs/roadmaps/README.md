@@ -14,8 +14,9 @@ chosen.
 
 - [Generation index](generation-index.md) is the canonical status summary.
 - `g16.001` is complete and operator-reviewed in PR #75. It repairs stale
-  parity reporting and produces one component-level evidence ledger. Later
-  cards remain uncompiled; do not infer a conformance programme from g15.
+  parity reporting and produces one component-level evidence ledger. `g16.002`
+  is the first bounded follow-up: mounted GPUI behaviour for five selection
+  controls. No later conformance programme is implied yet.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
