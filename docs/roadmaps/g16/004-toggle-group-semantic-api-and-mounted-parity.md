@@ -1,15 +1,15 @@
 # g16.004 — ToggleGroup Semantic API And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-26
+Completed: 2026-08-26
 Depends on: complete `g16.003`; accepted decision promoted from
 `../../triage/20260826-123030-selection-control-stops.md`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/toggle-group.md`,
 `parity-evidence-ledger.md`
-Execution log target:
-`../../logs/2026-08/20260826-g16-004-toggle-group-semantic-api-and-mounted-parity.md`
+execution log: `../../logs/2026-08/20260826-g16-004-toggle-group-semantic-api-and-mounted-parity.md`
 
 ## Outcome
 
@@ -119,26 +119,26 @@ accessibility stays `manual`. Jetstream backend admission stays deferred.
 
 ## Acceptance
 
-- [ ] Core, Svelte, React, Rust headless, and shared Rust rendering agree on
+- [x] Core, Svelte, React, Rust headless, and shared Rust rendering agree on
       resulting-selection payloads for single, deactivating single, and
       multiple modes.
-- [ ] Single mode has one selected-or-first-enabled tab stop and Left/Right
+- [x] Single mode has one selected-or-first-enabled tab stop and Left/Right
       wrap with disabled skipping in Svelte, React, and GPUI.
-- [ ] Multiple mode keeps ordinary button tab order and ignores Left/Right in
+- [x] Multiple mode keeps ordinary button tab order and ignores Left/Right in
       every active runtime.
-- [ ] Every native ToggleGroup construction provides a non-empty stable
+- [x] Every native ToggleGroup construction provides a non-empty stable
       interaction scope through `ToggleGroupHandlers`; no option-only focus
       identity or activated-option callback remains.
-- [ ] Two same-valued mounted web groups and two same-valued mounted GPUI
+- [x] Two same-valued mounted web groups and two same-valued mounted GPUI
       groups keep independent focus identity.
-- [ ] The real mounted GPUI path proves pointer and keyboard payloads,
+- [x] The real mounted GPUI path proves pointer and keyboard payloads,
       deactivation, multiple add/remove, disabled inertia, and host rebuilds.
-- [ ] Svelte and React public props remain unchanged; specimens remain curated
+- [x] Svelte and React public props remain unchanged; specimens remain curated
       and human-centred.
-- [ ] The generated ledger changes exactly the ToggleGroup GPUI
+- [x] The generated ledger changes exactly the ToggleGroup GPUI
       mounted-behaviour cell and derived totals. GPUI accessibility remains
       `manual`; Jetstream remains deferred.
-- [ ] One August execution log records the semantic/API migration, mounted
+- [x] One August execution log records the semantic/API migration, mounted
       evidence, validation, and remaining gaps.
 
 ## Writable Scope

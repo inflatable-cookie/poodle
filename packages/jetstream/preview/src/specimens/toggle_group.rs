@@ -30,6 +30,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_aria_label("View mode")
                     .with_value(vec!["grid".into()]),
                 theme,
+                "js-toggle-single",
             ),
         ))
         // Four options — Left / Center / Right / Justify, Left selected.
@@ -46,6 +47,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_aria_label("Text alignment")
                 .with_value(vec!["left".into()]),
                 theme,
+                "js-toggle-four",
             ),
         ))
         // Multiple selection — Design + Docs selected, Engineering off.
@@ -62,6 +64,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_aria_label("Filter tags")
                 .with_value(vec!["design".into(), "docs".into()]),
                 theme,
+                "js-toggle-multiple",
             ),
         ))
         // Allow deactivation — single mode that can clear on re-select.
@@ -74,6 +77,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_allow_deactivation(true)
                     .with_value(vec!["grid".into()]),
                 theme,
+                "js-toggle-deactivation",
             ),
         ))
         // With disabled item — List muted, Grid selected.
@@ -89,6 +93,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_aria_label("Toggle group with disabled item")
                 .with_value(vec!["grid".into()]),
                 theme,
+                "js-toggle-disabled-item",
             ),
         ))
         // Fully disabled — whole group muted, List shows selected styling.
@@ -101,6 +106,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_value(vec!["list".into()])
                     .with_disabled(true),
                 theme,
+                "js-toggle-disabled",
             ),
         ))
         // Sizes — full xs–xl ladder.
@@ -145,6 +151,7 @@ fn sized(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
             .with_value(vec!["grid".into()])
             .with_size(size),
         theme,
+        format!("js-toggle-size-{size:?}"),
     )
 }
 
@@ -154,6 +161,7 @@ fn dense(theme: &JetstreamThemeProvider, density: ControlDensity) -> El {
             .with_value(vec!["grid".into()])
             .with_density(density),
         theme,
+        format!("js-toggle-density-{density:?}"),
     )
 }
 

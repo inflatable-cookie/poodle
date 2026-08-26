@@ -185,6 +185,7 @@ fn build_controls_bar(
                     .with_value(vec![active.to_string()])
                     .with_size(poodle_specs::ControlSize::Xs),
                 theme,
+                eyebrow,
             )))
     };
 

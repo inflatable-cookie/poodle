@@ -6,10 +6,9 @@
 //! renders this specimen; everything around the groups (layout, Eyebrow
 //! headings, captions) is unchanged.
 //!
-//! Node interaction closures are context-free (`Arc<dyn Fn(&str) + Send +
-//! Sync>`), so instead of `cx.listener` the change handler pushes a
-//! `NodeSpecimenEvent::SetText` onto a queue the next render drains into
-//! specimen state (see `app_state.rs`).
+//! The change handler receives the owned resulting `ToggleGroupValue`. The
+//! specimen stores that result in the text map; it does not rebuild
+//! membership from an activated option.
 
 use crate::node_compat::Eyebrow;
 use std::sync::Arc;
@@ -21,69 +20,46 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_headless::toggle_group::ToggleGroupValue;
 
-use poodle_render::RenderContext;
-use poodle_render::toggle_group;
+use poodle_render::{toggle_group, RenderContext, ToggleGroupHandlers};
 use poodle_specs::{EyebrowSpec, ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
 
-/// Build a node-tier ToggleGroup whose change handler records the activated
-/// option's value under `key`. Mirrors the old specimen's behavior:
-/// `on_change` fires with the option value and the specimen stores it in the
-/// text map (`--print-state` reads it back).
+fn specimen_text(value: ToggleGroupValue) -> String {
+    match value {
+        ToggleGroupValue::Single(Some(value)) => value,
+        ToggleGroupValue::Single(None) => String::new(),
+        ToggleGroupValue::Multiple(values) => values.join(","),
+    }
+}
+
 fn node_toggle_group(spec: ToggleGroupSpec, key: &'static str, state: &AppState) -> AnyElement {
     let events = state.node_events.clone();
-    let on_change: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(move |value: &str| {
+    let on_value_change: Arc<dyn Fn(ToggleGroupValue) + Send + Sync> = Arc::new(move |value| {
         events.lock().unwrap().push(NodeSpecimenEvent::SetText {
             key: key.to_string(),
-            value: value.to_string(),
+            value: specimen_text(value),
         });
     });
-    let node = toggle_group(&spec, &RenderContext::new(&state.theme), Some(on_change));
+    let node = toggle_group(
+        &spec,
+        &RenderContext::new(&state.theme),
+        ToggleGroupHandlers::new(key).on_value_change(on_value_change),
+    );
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
-/// A node-tier ToggleGroup with no handlers (disabled / sizes / densities).
-fn node_toggle_group_static(spec: ToggleGroupSpec, state: &AppState) -> AnyElement {
-    let node = toggle_group(&spec, &RenderContext::new(&state.theme), None);
+fn node_toggle_group_static(
+    spec: ToggleGroupSpec,
+    instance_id: impl Into<String>,
+    state: &AppState,
+) -> AnyElement {
+    let node = toggle_group(
+        &spec,
+        &RenderContext::new(&state.theme),
+        ToggleGroupHandlers::new(instance_id),
+    );
     poodle_gpui_node_backend::to_gpui(&node)
-}
-
-/// Multi-select transition: the node tier's `on_change` reports the activated
-/// option, not the resulting set, so the specimen owns membership. Toggling
-/// an active value removes it; anything else is appended.
-fn multi_select_transition(current: &[String], activated: &str) -> Vec<String> {
-    let mut next = current.to_vec();
-    if let Some(index) = next.iter().position(|v| v == activated) {
-        next.remove(index);
-    } else {
-        next.push(activated.to_string());
-    }
-    next
-}
-
-/// The live multiple-selection group as a render node, handler wired: the
-/// node tier only attaches `on_activate` when a handler is present, so
-/// without this the section is inert. Returned as a node (pre-conversion) so
-/// the focused test can invoke an option's `on_activate` directly.
-fn multi_select_toggle_group_node(
-    options: Vec<ToggleGroupOption>,
-    current: Vec<String>,
-    events: &Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
-    theme: &GpuiThemeProvider,
-) -> poodle_node::Node {
-    let spec = ToggleGroupSpec::new(options)
-        .with_aria_label("Filter tags")
-        .with_value(current.clone())
-        .with_selection_mode(ToggleGroupSelectionMode::Multiple);
-    let events = Arc::clone(events);
-    let on_change: Arc<dyn Fn(&str) + Send + Sync> = Arc::new(move |value: &str| {
-        let next = multi_select_transition(&current, value);
-        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
-            key: "toggle-group-multiple".to_string(),
-            value: next.join(","),
-        });
-    });
-    toggle_group(&spec, &RenderContext::new(theme), Some(on_change))
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -191,19 +167,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Multiple selection"),
                     theme,
                 ))
-                .child({
-                    let current: Vec<String> = multi_value
-                        .split(',')
-                        .filter(|v| !v.is_empty())
-                        .map(str::to_string)
-                        .collect();
-                    poodle_gpui_node_backend::to_gpui(&multi_select_toggle_group_node(
-                        multi_options,
-                        current,
-                        &state.node_events,
-                        &state.theme,
-                    ))
-                })
+                .child(node_toggle_group(
+                    ToggleGroupSpec::new(multi_options)
+                        .with_aria_label("Filter tags")
+                        .with_value(
+                            multi_value
+                                .split(',')
+                                .filter(|value| !value.is_empty())
+                                .map(str::to_string)
+                                .collect(),
+                        )
+                        .with_selection_mode(ToggleGroupSelectionMode::Multiple),
+                    "toggle-group-multiple",
+                    state,
+                ))
                 .child(
                     div()
                         .text_sm()
@@ -233,6 +210,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_aria_label("Disabled toggle group")
                         .with_default_value(vec!["list".to_string()])
                         .with_disabled(true),
+                    "toggle-group-disabled",
                     state,
                 )),
         )
@@ -254,6 +232,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     ])
                     .with_aria_label("Toggle group with disabled item")
                     .with_default_value(vec!["grid".to_string()]),
+                    "toggle-group-disabled-item",
                     state,
                 )),
         )
@@ -277,95 +256,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 let spec = ToggleGroupSpec::new(make_opts())
                     .with_default_value(vec!["grid".to_string()])
                     .with_size(size);
-                poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, &RenderContext::new(theme), None))
+                poodle_gpui_node_backend::to_gpui(&toggle_group(
+                    &spec,
+                    &RenderContext::new(theme),
+                    ToggleGroupHandlers::new(format!("specimen-size-{size:?}")),
+                ))
             })
             .with_densities(move |density, theme: &GpuiThemeProvider| {
                 let spec = ToggleGroupSpec::new(make_opts())
                     .with_default_value(vec!["grid".to_string()])
                     .with_density(density);
-                poodle_gpui_node_backend::to_gpui(&toggle_group(&spec, &RenderContext::new(theme), None))
+                poodle_gpui_node_backend::to_gpui(&toggle_group(
+                    &spec,
+                    &RenderContext::new(theme),
+                    ToggleGroupHandlers::new(format!("specimen-density-{density:?}")),
+                ))
             }),
     )
-}
-
-#[cfg(test)]
-mod multi_select_tests {
-    // Explicit imports only: `use super::*` would chain the parent's
-    // `use gpui::*` and glob in gpui's `test` proc macro, shadowing the
-    // built-in `#[test]` (gpui-macros 0.2.2 crashes on current rustc).
-    use super::{multi_select_toggle_group_node, multi_select_transition};
-    use crate::app_state::NodeSpecimenEvent;
-    use poodle_gpui::GpuiThemeProvider;
-    use poodle_specs::ToggleGroupOption;
-    use std::sync::{Arc, Mutex};
-
-    fn tag_options() -> Vec<ToggleGroupOption> {
-        vec![
-            ToggleGroupOption::new("design", "Design"),
-            ToggleGroupOption::new("engineering", "Engineering"),
-            ToggleGroupOption::new("docs", "Docs"),
-        ]
-    }
-
-    fn activate(node: &poodle_node::Node, value: &str) {
-        let item = node
-            .find(&|n| n.id.as_deref() == Some(format!("toggle:{value}").as_str()))
-            .unwrap_or_else(|| panic!("item {value} exists"));
-        let on_activate = item
-            .interaction
-            .on_activate
-            .as_ref()
-            .expect("option has an on_activate handler — without one the section is inert");
-        on_activate();
-    }
-
-    fn drained_text(
-        events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
-        index: usize,
-    ) -> (String, String) {
-        let queue = events.lock().unwrap();
-        match &queue[index] {
-            NodeSpecimenEvent::SetText { key, value } => (key.clone(), value.clone()),
-            _ => panic!("event {index} is a SetText"),
-        }
-    }
-
-    #[test]
-    fn activation_adds_and_removes_membership() {
-        let events: Arc<Mutex<Vec<NodeSpecimenEvent>>> = Arc::new(Mutex::new(Vec::new()));
-        let theme = GpuiThemeProvider::new();
-        let node = multi_select_toggle_group_node(
-            tag_options(),
-            vec!["design".to_string(), "docs".to_string()],
-            &events,
-            &theme,
-        );
-
-        // Add: activating an inactive option appends it to the stored set.
-        activate(&node, "engineering");
-        assert_eq!(
-            drained_text(&events, 0),
-            (
-                "toggle-group-multiple".to_string(),
-                "design,docs,engineering".to_string()
-            )
-        );
-
-        // Remove: activating an active option drops it from the stored set.
-        activate(&node, "design");
-        assert_eq!(
-            drained_text(&events, 1),
-            ("toggle-group-multiple".to_string(), "docs".to_string())
-        );
-    }
-
-    #[test]
-    fn transition_toggles_membership() {
-        let current = vec!["design".to_string(), "docs".to_string()];
-        assert_eq!(
-            multi_select_transition(&current, "engineering"),
-            vec!["design", "docs", "engineering"]
-        );
-        assert_eq!(multi_select_transition(&current, "design"), vec!["docs"]);
-    }
 }

@@ -1046,8 +1046,16 @@ pub fn js_toast_stack(spec: &ToastStackSpec, theme: &JetstreamThemeProvider) -> 
     ))
 }
 
-pub fn js_toggle_group(spec: &ToggleGroupSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::toggle_group(spec, &pr::RenderContext::new(theme), None))
+pub fn js_toggle_group(
+    spec: &ToggleGroupSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
+) -> El {
+    El(pr::toggle_group(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::ToggleGroupHandlers::new(instance_id),
+    ))
 }
 
 pub fn js_token_input(spec: &TokenInputSpec, theme: &JetstreamThemeProvider) -> El {

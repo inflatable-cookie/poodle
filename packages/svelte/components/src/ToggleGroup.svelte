@@ -1,6 +1,12 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/toggle-group.css";
-  import { toggleGroupIsSelected, toggleGroupTransition, type ToggleGroupContext } from "@inflatable-cookie/poodle-core";
+  import {
+    toggleGroupArrowTarget,
+    toggleGroupIsSelected,
+    toggleGroupTabStopValue,
+    toggleGroupTransition,
+    type ToggleGroupContext,
+  } from "@inflatable-cookie/poodle-core";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -39,6 +45,7 @@
     onValueChange = undefined,
   }: Props = $props();
 
+  let root: HTMLDivElement | undefined;
   let uncontrolledValue = $state<string | string[] | null>(null);
   let seededDefaultValue = $state(false);
   const uiPresentation = getUiPresentation();
@@ -63,8 +70,32 @@
     disabled,
   });
 
+  const tabStop = $derived(toggleGroupTabStopValue(machineContext));
+
   function isSelected(optionValue: string): boolean {
     return toggleGroupIsSelected(machineContext, optionValue);
+  }
+
+  function itemTabIndex(optionValue: string, itemDisabled: boolean): number | undefined {
+    if (selectionMode !== "single") {
+      return undefined;
+    }
+
+    if (itemDisabled) {
+      return -1;
+    }
+
+    return tabStop === optionValue ? 0 : -1;
+  }
+
+  function itemElement(optionValue: string): HTMLButtonElement | undefined {
+    if (!root) {
+      return undefined;
+    }
+
+    return Array.from(root.querySelectorAll<HTMLButtonElement>("[data-toggle-value]")).find(
+      (element) => element.dataset.toggleValue === optionValue,
+    );
   }
 
   function toggle(optionValue: string): void {
@@ -82,9 +113,32 @@
       }
     }
   }
+
+  function handleKeydown(event: KeyboardEvent, optionValue: string): void {
+    if (selectionMode !== "single") {
+      return;
+    }
+
+    const direction = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : null;
+
+    if (direction === null) {
+      return;
+    }
+
+    event.preventDefault();
+    const target = toggleGroupArrowTarget(machineContext, optionValue, direction);
+
+    if (!target) {
+      return;
+    }
+
+    toggle(target);
+    itemElement(target)?.focus();
+  }
 </script>
 
 <div
+  bind:this={root}
   class="poodle-toggle-group"
   data-size={resolvedSize}
   data-density={resolvedDensity}
@@ -92,20 +146,23 @@
   aria-label={ariaLabel ?? undefined}
 >
   {#each options as option (option.value)}
+    {@const itemDisabled = disabled || option.disabled === true}
     <button
       type="button"
       class="poodle-toggle-group__item"
       class:poodle-selected={isSelected(option.value)}
       data-selected={isSelected(option.value) ? "true" : "false"}
-      disabled={disabled || option.disabled === true}
+      data-toggle-value={option.value}
+      tabindex={itemTabIndex(option.value, itemDisabled)}
+      disabled={itemDisabled}
       role={selectionMode === "multiple" ? "button" : "radio"}
       aria-label={option.ariaLabel ?? undefined}
       aria-pressed={selectionMode === "multiple" ? (isSelected(option.value) ? "true" : "false") : undefined}
       aria-checked={selectionMode === "single" ? (isSelected(option.value) ? "true" : "false") : undefined}
       onclick={() => toggle(option.value)}
+      onkeydown={(event) => handleKeydown(event, option.value)}
     >
       {option.label}
     </button>
   {/each}
 </div>
-

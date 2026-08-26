@@ -25,7 +25,7 @@ use std::sync::{Arc, Mutex};
 use gpui::TestAppContext;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
-use poodle_render::{ui_presentation_provider, RadioGroupHandlers, RenderContext};
+use poodle_render::{ui_presentation_provider, RadioGroupHandlers, RenderContext, ToggleGroupHandlers};
 use poodle_specs::{
     AgentTranscriptSpec, ControlDensity, ControlSize, PopoverSpec, RangeSliderSpec,
     UiPresentationProviderSpec,
@@ -4825,6 +4825,294 @@ fn radio_group_exclusive_focus_identity_and_disabled_paths() {
         let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
         let left = radio_option_id("left", "free");
         let right = radio_option_id("right", "free");
+        driver.wait_for_focus_handle(&left);
+        driver.wait_for_focus_handle(&right);
+        driver.focus_element(&left);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&left), Some(true));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right),
+            Some(false),
+            "two mounted groups keep independent focus identity"
+        );
+    });
+}
+
+fn toggle_option_id(scope: &str, value: &str) -> String {
+    format!("toggle:{scope}:option:{value}")
+}
+
+fn toggle_pressed(node: &Node, scope: &str, value: &str) -> bool {
+    let id = toggle_option_id(scope, value);
+    node.find(&|n| n.runtime_id.as_deref() == Some(id.as_str()))
+        .and_then(|n| n.a11y.toggled)
+        .map(|toggled| toggled == poodle_node::NodeToggled::True)
+        .unwrap_or(false)
+}
+
+fn spec_from_result(result: &poodle_headless::toggle_group::ToggleGroupValue) -> Vec<String> {
+    match result {
+        poodle_headless::toggle_group::ToggleGroupValue::Single(Some(value)) => {
+            vec![value.clone()]
+        }
+        poodle_headless::toggle_group::ToggleGroupValue::Single(None) => Vec::new(),
+        poodle_headless::toggle_group::ToggleGroupValue::Multiple(values) => values.clone(),
+    }
+}
+
+fn selection_toggle_options() -> Vec<poodle_specs::ToggleGroupOption> {
+    vec![
+        poodle_specs::ToggleGroupOption::new("grid", "Grid"),
+        poodle_specs::ToggleGroupOption::new("list", "List").with_disabled(true),
+        poodle_specs::ToggleGroupOption::new("board", "Board"),
+    ]
+}
+
+/// ToggleGroup resulting-selection payloads, same-value emission, wrap,
+/// disabled skip, multiple add/remove, disabled-group inertia, and
+/// independent instance focus identity through the mounted tree.
+#[test]
+fn toggle_group_result_focus_identity_and_disabled_paths() {
+    use poodle_headless::toggle_group::ToggleGroupValue;
+    use poodle_specs::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
+
+    run_headless(|cx| {
+        fn build(
+            value: Vec<String>,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<ToggleGroupValue>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let spec = ToggleGroupSpec::new(selection_toggle_options()).with_value(value);
+            let mut node = poodle_render::toggle_group(
+                &spec,
+                &RenderContext::new(&theme()),
+                ToggleGroupHandlers::new("view").on_value_change(Arc::new(move |next| {
+                    sink.lock().unwrap().push(next.clone());
+                    *mount.lock().unwrap() = build(
+                        spec_from_result(&next),
+                        Arc::clone(&mount),
+                        Arc::clone(&sink),
+                    );
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            vec!["grid".into()],
+            Arc::clone(&mounted),
+            Arc::clone(&payloads),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        let grid = toggle_option_id("view", "grid");
+        let list = toggle_option_id("view", "list");
+        let board = toggle_option_id("view", "board");
+        driver.wait_for_focus_handle(&grid);
+        driver.pointer_activate_id(&board);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [ToggleGroupValue::Single(Some("board".into()))]
+        );
+        assert!(toggle_pressed(&mounted.lock().unwrap(), "view", "board"));
+
+        driver.pointer_activate_id(&board);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [
+                ToggleGroupValue::Single(Some("board".into())),
+                ToggleGroupValue::Single(Some("board".into())),
+            ],
+            "same-value selection still emits"
+        );
+        driver.pointer_activate_id(&list);
+        assert_eq!(
+            payloads.lock().unwrap().len(),
+            2,
+            "disabled options stay inert"
+        );
+
+        driver.wait_for_focus_handle(&board);
+        driver.focus_element(&board);
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            payloads.lock().unwrap().last(),
+            Some(&ToggleGroupValue::Single(Some("grid".into())))
+        );
+        assert!(toggle_pressed(&mounted.lock().unwrap(), "view", "grid"));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&grid), Some(true));
+    });
+
+    run_headless(|cx| {
+        fn build(
+            value: Vec<String>,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<ToggleGroupValue>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let spec = ToggleGroupSpec::new(vec![
+                ToggleGroupOption::new("grid", "Grid"),
+                ToggleGroupOption::new("list", "List"),
+                ToggleGroupOption::new("board", "Board"),
+            ])
+            .with_value(value)
+            .with_allow_deactivation(true);
+            let mut node = poodle_render::toggle_group(
+                &spec,
+                &RenderContext::new(&theme()),
+                ToggleGroupHandlers::new("optional-view").on_value_change(Arc::new(move |next| {
+                    sink.lock().unwrap().push(next.clone());
+                    *mount.lock().unwrap() = build(
+                        spec_from_result(&next),
+                        Arc::clone(&mount),
+                        Arc::clone(&sink),
+                    );
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            vec!["grid".into()],
+            Arc::clone(&mounted),
+            Arc::clone(&payloads),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let grid = toggle_option_id("optional-view", "grid");
+        driver.wait_for_focus_handle(&grid);
+        driver.pointer_activate_id(&grid);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [ToggleGroupValue::Single(None)]
+        );
+        assert!(!toggle_pressed(
+            &mounted.lock().unwrap(),
+            "optional-view",
+            "grid"
+        ));
+    });
+
+    run_headless(|cx| {
+        fn build(
+            value: Vec<String>,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<ToggleGroupValue>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let spec = ToggleGroupSpec::new(vec![
+                ToggleGroupOption::new("design", "Design"),
+                ToggleGroupOption::new("engineering", "Engineering"),
+                ToggleGroupOption::new("docs", "Docs"),
+            ])
+            .with_value(value)
+            .with_selection_mode(ToggleGroupSelectionMode::Multiple);
+            let mut node = poodle_render::toggle_group(
+                &spec,
+                &RenderContext::new(&theme()),
+                ToggleGroupHandlers::new("tags").on_value_change(Arc::new(move |next| {
+                    sink.lock().unwrap().push(next.clone());
+                    *mount.lock().unwrap() = build(
+                        spec_from_result(&next),
+                        Arc::clone(&mount),
+                        Arc::clone(&sink),
+                    );
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            vec!["design".into(), "docs".into()],
+            Arc::clone(&mounted),
+            Arc::clone(&payloads),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let design = toggle_option_id("tags", "design");
+        let engineering = toggle_option_id("tags", "engineering");
+        driver.wait_for_focus_handle(&design);
+        driver.pointer_activate_id(&engineering);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [ToggleGroupValue::Multiple(vec![
+                "design".into(),
+                "docs".into(),
+                "engineering".into()
+            ])]
+        );
+        assert!(toggle_pressed(
+            &mounted.lock().unwrap(),
+            "tags",
+            "engineering"
+        ));
+        driver.pointer_activate_id(&design);
+        assert_eq!(
+            payloads.lock().unwrap().last(),
+            Some(&ToggleGroupValue::Multiple(vec![
+                "docs".into(),
+                "engineering".into()
+            ]))
+        );
+        assert!(!toggle_pressed(&mounted.lock().unwrap(), "tags", "design"));
+        driver.focus_element(&design);
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            payloads.lock().unwrap().len(),
+            2,
+            "multiple mode does not intercept arrows"
+        );
+    });
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let spec = ToggleGroupSpec {
+            is_disabled: true,
+            ..ToggleGroupSpec::new(selection_toggle_options()).with_value(vec!["grid".into()])
+        };
+        let mut node = poodle_render::toggle_group(
+            &spec,
+            &RenderContext::new(&theme()),
+            ToggleGroupHandlers::new("disabled-view")
+                .on_value_change(Arc::new(move |next| sink.lock().unwrap().push(next))),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.draw_frame();
+        driver.pointer_activate_id(&toggle_option_id("disabled-view", "board"));
+        assert!(payloads.lock().unwrap().is_empty());
+    });
+
+    run_headless(|cx| {
+        let picker = |scope: &str| {
+            poodle_render::toggle_group(
+                &ToggleGroupSpec::new(vec![
+                    ToggleGroupOption::new("grid", "Grid"),
+                    ToggleGroupOption::new("list", "List"),
+                ])
+                .with_value(vec!["grid".into()]),
+                &RenderContext::new(&theme()),
+                ToggleGroupHandlers::new(scope),
+            )
+        };
+        let mut node = Node::container()
+            .child(picker("left"))
+            .child(picker("right"));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        let left = toggle_option_id("left", "grid");
+        let right = toggle_option_id("right", "grid");
         driver.wait_for_focus_handle(&left);
         driver.wait_for_focus_handle(&right);
         driver.focus_element(&left);

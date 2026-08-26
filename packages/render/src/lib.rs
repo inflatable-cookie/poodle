@@ -380,7 +380,7 @@ pub use time_field::{time_field, time_field_with_change};
 pub use time_zone_select::{time_zone_select, TimeZoneSelectHandlers};
 pub use toast_host::toast_host;
 pub use toast_stack::{toast_stack, ToastStackHandlers};
-pub use toggle_group::toggle_group;
+pub use toggle_group::{toggle_group, ToggleGroupHandlers};
 pub use token_input::token_input;
 pub use tool_call::{tool_call, tool_call_focus_id, ToolCallHandlers};
 pub use tool_call_group::{tool_call_group, ToolCallGroupHandlers};
