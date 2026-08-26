@@ -44,6 +44,8 @@ enum HeadlessContent {
 pub struct HeadlessRoot {
     content: HeadlessContent,
     pub focus: FocusHandle,
+    box_width: f32,
+    box_height: f32,
 }
 
 impl Focusable for HeadlessRoot {
@@ -72,20 +74,17 @@ impl Render for HeadlessRoot {
         // the real event tree. The production preview root uses the same
         // wiring, so dismissal behaves identically here and in the real app.
         poodle_gpui_node_backend::attach_overlay_host(
-            div()
-                .size_full()
-                .track_focus(&self.focus)
-                .child(
-                    div()
-                        .w(px(MOUNT_BOX_WIDTH))
-                        .h(px(MOUNT_BOX_HEIGHT))
-                        .ml(px(MOUNT_BOX_LEFT))
-                        .mt(px(MOUNT_BOX_TOP))
-                        .flex()
-                        .items_center()
-                        .justify_center()
-                        .child(content),
-                ),
+            div().size_full().track_focus(&self.focus).child(
+                div()
+                    .w(px(self.box_width))
+                    .h(px(self.box_height))
+                    .ml(px(MOUNT_BOX_LEFT))
+                    .mt(px(MOUNT_BOX_TOP))
+                    .flex()
+                    .items_center()
+                    .justify_center()
+                    .child(content),
+            ),
         )
     }
 }
@@ -102,15 +101,30 @@ pub struct HeadlessDriver<'a> {
     cx: &'a mut VisualTestContext,
     root: Entity<HeadlessRoot>,
     root_focus: FocusHandle,
+    box_width: f32,
+    box_height: f32,
 }
 
 impl<'a> HeadlessDriver<'a> {
     /// Mount the given node into a fresh test-platform window.
     pub fn new(cx: &'a mut TestAppContext, node: Arc<Mutex<Node>>) -> Self {
+        Self::new_in_box(cx, node, MOUNT_BOX_WIDTH, MOUNT_BOX_HEIGHT)
+    }
+
+    /// Mount the node in a box of the given size. Vertical Slider needs a
+    /// taller host than the default 160×60 fixture.
+    pub fn new_in_box(
+        cx: &'a mut TestAppContext,
+        node: Arc<Mutex<Node>>,
+        box_width: f32,
+        box_height: f32,
+    ) -> Self {
         let (root, cx) = cx.add_window_view(|window, cx| {
             let root = HeadlessRoot {
                 content: HeadlessContent::Node(Arc::clone(&node)),
                 focus: cx.focus_handle(),
+                box_width,
+                box_height,
             };
             window.refresh();
             root
@@ -120,6 +134,8 @@ impl<'a> HeadlessDriver<'a> {
             cx,
             root,
             root_focus,
+            box_width,
+            box_height,
         };
         driver.draw_frame();
         driver
@@ -127,14 +143,13 @@ impl<'a> HeadlessDriver<'a> {
 
     /// Mount an element factory when a regression owns runtime state outside
     /// the renderer-neutral node tree (scroll handles, for example).
-    pub fn new_element(
-        cx: &'a mut TestAppContext,
-        build: Rc<dyn Fn() -> AnyElement>,
-    ) -> Self {
+    pub fn new_element(cx: &'a mut TestAppContext, build: Rc<dyn Fn() -> AnyElement>) -> Self {
         let (root, cx) = cx.add_window_view(|window, cx| {
             let root = HeadlessRoot {
                 content: HeadlessContent::Element(build),
                 focus: cx.focus_handle(),
+                box_width: MOUNT_BOX_WIDTH,
+                box_height: MOUNT_BOX_HEIGHT,
             };
             window.refresh();
             root
@@ -144,6 +159,8 @@ impl<'a> HeadlessDriver<'a> {
             cx,
             root,
             root_focus,
+            box_width: MOUNT_BOX_WIDTH,
+            box_height: MOUNT_BOX_HEIGHT,
         };
         driver.draw_frame();
         driver
@@ -168,8 +185,7 @@ impl<'a> HeadlessDriver<'a> {
     /// frame boundary (layer registry, bounds, focus queue) is this draw.
     pub fn draw_frame(&mut self) {
         poodle_gpui_node_backend::overlay_frame_begin();
-        self.root
-            .update(self.cx, |_root, cx| cx.notify());
+        self.root.update(self.cx, |_root, cx| cx.notify());
         self.cx.update(|window, cx| {
             window.refresh();
             let _ = window.draw(cx);
@@ -294,8 +310,8 @@ impl<'a> HeadlessDriver<'a> {
 
     /// One press/release at a fraction along the mount box (0 = left, 1 = right).
     pub fn pointer_activate_at(&mut self, fraction: f32) {
-        let x = MOUNT_BOX_LEFT + fraction.clamp(0.0, 1.0) * MOUNT_BOX_WIDTH;
-        let y = MOUNT_BOX_TOP + MOUNT_BOX_HEIGHT / 2.0;
+        let x = MOUNT_BOX_LEFT + fraction.clamp(0.0, 1.0) * self.box_width;
+        let y = MOUNT_BOX_TOP + self.box_height / 2.0;
         let target = point(px(x), px(y));
         self.pointer_press(target);
         self.pointer_release(target);
@@ -329,8 +345,20 @@ impl<'a> HeadlessDriver<'a> {
     /// Drag, mouse-up → Release. The mount box flex-centers the control, so Y
     /// targets the box mid-line (same as Button activation).
     pub fn pointer_scrub_at(&mut self, fraction: f32, phase: &str) {
-        let x = MOUNT_BOX_LEFT + fraction.clamp(0.0, 1.0) * MOUNT_BOX_WIDTH;
-        let y = MOUNT_BOX_TOP + MOUNT_BOX_HEIGHT / 2.0;
+        let x = MOUNT_BOX_LEFT + fraction.clamp(0.0, 1.0) * self.box_width;
+        let y = MOUNT_BOX_TOP + self.box_height / 2.0;
+        let target = point(px(x), px(y));
+        match phase {
+            "press" => self.pointer_press(target),
+            "drag" => self.pointer_drag(target),
+            _ => self.pointer_release(target),
+        }
+    }
+
+    /// Pointer scrub along a vertical mount box (0 = bottom, 1 = top).
+    pub fn pointer_scrub_vertical_at(&mut self, fraction: f32, phase: &str) {
+        let x = MOUNT_BOX_LEFT + self.box_width / 2.0;
+        let y = MOUNT_BOX_TOP + self.box_height * (1.0 - fraction.clamp(0.0, 1.0));
         let target = point(px(x), px(y));
         match phase {
             "press" => self.pointer_press(target),

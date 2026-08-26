@@ -1,8 +1,8 @@
 # g16 — Next Work
 
-Status: active — `g16.005` ready
-Posture: strict-ready; Slider axis, keyboard, callback, and mounted parity is
-the next bounded lane
+Status: active — `g16.005` complete, awaiting operator merge
+Posture: strict-ready; next lane is an orchestrator review after merge. Tabs
+remains stopped on its recorded native drag-lifecycle decision
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -36,7 +36,7 @@ stay maintained; backend admission is not part of the first card.
 2. [002 — Selection controls mounted parity](002-selection-controls-mounted-parity.md) — closed — partial outcome
 3. [003 — RadioGroup native identity and mounted parity](003-radio-group-native-identity-and-mounted-parity.md) — complete
 4. [004 — ToggleGroup semantic API and mounted parity](004-toggle-group-semantic-api-and-mounted-parity.md) — complete; merged in PR #78
-5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — ready
+5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; awaiting operator merge
 
 ## Measured Selection
 
@@ -65,16 +65,15 @@ keeps its web form-name behavior and required host-owned native interaction
 scope. ToggleGroup keeps resulting-selection payloads and single-mode
 radiogroup semantics, with the same required native scope pattern.
 
-The next measured foundation gap is Slider. Its shared renderer has the right
-headless value machines and an absolute scrub seam, but the scrub path drops
-commit effects, keyboard and slider-value intent are absent, and orientation
-does not reach native layout or pointer normalization. `g16.005` closes that
-one semantic seam and one ledger cell. Tabs was considered first and stopped:
-its pointer reorder contract needs a native drag-payload lifecycle decision,
-recorded in `../../triage/20260826-173329-tabs-native-drag-lifecycle.md`.
+`g16.005` closed Slider's native axis, callback, keyboard, and mounted
+parity. The generated ledger now has 35 mounted GPUI behaviour cells and 139
+missing. Tabs was considered first and stopped: its pointer reorder contract
+needs a native drag-payload lifecycle decision, recorded in
+`../../triage/20260826-173329-tabs-native-drag-lifecycle.md`.
 
 ## Next Task
 
-Dispatch `g16.005` only. After it merges, inspect the updated ledger and the
-open Tabs drag-lifecycle decision before choosing another bounded lane. Do not
-infer a broad conformance programme.
+After operator merge, inspect the updated ledger and the open Tabs
+drag-lifecycle decision before choosing another bounded lane. Do not infer a
+broad conformance programme. Do not compile or implement another card from
+this closeout.

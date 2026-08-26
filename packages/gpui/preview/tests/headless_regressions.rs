@@ -24,11 +24,13 @@ use std::sync::{Arc, Mutex};
 // crashes on current rustc).
 use gpui::TestAppContext;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_node::Node;
-use poodle_render::{ui_presentation_provider, RadioGroupHandlers, RenderContext, ToggleGroupHandlers};
+use poodle_node::{Node, NodeRole};
+use poodle_render::{
+    ui_presentation_provider, RadioGroupHandlers, RenderContext, SliderHandlers, ToggleGroupHandlers,
+};
 use poodle_specs::{
-    AgentTranscriptSpec, ControlDensity, ControlSize, PopoverSpec, RangeSliderSpec,
-    UiPresentationProviderSpec,
+    AgentTranscriptSpec, ControlDensity, ControlSize, Orientation, PopoverSpec, RangeSliderSpec,
+    SliderSpec, UiPresentationProviderSpec,
 };
 
 #[path = "../src/headless_driver.rs"]
@@ -304,6 +306,180 @@ fn a_scrub_reports_change_while_dragging_and_commits_once_at_release() {
             ["valueChange", "valueChange", "valueCommit"],
         );
         assert_eq!(*value.lock().expect("value lock"), (20.0, 95.0));
+    });
+}
+
+/// g16.005. Slider pointer, keyboard, disabled, and vertical paths through
+/// real backend input and a controlled host rebuild after commit.
+#[test]
+fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
+    run_headless(|cx| {
+        fn build(
+            value: f64,
+            mounted: Arc<Mutex<Node>>,
+            trace: Arc<Mutex<Vec<String>>>,
+            live: Arc<Mutex<f64>>,
+        ) -> Node {
+            let events = Arc::clone(&trace);
+            let state = Arc::clone(&live);
+            let commit_events = Arc::clone(&trace);
+            let commit_state = Arc::clone(&live);
+            let commit_mount = Arc::clone(&mounted);
+            let mut spec = SliderSpec::new(value).with_bounds(0.0, 100.0);
+            spec.step = 1.0;
+            spec.aria_label = Some("Volume".into());
+            spec.value_text = Some(format!("{value:.0}%"));
+            let mut node = poodle_render::slider(
+                &spec,
+                &RenderContext::new(&theme()),
+                &SliderHandlers {
+                    on_change: Some(Arc::new(move |next| {
+                        *state.lock().expect("value lock") = next;
+                        events.lock().expect("trace lock").push("valueChange".into());
+                    })),
+                    on_value_commit: Some(Arc::new(move |next| {
+                        *commit_state.lock().expect("value lock") = next;
+                        commit_events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueCommit".into());
+                        *commit_mount.lock().expect("mount lock") = build(
+                            next,
+                            Arc::clone(&commit_mount),
+                            Arc::clone(&commit_events),
+                            Arc::clone(&commit_state),
+                        );
+                    })),
+                },
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let live = Arc::new(Mutex::new(20.0f64));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            20.0,
+            Arc::clone(&mounted),
+            Arc::clone(&trace),
+            Arc::clone(&live),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(FIXTURE_ID);
+
+        driver.pointer_scrub_at(0.9, "press");
+        driver.pointer_scrub_at(0.93, "drag");
+        driver.pointer_scrub_at(0.95, "drag");
+        driver.pointer_scrub_at(0.95, "release");
+        assert_eq!(
+            trace.lock().expect("trace lock").as_slice(),
+            ["valueChange", "valueChange", "valueCommit"]
+        );
+        assert_eq!(*live.lock().expect("value lock"), 95.0);
+
+        let rebuilt = mounted.lock().unwrap();
+        assert_eq!(rebuilt.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(rebuilt.a11y.label.as_deref(), Some("Volume"));
+        assert_eq!(rebuilt.a11y.value, Some(95.0));
+        assert_eq!(rebuilt.a11y.value_min, Some(0.0));
+        assert_eq!(rebuilt.a11y.value_max, Some(100.0));
+        assert_eq!(rebuilt.a11y.value_text.as_deref(), Some("95%"));
+        assert_eq!(rebuilt.a11y.orientation.as_deref(), Some("horizontal"));
+        assert!(rebuilt.interaction.focusable);
+        assert!(rebuilt.style.focus_ring.is_some());
+        drop(rebuilt);
+
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        driver.focus_element(FIXTURE_ID);
+        driver.dispatch_key_raw("right");
+        assert_eq!(*live.lock().expect("value lock"), 96.0);
+        driver.dispatch_key_raw("home");
+        assert_eq!(*live.lock().expect("value lock"), 0.0);
+        driver.dispatch_key_raw("end");
+        assert_eq!(*live.lock().expect("value lock"), 100.0);
+        assert_eq!(
+            mounted.lock().unwrap().a11y.value,
+            Some(100.0),
+            "the rebuilt node carries the committed value"
+        );
+        let keys = trace.lock().expect("trace lock").clone();
+        assert_eq!(
+            &keys[keys.len() - 6..],
+            [
+                "valueChange",
+                "valueCommit",
+                "valueChange",
+                "valueCommit",
+                "valueChange",
+                "valueCommit"
+            ]
+        );
+    });
+
+    run_headless(|cx| {
+        let mut spec = SliderSpec::new(0.0)
+            .with_bounds(0.0, 100.0)
+            .with_orientation(Orientation::Vertical);
+        spec.step = 1.0;
+        spec.aria_label = Some("Level".into());
+        spec.value_text = Some("min".into());
+        let live = Arc::new(Mutex::new(0.0f64));
+        let sink = Arc::clone(&live);
+        let mut node = poodle_render::slider(
+            &spec,
+            &RenderContext::new(&theme()),
+            &SliderHandlers {
+                on_change: Some(Arc::new(move |next| {
+                    *sink.lock().expect("value lock") = next;
+                })),
+                on_value_commit: None,
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 48.0, 200.0);
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        driver.pointer_scrub_vertical_at(0.25, "press");
+        driver.pointer_scrub_vertical_at(0.28, "drag");
+        driver.pointer_scrub_vertical_at(0.75, "drag");
+        driver.pointer_scrub_vertical_at(0.75, "release");
+        assert_eq!(*live.lock().expect("value lock"), 75.0);
+    });
+
+    run_headless(|cx| {
+        let mut spec = SliderSpec::new(40.0).with_bounds(0.0, 100.0);
+        spec.is_disabled = true;
+        spec.aria_label = Some("Muted".into());
+        let live = Arc::new(Mutex::new(40.0f64));
+        let sink = Arc::clone(&live);
+        let mut node = poodle_render::slider(
+            &spec,
+            &RenderContext::new(&theme()),
+            &SliderHandlers {
+                on_change: Some(Arc::new(move |next| {
+                    *sink.lock().expect("value lock") = next;
+                })),
+                on_value_commit: Some(Arc::new(|_| {})),
+            },
+        );
+        node.id = Some("disabled-slider".to_owned());
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.pointer_scrub_at(0.9, "press");
+        driver.pointer_scrub_at(0.95, "drag");
+        driver.pointer_scrub_at(0.95, "release");
+        driver.dispatch_key("right");
+        assert_eq!(*live.lock().expect("value lock"), 40.0);
+        let disabled = mounted.lock().unwrap();
+        assert!(disabled.interaction.disabled);
+        assert!(!disabled.interaction.focusable);
+        assert!(disabled.interaction.on_key.is_none());
+        assert!(disabled.style.focus_ring.is_none());
+        assert!(
+            disabled
+                .find(&|n| n.interaction.on_scrub.is_some())
+                .is_none()
+        );
     });
 }
 

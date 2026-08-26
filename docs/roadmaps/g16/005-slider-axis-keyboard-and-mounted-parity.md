@@ -1,11 +1,13 @@
 # g16.005 — Slider Axis, Keyboard, And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-26
+Completed: 2026-08-26
 Depends on: complete `g16.004`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/slider.md`, `parity-evidence-ledger.md`
+execution log: `../../logs/2026-08/20260826-g16-005-slider-axis-keyboard-and-mounted-parity.md`
 
 ## Outcome
 
@@ -118,24 +120,24 @@ backend admission stays deferred.
 
 ## Acceptance
 
-- [ ] Shared TS/Rust machines and both web shells agree on normalized values,
+- [x] Shared TS/Rust machines and both web shells agree on normalized values,
       callback order, disabled inertia, and controlled rebuilds.
-- [ ] Horizontal and vertical pointer scrubs use the rendered axis; change
+- [x] Horizontal and vertical pointer scrubs use the rendered axis; change
       arrives during interaction and commit exactly once at release.
-- [ ] All arrows plus Home/End work on native Slider through shared transitions
+- [x] All arrows plus Home/End work on native Slider through shared transitions
       and emit change then commit; disabled Slider is inert.
-- [ ] Native standard and embedded variants expose one focusable Slider node
+- [x] Native standard and embedded variants expose one focusable Slider node
       with complete node-level accessibility intent and focus treatment.
-- [ ] `SliderHandlers` uses `on_change` / `on_value_commit`; all in-repo call
+- [x] `SliderHandlers` uses `on_change` / `on_value_commit`; all in-repo call
       sites compile without aliases or silent fallbacks.
-- [ ] RangeSlider uses the explicit scrub axis and its existing mounted
+- [x] RangeSlider uses the explicit scrub axis and its existing mounted
       regression remains green; no RangeSlider ledger cell moves.
-- [ ] The mounted GPUI proof uses real backend pointer/keyboard input and host
+- [x] The mounted GPUI proof uses real backend pointer/keyboard input and host
       rebuilds, not direct handler calls or spec inspection.
-- [ ] The generated ledger changes exactly Slider's mounted cell and derived
+- [x] The generated ledger changes exactly Slider's mounted cell and derived
       totals. GPUI accessibility remains `manual`; visual comparison remains
       `missing`; Jetstream remains deferred.
-- [ ] Specimens remain curated and human-centred. One August log records the
+- [x] Specimens remain curated and human-centred. One August log records the
       implementation, evidence, validation, and remaining gaps.
 
 ## Writable Scope
