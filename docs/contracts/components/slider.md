@@ -1,15 +1,15 @@
 # Slider
 
 Status: detailed contract
-Updated: 2026-08-11
+Updated: 2026-08-26
 
 ## 1. Purpose
 
 - Component name: `Slider`
 - Layer: `foundation`
-- Summary: a single-value continuous or stepped range control built on a native
-  range input overlaid on a custom track with fill visualization; supports
-  horizontal and vertical orientation via CSS custom property for fill width
+- Summary: a single-value continuous or stepped range control with a track,
+  fill, and focusable value control; web may use a native range input while
+  native runtimes draw the same semantic control directly
 - In scope: current value, min/max bounds, step behavior, keyboard and pointer
   adjustment, value commit semantics, horizontal and vertical orientation,
   standard and embedded variants, unipolar and bipolar fill geometry
@@ -89,10 +89,11 @@ Updated: 2026-08-11
 Behavior classification: machine-backed (`sliderTransition` in
 `@inflatable-cookie/poodle-core`)
 
-Keyboard and pointer interaction come from the native range input; the
-machine owns value normalization and the change/commit split. The embedded
-variant replaces the native pointer path with normalized pointer events owned
-by the adapter and interpreted by `sliderControlTransition`.
+Keyboard and pointer input stay adapter-owned. The machine owns value
+normalization and the change/commit split. Web standard mode delegates input
+mechanics to the native range input. Embedded web and native runtimes convert
+pointer position into a normalized coordinate owned by the adapter and
+interpreted by `sliderControlTransition`.
 
 - Context: `value` (controllable), `min`, `max`, `step`, `disabled`
 - Events: `INPUT { raw }` (native input), `COMMIT { raw }` (native change),
@@ -133,15 +134,17 @@ negative status color. All other values publish `fillTone="positive"`.
 
 ### Semantics
 
-- Role: native `<input type="range">` provides slider role automatically
-- Embedded variant: adapter root exposes the same slider role, bounds, value,
-  value text, orientation, disabled state, and keyboard behavior
+- Role: native `<input type="range">` provides slider role automatically on
+  web standard mode; custom web and native controls expose the same role
+- Every custom control exposes bounds, current value, optional value text,
+  orientation, disabled state, and keyboard behavior on its focusable node
 - `aria-label`: from ariaLabel prop; required when no visible label exists
 - `aria-valuemin`: from min prop
 - `aria-valuemax`: from max prop
 - `aria-valuenow`: from value prop
 - `aria-valuetext`: from valueText prop when provided
-- `aria-orientation`: NOT currently set on the range input; orientation is conveyed via `data-orientation` on the root element only
+- `aria-orientation`: from orientation on custom controls; native range inputs
+  retain their browser-native projection
 - `disabled`: native disabled attribute when disabled
 - Labeling rules: visible label or programmatic ariaLabel required
 
@@ -156,6 +159,12 @@ negative status color. All other values publish `fillTone="positive"`.
 | `Page Up` | increments by larger step (browser-native, typically step * 10) |
 | `Page Down` | decrements by larger step (browser-native, typically step * 10) |
 | `Tab` | moves focus to or from the control |
+
+All four arrow keys retain the same value mapping in either orientation:
+Left/Down decrement and Right/Up increment. Orientation changes layout,
+pointer normalization, and accessibility reporting; it does not disable the
+cross-axis arrow pair. Page-key amount remains browser-owned and is not part of
+strict cross-runtime parity.
 
 ### Focus And Announcement
 
@@ -394,30 +403,23 @@ track at every size.
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::primitives::slider`
-- GPUI implementation must intentionally expose thumb focus, keyboard
-  adjustments (arrow keys, Home, End), and current value semantics through
-  native accessibility APIs
-- slider role, value/min/max/step, and valuetext must be reflected in the
-  accessibility tree
-- orientation must affect both keyboard navigation direction and accessibility
-  tree reporting
+- GPUI implementation must intentionally expose control focus, keyboard
+  adjustments (all arrows, Home, End), and current value semantics through
+  the shared node accessibility intent
+- slider role, value/min/max, and value text must be carried by the shared
+  node accessibility intent; native assistive-technology projection remains a
+  separately measured backend evidence level
+- orientation must affect layout, pointer normalization, and accessibility
+  reporting; arrow-value mapping stays fixed across orientations
 - pointer/gesture drag behavior is platform-specific but must produce the same
   value snapping and commit semantics
 - vertical orientation must be implemented natively rather than via CSS rotation
 
 ## 10a. Jetstream Notes
 
-- `Slider::from_spec(spec, theme).on_change(...).on_value_commit(...)`, driven
-  by a real drag.
-- The value comes from the drag's per-frame **delta**, not its position. A
-  handler is built before layout runs, so it cannot know where its track ended
-  up; a pixel delta over a known track width is a value delta, and that stays
-  correct when the track is nested inside something scrolled or offset.
-- Snapping and clamping come from `slider_transition` in the shared headless
-  core — the same machine the web target drives — rather than being re-derived.
-- Every segment of the track carries the handler, not just their container:
-  unlike clicks, drags do **not** bubble to the nearest handler above, so the
-  gesture would be lost on whichever segment the pointer happened to land on.
+Jetstream backend admission is deferred. Its shared-Rust caller stays
+compile-compatible with the renderer-neutral Slider API, but this contract
+does not require Jetstream execution or evidence while that deferral stands.
 
 ## 11. Parity Checklist
 
@@ -427,7 +429,7 @@ track at every size.
 - [ ] keyboard adjustment semantics match (arrows, Home, End)
 - [ ] onValueChange fires during interaction, onValueCommit fires on release
 - [ ] slider accessibility exposure matches (role, value, min, max, valuetext)
-- [ ] orientation affects keyboard navigation axis
+- [ ] orientation affects layout, pointer axis, and accessibility reporting
 - [ ] disabled behavior matches
 
 ### Tier 2: Visual Parity
@@ -458,6 +460,7 @@ track at every size.
 | vertical via CSS rotation vs native | Svelte uses rotate(-90deg); GPUI implements natively | allowed | same visual and interaction result required |
 | webkit/moz thumb pseudo-elements | browser-specific CSS selectors | allowed | GPUI renders thumb directly |
 | color-mix formulas | GPUI must achieve same visual result by any means | allowed | verify visual parity |
+| Page Up/Down increment amount | native range inputs keep browser-owned paging behavior | allowed | strict parity covers arrows, Home, and End |
 
 ## 13. Specimen Definitions
 

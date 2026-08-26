@@ -7,11 +7,11 @@ Updated: 2026-08-26
 - `g16`
   - Status: active; strict-ready
   - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77;
-    `004` merged in PR #78
+    `004` merged in PR #78; `005` ready
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: inspect the updated evidence ledger and choose the next bounded
-    parity lane; no broader conformance programme is implied
+  - Next move: dispatch `g16.005` Slider axis, keyboard, callback, and mounted
+    parity; Tabs remains stopped on its recorded native drag-lifecycle decision
 
 ## Latest Completed Track
 
