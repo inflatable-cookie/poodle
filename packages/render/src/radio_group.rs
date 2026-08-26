@@ -6,8 +6,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeKey, NodeRole, NodeToggled, StylePatch,
+    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment,
+    Node, NodeKey, NodeRole, NodeToggled,
 };
 use poodle_specs::{ControlDensity, ControlSize, Orientation, RadioGroupSpec};
 
@@ -172,7 +172,11 @@ pub fn radio_group(
     let text_color = ctx.theme().resolve_color("color.text.primary");
     let selected_value = spec.current_value();
     let disabled_opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
-    let focus_ring = ctx.theme().resolve_color("color.accent.focusRing");
+    let focus_ring = FocusRing {
+        color: ctx.theme().resolve_color("color.accent.focusRing"),
+        width: ctx.theme().resolve_border_width("border.width.focus"),
+        offset: rem_to_px(0.125),
+    };
     let roving = roving_values(spec);
     let tab_stop = tab_stop_value(spec, &roving);
 
@@ -263,14 +267,9 @@ pub fn radio_group(
             } else {
                 -1
             });
-            // GPUI tracks a handle only when a focusable node also declares a
-            // focus patch (radio.rs).
-            row.style.focus = Some(StylePatch {
-                background: None,
-                border_color: Some(focus_ring),
-                text_color: None,
-                opacity: None,
-            });
+            // Contract §8: `border-width-focus` of `accent-focusRing` at a
+            // 0.125rem offset. The dedicated ring is also what GPUI tracks.
+            row.style.focus_ring = Some(focus_ring);
             // Same-value selection is inert: native radios do not re-fire.
             if !is_selected {
                 if let Some(handler) = &handlers.on_change {
@@ -306,6 +305,7 @@ pub fn radio_group(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_adapter::ThemeProvider;
     use poodle_node::NodeModifiers;
     use poodle_specs::ChoiceOption;
     use std::sync::Mutex;
@@ -374,6 +374,7 @@ mod tests {
             assert!(!option.interaction.focusable, "{value}");
             assert!(option.interaction.disabled, "{value}");
             assert_eq!(option.a11y.tab_index, Some(-1), "{value}");
+            assert!(option.style.focus_ring.is_none(), "{value}");
             assert!(option.interaction.on_activate.is_none(), "{value}");
             assert!(option.interaction.on_key.is_none(), "{value}");
         }
@@ -460,17 +461,30 @@ mod tests {
     }
 
     #[test]
-    fn enabled_options_carry_a_focus_patch_so_gpui_tracks_handles() {
-        let spec = RadioGroupSpec::new(plan_options()).with_value("pro");
+    fn enabled_options_declare_the_contracted_focus_ring() {
+        let theme = theme();
+        let ring_color = theme.resolve_color("color.accent.focusRing");
+        let spec = RadioGroupSpec::new(vec![
+            ChoiceOption::new("free", "Free"),
+            ChoiceOption::new("pro", "Pro"),
+            ChoiceOption::new("enterprise", "Enterprise").with_disabled(true),
+        ])
+        .with_value("pro");
         let node = render(&spec, RadioGroupHandlers::new("plan"));
-        let pro = find_option(&node, "pro");
-        assert!(pro.style.focus.is_some());
-        assert_eq!(
-            pro.style.focus.and_then(|patch| patch.border_color),
-            Some(poodle_adapter::ThemeProvider::resolve_color(
-                &theme(),
-                "color.accent.focusRing"
-            ))
+        let ring = find_option(&node, "pro")
+            .style
+            .focus_ring
+            .expect("an enabled option declares a ring");
+        assert_eq!(ring.color, ring_color);
+        assert_eq!(ring.width, 2.0);
+        assert_eq!(ring.offset, rem_to_px(0.125));
+        assert!(
+            find_option(&node, "free").style.focus_ring.is_some(),
+            "unselected enabled options also declare the ring",
+        );
+        assert!(
+            find_option(&node, "enterprise").style.focus_ring.is_none(),
+            "a disabled option is unfocusable and declares no ring",
         );
     }
 

@@ -21,7 +21,10 @@ not in this lane.
 ## Handler and call sites
 
 - `packages/render/src/radio_group.rs` — `RadioGroupHandlers`; scoped ids;
-  roving tab-stop, orientation-aware arrows, focus patches
+  roving tab-stop, orientation-aware arrows, contracted `FocusRing` on
+  enabled options (`color.accent.focusRing`, `border.width.focus`,
+  `0.125rem` offset). Colour-only `style.focus` patches do not paint on a
+  row with no resting border width.
 - `packages/render/src/lib.rs` — export
 - `packages/gpui/preview/src/node_compat.rs` — `RadioGroup::from_spec(spec, theme, instance_id)`
 - `packages/gpui/preview/src/specimens/radio_group.rs` — stable descriptive
@@ -51,6 +54,10 @@ not in this lane.
   and compile-only.
 
 ## Validation
+
+Review follow-up: enabled options now declare the dedicated `FocusRing`
+channel rather than a colour-only `StylePatch`. The renderer test asserts
+ring colour, width, and offset. Disabled options declare no ring.
 
 Passed on this revision, entirely headless:
 
