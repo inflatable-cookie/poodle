@@ -49,9 +49,12 @@ fn ordered_tabs(base: Vec<TabDefinition>, state: &AppState, order_key: &str) -> 
         .collect()
 }
 
-fn node_order_handler(state: &AppState, key: &'static str) -> Arc<dyn Fn(&[String]) + Send + Sync> {
+fn node_order_handler(
+    state: &AppState,
+    key: &'static str,
+) -> Arc<dyn Fn(Vec<String>) + Send + Sync> {
     let events = state.node_events.clone();
-    Arc::new(move |order: &[String]| {
+    Arc::new(move |order: Vec<String>| {
         events.lock().unwrap().push(NodeSpecimenEvent::SetText {
             key: key.to_string(),
             value: order.join(","),

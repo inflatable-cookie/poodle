@@ -53,8 +53,9 @@ Event order on a successful drop: `start` → hit-tested `hover` / `leave` →
 ## Shared Rust Tabs
 
 - `packages/render/src/tabs.rs` — `TabsHandlers` gains `on_reorder`,
-  `on_drag_start`, `on_drag_end`, and `on_drop_target_change`. Pointer drop
-  and Alt+orientation-arrow run `tabs_transition`. Delete maps to `Close`.
+  `on_drag_start`, `on_drag_end`, and `on_drop_target_change`. `on_reorder`
+  consumes the transition's owned `Vec<String>`. Pointer drop and
+  Alt+orientation-arrow run `tabs_transition`. Delete maps to `Close`.
   Reorderable enabled tabs publish payload/drop intent. Disabled tabs stay
   inert.
 - `packages/gpui/preview/src/node_compat.rs` and

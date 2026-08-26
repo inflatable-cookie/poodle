@@ -24,7 +24,9 @@ use crate::context::RenderContext;
 use crate::presentation::{control_height_rem, control_space_x_rem, rem_to_px, size_font_rem};
 
 pub type TabHandler = Arc<dyn Fn(&str) + Send + Sync>;
-pub type TabOrderHandler = Arc<dyn Fn(&[String]) + Send + Sync>;
+/// Complete next tab-value order. The host retains this owned result and
+/// rebuilds; it does not clone from a borrowed slice.
+pub type TabOrderHandler = Arc<dyn Fn(Vec<String>) + Send + Sync>;
 pub type TabDropTargetHandler = Arc<dyn Fn(Option<&str>) + Send + Sync>;
 
 #[derive(Clone, Default)]
@@ -84,7 +86,7 @@ fn tabs_activation(spec: &TabsSpec) -> poodle_headless::tabs::ActivationMode {
 }
 
 fn apply_tab_effects(
-    effects: &[poodle_headless::tabs::TabsEffect],
+    effects: Vec<poodle_headless::tabs::TabsEffect>,
     items: &[poodle_headless::tabs::TabsItem],
     instance_id: Option<&str>,
     on_change: Option<&TabHandler>,
@@ -97,7 +99,7 @@ fn apply_tab_effects(
     for effect in effects {
         match effect {
             poodle_headless::tabs::TabsEffect::FocusTab { index } => {
-                if let Some(item) = items.get(*index) {
+                if let Some(item) = items.get(index) {
                     focus_target = Some(
                         instance_id
                             .map(|scope| format!("tabs:{scope}:tab:{}", item.value))
@@ -112,12 +114,12 @@ fn apply_tab_effects(
             }
             poodle_headless::tabs::TabsEffect::EmitValueChange { value } => {
                 if let Some(handler) = on_change {
-                    handler(value);
+                    handler(&value);
                 }
             }
             poodle_headless::tabs::TabsEffect::EmitClose { value } => {
                 if let Some(handler) = on_close {
-                    handler(value);
+                    handler(&value);
                 }
             }
             poodle_headless::tabs::TabsEffect::EmitReorder { order } => {
@@ -435,7 +437,7 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
             },
         );
         apply_tab_effects(
-            &effects,
+            effects,
             &next.items,
             instance_id.as_deref(),
             None,
@@ -557,7 +559,7 @@ fn wire_collection_semantics(
         };
         let (next, effects) = poodle_headless::tabs::tabs_transition(context, event);
         apply_tab_effects(
-            &effects,
+            effects,
             &next.items,
             instance_id.as_deref(),
             on_change.as_ref(),
@@ -1279,8 +1281,8 @@ mod tests {
             TabsHandlers {
                 on_reorder: Some({
                     let orders = Arc::clone(&orders);
-                    Arc::new(move |order: &[String]| {
-                        orders.lock().unwrap().push(order.to_vec());
+                    Arc::new(move |order: Vec<String>| {
+                        orders.lock().unwrap().push(order);
                     })
                 }),
                 on_focus: Some({
@@ -1323,8 +1325,8 @@ mod tests {
                 }),
                 on_reorder: Some({
                     let orders = Arc::clone(&orders);
-                    Arc::new(move |order: &[String]| {
-                        orders.lock().unwrap().push(order.to_vec());
+                    Arc::new(move |order: Vec<String>| {
+                        orders.lock().unwrap().push(order);
                     })
                 }),
                 instance_id: Some("keys".to_owned()),

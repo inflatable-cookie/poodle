@@ -4850,7 +4850,7 @@ pub(crate) struct Tabs {
     content: Vec<(String, gpui::AnyElement)>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_close: Option<Arc<dyn Fn(&str) + Send + Sync>>,
-    on_reorder: Option<Arc<dyn Fn(&[String]) + Send + Sync>>,
+    on_reorder: Option<Arc<dyn Fn(Vec<String>) + Send + Sync>>,
     on_drag_start: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_drag_end: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_drop_target_change: Option<Arc<dyn Fn(Option<&str>) + Send + Sync>>,
@@ -4889,7 +4889,7 @@ impl Tabs {
         self
     }
 
-    pub(crate) fn on_reorder(mut self, handler: Arc<dyn Fn(&[String]) + Send + Sync>) -> Self {
+    pub(crate) fn on_reorder(mut self, handler: Arc<dyn Fn(Vec<String>) + Send + Sync>) -> Self {
         self.on_reorder = Some(handler);
         self
     }

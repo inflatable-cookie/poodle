@@ -697,8 +697,7 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
                         let rebuild = rebuild.clone();
                         let live_state = Arc::clone(&live_state);
                         let orders = Arc::clone(orders);
-                        Arc::new(move |order: &[String]| {
-                            orders.lock().expect("orders").push(order.to_vec());
+                        Arc::new(move |order: Vec<String>| {
                             let mut next = live_state.lock().expect("state lock").clone();
                             let mut by_value = next
                                 .items
@@ -710,6 +709,7 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
                                 .iter()
                                 .filter_map(|value| by_value.remove(value))
                                 .collect();
+                            orders.lock().expect("orders").push(order);
                             rebuild(next);
                         })
                     }),
@@ -952,8 +952,7 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
                         let orders = Arc::clone(&orders);
                         let starts = Arc::clone(&starts);
                         let ends = Arc::clone(&ends);
-                        Arc::new(move |order: &[String]| {
-                            orders.lock().unwrap().push(order.to_vec());
+                        Arc::new(move |order: Vec<String>| {
                             let mut next = live.lock().unwrap().clone();
                             let mut by_value = next
                                 .items
@@ -965,6 +964,7 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
                                 .iter()
                                 .filter_map(|value| by_value.remove(value))
                                 .collect();
+                            orders.lock().unwrap().push(order);
                             *live.lock().unwrap() = next.clone();
                             *mounted.lock().unwrap() = build(
                                 next,
@@ -1143,8 +1143,8 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
                 TabsHandlers {
                     on_reorder: Some({
                         let orders = Arc::clone(&orders);
-                        Arc::new(move |order: &[String]| {
-                            orders.lock().unwrap().push(order.to_vec());
+                        Arc::new(move |order: Vec<String>| {
+                            orders.lock().unwrap().push(order);
                         })
                     }),
                     on_drag_start: Some({
