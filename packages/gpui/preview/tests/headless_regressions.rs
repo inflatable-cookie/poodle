@@ -6295,3 +6295,556 @@ fn toggle_group_result_focus_identity_and_disabled_paths() {
         );
     });
 }
+
+// ── g16.007 TextInput controlled editing ───────────────────────────────────
+
+/// One field's worth of host-owned state. The Rust targets have no native
+/// editor, so the value, the caret and the focus flag all live here and the
+/// public spec is rebuilt from them after every reported callback — the same
+/// shape a real host has to implement.
+#[derive(Clone)]
+struct TextFieldState {
+    name: String,
+    value: String,
+    selection: (usize, usize),
+    is_focused: bool,
+    input_type: String,
+    placeholder: Option<String>,
+    is_disabled: bool,
+    is_read_only: bool,
+    max_length: Option<usize>,
+}
+
+impl TextFieldState {
+    fn new(name: &str, value: &str) -> Self {
+        Self {
+            name: name.to_owned(),
+            value: value.to_owned(),
+            selection: (0, 0),
+            is_focused: false,
+            input_type: "text".to_owned(),
+            placeholder: None,
+            is_disabled: false,
+            is_read_only: false,
+            max_length: None,
+        }
+    }
+
+    fn searchable(mut self) -> Self {
+        self.input_type = "search".to_owned();
+        self
+    }
+
+    fn with_placeholder(mut self, placeholder: &str) -> Self {
+        self.placeholder = Some(placeholder.to_owned());
+        self
+    }
+
+    fn disabled(mut self) -> Self {
+        self.is_disabled = true;
+        self
+    }
+
+    fn read_only(mut self) -> Self {
+        self.is_read_only = true;
+        self
+    }
+
+    fn limited(mut self, max: usize) -> Self {
+        self.max_length = Some(max);
+        self
+    }
+}
+
+/// The controlled host: what every field currently holds, and every callback
+/// it has been told about, in order.
+struct TextFieldHost {
+    fields: Mutex<Vec<TextFieldState>>,
+    log: Mutex<Vec<String>>,
+}
+
+impl TextFieldHost {
+    fn new(fields: Vec<TextFieldState>) -> Arc<Self> {
+        Arc::new(Self {
+            fields: Mutex::new(fields),
+            log: Mutex::new(Vec::new()),
+        })
+    }
+
+    fn field(&self, name: &str) -> TextFieldState {
+        self.fields
+            .lock()
+            .expect("fields")
+            .iter()
+            .find(|field| field.name == name)
+            .cloned()
+            .unwrap_or_else(|| panic!("{name} is mounted"))
+    }
+
+    fn log(&self) -> Vec<String> {
+        self.log.lock().expect("log").clone()
+    }
+
+    fn take_log(&self) -> Vec<String> {
+        std::mem::take(&mut *self.log.lock().expect("log"))
+    }
+}
+
+/// The element ids the backend keys focus, bounds and history by. Derived from
+/// the field's own `id`, which the contract requires every field to carry.
+fn field_id(name: &str) -> String {
+    format!("poodle-input-{name}")
+}
+fn field_value_id(name: &str) -> String {
+    format!("poodle-input-{name}-value")
+}
+fn field_clear_id(name: &str) -> String {
+    format!("poodle-input-{name}-clear")
+}
+
+/// Rebuild the whole mounted tree from host state. Every callback ends here,
+/// so nothing an assertion reads was written by the test: the value and the
+/// caret in the tree are the ones the host stored and handed back as props.
+fn text_field_tree(host: &Arc<TextFieldHost>, mounted: &Arc<Mutex<Node>>) -> Node {
+    let provider = theme();
+    let ctx = RenderContext::new(&provider);
+    let states = host.fields.lock().expect("fields").clone();
+
+    let mut column = Node::container();
+    column.id = Some(FIXTURE_ID.to_owned());
+    column.style.descriptor.layout.direction = LayoutDirection::Column;
+    column.style.descriptor.layout.spacing.gap = 8.0;
+    column.style.descriptor.layout.width = LayoutSizing::Fixed(360.0);
+
+    for state in &states {
+        let mut spec = poodle_specs::TextInputSpec::new()
+            .with_id(&state.name)
+            .with_aria_label(&state.name)
+            .with_value(&state.value)
+            .with_selection(state.selection.0, state.selection.1)
+            .with_is_focused(state.is_focused)
+            .with_type(&state.input_type)
+            .with_disabled(state.is_disabled)
+            .with_read_only(state.is_read_only);
+        if let Some(placeholder) = &state.placeholder {
+            spec = spec.with_placeholder(placeholder);
+        }
+        if let Some(max) = state.max_length {
+            spec = spec.with_max_length(max);
+        }
+        column = column.child(poodle_render::text_input_with_handlers(
+            &spec,
+            &ctx,
+            text_field_handlers(host, mounted, &state.name),
+        ));
+    }
+    column
+}
+
+/// Store one reported result and rebuild. The mutation and the rebuild are
+/// separated so the fields lock is never held across the rebuild.
+fn text_field_apply(
+    host: &Arc<TextFieldHost>,
+    mounted: &Arc<Mutex<Node>>,
+    name: &str,
+    entry: String,
+    mutate: impl FnOnce(&mut TextFieldState),
+) {
+    {
+        let mut fields = host.fields.lock().expect("fields");
+        let field = fields
+            .iter_mut()
+            .find(|field| field.name == name)
+            .unwrap_or_else(|| panic!("{name} is mounted"));
+        mutate(field);
+    }
+    host.log.lock().expect("log").push(entry);
+    let next = text_field_tree(host, mounted);
+    *mounted.lock().expect("mount") = next;
+}
+
+fn text_field_handlers(
+    host: &Arc<TextFieldHost>,
+    mounted: &Arc<Mutex<Node>>,
+    name: &str,
+) -> poodle_render::TextInputHandlers {
+    macro_rules! sink {
+        () => {{
+            (Arc::clone(host), Arc::clone(mounted), name.to_owned())
+        }};
+    }
+    let (change_host, change_mount, change_name) = sink!();
+    let (select_host, select_mount, select_name) = sink!();
+    let (focus_host, focus_mount, focus_name) = sink!();
+    let (submit_host, submit_mount, submit_name) = sink!();
+    let (cancel_host, cancel_mount, cancel_name) = sink!();
+    let (clear_host, clear_mount, clear_name) = sink!();
+
+    poodle_render::TextInputHandlers {
+        on_change: Some(Arc::new(move |value: &str| {
+            let value = value.to_owned();
+            text_field_apply(
+                &change_host,
+                &change_mount,
+                &change_name,
+                format!("{change_name}/change:{value}"),
+                |field| field.value = value,
+            );
+        })),
+        on_selection_change: Some(Arc::new(move |start: usize, end: usize| {
+            text_field_apply(
+                &select_host,
+                &select_mount,
+                &select_name,
+                format!("{select_name}/select:{start}-{end}"),
+                |field| field.selection = (start, end),
+            );
+        })),
+        on_focus_change: Some(Arc::new(move |focused: bool| {
+            text_field_apply(
+                &focus_host,
+                &focus_mount,
+                &focus_name,
+                format!("{focus_name}/focus:{focused}"),
+                |field| field.is_focused = focused,
+            );
+        })),
+        on_submit: Some(Arc::new(move || {
+            text_field_apply(
+                &submit_host,
+                &submit_mount,
+                &submit_name,
+                format!("{submit_name}/submit"),
+                |_| {},
+            );
+        })),
+        on_cancel: Some(Arc::new(move || {
+            text_field_apply(
+                &cancel_host,
+                &cancel_mount,
+                &cancel_name,
+                format!("{cancel_name}/cancel"),
+                |_| {},
+            );
+        })),
+        on_clear: Some(Arc::new(move || {
+            text_field_apply(
+                &clear_host,
+                &clear_mount,
+                &clear_name,
+                format!("{clear_name}/clear"),
+                |_| {},
+            );
+        })),
+    }
+}
+
+fn mount_text_fields<'a>(
+    cx: &'a mut TestAppContext,
+    host: &Arc<TextFieldHost>,
+) -> (HeadlessDriver<'a>, Arc<Mutex<Node>>) {
+    let mounted = Arc::new(Mutex::new(Node::container()));
+    *mounted.lock().expect("mount") = text_field_tree(host, &mounted);
+    let driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 200.0);
+    (driver, mounted)
+}
+
+/// The node the backend actually painted for a field, read back out of the
+/// rebuilt tree.
+fn mounted_field(mounted: &Arc<Mutex<Node>>, name: &str) -> Node {
+    mounted
+        .lock()
+        .expect("mount")
+        .find(&|node| node.id.as_deref() == Some(field_id(name).as_str()))
+        .cloned()
+        .unwrap_or_else(|| panic!("{name} is mounted"))
+}
+
+fn mounted_text(mounted: &Arc<Mutex<Node>>, name: &str) -> String {
+    let value = mounted
+        .lock()
+        .expect("mount")
+        .find(&|node| node.id.as_deref() == Some(field_value_id(name).as_str()))
+        .cloned()
+        .unwrap_or_else(|| panic!("{name} has a value node"));
+    match &value.kind {
+        poodle_node::NodeKind::Text { content } => content.clone(),
+        _ => panic!("{name}'s value node is text, so the field root stays the only input"),
+    }
+}
+
+/// g16.007. TextInput core controlled editing through the real GPUI node,
+/// backend and input path: focus is the backend's, the edit rules are shared
+/// Rust's, and the value and caret are the host's — restated as props on every
+/// frame. Nothing here invokes a handler, a transition or a renderer directly
+/// after mount.
+///
+/// Deliberately not claimed: multiline layout, slug source/generation,
+/// validation timing, OS input methods, and NumberInput's value model.
+#[test]
+fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
+    // ── Editing one controlled field ───────────────────────────────────────
+    run_headless(|cx| {
+        let host = TextFieldHost::new(vec![
+            TextFieldState::new("name", "kick").limited(6),
+            TextFieldState::new("note", "").with_placeholder("Describe it"),
+        ]);
+        let (mut driver, mounted) = mount_text_fields(cx, &host);
+        driver.wait_for_focus_handle(&field_id("name"));
+
+        // A field starts unfocused with a collapsed caret, and the placeholder
+        // is drawn as text while being declared as *not* the value — without
+        // that flag one layer down cannot tell the prompt from what was typed.
+        assert!(!host.field("name").is_focused);
+        assert_eq!(mounted_text(&mounted, "note"), "Describe it");
+        assert_eq!(
+            mounted_field(&mounted, "note")
+                .find(&|node| node.id.as_deref() == Some(field_value_id("note").as_str()))
+                .and_then(|node| node.caret)
+                .map(|caret| caret.showing_placeholder),
+            Some(true)
+        );
+
+        // Pointer focus: the press reaches the real focus handle, the backend
+        // reports the gain, and the rebuilt spec draws the caret where the
+        // click landed.
+        driver.pointer_press(payload_frac(&field_value_id("name"), 0.0, 0.5));
+        driver.pointer_release(payload_frac(&field_value_id("name"), 0.0, 0.5));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&field_id("name")),
+            Some(true)
+        );
+        assert!(host.field("name").is_focused);
+        assert_eq!(host.field("name").selection, (0, 0));
+        assert!(
+            host.log().iter().any(|entry| entry == "name/focus:true"),
+            "the backend reported the focus gain: {:?}",
+            host.log()
+        );
+
+        // Caret movement and printable input, both through the real key path.
+        host.take_log();
+        driver.dispatch_key_raw("end");
+        assert_eq!(host.field("name").selection, (4, 4));
+        driver.dispatch_key_raw("e");
+        driver.dispatch_key_raw("r");
+        assert_eq!(host.field("name").value, "kicker");
+        assert_eq!(host.field("name").selection, (6, 6));
+        assert_eq!(mounted_text(&mounted, "name"), "kicker");
+
+        // The field is now at its declared limit: the key is consumed, and the
+        // host is told nothing at all.
+        host.take_log();
+        driver.dispatch_key_raw("s");
+        assert_eq!(host.field("name").value, "kicker");
+        assert_eq!(host.field("name").selection, (6, 6));
+        assert_eq!(
+            host.take_log()
+                .into_iter()
+                .filter(|entry| entry.starts_with("name/change"))
+                .collect::<Vec<_>>(),
+            Vec::<String>::new(),
+            "a full field reports no new value"
+        );
+
+        // Shift-extend, then type over the selection.
+        driver.dispatch_key_raw("home");
+        for _ in 0..4 {
+            driver.dispatch_key_raw("shift-right");
+        }
+        assert_eq!(host.field("name").selection, (0, 4));
+        assert_eq!(host.field("name").value, "kicker", "extending never edits");
+        driver.dispatch_key_raw("p");
+        assert_eq!(host.field("name").value, "per");
+        assert_eq!(host.field("name").selection, (1, 1));
+
+        // Deletion in both directions.
+        driver.dispatch_key_raw("backspace");
+        assert_eq!(host.field("name").value, "er");
+        driver.dispatch_key_raw("delete");
+        assert_eq!(host.field("name").value, "r");
+        assert_eq!(host.field("name").selection, (0, 0));
+
+        // Commands report without touching the controlled value.
+        host.take_log();
+        driver.dispatch_key_raw("enter");
+        driver.dispatch_key_raw("escape");
+        assert_eq!(host.take_log(), vec!["name/submit", "name/cancel"]);
+        assert_eq!(host.field("name").value, "r");
+        assert_eq!(host.field("name").selection, (0, 0));
+
+        // The placeholder is never the value: typing into an empty field
+        // reports the typed character alone.
+        driver.pointer_press(payload_frac(&field_value_id("note"), 0.0, 0.5));
+        driver.pointer_release(payload_frac(&field_value_id("note"), 0.0, 0.5));
+        driver.dispatch_key_raw("a");
+        assert_eq!(host.field("note").value, "a");
+        assert_eq!(mounted_text(&mounted, "note"), "a");
+        assert_eq!(
+            mounted_field(&mounted, "note")
+                .find(&|node| node.id.as_deref() == Some(field_value_id("note").as_str()))
+                .and_then(|node| node.caret)
+                .map(|caret| caret.showing_placeholder),
+            Some(false)
+        );
+
+        // Focus moving on reports the loss once, and the rebuild drops the
+        // focus state without touching the value or the caret.
+        let before = host.field("name");
+        host.take_log();
+        driver.blur_element_focus(&field_id("note"));
+        assert!(!host.field("note").is_focused);
+        assert_eq!(host.field("name").value, before.value);
+        assert_eq!(host.field("name").selection, before.selection);
+        assert_eq!(
+            host.log()
+                .iter()
+                .filter(|entry| *entry == "note/focus:false")
+                .count(),
+            1,
+            "the loss is reported exactly once: {:?}",
+            host.log()
+        );
+    });
+
+    // ── Search clear, disabled, and read-only ──────────────────────────────
+    run_headless(|cx| {
+        let host = TextFieldHost::new(vec![
+            TextFieldState::new("query", "kick").searchable(),
+            TextFieldState::new("locked", "sealed").searchable().disabled(),
+            TextFieldState::new("frozen", "fixed").searchable().read_only(),
+        ]);
+        let (mut driver, mounted) = mount_text_fields(cx, &host);
+        driver.wait_for_focus_handle(&field_id("query"));
+
+        // Only a search field with a value, enabled and writable, offers the
+        // clear control at all.
+        assert!(mounted_field(&mounted, "query")
+            .find(&|node| node.id.as_deref() == Some(field_clear_id("query").as_str()))
+            .is_some());
+        for inert in ["locked", "frozen"] {
+            assert!(
+                mounted_field(&mounted, inert)
+                    .find(&|node| node.id.as_deref() == Some(field_clear_id(inert).as_str()))
+                    .is_none(),
+                "{inert} offers no clear control"
+            );
+        }
+
+        // Clearing is two signals in one order: the empty value first, then
+        // the command. Both kinds of host see the field empty.
+        host.take_log();
+        driver.pointer_activate_id(&field_clear_id("query"));
+        assert_eq!(
+            host.take_log()
+                .into_iter()
+                .filter(|entry| entry.starts_with("query/change") || entry.ends_with("clear"))
+                .collect::<Vec<_>>(),
+            vec!["query/change:".to_string(), "query/clear".to_string()]
+        );
+        assert_eq!(host.field("query").value, "");
+        assert!(
+            mounted_field(&mounted, "query")
+                .find(&|node| node.id.as_deref() == Some(field_clear_id("query").as_str()))
+                .is_none(),
+            "an empty search field has nothing to clear"
+        );
+
+        // Disabled is inert: no focus handle exists at all, so nothing can be
+        // focused, typed into, submitted or cancelled.
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&field_id("locked")).is_none(),
+            "a disabled field is not focusable"
+        );
+        assert!(mounted_field(&mounted, "locked").interaction.disabled);
+        host.take_log();
+        driver.pointer_activate_id(&field_id("locked"));
+        driver.dispatch_key_raw("x");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.field("locked").value, "sealed");
+        assert_eq!(
+            host.take_log()
+                .into_iter()
+                .filter(|entry| entry.starts_with("locked/"))
+                .collect::<Vec<_>>(),
+            Vec::<String>::new(),
+            "a disabled field reports nothing"
+        );
+
+        // Read-only takes real focus and reports selection, but no keystroke
+        // moves its value. Commands still reach the host.
+        driver.wait_for_focus_handle(&field_id("frozen"));
+        driver.focus_element(&field_id("frozen"));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&field_id("frozen")),
+            Some(true),
+            "a read-only field is still focusable"
+        );
+        host.take_log();
+        driver.dispatch_key_raw("x");
+        driver.dispatch_key_raw("backspace");
+        assert_eq!(host.field("frozen").value, "fixed");
+        driver.dispatch_key_raw("enter");
+        driver.pointer_press(payload_frac(&field_value_id("frozen"), 0.9, 0.5));
+        driver.pointer_release(payload_frac(&field_value_id("frozen"), 0.9, 0.5));
+        let log = host.take_log();
+        assert!(
+            !log.iter().any(|entry| entry.starts_with("frozen/change")),
+            "read-only never mutates: {log:?}"
+        );
+        assert!(
+            log.iter().any(|entry| entry == "frozen/submit"),
+            "read-only still submits: {log:?}"
+        );
+        assert!(
+            log.iter().any(|entry| entry.starts_with("frozen/select")),
+            "read-only still selects: {log:?}"
+        );
+    });
+
+    // ── Two fields with equal values keep their own identity ───────────────
+    run_headless(|cx| {
+        let host = TextFieldHost::new(vec![
+            TextFieldState::new("left", "same"),
+            TextFieldState::new("right", "same"),
+        ]);
+        let (mut driver, _mounted) = mount_text_fields(cx, &host);
+        driver.wait_for_focus_handle(&field_id("left"));
+        driver.wait_for_focus_handle(&field_id("right"));
+
+        driver.focus_element(&field_id("left"));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&field_id("left")),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&field_id("right")),
+            Some(false),
+            "equal values do not merge focus identity"
+        );
+
+        driver.dispatch_key_raw("end");
+        driver.dispatch_key_raw("x");
+        assert_eq!(host.field("left").value, "samex");
+        assert_eq!(host.field("right").value, "same");
+
+        driver.focus_element(&field_id("right"));
+        driver.dispatch_key_raw("home");
+        driver.dispatch_key_raw("y");
+        assert_eq!(host.field("right").value, "ysame");
+        assert_eq!(host.field("left").value, "samex");
+        assert_eq!(host.field("left").selection, (5, 5));
+        assert_eq!(host.field("right").selection, (1, 1));
+
+        // Undo history is per field too — the backend keys it by the value
+        // node's id, which is derived from the field's own.
+        driver.focus_element(&field_id("left"));
+        driver.dispatch_key_raw("cmd-z");
+        assert_eq!(host.field("left").value, "same");
+        assert_eq!(
+            host.field("right").value,
+            "ysame",
+            "one field's undo leaves the other alone"
+        );
+    });
+}
