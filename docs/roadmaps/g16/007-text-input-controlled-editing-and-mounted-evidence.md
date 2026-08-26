@@ -1,6 +1,6 @@
 # g16.007 — TextInput Controlled Editing And Mounted Evidence
 
-Status: complete
+Status: complete — merged in PR #81 (`d31044b9`)
 Opened: 2026-08-26
 Closed: 2026-08-26
 Depends on: merged `g16.006`

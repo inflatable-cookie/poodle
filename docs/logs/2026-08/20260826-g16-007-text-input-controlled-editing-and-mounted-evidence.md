@@ -1,7 +1,7 @@
 # g16.007 — TextInput Controlled Editing And Mounted Evidence
 
 Date: 2026-08-26
-Status: complete — PR pending operator review
+Status: complete — merged in PR #81
 Branch: `t3code/text-input-mounted-evidence`
 Card: `docs/roadmaps/g16/007-text-input-controlled-editing-and-mounted-evidence.md`
 

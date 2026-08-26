@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — `g16.007` complete; awaiting orchestrator review checkpoint
+Status: active — `g16.007` merged in PR #81; next evidence lane unchosen
 Posture: strict-ready; the next measured lane is unchosen until review
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -37,7 +37,7 @@ stay maintained; backend admission is not part of the first card.
 4. [004 — ToggleGroup semantic API and mounted parity](004-toggle-group-semantic-api-and-mounted-parity.md) — complete; merged in PR #78
 5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; merged in PR #79
 6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — complete; merged in PR #80
-7. [007 — TextInput controlled editing and mounted evidence](007-text-input-controlled-editing-and-mounted-evidence.md) — complete; PR pending operator review
+7. [007 — TextInput controlled editing and mounted evidence](007-text-input-controlled-editing-and-mounted-evidence.md) — complete; merged in PR #81
 
 ## Measured Selection
 
@@ -91,7 +91,8 @@ separate raw-draft/value-model decision recorded in
 
 ## Next Task
 
-Orchestrator review checkpoint. Review the `g16.007` PR, then choose the next
-evidence lane from current ledger state. Do not compile another card before
-that review, and do not fold NumberInput, multiline/slug closure, another
-component family, or a visual or accessibility programme into this one.
+Orchestrator evidence checkpoint. Choose the next bounded lane from the current
+ledger and the TextInput backend findings in
+`../../triage/20260826-224901-text-input-native-event-cleanup.md`. Keep
+NumberInput's value-model decision separate from multiline/slug closure, other
+component families, and visual or accessibility programmes.
