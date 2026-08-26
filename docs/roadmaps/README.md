@@ -19,10 +19,10 @@ chosen.
   SegmentedControl. PR #77 closed `g16.003` RadioGroup native identity and
   mounted evidence. `g16.004` closed ToggleGroup resulting-selection, single-mode
   roving focus, and instance-scoped native identity. `g16.005` closed Slider
-  axis, keyboard, callback, and mounted parity; ledger 34 → 35 mounted,
-  140 → 139 missing. After operator merge, the orchestrator inspects the ledger
-  and the open Tabs drag-lifecycle decision before choosing another bounded
-  lane. No broader conformance programme is implied yet.
+  axis, keyboard, callback, and mounted parity in PR #79; ledger 34 → 35
+  mounted, 140 → 139 missing. The orchestrator now inspects the ledger and
+  the open Tabs drag-lifecycle decision before choosing another bounded lane.
+  No broader conformance programme is implied yet.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -74,7 +74,7 @@ chosen.
   adopted and React retained as source-only
 - `g16` — active evidence-recovery checkpoint; `001` complete and
   operator-reviewed; `002` closed — partial outcome; `003` merged in PR #77;
-  `004` merged in PR #78; `005` complete, awaiting operator merge
+  `004` merged in PR #78; `005` merged in PR #79
 
 ## Rules
 

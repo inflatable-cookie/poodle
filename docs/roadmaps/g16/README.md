@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — `g16.005` complete, awaiting operator merge
-Posture: strict-ready; next lane is an orchestrator review after merge. Tabs
+Status: active — `g16.005` merged in PR #79
+Posture: strict-ready; next lane is an orchestrator review. Tabs
 remains stopped on its recorded native drag-lifecycle decision
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -36,7 +36,7 @@ stay maintained; backend admission is not part of the first card.
 2. [002 — Selection controls mounted parity](002-selection-controls-mounted-parity.md) — closed — partial outcome
 3. [003 — RadioGroup native identity and mounted parity](003-radio-group-native-identity-and-mounted-parity.md) — complete
 4. [004 — ToggleGroup semantic API and mounted parity](004-toggle-group-semantic-api-and-mounted-parity.md) — complete; merged in PR #78
-5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; awaiting operator merge
+5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; merged in PR #79
 
 ## Measured Selection
 
@@ -73,7 +73,6 @@ needs a native drag-payload lifecycle decision, recorded in
 
 ## Next Task
 
-After operator merge, inspect the updated ledger and the open Tabs
-drag-lifecycle decision before choosing another bounded lane. Do not infer a
-broad conformance programme. Do not compile or implement another card from
-this closeout.
+Inspect the updated ledger and the open Tabs drag-lifecycle decision before
+choosing another bounded lane. Do not infer a broad conformance programme. Do
+not compile or implement another card from this closeout.

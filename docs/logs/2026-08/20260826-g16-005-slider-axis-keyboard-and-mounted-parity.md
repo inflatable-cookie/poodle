@@ -1,7 +1,7 @@
 # g16.005 — Slider Axis, Keyboard, And Mounted Parity
 
 Date: 2026-08-26
-Status: complete — awaiting operator merge
+Status: complete — merged in PR #79
 Branch: `t3code/slider-axis-keyboard-parity`
 Card: `docs/roadmaps/g16/005-slider-axis-keyboard-and-mounted-parity.md`
 
