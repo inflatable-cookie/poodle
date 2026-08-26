@@ -146,10 +146,13 @@ pub fn radio_group(
             row.style.descriptor.opacity = disabled_opacity;
         }
 
+        // Same-value selection is inert: native radios do not re-fire.
         if let (false, Some(handler)) = (option_disabled, &on_change) {
-            let handler = Arc::clone(handler);
-            let value = option.value.clone();
-            row.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+            if !is_selected {
+                let handler = Arc::clone(handler);
+                let value = option.value.clone();
+                row.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+            }
         }
 
         el = el.child(row);

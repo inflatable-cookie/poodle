@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition,
-    NodeRole, NodeToggled, ShadowLayer,
+    NodeRole, NodeToggled, ShadowLayer, StylePatch,
 };
 use poodle_specs::{ControlDensity, SwitchSpec};
 
@@ -167,7 +167,15 @@ pub fn switch(
         s.descriptor.layout.spacing.gap = gap;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     }
-    root.interaction.focusable = true;
+    if !spec.is_disabled {
+        root.interaction.focusable = true;
+        root.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
+            text_color: None,
+            opacity: None,
+        });
+    }
 
     if spec.is_dual_label() {
         // Both side labels rest at text-muted; the active side re-tints.
@@ -236,10 +244,73 @@ pub fn switch(
         root.a11y.label = Some(name);
     }
     root.a11y.role = Some(NodeRole::Switch);
-    root.a11y.toggled = Some(match spec.checked {
-        Some(true) => NodeToggled::True,
-        Some(false) => NodeToggled::False,
-        None => NodeToggled::Mixed,
+    root.a11y.toggled = Some(if spec.current_checked() {
+        NodeToggled::True
+    } else {
+        NodeToggled::False
     });
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::SwitchSpec;
+    use std::sync::{Arc, Mutex};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn activation_emits_the_next_checked_value() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let seen: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let node = switch(
+            &SwitchSpec::new().with_checked(false).with_label("Dark"),
+            &ctx,
+            Some(Arc::new(move |next| sink.lock().unwrap().push(next))),
+        );
+        assert_eq!(node.a11y.toggled, Some(NodeToggled::False));
+        (node.interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(seen.lock().unwrap().as_slice(), [true]);
+    }
+
+    #[test]
+    fn readonly_stays_focusable_without_an_activate_handler() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = switch(
+            &SwitchSpec::new()
+                .with_checked(true)
+                .with_read_only(true)
+                .with_label("Locked"),
+            &ctx,
+            Some(Arc::new(|_: bool| panic!("readonly must not emit"))),
+        );
+        assert!(node.interaction.focusable);
+        assert!(node.style.focus.is_some());
+        assert!(node.interaction.on_activate.is_none());
+        assert_eq!(node.a11y.toggled, Some(NodeToggled::True));
+    }
+
+    #[test]
+    fn disabled_is_out_of_focus_and_activation() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = switch(
+            &SwitchSpec::new()
+                .with_checked(false)
+                .with_disabled(true)
+                .with_label("Off"),
+            &ctx,
+            Some(Arc::new(|_: bool| panic!("disabled must not emit"))),
+        );
+        assert!(!node.interaction.focusable);
+        assert!(node.interaction.disabled);
+        assert!(node.interaction.on_activate.is_none());
+        assert!(node.style.focus.is_none());
+    }
 }

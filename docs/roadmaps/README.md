@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-25
+Updated: 2026-08-26
 
 Roadmaps record Poodle's executable milestone work. `g15` completed the full
 v0.2.x release programme: the roster and parity baseline, failed v0.2.0
@@ -15,8 +15,9 @@ chosen.
 - [Generation index](generation-index.md) is the canonical status summary.
 - `g16.001` is complete and operator-reviewed in PR #75. It repairs stale
   parity reporting and produces one component-level evidence ledger. `g16.002`
-  is the first bounded follow-up: mounted GPUI behaviour for five selection
-  controls. No later conformance programme is implied yet.
+  closed — partial outcome: mounted GPUI behaviour for Checkbox, Switch, and
+  SegmentedControl. RadioGroup and ToggleGroup remain planning stops. No later
+  conformance programme is implied yet.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -66,8 +67,8 @@ chosen.
 - `g15` — completed v0.2.x release and adoption programme; corrected v0.2.2
   published from candidate `d5607def`, with all 16 authoritative consumers
   adopted and React retained as source-only
-- `g16` — active evidence-recovery checkpoint; `001` complete pending operator
-  review, later runway uncompiled
+- `g16` — active evidence-recovery checkpoint; `001` complete and
+  operator-reviewed; `002` closed — partial outcome; later runway uncompiled
 
 ## Rules
 

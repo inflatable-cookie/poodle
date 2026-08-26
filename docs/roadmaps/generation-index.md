@@ -1,16 +1,16 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-25
+Updated: 2026-08-26
 
 ## Active Track
 
 - `g16`
   - Status: active; strict-ready
-  - Range: `001` closed; `002` ready; later cards uncompiled pending review
+  - Range: `001` closed; `002` closed — partial outcome; later cards uncompiled
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: review `g16.001`'s measured semantic, behavioural,
-    accessibility, and visual evidence classes before compiling a next lane
+  - Next move: resolve RadioGroup instance identity and ToggleGroup
+    semantic/API as separate lanes; do not compile `g16.003` from this stop
 
 ## Latest Completed Track
 

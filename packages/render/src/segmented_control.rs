@@ -235,12 +235,15 @@ pub fn segmented_control(
             } else {
                 -1
             });
-            // Re-picking the current segment still fires: the host asked to
-            // be told about clicks, and swallowing one would hide a "confirm".
-            if let Some(handler) = &on_change {
-                let handler = Arc::clone(handler);
-                let value = option.value.clone();
-                seg.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+            // Same-value selection is inert for the active cohort: native
+            // radios do not re-fire an unchanged selection. Arrow keys still
+            // move to a different enabled segment.
+            if !is_selected {
+                if let Some(handler) = &on_change {
+                    let handler = Arc::clone(handler);
+                    let value = option.value.clone();
+                    seg.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+                }
             }
             seg.interaction.on_key = roving_key_handler(
                 &option.value,
@@ -313,6 +316,7 @@ fn roving_key_handler(
 ) -> Option<Arc<dyn Fn(NodeKey, poodle_node::NodeModifiers) -> Option<String> + Send + Sync>> {
     let index = roving.iter().position(|candidate| candidate == value)?;
     let ids = roving.to_vec();
+    let current = value.to_string();
     Some(Arc::new(move |key, _modifiers| {
         if ids.is_empty() {
             return None;
@@ -330,8 +334,10 @@ fn roving_key_handler(
             _ => None,
         }?;
         let target = ids[next].clone();
-        if let Some(handler) = &on_change {
-            handler(&target);
+        if target != current {
+            if let Some(handler) = &on_change {
+                handler(&target);
+            }
         }
         Some(segment_focus_id(&instance_scope, &target))
     }))
@@ -595,6 +601,11 @@ mod tests {
         let list = find_segment(&node, "List");
         (list.interaction.on_activate.as_ref().unwrap())();
         assert_eq!(seen.lock().unwrap().as_slice(), ["list"]);
+        let grid = find_segment(&node, "Grid");
+        assert!(
+            grid.interaction.on_activate.is_none(),
+            "re-picking the selected segment is inert"
+        );
     }
 
     #[test]
