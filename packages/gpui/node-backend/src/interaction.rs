@@ -17,7 +17,12 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                 .tab_index(tab_index.max(0) as isize)
                 .tab_stop(tab_index >= 0);
         } else if node.interaction.focusable {
-            el = el.focusable();
+            // No declared index means the DOM default: a focusable control is
+            // a tab stop at index 0. `focusable()` alone leaves gpui's
+            // auto-created handle with `tab_stop` off, which took every field,
+            // slot row and segment out of sequential traversal — the
+            // vocabulary says `focusable` *participates* in it.
+            el = el.focusable().tab_index(0);
         }
     }
 
@@ -33,6 +38,8 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         }
         let on_focus_change = node.interaction.on_focus_change.clone();
         let tab_index = node.a11y.tab_index;
+        let node_focusable = node.interaction.focusable;
+        let painted_id = input_text::painted_key(node, &id);
         el = el.child(
             gpui::canvas(
                 move |_bounds, window, cx| {
@@ -50,11 +57,13 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                         // selected item the permanent tab stop. gpui
                         // default-creates handles with tab_stop off, and once
                         // `track_focus` attaches, the handle's flags — not
-                        // the element refinement's — decide traversal.
+                        // the element refinement's — decide traversal. So the
+                        // undeclared-index case has to repeat the DOM default
+                        // here as well: focusable means tab stop.
                         let updated = entry
                             .clone()
                             .tab_index(tab_index.unwrap_or(0).max(0) as isize)
-                            .tab_stop(tab_index.is_some_and(|index| index >= 0));
+                            .tab_stop(tab_index.map_or(node_focusable, |index| index >= 0));
                         *entry = updated.clone();
                         updated
                     });
@@ -74,7 +83,16 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                     let now = handle.is_focused(window);
                     let changed = FOCUS_STATES.with(|states| {
                         let mut states = states.borrow_mut();
-                        states.insert(id.clone(), now) != Some(now)
+                        // The first observation of a node that is *not*
+                        // focused is not a change: it never held focus, so it
+                        // did not lose it. Reporting it as a blur made the
+                        // first painted frame indistinguishable from focus
+                        // leaving — which a field that commits on blur cannot
+                        // survive.
+                        match states.insert(id.clone(), now) {
+                            Some(previous) => previous != now,
+                            None => now,
+                        }
                     });
                     if changed {
                         // The value node draws the caret but the *root* holds
@@ -91,8 +109,16 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                         });
                         if !now {
                             // A stale measured line must not answer clicks on
-                            // whatever takes this id next.
+                            // whatever takes this id next. The transient state
+                            // hangs off the node that painted the value, which
+                            // is the root itself for a childless input and a
+                            // derived child for a composite field; clear both,
+                            // so neither shape can leave the other's entries
+                            // behind.
                             input_text::forget(&id);
+                            if painted_id != id {
+                                input_text::forget(&painted_id);
+                            }
                         }
                         if let Some(handler) = &on_focus_change {
                             handler(now);
@@ -355,9 +381,11 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         // `App` reaches it directly. (IME still needs an `EntityInputHandler`,
         // which a `&Node -> AnyElement` backend has no entity to hang on.)
         let insert = node.interaction.on_edit_insert.clone();
-        // Undo needs the *value* node's id, because that is what paint records
-        // history under; the keys arrive at the focusable root above it.
-        let value_id = input_text::history_key(id);
+        // Undo needs the id of the node that actually paints the value,
+        // because that is the only one that sees an edit's result; the keys
+        // arrive at the focusable root, which may be that same node or an
+        // ancestor of it.
+        let value_id = input_text::painted_key(node, id);
         let text_change = node.interaction.on_text_change.clone();
         let select_range = node.interaction.on_select_range.clone();
         let selection_text = node.caret.map(|c| c.selection).and_then(|(a, b)| {
@@ -427,7 +455,16 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                     }
                     return;
                 }
-                if matches!(key, "enter" | "tab") {
+                if key == "tab" {
+                    // Traversal, never submission and never an edit. The
+                    // window host turns it into gpui's own `focus_next`/
+                    // `focus_prev`; a field that wants to commit when Tab
+                    // leaves it hears the blur that follows. Returning here
+                    // only ends this listener — the keystroke still bubbles
+                    // to the host.
+                    return;
+                }
+                if key == "enter" {
                     if let Some(handler) = &submit {
                         handler();
                         cx.refresh_windows();

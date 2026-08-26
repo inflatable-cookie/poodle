@@ -377,3 +377,102 @@ fn gpui_animation_maps_loop_modes_and_easing() {
     assert!(((a.easing)(1.0) - 1.0).abs() < 1e-6);
     assert!(((a.easing)(0.5) - 0.5).abs() < 1e-6);
 }
+
+// ── g16.008 painted text-state identity ────────────────────────────────────
+
+fn caret_text(id: &str, content: &str) -> Node {
+    let mut node = Node::text(content).with_caret(
+        (0, 0),
+        ColorValue(1.0, 1.0, 1.0, 1.0),
+        ColorValue(0.3, 0.6, 1.0, 0.4),
+    );
+    node.id = Some(id.to_owned());
+    node
+}
+
+/// Transient text state and undo history are keyed by the node that *paints*
+/// the value, and the two shapes disagree about which node that is: a
+/// composite field paints a derived value child, a childless input paints
+/// itself. Keys and focus land on the root in both cases, so the root has to
+/// resolve the difference — in one helper, from the tree's own shape.
+#[test]
+fn the_painted_text_key_follows_the_node_that_draws_the_value() {
+    // Composite field: affixes and a counter around a derived value child.
+    let mut composite = Node::input("kick", "Name it");
+    composite.id = Some("poodle-input-name".into());
+    composite = composite
+        .child(Node::icon("search", 12.0))
+        .child(caret_text("poodle-input-name-value", "kick"))
+        .child(Node::text("4/6"));
+    assert_eq!(
+        input_text::painted_key(&composite, "poodle-input-name"),
+        "poodle-input-name-value",
+        "the value child paints, so it owns the measured line and the history"
+    );
+
+    // Childless input: native EditableLabel's editing field, which draws its
+    // own value. Deriving `-value` here addressed a node that never existed.
+    let mut childless = Node::input("kick", "Name it");
+    childless.id = Some("track-label".into());
+    assert_eq!(
+        input_text::painted_key(&childless, "track-label"),
+        "track-label",
+        "a childless input is its own painted value node"
+    );
+
+    // Nothing paints a value: the root id is the only honest answer, and no
+    // state is recorded under it either.
+    let mut inert = Node::container();
+    inert.id = Some("code-input-row".into());
+    let inert = inert.child(Node::text("1")).child(Node::text("2"));
+    assert_eq!(input_text::painted_key(&inert, "code-input-row"), "code-input-row");
+}
+
+/// The helper resolves an element id the way the rest of the backend does, so
+/// a runtime-stamped value node is addressed by the id it actually painted
+/// under rather than by the `-value` naming convention.
+#[test]
+fn the_painted_text_key_uses_the_element_id_the_backend_paints_under() {
+    let mut value = caret_text("row-value", "kick");
+    value.runtime_id = Some("list:row-7:value".into());
+    let mut field = Node::input("kick", "");
+    field.id = Some("row".into());
+    let field = field.child(value);
+    assert_eq!(input_text::painted_key(&field, "row"), "list:row-7:value");
+
+    // A multiline value falls back to the plain wrapped text child, which
+    // measures nothing — so it is not a painted text node.
+    let mut multiline = Node::input("one\ntwo", "");
+    multiline.id = Some("body".into());
+    assert_eq!(input_text::painted_key(&multiline, "body"), "body");
+}
+
+/// `forget` is the blur reset. It drops everything that describes the field
+/// as it is being edited, and keeps the undo history, which reaches back
+/// across a focus excursion for as long as the field is mounted.
+#[test]
+fn blur_clears_transient_text_state_and_keeps_undo_history() {
+    let id = "blur-reset-field";
+    input_text::record(id, "kick", (4, 4));
+    input_text::record(id, "kicks", (5, 5));
+    input_text::set_marked(id, (0, 2));
+    input_text::set_composing(id, "ki".to_owned());
+    let before = painted_text_state_for(id);
+    assert!(before.history && before.marked && before.composing);
+
+    input_text::forget(id);
+    let after = painted_text_state_for(id);
+    assert_eq!(
+        after,
+        PaintedTextState {
+            history: true,
+            ..PaintedTextState::default()
+        },
+        "blur clears the transient entries and nothing else"
+    );
+    assert_eq!(
+        input_text::undo(id).map(|snapshot| snapshot.value),
+        Some("kick".to_owned()),
+        "history survives the focus excursion"
+    );
+}

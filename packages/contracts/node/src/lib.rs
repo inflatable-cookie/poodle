@@ -478,8 +478,10 @@ pub struct NodePoint {
 ///
 /// Named physically, not semantically: ArrowDown means "next row" in a tree
 /// and "next option" in a select, so the meaning belongs to the component.
-/// Enter/Tab and Escape are deliberately absent — they stay on
-/// [`Interaction::on_submit`] and [`Interaction::on_cancel`].
+/// Enter and Escape are deliberately absent — they stay on
+/// [`Interaction::on_submit`] and [`Interaction::on_cancel`]. Tab is absent
+/// for a different reason: it is sequential focus traversal, which the
+/// backend owns outright, so no node ever sees it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NodeKey {
     ArrowUp,
@@ -527,7 +529,9 @@ pub type ActivateHandler = Arc<dyn Fn() + Send + Sync>;
 /// replacement string through this callback.
 pub type TextChangeHandler = Arc<dyn Fn(&str) + Send + Sync>;
 
-/// Handler for a host-owned edit submission (Enter or Tab on an input).
+/// Handler for a host-owned edit submission (Enter on an input). Tab is
+/// traversal, not submission: a field that commits when Tab leaves it does so
+/// because focus moved and [`Interaction::on_focus_change`] reported the blur.
 pub type SubmitHandler = Arc<dyn Fn() + Send + Sync>;
 
 /// Handler for a host-owned edit cancellation (Escape on an input).
@@ -549,7 +553,10 @@ pub type DismissHandler = Arc<dyn Fn(DismissReason) + Send + Sync>;
 /// backend's job; this declares what the node wants when dispatch reaches it.
 #[derive(Clone, Default)]
 pub struct Interaction {
-    /// Participates in focus traversal.
+    /// Participates in focus traversal: the node is a sequential tab stop,
+    /// the way a web `<input>` or `<button>` is without any `tabindex`.
+    /// [`NodeA11y::tab_index`] overrides that — `-1` keeps the node
+    /// programmatically focusable and out of the sequence.
     pub focusable: bool,
     /// Ignores activation and renders in the disabled state the style already
     /// describes (components bake disabled opacity into the descriptor).
@@ -559,9 +566,12 @@ pub struct Interaction {
     /// editor use its change stream; lightweight backends may provide a
     /// smaller editing subset while preserving the same callback contract.
     pub on_text_change: Option<TextChangeHandler>,
-    /// Completes the current input edit on Enter or Tab. The component
-    /// captures the current value in the closure; the backend only maps the
-    /// key gesture.
+    /// Completes the current input edit on Enter. The component captures the
+    /// current value in the closure; the backend only maps the key gesture.
+    ///
+    /// Enter only. Tab moves focus, and a component that wants a commit when
+    /// focus leaves observes the blur through [`Self::on_focus_change`] — the
+    /// same division a web field has between `keydown` and `blur`.
     pub on_submit: Option<SubmitHandler>,
     /// Cancels the current input edit on Escape.
     pub on_cancel: Option<CancelHandler>,
