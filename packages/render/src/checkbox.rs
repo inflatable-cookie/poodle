@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
-    NodeToggled,
+    NodeToggled, StylePatch,
 };
 use poodle_specs::{CheckState, CheckboxSpec, ControlDensity, ControlSize};
 
@@ -141,7 +141,17 @@ pub fn checkbox(
         s.descriptor.layout.spacing.gap = gap;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
     }
-    root.interaction.focusable = true;
+    if !spec.is_disabled {
+        root.interaction.focusable = true;
+        // GPUI tracks a handle only when a focusable node also declares a
+        // focus patch (radio.rs). Readonly stays in that set; disabled does not.
+        root.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(theme.resolve_color("color.accent.focusRing")),
+            text_color: None,
+            opacity: None,
+        });
+    }
     root = root.child(indicator);
 
     if let Some(ref label) = spec.label {
@@ -168,11 +178,73 @@ pub fn checkbox(
         root.a11y.label = Some(label.to_string());
     }
     root.a11y.role = Some(NodeRole::CheckBox);
-    root.a11y.toggled = Some(match spec.checked {
-        Some(true) => NodeToggled::True,
-        Some(false) => NodeToggled::False,
-        // None is mixed, not unchecked — a different and true claim.
-        None => NodeToggled::Mixed,
+    root.a11y.toggled = Some(match spec.current_state() {
+        CheckState::Checked => NodeToggled::True,
+        CheckState::Unchecked => NodeToggled::False,
+        CheckState::Mixed => NodeToggled::Mixed,
     });
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::CheckboxSpec;
+    use std::sync::{Arc, Mutex};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn mixed_resolves_to_checked_and_projects_mixed_until_then() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let seen: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let mixed = checkbox(
+            &CheckboxSpec::new().with_mixed(true).with_label("All"),
+            &ctx,
+            Some(Arc::new(move |next| sink.lock().unwrap().push(next))),
+        );
+        assert_eq!(mixed.a11y.toggled, Some(NodeToggled::Mixed));
+        (mixed.interaction.on_activate.as_ref().unwrap())();
+        assert_eq!(seen.lock().unwrap().as_slice(), [true]);
+    }
+
+    #[test]
+    fn readonly_stays_focusable_without_an_activate_handler() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = checkbox(
+            &CheckboxSpec::new()
+                .with_checked(true)
+                .with_read_only(true)
+                .with_label("Locked"),
+            &ctx,
+            Some(Arc::new(|_: bool| panic!("readonly must not emit"))),
+        );
+        assert!(node.interaction.focusable);
+        assert!(node.style.focus.is_some());
+        assert!(node.interaction.on_activate.is_none());
+        assert_eq!(node.a11y.toggled, Some(NodeToggled::True));
+    }
+
+    #[test]
+    fn disabled_is_out_of_focus_and_activation() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = checkbox(
+            &CheckboxSpec::new()
+                .with_checked(false)
+                .with_disabled(true)
+                .with_label("Off"),
+            &ctx,
+            Some(Arc::new(|_: bool| panic!("disabled must not emit"))),
+        );
+        assert!(!node.interaction.focusable);
+        assert!(node.interaction.disabled);
+        assert!(node.interaction.on_activate.is_none());
+        assert!(node.style.focus.is_none());
+    }
 }

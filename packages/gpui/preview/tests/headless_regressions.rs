@@ -4311,3 +4311,687 @@ fn a_real_accordion_still_paints_its_contracted_item_highlight() {
         );
     });
 }
+
+// ── g16.002 selection-controls mounted parity ─────────────────────────────
+
+fn checkbox_toggled(node: &Node) -> Option<poodle_node::NodeToggled> {
+    node.a11y.toggled
+}
+
+/// Checkbox activation, mixed-to-checked, readonly, and disabled all travel
+/// through the real mounted tree. The host stores the next checked value and
+/// supplies the rebuilt spec; mixed resolves to checked on the first accept.
+#[test]
+fn checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec() {
+    use poodle_node::NodeToggled;
+    use poodle_specs::CheckboxSpec;
+
+    run_headless(|cx| {
+        fn build(
+            checked: bool,
+            mixed: bool,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<bool>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let mut spec = CheckboxSpec::new()
+                .with_checked(checked)
+                .with_label("Notify");
+            if mixed {
+                spec = spec.with_mixed(true);
+            }
+            let mut node = poodle_render::checkbox(
+                &spec,
+                &RenderContext::new(&theme()),
+                Some(Arc::new(move |next| {
+                    sink.lock().unwrap().push(next);
+                    *mount.lock().unwrap() =
+                        build(next, false, Arc::clone(&mount), Arc::clone(&sink));
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, true, Arc::clone(&mounted), Arc::clone(&payloads));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        assert_eq!(
+            checkbox_toggled(&mounted.lock().unwrap()),
+            Some(NodeToggled::Mixed)
+        );
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        driver.pointer_activate();
+        assert_eq!(payloads.lock().unwrap().as_slice(), [true]);
+        assert_eq!(
+            checkbox_toggled(&mounted.lock().unwrap()),
+            Some(NodeToggled::True),
+            "mixed resolves to checked on the first accepted activation"
+        );
+
+        driver.pointer_activate();
+        assert_eq!(payloads.lock().unwrap().as_slice(), [true, false]);
+        assert_eq!(
+            checkbox_toggled(&mounted.lock().unwrap()),
+            Some(NodeToggled::False)
+        );
+    });
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let mut node = poodle_render::checkbox(
+            &CheckboxSpec::new()
+                .with_checked(true)
+                .with_read_only(true)
+                .with_label("Locked"),
+            &RenderContext::new(&theme()),
+            Some(Arc::new(move |next| sink.lock().unwrap().push(next))),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        driver.focus_element(FIXTURE_ID);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FIXTURE_ID),
+            Some(true),
+            "readonly stays focusable"
+        );
+        driver.dispatch_key_raw("space");
+        driver.pointer_activate();
+        assert!(
+            payloads.lock().unwrap().is_empty(),
+            "readonly does not change or emit"
+        );
+    });
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let mut node = poodle_render::checkbox(
+            &CheckboxSpec::new()
+                .with_checked(false)
+                .with_disabled(true)
+                .with_label("Off"),
+            &RenderContext::new(&theme()),
+            Some(Arc::new(move |next| sink.lock().unwrap().push(next))),
+        );
+        node.id = Some("checkbox-disabled".to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("checkbox-disabled").is_none(),
+            "disabled does not accept focus"
+        );
+        driver.pointer_activate();
+        assert!(
+            payloads.lock().unwrap().is_empty(),
+            "disabled does not accept activation"
+        );
+    });
+}
+
+/// Switch activation, readonly, and disabled match Checkbox's binary rules
+/// through the real mounted tree. The host rebuilds from the emitted next value.
+#[test]
+fn switch_toggle_readonly_and_disabled_rebuild_the_host_spec() {
+    use poodle_node::NodeToggled;
+    use poodle_specs::SwitchSpec;
+
+    run_headless(|cx| {
+        fn build(
+            checked: bool,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<bool>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let mut node = poodle_render::switch(
+                &SwitchSpec::new()
+                    .with_checked(checked)
+                    .with_label("Dark mode"),
+                &RenderContext::new(&theme()),
+                Some(Arc::new(move |next| {
+                    sink.lock().unwrap().push(next);
+                    *mount.lock().unwrap() = build(next, Arc::clone(&mount), Arc::clone(&sink));
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(false, Arc::clone(&mounted), Arc::clone(&payloads));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        driver.pointer_activate();
+        assert_eq!(payloads.lock().unwrap().as_slice(), [true]);
+        assert_eq!(
+            checkbox_toggled(&mounted.lock().unwrap()),
+            Some(NodeToggled::True)
+        );
+        driver.dispatch_key_raw("enter");
+        assert_eq!(payloads.lock().unwrap().as_slice(), [true, false]);
+    });
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let mut node = poodle_render::switch(
+            &SwitchSpec::new()
+                .with_checked(true)
+                .with_read_only(true)
+                .with_label("Locked"),
+            &RenderContext::new(&theme()),
+            Some(Arc::new(move |next| sink.lock().unwrap().push(next))),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        driver.keyboard_key(FIXTURE_ID, "space");
+        driver.pointer_activate();
+        assert!(payloads.lock().unwrap().is_empty());
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FIXTURE_ID),
+            Some(true)
+        );
+    });
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let mut node = poodle_render::switch(
+            &SwitchSpec::new()
+                .with_checked(false)
+                .with_disabled(true)
+                .with_label("Off"),
+            &RenderContext::new(&theme()),
+            Some(Arc::new(move |next| sink.lock().unwrap().push(next))),
+        );
+        node.id = Some("switch-disabled".to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.draw_frame();
+        assert!(poodle_gpui_node_backend::focus_handle_for("switch-disabled").is_none());
+        driver.pointer_activate();
+        assert!(payloads.lock().unwrap().is_empty());
+    });
+}
+
+fn radio_option_id(scope: &str, value: &str) -> String {
+    format!("radio:{scope}:option:{value}")
+}
+
+fn radio_option_selected(node: &Node, scope: &str, value: &str) -> bool {
+    let id = radio_option_id(scope, value);
+    node.find(&|n| n.id.as_deref() == Some(id.as_str()))
+        .and_then(|n| n.a11y.selected)
+        .unwrap_or(false)
+}
+
+fn selection_radio_options() -> Vec<poodle_specs::ChoiceOption> {
+    vec![
+        poodle_specs::ChoiceOption::new("free", "Free"),
+        poodle_specs::ChoiceOption::new("pro", "Pro").with_disabled(true),
+        poodle_specs::ChoiceOption::new("enterprise", "Enterprise"),
+    ]
+}
+
+/// RadioGroup exclusive selection, wrap, disabled-option skip, and disabled
+/// group inertia through mounted pointer and directional keys. The host
+/// rebuilds from the emitted value.
+#[test]
+fn radio_group_exclusive_focus_and_disabled_paths_through_mounted_input() {
+    use poodle_specs::{Orientation, RadioGroupSpec};
+
+    run_headless(|cx| {
+        fn build(
+            value: &str,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let mut node = poodle_render::radio_group(
+                &RadioGroupSpec::new(selection_radio_options())
+                    .with_name("plan")
+                    .with_orientation(Orientation::Horizontal)
+                    .with_value(value),
+                &RenderContext::new(&theme()),
+                Some(Arc::new(move |next: &str| {
+                    sink.lock().unwrap().push(next.to_string());
+                    *mount.lock().unwrap() = build(next, Arc::clone(&mount), Arc::clone(&sink));
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build("free", Arc::clone(&mounted), Arc::clone(&payloads));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        let free = radio_option_id("plan", "free");
+        let pro = radio_option_id("plan", "pro");
+        let enterprise = radio_option_id("plan", "enterprise");
+        driver.wait_for_focus_handle(&free);
+        driver.pointer_activate_id(&enterprise);
+        assert_eq!(payloads.lock().unwrap().as_slice(), ["enterprise"]);
+        assert!(radio_option_selected(
+            &mounted.lock().unwrap(),
+            "plan",
+            "enterprise"
+        ));
+        assert!(!radio_option_selected(
+            &mounted.lock().unwrap(),
+            "plan",
+            "free"
+        ));
+
+        driver.pointer_activate_id(&enterprise);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["enterprise"],
+            "same-value selection is inert"
+        );
+
+        driver.pointer_activate_id(&pro);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["enterprise"],
+            "a disabled option emits nothing"
+        );
+
+        driver.wait_for_focus_handle(&enterprise);
+        driver.focus_element(&enterprise);
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["enterprise", "free"],
+            "directional movement wraps and skips the disabled option"
+        );
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&free), Some(true));
+        driver.dispatch_key_raw("left");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["enterprise", "free", "enterprise"]
+        );
+    });
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let spec = RadioGroupSpec {
+            is_disabled: true,
+            ..RadioGroupSpec::new(selection_radio_options())
+                .with_name("disabled-plan")
+                .with_orientation(Orientation::Horizontal)
+                .with_value("free")
+        };
+        let mut node = poodle_render::radio_group(
+            &spec,
+            &RenderContext::new(&theme()),
+            Some(Arc::new(move |next: &str| {
+                sink.lock().unwrap().push(next.to_string())
+            })),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.draw_frame();
+        driver.pointer_activate_id(&radio_option_id("disabled-plan", "enterprise"));
+        assert!(payloads.lock().unwrap().is_empty());
+        assert!(poodle_gpui_node_backend::focus_handle_for(&radio_option_id(
+            "disabled-plan",
+            "free"
+        ))
+        .is_none());
+    });
+}
+
+fn segment_option_id(scope: &str, value: &str) -> String {
+    format!("segmented:{scope}:option:{value}")
+}
+
+fn segment_selected(node: &Node, scope: &str, value: &str) -> bool {
+    let id = segment_option_id(scope, value);
+    node.find(&|n| n.runtime_id.as_deref() == Some(id.as_str()))
+        .and_then(|n| n.a11y.selected)
+        .unwrap_or(false)
+}
+
+fn selection_segment_options() -> Vec<poodle_specs::SegmentedControlOption> {
+    vec![
+        poodle_specs::SegmentedControlOption::new("grid", "Grid"),
+        poodle_specs::SegmentedControlOption::new("list", "List").with_disabled(true),
+        poodle_specs::SegmentedControlOption::new("table", "Table"),
+    ]
+}
+
+/// SegmentedControl exclusive selection, wrap, disabled skip, disabled-group
+/// inertia, and independent instance focus identity through the mounted tree.
+#[test]
+fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
+    use poodle_specs::{SegmentedControlOption, SegmentedControlSpec};
+
+    run_headless(|cx| {
+        fn build(
+            value: &str,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let mut spec = SegmentedControlSpec::new("view", selection_segment_options());
+            spec.value = Some(value.to_string());
+            let mut node = poodle_render::segmented_control(
+                &spec,
+                &RenderContext::new(&theme()),
+                Some(Arc::new(move |next: &str| {
+                    sink.lock().unwrap().push(next.to_string());
+                    *mount.lock().unwrap() = build(next, Arc::clone(&mount), Arc::clone(&sink));
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build("grid", Arc::clone(&mounted), Arc::clone(&payloads));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        let grid = segment_option_id("view", "grid");
+        let list = segment_option_id("view", "list");
+        let table = segment_option_id("view", "table");
+        driver.wait_for_focus_handle(&grid);
+        driver.pointer_activate_id(&table);
+        assert_eq!(payloads.lock().unwrap().as_slice(), ["table"]);
+        assert!(segment_selected(&mounted.lock().unwrap(), "view", "table"));
+
+        driver.pointer_activate_id(&table);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["table"],
+            "same-value selection is inert"
+        );
+        driver.pointer_activate_id(&list);
+        assert_eq!(payloads.lock().unwrap().as_slice(), ["table"]);
+
+        driver.wait_for_focus_handle(&table);
+        driver.focus_element(&table);
+        driver.dispatch_key_raw("right");
+        assert_eq!(payloads.lock().unwrap().as_slice(), ["table", "grid"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&grid), Some(true));
+    });
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let spec = SegmentedControlSpec {
+            is_disabled: true,
+            ..SegmentedControlSpec::new("disabled-view", selection_segment_options())
+        };
+        let mut spec = spec;
+        spec.value = Some("grid".to_string());
+        let mut node = poodle_render::segmented_control(
+            &spec,
+            &RenderContext::new(&theme()),
+            Some(Arc::new(move |next: &str| {
+                sink.lock().unwrap().push(next.to_string())
+            })),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.draw_frame();
+        driver.pointer_activate_id(&segment_option_id("disabled-view", "table"));
+        assert!(payloads.lock().unwrap().is_empty());
+    });
+
+    run_headless(|cx| {
+        let picker = |scope: &str| {
+            let mut spec = SegmentedControlSpec::new(
+                scope,
+                vec![
+                    SegmentedControlOption::new("grid", "Grid"),
+                    SegmentedControlOption::new("list", "List"),
+                ],
+            );
+            spec.value = Some("grid".to_string());
+            poodle_render::segmented_control(&spec, &RenderContext::new(&theme()), None)
+        };
+        let mut node = Node::container()
+            .child(picker("left"))
+            .child(picker("right"));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        let left = segment_option_id("left", "grid");
+        let right = segment_option_id("right", "grid");
+        driver.wait_for_focus_handle(&left);
+        driver.wait_for_focus_handle(&right);
+        driver.focus_element(&left);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&left), Some(true));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right),
+            Some(false),
+            "two mounted controls keep independent focus identity"
+        );
+    });
+}
+
+fn toggle_item_on(node: &Node, value: &str) -> bool {
+    let id = format!("toggle:{value}");
+    node.find(&|n| n.id.as_deref() == Some(id.as_str()))
+        .and_then(|n| n.a11y.toggled)
+        .map(|toggled| toggled == poodle_node::NodeToggled::True)
+        .unwrap_or(false)
+}
+
+fn selection_toggle_options() -> Vec<poodle_specs::ToggleGroupOption> {
+    vec![
+        poodle_specs::ToggleGroupOption::new("grid", "Grid"),
+        poodle_specs::ToggleGroupOption::new("list", "List"),
+        poodle_specs::ToggleGroupOption::new("board", "Board"),
+    ]
+}
+
+/// ToggleGroup single, deactivating-single, multiple, and disabled payload
+/// semantics through mounted input. Native emit is the activated option; the
+/// host applies `next_value_on_toggle` and rebuilds the spec.
+#[test]
+fn toggle_group_single_multiple_and_disabled_payloads_through_mounted_input() {
+    use poodle_specs::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupSpec};
+
+    run_headless(|cx| {
+        fn build(
+            spec: ToggleGroupSpec,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<Vec<String>>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let current = spec.clone();
+            let mut node = poodle_render::toggle_group(
+                &spec,
+                &RenderContext::new(&theme()),
+                Some(Arc::new(move |value: &str| {
+                    let next = current.next_value_on_toggle(value);
+                    sink.lock().unwrap().push(next.clone());
+                    *mount.lock().unwrap() = build(
+                        current.clone().with_value(next),
+                        Arc::clone(&mount),
+                        Arc::clone(&sink),
+                    );
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            ToggleGroupSpec::new(selection_toggle_options()).with_value(vec!["grid".into()]),
+            Arc::clone(&mounted),
+            Arc::clone(&payloads),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("toggle:list");
+        driver.pointer_activate_id("toggle:list");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [vec!["list".to_string()]]
+        );
+        assert!(toggle_item_on(&mounted.lock().unwrap(), "list"));
+        assert!(!toggle_item_on(&mounted.lock().unwrap(), "grid"));
+
+        driver.pointer_activate_id("toggle:list");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [vec!["list".to_string()], vec!["list".to_string()]],
+            "re-selection emits the unchanged value"
+        );
+    });
+
+    run_headless(|cx| {
+        fn build(
+            spec: ToggleGroupSpec,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<Option<String>>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let current = spec.clone();
+            let mut node = poodle_render::toggle_group(
+                &spec,
+                &RenderContext::new(&theme()),
+                Some(Arc::new(move |value: &str| {
+                    let next = current.next_value_on_toggle(value);
+                    sink.lock().unwrap().push(next.first().cloned());
+                    *mount.lock().unwrap() = build(
+                        current.clone().with_value(next),
+                        Arc::clone(&mount),
+                        Arc::clone(&sink),
+                    );
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            ToggleGroupSpec::new(selection_toggle_options())
+                .with_value(vec!["grid".into()])
+                .with_allow_deactivation(true),
+            Arc::clone(&mounted),
+            Arc::clone(&payloads),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("toggle:grid");
+        driver.pointer_activate_id("toggle:grid");
+        assert_eq!(payloads.lock().unwrap().as_slice(), [None]);
+        assert!(!toggle_item_on(&mounted.lock().unwrap(), "grid"));
+    });
+
+    run_headless(|cx| {
+        fn build(
+            spec: ToggleGroupSpec,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<Vec<String>>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let current = spec.clone();
+            let mut node = poodle_render::toggle_group(
+                &spec,
+                &RenderContext::new(&theme()),
+                Some(Arc::new(move |value: &str| {
+                    let next = current.next_value_on_toggle(value);
+                    sink.lock().unwrap().push(next.clone());
+                    *mount.lock().unwrap() = build(
+                        current.clone().with_value(next),
+                        Arc::clone(&mount),
+                        Arc::clone(&sink),
+                    );
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            ToggleGroupSpec::new(selection_toggle_options())
+                .with_selection_mode(ToggleGroupSelectionMode::Multiple)
+                .with_value(vec!["grid".into()]),
+            Arc::clone(&mounted),
+            Arc::clone(&payloads),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle("toggle:board");
+        driver.pointer_activate_id("toggle:board");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [vec!["grid".to_string(), "board".to_string()]]
+        );
+        driver.pointer_activate_id("toggle:grid");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [
+                vec!["grid".to_string(), "board".to_string()],
+                vec!["board".to_string()]
+            ]
+        );
+        assert!(toggle_item_on(&mounted.lock().unwrap(), "board"));
+        assert!(!toggle_item_on(&mounted.lock().unwrap(), "grid"));
+    });
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let mut node = poodle_render::toggle_group(
+            &ToggleGroupSpec::new(vec![
+                ToggleGroupOption::new("grid", "Grid"),
+                ToggleGroupOption::new("blocked", "Blocked").with_disabled(true),
+            ])
+            .with_value(vec!["grid".into()]),
+            &RenderContext::new(&theme()),
+            Some(Arc::new(move |value: &str| {
+                sink.lock().unwrap().push(value.to_string())
+            })),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.draw_frame();
+        driver.pointer_activate_id("toggle:blocked");
+        assert!(payloads.lock().unwrap().is_empty());
+    });
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let spec = ToggleGroupSpec::new(vec![
+            poodle_specs::ToggleGroupOption::new("locked-grid", "Grid"),
+            poodle_specs::ToggleGroupOption::new("locked-list", "List"),
+        ])
+        .with_disabled(true);
+        let mut node = poodle_render::toggle_group(
+            &spec,
+            &RenderContext::new(&theme()),
+            Some(Arc::new(move |value: &str| {
+                sink.lock().unwrap().push(value.to_string())
+            })),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.draw_frame();
+        driver.pointer_activate_id("toggle:locked-list");
+        assert!(payloads.lock().unwrap().is_empty());
+    });
+}

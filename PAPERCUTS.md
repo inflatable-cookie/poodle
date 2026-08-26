@@ -7,6 +7,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-26 — `cargo fmt --manifest-path <crate>/Cargo.toml -- <file>` still
+  formats the whole crate. Format named files with `rustfmt <file>` instead.
+  Hit while closing `g16.002`.
+
+- 2026-08-26 — a launcher worktree without `node_modules` lets bun resolve
+  `lucide-static` from `~/.bun/install/cache` at 1.34.0 while the lock wants
+  1.31.0, so `audit:icons` fails before any web test. Run `bun install` in the
+  worktree first. Hit during `g16.002` `ci:web`.
+
 - 2026-08-25 — Bovine Accelerator Desktop PR 26 changed the current source set
   after the Poodle 0.2.2 adoption merged, but its frozen private-candidate
   receipt still names candidate `54bc1634` and Bovine source `9098a98`.

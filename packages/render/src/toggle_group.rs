@@ -132,9 +132,15 @@ pub fn toggle_group(
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
         }
-        item.interaction.focusable = true;
 
         if !is_item_disabled {
+            item.interaction.focusable = true;
+            item.style.focus = Some(StylePatch {
+                background: None,
+                border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
+                text_color: None,
+                opacity: None,
+            });
             let hover_fill = mix_srgb(bg, elevated, 0.84);
             item.style.hover = Some(StylePatch {
                 background: Some(hover_fill),
@@ -150,7 +156,8 @@ pub fn toggle_group(
                 item.interaction.on_activate = Some(Arc::new(move || handler(&value)));
             }
         } else {
-            item.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
+            item.style.descriptor.opacity =
+                ctx.theme().resolve_opacity(spec.disabled_opacity_token());
             // The old GPUI tier's `CursorStyle::OperationNotAllowed`.
             item.style.descriptor.cursor = CursorHint::NotAllowed;
             item.interaction.disabled = true;
@@ -345,6 +352,7 @@ mod tests {
         assert_eq!(node.a11y.role, Some(NodeRole::RadioGroup));
         let list = item(&node, "list");
         assert_eq!(list.a11y.role, Some(NodeRole::RadioButton));
+        assert!(list.style.focus.is_some());
         (list.interaction.on_activate.as_ref().expect("activatable"))();
         assert_eq!(seen.lock().unwrap().as_slice(), ["list"]);
 
@@ -379,7 +387,9 @@ mod tests {
         assert_eq!(disabled.style.descriptor.opacity, disabled_opacity);
         assert_eq!(disabled.style.descriptor.cursor, CursorHint::NotAllowed);
         assert!(disabled.interaction.disabled);
+        assert!(!disabled.interaction.focusable);
         assert!(disabled.interaction.on_activate.is_none());
+        assert!(disabled.style.focus.is_none());
         assert!(disabled.style.hover.is_none());
 
         let enabled = item(&node, "grid");

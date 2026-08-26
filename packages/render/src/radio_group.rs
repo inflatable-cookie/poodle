@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole,
+    NodeKey, NodeRole, NodeToggled, StylePatch,
 };
 use poodle_specs::{ControlDensity, ControlSize, Orientation, RadioGroupSpec};
 
@@ -79,8 +79,12 @@ pub fn radio_group(
         .unwrap_or_else(|| ctx.theme().resolve_color("color.accent.base"));
     let border = ctx.theme().resolve_color("color.border.default");
     let text_color = ctx.theme().resolve_color("color.text.primary");
-    let selected_value = spec.value.as_deref().or(spec.default_value.as_deref());
+    let selected_value = spec.current_value();
     let disabled_opacity = ctx.theme().resolve_opacity("state.opacity.disabled");
+    let instance_scope = spec.name.as_deref().unwrap_or("group");
+    let roving = roving_values(spec);
+    let tab_stop = tab_stop_value(spec, &roving);
+    let focus_ring = ctx.theme().resolve_color("color.accent.focusRing");
 
     let mut el = Node::container();
     {
@@ -131,9 +135,6 @@ pub fn radio_group(
                 CursorHint::Pointer
             };
         }
-        if !option_disabled {
-            row.interaction.focusable = true;
-        }
         row = row.child(indicator);
 
         let mut label = Node::text(&option.label);
@@ -146,10 +147,51 @@ pub fn radio_group(
             row.style.descriptor.opacity = disabled_opacity;
         }
 
-        if let (false, Some(handler)) = (option_disabled, &on_change) {
-            let handler = Arc::clone(handler);
-            let value = option.value.clone();
-            row.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+        let option_id = option_focus_id(instance_scope, &option.value);
+        row.id = Some(option_id.clone());
+        row.runtime_id = Some(option_id);
+        row.a11y.role = Some(NodeRole::RadioButton);
+        row.a11y.selected = Some(is_selected);
+        row.a11y.toggled = Some(if is_selected {
+            NodeToggled::True
+        } else {
+            NodeToggled::False
+        });
+        if let Some(name) = option.aria_label.as_deref() {
+            row.a11y.label = Some(name.to_string());
+        }
+
+        if !option_disabled {
+            row.interaction.focusable = true;
+            row.style.focus = Some(StylePatch {
+                background: None,
+                border_color: Some(focus_ring),
+                text_color: None,
+                opacity: None,
+            });
+            row.a11y.tab_index = Some(if tab_stop == Some(option.value.as_str()) {
+                0
+            } else {
+                -1
+            });
+            // Same-value selection is inert: native radios do not re-fire.
+            if !is_selected {
+                if let Some(handler) = &on_change {
+                    let handler = Arc::clone(handler);
+                    let value = option.value.clone();
+                    row.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+                }
+            }
+            row.interaction.on_key = roving_key_handler(
+                &option.value,
+                &roving,
+                instance_scope.to_string(),
+                on_change.clone(),
+            );
+        } else {
+            row.interaction.disabled = true;
+            row.interaction.focusable = false;
+            row.a11y.tab_index = Some(-1);
         }
 
         el = el.child(row);
@@ -164,4 +206,168 @@ pub fn radio_group(
     }
     el.a11y.role = Some(NodeRole::RadioGroup);
     el
+}
+
+fn option_focus_id(instance_scope: &str, value: &str) -> String {
+    format!("radio:{instance_scope}:option:{value}")
+}
+
+fn roving_values(spec: &RadioGroupSpec) -> Vec<String> {
+    spec.options
+        .iter()
+        .filter(|option| !spec.is_disabled && !option.is_disabled)
+        .map(|option| option.value.clone())
+        .collect()
+}
+
+fn tab_stop_value<'a>(spec: &'a RadioGroupSpec, roving: &'a [String]) -> Option<&'a str> {
+    let selected = spec.current_value();
+    if selected.is_some_and(|value| roving.iter().any(|candidate| candidate == value)) {
+        selected
+    } else {
+        roving.first().map(String::as_str)
+    }
+}
+
+fn roving_key_handler(
+    value: &str,
+    roving: &[String],
+    instance_scope: String,
+    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+) -> Option<Arc<dyn Fn(NodeKey, poodle_node::NodeModifiers) -> Option<String> + Send + Sync>> {
+    let index = roving.iter().position(|candidate| candidate == value)?;
+    let ids = roving.to_vec();
+    let current = value.to_string();
+    Some(Arc::new(move |key, _modifiers| {
+        if ids.is_empty() {
+            return None;
+        }
+        let last = ids.len() - 1;
+        let next = match key {
+            NodeKey::ArrowRight | NodeKey::ArrowDown => {
+                Some(if index == last { 0 } else { index + 1 })
+            }
+            NodeKey::ArrowLeft | NodeKey::ArrowUp => {
+                Some(if index == 0 { last } else { index - 1 })
+            }
+            NodeKey::Home => Some(0),
+            NodeKey::End => Some(last),
+            _ => None,
+        }?;
+        let target = ids[next].clone();
+        if target != current {
+            if let Some(handler) = &on_change {
+                handler(&target);
+            }
+        }
+        Some(option_focus_id(&instance_scope, &target))
+    }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_node::NodeModifiers;
+    use poodle_specs::ChoiceOption;
+    use std::sync::{Arc, Mutex};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn plan_options() -> Vec<ChoiceOption> {
+        vec![
+            ChoiceOption::new("free", "Free"),
+            ChoiceOption::new("pro", "Pro"),
+            ChoiceOption::new("enterprise", "Enterprise"),
+        ]
+    }
+
+    fn option<'a>(node: &'a Node, value: &str) -> &'a Node {
+        let id = format!("radio:plan:option:{value}");
+        node.find(&|n| n.id.as_deref() == Some(id.as_str()))
+            .unwrap_or_else(|| panic!("option {value} exists"))
+    }
+
+    #[test]
+    fn same_value_activation_is_inert() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let spec = RadioGroupSpec::new(plan_options())
+            .with_name("plan")
+            .with_value("pro");
+        let node = radio_group(
+            &spec,
+            &ctx,
+            Some(Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()))),
+        );
+        let pro = option(&node, "pro");
+        assert!(pro.interaction.on_activate.is_none());
+        assert_eq!(pro.a11y.selected, Some(true));
+        assert_eq!(pro.a11y.tab_index, Some(0));
+        (option(&node, "enterprise")
+            .interaction
+            .on_activate
+            .as_ref()
+            .unwrap())();
+        assert_eq!(seen.lock().unwrap().as_slice(), ["enterprise"]);
+    }
+
+    #[test]
+    fn arrows_wrap_and_skip_a_disabled_option() {
+        let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let spec = RadioGroupSpec::new(vec![
+            ChoiceOption::new("free", "Free"),
+            ChoiceOption::new("pro", "Pro").with_disabled(true),
+            ChoiceOption::new("enterprise", "Enterprise"),
+        ])
+        .with_name("plan")
+        .with_value("free");
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = radio_group(
+            &spec,
+            &ctx,
+            Some(Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()))),
+        );
+        let keys = option(&node, "free")
+            .interaction
+            .on_key
+            .as_ref()
+            .expect("roving handler");
+        let modifiers = NodeModifiers::default();
+        assert_eq!(
+            keys(NodeKey::ArrowRight, modifiers),
+            Some(option_focus_id("plan", "enterprise"))
+        );
+        assert_eq!(seen.lock().unwrap().as_slice(), ["enterprise"]);
+        assert!(option(&node, "pro").interaction.on_key.is_none());
+        assert!(!option(&node, "pro").interaction.focusable);
+    }
+
+    #[test]
+    fn disabled_group_emits_nothing() {
+        let spec = RadioGroupSpec {
+            is_disabled: true,
+            ..RadioGroupSpec::new(plan_options())
+                .with_name("plan")
+                .with_value("free")
+        };
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = radio_group(
+            &spec,
+            &ctx,
+            Some(Arc::new(|_: &str| panic!("disabled group must not emit"))),
+        );
+        for value in ["free", "pro", "enterprise"] {
+            let row = option(&node, value);
+            assert!(row.interaction.on_activate.is_none(), "{value}");
+            assert!(row.interaction.disabled, "{value}");
+            assert!(!row.interaction.focusable, "{value}");
+        }
+    }
 }

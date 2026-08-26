@@ -1,7 +1,8 @@
 # g16.002 — Selection Controls Mounted Parity
 
-Status: ready
+Status: complete — awaiting orchestrator review
 Opened: 2026-08-26
+Completed: 2026-08-26
 Depends on: completed `g16.001`
 Governing refs: `../../contracts/001-working-rules.md`,
 `parity-evidence-ledger.md`,
@@ -10,6 +11,20 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/radio-group.md`,
 `../../contracts/components/segmented-control.md`,
 `../../contracts/components/toggle-group.md`
+
+## Outcome
+
+Five named mounted GPUI regressions now drive Checkbox, Switch, RadioGroup,
+SegmentedControl, and ToggleGroup through the real backend/input path and host
+rebuild. The generated ledger moves only those five GPUI mounted-behaviour
+cells from `missing` to `mounted` (29 → 34 mounted; 145 → 140 missing).
+
+Contract-backed GPUI/shared-Rust repairs: focus patches so GPUI tracks handles
+(Checkbox, Switch, RadioGroup options, ToggleGroup items); Checkbox mixed and
+Switch checked projection through `current_state` / `current_checked`;
+RadioGroup option identity, RadioButton a11y, and wrap/skip-disabled roving;
+same-value inertia for RadioGroup and SegmentedControl. No contract or public
+API change. GPUI accessibility stays `manual`. No `g16.003`.
 
 ## Goal
 
@@ -100,23 +115,23 @@ choosing a new rule in this card.
 
 ## Acceptance
 
-- [ ] Each of the five named components has at least one resolvable mounted
+- [x] Each of the five named components has at least one resolvable mounted
       regression in `packages/gpui/preview/tests/headless_regressions.rs`.
-- [ ] The regressions drive the real mounted backend/input path and host
+- [x] The regressions drive the real mounted backend/input path and host
       rebuild; none passes by calling a handler or transition helper directly.
-- [ ] Checkbox and Switch prove accepted toggle, readonly, and disabled
+- [x] Checkbox and Switch prove accepted toggle, readonly, and disabled
       behaviour; Checkbox also proves mixed-to-checked resolution.
-- [ ] RadioGroup and SegmentedControl prove exclusive selection, directional
+- [x] RadioGroup and SegmentedControl prove exclusive selection, directional
       focus/selection, wrap, disabled-option skip, and disabled-group inertia.
-- [ ] SegmentedControl proves two mounted instances keep independent focus
+- [x] SegmentedControl proves two mounted instances keep independent focus
       identity.
-- [ ] ToggleGroup proves single, deactivating single, multiple, and disabled
+- [x] ToggleGroup proves single, deactivating single, multiple, and disabled
       payload semantics.
-- [ ] Any repaired runtime defect is contract-backed and recorded with its
+- [x] Any repaired runtime defect is contract-backed and recorded with its
       before/after evidence. No contract or public API changes.
-- [ ] The generated ledger changes exactly these five GPUI mounted-behaviour
+- [x] The generated ledger changes exactly these five GPUI mounted-behaviour
       rows from `missing` to `mounted`; unrelated evidence cells do not move.
-- [ ] One August execution log records tests, defects, repairs, validation, and
+- [x] One August execution log records tests, defects, repairs, validation, and
       unresolved gaps.
 
 ## Writable Scope
@@ -176,6 +191,6 @@ preview/QA, release, tag, or publication selectors.
 ## Continuation
 
 Return the five mounted proofs and the regenerated ledger to the orchestrator.
-Only then decide whether this same family should enter a bounded visual fixture
-inventory or whether a measured semantic defect requires another headless
-repair. No `g16.003` is implied before review.
+Review those proofs and the ledger delta before deciding whether this family
+enters a bounded visual fixture inventory or whether a measured semantic
+defect requires another headless repair. No `g16.003` is compiled.
