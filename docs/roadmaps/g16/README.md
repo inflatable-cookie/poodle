@@ -38,7 +38,7 @@ stay maintained; backend admission is not part of the first card.
 5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; merged in PR #79
 6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — complete; merged in PR #80
 7. [007 — TextInput controlled editing and mounted evidence](007-text-input-controlled-editing-and-mounted-evidence.md) — complete; merged in PR #81
-8. [008 — Native text event routing cleanup](008-native-text-event-routing-cleanup.md) — complete; PR pending operator merge authority
+8. [008 — Native text event routing cleanup](008-native-text-event-routing-cleanup.md) — complete; PR #82 awaiting operator merge authority
 
 ## Measured Selection
 

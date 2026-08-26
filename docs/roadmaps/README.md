@@ -79,7 +79,7 @@ chosen.
 - `g16` — active evidence-recovery checkpoint; `001` complete and
   operator-reviewed; `002` closed — partial outcome; `003` merged in PR #77;
   `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
-  `007` merged in PR #81; `008` complete, PR pending operator merge authority
+  `007` merged in PR #81; `008` complete in PR #82, awaiting operator merge
 
 ## Rules
 

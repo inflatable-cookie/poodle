@@ -1,7 +1,7 @@
 # g16.008 — Native Text Event Routing Cleanup
 
 Date: 2026-08-26
-Status: complete — PR pending operator merge authority
+Status: complete — PR #82, pending operator merge authority
 Branch: `t3code/native-text-event-routing-cleanup`
 Card: `docs/roadmaps/g16/008-native-text-event-routing-cleanup.md`
 Source triage: `docs/triage/20260826-224901-text-input-native-event-cleanup.md`
