@@ -98,7 +98,8 @@ submission, Tab is traversal through gpui's own `focus_next`/`focus_prev` bound
 at the window host, a node declaring `Interaction::focusable` is now a real tab
 stop, and transient text state is keyed by the node that paints the value rather
 than by the focused root. EditableLabel commits on Tab through the blur its
-contract names. TextInput, CodeInput, DurationInput, and EditableLabel keep
+contract names, and DurationInput traverses `H → M → S → out` after its inert
+focusable root declaration was removed in review. TextInput, CodeInput, DurationInput, and EditableLabel keep
 their current evidence levels — this card proved routing, not parity.
 NumberInput's value-model decision remains separate from multiline/slug closure,
 other component families, and visual or accessibility programmes.

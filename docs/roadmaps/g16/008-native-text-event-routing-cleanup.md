@@ -156,9 +156,23 @@ inside the same node/backend seam and neither a new focus architecture:
   stop at index 0, which is what the vocabulary already documented and what the
   DOM does; `-1` still means programmatically focusable and skipped.
 
-One consequence is recorded in `PAPERCUTS.md` rather than repaired here:
-`DurationInput` and `TextInput` mark their component root `focusable`, so a
-root that draws nothing of its own is now a tab stop ahead of its segments.
+Making `focusable` real also exposed one component declaration that was inert
+while nothing was Tab-reachable: `DurationInput` marked its component root
+focusable as well as its H/M/S segments, which would have put a stop that draws
+nothing and takes no key ahead of Hours. The root declaration is removed, so
+traversal is `H → M → S → out` in both directions, as §6 of the contract
+requires. `TextInput` is unaffected — its root *is* its one focusable field, and
+the `-value` child only paints.
+
+The consumer-facing side of window-level Tab is documented in
+`../../guides/gpui-developer-guide.md#wire-the-window-root` and
+`../../../packages/gpui/adapter/README.md#window-root`: an application calls
+`overlay_frame_begin()` once per rendered frame and wraps its one root element
+with `attach_overlay_host(...)` once per window.
+
+Both corrections were directed by orchestrator review of PR #82, which widened
+the writable scope below to `packages/render/src/duration_input.rs` and the two
+consumer-facing GPUI documents.
 
 ## Writable Scope
 
@@ -171,6 +185,11 @@ root that draws nothing of its own is now a tab stop ahead of its segments.
   text-entry tests only where required to retain behavior
 - this card, g16/front-door status, the source triage note, one August log, and
   `PAPERCUTS.md` only for new execution friction
+- widened by orchestrator review of PR #82:
+  `packages/render/src/duration_input.rs` for the contract-required segment
+  traversal, and `docs/guides/gpui-developer-guide.md` plus
+  `packages/gpui/adapter/README.md` for the window-root integration Tab now
+  depends on
 
 Do not change public component props, redesign another editable component,
 change ledger evidence, edit specimens or theme CSS, add visual fixtures,

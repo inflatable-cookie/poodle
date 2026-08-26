@@ -107,7 +107,9 @@ host.
 - `blur_clears_transient_text_state_and_keeps_undo_history` — the five
   transient entries go, history stays, and the retained snapshot restores.
 
-`packages/contracts/node` (8) and `packages/render` (431) stay green.
+`packages/render` (431) stays green, including
+`every_segment_is_its_own_focus_stop`, which now pins DurationInput's root as
+*not* a stop. `packages/contracts/node` (8) is unchanged.
 
 ## Mounted tests
 
@@ -127,9 +129,10 @@ as a shortcut.
   `<id>-value` holding nothing, and the neighbouring field sharing neither.
 - `code_and_duration_inputs_traverse_on_tab_without_mutating` — CodeInput is
   one stop and neither Tab completes a code one key from full, while a digit at
-  that stop still types and completes; DurationInput is crossed by five Tabs
-  without a segment reporting, and Shift+Tab plus an arrow key proves the
-  seconds/minutes/hours order by what each stop acts on.
+  that stop still types and completes; DurationInput is crossed by four Tabs —
+  H, M, S, out — without a segment reporting, Shift+Tab plus an arrow key
+  proves the seconds/minutes/hours order by what each stop acts on, and one
+  more Shift+Tab off Hours leaves the control with nothing in between.
 - `editable_label_commits_on_enter_and_once_through_the_blur_tab_causes` —
   Enter commits once; Escape cancels and leaves nothing behind for a blur;
   Tab produces `label/commit` *before* the next field's focus gain, focus
@@ -155,12 +158,34 @@ their current evidence levels: this card proves routing, not parity.
 `cargo test -p poodle-gpui-node-backend` (39), and
 `git diff --check origin/main...HEAD`.
 
+## Repair: DurationInput's root was a stop of its own
+
+Found in orchestrator review of PR #82. `DurationInput` marked its component
+root `focusable` as well as its H/M/S segments. The declaration was inert while
+nothing in Poodle was Tab-reachable; once `focusable` meant a real tab stop, it
+put a stop that draws nothing and takes no key ahead of Hours, which contract §6
+does not describe. `packages/render/src/duration_input.rs` no longer declares
+it, and `every_segment_is_its_own_focus_stop` now asserts the root is not one.
+Traversal is `H → M → S → out`, and one Shift+Tab off Hours leaves the control.
+
+`TextInput` is not the same shape and needed nothing: its root *is* its single
+focusable field, and the derived `-value` child paints the value without being
+another stop. The earlier `PAPERCUTS.md` entry claiming otherwise is removed,
+and nothing survives it.
+
+## Repair: consumers were never told to wire the window root
+
+Also from review. Window-level Tab lives on `attach_overlay_host`, but
+`docs/guides/gpui-developer-guide.md` and `packages/gpui/adapter/README.md`
+taught only `to_gpui(&node)`, so an application following the canonical guide
+would have got no traversal from this repair at all. Both now carry a root
+integration section: `overlay_frame_begin()` and `reset_element_ids()` once per
+rendered frame, `attach_overlay_host(...)` once per **window** — not per
+component — and what that host owns now that its name understates it. The
+production preview root's own comment says the same.
+
 ## Recorded, not repaired
 
-- `DurationInput` and `TextInput` mark their component root `focusable`. That
-  was inert while nothing was a tab stop; it now means a root that draws
-  nothing of its own takes a Tab before its segments do. Recorded in
-  `PAPERCUTS.md` — it is a component declaration, not this card's seam.
 - `CodeInput` and `DurationInput` carry no id prop, so their focusable nodes
   have no element id and no retrievable focus handle. The mounted tests observe
   those stops by what a key does at them, which is real evidence but not the
