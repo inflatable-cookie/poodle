@@ -331,7 +331,9 @@ function expectedComponentRow(root: string, component: LiveComponent, visualSkip
   };
 
   const contractSource = read(root, contractPath);
-  const deltaHeading = contractSource.match(/^#{2,4}\s+(Known Deltas|Known Differences)\s*$/m);
+  const deltaHeading = contractSource.match(
+    /^#{2,4}\s+(?:\d+(?:[a-z])?\.\s+)?(Known Deltas|Known Differences)\s*$/m,
+  );
   base["Known deltas"] =
     deltaHeading === null
       ? cell("not-applicable", `no runtime delta section in ${pathRef(contractPath)}`)

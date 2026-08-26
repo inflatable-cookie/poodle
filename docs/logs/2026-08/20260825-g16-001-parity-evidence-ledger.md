@@ -63,14 +63,10 @@ Passed:
   `effigy ci:web`, `effigy ci:native`, and one `effigy qa` board.
 - `git diff --check`.
 
-Known baseline exception:
-
-- `effigy test:visual-fixtures` reported 41 passing tests and 2 failures out
-  of 520 assertions. Both failures are authority-path drift in the existing
-  fixture test: it references the deleted
-  `packages/gpui/preview/src/bin/offscreen_capture/inventory.rs` and rejects
-  the live `window_capture/inventory.rs` import. The issue is recorded in
-  `PAPERCUTS.md`; no fixture, component, or workflow change was made.
+`effigy test:visual-fixtures` then passed after a bounded authority-path test
+repair: the TypeScript test now reads and sanctions the live
+`packages/gpui/preview/src/bin/window_capture/inventory.rs` loader. The fixture
+inventory and thresholds were unchanged.
 
 ## Unresolved evidence gaps
 

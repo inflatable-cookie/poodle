@@ -7,13 +7,6 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
-- 2026-08-25 — `effigy test:visual-fixtures` has a pre-existing authority-path
-  drift: its Rust-loader test still opens deleted
-  `packages/gpui/preview/src/bin/offscreen_capture/inventory.rs` and treats the
-  live `window_capture/inventory.rs` import as unsanctioned. The selector is
-  outside g16.001's fixture scope; align the test with the current capture
-  binary before relying on it as a clean visual-fixture gate.
-
 - 2026-08-25 — Bovine Accelerator Desktop PR 26 changed the current source set
   after the Poodle 0.2.2 adoption merged, but its frozen private-candidate
   receipt still names candidate `54bc1634` and Bovine source `9098a98`.

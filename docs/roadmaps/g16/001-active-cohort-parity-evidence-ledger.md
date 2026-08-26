@@ -192,10 +192,9 @@ Validation:
   `effigy docs:check`, and `effigy check:parity-evidence-ledger`: passed.
 - `effigy probe:gpui-specimens`: passed; `effigy regressions:native`: 70
   passed; `effigy ci:web`, `effigy ci:native`, and `effigy qa`: passed.
-- `effigy test:visual-fixtures`: 41 passed, 2 failed, 520 assertions. Both
-  failures are pre-existing authority-path drift in the fixture test; the
-  exact paths and boundary are recorded in `PAPERCUTS.md`. No fixture or
-  component source was changed for them.
+- `effigy test:visual-fixtures`: passed after the bounded authority-path test
+  repair; the test now reads and sanctions the live `window_capture` loader.
+  The fixture inventory and thresholds were unchanged.
 - `git diff --check`: passed.
 
 No `g16.002` is compiled. The next lane requires operator review of the

@@ -19,6 +19,14 @@ describe("g16.001 parity evidence ledger", () => {
     validateLedgerText(fs.readFileSync(ledgerPath, "utf8"), root);
   });
 
+  it("recognizes numbered Known Deltas headings", () => {
+    const buttonRow = generateLedgerMarkdown(root)
+      .split("\n")
+      .find((line) => line.startsWith("| Button |"));
+    expect(buttonRow).toContain("docs/contracts/components/button.md#Known Deltas");
+    expect(buttonRow).not.toContain("Known Deltas` | not-applicable");
+  });
+
   it("rejects missing, duplicate, extra, and unresolved evidence rows", () => {
     const ledger = fs.readFileSync(ledgerPath, "utf8");
     const buttonRow = ledger.split("\n").find((line) => line.startsWith("| Button |"));
