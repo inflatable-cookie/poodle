@@ -1,6 +1,7 @@
 # g16.001 — Active-Cohort Parity Evidence Ledger
 
-Status: ready
+Status: complete — operator review pending
+Completed: 2026-08-25
 Depends on: completed `g15`, published `v0.2.2`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
@@ -160,26 +161,65 @@ Do not collapse these into one `complete` flag.
   a rollout plan. The orchestrator and operator choose the next lane after
   reviewing the ledger.
 
+## Closeout — 2026-08-25
+
+The live denominator stayed at 175 public Svelte components and 174 portable
+native components. `MeterSurface` is the single explicit native
+`not-applicable` row. The checked-in ledger, generated reports, and
+`effigy check:parity-evidence-ledger` now share that denominator.
+
+Measured evidence classes:
+
+- Semantic/interface: Svelte and React each have 175 focused surface rows;
+  shared Rust has 174 present rows and one native exclusion; GPUI has 174
+  focused construction routes and one native exclusion.
+- Mounted behaviour: 29 component rows carry mounted evidence across 33 named
+  regression tests; 145 rows remain honestly missing and one is not applicable.
+- Accessibility: the Svelte axe sweep covers 175 rows; React has no equivalent
+  axe sweep; GPUI accessibility is manual for 174 portable rows and does not
+  claim broad native or assistive-technology parity.
+- Visual: the web inventory has one compared Button row, 169 focused rows, and
+  five manual skips. GPUI comparison is also Button-only with 18 fixtures and
+  operator-approved non-activating windowed capture; it is absent from default
+  QA/CI.
+- Jetstream remains program-level `deferred`; shared Rust and the in-repo
+  adapter do not admit its backend.
+
+Validation:
+
+- `effigy test:parity-evidence-ledger`: 4 tests passed.
+- `effigy report:parity`, `effigy report:accessibility`, `effigy docs:lint`,
+  `effigy docs:check`, and `effigy check:parity-evidence-ledger`: passed.
+- `effigy probe:gpui-specimens`: passed; `effigy regressions:native`: 70
+  passed; `effigy ci:web`, `effigy ci:native`, and `effigy qa`: passed.
+- `effigy test:visual-fixtures`: passed after the bounded authority-path test
+  repair; the test now reads and sanctions the live `window_capture` loader.
+  The fixture inventory and thresholds were unchanged.
+- `git diff --check`: passed.
+
+No `g16.002` is compiled. The next lane requires operator review of the
+measured missing cells.
+
 ## Acceptance
 
-- [ ] The ledger contains exactly the live public component denominator once,
+- [x] The ledger contains exactly the live public component denominator once,
       with the one approved native `not-applicable` component explicit.
-- [ ] Every evidence cell names a resolvable source, test, artifact, or an
+- [x] Every evidence cell names a resolvable source, test, artifact, or an
       honest `missing` / `manual` / `not-applicable` posture.
-- [ ] Summary counts are derived and a planted missing, duplicate, extra, or
+- [x] Summary counts are derived and a planted missing, duplicate, extra, or
       unresolved evidence reference fails the checker.
-- [ ] No report claims all-component behavioural, accessibility, or visual
+- [x] No report claims all-component behavioural, accessibility, or visual
       parity from roster presence or specimen construction.
-- [ ] Current web reports no longer embed the g09 GPUI 96-component baseline.
-- [ ] Current Jetstream reports say program-deferred and do not carry the old
+- [x] Current web reports no longer embed the g09 GPUI 96-component baseline.
+- [x] Current Jetstream reports say program-deferred and do not carry the old
       117-component parity result as current truth.
-- [ ] GPUI reporting distinguishes 174-route headless construction, bounded
+- [x] GPUI reporting distinguishes 174-route headless construction, bounded
       mounted regressions, Button-only comparison, and windowed pixel capture.
-- [ ] The g15 capture ledger and Longhorn lab note agree with the crates.io
+- [x] The g15 capture ledger and Longhorn lab note agree with the crates.io
       GPUI boundary shipped in v0.2.2.
-- [ ] No component contract, public API, runtime behaviour, specimen content,
+- [x] No component contract, public API, runtime behaviour, specimen content,
       visual threshold, or workflow changes.
-- [ ] One August execution log records inventory method, artifact dispositions,
+- [x] One August execution log records inventory method, artifact dispositions,
       before/after claims, validation, and unresolved evidence gaps.
 
 ## Writable Scope

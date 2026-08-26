@@ -2,8 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Reuses the canonical (Svelte-authored) cross-runtime accessibility audit
-// data; @inflatable-cookie/poodle-react shares the same contracts. Emits a React-pathed artifact.
+// Reuses the canonical (Svelte-authored) accessibility planning data. Shared
+// contracts do not transfer Svelte axe evidence to React; this artifact keeps
+// that missing React sweep explicit.
 import {
   accessibilityAuditBoundary,
   accessibilityAuditTargets,
@@ -30,7 +31,11 @@ const report = {
   previewBasePath: "/",
   frameworks: ["@inflatable-cookie/poodle-react", "@inflatable-cookie/poodle-svelte"],
   sharedContractNote:
-    "@inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same component contracts as @inflatable-cookie/poodle-svelte. Suite-level accessibility audit data is authored canonically in the Svelte preview and applies to both DOM runtimes.",
+    "@inflatable-cookie/poodle-react is a reference-faithful re-implementation of the same component contracts as @inflatable-cookie/poodle-svelte. The Svelte preview owns the current axe sweep; Svelte axe evidence does not transfer to React, and no React axe sweep is currently recorded.",
+  runtimeEvidence: {
+    svelteAxe: "test/a11y/component-a11y.test.ts",
+    reactAxe: "missing",
+  },
   automatedBoundary: accessibilityAuditBoundary.automated,
   manualBoundary: accessibilityAuditBoundary.manual,
   summary: {

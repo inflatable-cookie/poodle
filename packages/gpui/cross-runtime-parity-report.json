@@ -1,362 +1,91 @@
 {
-  "generation": "g09.018",
-  "comparisonArtifacts": [
-    "packages/svelte/preview/artifacts/parity-report.json",
-    "packages/svelte/preview/artifacts/accessibility-report.json",
-    "packages/gpui/native-accessibility-proof.json",
-    "packages/gpui/parity-priority-matrix.json",
-    "packages/gpui/preview-app-baseline.json"
-  ],
-  "acceptanceHarness": {
-    "suiteId": "gpui-target-matrix",
-    "status": "matrix-only",
-    "coveredPackages": [
-      "poodle-specs",
-      "poodle-node",
-      "poodle-render",
-      "poodle-gpui",
-      "poodle-gpui-node-backend",
-      "poodle-gpui-preview"
-    ],
-    "evidenceArtifacts": [
-      "packages/gpui/cross-runtime-parity-report.json",
-      "packages/gpui/native-accessibility-proof.json",
-      "packages/gpui/preview-app-baseline.json",
-      "packages/gpui/preview/Cargo.toml",
-      "docs/specs/042-gpui-multi-app-validation-target-matrix.md"
-    ],
-    "requiredChecks": [
-      "bun run parity:report",
-      "bun run accessibility:report",
-      "bun run docs:lint",
-      "bun run docs:build"
-    ],
-    "blockers": [
-      "The repo still lacks a mounted GPUI preview app with route-level acceptance coverage comparable to the Svelte preview surface.",
-      "This suite is still artifact-backed rather than runnable downstream production proof.",
-      "Downstream GPUI adoption remains future work, so this suite should still be read as validation pressure rather than deployment readiness."
+  "artifact": "packages/gpui/cross-runtime-parity-report.json",
+  "generation": "g16.001",
+  "sourceLedger": "docs/roadmaps/g16/parity-evidence-ledger.md",
+  "runtime": "gpui",
+  "status": "current",
+  "denominator": {
+    "publicSvelteComponents": 175,
+    "portableNativeComponents": 174,
+    "notApplicable": [
+      "MeterSurface"
     ]
   },
-  "summary": {
-    "sectionCount": 9,
-    "directParityCount": 5,
-    "nativeAdaptationCount": 4,
-    "deferredCount": 0,
-    "sideBySideSectionCount": 8,
-    "manualGpuiProofCount": 9,
-    "blockedGpuiProofCount": 0,
-    "componentExports": 96,
-    "primitiveSpecs": 64,
-    "compositeSpecs": 17,
-    "specimenFiles": 73,
-    "registryEntries": 113,
-    "cratesBuildClean": true
+  "construction": {
+    "status": "focused",
+    "routeCount": 174,
+    "routeDenominator": 174,
+    "claim": "Every portable component route constructs through the headless GPUI specimen probe.",
+    "evidence": [
+      "packages/gpui/preview/src/specimen_probe.rs#canonical_catalogue_constructs_every_route_and_axis_pane_1",
+      "packages/gpui/preview/src/specimens/mod.rs#render_single_specimen",
+      "effigy probe:gpui-specimens"
+    ]
   },
-  "sectionReports": [
-    {
-      "sectionId": "form-suite",
-      "parityMode": "direct-parity",
-      "owningLayer": "primitives-plus-composites",
-      "sideBySideReview": true,
-      "svelteRouteIds": [
-        "form-suite-baseline",
-        "form-suite-iceberg",
-        "form-suite-small"
-      ],
-      "gpuiEvidenceArtifacts": [
-        "packages/gpui/action-field-primitives-baseline.json",
-        "packages/gpui/form-validation-remediation-composites-baseline.json",
-        "packages/gpui/native-accessibility-proof.json"
-      ],
-      "gpuiStatuses": {
-        "gpui": "manual",
-        "focus": "explicit",
-        "keyboard": "hybrid",
-        "announcements": "hybrid"
-      },
-      "comparisonPosture": "Compare invalid, pending, and disabled form states side by side, keeping hierarchy, token usage, field relationships, and validation exposure aligned while treating final IME and assistive-technology behavior as native review work.",
-      "intentionalDeltaIds": []
-    },
-    {
-      "sectionId": "table-suite",
-      "parityMode": "native-adaptation",
-      "owningLayer": "composites",
-      "sideBySideReview": true,
-      "svelteRouteIds": [
-        "table-suite-baseline",
-        "table-suite-iceberg"
-      ],
-      "gpuiEvidenceArtifacts": [
-        "packages/gpui/data-browse-detail-picker-media-baseline.json",
-        "packages/gpui/native-accessibility-proof.json"
-      ],
-      "gpuiStatuses": {
-        "gpui": "manual",
-        "focus": "hybrid",
-        "keyboard": "hybrid",
-        "announcements": "manual"
-      },
-      "comparisonPosture": "Compare structured-data hierarchy, sort posture, visible selection semantics, and pagination summary across runtimes while allowing native adaptation for accessible table narration and virtualization mechanics.",
-      "intentionalDeltaIds": [
-        "native-table-and-list-structured-narration"
-      ]
-    },
-    {
-      "sectionId": "browse-suite",
-      "parityMode": "native-adaptation",
-      "owningLayer": "composites",
-      "sideBySideReview": true,
-      "svelteRouteIds": [
-        "browse-suite-baseline",
-        "browse-suite-iceberg"
-      ],
-      "gpuiEvidenceArtifacts": [
-        "packages/gpui/data-browse-detail-picker-media-baseline.json",
-        "packages/gpui/native-accessibility-proof.json"
-      ],
-      "gpuiStatuses": {
-        "gpui": "manual",
-        "focus": "hybrid",
-        "keyboard": "hybrid",
-        "announcements": "manual"
-      },
-      "comparisonPosture": "Compare result hierarchy, filter posture, empty or no-results handling, and selection scaffolding side by side while allowing native list behavior and narration to adapt where the runtime genuinely differs.",
-      "intentionalDeltaIds": [
-        "native-table-and-list-structured-narration"
-      ]
-    },
-    {
-      "sectionId": "detail-suite",
-      "parityMode": "direct-parity",
-      "owningLayer": "composites",
-      "sideBySideReview": true,
-      "svelteRouteIds": [
-        "detail-suite-baseline",
-        "detail-suite-iceberg"
-      ],
-      "gpuiEvidenceArtifacts": [
-        "packages/gpui/data-browse-detail-picker-media-baseline.json",
-        "packages/gpui/native-accessibility-proof.json"
-      ],
-      "gpuiStatuses": {
-        "gpui": "manual",
-        "focus": "hybrid",
-        "keyboard": "hybrid",
-        "announcements": "manual"
-      },
-      "comparisonPosture": "Keep metadata hierarchy, card roles, action ordering, and supporting-pane posture visually and structurally close enough that side-by-side review can expose real contract drift.",
-      "intentionalDeltaIds": []
-    },
-    {
-      "sectionId": "picker-suite",
-      "parityMode": "native-adaptation",
-      "owningLayer": "composites",
-      "sideBySideReview": true,
-      "svelteRouteIds": [
-        "picker-suite-baseline",
-        "picker-suite-iceberg"
-      ],
-      "gpuiEvidenceArtifacts": [
-        "packages/gpui/data-browse-detail-picker-media-baseline.json",
-        "packages/gpui/overlay-navigation-menu-baseline.json",
-        "packages/gpui/native-accessibility-proof.json"
-      ],
-      "gpuiStatuses": {
-        "gpui": "manual",
-        "focus": "hybrid",
-        "keyboard": "hybrid",
-        "announcements": "hybrid"
-      },
-      "comparisonPosture": "Compare selection workflow, attach or choose posture, and visible state scaffolding side by side while leaving focus-scope containment and active-item narration as explicit native deltas.",
-      "intentionalDeltaIds": [
-        "native-overlay-focus-scope-and-dismissal"
-      ]
-    },
-    {
-      "sectionId": "media-suite",
-      "parityMode": "native-adaptation",
-      "owningLayer": "composites",
-      "sideBySideReview": false,
-      "svelteRouteIds": [
-        "media-suite-baseline",
-        "media-suite-iceberg"
-      ],
-      "gpuiEvidenceArtifacts": [
-        "packages/gpui/data-browse-detail-picker-media-baseline.json",
-        "packages/gpui/native-accessibility-proof.json"
-      ],
-      "gpuiStatuses": {
-        "gpui": "manual",
-        "focus": "hybrid",
-        "keyboard": "manual",
-        "announcements": "manual"
-      },
-      "comparisonPosture": "Keep thumbnail, preview-state, and fallback semantics aligned at the contract level while explicitly allowing renderer and playback differences that are native-runtime specific.",
-      "intentionalDeltaIds": [
-        "native-media-renderer-and-fallback-behavior"
-      ]
-    },
-    {
-      "sectionId": "notification-suite",
-      "parityMode": "direct-parity",
-      "owningLayer": "primitives-plus-composites",
-      "sideBySideReview": true,
-      "svelteRouteIds": [
-        "notification-suite-baseline",
-        "notification-suite-iceberg"
-      ],
-      "gpuiEvidenceArtifacts": [
-        "packages/gpui/selection-feedback-date-baseline.json",
-        "packages/gpui/form-validation-remediation-composites-baseline.json",
-        "packages/gpui/native-accessibility-proof.json"
-      ],
-      "gpuiStatuses": {
-        "gpui": "manual",
-        "focus": "hybrid",
-        "keyboard": "explicit",
-        "announcements": "hybrid"
-      },
-      "comparisonPosture": "Keep banners, toasts, remediation actions, and urgency posture close enough that tone, hierarchy, and recovery actions can be reviewed directly across runtimes.",
-      "intentionalDeltaIds": [
-        "notification-and-command-announcement-timing"
-      ]
-    },
-    {
-      "sectionId": "command-suite",
-      "parityMode": "direct-parity",
-      "owningLayer": "workstation",
-      "sideBySideReview": true,
-      "svelteRouteIds": [
-        "command-suite-baseline",
-        "command-suite-eclipse"
-      ],
-      "gpuiEvidenceArtifacts": [
-        "packages/gpui/native-accessibility-proof.json"
-      ],
-      "gpuiStatuses": {
-        "gpui": "manual",
-        "focus": "hybrid",
-        "keyboard": "explicit",
-        "announcements": "hybrid"
-      },
-      "comparisonPosture": "Compare modal command shell posture, grouped discovery hierarchy, command ranking semantics, and shortcut presentation side by side while keeping focus recovery and announcement timing as explicit native review work.",
-      "intentionalDeltaIds": [
-        "native-overlay-focus-scope-and-dismissal",
-        "notification-and-command-announcement-timing"
-      ]
-    },
-    {
-      "sectionId": "workspace-suite",
-      "parityMode": "direct-parity",
-      "owningLayer": "workstation",
-      "sideBySideReview": true,
-      "svelteRouteIds": [
-        "workspace-suite-baseline",
-        "workspace-suite-eclipse"
-      ],
-      "gpuiEvidenceArtifacts": [
-        "packages/gpui/native-accessibility-proof.json"
-      ],
-      "gpuiStatuses": {
-        "gpui": "manual",
-        "focus": "hybrid",
-        "keyboard": "hybrid",
-        "announcements": "manual"
-      },
-      "comparisonPosture": "Keep dock, split, panel, shell-header, and status-bar hierarchy materially the same across runtimes so Loophole-facing workstation defects are obvious under side-by-side review.",
-      "intentionalDeltaIds": [
-        "native-overlay-focus-scope-and-dismissal",
-        "workstation-dock-region-and-multi-window-shell-behavior"
-      ]
-    }
-  ],
-  "deltaRegister": [
-    {
-      "id": "native-table-and-list-structured-narration",
-      "title": "Structured table and list narration remain native-adaptation work",
-      "status": "revisit",
-      "sectionIds": [
-        "table-suite",
-        "browse-suite"
-      ],
-      "runtimeReason": "HTML table and list semantics do not map directly to GPUI accessible-tree behavior, especially once selection, sorting, and virtualization enter the same surface.",
-      "followUp": "Reduce this delta once mounted GPUI browse and table review surfaces can prove row narration, sort-state exposure, and result-count updates.",
-      "evidenceArtifacts": [
-        "packages/gpui/data-browse-detail-picker-media-baseline.json",
-        "packages/gpui/native-accessibility-proof.json"
-      ]
-    },
-    {
-      "id": "native-overlay-focus-scope-and-dismissal",
-      "title": "Overlay focus scope, dismissal, and recovery remain runtime-specific",
-      "status": "revisit",
-      "sectionIds": [
-        "picker-suite",
-        "command-suite",
-        "workspace-suite"
-      ],
-      "runtimeReason": "Browser dialog and popover focus-scope behavior does not transfer automatically to GPUI command, picker, and workstation shells.",
-      "followUp": "Reduce this delta after the mounted GPUI preview app can exercise close recovery, initial focus, outside dismissal, and command or picker active-item traversal.",
-      "evidenceArtifacts": [
-        "packages/gpui/overlay-navigation-menu-baseline.json",
-        "packages/gpui/native-accessibility-proof.json"
-      ]
-    },
-    {
-      "id": "native-media-renderer-and-fallback-behavior",
-      "title": "Media renderer and fallback behavior are intentionally runtime-specific",
-      "status": "allowed",
-      "sectionIds": [
-        "media-suite"
-      ],
-      "runtimeReason": "Browser embeds, document affordances, and media playback surfaces are not expected to match GPUI one-to-one even when the same fallback and state contract is preserved.",
-      "followUp": "Keep the fallback, metadata, and unavailable-preview contract aligned without forcing pixel-identical renderer behavior.",
-      "evidenceArtifacts": [
-        "packages/gpui/data-browse-detail-picker-media-baseline.json",
-        "packages/gpui/native-accessibility-proof.json"
-      ]
-    },
-    {
-      "id": "notification-and-command-announcement-timing",
-      "title": "Announcement timing for notifications and command execution still needs native proof",
-      "status": "revisit",
-      "sectionIds": [
-        "notification-suite",
-        "command-suite"
-      ],
-      "runtimeReason": "Browser live-region timing and focus side effects do part of the work automatically, while GPUI will need native announcement sequencing.",
-      "followUp": "Reduce this delta after mounted GPUI notification and command surfaces can be exercised with real announcement traces.",
-      "evidenceArtifacts": [
-        "packages/gpui/native-accessibility-proof.json"
-      ]
-    },
-    {
-      "id": "workstation-dock-region-and-multi-window-shell-behavior",
-      "title": "Workstation dock-region and multi-window shell behavior remain explicit native deltas",
-      "status": "revisit",
-      "sectionIds": [
-        "workspace-suite"
-      ],
-      "runtimeReason": "Dock transfer, named region traversal, menu ownership, and multi-window movement are native shell concerns that Svelte can only model indirectly.",
-      "followUp": "Reduce this delta after GPUI workstation shells have mounted native review routes and downstream GPUI adoption proof.",
-      "evidenceArtifacts": [
-        "packages/gpui/native-accessibility-proof.json"
-      ]
-    }
-  ],
-  "automatedBoundary": [
-    "Svelte section registration, route generation, and package-surface coverage remain machine-checked through the preview parity registry.",
-    "GPUI section classification, package coverage, accessibility proof posture, and side-by-side review targets are machine-checked through this artifact and the existing baseline artifacts.",
-    "Acceptance-harness inventory and evidence paths are machine-checked through packages/ecosystem-acceptance.json."
-  ],
-  "manualBoundary": [
-    "GPUI preview app is now mounted with 96 components, 73 specimens, 4-section navigation, display controls, and a 6-screen demo app; side-by-side review is backed by real rendered surfaces.",
-    "Assistive-technology traces, focus recovery feel, motion nuance, and native shell orchestration still require human review.",
-    "Allowed or revisit deltas remain explicit debt, not invisible parity exemptions."
-  ],
-  "nonGoals": [
-    "Do not treat this report as downstream GPUI production deployment proof; the preview app exists but adoption is still future work.",
-    "Do not collapse runtime-specific deltas into defects when the shared contract is still preserved honestly.",
-    "Do not treat artifact-backed parity evidence as downstream GPUI adoption proof."
+  "mountedBehaviour": {
+    "status": "mounted",
+    "scope": "bounded named regression set, not a 174-component behaviour pass",
+    "testFile": "packages/gpui/preview/tests/headless_regressions.rs",
+    "namedTests": [
+      "a_mounted_button_carries_its_controls_target",
+      "a_scrub_reports_change_while_dragging_and_commits_once_at_release",
+      "a_nested_popover_paints_without_nesting_deferred_draws",
+      "a_grouped_code_input_types_and_completes_through_the_real_tree",
+      "a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam",
+      "licence_activation_key_entry_types_and_emits_through_the_real_tree",
+      "licence_seats_release_flows_through_confirm_in_a_mounted_window",
+      "licence_status_renders_state_and_authority_reads_in_a_mounted_window",
+      "model_connection_picker_roving_focus_moves_real_backend_focus",
+      "model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window",
+      "model_connection_card_closes_and_returns_real_focus_to_the_disclosure",
+      "model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window",
+      "radio_selects_on_activate_and_does_not_uncheck_itself",
+      "update_status_confirm_then_install_through_the_real_tree",
+      "update_center_hidden_presence_mounts_nothing_and_open_shows_status",
+      "settings_shell_navigates_and_refused_close_stays_open",
+      "a_focused_resize_handle_steps_the_pane_and_its_declared_value",
+      "a_disabled_resize_handle_takes_no_focus_and_answers_no_key",
+      "two_composed_split_views_do_not_share_a_divider_focus_handle",
+      "callout_dismiss_rebuilds_the_host_spec_through_mounted_input",
+      "remediation_banner_action_and_dismiss_rebuild_the_host_spec",
+      "action_discovery_selection_rebuilds_the_host_spec_through_mounted_input",
+      "dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input",
+      "agent_plan_decisions_rebuild_the_host_spec_through_mounted_input",
+      "agent_plan_record_disclosure_rebuilds_the_host_spec_through_mounted_input",
+      "agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input",
+      "changed_files_disclosure_and_selection_rebuild_the_host_spec",
+      "tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input",
+      "tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input",
+      "stepper_selection_and_rerun_reach_separate_mounted_controls",
+      "stepper_collapse_stays_independent_in_a_mounted_window",
+      "stepper_keyboard_entry_focuses_and_activates_without_a_pointer_press",
+      "stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring"
+    ]
+  },
+  "accessibility": {
+    "status": "manual",
+    "scope": "shared specs and bounded mounted evidence only; broad native semantics, focus, keyboard, announcement, and assistive-technology parity are not proved",
+    "evidence": [
+      "packages/gpui/native-accessibility-proof.json#currentPosture",
+      "packages/gpui/preview/tests/headless_regressions.rs",
+      "docs/contracts/003-native-accessibility.md"
+    ]
+  },
+  "visual": {
+    "status": "compared",
+    "scope": "Button-only 18-case inventory across Svelte, React, and GPUI",
+    "evidence": [
+      "test/visual/fixtures/button-visual-inventory.json",
+      "docs/logs/2026-08/assets/g15-047/summary.json",
+      "test/visual/button-comparison/README.md",
+      "test/visual/button-comparison/compare.test.ts"
+    ],
+    "capturePosture": "GPUI pixels require an operator-approved non-activating windowed diagnostic and are absent from default QA/CI."
+  },
+  "knownDeltas": [
+    "MeterSurface remains web-only and is not a native route.",
+    "GPUI mounted evidence is bounded to the named regression set; it is not a 174-component behaviour pass.",
+    "GPUI accessibility remains manual because no broad native assistive-technology evidence is recorded.",
+    "The retained three-runtime visual comparison is Button-only; other GPUI visual cells are missing."
   ]
 }
