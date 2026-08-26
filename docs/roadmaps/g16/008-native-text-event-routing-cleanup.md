@@ -1,7 +1,8 @@
 # g16.008 — Native Text Event Routing Cleanup
 
-Status: ready
+Status: complete
 Opened: 2026-08-26
+Closed: 2026-08-26
 Depends on: merged `g16.007`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
@@ -120,23 +121,44 @@ generated evidence ledger unchanged at 37 mounted / 137 missing.
 
 ## Acceptance
 
-- [ ] Node submit vocabulary and GPUI dispatch both mean Enter only.
-- [ ] Mounted TextInput Enter submits once; Tab and Shift+Tab traverse without
+- [x] Node submit vocabulary and GPUI dispatch both mean Enter only.
+- [x] Mounted TextInput Enter submits once; Tab and Shift+Tab traverse without
       submit or value mutation.
-- [ ] Mounted CodeInput and DurationInput traverse on Tab without completion or
+- [x] Mounted CodeInput and DurationInput traverse on Tab without completion or
       value mutation; DurationInput moves through its segment order.
-- [ ] Mounted EditableLabel Enter commits directly, Escape cancels, and Tab
+- [x] Mounted EditableLabel Enter commits directly, Escape cancels, and Tab
       commits once through blur before focus advances.
-- [ ] One backend identity helper addresses the actual painted text node for
+- [x] One backend identity helper addresses the actual painted text node for
       composite and childless inputs.
-- [ ] Blur clears measured, scroll, blink, marked, and composing state for the
+- [x] Blur clears measured, scroll, blink, marked, and composing state for the
       painted key without discarding mounted-lifetime undo history.
-- [ ] Existing TextInput mounted evidence and retained composite text-entry
+- [x] Existing TextInput mounted evidence and retained composite text-entry
       regressions stay green.
-- [ ] The parity evidence ledger remains byte-for-byte unchanged at 37 mounted
+- [x] The parity evidence ledger remains byte-for-byte unchanged at 37 mounted
       / 137 missing.
-- [ ] One August log records the repair and leaves NumberInput, multiline,
+- [x] One August log records the repair and leaves NumberInput, multiline,
       slug, accessibility, visual comparison, and Jetstream open.
+
+## Outcome
+
+Complete. The full record is
+`../../logs/2026-08/20260826-g16-008-native-text-event-routing-cleanup.md`.
+
+Two further generic repairs were required to make the fixed envelope real, both
+inside the same node/backend seam and neither a new focus architecture:
+
+- gpui 0.2.2 binds no key to its own sequential traversal, so Tab now reaches
+  `Window::focus_next`/`focus_prev` from the window host that already carries
+  Escape — the same place a browser puts a document-level default action.
+- a node declaring `Interaction::focusable` was not a tab stop, so no field,
+  slot row or segment was reachable by keyboard once Tab stopped being
+  intercepted. `focusable` with no declared `a11y.tab_index` now means a tab
+  stop at index 0, which is what the vocabulary already documented and what the
+  DOM does; `-1` still means programmatically focusable and skipped.
+
+One consequence is recorded in `PAPERCUTS.md` rather than repaired here:
+`DurationInput` and `TextInput` mark their component root `focusable`, so a
+root that draws nothing of its own is now a tab stop ahead of its segments.
 
 ## Writable Scope
 

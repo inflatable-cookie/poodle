@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — `g16.008` ready
-Posture: strict-ready; native text-event cleanup precedes the next evidence lane
+Status: active — orchestrator evidence checkpoint
+Posture: strict-ready; native text-event cleanup is complete and no card is compiled
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -38,7 +38,7 @@ stay maintained; backend admission is not part of the first card.
 5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; merged in PR #79
 6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — complete; merged in PR #80
 7. [007 — TextInput controlled editing and mounted evidence](007-text-input-controlled-editing-and-mounted-evidence.md) — complete; merged in PR #81
-8. [008 — Native text event routing cleanup](008-native-text-event-routing-cleanup.md) — ready
+8. [008 — Native text event routing cleanup](008-native-text-event-routing-cleanup.md) — complete; PR pending operator merge authority
 
 ## Measured Selection
 
@@ -91,14 +91,19 @@ separate raw-draft/value-model decision recorded in
 `../../triage/20260826-213343-number-input-native-value-model.md`.
 
 The post-`g16.007` checkpoint found that both recorded backend defects share one
-bounded routing seam. `g16.008` corrects generic Tab-versus-submit dispatch and
-root-versus-painted-value text-state identity before another editable control
-is measured. It deliberately moves no ledger cell. NumberInput's value-model
-decision remains separate from multiline/slug closure, other component
-families, and visual or accessibility programmes.
+bounded routing seam. `g16.008` corrected generic Tab-versus-submit dispatch and
+root-versus-painted-value text-state identity before another editable control is
+measured, and moved no ledger cell: still 37 mounted / 137 missing. Enter is
+submission, Tab is traversal through gpui's own `focus_next`/`focus_prev` bound
+at the window host, a node declaring `Interaction::focusable` is now a real tab
+stop, and transient text state is keyed by the node that paints the value rather
+than by the focused root. EditableLabel commits on Tab through the blur its
+contract names. TextInput, CodeInput, DurationInput, and EditableLabel keep
+their current evidence levels — this card proved routing, not parity.
+NumberInput's value-model decision remains separate from multiline/slug closure,
+other component families, and visual or accessibility programmes.
 
 ## Next Task
 
-Execute `g16.008`. Then return to an orchestrator evidence checkpoint and
-select the next component lane from the unchanged 37 mounted / 137 missing
-ledger.
+Orchestrator evidence checkpoint. No card is compiled. Select the next component
+lane from the unchanged 37 mounted / 137 missing ledger.

@@ -6859,3 +6859,715 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         );
     });
 }
+
+// ── g16.008 native text event routing ──────────────────────────────────────
+//
+// Two generic backend defects, proven through mounted dispatch rather than
+// through the components that exposed them: Tab was routed to the submit
+// channel, and the blur reset cleared transient text state under the focused
+// *root* id while a composite field paints its value under a derived child.
+//
+// Every traversal claim below drives real key dispatch through gpui's own
+// tab-stop order. Nothing calls a component handler, a focus helper or a
+// transition directly.
+
+/// One ordered sequence of everything the mounted hosts were told.
+type EventLog = Arc<Mutex<Vec<String>>>;
+
+fn event_log() -> EventLog {
+    Arc::new(Mutex::new(Vec::new()))
+}
+
+fn take_events(log: &EventLog) -> Vec<String> {
+    std::mem::take(&mut *log.lock().expect("log"))
+}
+
+fn note(log: &EventLog, entry: String) {
+    log.lock().expect("log").push(entry);
+}
+
+/// A TextInput used as an observable traversal bookend. It carries an explicit
+/// id, so it owns a retrievable focus handle, and it reports both focus
+/// directions and any submit — which is how a Tab-to-submit remap shows up.
+fn traversal_marker(name: &str, log: &EventLog, ctx: &RenderContext<'_>) -> Node {
+    let spec = poodle_specs::TextInputSpec::new()
+        .with_id(name)
+        .with_aria_label(name)
+        .with_value("");
+    let focus_log = Arc::clone(log);
+    let focus_name = name.to_owned();
+    let submit_log = Arc::clone(log);
+    let submit_name = name.to_owned();
+    poodle_render::text_input_with_handlers(
+        &spec,
+        ctx,
+        poodle_render::TextInputHandlers {
+            on_focus_change: Some(Arc::new(move |focused: bool| {
+                note(&focus_log, format!("{focus_name}/focus:{focused}"));
+            })),
+            on_submit: Some(Arc::new(move || {
+                note(&submit_log, format!("{submit_name}/submit"));
+            })),
+            ..poodle_render::TextInputHandlers::default()
+        },
+    )
+}
+
+fn routing_column(children: Vec<Node>) -> Node {
+    let mut column = Node::container();
+    column.id = Some(FIXTURE_ID.to_owned());
+    column.style.descriptor.layout.direction = LayoutDirection::Column;
+    column.style.descriptor.layout.spacing.gap = 8.0;
+    column.style.descriptor.layout.width = LayoutSizing::Fixed(360.0);
+    for child in children {
+        column = column.child(child);
+    }
+    column
+}
+
+// ── CodeInput ──────────────────────────────────────────────────────────────
+
+struct CodeRouting {
+    value: Mutex<String>,
+    log: EventLog,
+}
+
+fn code_routing_tree(host: &Arc<CodeRouting>, mounted: &Arc<Mutex<Node>>) -> Node {
+    let provider = theme();
+    let ctx = RenderContext::new(&provider);
+    let spec = poodle_specs::CodeInputSpec::new()
+        .with_length(4)
+        .with_value(host.value.lock().expect("code").clone())
+        .with_aria_label("code");
+
+    let change_host = Arc::clone(host);
+    let change_mount = Arc::clone(mounted);
+    let complete_host = Arc::clone(host);
+    let code = poodle_render::code_input_with_handlers(
+        &spec,
+        &ctx,
+        poodle_render::CodeInputHandlers {
+            on_value_change: Some(Arc::new(move |next: &str| {
+                *change_host.value.lock().expect("code") = next.to_owned();
+                note(&change_host.log, format!("code/change:{next}"));
+                let tree = code_routing_tree(&change_host, &change_mount);
+                *change_mount.lock().expect("mount") = tree;
+            })),
+            on_complete: Some(Arc::new(move |next: &str| {
+                note(&complete_host.log, format!("code/complete:{next}"));
+            })),
+            ..poodle_render::CodeInputHandlers::default()
+        },
+    );
+    routing_column(vec![
+        traversal_marker("code-before", &host.log, &ctx),
+        code,
+        traversal_marker("code-after", &host.log, &ctx),
+    ])
+}
+
+// ── DurationInput ──────────────────────────────────────────────────────────
+
+struct DurationRouting {
+    segments: Mutex<(u32, u32, u32)>,
+    log: EventLog,
+}
+
+fn duration_routing_tree(host: &Arc<DurationRouting>, mounted: &Arc<Mutex<Node>>) -> Node {
+    let provider = theme();
+    let ctx = RenderContext::new(&provider);
+    let (hours, minutes, seconds) = *host.segments.lock().expect("segments");
+    // The renderer reads the formatted `value`, which is what the host owns;
+    // the segment numbers are the same state written the other way round.
+    let spec = poodle_specs::DurationInputSpec::new()
+        .with_show_seconds(true)
+        .with_value(format!("{hours:02}:{minutes:02}:{seconds:02}"))
+        .with_segments(hours, minutes, seconds)
+        .with_aria_label("duration");
+
+    let change_host = Arc::clone(host);
+    let change_mount = Arc::clone(mounted);
+    let duration = poodle_render::duration_input_with_handlers(
+        &spec,
+        &ctx,
+        poodle_render::DurationInputHandlers {
+            on_change: Some(Arc::new(move |h: u32, m: u32, s: u32, _total: u32| {
+                *change_host.segments.lock().expect("segments") = (h, m, s);
+                note(&change_host.log, format!("duration/change:{h}:{m}:{s}"));
+                let tree = duration_routing_tree(&change_host, &change_mount);
+                *change_mount.lock().expect("mount") = tree;
+            })),
+        },
+    );
+    routing_column(vec![
+        traversal_marker("duration-before", &host.log, &ctx),
+        duration,
+        traversal_marker("duration-after", &host.log, &ctx),
+    ])
+}
+
+// ── EditableLabel ──────────────────────────────────────────────────────────
+
+struct LabelRouting {
+    /// The element id this mount stamps on the label. Each scenario below uses
+    /// its own, because focus handles and painted state are keyed by id and
+    /// outlive a single test-platform app.
+    id: String,
+    /// The committed value, which is what the host owns.
+    value: Mutex<String>,
+    /// The value the field currently shows — the draft, until it commits.
+    draft: Mutex<String>,
+    editing: Mutex<bool>,
+    log: EventLog,
+}
+
+fn label_routing_tree(host: &Arc<LabelRouting>, mounted: &Arc<Mutex<Node>>) -> Node {
+    let provider = theme();
+    let ctx = RenderContext::new(&provider);
+    let editing = *host.editing.lock().expect("editing");
+    let shown = if editing {
+        host.draft.lock().expect("draft").clone()
+    } else {
+        host.value.lock().expect("value").clone()
+    };
+    let spec = poodle_specs::EditableLabelSpec::new()
+        .with_value(&shown)
+        .with_editing(editing)
+        .with_aria_label("track name");
+    let id = host.id.clone();
+
+    let change_host = Arc::clone(host);
+    let change_mount = Arc::clone(mounted);
+    let commit_host = Arc::clone(host);
+    let commit_mount = Arc::clone(mounted);
+    let cancel_host = Arc::clone(host);
+    let cancel_mount = Arc::clone(mounted);
+    let mut label = poodle_render::editable_label_with_handlers(
+        &spec,
+        &ctx,
+        poodle_render::EditableLabelHandlers {
+            on_change: Some(Arc::new(move |next: &str| {
+                *change_host.draft.lock().expect("draft") = next.to_owned();
+                note(&change_host.log, format!("label/change:{next}"));
+                let tree = label_routing_tree(&change_host, &change_mount);
+                *change_mount.lock().expect("mount") = tree;
+            })),
+            on_commit: Some(Arc::new(move |next: &str| {
+                // The shared machine's guard, restated by the host: a commit
+                // only lands while the field is editing, so a blur that
+                // follows Escape or a completed Enter cannot emit a second.
+                if !*commit_host.editing.lock().expect("editing") {
+                    return;
+                }
+                *commit_host.editing.lock().expect("editing") = false;
+                *commit_host.value.lock().expect("value") = next.to_owned();
+                note(&commit_host.log, format!("label/commit:{next}"));
+                let tree = label_routing_tree(&commit_host, &commit_mount);
+                *commit_mount.lock().expect("mount") = tree;
+            })),
+            on_cancel: Some(Arc::new(move || {
+                if !*cancel_host.editing.lock().expect("editing") {
+                    return;
+                }
+                *cancel_host.editing.lock().expect("editing") = false;
+                let restored = cancel_host.value.lock().expect("value").clone();
+                *cancel_host.draft.lock().expect("draft") = restored;
+                note(&cancel_host.log, "label/cancel".to_owned());
+                let tree = label_routing_tree(&cancel_host, &cancel_mount);
+                *cancel_mount.lock().expect("mount") = tree;
+            })),
+            ..poodle_render::EditableLabelHandlers::default()
+        },
+    );
+    // EditableLabel carries no id prop, and the backend keys focus, bounds and
+    // painted text state by element id. The fixture stamps one so both modes
+    // are the same identity, exactly as a host with a real row key would.
+    label.id = Some(id.clone());
+    routing_column(vec![
+        traversal_marker(&format!("{id}-before"), &host.log, &ctx),
+        label,
+        traversal_marker(&format!("{id}-after"), &host.log, &ctx),
+    ])
+}
+
+fn label_host(id: &str) -> Arc<LabelRouting> {
+    Arc::new(LabelRouting {
+        id: id.to_owned(),
+        value: Mutex::new("Kick".to_owned()),
+        draft: Mutex::new("Kick".to_owned()),
+        editing: Mutex::new(true),
+        log: event_log(),
+    })
+}
+
+// ── A childless editable input ─────────────────────────────────────────────
+
+const DIRECT_ID: &str = "direct-field";
+
+/// The other input shape: a node that draws its own value, with no derived
+/// value child. Native `EditableLabel`'s editing field is one, and so is any
+/// plain `Node::input` with a caret. Built from the vocabulary directly, so
+/// the shape is the subject rather than one component's spelling of it.
+struct DirectInput {
+    value: Mutex<String>,
+    selection: Mutex<(usize, usize)>,
+    log: EventLog,
+}
+
+fn direct_input_tree(host: &Arc<DirectInput>, mounted: &Arc<Mutex<Node>>) -> Node {
+    let value = host.value.lock().expect("value").clone();
+    let selection = *host.selection.lock().expect("selection");
+
+    let mut input = Node::input(value.clone(), "");
+    input.id = Some(DIRECT_ID.to_owned());
+    input.interaction.focusable = true;
+    input.style.descriptor.layout.width = LayoutSizing::Fixed(200.0);
+    // A focus treatment is what makes the backend track this node's real
+    // handle, the same way TextInput's focus ring does.
+    input.style.focus = Some(poodle_node::StylePatch {
+        border_color: Some(ColorValue(0.3, 0.6, 1.0, 1.0)),
+        ..poodle_node::StylePatch::default()
+    });
+    let mut input = input.with_caret(
+        selection,
+        ColorValue(1.0, 1.0, 1.0, 1.0),
+        ColorValue(0.3, 0.6, 1.0, 0.4),
+    );
+
+    let apply = {
+        let host = Arc::clone(host);
+        let mounted = Arc::clone(mounted);
+        move |next: String, next_selection: (usize, usize), entry: String| {
+            *host.value.lock().expect("value") = next;
+            *host.selection.lock().expect("selection") = next_selection;
+            note(&host.log, entry);
+            let tree = direct_input_tree(&host, &mounted);
+            *mounted.lock().expect("mount") = tree;
+        }
+    };
+
+    let key_apply = apply.clone();
+    let key_value = value.clone();
+    input.interaction.on_edit_key = Some(Arc::new(move |key: &str, mods| {
+        let state = poodle_headless::text_input::EditState {
+            anchor: selection.0,
+            head: selection.1,
+        };
+        let Some(outcome) = poodle_headless::text_input::edit_transition(
+            &key_value, state, key, mods.shift, mods.accel, None,
+        ) else {
+            return;
+        };
+        let next = outcome.value.clone().unwrap_or_else(|| key_value.clone());
+        let next_selection = (outcome.state.anchor, outcome.state.head);
+        key_apply(next.clone(), next_selection, format!("direct/key:{next}"));
+    }));
+
+    // Undo restores a snapshot: the value and the caret together, reported by
+    // the backend on those two channels in that order, from the history it
+    // keeps for this field.
+    let text_apply = apply.clone();
+    input.interaction.on_text_change = Some(Arc::new(move |next: &str| {
+        let next = next.to_owned();
+        text_apply(next.clone(), selection, format!("direct/text:{next}"));
+    }));
+    // The caret channel moves the caret and nothing else: an undo reports the
+    // restored value first and its selection second, so re-stating the value
+    // here would put the pre-undo one back.
+    let select_host = Arc::clone(host);
+    let select_mount = Arc::clone(mounted);
+    input.interaction.on_select_range = Some(Arc::new(
+        move |start: usize, end: usize, _granularity| {
+            *select_host.selection.lock().expect("selection") = (start, end);
+            note(&select_host.log, format!("direct/select:{start}-{end}"));
+            let tree = direct_input_tree(&select_host, &select_mount);
+            *select_mount.lock().expect("mount") = tree;
+        },
+    ));
+
+    let log = Arc::clone(&host.log);
+    routing_column(vec![
+        input,
+        traversal_marker("direct-after", &log, &RenderContext::new(&theme())),
+    ])
+}
+
+/// g16.008. Enter is the submit gesture and Tab is traversal. Two controlled
+/// fields, real key dispatch, gpui's own tab-stop order: Tab moves focus and
+/// reports nothing else, Shift+Tab moves back, and Enter and Escape still
+/// reach the host on the field that holds focus.
+///
+/// Deliberately not claimed: which visual treatment a traversed field draws,
+/// NumberInput's value model, multiline, or IME behavior beyond the marked
+/// range asserted below.
+#[test]
+fn text_input_submits_on_enter_and_traverses_on_tab() {
+    run_headless(|cx| {
+        let host = TextFieldHost::new(vec![
+            TextFieldState::new("first", "kick"),
+            TextFieldState::new("second", "snare"),
+        ]);
+        let (mut driver, _mounted) = mount_text_fields(cx, &host);
+        driver.wait_for_focus_handle(&field_id("first"));
+        driver.wait_for_focus_handle(&field_id("second"));
+        driver.focus_element(&field_id("first"));
+        host.take_log();
+
+        // Enter submits, exactly once, and never falls through to the edit
+        // transition: the value the host holds is untouched.
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.take_log(), vec!["first/submit"]);
+        assert_eq!(host.field("first").value, "kick");
+
+        // Tab traverses. The only thing the host hears is the focus moving —
+        // no submit on the field being left, and no value change anywhere.
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&field_id("first")),
+            Some(false)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&field_id("second")),
+            Some(true)
+        );
+        assert_eq!(
+            host.take_log(),
+            vec!["first/focus:false", "second/focus:true"],
+            "Tab is traversal: no submit, no edit, no selection report"
+        );
+        assert_eq!(host.field("first").value, "kick");
+        assert_eq!(host.field("second").value, "snare");
+
+        // Shift+Tab walks the same order backwards.
+        driver.dispatch_key_raw("shift-tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&field_id("first")),
+            Some(true)
+        );
+        assert_eq!(
+            host.take_log(),
+            // Tree order, not gain-then-loss order: both fields observe their
+            // own handle as the frame paints them, and `first` paints first.
+            vec!["first/focus:true", "second/focus:false"]
+        );
+
+        // Enter and Escape still belong to whichever field holds focus.
+        driver.dispatch_key_raw("enter");
+        driver.dispatch_key_raw("escape");
+        assert_eq!(host.take_log(), vec!["first/submit", "first/cancel"]);
+        assert_eq!(host.field("first").value, "kick");
+        assert_eq!(host.field("second").value, "snare");
+
+        // A disabled field is not a tab stop at all: traversal from the last
+        // enabled field wraps back to the first rather than stopping on it.
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&field_id("first")),
+            Some(true),
+            "two stops in a two-field fixture wraps to the start"
+        );
+    });
+}
+
+/// g16.008. Transient text state is keyed by the node that *paints* the value,
+/// and the two input shapes disagree about which node that is. Proven from
+/// both sides in one mount: a composite `TextInput`, whose value is a derived
+/// child, and a childless input, which draws its own.
+///
+/// Deliberately not claimed: measured-line contents, pixel positions, or that
+/// a still-mounted field stops measuring after blur — it repaints, and
+/// re-measures, exactly as it should.
+#[test]
+fn blur_clears_the_painted_field_state_and_keeps_its_undo_history() {
+    // ── Composite: the value is a derived child ────────────────────────────
+    run_headless(|cx| {
+        let host = TextFieldHost::new(vec![TextFieldState::new("name", "kick")]);
+        let (mut driver, _mounted) = mount_text_fields(cx, &host);
+        driver.wait_for_focus_handle(&field_id("name"));
+        driver.focus_element(&field_id("name"));
+        driver.dispatch_key_raw("end");
+        driver.dispatch_key_raw("e");
+        driver.dispatch_key_raw("r");
+        assert_eq!(host.field("name").value, "kicker");
+
+        // The field root holds focus and takes the keys; none of the painted
+        // state hangs off it.
+        let root = poodle_gpui_node_backend::painted_text_state_for(&field_id("name"));
+        assert_eq!(
+            root,
+            poodle_gpui_node_backend::PaintedTextState::default(),
+            "the composite root paints no value, so it owns no text state"
+        );
+
+        // The value child does, including the history the edits recorded.
+        let value = poodle_gpui_node_backend::painted_text_state_for(&field_value_id("name"));
+        assert!(value.measured, "the value child is the node that measures");
+        assert!(value.blinking, "and the node whose caret blinks");
+        assert!(value.history, "and the node that records what was typed");
+
+        // An input method marks the same key. The old blur reset cleared the
+        // root id, so this survived a focus change and was spliced over the
+        // next field to take the caret.
+        poodle_gpui_node_backend::mark_composing(&field_value_id("name"), (6, 6), "\u{3053}");
+        assert!(poodle_gpui_node_backend::painted_text_state_for(&field_value_id("name")).composing);
+
+        driver.blur_element_focus(&field_id("name"));
+        let after = poodle_gpui_node_backend::painted_text_state_for(&field_value_id("name"));
+        assert!(!after.composing && !after.marked, "blur ends the composition");
+        assert!(!after.blinking, "and the blink epoch it started");
+        assert!(!after.scrolled, "and the scroll it was holding");
+        assert!(
+            after.history,
+            "history is mounted-lifetime state: focus moving is not a reason to forget it"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::take_composing(&field_value_id("name")),
+            None
+        );
+
+        // And the retained history is reachable again after refocus.
+        driver.focus_element(&field_id("name"));
+        host.take_log();
+        driver.dispatch_key_raw("cmd-z");
+        assert_eq!(
+            host.field("name").value,
+            // One typing run is one entry, so undo lands on what the field
+            // held before it — reached back across the focus excursion.
+            "kick",
+            "undo reaches back across the focus excursion"
+        );
+    });
+
+    // ── Childless: the input draws its own value ──────────────────────────
+    run_headless(|cx| {
+        let host = Arc::new(DirectInput {
+            value: Mutex::new("kick".to_owned()),
+            selection: Mutex::new((4, 4)),
+            log: event_log(),
+        });
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = direct_input_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 200.0);
+        driver.wait_for_focus_handle(DIRECT_ID);
+        driver.focus_element(DIRECT_ID);
+        driver.dispatch_key_raw("s");
+        assert_eq!(*host.value.lock().expect("value"), "kicks");
+
+        // Nothing is painted under a derived child here, because there is no
+        // child: keys, focus and paint all land on the same id. Deriving
+        // `<id>-value` addressed a node that never existed, so undo looked up
+        // an empty history.
+        assert_eq!(
+            poodle_gpui_node_backend::painted_text_state_for(&format!("{DIRECT_ID}-value")),
+            poodle_gpui_node_backend::PaintedTextState::default()
+        );
+        let painted = poodle_gpui_node_backend::painted_text_state_for(DIRECT_ID);
+        assert!(painted.measured && painted.blinking && painted.history);
+
+        take_events(&host.log);
+        driver.dispatch_key_raw("cmd-z");
+        assert_eq!(
+            *host.value.lock().expect("value"),
+            "kick",
+            "the keystroke side and the paint side address the same history"
+        );
+
+        // The same blur reset, on the same shape's own id.
+        poodle_gpui_node_backend::mark_composing(DIRECT_ID, (4, 4), "\u{3053}");
+        driver.blur_element_focus(DIRECT_ID);
+        let after = poodle_gpui_node_backend::painted_text_state_for(DIRECT_ID);
+        assert!(!after.composing && !after.marked && !after.blinking && !after.scrolled);
+        assert!(after.history);
+
+        // Two fields with distinct ids never share either.
+        assert_eq!(
+            poodle_gpui_node_backend::painted_text_state_for("poodle-input-direct-after"),
+            poodle_gpui_node_backend::PaintedTextState::default(),
+            "the neighbouring field kept none of this field's state"
+        );
+    });
+}
+
+/// g16.008. CodeInput and DurationInput are traversed, not typed into, by Tab.
+/// Both put their key handlers on plain containers — a slot row and one
+/// container per segment — so a generic Tab remap reaches them through the
+/// same channel a real keystroke does.
+///
+/// Deliberately not claimed: which slot or segment draws the active treatment,
+/// paste, or the completion check's own contract.
+#[test]
+fn code_and_duration_inputs_traverse_on_tab_without_mutating() {
+    // ── CodeInput: one stop, no completion, no value change ───────────────
+    run_headless(|cx| {
+        let host = Arc::new(CodeRouting {
+            value: Mutex::new("123".to_owned()),
+            log: event_log(),
+        });
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = code_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-code-before");
+        driver.focus_element("poodle-input-code-before");
+        take_events(&host.log);
+
+        // Into the slot row, then straight out of it. One key away from a full
+        // code, and neither Tab completes it.
+        driver.dispatch_key_raw("tab");
+        assert_eq!(take_events(&host.log), vec!["code-before/focus:false"]);
+        driver.dispatch_key_raw("tab");
+        assert_eq!(take_events(&host.log), vec!["code-after/focus:true"]);
+        assert_eq!(*host.value.lock().expect("code"), "123");
+
+        // The row really was the stop in between: coming back to it, a digit
+        // types and completes, through the same dispatch path.
+        driver.dispatch_key_raw("shift-tab");
+        take_events(&host.log);
+        driver.dispatch_key_raw("4");
+        assert_eq!(*host.value.lock().expect("code"), "1234");
+        assert_eq!(
+            take_events(&host.log),
+            vec!["code/change:1234", "code/complete:1234"]
+        );
+    });
+
+    // ── DurationInput: through its segments, in order, then out ───────────
+    run_headless(|cx| {
+        let host = Arc::new(DurationRouting {
+            segments: Mutex::new((1, 2, 3)),
+            log: event_log(),
+        });
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = duration_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-duration-before");
+        driver.focus_element("poodle-input-duration-before");
+        take_events(&host.log);
+
+        // Five Tabs cross the whole control: its focusable root, then hours,
+        // minutes and seconds, then out to the field after it. Not one of them
+        // changes a segment.
+        for _ in 0..5 {
+            driver.dispatch_key_raw("tab");
+        }
+        assert_eq!(*host.segments.lock().expect("segments"), (1, 2, 3));
+        assert_eq!(
+            take_events(&host.log),
+            vec!["duration-before/focus:false", "duration-after/focus:true"],
+            "traversal crosses the segments without any of them reporting"
+        );
+
+        // Which stop was which, proven by what the arrow key acts on: back
+        // through the same order, incrementing whichever segment holds focus.
+        for expected in [(1, 2, 4), (1, 3, 4), (2, 3, 4)] {
+            driver.dispatch_key_raw("shift-tab");
+            driver.dispatch_key_raw("up");
+            assert_eq!(
+                *host.segments.lock().expect("segments"),
+                expected,
+                "one Shift+Tab is one segment, in seconds/minutes/hours order"
+            );
+        }
+
+        // Shift+Tab off the hours segment leaves the control the way it came.
+        take_events(&host.log);
+        driver.dispatch_key_raw("shift-tab");
+        driver.dispatch_key_raw("shift-tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-input-duration-before"),
+            Some(true)
+        );
+        assert_eq!(*host.segments.lock().expect("segments"), (2, 3, 4));
+    });
+}
+
+/// g16.008. EditableLabel still commits when Tab leaves it — but for the
+/// reason its contract gives: Tab moves focus, and the blur commits the draft
+/// once. Enter is the direct commit, Escape cancels, and neither leaves a
+/// second commit behind for the blur to fire.
+///
+/// Deliberately not claimed: activation modes, select-on-focus, the display
+/// mode's own affordances, or focus restoration after a commit.
+#[test]
+fn editable_label_commits_on_enter_and_once_through_the_blur_tab_causes() {
+    // ── Enter: one commit, and the blur that follows adds nothing ─────────
+    run_headless(|cx| {
+        let host = label_host("label-enter");
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = label_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 200.0);
+        driver.wait_for_focus_handle(&host.id);
+        driver.focus_element(&host.id);
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("s");
+        assert_eq!(*host.draft.lock().expect("draft"), "Kicks");
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("enter");
+        driver.draw_frame();
+        assert_eq!(
+            take_events(&host.log),
+            vec!["label/commit:Kicks"],
+            "Enter commits directly, exactly once"
+        );
+        assert_eq!(*host.value.lock().expect("value"), "Kicks");
+        assert!(!*host.editing.lock().expect("editing"));
+    });
+
+    // ── Escape: cancel, and no commit behind it ───────────────────────────
+    run_headless(|cx| {
+        let host = label_host("label-escape");
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = label_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 200.0);
+        driver.wait_for_focus_handle(&host.id);
+        driver.focus_element(&host.id);
+        driver.dispatch_key_raw("s");
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("escape");
+        driver.draw_frame();
+        assert_eq!(take_events(&host.log), vec!["label/cancel"]);
+        assert_eq!(
+            *host.value.lock().expect("value"),
+            "Kick",
+            "a cancelled edit never reaches the committed value"
+        );
+    });
+
+    // ── Tab: focus moves, and the blur it causes commits once ─────────────
+    run_headless(|cx| {
+        let host = label_host("label-tab");
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = label_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 200.0);
+        driver.wait_for_focus_handle(&host.id);
+        driver.focus_element(&host.id);
+        driver.dispatch_key_raw("s");
+        assert_eq!(*host.draft.lock().expect("draft"), "Kicks");
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("tab");
+        driver.draw_frame();
+        // The order is the claim: the host hears the commit — reported from
+        // this field's blur — before it hears the next field take focus.
+        // Nothing here routed Tab to the submit channel.
+        assert_eq!(
+            take_events(&host.log),
+            vec!["label/commit:Kicks", "label-tab-after/focus:true"]
+        );
+        assert_eq!(*host.value.lock().expect("value"), "Kicks");
+        assert!(!*host.editing.lock().expect("editing"));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-input-label-tab-after"),
+            Some(true),
+            "and focus really did advance"
+        );
+
+        // Further frames cannot produce a second commit: the edit is over.
+        driver.draw_frame();
+        driver.draw_frame();
+        assert_eq!(take_events(&host.log), Vec::<String>::new());
+    });
+}

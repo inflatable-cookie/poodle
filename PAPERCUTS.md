@@ -1126,3 +1126,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   re-learned it from a timeout at fixture nine. A small shared
   `captureSession()` helper in `test/visual/` would save the next harness the
   same failure.
+
+- 2026-08-26 — g16.008 made `Interaction::focusable` mean what the vocabulary
+  says it means — a sequential tab stop — which exposed that **`TextInput` and
+  `DurationInput` mark their component root focusable as well as their real
+  stops**. The declaration was inert while nothing in Poodle was reachable by
+  Tab; now a root that draws no value of its own takes a Tab ahead of the
+  segments or field inside it, which is not what the DOM does for the same
+  markup. Dropping `root.interaction.focusable` where the root carries no
+  handlers of its own would close it. It is a component declaration rather than
+  the node/backend seam that card owned, so it is recorded instead of repaired.
+  `CodeInput` is unaffected: only its slot row is focusable.

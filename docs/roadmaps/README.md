@@ -23,9 +23,10 @@ chosen.
   mounted, 140 → 139 missing. `g16.006` closed Tabs drag, keyboard, and mounted
   parity in PR #80; ledger 35 → 36 mounted, 139 → 138 missing. PR #81 closed
   `g16.007` core TextInput controlled editing and one honest mounted claim;
-  ledger 36 → 37 mounted, 138 → 137 missing. The checkpoint compiled ready
-  `g16.008` to repair generic native text routing before another evidence cell
-  moves. No broader conformance programme is implied.
+  ledger 36 → 37 mounted, 138 → 137 missing. `g16.008` then repaired generic
+  native text routing — Enter is submission, Tab is real focus traversal, and
+  transient text state follows the node that paints the value — deliberately
+  moving no evidence cell. No broader conformance programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -78,7 +79,7 @@ chosen.
 - `g16` — active evidence-recovery checkpoint; `001` complete and
   operator-reviewed; `002` closed — partial outcome; `003` merged in PR #77;
   `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
-  `007` merged in PR #81; `008` ready
+  `007` merged in PR #81; `008` complete, PR pending operator merge authority
 
 ## Rules
 

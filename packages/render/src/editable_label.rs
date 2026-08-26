@@ -257,9 +257,24 @@ pub fn editable_label_with_handlers(
                 }));
             }
             if let Some(handler) = &handlers.on_commit {
-                let handler = Arc::clone(handler);
-                let value = spec.value.clone();
-                input.interaction.on_submit = Some(Arc::new(move || handler(&value)));
+                let submit_handler = Arc::clone(handler);
+                let submit_value = spec.value.clone();
+                input.interaction.on_submit =
+                    Some(Arc::new(move || submit_handler(&submit_value)));
+                // Contract §6: Tab in edit mode commits — *because* Tab moves
+                // focus and blur commits, not because a backend treats Tab as
+                // a submit gesture. Enter keeps the explicit channel above;
+                // this covers every other way focus leaves the field. The host
+                // owns `is_editing`, so a commit that ends the edit unmounts
+                // this node before a second one can arrive, and the shared
+                // machine guards commit-after-cancel.
+                let blur_handler = Arc::clone(handler);
+                let blur_value = spec.value.clone();
+                input.interaction.on_focus_change = Some(Arc::new(move |focused: bool| {
+                    if !focused {
+                        blur_handler(&blur_value);
+                    }
+                }));
             }
         }
         input
