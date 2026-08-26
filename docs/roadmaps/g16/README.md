@@ -1,8 +1,8 @@
 # g16 — Next Work
 
-Status: active — `g16.005` merged in PR #79
-Posture: strict-ready; next lane is an orchestrator review. Tabs
-remains stopped on its recorded native drag-lifecycle decision
+Status: active — `g16.006` ready
+Posture: strict-ready; Tabs lifecycle decision promoted and ready for one
+serial worker lane
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -37,6 +37,7 @@ stay maintained; backend admission is not part of the first card.
 3. [003 — RadioGroup native identity and mounted parity](003-radio-group-native-identity-and-mounted-parity.md) — complete
 4. [004 — ToggleGroup semantic API and mounted parity](004-toggle-group-semantic-api-and-mounted-parity.md) — complete; merged in PR #78
 5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; merged in PR #79
+6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — ready
 
 ## Measured Selection
 
@@ -65,14 +66,16 @@ keeps its web form-name behavior and required host-owned native interaction
 scope. ToggleGroup keeps resulting-selection payloads and single-mode
 radiogroup semantics, with the same required native scope pattern.
 
-`g16.005` closed Slider's native axis, callback, keyboard, and mounted
-parity. The generated ledger now has 35 mounted GPUI behaviour cells and 139
-missing. Tabs was considered first and stopped: its pointer reorder contract
-needs a native drag-payload lifecycle decision, recorded in
-`../../triage/20260826-173329-tabs-native-drag-lifecycle.md`.
+`g16.005` closed Slider's native axis, callback, keyboard, and mounted parity.
+The generated ledger now has 35 mounted GPUI behaviour cells and 139 missing.
+Post-merge inspection resolved Tabs' native drag boundary: Tree and
+ModelCatalogueEditor already consume the payload/drop seam, while the GPUI
+backend lacks source lifecycle, target leave, correct hit-testing, and retained
+drop edges. The decision is promoted into the Tabs contract and `g16.006` as a
+bounded repair of that existing seam, not a new conformance architecture.
 
 ## Next Task
 
-Inspect the updated ledger and the open Tabs drag-lifecycle decision before
-choosing another bounded lane. Do not infer a broad conformance programme. Do
-not compile or implement another card from this closeout.
+Dispatch `g16.006` as one serial worker lane. Do not split generic payload
+lifecycle and Tabs consumption across worktrees; they share node vocabulary,
+the GPUI event host, renderer handlers, mounted regressions, and ledger.

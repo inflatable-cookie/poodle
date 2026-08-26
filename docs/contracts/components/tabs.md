@@ -1,7 +1,7 @@
 # Tabs
 
 Status: detailed contract
-Updated: 2026-07-29
+Updated: 2026-08-26
 
 ## 1. Purpose
 
@@ -78,6 +78,21 @@ Updated: 2026-07-29
 | `onDragPrepare` | `(value: string, event: PointerEvent) => void` | `undefined` | no | primary pointer-down seam for an owning composite that must prepare before native `dragstart` |
 | `onDragStart` | `(value: string, event: DragEvent) => void` | `undefined` | no | native drag-start seam after Tabs has established local reorder state |
 | `onDragEnd` | `(value: string, event: DragEvent) => void` | `undefined` | no | native drag-end seam before Tabs clears the dragged value |
+
+The DOM event objects on `onDragPrepare`, `onDragStart`, and `onDragEnd` are
+web-platform escape hatches and do not cross into the portable Rust spec.
+Shared Rust preserves the observable lifecycle through semantic
+`TabsHandlers`: drag start/end carry the tab value, drop-target change carries
+the hovered tab value or `None`, and reorder carries the complete next value
+order. The node/backend seam carries opaque payload ids and semantic drop
+edges only; it never exposes pointer coordinates to the component.
+
+For native payload drags, start fires once after the backend's drag threshold.
+Hover is delivered only to the hit drop zone, leave clears that target, and a
+successful drop reports the last edge computed while hovering. Drop/reorder
+fires before end; release outside a zone or Escape ends as cancellation. End
+fires exactly once in every case so host-owned `dragValue` and
+`dropTargetValue` cannot latch.
 
 ### TabItem Type
 
@@ -181,9 +196,8 @@ state. In Svelte these come from the component's own internal `dragSourceIndex`
 / `dropTargetIndex` during a drag gesture (`[data-drag-source]` /
 `[data-drop-target]`). In the spec-driven targets (GPUI, Jetstream) the host
 sets `dragValue` / `dropTargetValue` (the tab values being dragged / hovered)
-on the spec; both default unset. GPUI box-shadow has no `inset` mode, so its
-drop-target ring renders as a `border-width-focus` accent-base border (closest
-native equivalent).
+on the spec; both default unset. GPUI consumes the same inset drop-target ring
+through the shared node shadow layer.
 
 ### Component States
 
@@ -313,6 +327,12 @@ not shared services.
 | `onDragPrepare` | primary pointer down on an enabled reorderable tab | `string`, `PointerEvent` | lets an owning composite start asynchronous work before native `dragstart`; does not replace Tabs reorder |
 | `onDragStart` | native drag starts | `string`, `DragEvent` | runs after Tabs writes its private same-region reorder payload |
 | `onDragEnd` | native drag ends | `string`, `DragEvent` | runs once for the value captured at drag start |
+
+On shared Rust, the corresponding handler signatures omit DOM events and
+carry only semantic values. `on_reorder` receives the complete next order;
+`on_drop_target_change` receives `Some(value)` while a target is active and
+`None` on leave/end. The host applies those controlled results and rebuilds
+the spec.
 
 ## 6. Accessibility
 
