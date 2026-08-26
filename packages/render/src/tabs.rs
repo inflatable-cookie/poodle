@@ -24,12 +24,20 @@ use crate::context::RenderContext;
 use crate::presentation::{control_height_rem, control_space_x_rem, rem_to_px, size_font_rem};
 
 pub type TabHandler = Arc<dyn Fn(&str) + Send + Sync>;
+/// Complete next tab-value order. The host retains this owned result and
+/// rebuilds; it does not clone from a borrowed slice.
+pub type TabOrderHandler = Arc<dyn Fn(Vec<String>) + Send + Sync>;
+pub type TabDropTargetHandler = Arc<dyn Fn(Option<&str>) + Send + Sync>;
 
 #[derive(Clone, Default)]
 pub struct TabsHandlers {
     pub on_change: Option<TabHandler>,
     pub on_close: Option<TabHandler>,
     pub on_focus: Option<TabHandler>,
+    pub on_reorder: Option<TabOrderHandler>,
+    pub on_drag_start: Option<TabHandler>,
+    pub on_drag_end: Option<TabHandler>,
+    pub on_drop_target_change: Option<TabDropTargetHandler>,
     pub focused_value: Option<String>,
     /// Stable native instance scope. Semantic ids remain readable, but two
     /// tabsets with the same values must never share backend focus handles.
@@ -57,6 +65,71 @@ fn tab_panel_runtime_id(handlers: &TabsHandlers, value: &str) -> Option<String> 
         .instance_id
         .as_ref()
         .map(|scope| format!("tabs:{scope}:panel:{value}"))
+}
+
+fn tabs_items(spec: &TabsSpec) -> Vec<poodle_headless::tabs::TabsItem> {
+    spec.tabs
+        .iter()
+        .map(|item| poodle_headless::tabs::TabsItem {
+            value: item.value.clone(),
+            disabled: item.is_disabled,
+            closable: item.is_closable,
+        })
+        .collect()
+}
+
+fn tabs_activation(spec: &TabsSpec) -> poodle_headless::tabs::ActivationMode {
+    match spec.activation_mode {
+        TabActivationMode::Manual => poodle_headless::tabs::ActivationMode::Manual,
+        TabActivationMode::Automatic => poodle_headless::tabs::ActivationMode::Automatic,
+    }
+}
+
+fn apply_tab_effects(
+    effects: Vec<poodle_headless::tabs::TabsEffect>,
+    items: &[poodle_headless::tabs::TabsItem],
+    instance_id: Option<&str>,
+    on_change: Option<&TabHandler>,
+    on_close: Option<&TabHandler>,
+    on_reorder: Option<&TabOrderHandler>,
+    on_focus: Option<&TabHandler>,
+    notify_focus: bool,
+) -> Option<String> {
+    let mut focus_target = None;
+    for effect in effects {
+        match effect {
+            poodle_headless::tabs::TabsEffect::FocusTab { index } => {
+                if let Some(item) = items.get(index) {
+                    focus_target = Some(
+                        instance_id
+                            .map(|scope| format!("tabs:{scope}:tab:{}", item.value))
+                            .unwrap_or_else(|| format!("tabs:{}", item.value)),
+                    );
+                    if notify_focus {
+                        if let Some(handler) = on_focus {
+                            handler(&item.value);
+                        }
+                    }
+                }
+            }
+            poodle_headless::tabs::TabsEffect::EmitValueChange { value } => {
+                if let Some(handler) = on_change {
+                    handler(&value);
+                }
+            }
+            poodle_headless::tabs::TabsEffect::EmitClose { value } => {
+                if let Some(handler) = on_close {
+                    handler(&value);
+                }
+            }
+            poodle_headless::tabs::TabsEffect::EmitReorder { order } => {
+                if let Some(handler) = on_reorder {
+                    handler(order);
+                }
+            }
+        }
+    }
+    focus_target
 }
 
 fn rounded_all(node: &mut Node, r: f32) {
@@ -119,7 +192,10 @@ fn build_tab_label(
     // Vertical/icon-only: icon alone, label fallback so the tab is never empty.
     if icon_only {
         if let Some(ref icon_name) = tab.icon {
-            let mut i = Node::icon(icon_name.as_str(), ctx.theme().resolve_space("size.icon.sm"));
+            let mut i = Node::icon(
+                icon_name.as_str(),
+                ctx.theme().resolve_space("size.icon.sm"),
+            );
             i.style.descriptor.text_color = Some(text_color);
             return i;
         }
@@ -146,7 +222,10 @@ fn build_tab_label(
     }
 
     if let Some(ref icon_name) = tab.icon {
-        let mut i = Node::icon(icon_name.as_str(), ctx.theme().resolve_space("size.icon.sm"));
+        let mut i = Node::icon(
+            icon_name.as_str(),
+            ctx.theme().resolve_space("size.icon.sm"),
+        );
         i.style.descriptor.text_color = Some(text_color);
         row = row.child(i);
     }
@@ -310,6 +389,66 @@ fn wire_select(node: &mut Node, is_disabled: bool, value: &str, on_change: Optio
     }
 }
 
+fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsHandlers) {
+    let tab = &spec.tabs[index];
+    if !spec.is_reorderable || tab.is_disabled {
+        return;
+    }
+    node.style.descriptor.cursor = CursorHint::Grab;
+    node.interaction.drag_payload = Some(tab.value.clone());
+    node.interaction.drop_zone = true;
+    if let Some(handler) = &handlers.on_drag_start {
+        let handler = Arc::clone(handler);
+        node.interaction.on_drag_start = Some(Arc::new(move |payload| handler(payload)));
+    }
+    if let Some(handler) = &handlers.on_drag_end {
+        let handler = Arc::clone(handler);
+        node.interaction.on_drag_end = Some(Arc::new(move |payload| handler(payload)));
+    }
+    if let Some(handler) = &handlers.on_drop_target_change {
+        let hover = Arc::clone(handler);
+        let value = tab.value.clone();
+        node.interaction.on_drop_hover = Some(Arc::new(move |_event| hover(Some(&value))));
+        let leave = Arc::clone(handler);
+        node.interaction.on_drop_leave = Some(Arc::new(move || leave(None)));
+    }
+    let items = tabs_items(spec);
+    let reorderable = spec.is_reorderable;
+    let on_reorder = handlers.on_reorder.clone();
+    let on_focus = handlers.on_focus.clone();
+    let instance_id = handlers.instance_id.clone();
+    let to_index = index;
+    node.interaction.on_drop = Some(Arc::new(move |event| {
+        let Some(from_index) = items.iter().position(|item| item.value == event.payload) else {
+            return;
+        };
+        let context = poodle_headless::tabs::TabsContext {
+            items: items.clone(),
+            value: None,
+            focus_index: from_index,
+            activation_mode: poodle_headless::tabs::ActivationMode::Automatic,
+            reorderable,
+        };
+        let (next, effects) = poodle_headless::tabs::tabs_transition(
+            context,
+            poodle_headless::tabs::TabsEvent::Reorder {
+                from_index,
+                to_index,
+            },
+        );
+        apply_tab_effects(
+            effects,
+            &next.items,
+            instance_id.as_deref(),
+            None,
+            None,
+            on_reorder.as_ref(),
+            on_focus.as_ref(),
+            true,
+        );
+    }));
+}
+
 fn wire_collection_semantics(
     node: &mut Node,
     spec: &TabsSpec,
@@ -359,76 +498,76 @@ fn wire_collection_semantics(
         return;
     }
 
-    let items = spec
-        .tabs
-        .iter()
-        .map(|item| poodle_headless::tabs::TabsItem {
-            value: item.value.clone(),
-            disabled: item.is_disabled,
-            closable: item.is_closable,
-        })
-        .collect::<Vec<_>>();
+    let items = tabs_items(spec);
     let value = spec.current_value().map(str::to_owned);
-    let activation_mode = match spec.activation_mode {
-        TabActivationMode::Manual => poodle_headless::tabs::ActivationMode::Manual,
-        TabActivationMode::Automatic => poodle_headless::tabs::ActivationMode::Automatic,
-    };
+    let activation_mode = tabs_activation(spec);
     let orientation = spec.orientation;
+    let reorderable = spec.is_reorderable;
     let on_change = handlers.on_change.clone();
+    let on_close = handlers.on_close.clone();
+    let on_reorder = handlers.on_reorder.clone();
     let instance_id = handlers.instance_id.clone();
-    node.interaction.on_key = Some(Arc::new(move |key, _modifiers| {
-        let direction = match (orientation, key) {
-            (Orientation::Horizontal, NodeKey::ArrowRight)
-            | (Orientation::Vertical, NodeKey::ArrowDown) => {
-                Some(poodle_headless::tabs::FocusDirection::Next)
-            }
-            (Orientation::Horizontal, NodeKey::ArrowLeft)
-            | (Orientation::Vertical, NodeKey::ArrowUp) => {
-                Some(poodle_headless::tabs::FocusDirection::Prev)
-            }
-            (_, NodeKey::Home) => Some(poodle_headless::tabs::FocusDirection::First),
-            (_, NodeKey::End) => Some(poodle_headless::tabs::FocusDirection::Last),
-            _ => None,
-        };
-        let Some(direction) = direction else {
-            return None;
-        };
+    let tab_value = tab.value.clone();
+    node.interaction.on_key = Some(Arc::new(move |key, modifiers| {
         let context = poodle_headless::tabs::TabsContext {
             items: items.clone(),
             value: value.clone(),
             focus_index: index,
             activation_mode,
-            reorderable: false,
+            reorderable,
         };
-        let (_, effects) = poodle_headless::tabs::tabs_transition(
-            context,
+        let event = if key == NodeKey::Delete {
+            poodle_headless::tabs::TabsEvent::Close {
+                value: tab_value.clone(),
+            }
+        } else if reorderable && modifiers.alt {
+            let direction = match (orientation, key) {
+                (Orientation::Horizontal, NodeKey::ArrowRight)
+                | (Orientation::Vertical, NodeKey::ArrowDown) => Some(1),
+                (Orientation::Horizontal, NodeKey::ArrowLeft)
+                | (Orientation::Vertical, NodeKey::ArrowUp) => Some(-1),
+                _ => None,
+            };
+            let Some(direction) = direction else {
+                return None;
+            };
+            poodle_headless::tabs::TabsEvent::ReorderStep {
+                direction,
+                from_index: Some(index),
+            }
+        } else {
+            let direction = match (orientation, key) {
+                (Orientation::Horizontal, NodeKey::ArrowRight)
+                | (Orientation::Vertical, NodeKey::ArrowDown) => {
+                    Some(poodle_headless::tabs::FocusDirection::Next)
+                }
+                (Orientation::Horizontal, NodeKey::ArrowLeft)
+                | (Orientation::Vertical, NodeKey::ArrowUp) => {
+                    Some(poodle_headless::tabs::FocusDirection::Prev)
+                }
+                (_, NodeKey::Home) => Some(poodle_headless::tabs::FocusDirection::First),
+                (_, NodeKey::End) => Some(poodle_headless::tabs::FocusDirection::Last),
+                _ => None,
+            };
+            let Some(direction) = direction else {
+                return None;
+            };
             poodle_headless::tabs::TabsEvent::FocusMove {
                 direction,
                 from_index: Some(index),
-            },
-        );
-        let mut focus_target = None;
-        for effect in effects {
-            match effect {
-                poodle_headless::tabs::TabsEffect::FocusTab { index } => {
-                    if let Some(item) = items.get(index) {
-                        focus_target = Some(
-                            instance_id
-                                .as_ref()
-                                .map(|scope| format!("tabs:{scope}:tab:{}", item.value))
-                                .unwrap_or_else(|| format!("tabs:{}", item.value)),
-                        );
-                    }
-                }
-                poodle_headless::tabs::TabsEffect::EmitValueChange { value } => {
-                    if let Some(handler) = on_change.as_ref() {
-                        handler(&value);
-                    }
-                }
-                _ => {}
             }
-        }
-        focus_target
+        };
+        let (next, effects) = poodle_headless::tabs::tabs_transition(context, event);
+        apply_tab_effects(
+            effects,
+            &next.items,
+            instance_id.as_deref(),
+            on_change.as_ref(),
+            on_close.as_ref(),
+            on_reorder.as_ref(),
+            None,
+            false,
+        )
     }));
 }
 
@@ -532,6 +671,11 @@ fn render_card(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers
 
         if tab.is_closable {
             let mut close = build_close_button(ctx, &tab.label);
+            close.id = Some(format!("tabs-close:{}", tab.value));
+            close.runtime_id = handlers
+                .instance_id
+                .as_ref()
+                .map(|scope| format!("tabs:{scope}:close:{}", tab.value));
             close.interaction.on_activate = Some(match (is_disabled, handlers.on_close.as_ref()) {
                 (false, Some(handler)) => {
                     let handler = Arc::clone(handler);
@@ -546,6 +690,7 @@ fn render_card(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers
         }
 
         apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, ctx);
+        wire_reorder(&mut tab_el, spec, tab_bar.children.len(), handlers);
         wire_select(
             &mut tab_el,
             is_disabled,
@@ -634,6 +779,7 @@ fn render_pill(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers
         let mut tab_el = tab_el.child(build_tab_label(tab, ctx, text_color, font_size, false));
 
         apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, ctx);
+        wire_reorder(&mut tab_el, spec, container.children.len(), handlers);
         wire_select(
             &mut tab_el,
             is_disabled,
@@ -740,6 +886,7 @@ fn render_block(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandler
         let mut tab_el = tab_el.child(build_tab_label(tab, ctx, text_color, font_size, vertical));
 
         apply_drag_state(&mut tab_el, tab.value.as_str(), spec, handlers, ctx);
+        wire_reorder(&mut tab_el, spec, tab_bar.children.len(), handlers);
         wire_select(
             &mut tab_el,
             is_disabled,
@@ -1094,5 +1241,155 @@ mod tests {
         assert!(second
             .find(&|node| node.runtime_id.as_deref() == Some("tabs:first:tab:a"))
             .is_none());
+    }
+
+    fn reorder_spec() -> TabsSpec {
+        TabsSpec::new(vec![
+            TabDefinition::new("a", "A"),
+            TabDefinition::new("b", "B").with_closable(true),
+            TabDefinition::new("c", "C").with_disabled(true),
+            TabDefinition::new("d", "D"),
+        ])
+        .with_reorderable(true)
+        .with_value("a")
+    }
+
+    #[test]
+    fn reorderable_tabs_publish_payload_and_drop_zones() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let root = tabs(&reorder_spec(), &ctx, None, None);
+        let a = tab_of(&root, "a");
+        assert_eq!(a.interaction.drag_payload.as_deref(), Some("a"));
+        assert!(a.interaction.drop_zone);
+        assert_eq!(a.style.descriptor.cursor, CursorHint::Grab);
+        let disabled = tab_of(&root, "c");
+        assert!(disabled.interaction.drag_payload.is_none());
+        assert!(!disabled.interaction.drop_zone);
+        assert!(disabled.interaction.on_key.is_none());
+    }
+
+    #[test]
+    fn pointer_drop_emits_the_complete_next_order() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let orders = Arc::new(Mutex::new(Vec::new()));
+        let focused = Arc::new(Mutex::new(Vec::new()));
+        let root = tabs_with_handlers(
+            &reorder_spec(),
+            &ctx,
+            TabsHandlers {
+                on_reorder: Some({
+                    let orders = Arc::clone(&orders);
+                    Arc::new(move |order: Vec<String>| {
+                        orders.lock().unwrap().push(order);
+                    })
+                }),
+                on_focus: Some({
+                    let focused = Arc::clone(&focused);
+                    Arc::new(move |value| focused.lock().unwrap().push(value.to_owned()))
+                }),
+                ..TabsHandlers::default()
+            },
+        );
+        let target = tab_of(&root, "d");
+        (target.interaction.on_drop.as_ref().expect("drop"))(&poodle_node::NodeDropEvent {
+            payload: "a".to_owned(),
+            edge: poodle_node::DropEdge::After,
+        });
+        assert_eq!(
+            orders.lock().unwrap().as_slice(),
+            [vec![
+                "b".to_string(),
+                "c".to_string(),
+                "d".to_string(),
+                "a".to_string()
+            ]]
+        );
+        assert_eq!(*focused.lock().unwrap(), vec!["a"]);
+    }
+
+    #[test]
+    fn alt_arrow_reorders_before_ordinary_focus_movement() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let orders = Arc::new(Mutex::new(Vec::new()));
+        let changes = Arc::new(Mutex::new(Vec::new()));
+        let root = tabs_with_handlers(
+            &reorder_spec(),
+            &ctx,
+            TabsHandlers {
+                on_change: Some({
+                    let changes = Arc::clone(&changes);
+                    Arc::new(move |value| changes.lock().unwrap().push(value.to_owned()))
+                }),
+                on_reorder: Some({
+                    let orders = Arc::clone(&orders);
+                    Arc::new(move |order: Vec<String>| {
+                        orders.lock().unwrap().push(order);
+                    })
+                }),
+                instance_id: Some("keys".to_owned()),
+                ..TabsHandlers::default()
+            },
+        );
+        let a = tab_of(&root, "a");
+        let keys = a.interaction.on_key.as_ref().expect("key handler");
+        let mut alt = poodle_node::NodeModifiers::default();
+        alt.alt = true;
+        assert_eq!(
+            keys(NodeKey::ArrowRight, alt),
+            Some("tabs:keys:tab:a".to_owned())
+        );
+        assert_eq!(
+            orders.lock().unwrap().as_slice(),
+            [vec![
+                "b".to_string(),
+                "a".to_string(),
+                "c".to_string(),
+                "d".to_string()
+            ]]
+        );
+        assert!(
+            changes.lock().unwrap().is_empty(),
+            "Alt+Arrow must not fall through to automatic selection"
+        );
+        assert_eq!(
+            keys(NodeKey::ArrowRight, poodle_node::NodeModifiers::default()),
+            Some("tabs:keys:tab:b".to_owned())
+        );
+        assert_eq!(*changes.lock().unwrap(), vec!["b"]);
+    }
+
+    #[test]
+    fn delete_closes_only_closable_enabled_tabs() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let closed = Arc::new(Mutex::new(Vec::new()));
+        let root = tabs_with_handlers(
+            &reorder_spec(),
+            &ctx,
+            TabsHandlers {
+                on_close: Some({
+                    let closed = Arc::clone(&closed);
+                    Arc::new(move |value| closed.lock().unwrap().push(value.to_owned()))
+                }),
+                ..TabsHandlers::default()
+            },
+        );
+        let keys = tab_of(&root, "b")
+            .interaction
+            .on_key
+            .as_ref()
+            .expect("key handler");
+        keys(NodeKey::Delete, poodle_node::NodeModifiers::default());
+        assert_eq!(*closed.lock().unwrap(), vec!["b"]);
+        let a_keys = tab_of(&root, "a")
+            .interaction
+            .on_key
+            .as_ref()
+            .expect("key handler");
+        a_keys(NodeKey::Delete, poodle_node::NodeModifiers::default());
+        assert_eq!(*closed.lock().unwrap(), vec!["b"]);
     }
 }

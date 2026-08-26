@@ -252,6 +252,18 @@
       "context": { "items": [{ "value": "a", "closable": true }], "value": "a", "focusIndex": 0, "activationMode": "automatic", "reorderable": false },
       "event": { "type": "CLOSE", "value": "a" },
       "expect": { "context": { "value": "a" }, "effects": [{ "type": "emitClose", "value": "a" }] }
+    },
+    {
+      "name": "reorder emits complete next order and focuses the moved tab",
+      "context": { "items": [{ "value": "a" }, { "value": "b" }, { "value": "c" }], "value": "a", "focusIndex": 0, "activationMode": "automatic", "reorderable": true },
+      "event": { "type": "REORDER", "fromIndex": 0, "toIndex": 2 },
+      "expect": { "context": { "focusIndex": 2 }, "order": ["b", "c", "a"], "effects": [{ "type": "focusTab", "index": 2 }, { "type": "emitReorder", "order": ["b", "c", "a"] }] }
+    },
+    {
+      "name": "reorder step is inert at the bound",
+      "context": { "items": [{ "value": "a" }, { "value": "b" }], "value": "a", "focusIndex": 0, "activationMode": "automatic", "reorderable": true },
+      "event": { "type": "REORDER_STEP", "direction": -1 },
+      "expect": { "context": { "focusIndex": 0 }, "effects": [] }
     }
   ],
   "switch": [

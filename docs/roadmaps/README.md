@@ -20,10 +20,9 @@ chosen.
   mounted evidence. `g16.004` closed ToggleGroup resulting-selection, single-mode
   roving focus, and instance-scoped native identity. `g16.005` closed Slider
   axis, keyboard, callback, and mounted parity in PR #79; ledger 34 → 35
-  mounted, 140 → 139 missing. That inspection selected `g16.006`: complete the
-  existing payload/drop lifecycle and consume it for Tabs pointer/keyboard
-  reorder, close, and mounted parity. It is one serial lane; no broader
-  conformance programme is implied.
+  mounted, 140 → 139 missing. `g16.006` closed Tabs drag, keyboard, and mounted
+  parity; ledger 35 → 36 mounted, 139 → 138 missing. Next is an orchestrator
+  review checkpoint. No broader conformance programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;

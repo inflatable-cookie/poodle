@@ -1,8 +1,7 @@
 # g16 — Next Work
 
-Status: active — `g16.006` ready
-Posture: strict-ready; Tabs lifecycle decision promoted and ready for one
-serial worker lane
+Status: active — `g16.006` complete; next is an orchestrator review checkpoint
+Posture: strict-ready; Tabs payload lifecycle and mounted parity closed
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -37,7 +36,7 @@ stay maintained; backend admission is not part of the first card.
 3. [003 — RadioGroup native identity and mounted parity](003-radio-group-native-identity-and-mounted-parity.md) — complete
 4. [004 — ToggleGroup semantic API and mounted parity](004-toggle-group-semantic-api-and-mounted-parity.md) — complete; merged in PR #78
 5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; merged in PR #79
-6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — ready
+6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — complete
 
 ## Measured Selection
 
@@ -67,15 +66,14 @@ scope. ToggleGroup keeps resulting-selection payloads and single-mode
 radiogroup semantics, with the same required native scope pattern.
 
 `g16.005` closed Slider's native axis, callback, keyboard, and mounted parity.
-The generated ledger now has 35 mounted GPUI behaviour cells and 139 missing.
-Post-merge inspection resolved Tabs' native drag boundary: Tree and
-ModelCatalogueEditor already consume the payload/drop seam, while the GPUI
-backend lacks source lifecycle, target leave, correct hit-testing, and retained
-drop edges. The decision is promoted into the Tabs contract and `g16.006` as a
-bounded repair of that existing seam, not a new conformance architecture.
+`g16.006` closed Tabs' payload lifecycle, keyboard reorder/close, and mounted
+GPUI behaviour. The generated ledger now has 36 mounted GPUI behaviour cells
+and 138 missing. Tree and ModelCatalogueEditor remain regression consumers of
+the corrected payload seam; their ledger cells did not move. Jetstream remains
+deferred.
 
 ## Next Task
 
-Dispatch `g16.006` as one serial worker lane. Do not split generic payload
-lifecycle and Tabs consumption across worktrees; they share node vocabulary,
-the GPUI event host, renderer handlers, mounted regressions, and ledger.
+Orchestrator review checkpoint after `g16.006`. Do not compile or implement
+another card until that review measures the ledger and chooses the next
+bounded parity lane.

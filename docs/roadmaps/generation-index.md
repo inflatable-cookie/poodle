@@ -7,11 +7,11 @@ Updated: 2026-08-26
 - `g16`
   - Status: active; strict-ready
   - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77;
-    `004` merged in PR #78; `005` merged in PR #79; `006` ready
+    `004` merged in PR #78; `005` merged in PR #79; `006` complete, awaiting
+    orchestrator review
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: dispatch `g16.006` as one serial Tabs/payload-lifecycle worker
-    lane
+  - Next move: orchestrator review of `g16.006`; do not compile another card
 
 ## Latest Completed Track
 

@@ -4850,6 +4850,11 @@ pub(crate) struct Tabs {
     content: Vec<(String, gpui::AnyElement)>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_close: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_reorder: Option<Arc<dyn Fn(Vec<String>) + Send + Sync>>,
+    on_drag_start: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_drag_end: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    on_drop_target_change: Option<Arc<dyn Fn(Option<&str>) + Send + Sync>>,
+    focused_value: Option<String>,
 }
 
 impl Tabs {
@@ -4861,6 +4866,11 @@ impl Tabs {
             content: Vec::new(),
             on_change: None,
             on_close: None,
+            on_reorder: None,
+            on_drag_start: None,
+            on_drag_end: None,
+            on_drop_target_change: None,
+            focused_value: None,
         }
     }
 
@@ -4876,6 +4886,34 @@ impl Tabs {
 
     pub(crate) fn on_close(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.on_close = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_reorder(mut self, handler: Arc<dyn Fn(Vec<String>) + Send + Sync>) -> Self {
+        self.on_reorder = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_drag_start(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_drag_start = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_drag_end(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_drag_end = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_drop_target_change(
+        mut self,
+        handler: Arc<dyn Fn(Option<&str>) + Send + Sync>,
+    ) -> Self {
+        self.on_drop_target_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_focused_value(mut self, value: impl Into<String>) -> Self {
+        self.focused_value = Some(value.into());
         self
     }
 
@@ -4897,17 +4935,19 @@ impl Tabs {
         GpuiThemeProvider,
         Vec<(String, gpui::AnyElement)>,
     ) {
-        let focused_value = self.id.as_ref().and_then(|scope| {
-            self.spec
-                .tabs
-                .iter()
-                .find(|tab| {
-                    poodle_gpui_node_backend::focus_state_for(&format!(
-                        "tabs:{scope}:tab:{}",
-                        tab.value
-                    )) == Some(true)
-                })
-                .map(|tab| tab.value.clone())
+        let focused_value = self.focused_value.or_else(|| {
+            self.id.as_ref().and_then(|scope| {
+                self.spec
+                    .tabs
+                    .iter()
+                    .find(|tab| {
+                        poodle_gpui_node_backend::focus_state_for(&format!(
+                            "tabs:{scope}:tab:{}",
+                            tab.value
+                        )) == Some(true)
+                    })
+                    .map(|tab| tab.value.clone())
+            })
         });
         let node = poodle_render::tabs_with_handlers(
             &self.spec,
@@ -4915,6 +4955,10 @@ impl Tabs {
             poodle_render::TabsHandlers {
                 on_change: self.on_change,
                 on_close: self.on_close,
+                on_reorder: self.on_reorder,
+                on_drag_start: self.on_drag_start,
+                on_drag_end: self.on_drag_end,
+                on_drop_target_change: self.on_drop_target_change,
                 focused_value,
                 instance_id: self.id,
                 ..poodle_render::TabsHandlers::default()

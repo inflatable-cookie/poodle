@@ -22,15 +22,16 @@ use std::sync::{Arc, Mutex};
 // Explicit import only: `use gpui::*` would glob in gpui's `test` proc macro
 // and shadow the built-in `#[test]` attribute (gpui-macros 0.2.2's `test`
 // crashes on current rustc).
-use gpui::TestAppContext;
+use gpui::{point, px, Pixels, Point, TestAppContext};
 use poodle_gpui::GpuiThemeProvider;
-use poodle_node::{Node, NodeRole};
+use poodle_node::{ColorValue, LayoutDirection, LayoutSizing, Node, NodeDropEvent, NodeRole};
 use poodle_render::{
-    ui_presentation_provider, RadioGroupHandlers, RenderContext, SliderHandlers, ToggleGroupHandlers,
+    ui_presentation_provider, RadioGroupHandlers, RenderContext, SliderHandlers, TabsHandlers,
+    ToggleGroupHandlers,
 };
 use poodle_specs::{
     AgentTranscriptSpec, ControlDensity, ControlSize, Orientation, PopoverSpec, RangeSliderSpec,
-    SliderSpec, UiPresentationProviderSpec,
+    SliderSpec, TabActivationMode, TabDefinition, TabsSpec, UiPresentationProviderSpec,
 };
 
 #[path = "../src/headless_driver.rs"]
@@ -306,6 +307,970 @@ fn a_scrub_reports_change_while_dragging_and_commits_once_at_release() {
             ["valueChange", "valueChange", "valueCommit"],
         );
         assert_eq!(*value.lock().expect("value lock"), (20.0, 95.0));
+    });
+}
+
+fn payload_paint_box(id: &str) -> Node {
+    let mut node = Node::container();
+    node.id = Some(id.to_owned());
+    node.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
+    node.style.descriptor.layout.height = LayoutSizing::Fixed(80.0);
+    node.style.descriptor.background = Some(ColorValue(0.2, 0.3, 0.4, 1.0));
+    node
+}
+
+fn payload_frac(id: &str, x_frac: f32, y_frac: f32) -> Point<Pixels> {
+    let bounds = poodle_gpui_node_backend::bounds_for(id).expect(id);
+    point(
+        px(f32::from(bounds.origin.x) + f32::from(bounds.size.width) * x_frac),
+        px(f32::from(bounds.origin.y) + f32::from(bounds.size.height) * y_frac),
+    )
+}
+
+fn payload_lifecycle_tree(trace: &Arc<Mutex<Vec<String>>>, disabled_source: bool) -> Node {
+    let push = |label: &'static str| {
+        let trace = Arc::clone(trace);
+        Arc::new(move |payload: &str| {
+            trace
+                .lock()
+                .expect("trace lock")
+                .push(format!("{label}:{payload}"));
+        }) as Arc<dyn Fn(&str) + Send + Sync>
+    };
+    let push_drop = |label: &'static str| {
+        let trace = Arc::clone(trace);
+        Arc::new(move |event: &NodeDropEvent| {
+            trace
+                .lock()
+                .expect("trace lock")
+                .push(format!("{label}:{}:{:?}", event.payload, event.edge));
+        }) as Arc<dyn Fn(&NodeDropEvent) + Send + Sync>
+    };
+    let push_leave = |label: &'static str| {
+        let trace = Arc::clone(trace);
+        Arc::new(move || {
+            trace.lock().expect("trace lock").push(label.to_owned());
+        }) as Arc<dyn Fn() + Send + Sync>
+    };
+
+    let mut source = payload_paint_box("payload-source");
+    source.interaction.disabled = disabled_source;
+    source.interaction.drag_payload = Some("alpha".to_owned());
+    source.interaction.on_drag_start = Some(push("start"));
+    source.interaction.on_drag_end = Some(push("end"));
+
+    let mut zone_a = payload_paint_box("payload-zone-a");
+    zone_a.interaction.drop_zone = true;
+    zone_a.interaction.on_drop_hover = Some(push_drop("hover-a"));
+    zone_a.interaction.on_drop_leave = Some(push_leave("leave-a"));
+    zone_a.interaction.on_drop = Some(push_drop("drop-a"));
+
+    let mut zone_b = payload_paint_box("payload-zone-b");
+    zone_b.interaction.drop_zone = true;
+    zone_b.interaction.on_drop_hover = Some(push_drop("hover-b"));
+    zone_b.interaction.on_drop_leave = Some(push_leave("leave-b"));
+    zone_b.interaction.on_drop = Some(push_drop("drop-b"));
+
+    let mut row = Node::container();
+    row.id = Some("payload-row".to_owned());
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.width = LayoutSizing::Fixed(240.0);
+    row.style.descriptor.layout.height = LayoutSizing::Fixed(80.0);
+    row.child(source).child(zone_a).child(zone_b)
+}
+
+/// g16.006. The reusable payload/drop seam reports one start after GPUI's
+/// drag threshold, hit-tested hover/leave, a drop with the retained edge,
+/// and exactly one end — including outside release and Escape — on stock
+/// GPUI. Direct handler invocation is not evidence.
+#[test]
+fn payload_lifecycle_hit_tests_retains_edge_and_ends_once() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(payload_lifecycle_tree(&trace, false)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.draw_frame();
+
+        let source = payload_frac("payload-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        assert_eq!(
+            trace.lock().expect("trace lock").as_slice(),
+            ["start:alpha"],
+            "start fires once after the runtime drag threshold"
+        );
+
+        driver.pointer_drag(payload_frac("payload-zone-a", 0.5, 0.1));
+        driver.pointer_drag(payload_frac("payload-zone-b", 0.5, 0.5));
+        let events = trace.lock().expect("trace lock").clone();
+        assert!(
+            events
+                .iter()
+                .any(|event| event.starts_with("hover-a:alpha:Before")),
+            "the hit zone receives the before-band edge: {events:?}"
+        );
+        assert!(
+            events.contains(&"leave-a".to_owned()),
+            "leaving zone A fires leave: {events:?}"
+        );
+        assert!(
+            events
+                .iter()
+                .any(|event| event.starts_with("hover-b:alpha:")),
+            "the new hit zone receives hover: {events:?}"
+        );
+        assert!(
+            !events
+                .iter()
+                .any(|event| event.starts_with("hover-b:") && event.contains("hover-a")),
+            "capture-wide moves must not deliver hover to a miss: {events:?}"
+        );
+        let hover_b_count = events
+            .iter()
+            .filter(|event| event.starts_with("hover-b:"))
+            .count();
+        let hover_a_after_leave = events
+            .iter()
+            .skip_while(|event| *event != "leave-a")
+            .filter(|event| event.starts_with("hover-a:"))
+            .count();
+        assert!(hover_b_count >= 1);
+        assert_eq!(
+            hover_a_after_leave, 0,
+            "zone A must not keep receiving hover after leave"
+        );
+    });
+
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(payload_lifecycle_tree(&trace, false)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.draw_frame();
+
+        let source = payload_frac("payload-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("payload-zone-a", 0.5, 0.1));
+        driver.pointer_release(payload_frac("payload-zone-a", 0.5, 0.1));
+
+        let events = trace.lock().expect("trace lock").clone();
+        let start = events.iter().position(|event| event == "start:alpha");
+        let drop = events
+            .iter()
+            .position(|event| event == "drop-a:alpha:Before");
+        let end = events.iter().position(|event| event == "end:alpha");
+        assert!(start.is_some(), "start: {events:?}");
+        assert_eq!(
+            drop.map(|index| events[index].as_str()),
+            Some("drop-a:alpha:Before"),
+            "drop reuses the last hover edge, not Inside: {events:?}"
+        );
+        assert!(end.is_some(), "end: {events:?}");
+        assert!(
+            start < drop && drop < end,
+            "successful drop ordering is start → drop → end: {events:?}"
+        );
+        assert_eq!(
+            events.iter().filter(|event| *event == "end:alpha").count(),
+            1,
+            "end fires exactly once on drop: {events:?}"
+        );
+        driver.pointer_release(payload_frac("payload-zone-a", 0.5, 0.5));
+        assert_eq!(
+            trace
+                .lock()
+                .expect("trace lock")
+                .iter()
+                .filter(|event| *event == "end:alpha")
+                .count(),
+            1,
+            "a later mouse-up must not emit a second end"
+        );
+    });
+
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(payload_lifecycle_tree(&trace, false)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.draw_frame();
+
+        let source = payload_frac("payload-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("payload-zone-a", 0.5, 0.5));
+        driver.pointer_drag(point(px(8.0), px(8.0)));
+        driver.pointer_release(point(px(8.0), px(8.0)));
+
+        let events = trace.lock().expect("trace lock").clone();
+        assert!(events.contains(&"start:alpha".to_owned()), "{events:?}");
+        assert!(events.contains(&"leave-a".to_owned()), "{events:?}");
+        assert!(
+            !events.iter().any(|event| event.starts_with("drop-")),
+            "outside release is cancellation, not drop: {events:?}"
+        );
+        assert_eq!(
+            events.iter().filter(|event| *event == "end:alpha").count(),
+            1,
+            "outside release ends once: {events:?}"
+        );
+    });
+
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(payload_lifecycle_tree(&trace, false)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.draw_frame();
+
+        let source = payload_frac("payload-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("payload-zone-b", 0.5, 0.9));
+        driver.dispatch_key("escape");
+
+        let events = trace.lock().expect("trace lock").clone();
+        assert!(events.contains(&"start:alpha".to_owned()), "{events:?}");
+        assert!(events.contains(&"leave-b".to_owned()), "{events:?}");
+        assert!(
+            !events.iter().any(|event| event.starts_with("drop-")),
+            "Escape is cancellation: {events:?}"
+        );
+        assert_eq!(
+            events.iter().filter(|event| *event == "end:alpha").count(),
+            1,
+            "Escape ends once: {events:?}"
+        );
+        driver.dispatch_key("escape");
+        assert_eq!(
+            trace
+                .lock()
+                .expect("trace lock")
+                .iter()
+                .filter(|event| *event == "end:alpha")
+                .count(),
+            1,
+            "a second Escape must not emit another end"
+        );
+    });
+
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(payload_lifecycle_tree(&trace, true)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.draw_frame();
+
+        let source = payload_frac("payload-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("payload-zone-a", 0.5, 0.5));
+        driver.pointer_release(payload_frac("payload-zone-a", 0.5, 0.5));
+        assert!(
+            trace.lock().expect("trace lock").is_empty(),
+            "a disabled source is inert"
+        );
+    });
+}
+
+fn tab_at<'a>(root: &'a Node, runtime_id: &str) -> &'a Node {
+    root.find(&|node| node.runtime_id.as_deref() == Some(runtime_id))
+        .unwrap_or_else(|| panic!("{runtime_id} exists"))
+}
+
+/// g16.006. Tabs selection, focus, close, keyboard reorder, and pointer
+/// reorder through real mounted GPUI input and controlled host rebuilds.
+#[test]
+fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
+    #[derive(Clone)]
+    struct TabsState {
+        items: Vec<TabDefinition>,
+        value: String,
+        focused: Option<String>,
+        drag: Option<String>,
+        drop: Option<String>,
+        orientation: Orientation,
+        activation: TabActivationMode,
+        instance: String,
+    }
+
+    fn definitions() -> Vec<TabDefinition> {
+        vec![
+            TabDefinition::new("one", "One"),
+            TabDefinition::new("skip", "Skip").with_disabled(true),
+            TabDefinition::new("two", "Two").with_closable(true),
+            TabDefinition::new("three", "Three").with_closable(true),
+        ]
+    }
+
+    run_headless(|cx| {
+        fn build(
+            state: &TabsState,
+            mounted: &Arc<Mutex<Node>>,
+            live: &Arc<Mutex<TabsState>>,
+            changes: &Arc<Mutex<Vec<String>>>,
+            closes: &Arc<Mutex<Vec<String>>>,
+            orders: &Arc<Mutex<Vec<Vec<String>>>>,
+            starts: &Arc<Mutex<Vec<String>>>,
+            ends: &Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let live_state = Arc::clone(live);
+            let mount = Arc::clone(mounted);
+            let rebuild = {
+                let live_state = Arc::clone(&live_state);
+                let mount = Arc::clone(&mount);
+                let changes = Arc::clone(changes);
+                let closes = Arc::clone(closes);
+                let orders = Arc::clone(orders);
+                let starts = Arc::clone(starts);
+                let ends = Arc::clone(ends);
+                move |next: TabsState| {
+                    *live_state.lock().expect("state lock") = next.clone();
+                    *mount.lock().expect("mount lock") = build(
+                        &next,
+                        &mount,
+                        &live_state,
+                        &changes,
+                        &closes,
+                        &orders,
+                        &starts,
+                        &ends,
+                    );
+                }
+            };
+            let mut spec = TabsSpec::new(state.items.clone())
+                .with_value(&state.value)
+                .with_orientation(state.orientation)
+                .with_activation_mode(state.activation)
+                .with_reorderable(true)
+                .with_drag_value(state.drag.clone())
+                .with_drop_target_value(state.drop.clone())
+                .with_aria_label("Files");
+            spec.activation_mode = state.activation;
+            let mut node = poodle_render::tabs_with_panel(
+                &spec,
+                &RenderContext::new(&theme()),
+                TabsHandlers {
+                    on_change: Some({
+                        let rebuild = rebuild.clone();
+                        let live_state = Arc::clone(&live_state);
+                        let changes = Arc::clone(changes);
+                        Arc::new(move |value: &str| {
+                            changes.lock().expect("changes").push(value.to_owned());
+                            let mut next = live_state.lock().expect("state lock").clone();
+                            next.value = value.to_owned();
+                            next.focused = Some(value.to_owned());
+                            rebuild(next);
+                        })
+                    }),
+                    on_close: Some({
+                        let rebuild = rebuild.clone();
+                        let live_state = Arc::clone(&live_state);
+                        let closes = Arc::clone(closes);
+                        Arc::new(move |value: &str| {
+                            closes.lock().expect("closes").push(value.to_owned());
+                            let mut next = live_state.lock().expect("state lock").clone();
+                            next.items.retain(|item| item.value != value);
+                            if next.value == value {
+                                next.value = next
+                                    .items
+                                    .iter()
+                                    .find(|item| !item.is_disabled)
+                                    .map(|item| item.value.clone())
+                                    .unwrap_or_default();
+                                next.focused = Some(next.value.clone());
+                            }
+                            rebuild(next);
+                        })
+                    }),
+                    on_focus: Some({
+                        let rebuild = rebuild.clone();
+                        let live_state = Arc::clone(&live_state);
+                        let instance = state.instance.clone();
+                        Arc::new(move |value: &str| {
+                            poodle_gpui_node_backend::request_focus(&format!(
+                                "tabs:{instance}:tab:{value}"
+                            ));
+                            let mut next = live_state.lock().expect("state lock").clone();
+                            next.focused = Some(value.to_owned());
+                            rebuild(next);
+                        })
+                    }),
+                    on_reorder: Some({
+                        let rebuild = rebuild.clone();
+                        let live_state = Arc::clone(&live_state);
+                        let orders = Arc::clone(orders);
+                        Arc::new(move |order: Vec<String>| {
+                            let mut next = live_state.lock().expect("state lock").clone();
+                            let mut by_value = next
+                                .items
+                                .iter()
+                                .cloned()
+                                .map(|item| (item.value.clone(), item))
+                                .collect::<std::collections::BTreeMap<_, _>>();
+                            next.items = order
+                                .iter()
+                                .filter_map(|value| by_value.remove(value))
+                                .collect();
+                            orders.lock().expect("orders").push(order);
+                            rebuild(next);
+                        })
+                    }),
+                    on_drag_start: Some({
+                        let rebuild = rebuild.clone();
+                        let live_state = Arc::clone(&live_state);
+                        let starts = Arc::clone(starts);
+                        Arc::new(move |value: &str| {
+                            starts.lock().expect("starts").push(value.to_owned());
+                            let mut next = live_state.lock().expect("state lock").clone();
+                            next.drag = Some(value.to_owned());
+                            rebuild(next);
+                        })
+                    }),
+                    on_drag_end: Some({
+                        let rebuild = rebuild.clone();
+                        let live_state = Arc::clone(&live_state);
+                        let ends = Arc::clone(ends);
+                        Arc::new(move |value: &str| {
+                            ends.lock().expect("ends").push(value.to_owned());
+                            let mut next = live_state.lock().expect("state lock").clone();
+                            next.drag = None;
+                            next.drop = None;
+                            rebuild(next);
+                        })
+                    }),
+                    on_drop_target_change: Some({
+                        let rebuild = rebuild.clone();
+                        let live_state = Arc::clone(&live_state);
+                        Arc::new(move |value: Option<&str>| {
+                            let mut next = live_state.lock().expect("state lock").clone();
+                            next.drop = value.map(str::to_owned);
+                            rebuild(next);
+                        })
+                    }),
+                    focused_value: state.focused.clone(),
+                    instance_id: Some(state.instance.clone()),
+                    has_panel: true,
+                    ..TabsHandlers::default()
+                },
+                {
+                    let mut panel = Node::text(format!("{} panel", state.value));
+                    panel.a11y.role = Some(NodeRole::TabPanel);
+                    panel
+                },
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let live = Arc::new(Mutex::new(TabsState {
+            items: definitions(),
+            value: "one".into(),
+            focused: Some("one".into()),
+            drag: None,
+            drop: None,
+            orientation: Orientation::Horizontal,
+            activation: TabActivationMode::Automatic,
+            instance: "mounted".into(),
+        }));
+        let changes = Arc::new(Mutex::new(Vec::new()));
+        let closes = Arc::new(Mutex::new(Vec::new()));
+        let orders = Arc::new(Mutex::new(Vec::new()));
+        let starts = Arc::new(Mutex::new(Vec::new()));
+        let ends = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            &live.lock().unwrap().clone(),
+            &mounted,
+            &live,
+            &changes,
+            &closes,
+            &orders,
+            &starts,
+            &ends,
+        );
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 80.0);
+        driver.wait_for_focus_handle("tabs:mounted:tab:one");
+
+        let two = payload_frac("tabs:mounted:tab:two", 0.2, 0.5);
+        driver.pointer_press(two);
+        driver.pointer_release(two);
+        assert_eq!(*changes.lock().unwrap(), vec!["two".to_string()]);
+        assert_eq!(live.lock().unwrap().value, "two");
+        {
+            let root = mounted.lock().unwrap();
+            let list = root
+                .find(&|node| node.a11y.role == Some(NodeRole::TabList))
+                .expect("tablist");
+            assert_eq!(list.a11y.orientation.as_deref(), Some("horizontal"));
+            let selected = tab_at(&root, "tabs:mounted:tab:two");
+            assert_eq!(selected.a11y.role, Some(NodeRole::Tab));
+            assert_eq!(selected.a11y.selected, Some(true));
+            assert_eq!(selected.a11y.tab_index, Some(0));
+            assert_eq!(selected.a11y.controls.as_deref(), Some("tabs-panel:two"));
+            let skip = tab_at(&root, "tabs:mounted:tab:skip");
+            assert!(skip.interaction.disabled);
+            assert!(!skip.interaction.focusable);
+            let panel = root
+                .find(&|node| node.a11y.role == Some(NodeRole::TabPanel))
+                .expect("panel");
+            assert_eq!(panel.a11y.labelled_by.as_deref(), Some("tabs:two"));
+            assert_eq!(panel.a11y.tab_index, Some(0));
+        }
+
+        driver.wait_for_focus_handle("tabs:mounted:tab:two");
+        driver.keyboard_key("tabs:mounted:tab:two", "right");
+        assert_eq!(live.lock().unwrap().value, "three");
+        assert_eq!(
+            tab_at(&mounted.lock().unwrap(), "tabs:mounted:tab:three")
+                .a11y
+                .tab_index,
+            Some(0)
+        );
+
+        driver.keyboard_key("tabs:mounted:tab:three", "left");
+        assert_eq!(
+            live.lock().unwrap().value,
+            "two",
+            "left skips the disabled tab"
+        );
+
+        driver.keyboard_key("tabs:mounted:tab:two", "alt-right");
+        assert_eq!(
+            orders.lock().unwrap().last().map(Vec::as_slice),
+            Some(
+                [
+                    "one".to_string(),
+                    "skip".to_string(),
+                    "three".to_string(),
+                    "two".to_string()
+                ]
+                .as_slice()
+            )
+        );
+        assert_eq!(
+            live.lock().unwrap().focused.as_deref(),
+            Some("two"),
+            "keyboard reorder keeps focus on the moved tab"
+        );
+
+        driver.keyboard_key("tabs:mounted:tab:two", "delete");
+        assert_eq!(*closes.lock().unwrap(), vec!["two".to_string()]);
+        assert!(mounted
+            .lock()
+            .unwrap()
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:mounted:tab:two"))
+            .is_none());
+        driver.pointer_activate_id("tabs:mounted:close:three");
+        assert_eq!(
+            closes.lock().unwrap().as_slice(),
+            ["two".to_string(), "three".to_string()]
+        );
+    });
+
+    run_headless(|cx| {
+        let mut spec = TabsSpec::new(definitions())
+            .with_value("one")
+            .with_activation_mode(TabActivationMode::Manual)
+            .with_reorderable(true);
+        spec.activation_mode = TabActivationMode::Manual;
+        let live = Arc::new(Mutex::new("one".to_string()));
+        let focused = Arc::new(Mutex::new(Some("one".to_string())));
+        let sink = Arc::clone(&live);
+        let focus_sink = Arc::clone(&focused);
+        let mut node = poodle_render::tabs_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            TabsHandlers {
+                on_change: Some(Arc::new(move |value: &str| {
+                    *sink.lock().unwrap() = value.to_owned();
+                })),
+                on_focus: Some(Arc::new(move |value: &str| {
+                    *focus_sink.lock().unwrap() = Some(value.to_owned());
+                    poodle_gpui_node_backend::request_focus(&format!("tabs:manual:tab:{value}"));
+                })),
+                focused_value: Some("one".into()),
+                instance_id: Some("manual".into()),
+                ..TabsHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 420.0, 80.0);
+        driver.wait_for_focus_handle("tabs:manual:tab:one");
+        driver.keyboard_key("tabs:manual:tab:one", "right");
+        assert_eq!(live.lock().unwrap().as_str(), "one");
+        assert_eq!(focused.lock().unwrap().as_deref(), Some("two"));
+        driver.keyboard_key("tabs:manual:tab:two", "enter");
+        assert_eq!(live.lock().unwrap().as_str(), "two");
+    });
+
+    run_headless(|cx| {
+        let mut spec = TabsSpec::new(definitions())
+            .with_value("one")
+            .with_orientation(Orientation::Vertical);
+        spec.orientation = Orientation::Vertical;
+        let live = Arc::new(Mutex::new("one".to_string()));
+        let sink = Arc::clone(&live);
+        let mut node = poodle_render::tabs_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            TabsHandlers {
+                on_change: Some(Arc::new(move |value: &str| {
+                    *sink.lock().unwrap() = value.to_owned();
+                })),
+                instance_id: Some("vertical".into()),
+                focused_value: Some("one".into()),
+                ..TabsHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 80.0, 220.0);
+        driver.wait_for_focus_handle("tabs:vertical:tab:one");
+        driver.keyboard_key("tabs:vertical:tab:one", "right");
+        assert_eq!(live.lock().unwrap().as_str(), "one");
+        driver.keyboard_key("tabs:vertical:tab:one", "down");
+        assert_eq!(live.lock().unwrap().as_str(), "two");
+    });
+
+    run_headless(|cx| {
+        fn build(
+            state: TabsState,
+            mounted: Arc<Mutex<Node>>,
+            live: Arc<Mutex<TabsState>>,
+            orders: Arc<Mutex<Vec<Vec<String>>>>,
+            starts: Arc<Mutex<Vec<String>>>,
+            ends: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let mut node = poodle_render::tabs_with_handlers(
+                &TabsSpec::new(state.items.clone())
+                    .with_value(&state.value)
+                    .with_reorderable(true)
+                    .with_drag_value(state.drag.clone())
+                    .with_drop_target_value(state.drop.clone()),
+                &RenderContext::new(&theme()),
+                TabsHandlers {
+                    on_reorder: Some({
+                        let mounted = Arc::clone(&mounted);
+                        let live = Arc::clone(&live);
+                        let orders = Arc::clone(&orders);
+                        let starts = Arc::clone(&starts);
+                        let ends = Arc::clone(&ends);
+                        Arc::new(move |order: Vec<String>| {
+                            let mut next = live.lock().unwrap().clone();
+                            let mut by_value = next
+                                .items
+                                .iter()
+                                .cloned()
+                                .map(|item| (item.value.clone(), item))
+                                .collect::<std::collections::BTreeMap<_, _>>();
+                            next.items = order
+                                .iter()
+                                .filter_map(|value| by_value.remove(value))
+                                .collect();
+                            orders.lock().unwrap().push(order);
+                            *live.lock().unwrap() = next.clone();
+                            *mounted.lock().unwrap() = build(
+                                next,
+                                Arc::clone(&mounted),
+                                Arc::clone(&live),
+                                Arc::clone(&orders),
+                                Arc::clone(&starts),
+                                Arc::clone(&ends),
+                            );
+                        })
+                    }),
+                    on_drag_start: Some({
+                        let mounted = Arc::clone(&mounted);
+                        let live = Arc::clone(&live);
+                        let orders = Arc::clone(&orders);
+                        let starts = Arc::clone(&starts);
+                        let ends = Arc::clone(&ends);
+                        Arc::new(move |value: &str| {
+                            starts.lock().unwrap().push(value.to_owned());
+                            let mut next = live.lock().unwrap().clone();
+                            next.drag = Some(value.to_owned());
+                            *live.lock().unwrap() = next.clone();
+                            *mounted.lock().unwrap() = build(
+                                next,
+                                Arc::clone(&mounted),
+                                Arc::clone(&live),
+                                Arc::clone(&orders),
+                                Arc::clone(&starts),
+                                Arc::clone(&ends),
+                            );
+                        })
+                    }),
+                    on_drag_end: Some({
+                        let mounted = Arc::clone(&mounted);
+                        let live = Arc::clone(&live);
+                        let orders = Arc::clone(&orders);
+                        let starts = Arc::clone(&starts);
+                        let ends = Arc::clone(&ends);
+                        Arc::new(move |value: &str| {
+                            ends.lock().unwrap().push(value.to_owned());
+                            let mut next = live.lock().unwrap().clone();
+                            next.drag = None;
+                            next.drop = None;
+                            *live.lock().unwrap() = next.clone();
+                            *mounted.lock().unwrap() = build(
+                                next,
+                                Arc::clone(&mounted),
+                                Arc::clone(&live),
+                                Arc::clone(&orders),
+                                Arc::clone(&starts),
+                                Arc::clone(&ends),
+                            );
+                        })
+                    }),
+                    on_drop_target_change: Some({
+                        let mounted = Arc::clone(&mounted);
+                        let live = Arc::clone(&live);
+                        let orders = Arc::clone(&orders);
+                        let starts = Arc::clone(&starts);
+                        let ends = Arc::clone(&ends);
+                        Arc::new(move |value: Option<&str>| {
+                            let mut next = live.lock().unwrap().clone();
+                            next.drop = value.map(str::to_owned);
+                            *live.lock().unwrap() = next.clone();
+                            *mounted.lock().unwrap() = build(
+                                next,
+                                Arc::clone(&mounted),
+                                Arc::clone(&live),
+                                Arc::clone(&orders),
+                                Arc::clone(&starts),
+                                Arc::clone(&ends),
+                            );
+                        })
+                    }),
+                    on_focus: Some({
+                        let live = Arc::clone(&live);
+                        Arc::new(move |value: &str| {
+                            live.lock().unwrap().focused = Some(value.to_owned());
+                            poodle_gpui_node_backend::request_focus(&format!(
+                                "tabs:drag:tab:{value}"
+                            ));
+                        })
+                    }),
+                    focused_value: state.focused.clone(),
+                    instance_id: Some("drag".into()),
+                    ..TabsHandlers::default()
+                },
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let live = Arc::new(Mutex::new(TabsState {
+            items: definitions(),
+            value: "one".into(),
+            focused: Some("one".into()),
+            drag: None,
+            drop: None,
+            orientation: Orientation::Horizontal,
+            activation: TabActivationMode::Automatic,
+            instance: "drag".into(),
+        }));
+        let orders = Arc::new(Mutex::new(Vec::new()));
+        let starts = Arc::new(Mutex::new(Vec::new()));
+        let ends = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            live.lock().unwrap().clone(),
+            Arc::clone(&mounted),
+            Arc::clone(&live),
+            Arc::clone(&orders),
+            Arc::clone(&starts),
+            Arc::clone(&ends),
+        );
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 80.0);
+        driver.draw_frame();
+
+        let source = payload_frac("tabs:drag:tab:one", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        assert_eq!(*starts.lock().unwrap(), vec!["one".to_string()]);
+        assert_eq!(live.lock().unwrap().drag.as_deref(), Some("one"));
+
+        driver.pointer_drag(payload_frac("tabs:drag:tab:three", 0.5, 0.5));
+        assert_eq!(live.lock().unwrap().drop.as_deref(), Some("three"));
+        driver.pointer_drag(payload_frac("tabs:drag:tab:one", 0.5, 0.5));
+        assert_eq!(live.lock().unwrap().drop.as_deref(), Some("one"));
+        driver.pointer_drag(payload_frac("tabs:drag:tab:three", 0.5, 0.5));
+        driver.pointer_release(payload_frac("tabs:drag:tab:three", 0.5, 0.5));
+        assert_eq!(
+            orders.lock().unwrap().last().map(Vec::as_slice),
+            Some(
+                [
+                    "skip".to_string(),
+                    "two".to_string(),
+                    "three".to_string(),
+                    "one".to_string()
+                ]
+                .as_slice()
+            )
+        );
+        assert_eq!(*ends.lock().unwrap(), vec!["one".to_string()]);
+        assert!(live.lock().unwrap().drag.is_none());
+        assert!(live.lock().unwrap().drop.is_none());
+        assert_eq!(live.lock().unwrap().focused.as_deref(), Some("one"));
+    });
+
+    run_headless(|cx| {
+        let live = Arc::new(Mutex::new(TabsState {
+            items: definitions(),
+            value: "one".into(),
+            focused: Some("one".into()),
+            drag: None,
+            drop: None,
+            orientation: Orientation::Horizontal,
+            activation: TabActivationMode::Automatic,
+            instance: "cancel".into(),
+        }));
+        let ends = Arc::new(Mutex::new(Vec::new()));
+        let orders = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        fn build_cancel(
+            state: TabsState,
+            mounted: Arc<Mutex<Node>>,
+            live: Arc<Mutex<TabsState>>,
+            ends: Arc<Mutex<Vec<String>>>,
+            orders: Arc<Mutex<Vec<Vec<String>>>>,
+        ) -> Node {
+            let mut node = poodle_render::tabs_with_handlers(
+                &TabsSpec::new(state.items.clone())
+                    .with_value(&state.value)
+                    .with_reorderable(true)
+                    .with_drag_value(state.drag.clone())
+                    .with_drop_target_value(state.drop.clone()),
+                &RenderContext::new(&theme()),
+                TabsHandlers {
+                    on_reorder: Some({
+                        let orders = Arc::clone(&orders);
+                        Arc::new(move |order: Vec<String>| {
+                            orders.lock().unwrap().push(order);
+                        })
+                    }),
+                    on_drag_start: Some({
+                        let mounted = Arc::clone(&mounted);
+                        let live = Arc::clone(&live);
+                        let ends = Arc::clone(&ends);
+                        let orders = Arc::clone(&orders);
+                        Arc::new(move |value: &str| {
+                            let mut next = live.lock().unwrap().clone();
+                            next.drag = Some(value.to_owned());
+                            *live.lock().unwrap() = next.clone();
+                            *mounted.lock().unwrap() = build_cancel(
+                                next,
+                                Arc::clone(&mounted),
+                                Arc::clone(&live),
+                                Arc::clone(&ends),
+                                Arc::clone(&orders),
+                            );
+                        })
+                    }),
+                    on_drag_end: Some({
+                        let mounted = Arc::clone(&mounted);
+                        let live = Arc::clone(&live);
+                        let ends = Arc::clone(&ends);
+                        let orders = Arc::clone(&orders);
+                        Arc::new(move |value: &str| {
+                            ends.lock().unwrap().push(value.to_owned());
+                            let mut next = live.lock().unwrap().clone();
+                            next.drag = None;
+                            next.drop = None;
+                            *live.lock().unwrap() = next.clone();
+                            *mounted.lock().unwrap() = build_cancel(
+                                next,
+                                Arc::clone(&mounted),
+                                Arc::clone(&live),
+                                Arc::clone(&ends),
+                                Arc::clone(&orders),
+                            );
+                        })
+                    }),
+                    on_drop_target_change: Some({
+                        let mounted = Arc::clone(&mounted);
+                        let live = Arc::clone(&live);
+                        let ends = Arc::clone(&ends);
+                        let orders = Arc::clone(&orders);
+                        Arc::new(move |value: Option<&str>| {
+                            let mut next = live.lock().unwrap().clone();
+                            next.drop = value.map(str::to_owned);
+                            *live.lock().unwrap() = next.clone();
+                            *mounted.lock().unwrap() = build_cancel(
+                                next,
+                                Arc::clone(&mounted),
+                                Arc::clone(&live),
+                                Arc::clone(&ends),
+                                Arc::clone(&orders),
+                            );
+                        })
+                    }),
+                    instance_id: Some("cancel".into()),
+                    ..TabsHandlers::default()
+                },
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+        *mounted.lock().unwrap() = build_cancel(
+            live.lock().unwrap().clone(),
+            Arc::clone(&mounted),
+            Arc::clone(&live),
+            Arc::clone(&ends),
+            Arc::clone(&orders),
+        );
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 80.0);
+        driver.draw_frame();
+        let source = payload_frac("tabs:cancel:tab:one", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("tabs:cancel:tab:three", 0.5, 0.5));
+        driver.dispatch_key("escape");
+        assert!(orders.lock().unwrap().is_empty());
+        assert_eq!(*ends.lock().unwrap(), vec!["one".to_string()]);
+        assert!(live.lock().unwrap().drag.is_none());
+        assert!(live.lock().unwrap().drop.is_none());
+    });
+
+    run_headless(|cx| {
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("shared", "Shared"),
+            TabDefinition::new("other", "Other"),
+        ])
+        .with_value("shared");
+        let first = poodle_render::tabs_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            TabsHandlers {
+                instance_id: Some("alpha".into()),
+                focused_value: Some("shared".into()),
+                ..TabsHandlers::default()
+            },
+        );
+        let second = poodle_render::tabs_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            TabsHandlers {
+                instance_id: Some("beta".into()),
+                focused_value: Some("shared".into()),
+                ..TabsHandlers::default()
+            },
+        );
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root = root.child(first).child(second);
+        root.id = Some(FIXTURE_ID.to_owned());
+        assert!(root
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:alpha:tab:shared"))
+            .is_some());
+        assert!(root
+            .find(&|node| node.runtime_id.as_deref() == Some("tabs:beta:tab:shared"))
+            .is_some());
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(root)), 280.0, 120.0);
+        driver.wait_for_focus_handle("tabs:alpha:tab:shared");
+        driver.wait_for_focus_handle("tabs:beta:tab:shared");
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("tabs:alpha:tab:shared").is_some()
+                && poodle_gpui_node_backend::focus_handle_for("tabs:beta:tab:shared").is_some()
+        );
     });
 }
 

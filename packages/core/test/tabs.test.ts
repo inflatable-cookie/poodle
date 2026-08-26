@@ -142,6 +142,17 @@ describe("tabsTransition REORDER", () => {
       tabsTransition(ctx({ reorderable: true }), { type: "REORDER", fromIndex: 0, toIndex: 9 }).effects,
     ).toEqual([]);
   });
+
+  test("REORDER emits the complete next order and focuses the moved tab", () => {
+    const result = tabsTransition(ctx({ reorderable: true }), { type: "REORDER", fromIndex: 0, toIndex: 3 });
+
+    expect(result.context.items.map((item) => item.value)).toEqual(["b", "c", "d", "a"]);
+    expect(result.context.focusIndex).toBe(3);
+    expect(result.effects).toEqual([
+      { type: "focusTab", index: 3 },
+      { type: "emitReorder", order: ["b", "c", "d", "a"] },
+    ]);
+  });
 });
 
 describe("tabsKeydownEvent", () => {
