@@ -1,19 +1,21 @@
 # g16.002 — Selection Controls Mounted Parity
 
 Date: 2026-08-26
-Status: complete; awaiting orchestrator review
+Status: four proofs complete; ToggleGroup planning stop
 Branch: `t3code/selection-controls-mounted-parity`
 Card: `docs/roadmaps/g16/002-selection-controls-mounted-parity.md`
+PR: #76
 
 ## Outcome
 
-Five named mounted GPUI regressions now drive Checkbox, Switch, RadioGroup,
-SegmentedControl, and ToggleGroup through the real node/backend/input path and
-host rebuild. Direct handler calls do not count for the mounted claim.
+Four named mounted GPUI regressions drive Checkbox, Switch, RadioGroup, and
+SegmentedControl through the real node/backend/input path and host rebuild.
+Direct handler calls do not count for the mounted claim.
 
-The generated ledger moves only those five GPUI mounted-behaviour rows from
-`missing` to `mounted`. Summary: 29 → 34 mounted; 145 → 140 missing. GPUI
-accessibility stays `manual`. No contract, public spec, or public API change.
+The generated ledger moves only those four GPUI mounted-behaviour rows from
+`missing` to `mounted`. Summary: 29 → 33 mounted; 145 → 141 missing. ToggleGroup
+stays `missing`. GPUI accessibility stays `manual`. No contract, public spec,
+or public API change.
 
 ## Mounted tests
 
@@ -31,17 +33,10 @@ accessibility stays `manual`. No contract, public spec, or public API change.
 - `segmented_control_exclusive_focus_identity_and_disabled_paths` — exclusive
   selection, same-value inertia, wrap/skip, disabled-group inertia, and two
   mounted instances with independent focus identity.
-- `toggle_group_single_multiple_and_disabled_payloads_through_mounted_input`
-  — single re-select emits the unchanged value; `allowDeactivation` emits
-  empty/`null`; multiple adds then removes membership in order; option- and
-  group-disabled emit nothing. Native `on_change` still emits the activated
-  option (`Fn(&str)`); the host applies `ToggleGroupSpec::next_value_on_toggle`
-  and rebuilds.
 
 Disabled focus assertions use unique ids/scopes. GPUI `FOCUS_HANDLES` is
 thread-local across `run_headless` blocks in one test, so reusing
-`FIXTURE_ID` / `radio:plan:…` / `toggle:list` would falsely see a prior
-handle.
+`FIXTURE_ID` / `radio:plan:…` would falsely see a prior handle.
 
 ## Defects and repairs
 
@@ -60,39 +55,41 @@ tree and disabled “no handle” assertions were unobservable.
 - SegmentedControl: same-value activation no longer fires; arrow wrap that
   lands on self does not emit. The deferred Jetstream re-pick note is not
   active-cohort authority; the contract’s same-value inertia stands.
-- ToggleGroup: focus patch on enabled items only. Public handler signature
-  stays `Fn(&str)`.
+- ToggleGroup: enabled items gained the same focus patch so GPUI can track
+  handles. That does not close the mounted cell.
 
 Shared-Rust unit tests cover mixed→checked, readonly, disabled, RadioGroup
 same-value/arrows/disabled-group, and SegmentedControl same-value inertia.
 
-## Unresolved gaps
+## ToggleGroup planning stop
 
-- ToggleGroup’s Keyboard table names Arrow Left/Right in single mode; the
-  machine says buttons provide focus with no roving tabindex. Svelte and GPUI
-  both omit arrow roving. This card recorded the gap rather than inventing a
-  GPUI-only rule.
-- GPUI accessibility remains `manual`. Node role/state assertions support the
-  mounted behaviour claim; they are not assistive-technology proof.
-- No visual fixtures. No `g16.003`.
+An earlier mounted ToggleGroup regression was withdrawn after review. It
+called `ToggleGroupSpec::next_value_on_toggle` inside the host callback, so it
+proved host reconstruction rather than the contracted native payload. The
+renderer still exposes `Fn(&str)` and reports the activated option; the
+contract requires `string | string[] | null` containing the resulting
+selection. Changing that signature is a public Rust API decision.
+
+The same proof never drove contracted single-mode Arrow Left/Right roving.
+The Keyboard table names that behaviour; the machine says buttons provide
+focus with no roving tabindex. Svelte and React omit it. Inventing a
+GPUI-only rule would also cross this card.
+
+Both are stop conditions. ToggleGroup stays `missing` for the orchestrator’s
+separate semantic/API lane. No `g16.003`.
 
 ## Validation
 
-Passed, entirely headless:
+Passed on the four-proof revision, entirely headless:
 
-- `cargo test --manifest-path packages/render/Cargo.toml --lib` — 404
-- five named mounted tests in `headless_regressions.rs`
-- `effigy regressions:native` — 75
-- `effigy probe:gpui-specimens` — 8
-- `effigy test:parity-evidence-ledger` — 5
+- focused `poodle-render` tests for the changed modules
+- four named mounted tests in `headless_regressions.rs`
+- `effigy regressions:native` — 74
+- `effigy test:parity-evidence-ledger`
 - `effigy check:parity-evidence-ledger`
-- `effigy ci:native`
-- `effigy ci:web`
-- `effigy docs:check`
-- `effigy qa`
 - `git diff --check`
 
-`ci:web` first failed because this worktree had no `node_modules` and bun
-resolved `lucide-static` 1.34.0 from `~/.bun/install/cache`. `bun install`
-restored lockfile 1.31.0; the rerun passed. Recorded in `PAPERCUTS.md`.
-No `*-windowed`, native visual, Jetstream, or release selectors.
+The earlier five-cell closeout also passed `effigy probe:gpui-specimens`,
+`effigy ci:native`, `effigy ci:web`, `effigy docs:check`, and `effigy qa`.
+This revision does not re-run that full board unless the four-proof checks
+fail. No `*-windowed`, native visual, Jetstream, or release selectors.

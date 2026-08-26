@@ -74,7 +74,6 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   Switch: "switch_toggle_readonly_and_disabled_rebuild_the_host_spec",
   RadioGroup: "radio_group_exclusive_focus_and_disabled_paths_through_mounted_input",
   SegmentedControl: "segmented_control_exclusive_focus_identity_and_disabled_paths",
-  ToggleGroup: "toggle_group_single_multiple_and_disabled_payloads_through_mounted_input",
   RangeSlider: "a_scrub_reports_change_while_dragging_and_commits_once_at_release",
   Popover: "a_nested_popover_paints_without_nesting_deferred_draws",
   CodeInput: "a_grouped_code_input_types_and_completes_through_the_real_tree",
@@ -613,8 +612,9 @@ ${componentRows}
   default QA/CI.
 - The next evidence decision should be chosen from the measured missing cells:
   semantic/interface, mounted behaviour, accessibility, web visual, or GPUI
-  visual. \`g16.002\` closed five selection-control mounted rows. This ledger
-  does not create \`g16.003\` or choose a visual-fixture lane.
+  visual. \`g16.002\` closed four selection-control mounted rows. ToggleGroup
+  remains missing pending a public callback and roving-focus decision. This
+  ledger does not create \`g16.003\` or choose a visual-fixture lane.
 
 ## Jetstream posture
 
