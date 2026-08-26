@@ -1,7 +1,8 @@
 # g16.007 — TextInput Controlled Editing And Mounted Evidence
 
-Status: ready
+Status: complete
 Opened: 2026-08-26
+Closed: 2026-08-26
 Depends on: merged `g16.006`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
@@ -151,26 +152,26 @@ slug source/autogeneration lifecycle.
 
 ## Acceptance
 
-- [ ] Focused Svelte and React tests agree on submit/cancel,
+- [x] Focused Svelte and React tests agree on submit/cancel,
       disabled/read-only suppression, and value-change-before-clear ordering.
-- [ ] Shared Rust owns one tested edit transition for the named value and
+- [x] Shared Rust owns one tested edit transition for the named value and
       selection rules; max-length enforcement is component/shared-machine
       owned, never backend-owned.
-- [ ] One readable named GPUI regression mounts real `TextInput` nodes, drives
+- [x] One readable named GPUI regression mounts real `TextInput` nodes, drives
       real pointer/keyboard input, stores callback results, and rebuilds the
       host-controlled spec.
-- [ ] The mounted proof covers focus gain/loss, typing, movement, selection
+- [x] The mounted proof covers focus gain/loss, typing, movement, selection
       replacement, Backspace/Delete, submit/cancel, search clear,
       disabled/read-only inertia, placeholder separation, and independent
       equal-valued fields.
-- [ ] No mounted assertion passes by directly invoking a handler, transition,
+- [x] No mounted assertion passes by directly invoking a handler, transition,
       renderer function after mount, or spec inspection alone.
-- [ ] Existing composite text-entry regressions and focused backend
+- [x] Existing composite text-entry regressions and focused backend
       caret/selection/clipboard/undo/IME tests remain green.
-- [ ] The generated ledger changes exactly TextInput's mounted-behaviour cell
+- [x] The generated ledger changes exactly TextInput's mounted-behaviour cell
       and derived totals. Accessibility, visual, and Jetstream statuses do not
       move.
-- [ ] One August log records the bounded claim and explicitly leaves
+- [x] One August log records the bounded claim and explicitly leaves
       multiline, slug lifecycle, async validation timing, OS IME, and
       NumberInput value-model closure open.
 
@@ -236,6 +237,45 @@ preview/QA, release, tag, or publication selectors.
   comparison, Jetstream, workflows, releases, or downstream repositories.
 - The ledger changes any component except TextInput or promotes an evidence
   class beyond the exact named tests.
+
+## Outcome
+
+`maxLength` had no owner in the Rust path: `TextInputSpec::max_length` was
+declared and read by nobody, so a native field took unlimited input while the
+web pair relied on the native attribute. It is now enforced inside
+`poodle_headless::text_input`'s two transitions — a keystroke into a full field
+is consumed and reports nothing, an over-long insertion truncates to fit — and
+EditableLabel's private post-truncation is gone from the transition paths.
+
+An unchanged outcome used to be reported anyway: a rejected keystroke still
+sent its unmoved caret through `on_selection_change`, and a paste with no room
+left still sent the value the host already held through `on_change`. One
+`report_edit` boundary in the component now decides what the host hears — no
+value callback when the value did not change, no selection callback when the
+caret did not move — so a rejected edit is distinguishable from an accepted
+one. The keys are still consumed, so they cannot fall through to another
+handler; there is simply nothing to report. Genuine movement and selection
+replacement report exactly as before.
+
+Every search field also rendered its clear button under the constant element id
+`text-input-clear`, so two search fields shared one focus handle and one
+paint-bounds entry. It is derived from the field id now, like the value node.
+
+`text_input_controlled_editing_and_identity_rebuild_the_host_spec` mounts real
+`TextInput` nodes and drives real GPUI pointer and keyboard input across three
+hosts: one editable field, one search/disabled/read-only trio, and two fields
+holding equal values. Ledger: 36 → 37 mounted; 138 → 137 missing.
+
+Two findings are recorded but not repaired, because neither is decided by this
+card's envelope:
+
+- `packages/gpui/node-backend/src/interaction.rs` maps `tab` to submit
+  alongside `enter`. Contract §Keyboard gives Tab to focus traversal. CodeInput
+  and DurationInput may depend on the current mapping.
+- `apply_listeners` calls `input_text::forget(&id)` on blur with the *field
+  root* id, while `MEASURED`, `SCROLL`, `BLINK_EPOCH` and `MARKED` are keyed by
+  the value node id — so the blur-time reset the contract describes never runs.
+  Not observable through a public channel, so it was not repaired blind.
 
 ## Continuation
 

@@ -78,6 +78,7 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   RangeSlider: "a_scrub_reports_change_while_dragging_and_commits_once_at_release",
   Slider: "slider_axis_keyboard_and_disabled_rebuild_the_host_spec",
   Tabs: "tabs_drag_keyboard_and_identity_rebuild_the_host_spec",
+  TextInput: "text_input_controlled_editing_and_identity_rebuild_the_host_spec",
   Popover: "a_nested_popover_paints_without_nesting_deferred_draws",
   CodeInput: "a_grouped_code_input_types_and_completes_through_the_real_tree",
   FileUpload: "a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam",

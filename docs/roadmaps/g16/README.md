@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — `g16.007` ready for worker dispatch
-Posture: strict-ready; core TextInput controlled editing is the next measured lane
+Status: active — `g16.007` complete; awaiting orchestrator review checkpoint
+Posture: strict-ready; the next measured lane is unchosen until review
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -37,7 +37,7 @@ stay maintained; backend admission is not part of the first card.
 4. [004 — ToggleGroup semantic API and mounted parity](004-toggle-group-semantic-api-and-mounted-parity.md) — complete; merged in PR #78
 5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; merged in PR #79
 6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — complete; merged in PR #80
-7. [007 — TextInput controlled editing and mounted evidence](007-text-input-controlled-editing-and-mounted-evidence.md) — ready
+7. [007 — TextInput controlled editing and mounted evidence](007-text-input-controlled-editing-and-mounted-evidence.md) — complete; PR pending operator review
 
 ## Measured Selection
 
@@ -75,15 +75,23 @@ deferred.
 
 The post-`g16.006` checkpoint selected `TextInput` as the next leverage point.
 It underpins search, command, settings, model, embed, token, editable-list, and
-relation-picker surfaces. `g16.007` proves its core controlled editing through
-the mounted GPUI path and moves only its ledger cell. It does not claim
-multiline, slug lifecycle, or full native accessibility/visual closure.
+relation-picker surfaces. `g16.007` closed its core controlled editing through
+the mounted GPUI path: 36 → 37 mounted, 138 → 137 missing. It repaired two
+measured defects — `maxLength` had no owner in the Rust path, and every search
+field shared one clear-button element id — and, after orchestrator review, made
+unchanged edit outcomes silent so a rejected edit is distinguishable from an
+accepted one. It left multiline, slug lifecycle,
+validation timing, OS input methods, and native accessibility/visual closure
+explicitly unclaimed. Two further findings (Tab mapped to submit in the backend
+key path; blur-time `forget` keyed by the wrong id) are recorded in the
+execution log for the orchestrator rather than repaired inside the card.
 `NumberInput` stays out: its concrete-`f64`, stepper-only native surface needs a
 separate raw-draft/value-model decision recorded in
 `../../triage/20260826-213343-number-input-native-value-model.md`.
 
 ## Next Task
 
-Dispatch `g16.007` as one serial worker lane. Do not combine it with
-NumberInput, multiline/slug closure, another component family, or a visual or
-accessibility evidence programme.
+Orchestrator review checkpoint. Review the `g16.007` PR, then choose the next
+evidence lane from current ledger state. Do not compile another card before
+that review, and do not fold NumberInput, multiline/slug closure, another
+component family, or a visual or accessibility programme into this one.

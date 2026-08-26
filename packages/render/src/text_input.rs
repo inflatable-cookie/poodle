@@ -40,6 +40,40 @@ pub fn text_input(
 
 const SELECTION_ALPHA: f32 = 0.30;
 
+/// Tell the host what changed, and nothing about what did not.
+///
+/// A controlled `on_change` means "the value is now this", so firing it with
+/// the value the host already holds makes a rejected edit — a keystroke into a
+/// field already at its `maxLength`, a paste with no room left, a Backspace at
+/// index 0 — indistinguishable from an accepted one. A host that diffs sees
+/// nothing; a host that counts edits, marks a form dirty, or debounces a save
+/// sees an edit that never happened. The caret is the same claim: a selection
+/// that did not move is not a selection change.
+///
+/// The edit model still *consumes* those keys — swallowing them is what stops
+/// them falling through to another handler — it simply has nothing to report.
+fn report_edit(
+    outcome: poodle_headless::text_input::EditOutcome,
+    value: &str,
+    selection: (usize, usize),
+    on_change: &Option<TextChangeHandler>,
+    on_selection_change: &Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
+) {
+    if let Some(next) = outcome.value {
+        if next != value {
+            if let Some(on_change) = on_change {
+                on_change(&next);
+            }
+        }
+    }
+    let moved = (outcome.state.anchor, outcome.state.head);
+    if moved != selection {
+        if let Some(on_selection_change) = on_selection_change {
+            on_selection_change(moved.0, moved.1);
+        }
+    }
+}
+
 /// Host callbacks for an editable field.
 ///
 /// `on_change` reports the new value; `on_selection_change` reports where the
@@ -270,6 +304,10 @@ pub fn text_input_with_handlers(
             let (start, end) = spec.selection_range();
             let on_selection = handlers.on_selection_change.clone();
             let change = on_change.clone();
+            // `maxLength` is spent here, before the host is told anything: the
+            // shared transition owns the rule, so GPUI and Jetstream cannot
+            // drift from `<input maxlength>` and from each other.
+            let limit = spec.max_length;
             value.interaction.on_edit_insert = Some(Arc::new(move |inserted: &str| {
                 let outcome = poodle_headless::text_input::insert_transition(
                     &text,
@@ -278,15 +316,9 @@ pub fn text_input_with_handlers(
                         head: end,
                     },
                     inserted,
+                    limit,
                 );
-                if let Some(next) = outcome.value {
-                    if let Some(change) = &change {
-                        change(&next);
-                    }
-                }
-                if let Some(on_selection) = &on_selection {
-                    on_selection(outcome.state.anchor, outcome.state.head);
-                }
+                report_edit(outcome, &text, (start, end), &change, &on_selection);
             }));
         }
     }
@@ -306,7 +338,11 @@ pub fn text_input_with_handlers(
         && !current_value.is_empty();
     if can_clear {
         let mut clear = Node::button("");
-        clear.id = Some("text-input-clear".to_owned());
+        // Derived from the field id for the same reason the value node is:
+        // the clear button is focusable, and the backend keys focus handles
+        // and paint bounds by element id. A constant would have made two
+        // search fields share one button identity.
+        clear.id = Some(format!("{field_id}-clear"));
         clear.a11y.role = Some(NodeRole::Button);
         clear.a11y.label = Some("Clear search query".to_owned());
         clear.interaction.focusable = true;
@@ -436,24 +472,18 @@ pub fn text_input_with_handlers(
         let (start, end) = spec.selection_range();
         let on_selection = handlers.on_selection_change.clone();
         let change = on_change.clone();
+        let limit = spec.max_length;
         root.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
             let state = poodle_headless::text_input::EditState {
                 anchor: start,
                 head: end,
             };
             let Some(outcome) = poodle_headless::text_input::edit_transition(
-                &value, state, key, mods.shift, mods.accel,
+                &value, state, key, mods.shift, mods.accel, limit,
             ) else {
                 return;
             };
-            if let Some(next) = outcome.value {
-                if let Some(change) = &change {
-                    change(&next);
-                }
-            }
-            if let Some(on_selection) = &on_selection {
-                on_selection(outcome.state.anchor, outcome.state.head);
-            }
+            report_edit(outcome, &value, (start, end), &change, &on_selection);
         }));
         // Paste and cut arrive as content, not as a keystroke, so they go
         // through the same edit model by a different door.
@@ -462,6 +492,7 @@ pub fn text_input_with_handlers(
             let (start, end) = spec.selection_range();
             let on_selection = handlers.on_selection_change.clone();
             let change = on_change.clone();
+            let limit = spec.max_length;
             root.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
                 let outcome = poodle_headless::text_input::insert_transition(
                     &value,
@@ -470,15 +501,9 @@ pub fn text_input_with_handlers(
                         head: end,
                     },
                     text,
+                    limit,
                 );
-                if let Some(next) = outcome.value {
-                    if let Some(change) = &change {
-                        change(&next);
-                    }
-                }
-                if let Some(on_selection) = &on_selection {
-                    on_selection(outcome.state.anchor, outcome.state.head);
-                }
+                report_edit(outcome, &value, (start, end), &change, &on_selection);
             }));
         }
         // The root carries the caret too. It never *draws* one — it has
@@ -708,6 +733,144 @@ mod tests {
             Some(callback),
         );
         assert!(read_only.interaction.on_text_change.is_none());
+    }
+
+    /// `maxLength` is spent before the host hears anything, and a rejected
+    /// edit is *completely* silent: the rule lives in the shared transition,
+    /// the component only hands it over, and a host that was told nothing is
+    /// the only way a rejected edit can be told apart from an accepted one.
+    #[test]
+    fn a_rejected_full_field_edit_reports_nothing_at_all() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+
+        // One ordered log for every channel the host owns, so "nothing" means
+        // nothing rather than "nothing of the kind this assertion looked at".
+        fn logging_field(
+            spec: &TextInputSpec,
+            ctx: &RenderContext<'_>,
+        ) -> (Node, Arc<std::sync::Mutex<Vec<String>>>) {
+            let log = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
+            let change_log = Arc::clone(&log);
+            let select_log = Arc::clone(&log);
+            let node = text_input_with_handlers(
+                spec,
+                ctx,
+                TextInputHandlers {
+                    on_change: Some(Arc::new(move |next: &str| {
+                        change_log.lock().unwrap().push(format!("change:{next}"))
+                    })),
+                    on_selection_change: Some(Arc::new(move |a: usize, b: usize| {
+                        select_log.lock().unwrap().push(format!("select:{a}-{b}"))
+                    })),
+                    ..TextInputHandlers::default()
+                },
+            );
+            (node, log)
+        }
+
+        let full = TextInputSpec::new()
+            .with_id("limited")
+            .with_value("abcd")
+            .with_max_length(4)
+            .with_selection(1, 1);
+
+        let (node, log) = logging_field(&full, &ctx);
+        node.interaction.on_edit_key.as_ref().expect("keys")(
+            "X",
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(
+            *log.lock().unwrap(),
+            Vec::<String>::new(),
+            "a key a full field cannot take reports neither value nor caret"
+        );
+
+        // A paste with no room left is the same claim through the other door.
+        let (node, log) = logging_field(&full, &ctx);
+        node.interaction.on_edit_insert.as_ref().expect("insert")("XY");
+        assert_eq!(*log.lock().unwrap(), Vec::<String>::new());
+
+        // Backspace at index 0 is consumed — it must not fall through — but
+        // there is still nothing to report.
+        let (node, log) = logging_field(
+            &TextInputSpec::new()
+                .with_id("limited")
+                .with_value("abcd")
+                .with_selection(0, 0),
+            &ctx,
+        );
+        node.interaction.on_edit_key.as_ref().expect("keys")(
+            "backspace",
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(*log.lock().unwrap(), Vec::<String>::new());
+
+        // Genuine edits still report both channels, in order.
+        let (node, log) = logging_field(
+            &TextInputSpec::new()
+                .with_id("limited")
+                .with_value("ab")
+                .with_max_length(4)
+                .with_selection(2, 2),
+            &ctx,
+        );
+        node.interaction.on_edit_key.as_ref().expect("keys")(
+            "c",
+            poodle_node::NodeModifiers::default(),
+        );
+        // An over-long paste truncates to what fits, and reports the result.
+        node.interaction.on_edit_insert.as_ref().expect("insert")("cdef");
+        assert_eq!(
+            *log.lock().unwrap(),
+            vec![
+                "change:abc".to_string(),
+                "select:3-3".to_string(),
+                "change:abcd".to_string(),
+                "select:4-4".to_string(),
+            ]
+        );
+
+        // A caret move with no edit reports the caret only.
+        let (node, log) = logging_field(
+            &TextInputSpec::new()
+                .with_id("limited")
+                .with_value("abcd")
+                .with_selection(0, 0),
+            &ctx,
+        );
+        node.interaction.on_edit_key.as_ref().expect("keys")(
+            "end",
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(*log.lock().unwrap(), vec!["select:4-4".to_string()]);
+    }
+
+    /// Two search fields must not share their clear button. The backend keys
+    /// focus handles and paint bounds by element id, so a constant id made one
+    /// field's clear control answer for the other's.
+    #[test]
+    fn each_search_field_owns_its_clear_control_identity() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let field = |id: &str| {
+            text_input(
+                &TextInputSpec::new()
+                    .with_id(id)
+                    .with_type("search")
+                    .with_value("kick"),
+                &ctx,
+                None,
+            )
+        };
+        let a = field("one");
+        let b = field("two");
+        assert!(a
+            .find(&|n| n.id.as_deref() == Some("poodle-input-one-clear"))
+            .is_some());
+        assert!(b
+            .find(&|n| n.id.as_deref() == Some("poodle-input-two-clear"))
+            .is_some());
     }
 
     #[test]

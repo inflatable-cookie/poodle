@@ -21,9 +21,10 @@ chosen.
   roving focus, and instance-scoped native identity. `g16.005` closed Slider
   axis, keyboard, callback, and mounted parity in PR #79; ledger 34 → 35
   mounted, 140 → 139 missing. `g16.006` closed Tabs drag, keyboard, and mounted
-  parity in PR #80; ledger 35 → 36 mounted, 139 → 138 missing. The resulting
-  checkpoint compiled `g16.007` for core TextInput controlled editing and one
-  honest mounted claim. No broader conformance programme is implied.
+  parity in PR #80; ledger 35 → 36 mounted, 139 → 138 missing. `g16.007` closed
+  core TextInput controlled editing and one honest mounted claim; ledger
+  36 → 37 mounted, 138 → 137 missing. g16 now sits at an orchestrator review
+  checkpoint. No broader conformance programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;

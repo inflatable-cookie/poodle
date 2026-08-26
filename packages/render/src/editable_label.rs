@@ -77,6 +77,9 @@ fn density_pad_x_offset_rem(density: ControlDensity) -> f32 {
     }
 }
 
+/// The whole-value channel's clamp. The edit transitions enforce the limit
+/// themselves; this is for `on_text_change`, where a backend hands down a
+/// complete replacement value rather than an edit.
 fn limit_edit_value(value: String, max_length: Option<usize>) -> String {
     let Some(max_length) = max_length else {
         return value;
@@ -220,9 +223,9 @@ pub fn editable_label_with_handlers(
                         &insert_value,
                         end_edit_state(&insert_value),
                         text,
+                        max_length,
                     );
                     if let Some(next) = outcome.value {
-                        let next = limit_edit_value(next, max_length);
                         if next != insert_value {
                             insert_change(&next);
                         }
@@ -242,11 +245,11 @@ pub fn editable_label_with_handlers(
                         &key,
                         false,
                         mods.accel,
+                        max_length,
                     ) else {
                         return;
                     };
                     if let Some(next) = outcome.value {
-                        let next = limit_edit_value(next, max_length);
                         if next != value {
                             change(&next);
                         }
