@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — `g16.006` merged; next is an orchestrator review checkpoint
-Posture: strict-ready; Tabs payload lifecycle and mounted parity closed
+Status: active — `g16.007` ready for worker dispatch
+Posture: strict-ready; core TextInput controlled editing is the next measured lane
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -37,6 +37,7 @@ stay maintained; backend admission is not part of the first card.
 4. [004 — ToggleGroup semantic API and mounted parity](004-toggle-group-semantic-api-and-mounted-parity.md) — complete; merged in PR #78
 5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; merged in PR #79
 6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — complete; merged in PR #80
+7. [007 — TextInput controlled editing and mounted evidence](007-text-input-controlled-editing-and-mounted-evidence.md) — ready
 
 ## Measured Selection
 
@@ -72,8 +73,17 @@ and 138 missing. Tree and ModelCatalogueEditor remain regression consumers of
 the corrected payload seam; their ledger cells did not move. Jetstream remains
 deferred.
 
+The post-`g16.006` checkpoint selected `TextInput` as the next leverage point.
+It underpins search, command, settings, model, embed, token, editable-list, and
+relation-picker surfaces. `g16.007` proves its core controlled editing through
+the mounted GPUI path and moves only its ledger cell. It does not claim
+multiline, slug lifecycle, or full native accessibility/visual closure.
+`NumberInput` stays out: its concrete-`f64`, stepper-only native surface needs a
+separate raw-draft/value-model decision recorded in
+`../../triage/20260826-213343-number-input-native-value-model.md`.
+
 ## Next Task
 
-Orchestrator review checkpoint after `g16.006`. Do not compile or implement
-another card until that review measures the ledger and chooses the next
-bounded parity lane.
+Dispatch `g16.007` as one serial worker lane. Do not combine it with
+NumberInput, multiline/slug closure, another component family, or a visual or
+accessibility evidence programme.
