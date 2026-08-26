@@ -1,6 +1,6 @@
 # g16.006 — Tabs Drag, Keyboard, And Mounted Parity
 
-Status: complete
+Status: complete — merged in PR #80 (`9e5934af`)
 Opened: 2026-08-26
 Depends on: complete `g16.005`; resolved decision in
 `../../triage/20260826-173329-tabs-native-drag-lifecycle.md`

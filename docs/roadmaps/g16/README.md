@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — `g16.006` complete; next is an orchestrator review checkpoint
+Status: active — `g16.006` merged; next is an orchestrator review checkpoint
 Posture: strict-ready; Tabs payload lifecycle and mounted parity closed
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -36,7 +36,7 @@ stay maintained; backend admission is not part of the first card.
 3. [003 — RadioGroup native identity and mounted parity](003-radio-group-native-identity-and-mounted-parity.md) — complete
 4. [004 — ToggleGroup semantic API and mounted parity](004-toggle-group-semantic-api-and-mounted-parity.md) — complete; merged in PR #78
 5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; merged in PR #79
-6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — complete
+6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — complete; merged in PR #80
 
 ## Measured Selection
 

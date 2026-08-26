@@ -1,7 +1,7 @@
 # g16.006 — Tabs Drag, Keyboard, And Mounted Parity
 
 Date: 2026-08-26
-Status: complete — awaiting orchestrator review
+Status: complete — merged in PR #80 (`9e5934af`)
 Branch: `t3code/tabs-drag-keyboard-parity`
 Card: `docs/roadmaps/g16/006-tabs-drag-keyboard-and-mounted-parity.md`
 
