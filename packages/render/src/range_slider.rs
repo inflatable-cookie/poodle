@@ -14,9 +14,9 @@ use std::sync::Arc;
 
 use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, NodeRole,
-    ScrubPhase, ShadowValue, StylePatch,
+    ScrubAxis, ScrubPhase, ShadowValue, StylePatch,
 };
-use poodle_specs::{ControlSize, RangeSliderSpec, SliderVariant};
+use poodle_specs::{ControlSize, Orientation, RangeSliderSpec, SliderVariant};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
@@ -493,6 +493,10 @@ pub fn range_slider(
         };
         grab.style.descriptor.cursor = CursorHint::Pointer;
         grab.interaction.on_scrub = Some(Arc::clone(handler));
+        grab.interaction.scrub_axis = match spec.orientation {
+            Orientation::Horizontal => ScrubAxis::Horizontal,
+            Orientation::Vertical => ScrubAxis::Vertical,
+        };
         track = track.child(grab);
     }
 
@@ -613,6 +617,26 @@ mod tests {
                 + node.children.iter().map(count_scrubs).sum::<usize>()
         }
         assert_eq!(count_scrubs(&node), 1);
+        assert_eq!(carrier.interaction.scrub_axis, ScrubAxis::Horizontal);
+    }
+
+    #[test]
+    fn a_vertical_range_slider_declares_its_scrub_axis() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = spec().with_orientation(Orientation::Vertical);
+        let node = range_slider(
+            &spec,
+            &ctx,
+            RangeSliderHandlers {
+                on_change: Some(Arc::new(|_, _| {})),
+                ..RangeSliderHandlers::default()
+            },
+        );
+        let carrier = node
+            .find(&|n| n.interaction.on_scrub.is_some())
+            .expect("grab area");
+        assert_eq!(carrier.interaction.scrub_axis, ScrubAxis::Vertical);
     }
 
     /// Pressing the track moves the *nearer* thumb there — the behaviour a

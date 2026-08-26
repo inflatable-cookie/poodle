@@ -81,6 +81,9 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
     if let Some(pct) = style.width_pct {
         el = el.w(relative(pct));
     }
+    if let Some(pct) = style.height_pct {
+        el = el.h(relative(pct));
+    }
     if style.flex_wrap {
         el = el.flex_wrap();
     }

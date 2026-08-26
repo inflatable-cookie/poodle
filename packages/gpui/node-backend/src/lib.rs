@@ -36,7 +36,8 @@ use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, CrossAxisAlignment, CursorHint, DropEdge,
     FocusRing, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
     NodeAnimation, NodeDragEvent, NodeDragPhase, NodeDropEvent, NodeKey, NodeKind, NodeModifiers,
-    NodePoint, NodePosition, NodeRole, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
+    NodePoint, NodePosition, NodeRole, ScrubAxis, ScrubPhase, SelectGranularity, StylePatch,
+    TextAlign,
 };
 
 mod inset_shadow;

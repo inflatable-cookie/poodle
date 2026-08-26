@@ -117,6 +117,7 @@
     if (activePointer === event.pointerId) { activePointer = null; runControl({ type: "POINTER_END" }); }
   }
   function embeddedKey(event: KeyboardEvent): void {
+    if (disabled) return;
     const direction = ({ ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 } as Record<string, -1 | 1>)[event.key];
     const raw = event.key === "Home" ? min : event.key === "End" ? safeMax : direction ? value + direction * step : null;
     if (raw == null) return;

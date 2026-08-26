@@ -108,6 +108,7 @@ export function Slider({
   function pointerMove(event: PointerEvent<HTMLDivElement>): void { if (activePointer.current === event.pointerId) runControl({ type: "POINTER_MOVE", valueNorm: pointNorm(event) }); }
   function pointerEnd(event: PointerEvent<HTMLDivElement>): void { if (activePointer.current === event.pointerId) { activePointer.current = null; runControl({ type: "POINTER_END" }); } }
   function embeddedKey(event: KeyboardEvent<HTMLDivElement>): void {
+    if (disabled) return;
     const direction = ({ ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 } as Record<string, -1 | 1>)[event.key];
     const raw = event.key === "Home" ? min : event.key === "End" ? safeMax : direction ? currentValue + direction * step : null;
     if (raw == null) return;
