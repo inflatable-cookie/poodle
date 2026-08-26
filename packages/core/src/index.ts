@@ -421,6 +421,9 @@ export {
 export {
   toggleGroupTransition,
   toggleGroupIsSelected,
+  toggleGroupEnabledValues,
+  toggleGroupTabStopValue,
+  toggleGroupArrowTarget,
   type ToggleGroupValue,
   type ToggleGroupContext,
   type ToggleGroupEvent,
