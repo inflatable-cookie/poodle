@@ -822,8 +822,16 @@ pub fn js_progress(spec: &ProgressSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::progress(spec, &pr::RenderContext::new(theme)))
 }
 
-pub fn js_radio_group(spec: &RadioGroupSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::radio_group(spec, &pr::RenderContext::new(theme), None))
+pub fn js_radio_group(
+    spec: &RadioGroupSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
+) -> El {
+    El(pr::radio_group(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::RadioGroupHandlers::new(instance_id),
+    ))
 }
 
 pub fn js_range_slider(spec: &RangeSliderSpec, theme: &JetstreamThemeProvider) -> El {

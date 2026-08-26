@@ -39,6 +39,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_radio_group(
                 &RadioGroupSpec::new(plan_options()).with_value("pro"),
                 theme,
+                "js-radio-vertical",
             ),
         ))
         // Contract §13 Horizontal — Size, Medium selected.
@@ -50,13 +51,14 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_value("md")
                     .with_orientation(Orientation::Horizontal),
                 theme,
+                "js-radio-horizontal",
             ),
         ))
         // Contract §13 Disabled — group-level disabled, Free selected.
         .child(group("Disabled", secondary, {
             let mut spec = RadioGroupSpec::new(plan_options()).with_value("free");
             spec.is_disabled = true;
-            js_radio_group(&spec, theme)
+            js_radio_group(&spec, theme, "js-radio-disabled")
         }))
         // Disabled option — single option muted, group otherwise interactive.
         .child(group(
@@ -70,6 +72,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 ])
                 .with_value("pro"),
                 theme,
+                "js-radio-disabled-option",
             ),
         ))
         // Custom selected color — per-instance selected ring + dot override.
@@ -81,6 +84,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_value("pro")
                     .with_selected_color("#22c55e"),
                 theme,
+                "js-radio-custom-color",
             ),
         ))
         // Sizes — xs–xl, indicator/dot scale per the §8 size table.
@@ -96,6 +100,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_orientation(Orientation::Horizontal)
                         .with_size(ControlSize::Xs),
                     theme,
+                    "js-radio-size-xs",
                 ))
                 .child(js_radio_group(
                     &RadioGroupSpec::new(plan_options())
@@ -103,6 +108,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_orientation(Orientation::Horizontal)
                         .with_size(ControlSize::Sm),
                     theme,
+                    "js-radio-size-sm",
                 ))
                 .child(js_radio_group(
                     &RadioGroupSpec::new(plan_options())
@@ -110,6 +116,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_orientation(Orientation::Horizontal)
                         .with_size(ControlSize::Md),
                     theme,
+                    "js-radio-size-md",
                 ))
                 .child(js_radio_group(
                     &RadioGroupSpec::new(plan_options())
@@ -117,6 +124,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_orientation(Orientation::Horizontal)
                         .with_size(ControlSize::Lg),
                     theme,
+                    "js-radio-size-lg",
                 ))
                 .child(js_radio_group(
                     &RadioGroupSpec::new(plan_options())
@@ -124,6 +132,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_orientation(Orientation::Horizontal)
                         .with_size(ControlSize::Xl),
                     theme,
+                    "js-radio-size-xl",
                 )),
         ))
         // Densities — group gap only; option height unchanged.
@@ -139,6 +148,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_orientation(Orientation::Horizontal)
                         .with_density(ControlDensity::Compact),
                     theme,
+                    "js-radio-density-compact",
                 ))
                 .child(js_radio_group(
                     &RadioGroupSpec::new(plan_options())
@@ -146,6 +156,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_orientation(Orientation::Horizontal)
                         .with_density(ControlDensity::Default),
                     theme,
+                    "js-radio-density-default",
                 ))
                 .child(js_radio_group(
                     &RadioGroupSpec::new(plan_options())
@@ -153,6 +164,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_orientation(Orientation::Horizontal)
                         .with_density(ControlDensity::Comfortable),
                     theme,
+                    "js-radio-density-comfortable",
                 )),
         ))
 }

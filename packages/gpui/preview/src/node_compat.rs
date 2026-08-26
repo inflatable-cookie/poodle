@@ -7159,26 +7159,26 @@ pub(crate) struct RadioGroup {
     spec: RadioGroupSpec,
     theme: GpuiThemeProvider,
     id: Option<String>,
-    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    handlers: poodle_render::RadioGroupHandlers,
 }
 
 impl RadioGroup {
-    pub(crate) fn from_spec(spec: RadioGroupSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: RadioGroupSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
+        let instance_id = instance_id.into();
         Self {
             spec,
             theme: theme.clone(),
-            id: None,
-            on_change: None,
+            id: Some(instance_id.clone()),
+            handlers: poodle_render::RadioGroupHandlers::new(instance_id),
         }
     }
 
-    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
-        self.id = Some(id.into());
-        self
-    }
-
     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.on_change = Some(handler);
+        self.handlers.on_change = Some(handler);
         self
     }
 }
@@ -7187,7 +7187,11 @@ impl IntoElement for RadioGroup {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let mut node = poodle_render::radio_group(&self.spec, &RenderContext::new(&self.theme), self.on_change);
+        let mut node = poodle_render::radio_group(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.handlers,
+        );
         if let Some(id) = self.id {
             node.id = Some(id);
         }

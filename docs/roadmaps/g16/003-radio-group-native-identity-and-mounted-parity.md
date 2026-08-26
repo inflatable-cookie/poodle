@@ -1,23 +1,29 @@
 # g16.003 — RadioGroup Native Identity And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-26
+Completed: 2026-08-26
 Depends on: closed `g16.002`; operator decision recorded in
 `../../triage/20260826-123030-selection-control-stops.md`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/radio-group.md`,
 `parity-evidence-ledger.md`
+execution log: `../../logs/2026-08/20260826-g16-003-radio-group-native-identity-and-mounted-parity.md`
 
 ## Outcome
 
-Close RadioGroup's one measured GPUI mounted-behaviour gap without changing
-its web API or selection meaning. Give shared native rendering an explicit,
-lifetime-stable interaction scope, then prove real roving focus and selection
-through the mounted GPUI backend/input path.
+RadioGroup's GPUI mounted-behaviour cell is closed. Shared native rendering
+takes `RadioGroupHandlers::new(instance_id)`; option runtime ids derive from
+that host-owned scope. The named mounted regression drives pointer selection,
+same-value inertia, both orientation axes, wrap, disabled-option skip,
+disabled-group inertia, and two same-valued instances with independent focus
+through the real GPUI backend/input path and host rebuilds.
 
-This card establishes the narrow native identity pattern ToggleGroup will use
-later. It does not refactor interaction identity across the component library.
+The generated ledger moves only RadioGroup's GPUI mounted-behaviour cell from
+`missing` to `mounted` (32 → 33 mounted; 142 → 141 missing). GPUI accessibility
+stays `manual`. Svelte and React are unchanged. ToggleGroup is not in this
+lane.
 
 ## Fixed Decisions
 
@@ -94,20 +100,20 @@ later. It does not refactor interaction identity across the component library.
 
 ## Acceptance
 
-- [ ] Every native RadioGroup construction provides a non-empty stable
+- [x] Every native RadioGroup construction provides a non-empty stable
       interaction scope through `RadioGroupHandlers`; no collision-prone
       fallback remains.
-- [ ] Two mounted same-valued groups retain independent backend focus identity.
-- [ ] The real mounted GPUI path proves exclusive selection, same-value
+- [x] Two mounted same-valued groups retain independent backend focus identity.
+- [x] The real mounted GPUI path proves exclusive selection, same-value
       inertia, orientation-aware arrow movement, wrap, disabled-option skip,
       and disabled-group inertia through host rebuilds.
-- [ ] Each enabled option exposes real focus tracking, one roving tab stop, and
+- [x] Each enabled option exposes real focus tracking, one roving tab stop, and
       its contracted radio selection state; disabled paths are not focusable.
-- [ ] Svelte and React APIs and behavior remain unchanged.
-- [ ] The generated ledger changes exactly the RadioGroup GPUI
+- [x] Svelte and React APIs and behavior remain unchanged.
+- [x] The generated ledger changes exactly the RadioGroup GPUI
       mounted-behaviour cell and derived totals; accessibility and visual cells
       do not move.
-- [ ] One August execution log records the API migration, mounted evidence,
+- [x] One August execution log records the API migration, mounted evidence,
       validation, and any remaining gap.
 
 ## Writable Scope
@@ -169,6 +175,7 @@ Jetstream preview/QA, release, tag, or publication selectors.
 
 Return the handler/API diff, mounted regression names, two-instance identity
 proof, regenerated ledger totals, validation, and execution log to the
-orchestrator. Do not implement ToggleGroup or compile another card. After this
-lands, the orchestrator promotes the accepted ToggleGroup decision and compiles
-its separate semantic/API/mounted-parity lane.
+orchestrator. Do not implement ToggleGroup or compile another card. After
+orchestrator review and operator merge, the orchestrator promotes the accepted
+ToggleGroup decision and compiles its separate semantic/API/mounted-parity
+lane.
