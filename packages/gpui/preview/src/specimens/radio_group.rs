@@ -68,8 +68,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     RadioGroup::from_spec(
                         RadioGroupSpec::new(plan_options.clone()).with_value(plan_value.clone()),
                         theme,
+                        "radio-plan",
                     )
-                    .with_id("radio-plan")
                     .on_change(radio_change(state, "radio-plan")),
                 )
                 .child(
@@ -95,8 +95,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_value(size_value.clone())
                             .with_orientation(Orientation::Horizontal),
                         theme,
+                        "radio-size",
                     )
-                    .with_id("radio-size")
                     .on_change(radio_change(state, "radio-size")),
                 )
                 .child(
@@ -120,7 +120,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     let mut spec = RadioGroupSpec::new(plan_options.clone()).with_value("free");
                     spec.is_disabled = true;
 
-                    RadioGroup::from_spec(spec, theme).with_id("radio-disabled")
+                    RadioGroup::from_spec(spec, theme, "radio-disabled")
                 }),
         )
         // --- Disabled option ---
@@ -133,18 +133,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Disabled option"),
                     theme,
                 ))
-                .child(
-                    RadioGroup::from_spec(
-                        RadioGroupSpec::new(vec![
-                            ChoiceOption::new("free", "Free"),
-                            ChoiceOption::new("pro", "Pro"),
-                            ChoiceOption::new("enterprise", "Enterprise").with_disabled(true),
-                        ])
-                        .with_value("pro"),
-                        theme,
-                    )
-                    .with_id("radio-disabled-option"),
-                ),
+                .child(RadioGroup::from_spec(
+                    RadioGroupSpec::new(vec![
+                        ChoiceOption::new("free", "Free"),
+                        ChoiceOption::new("pro", "Pro"),
+                        ChoiceOption::new("enterprise", "Enterprise").with_disabled(true),
+                    ])
+                    .with_value("pro"),
+                    theme,
+                    "radio-disabled-option",
+                )),
         )
         // --- Custom selected color ---
         .child(
@@ -166,8 +164,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_value(plan_value.clone())
                         .with_selected_color("#22c55e"),
                         theme,
+                        "radio-custom-color",
                     )
-                    .with_id("radio-custom-color")
                     .on_change(radio_change(state, "radio-plan")),
                 ),
         )
@@ -194,8 +192,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_orientation(Orientation::Horizontal)
                         .with_size(size),
                     theme,
+                    format!("specimen-size-{:?}", size),
                 )
-                .with_id(format!("specimen-size-{:?}", size))
                 .into_any_element()
             })
             .with_densities(move |density, theme: &GpuiThemeProvider| {
@@ -205,8 +203,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_orientation(Orientation::Horizontal)
                         .with_density(density),
                     theme,
+                    format!("specimen-density-{:?}", density),
                 )
-                .with_id(format!("specimen-density-{:?}", density))
                 .into_any_element()
             }),
     )

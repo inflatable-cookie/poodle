@@ -335,7 +335,7 @@ pub use pill::{pill, pill_with_remove};
 pub use popover::{popover, popover_surface, PopoverHandlers, POPOVER_ANCHOR_HEIGHT_PX, POPOVER_ANCHOR_WIDTH_PX};
 pub use progress::progress;
 pub use radio::radio;
-pub use radio_group::radio_group;
+pub use radio_group::{radio_group, RadioGroupHandlers};
 pub use range_slider::{range_slider, RangeSliderHandlers};
 pub use rating::rating;
 pub use ref_select::ref_select;
