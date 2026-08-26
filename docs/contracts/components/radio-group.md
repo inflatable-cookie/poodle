@@ -1,7 +1,7 @@
 # Radio Group
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-26
 
 ## 1. Purpose
 
@@ -49,7 +49,7 @@ Updated: 2026-07-10
 | `disabled` | `boolean` | `false` | no | disables entire group |
 | `ariaLabel` | `string \| null` | `null` | no | accessible name for the group; required when no visible group label exists |
 | `describedBy` | `string \| null` | `null` | no | aria-describedby target id |
-| `name` | `string \| undefined` | `undefined` | no | shared form name for all radio inputs; auto-generated via module-level counter when not provided |
+| `name` | `string \| undefined` | `undefined` | no | shared form name for all radio inputs; the web runtime generates a unique mounted-instance name when omitted |
 | `selectedColor` | `string \| null` | `null` | no | optional selected-state color override used for the selected indicator border and dot |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
@@ -68,8 +68,8 @@ Updated: 2026-07-10
 - controlled: `value` plus `onValueChange` callback; leave `value` undefined for uncontrolled mode
 - uncontrolled: `defaultValue` sets the initial selection; component owns its own
   state thereafter
-- a module-level `nextRadioGroupId` counter generates unique name attributes when
-  the `name` prop is not provided, ensuring radio grouping without collisions
+- each web runtime generates a unique mounted-instance name when the `name`
+  prop is not provided, ensuring radio grouping without collisions
 - `selectedColor` maps to a local CSS custom property on the root group and
   affects only the selected state visuals for that radio group instance
 
@@ -147,6 +147,10 @@ Behavior classification: machine-backed (shared `singleSelectTransition` in
 - GPUI-native accessibility mapping notes: GPUI must implement radiogroup role,
   per-option selection state, roving-focus behavior, and orientation-aware
   keyboard navigation explicitly
+- Shared native rendering is stateless. Every native RadioGroup construction
+  receives one host-owned, lifetime-stable interaction scope through
+  `RadioGroupHandlers`; it is not derived from render order, option values, or
+  the web form `name` prop.
 
 ## 7. Layout
 
@@ -297,6 +301,10 @@ Behavior classification: machine-backed (shared `singleSelectTransition` in
 - GPUI implementation must explicitly maintain one tabbable option (roving
   focus), directional selection movement, and native radiogroup accessibility
   semantics
+- `poodle_render::radio_group` receives `RadioGroupHandlers::new(instance_id)`.
+  The required `instance_id` is the native interaction scope. Hosts keep it
+  unique and stable for the mounted control's lifetime; option runtime ids are
+  derived from it. `on_change` remains optional on the handler bundle.
 - each option must expose its selected state and accessible name individually
 - orientation must be reflected in both keyboard navigation axis and the
   accessibility tree via `aria-orientation`
@@ -340,7 +348,7 @@ Behavior classification: machine-backed (shared `singleSelectTransition` in
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| module-level ID counter for name generation | Svelte-specific; GPUI handles grouping differently | allowed | same grouping semantics required |
+| web-generated form name vs host-owned native interaction scope | form grouping and backend focus identity have different runtime mechanisms | allowed | both remain unique and stable for one mounted instance |
 | CSS adjacent sibling selectors | Svelte-specific DOM pattern | allowed | GPUI achieves same visual result through state-driven rendering |
 | transition timing | GPUI may not support CSS-style transitions | allowed | match visual feel where possible |
 

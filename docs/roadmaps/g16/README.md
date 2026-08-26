@@ -1,7 +1,8 @@
 # g16 — Next Work
 
-Status: active — `g16.001` complete; `g16.002` closed — partial outcome
-Posture: strict-ready; RadioGroup identity and ToggleGroup semantic/API remain stops
+Status: active — `g16.003` ready
+Posture: strict-ready; RadioGroup identity decision promoted; ToggleGroup
+semantic/API lane sequenced behind it
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -33,6 +34,7 @@ stay maintained; backend admission is not part of the first card.
 
 1. [001 — Active-cohort parity evidence ledger](001-active-cohort-parity-evidence-ledger.md) — complete; operator-reviewed in PR #75
 2. [002 — Selection controls mounted parity](002-selection-controls-mounted-parity.md) — closed — partial outcome
+3. [003 — RadioGroup native identity and mounted parity](003-radio-group-native-identity-and-mounted-parity.md) — ready
 
 ## Measured Selection
 
@@ -51,15 +53,18 @@ parity:
 - GPUI visual comparison is missing for 173 non-Button portable components.
 
 `g16.002` closed mounted GPUI behaviour for `Checkbox`, `Switch`, and
-`SegmentedControl`. RadioGroup remains a planning stop: unnamed groups have
-no stable native instance identity without a public spec decision. ToggleGroup
-remains a planning stop: native option emission is not the contracted
-selection payload, contracted arrow roving is absent from Svelte/React/GPUI,
-and item ids are not instance-safe. Remaining measured gaps are still
+`SegmentedControl`. It stopped RadioGroup because unnamed groups had no stable
+native instance identity, and stopped ToggleGroup on callback payload, roving
+focus, and item identity. Remaining measured gaps are still
 semantic/interface breadth, accessibility, and visual comparison.
+
+The operator accepted the split-lane recommendation on 2026-08-26. RadioGroup
+keeps its web form-name behavior and receives required host-owned native
+interaction scope through a handler bundle. ToggleGroup will keep resulting-
+selection payloads and single-mode radiogroup semantics, but its contract and
+execution card wait until the RadioGroup identity pattern lands.
 
 ## Next Task
 
-Resolve the RadioGroup instance-identity stop and the ToggleGroup
-semantic/API/identity stop as separate lanes. Do not compile `g16.003` from
-this partial close.
+Dispatch `g16.003`. Do not parallelise or implement ToggleGroup in the same
+worker.
