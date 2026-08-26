@@ -32,7 +32,7 @@
 
 use std::cell::RefCell;
 
-use gpui::{App, Bounds, KeyDownEvent, MouseButton, MouseDownEvent, Pixels, Point};
+use gpui::{App, Bounds, KeyDownEvent, MouseButton, MouseDownEvent, MouseUpEvent, Pixels, Point};
 use poodle_node::{DismissHandler, DismissReason};
 
 /// One registered overlay layer for the current frame.
@@ -133,17 +133,11 @@ pub fn collect_layers(node: &poodle_node::Node, innermost: Option<&str>) {
                 id: id.to_owned(),
                 handler: node.interaction.on_dismiss.clone(),
                 bounds: Vec::new(),
-                parent: innermost
-                    .filter(|parent| *parent != id)
-                    .map(str::to_owned),
+                parent: innermost.filter(|parent| *parent != id).map(str::to_owned),
             });
         });
     }
-    let next = node
-        .interaction
-        .dismiss_layer
-        .as_deref()
-        .or(innermost);
+    let next = node.interaction.dismiss_layer.as_deref().or(innermost);
     for child in &node.children {
         collect_layers(child, next);
     }
@@ -169,7 +163,10 @@ fn contains(position: Point<Pixels>, bounds: &Bounds<Pixels>) -> bool {
 /// The layers an outside interaction spares: every layer containing the
 /// position, plus every ancestor of those layers (walking the parent chain
 /// recorded at registration — the web stack's `sparedByAncestry`).
-fn spared_by_ancestry(layers: &[LayerRecord], position: Point<Pixels>) -> std::collections::HashSet<String> {
+fn spared_by_ancestry(
+    layers: &[LayerRecord],
+    position: Point<Pixels>,
+) -> std::collections::HashSet<String> {
     let mut spared = std::collections::HashSet::new();
     for layer in layers {
         if !layer.bounds.iter().any(|bounds| contains(position, bounds)) {
@@ -190,8 +187,12 @@ fn spared_by_ancestry(layers: &[LayerRecord], position: Point<Pixels>) -> std::c
 
 /// Escape: the innermost (last-registered) layer dismisses.
 pub fn dismiss_innermost(cx: &mut App) {
-    let handler = LAYERS
-        .with(|layers| layers.borrow().last().and_then(|record| record.handler.clone()));
+    let handler = LAYERS.with(|layers| {
+        layers
+            .borrow()
+            .last()
+            .and_then(|record| record.handler.clone())
+    });
     if let Some(handler) = handler {
         handler(DismissReason::Escape);
         cx.refresh_windows();
@@ -223,9 +224,11 @@ pub fn dismiss_layers_at(position: Point<Pixels>, cx: &mut App) {
 
 /// Attach the window-level overlay host listeners to a root element: every
 /// pointer-down is routed through the layer registry (outside dismissal) and
-/// Escape dismisses the innermost layer. The production preview root and the
-/// conformance mount host use the same wiring, so overlay dismissal behaves
-/// identically in the real runtime and the headless driver.
+/// Escape dismisses the innermost layer. The same root also ends an unfinished
+/// payload-drag session on mouse-up (after a zone `on_drop` has already taken
+/// a successful drop) and on Escape. The production preview root and the
+/// conformance mount host use this wiring, so overlay dismissal and payload
+/// cleanup behave identically in the real runtime and the headless driver.
 pub fn attach_overlay_host<E>(el: E) -> E
 where
     E: gpui::InteractiveElement + 'static,
@@ -236,8 +239,15 @@ where
             dismiss_layers_at(event.position, cx);
         },
     )
-    .on_key_down(move |event: &KeyDownEvent, _window, cx| {
+    .on_mouse_up(
+        MouseButton::Left,
+        move |_event: &MouseUpEvent, _window, cx| {
+            crate::interaction::release_payload_session(cx);
+        },
+    )
+    .on_key_down(move |event: &KeyDownEvent, window, cx| {
         if event.keystroke.key.as_str() == "escape" {
+            crate::interaction::cancel_payload_session(window, cx);
             dismiss_innermost(cx);
         }
     })

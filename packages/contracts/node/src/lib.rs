@@ -490,6 +490,8 @@ pub enum NodeKey {
     End,
     Space,
     F2,
+    /// Close/delete on a focused item (closable tabs, for example).
+    Delete,
 }
 
 /// Where a drop lands relative to the zone it is over.
@@ -647,10 +649,20 @@ pub struct Interaction {
     pub drag_payload: Option<String>,
     /// Marks this node as a drop zone for `drag_payload` gestures.
     pub drop_zone: bool,
+    /// Fires once after the backend drag threshold, with the payload id.
+    pub on_drag_start: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Fires exactly once after a successful drop or cancellation, with the
+    /// payload id captured at start.
+    pub on_drag_end: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires repeatedly while a drag hovers this zone — drives the drop
-    /// indicator.
+    /// indicator. The backend delivers this only while the pointer is inside
+    /// this zone's own bounds.
     pub on_drop_hover: Option<Arc<dyn Fn(&NodeDropEvent) + Send + Sync>>,
-    /// Fires once when a drag is released over this zone.
+    /// Fires when this zone stops being the active drop target — the pointer
+    /// left its bounds, another zone became the target, or the gesture ended.
+    pub on_drop_leave: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// Fires once when a drag is released over this zone. `edge` is the last
+    /// edge computed during hover, not a default.
     pub on_drop: Option<Arc<dyn Fn(&NodeDropEvent) + Send + Sync>>,
 }
 
@@ -1013,6 +1025,24 @@ mod tests {
         let found = tree.find(&|n| n.interaction.on_activate.is_some());
         assert!(found.is_some());
         assert!(matches!(&found.unwrap().kind, NodeKind::Text { content } if content == "go"));
+    }
+
+    #[test]
+    fn payload_lifecycle_intents_are_opt_in() {
+        let node = Node::container();
+        assert!(node.interaction.drag_payload.is_none());
+        assert!(!node.interaction.drop_zone);
+        assert!(node.interaction.on_drag_start.is_none());
+        assert!(node.interaction.on_drag_end.is_none());
+        assert!(node.interaction.on_drop_hover.is_none());
+        assert!(node.interaction.on_drop_leave.is_none());
+        assert!(node.interaction.on_drop.is_none());
+    }
+
+    #[test]
+    fn delete_is_a_named_command_key() {
+        assert_ne!(NodeKey::Delete, NodeKey::Space);
+        assert_ne!(NodeKey::Delete, NodeKey::F2);
     }
 }
 

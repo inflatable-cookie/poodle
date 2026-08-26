@@ -115,12 +115,7 @@ pub fn model_catalogue_editor(
     ctx: &RenderContext<'_>,
     handlers: ModelCatalogueEditorHandlers,
 ) -> Node {
-    model_catalogue_editor_with_slots(
-        spec,
-        ctx,
-        ModelCatalogueEditorSlots::default(),
-        handlers,
-    )
+    model_catalogue_editor_with_slots(spec, ctx, ModelCatalogueEditorSlots::default(), handlers)
 }
 
 pub fn model_catalogue_editor_with_slots(
@@ -229,8 +224,7 @@ pub fn model_catalogue_editor_with_slots(
         hidden_list.a11y.label = Some(spec.hidden_title.clone());
         let mut hidden_list = hidden_list;
         for item in &hidden {
-            hidden_list =
-                hidden_list.child(hidden_row(spec, ctx, effective_size, item, &handlers));
+            hidden_list = hidden_list.child(hidden_row(spec, ctx, effective_size, item, &handlers));
         }
 
         let on_open = handlers.on_hidden_open_change.clone().map(|handler| {
@@ -250,11 +244,7 @@ pub fn model_catalogue_editor_with_slots(
         // outer region Collapsible returns is not focusable — its trigger is —
         // so naming the outer node would hand the backend a destination it can
         // never focus.
-        mark_hidden_disclosure(
-            &mut section,
-            handlers.instance_id.as_deref(),
-            ctx,
-        );
+        mark_hidden_disclosure(&mut section, handlers.instance_id.as_deref(), ctx);
         let mut wrapper = Node::container();
         {
             let s = &mut wrapper.style;
@@ -430,7 +420,12 @@ fn shown_row(
     let is_grabbed = spec.grabbed_id.as_deref() == Some(item.id.as_str());
     let is_drop_target = spec.drop_target_id.as_deref() == Some(item.id.as_str());
 
-    let move_to = move_emitter(spec, shown.to_vec(), shown_ids.to_vec(), Arc::clone(handlers));
+    let move_to = move_emitter(
+        spec,
+        shown.to_vec(),
+        shown_ids.to_vec(),
+        Arc::clone(handlers),
+    );
 
     // ── Reorder handle: grab, keyboard move, and the pointer drag source ──
     let handle = icon_button(
@@ -737,7 +732,8 @@ fn shown_row(
     }
     row.a11y.role = Some(NodeRole::ListItem);
     row.a11y.level = Some(index + 1);
-    row.roles.insert("grabbed".to_string(), is_grabbed.to_string());
+    row.roles
+        .insert("grabbed".to_string(), is_grabbed.to_string());
     row.roles
         .insert("dropTarget".to_string(), is_drop_target.to_string());
 
@@ -747,7 +743,9 @@ fn shown_row(
         if let Some(handler) = &handlers.on_drop_target_change {
             let handler = Arc::clone(handler);
             let id = item.id.clone();
+            let leave = Arc::clone(&handler);
             row.interaction.on_drop_hover = Some(Arc::new(move |_event| handler(Some(&id))));
+            row.interaction.on_drop_leave = Some(Arc::new(move || leave(None)));
         }
         let handlers = Arc::clone(handlers);
         let shown_ids = shown_ids.to_vec();
@@ -985,7 +983,8 @@ mod tests {
     #[test]
     fn explicit_moves_emit_the_complete_shown_order_and_follow_focus() {
         let recorder = Recorder::default();
-        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
+        let node =
+            model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
 
         press(&node, "Move Frontier Alpha down");
         assert_eq!(
@@ -1009,9 +1008,17 @@ mod tests {
 
     #[test]
     fn move_actions_are_disabled_at_the_boundaries() {
-        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), ModelCatalogueEditorHandlers::default());
+        let node = model_catalogue_editor(
+            &spec(),
+            &RenderContext::new(&theme()),
+            ModelCatalogueEditorHandlers::default(),
+        );
         assert!(named(&node, "Move Frontier Alpha up").interaction.disabled);
-        assert!(!named(&node, "Move Frontier Alpha down").interaction.disabled);
+        assert!(
+            !named(&node, "Move Frontier Alpha down")
+                .interaction
+                .disabled
+        );
         assert!(named(&node, "Move Shared Label down").interaction.disabled);
         assert!(!named(&node, "Move Shared Label up").interaction.disabled);
     }
@@ -1019,7 +1026,8 @@ mod tests {
     #[test]
     fn the_handle_grabs_drops_and_moves_by_keyboard() {
         let recorder = Recorder::default();
-        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
+        let node =
+            model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
 
         // Enter/Space and a pointer click all reach the same activation.
         press(&node, "Frontier Beta, position 2 of 4");
@@ -1079,7 +1087,8 @@ mod tests {
     #[test]
     fn arrow_keys_report_the_list_boundary_without_emitting_an_order() {
         let recorder = Recorder::default();
-        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
+        let node =
+            model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
         let handle = named(&node, "Frontier Alpha, position 1 of 4");
         let keys = handle.interaction.on_key.as_ref().expect("arrow handler");
         assert_eq!(
@@ -1096,10 +1105,14 @@ mod tests {
     #[test]
     fn an_admitted_pointer_drag_moves_through_the_same_order_payload() {
         let recorder = Recorder::default();
-        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
+        let node =
+            model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
 
         let handle = named(&node, "Frontier Alpha, position 1 of 4");
-        assert_eq!(handle.interaction.drag_payload.as_deref(), Some("model-alpha"));
+        assert_eq!(
+            handle.interaction.drag_payload.as_deref(),
+            Some("model-alpha")
+        );
 
         let row = node
             .find(&|n| {
@@ -1138,13 +1151,18 @@ mod tests {
         assert!(handle.interaction.drag_payload.is_none());
         assert!(handle.interaction.on_key.is_some());
         assert!(handle.interaction.on_activate.is_some());
-        assert!(!named(&node, "Move Frontier Alpha down").interaction.disabled);
+        assert!(
+            !named(&node, "Move Frontier Alpha down")
+                .interaction
+                .disabled
+        );
     }
 
     #[test]
     fn hiding_emits_only_visibility_and_moves_focus_to_the_next_shown_model() {
         let recorder = Recorder::default();
-        let node = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
+        let node =
+            model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
         press(&node, "Hide Frontier Beta");
 
         assert_eq!(
@@ -1172,7 +1190,8 @@ mod tests {
             ModelCatalogueItem::new("model-solo", "Solo"),
             ModelCatalogueItem::new("model-gone", "Gone").with_visible(false),
         ]);
-        let node = model_catalogue_editor(&only, &RenderContext::new(&theme()), recorder.handlers());
+        let node =
+            model_catalogue_editor(&only, &RenderContext::new(&theme()), recorder.handlers());
         press(&node, "Hide Solo");
 
         assert_eq!(recorder.hidden_open.lock().unwrap().as_slice(), [true]);
@@ -1214,7 +1233,8 @@ mod tests {
             .is_none());
 
         let recorder = Recorder::default();
-        let with = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
+        let with =
+            model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
         press(&with, "About Frontier Alpha");
         assert_eq!(recorder.info.lock().unwrap().as_slice(), ["model-alpha"]);
     }
@@ -1261,7 +1281,11 @@ mod tests {
 
     #[test]
     fn every_posture_renders_its_own_copy_and_no_rows() {
-        let ready = model_catalogue_editor(&spec(), &RenderContext::new(&theme()), ModelCatalogueEditorHandlers::default());
+        let ready = model_catalogue_editor(
+            &spec(),
+            &RenderContext::new(&theme()),
+            ModelCatalogueEditorHandlers::default(),
+        );
         assert!(ready.texts().contains(&"4 shown, 2 hidden"));
 
         for (state, title) in [
@@ -1269,7 +1293,10 @@ mod tests {
             (ModelCatalogueState::Unavailable, "Models unavailable"),
             (ModelCatalogueState::Empty, "No models"),
             (ModelCatalogueState::Error, "Could not load models"),
-            (ModelCatalogueState::SessionNegotiated, "Models after session"),
+            (
+                ModelCatalogueState::SessionNegotiated,
+                "Models after session",
+            ),
         ] {
             let node = model_catalogue_editor(
                 &spec().with_state(state),
@@ -1281,7 +1308,8 @@ mod tests {
                 "{title} posture states itself"
             );
             assert!(
-                node.find(&|n| n.a11y.role == Some(NodeRole::ListItem)).is_none(),
+                node.find(&|n| n.a11y.role == Some(NodeRole::ListItem))
+                    .is_none(),
                 "{title} shows no stale rows"
             );
             assert!(
@@ -1391,10 +1419,17 @@ mod tests {
             ModelCatalogueItem::new("model-solo", "Solo"),
             ModelCatalogueItem::new("model-gone", "Gone").with_visible(false),
         ]);
-        let node = model_catalogue_editor(&only, &RenderContext::new(&theme()), recorder.handlers());
+        let node =
+            model_catalogue_editor(&only, &RenderContext::new(&theme()), recorder.handlers());
         press(&node, "Hide Solo");
 
-        let requested = recorder.focus.lock().unwrap().last().cloned().expect("a request");
+        let requested = recorder
+            .focus
+            .lock()
+            .unwrap()
+            .last()
+            .cloned()
+            .expect("a request");
         // The host discloses the section, so re-render and check the named id
         // resolves to something the backend can focus.
         let disclosed = model_catalogue_editor(
@@ -1456,7 +1491,10 @@ mod tests {
         press(&node, "Move Frontier Alpha down");
         assert_eq!(
             recorder.focus.lock().unwrap().as_slice(),
-            [model_catalogue_handle_focus_id(Some("second"), "model-alpha")]
+            [model_catalogue_handle_focus_id(
+                Some("second"),
+                "model-alpha"
+            )]
         );
     }
 
