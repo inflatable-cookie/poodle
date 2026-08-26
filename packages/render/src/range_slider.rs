@@ -16,7 +16,7 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, NodeRole,
     ScrubAxis, ScrubPhase, ShadowValue, StylePatch,
 };
-use poodle_specs::{ControlSize, Orientation, RangeSliderSpec, SliderVariant};
+use poodle_specs::{ControlSize, RangeSliderSpec, SliderVariant};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
@@ -493,10 +493,10 @@ pub fn range_slider(
         };
         grab.style.descriptor.cursor = CursorHint::Pointer;
         grab.interaction.on_scrub = Some(Arc::clone(handler));
-        grab.interaction.scrub_axis = match spec.orientation {
-            Orientation::Horizontal => ScrubAxis::Horizontal,
-            Orientation::Vertical => ScrubAxis::Vertical,
-        };
+        // This renderer is still horizontal geometry. Vertical RangeSlider
+        // layout is a deferred delta; sampling Y here would read the track's
+        // few-pixel thickness.
+        grab.interaction.scrub_axis = ScrubAxis::Horizontal;
         track = track.child(grab);
     }
 
@@ -559,7 +559,7 @@ pub fn range_slider(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use poodle_specs::RangeSliderSpec;
+    use poodle_specs::{Orientation, RangeSliderSpec};
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -621,7 +621,7 @@ mod tests {
     }
 
     #[test]
-    fn a_vertical_range_slider_declares_its_scrub_axis() {
+    fn a_vertical_spec_still_scrubs_the_horizontal_geometry() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = spec().with_orientation(Orientation::Vertical);
@@ -636,7 +636,11 @@ mod tests {
         let carrier = node
             .find(&|n| n.interaction.on_scrub.is_some())
             .expect("grab area");
-        assert_eq!(carrier.interaction.scrub_axis, ScrubAxis::Vertical);
+        assert_eq!(carrier.interaction.scrub_axis, ScrubAxis::Horizontal);
+        assert!(
+            carrier.style.fill_width,
+            "vertical RangeSlider layout is deferred; the grab stays a horizontal overlay"
+        );
     }
 
     /// Pressing the track moves the *nearer* thumb there — the behaviour a

@@ -79,9 +79,10 @@ backend admission stays deferred.
 - If vertical fill/thumb layout cannot be expressed faithfully with existing
   flex and absolute-position vocabulary, add only the symmetric
   `NodeStyle.height_pct` channel and its GPUI/deferred-adapter mapping.
-- Wire RangeSlider's existing scrub handler to its declared orientation and
-  retain its focused and mounted regressions. Do not broaden this card into a
-  RangeSlider redesign or move its ledger cells.
+- Set RangeSlider's existing horizontal grab to `ScrubAxis::Horizontal`
+  explicitly and retain its focused and mounted regressions. Native vertical
+  RangeSlider geometry stays the existing deferred delta. Do not redesign
+  RangeSlider or move its ledger cells.
 
 ### 3. Repair shared Rust Slider behavior
 

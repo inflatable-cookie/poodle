@@ -7095,7 +7095,16 @@ impl IntoElement for Slider {
         };
         let mut node = poodle_render::slider(&self.spec, &RenderContext::new(&self.theme), &handlers);
         if let Some(id) = self.id {
-            node.id = Some(id);
+            fn stamp(node: &mut poodle_node::Node, id: &str) {
+                if node.a11y.role == Some(poodle_node::NodeRole::Slider) {
+                    node.id = Some(id.to_owned());
+                    return;
+                }
+                for child in &mut node.children {
+                    stamp(child, id);
+                }
+            }
+            stamp(&mut node, &id);
         }
         poodle_gpui_node_backend::to_gpui(&node)
     }

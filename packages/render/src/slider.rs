@@ -77,6 +77,51 @@ fn pill(node: &mut Node, radius: f32) {
     corners.bottom_left = radius;
 }
 
+fn standard_focus_ring(ctx: &RenderContext<'_>, spec: &SliderSpec) -> FocusRing {
+    FocusRing {
+        color: with_alpha(
+            ctx.theme().resolve_color(spec.focus_ring_color_token()),
+            0.32,
+        ),
+        width: rem_to_px(0.1875),
+        offset: 0.0,
+    }
+}
+
+fn embedded_focus_ring(ctx: &RenderContext<'_>, spec: &SliderSpec) -> FocusRing {
+    FocusRing {
+        color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+        width: rem_to_px(0.125),
+        offset: rem_to_px(0.0625),
+    }
+}
+
+fn bind_slider_control(
+    node: &mut Node,
+    spec: &SliderSpec,
+    value: f64,
+    safe_max: f64,
+    key_handler: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
+    ring: FocusRing,
+) {
+    node.a11y.role = Some(NodeRole::Slider);
+    if let Some(label) = spec.aria_label.as_deref() {
+        node.a11y.label = Some(label.to_string());
+    }
+    node.a11y.value = Some(value);
+    node.a11y.value_min = Some(spec.min);
+    node.a11y.value_max = Some(safe_max);
+    node.a11y.value_text = spec.value_text.clone();
+    node.a11y.orientation = Some(orientation_name(spec.orientation).to_owned());
+    if spec.is_disabled {
+        node.interaction.disabled = true;
+    } else {
+        node.interaction.focusable = true;
+        node.interaction.on_key = key_handler;
+        node.style.focus_ring = Some(ring);
+    }
+}
+
 fn emit_effects(
     effects: impl IntoIterator<Item = SliderEffect>,
     on_change: &Option<Arc<dyn Fn(f64) + Send + Sync>>,
@@ -313,6 +358,14 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
     let fill = if spec.variant == SliderVariant::Embedded {
         fill
     } else {
+        bind_slider_control(
+            &mut thumb,
+            spec,
+            visual.value,
+            safe_max,
+            key_handler.clone(),
+            standard_focus_ring(ctx, spec),
+        );
         fill.child(thumb)
     };
 
@@ -409,27 +462,18 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
     }
     let mut el = el.child(track);
 
-    el.a11y.role = Some(NodeRole::Slider);
-    if let Some(label) = spec.aria_label.as_deref() {
-        el.a11y.label = Some(label.to_string());
+    if spec.variant == SliderVariant::Embedded {
+        bind_slider_control(
+            &mut el,
+            spec,
+            visual.value,
+            safe_max,
+            key_handler,
+            embedded_focus_ring(ctx, spec),
+        );
     }
-    el.a11y.value = Some(visual.value);
-    el.a11y.value_min = Some(spec.min);
-    el.a11y.value_max = Some(safe_max);
-    el.a11y.value_text = spec.value_text.clone();
-    el.a11y.orientation = Some(orientation_name(spec.orientation).to_owned());
-
     if spec.is_disabled {
         el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
-        el.interaction.disabled = true;
-    } else {
-        el.interaction.focusable = true;
-        el.interaction.on_key = key_handler;
-        el.style.focus_ring = Some(FocusRing {
-            color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
-            width: ctx.theme().resolve_border_width("border.width.focus"),
-            offset: rem_to_px(0.125),
-        });
     }
 
     el
@@ -445,6 +489,11 @@ mod tests {
 
     fn find_scrub(node: &Node) -> Option<&Node> {
         node.find(&|n| n.interaction.on_scrub.is_some())
+    }
+
+    fn slider_control(node: &Node) -> &Node {
+        node.find(&|n| n.a11y.role == Some(NodeRole::Slider))
+            .expect("one slider node")
     }
 
     fn armed(spec: SliderSpec) -> (Node, Arc<std::sync::Mutex<Vec<(String, f64)>>>) {
@@ -503,7 +552,7 @@ mod tests {
         let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
         let node = slider(&spec, &ctx, &SliderHandlers::default());
         assert!(find_scrub(&node).is_none());
-        assert!(node.interaction.on_key.is_none());
+        assert!(slider_control(&node).interaction.on_key.is_none());
     }
 
     #[test]
@@ -555,7 +604,7 @@ mod tests {
         spec.aria_label = Some("Volume".into());
         spec.value_text = Some("half".into());
         let (node, seen) = armed(spec);
-        let key = node.interaction.on_key.as_ref().unwrap();
+        let key = slider_control(&node).interaction.on_key.as_ref().unwrap();
         let mods = NodeModifiers::default();
         key(NodeKey::ArrowRight, mods);
         key(NodeKey::Home, mods);
@@ -579,16 +628,40 @@ mod tests {
         spec.aria_label = Some("Volume".into());
         spec.value_text = Some("quiet".into());
         let (node, _) = armed(spec);
+        let control = slider_control(&node);
+        assert_eq!(control.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(control.a11y.label.as_deref(), Some("Volume"));
+        assert_eq!(control.a11y.value, Some(40.0));
+        assert_eq!(control.a11y.value_min, Some(0.0));
+        assert_eq!(control.a11y.value_max, Some(100.0));
+        assert_eq!(control.a11y.value_text.as_deref(), Some("quiet"));
+        assert_eq!(control.a11y.orientation.as_deref(), Some("horizontal"));
+        assert!(control.interaction.focusable);
+        assert!(!control.interaction.disabled);
+        let ring = control.style.focus_ring.expect("standard thumb ring");
+        assert!((ring.width - rem_to_px(0.1875)).abs() < 1e-6);
+        assert!((ring.offset - 0.0).abs() < 1e-6);
+        assert!((ring.color.3 - 0.32).abs() < 1e-6);
+        assert!(
+            node.style.focus_ring.is_none(),
+            "standard focus belongs on the thumb, not the root"
+        );
+        assert!(!node.interaction.focusable);
+    }
+
+    #[test]
+    fn embedded_focus_is_a_root_outline() {
+        let mut spec = SliderSpec::new(40.0)
+            .with_bounds(0.0, 100.0)
+            .with_embedded_control(poodle_headless::slider::SliderPolarity::Unipolar);
+        spec.aria_label = Some("Gain".into());
+        let (node, _) = armed(spec);
+        let ring = node.style.focus_ring.expect("embedded root ring");
         assert_eq!(node.a11y.role, Some(NodeRole::Slider));
-        assert_eq!(node.a11y.label.as_deref(), Some("Volume"));
-        assert_eq!(node.a11y.value, Some(40.0));
-        assert_eq!(node.a11y.value_min, Some(0.0));
-        assert_eq!(node.a11y.value_max, Some(100.0));
-        assert_eq!(node.a11y.value_text.as_deref(), Some("quiet"));
-        assert_eq!(node.a11y.orientation.as_deref(), Some("horizontal"));
         assert!(node.interaction.focusable);
-        assert!(node.style.focus_ring.is_some());
-        assert!(!node.interaction.disabled);
+        assert!((ring.width - rem_to_px(0.125)).abs() < 1e-6);
+        assert!((ring.offset - rem_to_px(0.0625)).abs() < 1e-6);
+        assert!((ring.color.3 - 1.0).abs() < 1e-6);
     }
 
     #[test]
@@ -597,12 +670,13 @@ mod tests {
         spec.is_disabled = true;
         spec.aria_label = Some("Volume".into());
         let (node, seen) = armed(spec);
+        let control = slider_control(&node);
         assert!(find_scrub(&node).is_none());
-        assert!(node.interaction.on_key.is_none());
-        assert!(node.interaction.disabled);
-        assert!(!node.interaction.focusable);
-        assert!(node.style.focus_ring.is_none());
-        assert_eq!(node.a11y.role, Some(NodeRole::Slider));
+        assert!(control.interaction.on_key.is_none());
+        assert!(control.interaction.disabled);
+        assert!(!control.interaction.focusable);
+        assert!(control.style.focus_ring.is_none());
+        assert_eq!(control.a11y.role, Some(NodeRole::Slider));
         assert!(seen.lock().unwrap().is_empty());
     }
 

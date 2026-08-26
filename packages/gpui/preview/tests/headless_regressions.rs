@@ -309,6 +309,21 @@ fn a_scrub_reports_change_while_dragging_and_commits_once_at_release() {
     });
 }
 
+fn stamp_slider_id(node: &mut Node, id: &str) {
+    if node.a11y.role == Some(NodeRole::Slider) {
+        node.id = Some(id.to_owned());
+        return;
+    }
+    for child in &mut node.children {
+        stamp_slider_id(child, id);
+    }
+}
+
+fn slider_control(node: &Node) -> &Node {
+    node.find(&|n| n.a11y.role == Some(NodeRole::Slider))
+        .expect("one slider node")
+}
+
 /// g16.005. Slider pointer, keyboard, disabled, and vertical paths through
 /// real backend input and a controlled host rebuild after commit.
 #[test]
@@ -352,7 +367,7 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
                     })),
                 },
             );
-            node.id = Some(FIXTURE_ID.to_owned());
+            stamp_slider_id(&mut node, FIXTURE_ID);
             node
         }
 
@@ -379,15 +394,23 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
         assert_eq!(*live.lock().expect("value lock"), 95.0);
 
         let rebuilt = mounted.lock().unwrap();
-        assert_eq!(rebuilt.a11y.role, Some(NodeRole::Slider));
-        assert_eq!(rebuilt.a11y.label.as_deref(), Some("Volume"));
-        assert_eq!(rebuilt.a11y.value, Some(95.0));
-        assert_eq!(rebuilt.a11y.value_min, Some(0.0));
-        assert_eq!(rebuilt.a11y.value_max, Some(100.0));
-        assert_eq!(rebuilt.a11y.value_text.as_deref(), Some("95%"));
-        assert_eq!(rebuilt.a11y.orientation.as_deref(), Some("horizontal"));
-        assert!(rebuilt.interaction.focusable);
-        assert!(rebuilt.style.focus_ring.is_some());
+        let control = slider_control(&rebuilt);
+        assert_eq!(control.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(control.a11y.label.as_deref(), Some("Volume"));
+        assert_eq!(control.a11y.value, Some(95.0));
+        assert_eq!(control.a11y.value_min, Some(0.0));
+        assert_eq!(control.a11y.value_max, Some(100.0));
+        assert_eq!(control.a11y.value_text.as_deref(), Some("95%"));
+        assert_eq!(control.a11y.orientation.as_deref(), Some("horizontal"));
+        assert!(control.interaction.focusable);
+        let ring = control.style.focus_ring.expect("standard thumb ring");
+        assert!((ring.width - poodle_render::presentation::rem_to_px(0.1875)).abs() < 1e-6);
+        assert!((ring.offset - 0.0).abs() < 1e-6);
+        assert!((ring.color.3 - 0.32).abs() < 1e-6);
+        assert!(
+            rebuilt.style.focus_ring.is_none(),
+            "standard focus belongs on the thumb"
+        );
         drop(rebuilt);
 
         driver.wait_for_focus_handle(FIXTURE_ID);
@@ -399,7 +422,7 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
         driver.dispatch_key_raw("end");
         assert_eq!(*live.lock().expect("value lock"), 100.0);
         assert_eq!(
-            mounted.lock().unwrap().a11y.value,
+            slider_control(&mounted.lock().unwrap()).a11y.value,
             Some(100.0),
             "the rebuilt node carries the committed value"
         );
@@ -436,7 +459,7 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
                 on_value_commit: None,
             },
         );
-        node.id = Some(FIXTURE_ID.to_owned());
+        stamp_slider_id(&mut node, FIXTURE_ID);
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 48.0, 200.0);
         driver.wait_for_focus_handle(FIXTURE_ID);
         driver.pointer_scrub_vertical_at(0.25, "press");
@@ -462,7 +485,7 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
                 on_value_commit: Some(Arc::new(|_| {})),
             },
         );
-        node.id = Some("disabled-slider".to_owned());
+        stamp_slider_id(&mut node, "disabled-slider");
         let mounted = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
         driver.pointer_scrub_at(0.9, "press");
@@ -471,10 +494,11 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
         driver.dispatch_key("right");
         assert_eq!(*live.lock().expect("value lock"), 40.0);
         let disabled = mounted.lock().unwrap();
-        assert!(disabled.interaction.disabled);
-        assert!(!disabled.interaction.focusable);
-        assert!(disabled.interaction.on_key.is_none());
-        assert!(disabled.style.focus_ring.is_none());
+        let control = slider_control(&disabled);
+        assert!(control.interaction.disabled);
+        assert!(!control.interaction.focusable);
+        assert!(control.interaction.on_key.is_none());
+        assert!(control.style.focus_ring.is_none());
         assert!(
             disabled
                 .find(&|n| n.interaction.on_scrub.is_some())

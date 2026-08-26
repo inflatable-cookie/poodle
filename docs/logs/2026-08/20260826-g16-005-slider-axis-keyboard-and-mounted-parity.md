@@ -37,8 +37,10 @@ stays deferred.
   `NodeA11y.value_text`; `NodeStyle.height_pct`
 - `packages/gpui/node-backend/` — axis-aware scrub fraction (horizontal
   left→right, vertical bottom→top); `height_pct` maps to `relative` height
-- `packages/render/src/range_slider.rs` — every `on_scrub` node sets its axis
-  from `RangeSliderSpec::orientation`; mounted scrub regression retained
+- `packages/render/src/range_slider.rs` — the existing horizontal grab sets
+  `ScrubAxis::Horizontal` explicitly. Native vertical RangeSlider geometry
+  remains the deferred delta already recorded on that contract; the mounted
+  horizontal scrub regression is retained
 
 ## Shared Rust Slider
 
@@ -46,7 +48,9 @@ stays deferred.
   `on_value_commit` with no aliases; scrub installs when either callback is
   present; every `SliderEffect` is forwarded; delta/fixed-width fallback
   removed; keyboard on the one focusable node; horizontal and vertical
-  geometry; disabled installs no scrub or key handler
+  geometry; disabled installs no scrub or key handler. Standard focus is the
+  0.1875rem, 32%-alpha ring on the thumb; embedded focus is a 0.125rem root
+  outline at 0.0625rem offset
 - `packages/gpui/preview/src/node_compat.rs` — mechanical field rename
 - Jetstream `js_slider` stays on `SliderHandlers::default()`; compile-only
 
@@ -67,6 +71,9 @@ stays deferred.
   native assistive-technology proof.
 - Slider visual comparison remains Button-only / missing on GPUI.
 - Page-key amount remains browser-owned and outside strict parity.
+- Native RangeSlider remains a horizontal renderer. A vertical spec still
+  scrubs X across `width_pct` / `fill_width` geometry; vertical layout is the
+  existing deferred delta on that contract.
 - Jetstream preview was not compiled in this worktree. Call-site compatibility
   is mechanical and compile-only.
 
