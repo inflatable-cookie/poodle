@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — `g16.001` complete; operator review pending
-Posture: evidence snapshot complete; conformance design remains uncompiled
+Status: active — `g16.001` complete and operator-reviewed
+Posture: evidence snapshot accepted; next conformance lane remains uncompiled
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -31,13 +31,13 @@ stay maintained; backend admission is not part of the first card.
 
 ## Runway
 
-1. [001 — Active-cohort parity evidence ledger](001-active-cohort-parity-evidence-ledger.md) — complete; operator review pending
+1. [001 — Active-cohort parity evidence ledger](001-active-cohort-parity-evidence-ledger.md) — complete; operator-reviewed in PR #75
 
 `g16.001` is the only compiled card and is complete. Its measured evidence
-classes decide the next primitive family and proof layer after operator review.
-No `g16.002` is implied yet.
+classes now inform the next primitive family and proof layer. No `g16.002` is
+implied yet.
 
 ## Next Task
 
-Review the completed `g16.001` current-state ledger and evidence-class summary
-before compiling further work.
+Choose the first bounded evidence lane from the accepted `g16.001` ledger, then
+compile `g16.002`. No implementation card is ready before that decision.

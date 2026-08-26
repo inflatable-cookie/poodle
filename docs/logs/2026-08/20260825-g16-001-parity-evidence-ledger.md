@@ -1,7 +1,7 @@
 # g16.001 — Active-Cohort Parity Evidence Ledger
 
 Date: 2026-08-25
-Status: complete; operator review pending
+Status: complete; operator-reviewed and merged in PR #75
 Branch: `t3code/parity-evidence-ledger`
 
 ## Outcome

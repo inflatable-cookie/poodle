@@ -13,9 +13,9 @@ chosen.
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
-- `g16.001` is complete pending operator review. It repairs stale parity
-  reporting and produces one component-level evidence ledger. Later cards
-  remain uncompiled; do not infer a conformance programme from g15.
+- `g16.001` is complete and operator-reviewed in PR #75. It repairs stale
+  parity reporting and produces one component-level evidence ledger. Later
+  cards remain uncompiled; do not infer a conformance programme from g15.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;

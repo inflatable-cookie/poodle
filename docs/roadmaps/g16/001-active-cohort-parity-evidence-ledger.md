@@ -1,6 +1,6 @@
 # g16.001 — Active-Cohort Parity Evidence Ledger
 
-Status: complete — operator review pending
+Status: complete — operator-reviewed and merged in PR #75
 Completed: 2026-08-25
 Depends on: completed `g15`, published `v0.2.2`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -278,7 +278,6 @@ Jetstream preview/QA, or release selectors.
 
 ## Continuation
 
-Return the completed ledger and evidence-class summary to the orchestrator.
-The operator reviews what Poodle actually proves, then chooses the first
-primitive family and evidence layer for `g16.002`. No later card is implied
-before that review.
+The completed ledger and evidence-class summary were operator-reviewed with PR
+#75. The operator and orchestrator now choose the first primitive family and
+evidence layer before compiling `g16.002`; no later card is implied yet.
