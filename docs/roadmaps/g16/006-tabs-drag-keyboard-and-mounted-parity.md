@@ -1,6 +1,6 @@
 # g16.006 — Tabs Drag, Keyboard, And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-26
 Depends on: complete `g16.005`; resolved decision in
 `../../triage/20260826-173329-tabs-native-drag-lifecycle.md`
@@ -131,27 +131,27 @@ deferred.
 
 ## Acceptance
 
-- [ ] Shared TS/Rust machines and both web shells agree on selection, focus,
+- [x] Shared TS/Rust machines and both web shells agree on selection, focus,
       close, reorder payloads, disabled inertia, and cancellation cleanup.
-- [ ] The generic payload lifecycle reports hit-tested hover/leave, retained
+- [x] The generic payload lifecycle reports hit-tested hover/leave, retained
       drop edge, successful-drop ordering, outside/Escape cancellation, and
       exactly one source end on stock GPUI.
-- [ ] Shared Rust Tabs emits complete next orders for pointer drop and
+- [x] Shared Rust Tabs emits complete next orders for pointer drop and
       Alt+Arrow through `tabs_transition`; no host or backend reorder helper is
       a second authority.
-- [ ] Delete closes only closable enabled tabs; automatic/manual activation,
+- [x] Delete closes only closable enabled tabs; automatic/manual activation,
       orientation-aware roving focus, panels, and scoped identity remain
       correct.
-- [ ] Tree and ModelCatalogueEditor payload/drop regressions remain green after
+- [x] Tree and ModelCatalogueEditor payload/drop regressions remain green after
       the generic backend correction; their public contracts and ledger cells
       do not move.
-- [ ] The mounted GPUI proof uses real backend pointer/keyboard input and
+- [x] The mounted GPUI proof uses real backend pointer/keyboard input and
       controlled host rebuilds, not direct handler invocation or spec
       inspection.
-- [ ] The generated ledger changes exactly Tabs' mounted cell and derived
+- [x] The generated ledger changes exactly Tabs' mounted cell and derived
       totals. GPUI accessibility remains `manual`; GPUI visual remains
       `missing`; Jetstream remains deferred.
-- [ ] Specimens remain curated and human-centred. One August log records the
+- [x] Specimens remain curated and human-centred. One August log records the
       lifecycle repair, Tabs parity, evidence, validation, and remaining gaps.
 
 ## Writable Scope

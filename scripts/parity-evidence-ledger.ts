@@ -77,6 +77,7 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   ToggleGroup: "toggle_group_result_focus_identity_and_disabled_paths",
   RangeSlider: "a_scrub_reports_change_while_dragging_and_commits_once_at_release",
   Slider: "slider_axis_keyboard_and_disabled_rebuild_the_host_spec",
+  Tabs: "tabs_drag_keyboard_and_identity_rebuild_the_host_spec",
   Popover: "a_nested_popover_paints_without_nesting_deferred_draws",
   CodeInput: "a_grouped_code_input_types_and_completes_through_the_real_tree",
   FileUpload: "a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam",
@@ -618,8 +619,9 @@ ${componentRows}
   closed RadioGroup's GPUI mounted-behaviour cell after host-owned native
   identity landed. \`g16.004\` closed ToggleGroup after resulting-selection
   payloads, single-mode roving focus, and instance-scoped native identity
-  landed. This ledger does not compile another card or choose a visual-fixture
-  lane.
+  landed. \`g16.005\` closed Slider axis, keyboard, and mounted parity.
+  \`g16.006\` closed Tabs drag, keyboard, and mounted parity. This ledger
+  does not compile another card or choose a visual-fixture lane.
 
 ## Jetstream posture
 

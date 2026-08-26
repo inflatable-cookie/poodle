@@ -26,6 +26,74 @@ fn node_close_handler(state: &AppState, key: &'static str) -> Arc<dyn Fn(&str) +
     node_value_handler(state, key)
 }
 
+fn ordered_tabs(base: Vec<TabDefinition>, state: &AppState, order_key: &str) -> Vec<TabDefinition> {
+    let Some(order) = state.specimens.text.get(order_key) else {
+        return base;
+    };
+    let wanted = order
+        .split(',')
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_owned)
+        .collect::<Vec<_>>();
+    if wanted.is_empty() {
+        return base;
+    }
+    let mut by_value = base
+        .into_iter()
+        .map(|tab| (tab.value.clone(), tab))
+        .collect::<std::collections::BTreeMap<_, _>>();
+    wanted
+        .into_iter()
+        .filter_map(|value| by_value.remove(&value))
+        .collect()
+}
+
+fn node_order_handler(state: &AppState, key: &'static str) -> Arc<dyn Fn(&[String]) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |order: &[String]| {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+            key: key.to_string(),
+            value: order.join(","),
+        });
+    })
+}
+
+fn node_optional_text_handler(
+    state: &AppState,
+    key: &'static str,
+) -> Arc<dyn Fn(Option<&str>) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |value: Option<&str>| {
+        events
+            .lock()
+            .unwrap()
+            .push(NodeSpecimenEvent::SetOptionalText {
+                key: key.to_string(),
+                value: value.map(str::to_owned),
+            });
+    })
+}
+
+fn node_drag_end_handler(
+    state: &AppState,
+    drag_key: &'static str,
+    drop_key: &'static str,
+) -> Arc<dyn Fn(&str) + Send + Sync> {
+    let events = state.node_events.clone();
+    Arc::new(move |_value: &str| {
+        let mut events = events.lock().unwrap();
+        events.push(NodeSpecimenEvent::SetOptionalText {
+            key: drag_key.to_string(),
+            value: None,
+        });
+        events.push(NodeSpecimenEvent::SetOptionalText {
+            key: drop_key.to_string(),
+            value: None,
+        });
+    })
+}
+
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
@@ -91,12 +159,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         );
 
     // 2. CARD VARIANT (CLOSABLE, REORDERABLE)
-    let card_tabs = vec![
-        TabDefinition::new("index.ts", "index.ts"),
-        TabDefinition::new("App.svelte", "App.svelte").with_closable(true),
-        TabDefinition::new("utils.ts", "utils.ts").with_closable(true),
-        TabDefinition::new("types.ts", "types.ts").with_closable(true),
-    ];
+    let card_tabs = ordered_tabs(
+        vec![
+            TabDefinition::new("index.ts", "index.ts"),
+            TabDefinition::new("App.svelte", "App.svelte").with_closable(true),
+            TabDefinition::new("utils.ts", "utils.ts").with_closable(true),
+            TabDefinition::new("types.ts", "types.ts").with_closable(true),
+        ],
+        state,
+        "tabs-card-order",
+    );
 
     let card_value = state
         .specimens
@@ -109,12 +181,23 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let card_spec = TabsSpec::new(card_tabs)
         .with_variant(TabVariant::Card)
         .with_value(&card_value)
+        .with_reorderable(true)
+        .with_drag_value(state.specimens.text.get("tabs-card-drag").cloned())
+        .with_drop_target_value(state.specimens.text.get("tabs-card-drop").cloned())
         .with_aria_label("Open files");
 
     let card_component = Tabs::from_spec(card_spec, theme)
         .with_id("specimen-card")
         .on_change(node_value_handler(state, "tabs-card-value"))
-        .on_close(node_close_handler(state, "tabs-card-closed"));
+        .on_close(node_close_handler(state, "tabs-card-closed"))
+        .on_reorder(node_order_handler(state, "tabs-card-order"))
+        .on_drag_start(node_value_handler(state, "tabs-card-drag"))
+        .on_drag_end(node_drag_end_handler(
+            state,
+            "tabs-card-drag",
+            "tabs-card-drop",
+        ))
+        .on_drop_target_change(node_optional_text_handler(state, "tabs-card-drop"));
 
     let last_card_closed = state
         .specimens
@@ -287,22 +370,36 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .unwrap_or("editor")
         .to_string();
 
-    let underline_spec = TabsSpec::new(vec![
-        TabDefinition::new("editor", "Editor").with_icon("code"),
-        TabDefinition::new("preview", "Preview").with_icon("eye"),
-        TabDefinition::new("terminal", "Terminal").with_icon("terminal"),
-        TabDefinition::new("output", "Output").with_icon("file-text"),
-    ])
+    let underline_spec = TabsSpec::new(ordered_tabs(
+        vec![
+            TabDefinition::new("editor", "Editor").with_icon("code"),
+            TabDefinition::new("preview", "Preview").with_icon("eye"),
+            TabDefinition::new("terminal", "Terminal").with_icon("terminal"),
+            TabDefinition::new("output", "Output").with_icon("file-text"),
+        ],
+        state,
+        "tabs-underline-order",
+    ))
     .with_variant(TabVariant::Block)
     .with_active_edge(ActiveEdge::Underline)
     .with_active_fill(ActiveFill::None)
     .with_value(&underline_value)
     .with_reorderable(true)
+    .with_drag_value(state.specimens.text.get("tabs-underline-drag").cloned())
+    .with_drop_target_value(state.specimens.text.get("tabs-underline-drop").cloned())
     .with_aria_label("Strip-equivalent workspace surfaces");
 
     let underline_component = Tabs::from_spec(underline_spec, theme)
         .with_id("specimen-block-underline")
-        .on_change(node_value_handler(state, "tabs-underline-value"));
+        .on_change(node_value_handler(state, "tabs-underline-value"))
+        .on_reorder(node_order_handler(state, "tabs-underline-order"))
+        .on_drag_start(node_value_handler(state, "tabs-underline-drag"))
+        .on_drag_end(node_drag_end_handler(
+            state,
+            "tabs-underline-drag",
+            "tabs-underline-drop",
+        ))
+        .on_drop_target_change(node_optional_text_handler(state, "tabs-underline-drop"));
 
     // 4. CARD WITH ICONS (NO PANEL)
     let card_icon_tabs = vec![
