@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — `g16.004` complete; next is orchestrator review
+Status: active — `g16.004` merged in PR #78; next lane not yet selected
 Posture: strict-ready; ToggleGroup resulting-selection, single-mode roving
 focus, and instance-scoped native identity are landed
 Opened: 2026-08-25
@@ -35,7 +35,7 @@ stay maintained; backend admission is not part of the first card.
 1. [001 — Active-cohort parity evidence ledger](001-active-cohort-parity-evidence-ledger.md) — complete; operator-reviewed in PR #75
 2. [002 — Selection controls mounted parity](002-selection-controls-mounted-parity.md) — closed — partial outcome
 3. [003 — RadioGroup native identity and mounted parity](003-radio-group-native-identity-and-mounted-parity.md) — complete
-4. [004 — ToggleGroup semantic API and mounted parity](004-toggle-group-semantic-api-and-mounted-parity.md) — complete
+4. [004 — ToggleGroup semantic API and mounted parity](004-toggle-group-semantic-api-and-mounted-parity.md) — complete; merged in PR #78
 
 ## Measured Selection
 
@@ -66,6 +66,6 @@ radiogroup semantics, with the same required native scope pattern.
 
 ## Next Task
 
-Orchestrator review of `g16.004`: web/native semantic alignment, mounted GPUI
-proof, and exact ledger movement (33 → 34 mounted; 141 → 140 missing). Do not
-compile another card from this closeout.
+Inspect the updated evidence ledger and choose the next bounded parity lane.
+Do not infer a broad conformance programme from the completed selection-control
+work.

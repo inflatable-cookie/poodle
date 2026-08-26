@@ -1,6 +1,6 @@
 # g16.004 — ToggleGroup Semantic API And Mounted Parity
 
-Status: complete
+Status: complete — merged in PR #78
 Opened: 2026-08-26
 Completed: 2026-08-26
 Depends on: complete `g16.003`; accepted decision promoted from

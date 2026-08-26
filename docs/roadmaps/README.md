@@ -71,7 +71,7 @@ chosen.
   adopted and React retained as source-only
 - `g16` — active evidence-recovery checkpoint; `001` complete and
   operator-reviewed; `002` closed — partial outcome; `003` merged in PR #77;
-  `004` complete, awaiting orchestrator review
+  `004` merged in PR #78; next bounded lane not yet selected
 
 ## Rules
 

@@ -1,7 +1,7 @@
 # g16.004 — ToggleGroup Semantic API And Mounted Parity
 
 Date: 2026-08-26
-Status: complete
+Status: complete — merged in PR #78 (`06bdb984`)
 Branch: `t3code/toggle-group-semantic-api`
 Card: `docs/roadmaps/g16/004-toggle-group-semantic-api-and-mounted-parity.md`
 

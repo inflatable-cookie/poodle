@@ -7,11 +7,11 @@ Updated: 2026-08-26
 - `g16`
   - Status: active; strict-ready
   - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77;
-    `004` complete
+    `004` merged in PR #78
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: orchestrator review of `g16.004` web/native semantic alignment,
-    mounted GPUI proof, and exact ledger movement; do not compile another card
+  - Next move: inspect the updated evidence ledger and choose the next bounded
+    parity lane; no broader conformance programme is implied
 
 ## Latest Completed Track
 
