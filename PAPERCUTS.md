@@ -8,7 +8,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
 - 2026-08-26 — `rustfmt packages/render/src/lib.rs` still formats every child
-  module. Format the leaf file, or pass `--skip-children`. Hit while landing
+  module. Format the leaf file, not the crate root. Hit while landing
   `g16.003`; recovered by restoring the crate and re-applying the export.
 
 - 2026-08-26 — `cargo fmt --manifest-path <crate>/Cargo.toml -- <file>` still

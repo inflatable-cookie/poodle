@@ -6,12 +6,12 @@ Updated: 2026-08-26
 
 - `g16`
   - Status: active; strict-ready
-  - Range: `001` closed; `002` closed — partial outcome; `003` ready
+  - Range: `001` closed; `002` closed — partial outcome; `003` complete, awaiting
+    orchestrator review
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: dispatch `g16.003` for required host-owned RadioGroup native
-    interaction scope and mounted evidence; ToggleGroup follows after that
-    identity pattern lands
+  - Next move: orchestrator review of `g16.003`; ToggleGroup follows after that
+    review, not in parallel
 
 ## Latest Completed Track
 

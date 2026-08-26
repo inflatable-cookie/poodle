@@ -25,7 +25,7 @@ use std::sync::{Arc, Mutex};
 use gpui::TestAppContext;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::Node;
-use poodle_render::{ui_presentation_provider, RenderContext};
+use poodle_render::{ui_presentation_provider, RadioGroupHandlers, RenderContext};
 use poodle_specs::{
     AgentTranscriptSpec, ControlDensity, ControlSize, PopoverSpec, RangeSliderSpec,
     UiPresentationProviderSpec,
@@ -4647,6 +4647,192 @@ fn segmented_control_exclusive_focus_identity_and_disabled_paths() {
             poodle_gpui_node_backend::focus_state_for(&right),
             Some(false),
             "two mounted controls keep independent focus identity"
+        );
+    });
+}
+
+fn radio_option_id(scope: &str, value: &str) -> String {
+    format!("radio:{scope}:option:{value}")
+}
+
+fn radio_selected(node: &Node, scope: &str, value: &str) -> bool {
+    let id = radio_option_id(scope, value);
+    node.find(&|n| n.runtime_id.as_deref() == Some(id.as_str()))
+        .and_then(|n| n.a11y.selected)
+        .unwrap_or(false)
+}
+
+fn selection_radio_options() -> Vec<poodle_specs::ChoiceOption> {
+    vec![
+        poodle_specs::ChoiceOption::new("free", "Free"),
+        poodle_specs::ChoiceOption::new("pro", "Pro").with_disabled(true),
+        poodle_specs::ChoiceOption::new("enterprise", "Enterprise"),
+    ]
+}
+
+/// RadioGroup exclusive selection, orientation-aware arrows, wrap, disabled
+/// skip, disabled-group inertia, and independent instance focus identity
+/// through the mounted tree.
+#[test]
+fn radio_group_exclusive_focus_identity_and_disabled_paths() {
+    use poodle_specs::{ChoiceOption, Orientation, RadioGroupSpec};
+
+    run_headless(|cx| {
+        fn build(
+            value: &str,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let mut spec = RadioGroupSpec::new(selection_radio_options());
+            spec.value = Some(value.to_string());
+            let mut node = poodle_render::radio_group(
+                &spec,
+                &RenderContext::new(&theme()),
+                RadioGroupHandlers::new("plan").on_change(Arc::new(move |next: &str| {
+                    sink.lock().unwrap().push(next.to_string());
+                    *mount.lock().unwrap() = build(next, Arc::clone(&mount), Arc::clone(&sink));
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build("free", Arc::clone(&mounted), Arc::clone(&payloads));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        let free = radio_option_id("plan", "free");
+        let pro = radio_option_id("plan", "pro");
+        let enterprise = radio_option_id("plan", "enterprise");
+        driver.wait_for_focus_handle(&free);
+        driver.pointer_activate_id(&enterprise);
+        assert_eq!(payloads.lock().unwrap().as_slice(), ["enterprise"]);
+        assert!(radio_selected(
+            &mounted.lock().unwrap(),
+            "plan",
+            "enterprise"
+        ));
+
+        driver.pointer_activate_id(&enterprise);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["enterprise"],
+            "same-value selection is inert"
+        );
+        driver.pointer_activate_id(&pro);
+        assert_eq!(payloads.lock().unwrap().as_slice(), ["enterprise"]);
+
+        driver.wait_for_focus_handle(&enterprise);
+        driver.focus_element(&enterprise);
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            ["enterprise"],
+            "unrelated-axis arrows are inert"
+        );
+        driver.dispatch_key_raw("down");
+        assert_eq!(payloads.lock().unwrap().as_slice(), ["enterprise", "free"]);
+        assert!(radio_selected(&mounted.lock().unwrap(), "plan", "free"));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&free), Some(true));
+    });
+
+    run_headless(|cx| {
+        fn build(
+            value: &str,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let spec = RadioGroupSpec::new(vec![
+                ChoiceOption::new("sm", "Small"),
+                ChoiceOption::new("md", "Medium"),
+                ChoiceOption::new("lg", "Large"),
+            ])
+            .with_value(value)
+            .with_orientation(Orientation::Horizontal);
+            let mut node = poodle_render::radio_group(
+                &spec,
+                &RenderContext::new(&theme()),
+                RadioGroupHandlers::new("size").on_change(Arc::new(move |next: &str| {
+                    sink.lock().unwrap().push(next.to_string());
+                    *mount.lock().unwrap() = build(next, Arc::clone(&mount), Arc::clone(&sink));
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build("lg", Arc::clone(&mounted), Arc::clone(&payloads));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let lg = radio_option_id("size", "lg");
+        let sm = radio_option_id("size", "sm");
+        driver.wait_for_focus_handle(&lg);
+        driver.focus_element(&lg);
+        driver.dispatch_key_raw("down");
+        assert!(
+            payloads.lock().unwrap().is_empty(),
+            "vertical arrows are inert on a horizontal group"
+        );
+        driver.dispatch_key_raw("right");
+        assert_eq!(payloads.lock().unwrap().as_slice(), ["sm"]);
+        assert!(radio_selected(&mounted.lock().unwrap(), "size", "sm"));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&sm), Some(true));
+    });
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let spec = RadioGroupSpec {
+            is_disabled: true,
+            ..RadioGroupSpec::new(selection_radio_options()).with_value("free")
+        };
+        let mut node = poodle_render::radio_group(
+            &spec,
+            &RenderContext::new(&theme()),
+            RadioGroupHandlers::new("disabled-plan").on_change(Arc::new(move |next: &str| {
+                sink.lock().unwrap().push(next.to_string())
+            })),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.draw_frame();
+        driver.pointer_activate_id(&radio_option_id("disabled-plan", "enterprise"));
+        assert!(payloads.lock().unwrap().is_empty());
+    });
+
+    run_headless(|cx| {
+        let picker = |scope: &str| {
+            poodle_render::radio_group(
+                &RadioGroupSpec::new(vec![
+                    ChoiceOption::new("free", "Free"),
+                    ChoiceOption::new("pro", "Pro"),
+                ])
+                .with_value("free"),
+                &RenderContext::new(&theme()),
+                RadioGroupHandlers::new(scope),
+            )
+        };
+        let mut node = Node::container()
+            .child(picker("left"))
+            .child(picker("right"));
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        let left = radio_option_id("left", "free");
+        let right = radio_option_id("right", "free");
+        driver.wait_for_focus_handle(&left);
+        driver.wait_for_focus_handle(&right);
+        driver.focus_element(&left);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&left), Some(true));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right),
+            Some(false),
+            "two mounted groups keep independent focus identity"
         );
     });
 }

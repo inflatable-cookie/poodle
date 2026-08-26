@@ -1,8 +1,8 @@
 # g16 — Next Work
 
-Status: active — `g16.003` ready
-Posture: strict-ready; RadioGroup identity decision promoted; ToggleGroup
-semantic/API lane sequenced behind it
+Status: active — `g16.003` complete, awaiting orchestrator review
+Posture: strict-ready; RadioGroup native identity and mounted evidence landed;
+ToggleGroup semantic/API lane sequenced behind orchestrator review
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -34,7 +34,7 @@ stay maintained; backend admission is not part of the first card.
 
 1. [001 — Active-cohort parity evidence ledger](001-active-cohort-parity-evidence-ledger.md) — complete; operator-reviewed in PR #75
 2. [002 — Selection controls mounted parity](002-selection-controls-mounted-parity.md) — closed — partial outcome
-3. [003 — RadioGroup native identity and mounted parity](003-radio-group-native-identity-and-mounted-parity.md) — ready
+3. [003 — RadioGroup native identity and mounted parity](003-radio-group-native-identity-and-mounted-parity.md) — complete
 
 ## Measured Selection
 
@@ -43,9 +43,8 @@ parity:
 
 - semantic/interface structure is present across the active cohort, but broad
   cross-runtime behavioural proof is not;
-- GPUI mounted behaviour is present for 32 components and missing for 142;
-  `g16.002` closed three selection-control cells; RadioGroup and ToggleGroup
-  stay missing;
+- `g16.002` closed three selection-control cells; `g16.003` closed RadioGroup;
+  ToggleGroup stays missing;
 - React has no equivalent whole-roster axe sweep, while GPUI accessibility
   remains manual;
 - web visual evidence is a route sweep for 169 components, manual for five,
@@ -53,18 +52,19 @@ parity:
 - GPUI visual comparison is missing for 173 non-Button portable components.
 
 `g16.002` closed mounted GPUI behaviour for `Checkbox`, `Switch`, and
-`SegmentedControl`. It stopped RadioGroup because unnamed groups had no stable
-native instance identity, and stopped ToggleGroup on callback payload, roving
-focus, and item identity. Remaining measured gaps are still
-semantic/interface breadth, accessibility, and visual comparison.
+`SegmentedControl`. `g16.003` closed RadioGroup after required host-owned
+native interaction scope landed; two same-valued groups keep independent
+focus identity. ToggleGroup stays missing on callback payload, roving focus,
+and item identity. Remaining measured gaps are still semantic/interface
+breadth, accessibility, and visual comparison.
 
 The operator accepted the split-lane recommendation on 2026-08-26. RadioGroup
 keeps its web form-name behavior and receives required host-owned native
 interaction scope through a handler bundle. ToggleGroup will keep resulting-
 selection payloads and single-mode radiogroup semantics, but its contract and
-execution card wait until the RadioGroup identity pattern lands.
+execution card wait on orchestrator review of this landed pattern.
 
 ## Next Task
 
-Dispatch `g16.003`. Do not parallelise or implement ToggleGroup in the same
-worker.
+Orchestrator review of `g16.003`. Do not compile or implement ToggleGroup
+until that review lands and the operator authorises the next lane.
