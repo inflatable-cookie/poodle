@@ -1,6 +1,6 @@
 # TextInput Native Event Cleanup
 
-Status: open — bounded follow-up decision after `g16.007`
+Status: promoted — resolved into ready card `g16.008`
 Captured: 2026-08-26
 Source: PR #81 review and `g16.007` execution log
 
@@ -17,12 +17,13 @@ safe to repair without checking their wider consumers:
   scroll, blink, and marked-text state use the value-node id. The documented
   blur-time reset therefore misses the state it intends to clear.
 
-## Decision Needed
+## Disposition
 
-Inspect every consumer of the shared key-submit mapping and input-text state
-keys. Decide whether these are one small generic backend repair or need
-separate cards. Do not patch TextInput alone or change CodeInput/DurationInput
-behaviour by implication.
+The post-`g16.007` checkpoint confirmed one bounded generic repair. TextInput
+and DurationInput require Tab traversal; CodeInput has no submit contract; and
+EditableLabel's Tab commit belongs to its documented blur path. Composite and
+childless inputs also need one backend-owned painted-state-key rule. Execute
+`../roadmaps/g16/008-native-text-event-routing-cleanup.md`.
 
 ## Guardrail
 
