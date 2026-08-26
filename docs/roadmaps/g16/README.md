@@ -78,7 +78,9 @@ It underpins search, command, settings, model, embed, token, editable-list, and
 relation-picker surfaces. `g16.007` closed its core controlled editing through
 the mounted GPUI path: 36 → 37 mounted, 138 → 137 missing. It repaired two
 measured defects — `maxLength` had no owner in the Rust path, and every search
-field shared one clear-button element id — and left multiline, slug lifecycle,
+field shared one clear-button element id — and, after orchestrator review, made
+unchanged edit outcomes silent so a rejected edit is distinguishable from an
+accepted one. It left multiline, slug lifecycle,
 validation timing, OS input methods, and native accessibility/visual closure
 explicitly unclaimed. Two further findings (Tab mapped to submit in the backend
 key path; blur-time `forget` keyed by the wrong id) are recorded in the

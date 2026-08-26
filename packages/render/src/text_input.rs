@@ -40,6 +40,40 @@ pub fn text_input(
 
 const SELECTION_ALPHA: f32 = 0.30;
 
+/// Tell the host what changed, and nothing about what did not.
+///
+/// A controlled `on_change` means "the value is now this", so firing it with
+/// the value the host already holds makes a rejected edit — a keystroke into a
+/// field already at its `maxLength`, a paste with no room left, a Backspace at
+/// index 0 — indistinguishable from an accepted one. A host that diffs sees
+/// nothing; a host that counts edits, marks a form dirty, or debounces a save
+/// sees an edit that never happened. The caret is the same claim: a selection
+/// that did not move is not a selection change.
+///
+/// The edit model still *consumes* those keys — swallowing them is what stops
+/// them falling through to another handler — it simply has nothing to report.
+fn report_edit(
+    outcome: poodle_headless::text_input::EditOutcome,
+    value: &str,
+    selection: (usize, usize),
+    on_change: &Option<TextChangeHandler>,
+    on_selection_change: &Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
+) {
+    if let Some(next) = outcome.value {
+        if next != value {
+            if let Some(on_change) = on_change {
+                on_change(&next);
+            }
+        }
+    }
+    let moved = (outcome.state.anchor, outcome.state.head);
+    if moved != selection {
+        if let Some(on_selection_change) = on_selection_change {
+            on_selection_change(moved.0, moved.1);
+        }
+    }
+}
+
 /// Host callbacks for an editable field.
 ///
 /// `on_change` reports the new value; `on_selection_change` reports where the
@@ -284,14 +318,7 @@ pub fn text_input_with_handlers(
                     inserted,
                     limit,
                 );
-                if let Some(next) = outcome.value {
-                    if let Some(change) = &change {
-                        change(&next);
-                    }
-                }
-                if let Some(on_selection) = &on_selection {
-                    on_selection(outcome.state.anchor, outcome.state.head);
-                }
+                report_edit(outcome, &text, (start, end), &change, &on_selection);
             }));
         }
     }
@@ -456,14 +483,7 @@ pub fn text_input_with_handlers(
             ) else {
                 return;
             };
-            if let Some(next) = outcome.value {
-                if let Some(change) = &change {
-                    change(&next);
-                }
-            }
-            if let Some(on_selection) = &on_selection {
-                on_selection(outcome.state.anchor, outcome.state.head);
-            }
+            report_edit(outcome, &value, (start, end), &change, &on_selection);
         }));
         // Paste and cut arrive as content, not as a keystroke, so they go
         // through the same edit model by a different door.
@@ -483,14 +503,7 @@ pub fn text_input_with_handlers(
                     text,
                     limit,
                 );
-                if let Some(next) = outcome.value {
-                    if let Some(change) = &change {
-                        change(&next);
-                    }
-                }
-                if let Some(on_selection) = &on_selection {
-                    on_selection(outcome.state.anchor, outcome.state.head);
-                }
+                report_edit(outcome, &value, (start, end), &change, &on_selection);
             }));
         }
         // The root carries the caret too. It never *draws* one — it has
@@ -722,68 +735,115 @@ mod tests {
         assert!(read_only.interaction.on_text_change.is_none());
     }
 
-    /// `maxLength` is spent before the host hears anything. The rule lives in
-    /// the shared transition; the component only hands it over, so a backend
-    /// never gets the chance to enforce a different one.
+    /// `maxLength` is spent before the host hears anything, and a rejected
+    /// edit is *completely* silent: the rule lives in the shared transition,
+    /// the component only hands it over, and a host that was told nothing is
+    /// the only way a rejected edit can be told apart from an accepted one.
     #[test]
-    fn max_length_is_enforced_before_the_host_sees_a_new_value() {
+    fn a_rejected_full_field_edit_reports_nothing_at_all() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let seen = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
-        let sink = Arc::clone(&seen);
-        let node = text_input_with_handlers(
+
+        // One ordered log for every channel the host owns, so "nothing" means
+        // nothing rather than "nothing of the kind this assertion looked at".
+        fn logging_field(
+            spec: &TextInputSpec,
+            ctx: &RenderContext<'_>,
+        ) -> (Node, Arc<std::sync::Mutex<Vec<String>>>) {
+            let log = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
+            let change_log = Arc::clone(&log);
+            let select_log = Arc::clone(&log);
+            let node = text_input_with_handlers(
+                spec,
+                ctx,
+                TextInputHandlers {
+                    on_change: Some(Arc::new(move |next: &str| {
+                        change_log.lock().unwrap().push(format!("change:{next}"))
+                    })),
+                    on_selection_change: Some(Arc::new(move |a: usize, b: usize| {
+                        select_log.lock().unwrap().push(format!("select:{a}-{b}"))
+                    })),
+                    ..TextInputHandlers::default()
+                },
+            );
+            (node, log)
+        }
+
+        let full = TextInputSpec::new()
+            .with_id("limited")
+            .with_value("abcd")
+            .with_max_length(4)
+            .with_selection(1, 1);
+
+        let (node, log) = logging_field(&full, &ctx);
+        node.interaction.on_edit_key.as_ref().expect("keys")(
+            "X",
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(
+            *log.lock().unwrap(),
+            Vec::<String>::new(),
+            "a key a full field cannot take reports neither value nor caret"
+        );
+
+        // A paste with no room left is the same claim through the other door.
+        let (node, log) = logging_field(&full, &ctx);
+        node.interaction.on_edit_insert.as_ref().expect("insert")("XY");
+        assert_eq!(*log.lock().unwrap(), Vec::<String>::new());
+
+        // Backspace at index 0 is consumed — it must not fall through — but
+        // there is still nothing to report.
+        let (node, log) = logging_field(
             &TextInputSpec::new()
                 .with_id("limited")
                 .with_value("abcd")
-                .with_max_length(4)
-                .with_selection(1, 1),
+                .with_selection(0, 0),
             &ctx,
-            TextInputHandlers {
-                on_change: Some(Arc::new(move |next: &str| {
-                    sink.lock().unwrap().push(next.to_string())
-                })),
-                ..TextInputHandlers::default()
-            },
         );
-
-        let edit_key = node
-            .interaction
-            .on_edit_key
-            .as_ref()
-            .expect("an editable field answers keys");
-        edit_key("X", poodle_node::NodeModifiers::default());
-        assert!(
-            seen.lock().unwrap().is_empty(),
-            "a full field reports no new value at all"
+        node.interaction.on_edit_key.as_ref().expect("keys")(
+            "backspace",
+            poodle_node::NodeModifiers::default(),
         );
+        assert_eq!(*log.lock().unwrap(), Vec::<String>::new());
 
-        // A paste is truncated to what fits rather than rejected.
-        let insert = node
-            .interaction
-            .on_edit_insert
-            .as_ref()
-            .expect("an editable field takes inserted content");
-        insert("XY");
-        assert_eq!(seen.lock().unwrap().as_slice(), &["abcd".to_string()]);
-
-        let seen = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
-        let sink = Arc::clone(&seen);
-        let room = text_input_with_handlers(
+        // Genuine edits still report both channels, in order.
+        let (node, log) = logging_field(
             &TextInputSpec::new()
                 .with_id("limited")
                 .with_value("ab")
                 .with_max_length(4)
                 .with_selection(2, 2),
             &ctx,
-            TextInputHandlers {
-                on_change: Some(Arc::new(move |next: &str| {
-                    sink.lock().unwrap().push(next.to_string())
-                })),
-                ..TextInputHandlers::default()
-            },
         );
-        room.interaction.on_edit_insert.as_ref().expect("insert")("cdef");
-        assert_eq!(seen.lock().unwrap().as_slice(), &["abcd".to_string()]);
+        node.interaction.on_edit_key.as_ref().expect("keys")(
+            "c",
+            poodle_node::NodeModifiers::default(),
+        );
+        // An over-long paste truncates to what fits, and reports the result.
+        node.interaction.on_edit_insert.as_ref().expect("insert")("cdef");
+        assert_eq!(
+            *log.lock().unwrap(),
+            vec![
+                "change:abc".to_string(),
+                "select:3-3".to_string(),
+                "change:abcd".to_string(),
+                "select:4-4".to_string(),
+            ]
+        );
+
+        // A caret move with no edit reports the caret only.
+        let (node, log) = logging_field(
+            &TextInputSpec::new()
+                .with_id("limited")
+                .with_value("abcd")
+                .with_selection(0, 0),
+            &ctx,
+        );
+        node.interaction.on_edit_key.as_ref().expect("keys")(
+            "end",
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(*log.lock().unwrap(), vec!["select:4-4".to_string()]);
     }
 
     /// Two search fields must not share their clear button. The backend keys

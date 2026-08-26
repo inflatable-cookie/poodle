@@ -247,6 +247,16 @@ web pair relied on the native attribute. It is now enforced inside
 is consumed and reports nothing, an over-long insertion truncates to fit — and
 EditableLabel's private post-truncation is gone from the transition paths.
 
+An unchanged outcome used to be reported anyway: a rejected keystroke still
+sent its unmoved caret through `on_selection_change`, and a paste with no room
+left still sent the value the host already held through `on_change`. One
+`report_edit` boundary in the component now decides what the host hears — no
+value callback when the value did not change, no selection callback when the
+caret did not move — so a rejected edit is distinguishable from an accepted
+one. The keys are still consumed, so they cannot fall through to another
+handler; there is simply nothing to report. Genuine movement and selection
+replacement report exactly as before.
+
 Every search field also rendered its clear button under the constant element id
 `text-input-clear`, so two search fields shared one focus handle and one
 paint-bounds entry. It is derived from the field id now, like the value node.

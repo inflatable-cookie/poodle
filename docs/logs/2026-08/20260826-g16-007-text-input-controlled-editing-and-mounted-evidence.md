@@ -42,6 +42,28 @@ start. So the limit went where the rest of the text rules already live.
   paths. The whole-value `on_text_change` channel keeps its clamp, because that
   one is a replacement rather than an edit.
 
+## Defect: unchanged outcomes were reported anyway
+
+Found in orchestrator review of PR #81. The component reported every consumed
+edit outcome: a keystroke rejected by `maxLength` still sent its *unmoved*
+caret through `on_selection_change`, and a paste with no room left still sent
+the value the host already held through `on_change`. A controlled `on_change`
+means "the value is now this", so a host that counts edits, marks a form dirty,
+or debounces a save saw an edit that never happened.
+
+`packages/render/src/text_input.rs` now has one `report_edit` boundary that all
+three edit doors go through: no value callback when the next value equals the
+current one, no selection callback when the outcome selection equals the input
+selection. The keys stay consumed — swallowing them is what stops them falling
+through to another handler — there is simply nothing to report. Genuine caret
+movement and selection replacement are unchanged.
+`packages/render/src/editable_label.rs` already guarded its value callback and
+reports no selection, so it needed nothing.
+
+Both the focused and the mounted proof now assert the **complete** callback log
+is empty for a rejected edit rather than filtering it: the earlier assertion
+passed while the host was still receiving `name/select:6-6`.
+
 ## Defect: search fields shared one clear-button identity
 
 Every search field rendered its clear button under the constant element id
@@ -62,8 +84,13 @@ value node already was.
 - `packages/contracts/headless/src/text_input.rs` — four focused cases for the
   limit: full-field rejection, selection budget, deletion below the limit, and
   truncated insertion.
-- `packages/render/src/text_input.rs` — focused cases for enforcement before
-  `on_change` and for per-field clear identity.
+- `packages/render/src/text_input.rs` —
+  `a_rejected_full_field_edit_reports_nothing_at_all` logs every channel in one
+  ordered list and asserts it is empty for a full-field key, a full-field
+  paste, and Backspace at index 0; the same test asserts that a genuine edit
+  still reports value then caret in order, that an over-long paste truncates
+  and reports the truncated result, and that a caret move with no edit reports
+  the caret alone. Plus a focused case for per-field clear identity.
 
 ## Mounted test
 
@@ -74,7 +101,8 @@ value, selection, and focus after every reported callback:
 
 - one editable field — pointer focus reaching the real focus handle, focus gain
   reported once, `end`/`home` caret movement, printable insertion, `maxLength`
-  rejection reporting nothing at all, `shift-right` extension, typing over the
+  rejection and an inert Delete each leaving the complete callback log empty,
+  `shift-right` extension, typing over the
   selection, Backspace, Delete, Enter submit and Escape cancel with the value
   untouched, placeholder text separated from the value by the caret channel's
   `showing_placeholder` flag, and focus loss reported exactly once with value

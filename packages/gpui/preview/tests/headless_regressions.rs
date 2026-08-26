@@ -6633,18 +6633,26 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         assert_eq!(mounted_text(&mounted, "name"), "kicker");
 
         // The field is now at its declared limit: the key is consumed, and the
-        // host is told nothing at all.
+        // host is told nothing at all. The whole log, not a filtered view of
+        // it — a rejected edit that still reports its unchanged caret is
+        // indistinguishable from an accepted one.
         host.take_log();
         driver.dispatch_key_raw("s");
         assert_eq!(host.field("name").value, "kicker");
         assert_eq!(host.field("name").selection, (6, 6));
         assert_eq!(
-            host.take_log()
-                .into_iter()
-                .filter(|entry| entry.starts_with("name/change"))
-                .collect::<Vec<_>>(),
+            host.take_log(),
             Vec::<String>::new(),
-            "a full field reports no new value"
+            "a full field reports nothing on any channel"
+        );
+
+        // Same claim through a key that is ours but has nothing to do: the
+        // caret is already at the end, so Delete is swallowed and silent.
+        driver.dispatch_key_raw("delete");
+        assert_eq!(
+            host.take_log(),
+            Vec::<String>::new(),
+            "a consumed but inert key reports nothing"
         );
 
         // Shift-extend, then type over the selection.
@@ -6738,7 +6746,10 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
         assert_eq!(
             host.take_log()
                 .into_iter()
-                .filter(|entry| entry.starts_with("query/change") || entry.ends_with("clear"))
+                // The press also focuses the field it belongs to, which the
+                // backend reports on the next paint. Everything else the host
+                // hears is the clear itself, in order.
+                .filter(|entry| !entry.ends_with("/focus:true"))
                 .collect::<Vec<_>>(),
             vec!["query/change:".to_string(), "query/clear".to_string()]
         );
