@@ -7444,10 +7444,10 @@ fn code_and_duration_inputs_traverse_on_tab_without_mutating() {
         driver.focus_element("poodle-input-duration-before");
         take_events(&host.log);
 
-        // Five Tabs cross the whole control: its focusable root, then hours,
-        // minutes and seconds, then out to the field after it. Not one of them
-        // changes a segment.
-        for _ in 0..5 {
+        // Four Tabs cross the whole control: hours, minutes, seconds, then out
+        // to the field after it. The root frames the segments and is not a
+        // stop of its own, and not one of the four changes a segment.
+        for _ in 0..4 {
             driver.dispatch_key_raw("tab");
         }
         assert_eq!(*host.segments.lock().expect("segments"), (1, 2, 3));
@@ -7469,13 +7469,14 @@ fn code_and_duration_inputs_traverse_on_tab_without_mutating() {
             );
         }
 
-        // Shift+Tab off the hours segment leaves the control the way it came.
+        // One more Shift+Tab off Hours leaves the control the way it came in —
+        // straight to the field before it, with nothing in between.
         take_events(&host.log);
-        driver.dispatch_key_raw("shift-tab");
         driver.dispatch_key_raw("shift-tab");
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for("poodle-input-duration-before"),
-            Some(true)
+            Some(true),
+            "Hours is the control's entry stop in both directions"
         );
         assert_eq!(*host.segments.lock().expect("segments"), (2, 3, 4));
     });
