@@ -1,8 +1,8 @@
 # g16 — Next Work
 
-Status: active — `g16.003` complete, awaiting orchestrator review
-Posture: strict-ready; RadioGroup native identity and mounted evidence landed;
-ToggleGroup semantic/API lane sequenced behind orchestrator review
+Status: active — `g16.003` merged in PR #77
+Posture: strict-ready; RadioGroup native identity and mounted evidence closed;
+ToggleGroup semantic/API promotion is next
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -66,5 +66,7 @@ execution card wait on orchestrator review of this landed pattern.
 
 ## Next Task
 
-Orchestrator review of `g16.003`. Do not compile or implement ToggleGroup
-until that review lands and the operator authorises the next lane.
+Promote the accepted ToggleGroup semantic/API decision into its component
+contract, then compile a separate `g16.004` mounted-parity card from the landed
+RadioGroup identity pattern. Do not implement ToggleGroup before that card is
+ready and dispatched through its own worker handoff.

@@ -16,9 +16,10 @@ chosen.
 - `g16.001` is complete and operator-reviewed in PR #75. It repairs stale
   parity reporting and produces one component-level evidence ledger. `g16.002`
   closed — partial outcome: mounted GPUI behaviour for Checkbox, Switch, and
-  SegmentedControl. `g16.003` closed RadioGroup native identity and mounted
-  evidence; ToggleGroup remains sequenced behind orchestrator review. No
-  broader conformance programme is implied yet.
+  SegmentedControl. PR #77 closed `g16.003` RadioGroup native identity and
+  mounted evidence. The accepted ToggleGroup semantic/API decision is next for
+  contract promotion and separate card compilation. No broader conformance
+  programme is implied yet.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -69,8 +70,8 @@ chosen.
   published from candidate `d5607def`, with all 16 authoritative consumers
   adopted and React retained as source-only
 - `g16` — active evidence-recovery checkpoint; `001` complete and
-  operator-reviewed; `002` closed — partial outcome; `003` complete, awaiting
-  orchestrator review
+  operator-reviewed; `002` closed — partial outcome; `003` merged in PR #77;
+  ToggleGroup contract promotion is next
 
 ## Rules
 

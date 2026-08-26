@@ -1,7 +1,7 @@
 # Selection-Control Stops After g16.002
 
-Status: open — RadioGroup decision promoted; ToggleGroup promotion waits on
-`g16.003`
+Status: open — RadioGroup landed in PR #77; ToggleGroup is ready for contract
+promotion and separate card compilation
 Captured: 2026-08-26
 Source: `g16.002` partial close and PR #76 review
 
@@ -70,7 +70,7 @@ generator, and generation front doors.
 
 After the accepted decisions:
 
-1. land the RadioGroup identity/mounted-parity card;
+1. land the RadioGroup identity/mounted-parity card — complete in PR #77;
 2. promote the accepted ToggleGroup decision into its contract;
 3. compile a separate ToggleGroup semantic/API/mounted-parity card using the
    landed identity pattern.

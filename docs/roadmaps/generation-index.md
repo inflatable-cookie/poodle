@@ -6,12 +6,11 @@ Updated: 2026-08-26
 
 - `g16`
   - Status: active; strict-ready
-  - Range: `001` closed; `002` closed — partial outcome; `003` complete, awaiting
-    orchestrator review
+  - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: orchestrator review of `g16.003`; ToggleGroup follows after that
-    review, not in parallel
+  - Next move: promote the accepted ToggleGroup semantic/API decision into its
+    contract, then compile its separate mounted-parity card
 
 ## Latest Completed Track
 
