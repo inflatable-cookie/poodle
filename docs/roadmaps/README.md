@@ -15,8 +15,8 @@ chosen.
 - [Generation index](generation-index.md) is the canonical status summary.
 - `g16.001` is complete and operator-reviewed in PR #75. It repairs stale
   parity reporting and produces one component-level evidence ledger. `g16.002`
-  closed mounted GPUI behaviour for four selection controls; ToggleGroup
-  remains a planning stop and awaits a separate semantic/API lane. No later
+  closed — partial outcome: mounted GPUI behaviour for Checkbox, Switch, and
+  SegmentedControl. RadioGroup and ToggleGroup remain planning stops. No later
   conformance programme is implied yet.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
@@ -68,8 +68,7 @@ chosen.
   published from candidate `d5607def`, with all 16 authoritative consumers
   adopted and React retained as source-only
 - `g16` — active evidence-recovery checkpoint; `001` complete and
-  operator-reviewed; `002` four proofs complete with a ToggleGroup planning
-  stop; later runway uncompiled
+  operator-reviewed; `002` closed — partial outcome; later runway uncompiled
 
 ## Rules
 

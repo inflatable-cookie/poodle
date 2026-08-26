@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — `g16.001` complete; `g16.002` four proofs complete, ToggleGroup stop
-Posture: strict-ready; ToggleGroup is a planning stop, not a closed mounted cell
+Status: active — `g16.001` complete; `g16.002` closed — partial outcome
+Posture: strict-ready; RadioGroup identity and ToggleGroup semantic/API remain stops
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -32,7 +32,7 @@ stay maintained; backend admission is not part of the first card.
 ## Runway
 
 1. [001 — Active-cohort parity evidence ledger](001-active-cohort-parity-evidence-ledger.md) — complete; operator-reviewed in PR #75
-2. [002 — Selection controls mounted parity](002-selection-controls-mounted-parity.md) — four proofs complete; ToggleGroup planning stop
+2. [002 — Selection controls mounted parity](002-selection-controls-mounted-parity.md) — closed — partial outcome
 
 ## Measured Selection
 
@@ -41,21 +41,25 @@ parity:
 
 - semantic/interface structure is present across the active cohort, but broad
   cross-runtime behavioural proof is not;
-- GPUI mounted behaviour is present for 33 components and missing for 141;
-  `g16.002` closed four selection-control cells; ToggleGroup stays missing;
+- GPUI mounted behaviour is present for 32 components and missing for 142;
+  `g16.002` closed three selection-control cells; RadioGroup and ToggleGroup
+  stay missing;
 - React has no equivalent whole-roster axe sweep, while GPUI accessibility
   remains manual;
 - web visual evidence is a route sweep for 169 components, manual for five,
   and a fixed comparison for Button only;
 - GPUI visual comparison is missing for 173 non-Button portable components.
 
-`g16.002` closed mounted GPUI behaviour for `Checkbox`, `Switch`, `RadioGroup`,
-and `SegmentedControl`. ToggleGroup remains a planning stop: native option
-emission is not the contracted selection payload, and contracted arrow roving
-is absent from Svelte/React/GPUI. Remaining measured gaps are still
+`g16.002` closed mounted GPUI behaviour for `Checkbox`, `Switch`, and
+`SegmentedControl`. RadioGroup remains a planning stop: unnamed groups have
+no stable native instance identity without a public spec decision. ToggleGroup
+remains a planning stop: native option emission is not the contracted
+selection payload, contracted arrow roving is absent from Svelte/React/GPUI,
+and item ids are not instance-safe. Remaining measured gaps are still
 semantic/interface breadth, accessibility, and visual comparison.
 
 ## Next Task
 
-Resolve the ToggleGroup public-callback and roving-focus stop as a separate
-semantic/API lane. Do not compile `g16.003` from this PR.
+Resolve the RadioGroup instance-identity stop and the ToggleGroup
+semantic/API/identity stop as separate lanes. Do not compile `g16.003` from
+this partial close.

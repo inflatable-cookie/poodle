@@ -6,12 +6,11 @@ Updated: 2026-08-26
 
 - `g16`
   - Status: active; strict-ready
-  - Range: `001` closed; `002` four proofs complete, ToggleGroup stop; later
-    cards uncompiled
+  - Range: `001` closed; `002` closed — partial outcome; later cards uncompiled
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: resolve ToggleGroup as a separate semantic/API lane; do not
-    compile `g16.003` from this stop
+  - Next move: resolve RadioGroup instance identity and ToggleGroup
+    semantic/API as separate lanes; do not compile `g16.003` from this stop
 
 ## Latest Completed Track
 

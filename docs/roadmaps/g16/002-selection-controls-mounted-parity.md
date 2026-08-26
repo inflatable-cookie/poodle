@@ -1,6 +1,6 @@
 # g16.002 — Selection Controls Mounted Parity
 
-Status: complete for four proofs — ToggleGroup planning stop; awaiting review
+Status: closed — partial outcome
 Opened: 2026-08-26
 Completed: 2026-08-26
 Depends on: completed `g16.001`
@@ -14,26 +14,29 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Outcome
 
-Four named mounted GPUI regressions now drive Checkbox, Switch, RadioGroup, and
+Three named mounted GPUI regressions now drive Checkbox, Switch, and
 SegmentedControl through the real backend/input path and host rebuild. The
-generated ledger moves only those four GPUI mounted-behaviour cells from
-`missing` to `mounted` (29 → 33 mounted; 145 → 141 missing).
+generated ledger moves only those three GPUI mounted-behaviour cells from
+`missing` to `mounted` (29 → 32 mounted; 145 → 142 missing).
 
-ToggleGroup remains `missing`. The native renderer still emits the activated
-option as `Fn(&str)`, while the contract requires the resulting selection as
-`string | string[] | null`. Honest mounted proof would also need contracted
-single-mode Arrow Left/Right roving, which Svelte, React, and the shared
-machine do not implement. Both are planning stops, not repairs this card may
-make. Do not invent a GPUI-only callback or keyboard rule here.
+RadioGroup remains `missing`. Option identity falls back to the literal
+`"group"` when `name` is omitted, so two unnamed groups with the same values
+share GPUI focus handles. The public spec keeps `name` optional; Svelte
+auto-generates a unique group name. There is no existing stable native
+instance identity that can solve this without a public spec decision.
 
-Contract-backed GPUI/shared-Rust repairs on the four closed controls: focus
-patches so GPUI tracks handles; Checkbox mixed and Switch checked projection
-through `current_state` / `current_checked`; RadioGroup option identity,
-RadioButton a11y, and wrap/skip-disabled roving; same-value inertia for
-RadioGroup and SegmentedControl. ToggleGroup also gained the same enabled-item
-focus patch so GPUI can track handles; that does not close its mounted cell.
-No contract or public API change. GPUI accessibility stays `manual`. No
-`g16.003`.
+ToggleGroup remains `missing`. Native still emits the activated option as
+`Fn(&str)`, while the contract requires the resulting selection as
+`string | string[] | null`. Contracted single-mode Arrow Left/Right roving is
+absent from Svelte, React, and the shared machine. Item ids remain
+`toggle:<value>`, so a focus patch would collide across instances. Both stops
+belong to a later semantic/API/identity lane.
+
+Contract-backed repairs on the three closed controls: focus patches so GPUI
+tracks handles; Checkbox mixed and Switch checked projection through
+`current_state` / `current_checked`; same-value inertia for SegmentedControl
+and RadioGroup (RadioGroup without new identity). No contract or public API
+change. GPUI accessibility stays `manual`. No `g16.003`.
 
 ## Goal
 
@@ -124,29 +127,32 @@ choosing a new rule in this card.
 
 ## Acceptance
 
-- [x] Checkbox, Switch, RadioGroup, and SegmentedControl each have at least
-      one resolvable mounted regression in
-      `packages/gpui/preview/tests/headless_regressions.rs`.
-- [x] Those four regressions drive the real mounted backend/input path and
-      host rebuild; none passes by calling a handler or transition helper
+- [ ] Each of the five named components has at least one resolvable mounted
+      regression in `packages/gpui/preview/tests/headless_regressions.rs`.
+      Stop: RadioGroup has no stable unnamed instance identity; ToggleGroup
+      callback payload and arrow roving need a public API/contract decision.
+- [x] The regressions that landed drive the real mounted backend/input path
+      and host rebuild; none passes by calling a handler or transition helper
       directly.
 - [x] Checkbox and Switch prove accepted toggle, readonly, and disabled
       behaviour; Checkbox also proves mixed-to-checked resolution.
-- [x] RadioGroup and SegmentedControl prove exclusive selection, directional
+- [ ] RadioGroup and SegmentedControl prove exclusive selection, directional
       focus/selection, wrap, disabled-option skip, and disabled-group inertia.
+      SegmentedControl passed. RadioGroup stopped on instance identity.
 - [x] SegmentedControl proves two mounted instances keep independent focus
       identity.
-- [x] ToggleGroup remains a planning stop: native `Fn(&str)` option emission
-      is not the contracted selection payload, and contracted single-mode
-      arrow roving is absent from Svelte/React/GPUI. No public API or
-      GPUI-only keyboard rule was invented.
+- [ ] ToggleGroup proves single, deactivating single, multiple, and disabled
+      payload semantics. Stop: native `Fn(&str)` is not the contracted
+      selection payload; contracted arrow roving is absent from
+      Svelte/React/GPUI; item ids are not instance-safe.
 - [x] Any repaired runtime defect is contract-backed and recorded with its
       before/after evidence. No contract or public API changes.
-- [x] The generated ledger changes exactly these four GPUI mounted-behaviour
-      rows from `missing` to `mounted`; ToggleGroup stays `missing`; unrelated
-      evidence cells do not move.
-- [x] One August execution log records tests, defects, repairs, validation,
-      the ToggleGroup stop, and remaining gaps.
+- [ ] The generated ledger changes exactly these five GPUI mounted-behaviour
+      rows from `missing` to `mounted`; unrelated evidence cells do not move.
+      Three rows moved (Checkbox, Switch, SegmentedControl). RadioGroup and
+      ToggleGroup stay `missing`.
+- [x] One August execution log records tests, defects, repairs, validation, and
+      unresolved gaps.
 
 ## Writable Scope
 
@@ -204,7 +210,7 @@ preview/QA, release, tag, or publication selectors.
 
 ## Continuation
 
-Return the four mounted proofs, the ToggleGroup planning stop, and the
-regenerated ledger to the orchestrator. Resolve ToggleGroup as a separate
-semantic/API lane before compiling a next card. Do not compile `g16.003` from
-this stop.
+Return the three mounted proofs, the RadioGroup identity stop, the ToggleGroup
+semantic/API stop, and the regenerated ledger to the orchestrator. Resolve
+those stops as separate lanes. Do not compile `g16.003` from this partial
+close.
