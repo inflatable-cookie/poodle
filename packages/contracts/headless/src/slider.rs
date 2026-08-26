@@ -604,4 +604,75 @@ mod control_tests {
         assert_eq!(context.active_thumb, Some(RangeThumb::Upper));
         assert!((context.value.1 - context.value.0).abs() < 1e-9);
     }
+
+    #[test]
+    fn press_move_and_end_emit_live_change_then_one_commit() {
+        let mut context = SliderControlContext {
+            value: 0.0,
+            min: 0.0,
+            max: 100.0,
+            step: 10.0,
+            ..SliderControlContext::default()
+        };
+        let (next, effects) = slider_control_transition(
+            context,
+            SliderControlEvent::PointerBegin { value_norm: 0.44 },
+        );
+        assert_eq!(effects, vec![SliderEffect::EmitValueChange { value: 40.0 }]);
+        context = next;
+        let (next, effects) = slider_control_transition(
+            context,
+            SliderControlEvent::PointerMove { value_norm: 0.76 },
+        );
+        assert_eq!(effects, vec![SliderEffect::EmitValueChange { value: 80.0 }]);
+        context = next;
+        let (next, effects) = slider_control_transition(context, SliderControlEvent::PointerEnd);
+        assert_eq!(effects, vec![SliderEffect::EmitValueCommit { value: 80.0 }]);
+        assert!(!next.pointer_active);
+    }
+
+    #[test]
+    fn set_value_rebuilds_without_emitting() {
+        let (next, effects) = slider_transition(
+            SliderContext {
+                value: 50.0,
+                min: 0.0,
+                max: 100.0,
+                step: 10.0,
+                disabled: false,
+            },
+            SliderEvent::SetValue { value: 70.0 },
+        );
+        assert_eq!(next.value, 70.0);
+        assert!(effects.is_empty());
+        let (next, effects) = slider_control_transition(
+            SliderControlContext {
+                value: 0.0,
+                step: 10.0,
+                ..SliderControlContext::default()
+            },
+            SliderControlEvent::SetValue { value: 74.0 },
+        );
+        assert_eq!(next.value, 70.0);
+        assert!(effects.is_empty());
+    }
+
+    #[test]
+    fn disabled_pointer_is_inert() {
+        let context = SliderControlContext {
+            disabled: true,
+            value: 50.0,
+            ..SliderControlContext::default()
+        };
+        let (_, effects) = slider_control_transition(
+            context,
+            SliderControlEvent::PointerBegin { value_norm: 0.9 },
+        );
+        assert!(effects.is_empty());
+        let (_, effects) =
+            slider_control_transition(context, SliderControlEvent::PointerMove { value_norm: 0.9 });
+        assert!(effects.is_empty());
+        let (_, effects) = slider_control_transition(context, SliderControlEvent::PointerEnd);
+        assert!(effects.is_empty());
+    }
 }

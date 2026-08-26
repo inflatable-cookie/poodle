@@ -127,6 +127,35 @@ describe("slider", () => {
     const negative = sliderVisualState(createSliderControlContext({ value: -0.25, min: -1, max: 0, step: 0 }));
     expect(negative).toMatchObject({ centerNorm: 1, fillStartNorm: 0.75, fillSpanNorm: 0.25 });
   });
+
+  test("press, move, and end emit live change then one commit", () => {
+    let control = createSliderControlContext({ value: 0, min: 0, max: 100, step: 10 });
+    let result = sliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.44 });
+    expect(result.effects).toEqual([{ type: "emitValueChange", value: 40 }]);
+    control = result.context;
+    result = sliderControlTransition(control, { type: "POINTER_MOVE", valueNorm: 0.76 });
+    expect(result.effects).toEqual([{ type: "emitValueChange", value: 80 }]);
+    control = result.context;
+    result = sliderControlTransition(control, { type: "POINTER_END" });
+    expect(result.effects).toEqual([{ type: "emitValueCommit", value: 80 }]);
+    expect(result.context.pointerActive).toBe(false);
+  });
+
+  test("SET_VALUE rebuilds without emitting", () => {
+    const set = sliderTransition(ctx, { type: "SET_VALUE", value: 70 });
+    expect(set.context.value).toBe(70);
+    expect(set.effects).toEqual([]);
+    const control = sliderControlTransition(createSliderControlContext({ value: 0, step: 10 }), { type: "SET_VALUE", value: 74 });
+    expect(control.context.value).toBe(70);
+    expect(control.effects).toEqual([]);
+  });
+
+  test("disabled pointer is inert", () => {
+    const control = createSliderControlContext({ disabled: true, value: 50 });
+    expect(sliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.9 }).effects).toEqual([]);
+    expect(sliderControlTransition(control, { type: "POINTER_MOVE", valueNorm: 0.9 }).effects).toEqual([]);
+    expect(sliderControlTransition(control, { type: "POINTER_END" }).effects).toEqual([]);
+  });
 });
 
 describe("rangeSlider", () => {

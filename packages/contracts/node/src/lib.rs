@@ -111,6 +111,18 @@ pub enum ScrubPhase {
     Release,
 }
 
+/// Which axis a scrub fraction is measured along.
+///
+/// Horizontal is left → right. Vertical is bottom → top, so the minimum sits
+/// at the visual bottom. Every node that carries [`Interaction::on_scrub`]
+/// must set this explicitly; the inert default stays horizontal.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum ScrubAxis {
+    #[default]
+    Horizontal,
+    Vertical,
+}
+
 /// How far a pointer selection reaches out from where it landed.
 ///
 /// A backend knows the click count; only the component knows what a "word" is,
@@ -268,6 +280,9 @@ pub struct NodeStyle {
     pub flex_basis_pct: Option<f32>,
     /// Width as a fraction of the parent (0.0..=1.0).
     pub width_pct: Option<f32>,
+    /// Height as a fraction of the parent (0.0..=1.0). Symmetric with
+    /// [`Self::width_pct`] for vertical fill geometry.
+    pub height_pct: Option<f32>,
     /// Wrap flex children onto multiple lines.
     pub flex_wrap: bool,
     /// Keep text on one line (white-space: nowrap).
@@ -337,6 +352,7 @@ impl Default for NodeStyle {
             flex_basis: None,
             flex_basis_pct: None,
             width_pct: None,
+            height_pct: None,
             flex_wrap: false,
             no_wrap: false,
             border_color_top: None,
@@ -596,6 +612,9 @@ pub struct Interaction {
     /// The [`ScrubPhase`] separates the press from the moves that follow, which
     /// is what lets a two-thumb control decide once which thumb it is moving.
     pub on_scrub: Option<Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>>,
+    /// Axis used to derive the scrub fraction. Horizontal is left-to-right;
+    /// vertical is bottom-to-top. Must be set whenever `on_scrub` is set.
+    pub scrub_axis: ScrubAxis,
     /// Activation that needs the modifier state — multi-select lists, where
     /// Shift extends the range and the platform accel toggles one item. When
     /// set the backend calls this INSTEAD of `on_activate`, so a node wires
@@ -792,6 +811,8 @@ pub struct NodeA11y {
     /// Inclusive upper bound of [`Self::value`], same argument as
     /// [`Self::value_min`].
     pub value_max: Option<f64>,
+    /// Human-readable value text for assistive technology (`aria-valuetext`).
+    pub value_text: Option<String>,
 }
 
 impl Node {
@@ -962,6 +983,20 @@ mod tests {
         assert_eq!(node.a11y.value, None);
         assert_eq!(node.a11y.value_min, None);
         assert_eq!(node.a11y.value_max, None);
+        assert_eq!(node.a11y.value_text, None);
+    }
+
+    #[test]
+    fn a_node_declares_no_percentage_height_by_default() {
+        assert_eq!(Node::container().style.height_pct, None);
+    }
+
+    #[test]
+    fn an_inert_scrub_axis_stays_horizontal() {
+        assert_eq!(
+            Node::container().interaction.scrub_axis,
+            ScrubAxis::Horizontal
+        );
     }
 
     /// The ring is opt-in: a node that said nothing about focus draws no ring

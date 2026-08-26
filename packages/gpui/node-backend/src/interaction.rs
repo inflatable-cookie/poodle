@@ -137,14 +137,10 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                     let expand = ring.offset + ring.width;
                     let x = f32::from(bounds.origin.x) - border_left - expand;
                     let y = f32::from(bounds.origin.y) - border_top - expand;
-                    let width = f32::from(bounds.size.width)
-                        + border_left
-                        + border_right
-                        + 2.0 * expand;
-                    let height = f32::from(bounds.size.height)
-                        + border_top
-                        + border_bottom
-                        + 2.0 * expand;
+                    let width =
+                        f32::from(bounds.size.width) + border_left + border_right + 2.0 * expand;
+                    let height =
+                        f32::from(bounds.size.height) + border_top + border_bottom + 2.0 * expand;
                     if width <= 0.0 || height <= 0.0 {
                         super::clear_painted_ring(&ring_id);
                         return;
@@ -501,8 +497,8 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
     }
 
     if let Some(handler) = &node.interaction.on_scrub {
-        // Scrub reports where the pointer sits along this element as a
-        // fraction of its width. Mouse down/up carry the explicit gesture
+        // Scrub reports where the pointer sits along this element's declared
+        // axis as a fraction of that axis. Mouse down/up carry the explicit gesture
         // boundaries. `on_drag_move` keeps real pointer capture after the
         // pointer leaves the element; the mouse-move listener is the fallback
         // for synthetic window events that do not arm gpui's drag payload.
@@ -522,6 +518,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         let mv = handler.clone();
         let captured_mv = handler.clone();
         let release = handler.clone();
+        let axis = node.interaction.scrub_axis;
         let gesture_id = next_gesture_id();
         el = el
             .child(
@@ -534,22 +531,25 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                 .absolute()
                 .size_full(),
             )
-            .on_mouse_down(MouseButton::Left, move |event: &MouseDownEvent, _window, cx| {
-                if let Some(bounds) = *track_down.borrow() {
-                    press(
-                        scrub_fraction(event.position.x.into(), bounds),
-                        ScrubPhase::Press,
-                    );
-                    cx.refresh_windows();
-                }
-            })
+            .on_mouse_down(
+                MouseButton::Left,
+                move |event: &MouseDownEvent, _window, cx| {
+                    if let Some(bounds) = *track_down.borrow() {
+                        press(
+                            scrub_fraction(event.position, bounds, axis),
+                            ScrubPhase::Press,
+                        );
+                        cx.refresh_windows();
+                    }
+                },
+            )
             .on_mouse_move(move |event: &MouseMoveEvent, _window, cx| {
                 if !event.dragging() || cx.has_active_drag() {
                     return;
                 }
                 if let Some(bounds) = *track_move.borrow() {
                     mv(
-                        scrub_fraction(event.position.x.into(), bounds),
+                        scrub_fraction(event.position, bounds, axis),
                         ScrubPhase::Drag,
                     );
                     cx.refresh_windows();
@@ -563,20 +563,23 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                     return;
                 }
                 captured_mv(
-                    scrub_fraction(event.event.position.x.into(), event.bounds),
+                    scrub_fraction(event.event.position, event.bounds, axis),
                     ScrubPhase::Drag,
                 );
                 cx.refresh_windows();
             })
-            .on_mouse_up(MouseButton::Left, move |event: &MouseUpEvent, _window, cx| {
-                if let Some(bounds) = *track_up.borrow() {
-                    release(
-                        scrub_fraction(event.position.x.into(), bounds),
-                        ScrubPhase::Release,
-                    );
-                    cx.refresh_windows();
-                }
-            });
+            .on_mouse_up(
+                MouseButton::Left,
+                move |event: &MouseUpEvent, _window, cx| {
+                    if let Some(bounds) = *track_up.borrow() {
+                        release(
+                            scrub_fraction(event.position, bounds, axis),
+                            ScrubPhase::Release,
+                        );
+                        cx.refresh_windows();
+                    }
+                },
+            );
     }
     el = apply_selection_listeners(el, node);
     apply_drop_listeners(el, node)
@@ -709,14 +712,33 @@ fn edge_for(rel: f32, accepts_inside: bool) -> DropEdge {
     }
 }
 
-/// Where `x` sits across `bounds`, clamped to 0.0..=1.0.
-fn scrub_fraction(x: f32, bounds: gpui::Bounds<gpui::Pixels>) -> f32 {
-    let left: f32 = bounds.origin.x.into();
-    let width: f32 = bounds.size.width.into();
-    if width <= 0.0 {
-        return 0.0;
+/// Where the pointer sits along `bounds` on the declared axis, clamped to
+/// 0.0..=1.0. Horizontal is left → right; vertical is bottom → top.
+fn scrub_fraction(
+    position: gpui::Point<gpui::Pixels>,
+    bounds: gpui::Bounds<gpui::Pixels>,
+    axis: ScrubAxis,
+) -> f32 {
+    match axis {
+        ScrubAxis::Horizontal => {
+            let left: f32 = bounds.origin.x.into();
+            let width: f32 = bounds.size.width.into();
+            if width <= 0.0 {
+                return 0.0;
+            }
+            let x: f32 = position.x.into();
+            ((x - left) / width).clamp(0.0, 1.0)
+        }
+        ScrubAxis::Vertical => {
+            let top: f32 = bounds.origin.y.into();
+            let height: f32 = bounds.size.height.into();
+            if height <= 0.0 {
+                return 0.0;
+            }
+            let y: f32 = position.y.into();
+            (1.0 - (y - top) / height).clamp(0.0, 1.0)
+        }
     }
-    ((x - left) / width).clamp(0.0, 1.0)
 }
 
 /// Payload for gesture drags (scrub, resize) — distinct from
@@ -761,5 +783,67 @@ impl gpui::Render for NodeTooltip {
             .text_color(gpui::hsla(0.0, 0.0, 0.96, 1.0))
             .text_sm()
             .child(self.text.clone())
+    }
+}
+
+#[cfg(test)]
+mod scrub_axis_tests {
+    use super::*;
+
+    fn track() -> gpui::Bounds<gpui::Pixels> {
+        gpui::Bounds {
+            origin: point(px(10.0), px(20.0)),
+            size: size(px(100.0), px(200.0)),
+        }
+    }
+
+    #[test]
+    fn horizontal_scrub_is_left_to_right() {
+        let bounds = track();
+        assert!(
+            (scrub_fraction(point(px(10.0), px(20.0)), bounds, ScrubAxis::Horizontal) - 0.0).abs()
+                < 1e-6
+        );
+        assert!(
+            (scrub_fraction(point(px(60.0), px(20.0)), bounds, ScrubAxis::Horizontal) - 0.5).abs()
+                < 1e-6
+        );
+        assert!(
+            (scrub_fraction(point(px(110.0), px(20.0)), bounds, ScrubAxis::Horizontal) - 1.0).abs()
+                < 1e-6
+        );
+        assert_eq!(
+            scrub_fraction(point(px(0.0), px(20.0)), bounds, ScrubAxis::Horizontal),
+            0.0
+        );
+        assert_eq!(
+            scrub_fraction(point(px(200.0), px(20.0)), bounds, ScrubAxis::Horizontal),
+            1.0
+        );
+    }
+
+    #[test]
+    fn vertical_scrub_is_bottom_to_top() {
+        let bounds = track();
+        assert!(
+            (scrub_fraction(point(px(10.0), px(220.0)), bounds, ScrubAxis::Vertical) - 0.0).abs()
+                < 1e-6
+        );
+        assert!(
+            (scrub_fraction(point(px(10.0), px(120.0)), bounds, ScrubAxis::Vertical) - 0.5).abs()
+                < 1e-6
+        );
+        assert!(
+            (scrub_fraction(point(px(10.0), px(20.0)), bounds, ScrubAxis::Vertical) - 1.0).abs()
+                < 1e-6
+        );
+        assert_eq!(
+            scrub_fraction(point(px(10.0), px(400.0)), bounds, ScrubAxis::Vertical),
+            0.0
+        );
+        assert_eq!(
+            scrub_fraction(point(px(10.0), px(0.0)), bounds, ScrubAxis::Vertical),
+            1.0
+        );
     }
 }

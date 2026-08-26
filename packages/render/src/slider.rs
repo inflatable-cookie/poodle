@@ -1,29 +1,26 @@
 //! Slider — a value along a track: fill + remainder segments, absolute thumb.
 //!
 //! Contract: `docs/contracts/components/slider.md`
-//! Ported from: `packages/jetstream/components/src/slider.rs`.
 //!
-//! The drag handler accumulates from per-frame deltas (the vocabulary carries
-//! no absolute positions — those depend on layout the component never sees),
-//! snapped and clamped by `poodle_headless::slider::slider_transition`, the
-//! same machine the web target drives.
+//! Pointer value is an axis-normalized position. The GPUI backend derives the
+//! fraction from the node that carries `on_scrub`; this renderer maps that
+//! fraction through `slider_control_transition`. Keyboard arrows, Home, and
+//! End go through `slider_transition` INPUT then COMMIT. Hosts do not
+//! reproduce snap/clamp math.
 
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 
+use poodle_headless::slider::{safe_slider_max, SliderEffect};
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodeDragEvent,
-    NodeDragPhase, NodePosition, ShadowValue,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, Node,
+    NodeKey, NodeModifiers, NodePosition, NodeRole, ScrubAxis, ScrubPhase, ShadowValue,
 };
-use poodle_specs::{ControlSize, SliderSpec, SliderVariant};
+use poodle_specs::{ControlSize, Orientation, SliderSpec, SliderVariant};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
-
-/// Fixed track length — 10 rem, matching the GPUI reference basis.
-fn track_w() -> f32 {
-    rem_to_px(10.0)
-}
 
 /// Thumb diameter in rem — contract §8 size table.
 fn thumb_diameter_rem(size: ControlSize) -> f32 {
@@ -47,30 +44,131 @@ fn track_thickness_rem(size: ControlSize) -> f32 {
     }
 }
 
-/// Handlers: `change` fires per-frame during a drag (clamped, snapped);
-/// `commit` fires once at drag end with the settled value.
+/// Cross-axis min-height in rem — contract §8 size table.
+fn control_min_height_rem(size: ControlSize) -> f32 {
+    match size {
+        ControlSize::Xs => 1.25,
+        ControlSize::Sm => 1.375,
+        ControlSize::Md => 1.5,
+        ControlSize::Lg => 1.625,
+        ControlSize::Xl => 1.75,
+    }
+}
+
+fn orientation_name(orientation: Orientation) -> &'static str {
+    match orientation {
+        Orientation::Horizontal => "horizontal",
+        Orientation::Vertical => "vertical",
+    }
+}
+
+fn scrub_axis(orientation: Orientation) -> ScrubAxis {
+    match orientation {
+        Orientation::Horizontal => ScrubAxis::Horizontal,
+        Orientation::Vertical => ScrubAxis::Vertical,
+    }
+}
+
+fn pill(node: &mut Node, radius: f32) {
+    let corners = &mut node.style.descriptor.corner_radii;
+    corners.top_left = radius;
+    corners.top_right = radius;
+    corners.bottom_right = radius;
+    corners.bottom_left = radius;
+}
+
+fn standard_focus_ring(ctx: &RenderContext<'_>, spec: &SliderSpec) -> FocusRing {
+    FocusRing {
+        color: with_alpha(
+            ctx.theme().resolve_color(spec.focus_ring_color_token()),
+            0.32,
+        ),
+        width: rem_to_px(0.1875),
+        offset: 0.0,
+    }
+}
+
+fn embedded_focus_ring(ctx: &RenderContext<'_>, spec: &SliderSpec) -> FocusRing {
+    FocusRing {
+        color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+        width: rem_to_px(0.125),
+        offset: rem_to_px(0.0625),
+    }
+}
+
+fn bind_slider_control(
+    node: &mut Node,
+    spec: &SliderSpec,
+    value: f64,
+    safe_max: f64,
+    key_handler: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
+    ring: FocusRing,
+) {
+    node.a11y.role = Some(NodeRole::Slider);
+    if let Some(label) = spec.aria_label.as_deref() {
+        node.a11y.label = Some(label.to_string());
+    }
+    node.a11y.value = Some(value);
+    node.a11y.value_min = Some(spec.min);
+    node.a11y.value_max = Some(safe_max);
+    node.a11y.value_text = spec.value_text.clone();
+    node.a11y.orientation = Some(orientation_name(spec.orientation).to_owned());
+    if spec.is_disabled {
+        node.interaction.disabled = true;
+    } else {
+        node.interaction.focusable = true;
+        node.a11y.tab_index = Some(0);
+        node.interaction.on_key = key_handler;
+        node.style.focus_ring = Some(ring);
+    }
+}
+
+fn emit_effects(
+    effects: impl IntoIterator<Item = SliderEffect>,
+    on_change: &Option<Arc<dyn Fn(f64) + Send + Sync>>,
+    on_value_commit: &Option<Arc<dyn Fn(f64) + Send + Sync>>,
+) {
+    for effect in effects {
+        match effect {
+            SliderEffect::EmitValueChange { value } => {
+                if let Some(handler) = on_change {
+                    handler(value);
+                }
+            }
+            SliderEffect::EmitValueCommit { value } => {
+                if let Some(handler) = on_value_commit {
+                    handler(value);
+                }
+            }
+        }
+    }
+}
+
+/// Handlers: `on_change` fires during interaction (clamped, snapped);
+/// `on_value_commit` fires once at pointer release or after each accepted key.
 #[derive(Default, Clone)]
 pub struct SliderHandlers {
-    pub change: Option<Arc<dyn Fn(f64) + Send + Sync>>,
-    pub commit: Option<Arc<dyn Fn(f64) + Send + Sync>>,
+    pub on_change: Option<Arc<dyn Fn(f64) + Send + Sync>>,
+    pub on_value_commit: Option<Arc<dyn Fn(f64) + Send + Sync>>,
 }
 
 pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandlers) -> Node {
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
     let thumb_size = rem_to_px(thumb_diameter_rem(effective_size));
-    let track_h = rem_to_px(track_thickness_rem(effective_size));
-    let pill = ctx.theme().resolve_radius("radius.pill");
+    let track_thickness = rem_to_px(track_thickness_rem(effective_size));
+    let cross_size = rem_to_px(control_min_height_rem(effective_size));
+    let pill_radius = ctx.theme().resolve_radius("radius.pill");
     let border_w = rem_to_px(0.0625);
+    let vertical = spec.orientation == Orientation::Vertical;
+    let axis = scrub_axis(spec.orientation);
+    let safe_max = safe_slider_max(spec.min, spec.max);
 
     let accent = ctx.theme().resolve_color(spec.range_fill_token());
     let negative = ctx.theme().resolve_color("color.status.danger");
     let surface = ctx.theme().resolve_color("color.background.surface");
     let border_default = ctx.theme().resolve_color("color.border.default");
     let elevated = ctx.theme().resolve_color("color.background.elevated");
-
-    // Contract §8 track bg = color-mix(surface 88%, transparent): surface at
-    // 88% of its own alpha.
     let track_bg = with_alpha(surface, surface.3 * 0.88);
 
     let visual = poodle_headless::slider::slider_visual_state(
@@ -87,181 +185,130 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
         },
     );
     let fraction = visual.value_norm as f32;
+    let fill_start = visual.fill_start_norm as f32;
+    let fill_span = if spec.variant == SliderVariant::Embedded {
+        visual.fill_span_norm as f32
+    } else {
+        fraction
+    };
+    let fill_origin = if spec.variant == SliderVariant::Embedded {
+        fill_start
+    } else {
+        0.0
+    };
 
     let thumb_r = thumb_size * 0.5;
+    let interactive =
+        !spec.is_disabled && (handlers.on_change.is_some() || handlers.on_value_commit.is_some());
 
-    // Drags do not bubble: every segment under the pointer carries the same
-    // handler.
-    let drag_handler: Option<Arc<dyn Fn(&NodeDragEvent) + Send + Sync>> = if spec.is_disabled
-        || (handlers.change.is_none() && handlers.commit.is_none())
-    {
-        None
-    } else {
-        use std::sync::atomic::{AtomicU64, Ordering};
+    let live = Arc::new(AtomicU64::new(spec.value.to_bits()));
+    let pointer_active = Arc::new(AtomicBool::new(false));
 
-        // The running value for this drag, travelling as its bit pattern —
-        // the handler must be Fn + Send + Sync, ruling out a captured local.
-        let live = Arc::new(AtomicU64::new(spec.value.to_bits()));
-        let context = poodle_headless::slider::SliderContext {
+    let scrub_handler: Option<Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>> = if interactive {
+        let context = poodle_headless::slider::SliderControlContext {
             value: spec.value,
             min: spec.min,
             max: spec.max,
             step: spec.step,
             disabled: false,
+            law: spec.law,
+            polarity: spec.polarity,
+            center_value: spec.center_value,
+            pointer_active: false,
         };
-        let units_per_px = (spec.max - spec.min) / track_w().max(1.0) as f64;
-        let on_change = handlers.change.clone();
-        let on_commit = handlers.commit.clone();
-
-        Some(Arc::new(move |event: &NodeDragEvent| match event.phase {
-            NodeDragPhase::Start => {}
-            NodeDragPhase::Move => {
-                let current = f64::from_bits(live.load(Ordering::SeqCst));
-                let (next, effects) = poodle_headless::slider::slider_transition(
-                    poodle_headless::slider::SliderContext {
-                        value: current,
-                        ..context
-                    },
-                    poodle_headless::slider::SliderEvent::Input {
-                        raw: current + event.delta_x as f64 * units_per_px,
-                    },
-                );
-                live.store(next.value.to_bits(), Ordering::SeqCst);
-                for effect in effects {
-                    if let poodle_headless::slider::SliderEffect::EmitValueChange { value } = effect
-                    {
-                        if let Some(handler) = &on_change {
-                            handler(value);
-                        }
+        let live = Arc::clone(&live);
+        let active = Arc::clone(&pointer_active);
+        let on_change = handlers.on_change.clone();
+        let on_value_commit = handlers.on_value_commit.clone();
+        Some(Arc::new(move |fraction: f32, phase| {
+            let current = f64::from_bits(live.load(Ordering::SeqCst));
+            let pointer_active = active.load(Ordering::SeqCst);
+            let event = match phase {
+                ScrubPhase::Press => poodle_headless::slider::SliderControlEvent::PointerBegin {
+                    value_norm: fraction as f64,
+                },
+                ScrubPhase::Drag if pointer_active => {
+                    poodle_headless::slider::SliderControlEvent::PointerMove {
+                        value_norm: fraction as f64,
                     }
                 }
-            }
-            NodeDragPhase::End => {
-                let current = f64::from_bits(live.load(Ordering::SeqCst));
-                let (_, effects) = poodle_headless::slider::slider_transition(
-                    poodle_headless::slider::SliderContext {
-                        value: current,
-                        ..context
-                    },
-                    poodle_headless::slider::SliderEvent::Commit { raw: current },
-                );
-                for effect in effects {
-                    if let poodle_headless::slider::SliderEffect::EmitValueCommit { value } = effect
-                    {
-                        if let Some(handler) = &on_commit {
-                            handler(value);
-                        }
-                    }
-                }
-            }
-        }))
-    };
-
-    // Scrub: the value IS the pointer's position along the track, so the
-    // backend reports a fraction of the control's own width and the component
-    // maps it onto the range. This replaced a delta accumulation that had to
-    // assume a fixed track length (`track_w()`), which was wrong for any slider
-    // not rendered at exactly that size — the header's contrast control moved a
-    // fraction of the distance the pointer did. It also makes pressing the
-    // track jump the value there, which a delta can never do.
-    let scrub_handler: Option<Arc<dyn Fn(f32, poodle_node::ScrubPhase) + Send + Sync>> =
-        if handlers.change.is_none() {
-            None
-        } else {
-            use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-            let context = poodle_headless::slider::SliderControlContext {
-                value: spec.value,
-                min: spec.min,
-                max: spec.max,
-                step: spec.step,
-                disabled: false,
-                law: spec.law,
-                polarity: spec.polarity,
-                center_value: spec.center_value,
-                pointer_active: false,
+                ScrubPhase::Drag => poodle_headless::slider::SliderControlEvent::PointerBegin {
+                    value_norm: fraction as f64,
+                },
+                ScrubPhase::Release => poodle_headless::slider::SliderControlEvent::PointerEnd,
             };
-            let live = Arc::new(AtomicU64::new(spec.value.to_bits()));
-            let active = Arc::new(AtomicBool::new(false));
-            let on_change = handlers.change.clone();
-            // A single-thumb slider treats press and drag identically: there is
-            // only one thing the pointer can be moving.
-            Some(Arc::new(move |fraction: f32, phase| {
+            let (next, effects) = poodle_headless::slider::slider_control_transition(
+                poodle_headless::slider::SliderControlContext {
+                    value: current,
+                    pointer_active,
+                    ..context
+                },
+                event,
+            );
+            live.store(next.value.to_bits(), Ordering::SeqCst);
+            active.store(next.pointer_active, Ordering::SeqCst);
+            emit_effects(effects, &on_change, &on_value_commit);
+        }))
+    } else {
+        None
+    };
+
+    let key_handler: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>> =
+        if interactive {
+            let live = Arc::clone(&live);
+            let on_change = handlers.on_change.clone();
+            let on_value_commit = handlers.on_value_commit.clone();
+            let min = spec.min;
+            let max = spec.max;
+            let step = spec.step;
+            Some(Arc::new(move |key: NodeKey, _mods: NodeModifiers| {
                 let current = f64::from_bits(live.load(Ordering::SeqCst));
-                let pointer_active = active.load(Ordering::SeqCst);
-                let event = match phase {
-                    poodle_node::ScrubPhase::Press => {
-                        poodle_headless::slider::SliderControlEvent::PointerBegin {
-                            value_norm: fraction as f64,
-                        }
-                    }
-                    poodle_node::ScrubPhase::Drag if pointer_active => {
-                        poodle_headless::slider::SliderControlEvent::PointerMove {
-                            value_norm: fraction as f64,
-                        }
-                    }
-                    poodle_node::ScrubPhase::Drag => {
-                        poodle_headless::slider::SliderControlEvent::PointerBegin {
-                            value_norm: fraction as f64,
-                        }
-                    }
-                    poodle_node::ScrubPhase::Release => {
-                        poodle_headless::slider::SliderControlEvent::PointerEnd
-                    }
+                let direction = match key {
+                    NodeKey::ArrowLeft | NodeKey::ArrowDown => -1.0,
+                    NodeKey::ArrowRight | NodeKey::ArrowUp => 1.0,
+                    _ => 0.0,
                 };
-                let (next, effects) = poodle_headless::slider::slider_control_transition(
-                    poodle_headless::slider::SliderControlContext {
-                        value: current,
-                        pointer_active,
-                        ..context
-                    },
-                    event,
+                let raw = match key {
+                    NodeKey::Home => min,
+                    NodeKey::End => safe_max,
+                    NodeKey::ArrowLeft
+                    | NodeKey::ArrowDown
+                    | NodeKey::ArrowRight
+                    | NodeKey::ArrowUp => current + direction * step,
+                    _ => return None,
+                };
+                let context = poodle_headless::slider::SliderContext {
+                    value: current,
+                    min,
+                    max,
+                    step,
+                    disabled: false,
+                };
+                let (changed, change_effects) = poodle_headless::slider::slider_transition(
+                    context,
+                    poodle_headless::slider::SliderEvent::Input { raw },
                 );
-                live.store(next.value.to_bits(), Ordering::SeqCst);
-                active.store(next.pointer_active, Ordering::SeqCst);
-                for effect in effects {
-                    if let poodle_headless::slider::SliderEffect::EmitValueChange { value } = effect
-                    {
-                        if let Some(handler) = &on_change {
-                            handler(value);
-                        }
-                    }
-                }
+                let (committed, commit_effects) = poodle_headless::slider::slider_transition(
+                    changed,
+                    poodle_headless::slider::SliderEvent::Commit { raw: changed.value },
+                );
+                live.store(committed.value.to_bits(), Ordering::SeqCst);
+                emit_effects(
+                    change_effects.into_iter().chain(commit_effects),
+                    &on_change,
+                    &on_value_commit,
+                );
+                None
             }))
+        } else {
+            None
         };
 
-    // Thumb and fill only advertise the affordance. The scrub itself belongs to
-    // the TRACK, because the fraction is measured across the node that carries
-    // it — putting it on the thumb would measure across the thumb's own few
-    // pixels. Both are children of the track, so a press on either still
-    // reaches it.
-    let draggable = |node: &mut Node| {
-        if scrub_handler.is_some() || drag_handler.is_some() {
-            node.style.descriptor.cursor = CursorHint::Pointer;
-        }
-    };
-
-    let scrubbable = |node: &mut Node| {
-        if let Some(handler) = &scrub_handler {
-            node.style.descriptor.cursor = CursorHint::Pointer;
-            node.interaction.on_scrub = Some(Arc::clone(handler));
-        } else if let Some(handler) = &drag_handler {
-            node.style.descriptor.cursor = CursorHint::Pointer;
-            node.interaction.on_drag = Some(Arc::clone(handler));
-        }
-    };
-
-    // Thumb: anchored to the right edge of the percentage-width fill so the
-    // track can use the host's full available width like the GPUI reference.
-    let thumb_top = -(thumb_r - track_h * 0.5);
     let mut thumb = Node::container();
     {
         let s = &mut thumb.style;
         s.descriptor.layout.width = LayoutSizing::Fixed(thumb_size);
         s.descriptor.layout.height = LayoutSizing::Fixed(thumb_size);
-        s.descriptor.corner_radii.top_left = thumb_r;
-        s.descriptor.corner_radii.top_right = thumb_r;
-        s.descriptor.corner_radii.bottom_right = thumb_r;
-        s.descriptor.corner_radii.bottom_left = thumb_r;
         s.descriptor.background = Some(elevated);
         s.descriptor.border.width = border_w;
         s.descriptor.border.color = border_default;
@@ -273,106 +320,163 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
             color: ColorValue(0.0, 0.0, 0.0, 0.18),
         });
     }
-    thumb.position = NodePosition::Absolute {
-        top: Some(thumb_top),
-        left: None,
-        right: Some(-thumb_r),
-        bottom: None,
+    pill(&mut thumb, thumb_r);
+    thumb.position = if vertical {
+        NodePosition::Absolute {
+            top: Some(-thumb_r),
+            left: Some(-(thumb_r - track_thickness * 0.5)),
+            right: None,
+            bottom: None,
+        }
+    } else {
+        NodePosition::Absolute {
+            top: Some(-(thumb_r - track_thickness * 0.5)),
+            left: None,
+            right: Some(-thumb_r),
+            bottom: None,
+        }
     };
-    draggable(&mut thumb);
 
-    // Filled portion. Its right edge is the thumb anchor.
+    let fill_color = if visual.fill_tone == poodle_headless::slider::SliderFillTone::Negative {
+        negative
+    } else {
+        accent
+    };
     let mut fill = Node::container();
     fill.position = NodePosition::Relative;
     {
         let s = &mut fill.style;
-        s.width_pct = Some(if spec.variant == SliderVariant::Embedded {
-            visual.fill_span_norm as f32
+        if vertical {
+            s.height_pct = Some(fill_span);
+            s.descriptor.layout.width = LayoutSizing::Fixed(track_thickness);
         } else {
-            fraction
-        });
-        s.descriptor.layout.height = LayoutSizing::Fixed(track_h);
-        s.descriptor.background = Some(
-            if visual.fill_tone == poodle_headless::slider::SliderFillTone::Negative {
-                negative
-            } else {
-                accent
-            },
-        );
-        s.descriptor.corner_radii.top_left = pill;
-        s.descriptor.corner_radii.top_right = pill;
-        s.descriptor.corner_radii.bottom_right = pill;
-        s.descriptor.corner_radii.bottom_left = pill;
+            s.width_pct = Some(fill_span);
+            s.descriptor.layout.height = LayoutSizing::Fixed(track_thickness);
+        }
+        s.descriptor.background = Some(fill_color);
     }
-    draggable(&mut fill);
+    pill(&mut fill, pill_radius);
     let fill = if spec.variant == SliderVariant::Embedded {
         fill
     } else {
+        bind_slider_control(
+            &mut thumb,
+            spec,
+            visual.value,
+            safe_max,
+            key_handler.clone(),
+            standard_focus_ring(ctx, spec),
+        );
         fill.child(thumb)
     };
 
-    // Track: full-width 6px pill. Its absolute thumb may overflow vertically
-    // without changing the 6px layout height, matching the old GPUI anatomy.
     let mut track = Node::container();
     {
         let s = &mut track.style;
-        s.fill_width = true;
-        s.descriptor.layout.height = LayoutSizing::Fixed(track_h);
-        s.descriptor.layout.direction = LayoutDirection::Row;
+        if vertical {
+            s.fill_height = true;
+            s.descriptor.layout.width = LayoutSizing::Fixed(track_thickness);
+            s.descriptor.layout.direction = LayoutDirection::Column;
+        } else {
+            s.fill_width = true;
+            s.descriptor.layout.height = LayoutSizing::Fixed(track_thickness);
+            s.descriptor.layout.direction = LayoutDirection::Row;
+        }
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.background = Some(track_bg);
-        s.descriptor.corner_radii.top_left = pill;
-        s.descriptor.corner_radii.top_right = pill;
-        s.descriptor.corner_radii.bottom_right = pill;
-        s.descriptor.corner_radii.bottom_left = pill;
     }
+    pill(&mut track, pill_radius);
     track.position = NodePosition::Relative;
-    let track = if spec.variant == SliderVariant::Embedded {
-        let mut leading = Node::container();
-        leading.style.width_pct = Some(visual.fill_start_norm as f32);
-        leading.style.descriptor.layout.height = LayoutSizing::Fixed(track_h);
-        track.child(leading).child(fill)
-    } else {
-        track.child(fill)
-    };
 
-    // Grab area. The track paints 6px tall, which is a punishing pointer
-    // target — the same reason ResizeHandle's contract puts its grab area on an
-    // overlay rather than the visible line. This transparent overlay spans the
-    // track's full width (so the scrub fraction is still measured across the
-    // track) and reaches past it vertically, giving the whole control height as
-    // hit area.
+    let leading_pct = if vertical {
+        (1.0 - fill_origin - fill_span).max(0.0)
+    } else {
+        fill_origin
+    };
+    let trailing_pct = if vertical { fill_origin } else { 0.0 };
+    if spec.variant == SliderVariant::Embedded || vertical {
+        if leading_pct > 0.0 {
+            let mut leading = Node::container();
+            if vertical {
+                leading.style.height_pct = Some(leading_pct);
+                leading.style.descriptor.layout.width = LayoutSizing::Fixed(track_thickness);
+            } else {
+                leading.style.width_pct = Some(leading_pct);
+                leading.style.descriptor.layout.height = LayoutSizing::Fixed(track_thickness);
+            }
+            track = track.child(leading);
+        }
+        track = track.child(fill);
+        if trailing_pct > 0.0 {
+            let mut trailing = Node::container();
+            trailing.style.height_pct = Some(trailing_pct);
+            trailing.style.descriptor.layout.width = LayoutSizing::Fixed(track_thickness);
+            track = track.child(trailing);
+        }
+    } else {
+        track = track.child(fill);
+    }
+
     let mut grab = Node::container();
     {
         let s = &mut grab.style;
-        s.fill_width = true;
+        if vertical {
+            s.fill_height = true;
+        } else {
+            s.fill_width = true;
+        }
     }
-    grab.position = NodePosition::Absolute {
-        top: Some(-thumb_r),
-        left: Some(0.0),
-        right: Some(0.0),
-        bottom: Some(-thumb_r),
+    grab.position = if vertical {
+        NodePosition::Absolute {
+            top: Some(0.0),
+            left: Some(-thumb_r),
+            right: Some(-thumb_r),
+            bottom: Some(0.0),
+        }
+    } else {
+        NodePosition::Absolute {
+            top: Some(-thumb_r),
+            left: Some(0.0),
+            right: Some(0.0),
+            bottom: Some(-thumb_r),
+        }
     };
-    scrubbable(&mut grab);
+    if let Some(handler) = &scrub_handler {
+        grab.style.descriptor.cursor = CursorHint::Pointer;
+        grab.interaction.on_scrub = Some(Arc::clone(handler));
+        grab.interaction.scrub_axis = axis;
+    }
     let track = track.child(grab);
 
     let mut el = Node::container();
     {
         let s = &mut el.style;
-        s.fill_width = true;
+        if vertical {
+            s.fill_height = true;
+            s.descriptor.layout.width = LayoutSizing::Fixed(cross_size);
+            s.min_width = Some(cross_size);
+            s.min_height = Some(rem_to_px(10.0));
+            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        } else {
+            s.fill_width = true;
+        }
     }
     let mut el = el.child(track);
 
+    if spec.variant == SliderVariant::Embedded {
+        bind_slider_control(
+            &mut el,
+            spec,
+            visual.value,
+            safe_max,
+            key_handler,
+            embedded_focus_ring(ctx, spec),
+        );
+    }
     if spec.is_disabled {
         el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
-        el.interaction.disabled = true;
-    } else {
-        el.interaction.focusable = true;
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        el.a11y.label = Some(label.to_string());
-    }
     el
 }
 
@@ -388,25 +492,58 @@ mod tests {
         node.find(&|n| n.interaction.on_scrub.is_some())
     }
 
-    #[test]
-    fn the_track_carries_the_scrub_and_the_thumb_does_not() {
-        // The fraction is measured across whichever node carries the handler,
-        // so it belongs to the full-width track. On the thumb it would measure
-        // across a few pixels and the value would jump wildly.
-        let handlers = SliderHandlers {
-            change: Some(Arc::new(|_| {})),
-            commit: None,
-        };
-        let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
+    fn slider_control(node: &Node) -> &Node {
+        node.find(&|n| n.a11y.role == Some(NodeRole::Slider))
+            .expect("one slider node")
+    }
+
+    fn armed(spec: SliderSpec) -> (Node, Arc<std::sync::Mutex<Vec<(String, f64)>>>) {
+        let seen = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let change = Arc::clone(&seen);
+        let commit = Arc::clone(&seen);
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = slider(&spec, &ctx, &handlers);
+        let node = slider(
+            &spec,
+            &ctx,
+            &SliderHandlers {
+                on_change: Some(Arc::new(move |value| {
+                    change.lock().unwrap().push(("change".into(), value));
+                })),
+                on_value_commit: Some(Arc::new(move |value| {
+                    commit.lock().unwrap().push(("commit".into(), value));
+                })),
+            },
+        );
+        (node, seen)
+    }
 
+    #[test]
+    fn the_track_carries_the_scrub_and_the_thumb_does_not() {
+        let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
+        let (node, _) = armed(spec);
         let scrub = find_scrub(&node).expect("a node carries the scrub handler");
         assert!(
             scrub.style.fill_width,
             "the scrub belongs to the full-width track"
         );
+        assert_eq!(scrub.interaction.scrub_axis, ScrubAxis::Horizontal);
+    }
+
+    #[test]
+    fn commit_only_hosts_still_install_the_scrub() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
+        let node = slider(
+            &spec,
+            &ctx,
+            &SliderHandlers {
+                on_change: None,
+                on_value_commit: Some(Arc::new(|_| {})),
+            },
+        );
+        assert!(find_scrub(&node).is_some());
     }
 
     #[test]
@@ -416,6 +553,135 @@ mod tests {
         let spec = SliderSpec::new(0.5).with_bounds(0.0, 1.0);
         let node = slider(&spec, &ctx, &SliderHandlers::default());
         assert!(find_scrub(&node).is_none());
+        assert!(slider_control(&node).interaction.on_key.is_none());
+    }
+
+    #[test]
+    fn a_vertical_slider_declares_its_axis_and_uses_height_pct() {
+        let spec = SliderSpec::new(40.0)
+            .with_bounds(0.0, 100.0)
+            .with_orientation(Orientation::Vertical);
+        let (node, _) = armed(spec);
+        let scrub = find_scrub(&node).expect("scrub");
+        assert_eq!(scrub.interaction.scrub_axis, ScrubAxis::Vertical);
+        assert!(scrub.style.fill_height);
+        let fill = node
+            .find(&|n| n.style.height_pct == Some(0.4))
+            .expect("vertical fill");
+        assert_eq!(fill.style.height_pct, Some(0.4));
+        assert!(fill.style.width_pct.is_none());
+    }
+
+    #[test]
+    fn pointer_release_commits_through_the_scrub() {
+        let spec = SliderSpec::new(0.0).with_bounds(0.0, 100.0);
+        let (node, seen) = armed(spec);
+        let scrub = Arc::clone(
+            find_scrub(&node)
+                .unwrap()
+                .interaction
+                .on_scrub
+                .as_ref()
+                .unwrap(),
+        );
+        scrub(0.44, ScrubPhase::Press);
+        scrub(0.76, ScrubPhase::Drag);
+        scrub(0.76, ScrubPhase::Release);
+        assert_eq!(
+            seen.lock().unwrap().as_slice(),
+            [
+                ("change".into(), 44.0),
+                ("change".into(), 76.0),
+                ("commit".into(), 76.0)
+            ]
+        );
+    }
+
+    #[test]
+    fn arrows_home_and_end_emit_change_then_commit() {
+        let spec = SliderSpec::new(50.0).with_bounds(0.0, 100.0);
+        let mut spec = spec;
+        spec.step = 10.0;
+        spec.aria_label = Some("Volume".into());
+        spec.value_text = Some("half".into());
+        let (node, seen) = armed(spec);
+        let key = slider_control(&node).interaction.on_key.as_ref().unwrap();
+        let mods = NodeModifiers::default();
+        key(NodeKey::ArrowRight, mods);
+        key(NodeKey::Home, mods);
+        key(NodeKey::End, mods);
+        assert_eq!(
+            seen.lock().unwrap().as_slice(),
+            [
+                ("change".into(), 60.0),
+                ("commit".into(), 60.0),
+                ("change".into(), 0.0),
+                ("commit".into(), 0.0),
+                ("change".into(), 100.0),
+                ("commit".into(), 100.0),
+            ]
+        );
+    }
+
+    #[test]
+    fn the_focusable_node_carries_slider_intent() {
+        let mut spec = SliderSpec::new(40.0).with_bounds(0.0, 100.0);
+        spec.aria_label = Some("Volume".into());
+        spec.value_text = Some("quiet".into());
+        let (node, _) = armed(spec);
+        let control = slider_control(&node);
+        assert_eq!(control.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(control.a11y.label.as_deref(), Some("Volume"));
+        assert_eq!(control.a11y.value, Some(40.0));
+        assert_eq!(control.a11y.value_min, Some(0.0));
+        assert_eq!(control.a11y.value_max, Some(100.0));
+        assert_eq!(control.a11y.value_text.as_deref(), Some("quiet"));
+        assert_eq!(control.a11y.orientation.as_deref(), Some("horizontal"));
+        assert!(control.interaction.focusable);
+        assert_eq!(control.a11y.tab_index, Some(0));
+        assert!(!control.interaction.disabled);
+        let ring = control.style.focus_ring.expect("standard thumb ring");
+        assert!((ring.width - rem_to_px(0.1875)).abs() < 1e-6);
+        assert!((ring.offset - 0.0).abs() < 1e-6);
+        assert!((ring.color.3 - 0.32).abs() < 1e-6);
+        assert!(
+            node.style.focus_ring.is_none(),
+            "standard focus belongs on the thumb, not the root"
+        );
+        assert!(!node.interaction.focusable);
+    }
+
+    #[test]
+    fn embedded_focus_is_a_root_outline() {
+        let mut spec = SliderSpec::new(40.0)
+            .with_bounds(0.0, 100.0)
+            .with_embedded_control(poodle_headless::slider::SliderPolarity::Unipolar);
+        spec.aria_label = Some("Gain".into());
+        let (node, _) = armed(spec);
+        let ring = node.style.focus_ring.expect("embedded root ring");
+        assert_eq!(node.a11y.role, Some(NodeRole::Slider));
+        assert!(node.interaction.focusable);
+        assert_eq!(node.a11y.tab_index, Some(0));
+        assert!((ring.width - rem_to_px(0.125)).abs() < 1e-6);
+        assert!((ring.offset - rem_to_px(0.0625)).abs() < 1e-6);
+        assert!((ring.color.3 - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn disabled_slider_is_inert() {
+        let mut spec = SliderSpec::new(40.0).with_bounds(0.0, 100.0);
+        spec.is_disabled = true;
+        spec.aria_label = Some("Volume".into());
+        let (node, seen) = armed(spec);
+        let control = slider_control(&node);
+        assert!(find_scrub(&node).is_none());
+        assert!(control.interaction.on_key.is_none());
+        assert!(control.interaction.disabled);
+        assert!(!control.interaction.focusable);
+        assert_eq!(control.a11y.tab_index, None);
+        assert!(control.style.focus_ring.is_none());
+        assert_eq!(control.a11y.role, Some(NodeRole::Slider));
+        assert!(seen.lock().unwrap().is_empty());
     }
 
     #[test]
