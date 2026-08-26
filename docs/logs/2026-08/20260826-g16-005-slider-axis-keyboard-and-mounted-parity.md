@@ -50,7 +50,8 @@ stays deferred.
   removed; keyboard on the one focusable node; horizontal and vertical
   geometry; disabled installs no scrub or key handler. Standard focus is the
   0.1875rem, 32%-alpha ring on the thumb; embedded focus is a 0.125rem root
-  outline at 0.0625rem offset
+  outline at 0.0625rem offset. Enabled controls declare `tab_index = 0` so
+  GPUI sequential Tab reaches them; disabled remains excluded
 - `packages/gpui/preview/src/node_compat.rs` — mechanical field rename
 - Jetstream `js_slider` stays on `SliderHandlers::default()`; compile-only
 

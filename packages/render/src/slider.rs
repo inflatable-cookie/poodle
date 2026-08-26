@@ -117,6 +117,7 @@ fn bind_slider_control(
         node.interaction.disabled = true;
     } else {
         node.interaction.focusable = true;
+        node.a11y.tab_index = Some(0);
         node.interaction.on_key = key_handler;
         node.style.focus_ring = Some(ring);
     }
@@ -637,6 +638,7 @@ mod tests {
         assert_eq!(control.a11y.value_text.as_deref(), Some("quiet"));
         assert_eq!(control.a11y.orientation.as_deref(), Some("horizontal"));
         assert!(control.interaction.focusable);
+        assert_eq!(control.a11y.tab_index, Some(0));
         assert!(!control.interaction.disabled);
         let ring = control.style.focus_ring.expect("standard thumb ring");
         assert!((ring.width - rem_to_px(0.1875)).abs() < 1e-6);
@@ -659,6 +661,7 @@ mod tests {
         let ring = node.style.focus_ring.expect("embedded root ring");
         assert_eq!(node.a11y.role, Some(NodeRole::Slider));
         assert!(node.interaction.focusable);
+        assert_eq!(node.a11y.tab_index, Some(0));
         assert!((ring.width - rem_to_px(0.125)).abs() < 1e-6);
         assert!((ring.offset - rem_to_px(0.0625)).abs() < 1e-6);
         assert!((ring.color.3 - 1.0).abs() < 1e-6);
@@ -675,6 +678,7 @@ mod tests {
         assert!(control.interaction.on_key.is_none());
         assert!(control.interaction.disabled);
         assert!(!control.interaction.focusable);
+        assert_eq!(control.a11y.tab_index, None);
         assert!(control.style.focus_ring.is_none());
         assert_eq!(control.a11y.role, Some(NodeRole::Slider));
         assert!(seen.lock().unwrap().is_empty());

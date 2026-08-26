@@ -414,7 +414,12 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
         drop(rebuilt);
 
         driver.wait_for_focus_handle(FIXTURE_ID);
-        driver.focus_element(FIXTURE_ID);
+        tab_until_focused(&mut driver, FIXTURE_ID);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(FIXTURE_ID),
+            Some(true),
+            "Tab traversal must reach the enabled slider before a key"
+        );
         driver.dispatch_key_raw("right");
         assert_eq!(*live.lock().expect("value lock"), 96.0);
         driver.dispatch_key_raw("home");
@@ -497,6 +502,7 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
         let control = slider_control(&disabled);
         assert!(control.interaction.disabled);
         assert!(!control.interaction.focusable);
+        assert_eq!(control.a11y.tab_index, None);
         assert!(control.interaction.on_key.is_none());
         assert!(control.style.focus_ring.is_none());
         assert!(
