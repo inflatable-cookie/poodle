@@ -3,7 +3,7 @@
 Status: complete
 Opened: 2026-08-27
 Completed: 2026-08-27
-PR: #92
+Merged: PR #92
 Depends on: merged `g16.016` / PR #91 and the resolved selection in
 `../../triage/20260827-222346-post-g16-016-native-lane-decision.md`
 Governing refs: `../../contracts/001-working-rules.md`,
