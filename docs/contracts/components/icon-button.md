@@ -1,7 +1,7 @@
 # IconButton
 
 Status: detailed contract
-Updated: 2026-07-19
+Updated: 2026-08-27
 
 ## 1. Purpose
 
@@ -429,6 +429,20 @@ button-owned wrapper.
 - Spec struct: `IconButtonSpec` in primitives crate holds variant + size + icon
 - Component struct: `PoodleIconButton` in components crate renders via `IntoElement`
 - GPUI must not rely on tooltip text as the only accessible name
+- Native tooltip text projects through `Node.tooltip`. Explicit `tooltip` wins;
+  otherwise a non-empty `ariaLabel` is the fallback. Empty text is omitted.
+  GPUI's native tooltip chrome owns timing, placement, and paint. Native does
+  not reproduce the web overlay, 300ms delay, Escape dismiss, or
+  `aria-describedby` linkage.
+- Toggle mode is active when `pressed` or `defaultPressed` is present. The
+  renderer is stateless: the host owns the current pressed value and rebuilds
+  after `onPressedChange`. `defaultPressed` is the initial seed, not hidden
+  renderer state. Available toggle activation reports the inverse boolean
+  once, then invokes the command callback once.
+- The same square target owns button role, accessible name, sequential focus,
+  optional toggled and disclosure state, pointer/keyboard activation, and the
+  standard structured focus ring. Disabled and loading targets emit nothing
+  and are not sequential focus stops.
 - Custom property pattern for fill/border/hover/active can be flattened in
   GPUI to direct computed values per variant
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
@@ -492,6 +506,7 @@ button-owned wrapper.
 |-------|-------------|-----------------|-----------|
 | Jetstream has no `onFocus` / `onBlur` | the runtime raises pointer events, not focus ones | accepted, tracked | arrives with focus plumbing |
 | Jetstream has no `onPressedChange` | `pressed` is a spec input there; the host derives the change from `on_click` | accepted | none |
+| Native tooltip uses `Node.tooltip` / GPUI chrome rather than the web overlay | placement, timing, and paint are runtime-owned; the node/backend already expose this channel | accepted | overlay, timer, Escape, and `aria-describedby` stay web |
 | Color-mix blending | GPUI may approximate color-mix differently | allowed | visual result must be comparable |
 | Custom property pattern | GPUI may use direct values instead of CSS custom properties | allowed | final computed colors must match |
 | Spinner animation | GPUI may use different animation primitives | allowed | visual effect must match (rotating arc) |

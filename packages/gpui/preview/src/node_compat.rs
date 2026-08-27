@@ -7418,6 +7418,8 @@ pub(crate) struct IconButton {
     spec: IconButtonSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
+    on_click: Option<Arc<dyn Fn() + Send + Sync>>,
+    on_pressed_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
 }
 
 impl IconButton {
@@ -7426,6 +7428,8 @@ impl IconButton {
             spec,
             theme: theme.clone(),
             id_suffix: None,
+            on_click: None,
+            on_pressed_change: None,
         }
     }
 
@@ -7434,11 +7438,28 @@ impl IconButton {
         self
     }
 
+    pub(crate) fn on_click(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.on_click = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_pressed_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.on_pressed_change = Some(handler);
+        self
+    }
+
     pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
         let id = self
             .id_suffix
             .unwrap_or_else(|| self.spec.icon.clone().unwrap_or_default());
-        let mut node = poodle_render::icon_button(&self.spec, ctx, None);
+        let mut node = poodle_render::icon_button_with_handlers(
+            &self.spec,
+            ctx,
+            poodle_render::IconButtonHandlers {
+                on_click: self.on_click,
+                on_pressed_change: self.on_pressed_change,
+            },
+        );
         node.id = Some(format!("poodle-icon-btn-{id}"));
         node
     }

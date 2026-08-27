@@ -12,8 +12,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeAnimation, StylePatch,
+    CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, MainAxisAlignment,
+    Node, NodeAnimation, NodeRole, NodeToggled, StylePatch,
 };
 use poodle_specs::{ButtonTone, ButtonVariant, IconButtonSpec, IconSize};
 
@@ -27,11 +27,37 @@ use crate::presentation::{rem_to_px, resolve_supporting_visual_size, size_height
 /// asset is carried as an animated icon node.
 const LOADING_SPINNER_PX: f32 = 12.0;
 
-/// Build an icon-button node. `on_click` fires unless disabled or loading.
+/// Command helper used by composites. Pressed-change reporting lives on
+/// [`icon_button_with_handlers`].
 pub fn icon_button(
     spec: &IconButtonSpec,
     ctx: &RenderContext<'_>,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
+) -> Node {
+    icon_button_with_handlers(
+        spec,
+        ctx,
+        IconButtonHandlers {
+            on_click,
+            on_pressed_change: None,
+        },
+    )
+}
+
+/// Host callbacks. Toggle activation reports the inverse pressed value first,
+/// then invokes the command callback. Command-only activation never
+/// manufactures a pressed-change event.
+#[derive(Default)]
+pub struct IconButtonHandlers {
+    pub on_click: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_pressed_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+}
+
+/// Build an icon-button node with command and optional pressed-change handlers.
+pub fn icon_button_with_handlers(
+    spec: &IconButtonSpec,
+    ctx: &RenderContext<'_>,
+    handlers: IconButtonHandlers,
 ) -> Node {
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let tone = spec.tone;
@@ -42,7 +68,9 @@ pub fn icon_button(
     // `icon_button_size_delta_rem`), which ignore the theme's
     // density/control-size layering. At base tokens (the Jetstream provider,
     // no axes) md/default reproduces the old fixed 36px square.
-    let size_px = ctx.theme().resolve_space(spec.control_height_token(ctx.base_size(spec.size)))
+    let size_px = ctx
+        .theme()
+        .resolve_space(spec.control_height_token(ctx.base_size(spec.size)))
         + rem_to_px(size_height_offset_rem(effective_size));
 
     // Glyph (contract §13): the old tier's
@@ -54,7 +82,8 @@ pub fn icon_button(
         .resolve_space(IconSize::from(resolve_supporting_visual_size(effective_size)).size_token());
 
     let radius = ctx.theme().resolve_radius("radius.control");
-    let is_pressed = spec.is_pressed.unwrap_or(false);
+    let is_pressed = spec.current_pressed();
+    let is_toggle = spec.is_toggle_mode();
     let is_unavailable = spec.is_disabled || spec.is_loading;
 
     let elevated = ctx.theme().resolve_color("color.background.elevated");
@@ -139,7 +168,7 @@ pub fn icon_button(
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
     }
-    el.interaction.focusable = true;
+    el.interaction.focusable = !is_unavailable;
 
     // Contract §8: the shadow is `none` in every state — no inset highlight,
     // no drop. The old fixed-table port carried an inset top highlight the
@@ -163,6 +192,7 @@ pub fn icon_button(
         el.interaction.disabled = true;
     } else {
         el.style.descriptor.cursor = CursorHint::Pointer;
+        el.a11y.tab_index = Some(0);
         el.style.hover = Some(StylePatch {
             background: Some(hover_fill),
             border_color: Some(hover_border),
@@ -175,23 +205,58 @@ pub fn icon_button(
             text_color: None,
             opacity: None,
         });
-        el.style.focus = Some(StylePatch {
-            background: None,
-            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
-            text_color: None,
-            opacity: None,
+        el.style.focus_ring = Some(FocusRing {
+            color: ctx.theme().resolve_color("color.accent.focusRing"),
+            width: ctx.theme().resolve_border_width("border.width.focus"),
+            offset: rem_to_px(0.125),
         });
-        if let Some(handler) = on_click {
-            el.interaction.on_activate = Some(Arc::new(move || handler()));
+        let on_click = handlers.on_click;
+        let on_pressed_change = handlers.on_pressed_change;
+        if on_click.is_some() || (is_toggle && on_pressed_change.is_some()) {
+            let next_pressed = !is_pressed;
+            el.interaction.on_activate = Some(Arc::new(move || {
+                if is_toggle {
+                    if let Some(ref handler) = on_pressed_change {
+                        handler(next_pressed);
+                    }
+                }
+                if let Some(ref handler) = on_click {
+                    handler();
+                }
+            }));
         }
     }
 
     if let Some(label) = spec.aria_label.as_deref() {
         el.a11y.label = Some(label.to_string());
     }
+    el.a11y.role = Some(NodeRole::Button);
+    if is_toggle {
+        el.a11y.toggled = Some(if is_pressed {
+            NodeToggled::True
+        } else {
+            NodeToggled::False
+        });
+    }
     el.a11y.expanded = spec.is_expanded;
     el.a11y.controls = spec.controls.clone();
+    el.tooltip = projected_tooltip(spec);
     el
+}
+
+fn projected_tooltip(spec: &IconButtonSpec) -> Option<String> {
+    match spec.tooltip.as_deref() {
+        Some(text) => non_empty_text(text),
+        None => spec.aria_label.as_deref().and_then(non_empty_text),
+    }
+}
+
+fn non_empty_text(text: &str) -> Option<String> {
+    if text.trim().is_empty() {
+        None
+    } else {
+        Some(text.to_string())
+    }
 }
 
 #[cfg(test)]
@@ -508,6 +573,9 @@ mod tests {
             Some(Arc::new(|| panic!("disabled buttons do not fire"))),
         );
         assert!(node.interaction.disabled);
+        assert!(!node.interaction.focusable);
+        assert_eq!(node.a11y.tab_index, None);
+        assert!(node.style.focus_ring.is_none());
         assert!(node.interaction.on_activate.is_none());
         assert_eq!(
             node.style.descriptor.opacity,
@@ -527,6 +595,8 @@ mod tests {
             .with_loading(true);
         let node = icon_button(&spec, &ctx, None);
         assert!(node.interaction.disabled);
+        assert!(!node.interaction.focusable);
+        assert_eq!(node.a11y.tab_index, None);
         let glyph = icon_child(&node).expect("the spinner stands in for the glyph");
         match &glyph.kind {
             NodeKind::Icon { name, size } => {
@@ -559,9 +629,15 @@ mod tests {
             &ctx,
             None,
         );
-        assert!(node.style.focus.is_some(), "keyboard focus has a visible patch");
+        assert_eq!(node.a11y.role, Some(NodeRole::Button));
+        assert_eq!(node.a11y.tab_index, Some(0));
+        assert!(
+            node.style.focus_ring.is_some(),
+            "keyboard focus has a structured ring"
+        );
         assert_eq!(node.a11y.expanded, Some(true));
         assert_eq!(node.a11y.controls.as_deref(), Some("details"));
+        assert!(node.a11y.toggled.is_none());
     }
 
     #[test]
@@ -580,5 +656,164 @@ mod tests {
         let activate = node.interaction.on_activate.expect("activatable");
         activate();
         assert_eq!(*fired.lock().unwrap(), 1);
+    }
+
+    #[test]
+    fn command_only_activation_never_emits_pressed_change() {
+        use std::sync::Mutex;
+        let clicks: Arc<Mutex<u32>> = Arc::new(Mutex::new(0));
+        let pressed: Arc<Mutex<Vec<bool>>> = Arc::new(Mutex::new(Vec::new()));
+        let click_sink = Arc::clone(&clicks);
+        let pressed_sink = Arc::clone(&pressed);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = icon_button_with_handlers(
+            &IconButtonSpec::new()
+                .with_icon("plus")
+                .with_aria_label("Add"),
+            &ctx,
+            IconButtonHandlers {
+                on_click: Some(Arc::new(move || *click_sink.lock().unwrap() += 1)),
+                on_pressed_change: Some(Arc::new(move |next| {
+                    pressed_sink.lock().unwrap().push(next);
+                })),
+            },
+        );
+        node.interaction.on_activate.expect("activatable")();
+        assert_eq!(*clicks.lock().unwrap(), 1);
+        assert!(pressed.lock().unwrap().is_empty());
+        assert!(node.a11y.toggled.is_none());
+    }
+
+    #[test]
+    fn toggle_activation_reports_the_inverse_before_the_command() {
+        use std::sync::Mutex;
+        let order: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
+        let pressed_order = Arc::clone(&order);
+        let click_order = Arc::clone(&order);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = icon_button_with_handlers(
+            &IconButtonSpec::new()
+                .with_icon("bold")
+                .with_aria_label("Bold")
+                .with_pressed(false),
+            &ctx,
+            IconButtonHandlers {
+                on_click: Some(Arc::new(move || {
+                    click_order.lock().unwrap().push("click".into());
+                })),
+                on_pressed_change: Some(Arc::new(move |next| {
+                    pressed_order
+                        .lock()
+                        .unwrap()
+                        .push(format!("pressed:{next}"));
+                })),
+            },
+        );
+        assert_eq!(node.a11y.toggled, Some(NodeToggled::False));
+        node.interaction.on_activate.expect("activatable")();
+        assert_eq!(
+            *order.lock().unwrap(),
+            ["pressed:true".to_string(), "click".to_string()]
+        );
+    }
+
+    #[test]
+    fn default_pressed_seeds_toggled_state_and_first_activation_reports_false() {
+        use std::sync::Mutex;
+        let next: Arc<Mutex<Option<bool>>> = Arc::new(Mutex::new(None));
+        let sink = Arc::clone(&next);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = IconButtonSpec::new()
+            .with_icon("pin")
+            .with_aria_label("Pin")
+            .with_default_pressed(true);
+        let node = icon_button_with_handlers(
+            &spec,
+            &ctx,
+            IconButtonHandlers {
+                on_click: None,
+                on_pressed_change: Some(Arc::new(move |value| {
+                    *sink.lock().unwrap() = Some(value);
+                })),
+            },
+        );
+        assert_eq!(node.a11y.toggled, Some(NodeToggled::True));
+        assert_eq!(
+            node.style.descriptor.background,
+            Some(resolve_color(&theme, "color.accent.base"))
+        );
+        node.interaction.on_activate.expect("activatable")();
+        assert_eq!(*next.lock().unwrap(), Some(false));
+    }
+
+    #[test]
+    fn explicit_tooltip_wins_and_empty_text_is_omitted() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let explicit = icon_button(
+            &IconButtonSpec::new()
+                .with_icon("plus")
+                .with_aria_label("Add")
+                .with_tooltip("Add item"),
+            &ctx,
+            None,
+        );
+        assert_eq!(explicit.tooltip.as_deref(), Some("Add item"));
+
+        let fallback = icon_button(
+            &IconButtonSpec::new()
+                .with_icon("plus")
+                .with_aria_label("Add"),
+            &ctx,
+            None,
+        );
+        assert_eq!(fallback.tooltip.as_deref(), Some("Add"));
+
+        let mut empty = IconButtonSpec::new()
+            .with_icon("plus")
+            .with_aria_label("Add");
+        empty.tooltip = Some(String::new());
+        let omitted = icon_button(&empty, &ctx, None);
+        assert!(omitted.tooltip.is_none());
+    }
+
+    #[test]
+    fn unavailable_targets_emit_nothing() {
+        use std::sync::Mutex;
+        let fired: Arc<Mutex<u32>> = Arc::new(Mutex::new(0));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        for spec in [
+            IconButtonSpec::new()
+                .with_icon("ban")
+                .with_aria_label("Block")
+                .with_disabled(true)
+                .with_pressed(false),
+            IconButtonSpec::new()
+                .with_icon("loader")
+                .with_aria_label("Loading")
+                .with_loading(true)
+                .with_default_pressed(true),
+        ] {
+            let click_sink = Arc::clone(&fired);
+            let pressed_sink = Arc::clone(&fired);
+            let node = icon_button_with_handlers(
+                &spec,
+                &ctx,
+                IconButtonHandlers {
+                    on_click: Some(Arc::new(move || *click_sink.lock().unwrap() += 1)),
+                    on_pressed_change: Some(Arc::new(move |_| {
+                        *pressed_sink.lock().unwrap() += 1;
+                    })),
+                },
+            );
+            assert!(node.interaction.on_activate.is_none());
+            assert!(!node.interaction.focusable);
+            assert_eq!(node.a11y.tab_index, None);
+        }
+        assert_eq!(*fired.lock().unwrap(), 0);
     }
 }

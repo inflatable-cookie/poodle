@@ -1,7 +1,8 @@
 # g16.011 — IconButton Activation, Toggle, And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-27
+Closed: 2026-08-27
 Depends on: merged `g16.010` / PR #84
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
@@ -152,29 +153,34 @@ behavior from `missing` to `mounted`, taking totals from 39 to 40 mounted and
 
 ## Acceptance
 
-- [ ] Command-only activation invokes `on_click` once and emits no pressed
+- [x] Command-only activation invokes `on_click` once and emits no pressed
       change.
-- [ ] Controlled and seeded toggle activation report the inverse current
+- [x] Controlled and seeded toggle activation report the inverse current
       state once, before the command callback, and host rebuilds project the
       new toggled state.
-- [ ] Disabled/loading buttons invoke neither callback and are not sequential
+- [x] Disabled/loading buttons invoke neither callback and are not sequential
       focus stops.
-- [ ] The target projects button role, accessible label, toggled/disclosure
+- [x] The target projects button role, accessible label, toggled/disclosure
       state, tab position, and the standard focus ring together.
-- [ ] Explicit tooltip text and the accessible-label fallback reach
+- [x] Explicit tooltip text and the accessible-label fallback reach
       `Node.tooltip`; empty tooltip text is omitted.
-- [ ] The existing GPUI specimen visibly demonstrates command and toggle
+- [x] The existing GPUI specimen visibly demonstrates command and toggle
       outcomes through the production wrapper path without becoming
       exhaustive.
-- [ ] One named mounted regression proves pointer, Enter, Space, seeded toggle,
+- [x] One named mounted regression proves pointer, Enter, Space, seeded toggle,
       rebuild, focus traversal, and inert-state behavior through production
       dispatch.
-- [ ] Focused Svelte and React IconButton tests stay green without behavior
+- [x] Focused Svelte and React IconButton tests stay green without behavior
       changes.
-- [ ] The ledger changes only IconButton from missing to mounted: 40 mounted /
+- [x] The ledger changes only IconButton from missing to mounted: 40 mounted /
       134 missing; known-delta totals remain 115 / 60.
-- [ ] One August log records the defect, repair, evidence, validation, exact
+- [x] One August log records the defect, repair, evidence, validation, exact
       non-claims, and next orchestrator checkpoint.
+
+## Outcome
+
+Complete. The full record is
+`../../logs/2026-08/20260827-g16-011-icon-button-activation-toggle-and-mounted-parity.md`.
 
 ## Writable Scope
 

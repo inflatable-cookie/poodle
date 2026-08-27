@@ -7,6 +7,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-27 — `rustfmt packages/contracts/components/src/lib.rs` formats
+  every child spec module. Format the leaf file (`icon_button.rs`) and keep
+  `lib.rs` edits surgical. Hit while landing `g16.011`; recovered by restoring
+  the unrelated spec files.
+
 - 2026-08-27 — `rustfmt <file>` without `--edition 2021` treats preview crates
   as 2015 (fails on `async`) and still rewrites wrapping across the whole
   file. Restore the file and re-apply the surgical edit; do not format
