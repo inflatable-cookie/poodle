@@ -343,7 +343,7 @@ pub use progress::progress;
 pub use radio::radio;
 pub use radio_group::{radio_group, RadioGroupHandlers};
 pub use range_slider::{range_slider, RangeSliderHandlers};
-pub use rating::rating;
+pub use rating::{rating, RatingHandlers};
 pub use ref_select::ref_select;
 pub use region::region;
 pub use relation_picker::{relation_picker, RelationPickerHandlers};

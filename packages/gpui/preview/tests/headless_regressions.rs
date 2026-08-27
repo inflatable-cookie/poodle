@@ -28,13 +28,13 @@ use poodle_node::{
     ColorValue, LayoutDirection, LayoutSizing, Node, NodeDropEvent, NodeKind, NodeRole,
 };
 use poodle_render::{
-    ui_presentation_provider, RadioGroupHandlers, RenderContext, SliderHandlers, TabsHandlers,
-    ToggleGroupHandlers, TriStateSwitchHandlers,
+    ui_presentation_provider, RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers,
+    TabsHandlers, ToggleGroupHandlers, TriStateSwitchHandlers,
 };
 use poodle_specs::{
     AccordionSelectionValue, AgentTranscriptSpec, ControlDensity, ControlSize, Orientation,
-    PopoverSpec, RangeSliderSpec, SliderSpec, TabActivationMode, TabDefinition, TabsSpec,
-    TriStateSwitchSpec, TriStateValue, UiPresentationProviderSpec,
+    PopoverSpec, RangeSliderSpec, RatingSpec, SliderSpec, TabActivationMode, TabDefinition,
+    TabsSpec, TriStateSwitchSpec, TriStateValue, UiPresentationProviderSpec,
 };
 
 #[path = "../src/headless_driver.rs"]
@@ -10165,5 +10165,229 @@ fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard(
         assert!(host.lock().expect("host lock").pages.is_empty());
         assert!(host.lock().expect("host lock").opens.is_empty());
         assert!(host.lock().expect("host lock").sizes.is_empty());
+    });
+}
+
+#[test]
+fn rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboard() {
+    #[derive(Clone)]
+    struct Host {
+        value: Option<f64>,
+        step: f64,
+        allow_clear: bool,
+        disabled: bool,
+        payloads: Vec<Option<f64>>,
+    }
+
+    fn item_id(scope: &str, value: u8) -> String {
+        format!("rating:{scope}:item:{value}")
+    }
+
+    fn root_id(scope: &str) -> String {
+        format!("rating:{scope}:root")
+    }
+
+    fn find_item<'a>(node: &'a Node, scope: &str, value: u8) -> &'a Node {
+        let id = item_id(scope, value);
+        node.find(&|n| n.runtime_id.as_deref() == Some(id.as_str()))
+            .unwrap_or_else(|| panic!("missing {id}"))
+    }
+
+    fn build(host: Arc<Mutex<Host>>, mounted: Arc<Mutex<Node>>, scope: &str) -> Node {
+        let state = host.lock().expect("host lock").clone();
+        let mut spec = RatingSpec::new()
+            .with_step(state.step)
+            .with_allow_clear(state.allow_clear)
+            .with_disabled(state.disabled)
+            .with_aria_label("Mounted rating");
+        if let Some(value) = state.value {
+            spec = spec.with_value(value);
+        }
+        let rebuild_host = Arc::clone(&host);
+        let rebuild_mount = Arc::clone(&mounted);
+        let scope_owned = scope.to_owned();
+        let mut node = poodle_render::rating(
+            &spec,
+            &RenderContext::new(&theme()),
+            RatingHandlers::new(scope).on_change(Arc::new(move |next| {
+                let mut host = rebuild_host.lock().expect("host lock");
+                host.payloads.push(next);
+                host.value = next;
+                drop(host);
+                *rebuild_mount.lock().expect("mount lock") = build(
+                    Arc::clone(&rebuild_host),
+                    Arc::clone(&rebuild_mount),
+                    &scope_owned,
+                );
+            })),
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        node
+    }
+
+    // Fractional default half-step: pointer, keys, clear, disabled inertia.
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(Host {
+            value: Some(2.0),
+            step: 0.5,
+            allow_clear: true,
+            disabled: false,
+            payloads: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") =
+            build(Arc::clone(&host), Arc::clone(&mounted), "half");
+        {
+            let root = mounted.lock().expect("mount lock");
+            assert_eq!(root.a11y.role, Some(NodeRole::Slider));
+            assert_eq!(root.a11y.value, Some(2.0));
+            assert_eq!(root.a11y.value_text.as_deref(), Some("2 out of 5"));
+            assert!(!find_item(&root, "half", 3).interaction.focusable);
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 64.0);
+        let third = item_id("half", 3);
+        driver.wait_for_focus_handle(&root_id("half"));
+        assert!(
+            poodle_gpui_node_backend::bounds_for(&third).is_some(),
+            "fractional star needs a real hit target"
+        );
+        // Center of star 3 → ratio 0.5 → snap-up half step → 2.5.
+        driver.pointer_activate_id(&third);
+        assert_eq!(host.lock().expect("host lock").payloads, [Some(2.5)]);
+        assert_eq!(host.lock().expect("host lock").value, Some(2.5));
+        {
+            let root = mounted.lock().expect("mount lock");
+            assert_eq!(root.a11y.value, Some(2.5));
+            assert_eq!(root.a11y.value_text.as_deref(), Some("2.5 out of 5"));
+        }
+
+        driver.focus_element(&root_id("half"));
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            host.lock().expect("host lock").payloads,
+            [Some(2.5), Some(3.0)]
+        );
+        driver.dispatch_key_raw("home");
+        assert_eq!(
+            host.lock().expect("host lock").payloads,
+            [Some(2.5), Some(3.0), Some(0.0)]
+        );
+        driver.dispatch_key_raw("end");
+        assert_eq!(host.lock().expect("host lock").value, Some(5.0));
+        driver.dispatch_key_raw("space");
+        assert_eq!(host.lock().expect("host lock").value, None);
+        assert_eq!(
+            mounted.lock().expect("mount lock").a11y.value_text.as_deref(),
+            Some("No rating selected out of 5")
+        );
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(Host {
+            value: Some(3.0),
+            step: 0.5,
+            allow_clear: true,
+            disabled: true,
+            payloads: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") =
+            build(Arc::clone(&host), Arc::clone(&mounted), "disabled");
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 64.0);
+        driver.draw_frame();
+        driver.pointer_activate_id(&item_id("disabled", 4));
+        assert!(host.lock().expect("host lock").payloads.is_empty());
+    });
+
+    // Whole-step radiogroup: roving focus without selection, then activate.
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(Host {
+            value: Some(2.0),
+            step: 1.0,
+            allow_clear: true,
+            disabled: false,
+            payloads: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") =
+            build(Arc::clone(&host), Arc::clone(&mounted), "whole");
+        {
+            let root = mounted.lock().expect("mount lock");
+            assert_eq!(root.a11y.role, Some(NodeRole::RadioGroup));
+            assert_eq!(find_item(&root, "whole", 2).a11y.selected, Some(true));
+            assert_eq!(find_item(&root, "whole", 2).a11y.tab_index, Some(0));
+            assert_eq!(find_item(&root, "whole", 1).a11y.selected, Some(false));
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 64.0);
+        let two = item_id("whole", 2);
+        let three = item_id("whole", 3);
+        let one = item_id("whole", 1);
+        driver.wait_for_focus_handle(&two);
+        driver.focus_element(&two);
+        driver.dispatch_key_raw("right");
+        assert!(
+            host.lock().expect("host lock").payloads.is_empty(),
+            "arrows move focus without selecting"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&three),
+            Some(true)
+        );
+
+        driver.dispatch_key_raw("home");
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&one), Some(true));
+        assert!(host.lock().expect("host lock").payloads.is_empty());
+
+        driver.focus_element(&three);
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.lock().expect("host lock").payloads, [Some(3.0)]);
+        assert_eq!(host.lock().expect("host lock").value, Some(3.0));
+        assert_eq!(
+            find_item(&mounted.lock().expect("mount lock"), "whole", 3)
+                .a11y
+                .selected,
+            Some(true)
+        );
+
+        driver.wait_for_focus_handle(&three);
+        driver.pointer_activate_id(&three);
+        assert_eq!(
+            host.lock().expect("host lock").payloads,
+            [Some(3.0), None],
+            "clearable whole-step reselect clears"
+        );
+        assert_eq!(host.lock().expect("host lock").value, None);
+    });
+
+    // Arbitrary display fraction is not quantized; separate instances keep focus ids.
+    run_headless(|cx| {
+        let left = poodle_render::rating(
+            &RatingSpec::new().with_value(3.7),
+            &RenderContext::new(&theme()),
+            RatingHandlers::new("left"),
+        );
+        assert!((RatingSpec::new().with_value(3.7).fill_ratio(3) - 0.7).abs() < 1e-9);
+        assert_eq!(left.a11y.value, Some(3.7));
+
+        let mut tree = Node::container()
+            .child(poodle_render::rating(
+                &RatingSpec::new().with_value(1.0).with_step(1.0),
+                &RenderContext::new(&theme()),
+                RatingHandlers::new("left"),
+            ))
+            .child(poodle_render::rating(
+                &RatingSpec::new().with_value(1.0).with_step(1.0),
+                &RenderContext::new(&theme()),
+                RatingHandlers::new("right"),
+            ));
+        tree.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(tree)), 480.0, 64.0);
+        let left_id = item_id("left", 1);
+        let right_id = item_id("right", 1);
+        driver.wait_for_focus_handle(&left_id);
+        driver.wait_for_focus_handle(&right_id);
+        assert_ne!(left_id, right_id);
     });
 }

@@ -131,6 +131,7 @@ impl Table {
 pub(crate) struct Rating {
     spec: RatingSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     on_change: Option<Arc<dyn Fn(Option<f64>) + Send + Sync>>,
 }
 
@@ -193,12 +194,18 @@ impl Rating {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: "specimen".to_string(),
             on_change: None,
         }
     }
 
     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(Option<f64>) + Send + Sync>) -> Self {
         self.on_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
+        self.instance_id = instance_id.into();
         self
     }
 }
@@ -210,7 +217,10 @@ impl IntoElement for Rating {
         poodle_gpui_node_backend::to_gpui(&poodle_render::rating(
             &self.spec,
             &RenderContext::new(&self.theme),
-            self.on_change,
+            poodle_render::RatingHandlers {
+                instance_id: self.instance_id,
+                on_change: self.on_change,
+            },
         ))
     }
 }

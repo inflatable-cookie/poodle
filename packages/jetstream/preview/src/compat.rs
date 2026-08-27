@@ -851,7 +851,11 @@ pub fn js_range_slider(spec: &RangeSliderSpec, theme: &JetstreamThemeProvider) -
 }
 
 pub fn js_rating(spec: &RatingSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::rating(spec, &pr::RenderContext::new(theme), None))
+    El(pr::rating(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::RatingHandlers::new("jetstream-specimen"),
+    ))
 }
 
 pub fn js_ref_select(spec: &RefSelectSpec, theme: &JetstreamThemeProvider) -> El {
