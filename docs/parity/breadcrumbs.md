@@ -1,5 +1,5 @@
 <!-- parity consv=fixed gpui=0 jetstream=0 specimen=ok -->
-<!-- pass 42: Jetstream specimen backfilled to full contract §12 coverage — Basic, Deep path, Collapsed (max 3), Size ladder (xs..xl), Density ladder — via real js_breadcrumbs + BreadcrumbsSpec builders; GPUI already full. Leading/home-icon group not represented (no BreadcrumbItem icon field in API/contract). Both previews build clean. -->
+<!-- pass 42: Jetstream specimen backfilled to full contract §12 coverage — Basic, Deep path, Collapsed (max 3), Size ladder (xs..xl), Density ladder — via real js_breadcrumbs + BreadcrumbsSpec builders; GPUI already full. Icons group is live on Svelte, React, and GPUI; Jetstream preview still omits it. Both previews build clean. -->
 <!-- pass 41: both targets — ellipsis truncation, density-gap ladder, breadcrumbs font ladder (md=body-size), dropped current weight-bump, chevron-icon separator at 0.4 on Jetstream; spec gained force_last_item_current + visible_items()/is_current_at() helpers + ELLIPSIS_VALUE. Remaining: href→anchor (GPUI router-hook gap, accepted), click/nav (preview-loop). -->
 # Parity: Breadcrumbs
 
@@ -54,10 +54,10 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 ## Specimen parity
 
-- Svelte covers: Basic (+ onNavigate readout), Deep path, Collapsed (`maxVisibleItems=3`), Size ladder (xs..xl), Density ladder (compact/default/comfortable). (`BreadcrumbsSpecimen.svelte`)
-- GPUI covers: Basic, Deep path, Collapsed (max 3), Size ladder + Density ladder (via `specimen_layout` closures). Basic wires `on_navigate` and a compact "Navigated to" readout.
-- Jetstream now covers: Basic, Deep path, Collapsed (max 3), Size ladder (xs..xl), Density ladder (`breadcrumbs.rs`) — built from real `js_breadcrumbs` + `BreadcrumbsSpec` builders, matching contract §12 and the Svelte/GPUI specimen sets. No fakes. `specimen=ok`.
-- Not represented on any target: a "with leading/home icon" group. `BreadcrumbItem` has no icon field and the contract anatomy §2 carries no per-item icon (only the separator chevron), so a real leading-icon crumb is unrepresentable without inventing API — skipped per CLAUDE.md "no fakes".
+- Svelte covers: Basic (+ onNavigate readout), Icons (icon-only Home, folder+Projects, package+Poodle), Deep path, Collapsed (`maxVisibleItems=3`), Size ladder (xs..xl), Density ladder (compact/default/comfortable). (`BreadcrumbsSpecimen.svelte`)
+- GPUI covers: Basic, Icons, Deep path, Collapsed (max 3), Size ladder + Density ladder (via `specimen_layout` closures). Basic wires `on_navigate` and a compact "Navigated to" readout.
+- React covers the same Icons group as Svelte.
+- Jetstream covers: Basic, Deep path, Collapsed (max 3), Size ladder (xs..xl), Density ladder (`breadcrumbs.rs`) — built from real `js_breadcrumbs` + `BreadcrumbsSpec` builders. It still has no Icons group. `specimen=ok` for the groups it publishes; icon presentation is a Jetstream specimen gap, not a missing `BreadcrumbItem.icon` field.
 
 ## Notes
 

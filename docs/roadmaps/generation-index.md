@@ -13,8 +13,9 @@ Updated: 2026-08-27
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
   - Next move: orchestrator evidence checkpoint after `g16.010`. Breadcrumbs
-    GPUI mounted behaviour is now proved; ledger 39 mounted / 135 missing. Do
-    not compile `g16.011` from this closeout.
+    GPUI mounted behaviour is now proved (39 mounted / 135 missing); its
+    known-delta cell is `present` (114 → 115 present, 61 → 60
+    not-applicable). Do not compile `g16.011` from this closeout.
 
 ## Latest Completed Track
 

@@ -368,7 +368,13 @@ Density controls list and item gap only. It does NOT affect font-size.
 - [ ] overflow presentation and wrap behavior stay internal
 - [ ] link vs button decision is renderer-specific
 
-## 12. Specimen Definitions
+## 12. Known Deltas
+
+| Delta | Why Allowed | Approval Status | Follow-Up |
+|-------|-------------|-----------------|-----------|
+| Native `href` crumbs stay inert | the node/backend boundary has no URL-routing channel; sending the URL through `on_navigate` reversed the web callback | accepted, tracked | a shared link channel; until then they must not fire the callback |
+
+## 13. Specimen Definitions
 
 ### Group: Basic
 
@@ -406,7 +412,7 @@ Density controls list and item gap only. It does NOT affect font-size.
 |-------|---------------|-----------------|
 | Collapsed | same deep items, `maxVisibleItems=3` | Home > ... > Primitives > Button with ellipsis replacing middle items |
 
-## 13. Approval And Adoption Notes
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending

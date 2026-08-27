@@ -122,8 +122,9 @@ value. `g16.010` repaired that seam. Linkless crumbs now call `on_navigate`
 with `BreadcrumbItem.value`; `href`, current, and ellipsis crumbs stay inert;
 the Basic GPUI specimen shows one compact readout; one named mounted
 regression proves pointer and keyboard dispatch. Ledger: 38 → 39 mounted,
-136 → 135 missing. Native URL routing, broad accessibility, visual
-comparison, and Jetstream stay out.
+136 → 135 missing; Breadcrumbs known-delta `not-applicable` → `present`
+(114 → 115 present, 61 → 60 not-applicable). Native URL routing, broad
+accessibility, visual comparison, and Jetstream stay out.
 
 ## Next Task
 

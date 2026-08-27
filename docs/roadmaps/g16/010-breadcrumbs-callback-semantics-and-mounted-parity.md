@@ -16,9 +16,11 @@ Make shared Rust Breadcrumbs obey the existing callback contract and prove
 linkless crumb navigation through real mounted GPUI pointer and keyboard
 dispatch.
 
-The generated ledger may move exactly one cell: Breadcrumbs GPUI mounted
-behavior from `missing` to `mounted`, taking the totals from 38 to 39 mounted
-and 136 to 135 missing.
+The generated ledger moves Breadcrumbs GPUI mounted behavior from `missing`
+to `mounted` (38 → 39 mounted, 136 → 135 missing). Recording the native
+`href` inertness as a contract Known Delta also moves Breadcrumbs' known-delta
+cell from `not-applicable` to `present` (114 → 115 present, 61 → 60
+not-applicable). No other component's row changes.
 
 ## Current Evidence
 
@@ -97,7 +99,8 @@ and 136 to 135 missing.
   Jetstream behavior or ledger claim moves.
 - It does not include IconButton, EditableLabel, NumberInput, TimeInput, Pill,
   or any composite that consumes Breadcrumbs.
-- It does not move any ledger row except Breadcrumbs.
+- It does not move any ledger row except Breadcrumbs. That row's mounted
+  cell and known-delta cell both move.
 
 ## Delivery
 
@@ -134,7 +137,7 @@ and 136 to 135 missing.
 ### 4. Prove and close
 
 - Regenerate the evidence ledger and verify only Breadcrumbs changes: 39
-  mounted / 135 missing.
+  mounted / 135 missing, and known-delta `not-applicable` → `present`.
 - Mark the source triage note resolved, add one August execution log, close
   this card, and return g16 to an orchestrator evidence checkpoint. Do not
   compile or start `g16.011` in the worker thread.
@@ -155,8 +158,9 @@ and 136 to 135 missing.
       changes.
 - [x] The contract and parity note no longer describe URL-driven Rust
       callbacks as parity.
-- [x] The ledger changes only Breadcrumbs from missing to mounted: 39 mounted
-      / 135 missing.
+- [x] The ledger changes only Breadcrumbs: mounted 38 → 39 / 136 → 135
+      missing, and known-delta `not-applicable` → `present` (114 → 115
+      present, 61 → 60 not-applicable).
 - [x] One August log records the defect, repair, evidence, validation, exact
       non-claims, and next orchestrator checkpoint.
 
@@ -175,7 +179,8 @@ Complete. The full record is
   `packages/gpui/preview/tests/headless_regressions.rs`
 - focused Svelte/React Breadcrumbs tests only if a test-only correction is
   required; do not change web implementation behavior
-- generated parity ledger/check surfaces only as required for the one-cell move
+- generated parity ledger/check surfaces only as required for the Breadcrumbs
+  mounted and known-delta cells
 - this card, its source triage note, one August log, g16/front-door status, and
   `PAPERCUTS.md` only for new execution friction
 

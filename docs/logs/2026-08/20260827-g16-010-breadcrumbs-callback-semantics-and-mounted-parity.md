@@ -15,10 +15,12 @@ matches the web rule. A crumb is callback-interactive only when it is
 non-current, linkless, not the ellipsis, and the host supplied `on_navigate`.
 Activation calls that handler once with `BreadcrumbItem.value`.
 
-The generated ledger moves only Breadcrumbs' GPUI mounted-behaviour cell from
-`missing` to `mounted`. Summary: 38 → 39 mounted; 136 → 135 missing. GPUI
-accessibility stays `manual`. GPUI visual stays `missing`. Jetstream stays
-deferred. No other component's cell moves.
+The generated ledger moves two Breadcrumbs cells and no other row. GPUI
+mounted behaviour: `missing` → `mounted` (38 → 39 mounted, 136 → 135
+missing). Known deltas: `not-applicable` → `present` (114 → 115 present,
+61 → 60 not-applicable), because native `href` inertness is a recorded
+runtime delta. GPUI accessibility stays `manual`. GPUI visual stays
+`missing`. Jetstream stays deferred.
 
 ## Repair
 
@@ -36,9 +38,9 @@ deferred. No other component's cell moves.
   "Navigated to" readout. Host state is the existing `specimens.text` map.
 
 The contract's stale Jetstream note described the reversed URL-driven
-behavior. GPUI notes now name the callback rule and the `href` delta. No
-`Known Deltas` heading was added, so the ledger's known-delta cell stays
-`not-applicable`.
+behavior. GPUI notes name the callback rule and the `href` delta. A real
+`Known Deltas` section records native `href` inertness so the ledger cell
+matches the contract.
 
 ## Mounted evidence
 
@@ -67,7 +69,7 @@ added. Direct handler calls are used only in focused renderer tests.
 - no Jetstream admission
 - no IconButton, EditableLabel, NumberInput, TimeInput, Pill, or Breadcrumbs
   consumers
-- no other ledger row
+- no other component's ledger row
 
 ## Validation
 

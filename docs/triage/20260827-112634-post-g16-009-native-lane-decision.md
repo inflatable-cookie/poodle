@@ -52,7 +52,9 @@ URL-routing channel.
 
 ## Decision
 
-Promote Breadcrumbs into `g16.010`. Move exactly its GPUI mounted-behavior
-cell from `missing` to `mounted`, taking the ledger from 38 to 39 mounted and
-136 to 135 missing. Do not add native URL routing, a generic link abstraction,
-or broader accessibility/visual claims.
+Promote Breadcrumbs into `g16.010`. Move its GPUI mounted-behavior cell from
+`missing` to `mounted`, taking the ledger from 38 to 39 mounted and 136 to
+135 missing. Recording native `href` inertness as a contract Known Delta also
+moves that same row's known-delta cell from `not-applicable` to `present`.
+Do not add native URL routing, a generic link abstraction, or broader
+accessibility/visual claims.
