@@ -29,7 +29,10 @@ fn parse_rating(raw: &str) -> Option<f64> {
     }
 }
 
-fn on_rating_text(node_events: Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>, key: &str) -> Arc<dyn Fn(Option<f64>) + Send + Sync> {
+fn on_rating_text(
+    node_events: Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
+    key: &str,
+) -> Arc<dyn Fn(Option<f64>) + Send + Sync> {
     let key = key.to_string();
     Arc::new(move |value: Option<f64>| {
         let text = match value {
@@ -92,8 +95,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     if let Some(value) = half_value {
                         spec = spec.with_value(value);
                     }
-                    Rating::from_spec(spec, theme)
-                        .with_instance_id("specimen-half")
+                    Rating::from_spec(spec, theme, "specimen-half")
                         .on_change(on_rating_text(Arc::clone(&node_events), "rating-half"))
                 })
                 .child(readout(
@@ -121,8 +123,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     if let Some(value) = whole_value {
                         spec = spec.with_value(value);
                     }
-                    Rating::from_spec(spec, theme)
-                        .with_instance_id("specimen-whole")
+                    Rating::from_spec(spec, theme, "specimen-whole")
                         .on_change(on_rating_text(Arc::clone(&node_events), "rating-whole"))
                 })
                 .child(readout(
@@ -150,6 +151,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_step(1.0)
                         .with_aria_label("Score out of 10"),
                     theme,
+                    "specimen-scale-10",
                 )),
         )
         // Arbitrary fractional display
@@ -167,6 +169,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_value(3.7)
                         .with_aria_label("Display fraction"),
                     theme,
+                    "specimen-display-37",
                 ))
                 .child(readout(text_primary, "3.7 / 5 (display only)".to_string())),
         )
@@ -192,8 +195,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     } else {
                         spec = spec.with_default_value(4.0);
                     }
-                    Rating::from_spec(spec, theme)
-                        .with_instance_id("specimen-clear")
+                    Rating::from_spec(spec, theme, "specimen-clear")
                         .on_change(on_rating_text(Arc::clone(&node_events), "rating-clear"))
                 })
                 .child(readout(
@@ -221,6 +223,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_disabled(true)
                         .with_aria_label("Disabled rating"),
                     theme,
+                    "specimen-disabled",
                 )),
         )
         .into_any_element();
@@ -235,6 +238,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 Rating::from_spec(
                     RatingSpec::new().with_value(3.0).with_step(1.0).with_size(size),
                     theme,
+                    format!("specimen-size-{size:?}"),
                 )
                 .into_any_element()
             })
@@ -245,6 +249,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_step(1.0)
                         .with_density(density),
                     theme,
+                    format!("specimen-density-{density:?}"),
                 )
                 .into_any_element()
             }),

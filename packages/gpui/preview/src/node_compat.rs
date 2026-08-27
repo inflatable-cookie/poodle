@@ -190,22 +190,21 @@ impl IntoElement for CollapseToggle {
 }
 
 impl Rating {
-    pub(crate) fn from_spec(spec: RatingSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: RatingSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
-            instance_id: "specimen".to_string(),
+            instance_id: instance_id.into(),
             on_change: None,
         }
     }
 
     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(Option<f64>) + Send + Sync>) -> Self {
         self.on_change = Some(handler);
-        self
-    }
-
-    pub(crate) fn with_instance_id(mut self, instance_id: impl Into<String>) -> Self {
-        self.instance_id = instance_id.into();
         self
     }
 }

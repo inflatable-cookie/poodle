@@ -279,17 +279,21 @@ and DOM geometry reads stay adapter-side.
   snap, pointer, clear, fill, format, keyboard); the renderer must not
   reimplement it
 - whole-step mode (`step >= 1`) maps to RadioGroup + RadioButton with roving
-  focus; Arrow/Home/End move focus without selecting; Enter/Space and pointer
-  activation select
+  focus; Arrow/Home/End move focus without selecting and clamp at the ends
+  (boundary arrows are inert); Enter/Space and pointer activation select
 - fractional mode (`step < 1`) maps to one focusable Slider root; star
-  targets are accessibility-hidden and are not separate focus stops
+  targets carry no role, label, or focus stop (`tab_index` left unset so the
+  GPUI backend does not treat them as programmatically focusable). Shared
+  node vocabulary has no hidden flag; GPUI accessibility remains manual
 - Rating stays host-controlled after render: callbacks report a result and the
   host rebuilds the spec; no hidden renderer state
 - glyph shape may differ from web star icon; the contract is ordinal selection,
   not glyph-specific branding
 - `color-mix` blending should be replicated using equivalent alpha-blended color
   calculations in GPUI's color system
-- instance-scoped focus ids are construction data, not a public web prop
+- instance-scoped focus ids are construction data, not a public web prop;
+  `Rating::from_spec(spec, theme, instance_id)` requires an explicit stable id
+  at every call site (same discipline as RadioGroup)
 
 ## 11. Parity Checklist
 
@@ -331,9 +335,11 @@ and DOM geometry reads stay adapter-side.
 - Jetstream remains program-deferred. In-repo call sites receive only the
   mechanical compile migration onto the shared `RatingSpec` /
   `Option<f64>` surface.
-- `Rating::from_spec(spec, theme).on_change(...)` historically carried the
-  pressed star as a 1-based whole value. Do not treat Jetstream's legacy
-  half-star click delta as authority to weaken GPUI behavior.
+- `Rating::from_spec(spec, theme, instance_id)` is the GPUI construction
+  surface; Jetstream preview uses `js_rating(spec, theme, instance_id)`. Both
+  require an explicit host-owned instance id.
+- Jetstream's legacy half-star click delta is not authority to weaken GPUI
+  behavior.
 - Disabled ratings ignore interaction. There is no public read-only Rating
   prop in the active cohort.
 

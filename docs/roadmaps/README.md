@@ -103,7 +103,8 @@ behavior repairs without inventing another conformance authority.
   `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
   `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
   `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
-  `016` ready for worker dispatch
+  `016` merged in PR #91; `017` complete — awaiting merge in PR #92;
+  orchestrator checkpoint at 46 mounted / 128 missing
 
 ## Rules
 

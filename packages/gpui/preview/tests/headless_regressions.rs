@@ -10281,6 +10281,16 @@ fn rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboar
             mounted.lock().expect("mount lock").a11y.value_text.as_deref(),
             Some("No rating selected out of 5")
         );
+        // Enter clear uses on_submit on the focused slider root.
+        driver.pointer_activate_id(&third);
+        assert_eq!(host.lock().expect("host lock").value, Some(2.5));
+        driver.focus_element(&root_id("half"));
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.lock().expect("host lock").value, None);
+        assert_eq!(
+            mounted.lock().expect("mount lock").a11y.value_text.as_deref(),
+            Some("No rating selected out of 5")
+        );
     });
 
     run_headless(|cx| {
@@ -10324,6 +10334,7 @@ fn rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboar
         let two = item_id("whole", 2);
         let three = item_id("whole", 3);
         let one = item_id("whole", 1);
+        let five = item_id("whole", 5);
         driver.wait_for_focus_handle(&two);
         driver.focus_element(&two);
         driver.dispatch_key_raw("right");
@@ -10340,9 +10351,38 @@ fn rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboar
         assert_eq!(poodle_gpui_node_backend::focus_state_for(&one), Some(true));
         assert!(host.lock().expect("host lock").payloads.is_empty());
 
+        // Web clamps: Left/Down on the first star and Right/Up on the last are inert.
+        driver.dispatch_key_raw("left");
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&one), Some(true));
+        driver.dispatch_key_raw("down");
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&one), Some(true));
+        assert!(host.lock().expect("host lock").payloads.is_empty());
+
+        driver.dispatch_key_raw("end");
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&five), Some(true));
+        assert!(host.lock().expect("host lock").payloads.is_empty());
+        driver.dispatch_key_raw("right");
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&five), Some(true));
+        driver.dispatch_key_raw("up");
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&five), Some(true));
+        assert!(host.lock().expect("host lock").payloads.is_empty());
+
+        driver.dispatch_key_raw("space");
+        assert_eq!(host.lock().expect("host lock").payloads, [Some(5.0)]);
+        assert_eq!(host.lock().expect("host lock").value, Some(5.0));
+        assert_eq!(
+            find_item(&mounted.lock().expect("mount lock"), "whole", 5)
+                .a11y
+                .selected,
+            Some(true)
+        );
+
         driver.focus_element(&three);
         driver.dispatch_key_raw("enter");
-        assert_eq!(host.lock().expect("host lock").payloads, [Some(3.0)]);
+        assert_eq!(
+            host.lock().expect("host lock").payloads,
+            [Some(5.0), Some(3.0)]
+        );
         assert_eq!(host.lock().expect("host lock").value, Some(3.0));
         assert_eq!(
             find_item(&mounted.lock().expect("mount lock"), "whole", 3)
@@ -10355,7 +10395,7 @@ fn rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboar
         driver.pointer_activate_id(&three);
         assert_eq!(
             host.lock().expect("host lock").payloads,
-            [Some(3.0), None],
+            [Some(5.0), Some(3.0), None],
             "clearable whole-step reselect clears"
         );
         assert_eq!(host.lock().expect("host lock").value, None);

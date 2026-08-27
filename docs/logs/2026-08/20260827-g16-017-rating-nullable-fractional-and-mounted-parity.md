@@ -47,18 +47,23 @@ proves, through production hit testing, focus, and key dispatch:
 
 - default half-step pointer input produces a fractional `Option<f64>` value,
   host rebuild, fill output, and slider accessibility value/text
-- fractional Arrow keys, Home, End, and clear-on-Space/Enter use the same
-  pure transition path; disabled mode emits nothing
+- fractional Arrow keys, Home, End, clear-on-Space, and clear-on-Enter
+  (`on_submit`) use the same pure transition path; disabled mode emits nothing
 - `step=1` Rating exposes one selected radio, one roving tab stop, and
-  Arrow/Home/End focus movement without selection
+  Arrow/Home/End focus movement without selection; boundary Left/Down on the
+  first star and Right/Up on the last are inert
 - whole-step Enter/Space and pointer activation report the same selected
   value, clear only when allowed, and host rebuild the control
 - empty state stays `None`; arbitrary incoming fractions display without
   quantization; user input remains quantized
 - separate Rating instances do not collide in native focus identity
+  (`Rating::from_spec` / `js_rating` require an explicit instance id; paint
+  ids are instance-scoped `rating:{scope}:…`, not unscoped `rating-item-*`)
 
-Fixture ids are test targeting aids only. Enter clear uses `on_submit` so a
-focused slider root does not clear after star scrub rebuilds mid-gesture.
+Fixture ids are test targeting aids only. Fractional star children carry no
+role, label, or `tab_index` (not programmatically focusable). Enter clear uses
+`on_submit` so a focused slider root does not clear after star scrub rebuilds
+mid-gesture. GPUI accessibility stays manual.
 
 ## Explicit non-claims
 
@@ -76,7 +81,7 @@ Ran in the worker worktree
 `t3code/review-rating-worker-handoff`):
 
 - focused `poodle-headless` Rating tests (6)
-- focused `poodle-render` Rating tests (7)
+- focused `poodle-render` Rating tests (9)
 - focused TypeScript core Rating math tests
 - focused Svelte/React component board via `effigy test:components` (3117)
 - named mounted Rating regression

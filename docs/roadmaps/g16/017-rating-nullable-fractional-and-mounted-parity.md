@@ -90,8 +90,9 @@ Governing refs: `../../contracts/001-working-rules.md`,
   earlier stars are not selected radios.
 - Enabled items use instance-scoped, host-owned stable focus ids and roving
   tab behavior. The selected item is the entry stop; otherwise the first item
-  is. Arrow keys and Home/End move focus without selecting, matching the web
-  authority. Enter/Space select the focused value.
+  is. Arrow keys and Home/End move focus without selecting and clamp at the
+  ends (boundary arrows are inert), matching the web authority. Enter/Space
+  select the focused value.
 - Selecting the current value reports `None` only when `allow_clear=true`.
   Otherwise it reports no semantic change. The host applies accepted output
   and rebuilds the spec.
@@ -101,8 +102,9 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 - `step < 1` renders one focusable Slider root with min `0`, max `max`, current
   numeric value (zero only for the accessibility fallback when state is
-  `None`), and readable value text. Star targets are accessibility-hidden and
-  are not separate focus stops.
+  `None`), and readable value text. Star targets carry no role, label, or
+  focus stop (`tab_index` unset); they are not separate focus targets. Shared
+  node vocabulary has no hidden flag; GPUI accessibility remains manual.
 - Pointer position within each star resolves through the shared snap-up math,
   including minimum one-step selection. Press/drag/release may use the existing
   scrub channel; emit a coherent semantic change and let the host rebuild.
@@ -149,7 +151,8 @@ Governing refs: `../../contracts/001-working-rules.md`,
   - fractional Arrow keys, Home, End, and clear-on-Space/Enter use the same
     pure transition path and disabled mode emits nothing;
   - a `step=1` Rating exposes one selected radio, one roving tab stop, and
-    Arrow/Home/End focus movement without selection;
+    Arrow/Home/End focus movement without selection, with boundary arrows
+    inert;
   - whole-step Enter/Space and pointer activation report the same selected
     value, clear only when allowed, and host rebuild the control;
   - empty state stays `None`, arbitrary incoming fractions display without

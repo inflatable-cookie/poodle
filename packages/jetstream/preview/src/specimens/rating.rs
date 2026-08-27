@@ -23,6 +23,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_rating(
                 &RatingSpec::new().with_value(3.0).with_step(1.0),
                 theme,
+                "jetstream-default",
             ),
         ))
         // 10-star scale — defaultValue=7, max=10
@@ -35,6 +36,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_max(10)
                     .with_step(1.0),
                 theme,
+                "jetstream-scale-10",
             ),
         ))
         // Half-star steps (fractional fill) — value=3.5, step=0.5, allowClear
@@ -47,6 +49,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_step(0.5)
                     .with_allow_clear(true),
                 theme,
+                "jetstream-half",
             ),
         ))
         // Clearable — defaultValue=4, allowClear
@@ -59,6 +62,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_step(1.0)
                     .with_allow_clear(true),
                 theme,
+                "jetstream-clear",
             ),
         ))
         // Disabled — defaultValue=2, disabled
@@ -71,6 +75,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_step(1.0)
                     .with_disabled(true),
                 theme,
+                "jetstream-disabled",
             ),
         ))
         // Sizes — value=3 at each ControlSize
@@ -87,6 +92,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_step(1.0)
                         .with_size(ControlSize::Xs),
                     theme,
+                    "jetstream-size-xs",
                 ))
                 .child(js_rating(
                     &RatingSpec::new()
@@ -94,6 +100,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_step(1.0)
                         .with_size(ControlSize::Sm),
                     theme,
+                    "jetstream-size-sm",
                 ))
                 .child(js_rating(
                     &RatingSpec::new()
@@ -101,6 +108,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_step(1.0)
                         .with_size(ControlSize::Md),
                     theme,
+                    "jetstream-size-md",
                 ))
                 .child(js_rating(
                     &RatingSpec::new()
@@ -108,6 +116,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_step(1.0)
                         .with_size(ControlSize::Lg),
                     theme,
+                    "jetstream-size-lg",
                 ))
                 .child(js_rating(
                     &RatingSpec::new()
@@ -115,6 +124,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                         .with_step(1.0)
                         .with_size(ControlSize::Xl),
                     theme,
+                    "jetstream-size-xl",
                 )),
         ))
 }

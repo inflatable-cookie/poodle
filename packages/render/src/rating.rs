@@ -71,8 +71,8 @@ fn item_focus_id(instance_scope: &str, value: u8) -> String {
     format!("rating:{instance_scope}:item:{value}")
 }
 
-fn item_test_id(value: u8) -> String {
-    format!("rating-item-{value}")
+fn root_focus_id(instance_scope: &str) -> String {
+    format!("rating:{instance_scope}:root")
 }
 
 fn emit_change(
@@ -107,11 +107,20 @@ fn whole_step_key_handler(
     Arc::new(move |key, _modifiers| {
         let last = item_count;
         let focus_target = match key {
+            // Match web: clamp at the ends; boundary arrows are inert.
             NodeKey::ArrowRight | NodeKey::ArrowUp => {
-                Some(if value == last { 1 } else { value + 1 })
+                if value == last {
+                    None
+                } else {
+                    Some(value + 1)
+                }
             }
             NodeKey::ArrowLeft | NodeKey::ArrowDown => {
-                Some(if value == 1 { last } else { value - 1 })
+                if value == 1 {
+                    None
+                } else {
+                    Some(value - 1)
+                }
             }
             NodeKey::Home => Some(1),
             NodeKey::End => Some(last),
@@ -264,13 +273,17 @@ pub fn rating(spec: &RatingSpec, ctx: &RenderContext<'_>, handlers: RatingHandle
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
         }
         let mut target = target.child(glyph);
-        target.id = Some(item_test_id(value));
-        target.runtime_id = Some(item_focus_id(instance_scope, value));
+        let focus_id = item_focus_id(instance_scope, value);
+        // Scoped `id` is required for GPUI paint-bounds observation
+        // (`bounds_for` keys on `node.id`). Same string as `runtime_id`.
+        target.id = Some(focus_id.clone());
+        target.runtime_id = Some(focus_id);
 
         if fractional {
-            // Accessibility-hidden pointer targets: no role, no tab stop.
+            // Pointer targets only: no role, label, or focus stop. The shared
+            // node vocabulary has no hidden flag; leave tab_index unset so the
+            // GPUI backend does not treat the child as programmatically focusable.
             target.interaction.focusable = false;
-            target.a11y.tab_index = Some(-1);
             if !spec.is_disabled {
                 if handlers.on_change.is_some() {
                     target.style.descriptor.cursor = CursorHint::Pointer;
@@ -374,8 +387,9 @@ pub fn rating(spec: &RatingSpec, ctx: &RenderContext<'_>, handlers: RatingHandle
             el.interaction.focusable = true;
             el.a11y.tab_index = Some(0);
             el.style.focus_ring = Some(focus_ring);
-            el.runtime_id = Some(format!("rating:{}:root", instance_scope));
-            el.id = Some("rating-root".to_owned());
+            let root_id = root_focus_id(instance_scope);
+            el.id = Some(root_id.clone());
+            el.runtime_id = Some(root_id);
             el.interaction.on_key = Some(fractional_key_handler(
                 current,
                 spec.allow_clear,
@@ -416,10 +430,34 @@ mod tests {
         rating(spec, &RenderContext::new(&theme()), handlers)
     }
 
-    fn item<'a>(node: &'a Node, value: u8) -> &'a Node {
-        let id = item_test_id(value);
-        node.find(&|n| n.id.as_deref() == Some(id.as_str()))
+    fn item<'a>(node: &'a Node, scope: &str, value: u8) -> &'a Node {
+        let id = item_focus_id(scope, value);
+        node.find(&|n| n.runtime_id.as_deref() == Some(id.as_str()))
             .unwrap_or_else(|| panic!("item {value}"))
+    }
+
+    #[test]
+    fn scoped_ids_match_runtime_identity() {
+        let node = render(
+            &RatingSpec::new().with_value(2.0).with_step(1.0),
+            RatingHandlers::new("scope-a"),
+        );
+        let star = item(&node, "scope-a", 2);
+        assert_eq!(star.id.as_deref(), Some("rating:scope-a:item:2"));
+        assert_eq!(star.runtime_id.as_deref(), Some("rating:scope-a:item:2"));
+
+        let fractional = render(
+            &RatingSpec::new().with_value(2.5),
+            RatingHandlers::new("scope-b"),
+        );
+        assert_eq!(
+            fractional.id.as_deref(),
+            Some("rating:scope-b:root")
+        );
+        assert_eq!(
+            fractional.runtime_id.as_deref(),
+            Some("rating:scope-b:root")
+        );
     }
 
     #[test]
@@ -431,8 +469,10 @@ mod tests {
             node.a11y.value_text.as_deref(),
             Some("3.5 out of 5")
         );
-        assert!(item(&node, 1).a11y.role.is_none());
-        assert!(!item(&node, 1).interaction.focusable);
+        let star = item(&node, "r", 1);
+        assert!(star.a11y.role.is_none());
+        assert!(!star.interaction.focusable);
+        assert_eq!(star.a11y.tab_index, None);
     }
 
     #[test]
@@ -442,11 +482,11 @@ mod tests {
             RatingHandlers::new("r"),
         );
         assert_eq!(node.a11y.role, Some(NodeRole::RadioGroup));
-        assert_eq!(item(&node, 3).a11y.selected, Some(true));
-        assert_eq!(item(&node, 3).a11y.tab_index, Some(0));
-        assert_eq!(item(&node, 2).a11y.selected, Some(false));
-        assert_eq!(item(&node, 2).a11y.tab_index, Some(-1));
-        assert_eq!(item(&node, 1).a11y.toggled, Some(NodeToggled::False));
+        assert_eq!(item(&node, "r", 3).a11y.selected, Some(true));
+        assert_eq!(item(&node, "r", 3).a11y.tab_index, Some(0));
+        assert_eq!(item(&node, "r", 2).a11y.selected, Some(false));
+        assert_eq!(item(&node, "r", 2).a11y.tab_index, Some(-1));
+        assert_eq!(item(&node, "r", 1).a11y.toggled, Some(NodeToggled::False));
     }
 
     #[test]
@@ -459,21 +499,38 @@ mod tests {
                 sink.lock().unwrap().push(v);
             })),
         );
-        let keys = item(&node, 2).interaction.on_key.as_ref().unwrap();
+        let keys = item(&node, "r", 2).interaction.on_key.as_ref().unwrap();
         let mods = NodeModifiers::default();
         assert_eq!(
             keys(NodeKey::ArrowRight, mods),
             Some(item_focus_id("r", 3))
         );
         assert!(seen.lock().unwrap().is_empty());
-        (item(&node, 3).interaction.on_activate.as_ref().unwrap())();
+        (item(&node, "r", 3).interaction.on_activate.as_ref().unwrap())();
         assert_eq!(seen.lock().unwrap().as_slice(), &[Some(3.0)]);
         seen.lock().unwrap().clear();
-        (item(&node, 2).interaction.on_activate.as_ref().unwrap())();
+        (item(&node, "r", 2).interaction.on_activate.as_ref().unwrap())();
         assert!(
             seen.lock().unwrap().is_empty(),
             "re-selecting the current value without clear is inert"
         );
+    }
+
+    #[test]
+    fn whole_step_boundary_arrows_are_inert() {
+        let node = render(
+            &RatingSpec::new().with_value(1.0).with_step(1.0),
+            RatingHandlers::new("r"),
+        );
+        let first = item(&node, "r", 1).interaction.on_key.as_ref().unwrap();
+        let last = item(&node, "r", 5).interaction.on_key.as_ref().unwrap();
+        let mods = NodeModifiers::default();
+        assert!(first(NodeKey::ArrowLeft, mods).is_none());
+        assert!(first(NodeKey::ArrowDown, mods).is_none());
+        assert_eq!(first(NodeKey::ArrowRight, mods), Some(item_focus_id("r", 2)));
+        assert!(last(NodeKey::ArrowRight, mods).is_none());
+        assert!(last(NodeKey::ArrowUp, mods).is_none());
+        assert_eq!(last(NodeKey::ArrowLeft, mods), Some(item_focus_id("r", 4)));
     }
 
     #[test]
@@ -489,7 +546,7 @@ mod tests {
                 sink.lock().unwrap().push(v);
             })),
         );
-        (item(&node, 3).interaction.on_activate.as_ref().unwrap())();
+        (item(&node, "r", 3).interaction.on_activate.as_ref().unwrap())();
         assert_eq!(seen.lock().unwrap().as_slice(), &[None]);
 
         let seen: Arc<Mutex<Vec<Option<f64>>>> = Arc::new(Mutex::new(Vec::new()));
@@ -503,8 +560,8 @@ mod tests {
                 sink.lock().unwrap().push(v);
             })),
         );
-        assert!(item(&disabled, 3).interaction.on_activate.is_none());
-        assert!(item(&disabled, 3).interaction.on_key.is_none());
+        assert!(item(&disabled, "d", 3).interaction.on_activate.is_none());
+        assert!(item(&disabled, "d", 3).interaction.on_key.is_none());
         assert!(seen.lock().unwrap().is_empty());
     }
 
@@ -518,7 +575,7 @@ mod tests {
                 sink.lock().unwrap().push(v);
             })),
         );
-        let scrub = item(&node, 3).interaction.on_scrub.as_ref().unwrap();
+        let scrub = item(&node, "f", 3).interaction.on_scrub.as_ref().unwrap();
         scrub(0.3, ScrubPhase::Press);
         assert_eq!(seen.lock().unwrap().as_slice(), &[Some(2.5)]);
 
@@ -572,11 +629,11 @@ mod tests {
             RatingHandlers::new("right"),
         );
         assert_eq!(
-            item(&left, 1).runtime_id.as_deref(),
+            item(&left, "left", 1).runtime_id.as_deref(),
             Some("rating:left:item:1")
         );
         assert_eq!(
-            item(&right, 1).runtime_id.as_deref(),
+            item(&right, "right", 1).runtime_id.as_deref(),
             Some("rating:right:item:1")
         );
     }
