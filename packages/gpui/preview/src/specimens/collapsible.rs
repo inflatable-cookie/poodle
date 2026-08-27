@@ -64,7 +64,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let open_toggled = state.specimens.is_on("collapsible-open-toggled");
     let open_spec = CollapsibleSpec::new()
         .with_title("Advanced options")
-        .with_open(!open_toggled);
+        .with_default_open(true);
+    let open_spec = if open_toggled {
+        open_spec.with_open(false)
+    } else {
+        open_spec
+    };
 
     let open_collapsible = Collapsible::from_spec(open_spec, theme)
         .with_id("specimen-open")

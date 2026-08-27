@@ -229,7 +229,10 @@ pub use checkbox::checkbox;
 pub use code::code;
 pub use code_input::{code_input, code_input_with_handlers, CodeInputHandlers};
 pub use collapse_toggle::collapse_toggle;
-pub use collapsible::collapsible;
+pub use collapsible::{
+    collapsible, collapsible_content_focus_id, collapsible_trigger_focus_id,
+    collapsible_with_handlers, CollapsibleHandlers,
+};
 pub use color_picker::{color_picker, ColorPickerHandlers};
 pub use command_palette::{command_palette, command_palette_with_handlers, CommandPaletteHandlers};
 pub use confirm_action::{confirm_action, confirm_action_with_slots, ConfirmActionHandlers};

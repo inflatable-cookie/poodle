@@ -9,11 +9,11 @@ Updated: 2026-08-27
   - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77;
     `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
     `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
-    `010` complete; `011` complete; `012` ready
+    `010` complete; `011` complete; `012` complete
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: dispatch `g16.012` Collapsible disclosure and mounted parity
-    against 40 mounted / 134 missing. Only Collapsible may move to 41 / 133.
+  - Next move: orchestrator evidence checkpoint against 41 mounted / 133
+    missing. Do not compile `g16.013` until the next lane is selected.
     TriStateSwitch's breaking native value migration, NumberInput,
     EditableLabel, Accordion, visual comparison, accessibility, and Jetstream
     remain outside the card.

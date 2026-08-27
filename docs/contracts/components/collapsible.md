@@ -301,10 +301,15 @@ Behavior classification: machine-backed (`disclosureTransition` in
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::primitives::collapsible`
-- GPUI must expose button role with expanded state on trigger
-- Region association between trigger and content must be maintained
-- Disabled state must suppress interaction, show not-allowed cursor, and reduce
-  root opacity
+- GPUI must expose button role with expanded state on the trigger
+- Region association between trigger and content must be maintained through
+  `controls` and `labelled_by` on the trigger/content pair
+- Effective open state is host-owned: controlled `open` wins over
+  `default_open`, and callbacks report the state the disclosure is moving to
+- The compatibility wrapper's `with_id` supplies a lifetime-stable instance
+  scope for trigger/content identity across host rebuilds
+- Disabled state must suppress interaction and sequential focus, show
+  not-allowed cursor on the trigger, and reduce root opacity
 - Chevron rotation animation maps to indicator transform
 - Content expand/collapse must animate height over ~180ms (equivalent to Svelte
   `slide` transition)
@@ -357,7 +362,7 @@ Behavior classification: machine-backed (`disclosureTransition` in
 |-------|-------------|-----------------|-----------|
 | slot-based trigger content may differ by runtime | composition freedom is acceptable | allowed | keep disclosure semantics strict |
 | CSS color-mix vs GPUI color blending | different color systems per platform | allowed | same visual result required |
-| module-level id counter vs GPUI id generation | different id generation mechanisms | allowed | unique ARIA id pairs required |
+| module-level id counter vs GPUI id generation | different id generation mechanisms | allowed | host-supplied instance scope must keep trigger/content pairs unique across rebuilds |
 
 ## 13. Specimen Definitions
 
