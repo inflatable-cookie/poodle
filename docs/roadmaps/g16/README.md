@@ -182,7 +182,8 @@ and Jetstream admission stay outside the card.
 
 ## Next Task
 
-Prepare and dispatch one worker handoff for `g16.014`. The worker executes only
-that card and returns a PR for orchestrator review. Do not compile or start
-`g16.015` until `g16.014` is merged and the ledger is re-evaluated against the
-expected 43 mounted / 131 missing checkpoint.
+Dispatch `g16.014` from
+`../../handoffs/20260827-174252-g16-014-accordion-worker.md`. The worker
+executes only that card and returns a PR for orchestrator review. Do not compile
+or start `g16.015` until `g16.014` is merged and the ledger is re-evaluated
+against the expected 43 mounted / 131 missing checkpoint.
