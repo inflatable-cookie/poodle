@@ -131,7 +131,8 @@ impl Table {
 pub(crate) struct Rating {
     spec: RatingSpec,
     theme: GpuiThemeProvider,
-    on_change: Option<Arc<dyn Fn(u32) + Send + Sync>>,
+    instance_id: String,
+    on_change: Option<Arc<dyn Fn(Option<f64>) + Send + Sync>>,
 }
 
 pub(crate) struct CollapseToggle {
@@ -189,15 +190,20 @@ impl IntoElement for CollapseToggle {
 }
 
 impl Rating {
-    pub(crate) fn from_spec(spec: RatingSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: RatingSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
             on_change: None,
         }
     }
 
-    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(u32) + Send + Sync>) -> Self {
+    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(Option<f64>) + Send + Sync>) -> Self {
         self.on_change = Some(handler);
         self
     }
@@ -210,7 +216,10 @@ impl IntoElement for Rating {
         poodle_gpui_node_backend::to_gpui(&poodle_render::rating(
             &self.spec,
             &RenderContext::new(&self.theme),
-            self.on_change,
+            poodle_render::RatingHandlers {
+                instance_id: self.instance_id,
+                on_change: self.on_change,
+            },
         ))
     }
 }

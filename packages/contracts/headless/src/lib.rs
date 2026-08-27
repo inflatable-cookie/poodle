@@ -27,6 +27,7 @@ pub mod model_connection;
 pub mod nav;
 pub mod pagination;
 pub mod popover;
+pub mod rating;
 pub mod single_select;
 pub mod slider;
 pub mod switch;

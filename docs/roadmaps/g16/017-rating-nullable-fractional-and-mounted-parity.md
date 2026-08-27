@@ -1,7 +1,9 @@
 # g16.017 — Rating Nullable, Fractional, And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-27
+Completed: 2026-08-27
+PR: #92
 Depends on: merged `g16.016` / PR #91 and the resolved selection in
 `../../triage/20260827-222346-post-g16-016-native-lane-decision.md`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -88,8 +90,9 @@ Governing refs: `../../contracts/001-working-rules.md`,
   earlier stars are not selected radios.
 - Enabled items use instance-scoped, host-owned stable focus ids and roving
   tab behavior. The selected item is the entry stop; otherwise the first item
-  is. Arrow keys and Home/End move focus without selecting, matching the web
-  authority. Enter/Space select the focused value.
+  is. Arrow keys and Home/End move focus without selecting and clamp at the
+  ends (boundary arrows are inert), matching the web authority. Enter/Space
+  select the focused value.
 - Selecting the current value reports `None` only when `allow_clear=true`.
   Otherwise it reports no semantic change. The host applies accepted output
   and rebuilds the spec.
@@ -99,8 +102,9 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 - `step < 1` renders one focusable Slider root with min `0`, max `max`, current
   numeric value (zero only for the accessibility fallback when state is
-  `None`), and readable value text. Star targets are accessibility-hidden and
-  are not separate focus stops.
+  `None`), and readable value text. Star targets carry no role, label, or
+  focus stop (`tab_index` unset); they are not separate focus targets. Shared
+  node vocabulary has no hidden flag; GPUI accessibility remains manual.
 - Pointer position within each star resolves through the shared snap-up math,
   including minimum one-step selection. Press/drag/release may use the existing
   scrub channel; emit a coherent semantic change and let the host rebuild.
@@ -122,15 +126,15 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Execution Plan
 
-- [ ] **Batch 1 — contract and pure machinery.** Apply the approved Rust API
+- [x] **Batch 1 — contract and pure machinery.** Apply the approved Rust API
       break, migrate in-repo call sites mechanically, add native pure Rating
       math with paired focused vectors, and update stale native contract notes.
-- [ ] **Batch 2 — renderer and mounted behavior.** Add Rating-specific handlers,
+- [x] **Batch 2 — renderer and mounted behavior.** Add Rating-specific handlers,
       implement whole-step radio and fractional slider paths through existing
       node vocabulary, update the curated GPUI specimen, and add one readable
       named mounted regression with real pointer/keyboard dispatch and host
       rebuilds.
-- [ ] **Batch 3 — evidence and closeout.** Regenerate only Rating's mounted
+- [x] **Batch 3 — evidence and closeout.** Regenerate only Rating's mounted
       ledger cell, close this card/source decision/log/front doors, and run the
       required headless board.
 
@@ -147,7 +151,8 @@ Governing refs: `../../contracts/001-working-rules.md`,
   - fractional Arrow keys, Home, End, and clear-on-Space/Enter use the same
     pure transition path and disabled mode emits nothing;
   - a `step=1` Rating exposes one selected radio, one roving tab stop, and
-    Arrow/Home/End focus movement without selection;
+    Arrow/Home/End focus movement without selection, with boundary arrows
+    inert;
   - whole-step Enter/Space and pointer activation report the same selected
     value, clear only when allowed, and host rebuild the control;
   - empty state stays `None`, arbitrary incoming fractions display without
@@ -172,28 +177,28 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Acceptance Criteria
 
-- [ ] Rust Rating uses nullable authored/default values, default half-step
+- [x] Rust Rating uses nullable authored/default values, default half-step
       input, no legacy precision/read-only surface, and `Option<f64>` callbacks.
-- [ ] Native pure math matches the TypeScript authority on display clamp,
+- [x] Native pure math matches the TypeScript authority on display clamp,
       snapping, pointer ratios, fill, clear, formatting, and keyboard vectors.
-- [ ] Whole-step mode has correct radiogroup/radio selection, roving focus,
+- [x] Whole-step mode has correct radiogroup/radio selection, roving focus,
       keyboard lifecycle, pointer behavior, disabled inertia, and host rebuilds.
-- [ ] Fractional mode has correct slider semantics, numeric value/text, stepped
+- [x] Fractional mode has correct slider semantics, numeric value/text, stepped
       pointer and keyboard behavior, clear behavior, disabled inertia, and host
       rebuilds.
-- [ ] Arbitrary incoming fractions display without step quantization; accepted
+- [x] Arbitrary incoming fractions display without step quantization; accepted
       user values are quantized; `None` is not collapsed into zero.
-- [ ] Focus identity is stable and isolated across Rating instances without a
+- [x] Focus identity is stable and isolated across Rating instances without a
       new web prop or render-order-derived id.
-- [ ] Focused Svelte and React Rating tests remain green without public web
+- [x] Focused Svelte and React Rating tests remain green without public web
       implementation changes.
-- [ ] The GPUI specimen is interactive, human-centred, and preserves Sizes and
+- [x] The GPUI specimen is interactive, human-centred, and preserves Sizes and
       Densities without becoming an exhaustive conformance page.
-- [ ] One named mounted regression proves the production Rating path.
-- [ ] The generated ledger changes only Rating to 46 mounted / 128 missing;
+- [x] One named mounted regression proves the production Rating path.
+- [x] The generated ledger changes only Rating to 46 mounted / 128 missing;
       known-delta totals remain 115 / 60 and visual/accessibility cells remain
       unchanged.
-- [ ] One August log records the migration, proof, validation, non-claims, and
+- [x] One August log records the migration, proof, validation, non-claims, and
       next checkpoint.
 
 ## Writable Scope

@@ -1,7 +1,7 @@
 # Rating
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-27
 
 ## 1. Purpose
 
@@ -270,12 +270,30 @@ and DOM geometry reads stay adapter-side.
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::primitives::rating`
+- expected crate/module surface: `poodle_gpui::primitives::rating` / shared
+  `RatingSpec` plus `poodle_render::rating`
+- shared Rust value model matches the web authority: `value` /
+  `default_value` are `Option<f64>` (both absent is empty), default `step` is
+  `0.5`, and change payloads are `Option<f64>` (`None` = clear)
+- pure value math lives in `poodle-headless` (`resolve_rating_step`, clamp,
+  snap, pointer, clear, fill, format, keyboard); the renderer must not
+  reimplement it
+- whole-step mode (`step >= 1`) maps to RadioGroup + RadioButton with roving
+  focus; Arrow/Home/End move focus without selecting and clamp at the ends
+  (boundary arrows are inert); Enter/Space and pointer activation select
+- fractional mode (`step < 1`) maps to one focusable Slider root; star
+  targets carry no role, label, or focus stop (`tab_index` left unset so the
+  GPUI backend does not treat them as programmatically focusable). Shared
+  node vocabulary has no hidden flag; GPUI accessibility remains manual
+- Rating stays host-controlled after render: callbacks report a result and the
+  host rebuilds the spec; no hidden renderer state
 - glyph shape may differ from web star icon; the contract is ordinal selection,
   not glyph-specific branding
 - `color-mix` blending should be replicated using equivalent alpha-blended color
   calculations in GPUI's color system
-- roving focus should map to GPUI's focus management primitives
+- instance-scoped focus ids are construction data, not a public web prop;
+  `Rating::from_spec(spec, theme, instance_id)` requires an explicit stable id
+  at every call site (same discipline as RadioGroup)
 
 ## 11. Parity Checklist
 
@@ -314,10 +332,16 @@ and DOM geometry reads stay adapter-side.
 
 ## 12a. Jetstream Notes
 
-- `Rating::from_spec(spec, theme).on_change(...)`, carrying the rating the
-  pressed star sets — 1-based, so the third star reports `3` rather than an
-  index.
-- Read-only and disabled ratings ignore clicks.
+- Jetstream remains program-deferred. In-repo call sites receive only the
+  mechanical compile migration onto the shared `RatingSpec` /
+  `Option<f64>` surface.
+- `Rating::from_spec(spec, theme, instance_id)` is the GPUI construction
+  surface. The deferred Jetstream preview adapter follows the same rule: both
+  require an explicit host-owned instance id.
+- Jetstream's legacy half-star click delta is not authority to weaken GPUI
+  behavior.
+- Disabled ratings ignore interaction. There is no public read-only Rating
+  prop in the active cohort.
 
 ## 13. Specimen Definitions
 

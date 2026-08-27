@@ -42,10 +42,12 @@ behavior repairs without inventing another conformance authority.
   selection, disclosure semantics, identity, and mounted parity, moving the
   ledger to 43 mounted / 131 missing. PR #90 closed `g16.015` CollapseToggle
   native label, expanded state, focus, disabled behavior, and standalone
-  mounted proof; ledger 44 mounted / 130 missing. No broader conformance
-  programme is implied. `g16.016` is ready to repair Pagination's loading-time
-  limit-selector leak and prove its navigation/limit paths through mounted
-  GPUI behavior; only Pagination may move to 45 mounted / 129 missing.
+  mounted proof; ledger 44 mounted / 130 missing. PR #91 closed `g16.016`
+  Pagination loading suppression and mounted navigation/limit proof; ledger
+  45 mounted / 129 missing. `g16.017` closed Rating's approved nullable /
+  fractional Rust migration and one mounted GPUI cell; ledger 46 mounted /
+  128 missing. Known-delta totals stay 115 / 60. No broader conformance
+  programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -101,7 +103,8 @@ behavior repairs without inventing another conformance authority.
   `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
   `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
   `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
-  `016` ready for worker dispatch
+  `016` merged in PR #91; `017` complete — awaiting merge in PR #92;
+  orchestrator checkpoint at 46 mounted / 128 missing
 
 ## Rules
 
