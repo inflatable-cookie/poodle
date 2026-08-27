@@ -14,9 +14,9 @@ use gpui::{
 };
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::{RenderContext, SlotBuilder};
+use poodle_render::{AccordionHandlers, RenderContext, SlotBuilder};
 use poodle_specs::{
-    AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentMessageSpec,
+    AccordionSelectionValue, AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentMessageSpec,
     AgentPlanRecordSpec, AgentPlanSpec, AgentQuestionRecordSpec, AgentQuestionSpec,
     AgentSubagentSpec, AgentTranscriptSpec, AlertDialogSpec, AppHeaderSpec, AudioPlayerSpec,
     AvatarSpec, BlockEditorSpec, BoxSpec, BreadcrumbsSpec, BulkActionBarSpec, ButtonSpec,
@@ -5684,7 +5684,7 @@ pub(crate) struct Accordion {
     spec: AccordionSpec,
     theme: GpuiThemeProvider,
     content: Vec<(String, poodle_node::Node)>,
-    on_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    handlers: AccordionHandlers,
 }
 
 impl Accordion {
@@ -5693,16 +5693,20 @@ impl Accordion {
             spec,
             theme: theme.clone(),
             content: Vec::new(),
-            on_toggle: None,
+            handlers: AccordionHandlers::new("accordion"),
         }
     }
 
-    pub(crate) fn with_id(self, _id: impl Into<String>) -> Self {
+    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.handlers.instance_id = id.into();
         self
     }
 
-    pub(crate) fn on_toggle(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
-        self.on_toggle = Some(handler);
+    pub(crate) fn on_value_change(
+        mut self,
+        handler: Arc<dyn Fn(AccordionSelectionValue) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_value_change = Some(handler);
         self
     }
 
@@ -5735,7 +5739,7 @@ impl IntoElement for Accordion {
             &self.spec,
             &RenderContext::new(&self.theme),
             &self.content,
-            self.on_toggle,
+            self.handlers,
         ))
     }
 }

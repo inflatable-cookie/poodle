@@ -128,7 +128,7 @@ fn build_scene(scene: &str, ctx: &poodle_render::RenderContext<'_>) -> EvidenceS
                     AccordionItemSpec::new("two", "Second section"),
                 ]),
                 ctx,
-                None,
+                poodle_render::AccordionHandlers::new("inset-evidence"),
             ),
             logical_width: 420.0,
             logical_height: 200.0,

@@ -18,7 +18,6 @@ pub struct AccordionSpec {
     pub items: Vec<AccordionItemSpec>,
     pub value: Option<AccordionSelectionValue>,
     pub default_value: Option<AccordionSelectionValue>,
-    pub allow_multiple: bool,
     pub is_collapsible: bool,
     pub aria_label: Option<String>,
     /// `None` inherits from the presentation context; an explicit value always wins.
@@ -36,7 +35,6 @@ impl Default for AccordionSpec {
             items: Vec::new(),
             value: None,
             default_value: None,
-            allow_multiple: false,
             is_collapsible: true,
             aria_label: None,
             size: None,
@@ -70,11 +68,6 @@ impl AccordionSpec {
         self
     }
 
-    pub fn with_allow_multiple(mut self, allow_multiple: bool) -> Self {
-        self.allow_multiple = allow_multiple;
-        self
-    }
-
     pub fn with_collapsible(mut self, is_collapsible: bool) -> Self {
         self.is_collapsible = is_collapsible;
         self
@@ -91,7 +84,8 @@ impl AccordionSpec {
 
     pub fn expanded_values(&self) -> Vec<&str> {
         match self.current_value() {
-            Some(AccordionSelectionValue::Single(value)) => vec![value.as_str()],
+            Some(AccordionSelectionValue::Single(Some(value))) => vec![value.as_str()],
+            Some(AccordionSelectionValue::Single(None)) => Vec::new(),
             Some(AccordionSelectionValue::Multiple(values)) => {
                 values.iter().map(String::as_str).collect()
             }
@@ -205,5 +199,63 @@ impl AccordionSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = Some(density);
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn items() -> Vec<AccordionItemSpec> {
+        vec![
+            AccordionItemSpec::new("first", "First"),
+            AccordionItemSpec::new("second", "Second"),
+        ]
+    }
+
+    #[test]
+    fn single_mode_represents_open_and_collapsed_results() {
+        let open = AccordionSpec::new(items()).with_value(AccordionSelectionValue::Single(Some(
+            "first".into(),
+        )));
+        assert_eq!(open.expanded_values(), ["first"]);
+
+        let collapsed =
+            AccordionSpec::new(items()).with_value(AccordionSelectionValue::Single(None));
+        assert!(collapsed.expanded_values().is_empty());
+        assert_eq!(collapsed.expanded_item_count(), 0);
+    }
+
+    #[test]
+    fn multiple_mode_represents_open_and_empty_sets() {
+        let open = AccordionSpec::new(items())
+            .with_selection_mode(AccordionSelectionMode::Multiple)
+            .with_value(AccordionSelectionValue::Multiple(vec!["second".into()]));
+        assert_eq!(open.expanded_values(), ["second"]);
+
+        let empty = AccordionSpec::new(items())
+            .with_selection_mode(AccordionSelectionMode::Multiple)
+            .with_value(AccordionSelectionValue::Multiple(vec![]));
+        assert!(empty.expanded_values().is_empty());
+    }
+
+    #[test]
+    fn controlled_value_wins_over_default_value() {
+        let spec = AccordionSpec::new(items())
+            .with_default_value(AccordionSelectionValue::Single(Some("first".into())))
+            .with_value(AccordionSelectionValue::Single(Some("second".into())));
+        assert_eq!(spec.current_value(), Some(&AccordionSelectionValue::Single(Some(
+            "second".into()
+        ))));
+        assert_eq!(spec.expanded_values(), ["second"]);
+    }
+
+    #[test]
+    fn selection_mode_is_the_sole_mode_field() {
+        let spec = AccordionSpec::new(items())
+            .with_selection_mode(AccordionSelectionMode::Multiple)
+            .with_default_value(AccordionSelectionValue::Multiple(vec!["first".into()]));
+        assert_eq!(spec.selection_mode, AccordionSelectionMode::Multiple);
+        assert_eq!(spec.expanded_item_count(), 1);
     }
 }

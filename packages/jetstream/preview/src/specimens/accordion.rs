@@ -5,7 +5,8 @@ use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
 use poodle_specs::{
-    AccordionItemSpec, AccordionSelectionValue, AccordionSpec, ControlDensity, ControlSize,
+    AccordionItemSpec, AccordionSelectionMode, AccordionSelectionValue, AccordionSpec,
+    ControlDensity, ControlSize,
 };
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
@@ -33,7 +34,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     description: Some("Built-in ARIA attributes, keyboard navigation, and screen reader support details.".into()),
                     is_disabled: false,
                 },
-            ]).with_default_value(AccordionSelectionValue::Single("getting-started".into())), theme)
+            ]).with_default_value(AccordionSelectionValue::Single(Some("getting-started".into()))), theme)
         ))
         // Multiple selection
         .child(group("Multiple selection", secondary,
@@ -56,7 +57,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     description: Some("Switch between comfortable and compact density for different use cases.".into()),
                     is_disabled: false,
                 },
-            ]).with_allow_multiple(true)
+            ]).with_selection_mode(AccordionSelectionMode::Multiple)
               .with_default_value(AccordionSelectionValue::Multiple(vec!["tokens".into(), "theming".into()])), theme)
         ))
         // All collapsed
@@ -97,7 +98,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     description: Some("Requires admin access.".into()),
                     is_disabled: true,
                 },
-            ]).with_default_value(AccordionSelectionValue::Single("open".into())), theme)
+            ]).with_default_value(AccordionSelectionValue::Single(Some("open".into())), theme)
         ))
         // Sizes (xs–xl) — intrinsic dimensions resolve from the size token.
         .child(group("Sizes", secondary,
@@ -130,7 +131,7 @@ fn size_variant(theme: &JetstreamThemeProvider, size: ControlSize, label: &str) 
     js_accordion(
         &AccordionSpec::new(variant_items(label))
             .with_size(size)
-            .with_default_value(AccordionSelectionValue::Single("section".into())),
+            .with_default_value(AccordionSelectionValue::Single(Some("section".into()))),
         theme,
     )
 }
@@ -139,7 +140,7 @@ fn density_variant(theme: &JetstreamThemeProvider, density: ControlDensity, labe
     js_accordion(
         &AccordionSpec::new(variant_items(label))
             .with_density(density)
-            .with_default_value(AccordionSelectionValue::Single("section".into())),
+            .with_default_value(AccordionSelectionValue::Single(Some("section".into()))),
         theme,
     )
 }
