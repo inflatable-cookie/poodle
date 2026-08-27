@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-27 — `effigy drift:roles` resolves the deferred Jetstream preview
+  and fails in an otherwise valid Poodle worktree when the sibling Jetstream
+  checkout is absent. Keep the role census on the active cohort or split the
+  deferred backend into an opt-in selector. Found while reviewing `g16.013`;
+  the roadmap explicitly keeps Jetstream out of normal validation.
+
 - 2026-08-27 — `rustfmt packages/contracts/components/src/lib.rs` formats
   every child spec module. Format the leaf file (`icon_button.rs`) and keep
   `lib.rs` edits surgical. Hit while landing `g16.011`; recovered by restoring
