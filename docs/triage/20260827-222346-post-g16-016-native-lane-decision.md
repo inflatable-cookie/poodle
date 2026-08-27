@@ -1,7 +1,8 @@
 # Post-g16.016 Native Lane Decision
 
-Status: open — operator approval required for the recommended Rust API migration
+Status: resolved — operator approved Rating as `g16.017`
 Captured: 2026-08-27
+Resolved: 2026-08-27
 Source: merged `g16.016` / PR #91 and the 45 mounted / 129 missing ledger
 
 ## Checkpoint
@@ -64,3 +65,11 @@ nullable/fractional behavior and one mounted GPUI cell. If the migration is not
 approved, pause component execution and plan Select as a larger contract/API
 lane rather than selecting an easier but lower-value row merely to increase the
 ledger count.
+
+## Decision
+
+The operator approved the clean pre-1.0 Rating migration on 2026-08-27.
+`g16.017` owns the nullable value model, default half-step input, removal of
+legacy `precision` and read-only fields, `Option<f64>` change payloads, and
+mounted whole-step and fractional GPUI proof. Select remains a later, larger
+planning lane.

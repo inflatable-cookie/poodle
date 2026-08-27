@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.016 merged in PR #91; 45 mounted / 129 missing
+Status: active — g16.017 ready for worker dispatch; 45 mounted / 129 missing
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -47,6 +47,7 @@ stay maintained; backend admission is not part of the first card.
 14. [014 — Accordion result selection and mounted parity](014-accordion-result-selection-and-mounted-parity.md) — complete; merged in PR #88
 15. [015 — CollapseToggle disclosure and mounted parity](015-collapse-toggle-disclosure-and-mounted-parity.md) — complete; merged in PR #90
 16. [016 — Pagination navigation, loading, and mounted parity](016-pagination-navigation-loading-and-mounted-parity.md) — complete; merged in PR #91
+17. [017 — Rating nullable, fractional, and mounted parity](017-rating-nullable-fractional-and-mounted-parity.md) — ready
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
@@ -198,7 +199,17 @@ changes through mounted GPUI host rebuilds. Ledger: 44 → 45 mounted and
 130 → 129 missing. Select's own row, native accessibility, visual comparison,
 and Jetstream stay unchanged.
 
+The post-`g16.016` checkpoint found that Select still needs a larger query,
+highlight, keyboard, freeform, overlay, and focus-return planning lane. The
+operator instead approved Rating's clean pre-1.0 Rust migration for `g16.017`:
+nullable values, default half-step input, removal of legacy precision/read-only
+fields, `Option<f64>` change payloads, shared pure math, and coherent whole-step
+radio plus fractional slider behavior. The card may move only Rating from
+45 → 46 mounted and 129 → 128 missing. Jetstream receives mechanical compile
+maintenance only and remains deferred.
+
 ## Next Task
 
-Return to the orchestrator evidence checkpoint at 45 mounted / 129 missing.
-Select the next bounded parity lane before compiling or starting `g16.017`.
+Dispatch `g16.017` as one serial worker lane. After merge, return to the
+orchestrator evidence checkpoint at 46 mounted / 128 missing before compiling
+or starting `g16.018`.
