@@ -307,7 +307,10 @@ pub fn duration_input_with_handlers(
         s.descriptor.border.width = border_width;
         s.descriptor.border.color = border_color;
     }
-    root.interaction.focusable = true;
+    // The root is a frame, not a stop. Contract §6 gives Tab the segments and
+    // then the way out; a focusable root would put a tab stop in front of
+    // Hours that draws nothing and takes no key. (It was inert while the GPUI
+    // backend ignored `focusable` for traversal, which is how it survived.)
 
     // Hours segment / separator / minutes.
     segments = segments
@@ -427,6 +430,13 @@ mod tests {
         let segs = segments(&node);
         assert_eq!(segs.len(), 3, "hours, minutes, seconds");
         assert!(segs.iter().all(|s| s.interaction.focusable));
+        // And only the segments are. `focusable` is a real tab stop on the
+        // native backend, so a focusable root would mean Tab entering the
+        // control before it reaches Hours.
+        assert!(
+            !node.interaction.focusable,
+            "the root frames the segments; it is not one of them"
+        );
 
         let (node, _) = armed(&DurationInputSpec::new().with_show_seconds(false));
         assert_eq!(segments(&node).len(), 2, "no seconds segment to focus");

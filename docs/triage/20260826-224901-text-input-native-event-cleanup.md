@@ -1,6 +1,6 @@
 # TextInput Native Event Cleanup
 
-Status: promoted — resolved into ready card `g16.008`
+Status: resolved — executed as `g16.008`
 Captured: 2026-08-26
 Source: PR #81 review and `g16.007` execution log
 
@@ -22,8 +22,14 @@ safe to repair without checking their wider consumers:
 The post-`g16.007` checkpoint confirmed one bounded generic repair. TextInput
 and DurationInput require Tab traversal; CodeInput has no submit contract; and
 EditableLabel's Tab commit belongs to its documented blur path. Composite and
-childless inputs also need one backend-owned painted-state-key rule. Execute
-`../roadmaps/g16/008-native-text-event-routing-cleanup.md`.
+childless inputs also need one backend-owned painted-state-key rule. Executed
+as `../roadmaps/g16/008-native-text-event-routing-cleanup.md`.
+
+Both findings are repaired in the node/backend seam and recorded in
+`../logs/2026-08/20260826-g16-008-native-text-event-routing-cleanup.md`. Making
+the fixed envelope real also required binding Tab to gpui's own
+`focus_next`/`focus_prev` at the window host, and making a node that declares
+`Interaction::focusable` an actual tab stop. No ledger cell moved.
 
 ## Guardrail
 

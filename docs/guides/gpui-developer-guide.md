@@ -70,6 +70,54 @@ The exact render signature is part of the Rust API. Check the function in
 [component contract](../contracts/components/README.md) for a component with
 multiple handlers or content slots.
 
+## Wire the Window Root
+
+`to_gpui` converts one node tree. Two behaviours are window-level rather than
+component-level, and an application has to opt into them **once**, at its root:
+
+- **Tab and Shift+Tab traversal.** GPUI owns sequential focus
+  (`Window::focus_next`/`focus_prev`) but binds no key to it, exactly as a
+  browser's Tab is a document-level default action rather than a control's.
+- **Overlay dismissal and drag cleanup.** Escape dismisses the innermost open
+  layer, a pointer press outside a layer dismisses it, and an unfinished
+  payload drag ends on mouse-up or Escape.
+
+Both live on `attach_overlay_host`, whose name predates the traversal it now
+also carries. Its companion, `overlay_frame_begin`, marks the frame boundary
+the layer registry, painted bounds, and focus queue are rebuilt at.
+
+```rust
+use gpui::{div, Context, IntoElement, ParentElement, Render, Styled, Window};
+
+impl Render for AppRoot {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+        // Once per rendered frame, before any node is converted.
+        poodle_gpui_node_backend::overlay_frame_begin();
+        // Restart the generated-id counter so a node that declares no id keeps
+        // the same ElementId across the frames a real click spans.
+        poodle_gpui_node_backend::reset_element_ids();
+
+        // Once per window, around the one root element.
+        poodle_gpui_node_backend::attach_overlay_host(
+            div()
+                .size_full()
+                .child(poodle_gpui_node_backend::to_gpui(&self.node_tree())),
+        )
+    }
+}
+```
+
+Once per **window**, not once per component: wrapping individual components
+would register the same window-level listeners many times over. A root that
+skips this still renders and still takes pointer input, but nothing in it is
+reachable by keyboard traversal and no overlay dismisses.
+
+Sequential traversal follows `Interaction::focusable` and `NodeA11y::tab_index`
+the way the DOM follows the absence or presence of `tabindex`: a focusable node
+with no declared index is a tab stop, an index of `0` or more orders it, and
+`-1` keeps it programmatically focusable and out of the sequence. Components
+declare that; applications do not manage focus by hand.
+
 ## Theme and Scale
 
 `GpuiThemeProvider` implements Poodle's renderer-neutral `ThemeProvider` trait.

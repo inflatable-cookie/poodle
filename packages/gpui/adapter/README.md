@@ -61,6 +61,27 @@ let element = poodle_gpui_node_backend::to_gpui(&node);
 Convert the completed node tree once at the GPUI boundary. Shared component
 composition belongs in `poodle-render`, not in this adapter or the backend.
 
+## Window Root
+
+`to_gpui` converts a tree; it does not install window-level behaviour. Tab and
+Shift+Tab traversal, Escape and outside-press overlay dismissal, and payload
+drag cleanup are all document-level defaults, so an application opts into them
+once at its root:
+
+```rust
+poodle_gpui_node_backend::overlay_frame_begin();   // once per rendered frame
+poodle_gpui_node_backend::reset_element_ids();     // once per rendered frame
+
+poodle_gpui_node_backend::attach_overlay_host(     // once per window
+    div().size_full().child(poodle_gpui_node_backend::to_gpui(&node)),
+)
+```
+
+`attach_overlay_host` is named for the overlay dismissal it started with and
+now also carries Tab traversal — GPUI owns `focus_next`/`focus_prev` but binds
+no key to them. Wrap the one root element, not each component. Full example:
+[GPUI developer guide](../../../docs/guides/gpui-developer-guide.md#wire-the-window-root).
+
 ## Style Mapping
 
 `map_layout()` converts `poodle_layout::LayoutIntent` to `GpuiStyle`.

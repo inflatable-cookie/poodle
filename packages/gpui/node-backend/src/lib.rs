@@ -747,7 +747,7 @@ fn tracks_focus(node: &Node) -> bool {
         || (node.interaction.focusable && node.style.focus.is_some())
 }
 
-fn element_id_string(node: &Node) -> String {
+pub(crate) fn element_id_string(node: &Node) -> String {
     match node.runtime_id.as_ref().or(node.id.as_ref()) {
         Some(id) => id.clone(),
         None => match &node.style.animation {
@@ -870,6 +870,7 @@ mod ime;
 mod input_text;
 
 pub use ime::{mark_composing, take_composing};
+pub use input_text::{painted_text_state_for, PaintedTextState};
 
 #[cfg(test)]
 mod tests;

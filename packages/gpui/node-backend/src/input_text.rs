@@ -24,6 +24,7 @@ use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
 use poodle_headless::text_input::{coalesces, EditSnapshot, EditState};
+use poodle_node::{Node, NodeKind};
 
 use gpui::{
     fill, point, px, relative, size, App, Bounds, Element, ElementId, GlobalElementId, Hsla,
@@ -133,11 +134,57 @@ pub(crate) struct History {
     run_open: bool,
 }
 
-/// History is keyed by the *value* node's id — the node that paints, and so
-/// the only one that sees an edit's result. The field root, where keystrokes
-/// land, derives it with this helper so exactly one place knows the shape.
-pub(crate) fn history_key(field_id: &str) -> String {
-    format!("{field_id}-value")
+/// Whether this node is the one the backend paints a value for — the shapes
+/// [`crate::to_gpui`] turns into an [`InputText`], and so the only nodes that
+/// measure, scroll, blink, compose or record history.
+fn paints_value(node: &Node) -> bool {
+    match &node.kind {
+        // A field's value drawn as text: one control in the accessibility
+        // tree, with the caret channel asking for measurement.
+        NodeKind::Text { content } => node.caret.is_some() && !content.contains('\n'),
+        // A childless input draws its own value; a composite one delegates to
+        // a styled subtree and the backend must not duplicate it underneath.
+        NodeKind::Input { value, placeholder } => {
+            if !node.children.is_empty() {
+                return false;
+            }
+            let display = if value.is_empty() { placeholder } else { value };
+            !display.contains('\n')
+        }
+        _ => false,
+    }
+}
+
+/// The id every piece of a field's transient text state is keyed by: the
+/// measured line, the scroll offset, the blink epoch, the marked range, the
+/// composing text, and the undo history.
+///
+/// All of it belongs to the node that *paints* the value, because that is the
+/// only one that sees an edit's result — the component computes the new value
+/// from a keystroke, and it arrives on the next frame. Keys and focus land
+/// somewhere else: on the focusable field root. The two coincide for a
+/// childless input (native `EditableLabel`) and differ for a composite field
+/// (`TextInput`, whose value is a `<field-id>-value` text child among affixes
+/// and counters).
+///
+/// Derived from the node's shape rather than from a naming convention, and
+/// derived in exactly one place, so a repair for either shape cannot regress
+/// the other.
+pub(crate) fn painted_key(node: &Node, field_id: &str) -> String {
+    // Only a field goes looking. Every focus-tracked node asks this once per
+    // frame, and a panel or a list row would otherwise walk its whole subtree
+    // for an answer that is always its own id.
+    if node.caret.is_none() && !matches!(node.kind, NodeKind::Input { .. }) {
+        return field_id.to_string();
+    }
+    fn find(node: &Node) -> Option<String> {
+        if paints_value(node) {
+            let id = crate::element_id_string(node);
+            return (!id.is_empty()).then_some(id);
+        }
+        node.children.iter().find_map(find)
+    }
+    find(node).unwrap_or_else(|| field_id.to_string())
 }
 
 /// Record what a field currently holds, if it changed.
@@ -236,6 +283,41 @@ pub(crate) fn char_index_for_position(id: &str, position: Point<Pixels>) -> Opti
             .closest_index_for_x(position.x - measured.origin_x);
         Some(char_for_byte(&measured.text, byte))
     })
+}
+
+/// What the backend still holds for one painted text id.
+///
+/// The first five are transient: they describe a field as it is being edited
+/// right now, and [`forget`] drops them when focus leaves. `history` is not —
+/// undo reaches back across a focus excursion, so it lives for as long as the
+/// field is mounted.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct PaintedTextState {
+    /// The last shaped line, which answers "which character did I click?".
+    pub measured: bool,
+    /// How far the value is scrolled to keep the caret visible.
+    pub scrolled: bool,
+    /// When the caret last moved, which is where the blink phase starts.
+    pub blinking: bool,
+    /// The range an input method is composing over.
+    pub marked: bool,
+    /// The provisional text an input method is composing.
+    pub composing: bool,
+    /// Undo/redo snapshots. Mounted-lifetime, not transient.
+    pub history: bool,
+}
+
+/// Read back what the backend holds for a painted text id. An observation
+/// surface for mounted regressions — the same class as `focus_state_for`.
+pub fn painted_text_state_for(id: &str) -> PaintedTextState {
+    PaintedTextState {
+        measured: MEASURED.with(|m| m.borrow().contains_key(id)),
+        scrolled: SCROLL.with(|s| s.borrow().contains_key(id)),
+        blinking: BLINK_EPOCH.with(|b| b.borrow().contains_key(id)),
+        marked: MARKED.with(|m| m.borrow().contains_key(id)),
+        composing: COMPOSING.with(|c| c.borrow().contains_key(id)),
+        history: HISTORY.with(|h| h.borrow().contains_key(id)),
+    }
 }
 
 /// Drop a field's cached measurement. Called when a field loses focus so a

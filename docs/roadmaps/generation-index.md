@@ -8,11 +8,12 @@ Updated: 2026-08-26
   - Status: active; strict-ready
   - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77;
     `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
-    `007` merged in PR #81; `008` ready
+    `007` merged in PR #81; `008` complete in PR #82, awaiting operator merge
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: execute `g16.008` native text-event routing cleanup without
-    moving the 37 mounted / 137 missing evidence ledger
+  - Next move: orchestrator evidence checkpoint. `g16.008` closed native
+    text-event routing without moving the 37 mounted / 137 missing evidence
+    ledger; no card is compiled
 
 ## Latest Completed Track
 

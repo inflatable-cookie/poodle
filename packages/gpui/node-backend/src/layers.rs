@@ -27,8 +27,8 @@
 //! many components independently per frame. [`overlay_frame_begin`] is called
 //! once at the start of each rendered frame by both the production preview
 //! root and the headless conformance driver; [`attach_overlay_host`] wires
-//! the window-level dismissal listeners onto a root element for the same two
-//! hosts.
+//! the window-level key and pointer listeners — dismissal, payload cleanup,
+//! and Tab traversal — onto a root element for the same two hosts.
 
 use std::cell::RefCell;
 
@@ -222,13 +222,19 @@ pub fn dismiss_layers_at(position: Point<Pixels>, cx: &mut App) {
     cx.refresh_windows();
 }
 
-/// Attach the window-level overlay host listeners to a root element: every
+/// Attach the window-level host listeners to a root element: every
 /// pointer-down is routed through the layer registry (outside dismissal) and
 /// Escape dismisses the innermost layer. The same root also ends an unfinished
 /// payload-drag session on mouse-up (after a zone `on_drop` has already taken
 /// a successful drop) and on Escape. The production preview root and the
 /// conformance mount host use this wiring, so overlay dismissal and payload
 /// cleanup behave identically in the real runtime and the headless driver.
+///
+/// Tab lives here too, for the same reason Escape does: it is a document-level
+/// default action, not something a focused control decides. gpui ships the
+/// traversal itself (`focus_next`/`focus_prev` over the frame's tab stops) but
+/// binds no key to it, so the window host is where the gesture meets the
+/// machinery — the one place a browser also puts it.
 pub fn attach_overlay_host<E>(el: E) -> E
 where
     E: gpui::InteractiveElement + 'static,
@@ -246,9 +252,20 @@ where
         },
     )
     .on_key_down(move |event: &KeyDownEvent, window, cx| {
-        if event.keystroke.key.as_str() == "escape" {
-            crate::interaction::cancel_payload_session(window, cx);
-            dismiss_innermost(cx);
+        match event.keystroke.key.as_str() {
+            "escape" => {
+                crate::interaction::cancel_payload_session(window, cx);
+                dismiss_innermost(cx);
+            }
+            "tab" => {
+                if event.keystroke.modifiers.shift {
+                    window.focus_prev();
+                } else {
+                    window.focus_next();
+                }
+                cx.refresh_windows();
+            }
+            _ => {}
         }
     })
 }

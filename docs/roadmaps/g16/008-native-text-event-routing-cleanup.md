@@ -1,7 +1,8 @@
 # g16.008 — Native Text Event Routing Cleanup
 
-Status: ready
+Status: complete
 Opened: 2026-08-26
+Closed: 2026-08-26
 Depends on: merged `g16.007`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
@@ -120,23 +121,58 @@ generated evidence ledger unchanged at 37 mounted / 137 missing.
 
 ## Acceptance
 
-- [ ] Node submit vocabulary and GPUI dispatch both mean Enter only.
-- [ ] Mounted TextInput Enter submits once; Tab and Shift+Tab traverse without
+- [x] Node submit vocabulary and GPUI dispatch both mean Enter only.
+- [x] Mounted TextInput Enter submits once; Tab and Shift+Tab traverse without
       submit or value mutation.
-- [ ] Mounted CodeInput and DurationInput traverse on Tab without completion or
+- [x] Mounted CodeInput and DurationInput traverse on Tab without completion or
       value mutation; DurationInput moves through its segment order.
-- [ ] Mounted EditableLabel Enter commits directly, Escape cancels, and Tab
+- [x] Mounted EditableLabel Enter commits directly, Escape cancels, and Tab
       commits once through blur before focus advances.
-- [ ] One backend identity helper addresses the actual painted text node for
+- [x] One backend identity helper addresses the actual painted text node for
       composite and childless inputs.
-- [ ] Blur clears measured, scroll, blink, marked, and composing state for the
+- [x] Blur clears measured, scroll, blink, marked, and composing state for the
       painted key without discarding mounted-lifetime undo history.
-- [ ] Existing TextInput mounted evidence and retained composite text-entry
+- [x] Existing TextInput mounted evidence and retained composite text-entry
       regressions stay green.
-- [ ] The parity evidence ledger remains byte-for-byte unchanged at 37 mounted
+- [x] The parity evidence ledger remains byte-for-byte unchanged at 37 mounted
       / 137 missing.
-- [ ] One August log records the repair and leaves NumberInput, multiline,
+- [x] One August log records the repair and leaves NumberInput, multiline,
       slug, accessibility, visual comparison, and Jetstream open.
+
+## Outcome
+
+Complete. The full record is
+`../../logs/2026-08/20260826-g16-008-native-text-event-routing-cleanup.md`.
+
+Two further generic repairs were required to make the fixed envelope real, both
+inside the same node/backend seam and neither a new focus architecture:
+
+- gpui 0.2.2 binds no key to its own sequential traversal, so Tab now reaches
+  `Window::focus_next`/`focus_prev` from the window host that already carries
+  Escape — the same place a browser puts a document-level default action.
+- a node declaring `Interaction::focusable` was not a tab stop, so no field,
+  slot row or segment was reachable by keyboard once Tab stopped being
+  intercepted. `focusable` with no declared `a11y.tab_index` now means a tab
+  stop at index 0, which is what the vocabulary already documented and what the
+  DOM does; `-1` still means programmatically focusable and skipped.
+
+Making `focusable` real also exposed one component declaration that was inert
+while nothing was Tab-reachable: `DurationInput` marked its component root
+focusable as well as its H/M/S segments, which would have put a stop that draws
+nothing and takes no key ahead of Hours. The root declaration is removed, so
+traversal is `H → M → S → out` in both directions, as §6 of the contract
+requires. `TextInput` is unaffected — its root *is* its one focusable field, and
+the `-value` child only paints.
+
+The consumer-facing side of window-level Tab is documented in
+`../../guides/gpui-developer-guide.md#wire-the-window-root` and
+`../../../packages/gpui/adapter/README.md#window-root`: an application calls
+`overlay_frame_begin()` once per rendered frame and wraps its one root element
+with `attach_overlay_host(...)` once per window.
+
+Both corrections were directed by orchestrator review of PR #82, which widened
+the writable scope below to `packages/render/src/duration_input.rs` and the two
+consumer-facing GPUI documents.
 
 ## Writable Scope
 
@@ -149,6 +185,11 @@ generated evidence ledger unchanged at 37 mounted / 137 missing.
   text-entry tests only where required to retain behavior
 - this card, g16/front-door status, the source triage note, one August log, and
   `PAPERCUTS.md` only for new execution friction
+- widened by orchestrator review of PR #82:
+  `packages/render/src/duration_input.rs` for the contract-required segment
+  traversal, and `docs/guides/gpui-developer-guide.md` plus
+  `packages/gpui/adapter/README.md` for the window-root integration Tab now
+  depends on
 
 Do not change public component props, redesign another editable component,
 change ledger evidence, edit specimens or theme CSS, add visual fixtures,

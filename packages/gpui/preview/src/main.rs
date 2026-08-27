@@ -417,10 +417,11 @@ impl Render for PreviewRoot {
         let controls_h = px(80.0);
         let content_h = window_h - top_bar_h - controls_h;
 
-        // The window-level overlay host: every pointer-down and Escape is
-        // routed through the node backend's layer registry (the same wiring
-        // the headless mount host uses), so production overlay dismissal
-        // executes through the real event tree.
+        // The window-level host: every pointer-down and Escape is routed
+        // through the node backend's layer registry, and Tab and Shift+Tab
+        // reach gpui's own sequential focus traversal (the same wiring the
+        // headless mount host uses), so production dismissal and keyboard
+        // traversal execute through the real event tree.
         poodle_gpui_node_backend::attach_overlay_host(
             div()
                 .size_full()
