@@ -46,6 +46,14 @@ describe("Select (react) ghost variant", () => {
     // b031: ghost drops the border and the fill, not the dropdown signal.
     expect(container.querySelector(".poodle-select__indicator-button")).not.toBeNull();
   });
+
+  it("stamps data-variant on the native root", () => {
+    const { container } = render(<Select options={options} variant="ghost" />);
+
+    const root = container.querySelector(".poodle-select");
+    expect(root?.classList.contains("poodle-select--custom")).toBe(false);
+    expect(root?.getAttribute("data-variant")).toBe("ghost");
+  });
 });
 
 /**

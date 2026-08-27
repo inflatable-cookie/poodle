@@ -6,6 +6,7 @@ import type {
 } from "@inflatable-cookie/poodle-core";
 
 import { HistoryCenter } from "../src";
+import type { HistoryEntry } from "../src/types";
 
 // v3 data: root path pages arrive newest-first (R3); display is oldest-first.
 // `continuationCount` counts the run's own next row, so forkCount is one less
@@ -1364,5 +1365,17 @@ describe("HistoryCenter (react)", () => {
       "2",
       "1",
     ]);
+  });
+});
+
+describe("HistoryCenter (react) package types", () => {
+  it("exports the live HistoryEntry shape, not v2 branchCount", () => {
+    const entry: HistoryEntry = {
+      id: "e1",
+      label: "Edit",
+      position: "current",
+      continuationCount: 0,
+    };
+    expect(entry.continuationCount).toBe(0);
   });
 });
