@@ -605,9 +605,20 @@ mod tests {
         assert!(spec.has_required_icon());
         assert!(spec.has_required_accessible_name());
         assert!(spec.uses_pressed_semantics());
+        assert!(spec.is_toggle_mode());
+        assert!(spec.current_pressed());
         assert_eq!(spec.is_expanded, Some(true));
         assert_eq!(spec.controls.as_deref(), Some("panel"));
         assert_eq!(spec.control_height_token(ControlSize::Md), semantic::SIZE_CONTROL_HEIGHT);
+        assert_eq!(
+            IconButtonSpec::new().tooltip_placement,
+            OverlayPlacement::Top
+        );
+        let seeded = IconButtonSpec::new().with_default_pressed(true);
+        assert!(seeded.is_toggle_mode());
+        assert!(seeded.current_pressed());
+        let controlled = seeded.with_pressed(false);
+        assert!(!controlled.current_pressed());
     }
 
     #[test]

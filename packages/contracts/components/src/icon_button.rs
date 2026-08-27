@@ -17,10 +17,9 @@ pub struct IconButtonSpec {
     pub is_disabled: bool,
     pub is_loading: bool,
     pub is_pressed: Option<bool>,
-    /// Optional tooltip text shown on hover. Pairs with
-    /// `tooltip_placement` for positioning. GPUI doesn't have a
-    /// first-class tooltip primitive yet; this field is carried
-    /// for consumer wiring.
+    /// Optional tooltip text. The renderer projects this through
+    /// `Node.tooltip`; otherwise a non-empty `aria_label` is the fallback.
+    /// GPUI native tooltip chrome owns timing, placement, and paint.
     pub tooltip: Option<String>,
     pub tooltip_placement: OverlayPlacement,
     pub size_role: SemanticControlSizeRole,
@@ -43,7 +42,7 @@ impl Default for IconButtonSpec {
             is_loading: false,
             is_pressed: None,
             tooltip: None,
-            tooltip_placement: OverlayPlacement::Bottom,
+            tooltip_placement: OverlayPlacement::Top,
             size_role: SemanticControlSizeRole::Control,
             density: None,
             default_pressed: None,
@@ -116,6 +115,11 @@ impl IconButtonSpec {
         self
     }
 
+    pub fn with_default_pressed(mut self, default_pressed: bool) -> Self {
+        self.default_pressed = Some(default_pressed);
+        self
+    }
+
     pub fn activation_allowed(&self) -> bool {
         !self.is_disabled && !self.is_loading
     }
@@ -135,7 +139,18 @@ impl IconButtonSpec {
     }
 
     pub fn uses_pressed_semantics(&self) -> bool {
-        self.is_pressed.is_some()
+        self.is_toggle_mode()
+    }
+
+    /// Toggle mode is active when either pressed input is present.
+    pub fn is_toggle_mode(&self) -> bool {
+        self.is_pressed.is_some() || self.default_pressed.is_some()
+    }
+
+    /// Effective current pressed state. `is_pressed` wins; otherwise
+    /// `default_pressed` is the host's initial seed.
+    pub fn current_pressed(&self) -> bool {
+        self.is_pressed.or(self.default_pressed).unwrap_or(false)
     }
 
     pub fn icon_size_token(&self, size: ControlSize) -> &'static str {

@@ -11,7 +11,7 @@
 //! so instead of `cx.listener` the handlers push `NodeSpecimenEvent`s onto a
 //! queue the next render drains into specimen state (see `app_state.rs`).
 
-use crate::node_compat::Eyebrow;
+use crate::node_compat::{Eyebrow, IconButton};
 use std::sync::Arc;
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
@@ -23,20 +23,20 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 
-use poodle_render::RenderContext;
-use poodle_render::icon_button;
 use poodle_specs::{ButtonTone, ButtonVariant, EyebrowSpec, IconButtonSpec};
 
-/// Build a node-tier IconButton with an optional click handler.
-/// Static instances (danger/success tones, disabled/loading states, string
-/// names, sizes, densities) pass `None`.
+/// Production compatibility wrapper. Interactive examples attach command
+/// and pressed-change handlers; static instances stay handler-free.
 fn node_icon_button(
     spec: IconButtonSpec,
     state: &AppState,
     on_click: Option<Arc<dyn Fn() + Send + Sync>>,
-) -> AnyElement {
-    let node = icon_button(&spec, &RenderContext::new(&state.theme), on_click);
-    poodle_gpui_node_backend::to_gpui(&node)
+) -> IconButton {
+    let mut button = IconButton::from_spec(spec, &state.theme);
+    if let Some(handler) = on_click {
+        button = button.on_click(handler);
+    }
+    button
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -218,54 +218,66 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex()
                         .gap(px(8.0))
                         .items_center()
-                        .child(node_icon_button(
-                            IconButtonSpec::new()
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_icon("bold")
-                                .with_pressed(state.specimens.is_on("icon-btn-bold"))
-                                .with_aria_label("Bold"),
-                            state,
-                            Some({
+                        .child(
+                            node_icon_button(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_icon("bold")
+                                    .with_pressed(state.specimens.is_on("icon-btn-bold"))
+                                    .with_aria_label("Bold"),
+                                state,
+                                None,
+                            )
+                            .on_pressed_change({
                                 let events = state.node_events.clone();
-                                Arc::new(move || {
-                                    events.lock().unwrap().push(NodeSpecimenEvent::Toggle(
-                                        "icon-btn-bold".to_string(),
-                                    ));
+                                Arc::new(move |pressed| {
+                                    events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                                        key: "icon-btn-bold".to_string(),
+                                        value: pressed,
+                                    });
                                 })
                             }),
-                        ))
-                        .child(node_icon_button(
-                            IconButtonSpec::new()
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_icon("italic")
-                                .with_pressed(state.specimens.is_on("icon-btn-italic"))
-                                .with_aria_label("Italic"),
-                            state,
-                            Some({
+                        )
+                        .child(
+                            node_icon_button(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_icon("italic")
+                                    .with_pressed(state.specimens.is_on("icon-btn-italic"))
+                                    .with_aria_label("Italic"),
+                                state,
+                                None,
+                            )
+                            .on_pressed_change({
                                 let events = state.node_events.clone();
-                                Arc::new(move || {
-                                    events.lock().unwrap().push(NodeSpecimenEvent::Toggle(
-                                        "icon-btn-italic".to_string(),
-                                    ));
+                                Arc::new(move |pressed| {
+                                    events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                                        key: "icon-btn-italic".to_string(),
+                                        value: pressed,
+                                    });
                                 })
                             }),
-                        ))
-                        .child(node_icon_button(
-                            IconButtonSpec::new()
-                                .with_variant(ButtonVariant::Ghost)
-                                .with_icon("underline")
-                                .with_pressed(state.specimens.is_on("icon-btn-underline"))
-                                .with_aria_label("Underline"),
-                            state,
-                            Some({
+                        )
+                        .child(
+                            node_icon_button(
+                                IconButtonSpec::new()
+                                    .with_variant(ButtonVariant::Ghost)
+                                    .with_icon("underline")
+                                    .with_pressed(state.specimens.is_on("icon-btn-underline"))
+                                    .with_aria_label("Underline"),
+                                state,
+                                None,
+                            )
+                            .on_pressed_change({
                                 let events = state.node_events.clone();
-                                Arc::new(move || {
-                                    events.lock().unwrap().push(NodeSpecimenEvent::Toggle(
-                                        "icon-btn-underline".to_string(),
-                                    ));
+                                Arc::new(move |pressed| {
+                                    events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                                        key: "icon-btn-underline".to_string(),
+                                        value: pressed,
+                                    });
                                 })
                             }),
-                        )),
+                        ),
                 ),
         )
         // --- States ---
@@ -283,26 +295,33 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex()
                         .gap(px(8.0))
                         .items_center()
-                        .child(node_icon_button(
-                            IconButtonSpec::new()
-                                .with_icon("map-pin")
-                                .with_pressed(state.specimens.is_on("icon-btn-pinned"))
-                                .with_aria_label("Pin"),
-                            state,
-                            Some({
+                        .child(
+                            node_icon_button(
+                                IconButtonSpec::new()
+                                    .with_icon("map-pin")
+                                    .with_pressed(state.specimens.is_on("icon-btn-pinned"))
+                                    .with_aria_label("Pin"),
+                                state,
+                                Some({
+                                    let events = state.node_events.clone();
+                                    Arc::new(move || {
+                                        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                                            key: "icon-btn-last".to_string(),
+                                            value: "Pin toggled".to_string(),
+                                        });
+                                    })
+                                }),
+                            )
+                            .on_pressed_change({
                                 let events = state.node_events.clone();
-                                Arc::new(move || {
-                                    let mut events = events.lock().unwrap();
-                                    events.push(NodeSpecimenEvent::Toggle(
-                                        "icon-btn-pinned".to_string(),
-                                    ));
-                                    events.push(NodeSpecimenEvent::SetText {
-                                        key: "icon-btn-last".to_string(),
-                                        value: "Pin toggled".to_string(),
+                                Arc::new(move |pressed| {
+                                    events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                                        key: "icon-btn-pinned".to_string(),
+                                        value: pressed,
                                     });
                                 })
                             }),
-                        ))
+                        )
                         .child(node_icon_button(
                             IconButtonSpec::new()
                                 .with_icon("settings")
@@ -379,26 +398,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         examples,
         SpecimenAxes::examples_only()
             .with_sizes(|size, theme: &GpuiThemeProvider| {
-                let node = icon_button(
-                    &IconButtonSpec::new()
+                IconButton::from_spec(
+                    IconButtonSpec::new()
                         .with_icon("star")
                         .with_size(size)
                         .with_aria_label("Star"),
-                    &poodle_render::RenderContext::new(theme),
-                    None,
-                );
-                poodle_gpui_node_backend::to_gpui(&node)
+                    theme,
+                )
+                .into_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
-                let node = icon_button(
-                    &IconButtonSpec::new()
+                IconButton::from_spec(
+                    IconButtonSpec::new()
                         .with_icon("star")
                         .with_density(density)
                         .with_aria_label("Star"),
-                    &poodle_render::RenderContext::new(theme),
-                    None,
-                );
-                poodle_gpui_node_backend::to_gpui(&node)
+                    theme,
+                )
+                .into_element()
             }),
     )
 }

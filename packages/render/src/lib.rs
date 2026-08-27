@@ -278,7 +278,7 @@ pub use history_center::{
 };
 pub use hover_card::hover_card;
 pub use icon::icon;
-pub use icon_button::icon_button;
+pub use icon_button::{icon_button, icon_button_with_handlers, IconButtonHandlers};
 pub use icon_provider::icon_provider;
 pub use inline_list_section::inline_list_section;
 pub use inline_remediation::inline_remediation;
