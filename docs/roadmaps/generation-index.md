@@ -9,12 +9,12 @@ Updated: 2026-08-27
   - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77;
     `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
     `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
-    `010` ready
+    `010` complete
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: dispatch `g16.010`. Repair Breadcrumbs' reversed Rust callback
-    routing and prove linkless-value navigation through mounted GPUI dispatch;
-    only its ledger cell may move, to 39 mounted / 135 missing.
+  - Next move: orchestrator evidence checkpoint after `g16.010`. Breadcrumbs
+    GPUI mounted behaviour is now proved; ledger 39 mounted / 135 missing. Do
+    not compile `g16.011` from this closeout.
 
 ## Latest Completed Track
 

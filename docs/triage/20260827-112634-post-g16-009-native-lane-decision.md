@@ -1,6 +1,7 @@
 # Post-g16.009 Native Lane Decision
 
-Status: promoted into `g16.010`
+Status: resolved — closed by `g16.010`; see
+`../logs/2026-08/20260827-g16-010-breadcrumbs-callback-semantics-and-mounted-parity.md`
 Captured: 2026-08-27
 Source: orchestrator evidence checkpoint after PR #83
 

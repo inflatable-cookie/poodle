@@ -1,7 +1,8 @@
 # g16.010 — Breadcrumbs Callback Semantics And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-27
+Closed: 2026-08-27
 Depends on: merged `g16.009` / PR #83
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
@@ -140,24 +141,29 @@ and 136 to 135 missing.
 
 ## Acceptance
 
-- [ ] Linkless, non-current, non-ellipsis Rust crumbs invoke `on_navigate`
+- [x] Linkless, non-current, non-ellipsis Rust crumbs invoke `on_navigate`
       exactly once with `BreadcrumbItem.value`.
-- [ ] `href`, current, and ellipsis crumbs never invoke the callback.
-- [ ] Text, icon-plus-label, and icon-only callback crumbs are single targets
+- [x] `href`, current, and ellipsis crumbs never invoke the callback.
+- [x] Text, icon-plus-label, and icon-only callback crumbs are single targets
       with button semantics, accessible label, sequential focus, and the
       contracted focus ring.
-- [ ] The GPUI specimen visibly demonstrates callback navigation without
+- [x] The GPUI specimen visibly demonstrates callback navigation without
       becoming an exhaustive fixture page.
-- [ ] One named mounted regression proves pointer and keyboard activation
+- [x] One named mounted regression proves pointer and keyboard activation
       through production dispatch and proves inert crumbs remain inert.
-- [ ] Svelte and React Breadcrumbs focused tests stay green without behavior
+- [x] Svelte and React Breadcrumbs focused tests stay green without behavior
       changes.
-- [ ] The contract and parity note no longer describe URL-driven Rust
+- [x] The contract and parity note no longer describe URL-driven Rust
       callbacks as parity.
-- [ ] The ledger changes only Breadcrumbs from missing to mounted: 39 mounted
+- [x] The ledger changes only Breadcrumbs from missing to mounted: 39 mounted
       / 135 missing.
-- [ ] One August log records the defect, repair, evidence, validation, exact
+- [x] One August log records the defect, repair, evidence, validation, exact
       non-claims, and next orchestrator checkpoint.
+
+## Outcome
+
+Complete. The full record is
+`../../logs/2026-08/20260827-g16-010-breadcrumbs-callback-semantics-and-mounted-parity.md`.
 
 ## Writable Scope
 
