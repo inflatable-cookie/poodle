@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — orchestrator evidence checkpoint after `g16.010`
+Status: active — `g16.011` ready
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -41,6 +41,7 @@ stay maintained; backend admission is not part of the first card.
 8. [008 — Native text event routing cleanup](008-native-text-event-routing-cleanup.md) — complete; merged in PR #82
 9. [009 — DurationInput single source and mounted behaviour](009-duration-input-single-source-and-mounted-behaviour.md) — complete; merged in PR #83
 10. [010 — Breadcrumbs callback semantics and mounted parity](010-breadcrumbs-callback-semantics-and-mounted-parity.md) — complete
+11. [011 — IconButton activation, toggle, and mounted parity](011-icon-button-activation-toggle-and-mounted-parity.md) — ready
 
 ## Measured Selection
 
@@ -126,7 +127,16 @@ regression proves pointer and keyboard dispatch. Ledger: 38 → 39 mounted,
 (114 → 115 present, 61 → 60 not-applicable). Native URL routing, broad
 accessibility, visual comparison, and Jetstream stay out.
 
+The post-`g16.010` checkpoint selected IconButton rather than an inert
+presentation component or a breaking editing migration. Rust currently ignores
+`default_pressed`, cannot separately report `onPressedChange`, drops tooltip
+text before the existing native-tooltip channel, and has no named mounted GPUI
+proof. `g16.011` closes that bounded primitive seam through existing node and
+backend capabilities. It may move only IconButton's mounted cell: 39 → 40
+mounted, 135 → 134 missing. NumberInput's raw-draft/value-model decision and
+broader visual/accessibility programmes remain separate.
+
 ## Next Task
 
-Orchestrator evidence checkpoint against 39 mounted / 135 missing. Do not
-compile or start `g16.011` from this closeout.
+Dispatch ready card `g16.011` serially. The worker must return g16 to an
+orchestrator evidence checkpoint and must not compile `g16.012`.

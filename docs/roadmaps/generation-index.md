@@ -9,13 +9,13 @@ Updated: 2026-08-27
   - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77;
     `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
     `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
-    `010` complete
+    `010` complete; `011` ready
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: orchestrator evidence checkpoint after `g16.010`. Breadcrumbs
-    GPUI mounted behaviour is now proved (39 mounted / 135 missing); its
-    known-delta cell is `present` (114 → 115 present, 61 → 60
-    not-applicable). Do not compile `g16.011` from this closeout.
+  - Next move: dispatch `g16.011` IconButton activation, toggle, tooltip
+    projection, and mounted parity. It may move only IconButton's mounted cell
+    to 40 mounted / 134 missing. NumberInput's breaking native value model,
+    visual comparison, accessibility, and Jetstream remain outside the card.
 
 ## Latest Completed Track
 
