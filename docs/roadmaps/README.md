@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-26
+Updated: 2026-08-27
 
 Roadmaps record Poodle's executable milestone work. `g15` completed the full
 v0.2.x release programme: the roster and parity baseline, failed v0.2.0
@@ -26,7 +26,10 @@ chosen.
   ledger 36 → 37 mounted, 138 → 137 missing. `g16.008` then repaired generic
   native text routing — Enter is submission, Tab is real focus traversal, and
   transient text state follows the node that paints the value — deliberately
-  moving no evidence cell. No broader conformance programme is implied.
+  moving no evidence cell. `g16.009` is ready to replace DurationInput's
+  duplicate Rust value/validation authority with its contract-owned segments
+  and prove mounted GPUI behaviour. No broader conformance programme is
+  implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -79,7 +82,7 @@ chosen.
 - `g16` — active evidence-recovery checkpoint; `001` complete and
   operator-reviewed; `002` closed — partial outcome; `003` merged in PR #77;
   `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
-  `007` merged in PR #81; `008` complete in PR #82, awaiting operator merge
+  `007` merged in PR #81; `008` merged in PR #82; `009` ready for dispatch
 
 ## Rules
 

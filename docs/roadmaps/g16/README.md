@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — orchestrator evidence checkpoint
-Posture: strict-ready; native text-event cleanup is complete and no card is compiled
+Status: active — `g16.009` ready for worker dispatch
+Posture: strict-ready; DurationInput single-source migration approved
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -38,7 +38,8 @@ stay maintained; backend admission is not part of the first card.
 5. [005 — Slider axis, keyboard, and mounted parity](005-slider-axis-keyboard-and-mounted-parity.md) — complete; merged in PR #79
 6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — complete; merged in PR #80
 7. [007 — TextInput controlled editing and mounted evidence](007-text-input-controlled-editing-and-mounted-evidence.md) — complete; merged in PR #81
-8. [008 — Native text event routing cleanup](008-native-text-event-routing-cleanup.md) — complete; PR #82 awaiting operator merge authority
+8. [008 — Native text event routing cleanup](008-native-text-event-routing-cleanup.md) — complete; merged in PR #82
+9. [009 — DurationInput single source and mounted behaviour](009-duration-input-single-source-and-mounted-behaviour.md) — ready
 
 ## Measured Selection
 
@@ -104,7 +105,16 @@ their current evidence levels — this card proved routing, not parity.
 NumberInput's value-model decision remains separate from multiline/slug closure,
 other component families, and visual or accessibility programmes.
 
+The post-`g16.008` checkpoint selected DurationInput as the next bounded lane.
+Its contract already names three bindable segments, but the Rust spec and
+renderer still require a duplicate formatted `value`, default Seconds
+incorrectly, and ignore min/max bounds unless a caller also supplies a
+non-contract validation state. The operator approved a clean pre-1.0 break:
+`g16.009` removes the duplicate value/validation authority, derives display and
+bounds from the segments, migrates all in-repo callers, and may move only
+DurationInput to mounted evidence (38 mounted / 136 missing).
+
 ## Next Task
 
-Orchestrator evidence checkpoint. No card is compiled. Select the next component
-lane from the unchanged 37 mounted / 137 missing ledger.
+Dispatch `g16.009` through
+`../../handoffs/20260827-094904-g16-009-duration-input-worker.md`.
