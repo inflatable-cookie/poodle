@@ -8,13 +8,12 @@ Updated: 2026-08-27
   - Status: active; strict-ready
   - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77;
     `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
-    `007` merged in PR #81; `008` merged in PR #82; `009` ready for dispatch
+    `007` merged in PR #81; `008` merged in PR #82; `009` complete, awaiting
+    orchestrator review
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: dispatch `g16.009`. Replace DurationInput's duplicate formatted
-    value/validation authority with its three contract-owned segments, then
-    prove mounted GPUI behaviour; expected ledger move 37 → 38 mounted and
-    137 → 136 missing
+  - Next move: orchestrator evidence checkpoint after `g16.009`. DurationInput
+    is mounted; ledger 38 mounted / 136 missing. Do not start another card.
 
 ## Latest Completed Track
 

@@ -6970,19 +6970,33 @@ fn code_routing_tree(host: &Arc<CodeRouting>, mounted: &Arc<Mutex<Node>>) -> Nod
 
 struct DurationRouting {
     segments: Mutex<(u32, u32, u32)>,
+    last_total: Mutex<Option<u64>>,
+    show_seconds: bool,
+    max_hours: u32,
+    disabled: bool,
     log: EventLog,
+}
+
+fn duration_host(hours: u32, minutes: u32, seconds: u32) -> DurationRouting {
+    DurationRouting {
+        segments: Mutex::new((hours, minutes, seconds)),
+        last_total: Mutex::new(None),
+        show_seconds: true,
+        max_hours: 99,
+        disabled: false,
+        log: event_log(),
+    }
 }
 
 fn duration_routing_tree(host: &Arc<DurationRouting>, mounted: &Arc<Mutex<Node>>) -> Node {
     let provider = theme();
     let ctx = RenderContext::new(&provider);
     let (hours, minutes, seconds) = *host.segments.lock().expect("segments");
-    // The renderer reads the formatted `value`, which is what the host owns;
-    // the segment numbers are the same state written the other way round.
     let spec = poodle_specs::DurationInputSpec::new()
-        .with_show_seconds(true)
-        .with_value(format!("{hours:02}:{minutes:02}:{seconds:02}"))
+        .with_show_seconds(host.show_seconds)
         .with_segments(hours, minutes, seconds)
+        .with_max_hours(host.max_hours)
+        .with_disabled(host.disabled)
         .with_aria_label("duration");
 
     let change_host = Arc::clone(host);
@@ -6991,9 +7005,13 @@ fn duration_routing_tree(host: &Arc<DurationRouting>, mounted: &Arc<Mutex<Node>>
         &spec,
         &ctx,
         poodle_render::DurationInputHandlers {
-            on_change: Some(Arc::new(move |h: u32, m: u32, s: u32, _total: u32| {
+            on_change: Some(Arc::new(move |h: u32, m: u32, s: u32, total: u64| {
                 *change_host.segments.lock().expect("segments") = (h, m, s);
-                note(&change_host.log, format!("duration/change:{h}:{m}:{s}"));
+                *change_host.last_total.lock().expect("total") = Some(total);
+                note(
+                    &change_host.log,
+                    format!("duration/change:{h}:{m}:{s}:{total}"),
+                );
                 let tree = duration_routing_tree(&change_host, &change_mount);
                 *change_mount.lock().expect("mount") = tree;
             })),
@@ -7433,10 +7451,7 @@ fn code_and_duration_inputs_traverse_on_tab_without_mutating() {
 
     // ── DurationInput: through its segments, in order, then out ───────────
     run_headless(|cx| {
-        let host = Arc::new(DurationRouting {
-            segments: Mutex::new((1, 2, 3)),
-            log: event_log(),
-        });
+        let host = Arc::new(duration_host(1, 2, 3));
         let mounted = Arc::new(Mutex::new(Node::container()));
         *mounted.lock().expect("mount") = duration_routing_tree(&host, &mounted);
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
@@ -7479,6 +7494,191 @@ fn code_and_duration_inputs_traverse_on_tab_without_mutating() {
             "Hours is the control's entry stop in both directions"
         );
         assert_eq!(*host.segments.lock().expect("segments"), (2, 3, 4));
+    });
+}
+
+/// g16.009. DurationInput's three segments are the only host value. Display,
+/// carry/borrow, digit entry, max-hours swallowing, callback totals, visible
+/// traversal, and disabled inertia all go through production focus/key
+/// dispatch and a host rebuild from those fields.
+///
+/// Deliberately not claimed: IME, free-form parsing, selection ranges, native
+/// accessibility, visual comparison, or Jetstream admission.
+#[test]
+fn duration_input_segments_edit_and_rebuild_the_host_spec() {
+    fn last_total(host: &DurationRouting) -> u64 {
+        host.last_total
+            .lock()
+            .expect("total")
+            .expect("a change reported a total")
+    }
+
+    // ── Carry, borrow, digit-shift, max-hours, callback totals ────────────
+    run_headless(|cx| {
+        let host = Arc::new(duration_host(0, 59, 59));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = duration_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-duration-before");
+        driver.focus_element("poodle-input-duration-before");
+        take_events(&host.log);
+
+        // Hours is the entry stop. One Tab lands there; ArrowUp steps hours.
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("up");
+        assert_eq!(*host.segments.lock().expect("segments"), (1, 59, 59));
+        assert_eq!(last_total(&host), 7199);
+
+        // Minutes carry into hours through the same dispatch path.
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("up");
+        assert_eq!(*host.segments.lock().expect("segments"), (2, 0, 59));
+        assert_eq!(last_total(&host), 7259);
+
+        // Seconds carry into minutes.
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("up");
+        assert_eq!(*host.segments.lock().expect("segments"), (2, 1, 0));
+        assert_eq!(last_total(&host), 7260);
+        assert_eq!(
+            take_events(&host.log),
+            vec![
+                "duration-before/focus:false",
+                "duration/change:1:59:59:7199",
+                "duration/change:2:0:59:7259",
+                "duration/change:2:1:0:7260",
+            ]
+        );
+
+        // One more Tab leaves the control.
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-input-duration-after"),
+            Some(true)
+        );
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(duration_host(1, 0, 0));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = duration_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-duration-before");
+        driver.focus_element("poodle-input-duration-before");
+
+        // Borrow: Seconds ArrowDown walks minutes and hours back.
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("down");
+        assert_eq!(*host.segments.lock().expect("segments"), (0, 59, 59));
+        assert_eq!(last_total(&host), 3599);
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(duration_host(0, 4, 0));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = duration_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-duration-before");
+        driver.focus_element("poodle-input-duration-before");
+
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("5");
+        assert_eq!(*host.segments.lock().expect("segments"), (0, 45, 0));
+        assert_eq!(last_total(&host), 2700);
+    });
+
+    run_headless(|cx| {
+        let mut host = duration_host(9, 59, 0);
+        host.max_hours = 9;
+        let host = Arc::new(host);
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = duration_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-duration-before");
+        driver.focus_element("poodle-input-duration-before");
+
+        // Carry at max hours is swallowed: minutes wrap, hours stay.
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("up");
+        assert_eq!(*host.segments.lock().expect("segments"), (9, 0, 0));
+        assert_eq!(last_total(&host), 32400);
+
+        // Hours themselves clamp at the bound.
+        driver.dispatch_key_raw("shift-tab");
+        take_events(&host.log);
+        driver.dispatch_key_raw("up");
+        assert_eq!(*host.segments.lock().expect("segments"), (9, 0, 0));
+        assert!(
+            take_events(&host.log).is_empty(),
+            "a swallowed hours step reports nothing"
+        );
+    });
+
+    // ── show_seconds=false: two stops, seconds retained in state/payload ──
+    run_headless(|cx| {
+        let mut host = duration_host(1, 2, 3);
+        host.show_seconds = false;
+        let host = Arc::new(host);
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = duration_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-duration-before");
+        driver.focus_element("poodle-input-duration-before");
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("up");
+        assert_eq!(
+            *host.segments.lock().expect("segments"),
+            (1, 3, 3),
+            "hidden seconds stay in the host value"
+        );
+        assert_eq!(last_total(&host), 3783);
+
+        take_events(&host.log);
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-input-duration-after"),
+            Some(true),
+            "without Seconds, the second Tab leaves the control"
+        );
+        assert_eq!(
+            take_events(&host.log),
+            vec!["duration-after/focus:true"],
+            "the third stop is the field after, not a hidden Seconds segment"
+        );
+    });
+
+    // ── Disabled: no segment stops, no change ─────────────────────────────
+    run_headless(|cx| {
+        let mut host = duration_host(1, 2, 3);
+        host.disabled = true;
+        let host = Arc::new(host);
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = duration_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-duration-before");
+        driver.focus_element("poodle-input-duration-before");
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-input-duration-after"),
+            Some(true),
+            "a disabled DurationInput exposes no segment stops"
+        );
+        driver.dispatch_key_raw("up");
+        assert_eq!(*host.segments.lock().expect("segments"), (1, 2, 3));
+        assert!(host.last_total.lock().expect("total").is_none());
+        assert_eq!(
+            take_events(&host.log),
+            vec!["duration-before/focus:false", "duration-after/focus:true"]
+        );
     });
 }
 

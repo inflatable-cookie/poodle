@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-27 — `rustfmt <file>` without `--edition 2021` treats preview crates
+  as 2015 (fails on `async`) and still rewrites wrapping across the whole
+  file. Restore the file and re-apply the surgical edit; do not format
+  `node_compat.rs` or `headless_regressions.rs` that way. Hit while landing
+  `g16.009`.
+
 - 2026-08-26 — `rustfmt packages/render/src/lib.rs` still formats every child
   module. Format the leaf file, not the crate root. Hit while landing
   `g16.003`; recovered by restoring the crate and re-applying the export.

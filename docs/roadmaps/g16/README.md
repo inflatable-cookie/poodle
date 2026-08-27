@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — `g16.009` ready for worker dispatch
-Posture: strict-ready; DurationInput single-source migration approved
+Status: active — `g16.009` complete; awaiting orchestrator checkpoint
+Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -39,7 +39,7 @@ stay maintained; backend admission is not part of the first card.
 6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — complete; merged in PR #80
 7. [007 — TextInput controlled editing and mounted evidence](007-text-input-controlled-editing-and-mounted-evidence.md) — complete; merged in PR #81
 8. [008 — Native text event routing cleanup](008-native-text-event-routing-cleanup.md) — complete; merged in PR #82
-9. [009 — DurationInput single source and mounted behaviour](009-duration-input-single-source-and-mounted-behaviour.md) — ready
+9. [009 — DurationInput single source and mounted behaviour](009-duration-input-single-source-and-mounted-behaviour.md) — complete
 
 ## Measured Selection
 
@@ -106,15 +106,15 @@ NumberInput's value-model decision remains separate from multiline/slug closure,
 other component families, and visual or accessibility programmes.
 
 The post-`g16.008` checkpoint selected DurationInput as the next bounded lane.
-Its contract already names three bindable segments, but the Rust spec and
-renderer still require a duplicate formatted `value`, default Seconds
-incorrectly, and ignore min/max bounds unless a caller also supplies a
-non-contract validation state. The operator approved a clean pre-1.0 break:
-`g16.009` removes the duplicate value/validation authority, derives display and
-bounds from the segments, migrates all in-repo callers, and may move only
-DurationInput to mounted evidence (38 mounted / 136 missing).
+`g16.009` closed the clean pre-1.0 break: the three segment fields are the only
+Rust value, `show_seconds` defaults to `true`, display and min/max invalid
+state derive from that value, and one named mounted GPUI regression proves
+carry, borrow, digit entry, max-hours swallowing, visible-segment traversal,
+callback totals, and disabled inertia through production dispatch. Ledger:
+37 → 38 mounted, 137 → 136 missing. Accessibility, visual comparison, IME,
+and Jetstream stay unclaimed.
 
 ## Next Task
 
-Dispatch `g16.009` through
-`../../handoffs/20260827-094904-g16-009-duration-input-worker.md`.
+Orchestrator evidence checkpoint after `g16.009`. Do not compile or start
+another card from this worker thread.
