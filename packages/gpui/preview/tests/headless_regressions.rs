@@ -8278,3 +8278,387 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
         );
     });
 }
+
+/// Collapsible disclosure travels through mounted pointer and keyboard input.
+///
+/// Deliberately not claimed: content height animation, exact web transition
+/// timing, trigger snippets, assistive-technology coverage, visual
+/// comparison, or Jetstream admission.
+#[test]
+fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
+    use poodle_render::{
+        collapsible_content_focus_id, collapsible_trigger_focus_id, collapsible_with_handlers,
+        CollapsibleHandlers, COLLAPSIBLE_CONTENT_SEMANTIC_ID, COLLAPSIBLE_TRIGGER_SEMANTIC_ID,
+    };
+    use poodle_specs::CollapsibleSpec;
+
+    fn marker(id: &str, label: &str) -> Node {
+        let mut node = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label(label),
+            &RenderContext::new(&theme()),
+            None,
+        );
+        node.id = Some(id.to_owned());
+        node
+    }
+
+    fn target<'a>(root: &'a Node, id: &str) -> &'a Node {
+        root.find(&|node| {
+            node.runtime_id.as_deref() == Some(id)
+                || node.id.as_deref() == Some(id)
+        })
+        .unwrap_or_else(|| panic!("{id}"))
+    }
+
+    // ── Semantics, naming, inert skips ─────────────────────────────────
+    run_headless(|cx| {
+        let reported = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let sink = Arc::clone(&reported);
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.descriptor.layout.spacing.gap = 8.0;
+        root = root
+            .child(marker("before", "Before"))
+            .child(collapsible_with_handlers(
+                &CollapsibleSpec::new().with_title("Project settings"),
+                &RenderContext::new(&theme()),
+                Some(Node::text("Build target: production")),
+                CollapsibleHandlers {
+                    instance_id: Some("closed".to_string()),
+                    on_open_change: Some(Arc::new(move |next| {
+                        sink.lock().expect("report lock").push(next);
+                    })),
+                },
+            ))
+            .child(collapsible_with_handlers(
+                &CollapsibleSpec::new().with_aria_label("Hidden section"),
+                &RenderContext::new(&theme()),
+                None,
+                CollapsibleHandlers {
+                    instance_id: Some("aria".to_string()),
+                    ..CollapsibleHandlers::default()
+                },
+            ))
+            .child(collapsible_with_handlers(
+                &CollapsibleSpec::new()
+                    .with_title("Locked section")
+                    .with_disabled(true),
+                &RenderContext::new(&theme()),
+                Some(Node::text("secret")),
+                CollapsibleHandlers {
+                    instance_id: Some("disabled".to_string()),
+                    on_open_change: Some(Arc::new(|_| panic!("disabled collapsible does not fire"))),
+                },
+            ))
+            .child(marker("after", "After"));
+
+        let closed_trigger =
+            collapsible_trigger_focus_id(Some("closed"));
+        let aria_trigger = collapsible_trigger_focus_id(Some("aria"));
+        let disabled_trigger = collapsible_trigger_focus_id(Some("disabled"));
+
+        {
+            let trigger = target(&root, &closed_trigger);
+            assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+            assert_eq!(trigger.a11y.label.as_deref(), Some("Project settings"));
+            assert_eq!(trigger.a11y.expanded, Some(false));
+            assert_eq!(
+                trigger.a11y.controls.as_deref(),
+                Some(collapsible_content_focus_id(Some("closed")).as_str())
+            );
+            assert_eq!(trigger.a11y.tab_index, Some(0));
+            assert!(trigger.style.focus_ring.is_some());
+
+            let aria = target(&root, &aria_trigger);
+            assert_eq!(aria.a11y.label.as_deref(), Some("Hidden section"));
+
+            let disabled = target(&root, &disabled_trigger);
+            assert!(disabled.interaction.disabled);
+            assert!(!disabled.interaction.focusable);
+            assert_eq!(disabled.a11y.tab_index, None);
+            assert!(disabled.interaction.on_activate.is_none());
+        }
+
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 420.0);
+        driver.wait_for_focus_handle("before");
+        driver.wait_for_focus_handle(&closed_trigger);
+        driver.wait_for_focus_handle(&aria_trigger);
+        driver.wait_for_focus_handle("after");
+
+        assert!(
+            poodle_gpui_node_backend::bounds_for(&closed_trigger).is_some(),
+            "pointer proof needs a real hit target"
+        );
+        driver.pointer_activate_id(&closed_trigger);
+        assert_eq!(*reported.lock().expect("report lock"), [true]);
+
+        driver.focus_element("before");
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&closed_trigger),
+            Some(true)
+        );
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&aria_trigger),
+            Some(true)
+        );
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("after"),
+            Some(true),
+            "disabled collapsible is skipped"
+        );
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&disabled_trigger).is_none(),
+            "disabled trigger never registers a sequential stop"
+        );
+    });
+
+    // ── Controlled rebuild: pointer, Enter, Space ─────────────────────
+    run_headless(|cx| {
+        fn build(
+            open: bool,
+            mounted: Arc<Mutex<Node>>,
+            events: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let event_sink = Arc::clone(&events);
+            let mount = Arc::clone(&mounted);
+            collapsible_with_handlers(
+                &CollapsibleSpec::new()
+                    .with_title("Advanced options")
+                    .with_open(open),
+                &RenderContext::new(&theme()),
+                Some(Node::text(if open {
+                    "Cache TTL: 3600s"
+                } else {
+                    "hidden"
+                })),
+                CollapsibleHandlers {
+                    instance_id: Some("controlled".to_string()),
+                    on_open_change: Some(Arc::new(move |next| {
+                        event_sink
+                            .lock()
+                            .expect("event lock")
+                            .push(format!("open:{next}"));
+                        *mount.lock().expect("mount lock") =
+                            build(next, Arc::clone(&mount), Arc::clone(&event_sink));
+                    })),
+                },
+            )
+        }
+
+        let events = Arc::new(Mutex::new(Vec::<String>::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") =
+            build(false, Arc::clone(&mounted), Arc::clone(&events));
+        let trigger = collapsible_trigger_focus_id(Some("controlled"));
+        {
+            let node = mounted.lock().expect("mount lock");
+            let trigger_node = node
+                .find(&|n| n.runtime_id.as_deref() == Some(trigger.as_str()))
+                .expect("trigger");
+            assert_eq!(trigger_node.a11y.expanded, Some(false));
+            assert!(node
+                .find(&|n| n.id.as_deref() == Some(COLLAPSIBLE_CONTENT_SEMANTIC_ID))
+                .is_none());
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle(&trigger);
+        driver.pointer_activate_id(&trigger);
+        assert_eq!(*events.lock().expect("event lock"), ["open:true".to_string()]);
+        assert_eq!(
+            mounted
+                .lock()
+                .expect("mount lock")
+                .find(&|n| n.runtime_id.as_deref() == Some(trigger.as_str()))
+                .expect("trigger")
+                .a11y
+                .expanded,
+            Some(true)
+        );
+        assert!(mounted
+            .lock()
+            .expect("mount lock")
+            .find(&|n| n.id.as_deref() == Some(COLLAPSIBLE_CONTENT_SEMANTIC_ID))
+            .is_some());
+
+        driver.wait_for_focus_handle(&trigger);
+        driver.focus_element(&trigger);
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            *events.lock().expect("event lock"),
+            ["open:true".to_string(), "open:false".to_string()]
+        );
+
+        driver.wait_for_focus_handle(&trigger);
+        driver.focus_element(&trigger);
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            *events.lock().expect("event lock"),
+            [
+                "open:true".to_string(),
+                "open:false".to_string(),
+                "open:true".to_string()
+            ]
+        );
+    });
+
+    // ── Default-open seed reports false first ───────────────────────────
+    run_headless(|cx| {
+        fn build(
+            open: Option<bool>,
+            default_open: bool,
+            mounted: Arc<Mutex<Node>>,
+            events: Arc<Mutex<Vec<bool>>>,
+        ) -> Node {
+            let event_sink = Arc::clone(&events);
+            let mount = Arc::clone(&mounted);
+            let mut spec = CollapsibleSpec::new()
+                .with_title("Advanced options")
+                .with_default_open(default_open);
+            if let Some(value) = open {
+                spec = spec.with_open(value);
+            }
+            collapsible_with_handlers(
+                &spec,
+                &RenderContext::new(&theme()),
+                Some(Node::text("seeded content")),
+                CollapsibleHandlers {
+                    instance_id: Some("seeded".to_string()),
+                    on_open_change: Some(Arc::new(move |next| {
+                        event_sink.lock().expect("event lock").push(next);
+                        *mount.lock().expect("mount lock") = build(
+                            Some(next),
+                            default_open,
+                            Arc::clone(&mount),
+                            Arc::clone(&event_sink),
+                        );
+                    })),
+                },
+            )
+        }
+
+        let events = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(
+            None,
+            true,
+            Arc::clone(&mounted),
+            Arc::clone(&events),
+        );
+        let trigger = collapsible_trigger_focus_id(Some("seeded"));
+        {
+            let node = mounted.lock().expect("mount lock");
+            let trigger_node = node
+                .find(&|n| n.runtime_id.as_deref() == Some(trigger.as_str()))
+                .expect("trigger");
+            assert_eq!(trigger_node.a11y.expanded, Some(true));
+            assert!(node
+                .find(&|n| n.id.as_deref() == Some(COLLAPSIBLE_CONTENT_SEMANTIC_ID))
+                .is_some());
+            let region = node
+                .find(&|n| n.id.as_deref() == Some(COLLAPSIBLE_CONTENT_SEMANTIC_ID))
+                .expect("region");
+            assert_eq!(region.a11y.role, Some(NodeRole::Region));
+            assert_eq!(
+                region.a11y.labelled_by.as_deref(),
+                Some(trigger.as_str())
+            );
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle(&trigger);
+        driver.focus_element(&trigger);
+        driver.dispatch_key_raw("enter");
+        assert_eq!(*events.lock().expect("event lock"), [false]);
+        assert_eq!(
+            mounted
+                .lock()
+                .expect("mount lock")
+                .find(&|n| n.runtime_id.as_deref() == Some(trigger.as_str()))
+                .expect("trigger")
+                .a11y
+                .expanded,
+            Some(false)
+        );
+    });
+
+    // ── Two same-titled instances keep separate backend handles ─────────
+    run_headless(|cx| {
+        fn build(left_open: bool, right_open: bool, mounted: Arc<Mutex<Node>>) -> Node {
+            fn one(
+                scope: &str,
+                open: bool,
+                mounted: &Arc<Mutex<Node>>,
+                left_open: bool,
+                right_open: bool,
+            ) -> Node {
+                let mount = Arc::clone(mounted);
+                let scope_owned = scope.to_string();
+                collapsible_with_handlers(
+                    &CollapsibleSpec::new()
+                        .with_title("Same title")
+                        .with_open(open),
+                    &RenderContext::new(&theme()),
+                    Some(Node::text(format!("{scope} content"))),
+                    CollapsibleHandlers {
+                        instance_id: Some(scope.to_string()),
+                        on_open_change: Some(Arc::new(move |next| {
+                            let (left, right) = if scope_owned == "left" {
+                                (next, right_open)
+                            } else {
+                                (left_open, next)
+                            };
+                            *mount.lock().expect("mount lock") =
+                                build(left, right, Arc::clone(&mount));
+                        })),
+                    },
+                )
+            }
+
+            Node::container()
+                .child(one("left", left_open, &mounted, left_open, right_open))
+                .child(one("right", right_open, &mounted, left_open, right_open))
+        }
+
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(false, false, Arc::clone(&mounted));
+        let left = collapsible_trigger_focus_id(Some("left"));
+        let right = collapsible_trigger_focus_id(Some("right"));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(&left);
+        driver.wait_for_focus_handle(&right);
+        driver.focus_element(&left);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&left), Some(true));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right),
+            Some(false)
+        );
+
+        driver.keyboard_activate(&left);
+        assert_eq!(
+            mounted
+                .lock()
+                .expect("mount lock")
+                .find(&|n| n.runtime_id.as_deref() == Some(left.as_str()))
+                .expect("left trigger")
+                .a11y
+                .expanded,
+            Some(true)
+        );
+        assert_eq!(
+            mounted
+                .lock()
+                .expect("mount lock")
+                .find(&|n| n.runtime_id.as_deref() == Some(right.as_str()))
+                .expect("right trigger")
+                .a11y
+                .expanded,
+            Some(false),
+            "activating one instance does not expand the other"
+        );
+    });
+}

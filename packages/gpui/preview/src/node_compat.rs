@@ -5745,6 +5745,7 @@ pub(crate) struct Collapsible {
     theme: GpuiThemeProvider,
     content: Option<poodle_node::Node>,
     on_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    instance_id: Option<String>,
 }
 
 impl Collapsible {
@@ -5754,10 +5755,12 @@ impl Collapsible {
             theme: theme.clone(),
             content: None,
             on_toggle: None,
+            instance_id: None,
         }
     }
 
-    pub(crate) fn with_id(self, _id: impl Into<String>) -> Self {
+    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.instance_id = Some(id.into());
         self
     }
 
@@ -5786,11 +5789,14 @@ impl IntoElement for Collapsible {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::collapsible(
+        poodle_gpui_node_backend::to_gpui(&poodle_render::collapsible_with_handlers(
             &self.spec,
             &RenderContext::new(&self.theme),
             self.content,
-            self.on_toggle,
+            poodle_render::CollapsibleHandlers {
+                on_open_change: self.on_toggle,
+                instance_id: self.instance_id,
+            },
         ))
     }
 }

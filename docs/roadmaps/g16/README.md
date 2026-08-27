@@ -137,19 +137,14 @@ Ledger: 39 → 40 mounted, 135 → 134 missing. Known-delta totals stay 115 pres
 visual/accessibility programmes remain separate.
 
 The post-`g16.011` checkpoint selected Collapsible as the next bounded
-foundation lane. Its renderer already computes effective controlled/default
-open state but announces a different value, places disclosure semantics on the
-outer shell instead of the trigger/content pair, leaves disabled triggers
-focusable, and discards the GPUI wrapper's authored instance id. `g16.012`
-repairs those seams through existing node/backend channels and adds one named
-mounted regression. Only Collapsible may move: 40 → 41 mounted and 134 → 133
-missing; known-delta totals stay 115 / 60. TriStateSwitch, NumberInput,
-EditableLabel, Accordion, visual comparison, accessibility, and Jetstream stay
-outside the card.
+foundation lane. `g16.012` closed that seam: effective open state,
+trigger/content disclosure ownership, disabled focus suppression, host-supplied
+instance identity, an honest default-open specimen, and one named mounted GPUI
+regression. Ledger: 40 → 41 mounted, 134 → 133 missing; known-delta totals
+stay 115 / 60. TriStateSwitch, NumberInput, EditableLabel, Accordion, visual
+comparison, accessibility, and Jetstream stay outside the card.
 
 ## Next Task
 
-Dispatch `g16.012` from
-`../../handoffs/20260827-141543-g16-012-collapsible-worker.md`. Keep the lane
-serial; the worker must return g16 to an orchestrator evidence checkpoint and
-must not compile `g16.013`.
+Return g16 to an orchestrator evidence checkpoint against 41 mounted / 133
+missing. Do not compile `g16.013` until the orchestrator selects the next lane.

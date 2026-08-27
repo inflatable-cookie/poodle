@@ -1,7 +1,8 @@
 # Post-g16.011 Native Lane Decision
 
-Status: promoted into `g16.012`; implementation pending
+Status: resolved — promoted into merged `g16.012`
 Captured: 2026-08-27
+Resolved: 2026-08-27
 Source: orchestrator evidence checkpoint after PR #85
 
 ## Finding

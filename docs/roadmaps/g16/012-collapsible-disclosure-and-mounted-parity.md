@@ -1,7 +1,8 @@
 # g16.012 — Collapsible Disclosure And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-27
+Closed: 2026-08-27
 Depends on: merged `g16.011` / PR #85
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
@@ -143,26 +144,26 @@ behavior from `missing` to `mounted`, taking totals from 40 to 41 mounted and
 
 ## Acceptance
 
-- [ ] Controlled and default-open state use one effective value for paint,
+- [x] Controlled and default-open state use one effective value for paint,
       content, trigger semantics, and next callback payload.
-- [ ] Pointer, Enter, and Space each emit the next open value once; host
+- [x] Pointer, Enter, and Space each emit the next open value once; host
       rebuilds project the new content and expanded state.
-- [ ] The trigger owns button role, label, expanded/controls state, stable
+- [x] The trigger owns button role, label, expanded/controls state, stable
       scoped identity, sequential focus, and the standard focus ring.
-- [ ] Open content owns region role and is labelled by its trigger; the outer
+- [x] Open content owns region role and is labelled by its trigger; the outer
       shell does not falsely claim either disclosure role.
-- [ ] Two same-titled instances keep independent identities through rebuilds.
-- [ ] Disabled triggers emit nothing, have no interactive handlers, and are
+- [x] Two same-titled instances keep independent identities through rebuilds.
+- [x] Disabled triggers emit nothing, have no interactive handlers, and are
       skipped by sequential focus.
-- [ ] The existing specimen stays human-centered and demonstrates a real
+- [x] The existing specimen stays human-centered and demonstrates a real
       default-open seed through the production wrapper path.
-- [ ] One named mounted regression proves the behavior envelope through real
+- [x] One named mounted regression proves the behavior envelope through real
       GPUI production dispatch.
-- [ ] Focused Svelte and React Collapsible tests stay green without behavior
+- [x] Focused Svelte and React Collapsible tests stay green without behavior
       changes.
-- [ ] The ledger changes only Collapsible from missing to mounted: 41 mounted /
+- [x] The ledger changes only Collapsible from missing to mounted: 41 mounted /
       133 missing; known-delta totals remain 115 / 60.
-- [ ] One August log records the defect, repair, evidence, validation, exact
+- [x] One August log records the defect, repair, evidence, validation, exact
       non-claims, and next orchestrator checkpoint.
 
 ## Writable Scope
