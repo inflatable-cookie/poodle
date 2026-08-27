@@ -336,7 +336,7 @@ and DOM geometry reads stay adapter-side.
   mechanical compile migration onto the shared `RatingSpec` /
   `Option<f64>` surface.
 - `Rating::from_spec(spec, theme, instance_id)` is the GPUI construction
-  surface; Jetstream preview uses `js_rating(spec, theme, instance_id)`. Both
+  surface. The deferred Jetstream preview adapter follows the same rule: both
   require an explicit host-owned instance id.
 - Jetstream's legacy half-star click delta is not authority to weaken GPUI
   behavior.
