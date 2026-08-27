@@ -35,9 +35,10 @@ behavior repairs without inventing another conformance authority.
   command, toggle, tooltip projection, and mounted GPUI evidence (39 → 40
   mounted, 135 → 134 missing). Known-delta totals stay 115 / 60. PR #86
   closed `g16.012` Collapsible disclosure and mounted parity, moving the ledger
-  to 41 mounted / 133 missing. The operator-approved `g16.013` cleanly
-  migrates TriStateSwitch from legacy `CheckState` to `TriStateValue`, repairs
-  native radio behavior and identity, and targets 42 mounted / 132 missing.
+  to 41 mounted / 133 missing. PR #87 closed the operator-approved `g16.013`
+  clean migration of TriStateSwitch from legacy `CheckState` to
+  `TriStateValue`, repaired native radio behavior and identity, and moved the
+  ledger to 42 mounted / 132 missing.
   No broader conformance programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
@@ -93,7 +94,7 @@ behavior repairs without inventing another conformance authority.
   `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
   `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
   `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
-  `013` ready for worker dispatch
+  `013` merged in PR #87; generation returned to an evidence checkpoint
 
 ## Rules
 

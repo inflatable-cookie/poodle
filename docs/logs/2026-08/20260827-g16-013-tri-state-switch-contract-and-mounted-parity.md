@@ -1,8 +1,9 @@
 # g16.013 — TriStateSwitch Contract And Mounted Parity
 
 Date: 2026-08-27
-Status: complete — review follow-up on `t3code/tri-state-switch`
-Branch: `t3code/tri-state-switch`
+Status: complete — merged in PR #87
+PR: #87
+Merge commit: `c9837f779412f76213c4aa0bca53638960fd02f5`
 Card: `docs/roadmaps/g16/013-tri-state-switch-contract-and-mounted-parity.md`
 Source triage: `docs/triage/20260827-160028-post-g16-012-native-lane-decision.md`
 
@@ -73,4 +74,4 @@ unchanged.
 ## Remaining gaps
 
 - native accessibility, visual comparison, and Jetstream admission unchanged
-- orchestrator checkpoint at 42 mounted / 132 missing
+- generation returned to an orchestrator checkpoint at 42 mounted / 132 missing

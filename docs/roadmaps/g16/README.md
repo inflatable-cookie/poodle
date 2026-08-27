@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — g16.013 complete; orchestrator evidence checkpoint
-Posture: strict-ready
+Status: active — g16.013 merged; orchestrator evidence checkpoint
+Posture: strict-paused
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -43,7 +43,7 @@ stay maintained; backend admission is not part of the first card.
 10. [010 — Breadcrumbs callback semantics and mounted parity](010-breadcrumbs-callback-semantics-and-mounted-parity.md) — complete
 11. [011 — IconButton activation, toggle, and mounted parity](011-icon-button-activation-toggle-and-mounted-parity.md) — complete
 12. [012 — Collapsible disclosure and mounted parity](012-collapsible-disclosure-and-mounted-parity.md) — complete; merged in PR #86
-13. [013 — TriStateSwitch contract and mounted parity](013-tri-state-switch-contract-and-mounted-parity.md) — complete; clean breaking migration landed on `t3code/tri-state-switch`
+13. [013 — TriStateSwitch contract and mounted parity](013-tri-state-switch-contract-and-mounted-parity.md) — complete; merged in PR #87
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
@@ -161,19 +161,18 @@ stay 115 / 60. TriStateSwitch, NumberInput, EditableLabel, Accordion, visual
 comparison, accessibility, and Jetstream stay outside the card.
 
 The post-`g16.012` checkpoint selected TriStateSwitch after explicit operator
-approval of its clean pre-1.0 Rust migration. `g16.013` replaces legacy
+approval of its clean pre-1.0 Rust migration. PR #87 closed `g16.013`: it replaces legacy
 checkbox-shaped `CheckState` storage with `TriStateValue`, makes Default the
 real default, removes the undocumented general label and compatibility
 surface, and closes radio semantics, roving focus, stable identity, and one
-mounted GPUI behavior cell. Expected ledger movement is 41 → 42 mounted and
+mounted GPUI behavior cell. The ledger moved 41 → 42 mounted and
 133 → 132 missing; known-delta totals stay 115 / 60. NumberInput,
 EditableLabel, Accordion, visual comparison, accessibility, and Jetstream stay
 outside the card.
 
 ## Next Task
 
-Dispatch `g16.013` from
-`../../handoffs/20260827-160028-g16-013-tri-state-switch-worker.md`. The worker
-executes only that card and returns a PR for orchestrator review. Do not compile
-or start `g16.014` until `g16.013` is merged and the ledger is re-evaluated
-against the expected 42 mounted / 132 missing checkpoint.
+Re-evaluate the ledger at 42 mounted / 132 missing and select the next bounded
+lane. Do not compile or start `g16.014` until that evidence checkpoint chooses
+the work. NumberInput, EditableLabel, Accordion, visual comparison,
+accessibility, and Jetstream remain separate decisions.

@@ -1,7 +1,8 @@
 # g16.013 — TriStateSwitch Contract And Mounted Parity
 
-Status: complete — worker implementation on `t3code/tri-state-switch`
+Status: complete — merged in PR #87
 Opened: 2026-08-27
+Completed: 2026-08-27
 Depends on: merged `g16.012` / PR #86; operator-approved breaking migration in
 `../../triage/20260827-160028-post-g16-012-native-lane-decision.md`
 Governing refs: `../../contracts/001-working-rules.md`,
