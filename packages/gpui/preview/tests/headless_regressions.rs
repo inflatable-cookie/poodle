@@ -9460,3 +9460,269 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
         );
     });
 }
+
+/// Standalone CollapseToggle label, expanded state, direction, host-owned
+/// rebuild, focus, and disabled inertia through the production renderer.
+#[test]
+fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard() {
+    use poodle_node::NodeKind;
+    use poodle_specs::{CollapseDirection, CollapseToggleSpec};
+
+    fn marker(id: &str, label: &str) -> Node {
+        let mut node = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label(label),
+            &RenderContext::new(&theme()),
+            None,
+        );
+        node.id = Some(id.to_owned());
+        node
+    }
+
+    fn toggle(
+        spec: CollapseToggleSpec,
+        id: &str,
+        on_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+    ) -> Node {
+        let mut node =
+            poodle_render::collapse_toggle(&spec, &RenderContext::new(&theme()), on_toggle);
+        node.id = Some(id.to_owned());
+        node
+    }
+
+    fn target<'a>(root: &'a Node, id: &str) -> &'a Node {
+        root.find(&|node| node.id.as_deref() == Some(id))
+            .unwrap_or_else(|| panic!("{id}"))
+    }
+
+    fn icon_name(node: &Node) -> &str {
+        node.find(&|child| matches!(&child.kind, NodeKind::Icon { .. }))
+            .and_then(|child| match &child.kind {
+                NodeKind::Icon { name, .. } => Some(name.as_str()),
+                _ => None,
+            })
+            .expect("chevron")
+    }
+
+    // ── Semantics, naming, inert skips ─────────────────────────────────
+    run_headless(|cx| {
+        let reported = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let sink = Arc::clone(&reported);
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.descriptor.layout.spacing.gap = 8.0;
+        root = root
+            .child(marker("ct-before", "Before"))
+            .child(toggle(
+                CollapseToggleSpec::new().with_direction(CollapseDirection::Left),
+                "ct-enabled",
+                Some(Arc::new(move |next| {
+                    sink.lock().expect("report lock").push(next);
+                })),
+            ))
+            .child(toggle(
+                CollapseToggleSpec::new()
+                    .with_collapsed(true)
+                    .with_aria_label("Collapse left dock"),
+                "ct-labeled",
+                None,
+            ))
+            .child(toggle(
+                CollapseToggleSpec::new().with_disabled(true),
+                "ct-disabled",
+                Some(Arc::new(|_| panic!("disabled collapse toggle does not fire"))),
+            ))
+            .child(marker("ct-after", "After"));
+
+        {
+            let enabled = target(&root, "ct-enabled");
+            assert_eq!(enabled.a11y.role, Some(NodeRole::Button));
+            assert_eq!(enabled.a11y.label.as_deref(), Some("Collapse"));
+            assert_eq!(enabled.a11y.expanded, Some(true));
+            assert_eq!(icon_name(enabled), "chevron-left");
+            assert_eq!(enabled.a11y.tab_index, Some(0));
+            assert!(enabled.style.focus_ring.is_some());
+
+            let labeled = target(&root, "ct-labeled");
+            assert_eq!(labeled.a11y.label.as_deref(), Some("Collapse left dock"));
+            assert_eq!(labeled.a11y.expanded, Some(false));
+            assert_eq!(icon_name(labeled), "chevron-right");
+
+            let disabled = target(&root, "ct-disabled");
+            assert!(disabled.interaction.disabled);
+            assert!(!disabled.interaction.focusable);
+            assert_eq!(disabled.a11y.tab_index, None);
+            assert!(disabled.style.focus_ring.is_none());
+            assert!(disabled.interaction.on_activate.is_none());
+        }
+
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 420.0);
+        driver.wait_for_focus_handle("ct-before");
+        driver.wait_for_focus_handle("ct-enabled");
+        driver.wait_for_focus_handle("ct-labeled");
+        driver.wait_for_focus_handle("ct-after");
+
+        assert!(
+            poodle_gpui_node_backend::bounds_for("ct-enabled").is_some(),
+            "pointer proof needs a real hit target"
+        );
+        driver.pointer_activate_id("ct-enabled");
+        assert_eq!(*reported.lock().expect("report lock"), [true]);
+
+        assert!(
+            poodle_gpui_node_backend::bounds_for("ct-disabled").is_some(),
+            "disabled pointer proof needs a real hit target"
+        );
+        driver.pointer_activate_id("ct-disabled");
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for("ct-disabled").is_none(),
+            "disabled toggle never registers a sequential stop"
+        );
+        assert_eq!(*reported.lock().expect("report lock"), [true]);
+
+        driver.focus_element("ct-before");
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("ct-enabled"),
+            Some(true)
+        );
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("ct-labeled"),
+            Some(true)
+        );
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("ct-after"),
+            Some(true),
+            "disabled collapse toggle is skipped"
+        );
+    });
+
+    // ── Host rebuild: pointer, Enter, Space ────────────────────────────
+    run_headless(|cx| {
+        fn build(
+            collapsed: bool,
+            mounted: Arc<Mutex<Node>>,
+            events: Arc<Mutex<Vec<bool>>>,
+        ) -> Node {
+            let event_sink = Arc::clone(&events);
+            let mount = Arc::clone(&mounted);
+            let mut node = poodle_render::collapse_toggle(
+                &CollapseToggleSpec::new()
+                    .with_direction(CollapseDirection::Left)
+                    .with_collapsed(collapsed),
+                &RenderContext::new(&theme()),
+                Some(Arc::new(move |next| {
+                    event_sink.lock().expect("event lock").push(next);
+                    *mount.lock().expect("mount lock") =
+                        build(next, Arc::clone(&mount), Arc::clone(&event_sink));
+                })),
+            );
+            node.id = Some("ct-controlled".to_owned());
+            node
+        }
+
+        let events = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") =
+            build(false, Arc::clone(&mounted), Arc::clone(&events));
+        {
+            let node = mounted.lock().expect("mount lock");
+            assert_eq!(node.a11y.label.as_deref(), Some("Collapse"));
+            assert_eq!(node.a11y.expanded, Some(true));
+            assert_eq!(icon_name(&node), "chevron-left");
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("ct-controlled");
+        driver.pointer_activate_id("ct-controlled");
+        assert_eq!(*events.lock().expect("event lock"), [true]);
+        {
+            let node = mounted.lock().expect("mount lock");
+            assert_eq!(node.a11y.label.as_deref(), Some("Expand"));
+            assert_eq!(node.a11y.expanded, Some(false));
+            assert_eq!(icon_name(&node), "chevron-right");
+        }
+
+        driver.wait_for_focus_handle("ct-controlled");
+        driver.focus_element("ct-controlled");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(*events.lock().expect("event lock"), [true, false]);
+        {
+            let node = mounted.lock().expect("mount lock");
+            assert_eq!(node.a11y.label.as_deref(), Some("Collapse"));
+            assert_eq!(node.a11y.expanded, Some(true));
+            assert_eq!(icon_name(&node), "chevron-left");
+        }
+
+        driver.wait_for_focus_handle("ct-controlled");
+        driver.focus_element("ct-controlled");
+        driver.dispatch_key_raw("space");
+        assert_eq!(*events.lock().expect("event lock"), [true, false, true]);
+        {
+            let node = mounted.lock().expect("mount lock");
+            assert_eq!(node.a11y.label.as_deref(), Some("Expand"));
+            assert_eq!(node.a11y.expanded, Some(false));
+            assert_eq!(icon_name(&node), "chevron-right");
+        }
+    });
+
+    // ── Explicit label survives host rebuild ───────────────────────────
+    run_headless(|cx| {
+        fn build(
+            collapsed: bool,
+            mounted: Arc<Mutex<Node>>,
+            events: Arc<Mutex<Vec<bool>>>,
+        ) -> Node {
+            let event_sink = Arc::clone(&events);
+            let mount = Arc::clone(&mounted);
+            let mut node = poodle_render::collapse_toggle(
+                &CollapseToggleSpec::new()
+                    .with_collapsed(collapsed)
+                    .with_aria_label("Collapse left dock"),
+                &RenderContext::new(&theme()),
+                Some(Arc::new(move |next| {
+                    event_sink.lock().expect("event lock").push(next);
+                    *mount.lock().expect("mount lock") =
+                        build(next, Arc::clone(&mount), Arc::clone(&event_sink));
+                })),
+            );
+            node.id = Some("ct-named".to_owned());
+            node
+        }
+
+        let events = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") =
+            build(false, Arc::clone(&mounted), Arc::clone(&events));
+        assert_eq!(
+            mounted.lock().expect("mount lock").a11y.label.as_deref(),
+            Some("Collapse left dock")
+        );
+        assert_eq!(
+            mounted.lock().expect("mount lock").a11y.expanded,
+            Some(true)
+        );
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("ct-named");
+        driver.pointer_activate_id("ct-named");
+        assert_eq!(*events.lock().expect("event lock"), [true]);
+        {
+            let node = mounted.lock().expect("mount lock");
+            assert_eq!(node.a11y.label.as_deref(), Some("Collapse left dock"));
+            assert_eq!(node.a11y.expanded, Some(false));
+        }
+
+        driver.wait_for_focus_handle("ct-named");
+        driver.focus_element("ct-named");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(*events.lock().expect("event lock"), [true, false]);
+        {
+            let node = mounted.lock().expect("mount lock");
+            assert_eq!(node.a11y.label.as_deref(), Some("Collapse left dock"));
+            assert_eq!(node.a11y.expanded, Some(true));
+        }
+    });
+}

@@ -1,7 +1,8 @@
 # g16.015 — CollapseToggle Disclosure And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-27
+Completed: 2026-08-27
 Depends on: merged `g16.014` / PR #88 and the resolved selection in
 `../../triage/20260827-195632-post-g16-014-native-lane-decision.md`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -72,16 +73,16 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Execution Plan
 
-- [ ] **Batch 1 — focused renderer contract.** Correct default/custom labels,
+- [x] **Batch 1 — focused renderer contract.** Correct default/custom labels,
       expanded state, enabled focus/tab/ring declaration, and disabled focus /
       activation suppression. Add focused spec/renderer tests for all four
       directions, both collapsed states, labels, callback results, and disabled
       behavior.
-- [ ] **Batch 2 — mounted standalone behavior.** Add one readable named
+- [x] **Batch 2 — mounted standalone behavior.** Add one readable named
       headless GPUI regression through the production renderer and node backend.
       Drive pointer, Enter, and Space activation with host rebuilds; prove
       state, label, icon, callback, focus, and disabled inertia.
-- [ ] **Batch 3 — evidence and closeout.** Preserve the curated GPUI specimen,
+- [x] **Batch 3 — evidence and closeout.** Preserve the curated GPUI specimen,
       regenerate only CollapseToggle's ledger cell, close the card/decision/log
       and front doors, and run the required headless validation board.
 
@@ -126,24 +127,24 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Acceptance Criteria
 
-- [ ] Native default and explicit accessible labels match the web authority in
+- [x] Native default and explicit accessible labels match the web authority in
       both collapsed states.
-- [ ] Native expanded state is always the inverse of collapsed state.
-- [ ] Enabled controls are Button tab stops with a structured focus ring using
+- [x] Native expanded state is always the inverse of collapsed state.
+- [x] Enabled controls are Button tab stops with a structured focus ring using
       the contract tokens and offset; disabled controls have no focus or ring.
-- [ ] Pointer, Enter, and Space report only the next collapsed boolean and the
+- [x] Pointer, Enter, and Space report only the next collapsed boolean and the
       mounted host rebuilds the spec; no hidden renderer state is introduced.
-- [ ] Disabled controls expose the disabled channel and emit nothing.
-- [ ] Every direction paints its authored chevron when expanded and the exact
+- [x] Disabled controls expose the disabled channel and emit nothing.
+- [x] Every direction paints its authored chevron when expanded and the exact
       opposite when collapsed.
-- [ ] Focused Svelte and React tests remain green without web implementation
+- [x] Focused Svelte and React tests remain green without web implementation
       changes.
-- [ ] The curated GPUI specimen stays human-centred and keeps its current axes.
-- [ ] One named mounted regression proves the standalone production path.
-- [ ] The generated ledger changes only CollapseToggle to 44 mounted / 130
+- [x] The curated GPUI specimen stays human-centred and keeps its current axes.
+- [x] One named mounted regression proves the standalone production path.
+- [x] The generated ledger changes only CollapseToggle to 44 mounted / 130
       missing; known-delta totals stay 115 / 60 and visual/accessibility cells
       remain unchanged.
-- [ ] One August log records the behavior repair, evidence, validation,
+- [x] One August log records the behavior repair, evidence, validation,
       non-claims, and next checkpoint.
 
 ## Writable Scope
@@ -206,6 +207,6 @@ preview/QA, release, tag, publication, or workflow-mutation selectors.
 Return the renderer semantic diff, focused test names, mounted regression name,
 host-rebuild proof, regenerated ledger totals, validation, and execution log to
 the orchestrator. Do not compile or implement `g16.016`. After operator merge,
-the orchestrator returns to the measured ledger and chooses the next bounded
-parity lane.
+the orchestrator returns to the measured 44 mounted / 130 missing ledger and
+chooses the next bounded parity lane.
 

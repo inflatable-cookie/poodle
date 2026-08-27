@@ -239,3 +239,49 @@ impl CollapseToggleSpec {
         self
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_and_explicit_labels_follow_collapsed_state() {
+        assert_eq!(CollapseToggleSpec::new().effective_aria_label(), "Collapse");
+        assert_eq!(
+            CollapseToggleSpec::new()
+                .with_collapsed(true)
+                .effective_aria_label(),
+            "Expand"
+        );
+        assert_eq!(
+            CollapseToggleSpec::new()
+                .with_collapsed(false)
+                .with_aria_label("Collapse left dock")
+                .effective_aria_label(),
+            "Collapse left dock"
+        );
+        assert_eq!(
+            CollapseToggleSpec::new()
+                .with_collapsed(true)
+                .with_aria_label("Collapse left dock")
+                .effective_aria_label(),
+            "Collapse left dock"
+        );
+    }
+
+    #[test]
+    fn every_direction_maps_to_its_opposite_when_collapsed() {
+        let pairs = [
+            (CollapseDirection::Left, "chevron-left", "chevron-right"),
+            (CollapseDirection::Right, "chevron-right", "chevron-left"),
+            (CollapseDirection::Up, "chevron-up", "chevron-down"),
+            (CollapseDirection::Down, "chevron-down", "chevron-up"),
+        ];
+        for (direction, expanded, collapsed) in pairs {
+            let expanded_spec = CollapseToggleSpec::new().with_direction(direction);
+            assert_eq!(expanded_spec.effective_icon_name(), expanded);
+            let collapsed_spec = expanded_spec.with_collapsed(true);
+            assert_eq!(collapsed_spec.effective_icon_name(), collapsed);
+        }
+    }
+}
