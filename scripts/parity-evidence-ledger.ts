@@ -84,6 +84,7 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   IconButton: "icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard",
   Collapsible: "collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard",
   CollapseToggle: "collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_keyboard",
+  Pagination: "pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard",
   Accordion: "accordion_result_disclosure_focus_identity_and_disabled_paths",
   TriStateSwitch: "tri_state_switch_value_focus_identity_and_disabled_paths",
   Popover: "a_nested_popover_paints_without_nesting_deferred_draws",

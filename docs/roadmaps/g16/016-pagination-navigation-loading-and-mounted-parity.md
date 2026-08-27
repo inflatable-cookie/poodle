@@ -1,7 +1,8 @@
 # g16.016 — Pagination Navigation, Loading, And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-27
+Completed: 2026-08-27
 Depends on: merged `g16.015` / PR #90 and the resolved selection in
 `../../triage/20260827-210417-post-g16-015-native-lane-decision.md`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -86,17 +87,17 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Execution Plan
 
-- [ ] **Batch 1 — focused loading and renderer contract.** Reproduce the live
+- [x] **Batch 1 — focused loading and renderer contract.** Reproduce the live
       page-size selector under loading, apply the existing disabled channel,
       and strengthen focused spec/renderer tests for page windows, variants,
       current/boundary/loading inertia, destination payloads, and limit
       callbacks.
-- [ ] **Batch 2 — mounted host behavior.** Add one readable named headless GPUI
+- [x] **Batch 2 — mounted host behavior.** Add one readable named headless GPUI
       regression through production Pagination, Select, renderer, and node
       backend. Drive pointer, Enter, and Space requests; rebuild the host; open
       and choose a page-size option; prove boundaries, current page, and loading
       emit nothing.
-- [ ] **Batch 3 — evidence and closeout.** Preserve the human-facing specimen,
+- [x] **Batch 3 — evidence and closeout.** Preserve the human-facing specimen,
       regenerate only Pagination's mounted ledger cell, close this card/source
       decision/log/front doors, and run the required headless board.
 
@@ -137,23 +138,23 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Acceptance Criteria
 
-- [ ] Loading disables the wired page-size Select as well as every page button.
-- [ ] Numbered, simple, and full variants preserve their page-request payloads,
+- [x] Loading disables the wired page-size Select as well as every page button.
+- [x] Numbered, simple, and full variants preserve their page-request payloads,
       summaries, page windows, and host-owned state model.
-- [ ] Current page, ellipsis, boundary, and loading activations emit nothing.
-- [ ] Enabled pointer, Enter, and Space activation report the same destination
+- [x] Current page, ellipsis, boundary, and loading activations emit nothing.
+- [x] Enabled pointer, Enter, and Space activation report the same destination
       and the mounted host rebuilds the spec.
-- [ ] The wired limit Select reports controlled open and numeric page-size
+- [x] The wired limit Select reports controlled open and numeric page-size
       changes through the production mounted path; loading suppresses both.
-- [ ] Focused Svelte and React Pagination tests remain green without web
+- [x] Focused Svelte and React Pagination tests remain green without web
       implementation changes.
-- [ ] The curated GPUI specimen remains human-centred and keeps its current
+- [x] The curated GPUI specimen remains human-centred and keeps its current
       axes and live full example.
-- [ ] One named mounted regression proves the production Pagination path.
-- [ ] The generated ledger changes only Pagination to 45 mounted / 129 missing;
+- [x] One named mounted regression proves the production Pagination path.
+- [x] The generated ledger changes only Pagination to 45 mounted / 129 missing;
       Select stays missing, known-delta totals stay 115 / 60, and visual /
       accessibility cells remain unchanged.
-- [ ] One August log records the loading repair, behavior evidence, validation,
+- [x] One August log records the loading repair, behavior evidence, validation,
       non-claims, and next checkpoint.
 
 ## Writable Scope
