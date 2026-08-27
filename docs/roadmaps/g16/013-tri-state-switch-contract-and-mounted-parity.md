@@ -1,6 +1,6 @@
 # g16.013 — TriStateSwitch Contract And Mounted Parity
 
-Status: ready
+Status: complete — worker implementation on `t3code/tri-state-switch`
 Opened: 2026-08-27
 Depends on: merged `g16.012` / PR #86; operator-approved breaking migration in
 `../../triage/20260827-160028-post-g16-012-native-lane-decision.md`
@@ -11,13 +11,13 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Goal
 
-- [ ] Give Svelte, React, shared Rust, and GPUI one ternary
+- [x] Give Svelte, React, shared Rust, and GPUI one ternary
       `excluded | default | included` value contract.
-- [ ] Remove the legacy checkbox-shaped Rust compatibility surface rather than
+- [x] Remove the legacy checkbox-shaped Rust compatibility surface rather than
       preserving aliases or fallbacks before v1.0.
-- [ ] Make native radio selection, roving focus, disabled behavior, and
+- [x] Make native radio selection, roving focus, disabled behavior, and
       instance identity match the documented web authority.
-- [ ] Move exactly TriStateSwitch's GPUI mounted-behaviour cell from `missing`
+- [x] Move exactly TriStateSwitch's GPUI mounted-behaviour cell from `missing`
       to `mounted`: 41 → 42 mounted and 133 → 132 missing. Keep known-delta
       totals at 115 present / 60 not-applicable.
 
@@ -89,15 +89,15 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Execution Plan
 
-- [ ] **Batch 1 — migrate the semantic Rust contract.** Replace legacy spec
+- [x] **Batch 1 — migrate the semantic Rust contract.** Replace legacy spec
       storage/builders/defaults and conversion helpers, correct the component
       contract's conflicting Jetstream same-value note, migrate all in-repo
       Rust call sites mechanically, and add focused `poodle-specs` tests.
-- [ ] **Batch 2 — repair native selection and focus.** Introduce the required
+- [x] **Batch 2 — repair native selection and focus.** Introduce the required
       scoped handler boundary, project radio semantics and one roving tab stop,
       implement same-value/disabled inertia and Left/Right focus movement, and
       add focused renderer tests including two-instance identity.
-- [ ] **Batch 3 — prove production dispatch and close evidence.** Wire the GPUI
+- [x] **Batch 3 — prove production dispatch and close evidence.** Wire the GPUI
       wrapper/specimen through stable scopes and host rebuilds, add one named
       mounted headless regression, regenerate only the TriStateSwitch ledger
       cell, close the decision/card/log/front doors, and run the full headless
@@ -145,29 +145,29 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Acceptance Criteria
 
-- [ ] `TriStateSwitchSpec` uses `TriStateValue`, defaults to Default, exposes
+- [x] `TriStateSwitchSpec` uses `TriStateValue`, defaults to Default, exposes
       `with_value`, and contains no legacy `state`, `with_state`, undocumented
       general `label`, or TriStateSwitch-only CheckState compatibility path.
-- [ ] All Poodle-owned Rust call sites use the semantic enum directly and the
+- [x] All Poodle-owned Rust call sites use the semantic enum directly and the
       active cohort still compiles; Jetstream changes are mechanical only.
-- [ ] Every native construction provides non-empty stable interaction scope
+- [x] Every native construction provides non-empty stable interaction scope
       through `TriStateSwitchHandlers`; no collision-prone fallback remains.
-- [ ] Native semantics expose one labelled radiogroup, three labelled radios,
+- [x] Native semantics expose one labelled radiogroup, three labelled radios,
       correct selected state, one selected tab stop, and structured focus rings.
-- [ ] Pointer, Space, and Left/Right report only changed resulting values;
+- [x] Pointer, Space, and Left/Right report only changed resulting values;
       arrows wrap and move focus inside the originating instance.
-- [ ] Same-value and disabled paths emit nothing; disabled segments are not
+- [x] Same-value and disabled paths emit nothing; disabled segments are not
       focusable or sequential tab stops.
-- [ ] Two mounted instances with the same current value retain independent
+- [x] Two mounted instances with the same current value retain independent
       runtime and focus identity through host rebuilds.
-- [ ] The curated GPUI specimen starts at Default and uses production scoped
+- [x] The curated GPUI specimen starts at Default and uses production scoped
       handlers without adding an exhaustive example matrix.
-- [ ] One named mounted regression proves the fixed behavior through real
+- [x] One named mounted regression proves the fixed behavior through real
       backend dispatch.
-- [ ] The generated ledger changes only TriStateSwitch to 42 mounted / 132
+- [x] The generated ledger changes only TriStateSwitch to 42 mounted / 132
       missing; known-delta totals stay 115 / 60 and visual/accessibility cells
       remain unchanged.
-- [ ] One August log records the approved break, behavior repair, evidence,
+- [x] One August log records the approved break, behavior repair, evidence,
       validation, exact non-claims, and next orchestrator checkpoint.
 
 ## Writable Scope

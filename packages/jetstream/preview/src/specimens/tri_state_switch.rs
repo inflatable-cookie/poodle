@@ -4,7 +4,7 @@ use crate::compat::js_tri_state_switch;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{CheckState, ControlSize, TriStateSwitchSpec};
+use poodle_specs::{ControlSize, TriStateSwitchSpec, TriStateValue};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -21,21 +21,24 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .gap(12.0)
                 .child(js_tri_state_switch(
                     &TriStateSwitchSpec::new()
-                        .with_state(CheckState::Unchecked)
-                        .with_label("Excluded"),
+                        .with_value(TriStateValue::Excluded)
+                        .with_aria_label("Excluded"),
                     theme,
+                    "jetstream-state-excluded",
                 ))
                 .child(js_tri_state_switch(
                     &TriStateSwitchSpec::new()
-                        .with_state(CheckState::Mixed)
-                        .with_label("Default"),
+                        .with_value(TriStateValue::Default)
+                        .with_aria_label("Default"),
                     theme,
+                    "jetstream-state-default",
                 ))
                 .child(js_tri_state_switch(
                     &TriStateSwitchSpec::new()
-                        .with_state(CheckState::Checked)
-                        .with_label("Included"),
+                        .with_value(TriStateValue::Included)
+                        .with_aria_label("Included"),
                     theme,
+                    "jetstream-state-included",
                 )),
         ))
         // Sizes
@@ -48,23 +51,26 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .child(js_tri_state_switch(
                     &TriStateSwitchSpec::new()
                         .with_size(ControlSize::Sm)
-                        .with_state(CheckState::Checked)
-                        .with_label("Small"),
+                        .with_value(TriStateValue::Included)
+                        .with_aria_label("Small"),
                     theme,
+                    "jetstream-size-sm",
                 ))
                 .child(js_tri_state_switch(
                     &TriStateSwitchSpec::new()
                         .with_size(ControlSize::Md)
-                        .with_state(CheckState::Checked)
-                        .with_label("Medium"),
+                        .with_value(TriStateValue::Included)
+                        .with_aria_label("Medium"),
                     theme,
+                    "jetstream-size-md",
                 ))
                 .child(js_tri_state_switch(
                     &TriStateSwitchSpec::new()
                         .with_size(ControlSize::Lg)
-                        .with_state(CheckState::Checked)
-                        .with_label("Large"),
+                        .with_value(TriStateValue::Included)
+                        .with_aria_label("Large"),
                     theme,
+                    "jetstream-size-lg",
                 )),
         ))
         // Custom labels (Hide / All / Show)
@@ -73,11 +79,13 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             div().flex_col().gap(12.0).child(js_tri_state_switch(
                 &TriStateSwitchSpec::new()
-                    .with_state(CheckState::Mixed)
+                    .with_value(TriStateValue::Default)
                     .with_excluded_label("Hide")
                     .with_default_label("All")
-                    .with_included_label("Show"),
+                    .with_included_label("Show")
+                    .with_aria_label("Visibility filter"),
                 theme,
+                "jetstream-custom-labels",
             )),
         ))
         // Custom semantic colors (per-state hex overrides)
@@ -89,19 +97,23 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .gap(12.0)
                 .child(js_tri_state_switch(
                     &TriStateSwitchSpec::new()
-                        .with_state(CheckState::Unchecked)
+                        .with_value(TriStateValue::Excluded)
                         .with_excluded_color("#ef4444")
                         .with_default_color("#64748b")
-                        .with_included_color("#22c55e"),
+                        .with_included_color("#22c55e")
+                        .with_aria_label("Custom colors excluded"),
                     theme,
+                    "jetstream-custom-colors-excluded",
                 ))
                 .child(js_tri_state_switch(
                     &TriStateSwitchSpec::new()
-                        .with_state(CheckState::Checked)
+                        .with_value(TriStateValue::Included)
                         .with_excluded_color("#ef4444")
                         .with_default_color("#64748b")
-                        .with_included_color("#22c55e"),
+                        .with_included_color("#22c55e")
+                        .with_aria_label("Custom colors included"),
                     theme,
+                    "jetstream-custom-colors-included",
                 )),
         ))
         // Disabled
@@ -113,17 +125,19 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .gap(12.0)
                 .child(js_tri_state_switch(
                     &TriStateSwitchSpec::new()
-                        .with_state(CheckState::Unchecked)
-                        .with_label("Disabled excluded")
+                        .with_value(TriStateValue::Excluded)
+                        .with_aria_label("Disabled excluded")
                         .with_disabled(true),
                     theme,
+                    "jetstream-disabled-excluded",
                 ))
                 .child(js_tri_state_switch(
                     &TriStateSwitchSpec::new()
-                        .with_state(CheckState::Checked)
-                        .with_label("Disabled included")
+                        .with_value(TriStateValue::Included)
+                        .with_aria_label("Disabled included")
                         .with_disabled(true),
                     theme,
+                    "jetstream-disabled-included",
                 )),
         ))
 }

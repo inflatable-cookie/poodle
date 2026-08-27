@@ -7079,20 +7079,27 @@ impl IntoElement for Switch {
 pub(crate) struct TriStateSwitch {
     spec: TriStateSwitchSpec,
     theme: GpuiThemeProvider,
-    on_change: Option<Arc<dyn Fn(TriStateValue) + Send + Sync>>,
+    id: Option<String>,
+    handlers: poodle_render::TriStateSwitchHandlers,
 }
 
 impl TriStateSwitch {
-    pub(crate) fn from_spec(spec: TriStateSwitchSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: TriStateSwitchSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
+        let instance_id = instance_id.into();
         Self {
             spec,
             theme: theme.clone(),
-            on_change: None,
+            id: Some(instance_id.clone()),
+            handlers: poodle_render::TriStateSwitchHandlers::new(instance_id),
         }
     }
 
     pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(TriStateValue) + Send + Sync>) -> Self {
-        self.on_change = Some(handler);
+        self.handlers.on_value_change = Some(handler);
         self
     }
 }
@@ -7101,8 +7108,14 @@ impl IntoElement for TriStateSwitch {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let mut node = poodle_render::tri_state_switch(&self.spec, &RenderContext::new(&self.theme), self.on_change);
-        node.id = Some("poodle-tri-state-switch".to_string());
+        let mut node = poodle_render::tri_state_switch(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.handlers,
+        );
+        if let Some(id) = self.id {
+            node.id = Some(id);
+        }
         poodle_gpui_node_backend::to_gpui(&node)
     }
 }

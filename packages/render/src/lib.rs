@@ -393,7 +393,7 @@ pub use tool_call_group::{tool_call_group, ToolCallGroupHandlers};
 pub use toolbar::toolbar;
 pub use tooltip::tooltip;
 pub use tree::{tree, TreeDropHandler, TreeHandlers, TreeKeyHandler};
-pub use tri_state_switch::tri_state_switch;
+pub use tri_state_switch::{tri_state_switch, TriStateSwitchHandlers};
 pub use update_center::{update_center, UpdateCenterHandlers};
 pub use update_status::{update_status, UpdateStatusHandlers};
 pub use validation_summary::validation_summary;

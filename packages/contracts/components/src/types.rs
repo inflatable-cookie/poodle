@@ -384,10 +384,7 @@ impl CheckState {
 /// The ternary value of a `TriStateSwitch`, in fixed display order.
 ///
 /// The contract (`tri-state-switch.md`) names the three positions
-/// `excluded | default | included`. `TriStateSwitchSpec` still stores a
-/// `CheckState` for backward compatibility with existing call sites, but
-/// this enum gives the component its real semantic surface
-/// (`Unchecked → Excluded`, `Mixed → Default`, `Checked → Included`).
+/// `excluded | default | included`.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TriStateValue {
     Excluded,
@@ -405,23 +402,17 @@ impl TriStateValue {
         }
     }
 
-    /// Map from the legacy `CheckState` storage.
-    pub fn from_check_state(state: CheckState) -> Self {
-        match state {
-            CheckState::Unchecked => Self::Excluded,
-            CheckState::Mixed => Self::Default,
-            CheckState::Checked => Self::Included,
+    /// Contract string form for runtime identity and callbacks.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Excluded => "excluded",
+            Self::Default => "default",
+            Self::Included => "included",
         }
     }
 
-    /// Back to the legacy `CheckState` storage.
-    pub fn to_check_state(self) -> CheckState {
-        match self {
-            Self::Excluded => CheckState::Unchecked,
-            Self::Default => CheckState::Mixed,
-            Self::Included => CheckState::Checked,
-        }
-    }
+    /// Fixed option order for native roving focus.
+    pub const ALL: [Self; 3] = [Self::Excluded, Self::Default, Self::Included];
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

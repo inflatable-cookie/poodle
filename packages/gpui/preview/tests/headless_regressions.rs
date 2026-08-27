@@ -29,11 +29,12 @@ use poodle_node::{
 };
 use poodle_render::{
     ui_presentation_provider, RadioGroupHandlers, RenderContext, SliderHandlers, TabsHandlers,
-    ToggleGroupHandlers,
+    ToggleGroupHandlers, TriStateSwitchHandlers,
 };
 use poodle_specs::{
     AgentTranscriptSpec, ControlDensity, ControlSize, Orientation, PopoverSpec, RangeSliderSpec,
-    SliderSpec, TabActivationMode, TabDefinition, TabsSpec, UiPresentationProviderSpec,
+    SliderSpec, TabActivationMode, TabDefinition, TabsSpec, TriStateSwitchSpec, TriStateValue,
+    UiPresentationProviderSpec,
 };
 
 #[path = "../src/headless_driver.rs"]
@@ -6006,6 +6007,365 @@ fn radio_group_exclusive_focus_identity_and_disabled_paths() {
             poodle_gpui_node_backend::focus_state_for(&right),
             Some(false),
             "two mounted groups keep independent focus identity"
+        );
+    });
+}
+
+fn tri_state_segment_id(scope: &str, value: TriStateValue) -> String {
+    format!("tri-state:{scope}:option:{}", value.as_str())
+}
+
+fn tri_state_marker(id: &str, label: &str) -> Node {
+    let mut node = poodle_render::button(
+        &poodle_specs::ButtonSpec::new().with_label(label),
+        &RenderContext::new(&theme()),
+        None,
+    );
+    node.id = Some(id.to_owned());
+    node
+}
+
+fn tri_state_target<'a>(root: &'a Node, id: &str) -> &'a Node {
+    root.find(&|node| {
+        node.runtime_id.as_deref() == Some(id) || node.id.as_deref() == Some(id)
+    })
+    .unwrap_or_else(|| panic!("{id}"))
+}
+
+fn tri_state_selected(node: &Node, scope: &str, value: TriStateValue) -> bool {
+    tri_state_target(node, &tri_state_segment_id(scope, value))
+        .a11y
+        .selected
+        .unwrap_or(false)
+}
+
+fn assert_tri_state_pointer_targets(ids: &[String]) {
+    for id in ids {
+        assert!(
+            poodle_gpui_node_backend::bounds_for(id).is_some(),
+            "pointer proof needs a real hit target for {id}"
+        );
+    }
+}
+
+fn assert_tri_state_radio_semantics(
+    switch: &Node,
+    scope: &str,
+    selected: TriStateValue,
+    group_label: &str,
+) {
+    assert_eq!(switch.a11y.role, Some(NodeRole::RadioGroup));
+    assert_eq!(switch.a11y.label.as_deref(), Some(group_label));
+
+    let labels = ["Exclude", "Default", "Include"];
+    let mut tab_stops = 0;
+    for (value, label) in TriStateValue::ALL.iter().zip(labels) {
+        let segment = tri_state_target(switch, &tri_state_segment_id(scope, *value));
+        assert_eq!(segment.a11y.role, Some(NodeRole::RadioButton));
+        assert_eq!(segment.a11y.label.as_deref(), Some(label));
+        let is_selected = *value == selected;
+        assert_eq!(segment.a11y.selected, Some(is_selected));
+        assert_eq!(
+            segment.a11y.toggled,
+            Some(if is_selected {
+                poodle_node::NodeToggled::True
+            } else {
+                poodle_node::NodeToggled::False
+            })
+        );
+        if segment.a11y.tab_index == Some(0) {
+            tab_stops += 1;
+        }
+        assert!(segment.style.focus_ring.is_some(), "{label} focus ring");
+    }
+    assert_eq!(tab_stops, 1, "exactly one roving tab stop");
+}
+
+/// TriStateSwitch exclusive selection, arrow wrap, same-value inertia, disabled
+/// skip, and independent instance focus identity through the mounted tree.
+#[test]
+fn tri_state_switch_value_focus_identity_and_disabled_paths() {
+    run_headless(|cx| {
+        fn build(
+            value: TriStateValue,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<TriStateValue>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let mut node = poodle_render::tri_state_switch(
+                &TriStateSwitchSpec::new()
+                    .with_value(value)
+                    .with_aria_label("Filter mode"),
+                &RenderContext::new(&theme()),
+                TriStateSwitchHandlers::new("filter").on_value_change(Arc::new(
+                    move |next: TriStateValue| {
+                        sink.lock().unwrap().push(next);
+                        *mount.lock().unwrap() =
+                            build(next, Arc::clone(&mount), Arc::clone(&sink));
+                    },
+                )),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            TriStateValue::Default,
+            Arc::clone(&mounted),
+            Arc::clone(&payloads),
+        );
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 280.0, 60.0);
+
+        let excluded = tri_state_segment_id("filter", TriStateValue::Excluded);
+        let default = tri_state_segment_id("filter", TriStateValue::Default);
+        let included = tri_state_segment_id("filter", TriStateValue::Included);
+        let pointer_targets = [excluded.clone(), default.clone(), included.clone()];
+
+        assert_tri_state_radio_semantics(
+            &mounted.lock().unwrap(),
+            "filter",
+            TriStateValue::Default,
+            "Filter mode",
+        );
+        assert_tri_state_pointer_targets(&pointer_targets);
+        driver.wait_for_focus_handle(&default);
+        driver.wait_for_focus_handle(&excluded);
+        assert!(tri_state_selected(
+            &mounted.lock().unwrap(),
+            "filter",
+            TriStateValue::Default
+        ));
+
+        driver.focus_element(&excluded);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&excluded),
+            Some(true),
+            "an unselected segment accepts programmatic focus"
+        );
+        driver.dispatch_key_raw("space");
+        assert_eq!(payloads.lock().unwrap().as_slice(), [TriStateValue::Excluded]);
+        assert_tri_state_radio_semantics(
+            &mounted.lock().unwrap(),
+            "filter",
+            TriStateValue::Excluded,
+            "Filter mode",
+        );
+        assert_tri_state_pointer_targets(&pointer_targets);
+
+        driver.wait_for_focus_handle(&excluded);
+        driver.focus_element(&excluded);
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [TriStateValue::Excluded],
+            "space on the selected segment is inert"
+        );
+
+        driver.pointer_activate_id(&included);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [TriStateValue::Excluded, TriStateValue::Included]
+        );
+        assert!(tri_state_selected(
+            &mounted.lock().unwrap(),
+            "filter",
+            TriStateValue::Included
+        ));
+
+        driver.pointer_activate_id(&included);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [TriStateValue::Excluded, TriStateValue::Included],
+            "same-value pointer selection is inert"
+        );
+
+        driver.wait_for_focus_handle(&included);
+        driver.focus_element(&included);
+        driver.dispatch_key_raw("right");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [
+                TriStateValue::Excluded,
+                TriStateValue::Included,
+                TriStateValue::Excluded
+            ],
+            "right wraps from included to excluded"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&excluded),
+            Some(true)
+        );
+
+        driver.dispatch_key_raw("left");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [
+                TriStateValue::Excluded,
+                TriStateValue::Included,
+                TriStateValue::Excluded,
+                TriStateValue::Included
+            ],
+            "left wraps from excluded to included"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&included),
+            Some(true)
+        );
+    });
+
+    run_headless(|cx| {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let disabled = tri_state_segment_id("disabled-filter", TriStateValue::Included);
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.descriptor.layout.spacing.gap = 8.0;
+        root = root
+            .child(tri_state_marker("tri-state-before", "Before"))
+            .child({
+                let mut node = poodle_render::tri_state_switch(
+                    &TriStateSwitchSpec::new()
+                        .with_value(TriStateValue::Default)
+                        .with_disabled(true)
+                        .with_aria_label("Disabled switch"),
+                    &RenderContext::new(&theme()),
+                    TriStateSwitchHandlers::new("disabled-filter")
+                        .on_value_change(Arc::new(move |next| sink.lock().unwrap().push(next))),
+                );
+                node.id = Some("tri-state-disabled-host".to_owned());
+                node
+            })
+            .child(tri_state_marker("tri-state-after", "After"));
+
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 280.0, 120.0);
+        driver.wait_for_focus_handle("tri-state-before");
+        driver.wait_for_focus_handle("tri-state-after");
+
+        let root = mounted.lock().unwrap();
+        let disabled_segment = tri_state_target(&root, &disabled);
+        assert!(disabled_segment.interaction.disabled);
+        assert!(!disabled_segment.interaction.focusable);
+        assert_eq!(disabled_segment.a11y.tab_index, Some(-1));
+        assert!(disabled_segment.interaction.on_activate.is_none());
+        drop(root);
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&disabled).is_none(),
+            "disabled segment never registers a sequential stop"
+        );
+
+        driver.pointer_activate_id(&disabled);
+        assert!(payloads.lock().unwrap().is_empty());
+
+        driver.focus_element("tri-state-before");
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("tri-state-after"),
+            Some(true),
+            "disabled tri-state is skipped by sequential focus"
+        );
+    });
+
+    run_headless(|cx| {
+        fn build_pair(
+            left_value: TriStateValue,
+            mounted: Arc<Mutex<Node>>,
+            left_events: Arc<Mutex<Vec<TriStateValue>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&left_events);
+            let left = {
+                let mut node = poodle_render::tri_state_switch(
+                    &TriStateSwitchSpec::new()
+                        .with_value(left_value)
+                        .with_aria_label("Left filter"),
+                    &RenderContext::new(&theme()),
+                    TriStateSwitchHandlers::new("left").on_value_change(Arc::new(
+                        move |next: TriStateValue| {
+                            sink.lock().unwrap().push(next);
+                            *mount.lock().unwrap() = build_pair(
+                                next,
+                                Arc::clone(&mount),
+                                Arc::clone(&sink),
+                            );
+                        },
+                    )),
+                );
+                node.id = Some("tri-state-left-host".to_owned());
+                node
+            };
+            let right = {
+                let mut node = poodle_render::tri_state_switch(
+                    &TriStateSwitchSpec::new()
+                        .with_value(TriStateValue::Default)
+                        .with_aria_label("Right filter"),
+                    &RenderContext::new(&theme()),
+                    TriStateSwitchHandlers::new("right"),
+                );
+                node.id = Some("tri-state-right-host".to_owned());
+                node
+            };
+            Node::container().child(left).child(right)
+        }
+
+        let left_events = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build_pair(
+            TriStateValue::Default,
+            Arc::clone(&mounted),
+            Arc::clone(&left_events),
+        );
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 560.0, 60.0);
+
+        let left_default = tri_state_segment_id("left", TriStateValue::Default);
+        let left_excluded = tri_state_segment_id("left", TriStateValue::Excluded);
+        let right_default = tri_state_segment_id("right", TriStateValue::Default);
+        driver.wait_for_focus_handle(&left_default);
+        driver.wait_for_focus_handle(&right_default);
+        assert_tri_state_pointer_targets(&[
+            left_default.clone(),
+            left_excluded.clone(),
+            right_default.clone(),
+        ]);
+
+        driver.pointer_activate_id(&left_excluded);
+        assert_eq!(left_events.lock().unwrap().as_slice(), [TriStateValue::Excluded]);
+        let root = mounted.lock().unwrap();
+        let left_host = tri_state_target(&root, "tri-state-left-host");
+        let right_host = tri_state_target(&root, "tri-state-right-host");
+        assert_tri_state_radio_semantics(
+            left_host,
+            "left",
+            TriStateValue::Excluded,
+            "Left filter",
+        );
+        assert_tri_state_radio_semantics(
+            right_host,
+            "right",
+            TriStateValue::Default,
+            "Right filter",
+        );
+        drop(root);
+
+        driver.wait_for_focus_handle(&left_excluded);
+        driver.wait_for_focus_handle(&right_default);
+        driver.focus_element(&left_excluded);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_excluded),
+            Some(true)
+        );
+        driver.focus_element(&right_default);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_default),
+            Some(true)
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&left_excluded),
+            Some(false),
+            "rebuilt instances keep independent focus identity"
         );
     });
 }
