@@ -6,23 +6,28 @@ use crate::PreviewRoot;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{CheckState, ControlSize, EyebrowSpec, TriStateSwitchSpec, TriStateValue};
+use poodle_specs::{ControlSize, EyebrowSpec, TriStateSwitchSpec, TriStateValue};
 use std::sync::Arc;
 
-fn state_from_key(value: usize) -> CheckState {
-    match value {
-        0 => CheckState::Unchecked,
-        2 => CheckState::Checked,
-        _ => CheckState::Mixed,
+fn value_from_index(index: usize) -> TriStateValue {
+    match index {
+        0 => TriStateValue::Excluded,
+        2 => TriStateValue::Included,
+        _ => TriStateValue::Default,
     }
 }
 
-fn state_label(state: CheckState) -> &'static str {
-    match state {
-        CheckState::Unchecked => "excluded",
-        CheckState::Mixed => "default",
-        CheckState::Checked => "included",
-    }
+fn value_label(value: TriStateValue) -> &'static str {
+    value.as_str()
+}
+
+fn filter_value(state: &AppState) -> TriStateValue {
+    state
+        .specimens
+        .selections
+        .get("tri-state-filter")
+        .map(|&idx| value_from_index(idx))
+        .unwrap_or(TriStateValue::Default)
 }
 
 fn filter_change(state: &AppState) -> Arc<dyn Fn(TriStateValue) + Send + Sync> {
@@ -39,7 +44,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
-    let filter_state = state_from_key(state.specimens.selected("tri-state-filter"));
+    let filter_value = filter_value(state);
     let examples = div()
         .flex()
         .flex_col()
@@ -56,8 +61,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(
                     TriStateSwitch::from_spec(
-                        TriStateSwitchSpec::new().with_state(filter_state),
+                        TriStateSwitchSpec::new()
+                            .with_value(filter_value)
+                            .with_aria_label("Filter mode"),
                         theme,
+                        "tri-state-filter",
                     )
                     .on_change(filter_change(state)),
                 )
@@ -65,7 +73,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     div()
                         .text_sm()
                         .text_color(color_to_hsla(text_secondary))
-                        .child(format!("Value: {}", state_label(filter_state))),
+                        .child(format!("Value: {}", value_label(filter_value))),
                 ),
         )
         // --- Custom labels ---
@@ -82,8 +90,10 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     TriStateSwitchSpec::new()
                         .with_excluded_label("Hide")
                         .with_default_label("All")
-                        .with_included_label("Show"),
+                        .with_included_label("Show")
+                        .with_aria_label("Visibility filter"),
                     theme,
+                    "tri-state-custom-labels",
                 )),
         )
         // --- Semantic sizes ---
@@ -104,33 +114,38 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .items_center()
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
-                                .with_state(CheckState::Mixed)
+                                .with_value(TriStateValue::Default)
                                 .with_size(ControlSize::Xs),
                             theme,
+                            "tri-state-size-xs",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
-                                .with_state(CheckState::Mixed)
+                                .with_value(TriStateValue::Default)
                                 .with_size(ControlSize::Sm),
                             theme,
+                            "tri-state-size-sm",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
-                                .with_state(CheckState::Mixed)
+                                .with_value(TriStateValue::Default)
                                 .with_size(ControlSize::Md),
                             theme,
+                            "tri-state-size-md",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
-                                .with_state(CheckState::Mixed)
+                                .with_value(TriStateValue::Default)
                                 .with_size(ControlSize::Lg),
                             theme,
+                            "tri-state-size-lg",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
-                                .with_state(CheckState::Mixed)
+                                .with_value(TriStateValue::Default)
                                 .with_size(ControlSize::Xl),
                             theme,
+                            "tri-state-size-xl",
                         )),
                 ),
         )
@@ -152,21 +167,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .items_center()
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
-                                .with_state(CheckState::Unchecked)
+                                .with_value(TriStateValue::Excluded)
                                 .with_size(ControlSize::Xs),
                             theme,
+                            "tri-state-role-xs",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
-                                .with_state(CheckState::Checked)
+                                .with_value(TriStateValue::Included)
                                 .with_size(ControlSize::Sm),
                             theme,
+                            "tri-state-role-sm",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
-                                .with_state(CheckState::Mixed)
+                                .with_value(TriStateValue::Default)
                                 .with_size(ControlSize::Md),
                             theme,
+                            "tri-state-role-md",
                         )),
                 ),
         )
@@ -182,9 +200,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 ))
                 .child(TriStateSwitch::from_spec(
                     TriStateSwitchSpec::new()
-                        .with_state(CheckState::Checked)
-                        .with_disabled(true),
+                        .with_value(TriStateValue::Included)
+                        .with_disabled(true)
+                        .with_aria_label("Disabled switch"),
                     theme,
+                    "tri-state-disabled",
                 )),
         )
         // --- Custom semantic colors ---
@@ -200,11 +220,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     TriStateSwitch::from_spec(
                         TriStateSwitchSpec::new()
-                            .with_state(filter_state)
+                            .with_value(filter_value)
                             .with_excluded_color("#ef4444")
                             .with_default_color("#64748b")
-                            .with_included_color("#22c55e"),
+                            .with_included_color("#22c55e")
+                            .with_aria_label("Filter mode"),
                         theme,
+                        "tri-state-custom-colors",
                     )
                     .on_change(filter_change(state)),
                 ),
@@ -220,18 +242,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_sizes(|size, theme: &GpuiThemeProvider| {
                 TriStateSwitch::from_spec(
                     TriStateSwitchSpec::new()
-                        .with_state(CheckState::Mixed)
+                        .with_value(TriStateValue::Default)
                         .with_size(size),
                     theme,
+                    format!("tri-state-axis-size-{size:?}"),
                 )
                 .into_any_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
                 TriStateSwitch::from_spec(
                     TriStateSwitchSpec::new()
-                        .with_state(CheckState::Mixed)
+                        .with_value(TriStateValue::Default)
                         .with_density(density),
                     theme,
+                    format!("tri-state-axis-density-{density:?}"),
                 )
                 .into_any_element()
             }),

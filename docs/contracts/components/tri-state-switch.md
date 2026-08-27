@@ -302,8 +302,8 @@ var(--poodle-space-control-x)`, `--poodle-tri-state-track-inset: 0.125rem`, and
 - The payload is `TriStateValue`, not a bool. Three states have no toggle
   semantics, so there is no "next" to report — the event says which segment was
   chosen.
-- The active segment stays clickable: re-picking the current state is still a
-  click the host asked to hear about.
+- Selecting the current value is inert, matching the shared
+  `singleSelectTransition` behavior machine and the web runtimes.
 
 ## 11. Parity Checklist
 

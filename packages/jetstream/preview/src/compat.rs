@@ -1075,8 +1075,16 @@ pub fn js_tree(spec: &TreeSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::tree(spec, &pr::RenderContext::new(theme), pr::TreeHandlers::default()))
 }
 
-pub fn js_tri_state_switch(spec: &TriStateSwitchSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::tri_state_switch(spec, &pr::RenderContext::new(theme), None))
+pub fn js_tri_state_switch(
+    spec: &TriStateSwitchSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
+) -> El {
+    El(pr::tri_state_switch(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::TriStateSwitchHandlers::new(instance_id),
+    ))
 }
 
 pub fn js_validation_summary(spec: &ValidationSummarySpec, theme: &JetstreamThemeProvider) -> El {

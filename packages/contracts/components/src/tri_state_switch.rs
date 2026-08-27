@@ -1,15 +1,12 @@
 use poodle_tokens::semantic;
 
-use crate::types::{
-    CheckState, ControlDensity, ControlSize, SemanticControlSizeRole, TriStateValue,
-};
+use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole, TriStateValue};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TriStateSwitchSpec {
-    pub state: CheckState,
+    pub value: TriStateValue,
     /// `None` inherits from the presentation context; an explicit value wins.
     pub size: Option<ControlSize>,
-    pub label: Option<String>,
     pub excluded_label: Option<String>,
     pub default_label: Option<String>,
     pub included_label: Option<String>,
@@ -27,9 +24,8 @@ pub struct TriStateSwitchSpec {
 impl Default for TriStateSwitchSpec {
     fn default() -> Self {
         Self {
-            state: CheckState::Unchecked,
+            value: TriStateValue::Default,
             size: None,
-            label: None,
             excluded_label: None,
             default_label: None,
             included_label: None,
@@ -54,18 +50,13 @@ impl TriStateSwitchSpec {
         Self::default()
     }
 
-    pub fn with_state(mut self, state: CheckState) -> Self {
-        self.state = state;
+    pub fn with_value(mut self, value: TriStateValue) -> Self {
+        self.value = value;
         self
     }
 
     pub fn with_size(mut self, size: ControlSize) -> Self {
         self.size = Some(size);
-        self
-    }
-
-    pub fn with_label(mut self, label: impl Into<String>) -> Self {
-        self.label = Some(label.into());
         self
     }
 
@@ -116,20 +107,10 @@ impl TriStateSwitchSpec {
         self.included_label.as_deref().unwrap_or("Include")
     }
 
-    pub fn aria_checked(&self) -> &'static str {
-        self.state.aria_checked()
-    }
-
-    /// The ternary value in contract terms (excluded/default/included),
-    /// derived from the legacy `CheckState` storage.
-    pub fn value(&self) -> TriStateValue {
-        TriStateValue::from_check_state(self.state)
-    }
-
     /// Selected segment index (excluded 0, default 1, included 2). Drives the
     /// sliding-capsule offset (`translateX(index * 100%)` in Svelte).
     pub fn selected_index(&self) -> usize {
-        self.value().index()
+        self.value.index()
     }
 
     // ── Per-state semantic colors (contract §8 root custom props) ──
@@ -195,5 +176,25 @@ impl TriStateSwitchSpec {
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = Some(density);
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn defaults_to_default_value() {
+        assert_eq!(TriStateSwitchSpec::default().value, TriStateValue::Default);
+        assert_eq!(TriStateSwitchSpec::new().value, TriStateValue::Default);
+    }
+
+    #[test]
+    fn with_value_sets_semantic_state() {
+        let spec = TriStateSwitchSpec::new()
+            .with_value(TriStateValue::Excluded)
+            .with_value(TriStateValue::Included);
+        assert_eq!(spec.value, TriStateValue::Included);
+        assert_eq!(spec.selected_index(), 2);
     }
 }

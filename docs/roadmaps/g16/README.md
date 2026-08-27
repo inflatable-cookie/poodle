@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.013 ready for worker dispatch
+Status: active — g16.013 complete; orchestrator evidence checkpoint
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -43,7 +43,7 @@ stay maintained; backend admission is not part of the first card.
 10. [010 — Breadcrumbs callback semantics and mounted parity](010-breadcrumbs-callback-semantics-and-mounted-parity.md) — complete
 11. [011 — IconButton activation, toggle, and mounted parity](011-icon-button-activation-toggle-and-mounted-parity.md) — complete
 12. [012 — Collapsible disclosure and mounted parity](012-collapsible-disclosure-and-mounted-parity.md) — complete; merged in PR #86
-13. [013 — TriStateSwitch contract and mounted parity](013-tri-state-switch-contract-and-mounted-parity.md) — ready; clean breaking migration approved by the operator
+13. [013 — TriStateSwitch contract and mounted parity](013-tri-state-switch-contract-and-mounted-parity.md) — complete; clean breaking migration landed on `t3code/tri-state-switch`
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:

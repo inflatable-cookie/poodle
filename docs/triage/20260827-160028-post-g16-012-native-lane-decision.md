@@ -1,6 +1,6 @@
 # Post-g16.012 Native Lane Decision
 
-Status: resolved — operator approved clean breaking migration; promoted to g16.013
+Status: resolved — implemented in g16.013 on `t3code/tri-state-switch`
 Captured: 2026-08-27
 Resolved: 2026-08-27
 Source: orchestrator evidence checkpoint after PR #86

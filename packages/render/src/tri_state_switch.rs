@@ -13,14 +13,39 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, NodePosition, NodeRole, NodeToggled, ShadowLayer,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutOverflow,
+    LayoutSizing, MainAxisAlignment, Node, NodeKey, NodePosition, NodeRole, NodeToggled,
+    ShadowLayer,
 };
 use poodle_specs::{ControlSize, TriStateSwitchSpec, TriStateValue};
 
 use crate::color::{hex_color, mix_srgb, BLACK};
 use crate::context::RenderContext;
 use crate::presentation::{control_height_rem, control_space_x_rem, rem_to_px, size_font_rem};
+
+/// Host-owned native interaction for one TriStateSwitch instance.
+///
+/// `instance_id` is the lifetime-stable scope. It is not a form name, and the
+/// renderer never invents one from render order or the selected value.
+#[derive(Clone)]
+pub struct TriStateSwitchHandlers {
+    pub instance_id: String,
+    pub on_value_change: Option<Arc<dyn Fn(TriStateValue) + Send + Sync>>,
+}
+
+impl TriStateSwitchHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        Self {
+            instance_id: instance_id.into(),
+            on_value_change: None,
+        }
+    }
+
+    pub fn on_value_change(mut self, handler: Arc<dyn Fn(TriStateValue) + Send + Sync>) -> Self {
+        self.on_value_change = Some(handler);
+        self
+    }
+}
 
 /// Track inset in rem, derived from density (contract §8).
 fn track_inset_rem(density: poodle_specs::ControlDensity) -> f32 {
@@ -56,11 +81,52 @@ fn override_or(
     ctx.theme().resolve_color(token)
 }
 
+fn segment_id(value: TriStateValue) -> String {
+    format!("tri-state:{}", value.as_str())
+}
+
+fn segment_focus_id(instance_scope: &str, value: TriStateValue) -> String {
+    format!("tri-state:{instance_scope}:option:{}", value.as_str())
+}
+
+fn tab_stop_value(value: TriStateValue, enabled: bool) -> Option<TriStateValue> {
+    if enabled {
+        Some(value)
+    } else {
+        None
+    }
+}
+
+fn roving_key_handler(
+    value: TriStateValue,
+    instance_scope: String,
+    current: TriStateValue,
+    on_value_change: Option<Arc<dyn Fn(TriStateValue) + Send + Sync>>,
+) -> Option<Arc<dyn Fn(NodeKey, poodle_node::NodeModifiers) -> Option<String> + Send + Sync>> {
+    let index = TriStateValue::ALL.iter().position(|candidate| *candidate == value)?;
+    Some(Arc::new(move |key, _modifiers| {
+        let last = TriStateValue::ALL.len() - 1;
+        let next = match key {
+            NodeKey::ArrowRight => Some(if index == last { 0 } else { index + 1 }),
+            NodeKey::ArrowLeft => Some(if index == 0 { last } else { index - 1 }),
+            _ => None,
+        }?;
+        let target = TriStateValue::ALL[next];
+        if target != current {
+            if let Some(handler) = &on_value_change {
+                handler(target);
+            }
+        }
+        Some(segment_focus_id(&instance_scope, target))
+    }))
+}
+
 pub fn tri_state_switch(
     spec: &TriStateSwitchSpec,
     ctx: &RenderContext<'_>,
-    on_change: Option<Arc<dyn Fn(TriStateValue) + Send + Sync>>,
+    handlers: TriStateSwitchHandlers,
 ) -> Node {
+    let instance_scope = handlers.instance_id.as_str();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
 
@@ -95,8 +161,14 @@ pub fn tri_state_switch(
     // `ThemeProvider::resolve_space` (the GPUI provider correctly returns 0).
     let label_weight = 500;
 
+    let focus_ring = FocusRing {
+        color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+        width: ctx.theme().resolve_border_width("border.width.focus"),
+        offset: rem_to_px(0.125),
+    };
+
     // ── Per-state selection fill + border ──
-    let value = spec.value();
+    let value = spec.value;
     let (selection_fill, selection_border) = match value {
         TriStateValue::Excluded => (
             mix_srgb(excluded_color, track_base, 0.14),
@@ -126,6 +198,8 @@ pub fn tri_state_switch(
 
     let segment_height = height - inset * 2.0;
     let segment_radius = segment_height / 2.0;
+    let group_enabled = !spec.is_disabled;
+    let tab_stop = tab_stop_value(value, group_enabled);
 
     let mut selection = Node::container();
     selection.position = NodePosition::Absolute {
@@ -204,13 +278,17 @@ pub fn tri_state_switch(
 
         let mut segment = Node::button(label_text);
         segment.position = NodePosition::Relative;
-        // Contract: three mutually exclusive states — each is a `radio`.
+        segment.id = Some(segment_id(state));
+        segment.runtime_id = Some(segment_focus_id(instance_scope, state));
         segment.a11y.role = Some(NodeRole::RadioButton);
+        segment.a11y.label = Some(label_text.to_string());
+        segment.a11y.selected = Some(is_active);
         segment.a11y.toggled = Some(if is_active {
             NodeToggled::True
         } else {
             NodeToggled::False
         });
+
         {
             let s = &mut segment.style;
             s.descriptor.layout.width = LayoutSizing::Fixed(min_segment_width);
@@ -234,14 +312,28 @@ pub fn tri_state_switch(
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
             s.descriptor.layout.alignment.main = MainAxisAlignment::Center;
         }
-        segment.interaction.focusable = true;
 
-        // The active segment stays clickable: re-picking the current state is
-        // still a click a host asked to hear about.
-        if let (false, Some(handler)) = (spec.is_disabled, &on_change) {
-            let handler = Arc::clone(handler);
+        if group_enabled {
+            segment.interaction.focusable = true;
+            segment.style.focus_ring = Some(focus_ring);
+            segment.a11y.tab_index = Some(if tab_stop == Some(state) { 0 } else { -1 });
             segment.style.descriptor.cursor = CursorHint::Pointer;
-            segment.interaction.on_activate = Some(Arc::new(move || handler(state)));
+            if !is_active {
+                if let Some(handler) = &handlers.on_value_change {
+                    let handler = Arc::clone(handler);
+                    segment.interaction.on_activate = Some(Arc::new(move || handler(state)));
+                }
+            }
+            segment.interaction.on_key = roving_key_handler(
+                state,
+                instance_scope.to_string(),
+                value,
+                handlers.on_value_change.clone(),
+            );
+        } else {
+            segment.interaction.disabled = true;
+            segment.interaction.focusable = false;
+            segment.a11y.tab_index = Some(-1);
         }
 
         root = root.child(segment);
@@ -258,7 +350,115 @@ pub fn tri_state_switch(
             root.a11y.label = Some(label.to_string());
         }
     }
-    // Contract: three mutually exclusive options — a `radiogroup`.
     root.a11y.role = Some(NodeRole::RadioGroup);
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_node::NodeModifiers;
+    use std::sync::Mutex;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn render(spec: &TriStateSwitchSpec, handlers: TriStateSwitchHandlers) -> Node {
+        tri_state_switch(spec, &RenderContext::new(&theme()), handlers)
+    }
+
+    fn find_segment<'a>(node: &'a Node, value: TriStateValue) -> &'a Node {
+        let id = segment_id(value);
+        node.find(&|n| n.id.as_deref() == Some(id.as_str()))
+            .unwrap_or_else(|| panic!("segment {:?} exists", value))
+    }
+
+    #[test]
+    fn selected_segment_is_the_roving_tab_stop() {
+        let spec = TriStateSwitchSpec::new().with_value(TriStateValue::Included);
+        let node = render(&spec, TriStateSwitchHandlers::new("filter"));
+        assert_eq!(
+            find_segment(&node, TriStateValue::Excluded).a11y.tab_index,
+            Some(-1)
+        );
+        let included = find_segment(&node, TriStateValue::Included);
+        assert_eq!(included.a11y.tab_index, Some(0));
+        assert_eq!(included.a11y.selected, Some(true));
+        assert_eq!(included.a11y.toggled, Some(NodeToggled::True));
+    }
+
+    #[test]
+    fn disabled_group_suppresses_focus_and_handlers() {
+        let spec = TriStateSwitchSpec::new()
+            .with_value(TriStateValue::Default)
+            .with_disabled(true);
+        let node = render(
+            &spec,
+            TriStateSwitchHandlers::new("disabled-filter").on_value_change(Arc::new(|_| {})),
+        );
+        for value in TriStateValue::ALL {
+            let segment = find_segment(&node, value);
+            assert_eq!(segment.a11y.tab_index, Some(-1));
+            assert!(!segment.interaction.focusable);
+            assert!(segment.interaction.on_activate.is_none());
+        }
+    }
+
+    #[test]
+    fn same_value_activation_is_inert() {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let spec = TriStateSwitchSpec::new().with_value(TriStateValue::Default);
+        let node = render(
+            &spec,
+            TriStateSwitchHandlers::new("filter").on_value_change(Arc::new(move |value| {
+                sink.lock().unwrap().push(value);
+            })),
+        );
+        let default = find_segment(&node, TriStateValue::Default);
+        assert!(default.interaction.on_activate.is_none());
+    }
+
+    #[test]
+    fn arrow_wrap_reports_changed_value_and_requests_focus() {
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let spec = TriStateSwitchSpec::new().with_value(TriStateValue::Included);
+        let node = render(
+            &spec,
+            TriStateSwitchHandlers::new("filter").on_value_change(Arc::new(move |value| {
+                sink.lock().unwrap().push(value);
+            })),
+        );
+        let included = find_segment(&node, TriStateValue::Included);
+        let handler = included
+            .interaction
+            .on_key
+            .as_ref()
+            .expect("arrow handler exists");
+        let focus = handler(NodeKey::ArrowRight, NodeModifiers::default());
+        assert_eq!(focus, Some(segment_focus_id("filter", TriStateValue::Excluded)));
+        assert_eq!(payloads.lock().unwrap().as_slice(), [TriStateValue::Excluded]);
+    }
+
+    #[test]
+    fn two_instances_keep_independent_runtime_identity() {
+        let left = render(
+            &TriStateSwitchSpec::new().with_value(TriStateValue::Default),
+            TriStateSwitchHandlers::new("left"),
+        );
+        let right = render(
+            &TriStateSwitchSpec::new().with_value(TriStateValue::Default),
+            TriStateSwitchHandlers::new("right"),
+        );
+        assert_eq!(
+            find_segment(&left, TriStateValue::Default).runtime_id,
+            Some(segment_focus_id("left", TriStateValue::Default))
+        );
+        assert_eq!(
+            find_segment(&right, TriStateValue::Default).runtime_id,
+            Some(segment_focus_id("right", TriStateValue::Default))
+        );
+    }
 }
