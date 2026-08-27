@@ -8,8 +8,7 @@ Updated: 2026-08-27
   - Status: active; strict-ready
   - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77;
     `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
-    `007` merged in PR #81; `008` merged in PR #82; `009` in PR #83, awaiting
-    orchestrator review
+    `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83
   - Aim: replace stale and contradictory parity status with one current
     active-cohort evidence ledger before choosing a new conformance lane
   - Next move: orchestrator evidence checkpoint after `g16.009`. DurationInput

@@ -1,7 +1,7 @@
 # g16.009 — DurationInput Single Source And Mounted Behaviour
 
 Date: 2026-08-27
-Status: complete — PR #83, pending operator merge authority
+Status: complete — merged in PR #83
 Branch: `t3code/duration-input-single-source`
 Card: `docs/roadmaps/g16/009-duration-input-single-source-and-mounted-behaviour.md`
 Source triage: `docs/triage/20260827-094214-post-g16-008-native-lane-decision.md`

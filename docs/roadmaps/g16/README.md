@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — `g16.009` complete; awaiting orchestrator checkpoint
+Status: active — orchestrator evidence checkpoint after merged `g16.009`
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -39,7 +39,7 @@ stay maintained; backend admission is not part of the first card.
 6. [006 — Tabs drag, keyboard, and mounted parity](006-tabs-drag-keyboard-and-mounted-parity.md) — complete; merged in PR #80
 7. [007 — TextInput controlled editing and mounted evidence](007-text-input-controlled-editing-and-mounted-evidence.md) — complete; merged in PR #81
 8. [008 — Native text event routing cleanup](008-native-text-event-routing-cleanup.md) — complete; merged in PR #82
-9. [009 — DurationInput single source and mounted behaviour](009-duration-input-single-source-and-mounted-behaviour.md) — complete; PR #83
+9. [009 — DurationInput single source and mounted behaviour](009-duration-input-single-source-and-mounted-behaviour.md) — complete; merged in PR #83
 
 ## Measured Selection
 
