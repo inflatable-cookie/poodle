@@ -7944,3 +7944,337 @@ fn breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard() {
         );
     });
 }
+
+/// g16.011. IconButton command and toggle outcomes travel through real pointer
+/// and keyboard dispatch. Tooltip text, role, label, tab position, focus ring,
+/// and toggled/disclosure state ride the same production target.
+///
+/// Deliberately not claimed: Tooltip overlay chrome, web timer/Escape
+/// lifecycle, aria-describedby, assistive-technology coverage, visual
+/// comparison, or Jetstream admission.
+#[test]
+fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard() {
+    use poodle_node::NodeToggled;
+    use poodle_render::IconButtonHandlers;
+    use poodle_specs::IconButtonSpec;
+
+    fn marker(id: &str, label: &str) -> Node {
+        let mut node = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label(label),
+            &RenderContext::new(&theme()),
+            None,
+        );
+        node.id = Some(id.to_owned());
+        node
+    }
+
+    fn icon(spec: IconButtonSpec, id: &str, handlers: IconButtonHandlers) -> Node {
+        let mut node =
+            poodle_render::icon_button_with_handlers(&spec, &RenderContext::new(&theme()), handlers);
+        node.id = Some(id.to_owned());
+        node
+    }
+
+    fn target<'a>(root: &'a Node, id: &str) -> &'a Node {
+        root.find(&|node| node.id.as_deref() == Some(id))
+            .unwrap_or_else(|| panic!("{id}"))
+    }
+
+    // ── Command, tooltip projection, semantics, inert skips ──────────────
+    run_headless(|cx| {
+        let clicks = Arc::new(Mutex::new(Vec::<String>::new()));
+        let pressed = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let click_sink = Arc::clone(&clicks);
+        let pressed_sink = Arc::clone(&pressed);
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.descriptor.layout.spacing.gap = 8.0;
+        root = root
+            .child(marker("icon-before", "Before"))
+            .child(icon(
+                IconButtonSpec::new()
+                    .with_icon("plus")
+                    .with_aria_label("Add"),
+                "icon-command",
+                IconButtonHandlers {
+                    on_click: Some(Arc::new(move || {
+                        click_sink.lock().expect("click lock").push("Add".into());
+                    })),
+                    on_pressed_change: Some(Arc::new(move |next| {
+                        pressed_sink.lock().expect("pressed lock").push(next);
+                    })),
+                },
+            ))
+            .child(icon(
+                IconButtonSpec::new()
+                    .with_icon("save")
+                    .with_aria_label("Save")
+                    .with_tooltip("Save document"),
+                "icon-tooltip",
+                IconButtonHandlers::default(),
+            ))
+            .child(icon(
+                IconButtonSpec::new()
+                    .with_icon("x")
+                    .with_aria_label("Close"),
+                "icon-fallback",
+                IconButtonHandlers::default(),
+            ))
+            .child(icon(
+                IconButtonSpec::new()
+                    .with_icon("chevron-down")
+                    .with_aria_label("Details")
+                    .with_expanded(true)
+                    .with_controls("panel"),
+                "icon-disclosure",
+                IconButtonHandlers::default(),
+            ))
+            .child(icon(
+                IconButtonSpec::new()
+                    .with_icon("ban")
+                    .with_aria_label("Block")
+                    .with_disabled(true),
+                "icon-disabled",
+                IconButtonHandlers {
+                    on_click: Some(Arc::new(|| panic!("disabled buttons do not fire"))),
+                    on_pressed_change: Some(Arc::new(|_| panic!("disabled buttons do not fire"))),
+                },
+            ))
+            .child(icon(
+                IconButtonSpec::new()
+                    .with_icon("loader")
+                    .with_aria_label("Refresh")
+                    .with_loading(true),
+                "icon-loading",
+                IconButtonHandlers {
+                    on_click: Some(Arc::new(|| panic!("loading buttons do not fire"))),
+                    on_pressed_change: Some(Arc::new(|_| panic!("loading buttons do not fire"))),
+                },
+            ))
+            .child(marker("icon-after", "After"));
+
+        {
+            let command = target(&root, "icon-command");
+            assert_eq!(command.a11y.role, Some(NodeRole::Button));
+            assert_eq!(command.a11y.label.as_deref(), Some("Add"));
+            assert_eq!(command.a11y.tab_index, Some(0));
+            assert!(command.style.focus_ring.is_some());
+            assert!(command.a11y.toggled.is_none());
+            assert_eq!(command.tooltip.as_deref(), Some("Add"));
+
+            let explicit = target(&root, "icon-tooltip");
+            assert_eq!(explicit.tooltip.as_deref(), Some("Save document"));
+            assert_eq!(explicit.a11y.label.as_deref(), Some("Save"));
+
+            let fallback = target(&root, "icon-fallback");
+            assert_eq!(fallback.tooltip.as_deref(), Some("Close"));
+
+            let disclosure = target(&root, "icon-disclosure");
+            assert_eq!(disclosure.a11y.role, Some(NodeRole::Button));
+            assert_eq!(disclosure.a11y.expanded, Some(true));
+            assert_eq!(disclosure.a11y.controls.as_deref(), Some("panel"));
+            assert!(disclosure.style.focus_ring.is_some());
+
+            for id in ["icon-disabled", "icon-loading"] {
+                let node = target(&root, id);
+                assert!(node.interaction.disabled, "{id}");
+                assert!(!node.interaction.focusable, "{id}");
+                assert_eq!(node.a11y.tab_index, None, "{id}");
+                assert!(node.style.focus_ring.is_none(), "{id}");
+                assert!(node.interaction.on_activate.is_none(), "{id}");
+            }
+        }
+
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 420.0);
+        driver.wait_for_focus_handle("icon-before");
+        driver.wait_for_focus_handle("icon-command");
+        driver.wait_for_focus_handle("icon-after");
+
+        assert!(
+            poodle_gpui_node_backend::bounds_for("icon-command").is_some(),
+            "pointer proof needs a real hit target"
+        );
+        driver.pointer_activate_id("icon-command");
+        assert_eq!(*clicks.lock().expect("click lock"), ["Add"]);
+        assert!(
+            pressed.lock().expect("pressed lock").is_empty(),
+            "command-only activation must not manufacture a pressed change"
+        );
+
+        for id in ["icon-disabled", "icon-loading"] {
+            if poodle_gpui_node_backend::bounds_for(id).is_some() {
+                driver.pointer_activate_id(id);
+            }
+            assert!(
+                poodle_gpui_node_backend::focus_handle_for(id).is_none(),
+                "{id} must not become a sequential stop"
+            );
+        }
+        assert_eq!(*clicks.lock().expect("click lock"), ["Add"]);
+
+        driver.focus_element("icon-before");
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("icon-command"),
+            Some(true)
+        );
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("icon-tooltip"),
+            Some(true)
+        );
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("icon-fallback"),
+            Some(true)
+        );
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("icon-disclosure"),
+            Some(true)
+        );
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("icon-after"),
+            Some(true),
+            "disabled and loading targets are skipped"
+        );
+    });
+
+    // ── Controlled toggle: Enter then Space rebuild the host spec ────────
+    run_headless(|cx| {
+        fn build(
+            pressed: bool,
+            mounted: Arc<Mutex<Node>>,
+            events: Arc<Mutex<Vec<String>>>,
+        ) -> Node {
+            let event_sink = Arc::clone(&events);
+            let click_sink = Arc::clone(&events);
+            let mount = Arc::clone(&mounted);
+            let mut node = poodle_render::icon_button_with_handlers(
+                &IconButtonSpec::new()
+                    .with_icon("bold")
+                    .with_aria_label("Bold")
+                    .with_pressed(pressed),
+                &RenderContext::new(&theme()),
+                IconButtonHandlers {
+                    on_pressed_change: Some(Arc::new(move |next| {
+                        event_sink
+                            .lock()
+                            .expect("event lock")
+                            .push(format!("pressed:{next}"));
+                        *mount.lock().expect("mount lock") =
+                            build(next, Arc::clone(&mount), Arc::clone(&event_sink));
+                    })),
+                    on_click: Some(Arc::new(move || {
+                        click_sink.lock().expect("event lock").push("click".into());
+                    })),
+                },
+            );
+            node.id = Some("icon-toggle".to_owned());
+            node
+        }
+
+        let events = Arc::new(Mutex::new(Vec::<String>::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") =
+            build(false, Arc::clone(&mounted), Arc::clone(&events));
+        {
+            let node = mounted.lock().expect("mount lock");
+            assert_eq!(node.a11y.toggled, Some(NodeToggled::False));
+            assert_eq!(node.a11y.role, Some(NodeRole::Button));
+            assert!(node.style.focus_ring.is_some());
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 120.0, 120.0);
+        driver.wait_for_focus_handle("icon-toggle");
+        driver.focus_element("icon-toggle");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            *events.lock().expect("event lock"),
+            ["pressed:true".to_string(), "click".to_string()]
+        );
+        assert_eq!(
+            mounted.lock().expect("mount lock").a11y.toggled,
+            Some(NodeToggled::True)
+        );
+
+        driver.wait_for_focus_handle("icon-toggle");
+        driver.focus_element("icon-toggle");
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            *events.lock().expect("event lock"),
+            [
+                "pressed:true".to_string(),
+                "click".to_string(),
+                "pressed:false".to_string(),
+                "click".to_string()
+            ]
+        );
+        assert_eq!(
+            mounted.lock().expect("mount lock").a11y.toggled,
+            Some(NodeToggled::False)
+        );
+    });
+
+    // ── Seeded toggle: default_pressed starts on and reports false first ─
+    run_headless(|cx| {
+        fn build(
+            pressed: Option<bool>,
+            default_pressed: Option<bool>,
+            mounted: Arc<Mutex<Node>>,
+            events: Arc<Mutex<Vec<bool>>>,
+        ) -> Node {
+            let event_sink = Arc::clone(&events);
+            let mount = Arc::clone(&mounted);
+            let mut spec = IconButtonSpec::new()
+                .with_icon("pin")
+                .with_aria_label("Pin");
+            if let Some(value) = pressed {
+                spec = spec.with_pressed(value);
+            }
+            if let Some(value) = default_pressed {
+                spec = spec.with_default_pressed(value);
+            }
+            let mut node = poodle_render::icon_button_with_handlers(
+                &spec,
+                &RenderContext::new(&theme()),
+                IconButtonHandlers {
+                    on_pressed_change: Some(Arc::new(move |next| {
+                        event_sink.lock().expect("event lock").push(next);
+                        *mount.lock().expect("mount lock") = build(
+                            Some(next),
+                            None,
+                            Arc::clone(&mount),
+                            Arc::clone(&event_sink),
+                        );
+                    })),
+                    on_click: None,
+                },
+            );
+            node.id = Some("icon-seeded".to_owned());
+            node
+        }
+
+        let events = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") =
+            build(None, Some(true), Arc::clone(&mounted), Arc::clone(&events));
+        assert_eq!(
+            mounted.lock().expect("mount lock").a11y.toggled,
+            Some(NodeToggled::True)
+        );
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 120.0, 120.0);
+        driver.wait_for_focus_handle("icon-seeded");
+        driver.focus_element("icon-seeded");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(*events.lock().expect("event lock"), [false]);
+        assert_eq!(
+            mounted.lock().expect("mount lock").a11y.toggled,
+            Some(NodeToggled::False),
+            "the host rebuilds from the reported inverse"
+        );
+    });
+}
