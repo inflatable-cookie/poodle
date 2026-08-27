@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.014 ready; Accordion result-selection lane
+Status: active — post-g16.014 checkpoint; 43 mounted / 131 missing
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -172,7 +172,7 @@ EditableLabel, Accordion, visual comparison, accessibility, and Jetstream stay
 outside the card.
 
 The post-`g16.013` checkpoint selected Accordion after explicit operator
-approval of its clean pre-1.0 Rust migration. PR pending for `g16.014`: it removes the duplicate
+approval of its clean pre-1.0 Rust migration. Merged `g16.014` removes the duplicate
 `allow_multiple` mode and activated-item callback, gives single mode an
 explicit collapsed result, reuses the existing headless ToggleGroup transition,
 and repairs disclosure semantics plus stable native identity. Ledger moved
@@ -182,6 +182,6 @@ and Jetstream admission stay outside the card.
 
 ## Next Task
 
-After `g16.014` merge, re-evaluate the ledger at 43 mounted / 131 missing and
+Re-evaluate the ledger at the merged 43 mounted / 131 missing checkpoint and
 choose the next bounded parity lane. Do not compile or start `g16.015` until
 that checkpoint is recorded.

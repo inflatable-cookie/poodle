@@ -1,6 +1,6 @@
 # Post-g16.013 Native Lane Decision
 
-Status: resolved — implemented in g16.014 worker PR
+Status: resolved — merged in g16.014 / PR #88
 Captured: 2026-08-27
 Resolved: 2026-08-27
 Source: orchestrator evidence checkpoint after PR #87

@@ -1,7 +1,7 @@
 # g16.014 — Accordion Result Selection And Mounted Parity
 
 Date: 2026-08-27
-Status: complete — worker PR #88 awaiting re-review after review fixes
+Status: complete — merged in PR #88
 Card: `docs/roadmaps/g16/014-accordion-result-selection-and-mounted-parity.md`
 Source triage: `docs/triage/20260827-173242-post-g16-013-native-lane-decision.md`
 
