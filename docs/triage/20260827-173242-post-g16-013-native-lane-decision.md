@@ -1,7 +1,8 @@
 # Post-g16.013 Native Lane Decision
 
-Status: open — operator approval required for a clean Accordion Rust migration
+Status: resolved — approved and promoted into g16.014
 Captured: 2026-08-27
+Resolved: 2026-08-27
 Source: orchestrator evidence checkpoint after PR #87
 
 ## Checkpoint
@@ -77,11 +78,10 @@ selection/disclosure seam.
 
 ## Approval Needed
 
-Approve or reject the clean Rust migration above. Approval authorizes removal
-of the legacy Accordion mode field and activated-item callback without a
-compatibility layer. It does not authorize web API changes, Jetstream
-admission, animation work, visual comparison, or broad accessibility claims.
+The operator approved the clean migration. Removal of the legacy Accordion
+mode field and activated-item callback is authorized without a compatibility
+layer. Web API changes, Jetstream admission, animation work, visual comparison,
+and broad accessibility claims remain outside the decision.
 
-After approval, promote this decision into `g16.014`, compile one worker
-handoff, push the planning base, and return the repository-relative path to the
-operator.
+The executable lane is
+`../roadmaps/g16/014-accordion-result-selection-and-mounted-parity.md`.

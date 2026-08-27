@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — g16.013 merged; Accordion migration awaiting approval
-Posture: strict-paused
+Status: active — g16.014 ready; Accordion result-selection lane
+Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -44,6 +44,7 @@ stay maintained; backend admission is not part of the first card.
 11. [011 — IconButton activation, toggle, and mounted parity](011-icon-button-activation-toggle-and-mounted-parity.md) — complete
 12. [012 — Collapsible disclosure and mounted parity](012-collapsible-disclosure-and-mounted-parity.md) — complete; merged in PR #86
 13. [013 — TriStateSwitch contract and mounted parity](013-tri-state-switch-contract-and-mounted-parity.md) — complete; merged in PR #87
+14. [014 — Accordion result selection and mounted parity](014-accordion-result-selection-and-mounted-parity.md) — ready; clean Rust migration approved
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
@@ -170,10 +171,18 @@ mounted GPUI behavior cell. The ledger moved 41 → 42 mounted and
 EditableLabel, Accordion, visual comparison, accessibility, and Jetstream stay
 outside the card.
 
+The post-`g16.013` checkpoint selected Accordion after explicit operator
+approval of its clean pre-1.0 Rust migration. `g16.014` removes the duplicate
+`allow_multiple` mode and activated-item callback, gives single mode an
+explicit collapsed result, reuses the existing headless ToggleGroup transition,
+and repairs disclosure semantics plus stable native identity. Expected ledger
+movement is 42 → 43 mounted and 132 → 131 missing; known-delta totals stay
+115 / 60. Web APIs, panel animation, visual comparison, broad accessibility,
+and Jetstream admission stay outside the card.
+
 ## Next Task
 
-Resolve the recommended clean Accordion Rust migration in
-`../../triage/20260827-173242-post-g16-013-native-lane-decision.md`. Do not
-compile or start `g16.014` until the operator approves or rejects that break.
-NumberInput, EditableLabel, Rating, visual comparison, accessibility, and
-Jetstream remain separate decisions.
+Prepare and dispatch one worker handoff for `g16.014`. The worker executes only
+that card and returns a PR for orchestrator review. Do not compile or start
+`g16.015` until `g16.014` is merged and the ledger is re-evaluated against the
+expected 43 mounted / 131 missing checkpoint.

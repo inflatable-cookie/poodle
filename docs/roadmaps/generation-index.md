@@ -5,20 +5,19 @@ Updated: 2026-08-27
 ## Active Track
 
 - `g16`
-  - Status: active; strict-paused
+  - Status: active; strict-ready
   - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77;
     `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
     `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
     `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
-    `013` merged in PR #87
+    `013` merged in PR #87; `014` ready
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: approve or reject the recommended clean Accordion Rust migration
-    recorded in `docs/triage/20260827-173242-post-g16-013-native-lane-decision.md`.
-    Do not compile `g16.014` before that decision. NumberInput, EditableLabel,
-    Rating, visual comparison, accessibility, and Jetstream remain separate
-    decisions.
+  - Next move: dispatch `g16.014` for the approved clean Accordion result-value,
+    mode, disclosure-semantics, identity, and mounted-proof migration. Expected
+    checkpoint: 43 mounted / 131 missing. NumberInput, EditableLabel, Rating,
+    visual comparison, accessibility, and Jetstream remain separate decisions.
 
 ## Latest Completed Track
 

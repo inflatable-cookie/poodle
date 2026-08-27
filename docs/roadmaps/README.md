@@ -38,7 +38,10 @@ behavior repairs without inventing another conformance authority.
   to 41 mounted / 133 missing. PR #87 closed the operator-approved `g16.013`
   clean migration of TriStateSwitch from legacy `CheckState` to
   `TriStateValue`, repaired native radio behavior and identity, and moved the
-  ledger to 42 mounted / 132 missing.
+  ledger to 42 mounted / 132 missing. The approved `g16.014` Accordion lane is
+  now ready: it removes duplicate Rust mode state and activated-item callbacks,
+  adopts resulting-selection payloads through the existing headless transition,
+  and targets 43 mounted / 131 missing.
   No broader conformance programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
@@ -94,7 +97,7 @@ behavior repairs without inventing another conformance authority.
   `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
   `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
   `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
-  `013` merged in PR #87; generation returned to an evidence checkpoint
+  `013` merged in PR #87; `014` ready for worker dispatch
 
 ## Rules
 

@@ -3,7 +3,7 @@
 > **Surface elevation**: Accordion is a surface consumer (50% strong contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-27
 
 ## 1. Purpose
 
@@ -108,6 +108,9 @@ items. `selectionMode` maps directly; `collapsible` maps to
 `allowDeactivation` (single mode reselect closes the panel only when
 collapsible). Disabled items are inert. Every accepted toggle emits
 `emitValueChange(nextValue)`.
+
+The resulting selection is the callback authority in every runtime. The host
+does not reconstruct single/multiple membership from the activated item.
 
 - Machinery dependencies: none (native buttons provide keyboard/focus).
 
@@ -302,21 +305,35 @@ collapsible). Disabled items are inert. Every accepted toggle emits
 ## 10. GPUI Notes
 
 - expected crate/module surface: `poodle_gpui::primitives::accordion`
+- `AccordionSpec.selection_mode` is the only native mode field. The legacy
+  duplicate `allow_multiple` field and builder are removed before v1.0.
+- Native `AccordionSelectionValue` is `Single(Option<String>)` or
+  `Multiple(Vec<String>)`. The inner `None` is an explicit collapsed
+  single-mode result; the outer optional spec value continues to distinguish
+  an omitted controlled value from a supplied value/default seed.
+- Native construction requires `AccordionHandlers::new(instance_id)` with an
+  optional typed `on_value_change`. Every accepted activation runs through the
+  existing headless ToggleGroup transition and reports the resulting selection;
+  the host rebuilds the spec.
+- The instance id is lifetime-stable construction data, not an item value or
+  render-order fallback. Trigger and panel runtime ids derive from it plus the
+  authored item value.
 - GPUI must expose button role with expanded state on each trigger
 - Region association between trigger and panel must be maintained
 - Group role required in multiple mode
 - Per-item disabled state must suppress interaction and reduce opacity
+- Enter and Space activate the focused trigger. Tab uses ordinary focus order;
+  Accordion does not add Arrow/Home/End composite navigation.
 - Chevron rotation animation maps to indicator transform
 - Panel expand/collapse must animate height over ~180ms (equivalent to Svelte
   `slide` transition)
 
 ## 10a. Jetstream Notes
 
-- `Accordion::from_spec(spec, theme).on_change(...)`, carrying the value of the
-  item whose trigger was pressed.
-- The item, not the resulting expanded set: single- and multi-expand are the
-  host's policy, and returning a set would move that decision into the
-  component.
+- Jetstream backend admission remains program-deferred. In-repo callers migrate
+  mechanically to the same semantic value and required instance scope.
+- When admitted, Jetstream consumes the same resulting-selection callback as
+  GPUI. It does not receive only the activated item or reconstruct membership.
 - The whole header row is the trigger, not just the chevron.
 
 ## 11. Parity Checklist
