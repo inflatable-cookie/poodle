@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — `g16.012` ready
-Posture: strict-ready
+Status: active — orchestrator evidence checkpoint
+Posture: strict-paused
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -42,7 +42,7 @@ stay maintained; backend admission is not part of the first card.
 9. [009 — DurationInput single source and mounted behaviour](009-duration-input-single-source-and-mounted-behaviour.md) — complete; merged in PR #83
 10. [010 — Breadcrumbs callback semantics and mounted parity](010-breadcrumbs-callback-semantics-and-mounted-parity.md) — complete
 11. [011 — IconButton activation, toggle, and mounted parity](011-icon-button-activation-toggle-and-mounted-parity.md) — complete
-12. [012 — Collapsible disclosure and mounted parity](012-collapsible-disclosure-and-mounted-parity.md) — ready
+12. [012 — Collapsible disclosure and mounted parity](012-collapsible-disclosure-and-mounted-parity.md) — complete; merged in PR #86
 
 ## Measured Selection
 
