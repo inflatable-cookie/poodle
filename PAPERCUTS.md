@@ -1177,3 +1177,9 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   re-learned it from a timeout at fixture nine. A small shared
   `captureSession()` helper in `test/visual/` would save the next harness the
   same failure.
+
+- 2026-08-27 — `effigy graph index --json` rebuilt the graph successfully and
+  `effigy graph status --json` reported `ready`, but the indexing process stayed
+  alive beyond the command's 30-second execution window with no final envelope.
+  Make successful index completion terminate promptly or emit a diagnostic for
+  the remaining work. Affects graph-assisted orchestrator checkpoints.

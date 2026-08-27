@@ -10,14 +10,15 @@ Updated: 2026-08-27
     `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
     `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
     `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
-    `013` merged in PR #87; `014` ready
+    `013` merged in PR #87; `014` merged in PR #88; `015` ready
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: dispatch `g16.014` for the approved clean Accordion result-value,
-    mode, disclosure-semantics, identity, and mounted-proof migration. Expected
-    checkpoint: 43 mounted / 131 missing. NumberInput, EditableLabel, Rating,
-    visual comparison, accessibility, and Jetstream remain separate decisions.
+  - Next move: dispatch `g16.015` for the bounded CollapseToggle label,
+    expanded-state, focus, disabled, callback, direction, and standalone
+    mounted-proof repair. Expected checkpoint: 44 mounted / 130 missing.
+    Select, NumberInput, EditableLabel, Rating, visual comparison,
+    accessibility, and Jetstream remain separate decisions.
 
 ## Latest Completed Track
 
