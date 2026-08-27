@@ -3,7 +3,7 @@
 //! Contract: `docs/contracts/components/rating.md`
 //! Ported from: `packages/jetstream/components/src/rating.rs`.
 //!
-//! `on_change` fires with the rating the pressed star sets — 1-based.
+//! `on_change` fires with the accepted `Option<f64>` rating. `None` is clear.
 
 use std::sync::Arc;
 
@@ -40,7 +40,7 @@ fn item_gap_rem(density: ControlDensity) -> f32 {
 pub fn rating(
     spec: &RatingSpec,
     ctx: &RenderContext<'_>,
-    on_change: Option<Arc<dyn Fn(u32) + Send + Sync>>,
+    on_change: Option<Arc<dyn Fn(Option<f64>) + Send + Sync>>,
 ) -> Node {
     let active = ctx.theme().resolve_color(spec.active_color_token());
     // Contract §8: unfilled color = color-mix(text-secondary 48%, transparent).
@@ -55,6 +55,7 @@ pub fn rating(
     let item_px = rem_to_px(control_height_rem(effective_size));
     // Gap between stars: density-driven (contract §8).
     let gap = rem_to_px(item_gap_rem(density));
+    let item_count = spec.item_count();
 
     let mut el = Node::container();
     {
@@ -64,7 +65,7 @@ pub fn rating(
         s.descriptor.layout.spacing.gap = gap;
     }
 
-    for i in 0..spec.max {
+    for i in 0..item_count {
         // Contract §2/§4: clipped accent overlay sized by per-star fill ratio.
         let ratio = spec.fill_ratio(i) as f32;
         let fill_w = (glyph_px * ratio).clamp(0.0, glyph_px);
@@ -78,7 +79,7 @@ pub fn rating(
         // `radio` naming the value it sets.
         let mut glyph = Node::container();
         glyph.a11y.role = Some(NodeRole::RadioButton);
-        glyph.a11y.label = Some(format!("{} of {}", i + 1, spec.max));
+        glyph.a11y.label = Some(format!("{} of {}", i + 1, item_count));
         glyph.a11y.toggled = Some(if spec.fill_ratio(i) > 0.0 {
             NodeToggled::True
         } else {
@@ -130,11 +131,11 @@ pub fn rating(
         }
         let mut target = target.child(glyph);
 
-        if let (false, false, Some(handler)) = (spec.is_disabled, spec.is_readonly, &on_change) {
+        if let (false, Some(handler)) = (spec.is_disabled, &on_change) {
             let handler = Arc::clone(handler);
-            let value = (i + 1) as u32;
+            let value = (i + 1) as f64;
             target.style.descriptor.cursor = CursorHint::Pointer;
-            target.interaction.on_activate = Some(Arc::new(move || handler(value)));
+            target.interaction.on_activate = Some(Arc::new(move || handler(Some(value))));
         }
 
         el = el.child(target);

@@ -131,7 +131,7 @@ impl Table {
 pub(crate) struct Rating {
     spec: RatingSpec,
     theme: GpuiThemeProvider,
-    on_change: Option<Arc<dyn Fn(u32) + Send + Sync>>,
+    on_change: Option<Arc<dyn Fn(Option<f64>) + Send + Sync>>,
 }
 
 pub(crate) struct CollapseToggle {
@@ -197,7 +197,7 @@ impl Rating {
         }
     }
 
-    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(u32) + Send + Sync>) -> Self {
+    pub(crate) fn on_change(mut self, handler: Arc<dyn Fn(Option<f64>) + Send + Sync>) -> Self {
         self.on_change = Some(handler);
         self
     }
