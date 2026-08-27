@@ -31,10 +31,11 @@ chosen.
   missing). `g16.010` closed Breadcrumbs' reversed Rust callback routing and
   one named mounted GPUI behaviour cell (38 → 39 mounted, 136 → 135 missing)
   plus the Breadcrumbs known-delta cell (`not-applicable` → `present`;
-  114 → 115 present, 61 → 60 not-applicable). The post-`g16.010` checkpoint
-  compiled `g16.011` for IconButton's command, toggle, tooltip projection, and
-  mounted GPUI seam; it is ready and may move only 39 → 40 mounted / 135 → 134
-  missing. No broader conformance programme is implied.
+  114 → 115 present, 61 → 60 not-applicable). `g16.011` closed IconButton
+  command, toggle, tooltip projection, and mounted GPUI evidence (39 → 40
+  mounted, 135 → 134 missing). Known-delta totals stay 115 / 60. The next
+  move is an orchestrator evidence checkpoint; do not compile `g16.012` from
+  this closeout. No broader conformance programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;

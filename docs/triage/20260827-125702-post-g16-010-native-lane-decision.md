@@ -1,6 +1,7 @@
 # Post-g16.010 Native Lane Decision
 
-Status: promoted — `g16.011` ready
+Status: resolved — closed by `g16.011`; see
+`../logs/2026-08/20260827-g16-011-icon-button-activation-toggle-and-mounted-parity.md`
 Captured: 2026-08-27
 Source: orchestrator evidence checkpoint after PR #84
 
