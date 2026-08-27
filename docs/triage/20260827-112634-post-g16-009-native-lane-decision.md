@@ -1,6 +1,7 @@
 # Post-g16.009 Native Lane Decision
 
-Status: promoted into `g16.010`
+Status: resolved — closed by `g16.010`; see
+`../logs/2026-08/20260827-g16-010-breadcrumbs-callback-semantics-and-mounted-parity.md`
 Captured: 2026-08-27
 Source: orchestrator evidence checkpoint after PR #83
 
@@ -51,7 +52,9 @@ URL-routing channel.
 
 ## Decision
 
-Promote Breadcrumbs into `g16.010`. Move exactly its GPUI mounted-behavior
-cell from `missing` to `mounted`, taking the ledger from 38 to 39 mounted and
-136 to 135 missing. Do not add native URL routing, a generic link abstraction,
-or broader accessibility/visual claims.
+Promote Breadcrumbs into `g16.010`. Move its GPUI mounted-behavior cell from
+`missing` to `mounted`, taking the ledger from 38 to 39 mounted and 136 to
+135 missing. Recording native `href` inertness as a contract Known Delta also
+moves that same row's known-delta cell from `not-applicable` to `present`.
+Do not add native URL routing, a generic link abstraction, or broader
+accessibility/visual claims.

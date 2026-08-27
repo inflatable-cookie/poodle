@@ -1,7 +1,7 @@
 # Breadcrumbs
 
 Status: detailed contract
-Updated: 2026-08-23
+Updated: 2026-08-27
 
 ## 1. Purpose
 
@@ -318,13 +318,22 @@ Density controls list and item gap only. It does NOT affect font-size.
 - Item icons are built into the shared `poodle-render` node: an icon-bearing
   crumb becomes one row container carrying the crumb's activation handler and
   accessible name, with a decorative icon child and an optional text child
+- A crumb is callback-interactive only when it is non-current, has no `href`,
+  is not the ellipsis, and the host supplied `on_navigate`. Activation calls
+  that handler once with `BreadcrumbItem.value`.
+- Each callback crumb is one button-like target: `NodeRole::Button`, sequential
+  focus, pointer cursor, accessible name from `label`, and the standard focus
+  ring. The icon stays decorative. Icon-only presentation keeps the hidden
+  semantic label on that same target.
+- Native `href` crumbs stay inert. The node/backend boundary has no URL-routing
+  channel, so they must not be sent through `on_navigate`. This is a runtime
+  delta against web anchor navigation, not a reason to reverse the callback.
 
 ## 10a. Jetstream Notes
 
-- `Breadcrumbs::from_spec(spec, theme).on_navigate(...)`, carrying the crumb's
-  `href`.
-- The current crumb never fires — you are already there — and neither does a
-  crumb with no `href`, which has nowhere to send you.
+- Jetstream remains deferred. Shared `poodle-render` matches the web callback
+  rule: `on_navigate` receives `value`, never `href`. The in-repo adapter
+  currently passes no handler. Native URL routing is still absent.
 
 ## 11. Parity Checklist
 
@@ -359,7 +368,13 @@ Density controls list and item gap only. It does NOT affect font-size.
 - [ ] overflow presentation and wrap behavior stay internal
 - [ ] link vs button decision is renderer-specific
 
-## 12. Specimen Definitions
+## 12. Known Deltas
+
+| Delta | Why Allowed | Approval Status | Follow-Up |
+|-------|-------------|-----------------|-----------|
+| Native `href` crumbs stay inert | the node/backend boundary has no URL-routing channel; sending the URL through `on_navigate` reversed the web callback | accepted, tracked | a shared link channel; until then they must not fire the callback |
+
+## 13. Specimen Definitions
 
 ### Group: Basic
 
@@ -397,7 +412,7 @@ Density controls list and item gap only. It does NOT affect font-size.
 |-------|---------------|-----------------|
 | Collapsed | same deep items, `maxVisibleItems=3` | Home > ... > Primitives > Button with ellipsis replacing middle items |
 
-## 13. Approval And Adoption Notes
+## 14. Approval And Adoption Notes
 
 - contract status: `detailed contract`
 - approvers: pending
