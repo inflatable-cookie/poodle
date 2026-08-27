@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — orchestrator evidence checkpoint after merged `g16.009`
+Status: active — `g16.010` ready for worker dispatch
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -40,6 +40,7 @@ stay maintained; backend admission is not part of the first card.
 7. [007 — TextInput controlled editing and mounted evidence](007-text-input-controlled-editing-and-mounted-evidence.md) — complete; merged in PR #81
 8. [008 — Native text event routing cleanup](008-native-text-event-routing-cleanup.md) — complete; merged in PR #82
 9. [009 — DurationInput single source and mounted behaviour](009-duration-input-single-source-and-mounted-behaviour.md) — complete; merged in PR #83
+10. [010 — Breadcrumbs callback semantics and mounted parity](010-breadcrumbs-callback-semantics-and-mounted-parity.md) — ready
 
 ## Measured Selection
 
@@ -114,7 +115,15 @@ callback totals, and disabled inertia through production dispatch. Ledger:
 37 → 38 mounted, 137 → 136 missing. Accessibility, visual comparison, IME,
 and Jetstream stay unclaimed.
 
+The post-`g16.009` checkpoint selected Breadcrumbs because it exposes a
+measured callback reversal: shared Rust currently activates `href` crumbs and
+sends URLs, while both web references activate linkless crumbs and send the
+authored value. `g16.010` repairs that existing contract seam, wires one
+human-visible GPUI example, and may move exactly Breadcrumbs' mounted cell:
+38 → 39 mounted, 136 → 135 missing. Native URL routing, broad accessibility,
+visual comparison, and Jetstream stay out.
+
 ## Next Task
 
-Orchestrator evidence checkpoint after `g16.009`. Do not compile or start
-another card from this worker thread.
+Dispatch `g16.010` from its orchestrator handoff. The worker executes only
+that card and returns the runway to an evidence checkpoint.
