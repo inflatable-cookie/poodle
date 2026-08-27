@@ -1,7 +1,7 @@
 # g16.011 — IconButton Activation, Toggle, And Mounted Parity
 
 Date: 2026-08-27
-Status: complete
+Status: complete — PR #85
 Branch: `t3code/icon-button-worker-handoff`
 Card: `docs/roadmaps/g16/011-icon-button-activation-toggle-and-mounted-parity.md`
 Source triage: `docs/triage/20260827-125702-post-g16-010-native-lane-decision.md`
