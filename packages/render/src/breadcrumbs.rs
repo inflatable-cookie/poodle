@@ -5,8 +5,10 @@
 
 use std::sync::Arc;
 
-use poodle_node::{CrossAxisAlignment, CursorHint, LayoutDirection, Node};
-use poodle_specs::{BreadcrumbItem, BreadcrumbsSpec, IconSize, IconSpec};
+use poodle_node::{CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, Node, NodeRole};
+use poodle_specs::{
+    BreadcrumbItem, BreadcrumbsSpec, IconSize, IconSpec, BREADCRUMBS_ELLIPSIS_VALUE,
+};
 
 use crate::context::RenderContext;
 use crate::icon::icon;
@@ -80,11 +82,10 @@ pub fn breadcrumbs(
 
         let mut crumb = crumb_node(item, color, font_size, item_icon_size, icon_gap, ctx);
 
-        if let (false, Some(href), Some(handler)) = (is_current, item.href.as_ref(), &on_navigate) {
-            let handler = Arc::clone(handler);
-            let href = href.clone();
-            crumb.style.descriptor.cursor = CursorHint::Pointer;
-            crumb.interaction.on_activate = Some(Arc::new(move || handler(&href)));
+        if let (true, Some(handler)) = (is_callback_target(item, is_current), on_navigate.as_ref())
+        {
+            crumb = as_single_target(crumb);
+            apply_callback_target(&mut crumb, item, handler, ctx);
         }
 
         el = el.child(crumb);
@@ -94,10 +95,51 @@ pub fn breadcrumbs(
     el
 }
 
+fn is_callback_target(item: &BreadcrumbItem, is_current: bool) -> bool {
+    !is_current && item.href.is_none() && item.value != BREADCRUMBS_ELLIPSIS_VALUE
+}
+
+/// A text-only crumb is a bare text node until it becomes a callback target.
+/// Interactive crumbs need a container so role, focus, and the ring live on
+/// the same node as activation. Icon-bearing crumbs are already that row.
+fn as_single_target(crumb: Node) -> Node {
+    if !crumb.children.is_empty() {
+        return crumb;
+    }
+    let mut row = Node::container();
+    {
+        let s = &mut row.style;
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    }
+    row.child(crumb)
+}
+
+fn apply_callback_target(
+    crumb: &mut Node,
+    item: &BreadcrumbItem,
+    handler: &Arc<dyn Fn(&str) + Send + Sync>,
+    ctx: &RenderContext<'_>,
+) {
+    crumb.a11y.role = Some(NodeRole::Button);
+    crumb.a11y.tab_index = Some(0);
+    crumb.a11y.label = Some(item.label.clone());
+    crumb.interaction.focusable = true;
+    crumb.style.descriptor.cursor = CursorHint::Pointer;
+    crumb.style.focus_ring = Some(FocusRing {
+        color: ctx.theme().resolve_color("color.accent.focusRing"),
+        width: ctx.theme().resolve_border_width("border.width.focus"),
+        offset: rem_to_px(0.125),
+    });
+    let handler = Arc::clone(handler);
+    let value = item.value.clone();
+    crumb.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+}
+
 /// One crumb's content. A text-only item stays a bare text node — the shape the
-/// component has always emitted. An icon-bearing item becomes a single row that
-/// carries the crumb's accessible name and, later, its activation handler, so
-/// glyph and label remain one navigation target.
+/// component has always emitted — unless it is later wrapped as a callback
+/// target. An icon-bearing item is a single row that carries the accessible
+/// name, so glyph and label remain one navigation target.
 fn crumb_node(
     item: &BreadcrumbItem,
     color: poodle_tokens::typed::ColorValue,
@@ -148,6 +190,8 @@ fn crumb_label(label: &str, color: poodle_tokens::typed::ColorValue, font_size: 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Mutex;
+
     use poodle_adapter::ThemeProvider as _;
     use poodle_node::NodeKind;
     use poodle_specs::{BreadcrumbItem, ControlSize};
@@ -176,6 +220,57 @@ mod tests {
         }
     }
 
+    fn crumbs_of(tree: &Node) -> Vec<&Node> {
+        tree.children.iter().step_by(2).collect()
+    }
+
+    fn capturing_nav() -> (
+        Option<Arc<dyn Fn(&str) + Send + Sync>>,
+        Arc<Mutex<Vec<String>>>,
+    ) {
+        let captured = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&captured);
+        let handler: Arc<dyn Fn(&str) + Send + Sync> =
+            Arc::new(move |value: &str| sink.lock().expect("nav lock").push(value.to_string()));
+        (Some(handler), captured)
+    }
+
+    fn tree_with_nav(
+        items: Vec<BreadcrumbItem>,
+        spec: impl FnOnce(BreadcrumbsSpec) -> BreadcrumbsSpec,
+    ) -> (Node, Arc<Mutex<Vec<String>>>) {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let (handler, captured) = capturing_nav();
+        let tree = breadcrumbs(&spec(BreadcrumbsSpec::new(items)), &ctx, handler);
+        (tree, captured)
+    }
+
+    fn assert_callback_target(crumb: &Node, label: &str) {
+        assert_eq!(crumb.a11y.role, Some(NodeRole::Button), "{label}");
+        assert_eq!(crumb.a11y.tab_index, Some(0), "{label}");
+        assert_eq!(crumb.a11y.label.as_deref(), Some(label), "{label}");
+        assert!(crumb.interaction.focusable, "{label}");
+        assert_eq!(
+            crumb.style.descriptor.cursor,
+            CursorHint::Pointer,
+            "{label}"
+        );
+        assert!(crumb.interaction.on_activate.is_some(), "{label}");
+        let ring = crumb.style.focus_ring.expect(label);
+        assert!((ring.offset - rem_to_px(0.125)).abs() < 1e-6, "{label}");
+        assert!(ring.width > 0.0, "{label}");
+    }
+
+    fn assert_inert(crumb: &Node, desc: &str) {
+        assert_ne!(crumb.a11y.role, Some(NodeRole::Button), "{desc}");
+        assert_eq!(crumb.a11y.tab_index, None, "{desc}");
+        assert!(!crumb.interaction.focusable, "{desc}");
+        assert!(crumb.interaction.on_activate.is_none(), "{desc}");
+        assert!(crumb.style.focus_ring.is_none(), "{desc}");
+        assert_ne!(crumb.style.descriptor.cursor, CursorHint::Pointer, "{desc}");
+    }
+
     #[test]
     fn a_text_only_crumb_stays_a_bare_text_node() {
         let tree = crumbs(vec![BreadcrumbItem::new("home", "Home")]);
@@ -192,7 +287,10 @@ mod tests {
         let crumb = &tree.children[0];
 
         assert_eq!(crumb.children.len(), 2);
-        assert_eq!(icon_of(&crumb.children[0]).map(|(name, _)| name), Some("folder"));
+        assert_eq!(
+            icon_of(&crumb.children[0]).map(|(name, _)| name),
+            Some("folder")
+        );
         assert_eq!(text_of(&crumb.children[1]), Some("Projects"));
         assert_eq!(crumb.a11y.label.as_deref(), Some("Projects"));
         // The icon child carries no name of its own: it is decorative.
@@ -201,11 +299,16 @@ mod tests {
 
     #[test]
     fn an_icon_only_crumb_drops_the_text_but_keeps_the_name() {
-        let tree = crumbs(vec![BreadcrumbItem::new("home", "Home").with_icon_only("home")]);
+        let tree = crumbs(vec![
+            BreadcrumbItem::new("home", "Home").with_icon_only("home")
+        ]);
         let crumb = &tree.children[0];
 
         assert_eq!(crumb.children.len(), 1);
-        assert_eq!(icon_of(&crumb.children[0]).map(|(name, _)| name), Some("home"));
+        assert_eq!(
+            icon_of(&crumb.children[0]).map(|(name, _)| name),
+            Some("home")
+        );
         assert_eq!(crumb.a11y.label.as_deref(), Some("Home"));
     }
 
@@ -224,16 +327,18 @@ mod tests {
     fn item_icons_take_the_resolved_breadcrumbs_size_without_a_role_shift() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let spec = BreadcrumbsSpec::new(vec![
-            BreadcrumbItem::new("home", "Home").with_icon("home")
-        ])
-        .with_size(ControlSize::Lg);
+        let spec =
+            BreadcrumbsSpec::new(vec![BreadcrumbItem::new("home", "Home").with_icon("home")])
+                .with_size(ControlSize::Lg);
         let tree = breadcrumbs(&spec, &ctx, None);
 
         // Explicit lg is the final Breadcrumbs size; the icon follows it and
         // does not apply the chrome role a second time.
         let expected = theme.resolve_space(IconSize::Lg.size_token());
-        assert_eq!(icon_of(&tree.children[0].children[0]).map(|(_, size)| size), Some(expected));
+        assert_eq!(
+            icon_of(&tree.children[0].children[0]).map(|(_, size)| size),
+            Some(expected)
+        );
     }
 
     #[test]
@@ -246,7 +351,10 @@ mod tests {
         let tree = breadcrumbs(&spec, &ctx, None);
 
         let expected = theme.resolve_space(spec.icon_gap_token());
-        assert_eq!(tree.children[0].style.descriptor.layout.spacing.gap, expected);
+        assert_eq!(
+            tree.children[0].style.descriptor.layout.spacing.gap,
+            expected
+        );
         assert!(expected < theme.resolve_space(spec.gap_token()));
     }
 
@@ -271,19 +379,98 @@ mod tests {
     }
 
     #[test]
-    fn an_icon_crumb_carries_its_own_activation() {
-        let theme = theme();
-        let ctx = RenderContext::new(&theme);
-        let spec = BreadcrumbsSpec::new(vec![
-            BreadcrumbItem::new("home", "Home")
-                .with_icon_only("home")
-                .with_href("/"),
-            BreadcrumbItem::new("poodle", "Poodle").with_is_current(true),
-        ]);
-        let tree = breadcrumbs(&spec, &ctx, Some(Arc::new(|_: &str| {})));
+    fn a_linkless_crumb_calls_on_navigate_with_its_value() {
+        let (tree, captured) = tree_with_nav(
+            vec![
+                BreadcrumbItem::new("home", "Home page"),
+                BreadcrumbItem::new("poodle", "Poodle").with_is_current(true),
+            ],
+            |spec| spec,
+        );
 
-        let crumb = &tree.children[0];
-        assert!(crumb.interaction.on_activate.is_some());
-        assert_eq!(crumb.style.descriptor.cursor, CursorHint::Pointer);
+        let home = crumbs_of(&tree)[0];
+        assert_callback_target(home, "Home page");
+        (home.interaction.on_activate.as_ref().expect("callback"))();
+        assert_eq!(*captured.lock().expect("nav lock"), ["home"]);
+    }
+
+    #[test]
+    fn href_current_and_ellipsis_crumbs_do_not_invoke_on_navigate() {
+        let (tree, captured) = tree_with_nav(
+            vec![
+                BreadcrumbItem::new("home", "Home"),
+                BreadcrumbItem::new("hidden", "Hidden"),
+                BreadcrumbItem::new("workspace", "Workspace").with_href("/workspace"),
+                BreadcrumbItem::new("projects", "Projects").with_icon_only("folder"),
+                BreadcrumbItem::new("poodle", "Poodle").with_is_current(true),
+            ],
+            |spec| spec.with_max_visible_items(4),
+        );
+
+        let crumbs = crumbs_of(&tree);
+        assert_eq!(crumbs.len(), 5);
+        assert_callback_target(crumbs[0], "Home");
+        assert_eq!(text_of(crumbs[1]), Some("\u{2026}"));
+        assert_inert(crumbs[1], "ellipsis");
+        assert_eq!(text_of(crumbs[2]), Some("Workspace"));
+        assert_inert(crumbs[2], "href");
+        assert_callback_target(crumbs[3], "Projects");
+        assert_inert(crumbs[4], "current");
+
+        (crumbs[0].interaction.on_activate.as_ref().expect("home"))();
+        (crumbs[3]
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("projects"))();
+        assert_eq!(*captured.lock().expect("nav lock"), ["home", "projects"]);
+    }
+
+    #[test]
+    fn text_icon_and_icon_only_callback_crumbs_are_one_button_target() {
+        let (tree, captured) = tree_with_nav(
+            vec![
+                BreadcrumbItem::new("home", "Home"),
+                BreadcrumbItem::new("projects", "Projects").with_icon("folder"),
+                BreadcrumbItem::new("docs", "Docs").with_icon_only("file"),
+                BreadcrumbItem::new("poodle", "Poodle").with_is_current(true),
+            ],
+            |spec| spec,
+        );
+
+        let crumbs = crumbs_of(&tree);
+        let home = crumbs[0];
+        assert_callback_target(home, "Home");
+        assert_eq!(home.children.len(), 1);
+        assert_eq!(text_of(&home.children[0]), Some("Home"));
+
+        let projects = crumbs[1];
+        assert_callback_target(projects, "Projects");
+        assert_eq!(projects.children.len(), 2);
+        assert_eq!(
+            icon_of(&projects.children[0]).map(|(name, _)| name),
+            Some("folder")
+        );
+        assert_eq!(text_of(&projects.children[1]), Some("Projects"));
+        assert!(projects.children[0].a11y.label.is_none());
+        assert!(projects.children[0].interaction.on_activate.is_none());
+
+        let docs = crumbs[2];
+        assert_callback_target(docs, "Docs");
+        assert_eq!(docs.children.len(), 1);
+        assert_eq!(
+            icon_of(&docs.children[0]).map(|(name, _)| name),
+            Some("file")
+        );
+        assert!(docs.children[0].a11y.label.is_none());
+        assert_eq!(text_of(docs), None);
+
+        (home.interaction.on_activate.as_ref().expect("home"))();
+        (projects.interaction.on_activate.as_ref().expect("projects"))();
+        (docs.interaction.on_activate.as_ref().expect("docs"))();
+        assert_eq!(
+            *captured.lock().expect("nav lock"),
+            ["home", "projects", "docs"]
+        );
     }
 }

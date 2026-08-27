@@ -31,7 +31,11 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 - [x] FIXED Truncation now inserts the ellipsis — `into_element` calls `spec.visible_items()` which builds `first + … + last N-1` (matching Svelte); the `…` crumb is rendered non-interactive (no `on_click`).
 - [x] FIXED Dropped the `FontWeight::MEDIUM` bump on current — current is now color-only (`current_text_color`), matching Svelte CSS lines 102-104.
 - [x] FIXED Density folded into the gap calc — `breadcrumbs_density_gap_rem` overrides the size gap when density != default (compact 0.25, comfortable 0.75rem).
-- [x] FIXED `href` items differentiated — items with `href` no longer attach `on_navigate` (anchor navigation is a router concern GPUI lacks); only no-href items fire the callback. (router-hook gap noted in code.)
+- [x] FIXED callback routing — `poodle-render` activates linkless, non-current,
+  non-ellipsis crumbs and sends `BreadcrumbItem.value`. `href`, current, and
+  ellipsis crumbs do not invoke `on_navigate`. Native `href` items stay inert
+  (no URL-routing channel); that is a runtime delta, not a reason to send the
+  URL through the callback.
 - accepted: Separator `opacity(0.4)` is the contract-pinned constant (contract §8 separator opacity 0.4); no `separator-opacity` token exists, so the raw float matches the contract value.
 - accepted: no ARIA (gpui has no accessibility API) — no `<nav>`/`aria-label`/`aria-current`/`aria-hidden`; semantics carried visually only.
 - accepted: hover uses `color.accent.base` (`spec.hover_color_token()`, `breadcrumbs.rs:163`) — Svelte relies on browser default link hover; accent hover is an acceptable native affordance.
@@ -51,7 +55,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Basic (+ onNavigate readout), Deep path, Collapsed (`maxVisibleItems=3`), Size ladder (xs..xl), Density ladder (compact/default/comfortable). (`BreadcrumbsSpecimen.svelte`)
-- GPUI covers: Basic, Deep path, Collapsed (max 3), Size ladder + Density ladder (via `specimen_layout` closures). — missing: onNavigate readout (interactive), but state hook is wired (`on_navigate` exists). Effectively full coverage; collapsed group will visibly differ until the ellipsis todo lands.
+- GPUI covers: Basic, Deep path, Collapsed (max 3), Size ladder + Density ladder (via `specimen_layout` closures). Basic wires `on_navigate` and a compact "Navigated to" readout.
 - Jetstream now covers: Basic, Deep path, Collapsed (max 3), Size ladder (xs..xl), Density ladder (`breadcrumbs.rs`) — built from real `js_breadcrumbs` + `BreadcrumbsSpec` builders, matching contract §12 and the Svelte/GPUI specimen sets. No fakes. `specimen=ok`.
 - Not represented on any target: a "with leading/home icon" group. `BreadcrumbItem` has no icon field and the contract anatomy §2 carries no per-item icon (only the separator chevron), so a real leading-icon crumb is unrepresentable without inventing API — skipped per CLAUDE.md "no fakes".
 
