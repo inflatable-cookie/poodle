@@ -36,8 +36,13 @@ pub struct AccordionHandlers {
 
 impl AccordionHandlers {
     pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.is_empty(),
+            "AccordionHandlers requires a non-empty lifetime-stable instance_id"
+        );
         Self {
-            instance_id: instance_id.into(),
+            instance_id,
             on_value_change: None,
         }
     }
@@ -150,6 +155,10 @@ pub fn accordion_with_content(
     content: &[(String, Node)],
     handlers: AccordionHandlers,
 ) -> Node {
+    assert!(
+        !handlers.instance_id.is_empty(),
+        "accordion requires a non-empty AccordionHandlers instance_id"
+    );
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
     let root_gap = ctx.theme().resolve_space(spec.root_gap_token());
@@ -407,13 +416,18 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "AccordionHandlers requires a non-empty lifetime-stable instance_id")]
+    fn empty_instance_scope_is_rejected() {
+        let _ = AccordionHandlers::new("");
+    }
+
+    #[test]
     fn single_mode_omits_root_group_and_reports_resulting_selection() {
         use std::sync::Mutex;
         let seen: Arc<Mutex<Vec<AccordionSelectionValue>>> = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&seen);
-        let spec = AccordionSpec::new(items()).with_value(AccordionSelectionValue::Single(Some(
-            "first".into(),
-        )));
+        let spec = AccordionSpec::new(items())
+            .with_value(AccordionSelectionValue::Single(Some("first".into())));
         let node = render_with(
             &spec,
             AccordionHandlers::new("faq").on_value_change(Arc::new(move |value| {
@@ -466,9 +480,8 @@ mod tests {
 
     #[test]
     fn disabled_items_do_not_activate_or_focus() {
-        let spec = AccordionSpec::new(items()).with_value(AccordionSelectionValue::Single(Some(
-            "first".into(),
-        )));
+        let spec = AccordionSpec::new(items())
+            .with_value(AccordionSelectionValue::Single(Some("first".into())));
         let node = render_with(
             &spec,
             AccordionHandlers::new("faq")

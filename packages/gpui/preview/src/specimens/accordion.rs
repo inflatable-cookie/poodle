@@ -89,17 +89,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_collapsible(true)
         .with_value(single_value);
 
-    let mut single_accordion = Accordion::from_spec(single_spec, theme)
-        .with_id("specimen-accordion-single")
-        .on_value_change(Arc::new({
-            let events = state.node_events.clone();
-            move |value| {
-                events.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                    key: "accordion-single".to_string(),
-                    value: single_value_text(&value),
-                });
-            }
-        }));
+    let mut single_accordion =
+        Accordion::from_spec(single_spec, theme, "specimen-accordion-single").on_value_change(
+            Arc::new({
+                let events = state.node_events.clone();
+                move |value| {
+                    events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                        key: "accordion-single".to_string(),
+                        value: single_value_text(&value),
+                    });
+                }
+            }),
+        );
 
     for (value, text) in &single_content {
         single_accordion =
@@ -131,8 +132,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .with_collapsible(true)
         .with_value(multi_value);
 
-    let mut multi_accordion = Accordion::from_spec(multi_spec, theme)
-        .with_id("specimen-accordion-multi")
+    let mut multi_accordion = Accordion::from_spec(multi_spec, theme, "specimen-accordion-multi")
         .on_value_change(Arc::new({
             let events = state.node_events.clone();
             move |value| {
@@ -189,8 +189,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )))
                         .with_size(size),
                     theme,
+                    format!("accordion-axis-{}", size_key(size)),
                 )
-                .with_id(format!("accordion-axis-{}", size_key(size)))
                 .with_content(
                     "getting-started",
                     content_node(
@@ -210,8 +210,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         )))
                         .with_density(density),
                     theme,
+                    format!("accordion-axis-{}", density_key(density)),
                 )
-                .with_id(format!("accordion-axis-{}", density_key(density)))
                 .with_content(
                     "getting-started",
                     content_node(

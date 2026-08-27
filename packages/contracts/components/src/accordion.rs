@@ -215,9 +215,8 @@ mod tests {
 
     #[test]
     fn single_mode_represents_open_and_collapsed_results() {
-        let open = AccordionSpec::new(items()).with_value(AccordionSelectionValue::Single(Some(
-            "first".into(),
-        )));
+        let open = AccordionSpec::new(items())
+            .with_value(AccordionSelectionValue::Single(Some("first".into())));
         assert_eq!(open.expanded_values(), ["first"]);
 
         let collapsed =
@@ -244,9 +243,10 @@ mod tests {
         let spec = AccordionSpec::new(items())
             .with_default_value(AccordionSelectionValue::Single(Some("first".into())))
             .with_value(AccordionSelectionValue::Single(Some("second".into())));
-        assert_eq!(spec.current_value(), Some(&AccordionSelectionValue::Single(Some(
-            "second".into()
-        ))));
+        assert_eq!(
+            spec.current_value(),
+            Some(&AccordionSelectionValue::Single(Some("second".into())))
+        );
         assert_eq!(spec.expanded_values(), ["second"]);
     }
 

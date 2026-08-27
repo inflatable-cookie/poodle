@@ -1,7 +1,7 @@
 # g16.014 — Accordion Result Selection And Mounted Parity
 
 Date: 2026-08-27
-Status: complete — worker PR pending orchestrator review
+Status: complete — worker PR #88 awaiting re-review after review fixes
 Card: `docs/roadmaps/g16/014-accordion-result-selection-and-mounted-parity.md`
 Source triage: `docs/triage/20260827-173242-post-g16-013-native-lane-decision.md`
 
@@ -11,9 +11,9 @@ Shared Rust Accordion carried duplicate `allow_multiple` mode state, could not
 represent a collapsed single result, reported only the activated item, and left
 native triggers without Button disclosure semantics or stable instance scope.
 The contract now stores `AccordionSelectionValue::Single(Option<String>)` and
-`Multiple(Vec<String>)`, requires `AccordionHandlers::new(instance_id)`, routes
-activation through the existing headless ToggleGroup transition, and projects
-mode-correct root roles, expanded state, controls/labelled-by relations,
+`Multiple(Vec<String>)`, requires a non-empty `AccordionHandlers` instance scope,
+routes activation through the existing headless ToggleGroup transition, and
+projects mode-correct root roles, expanded state, controls/labelled-by relations,
 structured focus rings, and disabled focus suppression.
 
 The generated ledger moves only Accordion's GPUI mounted-behaviour cell:
@@ -25,7 +25,8 @@ stay 115 present / 60 not-applicable.
 - removed `AccordionSpec.allow_multiple` and `with_allow_multiple`
 - `AccordionSelectionValue::Single(String)` → `Single(Option<String>)`
 - bare `Fn(&str)` renderer callbacks → typed `AccordionHandlers::on_value_change`
-- GPUI `Accordion::on_toggle` → `on_value_change`; `with_id` now sets instance scope
+- GPUI `Accordion::on_toggle` → `on_value_change`; `from_spec(..., instance_id)`
+  now requires an explicit non-empty scope (no fallback)
 - Poodle GPUI and deferred Jetstream call sites migrated directly
 
 ## Mounted evidence
@@ -38,11 +39,12 @@ proves, through production hit testing, focus, and key dispatch:
 - pointer selection reports `Single(Some(...))` once and rebuilds open state
 - collapsible reactivation reports `Single(None)` and removes the panel
 - non-collapsible reactivation reports the unchanged single result
-- multiple add/remove reports complete ordered `Multiple(...)` results
+- multiple add and remove report complete ordered `Multiple(...)` results
 - Enter and Space use the same result path as pointer activation
 - disabled items emit nothing and are skipped by sequential focus
-- two mounted accordions with identical item values keep independent trigger and
-  panel runtime/focus identity through rebuilds
+- two simultaneously open same-valued mounted accordions keep independent trigger
+  and panel runtime ids/relations through rebuilds while the sibling instance
+  stays mounted
 
 ## Explicit non-claims
 
@@ -54,17 +56,23 @@ proves, through production hit testing, focus, and key dispatch:
 
 ## Validation
 
-Focused `poodle-specs` and `poodle-render` Accordion tests, Svelte and React
-Accordion tests (unchanged), named mounted regression,
-`effigy regressions:native`, `effigy probe:gpui-specimens`, `effigy drift:handlers`,
-`effigy drift:events`, `effigy test:parity-evidence-ledger`,
-`effigy check:parity-evidence-ledger`, `effigy ci:rust`, `effigy ci:native`,
-`effigy ci:web`, `effigy docs:check`, `effigy qa`, and
-`git diff --check origin/main...HEAD`.
+Ran in the worker worktree after `bun install`:
 
-`effigy drift:roles` is blocked in a normal active-cohort worktree: it resolves
-the deferred Jetstream preview and fails on the absent sibling checkout
-(`PAPERCUTS.md`).
+- focused `poodle-specs` and `poodle-render` Accordion tests (including empty-scope rejection)
+- focused Svelte and React Accordion tests via `effigy test poodle-svelte -- Accordion`
+  and `effigy test poodle-react -- Accordion` (10 tests each)
+- `effigy regressions:native` (89/89, including the named mounted regression)
+- `effigy probe:gpui-specimens`
+- `effigy ci:rust`, `effigy ci:native`, `effigy ci:web`
+- `effigy drift:handlers`, `effigy drift:events`
+- `effigy check:parity-evidence-ledger`
+- `git diff --check origin/main...HEAD`
+
+Not run / blocked:
+
+- final `effigy qa` — fails on `gate-tree-guard.ts --compare` when unrelated
+  workspace files are dirty; accordion-only validation above passed cleanly
+- `effigy drift:roles` — deferred Jetstream sibling absent (`PAPERCUTS.md`)
 
 `effigy doctor` baseline (generated-in-src, god-files, stale-suppressions)
 unchanged.

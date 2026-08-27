@@ -16,35 +16,36 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_render::{AccordionHandlers, RenderContext, SlotBuilder};
 use poodle_specs::{
-    AccordionSelectionValue, AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec, AgentMessageSpec,
-    AgentPlanRecordSpec, AgentPlanSpec, AgentQuestionRecordSpec, AgentQuestionSpec,
-    AgentSubagentSpec, AgentTranscriptSpec, AlertDialogSpec, AppHeaderSpec, AudioPlayerSpec,
-    AvatarSpec, BlockEditorSpec, BoxSpec, BreadcrumbsSpec, BulkActionBarSpec, ButtonSpec,
-    CalendarSpec, CallOutSpec, CardRadioGroupSpec, ChangedFilesSpec, CheckboxSpec, CodeInputSpec,
-    CodeSpec, CollapseToggleSpec, CollapsibleSpec, ColorPickerSpec, CommandPaletteSpec,
-    ConfirmActionSpec, ContextMenuSpec, ControlDensity, ControlSize, DataTableSpec, DatePickerSpec,
-    DateRangePickerSpec, DateRangeValue, DateTimePickerSpec, DateTimeRangePickerSpec,
-    DateTimeZonePickerSpec, DebugDialogSpec, DetailItemSpec, DetailSectionGroupSpec,
-    DetailSectionSpec, DetailShellSpec, DialogSpec, DockRegionSpec, DrawerSpec, DurationInputSpec,
-    EditableLabelSpec, EditableListSpec, EmbedInputSpec, EmbedPreviewSpec, EmptyStateSpec,
-    ErrorBoundarySpec, EyebrowSpec, FieldSetSpec, FieldSpec, FileUploadSpec, FilterBuilderSpec,
-    FilterToolbarSpec, FormActionsSpec, FormDialogSpec, FormLayoutSpec, FormShellSpec, GridSpec,
-    HoverCardSpec, IconButtonSpec, IconSpec, InlineListSectionSpec, LicenceActivationSpec,
-    LicenceSeatsSpec, LicenceStatusSpec, ListCardCounterSpec, ListCardSpec, ListContainerSpec,
-    ListGridSpec, LogListSpec, MarkdownEditorSpec, MediaBrowsePanelSpec, MediaPickerSpec,
-    MediaPreviewSpec, MediaThumbnailSpec, MenuSpec, MenubarSpec, MetaBarSpec, MetaItemSpec,
-    MeterSpec, MetricTileSpec, ModelPickerSpec, NavCardSpec, NavigationMenuSpec, NumberInputSpec,
-    OrderBySpec, OverlayPlacement, PageHeaderSpec, PageLoadingSpec, PaginationSpec,
-    PaginationSummarySpec, PasswordRequirementsSpec, PickerShellSpec, PillSpec, PopoverSpec,
-    ProgressSpec, RadioGroupSpec, RadioSpec, RangeSliderSpec, RatingSpec, RefSelectSpec,
-    RegionSpec, RelationPickerSpec, RemediationBannerSpec, ResizeHandleSpec, ScrollShellSpec,
-    SelectSpec, SelectionSummarySpec, SeparatorSpec, ShellStatusBarSpec, SidebarNavSpec,
-    SkeletonSpec, SliderSpec, SpacerSpec, SpinnerSpec, SplitOrientation, SplitViewSpec, StackSpec,
-    StateTileSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec, TabStripSpec,
-    TableSpec, TabsSpec, TextInputSpec, TextLinkSpec, TextSpec, ThemeSelectSpec, TimeAgoSpec,
-    TimeFieldSpec, TimeZoneSelectSpec, ToastHostSpec, ToastStackSpec, TokenInputSpec,
-    ToolCallGroupSpec, ToolCallSpec, ToolbarSpec, TooltipSpec, TreeSpec, TriStateSwitchSpec,
-    TriStateValue, ValidationSummarySpec, VideoPlayerSpec,
+    AccordionSelectionValue, AccordionSpec, ActionDiscoveryPanelSpec, AgentChatInputSpec,
+    AgentMessageSpec, AgentPlanRecordSpec, AgentPlanSpec, AgentQuestionRecordSpec,
+    AgentQuestionSpec, AgentSubagentSpec, AgentTranscriptSpec, AlertDialogSpec, AppHeaderSpec,
+    AudioPlayerSpec, AvatarSpec, BlockEditorSpec, BoxSpec, BreadcrumbsSpec, BulkActionBarSpec,
+    ButtonSpec, CalendarSpec, CallOutSpec, CardRadioGroupSpec, ChangedFilesSpec, CheckboxSpec,
+    CodeInputSpec, CodeSpec, CollapseToggleSpec, CollapsibleSpec, ColorPickerSpec,
+    CommandPaletteSpec, ConfirmActionSpec, ContextMenuSpec, ControlDensity, ControlSize,
+    DataTableSpec, DatePickerSpec, DateRangePickerSpec, DateRangeValue, DateTimePickerSpec,
+    DateTimeRangePickerSpec, DateTimeZonePickerSpec, DebugDialogSpec, DetailItemSpec,
+    DetailSectionGroupSpec, DetailSectionSpec, DetailShellSpec, DialogSpec, DockRegionSpec,
+    DrawerSpec, DurationInputSpec, EditableLabelSpec, EditableListSpec, EmbedInputSpec,
+    EmbedPreviewSpec, EmptyStateSpec, ErrorBoundarySpec, EyebrowSpec, FieldSetSpec, FieldSpec,
+    FileUploadSpec, FilterBuilderSpec, FilterToolbarSpec, FormActionsSpec, FormDialogSpec,
+    FormLayoutSpec, FormShellSpec, GridSpec, HoverCardSpec, IconButtonSpec, IconSpec,
+    InlineListSectionSpec, LicenceActivationSpec, LicenceSeatsSpec, LicenceStatusSpec,
+    ListCardCounterSpec, ListCardSpec, ListContainerSpec, ListGridSpec, LogListSpec,
+    MarkdownEditorSpec, MediaBrowsePanelSpec, MediaPickerSpec, MediaPreviewSpec,
+    MediaThumbnailSpec, MenuSpec, MenubarSpec, MetaBarSpec, MetaItemSpec, MeterSpec,
+    MetricTileSpec, ModelPickerSpec, NavCardSpec, NavigationMenuSpec, NumberInputSpec, OrderBySpec,
+    OverlayPlacement, PageHeaderSpec, PageLoadingSpec, PaginationSpec, PaginationSummarySpec,
+    PasswordRequirementsSpec, PickerShellSpec, PillSpec, PopoverSpec, ProgressSpec, RadioGroupSpec,
+    RadioSpec, RangeSliderSpec, RatingSpec, RefSelectSpec, RegionSpec, RelationPickerSpec,
+    RemediationBannerSpec, ResizeHandleSpec, ScrollShellSpec, SelectSpec, SelectionSummarySpec,
+    SeparatorSpec, ShellStatusBarSpec, SidebarNavSpec, SkeletonSpec, SliderSpec, SpacerSpec,
+    SpinnerSpec, SplitOrientation, SplitViewSpec, StackSpec, StateTileSpec, StatusIndicatorSpec,
+    StepperSpec, SurfaceSpec, SwitchSpec, TabStripSpec, TableSpec, TabsSpec, TextInputSpec,
+    TextLinkSpec, TextSpec, ThemeSelectSpec, TimeAgoSpec, TimeFieldSpec, TimeZoneSelectSpec,
+    ToastHostSpec, ToastStackSpec, TokenInputSpec, ToolCallGroupSpec, ToolCallSpec, ToolbarSpec,
+    TooltipSpec, TreeSpec, TriStateSwitchSpec, TriStateValue, ValidationSummarySpec,
+    VideoPlayerSpec,
 };
 use poodle_tokens::typed::ColorValue;
 
@@ -57,7 +58,10 @@ pub(crate) struct Eyebrow;
 
 impl Eyebrow {
     pub(crate) fn from_spec(spec: EyebrowSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::eyebrow(&spec, &RenderContext::new(theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::eyebrow(
+            &spec,
+            &RenderContext::new(theme),
+        ))
     }
 }
 
@@ -77,7 +81,10 @@ pub(crate) struct Skeleton;
 
 impl Skeleton {
     pub(crate) fn from_spec(spec: SkeletonSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::skeleton(&spec, &RenderContext::new(theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::skeleton(
+            &spec,
+            &RenderContext::new(theme),
+        ))
     }
 }
 
@@ -85,7 +92,10 @@ pub(crate) struct Spinner;
 
 impl Spinner {
     pub(crate) fn from_spec(spec: SpinnerSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::spinner(&spec, &RenderContext::new(theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::spinner(
+            &spec,
+            &RenderContext::new(theme),
+        ))
     }
 }
 
@@ -101,7 +111,10 @@ pub(crate) struct StatusIndicator;
 
 impl StatusIndicator {
     pub(crate) fn from_spec(spec: StatusIndicatorSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::status_indicator(&spec, &RenderContext::new(theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::status_indicator(
+            &spec,
+            &RenderContext::new(theme),
+        ))
     }
 
     pub(crate) fn node_from_spec(
@@ -172,7 +185,11 @@ impl CollapseToggle {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        let mut node = poodle_render::collapse_toggle(&self.spec, &RenderContext::new(&self.theme), self.on_toggle);
+        let mut node = poodle_render::collapse_toggle(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_toggle,
+        );
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-collapse-toggle-{id}"));
         }
@@ -394,7 +411,11 @@ impl RemediationBanner {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::remediation_banner(&self.spec, &RenderContext::new(&self.theme), self.handlers)
+        poodle_render::remediation_banner(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.handlers,
+        )
     }
 }
 
@@ -908,7 +929,11 @@ impl MediaPreview {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::media_preview_with_content(&self.spec, &RenderContext::new(&self.theme), self.media_content)
+        poodle_render::media_preview_with_content(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.media_content,
+        )
     }
 }
 
@@ -951,7 +976,11 @@ impl CardRadioGroup {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::card_radio_group(&self.spec, &RenderContext::new(&self.theme), self.on_change)
+        poodle_render::card_radio_group(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_change,
+        )
     }
 }
 
@@ -1066,7 +1095,10 @@ impl IntoElement for AgentMessage {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_message(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::agent_message(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -1481,7 +1513,10 @@ impl IntoElement for DebugDialog {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::debug_dialog(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::debug_dialog(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -2232,7 +2267,12 @@ impl ModelPicker {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::model_picker(&self.spec, &RenderContext::new(&self.theme), &self.instance_id, None)
+        poodle_render::model_picker(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            &self.instance_id,
+            None,
+        )
     }
 }
 
@@ -2395,7 +2435,12 @@ impl FormLayout {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::form_layout(&self.spec, &RenderContext::new(&self.theme), self.children, self.actions)
+        poodle_render::form_layout(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.children,
+            self.actions,
+        )
     }
 }
 
@@ -2445,7 +2490,12 @@ impl FormShell {
                 self.theme.resolve_space("space.stack.sm");
             Some(self.actions.into_iter().fold(row, poodle_node::Node::child))
         };
-        poodle_render::form_shell(&self.spec, &RenderContext::new(&self.theme), self.section_slots, actions)
+        poodle_render::form_shell(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.section_slots,
+            actions,
+        )
     }
 }
 
@@ -2649,7 +2699,12 @@ impl FormActions {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::form_actions_full(&self.spec, &RenderContext::new(&self.theme), self.danger, self.actions)
+        poodle_render::form_actions_full(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.danger,
+            self.actions,
+        )
     }
 }
 
@@ -2741,7 +2796,12 @@ impl StatusBar {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::shell_status_bar(&self.spec, &RenderContext::new(&self.theme), self.leading, self.trailing)
+        poodle_render::shell_status_bar(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.leading,
+            self.trailing,
+        )
     }
 }
 
@@ -2775,7 +2835,12 @@ impl NavCard {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::nav_card_with_icon(&self.spec, &RenderContext::new(&self.theme), self.on_click, self.icon)
+        poodle_render::nav_card_with_icon(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_click,
+            self.icon,
+        )
     }
 }
 
@@ -2866,7 +2931,10 @@ impl IntoElement for Progress {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::progress(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::progress(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -2952,7 +3020,10 @@ impl IntoElement for EmptyState {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::empty_state(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::empty_state(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -3346,7 +3417,11 @@ impl ListCardCounter {
 
 impl IntoCompatNode for ListCardCounter {
     fn into_compat_node(self) -> poodle_node::Node {
-        poodle_render::list_card_counter(&self.spec, &RenderContext::new(&self.theme), self.on_link_click)
+        poodle_render::list_card_counter(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_link_click,
+        )
     }
 }
 
@@ -3376,7 +3451,10 @@ impl IntoElement for MetricTile {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::metric_tile(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::metric_tile(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -3398,7 +3476,10 @@ impl IntoElement for StateTile {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::state_tile(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::state_tile(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -3516,7 +3597,12 @@ impl ListGrid {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::list_grid(&self.spec, &RenderContext::new(&self.theme), self.header, self.children)
+        poodle_render::list_grid(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.header,
+            self.children,
+        )
     }
 }
 
@@ -3600,7 +3686,12 @@ impl InlineListSection {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::inline_list_section(&self.spec, &RenderContext::new(&self.theme), self.items, self.action)
+        poodle_render::inline_list_section(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.items,
+            self.action,
+        )
     }
 }
 
@@ -4184,7 +4275,10 @@ impl IntoElement for LicenceStatus {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::licence_status(&self.spec, &RenderContext::new(&self.theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::licence_status(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+        ))
     }
 }
 
@@ -5447,8 +5541,11 @@ impl TimeField {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        let mut node =
-            poodle_render::time_field_with_change(&self.spec, &RenderContext::new(&self.theme), self.on_change);
+        let mut node = poodle_render::time_field_with_change(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_change,
+        );
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-time-field-{id}"));
         }
@@ -5688,18 +5785,17 @@ pub(crate) struct Accordion {
 }
 
 impl Accordion {
-    pub(crate) fn from_spec(spec: AccordionSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: AccordionSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
             content: Vec::new(),
-            handlers: AccordionHandlers::new("accordion"),
+            handlers: AccordionHandlers::new(instance_id),
         }
-    }
-
-    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
-        self.handlers.instance_id = id.into();
-        self
     }
 
     pub(crate) fn on_value_change(
@@ -6209,7 +6305,11 @@ impl Menu {
             wrapper = wrapper.child(trigger);
         }
         if self.spec.current_open() {
-            wrapper = wrapper.child(poodle_render::menu(&self.spec, &RenderContext::new(&self.theme), self.on_select));
+            wrapper = wrapper.child(poodle_render::menu(
+                &self.spec,
+                &RenderContext::new(&self.theme),
+                self.on_select,
+            ));
         }
         wrapper
     }
@@ -6377,7 +6477,11 @@ impl IntoElement for ContextMenu {
 
     fn into_element(self) -> Self::Element {
         let menu = self.spec.current_open().then(|| {
-            let node = poodle_render::context_menu(&self.spec, &RenderContext::new(&self.theme), self.on_select);
+            let node = poodle_render::context_menu(
+                &self.spec,
+                &RenderContext::new(&self.theme),
+                self.on_select,
+            );
             let menu = poodle_gpui_node_backend::to_gpui(&node);
             if let Some((x, y)) = self.spec.anchor_point {
                 div()
@@ -6513,7 +6617,10 @@ impl IntoElement for Tooltip {
             });
         }
         let bubble = (self.spec.current_open() && self.spec.has_content()).then(|| {
-            poodle_gpui_node_backend::to_gpui(&poodle_render::tooltip(&self.spec, &RenderContext::new(&self.theme)))
+            poodle_gpui_node_backend::to_gpui(&poodle_render::tooltip(
+                &self.spec,
+                &RenderContext::new(&self.theme),
+            ))
         });
         floating_overlay(trigger.into_any_element(), bubble, self.spec.placement)
     }
@@ -6893,7 +7000,11 @@ impl DetailSectionGroup {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::detail_section_group(&self.spec, &RenderContext::new(&self.theme), self.children)
+        poodle_render::detail_section_group(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.children,
+        )
     }
 }
 
@@ -7016,7 +7127,8 @@ impl Checkbox {
                 .clone()
                 .unwrap_or_else(|| "anon".to_string())
         });
-        let mut node = poodle_render::checkbox(&self.spec, &RenderContext::new(&self.theme), self.on_change);
+        let mut node =
+            poodle_render::checkbox(&self.spec, &RenderContext::new(&self.theme), self.on_change);
         node.id = Some(format!("poodle-checkbox-{id}"));
         node
     }
@@ -7074,7 +7186,8 @@ impl IntoElement for Switch {
                 .clone()
                 .unwrap_or_else(|| "anon".to_string())
         });
-        let mut node = poodle_render::switch(&self.spec, &RenderContext::new(&self.theme), self.on_change);
+        let mut node =
+            poodle_render::switch(&self.spec, &RenderContext::new(&self.theme), self.on_change);
         node.id = Some(format!("poodle-switch-{id}"));
         poodle_gpui_node_backend::to_gpui(&node)
     }
@@ -7165,7 +7278,8 @@ impl IntoElement for Slider {
             on_change: self.on_change,
             on_value_commit: None,
         };
-        let mut node = poodle_render::slider(&self.spec, &RenderContext::new(&self.theme), &handlers);
+        let mut node =
+            poodle_render::slider(&self.spec, &RenderContext::new(&self.theme), &handlers);
         if let Some(id) = self.id {
             fn stamp(node: &mut poodle_node::Node, id: &str) {
                 if node.a11y.role == Some(poodle_node::NodeRole::Slider) {
@@ -7228,7 +7342,8 @@ impl IntoElement for RangeSlider {
             on_change: self.on_change,
             on_value_commit: None,
         };
-        let mut node = poodle_render::range_slider(&self.spec, &RenderContext::new(&self.theme), handlers);
+        let mut node =
+            poodle_render::range_slider(&self.spec, &RenderContext::new(&self.theme), handlers);
         if let Some(id) = self.id {
             node.id = Some(id);
         }
@@ -7268,11 +7383,8 @@ impl IntoElement for RadioGroup {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let mut node = poodle_render::radio_group(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            self.handlers,
-        );
+        let mut node =
+            poodle_render::radio_group(&self.spec, &RenderContext::new(&self.theme), self.handlers);
         if let Some(id) = self.id {
             node.id = Some(id);
         }
@@ -7312,7 +7424,11 @@ impl IntoElement for Radio {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        let mut node = poodle_render::radio(&self.spec, &RenderContext::new(&self.theme), self.on_checked_change);
+        let mut node = poodle_render::radio(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_checked_change,
+        );
         if let Some(id) = self.id {
             node.id = Some(id);
         }
@@ -7524,7 +7640,10 @@ pub(crate) struct AudioPlayer;
 
 impl AudioPlayer {
     pub(crate) fn from_spec(spec: AudioPlayerSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::audio_player(&spec, &RenderContext::new(theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::audio_player(
+            &spec,
+            &RenderContext::new(theme),
+        ))
     }
 }
 
@@ -7532,7 +7651,10 @@ pub(crate) struct VideoPlayer;
 
 impl VideoPlayer {
     pub(crate) fn from_spec(spec: VideoPlayerSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::video_player(&spec, &RenderContext::new(theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::video_player(
+            &spec,
+            &RenderContext::new(theme),
+        ))
     }
 }
 
@@ -7540,7 +7662,10 @@ pub(crate) struct TimeAgo;
 
 impl TimeAgo {
     pub(crate) fn from_spec(spec: TimeAgoSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::time_ago(&spec, &RenderContext::new(theme)))
+        poodle_gpui_node_backend::to_gpui(&poodle_render::time_ago(
+            &spec,
+            &RenderContext::new(theme),
+        ))
     }
 }
 
@@ -7707,7 +7832,12 @@ impl DockRegion {
             on_collapse_toggle: self.on_collapse_toggle,
             instance_id: self.instance_id,
         };
-        poodle_render::dock_region(&self.spec, &RenderContext::new(&self.theme), self.content, handlers)
+        poodle_render::dock_region(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.content,
+            handlers,
+        )
     }
 }
 
@@ -7753,7 +7883,11 @@ impl BlockEditor {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::block_editor_with_children(&self.spec, &RenderContext::new(&self.theme), self.children)
+        poodle_render::block_editor_with_children(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.children,
+        )
     }
 }
 
@@ -7798,7 +7932,11 @@ impl LogList {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::log_list(&self.spec, &RenderContext::new(&self.theme), self.on_clear_filters)
+        poodle_render::log_list(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.on_clear_filters,
+        )
     }
 }
 
