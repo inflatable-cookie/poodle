@@ -149,4 +149,21 @@ describe("Pagination (svelte)", () => {
     expect(summary).toContain("51–75");
     expect(summary).toContain("of 248");
   });
+
+  it("disables page buttons and the limit selector while loading", () => {
+    const { container } = render(Pagination, {
+      props: {
+        currentPage: 2,
+        totalPages: 5,
+        showLimitSelector: true,
+        limitOptions: [10, 25, 50],
+        loading: true,
+      },
+    });
+    const next = container.querySelector<HTMLButtonElement>('button[aria-label="Next page"]')!;
+    const select = container.querySelector<HTMLSelectElement>(".poodle-pagination__limit select")!;
+    expect(next.disabled).toBe(true);
+    expect(select.disabled).toBe(true);
+    expect(container.querySelector(".poodle-pagination--loading")).not.toBeNull();
+  });
 });

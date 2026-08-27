@@ -9726,3 +9726,444 @@ fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_key
         }
     });
 }
+
+/// g16.016. Pagination page destinations, variant summaries, boundary/loading
+/// inertia, and the wired page-size Select through real mounted GPUI pointer
+/// and keyboard dispatch with host-owned rebuilds.
+///
+/// Deliberately not claimed: Select's own mounted ledger cell, navigation
+/// landmark/current-page accessibility, visual comparison, or Jetstream.
+#[test]
+fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard() {
+    use poodle_adapter::ThemeProvider;
+    use poodle_specs::{PaginationSpec, PaginationVariant};
+
+    #[derive(Clone)]
+    struct Host {
+        page: usize,
+        total_pages: usize,
+        variant: PaginationVariant,
+        page_size: usize,
+        limit_open: bool,
+        loading: bool,
+        pages: Vec<usize>,
+        opens: Vec<bool>,
+        sizes: Vec<usize>,
+    }
+
+    fn stamp_ids(node: &mut Node) {
+        if let Some(label) = node.a11y.label.clone() {
+            match label.as_str() {
+                "Previous page" => node.id = Some("pagination-prev".to_owned()),
+                "Next page" => node.id = Some("pagination-next".to_owned()),
+                "Items per page" => node.id = Some("pagination-limit".to_owned()),
+                "10" if node.a11y.role == Some(NodeRole::ListBoxOption) => {
+                    node.id = Some("pagination-limit-10".to_owned());
+                }
+                "25" if node.a11y.role == Some(NodeRole::ListBoxOption) => {
+                    node.id = Some("pagination-limit-25".to_owned());
+                    // Test-only: Select options are focusable but declare no
+                    // ring, so the backend never tracks a handle. Stamp a ring
+                    // so Enter/Space can exercise the production on_activate
+                    // path (overlay pointer hit-testing misses deferred rows).
+                    if node.style.focus_ring.is_none() {
+                        node.style.focus_ring = Some(poodle_node::FocusRing {
+                            color: theme().resolve_color("color.accent.focusRing"),
+                            width: theme().resolve_border_width("border.width.focus"),
+                            offset: 2.0,
+                        });
+                    }
+                }
+                "50" if node.a11y.role == Some(NodeRole::ListBoxOption) => {
+                    node.id = Some("pagination-limit-50".to_owned());
+                }
+                _ => {}
+            }
+        }
+        if let NodeKind::Button { label } = &node.kind {
+            let id = match label.as_str() {
+                "Prev" => Some("pagination-simple-prev".to_owned()),
+                "Next" => Some("pagination-simple-next".to_owned()),
+                "««" => Some("pagination-first".to_owned()),
+                "»»" => Some("pagination-last".to_owned()),
+                digits if digits.chars().all(|c| c.is_ascii_digit()) && !digits.is_empty() => {
+                    Some(format!("pagination-page-{digits}"))
+                }
+                _ => None,
+            };
+            if let Some(id) = id {
+                node.id = Some(id);
+            }
+        }
+        // Closed Select has no aria label on the trigger; stamp by shape.
+        if node.id.is_none()
+            && node.interaction.focusable
+            && node
+                .find(&|c| matches!(&c.kind, NodeKind::Icon { name, .. } if name == "chevron-down"))
+                .is_some()
+            && node
+                .find(&|c| c.has_text("10") || c.has_text("25") || c.has_text("50"))
+                .is_some()
+        {
+            node.id = Some("pagination-limit".to_owned());
+        }
+        for child in &mut node.children {
+            stamp_ids(child);
+        }
+    }
+
+    fn build(host: Arc<Mutex<Host>>, mounted: Arc<Mutex<Node>>) -> Node {
+        let state = host.lock().expect("host lock").clone();
+        let page_host = Arc::clone(&host);
+        let page_mount = Arc::clone(&mounted);
+        let open_host = Arc::clone(&host);
+        let open_mount = Arc::clone(&mounted);
+        let size_host = Arc::clone(&host);
+        let size_mount = Arc::clone(&mounted);
+
+        let mut spec = PaginationSpec::new()
+            .with_current_page(state.page)
+            .with_total_pages(state.total_pages)
+            .with_sibling_count(1)
+            .with_variant(state.variant)
+            .with_page_size(state.page_size)
+            .with_total_items(248)
+            .with_show_limit_selector(true)
+            .with_limit_options(vec![10, 25, 50])
+            .with_aria_label("Results pagination")
+            .with_loading(state.loading);
+        if state.variant == PaginationVariant::Simple {
+            // Simple summary uses item range; keep totals for the label.
+            spec = spec.with_show_info(false);
+        }
+
+        let mut node = poodle_render::pagination_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &poodle_render::PaginationHandlers {
+                page_change: Some(Arc::new(move |page| {
+                    let mut host = page_host.lock().expect("host lock");
+                    host.pages.push(page);
+                    host.page = page;
+                    drop(host);
+                    *page_mount.lock().expect("mount lock") =
+                        build(Arc::clone(&page_host), Arc::clone(&page_mount));
+                })),
+                limit_open: state.limit_open,
+                limit_open_change: Some(Arc::new(move |open| {
+                    let mut host = open_host.lock().expect("host lock");
+                    host.opens.push(open);
+                    host.limit_open = open;
+                    drop(host);
+                    *open_mount.lock().expect("mount lock") =
+                        build(Arc::clone(&open_host), Arc::clone(&open_mount));
+                })),
+                page_size_change: Some(Arc::new(move |size| {
+                    let mut host = size_host.lock().expect("host lock");
+                    host.sizes.push(size);
+                    host.page_size = size;
+                    host.limit_open = false;
+                    drop(host);
+                    *size_mount.lock().expect("mount lock") =
+                        build(Arc::clone(&size_host), Arc::clone(&size_mount));
+                })),
+            },
+        );
+        stamp_ids(&mut node);
+        node
+    }
+
+    fn target<'a>(root: &'a Node, id: &str) -> &'a Node {
+        root.find(&|n| n.id.as_deref() == Some(id))
+            .unwrap_or_else(|| panic!("missing {id}"))
+    }
+
+    // ── Numbered destinations, inertia, pointer / Enter / Space ────────
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(Host {
+            page: 5,
+            total_pages: 20,
+            variant: PaginationVariant::Numbered,
+            page_size: 10,
+            limit_open: false,
+            loading: false,
+            pages: Vec::new(),
+            opens: Vec::new(),
+            sizes: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        {
+            let root = mounted.lock().expect("mount lock");
+            assert!(root.has_text("..."));
+            assert!(target(&root, "pagination-page-5")
+                .interaction
+                .on_activate
+                .is_none());
+            assert!(!target(&root, "pagination-prev").interaction.disabled);
+            assert!(!target(&root, "pagination-next").interaction.disabled);
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 160.0);
+        driver.wait_for_focus_handle("pagination-page-4");
+        assert!(
+            poodle_gpui_node_backend::bounds_for("pagination-page-4").is_some(),
+            "pointer proof needs a real hit target"
+        );
+        driver.pointer_activate_id("pagination-page-4");
+        assert_eq!(host.lock().expect("host lock").pages, [4]);
+        assert_eq!(host.lock().expect("host lock").page, 4);
+        {
+            let root = mounted.lock().expect("mount lock");
+            assert!(target(&root, "pagination-page-4")
+                .interaction
+                .on_activate
+                .is_none());
+        }
+
+        // After landing on 4, the window is 1 … 3 4 5 … 20 — drive Enter/Space
+        // against pages that stay visible.
+        driver.wait_for_focus_handle("pagination-page-5");
+        driver.focus_element("pagination-page-5");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.lock().expect("host lock").pages, [4, 5]);
+        assert_eq!(host.lock().expect("host lock").page, 5);
+
+        driver.wait_for_focus_handle("pagination-page-6");
+        driver.focus_element("pagination-page-6");
+        driver.dispatch_key_raw("space");
+        assert_eq!(host.lock().expect("host lock").pages, [4, 5, 6]);
+        assert_eq!(host.lock().expect("host lock").page, 6);
+
+        driver.wait_for_focus_handle("pagination-next");
+        driver.pointer_activate_id("pagination-next");
+        assert_eq!(host.lock().expect("host lock").pages, [4, 5, 6, 7]);
+
+        driver.wait_for_focus_handle("pagination-prev");
+        driver.pointer_activate_id("pagination-prev");
+        assert_eq!(host.lock().expect("host lock").pages, [4, 5, 6, 7, 6]);
+
+        // Current page stays inert under pointer.
+        let before = host.lock().expect("host lock").pages.len();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("pagination-page-6").is_some(),
+            "current page still has a hit target"
+        );
+        driver.pointer_activate_id("pagination-page-6");
+        assert_eq!(host.lock().expect("host lock").pages.len(), before);
+    });
+
+    // ── Boundary disabled first/last pages ─────────────────────────────
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(Host {
+            page: 1,
+            total_pages: 5,
+            variant: PaginationVariant::Numbered,
+            page_size: 10,
+            limit_open: false,
+            loading: false,
+            pages: Vec::new(),
+            opens: Vec::new(),
+            sizes: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        {
+            let root = mounted.lock().expect("mount lock");
+            assert!(target(&root, "pagination-prev").interaction.disabled);
+            assert!(target(&root, "pagination-prev")
+                .interaction
+                .on_activate
+                .is_none());
+        }
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 140.0);
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("pagination-prev").is_some(),
+            "disabled prev still paints a hit target"
+        );
+        driver.pointer_activate_id("pagination-prev");
+        driver.wait_for_focus_handle("pagination-next");
+        driver.focus_element("pagination-next");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.lock().expect("host lock").pages, [2]);
+
+        // Move to last page and prove next is inert.
+        host.lock().expect("host lock").page = 5;
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        {
+            let root = mounted.lock().expect("mount lock");
+            assert!(target(&root, "pagination-next").interaction.disabled);
+            assert!(target(&root, "pagination-next")
+                .interaction
+                .on_activate
+                .is_none());
+        }
+        driver.draw_frame();
+        let before = host.lock().expect("host lock").pages.len();
+        driver.pointer_activate_id("pagination-next");
+        assert_eq!(host.lock().expect("host lock").pages.len(), before);
+    });
+
+    // ── Simple and full variants ───────────────────────────────────────
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(Host {
+            page: 3,
+            total_pages: 10,
+            variant: PaginationVariant::Simple,
+            page_size: 25,
+            limit_open: false,
+            loading: false,
+            pages: Vec::new(),
+            opens: Vec::new(),
+            sizes: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        assert!(mounted.lock().expect("mount lock").has_text("51–75 of 248"));
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 140.0);
+        driver.wait_for_focus_handle("pagination-simple-next");
+        driver.pointer_activate_id("pagination-simple-next");
+        assert_eq!(host.lock().expect("host lock").pages, [4]);
+        driver.wait_for_focus_handle("pagination-simple-prev");
+        driver.pointer_activate_id("pagination-simple-prev");
+        assert_eq!(host.lock().expect("host lock").pages, [4, 3]);
+
+        host.lock().expect("host lock").variant = PaginationVariant::Full;
+        host.lock().expect("host lock").pages.clear();
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        assert!(mounted.lock().expect("mount lock").has_text("Page 3 of 10"));
+        driver.draw_frame();
+        driver.wait_for_focus_handle("pagination-first");
+        driver.pointer_activate_id("pagination-first");
+        assert_eq!(host.lock().expect("host lock").pages, [1]);
+        driver.wait_for_focus_handle("pagination-last");
+        driver.pointer_activate_id("pagination-last");
+        assert_eq!(host.lock().expect("host lock").pages, [1, 10]);
+    });
+
+    // ── Wired page-size Select open + choose ────────────────────────────
+    run_headless(|cx| {
+        // Open path: closed trigger reports the next open state.
+        let host = Arc::new(Mutex::new(Host {
+            page: 2,
+            total_pages: 10,
+            variant: PaginationVariant::Numbered,
+            page_size: 10,
+            limit_open: false,
+            loading: false,
+            pages: Vec::new(),
+            opens: Vec::new(),
+            sizes: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 420.0);
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("pagination-limit").is_some(),
+            "limit Select needs a real hit target"
+        );
+        // Select itself does not declare a focus ring yet; open via pointer.
+        driver.pointer_activate_id("pagination-limit");
+        assert_eq!(host.lock().expect("host lock").opens, [true]);
+        assert!(host.lock().expect("host lock").limit_open);
+    });
+
+    run_headless(|cx| {
+        // Choose path: host-owned open Select reports a parsed limit and
+        // rebuilds closed. Starting open avoids overlay race with the open
+        // rebuild frame.
+        let host = Arc::new(Mutex::new(Host {
+            page: 2,
+            total_pages: 10,
+            variant: PaginationVariant::Numbered,
+            page_size: 10,
+            limit_open: true,
+            loading: false,
+            pages: Vec::new(),
+            opens: Vec::new(),
+            sizes: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        {
+            let root = mounted.lock().expect("mount lock");
+            let option = target(&root, "pagination-limit-25");
+            assert!(
+                option.interaction.on_activate.is_some(),
+                "open option must carry the production change handler"
+            );
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 420.0);
+        driver.wait_for_focus_handle("pagination-limit-25");
+        driver.focus_element("pagination-limit-25");
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.lock().expect("host lock").sizes, [25]);
+        assert!(!host.lock().expect("host lock").limit_open);
+        assert_eq!(host.lock().expect("host lock").page_size, 25);
+        {
+            let root = mounted.lock().expect("mount lock");
+            assert!(root.has_text("25"));
+            assert!(
+                root.find(&|n| n.a11y.role == Some(NodeRole::ListBoxOption))
+                    .is_none(),
+                "host rebuild closes the Select after a limit choice"
+            );
+        }
+    });
+
+    // ── Loading suppresses page, open, and page-size events ────────────
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(Host {
+            page: 5,
+            total_pages: 20,
+            variant: PaginationVariant::Numbered,
+            page_size: 10,
+            limit_open: false,
+            loading: true,
+            pages: Vec::new(),
+            opens: Vec::new(),
+            sizes: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        {
+            let root = mounted.lock().expect("mount lock");
+            assert!(target(&root, "pagination-page-4").interaction.disabled);
+            assert!(target(&root, "pagination-next").interaction.disabled);
+            assert!(target(&root, "pagination-limit").interaction.disabled);
+            assert!(target(&root, "pagination-limit")
+                .interaction
+                .on_activate
+                .is_none());
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 160.0);
+        driver.draw_frame();
+        for id in [
+            "pagination-page-4",
+            "pagination-next",
+            "pagination-prev",
+            "pagination-limit",
+        ] {
+            assert!(
+                poodle_gpui_node_backend::bounds_for(id).is_some(),
+                "{id} still paints under loading"
+            );
+            driver.pointer_activate_id(id);
+        }
+        // Keyboard on a disabled limit / next must also stay silent.
+        if poodle_gpui_node_backend::focus_handle_for("pagination-limit").is_some() {
+            driver.focus_element("pagination-limit");
+            driver.dispatch_key_raw("enter");
+            driver.dispatch_key_raw("space");
+        }
+        assert!(host.lock().expect("host lock").pages.is_empty());
+        assert!(host.lock().expect("host lock").opens.is_empty());
+        assert!(host.lock().expect("host lock").sizes.is_empty());
+    });
+}

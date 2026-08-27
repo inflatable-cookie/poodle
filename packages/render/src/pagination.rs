@@ -23,8 +23,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeRole,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing,
+    MainAxisAlignment, Node, NodeRole,
 };
 use poodle_specs::{ChoiceOption, PageItem, PaginationSpec, PaginationVariant, SelectSpec};
 
@@ -91,6 +91,11 @@ pub fn pagination_with_handlers(
     let button_border = with_alpha(border_color, border_color.3 * 0.78);
 
     let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
+    let focus_ring = FocusRing {
+        color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+        width: ctx.theme().resolve_border_width("border.width.focus"),
+        offset: rem_to_px(0.125),
+    };
 
     // One wrapping row: info, optional limit selector and navigation controls.
     let mut root = Node::container();
@@ -195,11 +200,21 @@ pub fn pagination_with_handlers(
             if is_disabled || spec.is_loading {
                 btn.style.descriptor.opacity = disabled_opacity;
                 btn.interaction.disabled = true;
-            } else if !is_current {
+                btn.interaction.focusable = false;
+                btn.a11y.tab_index = None;
+            } else {
+                btn.a11y.tab_index = Some(0);
+                btn.style.focus_ring = Some(FocusRing {
+                    color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+                    width: ctx.theme().resolve_border_width("border.width.focus"),
+                    offset: rem_to_px(0.125),
+                });
                 // The current page is where you already are, so it is not a route.
-                if let (Some(page), Some(handler)) = (goto, &handlers.page_change) {
-                    let handler = Arc::clone(handler);
-                    btn.interaction.on_activate = Some(Arc::new(move || handler(page)));
+                if !is_current {
+                    if let (Some(page), Some(handler)) = (goto, &handlers.page_change) {
+                        let handler = Arc::clone(handler);
+                        btn.interaction.on_activate = Some(Arc::new(move || handler(page)));
+                    }
                 }
             }
 
@@ -239,6 +254,7 @@ pub fn pagination_with_handlers(
             text_primary,
             disabled_opacity,
             pad_x,
+            Some(focus_ring),
         ));
     }
 
@@ -325,6 +341,7 @@ pub fn pagination_with_handlers(
             text_primary,
             disabled_opacity,
             pad_x,
+            Some(focus_ring),
         ));
     }
 
@@ -369,6 +386,7 @@ fn arrow_button(
     text_primary: ColorValue,
     disabled_opacity: f32,
     pad_x: f32,
+    focus_ring: Option<FocusRing>,
 ) -> Node {
     // Icon-only, so there is no text anywhere for a screen reader to name it
     // from — not on the button and not in its children, since an icon carries
@@ -412,9 +430,15 @@ fn arrow_button(
     if is_disabled {
         btn.style.descriptor.opacity = disabled_opacity;
         btn.interaction.disabled = true;
-    } else if let (Some(page), Some(handler)) = (goto, on_page_change) {
-        let handler = Arc::clone(handler);
-        btn.interaction.on_activate = Some(Arc::new(move || handler(page)));
+        btn.interaction.focusable = false;
+        btn.a11y.tab_index = None;
+    } else {
+        btn.a11y.tab_index = Some(0);
+        btn.style.focus_ring = focus_ring;
+        if let (Some(page), Some(handler)) = (goto, on_page_change) {
+            let handler = Arc::clone(handler);
+            btn.interaction.on_activate = Some(Arc::new(move || handler(page)));
+        }
     }
     btn
 }
@@ -460,13 +484,16 @@ fn build_limit_selector(
             .copied()
             .map(|size| ChoiceOption::new(size.to_string(), size.to_string()))
             .collect();
-        let select_spec = SelectSpec::new(options)
+        let mut select_spec = SelectSpec::new(options)
             .with_value(page_size_label.clone())
-            .with_open(handlers.limit_open)
+            .with_open(handlers.limit_open && !spec.is_loading)
             .with_size(ctx.base_size(spec.size))
             .with_size_role(spec.size_role)
             .with_density(ctx.resolve_density(spec.density))
             .with_aria_label("Items per page");
+        // Match Svelte/React: loading disables the page-size Select as well as
+        // every page button. Use Select's public disabled field — do not fork it.
+        select_spec.is_disabled = spec.is_loading;
 
         let toggle = handlers.limit_open_change.as_ref().map(|handler| {
             let handler = Arc::clone(handler);
@@ -537,4 +564,332 @@ fn build_limit_selector(
     row.child(text("Show", text_secondary))
         .child(select_box)
         .child(text("per page", text_secondary))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_node::NodeKind;
+    use std::sync::Mutex;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn numbered_spec() -> PaginationSpec {
+        PaginationSpec::new()
+            .with_current_page(5)
+            .with_total_pages(20)
+            .with_sibling_count(1)
+            .with_show_limit_selector(true)
+            .with_limit_options(vec![10, 25, 50])
+            .with_page_size(10)
+            .with_aria_label("Results pagination")
+    }
+
+    fn wired_handlers(
+        pages: Arc<Mutex<Vec<usize>>>,
+        opens: Arc<Mutex<Vec<bool>>>,
+        sizes: Arc<Mutex<Vec<usize>>>,
+        limit_open: bool,
+    ) -> PaginationHandlers {
+        let page_sink = Arc::clone(&pages);
+        let open_sink = Arc::clone(&opens);
+        let size_sink = Arc::clone(&sizes);
+        PaginationHandlers {
+            page_change: Some(Arc::new(move |page| {
+                page_sink.lock().expect("page lock").push(page);
+            })),
+            limit_open,
+            limit_open_change: Some(Arc::new(move |open| {
+                open_sink.lock().expect("open lock").push(open);
+            })),
+            page_size_change: Some(Arc::new(move |size| {
+                size_sink.lock().expect("size lock").push(size);
+            })),
+        }
+    }
+
+    fn render(spec: &PaginationSpec, handlers: &PaginationHandlers) -> Node {
+        pagination_with_handlers(spec, &RenderContext::new(&theme()), handlers)
+    }
+
+    fn activatable_by_label<'a>(root: &'a Node, label: &str) -> &'a Node {
+        root.find(&|n| {
+            n.a11y.label.as_deref() == Some(label) && n.interaction.on_activate.is_some()
+        })
+        .unwrap_or_else(|| panic!("activatable '{label}'"))
+    }
+
+    fn button_by_text<'a>(root: &'a Node, text: &str) -> &'a Node {
+        root.find(&|n| {
+            matches!(&n.kind, NodeKind::Button { .. })
+                && n.has_text(text)
+                && n.a11y.role == Some(NodeRole::Button)
+        })
+        .unwrap_or_else(|| panic!("button '{text}'"))
+    }
+
+    fn limit_trigger(root: &Node) -> &Node {
+        root.find(&|n| {
+            n.a11y.label.as_deref() == Some("Items per page")
+                || (n.a11y.role == Some(NodeRole::ComboBox)
+                    && n.find(&|c| c.has_text("10") || c.has_text("25") || c.has_text("50"))
+                        .is_some())
+        })
+        .or_else(|| {
+            // Closed Select returns the trigger root with no ComboBox role on a
+            // wrapping container — find the trigger that owns the chevron.
+            root.find(&|n| {
+                n.interaction.focusable
+                    && n.find(&|c| {
+                        matches!(&c.kind, NodeKind::Icon { name, .. } if name == "chevron-down")
+                    })
+                    .is_some()
+                    && n.find(&|c| c.has_text("10") || c.has_text("25") || c.has_text("50"))
+                        .is_some()
+            })
+        })
+        .expect("limit select trigger")
+    }
+
+    #[test]
+    fn loading_disables_wired_page_size_select_and_page_buttons() {
+        let pages = Arc::new(Mutex::new(Vec::new()));
+        let opens = Arc::new(Mutex::new(Vec::new()));
+        let sizes = Arc::new(Mutex::new(Vec::new()));
+        let handlers = wired_handlers(
+            Arc::clone(&pages),
+            Arc::clone(&opens),
+            Arc::clone(&sizes),
+            false,
+        );
+        let node = render(&numbered_spec().with_loading(true), &handlers);
+
+        let trigger = limit_trigger(&node);
+        assert!(trigger.interaction.disabled, "loading disables the Select trigger");
+        assert!(
+            trigger.interaction.on_activate.is_none(),
+            "loading Select must not report open changes"
+        );
+
+        let page_four = button_by_text(&node, "4");
+        assert!(page_four.interaction.disabled);
+        assert!(page_four.interaction.on_activate.is_none());
+
+        let next = node
+            .find(&|n| n.a11y.label.as_deref() == Some("Next page"))
+            .expect("next");
+        assert!(next.interaction.disabled);
+        assert!(next.interaction.on_activate.is_none());
+
+        assert!(pages.lock().expect("page lock").is_empty());
+        assert!(opens.lock().expect("open lock").is_empty());
+        assert!(sizes.lock().expect("size lock").is_empty());
+    }
+
+    #[test]
+    fn loading_keeps_open_limit_options_from_reporting_size_changes() {
+        // Host may still hold limit_open=true while loading; Pagination presents
+        // the composed Select closed and disabled so neither trigger nor options
+        // can emit.
+        let pages = Arc::new(Mutex::new(Vec::new()));
+        let opens = Arc::new(Mutex::new(Vec::new()));
+        let sizes = Arc::new(Mutex::new(Vec::new()));
+        let handlers = wired_handlers(
+            Arc::clone(&pages),
+            Arc::clone(&opens),
+            Arc::clone(&sizes),
+            true,
+        );
+        let node = render(&numbered_spec().with_loading(true), &handlers);
+
+        let trigger = limit_trigger(&node);
+        assert!(trigger.interaction.disabled);
+        assert!(trigger.interaction.on_activate.is_none());
+        assert!(
+            node.find(&|n| n.a11y.role == Some(NodeRole::ListBoxOption))
+                .is_none(),
+            "loading must not present open page-size options"
+        );
+
+        assert!(sizes.lock().expect("size lock").is_empty());
+        assert!(opens.lock().expect("open lock").is_empty());
+    }
+
+    #[test]
+    fn numbered_page_and_adjacent_requests_report_destinations() {
+        let pages = Arc::new(Mutex::new(Vec::new()));
+        let opens = Arc::new(Mutex::new(Vec::new()));
+        let sizes = Arc::new(Mutex::new(Vec::new()));
+        let handlers = wired_handlers(pages.clone(), opens, sizes, false);
+        let node = render(&numbered_spec(), &handlers);
+
+        let activate = button_by_text(&node, "4")
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("page 4");
+        activate.as_ref()();
+        assert_eq!(*pages.lock().expect("page lock"), [4]);
+
+        pages.lock().expect("page lock").clear();
+        activatable_by_label(&node, "Next page")
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("next")
+            .as_ref()();
+        assert_eq!(*pages.lock().expect("page lock"), [6]);
+
+        pages.lock().expect("page lock").clear();
+        activatable_by_label(&node, "Previous page")
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("prev")
+            .as_ref()();
+        assert_eq!(*pages.lock().expect("page lock"), [4]);
+    }
+
+    #[test]
+    fn current_page_ellipsis_and_boundary_controls_emit_nothing() {
+        let pages = Arc::new(Mutex::new(Vec::new()));
+        let opens = Arc::new(Mutex::new(Vec::new()));
+        let sizes = Arc::new(Mutex::new(Vec::new()));
+        let handlers = wired_handlers(pages.clone(), opens, sizes, false);
+
+        // Middle of range: current page 5 has no activation; ellipsis is text.
+        let mid = render(&numbered_spec(), &handlers);
+        let current = button_by_text(&mid, "5");
+        assert!(current.interaction.on_activate.is_none());
+        assert!(mid.has_text("..."));
+
+        // First page: previous is disabled.
+        let first = render(
+            &PaginationSpec::new()
+                .with_current_page(1)
+                .with_total_pages(5),
+            &handlers,
+        );
+        let prev = first
+            .find(&|n| n.a11y.label.as_deref() == Some("Previous page"))
+            .expect("prev");
+        assert!(prev.interaction.disabled);
+        assert!(prev.interaction.on_activate.is_none());
+
+        // Last page: next is disabled.
+        let last = render(
+            &PaginationSpec::new()
+                .with_current_page(5)
+                .with_total_pages(5),
+            &handlers,
+        );
+        let next = last
+            .find(&|n| n.a11y.label.as_deref() == Some("Next page"))
+            .expect("next");
+        assert!(next.interaction.disabled);
+        assert!(next.interaction.on_activate.is_none());
+
+        assert!(pages.lock().expect("page lock").is_empty());
+    }
+
+    #[test]
+    fn simple_and_full_variants_report_adjacent_and_first_last_destinations() {
+        let pages = Arc::new(Mutex::new(Vec::new()));
+        let opens = Arc::new(Mutex::new(Vec::new()));
+        let sizes = Arc::new(Mutex::new(Vec::new()));
+        let handlers = wired_handlers(pages.clone(), opens, sizes, false);
+
+        let simple = render(
+            &PaginationSpec::new()
+                .with_current_page(3)
+                .with_total_pages(10)
+                .with_page_size(25)
+                .with_total_items(248)
+                .with_variant(PaginationVariant::Simple),
+            &handlers,
+        );
+        assert!(simple.has_text("51–75 of 248"));
+        button_by_text(&simple, "Next")
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("simple next")
+            .as_ref()();
+        assert_eq!(*pages.lock().expect("page lock"), [4]);
+        pages.lock().expect("page lock").clear();
+        button_by_text(&simple, "Prev")
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("simple prev")
+            .as_ref()();
+        assert_eq!(*pages.lock().expect("page lock"), [2]);
+        pages.lock().expect("page lock").clear();
+
+        let full = render(
+            &PaginationSpec::new()
+                .with_current_page(3)
+                .with_total_pages(10)
+                .with_variant(PaginationVariant::Full),
+            &handlers,
+        );
+        assert!(full.has_text("Page 3 of 10"));
+        button_by_text(&full, "««")
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("first")
+            .as_ref()();
+        assert_eq!(*pages.lock().expect("page lock"), [1]);
+        pages.lock().expect("page lock").clear();
+        button_by_text(&full, "»»")
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("last")
+            .as_ref()();
+        assert_eq!(*pages.lock().expect("page lock"), [10]);
+    }
+
+    #[test]
+    fn enabled_limit_select_reports_open_and_parsed_page_size() {
+        let pages = Arc::new(Mutex::new(Vec::new()));
+        let opens = Arc::new(Mutex::new(Vec::new()));
+        let sizes = Arc::new(Mutex::new(Vec::new()));
+        let handlers = wired_handlers(
+            Arc::clone(&pages),
+            Arc::clone(&opens),
+            Arc::clone(&sizes),
+            false,
+        );
+        let closed = render(&numbered_spec(), &handlers);
+        let trigger = limit_trigger(&closed);
+        assert!(!trigger.interaction.disabled);
+        trigger
+            .interaction
+            .on_activate
+            .as_ref()
+            .expect("open toggle")
+            .as_ref()();
+        assert_eq!(*opens.lock().expect("open lock"), [true]);
+
+        let open_handlers = wired_handlers(
+            Arc::clone(&pages),
+            Arc::clone(&opens),
+            Arc::clone(&sizes),
+            true,
+        );
+        let open = render(&numbered_spec(), &open_handlers);
+        let option = open
+            .find(&|n| {
+                n.a11y.role == Some(NodeRole::ListBoxOption)
+                    && n.a11y.label.as_deref() == Some("25")
+                    && n.interaction.on_activate.is_some()
+            })
+            .expect("page-size option 25");
+        option.interaction.on_activate.as_ref().unwrap().as_ref()();
+        assert_eq!(*sizes.lock().expect("size lock"), [25]);
+    }
 }

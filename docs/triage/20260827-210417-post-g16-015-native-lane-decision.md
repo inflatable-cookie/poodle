@@ -1,6 +1,6 @@
 # Post-g16.015 Native Lane Decision
 
-Status: resolved — selected as g16.016
+Status: resolved — selected as g16.016; closed in g16.016 pending merge
 Captured: 2026-08-27
 Resolved: 2026-08-27
 Source: merged `g16.015` / PR #90 and the 44 mounted / 130 missing ledger
