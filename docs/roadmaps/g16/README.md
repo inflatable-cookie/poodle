@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.015 ready; CollapseToggle disclosure lane
+Status: active — g16.015 complete; orchestrator evidence checkpoint
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -45,7 +45,7 @@ stay maintained; backend admission is not part of the first card.
 12. [012 — Collapsible disclosure and mounted parity](012-collapsible-disclosure-and-mounted-parity.md) — complete; merged in PR #86
 13. [013 — TriStateSwitch contract and mounted parity](013-tri-state-switch-contract-and-mounted-parity.md) — complete; merged in PR #87
 14. [014 — Accordion result selection and mounted parity](014-accordion-result-selection-and-mounted-parity.md) — complete; merged in PR #88
-15. [015 — CollapseToggle disclosure and mounted parity](015-collapse-toggle-disclosure-and-mounted-parity.md) — ready
+15. [015 — CollapseToggle disclosure and mounted parity](015-collapse-toggle-disclosure-and-mounted-parity.md) — complete
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
@@ -181,18 +181,16 @@ and repairs disclosure semantics plus stable native identity. Ledger moved
 115 / 60. Web APIs, panel animation, visual comparison, broad accessibility,
 and Jetstream admission stay outside the card.
 
-The post-`g16.014` checkpoint selected CollapseToggle. Its web and Rust spec
-authority already agree, but the shared renderer hardcodes the wrong default
-label, omits expanded state, leaves disabled controls focusable, and declares no
-structured focus ring. `g16.015` repairs that bounded disclosure seam without a
-public API change, then targets one standalone mounted GPUI behavior cell:
-43 → 44 mounted and 131 → 130 missing. Select, EditableLabel, NumberInput,
-Rating, visual comparison, broad accessibility, and Jetstream stay outside the
-card.
+The post-`g16.014` checkpoint selected CollapseToggle. `g16.015` repaired that
+bounded disclosure seam without a public API change: native default/explicit
+labels, expanded state, enabled focus/tab/ring, disabled suppression, next-state
+callback, and directional chevrons now match the web authority, with one named
+mounted GPUI regression. Ledger: 43 → 44 mounted and 131 → 130 missing.
+Known-delta totals stay 115 / 60. Select, EditableLabel, NumberInput, Rating,
+visual comparison, broad accessibility, and Jetstream stay outside the card.
 
 ## Next Task
 
-Dispatch `g16.015` for CollapseToggle label, expanded-state, focus, disabled,
-next-state callback, direction, and standalone mounted parity. Do not compile or
-start `g16.016` until the expected 44 mounted / 130 missing checkpoint is
-merged and re-evaluated.
+Do not compile or start `g16.016`. After operator merge, the orchestrator
+returns to the measured 44 mounted / 130 missing ledger and chooses the next
+bounded parity lane.

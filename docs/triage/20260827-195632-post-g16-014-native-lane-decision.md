@@ -1,6 +1,6 @@
 # Post-g16.014 Native Lane Decision
 
-Status: resolved — compiled as g16.015
+Status: resolved — executed as g16.015
 Captured: 2026-08-27
 Resolved: 2026-08-27
 Source: orchestrator evidence checkpoint after PR #88
