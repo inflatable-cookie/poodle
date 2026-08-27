@@ -40,10 +40,10 @@ behavior repairs without inventing another conformance authority.
   `TriStateValue`, repaired native radio behavior and identity, and moved the
   ledger to 42 mounted / 132 missing. PR #88 closed `g16.014` Accordion result
   selection, disclosure semantics, identity, and mounted parity, moving the
-  ledger to 43 mounted / 131 missing. `g16.015` closed CollapseToggle native
-  label, expanded state, focus, disabled behavior, and standalone mounted
-  proof; ledger 44 mounted / 130 missing. No broader conformance programme is
-  implied. Do not compile `g16.016` until that checkpoint is merged.
+  ledger to 43 mounted / 131 missing. PR #90 closed `g16.015` CollapseToggle
+  native label, expanded state, focus, disabled behavior, and standalone
+  mounted proof; ledger 44 mounted / 130 missing. No broader conformance
+  programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -98,7 +98,7 @@ behavior repairs without inventing another conformance authority.
   `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
   `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
   `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
-  `013` merged in PR #87; `014` merged in PR #88; `015` ready for worker dispatch
+  `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90
 
 ## Rules
 

@@ -1,6 +1,6 @@
 # Post-g16.014 Native Lane Decision
 
-Status: resolved — executed as g16.015
+Status: resolved — merged in g16.015 / PR #90
 Captured: 2026-08-27
 Resolved: 2026-08-27
 Source: orchestrator evidence checkpoint after PR #88
@@ -65,4 +65,3 @@ Compile CollapseToggle as `g16.015`. Keep the public web surface, Rust spec API,
 generic node/backend vocabulary, composite collapse implementations, visual
 comparison, broad native accessibility, and Jetstream admission outside the
 card.
-

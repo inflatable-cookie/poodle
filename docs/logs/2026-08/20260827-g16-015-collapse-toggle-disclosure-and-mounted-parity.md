@@ -1,7 +1,7 @@
 # g16.015 — CollapseToggle Disclosure And Mounted Parity
 
 Date: 2026-08-27
-Status: complete
+Status: complete — merged in PR #90
 Branch: `t3code/collapse-toggle-worker`
 Card: `docs/roadmaps/g16/015-collapse-toggle-disclosure-and-mounted-parity.md`
 Source triage: `docs/triage/20260827-195632-post-g16-014-native-lane-decision.md`

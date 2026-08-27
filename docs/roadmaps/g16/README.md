@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.015 complete; orchestrator evidence checkpoint
+Status: active — post-g16.015 checkpoint; 44 mounted / 130 missing
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -45,7 +45,7 @@ stay maintained; backend admission is not part of the first card.
 12. [012 — Collapsible disclosure and mounted parity](012-collapsible-disclosure-and-mounted-parity.md) — complete; merged in PR #86
 13. [013 — TriStateSwitch contract and mounted parity](013-tri-state-switch-contract-and-mounted-parity.md) — complete; merged in PR #87
 14. [014 — Accordion result selection and mounted parity](014-accordion-result-selection-and-mounted-parity.md) — complete; merged in PR #88
-15. [015 — CollapseToggle disclosure and mounted parity](015-collapse-toggle-disclosure-and-mounted-parity.md) — complete
+15. [015 — CollapseToggle disclosure and mounted parity](015-collapse-toggle-disclosure-and-mounted-parity.md) — complete; merged in PR #90
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
@@ -191,6 +191,6 @@ visual comparison, broad accessibility, and Jetstream stay outside the card.
 
 ## Next Task
 
-Do not compile or start `g16.016`. After operator merge, the orchestrator
-returns to the measured 44 mounted / 130 missing ledger and chooses the next
-bounded parity lane.
+Re-evaluate the ledger at the merged 44 mounted / 130 missing checkpoint and
+choose the next bounded parity lane. Do not compile or start `g16.016` until
+that checkpoint is recorded.
