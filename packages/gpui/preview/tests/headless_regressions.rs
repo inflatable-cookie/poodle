@@ -24,7 +24,9 @@ use std::sync::{Arc, Mutex};
 // crashes on current rustc).
 use gpui::{point, px, Pixels, Point, TestAppContext};
 use poodle_gpui::GpuiThemeProvider;
-use poodle_node::{ColorValue, LayoutDirection, LayoutSizing, Node, NodeDropEvent, NodeRole};
+use poodle_node::{
+    ColorValue, LayoutDirection, LayoutSizing, Node, NodeDropEvent, NodeKind, NodeRole,
+};
 use poodle_render::{
     ui_presentation_provider, RadioGroupHandlers, RenderContext, SliderHandlers, TabsHandlers,
     ToggleGroupHandlers,
@@ -7770,5 +7772,175 @@ fn editable_label_commits_on_enter_and_once_through_the_blur_tab_causes() {
         driver.draw_frame();
         driver.draw_frame();
         assert_eq!(take_events(&host.log), Vec::<String>::new());
+    });
+}
+
+/// g16.010. Linkless Breadcrumbs crumbs call `on_navigate` with their authored
+/// value through real pointer and keyboard dispatch. `href`, current, and
+/// ellipsis crumbs stay inert and are not sequential stops.
+///
+/// Deliberately not claimed: native URL routing, assistive-technology
+/// coverage, visual comparison, or Jetstream admission.
+#[test]
+fn breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard() {
+    fn crumb_name(node: &Node) -> Option<String> {
+        if let Some(label) = node.a11y.label.clone() {
+            return Some(label);
+        }
+        match &node.kind {
+            NodeKind::Text { content } => Some(content.clone()),
+            _ => node.children.iter().find_map(|child| match &child.kind {
+                NodeKind::Text { content } => Some(content.clone()),
+                _ => None,
+            }),
+        }
+    }
+
+    fn stamp_crumb_ids(root: &mut Node) {
+        let trail = root
+            .children
+            .iter_mut()
+            .find(|node| node.a11y.label.as_deref() == Some("Trail"))
+            .expect("the breadcrumbs root keeps its aria label");
+        for child in trail.children.iter_mut().step_by(2) {
+            let id = match crumb_name(child).as_deref() {
+                Some("Home") => "breadcrumbs-home",
+                Some("\u{2026}") => "breadcrumbs-ellipsis",
+                Some("Workspace") => "breadcrumbs-workspace",
+                Some("Projects") => "breadcrumbs-projects",
+                Some("Poodle") => "breadcrumbs-poodle",
+                other => panic!("unexpected crumb {other:?}"),
+            };
+            child.id = Some(id.to_owned());
+        }
+    }
+
+    fn marker(id: &str, label: &str) -> Node {
+        let mut node = poodle_render::button(
+            &poodle_specs::ButtonSpec::new().with_label(label),
+            &RenderContext::new(&theme()),
+            None,
+        );
+        node.id = Some(id.to_owned());
+        node
+    }
+
+    fn crumb<'a>(root: &'a Node, id: &str) -> &'a Node {
+        root.find(&|node| node.id.as_deref() == Some(id))
+            .unwrap_or_else(|| panic!("{id}"))
+    }
+
+    run_headless(|cx| {
+        let nav = Arc::new(Mutex::new(Vec::<String>::new()));
+        let sink = Arc::clone(&nav);
+        let trail = poodle_render::breadcrumbs(
+            &poodle_specs::BreadcrumbsSpec::new(vec![
+                poodle_specs::BreadcrumbItem::new("home", "Home"),
+                poodle_specs::BreadcrumbItem::new("hidden", "Hidden"),
+                poodle_specs::BreadcrumbItem::new("workspace", "Workspace").with_href("/workspace"),
+                poodle_specs::BreadcrumbItem::new("projects", "Projects").with_icon_only("folder"),
+                poodle_specs::BreadcrumbItem::new("poodle", "Poodle").with_is_current(true),
+            ])
+            .with_aria_label("Trail")
+            .with_max_visible_items(4),
+            &RenderContext::new(&theme()),
+            Some(Arc::new(move |value: &str| {
+                sink.lock().expect("nav lock").push(value.to_string());
+            })),
+        );
+
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.descriptor.layout.spacing.gap = 8.0;
+        root = root
+            .child(marker("breadcrumbs-before", "Before"))
+            .child(trail)
+            .child(marker("breadcrumbs-after", "After"));
+        stamp_crumb_ids(&mut root);
+
+        {
+            let home = crumb(&root, "breadcrumbs-home");
+            let projects = crumb(&root, "breadcrumbs-projects");
+            assert_eq!(home.a11y.role, Some(NodeRole::Button));
+            assert_eq!(home.a11y.label.as_deref(), Some("Home"));
+            assert!(home.style.focus_ring.is_some());
+            assert_eq!(projects.a11y.role, Some(NodeRole::Button));
+            assert_eq!(projects.a11y.label.as_deref(), Some("Projects"));
+            assert!(projects.style.focus_ring.is_some());
+            for id in [
+                "breadcrumbs-ellipsis",
+                "breadcrumbs-workspace",
+                "breadcrumbs-poodle",
+            ] {
+                let node = crumb(&root, id);
+                assert!(node.interaction.on_activate.is_none(), "{id}");
+                assert!(!node.interaction.focusable, "{id}");
+                assert!(node.style.focus_ring.is_none(), "{id}");
+            }
+        }
+
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 640.0, 160.0);
+        driver.wait_for_focus_handle("breadcrumbs-before");
+        driver.wait_for_focus_handle("breadcrumbs-home");
+        driver.wait_for_focus_handle("breadcrumbs-projects");
+        driver.wait_for_focus_handle("breadcrumbs-after");
+
+        assert!(
+            poodle_gpui_node_backend::bounds_for("breadcrumbs-home").is_some(),
+            "pointer proof needs a real hit target"
+        );
+        driver.pointer_activate_id("breadcrumbs-home");
+        assert_eq!(*nav.lock().expect("nav lock"), ["home"]);
+
+        driver.focus_element("breadcrumbs-projects");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("breadcrumbs-projects"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("enter");
+        assert_eq!(*nav.lock().expect("nav lock"), ["home", "projects"]);
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            *nav.lock().expect("nav lock"),
+            ["home", "projects", "projects"]
+        );
+
+        for id in [
+            "breadcrumbs-ellipsis",
+            "breadcrumbs-workspace",
+            "breadcrumbs-poodle",
+        ] {
+            if poodle_gpui_node_backend::bounds_for(id).is_some() {
+                driver.pointer_activate_id(id);
+            }
+            assert!(
+                poodle_gpui_node_backend::focus_handle_for(id).is_none(),
+                "{id} must not become a sequential stop"
+            );
+        }
+        assert_eq!(
+            *nav.lock().expect("nav lock"),
+            ["home", "projects", "projects"]
+        );
+
+        driver.focus_element("breadcrumbs-before");
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("breadcrumbs-home"),
+            Some(true),
+            "the first Tab from Before lands on the linkless text crumb"
+        );
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("breadcrumbs-projects"),
+            Some(true),
+            "href, ellipsis, and current crumbs are skipped"
+        );
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("breadcrumbs-after"),
+            Some(true)
+        );
     });
 }

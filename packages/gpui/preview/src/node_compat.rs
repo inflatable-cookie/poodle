@@ -4732,6 +4732,11 @@ impl Breadcrumbs {
         self
     }
 
+    pub(crate) fn on_navigate(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.on_navigate = Some(handler);
+        self
+    }
+
     pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
         poodle_render::breadcrumbs(&self.spec, ctx, self.on_navigate)
     }

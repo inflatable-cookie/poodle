@@ -1,13 +1,25 @@
-use crate::app_state::AppState;
+use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::node_compat::{Breadcrumbs, Eyebrow};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
+use gpui::prelude::FluentBuilder;
 use gpui::*;
+use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{BreadcrumbItem, BreadcrumbsSpec, EyebrowSpec};
+use std::sync::Arc;
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
+    let text_secondary = theme.resolve_color("color.text.secondary");
+    let last_nav = state
+        .specimens
+        .text
+        .get("breadcrumbs-nav")
+        .cloned()
+        .unwrap_or_default();
+    let events = Arc::clone(&state.node_events);
 
     let examples = div()
         .flex()
@@ -23,14 +35,30 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     EyebrowSpec::new().with_content("Basic"),
                     theme,
                 ))
-                .child(Breadcrumbs::from_spec(
-                    BreadcrumbsSpec::new(vec![
-                        BreadcrumbItem::new("home", "Home"),
-                        BreadcrumbItem::new("projects", "Projects"),
-                        BreadcrumbItem::new("poodle", "Poodle").with_is_current(true),
-                    ]),
-                    theme,
-                )),
+                .child(
+                    Breadcrumbs::from_spec(
+                        BreadcrumbsSpec::new(vec![
+                            BreadcrumbItem::new("home", "Home"),
+                            BreadcrumbItem::new("projects", "Projects"),
+                            BreadcrumbItem::new("poodle", "Poodle").with_is_current(true),
+                        ]),
+                        theme,
+                    )
+                    .on_navigate(Arc::new(move |value: &str| {
+                        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                            key: "breadcrumbs-nav".to_string(),
+                            value: value.to_string(),
+                        });
+                    })),
+                )
+                .when(!last_nav.is_empty(), |el| {
+                    el.child(
+                        div()
+                            .text_xs()
+                            .text_color(color_to_hsla(text_secondary))
+                            .child(format!("Navigated to: {last_nav}")),
+                    )
+                }),
         )
         // --- Icons ---
         .child(
