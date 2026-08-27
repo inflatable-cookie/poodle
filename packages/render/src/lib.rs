@@ -231,8 +231,7 @@ pub use code_input::{code_input, code_input_with_handlers, CodeInputHandlers};
 pub use collapse_toggle::collapse_toggle;
 pub use collapsible::{
     collapsible, collapsible_content_focus_id, collapsible_trigger_focus_id,
-    collapsible_with_handlers, CollapsibleHandlers, COLLAPSIBLE_CONTENT_SEMANTIC_ID,
-    COLLAPSIBLE_TRIGGER_SEMANTIC_ID,
+    collapsible_with_handlers, CollapsibleHandlers,
 };
 pub use color_picker::{color_picker, ColorPickerHandlers};
 pub use command_palette::{command_palette, command_palette_with_handlers, CommandPaletteHandlers};

@@ -8288,7 +8288,7 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
 fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
     use poodle_render::{
         collapsible_content_focus_id, collapsible_trigger_focus_id, collapsible_with_handlers,
-        CollapsibleHandlers, COLLAPSIBLE_CONTENT_SEMANTIC_ID, COLLAPSIBLE_TRIGGER_SEMANTIC_ID,
+        CollapsibleHandlers,
     };
     use poodle_specs::CollapsibleSpec;
 
@@ -8352,10 +8352,9 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
             ))
             .child(marker("after", "After"));
 
-        let closed_trigger =
-            collapsible_trigger_focus_id(Some("closed"));
-        let aria_trigger = collapsible_trigger_focus_id(Some("aria"));
-        let disabled_trigger = collapsible_trigger_focus_id(Some("disabled"));
+        let closed_trigger = collapsible_trigger_focus_id("closed");
+        let aria_trigger = collapsible_trigger_focus_id("aria");
+        let disabled_trigger = collapsible_trigger_focus_id("disabled");
 
         {
             let trigger = target(&root, &closed_trigger);
@@ -8364,7 +8363,7 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
             assert_eq!(trigger.a11y.expanded, Some(false));
             assert_eq!(
                 trigger.a11y.controls.as_deref(),
-                Some(collapsible_content_focus_id(Some("closed")).as_str())
+                Some(collapsible_content_focus_id("closed").as_str())
             );
             assert_eq!(trigger.a11y.tab_index, Some(0));
             assert!(trigger.style.focus_ring.is_some());
@@ -8453,7 +8452,7 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
         let mounted = Arc::new(Mutex::new(Node::container()));
         *mounted.lock().expect("mount lock") =
             build(false, Arc::clone(&mounted), Arc::clone(&events));
-        let trigger = collapsible_trigger_focus_id(Some("controlled"));
+        let trigger = collapsible_trigger_focus_id("controlled");
         {
             let node = mounted.lock().expect("mount lock");
             let trigger_node = node
@@ -8461,7 +8460,7 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
                 .expect("trigger");
             assert_eq!(trigger_node.a11y.expanded, Some(false));
             assert!(node
-                .find(&|n| n.id.as_deref() == Some(COLLAPSIBLE_CONTENT_SEMANTIC_ID))
+                .find(&|n| n.runtime_id.as_deref() == Some(collapsible_content_focus_id("controlled").as_str()))
                 .is_none());
         }
 
@@ -8482,7 +8481,7 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
         assert!(mounted
             .lock()
             .expect("mount lock")
-            .find(&|n| n.id.as_deref() == Some(COLLAPSIBLE_CONTENT_SEMANTIC_ID))
+            .find(&|n| n.runtime_id.as_deref() == Some(collapsible_content_focus_id("controlled").as_str()))
             .is_some());
 
         driver.wait_for_focus_handle(&trigger);
@@ -8549,18 +8548,16 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
             Arc::clone(&mounted),
             Arc::clone(&events),
         );
-        let trigger = collapsible_trigger_focus_id(Some("seeded"));
+        let trigger = collapsible_trigger_focus_id("seeded");
         {
             let node = mounted.lock().expect("mount lock");
             let trigger_node = node
                 .find(&|n| n.runtime_id.as_deref() == Some(trigger.as_str()))
                 .expect("trigger");
             assert_eq!(trigger_node.a11y.expanded, Some(true));
-            assert!(node
-                .find(&|n| n.id.as_deref() == Some(COLLAPSIBLE_CONTENT_SEMANTIC_ID))
-                .is_some());
+            let content_id = collapsible_content_focus_id("seeded");
             let region = node
-                .find(&|n| n.id.as_deref() == Some(COLLAPSIBLE_CONTENT_SEMANTIC_ID))
+                .find(&|n| n.runtime_id.as_deref() == Some(content_id.as_str()))
                 .expect("region");
             assert_eq!(region.a11y.role, Some(NodeRole::Region));
             assert_eq!(
@@ -8626,8 +8623,8 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
 
         let mounted = Arc::new(Mutex::new(Node::container()));
         *mounted.lock().expect("mount lock") = build(false, false, Arc::clone(&mounted));
-        let left = collapsible_trigger_focus_id(Some("left"));
-        let right = collapsible_trigger_focus_id(Some("right"));
+        let left = collapsible_trigger_focus_id("left");
+        let right = collapsible_trigger_focus_id("right");
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
         driver.wait_for_focus_handle(&left);
         driver.wait_for_focus_handle(&right);

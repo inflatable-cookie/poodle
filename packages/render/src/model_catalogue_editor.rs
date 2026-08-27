@@ -40,7 +40,7 @@ use poodle_specs::{
 };
 
 use crate::callout::{callout, CalloutHandlers};
-use crate::collapsible::collapsible;
+use crate::collapsible::{collapsible_with_handlers, CollapsibleHandlers};
 use crate::context::RenderContext;
 use crate::empty_state::empty_state;
 use crate::icon_button::icon_button;
@@ -91,6 +91,14 @@ pub fn model_catalogue_hidden_focus_id(instance_id: Option<&str>) -> String {
     match instance_id {
         Some(scope) => format!("model-catalogue-editor:{scope}:hidden"),
         None => MODEL_CATALOGUE_HIDDEN_SECTION_ID.to_string(),
+    }
+}
+
+/// The backend-state id of the hidden-section content region.
+pub fn model_catalogue_hidden_content_focus_id(instance_id: Option<&str>) -> String {
+    match instance_id {
+        Some(scope) => format!("model-catalogue-editor:{scope}:hidden-content"),
+        None => "model-catalogue-hidden-content".to_string(),
     }
 }
 
@@ -230,7 +238,7 @@ pub fn model_catalogue_editor_with_slots(
         let on_open = handlers.on_hidden_open_change.clone().map(|handler| {
             Arc::new(move |open: bool| handler(open)) as Arc<dyn Fn(bool) + Send + Sync>
         });
-        let mut section = collapsible(
+        let mut section = collapsible_with_handlers(
             &CollapsibleSpec::new()
                 .with_title(spec.hidden_title.clone())
                 .with_open(spec.hidden_open)
@@ -238,7 +246,10 @@ pub fn model_catalogue_editor_with_slots(
                 .with_density(density),
             ctx,
             Some(hidden_list),
-            on_open,
+            CollapsibleHandlers {
+                on_open_change: on_open,
+                instance_id: handlers.instance_id.clone(),
+            },
         );
         // The focus destination when the last shown model is hidden. The
         // outer region Collapsible returns is not focusable — its trigger is —
@@ -272,27 +283,39 @@ pub fn model_catalogue_editor_with_slots(
 }
 
 /// Stamp the hidden-section disclosure on `Collapsible`'s own focusable
-/// trigger. The trigger carries no focus patch of its own, and the GPUI
-/// backend creates a tracked focus handle only for a focusable node that draws
-/// differently when focused — so the id and the ring have to land together, on
-/// the node that can actually take focus.
+/// trigger and reconcile the open content region's identity and relationships.
 fn mark_hidden_disclosure(
     node: &mut Node,
     instance_id: Option<&str>,
     ctx: &RenderContext<'_>,
 ) -> bool {
+    let trigger_focus = model_catalogue_hidden_focus_id(instance_id);
+    let content_focus = model_catalogue_hidden_content_focus_id(instance_id);
+    let mut matched = false;
+
     if node.interaction.focusable {
         node.id = Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID.to_string());
-        node.runtime_id = instance_id.map(|scope| model_catalogue_hidden_focus_id(Some(scope)));
+        node.runtime_id = Some(trigger_focus.clone());
+        node.a11y.controls = Some(content_focus.clone());
         node.style.focus = Some(StylePatch {
             border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
             ..StylePatch::default()
         });
-        return true;
+        matched = true;
     }
-    node.children
-        .iter_mut()
-        .any(|child| mark_hidden_disclosure(child, instance_id, ctx))
+
+    if node.a11y.role == Some(NodeRole::Region) {
+        node.id = Some(content_focus.clone());
+        node.runtime_id = Some(content_focus);
+        node.a11y.labelled_by = Some(trigger_focus);
+        matched = true;
+    }
+
+    for child in &mut node.children {
+        matched |= mark_hidden_disclosure(child, instance_id, ctx);
+    }
+
+    matched
 }
 
 /// `icon_button` renders no focus patch, and the GPUI backend only creates a
@@ -1410,6 +1433,36 @@ mod tests {
             "the GPUI backend only tracks a focusable node that draws differently when focused"
         );
         assert!(disclosure.interaction.on_activate.is_some());
+    }
+
+    #[test]
+    fn the_hidden_section_controls_and_labelled_by_agree_after_stamping() {
+        let node = model_catalogue_editor(
+            &spec().with_hidden_open(true),
+            &RenderContext::new(&theme()),
+            ModelCatalogueEditorHandlers {
+                instance_id: Some("editor".to_string()),
+                ..ModelCatalogueEditorHandlers::default()
+            },
+        );
+        let trigger_focus = model_catalogue_hidden_focus_id(Some("editor"));
+        let content_focus = model_catalogue_hidden_content_focus_id(Some("editor"));
+        let trigger = node
+            .find(&|n| n.id.as_deref() == Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID))
+            .expect("hidden-section trigger");
+        let content = node
+            .find(&|n| {
+                n.a11y.role == Some(NodeRole::Region)
+                    && n.a11y.labelled_by.as_deref() == Some(trigger_focus.as_str())
+            })
+            .expect("hidden-section content");
+        assert_eq!(trigger.runtime_id.as_deref(), Some(trigger_focus.as_str()));
+        assert_eq!(trigger.a11y.controls.as_deref(), Some(content_focus.as_str()));
+        assert_eq!(content.runtime_id.as_deref(), Some(content_focus.as_str()));
+        assert_eq!(
+            content.a11y.labelled_by.as_deref(),
+            Some(trigger_focus.as_str())
+        );
     }
 
     #[test]

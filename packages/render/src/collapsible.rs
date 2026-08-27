@@ -14,9 +14,6 @@ use crate::color::{mix_srgb, with_alpha};
 use crate::context::RenderContext;
 use crate::presentation::{rem_to_px, size_font_rem};
 
-pub const COLLAPSIBLE_TRIGGER_SEMANTIC_ID: &str = "poodle-collapsible-trigger";
-pub const COLLAPSIBLE_CONTENT_SEMANTIC_ID: &str = "poodle-collapsible-content";
-
 /// Host callbacks. Open-state reporting travels through
 /// [`collapsible_with_handlers`].
 #[derive(Default)]
@@ -27,18 +24,22 @@ pub struct CollapsibleHandlers {
     pub instance_id: Option<String>,
 }
 
-fn scoped(instance_id: Option<&str>, part: &str) -> Option<String> {
-    instance_id.map(|scope| format!("collapsible:{scope}:{part}"))
+fn scoped(instance_id: &str, part: &str) -> String {
+    format!("collapsible:{instance_id}:{part}")
 }
 
-/// The backend-state id of the disclosure trigger.
-pub fn collapsible_trigger_focus_id(instance_id: Option<&str>) -> String {
-    scoped(instance_id, "trigger").unwrap_or_else(|| COLLAPSIBLE_TRIGGER_SEMANTIC_ID.to_string())
+fn has_instance_scope(instance_id: Option<&str>) -> Option<&str> {
+    instance_id.and_then(|scope| if scope.is_empty() { None } else { Some(scope) })
 }
 
-/// The backend-state id of the open content region.
-pub fn collapsible_content_focus_id(instance_id: Option<&str>) -> String {
-    scoped(instance_id, "content").unwrap_or_else(|| COLLAPSIBLE_CONTENT_SEMANTIC_ID.to_string())
+/// The backend-state id of the disclosure trigger for a scoped instance.
+pub fn collapsible_trigger_focus_id(instance_id: &str) -> String {
+    scoped(instance_id, "trigger")
+}
+
+/// The backend-state id of the open content region for a scoped instance.
+pub fn collapsible_content_focus_id(instance_id: &str) -> String {
+    scoped(instance_id, "content")
 }
 
 pub fn collapsible(
@@ -69,8 +70,7 @@ pub fn collapsible_with_handlers(
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
     let is_open = spec.current_open();
-    let trigger_id = collapsible_trigger_focus_id(handlers.instance_id.as_deref());
-    let content_id = collapsible_content_focus_id(handlers.instance_id.as_deref());
+    let instance_scope = has_instance_scope(handlers.instance_id.as_deref());
 
     let open_gap = theme.resolve_space("space.stack.md");
     let root_gap = if is_open { open_gap } else { 0.0 };
@@ -175,11 +175,15 @@ pub fn collapsible_with_handlers(
     indicator.style.descriptor.text_color = Some(text_secondary);
 
     let mut trigger = Node::button("");
-    trigger.id = Some(COLLAPSIBLE_TRIGGER_SEMANTIC_ID.to_string());
-    trigger.runtime_id = scoped(handlers.instance_id.as_deref(), "trigger");
+    if let Some(scope) = instance_scope {
+        let trigger_id = collapsible_trigger_focus_id(scope);
+        let content_id = collapsible_content_focus_id(scope);
+        trigger.id = Some(trigger_id.clone());
+        trigger.runtime_id = Some(trigger_id);
+        trigger.a11y.controls = Some(content_id);
+    }
     trigger.a11y.role = Some(NodeRole::Button);
     trigger.a11y.expanded = Some(is_open);
-    trigger.a11y.controls = Some(content_id.clone());
     if let Some(ref title) = spec.title {
         trigger.a11y.label = Some(title.clone());
     } else if let Some(ref label) = spec.aria_label {
@@ -230,10 +234,13 @@ pub fn collapsible_with_handlers(
                 s.self_stretch = true;
                 s.descriptor.layout.spacing.padding.top = rem_to_px(0.125);
             }
-            wrapper.id = Some(COLLAPSIBLE_CONTENT_SEMANTIC_ID.to_string());
-            wrapper.runtime_id = scoped(handlers.instance_id.as_deref(), "content");
+            if let Some(scope) = instance_scope {
+                let content_id = collapsible_content_focus_id(scope);
+                wrapper.id = Some(content_id.clone());
+                wrapper.runtime_id = Some(content_id);
+                wrapper.a11y.labelled_by = Some(collapsible_trigger_focus_id(scope));
+            }
             wrapper.a11y.role = Some(NodeRole::Region);
-            wrapper.a11y.labelled_by = Some(trigger_id);
             outer = outer.child(wrapper.child(content_el));
         }
     }
@@ -256,12 +263,12 @@ mod tests {
     }
 
     fn trigger<'a>(root: &'a Node) -> &'a Node {
-        root.find(&|node| node.id.as_deref() == Some(COLLAPSIBLE_TRIGGER_SEMANTIC_ID))
+        root.find(&|node| node.a11y.role == Some(NodeRole::Button))
             .expect("trigger")
     }
 
     fn content<'a>(root: &'a Node) -> Option<&'a Node> {
-        root.find(&|node| node.id.as_deref() == Some(COLLAPSIBLE_CONTENT_SEMANTIC_ID))
+        root.find(&|node| node.a11y.role == Some(NodeRole::Region))
     }
 
     #[test]
@@ -345,27 +352,63 @@ mod tests {
     }
 
     #[test]
-    fn trigger_owns_button_semantics_and_content_owns_region() {
+    fn legacy_instances_emit_no_colliding_identity_or_false_relationships() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = CollapsibleSpec::new()
+            .with_title("Same title")
+            .with_open(true);
+        let first = collapsible(&spec, &ctx, Some(Node::text("one")), None);
+        let second = collapsible(&spec, &ctx, Some(Node::text("two")), None);
+        let first_trigger = trigger(&first);
+        let second_trigger = trigger(&second);
+        assert!(first_trigger.id.is_none());
+        assert!(second_trigger.id.is_none());
+        assert!(first_trigger.runtime_id.is_none());
+        assert!(second_trigger.runtime_id.is_none());
+        assert!(first_trigger.a11y.controls.is_none());
+        assert!(second_trigger.a11y.controls.is_none());
+        let first_region = content(&first).expect("first region");
+        let second_region = content(&second).expect("second region");
+        assert!(first_region.runtime_id.is_none());
+        assert!(second_region.runtime_id.is_none());
+        assert!(first_region.a11y.labelled_by.is_none());
+        assert!(second_region.a11y.labelled_by.is_none());
+    }
+
+    #[test]
+    fn scoped_instances_wire_controls_and_labelled_by() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = CollapsibleSpec::new()
             .with_title("Project settings")
             .with_open(true);
-        let node = collapsible(&spec, &ctx, Some(Node::text("content")), None);
+        let node = collapsible_with_handlers(
+            &spec,
+            &ctx,
+            Some(Node::text("content")),
+            CollapsibleHandlers {
+                instance_id: Some("scope".to_string()),
+                ..CollapsibleHandlers::default()
+            },
+        );
         let trigger = trigger(&node);
-        assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
-        assert_eq!(trigger.a11y.label.as_deref(), Some("Project settings"));
+        assert_eq!(trigger.runtime_id.as_deref(), Some("collapsible:scope:trigger"));
+        assert_eq!(trigger.id.as_deref(), Some("collapsible:scope:trigger"));
         assert_eq!(
             trigger.a11y.controls.as_deref(),
-            Some(COLLAPSIBLE_CONTENT_SEMANTIC_ID)
+            Some("collapsible:scope:content")
         );
         assert!(trigger.style.focus_ring.is_some());
 
         let region = content(&node).expect("open content");
-        assert_eq!(region.a11y.role, Some(NodeRole::Region));
+        assert_eq!(
+            region.id.as_deref(),
+            Some("collapsible:scope:content")
+        );
         assert_eq!(
             region.a11y.labelled_by.as_deref(),
-            Some(COLLAPSIBLE_TRIGGER_SEMANTIC_ID)
+            Some("collapsible:scope:trigger")
         );
         assert_eq!(outer_has_region_role(&node), false);
     }
@@ -406,7 +449,6 @@ mod tests {
         );
         let first_trigger = trigger(&first);
         let second_trigger = trigger(&second);
-        assert_eq!(first_trigger.id, second_trigger.id);
         assert_ne!(first_trigger.runtime_id, second_trigger.runtime_id);
         assert_eq!(
             first_trigger.runtime_id.as_deref(),
@@ -416,6 +458,8 @@ mod tests {
             second_trigger.runtime_id.as_deref(),
             Some("collapsible:second:trigger")
         );
+        assert_eq!(first_trigger.id.as_deref(), Some("collapsible:first:trigger"));
+        assert_eq!(second_trigger.id.as_deref(), Some("collapsible:second:trigger"));
     }
 
     #[test]

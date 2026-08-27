@@ -1,7 +1,7 @@
 # g16.012 — Collapsible Disclosure And Mounted Parity
 
 Date: 2026-08-27
-Status: complete — PR pending
+Status: complete — PR #86 (review fixes pushed)
 Branch: `t3code/g16-012-collapsible-mounted-parity`
 Card: `docs/roadmaps/g16/012-collapsible-disclosure-and-mounted-parity.md`
 Source triage: `docs/triage/20260827-141543-post-g16-011-native-lane-decision.md`
