@@ -461,18 +461,10 @@ export type MessageCenterItem = {
   readControl?: boolean;
 };
 
-export type HistoryEntryPosition = "past" | "current" | "future";
-
-export type HistoryEntry = {
-  id: string;
-  label: string;
-  position: HistoryEntryPosition;
-  /** Renders as a named pin when branches are supplied. */
-  checkpoint?: boolean;
-  /** > 1 marks a fork point, expandable to the supplied branch rows. */
-  branchCount?: number;
-  groupId?: string | null;
-};
+export type {
+  HistoryEntry,
+  HistoryEntryPosition,
+} from "@inflatable-cookie/poodle-core";
 
 export type HistoryBranch = {
   id: string;

@@ -636,7 +636,7 @@
 
 {:else}
   <!-- ═══ NATIVE MODE ═══ -->
-  <div class="poodle-select" data-placeholder={!hasSelection} data-size={resolvedSize} data-density={resolvedDensity} data-validation-state={validationState}>
+  <div class="poodle-select" data-placeholder={!hasSelection} data-variant={variant} data-size={resolvedSize} data-density={resolvedDensity} data-validation-state={validationState}>
     <select
       id={selectId}
       {name}

@@ -350,6 +350,7 @@ export function Select({
       <div
         className="poodle-select"
         data-placeholder={!hasSelection}
+        data-variant={variant}
         data-size={resolvedSize}
         data-density={resolvedDensity}
         data-validation-state={validationState}

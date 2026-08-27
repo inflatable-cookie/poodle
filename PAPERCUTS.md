@@ -7,6 +7,40 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-27 — RESOLVED 2026-08-27. HistoryCenter never re-read props after
+  OPEN, so a host that handed back new pages while the popover stayed open
+  kept the OPEN-time copy. Already fixed: the Svelte/React adapters dispatch
+  `PAGES_CHANGED` on pages identity change (`HistoryCenter.svelte` /
+  `HistoryCenter.tsx` pages `$effect` / `useEffect`). Evidence:
+  `HistoryCenter.test.ts` "re-requests continuations when the host supplies
+  pages containing the open run". Filed from Loophole 2026-08-12.
+
+- 2026-08-27 — RESOLVED 2026-08-27. HistoryCenter stale-level reconcile needed
+  an event that never came, so an open fork whose run now sat on the spine
+  spun on "Loading…". Already fixed: `PAGES_CHANGED` is inert itself and
+  drives `reconcileStaleLevels` once. Evidence: core tests "PAGES_CHANGED is
+  inert on its own" and "PAGES_CHANGED drives the stale-level reconcile
+  exactly once". Filed from Loophole 2026-08-12.
+
+- 2026-08-27 — RESOLVED 2026-08-27. HistoryCenter's single-fork picker
+  disabled its actions menu with the Select, greying out Checkout. Already
+  fixed: menu enablement is independent of `row.disabled`; Checkout gates on
+  `picked.preferred`. Evidence: "single fork: the Select is disabled but
+  Checkout and Rename stay live on their own gates (R1)". Filed from Loophole
+  2026-08-12.
+
+- 2026-08-27 — RESOLVED 2026-08-27. Poodle-svelte `types.ts` still exported
+  the v2 `HistoryEntry` (`branchCount`). Replaced with a re-export of the
+  core `HistoryEntry` / `HistoryEntryPosition` shapes; React `types.ts`
+  matched. Evidence: HistoryCenter package-types tests assign
+  `continuationCount` on the public type.
+
+- 2026-08-27 — RESOLVED 2026-08-27. Poodle Select ignored `variant="ghost"`
+  in native mode: the native root had no `data-variant`, so ghost CSS never
+  applied. Native root now stamps `data-variant={variant}`. Evidence:
+  Select svelte/react tests "stamps data-variant on the native root". Filed
+  from Figmatic 2026-08-14.
+
 - 2026-08-27 — `effigy drift:roles` resolves the deferred Jetstream preview
   and fails in an otherwise valid Poodle worktree when the sibling Jetstream
   checkout is absent. Keep the role census on the active cohort or split the

@@ -6,6 +6,7 @@ import type {
 } from "@inflatable-cookie/poodle-core";
 
 import HistoryCenter from "../src/HistoryCenter.svelte";
+import type { HistoryEntry } from "../src/types";
 import HistoryCenterHostHarness from "./HistoryCenterHostHarness.svelte";
 
 // v3 data: root path pages arrive newest-first (R3); display is oldest-first.
@@ -1122,5 +1123,17 @@ describe("HistoryCenter (svelte)", () => {
       "2",
       "1",
     ]);
+  });
+});
+
+describe("HistoryCenter (svelte) package types", () => {
+  it("exports the live HistoryEntry shape, not v2 branchCount", () => {
+    const entry: HistoryEntry = {
+      id: "e1",
+      label: "Edit",
+      position: "current",
+      continuationCount: 0,
+    };
+    expect(entry.continuationCount).toBe(0);
   });
 });
