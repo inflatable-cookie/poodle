@@ -1,7 +1,7 @@
 # g16.013 — TriStateSwitch Contract And Mounted Parity
 
 Date: 2026-08-27
-Status: complete — awaiting PR review
+Status: complete — review follow-up on `t3code/tri-state-switch`
 Branch: `t3code/tri-state-switch`
 Card: `docs/roadmaps/g16/013-tri-state-switch-contract-and-mounted-parity.md`
 Source triage: `docs/triage/20260827-160028-post-g16-012-native-lane-decision.md`
@@ -33,13 +33,18 @@ stay 115 present / 60 not-applicable.
 `packages/gpui/preview/tests/headless_regressions.rs#tri_state_switch_value_focus_identity_and_disabled_paths`
 proves, through production hit testing, focus, and key dispatch:
 
-- initial Default selection, one selected tab stop, and radiogroup/radio roles
-- pointer Excluded and Included selection with host rebuild
-- same-value activation is inert
-- Left/Right wrap, callback payload, and requested focus
-- Space on the selected segment is inert
-- disabled group emits nothing
-- two same-valued instances keep independent runtime/focus identity
+- labelled `RadioGroup` and three labelled `RadioButton` nodes, selected/toggled
+  state, exactly one `tab_index=0`, and structured focus rings on every enabled
+  segment
+- real pointer targets register backend bounds before `pointer_activate_id`
+- Space on a focused unselected production target emits and rebuilds; Space on
+  the selected segment is inert
+- pointer and Left/Right selection with host rebuild, wrap, and requested focus
+- same-value pointer activation is inert
+- a disabled control between real tab stops is skipped by sequential focus and
+  registers no focus handle
+- after rebuilding one of two same-valued instances, both scoped identities and
+  focus handles remain independent
 
 ## Explicit non-claims
 
@@ -52,10 +57,15 @@ proves, through production hit testing, focus, and key dispatch:
 
 Focused `poodle-specs` and `poodle-render` TriStateSwitch tests, Svelte and
 React TriStateSwitch tests (unchanged), named mounted regression,
-`effigy regressions:native`, `effigy probe:gpui-specimens`, drift selectors,
-`effigy test:parity-evidence-ledger`, `effigy check:parity-evidence-ledger`,
-`effigy ci:rust`, `effigy ci:native`, `effigy ci:web`, `effigy docs:check`,
-`effigy qa`, and `git diff --check origin/main...HEAD`.
+`effigy regressions:native`, `effigy probe:gpui-specimens`, `effigy drift:handlers`,
+`effigy drift:events`, `effigy test:parity-evidence-ledger`,
+`effigy check:parity-evidence-ledger`, `effigy ci:rust`, `effigy ci:native`,
+`effigy ci:web`, `effigy docs:check`, `effigy qa`, and
+`git diff --check origin/main...HEAD`.
+
+`effigy drift:roles` is blocked in a normal active-cohort worktree: it resolves
+the deferred Jetstream preview and fails on the absent sibling checkout
+(`PAPERCUTS.md`, recorded on `main` at `ded8b5e71`).
 
 `effigy doctor` baseline (generated-in-src, god-files, stale-suppressions)
 unchanged.

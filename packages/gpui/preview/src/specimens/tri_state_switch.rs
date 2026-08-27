@@ -115,35 +115,40 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
                                 .with_value(TriStateValue::Default)
-                                .with_size(ControlSize::Xs),
+                                .with_size(ControlSize::Xs)
+                                .with_aria_label("Extra small filter"),
                             theme,
                             "tri-state-size-xs",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
                                 .with_value(TriStateValue::Default)
-                                .with_size(ControlSize::Sm),
+                                .with_size(ControlSize::Sm)
+                                .with_aria_label("Small filter"),
                             theme,
                             "tri-state-size-sm",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
                                 .with_value(TriStateValue::Default)
-                                .with_size(ControlSize::Md),
+                                .with_size(ControlSize::Md)
+                                .with_aria_label("Medium filter"),
                             theme,
                             "tri-state-size-md",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
                                 .with_value(TriStateValue::Default)
-                                .with_size(ControlSize::Lg),
+                                .with_size(ControlSize::Lg)
+                                .with_aria_label("Large filter"),
                             theme,
                             "tri-state-size-lg",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
                                 .with_value(TriStateValue::Default)
-                                .with_size(ControlSize::Xl),
+                                .with_size(ControlSize::Xl)
+                                .with_aria_label("Extra large filter"),
                             theme,
                             "tri-state-size-xl",
                         )),
@@ -168,21 +173,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
                                 .with_value(TriStateValue::Excluded)
-                                .with_size(ControlSize::Xs),
+                                .with_size(ControlSize::Xs)
+                                .with_aria_label("Chrome extra small filter"),
                             theme,
                             "tri-state-role-xs",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
                                 .with_value(TriStateValue::Included)
-                                .with_size(ControlSize::Sm),
+                                .with_size(ControlSize::Sm)
+                                .with_aria_label("Prominent small filter"),
                             theme,
                             "tri-state-role-sm",
                         ))
                         .child(TriStateSwitch::from_spec(
                             TriStateSwitchSpec::new()
                                 .with_value(TriStateValue::Default)
-                                .with_size(ControlSize::Md),
+                                .with_size(ControlSize::Md)
+                                .with_aria_label("Control medium filter"),
                             theme,
                             "tri-state-role-md",
                         )),
@@ -243,7 +251,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 TriStateSwitch::from_spec(
                     TriStateSwitchSpec::new()
                         .with_value(TriStateValue::Default)
-                        .with_size(size),
+                        .with_size(size)
+                        .with_aria_label(format!("TriStateSwitch size {size:?}")),
                     theme,
                     format!("tri-state-axis-size-{size:?}"),
                 )
@@ -253,7 +262,8 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 TriStateSwitch::from_spec(
                     TriStateSwitchSpec::new()
                         .with_value(TriStateValue::Default)
-                        .with_density(density),
+                        .with_density(density)
+                        .with_aria_label(format!("TriStateSwitch density {density:?}")),
                     theme,
                     format!("tri-state-axis-density-{density:?}"),
                 )
