@@ -185,7 +185,10 @@ pub mod update_status;
 pub mod validation_summary;
 pub mod video_player;
 
-pub use accordion::{accordion, accordion_with_content};
+pub use accordion::{
+    accordion, accordion_panel_focus_id, accordion_trigger_focus_id, accordion_with_content,
+    AccordionHandlers,
+};
 pub use action_discovery_panel::{
     action_discovery_panel, action_discovery_row_focus_id, ActionDiscoveryPanelHandlers,
 };

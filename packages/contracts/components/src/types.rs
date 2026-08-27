@@ -873,7 +873,9 @@ impl AccordionItemSpec {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum AccordionSelectionValue {
-    Single(String),
+    /// Single-mode open value. The inner `None` is an explicit collapsed result.
+    Single(Option<String>),
+    /// Multiple-mode ordered open set, including empty.
     Multiple(Vec<String>),
 }
 

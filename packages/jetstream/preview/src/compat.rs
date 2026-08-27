@@ -16,8 +16,16 @@ pub fn js_spinner(spec: &SpinnerSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::spinner(spec, &pr::RenderContext::new(theme)))
 }
 
-pub fn js_accordion(spec: &AccordionSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::accordion(spec, &pr::RenderContext::new(theme), None))
+pub fn js_accordion(
+    spec: &AccordionSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: &str,
+) -> El {
+    El(pr::accordion(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::AccordionHandlers::new(instance_id),
+    ))
 }
 
 pub fn js_action_discovery_panel(

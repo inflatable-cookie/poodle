@@ -128,7 +128,7 @@ fn build_scene(scene: &str, ctx: &poodle_render::RenderContext<'_>) -> EvidenceS
                     AccordionItemSpec::new("two", "Second section"),
                 ]),
                 ctx,
-                None,
+                poodle_render::AccordionHandlers::new("inset-evidence"),
             ),
             logical_width: 420.0,
             logical_height: 200.0,
@@ -404,10 +404,8 @@ mod tests {
     }
 
     fn temp_dir() -> PathBuf {
-        let dir = std::env::temp_dir().join(format!(
-            "poodle-inset-evidence-test-{}",
-            std::process::id()
-        ));
+        let dir =
+            std::env::temp_dir().join(format!("poodle-inset-evidence-test-{}", std::process::id()));
         std::fs::create_dir_all(&dir).expect("create test dir");
         dir
     }

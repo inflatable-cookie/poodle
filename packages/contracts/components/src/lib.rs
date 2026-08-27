@@ -486,7 +486,7 @@ mod tests {
     use poodle_tokens::semantic;
 
     use super::{
-        AccordionItemSpec, AccordionSelectionValue, AccordionSpec, BadgeSpec, BadgeVariant,
+        AccordionItemSpec, AccordionSelectionMode, AccordionSelectionValue, AccordionSpec, BadgeSpec, BadgeVariant,
         BoxSpec, ButtonSpec, ButtonVariant, CalendarMode, CalendarSpec, CalendarWeekStart,
         CheckState, CheckboxSpec, ChoiceOption, CollapsibleSpec, ContextMenuSpec, ControlDensity,
         ControlSize,
@@ -923,7 +923,7 @@ mod tests {
             AccordionItemSpec::new("filters", "Filters"),
             AccordionItemSpec::new("reference", "Reference"),
         ])
-        .with_allow_multiple(true)
+        .with_selection_mode(AccordionSelectionMode::Multiple)
         .with_collapsible(true)
         .with_default_value(AccordionSelectionValue::Multiple(vec![
             String::from("filters"),
@@ -933,7 +933,7 @@ mod tests {
             .with_title("Reference")
             .with_default_open(true);
 
-        assert!(accordion.allow_multiple);
+        assert_eq!(accordion.selection_mode, AccordionSelectionMode::Multiple);
         assert_eq!(accordion.expanded_item_count(), 2);
         assert_eq!(accordion.item_gap_token(), semantic::SPACE_STACK_SM);
         assert!(collapsible.current_open());

@@ -172,18 +172,16 @@ EditableLabel, Accordion, visual comparison, accessibility, and Jetstream stay
 outside the card.
 
 The post-`g16.013` checkpoint selected Accordion after explicit operator
-approval of its clean pre-1.0 Rust migration. `g16.014` removes the duplicate
+approval of its clean pre-1.0 Rust migration. PR pending for `g16.014`: it removes the duplicate
 `allow_multiple` mode and activated-item callback, gives single mode an
 explicit collapsed result, reuses the existing headless ToggleGroup transition,
-and repairs disclosure semantics plus stable native identity. Expected ledger
-movement is 42 → 43 mounted and 132 → 131 missing; known-delta totals stay
+and repairs disclosure semantics plus stable native identity. Ledger moved
+42 → 43 mounted and 132 → 131 missing; known-delta totals stay
 115 / 60. Web APIs, panel animation, visual comparison, broad accessibility,
 and Jetstream admission stay outside the card.
 
 ## Next Task
 
-Dispatch `g16.014` from
-`../../handoffs/20260827-174252-g16-014-accordion-worker.md`. The worker
-executes only that card and returns a PR for orchestrator review. Do not compile
-or start `g16.015` until `g16.014` is merged and the ledger is re-evaluated
-against the expected 43 mounted / 131 missing checkpoint.
+After `g16.014` merge, re-evaluate the ledger at 43 mounted / 131 missing and
+choose the next bounded parity lane. Do not compile or start `g16.015` until
+that checkpoint is recorded.

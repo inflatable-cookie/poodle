@@ -32,9 +32,9 @@ use poodle_render::{
     ToggleGroupHandlers, TriStateSwitchHandlers,
 };
 use poodle_specs::{
-    AgentTranscriptSpec, ControlDensity, ControlSize, Orientation, PopoverSpec, RangeSliderSpec,
-    SliderSpec, TabActivationMode, TabDefinition, TabsSpec, TriStateSwitchSpec, TriStateValue,
-    UiPresentationProviderSpec,
+    AccordionSelectionValue, AgentTranscriptSpec, ControlDensity, ControlSize, Orientation,
+    PopoverSpec, RangeSliderSpec, SliderSpec, TabActivationMode, TabDefinition, TabsSpec,
+    TriStateSwitchSpec, TriStateValue, UiPresentationProviderSpec,
 };
 
 #[path = "../src/headless_driver.rs"]
@@ -5458,7 +5458,7 @@ fn a_real_accordion_still_paints_its_contracted_item_highlight() {
                 poodle_specs::AccordionItemSpec::new("two", "Two"),
             ]),
             &RenderContext::new(&theme()),
-            None,
+            poodle_render::AccordionHandlers::new("inset-shadow-proof"),
         );
         // The highlight lives on an item surface, not the composition root.
         assert!(
@@ -5482,6 +5482,447 @@ fn a_real_accordion_still_paints_its_contracted_item_highlight() {
         assert!(
             painted[0].bounds[2] > 0.0 && painted[0].bounds[3] > 0.0,
             "the band must be clipped to a real padding box, got {painted:?}"
+        );
+    });
+}
+
+// ── g16.014 accordion mounted parity ────────────────────────────────────────
+
+fn accordion_trigger_id(scope: &str, value: &str) -> String {
+    poodle_render::accordion_trigger_focus_id(scope, value)
+}
+
+fn accordion_panel_id(scope: &str, value: &str) -> String {
+    poodle_render::accordion_panel_focus_id(scope, value)
+}
+
+fn accordion_target<'a>(root: &'a Node, id: &str) -> &'a Node {
+    root.find(&|node| {
+        node.runtime_id.as_deref() == Some(id) || node.id.as_deref() == Some(id)
+    })
+    .unwrap_or_else(|| panic!("{id}"))
+}
+
+fn spec_from_accordion_result(value: &AccordionSelectionValue) -> AccordionSelectionValue {
+    value.clone()
+}
+
+/// Accordion resulting-selection, disclosure semantics, keyboard parity, disabled
+/// skips, and two-instance identity all travel through the real mounted tree.
+#[test]
+fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
+    use poodle_render::{accordion_with_content, AccordionHandlers};
+    use poodle_specs::{AccordionItemSpec, AccordionSelectionMode, AccordionSelectionValue, AccordionSpec};
+
+    run_headless(|cx| {
+        fn build(
+            value: AccordionSelectionValue,
+            collapsible: bool,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<AccordionSelectionValue>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let spec = AccordionSpec::new(vec![
+                AccordionItemSpec::new("first", "First"),
+                AccordionItemSpec::new("second", "Second"),
+            ])
+            .with_collapsible(collapsible)
+            .with_value(value);
+            let mut node = accordion_with_content(
+                &spec,
+                &RenderContext::new(&theme()),
+                &[(
+                    "first".to_string(),
+                    Node::text("First panel"),
+                )],
+                AccordionHandlers::new("single").on_value_change(Arc::new(move |next| {
+                    sink.lock().unwrap().push(next.clone());
+                    *mount.lock().unwrap() = build(
+                        spec_from_accordion_result(&next),
+                        collapsible,
+                        Arc::clone(&mount),
+                        Arc::clone(&sink),
+                    );
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            AccordionSelectionValue::Single(Some("first".into())),
+            true,
+            Arc::clone(&mounted),
+            Arc::clone(&payloads),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+
+        let first = accordion_trigger_id("single", "first");
+        let second = accordion_trigger_id("single", "second");
+        let panel = accordion_panel_id("single", "first");
+
+        {
+            let root = mounted.lock().unwrap();
+            assert!(root.a11y.role.is_none());
+            let trigger = accordion_target(&root, &first);
+            assert_eq!(trigger.a11y.role, Some(NodeRole::Button));
+            assert_eq!(trigger.a11y.expanded, Some(true));
+            assert_eq!(trigger.a11y.controls.as_deref(), Some(panel.as_str()));
+            assert!(trigger.style.focus_ring.is_some());
+            let region = accordion_target(&root, &panel);
+            assert_eq!(region.a11y.role, Some(NodeRole::Region));
+            assert_eq!(region.a11y.labelled_by.as_deref(), Some(first.as_str()));
+        }
+
+        driver.wait_for_focus_handle(&first);
+        driver.pointer_activate_id(&second);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [AccordionSelectionValue::Single(Some("second".into()))]
+        );
+        assert!(!mounted.lock().unwrap().has_text("First panel"));
+
+        driver.wait_for_focus_handle(&second);
+        driver.focus_element(&second);
+        driver.dispatch_key_raw("space");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [
+                AccordionSelectionValue::Single(Some("second".into())),
+                AccordionSelectionValue::Single(None),
+            ]
+        );
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .find(&|node| node.a11y.role == Some(NodeRole::Region))
+                .is_none()
+        );
+
+        driver.pointer_activate_id(&first);
+        assert_eq!(
+            payloads.lock().unwrap().last(),
+            Some(&AccordionSelectionValue::Single(Some("first".into())))
+        );
+    });
+
+    run_headless(|cx| {
+        fn build(
+            value: AccordionSelectionValue,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<AccordionSelectionValue>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let spec = AccordionSpec::new(vec![
+                AccordionItemSpec::new("first", "First"),
+                AccordionItemSpec::new("second", "Second"),
+            ])
+            .with_collapsible(false)
+            .with_value(value);
+            let mut node = accordion_with_content(
+                &spec,
+                &RenderContext::new(&theme()),
+                &[],
+                AccordionHandlers::new("locked").on_value_change(Arc::new(move |next| {
+                    sink.lock().unwrap().push(next.clone());
+                    *mount.lock().unwrap() =
+                        build(spec_from_accordion_result(&next), Arc::clone(&mount), Arc::clone(&sink));
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            AccordionSelectionValue::Single(Some("first".into())),
+            Arc::clone(&mounted),
+            Arc::clone(&payloads),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let first = accordion_trigger_id("locked", "first");
+        driver.wait_for_focus_handle(&first);
+        driver.pointer_activate_id(&first);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [AccordionSelectionValue::Single(Some("first".into()))]
+        );
+    });
+
+    run_headless(|cx| {
+        fn build(
+            value: AccordionSelectionValue,
+            mounted: Arc<Mutex<Node>>,
+            payloads: Arc<Mutex<Vec<AccordionSelectionValue>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&payloads);
+            let spec = AccordionSpec::new(vec![
+                AccordionItemSpec::new("design", "Design"),
+                AccordionItemSpec::new("keyboard", "Keyboard"),
+            ])
+            .with_selection_mode(AccordionSelectionMode::Multiple)
+            .with_value(value);
+            let mut node = accordion_with_content(
+                &spec,
+                &RenderContext::new(&theme()),
+                &[],
+                AccordionHandlers::new("multi").on_value_change(Arc::new(move |next| {
+                    sink.lock().unwrap().push(next.clone());
+                    *mount.lock().unwrap() =
+                        build(spec_from_accordion_result(&next), Arc::clone(&mount), Arc::clone(&sink));
+                })),
+            );
+            node.id = Some(FIXTURE_ID.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build(
+            AccordionSelectionValue::Multiple(vec!["design".into()]),
+            Arc::clone(&mounted),
+            Arc::clone(&payloads),
+        );
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        assert_eq!(
+            mounted.lock().unwrap().a11y.role,
+            Some(NodeRole::Group)
+        );
+        let design = accordion_trigger_id("multi", "design");
+        let keyboard = accordion_trigger_id("multi", "keyboard");
+        driver.wait_for_focus_handle(&keyboard);
+        driver.focus_element(&keyboard);
+        driver.dispatch_key_raw("enter");
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [AccordionSelectionValue::Multiple(vec![
+                "design".into(),
+                "keyboard".into()
+            ])],
+            "enter adds the closed item to the ordered set"
+        );
+        driver.pointer_activate_id(&design);
+        assert_eq!(
+            payloads.lock().unwrap().last(),
+            Some(&AccordionSelectionValue::Multiple(vec!["keyboard".into()])),
+            "pointer removes an open member from the ordered set"
+        );
+        driver.pointer_activate_id(&design);
+        assert_eq!(
+            payloads.lock().unwrap().last(),
+            Some(&AccordionSelectionValue::Multiple(vec![
+                "keyboard".into(),
+                "design".into()
+            ])),
+            "pointer add after remove rebuilds the complete Multiple result"
+        );
+    });
+
+    run_headless(|cx| {
+        fn marker(id: &str, label: &str) -> Node {
+            let mut node = poodle_render::button(
+                &poodle_specs::ButtonSpec::new().with_label(label),
+                &RenderContext::new(&theme()),
+                None,
+            );
+            node.id = Some(id.to_owned());
+            node
+        }
+
+        let payloads = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&payloads);
+        let disabled = accordion_trigger_id("disabled", "locked");
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.descriptor.layout.spacing.gap = 8.0;
+        root = root
+            .child(marker("accordion-before", "Before"))
+            .child(accordion_with_content(
+                &AccordionSpec::new(vec![
+                    AccordionItemSpec::new("locked", "Locked").with_disabled(true),
+                ])
+                .with_value(AccordionSelectionValue::Single(None)),
+                &RenderContext::new(&theme()),
+                &[],
+                AccordionHandlers::new("disabled")
+                    .on_value_change(Arc::new(move |next| sink.lock().unwrap().push(next))),
+            ))
+            .child(marker("accordion-after", "After"));
+
+        let mounted = Arc::new(Mutex::new(root));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 160.0);
+        driver.wait_for_focus_handle("accordion-before");
+        driver.wait_for_focus_handle("accordion-after");
+
+        let root_guard = mounted.lock().unwrap();
+        let disabled_trigger = accordion_target(&root_guard, &disabled);
+        assert!(disabled_trigger.interaction.disabled);
+        assert!(!disabled_trigger.interaction.focusable);
+        assert_eq!(disabled_trigger.a11y.tab_index, Some(-1));
+        assert!(disabled_trigger.interaction.on_activate.is_none());
+        drop(root_guard);
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&disabled).is_none(),
+            "disabled trigger never registers a sequential stop"
+        );
+
+        driver.pointer_activate_id(&disabled);
+        assert!(payloads.lock().unwrap().is_empty());
+
+        driver.focus_element("accordion-before");
+        driver.focus_next_tab_stop();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("accordion-after"),
+            Some(true),
+            "disabled accordion item is skipped by sequential focus"
+        );
+    });
+
+    run_headless(|cx| {
+        fn build_pair(
+            left_value: AccordionSelectionValue,
+            mounted: Arc<Mutex<Node>>,
+            left_events: Arc<Mutex<Vec<AccordionSelectionValue>>>,
+        ) -> Node {
+            let mount = Arc::clone(&mounted);
+            let sink = Arc::clone(&left_events);
+            let panel_body = Node::text("Shared panel");
+            let left = {
+                let mut node = accordion_with_content(
+                    &AccordionSpec::new(vec![AccordionItemSpec::new("shared", "Shared")])
+                        .with_value(left_value),
+                    &RenderContext::new(&theme()),
+                    &[("shared".to_string(), panel_body.clone())],
+                    AccordionHandlers::new("left").on_value_change(Arc::new({
+                        let mount = Arc::clone(&mount);
+                        let sink = Arc::clone(&sink);
+                        move |next| {
+                            sink.lock().unwrap().push(next.clone());
+                            *mount.lock().unwrap() = build_pair(
+                                spec_from_accordion_result(&next),
+                                Arc::clone(&mount),
+                                Arc::clone(&sink),
+                            );
+                        }
+                    })),
+                );
+                node.id = Some("accordion-left-host".to_owned());
+                node
+            };
+            let right = {
+                let mut node = accordion_with_content(
+                    &AccordionSpec::new(vec![AccordionItemSpec::new("shared", "Shared")])
+                        .with_value(AccordionSelectionValue::Single(Some("shared".into()))),
+                    &RenderContext::new(&theme()),
+                    &[("shared".to_string(), panel_body)],
+                    AccordionHandlers::new("right"),
+                );
+                node.id = Some("accordion-right-host".to_owned());
+                node
+            };
+            let mut root = Node::container();
+            root.style.descriptor.layout.direction = LayoutDirection::Row;
+            root.style.descriptor.layout.spacing.gap = 16.0;
+            root = root.child(left).child(right);
+            root
+        }
+
+        let left_events = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().unwrap() = build_pair(
+            AccordionSelectionValue::Single(Some("shared".into())),
+            Arc::clone(&mounted),
+            Arc::clone(&left_events),
+        );
+
+        let left_trigger = accordion_trigger_id("left", "shared");
+        let right_trigger = accordion_trigger_id("right", "shared");
+        let left_panel = accordion_panel_id("left", "shared");
+        let right_panel = accordion_panel_id("right", "shared");
+        assert_ne!(left_trigger, right_trigger);
+        assert_ne!(left_panel, right_panel);
+
+        {
+            let root = mounted.lock().unwrap();
+            let left_region = accordion_target(&root, &left_panel);
+            let right_region = accordion_target(&root, &right_panel);
+            assert_eq!(left_region.a11y.role, Some(NodeRole::Region));
+            assert_eq!(right_region.a11y.role, Some(NodeRole::Region));
+            assert_eq!(
+                left_region.a11y.labelled_by.as_deref(),
+                Some(left_trigger.as_str())
+            );
+            assert_eq!(
+                right_region.a11y.labelled_by.as_deref(),
+                Some(right_trigger.as_str())
+            );
+            assert_eq!(
+                accordion_target(&root, &left_trigger)
+                    .a11y
+                    .controls
+                    .as_deref(),
+                Some(left_panel.as_str())
+            );
+            assert_eq!(
+                accordion_target(&root, &right_trigger)
+                    .a11y
+                    .controls
+                    .as_deref(),
+                Some(right_panel.as_str())
+            );
+        }
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 480.0, 120.0);
+        driver.wait_for_focus_handle(&left_trigger);
+        driver.wait_for_focus_handle(&right_trigger);
+        assert_ne!(
+            poodle_gpui_node_backend::focus_handle_for(&left_trigger),
+            poodle_gpui_node_backend::focus_handle_for(&right_trigger)
+        );
+
+        driver.pointer_activate_id(&left_trigger);
+        assert_eq!(
+            left_events.lock().unwrap().as_slice(),
+            [AccordionSelectionValue::Single(None)]
+        );
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .find(&|node| node.runtime_id.as_deref() == Some(left_panel.as_str()))
+                .is_none(),
+            "left rebuild removes its panel while the right panel stays mounted"
+        );
+        assert!(
+            mounted
+                .lock()
+                .unwrap()
+                .find(&|node| node.runtime_id.as_deref() == Some(right_panel.as_str()))
+                .is_some()
+        );
+
+        driver.pointer_activate_id(&left_trigger);
+        assert_eq!(
+            left_events.lock().unwrap().last(),
+            Some(&AccordionSelectionValue::Single(Some("shared".into())))
+        );
+        assert_eq!(
+            mounted
+                .lock()
+                .unwrap()
+                .find(&|node| node.runtime_id.as_deref() == Some(left_panel.as_str()))
+                .expect("left panel returns after rebuild")
+                .a11y
+                .labelled_by
+                .as_deref(),
+            Some(left_trigger.as_str())
         );
     });
 }

@@ -1,6 +1,6 @@
 # g16.014 — Accordion Result Selection And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-27
 Depends on: merged `g16.013` / PR #87; operator-approved clean migration in
 `../../triage/20260827-173242-post-g16-013-native-lane-decision.md`
@@ -93,15 +93,15 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Execution Plan
 
-- [ ] **Batch 1 — clean semantic migration.** Update the contract-backed Rust
+- [x] **Batch 1 — clean semantic migration.** Update the contract-backed Rust
       value and mode surface, remove legacy APIs, migrate every Rust call site,
       and add focused `poodle-specs` tests for single open/collapsed, multiple
       open/empty, value-over-default precedence, and mode consistency.
-- [ ] **Batch 2 — shared transition and disclosure semantics.** Introduce the
+- [x] **Batch 2 — shared transition and disclosure semantics.** Introduce the
       required handler bundle, route activation through the existing headless
       transition, project roles/expanded/relations/focus/disabled state, and add
       focused `poodle-render` tests including two-instance identity.
-- [ ] **Batch 3 — GPUI host rebuild and evidence.** Wire the wrapper/specimen
+- [x] **Batch 3 — GPUI host rebuild and evidence.** Wire the wrapper/specimen
       through typed results and stable scopes, correct the specimen keyboard
       copy, add one named mounted headless regression, regenerate only
       Accordion's ledger cell, close the card/decision/log/front doors, and run
@@ -151,30 +151,30 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Acceptance Criteria
 
-- [ ] `AccordionSpec` has one `selection_mode` field and no `allow_multiple` or
+- [x] `AccordionSpec` has one `selection_mode` field and no `allow_multiple` or
       `with_allow_multiple` compatibility surface.
-- [ ] Single mode represents both `Some(value)` and explicit `None`; multiple
+- [x] Single mode represents both `Some(value)` and explicit `None`; multiple
       mode represents the complete ordered set, including empty.
-- [ ] All Rust call sites use the semantic enum and mode directly; deferred
+- [x] All Rust call sites use the semantic enum and mode directly; deferred
       Jetstream changes are mechanical only.
-- [ ] Every native construction supplies a non-empty stable scope through
+- [x] Every native construction supplies a non-empty stable scope through
       `AccordionHandlers`; no bare activated-item callback or no-op identity
       builder remains.
-- [ ] Native activation uses the existing headless ToggleGroup transition and
+- [x] Native activation uses the existing headless ToggleGroup transition and
       reports only resulting typed selections for single, collapsible single,
       non-collapsible single, and multiple modes.
-- [ ] Root, trigger, and panel semantics match the contract; enabled triggers
+- [x] Root, trigger, and panel semantics match the contract; enabled triggers
       carry focus rings and ordinary tab stops; disabled triggers do not.
-- [ ] Trigger/panel relations and runtime ids remain stable across host rebuilds
+- [x] Trigger/panel relations and runtime ids remain stable across host rebuilds
       and independent across two same-valued mounted instances.
-- [ ] The curated GPUI specimen uses typed host rebuilds, retains its useful
+- [x] The curated GPUI specimen uses typed host rebuilds, retains its useful
       examples/axes, and no longer advertises unsupported key behavior.
-- [ ] One named mounted regression proves the fixed behavior through real
+- [x] One named mounted regression proves the fixed behavior through real
       pointer and keyboard dispatch.
-- [ ] The generated ledger changes only Accordion to 43 mounted / 131 missing;
+- [x] The generated ledger changes only Accordion to 43 mounted / 131 missing;
       known-delta totals stay 115 / 60 and visual/accessibility cells remain
       unchanged.
-- [ ] One August log records the approved break, result transition, disclosure
+- [x] One August log records the approved break, result transition, disclosure
       repair, evidence, validation, exact non-claims, and next checkpoint.
 
 ## Writable Scope
