@@ -1,7 +1,7 @@
 # g16.017 — Rating Nullable, Fractional, And Mounted Parity
 
 Date: 2026-08-27
-Status: complete — awaiting merge
+Status: complete — awaiting merge in PR #92
 Branch: `t3code/review-rating-worker-handoff`
 Card: `docs/roadmaps/g16/017-rating-nullable-fractional-and-mounted-parity.md`
 Source triage: `docs/triage/20260827-222346-post-g16-016-native-lane-decision.md`
