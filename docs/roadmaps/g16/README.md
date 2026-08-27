@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — `g16.011` complete; awaiting orchestrator evidence checkpoint
+Status: active — `g16.012` ready
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -42,6 +42,7 @@ stay maintained; backend admission is not part of the first card.
 9. [009 — DurationInput single source and mounted behaviour](009-duration-input-single-source-and-mounted-behaviour.md) — complete; merged in PR #83
 10. [010 — Breadcrumbs callback semantics and mounted parity](010-breadcrumbs-callback-semantics-and-mounted-parity.md) — complete
 11. [011 — IconButton activation, toggle, and mounted parity](011-icon-button-activation-toggle-and-mounted-parity.md) — complete
+12. [012 — Collapsible disclosure and mounted parity](012-collapsible-disclosure-and-mounted-parity.md) — ready
 
 ## Measured Selection
 
@@ -135,7 +136,20 @@ Ledger: 39 → 40 mounted, 135 → 134 missing. Known-delta totals stay 115 pres
 60 not-applicable. NumberInput's raw-draft/value-model decision and broader
 visual/accessibility programmes remain separate.
 
+The post-`g16.011` checkpoint selected Collapsible as the next bounded
+foundation lane. Its renderer already computes effective controlled/default
+open state but announces a different value, places disclosure semantics on the
+outer shell instead of the trigger/content pair, leaves disabled triggers
+focusable, and discards the GPUI wrapper's authored instance id. `g16.012`
+repairs those seams through existing node/backend channels and adds one named
+mounted regression. Only Collapsible may move: 40 → 41 mounted and 134 → 133
+missing; known-delta totals stay 115 / 60. TriStateSwitch, NumberInput,
+EditableLabel, Accordion, visual comparison, accessibility, and Jetstream stay
+outside the card.
+
 ## Next Task
 
-Return g16 to an orchestrator evidence checkpoint. Do not compile `g16.012` in
-this worker thread.
+Dispatch `g16.012` from
+`../../handoffs/20260827-141543-g16-012-collapsible-worker.md`. Keep the lane
+serial; the worker must return g16 to an orchestrator evidence checkpoint and
+must not compile `g16.013`.

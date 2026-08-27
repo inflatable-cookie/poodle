@@ -33,9 +33,10 @@ chosen.
   plus the Breadcrumbs known-delta cell (`not-applicable` → `present`;
   114 → 115 present, 61 → 60 not-applicable). `g16.011` closed IconButton
   command, toggle, tooltip projection, and mounted GPUI evidence (39 → 40
-  mounted, 135 → 134 missing). Known-delta totals stay 115 / 60. The next
-  move is an orchestrator evidence checkpoint; do not compile `g16.012` from
-  this closeout. No broader conformance programme is implied.
+  mounted, 135 → 134 missing). Known-delta totals stay 115 / 60. The
+  orchestrator checkpoint selected `g16.012` Collapsible disclosure and
+  mounted parity as the next serial lane. It may move only Collapsible to 41
+  mounted / 133 missing. No broader conformance programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -89,7 +90,7 @@ chosen.
   operator-reviewed; `002` closed — partial outcome; `003` merged in PR #77;
   `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
   `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
-  `010` merged in PR #84; `011` ready
+  `010` merged in PR #84; `011` merged in PR #85; `012` ready
 
 ## Rules
 
