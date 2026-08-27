@@ -8,15 +8,11 @@ use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{DurationInputSpec, EyebrowSpec};
 
-fn duration_total_label(value: &str) -> String {
-    let parts: Vec<u32> = value
-        .split(':')
-        .filter_map(|part| part.parse().ok())
-        .collect();
-    match parts.as_slice() {
-        [hours, minutes, seconds] => format!("Total: {hours}h {minutes}m {seconds}s"),
-        [hours, minutes] => format!("Total: {hours}h {minutes}m"),
-        _ => format!("Total: {value}"),
+fn duration_total_label(hours: u32, minutes: u32, seconds: u32, show_seconds: bool) -> String {
+    if show_seconds {
+        format!("Total: {hours}h {minutes}m {seconds}s")
+    } else {
+        format!("Total: {hours}h {minutes}m")
     }
 }
 
@@ -24,38 +20,32 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let theme = &state.theme;
     let text_secondary = theme.resolve_color("color.text.secondary");
 
-    // Segment edits are host state, like every other value on this page: the
-    // component reports hours/minutes/seconds after carry and the host stores
-    // the formatted result.
-    let stored = |key: &str, fallback: &str| {
+    let stored = |key: &str, fallback: (u32, u32, u32)| {
         state
             .specimens
-            .text
+            .durations
             .get(key)
-            .cloned()
-            .unwrap_or_else(|| fallback.to_string())
+            .copied()
+            .unwrap_or(fallback)
     };
     macro_rules! live_duration {
-        ($builder:expr, $key:literal, $seconds:expr) => {{
+        ($builder:expr, $key:literal) => {{
             let queue = std::sync::Arc::clone(&state.node_events);
-            let show_seconds = $seconds;
             $builder.on_change(std::sync::Arc::new(
-                move |h: u32, m: u32, sec: u32, _total: u32| {
-                    let value = if show_seconds {
-                        format!("{h:02}:{m:02}:{sec:02}")
-                    } else {
-                        format!("{h:02}:{m:02}")
-                    };
-                    queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                move |hours: u32, minutes: u32, seconds: u32, _total: u64| {
+                    queue.lock().unwrap().push(NodeSpecimenEvent::SetDuration {
                         key: $key.to_string(),
-                        value,
+                        hours,
+                        minutes,
+                        seconds,
                     });
                 },
             ))
         }};
     }
 
-    let full_value = stored("duration-full", "01:30:00");
+    let (full_h, full_m, full_s) = stored("duration-full", (1, 30, 0));
+    let (hm_h, hm_m, hm_s) = stored("duration-hm", (0, 45, 0));
     let examples = div()
         .flex()
         .flex_col()
@@ -78,20 +68,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .gap(px(4.0))
                         .child(live_duration!(
                             DurationInput::from_spec(
-                                DurationInputSpec::new()
-                                    .with_value(full_value.clone())
-                                    .with_show_seconds(true),
+                                DurationInputSpec::new().with_segments(full_h, full_m, full_s),
                                 theme,
                             )
                             .with_id("duration-full"),
-                            "duration-full",
-                            true
+                            "duration-full"
                         ))
                         .child(
                             div()
                                 .text_xs()
                                 .text_color(color_to_hsla(text_secondary))
-                                .child(duration_total_label(&full_value)),
+                                .child(duration_total_label(full_h, full_m, full_s, true)),
                         ),
                 ),
         )
@@ -108,13 +95,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(live_duration!(
                     DurationInput::from_spec(
                         DurationInputSpec::new()
-                            .with_value(stored("duration-hm", "00:45"))
+                            .with_segments(hm_h, hm_m, hm_s)
                             .with_show_seconds(false),
                         theme,
                     )
                     .with_id("duration-hm"),
-                    "duration-hm",
-                    false
+                    "duration-hm"
                 )),
         )
         // --- Disabled ---
@@ -130,7 +116,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(
                     DurationInput::from_spec(
                         DurationInputSpec::new()
-                            .with_value("02:15:30")
+                            .with_segments(2, 15, 30)
                             .with_disabled(true),
                         theme,
                     )
@@ -146,13 +132,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         examples,
         SpecimenAxes::examples_only()
             .with_sizes(|size, theme: &GpuiThemeProvider| {
-                DurationInput::from_spec(DurationInputSpec::new().with_value("01:00"), theme)
+                DurationInput::from_spec(DurationInputSpec::new().with_segments(1, 0, 0), theme)
                     .with_id(format!("specimen-size-{:?}", size))
                     .size(size)
                     .into_any_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
-                DurationInput::from_spec(DurationInputSpec::new().with_value("01:00"), theme)
+                DurationInput::from_spec(DurationInputSpec::new().with_segments(1, 0, 0), theme)
                     .with_id(format!("specimen-density-{:?}", density))
                     .with_density(density)
                     .into_any_element()

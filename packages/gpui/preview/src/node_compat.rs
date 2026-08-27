@@ -5053,7 +5053,7 @@ pub(crate) struct DurationInput {
     spec: DurationInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
-    on_change: Option<Arc<dyn Fn(u32, u32, u32, u32) + Send + Sync>>,
+    on_change: Option<Arc<dyn Fn(u32, u32, u32, u64) + Send + Sync>>,
 }
 
 impl DurationInput {
@@ -5083,7 +5083,7 @@ impl DurationInput {
 
     pub(crate) fn on_change(
         mut self,
-        handler: Arc<dyn Fn(u32, u32, u32, u32) + Send + Sync>,
+        handler: Arc<dyn Fn(u32, u32, u32, u64) + Send + Sync>,
     ) -> Self {
         self.on_change = Some(handler);
         self

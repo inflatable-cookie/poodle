@@ -26,8 +26,8 @@ fn clamp(value: i64, min: i64, max: i64) -> i64 {
     value.max(min).min(max)
 }
 
-pub fn duration_total_seconds(value: DurationValue) -> u32 {
-    value.hours * 3600 + value.minutes * 60 + value.seconds
+pub fn duration_total_seconds(value: DurationValue) -> u64 {
+    u64::from(value.hours) * 3600 + u64::from(value.minutes) * 60 + u64::from(value.seconds)
 }
 
 /// Step a segment by ±`delta` with carry/borrow, hours clamped to
@@ -252,5 +252,13 @@ mod tests {
         assert_eq!(duration_total_seconds(v(1, 2, 3)), 3723);
         assert_eq!(pad_duration_segment(7), "07");
         assert_eq!(pad_duration_segment(42), "42");
+    }
+
+    #[test]
+    fn a_large_hours_value_does_not_overflow_the_total() {
+        assert_eq!(
+            duration_total_seconds(v(u32::MAX, 59, 59)),
+            u64::from(u32::MAX) * 3600 + 59 * 60 + 59
+        );
     }
 }

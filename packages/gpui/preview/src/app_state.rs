@@ -217,6 +217,9 @@ pub struct SpecimenState {
     /// whose value is stored but whose caret is not inserts every keystroke at
     /// index 0, which spells typed text backwards.
     pub carets: HashMap<String, (usize, usize)>,
+    /// Hours/minutes/seconds per DurationInput specimen key. The formatted
+    /// display is derived; the host stores the three segments.
+    pub durations: HashMap<String, (u32, u32, u32)>,
 }
 
 impl SpecimenState {
@@ -241,6 +244,7 @@ impl SpecimenState {
             counters: HashMap::new(),
             text: HashMap::new(),
             carets: HashMap::new(),
+            durations: HashMap::new(),
         }
     }
 
@@ -393,6 +397,13 @@ pub enum NodeSpecimenEvent {
     /// Set a text specimen key without touching any overlay state
     /// (e.g. segmented-control change, button "last clicked" captions).
     SetText { key: String, value: String },
+    /// Write a DurationInput's three segment values directly.
+    SetDuration {
+        key: String,
+        hours: u32,
+        minutes: u32,
+        seconds: u32,
+    },
     /// Set or clear an optional text specimen key (e.g. either endpoint of a
     /// partially selected calendar range).
     SetOptionalText { key: String, value: Option<String> },
@@ -805,6 +816,16 @@ impl AppState {
                         caret.1 = caret.1.min(len);
                     }
                     self.specimens.text.insert(key, value);
+                }
+                NodeSpecimenEvent::SetDuration {
+                    key,
+                    hours,
+                    minutes,
+                    seconds,
+                } => {
+                    self.specimens
+                        .durations
+                        .insert(key, (hours, minutes, seconds));
                 }
                 NodeSpecimenEvent::SetCaret { key, start, end } => {
                     self.specimens.carets.insert(key, (start, end));
