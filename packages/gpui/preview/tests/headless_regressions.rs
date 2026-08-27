@@ -9569,9 +9569,11 @@ fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_key
         driver.pointer_activate_id("ct-enabled");
         assert_eq!(*reported.lock().expect("report lock"), [true]);
 
-        if poodle_gpui_node_backend::bounds_for("ct-disabled").is_some() {
-            driver.pointer_activate_id("ct-disabled");
-        }
+        assert!(
+            poodle_gpui_node_backend::bounds_for("ct-disabled").is_some(),
+            "disabled pointer proof needs a real hit target"
+        );
+        driver.pointer_activate_id("ct-disabled");
         assert!(
             poodle_gpui_node_backend::focus_handle_for("ct-disabled").is_none(),
             "disabled toggle never registers a sequential stop"

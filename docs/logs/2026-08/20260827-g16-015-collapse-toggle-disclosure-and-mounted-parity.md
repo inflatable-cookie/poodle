@@ -51,7 +51,7 @@ proves, through production hit testing, focus, and key dispatch:
 - enabled focus is a real sequential stop and the node declares the contracted
   ring
 - disabled controls expose disabled state, cannot receive sequential focus, and
-  emit nothing through pointer input
+  emit nothing through real pointer dispatch against painted bounds
 
 All four direction pairs are covered by focused spec/renderer tests. Fixture
 ids are test targeting aids only.
