@@ -1,7 +1,8 @@
 # g16.017 — Rating Nullable, Fractional, And Mounted Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-27
+Completed: 2026-08-27
 Depends on: merged `g16.016` / PR #91 and the resolved selection in
 `../../triage/20260827-222346-post-g16-016-native-lane-decision.md`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -122,15 +123,15 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Execution Plan
 
-- [ ] **Batch 1 — contract and pure machinery.** Apply the approved Rust API
+- [x] **Batch 1 — contract and pure machinery.** Apply the approved Rust API
       break, migrate in-repo call sites mechanically, add native pure Rating
       math with paired focused vectors, and update stale native contract notes.
-- [ ] **Batch 2 — renderer and mounted behavior.** Add Rating-specific handlers,
+- [x] **Batch 2 — renderer and mounted behavior.** Add Rating-specific handlers,
       implement whole-step radio and fractional slider paths through existing
       node vocabulary, update the curated GPUI specimen, and add one readable
       named mounted regression with real pointer/keyboard dispatch and host
       rebuilds.
-- [ ] **Batch 3 — evidence and closeout.** Regenerate only Rating's mounted
+- [x] **Batch 3 — evidence and closeout.** Regenerate only Rating's mounted
       ledger cell, close this card/source decision/log/front doors, and run the
       required headless board.
 
@@ -172,28 +173,28 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Acceptance Criteria
 
-- [ ] Rust Rating uses nullable authored/default values, default half-step
+- [x] Rust Rating uses nullable authored/default values, default half-step
       input, no legacy precision/read-only surface, and `Option<f64>` callbacks.
-- [ ] Native pure math matches the TypeScript authority on display clamp,
+- [x] Native pure math matches the TypeScript authority on display clamp,
       snapping, pointer ratios, fill, clear, formatting, and keyboard vectors.
-- [ ] Whole-step mode has correct radiogroup/radio selection, roving focus,
+- [x] Whole-step mode has correct radiogroup/radio selection, roving focus,
       keyboard lifecycle, pointer behavior, disabled inertia, and host rebuilds.
-- [ ] Fractional mode has correct slider semantics, numeric value/text, stepped
+- [x] Fractional mode has correct slider semantics, numeric value/text, stepped
       pointer and keyboard behavior, clear behavior, disabled inertia, and host
       rebuilds.
-- [ ] Arbitrary incoming fractions display without step quantization; accepted
+- [x] Arbitrary incoming fractions display without step quantization; accepted
       user values are quantized; `None` is not collapsed into zero.
-- [ ] Focus identity is stable and isolated across Rating instances without a
+- [x] Focus identity is stable and isolated across Rating instances without a
       new web prop or render-order-derived id.
-- [ ] Focused Svelte and React Rating tests remain green without public web
+- [x] Focused Svelte and React Rating tests remain green without public web
       implementation changes.
-- [ ] The GPUI specimen is interactive, human-centred, and preserves Sizes and
+- [x] The GPUI specimen is interactive, human-centred, and preserves Sizes and
       Densities without becoming an exhaustive conformance page.
-- [ ] One named mounted regression proves the production Rating path.
-- [ ] The generated ledger changes only Rating to 46 mounted / 128 missing;
+- [x] One named mounted regression proves the production Rating path.
+- [x] The generated ledger changes only Rating to 46 mounted / 128 missing;
       known-delta totals remain 115 / 60 and visual/accessibility cells remain
       unchanged.
-- [ ] One August log records the migration, proof, validation, non-claims, and
+- [x] One August log records the migration, proof, validation, non-claims, and
       next checkpoint.
 
 ## Writable Scope
