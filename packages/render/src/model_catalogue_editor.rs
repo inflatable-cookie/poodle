@@ -282,40 +282,35 @@ pub fn model_catalogue_editor_with_slots(
     root
 }
 
-/// Stamp the hidden-section disclosure on `Collapsible`'s own focusable
-/// trigger and reconcile the open content region's identity and relationships.
+/// Stamp the hidden-section disclosure on `Collapsible`'s direct trigger and
+/// optional content wrapper only. Nested focusable controls keep their own ids.
 fn mark_hidden_disclosure(
-    node: &mut Node,
+    section: &mut Node,
     instance_id: Option<&str>,
     ctx: &RenderContext<'_>,
-) -> bool {
+) {
     let trigger_focus = model_catalogue_hidden_focus_id(instance_id);
     let content_focus = model_catalogue_hidden_content_focus_id(instance_id);
-    let mut matched = false;
 
-    if node.interaction.focusable {
-        node.id = Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID.to_string());
-        node.runtime_id = Some(trigger_focus.clone());
-        node.a11y.controls = Some(content_focus.clone());
-        node.style.focus = Some(StylePatch {
-            border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
-            ..StylePatch::default()
-        });
-        matched = true;
+    if let Some(trigger) = section.children.first_mut() {
+        if trigger.interaction.focusable {
+            trigger.id = Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID.to_string());
+            trigger.runtime_id = Some(trigger_focus.clone());
+            trigger.a11y.controls = Some(content_focus.clone());
+            trigger.style.focus = Some(StylePatch {
+                border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
+                ..StylePatch::default()
+            });
+        }
     }
 
-    if node.a11y.role == Some(NodeRole::Region) {
-        node.id = Some(content_focus.clone());
-        node.runtime_id = Some(content_focus);
-        node.a11y.labelled_by = Some(trigger_focus);
-        matched = true;
+    if let Some(content) = section.children.get_mut(1) {
+        if content.a11y.role == Some(NodeRole::Region) {
+            content.id = Some(content_focus.clone());
+            content.runtime_id = Some(content_focus);
+            content.a11y.labelled_by = Some(trigger_focus);
+        }
     }
-
-    for child in &mut node.children {
-        matched |= mark_hidden_disclosure(child, instance_id, ctx);
-    }
-
-    matched
 }
 
 /// `icon_button` renders no focus patch, and the GPUI backend only creates a
@@ -1463,6 +1458,38 @@ mod tests {
             content.a11y.labelled_by.as_deref(),
             Some(trigger_focus.as_str())
         );
+    }
+
+    #[test]
+    fn hidden_restore_controls_keep_their_scoped_identity() {
+        let node = model_catalogue_editor(
+            &spec().with_hidden_open(true),
+            &RenderContext::new(&theme()),
+            ModelCatalogueEditorHandlers {
+                instance_id: Some("editor".to_string()),
+                ..ModelCatalogueEditorHandlers::default()
+            },
+        );
+        let trigger_focus = model_catalogue_hidden_focus_id(Some("editor"));
+        let content_focus = model_catalogue_hidden_content_focus_id(Some("editor"));
+        let trigger = node
+            .find(&|n| n.id.as_deref() == Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID))
+            .expect("hidden-section trigger");
+        assert_eq!(trigger.a11y.controls.as_deref(), Some(content_focus.as_str()));
+
+        let restore = node
+            .find(&|n| n.a11y.label.as_deref() == Some("Restore Archive Delta"))
+            .expect("hidden restore control");
+        assert_eq!(
+            restore.id.as_deref(),
+            Some("model-catalogue-editor:model-hidden:restore")
+        );
+        assert_eq!(
+            restore.runtime_id.as_deref(),
+            Some("model-catalogue-editor:editor:model-hidden:restore")
+        );
+        assert_ne!(restore.runtime_id, trigger.runtime_id);
+        assert_ne!(restore.id.as_deref(), trigger.id.as_deref());
     }
 
     #[test]
