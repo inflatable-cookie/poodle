@@ -1,7 +1,7 @@
 # g16.010 — Breadcrumbs Callback Semantics And Mounted Parity
 
 Date: 2026-08-27
-Status: complete — awaiting PR
+Status: complete — PR #84
 Branch: `t3code/update-breadcrumb-component`
 Card: `docs/roadmaps/g16/010-breadcrumbs-callback-semantics-and-mounted-parity.md`
 Source triage: `docs/triage/20260827-112634-post-g16-009-native-lane-decision.md`
@@ -72,12 +72,12 @@ added. Direct handler calls are used only in focused renderer tests.
 ## Validation
 
 Focused `poodle-render` Breadcrumbs tests (10), Svelte and React Breadcrumbs
-tests (20, unchanged), named mounted Breadcrumbs regression. Remaining
-headless board ran at closeout: `effigy regressions:native`,
-`effigy probe:gpui-specimens`, `effigy drift:handlers`, `effigy drift:events`,
-`effigy test:parity-evidence-ledger`, `effigy check:parity-evidence-ledger`,
-`effigy ci:native`, `effigy ci:web`, `effigy docs:check`, `effigy qa`, and
-`git diff --check origin/main...HEAD`.
+tests (20, unchanged), named mounted Breadcrumbs regression.
+`effigy regressions:native` (85), `effigy probe:gpui-specimens` (8),
+`effigy drift:handlers`, `effigy drift:events`,
+`effigy test:parity-evidence-ledger` (5), `effigy check:parity-evidence-ledger`
+(175 rows), `effigy ci:native`, `effigy ci:web`, `effigy docs:check`,
+`effigy qa`, and `git diff --check origin/main...HEAD`.
 
 `effigy doctor` is already red on the planning base (generated-in-src,
 god-files, stale-suppressions). That baseline is unchanged and was not
