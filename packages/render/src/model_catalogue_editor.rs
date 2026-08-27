@@ -1470,7 +1470,6 @@ mod tests {
                 ..ModelCatalogueEditorHandlers::default()
             },
         );
-        let trigger_focus = model_catalogue_hidden_focus_id(Some("editor"));
         let content_focus = model_catalogue_hidden_content_focus_id(Some("editor"));
         let trigger = node
             .find(&|n| n.id.as_deref() == Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID))
