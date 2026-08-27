@@ -10,12 +10,13 @@ Updated: 2026-08-27
     `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
     `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
     `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
-    `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90
+    `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
+    `016` ready for worker dispatch
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: re-evaluate the merged 44 mounted / 130 missing checkpoint and
-    choose the next bounded lane before compiling `g16.016`. Select,
+  - Next move: dispatch `g16.016` Pagination navigation/loading/mounted parity.
+    Only Pagination may move the ledger to 45 mounted / 129 missing. Select,
     NumberInput, EditableLabel, Rating, visual comparison, accessibility, and
     Jetstream remain separate decisions.
 

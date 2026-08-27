@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — post-g16.015 checkpoint; 44 mounted / 130 missing
+Status: active — g16.016 ready for worker dispatch; 44 mounted / 130 missing
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -46,6 +46,7 @@ stay maintained; backend admission is not part of the first card.
 13. [013 — TriStateSwitch contract and mounted parity](013-tri-state-switch-contract-and-mounted-parity.md) — complete; merged in PR #87
 14. [014 — Accordion result selection and mounted parity](014-accordion-result-selection-and-mounted-parity.md) — complete; merged in PR #88
 15. [015 — CollapseToggle disclosure and mounted parity](015-collapse-toggle-disclosure-and-mounted-parity.md) — complete; merged in PR #90
+16. [016 — Pagination navigation, loading, and mounted parity](016-pagination-navigation-loading-and-mounted-parity.md) — ready
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
@@ -189,8 +190,16 @@ mounted GPUI regression. Ledger: 43 → 44 mounted and 131 → 130 missing.
 Known-delta totals stay 115 / 60. Select, EditableLabel, NumberInput, Rating,
 visual comparison, broad accessibility, and Jetstream stay outside the card.
 
+The post-`g16.015` checkpoint selected Pagination rather than an unresolved
+editing/API migration or a full overlay lane. `g16.016` is ready to close one
+measured loading leak — the wired page-size Select remains live while page
+buttons are disabled — and prove numbered, simple, full, boundary, loading,
+and limit changes through mounted GPUI host rebuilds. It may move only
+Pagination's behavior cell: 44 → 45 mounted and 130 → 129 missing. Select's own
+row, native accessibility, visual comparison, and Jetstream stay unchanged.
+
 ## Next Task
 
-Re-evaluate the ledger at the merged 44 mounted / 130 missing checkpoint and
-choose the next bounded parity lane. Do not compile or start `g16.016` until
-that checkpoint is recorded.
+Dispatch `g16.016` from its committed worker handoff. Keep the lane serial and
+do not compile or start `g16.017` until Pagination is merged and the resulting
+45 mounted / 129 missing checkpoint is re-evaluated.
