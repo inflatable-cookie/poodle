@@ -39,7 +39,8 @@ proves, through production hit testing, focus, and key dispatch:
 - pointer selection reports `Single(Some(...))` once and rebuilds open state
 - collapsible reactivation reports `Single(None)` and removes the panel
 - non-collapsible reactivation reports the unchanged single result
-- multiple add and remove report complete ordered `Multiple(...)` results
+- multiple add and remove report complete ordered `Multiple(...)` results,
+  including add after remove through the mounted rebuild path
 - Enter and Space use the same result path as pointer activation
 - disabled items emit nothing and are skipped by sequential focus
 - two simultaneously open same-valued mounted accordions keep independent trigger
@@ -70,8 +71,9 @@ Ran in the worker worktree after `bun install`:
 
 Not run / blocked:
 
-- final `effigy qa` — fails on `gate-tree-guard.ts --compare` when unrelated
-  workspace files are dirty; accordion-only validation above passed cleanly
+- final `effigy qa` — known `gate-tree-guard --compare` board issue recorded in
+  `PAPERCUTS.md` (reproduces from a clean committed worktree; preceding web/docs
+  steps pass). Not Accordion-specific.
 - `effigy drift:roles` — deferred Jetstream sibling absent (`PAPERCUTS.md`)
 
 `effigy doctor` baseline (generated-in-src, god-files, stale-suppressions)
