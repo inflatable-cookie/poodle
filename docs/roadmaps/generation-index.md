@@ -14,10 +14,11 @@ Updated: 2026-08-27
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: run the orchestrator evidence checkpoint at 42 mounted / 132
-    missing and select the next bounded lane. Do not compile `g16.014` before
-    that selection. NumberInput, EditableLabel, Accordion, visual comparison,
-    accessibility, and Jetstream remain separate decisions.
+  - Next move: approve or reject the recommended clean Accordion Rust migration
+    recorded in `docs/triage/20260827-173242-post-g16-013-native-lane-decision.md`.
+    Do not compile `g16.014` before that decision. NumberInput, EditableLabel,
+    Rating, visual comparison, accessibility, and Jetstream remain separate
+    decisions.
 
 ## Latest Completed Track
 

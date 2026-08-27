@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.013 merged; orchestrator evidence checkpoint
+Status: active — g16.013 merged; Accordion migration awaiting approval
 Posture: strict-paused
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -172,7 +172,8 @@ outside the card.
 
 ## Next Task
 
-Re-evaluate the ledger at 42 mounted / 132 missing and select the next bounded
-lane. Do not compile or start `g16.014` until that evidence checkpoint chooses
-the work. NumberInput, EditableLabel, Accordion, visual comparison,
-accessibility, and Jetstream remain separate decisions.
+Resolve the recommended clean Accordion Rust migration in
+`../../triage/20260827-173242-post-g16-013-native-lane-decision.md`. Do not
+compile or start `g16.014` until the operator approves or rejects that break.
+NumberInput, EditableLabel, Rating, visual comparison, accessibility, and
+Jetstream remain separate decisions.
