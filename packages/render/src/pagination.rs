@@ -23,8 +23,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeRole,
+    ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing,
+    MainAxisAlignment, Node, NodeRole,
 };
 use poodle_specs::{ChoiceOption, PageItem, PaginationSpec, PaginationVariant, SelectSpec};
 
@@ -91,6 +91,11 @@ pub fn pagination_with_handlers(
     let button_border = with_alpha(border_color, border_color.3 * 0.78);
 
     let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
+    let focus_ring = FocusRing {
+        color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+        width: ctx.theme().resolve_border_width("border.width.focus"),
+        offset: rem_to_px(0.125),
+    };
 
     // One wrapping row: info, optional limit selector and navigation controls.
     let mut root = Node::container();
@@ -195,11 +200,21 @@ pub fn pagination_with_handlers(
             if is_disabled || spec.is_loading {
                 btn.style.descriptor.opacity = disabled_opacity;
                 btn.interaction.disabled = true;
-            } else if !is_current {
+                btn.interaction.focusable = false;
+                btn.a11y.tab_index = None;
+            } else {
+                btn.a11y.tab_index = Some(0);
+                btn.style.focus_ring = Some(FocusRing {
+                    color: ctx.theme().resolve_color(spec.focus_ring_color_token()),
+                    width: ctx.theme().resolve_border_width("border.width.focus"),
+                    offset: rem_to_px(0.125),
+                });
                 // The current page is where you already are, so it is not a route.
-                if let (Some(page), Some(handler)) = (goto, &handlers.page_change) {
-                    let handler = Arc::clone(handler);
-                    btn.interaction.on_activate = Some(Arc::new(move || handler(page)));
+                if !is_current {
+                    if let (Some(page), Some(handler)) = (goto, &handlers.page_change) {
+                        let handler = Arc::clone(handler);
+                        btn.interaction.on_activate = Some(Arc::new(move || handler(page)));
+                    }
                 }
             }
 
@@ -239,6 +254,7 @@ pub fn pagination_with_handlers(
             text_primary,
             disabled_opacity,
             pad_x,
+            Some(focus_ring),
         ));
     }
 
@@ -325,6 +341,7 @@ pub fn pagination_with_handlers(
             text_primary,
             disabled_opacity,
             pad_x,
+            Some(focus_ring),
         ));
     }
 
@@ -369,6 +386,7 @@ fn arrow_button(
     text_primary: ColorValue,
     disabled_opacity: f32,
     pad_x: f32,
+    focus_ring: Option<FocusRing>,
 ) -> Node {
     // Icon-only, so there is no text anywhere for a screen reader to name it
     // from — not on the button and not in its children, since an icon carries
@@ -412,9 +430,15 @@ fn arrow_button(
     if is_disabled {
         btn.style.descriptor.opacity = disabled_opacity;
         btn.interaction.disabled = true;
-    } else if let (Some(page), Some(handler)) = (goto, on_page_change) {
-        let handler = Arc::clone(handler);
-        btn.interaction.on_activate = Some(Arc::new(move || handler(page)));
+        btn.interaction.focusable = false;
+        btn.a11y.tab_index = None;
+    } else {
+        btn.a11y.tab_index = Some(0);
+        btn.style.focus_ring = focus_ring;
+        if let (Some(page), Some(handler)) = (goto, on_page_change) {
+            let handler = Arc::clone(handler);
+            btn.interaction.on_activate = Some(Arc::new(move || handler(page)));
+        }
     }
     btn
 }
