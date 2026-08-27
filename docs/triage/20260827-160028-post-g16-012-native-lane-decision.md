@@ -1,7 +1,8 @@
 # Post-g16.012 Native Lane Decision
 
-Status: open — operator decision required
+Status: resolved — operator approved clean breaking migration; promoted to g16.013
 Captured: 2026-08-27
+Resolved: 2026-08-27
 Source: orchestrator evidence checkpoint after PR #86
 
 ## Finding
@@ -57,9 +58,9 @@ are bounded to Poodle's GPUI and deferred Jetstream specimens/adapters.
   versus activated item and overlapping selection fields.
 - **Visual and accessibility programmes:** remain separate evidence lanes.
 
-## Decision Required
+## Decision
 
-Approve or reject the breaking Rust migration:
+The operator approved the breaking Rust migration:
 
 1. `TriStateSwitchSpec.state: CheckState` → `value: TriStateValue`;
 2. `with_state(...)` → `with_value(...)` with no alias;
@@ -67,7 +68,8 @@ Approve or reject the breaking Rust migration:
 4. remove the undocumented `label` field and `with_label(...)`;
 5. update Poodle-owned call sites directly; do not preserve the legacy surface.
 
-If approved, compile this as `g16.013`. Expected ledger movement is 41 → 42
-mounted and 133 → 132 missing. Known-delta totals remain 115 present / 60
-not-applicable unless card evidence finds a contract-owned reason to change
-them.
+This is compiled as
+`../roadmaps/g16/013-tri-state-switch-contract-and-mounted-parity.md`.
+Expected ledger movement is 41 → 42 mounted and 133 → 132 missing.
+Known-delta totals remain 115 present / 60 not-applicable unless card evidence
+finds a contract-owned reason to change them.

@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — orchestrator evidence checkpoint
-Posture: strict-paused
+Status: active — g16.013 ready for worker dispatch
+Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
 `../../contracts/001-working-rules.md`, `../g15/README.md`,
@@ -29,7 +29,7 @@ they do not define this generation's runway.
 Jetstream remains program-deferred. Its shared Rust and in-repo adapter surfaces
 stay maintained; backend admission is not part of the first card.
 
-## Runway
+## Generation Runway
 
 1. [001 — Active-cohort parity evidence ledger](001-active-cohort-parity-evidence-ledger.md) — complete; operator-reviewed in PR #75
 2. [002 — Selection controls mounted parity](002-selection-controls-mounted-parity.md) — closed — partial outcome
@@ -43,6 +43,22 @@ stay maintained; backend admission is not part of the first card.
 10. [010 — Breadcrumbs callback semantics and mounted parity](010-breadcrumbs-callback-semantics-and-mounted-parity.md) — complete
 11. [011 — IconButton activation, toggle, and mounted parity](011-icon-button-activation-toggle-and-mounted-parity.md) — complete
 12. [012 — Collapsible disclosure and mounted parity](012-collapsible-disclosure-and-mounted-parity.md) — complete; merged in PR #86
+13. [013 — TriStateSwitch contract and mounted parity](013-tri-state-switch-contract-and-mounted-parity.md) — ready; clean breaking migration approved by the operator
+
+The longer generation direction stays evidence-led rather than becoming a
+component-order checklist:
+
+- close bounded foundation behavior gaps where the web authority, Rust
+  contract, and mounted proof can be made coherent in one card;
+- resolve editing value-model gates before implementing NumberInput or
+  EditableLabel parity;
+- repair composite selection/disclosure APIs such as Accordion only after
+  their callback and state ownership are explicit;
+- choose a separate visual-comparison or native-accessibility programme only
+  from measured ledger leverage, without using specimen pages as exhaustive
+  conformance fixtures; and
+- keep Jetstream deferred until the active cohort's shared Rust/GPUI boundary
+  is dependable enough for backend admission.
 
 ## Measured Selection
 
@@ -144,7 +160,20 @@ regression. Ledger: 40 → 41 mounted, 134 → 133 missing; known-delta totals
 stay 115 / 60. TriStateSwitch, NumberInput, EditableLabel, Accordion, visual
 comparison, accessibility, and Jetstream stay outside the card.
 
+The post-`g16.012` checkpoint selected TriStateSwitch after explicit operator
+approval of its clean pre-1.0 Rust migration. `g16.013` replaces legacy
+checkbox-shaped `CheckState` storage with `TriStateValue`, makes Default the
+real default, removes the undocumented general label and compatibility
+surface, and closes radio semantics, roving focus, stable identity, and one
+mounted GPUI behavior cell. Expected ledger movement is 41 → 42 mounted and
+133 → 132 missing; known-delta totals stay 115 / 60. NumberInput,
+EditableLabel, Accordion, visual comparison, accessibility, and Jetstream stay
+outside the card.
+
 ## Next Task
 
-Return g16 to an orchestrator evidence checkpoint against 41 mounted / 133
-missing. Do not compile `g16.013` until the orchestrator selects the next lane.
+Dispatch `g16.013` from
+`../../handoffs/20260827-160028-g16-013-tri-state-switch-worker.md`. The worker
+executes only that card and returns a PR for orchestrator review. Do not compile
+or start `g16.014` until `g16.013` is merged and the ledger is re-evaluated
+against the expected 42 mounted / 132 missing checkpoint.

@@ -6,9 +6,9 @@ Updated: 2026-08-27
 Roadmaps record Poodle's executable milestone work. `g15` completed the full
 v0.2.x release programme: the roster and parity baseline, failed v0.2.0
 publication, v0.2.1 recovery, crates.io-GPUI correction, v0.2.2 publication,
-and adoption by all 16 authoritative consumers. `g16` begins with a current
-active-cohort parity evidence ledger before any new conformance runway is
-chosen.
+and adoption by all 16 authoritative consumers. `g16` uses a current
+active-cohort parity evidence ledger to select bounded semantic and mounted
+behavior repairs without inventing another conformance authority.
 
 ## Current State
 
@@ -35,7 +35,10 @@ chosen.
   command, toggle, tooltip projection, and mounted GPUI evidence (39 → 40
   mounted, 135 → 134 missing). Known-delta totals stay 115 / 60. PR #86
   closed `g16.012` Collapsible disclosure and mounted parity, moving the ledger
-  to 41 mounted / 133 missing. No broader conformance programme is implied.
+  to 41 mounted / 133 missing. The operator-approved `g16.013` cleanly
+  migrates TriStateSwitch from legacy `CheckState` to `TriStateValue`, repairs
+  native radio behavior and identity, and targets 42 mounted / 132 missing.
+  No broader conformance programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -89,7 +92,8 @@ chosen.
   operator-reviewed; `002` closed — partial outcome; `003` merged in PR #77;
   `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
   `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
-  `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86
+  `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
+  `013` ready for worker dispatch
 
 ## Rules
 

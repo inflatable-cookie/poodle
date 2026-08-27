@@ -9,14 +9,16 @@ Updated: 2026-08-27
   - Range: `001` closed; `002` closed — partial outcome; `003` merged in PR #77;
     `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
     `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
-    `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86
-  - Aim: replace stale and contradictory parity status with one current
-    active-cohort evidence ledger before choosing a new conformance lane
-  - Next move: orchestrator evidence checkpoint against 41 mounted / 133
-    missing. Do not compile `g16.013` until the next lane is selected.
-    TriStateSwitch's breaking native value migration, NumberInput,
-    EditableLabel, Accordion, visual comparison, accessibility, and Jetstream
-    remain outside the card.
+    `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
+    `013` ready
+  - Aim: use one current active-cohort evidence ledger to select and close
+    bounded semantic and mounted-behavior gaps without inventing another
+    conformance authority
+  - Next move: dispatch `g16.013` for the operator-approved clean
+    TriStateSwitch value migration, native radio behavior, and mounted proof.
+    Expected checkpoint: 42 mounted / 132 missing. NumberInput, EditableLabel,
+    Accordion, visual comparison, accessibility, and Jetstream remain outside
+    the card.
 
 ## Latest Completed Track
 
