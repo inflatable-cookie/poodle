@@ -11,13 +11,13 @@ Updated: 2026-08-27
     `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
     `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
     `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
-    `016` complete pending merge
+    `016` merged in PR #91
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: after operator merge of `g16.016`, re-evaluate at 45 mounted /
-    129 missing. Select, NumberInput, EditableLabel, Rating, visual comparison,
-    accessibility, and Jetstream remain separate decisions.
+  - Next move: re-evaluate at 45 mounted / 129 missing and select one bounded
+    `g16.017` lane. Select, NumberInput, EditableLabel, Rating, visual
+    comparison, accessibility, and Jetstream remain separate decisions.
 
 ## Latest Completed Track
 

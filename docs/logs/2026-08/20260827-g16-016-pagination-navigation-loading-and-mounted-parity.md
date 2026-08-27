@@ -1,7 +1,7 @@
 # g16.016 — Pagination Navigation, Loading, And Mounted Parity
 
 Date: 2026-08-27
-Status: complete — awaiting merge
+Status: complete — merged in PR #91
 Branch: `t3code/review-pagination-worker-handoff`
 Card: `docs/roadmaps/g16/016-pagination-navigation-loading-and-mounted-parity.md`
 Source triage: `docs/triage/20260827-210417-post-g16-015-native-lane-decision.md`

@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.016 complete pending merge; 45 mounted / 129 missing
+Status: active — g16.016 merged in PR #91; 45 mounted / 129 missing
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -46,7 +46,7 @@ stay maintained; backend admission is not part of the first card.
 13. [013 — TriStateSwitch contract and mounted parity](013-tri-state-switch-contract-and-mounted-parity.md) — complete; merged in PR #87
 14. [014 — Accordion result selection and mounted parity](014-accordion-result-selection-and-mounted-parity.md) — complete; merged in PR #88
 15. [015 — CollapseToggle disclosure and mounted parity](015-collapse-toggle-disclosure-and-mounted-parity.md) — complete; merged in PR #90
-16. [016 — Pagination navigation, loading, and mounted parity](016-pagination-navigation-loading-and-mounted-parity.md) — complete; awaiting merge
+16. [016 — Pagination navigation, loading, and mounted parity](016-pagination-navigation-loading-and-mounted-parity.md) — complete; merged in PR #91
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
@@ -201,5 +201,4 @@ and Jetstream stay unchanged.
 ## Next Task
 
 Return to the orchestrator evidence checkpoint at 45 mounted / 129 missing.
-Do not compile or start `g16.017` until operator merge lands and the next
-bounded parity lane is selected.
+Select the next bounded parity lane before compiling or starting `g16.017`.

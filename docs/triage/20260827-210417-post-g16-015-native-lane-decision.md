@@ -1,6 +1,6 @@
 # Post-g16.015 Native Lane Decision
 
-Status: resolved — selected as g16.016; closed in g16.016 pending merge
+Status: resolved — selected as g16.016; merged in PR #91
 Captured: 2026-08-27
 Resolved: 2026-08-27
 Source: merged `g16.015` / PR #90 and the 44 mounted / 130 missing ledger
@@ -48,4 +48,3 @@ mounted GPUI regression, and exactly one ledger-cell move. It does not change
 the public web or Rust APIs, remove legacy Pagination aliases, extend generic
 node vocabulary, claim native accessibility or visual parity, or move Select's
 evidence cell.
-

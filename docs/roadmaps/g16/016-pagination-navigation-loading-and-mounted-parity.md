@@ -3,6 +3,7 @@
 Status: complete
 Opened: 2026-08-27
 Completed: 2026-08-27
+Merged: PR #91
 Depends on: merged `g16.015` / PR #90 and the resolved selection in
 `../../triage/20260827-210417-post-g16-015-native-lane-decision.md`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -217,4 +218,3 @@ name, host-rebuild and limit-selector proof, exact ledger totals, validation,
 and execution log to the orchestrator. Do not compile or implement `g16.017`.
 After operator merge, the orchestrator returns to the measured 45 mounted / 129
 missing ledger and chooses the next bounded parity lane.
-
