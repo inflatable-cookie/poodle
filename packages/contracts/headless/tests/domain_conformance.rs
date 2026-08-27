@@ -484,7 +484,7 @@ fn duration_conformance() {
         match op {
             "totalSeconds" => {
                 let result = duration_total_seconds(duration_value_from(&case["value"]));
-                assert_eq!(result, expect.as_u64().unwrap() as u32, "totalSeconds {case}");
+                assert_eq!(result, expect.as_u64().unwrap(), "totalSeconds {case}");
             }
             "adjust" => {
                 let segment = match s(case, "segment") {

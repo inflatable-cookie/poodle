@@ -1,7 +1,8 @@
 # g16.009 — DurationInput Single Source And Mounted Behaviour
 
-Status: ready
+Status: complete
 Opened: 2026-08-27
+Closed: 2026-08-27
 Depends on: merged `g16.008` / PR #82
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
@@ -148,27 +149,32 @@ and 137 to 136 missing.
 
 ## Acceptance
 
-- [ ] Rust has one duration value authority: segment fields only; the formatted
+- [x] Rust has one duration value authority: segment fields only; the formatted
       value and caller-validation fields/builders are gone.
-- [ ] `show_seconds` defaults to `true` across contract, Rust, and both web
+- [x] `show_seconds` defaults to `true` across contract, Rust, and both web
       references.
-- [ ] Display strings, edit transitions, callback payloads, totals, and bounds
+- [x] Display strings, edit transitions, callback payloads, totals, and bounds
       validation derive from the same segment value.
-- [ ] Total calculation and the native callback use `u64`; large valid Hours
+- [x] Total calculation and the native callback use `u64`; large valid Hours
       values cannot overflow the total path.
-- [ ] Inclusive min/max endpoints are valid; totals outside either bound render
+- [x] Inclusive min/max endpoints are valid; totals outside either bound render
       invalid without clamping the edited value.
-- [ ] Every in-repo Rust caller uses the corrected spec; no compatibility shim
+- [x] Every in-repo Rust caller uses the corrected spec; no compatibility shim
       or duplicate synchronization remains.
-- [ ] One named mounted GPUI regression proves carry, borrow, digit entry,
+- [x] One named mounted GPUI regression proves carry, borrow, digit entry,
       max-hours behavior, visible-segment traversal, callback totals, and
       disabled inertia through production dispatch and host rebuilds.
-- [ ] Existing Svelte and React DurationInput tests remain green and unchanged
+- [x] Existing Svelte and React DurationInput tests remain green and unchanged
       unless a test-only correction is required to state existing behaviour.
-- [ ] The ledger changes only DurationInput from missing to mounted: 38 mounted
+- [x] The ledger changes only DurationInput from missing to mounted: 38 mounted
       / 136 missing.
-- [ ] One August log records the migration, evidence, validation, exact
+- [x] One August log records the migration, evidence, validation, exact
       non-claims, and the next orchestrator checkpoint.
+
+## Outcome
+
+Complete. The full record is
+`../../logs/2026-08/20260827-g16-009-duration-input-single-source-and-mounted-behaviour.md`.
 
 ## Writable Scope
 

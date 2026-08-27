@@ -4,18 +4,19 @@
 //! Ported from: `packages/jetstream/components/src/duration_input.rs`.
 //!
 //! Size drives field width + vertical padding (contract §8 size table);
-//! density drives only the inline padding/gap. The root border resolves
-//! through `spec.border_token()` (ValidationState::Invalid →
-//! color.status.danger, else color.border.default). Each separator is a
-//! 2-row column (spacer matched to the label row + glyph) so the colon
+//! density drives only the inline padding/gap. Display text, totals, and
+//! invalid presentation all come from the spec's three segment fields.
+//! The root border resolves through `spec.border_token()` (out-of-bounds
+//! total → color.status.danger, else color.border.default). Each separator
+//! is a 2-row column (spacer matched to the label row + glyph) so the colon
 //! aligns with the field rather than the labels. Focus tracking + keyboard
 //! ±1 / onChange are host-owned; hover renders the accent-12% band.
 
 use std::sync::Arc;
 
 use poodle_headless::duration::{
-    adjust_duration_segment, duration_total_seconds, type_duration_digit, DurationSegment,
-    DurationValue,
+    adjust_duration_segment, duration_total_seconds, pad_duration_segment, type_duration_digit,
+    DurationSegment, DurationValue,
 };
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, StylePatch,
@@ -71,7 +72,7 @@ fn label_font_rem(size: ControlSize) -> f32 {
 /// carry rules have been applied — the payload the contract documents.
 #[derive(Default)]
 pub struct DurationInputHandlers {
-    pub on_change: Option<Arc<dyn Fn(u32, u32, u32, u32) + Send + Sync>>,
+    pub on_change: Option<Arc<dyn Fn(u32, u32, u32, u64) + Send + Sync>>,
 }
 
 pub fn duration_input(spec: &DurationInputSpec, ctx: &RenderContext<'_>) -> Node {
@@ -95,7 +96,7 @@ pub fn duration_input_with_handlers(
 
     // ── Token resolution ──
     let fill = ctx.theme().resolve_color(spec.fill_token());
-    // Border resolves through the spec: ValidationState::Invalid →
+    // Border resolves through the spec: an out-of-bounds total →
     // color.status.danger, otherwise color.border.default (contract §4/§8).
     let border_color = ctx.theme().resolve_color(spec.border_token());
     let text_primary = ctx.theme().resolve_color(spec.text_color_token());
@@ -132,9 +133,11 @@ pub fn duration_input_with_handlers(
     let segment_radius = rem_to_px(0.1875); // Contract: 0.1875rem
     let label_gap = rem_to_px(0.125); // label→field gap inside a segment
 
-    // The segments' keys act on this, so it has to be parsed before the
-    // builder closes over it.
-    let current_value = parse_duration_value(spec.value.as_deref());
+    let current_value = DurationValue {
+        hours: spec.hours,
+        minutes: spec.minutes,
+        seconds: spec.seconds,
+    };
 
     // ── Segment builder ──
     // Column of label + field. Typography is inherited from the preview's
@@ -274,8 +277,9 @@ pub fn duration_input_with_handlers(
         sep.child(spacer).child(glyph)
     };
 
-    // Parse the value "HH:MM:SS" / "HH:MM" or display zeros.
-    let (hours_str, minutes_str, seconds_str) = parse_duration(spec.value.as_deref());
+    let hours_str = pad_duration_segment(spec.hours);
+    let minutes_str = pad_duration_segment(spec.minutes);
+    let seconds_str = pad_duration_segment(spec.seconds);
 
     // ── Root ──
     // Contract: inline-flex, width: fit-content (default flex sizing),
@@ -335,9 +339,7 @@ pub fn duration_input_with_handlers(
 
     // ── Disabled state ──
     if spec.is_disabled {
-        root.style.descriptor.opacity = ctx
-            .theme()
-            .resolve_opacity(spec.disabled_opacity_token());
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         root.interaction.disabled = true;
     } else {
         // Segment-focus highlight on hover (focus tracking is host-owned;
@@ -358,39 +360,17 @@ pub fn duration_input_with_handlers(
     root
 }
 
-/// Parse a duration string "HH:MM:SS" or "HH:MM" into display strings.
-/// The same parse as `parse_duration`, as numbers the carry rules can use.
-fn parse_duration_value(value: Option<&str>) -> DurationValue {
-    let (h, m, sec) = parse_duration(value);
-    DurationValue {
-        hours: h.trim().parse().unwrap_or(0),
-        minutes: m.trim().parse().unwrap_or(0),
-        seconds: sec.trim().parse().unwrap_or(0),
-    }
-}
-
-fn parse_duration(value: Option<&str>) -> (String, String, String) {
-    match value {
-        Some(s) => {
-            let parts: Vec<&str> = s.split(':').collect();
-            let hours = parts.first().copied().unwrap_or("00");
-            let minutes = parts.get(1).copied().unwrap_or("00");
-            let seconds = parts.get(2).copied().unwrap_or("00");
-            (hours.to_string(), minutes.to_string(), seconds.to_string())
-        }
-        None => ("00".to_string(), "00".to_string(), "00".to_string()),
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use poodle_adapter::ThemeProvider;
+
     use super::*;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
     }
 
-    type Reports = std::sync::Arc<std::sync::Mutex<Vec<(u32, u32, u32, u32)>>>;
+    type Reports = std::sync::Arc<std::sync::Mutex<Vec<(u32, u32, u32, u64)>>>;
 
     fn armed(spec: &DurationInputSpec) -> (Node, Reports) {
         let seen: Reports = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
@@ -426,7 +406,7 @@ mod tests {
 
     #[test]
     fn every_segment_is_its_own_focus_stop() {
-        let (node, _) = armed(&DurationInputSpec::new().with_show_seconds(true));
+        let (node, _) = armed(&DurationInputSpec::new());
         let segs = segments(&node);
         assert_eq!(segs.len(), 3, "hours, minutes, seconds");
         assert!(segs.iter().all(|s| s.interaction.focusable));
@@ -442,11 +422,44 @@ mod tests {
         assert_eq!(segments(&node).len(), 2, "no seconds segment to focus");
     }
 
+    #[test]
+    fn display_text_comes_from_the_segment_fields() {
+        let (node, _) = armed(&DurationInputSpec::new().with_segments(1, 30, 5));
+        let texts = node.texts();
+        assert!(texts.contains(&"01"), "{texts:?}");
+        assert!(texts.contains(&"30"), "{texts:?}");
+        assert!(texts.contains(&"05"), "{texts:?}");
+        assert!(
+            texts.contains(&"S"),
+            "seconds is shown by default: {texts:?}"
+        );
+    }
+
+    #[test]
+    fn hiding_seconds_leaves_the_stored_value_in_the_callback() {
+        let (node, seen) = armed(
+            &DurationInputSpec::new()
+                .with_segments(0, 4, 7)
+                .with_show_seconds(false),
+        );
+        assert!(!node.texts().contains(&"S"));
+        let minutes = segments(&node)[1];
+        (minutes.interaction.on_edit_key.as_ref().unwrap())(
+            "up",
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(
+            seen.lock().unwrap().last().copied(),
+            Some((0, 5, 7, 307)),
+            "hidden seconds still ride in the payload"
+        );
+    }
+
     /// The arrows carry between segments, which is the whole reason the rules
     /// are shared with the web target rather than reimplemented.
     #[test]
     fn arrow_up_on_minutes_carries_into_hours() {
-        let (node, seen) = armed(&DurationInputSpec::new().with_value("00:59:00"));
+        let (node, seen) = armed(&DurationInputSpec::new().with_segments(0, 59, 0));
         let minutes = segments(&node)[1];
         (minutes.interaction.on_edit_key.as_ref().unwrap())(
             "up",
@@ -461,7 +474,7 @@ mod tests {
 
     #[test]
     fn digits_shift_into_the_focused_segment() {
-        let (node, seen) = armed(&DurationInputSpec::new().with_value("00:04:00"));
+        let (node, seen) = armed(&DurationInputSpec::new().with_segments(0, 4, 0));
         let minutes = segments(&node)[1];
         (minutes.interaction.on_edit_key.as_ref().unwrap())(
             "5",
@@ -470,10 +483,60 @@ mod tests {
         assert_eq!(seen.lock().unwrap().last().copied(), Some((0, 45, 0, 2700)));
     }
 
+    #[test]
+    fn derived_invalid_follows_inclusive_bounds() {
+        let theme = theme();
+        let danger = theme.resolve_color("color.status.danger");
+        let default_border = theme.resolve_color("color.border.default");
+
+        let under = DurationInputSpec::new()
+            .with_segments(0, 0, 59)
+            .with_min_total_seconds(60);
+        let (node, _) = armed(&under);
+        assert_eq!(node.style.descriptor.border.color, danger);
+
+        let at_min = DurationInputSpec::new()
+            .with_segments(0, 1, 0)
+            .with_min_total_seconds(60);
+        let (node, _) = armed(&at_min);
+        assert_eq!(node.style.descriptor.border.color, default_border);
+
+        let over = DurationInputSpec::new()
+            .with_segments(1, 0, 1)
+            .with_max_total_seconds(3600);
+        let (node, _) = armed(&over);
+        assert_eq!(node.style.descriptor.border.color, danger);
+
+        let at_max = DurationInputSpec::new()
+            .with_segments(1, 0, 0)
+            .with_max_total_seconds(3600);
+        let (node, _) = armed(&at_max);
+        assert_eq!(node.style.descriptor.border.color, default_border);
+    }
+
+    #[test]
+    fn a_large_hours_total_is_reported_as_u64() {
+        // 1_200_000h * 3600 overflows u32. The callback has to carry u64.
+        let (node, seen) = armed(
+            &DurationInputSpec::new()
+                .with_segments(1_200_000, 0, 0)
+                .with_max_hours(2_000_000),
+        );
+        let hours = segments(&node)[0];
+        (hours.interaction.on_edit_key.as_ref().unwrap())(
+            "up",
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(
+            seen.lock().unwrap().last().copied(),
+            Some((1_200_001, 0, 0, 1_200_001u64 * 3600)),
+        );
+    }
+
     /// Tab and Enter have to reach the host, so a segment must not claim them.
     #[test]
     fn keys_that_are_not_ours_pass_through() {
-        let (node, seen) = armed(&DurationInputSpec::new().with_value("00:04:00"));
+        let (node, seen) = armed(&DurationInputSpec::new().with_segments(0, 4, 0));
         let minutes = segments(&node)[1];
         for key in ["tab", "enter", "escape", "left"] {
             (minutes.interaction.on_edit_key.as_ref().unwrap())(

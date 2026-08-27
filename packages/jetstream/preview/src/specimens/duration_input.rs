@@ -9,7 +9,7 @@ use crate::compat::js_duration_input;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{ControlDensity, ControlSize, DurationInputSpec, ValidationState};
+use poodle_specs::{ControlDensity, ControlSize, DurationInputSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -22,7 +22,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Value display (H:M)",
             secondary,
             div().w(240.0).child(js_duration_input(
-                &DurationInputSpec::new().with_value("02:30"),
+                &DurationInputSpec::new()
+                    .with_segments(2, 30, 0)
+                    .with_show_seconds(false),
                 theme,
             )),
         ))
@@ -31,9 +33,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Segments (H:M:S)",
             secondary,
             div().w(240.0).child(js_duration_input(
-                &DurationInputSpec::new()
-                    .with_value("01:15:45")
-                    .with_show_seconds(true),
+                &DurationInputSpec::new().with_segments(1, 15, 45),
                 theme,
             )),
         ))
@@ -41,10 +41,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .child(group(
             "Empty / zero",
             secondary,
-            div().w(240.0).child(js_duration_input(
-                &DurationInputSpec::new().with_show_seconds(true),
-                theme,
-            )),
+            div()
+                .w(240.0)
+                .child(js_duration_input(&DurationInputSpec::new(), theme)),
         ))
         // Invalid — total below min bound shows danger border
         .child(group(
@@ -52,10 +51,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             div().w(240.0).child(js_duration_input(
                 &DurationInputSpec::new()
-                    .with_value("00:00:05")
-                    .with_show_seconds(true)
-                    .with_min_total_seconds(60)
-                    .with_validation_state(ValidationState::Invalid),
+                    .with_segments(0, 0, 5)
+                    .with_min_total_seconds(60),
                 theme,
             )),
         ))
@@ -65,7 +62,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             div().w(240.0).child(js_duration_input(
                 &DurationInputSpec::new()
-                    .with_value("01:00")
+                    .with_segments(1, 0, 0)
                     .with_disabled(true),
                 theme,
             )),
@@ -80,7 +77,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .child(
                     div().w(240.0).child(js_duration_input(
                         &DurationInputSpec::new()
-                            .with_value("00:30")
+                            .with_segments(0, 30, 0)
                             .with_size(ControlSize::Xs),
                         theme,
                     )),
@@ -88,7 +85,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .child(
                     div().w(240.0).child(js_duration_input(
                         &DurationInputSpec::new()
-                            .with_value("00:30")
+                            .with_segments(0, 30, 0)
                             .with_size(ControlSize::Sm),
                         theme,
                     )),
@@ -96,7 +93,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .child(
                     div().w(240.0).child(js_duration_input(
                         &DurationInputSpec::new()
-                            .with_value("00:30")
+                            .with_segments(0, 30, 0)
                             .with_size(ControlSize::Md),
                         theme,
                     )),
@@ -104,7 +101,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .child(
                     div().w(240.0).child(js_duration_input(
                         &DurationInputSpec::new()
-                            .with_value("00:30")
+                            .with_segments(0, 30, 0)
                             .with_size(ControlSize::Lg),
                         theme,
                     )),
@@ -112,7 +109,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .child(
                     div().w(240.0).child(js_duration_input(
                         &DurationInputSpec::new()
-                            .with_value("00:30")
+                            .with_segments(0, 30, 0)
                             .with_size(ControlSize::Xl),
                         theme,
                     )),
@@ -128,7 +125,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .child(
                     div().w(240.0).child(js_duration_input(
                         &DurationInputSpec::new()
-                            .with_value("00:30")
+                            .with_segments(0, 30, 0)
                             .with_density(ControlDensity::Compact),
                         theme,
                     )),
@@ -136,7 +133,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .child(
                     div().w(240.0).child(js_duration_input(
                         &DurationInputSpec::new()
-                            .with_value("00:30")
+                            .with_segments(0, 30, 0)
                             .with_density(ControlDensity::Default),
                         theme,
                     )),
@@ -144,7 +141,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .child(
                     div().w(240.0).child(js_duration_input(
                         &DurationInputSpec::new()
-                            .with_value("00:30")
+                            .with_segments(0, 30, 0)
                             .with_density(ControlDensity::Comfortable),
                         theme,
                     )),

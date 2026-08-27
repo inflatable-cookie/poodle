@@ -1,6 +1,7 @@
 # Post-g16.008 Native Lane Decision
 
-Status: promoted — operator approved the clean migration for `g16.009`
+Status: resolved — closed by `g16.009`; see
+`../logs/2026-08/20260827-g16-009-duration-input-single-source-and-mounted-behaviour.md`
 Captured: 2026-08-27
 Source: orchestrator evidence checkpoint after PR #82
 

@@ -1,7 +1,7 @@
 # DurationInput
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-27
 
 ## 1. Purpose
 
@@ -272,11 +272,17 @@ Horizontal padding combines a size adjust (per table) with a density adjust (`co
 
 ## 10. GPUI Notes
 
-- expected crate/module surface: `poodle_gpui::components::duration_input`
-- Spec struct: `DurationInputSpec` in primitives crate
-- Component struct: `PoodleDurationInput` in components crate
+- Spec struct: `DurationInputSpec` in `poodle-specs`. Hours, minutes, and
+  seconds are the only controlled value. The renderer formats each visible
+  segment from those fields; it does not take a formatted string or a
+  caller-supplied validation state.
+- `show_seconds` defaults to `true`. Hiding Seconds does not drop the stored
+  seconds value or change the change-callback payload.
+- Native `onChange` reports `{hours, minutes, seconds, totalSeconds}` with a
+  `u64` total. Min/max totals are inclusive presentation bounds, not edit
+  clamps.
 - Segmented input fields may use GPUI's text input with custom formatting
-- Carry logic implemented as pure Rust function
+- Carry, borrow, and digit-shift live in `poodle-headless::duration`
 - `tabular-nums` font variant may need GPUI font feature support
 
 ## 11. Parity Checklist
