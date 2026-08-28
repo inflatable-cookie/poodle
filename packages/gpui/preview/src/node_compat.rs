@@ -1787,15 +1787,11 @@ impl IntoElement for EditableList {
 }
 
 impl RelationPicker {
-    pub(crate) fn from_spec(
-        spec: RelationPickerSpec,
-        theme: &GpuiThemeProvider,
-        instance_id: impl Into<String>,
-    ) -> Self {
+    pub(crate) fn from_spec(spec: RelationPickerSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
-            handlers: poodle_render::RelationPickerHandlers::new(instance_id),
+            handlers: poodle_render::RelationPickerHandlers::default(),
         }
     }
 
@@ -2578,21 +2574,15 @@ impl IntoElement for Toolbar {
 pub(crate) struct OrderBy {
     spec: OrderBySpec,
     theme: GpuiThemeProvider,
-    instance_id: String,
     on_direction_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
 impl OrderBy {
-    pub(crate) fn from_spec(
-        spec: OrderBySpec,
-        theme: &GpuiThemeProvider,
-        instance_id: impl Into<String>,
-    ) -> Self {
+    pub(crate) fn from_spec(spec: OrderBySpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
-            instance_id: instance_id.into(),
             on_direction_toggle: None,
             on_remove: None,
         }
@@ -2613,9 +2603,9 @@ impl OrderBy {
             &self.spec,
             &RenderContext::new(&self.theme),
             poodle_render::OrderByHandlers {
-                instance_id: self.instance_id,
                 on_direction_toggle: self.on_direction_toggle,
                 on_remove: self.on_remove,
+                instance_id: None,
             },
         )
     }
@@ -5380,20 +5370,14 @@ impl IntoElement for Calendar {
 pub(crate) struct DateTimeZonePicker {
     spec: DateTimeZonePickerSpec,
     theme: GpuiThemeProvider,
-    instance_id: String,
     on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
 impl DateTimeZonePicker {
-    pub(crate) fn from_spec(
-        spec: DateTimeZonePickerSpec,
-        theme: &GpuiThemeProvider,
-        instance_id: impl Into<String>,
-    ) -> Self {
+    pub(crate) fn from_spec(spec: DateTimeZonePickerSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
-            instance_id: instance_id.into(),
             on_toggle: None,
         }
     }
@@ -5418,12 +5402,8 @@ impl DateTimeZonePicker {
             &self.spec,
             &RenderContext::new(&self.theme),
             poodle_render::DateTimeZonePickerHandlers {
-                instance_id: self.instance_id,
                 on_toggle: self.on_toggle,
-                on_select: None,
-                on_navigate: None,
-                on_zone_toggle: None,
-                on_zone_change: None,
+                ..Default::default()
             },
         )
     }
@@ -5495,20 +5475,14 @@ impl IntoElement for TimeField {
 pub(crate) struct TimeZoneSelect {
     spec: TimeZoneSelectSpec,
     theme: GpuiThemeProvider,
-    instance_id: String,
     on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
 impl TimeZoneSelect {
-    pub(crate) fn from_spec(
-        spec: TimeZoneSelectSpec,
-        theme: &GpuiThemeProvider,
-        instance_id: impl Into<String>,
-    ) -> Self {
+    pub(crate) fn from_spec(spec: TimeZoneSelectSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
-            instance_id: instance_id.into(),
             on_toggle: None,
         }
     }
@@ -5533,9 +5507,9 @@ impl TimeZoneSelect {
             &self.spec,
             &RenderContext::new(&self.theme),
             poodle_render::TimeZoneSelectHandlers {
-                instance_id: self.instance_id,
                 on_toggle: self.on_toggle,
                 on_change: None,
+                instance_id: None,
             },
         )
     }
@@ -7357,7 +7331,6 @@ impl IntoElement for Radio {
 pub(crate) struct Pagination {
     spec: PaginationSpec,
     theme: GpuiThemeProvider,
-    instance_id: String,
     on_page_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
     limit_open: bool,
     on_limit_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
@@ -7365,15 +7338,10 @@ pub(crate) struct Pagination {
 }
 
 impl Pagination {
-    pub(crate) fn from_spec(
-        spec: PaginationSpec,
-        theme: &GpuiThemeProvider,
-        instance_id: impl Into<String>,
-    ) -> Self {
+    pub(crate) fn from_spec(spec: PaginationSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
-            instance_id: instance_id.into(),
             on_page_change: None,
             limit_open: false,
             on_limit_open_change: None,
@@ -7417,11 +7385,11 @@ impl IntoElement for Pagination {
 
     fn into_element(self) -> Self::Element {
         let handlers = poodle_render::PaginationHandlers {
-            instance_id: self.instance_id,
             page_change: self.on_page_change,
             limit_open: self.limit_open,
             limit_open_change: self.on_limit_open_change,
             page_size_change: self.on_page_size_change,
+            instance_id: None,
         };
         poodle_gpui_node_backend::to_gpui(&poodle_render::pagination_with_handlers(
             &self.spec,

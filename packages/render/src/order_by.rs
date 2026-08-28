@@ -24,28 +24,16 @@ use crate::color::mix_srgb;
 use crate::context::RenderContext;
 use crate::icon_button::icon_button;
 use crate::presentation::{rem_to_px, size_padding_x_offset_rem};
-use crate::select::{select, SelectHandlers};
+use crate::select::{composite_select_scope, select, SelectHandlers};
 
-/// Host-owned native interaction for one OrderBy instance.
-///
-/// `instance_id` is the lifetime-stable scope. It is not a web public prop, and
-/// the renderer never invents one from render order or selected value.
+/// Handlers mirror the GPUI target's names.
+#[derive(Default)]
 pub struct OrderByHandlers {
-    pub instance_id: String,
     /// Fires with the field whose direction arrow was pressed.
     pub on_direction_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires with the field that was removed.
     pub on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
-}
-
-impl OrderByHandlers {
-    pub fn new(instance_id: impl Into<String>) -> Self {
-        Self {
-            instance_id: instance_id.into(),
-            on_direction_toggle: None,
-            on_remove: None,
-        }
-    }
+    pub instance_id: Option<String>,
 }
 
 pub fn order_by(spec: &OrderBySpec, ctx: &RenderContext<'_>, handlers: OrderByHandlers) -> Node {
@@ -383,7 +371,11 @@ pub fn order_by(spec: &OrderBySpec, ctx: &RenderContext<'_>, handlers: OrderByHa
             panel = panel.child(row.child(select(
                 &select_spec,
                 ctx,
-                &SelectHandlers::new(&handlers.instance_id),
+                &SelectHandlers::new(composite_select_scope(
+                    handlers.instance_id.as_deref(),
+                    Some(spec.aria_label.as_str()),
+                    "order-by-add",
+                )),
             )));
         }
 
@@ -443,7 +435,7 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = OrderBySpec::new().with_open(true);
-        let node = order_by(&spec, &ctx, OrderByHandlers::new("order-by"));
+        let node = order_by(&spec, &ctx, OrderByHandlers::default());
         assert!(node
             .find(&|n| n.interaction.on_activate.is_some())
             .is_none());
@@ -451,7 +443,7 @@ mod tests {
         // Refusal: the open surface carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = order_by(&refusing, &ctx, OrderByHandlers::new("order-by"));
+        let node = order_by(&refusing, &ctx, OrderByHandlers::default());
         assert!(node
             .find(&|n| n.interaction.on_activate.is_some())
             .is_some());
@@ -467,8 +459,22 @@ mod tests {
                 SortField::new("created", "Created"),
             ])
             .with_open(true);
-        let left = order_by(&spec, &ctx, OrderByHandlers::new("sort-a"));
-        let right = order_by(&spec, &ctx, OrderByHandlers::new("sort-b"));
+        let left = order_by(
+            &spec,
+            &ctx,
+            OrderByHandlers {
+                instance_id: Some("sort-a".to_string()),
+                ..OrderByHandlers::default()
+            },
+        );
+        let right = order_by(
+            &spec,
+            &ctx,
+            OrderByHandlers {
+                instance_id: Some("sort-b".to_string()),
+                ..OrderByHandlers::default()
+            },
+        );
         let mut tree = Node::container();
         tree = tree.child(left).child(right);
         assert!(tree

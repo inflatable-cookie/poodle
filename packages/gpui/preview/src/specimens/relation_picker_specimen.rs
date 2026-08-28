@@ -147,7 +147,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_selection_mode(SelectionMode::Multiple)
                         .with_state(BrowseState::Ready),
                     theme,
-                    "relation-picker-1",
                 )),
         )
         // --- Single selection ---
@@ -166,7 +165,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_selection_mode(SelectionMode::Single)
                         .with_state(BrowseState::Ready),
                     theme,
-                    "relation-picker-2",
                 )),
         )
         // --- Loading state ---
@@ -184,7 +182,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_selection_mode(SelectionMode::Multiple)
                         .with_state(BrowseState::Loading),
                     theme,
-                    "relation-picker-3",
                 )),
         )
         // --- Drill-down (Category → Subcategory → Items) ---
@@ -206,7 +203,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_selection_mode(SelectionMode::Multiple)
                             .with_state(BrowseState::Ready),
                         theme,
-                        "relation-picker-4",
                     )
                     .on_drill_enter({
                         let events = Arc::clone(&state.node_events);
@@ -260,7 +256,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_size_role(SemanticControlSizeRole::Chrome)
                         .with_density(ControlDensity::Comfortable),
                     theme,
-                    "relation-picker-5",
                 )),
         );
 
@@ -306,7 +301,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_show_footer(true)
                     .with_show_selection_summary(true),
                 theme,
-                "relation-picker-6",
             )),
     );
 
@@ -326,7 +320,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_selection_mode(SelectionMode::Multiple)
                     .with_state(BrowseState::Empty),
                 theme,
-                "relation-picker-7",
             )),
     );
 
@@ -366,7 +359,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_state(BrowseState::Ready)
                         .with_size(size),
                     theme,
-                    "relation-picker-8",
                 )),
         );
     }
@@ -406,7 +398,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_state(BrowseState::Ready)
                         .with_density(density),
                     theme,
-                    "relation-picker-9",
                 )),
         );
     }
@@ -427,7 +418,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_state(BrowseState::Ready)
                         .with_size(size),
                     theme,
-                    "relation-picker-10",
                 )
                 .into_any_element()
             })
@@ -439,7 +429,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_state(BrowseState::Ready)
                         .with_density(density),
                     theme,
-                    "relation-picker-11",
                 )
                 .into_any_element()
             }),

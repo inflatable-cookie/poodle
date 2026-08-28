@@ -44,7 +44,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     DateTimeZonePicker::from_spec(
                         DateTimeZonePickerSpec::new().with_open(is_open),
                         theme,
-                        "dtz-picker-1",
                     )
                     .on_toggle(toggle_handler(&state.node_events, "dtz-picker-open")),
                 ),
@@ -66,7 +65,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         Some("America/Los_Angeles".into()),
                     )),
                     theme,
-                    "dtz-picker-2",
                 )),
         )
         // --- Open (calendar + time + zone) ---
@@ -90,7 +88,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ))
                         .with_open(true),
                     theme,
-                    "dtz-picker-3",
                 )),
         )
         // --- Disabled ---
@@ -106,7 +103,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(DateTimeZonePicker::from_spec(
                     DateTimeZonePickerSpec::new().with_disabled(true),
                     theme,
-                    "dtz-picker-4",
                 )),
         )
         .into_any_element();
@@ -125,7 +121,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         Some("America/New_York".into()),
                     )),
                     theme,
-                    "dtz-picker-5",
                 )
                 .size(size)
                 .into_any_element()
@@ -138,7 +133,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         Some("America/New_York".into()),
                     )),
                     theme,
-                    "dtz-picker-6",
                 )
                 .with_density(density)
                 .into_any_element()

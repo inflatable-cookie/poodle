@@ -47,7 +47,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 ])
                                 .with_open(true),
                             theme,
-                            "order-by-1",
                         ))
                         .child(
                             div()
@@ -81,7 +80,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_trigger_variant(OrderByTriggerVariant::Icon)
                         .with_open(true),
                     theme,
-                    "order-by-2",
                 )),
         )
         // --- Disabled ---
@@ -103,7 +101,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_disabled(true)
                         .with_open(true),
                     theme,
-                    "order-by-3",
                 )),
         )
         .into_any_element();
@@ -124,7 +121,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_value(vec![OrderByField::new("name", SortDirection::Asc)])
                         .with_open(true),
                     theme,
-                    "order-by-4",
                 )
                 .size(size)
                 .into_any_element()
@@ -139,7 +135,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_value(vec![OrderByField::new("name", SortDirection::Asc)])
                         .with_open(true),
                     theme,
-                    "order-by-5",
                 )
                 .with_density(density)
                 .into_any_element()

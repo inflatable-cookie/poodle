@@ -41,7 +41,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_compact(true)
                     .with_open(true),
                 theme,
-                "order-by-1",
             ),
         ))
         .child(group(
@@ -57,7 +56,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_trigger_variant(OrderByTriggerVariant::Icon)
                     .with_open(true),
                 theme,
-                "order-by-2",
             ),
         ))
         .child(group(
@@ -66,7 +64,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_order_by(
                 &OrderBySpec::new().with_fields(fields()).with_open(true),
                 theme,
-                "order-by-3",
             ),
         ))
         .child(group(
@@ -78,7 +75,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_value(single.clone())
                     .with_disabled(true),
                 theme,
-                "order-by-4",
             ),
         ))
         .child(group(
@@ -100,7 +96,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                             .with_value(single.clone())
                             .with_size(size),
                         theme,
-                        "order-by-5",
                     )
                 }),
             ),
@@ -122,7 +117,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                             .with_value(single.clone())
                             .with_density(density),
                         theme,
-                        "order-by-6",
                     )
                 }),
             ),

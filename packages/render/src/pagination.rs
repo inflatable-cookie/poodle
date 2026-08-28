@@ -34,25 +34,13 @@ use crate::presentation::{
     rem_to_px, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem,
 };
 
-#[derive(Clone)]
+#[derive(Default, Clone)]
 pub struct PaginationHandlers {
-    pub instance_id: String,
     pub page_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
     pub limit_open: bool,
     pub limit_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
     pub page_size_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
-}
-
-impl PaginationHandlers {
-    pub fn new(instance_id: impl Into<String>) -> Self {
-        Self {
-            instance_id: instance_id.into(),
-            page_change: None,
-            limit_open: false,
-            limit_open_change: None,
-            page_size_change: None,
-        }
-    }
+    pub instance_id: Option<String>,
 }
 
 pub fn pagination(
@@ -65,7 +53,7 @@ pub fn pagination(
         ctx,
         &PaginationHandlers {
             page_change: on_page_change,
-            ..PaginationHandlers::new("pagination")
+            ..PaginationHandlers::default()
         },
     )
 }
@@ -510,7 +498,12 @@ fn build_limit_selector(
 
         let open_change = handlers.limit_open_change.clone();
         let size_change = handlers.page_size_change.clone();
-        let mut select_handlers = crate::SelectHandlers::new(&handlers.instance_id);
+        let mut select_handlers =
+            crate::SelectHandlers::new(crate::select::composite_select_scope(
+                handlers.instance_id.as_deref(),
+                spec.aria_label.as_deref(),
+                "pagination-limit",
+            ));
         if open_change.is_some() || size_change.is_some() {
             select_handlers = select_handlers.on_transition(Arc::new(move |result| {
                 for effect in &result.effects {
@@ -626,7 +619,7 @@ mod tests {
             page_size_change: Some(Arc::new(move |size| {
                 size_sink.lock().expect("size lock").push(size);
             })),
-            instance_id: "pagination-test".to_string(),
+            instance_id: None,
         }
     }
 
@@ -922,7 +915,7 @@ mod tests {
         let left = render(
             &spec,
             &PaginationHandlers {
-                instance_id: "pager-a".to_string(),
+                instance_id: Some("pager-a".to_string()),
                 ..wired_handlers(
                     Arc::new(Mutex::new(Vec::new())),
                     Arc::new(Mutex::new(Vec::new())),
@@ -934,7 +927,7 @@ mod tests {
         let right = render(
             &spec,
             &PaginationHandlers {
-                instance_id: "pager-b".to_string(),
+                instance_id: Some("pager-b".to_string()),
                 ..wired_handlers(
                     Arc::new(Mutex::new(Vec::new())),
                     Arc::new(Mutex::new(Vec::new())),

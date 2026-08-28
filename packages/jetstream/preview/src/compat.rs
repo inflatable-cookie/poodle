@@ -307,12 +307,11 @@ pub fn js_date_time_range_picker(
 pub fn js_date_time_zone_picker(
     spec: &DateTimeZonePickerSpec,
     theme: &JetstreamThemeProvider,
-    instance_id: impl Into<String>,
 ) -> El {
     El(pr::date_time_zone_picker(
         spec,
         &pr::RenderContext::new(theme),
-        pr::DateTimeZonePickerHandlers::new(instance_id),
+        pr::DateTimeZonePickerHandlers::default(),
     ))
 }
 
@@ -743,16 +742,8 @@ pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -
     ))
 }
 
-pub fn js_order_by(
-    spec: &OrderBySpec,
-    theme: &JetstreamThemeProvider,
-    instance_id: impl Into<String>,
-) -> El {
-    El(pr::order_by(
-        spec,
-        &pr::RenderContext::new(theme),
-        pr::OrderByHandlers::new(instance_id),
-    ))
+pub fn js_order_by(spec: &OrderBySpec, theme: &JetstreamThemeProvider) -> El {
+    El(pr::order_by(spec, &pr::RenderContext::new(theme), pr::OrderByHandlers::default()))
 }
 
 pub fn js_page_header(spec: &PageHeaderSpec, theme: &JetstreamThemeProvider) -> El {
@@ -879,15 +870,11 @@ pub fn js_region(spec: &RegionSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::region(spec, &pr::RenderContext::new(theme)))
 }
 
-pub fn js_relation_picker(
-    spec: &RelationPickerSpec,
-    theme: &JetstreamThemeProvider,
-    instance_id: impl Into<String>,
-) -> El {
+pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::relation_picker(
         spec,
         &pr::RenderContext::new(theme),
-        pr::RelationPickerHandlers::new(instance_id),
+        pr::RelationPickerHandlers::default(),
     ))
 }
 
@@ -1050,15 +1037,11 @@ pub fn js_time_field(spec: &TimeFieldSpec, theme: &JetstreamThemeProvider) -> El
     El(pr::time_field(spec, &pr::RenderContext::new(theme)))
 }
 
-pub fn js_time_zone_select(
-    spec: &TimeZoneSelectSpec,
-    theme: &JetstreamThemeProvider,
-    instance_id: impl Into<String>,
-) -> El {
+pub fn js_time_zone_select(spec: &TimeZoneSelectSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::time_zone_select(
         spec,
         &pr::RenderContext::new(theme),
-        pr::TimeZoneSelectHandlers::new(instance_id),
+        pr::TimeZoneSelectHandlers::default(),
     ))
 }
 

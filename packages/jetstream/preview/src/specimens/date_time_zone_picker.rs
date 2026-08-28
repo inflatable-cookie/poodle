@@ -29,7 +29,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     Some("America/New_York".into()),
                 )),
                 theme,
-                "dtz-picker-1",
             )),
         ))
         // Closed, no value — placeholder text in secondary color.
@@ -39,7 +38,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             div().w(360.0).child(js_date_time_zone_picker(
                 &DateTimeZonePickerSpec::new(),
                 theme,
-                "dtz-picker-2",
             )),
         ))
         // Open — surface visible: composes the real Calendar + TimeInput +
@@ -56,7 +54,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     ))
                     .with_open(true),
                 theme,
-                "dtz-picker-3",
             )),
         ))
         // Disabled — reduced opacity, non-interactive trigger.
@@ -72,7 +69,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     ))
                     .with_disabled(true),
                 theme,
-                "dtz-picker-4",
             )),
         ))
         // Sizes — trigger min-height, font-size, indicator font-size.
@@ -113,18 +109,14 @@ fn sized_picker(theme: &JetstreamThemeProvider, size: ControlSize) -> El {
     let spec = DateTimeZonePickerSpec::new()
         .with_value(sample_value())
         .with_size(size);
-    div()
-        .w(360.0)
-        .child(js_date_time_zone_picker(&spec, theme, "dtz-picker-5"))
+    div().w(360.0).child(js_date_time_zone_picker(&spec, theme))
 }
 
 fn dense_picker(theme: &JetstreamThemeProvider, density: ControlDensity) -> El {
     let spec = DateTimeZonePickerSpec::new()
         .with_value(sample_value())
         .with_density(density);
-    div()
-        .w(360.0)
-        .child(js_date_time_zone_picker(&spec, theme, "dtz-picker-6"))
+    div().w(360.0).child(js_date_time_zone_picker(&spec, theme))
 }
 
 fn group(title: &str, text_secondary: ColorValue, content: El) -> El {

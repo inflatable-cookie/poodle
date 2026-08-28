@@ -26,7 +26,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_aria_label("Time zone 1")
                     .with_placeholder("Select time zone…"),
                 theme,
-                "tz-select-1",
             )),
         ))
         // --- With pre-selected zone ---
@@ -38,7 +37,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_aria_label("Time zone 2")
                     .with_value("America/New_York"),
                 theme,
-                "tz-select-2",
             )),
         ))
         // --- Open (searchable, selected): trigger expanded, live query filters
@@ -55,7 +53,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_open(true)
                     .with_search_query("amer"),
                 theme,
-                "tz-select-3",
             )),
         ))
         // --- Disabled ---
@@ -68,7 +65,6 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_value("Europe/London")
                     .with_disabled(true),
                 theme,
-                "tz-select-4",
             )),
         ))
         // --- Sizes (sm / md / lg) ---
@@ -107,7 +103,6 @@ fn size_row(
                     .with_value("America/New_York")
                     .with_size(size),
                 theme,
-                "tz-select-5",
             )),
         )
 }

@@ -46,7 +46,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_placeholder("Select time zone\u{2026}")
                             .with_open(is_open),
                         theme,
-                        "tz-select-1",
                     )
                     .on_toggle(toggle_handler(&state.node_events, "tz-select-open")),
                 ),
@@ -64,7 +63,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(TimeZoneSelect::from_spec(
                     TimeZoneSelectSpec::new().with_value("America/New_York"),
                     theme,
-                    "tz-select-2",
                 )),
         )
         // --- Open (searchable): trigger expanded, live query filters the zone
@@ -89,7 +87,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_open(true)
                         .with_search_query("amer"),
                     theme,
-                    "tz-select-3",
                 )),
         )
         // --- Disabled ---
@@ -107,7 +104,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_value("Europe/London")
                         .with_disabled(true),
                     theme,
-                    "tz-select-4",
                 )),
         )
         .into_any_element();
@@ -122,7 +118,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 TimeZoneSelect::from_spec(
                     TimeZoneSelectSpec::new().with_value("America/New_York"),
                     theme,
-                    "tz-select-5",
                 )
                 .size(size)
                 .into_any_element()
@@ -131,7 +126,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 TimeZoneSelect::from_spec(
                     TimeZoneSelectSpec::new().with_value("America/New_York"),
                     theme,
-                    "tz-select-6",
                 )
                 .with_density(density)
                 .into_any_element()
