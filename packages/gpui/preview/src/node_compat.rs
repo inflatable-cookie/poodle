@@ -1787,11 +1787,15 @@ impl IntoElement for EditableList {
 }
 
 impl RelationPicker {
-    pub(crate) fn from_spec(spec: RelationPickerSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: RelationPickerSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
-            handlers: poodle_render::RelationPickerHandlers::default(),
+            handlers: poodle_render::RelationPickerHandlers::new(instance_id),
         }
     }
 
@@ -2574,15 +2578,21 @@ impl IntoElement for Toolbar {
 pub(crate) struct OrderBy {
     spec: OrderBySpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     on_direction_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
 impl OrderBy {
-    pub(crate) fn from_spec(spec: OrderBySpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: OrderBySpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
             on_direction_toggle: None,
             on_remove: None,
         }
@@ -2605,6 +2615,7 @@ impl OrderBy {
             poodle_render::OrderByHandlers {
                 on_direction_toggle: self.on_direction_toggle,
                 on_remove: self.on_remove,
+                ..poodle_render::OrderByHandlers::new(self.instance_id)
             },
         )
     }
@@ -3546,14 +3557,20 @@ impl IntoElement for ListGrid {
 pub(crate) struct ListContainer {
     spec: ListContainerSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     content: Option<poodle_node::Node>,
 }
 
 impl ListContainer {
-    pub(crate) fn from_spec(spec: ListContainerSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: ListContainerSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
             content: None,
         }
     }
@@ -3576,6 +3593,7 @@ impl IntoElement for ListContainer {
             &self.spec,
             &RenderContext::new(&self.theme),
             slots,
+            self.instance_id,
             None,
         ))
     }
@@ -3841,21 +3859,23 @@ impl IntoCompatNode for TextInput {
 pub(crate) struct Select {
     spec: SelectSpec,
     theme: GpuiThemeProvider,
+    instance_scope: String,
     id_suffix: Option<String>,
-    on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
-    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
-    on_clear: Option<Arc<dyn Fn() + Send + Sync>>,
+    on_transition: Option<Arc<dyn Fn(poodle_render::SelectTransitionResult) + Send + Sync>>,
 }
 
 impl Select {
-    pub(crate) fn from_spec(spec: SelectSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: SelectSpec,
+        theme: &GpuiThemeProvider,
+        instance_scope: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_scope: instance_scope.into(),
             id_suffix: None,
-            on_toggle: None,
-            on_change: None,
-            on_clear: None,
+            on_transition: None,
         }
     }
 
@@ -3865,15 +3885,11 @@ impl Select {
     }
 
     pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
-        let mut node = poodle_render::select(
-            &self.spec,
-            ctx,
-            &poodle_render::SelectHandlers {
-                toggle: self.on_toggle,
-                change: self.on_change,
-                clear: self.on_clear,
-            },
-        );
+        let mut handlers = poodle_render::SelectHandlers::new(self.instance_scope);
+        if let Some(on_transition) = self.on_transition {
+            handlers = handlers.on_transition(on_transition);
+        }
+        let mut node = poodle_render::select(&self.spec, ctx, &handlers);
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-select-{id}"));
         }
@@ -5371,14 +5387,20 @@ impl IntoElement for Calendar {
 pub(crate) struct DateTimeZonePicker {
     spec: DateTimeZonePickerSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
 impl DateTimeZonePicker {
-    pub(crate) fn from_spec(spec: DateTimeZonePickerSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: DateTimeZonePickerSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
             on_toggle: None,
         }
     }
@@ -5404,7 +5426,7 @@ impl DateTimeZonePicker {
             &RenderContext::new(&self.theme),
             poodle_render::DateTimeZonePickerHandlers {
                 on_toggle: self.on_toggle,
-                ..Default::default()
+                ..poodle_render::DateTimeZonePickerHandlers::new(self.instance_id)
             },
         )
     }
@@ -5476,14 +5498,20 @@ impl IntoElement for TimeField {
 pub(crate) struct TimeZoneSelect {
     spec: TimeZoneSelectSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
 impl TimeZoneSelect {
-    pub(crate) fn from_spec(spec: TimeZoneSelectSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: TimeZoneSelectSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
             on_toggle: None,
         }
     }
@@ -5509,7 +5537,7 @@ impl TimeZoneSelect {
             &RenderContext::new(&self.theme),
             poodle_render::TimeZoneSelectHandlers {
                 on_toggle: self.on_toggle,
-                on_change: None,
+                ..poodle_render::TimeZoneSelectHandlers::new(self.instance_id)
             },
         )
     }
@@ -7331,6 +7359,7 @@ impl IntoElement for Radio {
 pub(crate) struct Pagination {
     spec: PaginationSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     on_page_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
     limit_open: bool,
     on_limit_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
@@ -7338,10 +7367,15 @@ pub(crate) struct Pagination {
 }
 
 impl Pagination {
-    pub(crate) fn from_spec(spec: PaginationSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: PaginationSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
             on_page_change: None,
             limit_open: false,
             on_limit_open_change: None,
@@ -7389,6 +7423,7 @@ impl IntoElement for Pagination {
             limit_open: self.limit_open,
             limit_open_change: self.on_limit_open_change,
             page_size_change: self.on_page_size_change,
+            ..poodle_render::PaginationHandlers::new(self.instance_id)
         };
         poodle_gpui_node_backend::to_gpui(&poodle_render::pagination_with_handlers(
             &self.spec,
@@ -7784,14 +7819,20 @@ impl IntoElement for BlockEditor {
 pub(crate) struct LogList {
     spec: LogListSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     on_clear_filters: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
 impl LogList {
-    pub(crate) fn from_spec(spec: LogListSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: LogListSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
             on_clear_filters: None,
         }
     }
@@ -7806,7 +7847,12 @@ impl LogList {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::log_list(&self.spec, &RenderContext::new(&self.theme), self.on_clear_filters)
+        poodle_render::log_list(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.instance_id,
+            self.on_clear_filters,
+        )
     }
 }
 

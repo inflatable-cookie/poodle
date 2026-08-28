@@ -78,6 +78,13 @@ const PINNED: Record<
     rsRunner: "packages/contracts/headless/tests/conformance.rs",
     rsEvidence: "fn single_select_conformance",
   },
+  select: {
+    file: "machines.json",
+    tsRunner: "packages/core/test/conformance.test.ts",
+    tsEvidence: 'case "select"',
+    rsRunner: "packages/contracts/headless/tests/conformance.rs",
+    rsEvidence: "fn select_conformance",
+  },
   slider: {
     file: "machines.json",
     tsRunner: "packages/core/test/conformance.test.ts",

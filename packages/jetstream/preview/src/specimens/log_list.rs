@@ -42,6 +42,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_entries(stream_entries(8))
                     .with_auto_scroll(true),
                 theme,
+                "log-list-1",
             ),
         ))
         .child(group(
@@ -52,6 +53,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_entries(stream_entries(12))
                     .with_filter_level("error"),
                 theme,
+                "log-list-2",
             ),
         ))
         .child(group(
@@ -71,12 +73,13 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_page_size(20)
                     .with_total(85),
                 theme,
+                "log-list-3",
             ),
         ))
         .child(group(
             "Loading",
             secondary,
-            js_log_list(&LogListSpec::new().with_loading(true), theme),
+            js_log_list(&LogListSpec::new().with_loading(true), theme, "log-list-5"),
         ))
         .child(group(
             "Error",
@@ -84,6 +87,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_log_list(
                 &LogListSpec::new().with_error("Failed to load audit entries"),
                 theme,
+                "log-list-4",
             ),
         ))
 }

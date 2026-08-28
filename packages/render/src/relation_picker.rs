@@ -41,8 +41,12 @@ const LABEL_WEIGHT: u16 = 500;
 /// Handlers mirror the GPUI target's names. No `on_query_change` /
 /// `on_filter_change`: both are typed, and the vocabulary raises no key
 /// events.
-#[derive(Default)]
+/// Host-owned native interaction for one RelationPicker instance.
+///
+/// `instance_id` is the lifetime-stable scope. It is not a web public prop, and
+/// the renderer never invents one from render order or selected value.
 pub struct RelationPickerHandlers {
+    pub instance_id: String,
     /// Fires with the candidate's id. The host resolves the click into the
     /// next selection — single- and multi-select are its policy.
     pub on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
@@ -53,6 +57,24 @@ pub struct RelationPickerHandlers {
     pub on_breadcrumb_click: Option<Arc<dyn Fn(usize) + Send + Sync>>,
     pub on_confirm: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
+}
+
+impl RelationPickerHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "RelationPickerHandlers requires a non-empty lifetime-stable instance_id"
+        );
+        Self {
+            instance_id,
+            on_select: None,
+            on_drill_enter: None,
+            on_breadcrumb_click: None,
+            on_confirm: None,
+            on_cancel: None,
+        }
+    }
 }
 
 fn all_radius(node: &mut Node, r: f32) {
@@ -388,8 +410,7 @@ fn build_search(
         let mut filters_row = Node::container();
         filters_row.style.descriptor.layout.direction = LayoutDirection::Row;
         filters_row.style.flex_wrap = true;
-        filters_row.style.descriptor.layout.spacing.gap =
-            rem_to_px(control_space_x_rem(density));
+        filters_row.style.descriptor.layout.spacing.gap = rem_to_px(control_space_x_rem(density));
         let mut filters_row = filters_row;
         for filter in &spec.filters {
             let options = filter
@@ -403,8 +424,11 @@ fn build_search(
                 .with_size_role(spec.size_role)
                 .with_density(density);
             select_spec.aria_label = Some(format!("{} filter", filter.label));
-            filters_row =
-                filters_row.child(select(&select_spec, ctx, &SelectHandlers::default()));
+            filters_row = filters_row.child(select(
+                &select_spec,
+                ctx,
+                &SelectHandlers::new(format!("{}:{}", handlers.instance_id, filter.key)),
+            ));
         }
         col = col.child(filters_row);
     }
@@ -571,4 +595,44 @@ fn candidate_row(
     }
 
     row.child(copy)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::{PickerFilterConfig, PickerFilterOption, PickerItemSpec};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn two_relation_pickers_do_not_share_select_runtime_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = RelationPickerSpec::new(vec![PickerItemSpec::new("btn", "Button")])
+            .with_filters(vec![PickerFilterConfig::new(
+                "kind",
+                "Kind",
+                vec![PickerFilterOption::new("primitive", "Primitive")],
+            )]);
+        let left = relation_picker(&spec, &ctx, RelationPickerHandlers::new("picker-a"));
+        let right = relation_picker(&spec, &ctx, RelationPickerHandlers::new("picker-b"));
+        let mut tree = Node::container();
+        tree = tree.child(left).child(right);
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:picker-a:kind:trigger"))
+            .is_some());
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:picker-b:kind:trigger"))
+            .is_some());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "RelationPickerHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn empty_instance_scope_is_rejected() {
+        let _ = RelationPickerHandlers::new("");
+    }
 }

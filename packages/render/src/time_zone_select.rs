@@ -17,12 +17,29 @@ use crate::context::RenderContext;
 use crate::presentation::{rem_to_px, size_height_offset_rem, size_padding_x_offset_rem};
 use crate::select::{select, SelectHandlers};
 
-/// Host callbacks: `on_toggle` (trigger) and `on_change` (chosen zone id),
-/// forwarded to the composed select.
-#[derive(Default)]
+/// Host-owned native interaction for one TimeZoneSelect instance.
+///
+/// `instance_id` is the lifetime-stable scope. It is not a web public prop, and
+/// the renderer never invents one from render order or selected value.
 pub struct TimeZoneSelectHandlers {
+    pub instance_id: String,
     pub on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+}
+
+impl TimeZoneSelectHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "TimeZoneSelectHandlers requires a non-empty lifetime-stable instance_id"
+        );
+        Self {
+            instance_id,
+            on_toggle: None,
+            on_change: None,
+        }
+    }
 }
 
 pub fn time_zone_select(
@@ -34,15 +51,29 @@ pub fn time_zone_select(
     // (searchable always on, timezone empty message, mapped option list,
     // placeholder + value + size/density forwarded) and delegate.
     let select_spec = spec.to_select_spec();
-    let mut root = select(
-        &select_spec,
-        ctx,
-        &SelectHandlers {
-            toggle: handlers.on_toggle,
-            change: handlers.on_change,
-            clear: None,
-        },
-    );
+    let toggle = handlers.on_toggle;
+    let change = handlers.on_change;
+    let mut select_handlers = SelectHandlers::new(&handlers.instance_id);
+    if toggle.is_some() || change.is_some() {
+        select_handlers = select_handlers.on_transition(Arc::new(move |result| {
+            for effect in &result.effects {
+                match effect {
+                    crate::SelectEffect::OpenChanged { .. } => {
+                        if let Some(handler) = &toggle {
+                            handler();
+                        }
+                    }
+                    crate::SelectEffect::ValueChanged { value } => {
+                        if let Some(handler) = &change {
+                            handler(value);
+                        }
+                    }
+                    crate::SelectEffect::QueryChanged { .. } => {}
+                }
+            }
+        }));
+    }
+    let mut root = select(&select_spec, ctx, &select_handlers);
 
     // The standalone GPUI tier predates the generic Select's translucent
     // trigger recipe. Preserve its public TimeZoneSelect treatment while
@@ -116,4 +147,38 @@ pub fn time_zone_select(
         }
     }
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn two_time_zone_selects_do_not_share_runtime_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = TimeZoneSelectSpec::new();
+        let left = time_zone_select(&spec, &ctx, TimeZoneSelectHandlers::new("zone-a"));
+        let right = time_zone_select(&spec, &ctx, TimeZoneSelectHandlers::new("zone-b"));
+        let mut tree = Node::container();
+        tree = tree.child(left).child(right);
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:zone-a:trigger"))
+            .is_some());
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:zone-b:trigger"))
+            .is_some());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "TimeZoneSelectHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn empty_instance_scope_is_rejected() {
+        let _ = TimeZoneSelectHandlers::new("");
+    }
 }

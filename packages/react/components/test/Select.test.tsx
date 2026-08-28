@@ -1,8 +1,8 @@
-import { fireEvent, render } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
 import { Select } from "../src/Select";
-import type { SelectItems } from "../src/types";
+import type { SelectItems, SelectLoadContext } from "../src/types";
 
 const options: SelectItems = [
   { value: "alpha", label: "Alpha" },
@@ -71,5 +71,236 @@ describe("Select (react) option identity", () => {
       el.getAttribute("data-value"),
     );
     expect(values).toEqual(["alpha", "beta"]);
+  });
+});
+
+describe("Select (react) semantic machine", () => {
+  const triggerOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-select__trigger") as HTMLButtonElement;
+  const inputOf = (container: HTMLElement) =>
+    container.querySelector(".poodle-select__input") as HTMLInputElement;
+  const listboxOf = (container: HTMLElement) =>
+    document.querySelector('[role="listbox"]') as HTMLElement | null;
+
+  it("reports query edits without committing a value", async () => {
+    const onValueChange = vi.fn();
+    const onQueryChange = vi.fn();
+    const onOpenChange = vi.fn();
+    const { container } = render(
+      <Select
+        options={options}
+        searchable
+        freeform
+        native={false}
+        onValueChange={onValueChange}
+        onQueryChange={onQueryChange}
+        onOpenChange={onOpenChange}
+      />,
+    );
+
+    fireEvent.change(inputOf(container), { target: { value: "al" } });
+
+    expect(onQueryChange.mock.calls.map((call) => call[0])).toEqual(["al"]);
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(onOpenChange.mock.calls.map((call) => call[0])).toEqual([true]);
+  });
+
+  it("commits a highlighted option on Enter and reports value after query", () => {
+    const onValueChange = vi.fn();
+    const onQueryChange = vi.fn();
+    const onOpenChange = vi.fn();
+    const { container } = render(
+      <Select
+        options={options}
+        searchable
+        freeform
+        native={false}
+        onValueChange={onValueChange}
+        onQueryChange={onQueryChange}
+        onOpenChange={onOpenChange}
+      />,
+    );
+
+    fireEvent.change(inputOf(container), { target: { value: "be" } });
+    fireEvent.keyDown(inputOf(container), { key: "Enter" });
+
+    expect(onQueryChange.mock.calls.map((call) => call[0])).toEqual(["be", "Beta"]);
+    expect(onValueChange.mock.calls.map((call) => call[0])).toEqual(["beta"]);
+    expect(onOpenChange.mock.calls.map((call) => call[0])).toEqual([true, false]);
+  });
+
+  it("commits freeform text on Enter when no option is highlighted", () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <Select options={options} searchable freeform native={false} onValueChange={onValueChange} />,
+    );
+
+    fireEvent.change(inputOf(container), { target: { value: "kiwi" } });
+    fireEvent.keyDown(inputOf(container), { key: "Enter" });
+
+    expect(onValueChange.mock.calls.map((call) => call[0])).toEqual(["kiwi"]);
+  });
+
+  it("does not commit freeform text on Tab or Escape", () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <Select options={options} searchable freeform native={false} onValueChange={onValueChange} />,
+    );
+
+    fireEvent.change(inputOf(container), { target: { value: "kiwi" } });
+    fireEvent.keyDown(inputOf(container), { key: "Escape" });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(listboxOf(container)).toBeNull();
+
+    fireEvent.change(inputOf(container), { target: { value: "kiwi" } });
+    fireEvent.keyDown(inputOf(container), { key: "Tab" });
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  it("commits freeform text on control blur when no option is highlighted", () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <Select options={options} searchable freeform native={false} onValueChange={onValueChange} />,
+    );
+
+    fireEvent.change(inputOf(container), { target: { value: "kiwi" } });
+    fireEvent.blur(container.querySelector(".poodle-select") as HTMLElement, {
+      relatedTarget: document.body,
+    });
+
+    expect(onValueChange.mock.calls.map((call) => call[0])).toEqual(["kiwi"]);
+  });
+
+  it("does not commit a draft query before an option click", () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <Select options={options} searchable freeform native={false} onValueChange={onValueChange} />,
+    );
+
+    fireEvent.change(inputOf(container), { target: { value: "al" } });
+    const option = document.querySelector('[data-value="alpha"]') as HTMLElement;
+    fireEvent.mouseDown(option);
+    fireEvent.click(option);
+
+    expect(onValueChange.mock.calls.map((call) => call[0])).toEqual(["alpha"]);
+  });
+
+  it("clamps arrow movement and skips a disabled option", () => {
+    const { container } = render(
+      <Select
+        options={[
+          { value: "alpha", label: "Alpha" },
+          { value: "skip", label: "Skip", disabled: true },
+          { value: "beta", label: "Beta" },
+        ]}
+        native={false}
+      />,
+    );
+
+    fireEvent.click(triggerOf(container));
+    const trigger = triggerOf(container);
+    fireEvent.keyDown(trigger, { key: "ArrowDown" });
+    fireEvent.keyDown(trigger, { key: "ArrowDown" });
+
+    const highlighted = [...document.querySelectorAll('[role="option"]')].map((el) =>
+      el.getAttribute("data-highlighted"),
+    );
+    expect(highlighted).toEqual(["false", "false", "true"]);
+  });
+
+  it("highlights the first enabled query match even when the selected option also matches later", () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <Select
+        options={[
+          { value: "apple", label: "Apple" },
+          { value: "apricot", label: "Apricot" },
+        ]}
+        value="apricot"
+        searchable
+        native={false}
+        onValueChange={onValueChange}
+      />,
+    );
+
+    fireEvent.change(inputOf(container), { target: { value: "ap" } });
+    const highlighted = [...document.querySelectorAll('[role="option"]')].map((el) =>
+      el.getAttribute("data-highlighted"),
+    );
+    expect(highlighted).toEqual(["true", "false"]);
+
+    fireEvent.keyDown(inputOf(container), { key: "Enter" });
+    expect(onValueChange.mock.calls.map((call) => call[0])).toEqual(["apple"]);
+  });
+
+  it("reconciles lazy option results without a duplicate query callback", async () => {
+    const onQueryChange = vi.fn();
+    const onValueChange = vi.fn();
+    const loadOptions = vi.fn(async (context?: SelectLoadContext) => {
+      const query = context?.query;
+      await Promise.resolve();
+      if (query === "ap") {
+        return [
+          { value: "apple", label: "Apple" },
+          { value: "apricot", label: "Apricot" },
+        ];
+      }
+      return [
+        { value: "apricot", label: "Apricot" },
+        { value: "banana", label: "Banana" },
+      ];
+    });
+    const { container } = render(
+      <Select
+        loadOptions={loadOptions}
+        value="apricot"
+        searchable
+        native={false}
+        onQueryChange={onQueryChange}
+        onValueChange={onValueChange}
+      />,
+    );
+
+    fireEvent.change(inputOf(container), { target: { value: "ap" } });
+    expect(onQueryChange.mock.calls.map((call) => call[0])).toEqual(["ap"]);
+
+    await waitFor(() => {
+      expect([...document.querySelectorAll('[role="option"]')].map((el) => el.getAttribute("data-value"))).toEqual([
+        "apple",
+        "apricot",
+      ]);
+    });
+
+    const highlighted = [...document.querySelectorAll('[role="option"]')].map((el) =>
+      el.getAttribute("data-highlighted"),
+    );
+    expect(highlighted).toEqual(["true", "false"]);
+
+    fireEvent.keyDown(inputOf(container), { key: "Enter" });
+    expect(onValueChange.mock.calls.map((call) => call[0])).toEqual(["apple"]);
+    expect(onQueryChange.mock.calls.map((call) => call[0])).toEqual(["ap", "Apple"]);
+  });
+
+  it("does not emit a second toggle from clear", () => {
+    const onOpenChange = vi.fn();
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <Select
+        options={options}
+        native={false}
+        clearable
+        value="alpha"
+        onOpenChange={onOpenChange}
+        onValueChange={onValueChange}
+      />,
+    );
+
+    fireEvent.click(triggerOf(container));
+    onOpenChange.mockClear();
+    fireEvent.click(container.querySelector(".poodle-select__clear") as HTMLElement);
+
+    expect(onValueChange.mock.calls.map((call) => call[0])).toEqual([""]);
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(listboxOf(container)).not.toBeNull();
   });
 });

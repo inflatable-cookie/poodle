@@ -34,17 +34,36 @@ use crate::presentation::{
     rem_to_px, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem,
 };
 
-#[derive(Default, Clone)]
+#[derive(Clone)]
 pub struct PaginationHandlers {
+    pub instance_id: String,
     pub page_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
     pub limit_open: bool,
     pub limit_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
     pub page_size_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
 }
 
+impl PaginationHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "PaginationHandlers requires a non-empty lifetime-stable instance_id"
+        );
+        Self {
+            instance_id,
+            page_change: None,
+            limit_open: false,
+            limit_open_change: None,
+            page_size_change: None,
+        }
+    }
+}
+
 pub fn pagination(
     spec: &PaginationSpec,
     ctx: &RenderContext<'_>,
+    instance_id: impl Into<String>,
     on_page_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
 ) -> Node {
     pagination_with_handlers(
@@ -52,7 +71,7 @@ pub fn pagination(
         ctx,
         &PaginationHandlers {
             page_change: on_page_change,
-            ..PaginationHandlers::default()
+            ..PaginationHandlers::new(instance_id)
         },
     )
 }
@@ -495,24 +514,30 @@ fn build_limit_selector(
         // every page button. Use Select's public disabled field — do not fork it.
         select_spec.is_disabled = spec.is_loading;
 
-        let toggle = handlers.limit_open_change.as_ref().map(|handler| {
-            let handler = Arc::clone(handler);
-            let next = !handlers.limit_open;
-            Arc::new(move || handler(next)) as Arc<dyn Fn() + Send + Sync>
-        });
-        let change = handlers.page_size_change.as_ref().map(|handler| {
-            let handler = Arc::clone(handler);
-            Arc::new(move |value: &str| {
-                if let Ok(size) = value.parse::<usize>() {
-                    handler(size);
+        let open_change = handlers.limit_open_change.clone();
+        let size_change = handlers.page_size_change.clone();
+        let mut select_handlers = crate::SelectHandlers::new(&handlers.instance_id);
+        if open_change.is_some() || size_change.is_some() {
+            select_handlers = select_handlers.on_transition(Arc::new(move |result| {
+                for effect in &result.effects {
+                    match effect {
+                        crate::SelectEffect::OpenChanged { open } => {
+                            if let Some(handler) = &open_change {
+                                handler(*open);
+                            }
+                        }
+                        crate::SelectEffect::ValueChanged { value } => {
+                            if let Some(handler) = &size_change {
+                                if let Ok(size) = value.parse::<usize>() {
+                                    handler(size);
+                                }
+                            }
+                        }
+                        crate::SelectEffect::QueryChanged { .. } => {}
+                    }
                 }
-            }) as Arc<dyn Fn(&str) + Send + Sync>
-        });
-        let select_handlers = crate::SelectHandlers {
-            toggle,
-            change,
-            clear: None,
-        };
+            }));
+        }
         let select_box = crate::select(&select_spec, ctx, &select_handlers);
 
         let mut row = Node::container();
@@ -549,6 +574,7 @@ fn build_limit_selector(
     }
     let mut chevron = Node::icon("chevron-down", font_size);
     chevron.style.descriptor.text_color = Some(text_secondary);
+    select_box.runtime_id = Some(format!("select:{}:trigger", handlers.instance_id));
     let select_box = select_box
         .child(text(&page_size_label, text_primary))
         .child(chevron);
@@ -607,6 +633,7 @@ mod tests {
             page_size_change: Some(Arc::new(move |size| {
                 size_sink.lock().expect("size lock").push(size);
             })),
+            ..PaginationHandlers::new("pagination-test")
         }
     }
 
@@ -667,7 +694,10 @@ mod tests {
         let node = render(&numbered_spec().with_loading(true), &handlers);
 
         let trigger = limit_trigger(&node);
-        assert!(trigger.interaction.disabled, "loading disables the Select trigger");
+        assert!(
+            trigger.interaction.disabled,
+            "loading disables the Select trigger"
+        );
         assert!(
             trigger.interaction.on_activate.is_none(),
             "loading Select must not report open changes"
@@ -891,5 +921,90 @@ mod tests {
             .expect("page-size option 25");
         option.interaction.on_activate.as_ref().unwrap().as_ref()();
         assert_eq!(*sizes.lock().expect("size lock"), [25]);
+    }
+
+    #[test]
+    fn two_paginations_do_not_share_select_runtime_ids() {
+        let spec = numbered_spec();
+        let left = render(
+            &spec,
+            &PaginationHandlers {
+                instance_id: "pager-a".to_string(),
+                ..wired_handlers(
+                    Arc::new(Mutex::new(Vec::new())),
+                    Arc::new(Mutex::new(Vec::new())),
+                    Arc::new(Mutex::new(Vec::new())),
+                    false,
+                )
+            },
+        );
+        let right = render(
+            &spec,
+            &PaginationHandlers {
+                instance_id: "pager-b".to_string(),
+                ..wired_handlers(
+                    Arc::new(Mutex::new(Vec::new())),
+                    Arc::new(Mutex::new(Vec::new())),
+                    Arc::new(Mutex::new(Vec::new())),
+                    false,
+                )
+            },
+        );
+        let mut tree = Node::container();
+        tree = tree.child(left).child(right);
+        let left_trigger = tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:pager-a:trigger"))
+            .expect("left limit trigger");
+        let right_trigger = tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:pager-b:trigger"))
+            .expect("right limit trigger");
+        assert_ne!(left_trigger.runtime_id, right_trigger.runtime_id);
+    }
+
+    #[test]
+    fn public_pagination_path_does_not_share_select_runtime_ids() {
+        let spec = numbered_spec();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let left = pagination(&spec, &ctx, "pager-public-a", None);
+        let right = pagination(&spec, &ctx, "pager-public-b", None);
+        let mut tree = Node::container();
+        tree = tree.child(left).child(right);
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:pager-public-a:trigger"))
+            .is_some());
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:pager-public-b:trigger"))
+            .is_some());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "PaginationHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn empty_instance_scope_is_rejected() {
+        let _ = PaginationHandlers::new("");
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "PaginationHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn public_pagination_path_rejects_empty_instance_scope() {
+        let spec = numbered_spec();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let _ = pagination(&spec, &ctx, "", None);
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "PaginationHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn public_pagination_path_rejects_blank_instance_scope() {
+        let spec = numbered_spec();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let _ = pagination(&spec, &ctx, "  \t", None);
     }
 }

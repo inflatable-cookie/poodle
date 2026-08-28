@@ -307,11 +307,12 @@ pub fn js_date_time_range_picker(
 pub fn js_date_time_zone_picker(
     spec: &DateTimeZonePickerSpec,
     theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
 ) -> El {
     El(pr::date_time_zone_picker(
         spec,
         &pr::RenderContext::new(theme),
-        pr::DateTimeZonePickerHandlers::default(),
+        pr::DateTimeZonePickerHandlers::new(instance_id),
     ))
 }
 
@@ -649,8 +650,17 @@ pub fn js_list_grid(
     El(pr::list_grid(spec, &pr::RenderContext::new(theme), header, children))
 }
 
-pub fn js_log_list(spec: &LogListSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::log_list(spec, &pr::RenderContext::new(theme), None))
+pub fn js_log_list(
+    spec: &LogListSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
+) -> El {
+    El(pr::log_list(
+        spec,
+        &pr::RenderContext::new(theme),
+        instance_id,
+        None,
+    ))
 }
 
 pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvider) -> El {
@@ -742,8 +752,16 @@ pub fn js_number_input(spec: &NumberInputSpec, theme: &JetstreamThemeProvider) -
     ))
 }
 
-pub fn js_order_by(spec: &OrderBySpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::order_by(spec, &pr::RenderContext::new(theme), pr::OrderByHandlers::default()))
+pub fn js_order_by(
+    spec: &OrderBySpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
+) -> El {
+    El(pr::order_by(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::OrderByHandlers::new(instance_id),
+    ))
 }
 
 pub fn js_page_header(spec: &PageHeaderSpec, theme: &JetstreamThemeProvider) -> El {
@@ -777,8 +795,17 @@ pub fn js_page_loading(spec: &PageLoadingSpec, theme: &JetstreamThemeProvider) -
     El(pr::page_loading(spec, &pr::RenderContext::new(theme), None))
 }
 
-pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::pagination(spec, &pr::RenderContext::new(theme), None))
+pub fn js_pagination(
+    spec: &PaginationSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
+) -> El {
+    El(pr::pagination(
+        spec,
+        &pr::RenderContext::new(theme),
+        instance_id,
+        None,
+    ))
 }
 
 pub fn js_pagination_summary(spec: &PaginationSummarySpec, theme: &JetstreamThemeProvider) -> El {
@@ -870,11 +897,15 @@ pub fn js_region(spec: &RegionSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::region(spec, &pr::RenderContext::new(theme)))
 }
 
-pub fn js_relation_picker(spec: &RelationPickerSpec, theme: &JetstreamThemeProvider) -> El {
+pub fn js_relation_picker(
+    spec: &RelationPickerSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
+) -> El {
     El(pr::relation_picker(
         spec,
         &pr::RenderContext::new(theme),
-        pr::RelationPickerHandlers::default(),
+        pr::RelationPickerHandlers::new(instance_id),
     ))
 }
 
@@ -904,7 +935,11 @@ pub fn js_segmented_control(spec: &SegmentedControlSpec, theme: &JetstreamThemeP
 }
 
 pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::select(spec, &pr::RenderContext::new(theme), &pr::SelectHandlers::default()))
+    El(pr::select(
+        spec,
+        &pr::RenderContext::new(theme),
+        &pr::SelectHandlers::new(spec.id.clone().unwrap_or_else(|| "select".to_string())),
+    ))
 }
 
 pub fn js_selection_summary(spec: &SelectionSummarySpec, theme: &JetstreamThemeProvider) -> El {
@@ -1033,11 +1068,15 @@ pub fn js_time_field(spec: &TimeFieldSpec, theme: &JetstreamThemeProvider) -> El
     El(pr::time_field(spec, &pr::RenderContext::new(theme)))
 }
 
-pub fn js_time_zone_select(spec: &TimeZoneSelectSpec, theme: &JetstreamThemeProvider) -> El {
+pub fn js_time_zone_select(
+    spec: &TimeZoneSelectSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
+) -> El {
     El(pr::time_zone_select(
         spec,
         &pr::RenderContext::new(theme),
-        pr::TimeZoneSelectHandlers::default(),
+        pr::TimeZoneSelectHandlers::new(instance_id),
     ))
 }
 
@@ -1158,16 +1197,18 @@ pub fn js_list_card_with_slots(
 pub fn js_list_container(
     spec: &ListContainerSpec,
     theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
     content: Option<El>,
     filters: Option<El>,
     batch: Option<El>,
 ) -> El {
-    js_list_container_with_slots(spec, theme, content, filters, batch, None, None)
+    js_list_container_with_slots(spec, theme, instance_id, content, filters, batch, None, None)
 }
 
 pub fn js_list_container_with_slots(
     spec: &ListContainerSpec,
     theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
     content: Option<El>,
     filters: Option<El>,
     batch: Option<El>,
@@ -1187,6 +1228,7 @@ pub fn js_list_container_with_slots(
             actions: actions
                 .map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>),
         },
+        instance_id,
         None,
     ))
 }

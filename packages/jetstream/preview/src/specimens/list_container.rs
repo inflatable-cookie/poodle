@@ -49,6 +49,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_total_items(48)
                     .with_page_size(10),
                 theme,
+                "list-container-1",
                 Some(rows()),
                 None,
                 None,
@@ -61,6 +62,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_list_container(
                 &ListContainerSpec::new("Team members").with_eyebrow("Settings"),
                 theme,
+                "list-container-2",
                 Some(rows()),
                 Some(
                     label("Filter toolbar")
@@ -81,6 +83,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             js_list_container_with_slots(
                 &ListContainerSpec::new("Team members").with_eyebrow("Settings"),
                 theme,
+                "list-container-3",
                 Some(rows()),
                 None,
                 None,
@@ -109,6 +112,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_empty_title("No assets yet")
                     .with_empty_message("Upload your first asset to get started."),
                 theme,
+                "list-container-4",
                 None,
                 None,
                 None,
@@ -122,6 +126,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_state(ListContainerState::Loading)
                     .with_loading_message("Searching..."),
                 theme,
+                "list-container-5",
                 None,
                 None,
                 None,
@@ -135,6 +140,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_state(ListContainerState::Error)
                     .with_error_message("A network error occurred. Please try again."),
                 theme,
+                "list-container-6",
                 None,
                 None,
                 None,

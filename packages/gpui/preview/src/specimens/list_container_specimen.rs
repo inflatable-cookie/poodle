@@ -33,6 +33,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                             .with_total_items(24)
                             .with_page_size(10),
                         theme,
+                        "list-container-1",
                     )
                     .with_content({
                         let mut content = Node::text("[ List items rendered here ]");
@@ -61,12 +62,14 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                             ListContainerSpec::new("Loading example")
                                 .with_state(ListContainerState::Loading),
                             theme,
+                            "list-container-2",
                         ))
                         .child(ListContainer::from_spec(
                             ListContainerSpec::new("Error example")
                                 .with_state(ListContainerState::Error)
                                 .with_error_message("Network request failed. Please try again."),
                             theme,
+                            "list-container-3",
                         ))
                         .child(ListContainer::from_spec(
                             ListContainerSpec::new("Empty example")
@@ -75,6 +78,7 @@ pub(crate) fn render(state: &AppState, _cx: &mut Context<PreviewRoot>) -> Div {
                                     "Create your first team member to get started.",
                                 ),
                             theme,
+                            "list-container-4",
                         )),
                 ),
         )

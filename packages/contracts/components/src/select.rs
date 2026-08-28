@@ -1,3 +1,4 @@
+use poodle_headless::select::{SelectContext, SelectOptionState};
 use poodle_tokens::semantic;
 
 use crate::types::{ChoiceOption, ControlDensity, ControlSize, SemanticControlSizeRole};
@@ -76,8 +77,9 @@ pub struct SelectSpec {
     /// Current search/filter query string for the inline search input.
     /// When `searchable` is true and this is set, only options whose
     /// labels contain the query (case-insensitive) are shown.
-    /// The host controls this via the `on_search_change` callback.
     pub search_query: Option<String>,
+    /// Host-authored highlighted option value. `None` means no highlight.
+    pub highlighted_value: Option<String>,
 }
 
 impl Default for SelectSpec {
@@ -110,6 +112,7 @@ impl Default for SelectSpec {
             value_label: None,
             load_key: None,
             search_query: None,
+            highlighted_value: None,
         }
     }
 }
@@ -230,18 +233,18 @@ impl SelectSpec {
     }
 
     /// Returns true when the dropdown should render a search/filter input.
-    /// This is the case when `searchable` is true or `freeform` is true.
+    /// Search is `searchable` only; `freeform` alone does not show it.
     pub fn shows_search_input(&self) -> bool {
-        self.searchable || self.freeform
+        self.searchable
     }
 
     /// Returns true when the select must use a custom dropdown
-    /// (either explicitly requested or required by searchable/freeform).
+    /// (either explicitly requested or required by searchable).
     pub fn requires_custom_dropdown(&self) -> bool {
         match self.mode {
             SelectMode::Custom => true,
             SelectMode::Native => false,
-            SelectMode::Auto => self.shows_search_input(),
+            SelectMode::Auto => self.searchable,
         }
     }
 
@@ -286,5 +289,36 @@ impl SelectSpec {
     pub fn with_search_query(mut self, query: impl Into<String>) -> Self {
         self.search_query = Some(query.into());
         self
+    }
+
+    pub fn with_highlighted_value(mut self, value: impl Into<String>) -> Self {
+        self.highlighted_value = Some(value.into());
+        self
+    }
+
+    pub fn effective_value(&self) -> String {
+        self.current_value().unwrap_or("").to_string()
+    }
+
+    pub fn select_context(&self) -> SelectContext {
+        SelectContext {
+            value: self.effective_value(),
+            open: self.current_open(),
+            query: self.search_query.clone().unwrap_or_default(),
+            highlighted_value: self.highlighted_value.clone(),
+            options: self
+                .options
+                .iter()
+                .map(|option| SelectOptionState {
+                    value: option.value.clone(),
+                    label: option.label.clone(),
+                    disabled: option.is_disabled,
+                })
+                .collect(),
+            clear_value: self.default_value.clone().unwrap_or_default(),
+            searchable: self.searchable,
+            freeform: self.freeform,
+            disabled: self.is_disabled,
+        }
     }
 }

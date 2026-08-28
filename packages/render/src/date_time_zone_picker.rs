@@ -24,13 +24,33 @@ use crate::time_zone_select::{time_zone_select, TimeZoneSelectHandlers};
 
 /// Host callbacks: the shared picker trio plus zone toggle/change forwarded
 /// to the composed time-zone select.
-#[derive(Default)]
+///
+/// `instance_id` is the lifetime-stable scope for the nested TimeZoneSelect.
 pub struct DateTimeZonePickerHandlers {
+    pub instance_id: String,
     pub on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_navigate: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_zone_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_zone_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+}
+
+impl DateTimeZonePickerHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "DateTimeZonePickerHandlers requires a non-empty lifetime-stable instance_id"
+        );
+        Self {
+            instance_id,
+            on_toggle: None,
+            on_select: None,
+            on_navigate: None,
+            on_zone_toggle: None,
+            on_zone_change: None,
+        }
+    }
 }
 
 pub fn date_time_zone_picker(
@@ -141,8 +161,7 @@ pub fn date_time_zone_picker(
         };
 
         // Time field — contract Field: "TIME" label above composed TimeInput.
-        let time_field_group =
-            field_group(field_label("Time", muted), time_field(&time_spec, ctx));
+        let time_field_group = field_group(field_label("Time", muted), time_field(&time_spec, ctx));
 
         // Time zone field — "TIME ZONE" label above composed TimeZoneSelect.
         let tz_field_group = field_group(
@@ -153,6 +172,7 @@ pub fn date_time_zone_picker(
                 TimeZoneSelectHandlers {
                     on_toggle: handlers.on_zone_toggle.clone(),
                     on_change: handlers.on_zone_change.clone(),
+                    ..TimeZoneSelectHandlers::new(handlers.instance_id.clone())
                 },
             ),
         );
@@ -237,4 +257,17 @@ pub fn date_time_zone_picker(
         }
     }
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic(
+        expected = "DateTimeZonePickerHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn empty_instance_scope_is_rejected() {
+        let _ = DateTimeZonePickerHandlers::new("");
+    }
 }

@@ -9756,12 +9756,17 @@ fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard(
             match label.as_str() {
                 "Previous page" => node.id = Some("pagination-prev".to_owned()),
                 "Next page" => node.id = Some("pagination-next".to_owned()),
-                "Items per page" => node.id = Some("pagination-limit".to_owned()),
+                "Items per page" => {
+                    node.id = Some("pagination-limit".to_owned());
+                    node.runtime_id = Some("pagination-limit".to_owned());
+                }
                 "10" if node.a11y.role == Some(NodeRole::ListBoxOption) => {
                     node.id = Some("pagination-limit-10".to_owned());
+                    node.runtime_id = Some("pagination-limit-10".to_owned());
                 }
                 "25" if node.a11y.role == Some(NodeRole::ListBoxOption) => {
                     node.id = Some("pagination-limit-25".to_owned());
+                    node.runtime_id = Some("pagination-limit-25".to_owned());
                     // Test-only: Select options are focusable but declare no
                     // ring, so the backend never tracks a handle. Stamp a ring
                     // so Enter/Space can exercise the production on_activate
@@ -9776,6 +9781,7 @@ fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard(
                 }
                 "50" if node.a11y.role == Some(NodeRole::ListBoxOption) => {
                     node.id = Some("pagination-limit-50".to_owned());
+                    node.runtime_id = Some("pagination-limit-50".to_owned());
                 }
                 _ => {}
             }
@@ -9806,6 +9812,7 @@ fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard(
                 .is_some()
         {
             node.id = Some("pagination-limit".to_owned());
+            node.runtime_id = Some("pagination-limit".to_owned());
         }
         for child in &mut node.children {
             stamp_ids(child);
@@ -9867,6 +9874,7 @@ fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard(
                     *size_mount.lock().expect("mount lock") =
                         build(Arc::clone(&size_host), Arc::clone(&size_mount));
                 })),
+                ..poodle_render::PaginationHandlers::new("pagination-limit")
             },
         );
         stamp_ids(&mut node);

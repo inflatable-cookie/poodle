@@ -26,20 +26,34 @@ use crate::icon_button::icon_button;
 use crate::presentation::{rem_to_px, size_padding_x_offset_rem};
 use crate::select::{select, SelectHandlers};
 
-/// Handlers mirror the GPUI target's names.
-#[derive(Default)]
+/// Host-owned native interaction for one OrderBy instance.
+///
+/// `instance_id` is the lifetime-stable scope. It is not a web public prop, and
+/// the renderer never invents one from render order or selected value.
 pub struct OrderByHandlers {
+    pub instance_id: String,
     /// Fires with the field whose direction arrow was pressed.
     pub on_direction_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires with the field that was removed.
     pub on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
-pub fn order_by(
-    spec: &OrderBySpec,
-    ctx: &RenderContext<'_>,
-    handlers: OrderByHandlers,
-) -> Node {
+impl OrderByHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "OrderByHandlers requires a non-empty lifetime-stable instance_id"
+        );
+        Self {
+            instance_id,
+            on_direction_toggle: None,
+            on_remove: None,
+        }
+    }
+}
+
+pub fn order_by(spec: &OrderBySpec, ctx: &RenderContext<'_>, handlers: OrderByHandlers) -> Node {
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
     // ── Size table (matches corrected contract §8) ────────────────────────────
@@ -371,7 +385,11 @@ pub fn order_by(
             let mut row = Node::container();
             row.style.descriptor.layout.direction = LayoutDirection::Row;
             row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            panel = panel.child(row.child(select(&select_spec, ctx, &SelectHandlers::default())));
+            panel = panel.child(row.child(select(
+                &select_spec,
+                ctx,
+                &SelectHandlers::new(&handlers.instance_id),
+            )));
         }
 
         // Dialog surface chrome.
@@ -418,6 +436,7 @@ pub fn order_by(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_specs::SortField;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -429,13 +448,45 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = OrderBySpec::new().with_open(true);
-        let node = order_by(&spec, &ctx, OrderByHandlers::default());
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
+        let node = order_by(&spec, &ctx, OrderByHandlers::new("order-by"));
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_none());
 
         // Refusal: the open surface carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = order_by(&refusing, &ctx, OrderByHandlers::default());
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
+        let node = order_by(&refusing, &ctx, OrderByHandlers::new("order-by"));
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_some());
+    }
+
+    #[test]
+    fn two_order_bys_do_not_share_select_runtime_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = OrderBySpec::new()
+            .with_fields(vec![
+                SortField::new("name", "Name"),
+                SortField::new("created", "Created"),
+            ])
+            .with_open(true);
+        let left = order_by(&spec, &ctx, OrderByHandlers::new("sort-a"));
+        let right = order_by(&spec, &ctx, OrderByHandlers::new("sort-b"));
+        let mut tree = Node::container();
+        tree = tree.child(left).child(right);
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:sort-a:trigger"))
+            .is_some());
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:sort-b:trigger"))
+            .is_some());
+    }
+
+    #[test]
+    #[should_panic(expected = "OrderByHandlers requires a non-empty lifetime-stable instance_id")]
+    fn empty_instance_scope_is_rejected() {
+        let _ = OrderByHandlers::new("");
     }
 }

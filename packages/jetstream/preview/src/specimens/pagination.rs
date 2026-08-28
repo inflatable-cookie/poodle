@@ -28,6 +28,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_total_pages(10)
                     .with_aria_label("Results pagination"),
                 theme,
+                "pagination-1",
             ),
         ))
         // Contract §13 Middle of range — siblingCount 2, both ends truncated.
@@ -41,6 +42,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_sibling_count(2)
                     .with_aria_label("Extended pagination"),
                 theme,
+                "pagination-2",
             ),
         ))
         // Contract §13 Few pages — all three buttons, no ellipsis.
@@ -53,6 +55,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_total_pages(3)
                     .with_aria_label("Short pagination"),
                 theme,
+                "pagination-3",
             ),
         ))
         // Boundary states — prev disabled at first page, next disabled at last.
@@ -64,6 +67,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_current_page(1)
                     .with_total_pages(8),
                 theme,
+                "pagination-4",
             ),
         ))
         .child(group(
@@ -74,6 +78,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_current_page(8)
                     .with_total_pages(8),
                 theme,
+                "pagination-5",
             ),
         ))
         // Contract §13 Simple variant — item range + info + limit selector.
@@ -92,6 +97,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_limit_options(vec![10, 25, 50, 100])
                     .with_aria_label("Simple pagination"),
                 theme,
+                "pagination-6",
             ),
         ))
         // Contract §13 Full variant — "Page X of Y" + first/last guillemets.
@@ -107,6 +113,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_total_items(140)
                     .with_aria_label("Full pagination"),
                 theme,
+                "pagination-7",
             ),
         ))
         // Container chrome — padding + top border + elevated bg (default here).
@@ -119,6 +126,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_total_pages(10)
                     .with_aria_label("Pagination with chrome"),
                 theme,
+                "pagination-8",
             ),
         ))
         // Standalone — chrome-free (no padding/border/bg).
@@ -132,6 +140,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_standalone(true)
                     .with_aria_label("Standalone pagination"),
                 theme,
+                "pagination-9",
             ),
         ))
         // Compact — tighter gap/padding.
@@ -145,6 +154,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_compact(true)
                     .with_standalone(true),
                 theme,
+                "pagination-10",
             ),
         ))
         // Loading — whole control at reduced opacity, controls disabled.
@@ -158,6 +168,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_loading(true)
                     .with_standalone(true),
                 theme,
+                "pagination-11",
             ),
         ))
         // Contract §13 Sizes — xs..xl button height + font ladder.
@@ -194,6 +205,7 @@ fn sized(size: ControlSize, theme: &JetstreamThemeProvider) -> El {
             .with_standalone(true)
             .with_size(size),
         theme,
+        "pagination-12",
     )
 }
 
@@ -205,6 +217,7 @@ fn densified(density: ControlDensity, theme: &JetstreamThemeProvider) -> El {
             .with_standalone(true)
             .with_density(density),
         theme,
+        "pagination-13",
     )
 }
 

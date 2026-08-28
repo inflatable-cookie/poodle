@@ -30,8 +30,9 @@ use crate::icon_button::icon_button;
 use crate::number_input::{number_input, NumberInputHandlers};
 use crate::presentation::{rem_to_px, size_padding_x_offset_rem};
 use crate::segmented_control::segmented_control;
-use crate::select::{select, SelectHandlers};
+use crate::select::{select, SelectHandlers, SelectTransitionResult};
 use crate::text_input::text_input;
+use crate::SelectEffect;
 
 /// The full intent surface, threaded through as one bundle.
 #[derive(Default, Clone)]
@@ -46,6 +47,35 @@ pub struct FilterBuilderHandlers {
     pub on_combinator_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_commit: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
+}
+
+fn select_from_filter(
+    scope: String,
+    on_picker_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    picker: &'static str,
+    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+) -> SelectHandlers {
+    let mut handlers = SelectHandlers::new(scope);
+    if on_picker_toggle.is_some() || on_change.is_some() {
+        handlers = handlers.on_transition(Arc::new(move |result: SelectTransitionResult| {
+            for effect in &result.effects {
+                match effect {
+                    SelectEffect::OpenChanged { .. } => {
+                        if let Some(handler) = &on_picker_toggle {
+                            handler(picker);
+                        }
+                    }
+                    SelectEffect::ValueChanged { value } => {
+                        if let Some(handler) = &on_change {
+                            handler(value);
+                        }
+                    }
+                    SelectEffect::QueryChanged { .. } => {}
+                }
+            }
+        }));
+    }
+    handlers
 }
 
 fn all_corners(node: &mut Node, r: f32) {
@@ -150,18 +180,15 @@ fn operand_editor(
                 }
                 s.is_disabled = disabled;
                 s = s.with_open(operand_picker_open);
-                let toggle = handlers.on_picker_toggle.as_ref().map(|handler| {
-                    let handler = Arc::clone(handler);
-                    Arc::new(move || handler("operand")) as Arc<dyn Fn() + Send + Sync>
-                });
                 select(
                     &s,
                     ctx,
-                    &SelectHandlers {
-                        toggle,
-                        change: handlers.on_operand_change.clone(),
-                        clear: None,
-                    },
+                    &select_from_filter(
+                        format!("{instance_id}:operand:{}", field.key),
+                        handlers.on_picker_toggle.clone(),
+                        "operand",
+                        handlers.on_operand_change.clone(),
+                    ),
                 )
             } else {
                 let mut list = Node::container();
@@ -519,18 +546,15 @@ pub fn filter_builder(
                 op_spec.is_disabled = spec.is_disabled;
                 op_spec =
                     op_spec.with_open(spec.open_picker == Some(FilterBuilderPicker::Operator));
-                let toggle = handlers.on_picker_toggle.as_ref().map(|handler| {
-                    let handler = Arc::clone(handler);
-                    Arc::new(move || handler("operator")) as Arc<dyn Fn() + Send + Sync>
-                });
                 editor = editor.child(select(
                     &op_spec,
                     ctx,
-                    &SelectHandlers {
-                        toggle,
-                        change: handlers.on_operator_change.clone(),
-                        clear: None,
-                    },
+                    &select_from_filter(
+                        format!("{instance_id}:operator"),
+                        handlers.on_picker_toggle.clone(),
+                        "operator",
+                        handlers.on_operator_change.clone(),
+                    ),
                 ));
             }
 
@@ -591,18 +615,15 @@ pub fn filter_builder(
             select_spec.is_disabled = spec.is_disabled;
             select_spec =
                 select_spec.with_open(spec.open_picker == Some(FilterBuilderPicker::AddField));
-            let toggle = handlers.on_picker_toggle.as_ref().map(|handler| {
-                let handler = Arc::clone(handler);
-                Arc::new(move || handler("add-field")) as Arc<dyn Fn() + Send + Sync>
-            });
             panel = panel.child(row(0.0).child(select(
                 &select_spec,
                 ctx,
-                &SelectHandlers {
-                    toggle,
-                    change: handlers.on_field_pick.clone(),
-                    clear: None,
-                },
+                &select_from_filter(
+                    format!("{instance_id}:add-field"),
+                    handlers.on_picker_toggle.clone(),
+                    "add-field",
+                    handlers.on_field_pick.clone(),
+                ),
             )));
         }
 

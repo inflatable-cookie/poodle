@@ -48,8 +48,12 @@ fn search_input(theme: &GpuiThemeProvider, id: &str) -> TextInput {
 }
 
 fn select_input(theme: &GpuiThemeProvider, id: &str, options: Vec<ChoiceOption>) -> Select {
-    Select::from_spec(SelectSpec::new(options).with_default_value("all"), theme)
-        .with_id(id.to_string())
+    Select::from_spec(
+        SelectSpec::new(options).with_default_value("all"),
+        theme,
+        id.to_string(),
+    )
+    .with_id(id.to_string())
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -79,9 +83,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_child(search_input(theme, "filter-search").into_slot())
                     .with_child(select_input(theme, "filter-status", status_options()).into_slot())
                     .with_child(select_input(theme, "filter-type", type_options()).into_slot())
-                    .with_child(
-                        select_input(theme, "filter-owner", owner_options()).into_slot(),
-                    ),
+                    .with_child(select_input(theme, "filter-owner", owner_options()).into_slot()),
                 ),
         )
         // --- Collapsible with actions (expanded) ---
@@ -148,9 +150,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .into_slot(),
                     )
                     .with_child(search_input(theme, "col2-search").into_slot())
-                    .with_child(
-                        select_input(theme, "col2-status", status_options()).into_slot(),
-                    ),
+                    .with_child(select_input(theme, "col2-status", status_options()).into_slot()),
                 ),
         )
         // --- With secondary slot ---
@@ -207,8 +207,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     search_input(theme, &format!("size-search-{}", size_key(size))).into_slot(),
                 )
                 .with_child(
-                    select_input(theme, &format!("size-status-{}", size_key(size)), status_options())
-                        .into_slot(),
+                    select_input(
+                        theme,
+                        &format!("size-status-{}", size_key(size)),
+                        status_options(),
+                    )
+                    .into_slot(),
                 )
                 .into_any_element()
             })

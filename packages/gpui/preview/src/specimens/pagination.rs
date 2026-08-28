@@ -98,6 +98,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_total_pages(10)
                                 .with_aria_label("Results pagination"),
                             theme,
+                            "pagination-1",
                         ))
                         .child(
                             div()
@@ -129,6 +130,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .with_sibling_count(2)
                                 .with_aria_label("Extended pagination"),
                             theme,
+                            "pagination-2",
                         ))
                         .child(
                             div()
@@ -153,8 +155,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_current_page(2)
                         .with_total_pages(3)
                         .with_aria_label("Short pagination"),
-                    theme,
-                )),
+                            theme,
+                            "pagination-3",
+                        )),
         )
         // --- Simple variant with info and page size ---
         .child(
@@ -174,8 +177,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_info_text("Showing 31–40 of 112")
                         .with_page_size(10)
                         .with_aria_label("Simple pagination"),
-                    theme,
-                )),
+                            theme,
+                            "pagination-4",
+                        )),
         )
         // --- Full variant + limit (interactive) ---
         .child(
@@ -199,8 +203,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_show_limit_selector(true)
                             .with_limit_options(vec![10, 25, 50])
                             .with_aria_label("Full pagination"),
-                        theme,
-                    )
+                            theme,
+                            "pagination-5",
+                        )
                     .on_page_change(page_change(state))
                     .limit_selector_open(full_limit_open)
                     .on_limit_open_change(limit_open_change(state))
@@ -232,8 +237,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_total_pages(8)
                         .with_standalone(true)
                         .with_aria_label("Standalone pagination"),
-                    theme,
-                )),
+                            theme,
+                            "pagination-6",
+                        )),
         )
         // --- With container chrome (padding + top border + elevated bg) ---
         .child(
@@ -250,8 +256,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_current_page(1)
                         .with_total_pages(10)
                         .with_aria_label("Pagination with chrome"),
-                    theme,
-                )),
+                            theme,
+                            "pagination-7",
+                        )),
         )
         // --- Last page (next button disabled at boundary) ---
         .child(
@@ -269,8 +276,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_total_pages(8)
                         .with_standalone(true)
                         .with_aria_label("Last page pagination"),
-                    theme,
-                )),
+                            theme,
+                            "pagination-8",
+                        )),
         )
         .into_any_element();
 
@@ -287,6 +295,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_total_pages(10)
                         .with_aria_label("Pagination"),
                     theme,
+                    "pagination-9",
                 )
                 .size(size)
                 .into_any_element()
@@ -298,6 +307,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_total_pages(10)
                         .with_aria_label("Pagination"),
                     theme,
+                    "pagination-10",
                 )
                 .with_density(density)
                 .into_any_element()

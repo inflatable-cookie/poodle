@@ -4,6 +4,7 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type FocusEvent,
   type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
@@ -14,7 +15,11 @@ import {
   isSelectOptionDisabled,
   layerContains,
   registerDismissLayer,
-  selectOpenHighlightIndex,
+  selectTransition,
+  type SelectContext,
+  type SelectEvent,
+  type SelectOptionState,
+  type SelectResult,
 } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/select.css";
@@ -114,7 +119,8 @@ export function Select({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [open, setOpenState] = useState(false);
   const [query, setQuery] = useState("");
-  const [highlightIndex, setHighlightIndex] = useState(0);
+  const [highlightedValue, setHighlightedValue] = useState<string | null>(null);
+  const skipBlurCommit = useRef(false);
   // Reported by the anchored surface once the listbox is measured; the classes
   // below only need the side and the alignment, not the full placement.
   const [resolvedPlacement, setResolvedPlacement] = useState<OverlayPlacement>("bottom-start");
@@ -150,20 +156,48 @@ export function Select({
   const selectedOption = flatOptions.find((entry) => entry.value === currentValue) ?? null;
   const filteredOptions =
     searchable && query.length > 0
-      ? flatOptions.filter(
-          (entry) => !isSelectOptionDisabled(entry) && entry.label.toLowerCase().includes(query.toLowerCase()),
-        )
-      : flatOptions.filter((entry) => !isSelectOptionDisabled(entry));
+      ? flatOptions.filter((entry) => entry.label.toLowerCase().includes(query.toLowerCase()))
+      : flatOptions;
   const filteredGroups =
     isGrouped && searchable && query.length > 0
       ? (filterSelectGroups(normalizedOptions as SelectOptionGroup[], query) as SelectItems)
       : normalizedOptions;
   const visibleGroups = isGrouped ? (filteredGroups as SelectOptionGroup[]) : [];
+  const highlightedOptionIndex =
+    highlightedValue === null ? -1 : filteredOptions.findIndex((entry) => entry.value === highlightedValue);
   const highlightedOptionId =
-    open && filteredOptions.length > 0 && highlightIndex >= 0 ? `${listboxId}-option-${highlightIndex}` : undefined;
+    open && highlightedOptionIndex >= 0 ? `${listboxId}-option-${highlightedOptionIndex}` : undefined;
 
-  const stateRef = useRef({ filteredOptions, selectedOption, currentValue, open, highlightIndex, hasSelection });
-  stateRef.current = { filteredOptions, selectedOption, currentValue, open, highlightIndex, hasSelection };
+  const stateRef = useRef({
+    filteredOptions,
+    selectedOption,
+    currentValue,
+    open,
+    query,
+    highlightedValue,
+    hasSelection,
+    flatOptions,
+    clearValue,
+    searchable,
+    freeform,
+    disabled,
+    useCustom,
+  });
+  stateRef.current = {
+    filteredOptions,
+    selectedOption,
+    currentValue,
+    open,
+    query,
+    highlightedValue,
+    hasSelection,
+    flatOptions,
+    clearValue,
+    searchable,
+    freeform,
+    disabled,
+    useCustom,
+  };
 
   async function startLoad(nextQuery = query): Promise<void> {
     const requestId = ++activeLoadRequestId.current;
@@ -174,8 +208,18 @@ export function Select({
         ? await loadOptions({ query: nextQuery.trim() || undefined, value: stateRef.current.currentValue || null, loadKey })
         : [];
       if (requestId !== activeLoadRequestId.current) return;
+      const flattened = flattenSelectOptions(nextOptions as (SelectOption | SelectOptionGroup)[]) as SelectOption[];
+      const mapped: SelectOptionState[] = flattened.map((option) => ({
+        value: option.value,
+        label: option.label,
+        disabled: isSelectOptionDisabled(option),
+      }));
       setLoadedOptions(nextOptions);
       setLoadState("loaded");
+      stateRef.current = { ...stateRef.current, flatOptions: flattened };
+      if (stateRef.current.open) {
+        dispatch({ type: "OPTIONS_CHANGED", options: mapped }, machineContext({ options: mapped }));
+      }
     } catch (error) {
       if (requestId !== activeLoadRequestId.current) return;
       setLoadState("error");
@@ -183,78 +227,127 @@ export function Select({
     }
   }
 
-  function commitValue(nextValue: string): void {
-    if (!isControlled) setUncontrolledValue(nextValue);
-    onValueChange?.(nextValue);
+  function machineContext(overrides: Partial<SelectContext> = {}): SelectContext {
+    const current = stateRef.current;
+    return {
+      value: current.currentValue,
+      open: current.open,
+      query: current.query,
+      highlightedValue: current.highlightedValue,
+      options: current.flatOptions.map((option) => ({
+        value: option.value,
+        label: option.label,
+        disabled: isSelectOptionDisabled(option),
+      })),
+      clearValue: current.clearValue,
+      searchable: current.searchable,
+      freeform: current.freeform,
+      disabled: current.disabled,
+      ...overrides,
+    };
   }
 
-  function setOpen(nextOpen: boolean): void {
-    setOpenState(nextOpen);
-    onOpenChange?.(nextOpen);
-    if (nextOpen) {
-      setHighlightIndex(
-        selectOpenHighlightIndex(stateRef.current.filteredOptions, stateRef.current.selectedOption?.value ?? null),
-      );
+  function applyResult(result: SelectResult): SelectContext {
+    setOpenState(result.context.open);
+    setQuery(result.context.query);
+    setHighlightedValue(result.context.highlightedValue);
+    stateRef.current = {
+      ...stateRef.current,
+      open: result.context.open,
+      query: result.context.query,
+      highlightedValue: result.context.highlightedValue,
+      currentValue: result.effects.some((effect) => effect.type === "valueChanged")
+        ? result.context.value
+        : stateRef.current.currentValue,
+    };
+
+    for (const effect of result.effects) {
+      if (effect.type === "openChanged") {
+        onOpenChange?.(effect.open);
+      } else if (effect.type === "queryChanged") {
+        if (stateRef.current.useCustom && stateRef.current.searchable) {
+          onQueryChange?.(effect.query);
+        }
+      } else if (effect.type === "valueChanged") {
+        if (!isControlled) setUncontrolledValue(effect.value);
+        onValueChange?.(effect.value);
+      }
     }
+
+    return result.context;
+  }
+
+  function dispatch(event: SelectEvent, from = machineContext()): SelectContext {
+    return applyResult(selectTransition(from, event));
   }
 
   function selectOption(option: SelectOption): void {
-    if (isSelectOptionDisabled(option)) return;
-    setQuery(option.label);
-    commitValue(option.value);
-    setOpen(false);
+    dispatch({ type: "COMMIT_OPTION", value: option.value });
   }
 
   function handleInputInput(event: ChangeEvent<HTMLInputElement>): void {
     const next = event.currentTarget.value;
-    setQuery(next);
-    setHighlightIndex(0);
-    if (!open) setOpen(true);
-    onQueryChange?.(next);
+    dispatch({ type: "QUERY", query: next });
     if (isLazy) void startLoad(next);
-    if (freeform) commitValue(next);
   }
 
   function handleKeydown(event: KeyboardEvent): void {
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      if (!open) {
-        setOpen(true);
-        return;
-      }
-      setHighlightIndex((i) => Math.min(i + 1, filteredOptions.length - 1));
+      dispatch({ type: "HIGHLIGHT_NEXT" });
     }
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      if (!open) {
-        setOpen(true);
-        return;
-      }
-      setHighlightIndex((i) => Math.max(i - 1, 0));
+      dispatch({ type: "HIGHLIGHT_PREV" });
     }
-    if (event.key === "Enter" && open && filteredOptions[highlightIndex]) {
+    if (event.key === "Enter" && stateRef.current.open) {
       event.preventDefault();
-      selectOption(filteredOptions[highlightIndex]);
+      dispatch({ type: "COMMIT_HIGHLIGHTED" });
     }
-    if (event.key === "Escape" && open) {
+    if (event.key === "Escape" && stateRef.current.open) {
       event.preventDefault();
-      setOpen(false);
+      dispatch({ type: "CLOSE" });
     }
-    if (event.key === "Home" && open) {
-      event.preventDefault();
-      setHighlightIndex(0);
+    if (event.key === "Tab" && stateRef.current.open) {
+      skipBlurCommit.current = true;
+      dispatch({ type: "CLOSE" });
     }
-    if (event.key === "End" && open) {
+    if (event.key === "Home" && stateRef.current.open) {
       event.preventDefault();
-      setHighlightIndex(Math.max(filteredOptions.length - 1, 0));
+      dispatch({ type: "HIGHLIGHT_FIRST" });
+    }
+    if (event.key === "End" && stateRef.current.open) {
+      event.preventDefault();
+      dispatch({ type: "HIGHLIGHT_LAST" });
     }
   }
 
   function handleClear(event: MouseEvent): void {
     event.stopPropagation();
-    setQuery("");
-    commitValue(clearValue);
+    dispatch({ type: "CLEAR" });
     if (isLazy) void startLoad("");
+  }
+
+  function handleControlFocusOut(event: FocusEvent<HTMLDivElement>): void {
+    if (
+      event.relatedTarget instanceof Node &&
+      layerContains(event.relatedTarget, rootElement, listboxRef.current)
+    ) {
+      return;
+    }
+
+    if (skipBlurCommit.current) {
+      skipBlurCommit.current = false;
+      if (stateRef.current.open) {
+        dispatch({ type: "CLOSE" });
+      }
+      return;
+    }
+
+    const afterCommit = dispatch({ type: "COMMIT_FREEFORM" });
+    if (afterCommit.open) {
+      dispatch({ type: "CLOSE" }, afterCommit);
+    }
   }
 
   // sync query to selected label when closed (non-freeform)
@@ -263,11 +356,6 @@ export function Select({
       setQuery(stateRef.current.hasSelection ? (stateRef.current.selectedOption?.label ?? "") : "");
     }
   }, [open, freeform, currentValue, flatOptions.length]);
-
-  // clamp highlight
-  useEffect(() => {
-    if (filteredOptions.length > 0 && highlightIndex >= filteredOptions.length) setHighlightIndex(0);
-  }, [filteredOptions.length, highlightIndex]);
 
   // loadKey reset
   useEffect(() => {
@@ -292,7 +380,10 @@ export function Select({
       // The listbox is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target as Node, rootElement, listboxRef.current),
       dismissOnOutsideInteract,
-      onDismiss: () => setOpenState(false),
+      onDismiss: () => {
+        skipBlurCommit.current = true;
+        dispatch({ type: "CLOSE" });
+      },
       // Host-aware so a parent composite that registers around this Select
       // (child effects can run first) still becomes the parent layer.
       hostElement: rootElement,
@@ -309,16 +400,17 @@ export function Select({
         data-value={option.value}
         role="option"
         aria-selected={currentValue === option.value}
-        data-highlighted={highlightIndex === flatIdx}
+        data-highlighted={highlightedValue === option.value}
         disabled={isSelectOptionDisabled(option)}
-        onMouseEnter={() => setHighlightIndex(flatIdx)}
+        onMouseDown={(event) => event.preventDefault()}
+        onMouseEnter={() => dispatch({ type: "HIGHLIGHT", value: option.value })}
         onClick={() => selectOption(option)}
       >
         {optionRender ? (
           <span className="poodle-select__option-content">
             {optionRender({
               option,
-              highlighted: highlightIndex === flatIdx,
+              highlighted: highlightedValue === option.value,
               selected: currentValue === option.value,
               index: flatIdx,
             })}
@@ -365,7 +457,15 @@ export function Select({
           aria-label={ariaLabel ?? undefined}
           aria-describedby={describedBy ?? undefined}
           aria-invalid={validationState === "invalid" ? "true" : undefined}
-          onChange={(event) => commitValue(event.currentTarget.value)}
+          onChange={(event) => {
+            const nextValue = event.currentTarget.value;
+            const option = flatOptions.find((entry) => entry.value === nextValue);
+            if (option) {
+              dispatch({ type: "COMMIT_OPTION", value: nextValue });
+            } else if (nextValue === clearValue) {
+              dispatch({ type: "CLEAR" });
+            }
+          }}
         >
           {placeholderLabel && !hasPlaceholderOption ? (
             <option value={placeholderValue} disabled={!clearable && required}>
@@ -434,6 +534,7 @@ export function Select({
       data-validation-state={validationState}
       data-has-clear={showClear}
       aria-invalid={validationState === "invalid" ? "true" : undefined}
+      onBlur={handleControlFocusOut}
     >
       {searchable ? (
         <div
@@ -457,7 +558,7 @@ export function Select({
             aria-activedescendant={highlightedOptionId}
             aria-describedby={describedBy ?? undefined}
             onFocus={() => {
-              if (!open) setOpen(true);
+              if (!stateRef.current.open) dispatch({ type: "OPEN" });
             }}
             onChange={handleInputInput}
             onKeyDown={handleKeydown}
@@ -473,8 +574,7 @@ export function Select({
             aria-label={open ? "Close options" : "Open options"}
             onClick={(event) => {
               event.stopPropagation();
-              if (disabled) return;
-              setOpen(!open);
+              dispatch({ type: "TOGGLE" });
               inputRef.current?.focus();
             }}
           >
@@ -494,7 +594,7 @@ export function Select({
             aria-label={ariaLabel ?? undefined}
             aria-describedby={describedBy ?? undefined}
             onClick={() => {
-              if (!disabled) setOpen(!open);
+              dispatch({ type: "TOGGLE" });
             }}
             onKeyDown={handleKeydown}
           >
@@ -518,7 +618,7 @@ export function Select({
             className="poodle-select__indicator-button"
             aria-label={open ? "Close options" : "Open options"}
             onClick={() => {
-              if (!disabled) setOpen(!open);
+              dispatch({ type: "TOGGLE" });
             }}
           >
             <Icon name="chevron-down" />

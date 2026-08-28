@@ -1,7 +1,8 @@
 # g16.018 — Select Semantic Machine And Interface Convergence
 
-Status: ready
+Status: complete
 Opened: 2026-08-28
+Completed: 2026-08-28
 Depends on: merged `g16.017` / PR #92 and the resolved decision in
 `../../triage/20260828-085200-post-g16-017-native-lane-decision.md`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -146,16 +147,16 @@ callbacks from those effects. One input event produces one atomic result.
 
 ## Execution Plan
 
-- [ ] **Batch 1 — contract and shared machine.** Clarify Select callback/mode
+- [x] **Batch 1 — contract and shared machine.** Clarify Select callback/mode
       rules in the detailed contract; implement paired TypeScript/Rust
       transitions and focused vectors.
-- [ ] **Batch 2 — web adapters.** Move Svelte/React semantic decisions onto the
+- [x] **Batch 2 — web adapters.** Move Svelte/React semantic decisions onto the
       shared machine, repair freeform callback timing, and prove callback/order
       behavior without changing the public prop surface.
-- [ ] **Batch 3 — Rust interface and renderer.** Apply the approved breaking
+- [x] **Batch 3 — Rust interface and renderer.** Apply the approved breaking
       handler/state migration, project shared result/highlight/identity, and
       migrate every in-repo call site mechanically.
-- [ ] **Batch 4 — evidence and closeout.** Keep the ledger totals unchanged,
+- [x] **Batch 4 — evidence and closeout.** Keep the ledger totals unchanged,
       write one August execution log, mark this card complete, and leave
       `g16.019` as the single next task.
 
@@ -177,23 +178,23 @@ callbacks from those effects. One input event produces one atomic result.
 
 ## Acceptance Criteria
 
-- [ ] Contract, TypeScript core, Rust headless, Svelte, and React agree on the
+- [x] Contract, TypeScript core, Rust headless, Svelte, and React agree on the
       state/event/effect rules above.
-- [ ] Freeform typing reports query only; explicit Enter/control-blur commit
+- [x] Freeform typing reports query only; explicit Enter/control-blur commit
       reports value only when no option is highlighted.
-- [ ] Option selection, clear, Escape/Tab/outside close, disabled inertia,
+- [x] Option selection, clear, Escape/Tab/outside close, disabled inertia,
       clamp navigation, and no-op emission counts have paired focused proof.
-- [ ] Svelte and React retain identical public props/callbacks and consume the
+- [x] Svelte and React retain identical public props/callbacks and consume the
       shared machine rather than parallel semantic branches.
-- [ ] Rust Select has explicit highlighted state, an instance-scoped atomic
+- [x] Rust Select has explicit highlighted state, an instance-scoped atomic
       result handler, no legacy toggle/change/clear compatibility surface, and
       no hidden renderer state.
-- [ ] Renderer activation uses shared transitions and emits scoped identities;
+- [x] Renderer activation uses shared transitions and emits scoped identities;
       all in-repo Rust call sites compile with behavior preserved.
-- [ ] Curated specimens remain human-facing. Any readout added is small and
+- [x] Curated specimens remain human-facing. Any readout added is small and
       explanatory; Examples does not become a state matrix.
-- [ ] Ledger generation/checks remain byte-stable at 46 / 128 and 115 / 60.
-- [ ] One execution log records the approved break, paired vectors, migrations,
+- [x] Ledger generation/checks remain byte-stable at 46 / 128 and 115 / 60.
+- [x] One execution log records the approved break, paired vectors, migrations,
       validation, non-claims, and `g16.019` entry state.
 
 ## Writable Scope
