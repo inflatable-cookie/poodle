@@ -56,12 +56,12 @@ behavior repairs without inventing another conformance authority.
   repair at audit closeout. Architecture 011/spec 069 are now compiled as
   `g16.021`–`g16.028`; the paired semantic kernel in `021` landed with its
   shared `dragDrop` vector corpus in PR #96.
-  TimeInput's native editing decision is approved and compiled separately as
-  `g16.029`, held serially behind `021` because their shared export/vector
-  surfaces overlap. NumberInput's committed-number/raw-draft and clean callback
-  decision is approved as `g16.030`, serial behind `029` for the same reason.
-  Its promoted contract documents the runtime deltas, moving only that ledger
-  axis to 116 present / 59 not-applicable; mounted totals stay 47 / 127.
+  TimeInput's native editing decision closed as `g16.029` (ledger 48 mounted /
+  126 missing, awaiting merge). NumberInput's committed-number/raw-draft and
+  clean callback decision is approved as `g16.030`, serial behind `029`. Its
+  promoted contract documents the runtime deltas, moving only that ledger axis
+  to 116 present / 59 not-applicable after NumberInput lands; mounted totals
+  stay 48 / 126 until then.
   A bounded Fader/Knob/XYPad audit then found real paired-machine, web gesture
   lifetime, native mounting, and accessibility-projection defects. `g16.031`
   closes paired semantics and Svelte/React lifecycle after `030`; `g16.032`

@@ -1,6 +1,6 @@
 # g16.029 — TimeInput Semantic Model And Native Parity
 
-Status: ready — decision approved; g16.021 merged in PR #96
+Status: complete — awaiting merge
 Opened: 2026-08-28
 Depends on: approved `docs/contracts/components/time-input.md`; merged
 `g16.021` before dispatch because both lanes edit shared core/headless exports
@@ -87,45 +87,46 @@ generator, runtime registry, specimen matrix, or second evidence ledger.
 
 ## Execution Plan
 
-- [ ] **Batch 1 — paired model and vectors.** Land the TypeScript/Rust pure
+- [x] **Batch 1 — paired model and vectors.** Land the TypeScript/Rust pure
       semantics and shared domain cases without touching adapters.
-- [ ] **Batch 2 — web commit boundary.** Route Svelte and React native input,
+- [x] **Batch 2 — web commit boundary.** Route Svelte and React native input,
       validity, clearing, blur, and controlled replacement through the shared
       semantics; keep browser picker presentation native.
-- [ ] **Batch 3 — clean Rust rename.** Rename the declaration/module/renderer
+- [x] **Batch 3 — clean Rust rename.** Rename the declaration/module/renderer
       and every in-repository caller, compatibility surface, census, and
       generated inventory from `TimeField` to `TimeInput`. Add no alias.
-- [ ] **Batch 4 — mounted GPUI editor.** Render and dispatch the segmented
+- [x] **Batch 4 — mounted GPUI editor.** Render and dispatch the segmented
       control through Node and the GPUI backend, including focus traversal,
       digit/arrow/clear/Escape routes, invalid presentation, and accessibility
       projection.
-- [ ] **Batch 5 — specimens and closeout.** Curate default, bounded, seconds,
-      overnight, invalid-draft, and disabled examples; record exact evidence
-      and honest non-claims in one August log.
+- [x] **Batch 5 — specimens and closeout.** Curate default, bounded, seconds,
+      overnight, and disabled examples; record exact evidence and honest
+      non-claims in one August log. Invalid-draft remains a live interaction
+      proof, not a static specimen.
 
 ## Acceptance Criteria
 
-- [ ] TypeScript and Rust return identical parse, format, validation, stepping,
+- [x] TypeScript and Rust return identical parse, format, validation, stepping,
       draft, and effect results for the shared corpus.
-- [ ] Svelte and React emit only canonical constraint-valid values or `null`;
+- [x] Svelte and React emit only canonical constraint-valid values or `null`;
       invalid/off-step native values do not leak through `onValueChange`.
-- [ ] GPUI presents separately focusable labelled segments inside one labelled
+- [x] GPUI presents separately focusable labelled segments inside one labelled
       visual control and routes real mounted key/text/focus dispatch through the
       shared machine.
-- [ ] Named mounted tests prove valid live commit, partial/invalid no-emit,
+- [x] Named mounted tests prove valid live commit, partial/invalid no-emit,
       blur/Escape reversion, clear, step, linear and overnight bounds,
       conditional seconds, controlled replacement, Tab traversal, and disabled
       inertia.
-- [ ] `TimeInputSpec` / `time_input` are the only public Rust names; every
+- [x] `TimeInputSpec` / `time_input` are the only public Rust names; every
       in-repository composite and compatibility caller is migrated and no
       `TimeFieldSpec`, `time_field` module, alias, or fallback remains.
-- [ ] Human-facing specimens demonstrate the useful states without becoming an
+- [x] Human-facing specimens demonstrate the useful states without becoming an
       exhaustive conformance listing.
-- [ ] Only TimeInput's GPUI mounted-behaviour ledger cell moves from missing to
+- [x] Only TimeInput's GPUI mounted-behaviour ledger cell moves from missing to
       mounted, taking the live total from 47 / 127 to 48 / 126 if the named
       mounted proof passes. Accessibility and GPUI visual-comparison cells do
       not move.
-- [ ] Jetstream receives mechanical compile maintenance required by the clean
+- [x] Jetstream receives mechanical compile maintenance required by the clean
       renderer-neutral rename only; it remains deferred and unclaimed.
 
 ## Writable Scope

@@ -1,7 +1,7 @@
 # Time Input
 
 Status: detailed contract
-Updated: 2026-08-28
+Updated: 2026-08-29
 
 ## 1. Purpose
 
@@ -260,13 +260,13 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 
 ### Tier 1: Strict Parity
 
-- [ ] value and onValueChange semantics match
-- [ ] min, max, step constraints match
-- [ ] canonical format, conditional seconds, overnight range, and step anchor match
-- [ ] incomplete/invalid drafts remain local and revert without callback
-- [ ] clearing, controlled replacement, and disabled inertia match
-- [ ] disabled state matches
-- [ ] accessible name from label or ariaLabel matches
+- [x] value and onValueChange semantics match
+- [x] min, max, step constraints match
+- [x] canonical format, conditional seconds, overnight range, and step anchor match
+- [x] incomplete/invalid drafts remain local and revert without callback
+- [x] clearing, controlled replacement, and disabled inertia match
+- [x] disabled state matches
+- [x] accessible name from label or ariaLabel matches
 - [ ] describedBy relationship matches
 
 ### Tier 2: Visual Parity
@@ -282,8 +282,8 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 
 ### Tier 3: Implementation Freedom
 
-- [ ] native time-entry UI vs GPUI custom time editing stays internal
-- [ ] transition timing is platform-owned
+- [x] native time-entry UI vs GPUI custom time editing stays internal
+- [x] transition timing is platform-owned
 
 ## 12. Known Deltas
 
@@ -346,7 +346,7 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 
 ## Rust Spec Migration
 
-The approved implementation tranche renames the legacy Rust
-`TimeFieldSpec` / `time_field` surface to `TimeInputSpec` / `time_input` and
-migrates every in-repository caller. Poodle is pre-1.0, so the old public names
-are removed without aliases, wrappers, or silent fallback.
+The landed implementation renamed the legacy Rust `TimeFieldSpec` /
+`time_field` surface to `TimeInputSpec` / `time_input` and migrated every
+in-repository caller. Poodle is pre-1.0, so the old public names are gone
+without aliases, wrappers, or silent fallback.
