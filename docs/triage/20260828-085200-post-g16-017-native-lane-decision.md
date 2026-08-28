@@ -1,7 +1,8 @@
 # Post-g16.017 Native Lane Decision
 
-Status: open — operator decision required before g16.018 compilation
+Status: resolved — operator approved the two-card Select lane
 Captured: 2026-08-28
+Resolved: 2026-08-28
 Source: merged `g16.017` / PR #92 and the 46 mounted / 128 missing ledger
 
 ## Checkpoint
@@ -73,9 +74,13 @@ keeps draft query separate from committed application state.
 
 ## Operator Decision
 
-Confirm or reject both parts before compiling g16.018:
+The operator approved both parts on 2026-08-28:
 
 1. take Select as a deliberate two-card prerequisite lane; and
 2. use query-per-edit / value-on-explicit-commit freeform semantics, repairing
    the current Svelte and React live-value behavior as a pre-1.0 break.
 
+`g16.018` owns semantic-machine and interface convergence. `g16.019` remains
+planned and blocked on the merged output of `g16.018`; it owns real editable
+native search, deferred-overlay interaction, focus behavior, mounted proof, and
+the Select ledger-cell move.

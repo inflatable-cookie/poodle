@@ -1,6 +1,6 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-27
+Updated: 2026-08-28
 
 ## Active Track
 
@@ -11,14 +11,14 @@ Updated: 2026-08-27
     `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
     `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
     `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
-    `016` merged in PR #91; `017` merged in PR #92
+    `016` merged in PR #91; `017` merged in PR #92; `018` ready; `019` planned
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: return to the orchestrator checkpoint at 46 mounted / 128
-    missing before choosing the next bounded parity lane.
-    Select, NumberInput, EditableLabel, visual comparison, accessibility, and
-    Jetstream remain separate decisions.
+  - Next move: dispatch `g16.018` for Select semantic-machine and interface
+    convergence. Keep `g16.019` blocked until the landed substrate is reviewed.
+    NumberInput, EditableLabel, visual comparison, accessibility, and Jetstream
+    remain separate decisions.
 
 ## Latest Completed Track
 
