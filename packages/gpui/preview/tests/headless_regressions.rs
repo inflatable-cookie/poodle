@@ -25,7 +25,8 @@ use std::sync::{Arc, Mutex};
 use gpui::{point, px, Pixels, Point, TestAppContext};
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{
-    ColorValue, LayoutDirection, LayoutSizing, Node, NodeDropEvent, NodeKind, NodeRole,
+    ColorValue, DismissReason, LayoutDirection, LayoutOverflow, LayoutSizing, Node, NodeDropEvent,
+    NodeKind, NodePosition, NodeRole,
 };
 use poodle_render::{
     ui_presentation_provider, RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers,
@@ -59,6 +60,7 @@ const FIXTURE_ID: &str = "headless-fixture";
 /// gpui-macros 0.2.2 crashes on current rustc, so this mirrors its teardown
 /// (parked queue, forbidden parking, app shutdown) in a plain `#[test]`.
 fn run_headless(body: impl FnOnce(&mut TestAppContext)) {
+    poodle_gpui_node_backend::reset_focus_registry();
     let mut cx = TestAppContext::single();
     body(&mut cx);
     cx.dispatcher.run_until_parked();
@@ -1653,6 +1655,260 @@ fn a_nested_popover_paints_without_nesting_deferred_draws() {
             poodle_gpui_node_backend::open_layer_count(),
             2,
             "the outer and nested popover must both survive the paint",
+        );
+    });
+}
+
+/// g16.019. A deferred overlay row must receive a real pointer press/release
+/// after the host rebuilds the tree open. Direct handler invocation is not
+/// this proof. The fixture is generic — no Select identifier — so the repair
+/// stays on the layer/hit-test seam.
+#[test]
+fn a_deferred_overlay_row_receives_pointer_after_host_rebuild() {
+    use poodle_adapter::ThemeProvider;
+
+    #[derive(Clone)]
+    struct Host {
+        open: bool,
+        activations: Vec<String>,
+        dismissals: Vec<DismissReason>,
+    }
+
+    fn build(host: Arc<Mutex<Host>>, mounted: Arc<Mutex<Node>>) -> Node {
+        let state = host.lock().expect("host lock").clone();
+        let trigger_host = Arc::clone(&host);
+        let trigger_mount = Arc::clone(&mounted);
+        let option_host = Arc::clone(&host);
+        let option_mount = Arc::clone(&mounted);
+        let dismiss_host = Arc::clone(&host);
+        let dismiss_mount = Arc::clone(&mounted);
+
+        let mut trigger = Node::container();
+        trigger.runtime_id = Some("overlay-trigger".to_owned());
+        trigger.interaction.focusable = true;
+        trigger.style.descriptor.layout.height = LayoutSizing::Fixed(36.0);
+        trigger.style.descriptor.layout.width = LayoutSizing::Fixed(160.0);
+        trigger.style.focus_ring = Some(poodle_node::FocusRing {
+            color: theme().resolve_color("color.accent.focusRing"),
+            width: theme().resolve_border_width("border.width.focus"),
+            offset: 2.0,
+        });
+        trigger = trigger.child(Node::text("Open"));
+        trigger.interaction.on_activate = Some(Arc::new(move || {
+            let mut host = trigger_host.lock().expect("host lock");
+            host.open = !host.open;
+            drop(host);
+            *trigger_mount.lock().expect("mount lock") =
+                build(Arc::clone(&trigger_host), Arc::clone(&trigger_mount));
+        }));
+
+        let under_host = Arc::clone(&host);
+        let mut under = Node::container();
+        under.runtime_id = Some("overlay-under".to_owned());
+        under.style.descriptor.layout.height = LayoutSizing::Fixed(36.0);
+        under.style.descriptor.layout.width = LayoutSizing::Fixed(160.0);
+        under = under.child(Node::text("Covered"));
+        under.interaction.on_activate = Some(Arc::new(move || {
+            under_host
+                .lock()
+                .expect("host lock")
+                .activations
+                .push("under".to_owned());
+        }));
+
+        let mut root = Node::container().child(trigger).child(under);
+        root.position = NodePosition::Relative;
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        if state.open {
+            let mut option = Node::container();
+            option.runtime_id = Some("overlay-option".to_owned());
+            option.style.descriptor.layout.height = LayoutSizing::Fixed(32.0);
+            option.style.descriptor.layout.width = LayoutSizing::Fixed(160.0);
+            option = option.child(Node::text("Choose me"));
+            option.interaction.on_activate = Some(Arc::new(move || {
+                let mut host = option_host.lock().expect("host lock");
+                host.activations.push("option".to_owned());
+                host.open = false;
+                drop(host);
+                *option_mount.lock().expect("mount lock") =
+                    build(Arc::clone(&option_host), Arc::clone(&option_mount));
+            }));
+
+            let mut panel = Node::container().child(option);
+            panel.runtime_id = Some("overlay-panel".to_owned());
+            panel.style.overlay = true;
+            panel.style.descriptor.layout.direction = LayoutDirection::Column;
+            panel.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+            panel.style.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+            panel.position = NodePosition::Absolute {
+                top: Some(40.0),
+                left: Some(0.0),
+                right: None,
+                bottom: None,
+            };
+            panel.interaction.dismiss_layer = Some("overlay-layer".to_owned());
+
+            trigger_dismiss(&mut root, &dismiss_host, &dismiss_mount);
+            root = root.child(panel);
+        }
+        root
+    }
+
+    fn trigger_dismiss(
+        root: &mut Node,
+        host: &Arc<Mutex<Host>>,
+        mounted: &Arc<Mutex<Node>>,
+    ) {
+        let host = Arc::clone(host);
+        let mounted = Arc::clone(mounted);
+        if let Some(trigger) = root.children.first_mut() {
+            trigger.interaction.dismiss_layer = Some("overlay-layer".to_owned());
+            trigger.interaction.on_dismiss = Some(Arc::new(move |reason| {
+                let mut state = host.lock().expect("host lock");
+                state.dismissals.push(reason);
+                state.open = false;
+                drop(state);
+                *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+            }));
+        }
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(Host {
+            open: false,
+            activations: Vec::new(),
+            dismissals: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 240.0, 180.0);
+        driver.wait_for_focus_handle("overlay-trigger");
+        driver.pointer_activate_id("overlay-trigger");
+        assert!(
+            host.lock().expect("host lock").open,
+            "pointer on the trigger must rebuild the overlay open"
+        );
+        driver.draw_frame();
+        assert!(
+            poodle_gpui_node_backend::bounds_for("overlay-option").is_some(),
+            "deferred option must record painted bounds after the open rebuild"
+        );
+        driver.pointer_activate_id("overlay-option");
+        let state = host.lock().expect("host lock").clone();
+        assert_eq!(
+            state.activations,
+            ["option"],
+            "pointer on a deferred option row must fire on_activate, not the in-flow widget it covers"
+        );
+        assert!(
+            state.dismissals.is_empty(),
+            "an inside option click must not first dispatch outside dismissal"
+        );
+        assert!(!state.open);
+    });
+}
+
+/// g16.019. Declared overlay overflow still clips pointer targets that sit
+/// past `max_height`. Skipping Taffy overflow would let those rows receive
+/// input outside the surface.
+#[test]
+fn a_capped_deferred_overlay_clips_overflowing_rows() {
+    use poodle_adapter::ThemeProvider;
+
+    #[derive(Clone)]
+    struct Host {
+        open: bool,
+        activations: Vec<String>,
+    }
+
+    fn build(host: Arc<Mutex<Host>>, mounted: Arc<Mutex<Node>>) -> Node {
+        let state = host.lock().expect("host lock").clone();
+        let trigger_host = Arc::clone(&host);
+        let trigger_mount = Arc::clone(&mounted);
+        let mut trigger = Node::container();
+        trigger.runtime_id = Some("clip-trigger".to_owned());
+        trigger.interaction.focusable = true;
+        trigger.style.focus_ring = Some(poodle_node::FocusRing {
+            color: theme().resolve_color("color.accent.focusRing"),
+            width: theme().resolve_border_width("border.width.focus"),
+            offset: 2.0,
+        });
+        trigger.style.descriptor.layout.height = LayoutSizing::Fixed(36.0);
+        trigger.style.descriptor.layout.width = LayoutSizing::Fixed(160.0);
+        trigger = trigger.child(Node::text("Open"));
+        trigger.interaction.on_activate = Some(Arc::new(move || {
+            let mut host = trigger_host.lock().expect("host lock");
+            host.open = !host.open;
+            drop(host);
+            *trigger_mount.lock().expect("mount lock") =
+                build(Arc::clone(&trigger_host), Arc::clone(&trigger_mount));
+        }));
+
+        let mut root = Node::container().child(trigger);
+        root.position = NodePosition::Relative;
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        if state.open {
+            let mut panel = Node::container();
+            panel.runtime_id = Some("clip-panel".to_owned());
+            panel.style.overlay = true;
+            panel.style.max_height = Some(40.0);
+            panel.style.descriptor.layout.direction = LayoutDirection::Column;
+            panel.style.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+            panel.style.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+            panel.position = NodePosition::Absolute {
+                top: Some(40.0),
+                left: Some(0.0),
+                right: None,
+                bottom: None,
+            };
+            panel.interaction.dismiss_layer = Some("clip-layer".to_owned());
+            for (index, label) in ["one", "two", "three"].iter().enumerate() {
+                let option_host = Arc::clone(&host);
+                let mut option = Node::container();
+                option.runtime_id = Some(format!("clip-option-{index}"));
+                option.style.descriptor.layout.height = LayoutSizing::Fixed(32.0);
+                option.style.descriptor.layout.width = LayoutSizing::Fixed(160.0);
+                option = option.child(Node::text(*label));
+                let name = (*label).to_string();
+                option.interaction.on_activate = Some(Arc::new(move || {
+                    option_host
+                        .lock()
+                        .expect("host lock")
+                        .activations
+                        .push(name.clone());
+                }));
+                panel = panel.child(option);
+            }
+            root = root.child(panel);
+        }
+        root
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(Host {
+            open: false,
+            activations: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 240.0, 220.0);
+        driver.wait_for_focus_handle("clip-trigger");
+        driver.pointer_activate_id("clip-trigger");
+        driver.draw_frame();
+        assert!(poodle_gpui_node_backend::bounds_for("clip-option-0").is_some());
+        driver.pointer_activate_id("clip-option-0");
+        assert_eq!(
+            host.lock().expect("host lock").activations,
+            ["one"],
+            "the row inside max_height remains a pointer target"
+        );
+        assert!(poodle_gpui_node_backend::bounds_for("clip-option-2").is_some());
+        driver.pointer_activate_id("clip-option-2");
+        assert_eq!(
+            host.lock().expect("host lock").activations,
+            ["one"],
+            "a row past max_height is clipped and does not activate"
         );
     });
 }
@@ -9735,7 +9991,6 @@ fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_key
 /// landmark/current-page accessibility, visual comparison, or Jetstream.
 #[test]
 fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard() {
-    use poodle_adapter::ThemeProvider;
     use poodle_specs::{PaginationSpec, PaginationVariant};
 
     #[derive(Clone)]
@@ -9760,29 +10015,6 @@ fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard(
                     node.id = Some("pagination-limit".to_owned());
                     node.runtime_id = Some("pagination-limit".to_owned());
                 }
-                "10" if node.a11y.role == Some(NodeRole::ListBoxOption) => {
-                    node.id = Some("pagination-limit-10".to_owned());
-                    node.runtime_id = Some("pagination-limit-10".to_owned());
-                }
-                "25" if node.a11y.role == Some(NodeRole::ListBoxOption) => {
-                    node.id = Some("pagination-limit-25".to_owned());
-                    node.runtime_id = Some("pagination-limit-25".to_owned());
-                    // Test-only: Select options are focusable but declare no
-                    // ring, so the backend never tracks a handle. Stamp a ring
-                    // so Enter/Space can exercise the production on_activate
-                    // path (overlay pointer hit-testing misses deferred rows).
-                    if node.style.focus_ring.is_none() {
-                        node.style.focus_ring = Some(poodle_node::FocusRing {
-                            color: theme().resolve_color("color.accent.focusRing"),
-                            width: theme().resolve_border_width("border.width.focus"),
-                            offset: 2.0,
-                        });
-                    }
-                }
-                "50" if node.a11y.role == Some(NodeRole::ListBoxOption) => {
-                    node.id = Some("pagination-limit-50".to_owned());
-                    node.runtime_id = Some("pagination-limit-50".to_owned());
-                }
                 _ => {}
             }
         }
@@ -9801,7 +10033,6 @@ fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard(
                 node.id = Some(id);
             }
         }
-        // Closed Select has no aria label on the trigger; stamp by shape.
         if node.id.is_none()
             && node.interaction.focusable
             && node
@@ -10074,22 +10305,20 @@ fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard(
             poodle_gpui_node_backend::bounds_for("pagination-limit").is_some(),
             "limit Select needs a real hit target"
         );
-        // Select itself does not declare a focus ring yet; open via pointer.
         driver.pointer_activate_id("pagination-limit");
         assert_eq!(host.lock().expect("host lock").opens, [true]);
         assert!(host.lock().expect("host lock").limit_open);
     });
 
     run_headless(|cx| {
-        // Choose path: host-owned open Select reports a parsed limit and
-        // rebuilds closed. Starting open avoids overlay race with the open
-        // rebuild frame.
+        // Choose path: pointer on the production deferred option reports a
+        // parsed limit and rebuilds closed. No test-only option id or ring.
         let host = Arc::new(Mutex::new(Host {
             page: 2,
             total_pages: 10,
             variant: PaginationVariant::Numbered,
             page_size: 10,
-            limit_open: true,
+            limit_open: false,
             loading: false,
             pages: Vec::new(),
             opens: Vec::new(),
@@ -10097,19 +10326,31 @@ fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard(
         }));
         let mounted = Arc::new(Mutex::new(Node::container()));
         *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        let option_id = poodle_render::select_option_id("pagination-limit", "25");
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 420.0);
+        driver.pointer_activate_id("pagination-limit");
+        assert!(host.lock().expect("host lock").limit_open);
+        driver.draw_frame();
         {
             let root = mounted.lock().expect("mount lock");
-            let option = target(&root, "pagination-limit-25");
+            let option = root
+                .find(&|n| n.runtime_id.as_deref() == Some(option_id.as_str()))
+                .expect("production option id");
             assert!(
                 option.interaction.on_activate.is_some(),
                 "open option must carry the production change handler"
             );
+            assert!(
+                !option.interaction.focusable,
+                "option rows are pointer targets, not a keyboard workaround"
+            );
         }
-
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 720.0, 420.0);
-        driver.wait_for_focus_handle("pagination-limit-25");
-        driver.focus_element("pagination-limit-25");
-        driver.dispatch_key_raw("enter");
+        assert!(
+            poodle_gpui_node_backend::bounds_for(&option_id).is_some(),
+            "deferred limit option is a real pointer target"
+        );
+        driver.pointer_activate_id(&option_id);
         assert_eq!(host.lock().expect("host lock").sizes, [25]);
         assert!(!host.lock().expect("host lock").limit_open);
         assert_eq!(host.lock().expect("host lock").page_size, 25);
@@ -10437,5 +10678,463 @@ fn rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboar
         driver.wait_for_focus_handle(&left_id);
         driver.wait_for_focus_handle(&right_id);
         assert_ne!(left_id, right_id);
+    });
+}
+
+/// g16.019. Two independently scoped Selects open, choose, type, clear, and
+/// dismiss through real GPUI pointer and keyboard dispatch with host-owned
+/// rebuilds. Pointer proof uses production option identity, not a test-only
+/// ring or id stamp.
+#[test]
+fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
+    use poodle_render::{
+        select, select_option_id, select_search_focus_id, select_trigger_focus_id, SelectHandlers,
+    };
+    use poodle_specs::{ChoiceOption, SelectSpec};
+
+    #[derive(Clone)]
+    struct Instance {
+        spec: SelectSpec,
+        values: Vec<String>,
+        queries: Vec<String>,
+        opens: Vec<bool>,
+        transitions: usize,
+    }
+
+    #[derive(Clone)]
+    struct Host {
+        left: Instance,
+        right: Instance,
+    }
+
+    fn fruit() -> Vec<ChoiceOption> {
+        vec![
+            ChoiceOption::new("apple", "Apple"),
+            ChoiceOption::new("banana", "Banana"),
+            ChoiceOption::new("cherry", "Cherry"),
+            {
+                let mut spinach = ChoiceOption::new("spinach", "Spinach");
+                spinach.is_disabled = true;
+                spinach.group = Some("Vegetables".to_owned());
+                spinach
+            },
+        ]
+    }
+
+    fn apply_result(instance: &mut Instance, result: poodle_render::SelectTransitionResult) {
+        instance.transitions += 1;
+        let previous_query = instance.spec.search_query.clone();
+        instance.spec = instance.spec.clone().applying_context(&result.context);
+        if let Some((start, end)) = result.search_selection {
+            instance.spec.search_selection_start = start;
+            instance.spec.search_selection_end = end;
+        } else if instance.spec.search_query != previous_query {
+            let len = instance
+                .spec
+                .search_query
+                .as_deref()
+                .unwrap_or("")
+                .chars()
+                .count();
+            instance.spec.search_selection_start = len;
+            instance.spec.search_selection_end = len;
+        }
+        for effect in result.effects {
+            match effect {
+                poodle_render::SelectEffect::OpenChanged { open } => instance.opens.push(open),
+                poodle_render::SelectEffect::QueryChanged { query } => instance.queries.push(query),
+                poodle_render::SelectEffect::ValueChanged { value } => instance.values.push(value),
+            }
+        }
+    }
+
+    fn build(host: Arc<Mutex<Host>>, mounted: Arc<Mutex<Node>>) -> Node {
+        let state = host.lock().expect("host lock").clone();
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.descriptor.layout.spacing.gap = 24.0;
+
+        for (scope, instance) in [("left", state.left), ("right", state.right)] {
+            let host_i = Arc::clone(&host);
+            let mount_i = Arc::clone(&mounted);
+            let is_left = scope == "left";
+            let handlers = SelectHandlers::new(scope).on_transition(Arc::new(move |result| {
+                let mut host = host_i.lock().expect("host lock");
+                if is_left {
+                    apply_result(&mut host.left, result);
+                } else {
+                    apply_result(&mut host.right, result);
+                }
+                let request_search = if is_left {
+                    host.left.spec.searchable && host.left.spec.current_open()
+                } else {
+                    host.right.spec.searchable && host.right.spec.current_open()
+                };
+                drop(host);
+                if request_search {
+                    poodle_gpui_node_backend::request_focus(&select_search_focus_id(scope));
+                }
+                *mount_i.lock().expect("mount lock") =
+                    build(Arc::clone(&host_i), Arc::clone(&mount_i));
+            }));
+            root = root.child(select(
+                &instance.spec,
+                &RenderContext::new(&theme()),
+                &handlers,
+            ));
+        }
+        root
+    }
+
+    run_headless(|cx| {
+        let left = Instance {
+            spec: SelectSpec::new(fruit())
+                .with_placeholder("Left fruit")
+                .with_clearable(true),
+            values: Vec::new(),
+            queries: Vec::new(),
+            opens: Vec::new(),
+            transitions: 0,
+        };
+        let mut right_spec = SelectSpec::new(fruit())
+            .with_placeholder("Right fruit")
+            .with_searchable(true)
+            .with_freeform(true);
+        right_spec.searchable = true;
+        right_spec.freeform = true;
+        let right = Instance {
+            spec: right_spec,
+            values: Vec::new(),
+            queries: Vec::new(),
+            opens: Vec::new(),
+            transitions: 0,
+        };
+        let host = Arc::new(Mutex::new(Host { left, right }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 420.0);
+        let left_trigger = select_trigger_focus_id("left");
+        let left_banana = select_option_id("left", "banana");
+        let left_spinach = select_option_id("left", "spinach");
+        let right_trigger = select_trigger_focus_id("right");
+        let right_search = select_search_focus_id("right");
+        driver.wait_for_focus_handle(&left_trigger);
+        driver.wait_for_focus_handle(&right_trigger);
+
+        driver.pointer_activate_id(&left_trigger);
+        assert_eq!(host.lock().expect("host lock").left.opens, [true]);
+        driver.draw_frame();
+        let listbox = "select:left:listbox";
+        assert!(
+            poodle_gpui_node_backend::bounds_for(listbox).is_some(),
+            "open panel records containment bounds"
+        );
+        let group_header = "select:left:group-Vegetables";
+        assert!(
+            poodle_gpui_node_backend::bounds_for(group_header).is_some(),
+            "group header is a real painted target"
+        );
+        driver.pointer_activate_id(group_header);
+        {
+            let host = host.lock().expect("host lock");
+            assert!(
+                host.left.spec.current_open(),
+                "a click on a group header is inside the layer"
+            );
+            assert!(host.left.values.is_empty());
+        }
+        assert!(
+            poodle_gpui_node_backend::bounds_for(&left_spinach).is_some(),
+            "disabled deferred option still paints"
+        );
+        driver.pointer_activate_id(&left_spinach);
+        {
+            let host = host.lock().expect("host lock");
+            assert!(host.left.values.is_empty(), "disabled option is inert");
+            assert!(host.left.spec.current_open());
+        }
+        assert!(
+            poodle_gpui_node_backend::bounds_for(&left_banana).is_some(),
+            "left deferred option is a real pointer target"
+        );
+        driver.pointer_activate_id(&left_banana);
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.left.values, ["banana"]);
+            assert!(!host.left.spec.current_open());
+            assert!(host.right.values.is_empty());
+        }
+
+        driver.pointer_activate_id(&left_trigger);
+        assert!(host.lock().expect("host lock").left.spec.current_open());
+        driver.pointer_press(point(px(8.0), px(8.0)));
+        driver.pointer_release(point(px(8.0), px(8.0)));
+        {
+            let host = host.lock().expect("host lock");
+            assert!(!host.left.spec.current_open(), "outside pointer closes");
+            assert_eq!(host.left.values, ["banana"]);
+        }
+
+        driver.pointer_activate_id(&right_trigger);
+        assert!(host.lock().expect("host lock").right.spec.current_open());
+        driver.draw_frame();
+        driver.wait_for_focus_handle(&right_search);
+        driver.focus_element(&right_search);
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.right.spec.highlighted_value.as_deref(),
+                Some("apple"),
+                "open searchable starts on the first option"
+            );
+        }
+        driver.dispatch_key_raw("end");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.right.spec.highlighted_value.as_deref(),
+                Some("cherry"),
+                "End highlights the last enabled option through a host rebuild"
+            );
+            assert!(host.right.spec.current_open());
+        }
+        driver.dispatch_key_raw("home");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.right.spec.highlighted_value.as_deref(),
+                Some("apple"),
+                "Home highlights the first enabled option through a host rebuild"
+            );
+        }
+        driver.dispatch_key_raw("b");
+        driver.dispatch_key_raw("a");
+        driver.dispatch_key_raw("n");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.right.queries.last().map(String::as_str), Some("ban"));
+            assert_eq!(
+                (
+                    host.right.spec.search_selection_start,
+                    host.right.spec.search_selection_end
+                ),
+                (3, 3)
+            );
+            assert!(host.right.values.is_empty());
+        }
+        driver.dispatch_key_raw("shift-left");
+        driver.dispatch_key_raw("shift-left");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                (
+                    host.right.spec.search_selection_start,
+                    host.right.spec.search_selection_end
+                ),
+                (3, 1),
+                "backward selection keeps anchor at the original caret"
+            );
+        }
+        driver.dispatch_key_raw("shift-left");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                (
+                    host.right.spec.search_selection_start,
+                    host.right.spec.search_selection_end
+                ),
+                (3, 0),
+                "Shift+Arrow after rebuild moves the head, not a swapped anchor"
+            );
+        }
+        driver.dispatch_key_raw("right");
+        driver.dispatch_key_raw("left");
+        driver.dispatch_key_raw("left");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                (
+                    host.right.spec.search_selection_start,
+                    host.right.spec.search_selection_end
+                ),
+                (1, 1)
+            );
+        }
+        driver.dispatch_key_raw("x");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.right.queries.last().map(String::as_str), Some("bxan"));
+            assert_eq!(host.right.spec.search_selection_range(), (2, 2));
+        }
+        driver.dispatch_key_raw("backspace");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.right.queries.last().map(String::as_str), Some("ban"));
+        }
+        let search_value = format!("{right_search}-value");
+        driver.pointer_press(payload_frac(&search_value, 0.2, 0.5));
+        driver.pointer_release(payload_frac(&search_value, 0.2, 0.5));
+        {
+            let host = host.lock().expect("host lock");
+            assert_ne!(
+                (
+                    host.right.spec.search_selection_start,
+                    host.right.spec.search_selection_end
+                ),
+                (3, 3),
+                "pointer placement moves the search caret"
+            );
+        }
+        driver.dispatch_key_raw("enter");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.right.values, ["banana"]);
+            assert!(!host.right.spec.current_open());
+            assert_eq!(host.left.values, ["banana"]);
+        }
+
+        let left_clear = "select:left:clear";
+        driver.wait_for_focus_handle(&left_trigger);
+        assert!(
+            poodle_gpui_node_backend::bounds_for(left_clear).is_some()
+                || mounted
+                    .lock()
+                    .expect("mount lock")
+                    .find(&|n| n.runtime_id.as_deref() == Some(left_clear))
+                    .is_some()
+        );
+        if poodle_gpui_node_backend::bounds_for(left_clear).is_some() {
+            driver.pointer_activate_id(left_clear);
+            assert_eq!(
+                host.lock()
+                    .expect("host lock")
+                    .left
+                    .values
+                    .last()
+                    .map(String::as_str),
+                Some("")
+            );
+        }
+
+        driver.keyboard_key(&right_trigger, "escape");
+        assert!(!host.lock().expect("host lock").right.spec.current_open());
+
+        driver.pointer_activate_id(&right_trigger);
+        driver.wait_for_focus_handle(&right_search);
+        driver.focus_element(&right_search);
+        for _ in 0..16 {
+            driver.dispatch_key_raw("backspace");
+        }
+        driver.dispatch_key_raw("z");
+        driver.dispatch_key_raw("z");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&right_search),
+            Some(true),
+            "search editor holds focus before control blur"
+        );
+        let before_blur = host.lock().expect("host lock").right.transitions;
+        driver.dispatch_key_raw("tab");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.right.transitions,
+                before_blur + 1,
+                "control blur emits one transition result"
+            );
+            assert_eq!(host.right.values.last().map(String::as_str), Some("zz"));
+            assert!(!host.right.spec.current_open());
+            assert_eq!(host.right.spec.search_query.as_deref(), Some("zz"));
+        }
+    });
+}
+
+/// g16.019. A production Select listbox that exceeds `size.menu.maxHeight`
+/// clips option rows past the cap. Short menus stay content-sized; this
+/// case is the long-menu half of that contract.
+#[test]
+fn a_long_select_menu_clips_overflowing_option_rows() {
+    use poodle_render::{select, select_option_id, select_trigger_focus_id, SelectHandlers};
+    use poodle_specs::{ChoiceOption, SelectSpec};
+
+    #[derive(Clone)]
+    struct Host {
+        spec: SelectSpec,
+        values: Vec<String>,
+    }
+
+    fn options() -> Vec<ChoiceOption> {
+        (0..20)
+            .map(|index| ChoiceOption::new(format!("{index}"), format!("Option {index}")))
+            .collect()
+    }
+
+    fn build(host: Arc<Mutex<Host>>, mounted: Arc<Mutex<Node>>) -> Node {
+        let spec = host.lock().expect("host lock").spec.clone();
+        let host_i = Arc::clone(&host);
+        let mount_i = Arc::clone(&mounted);
+        let handlers = SelectHandlers::new("long").on_transition(Arc::new(move |result| {
+            let mut host = host_i.lock().expect("host lock");
+            host.spec = host.spec.clone().applying_context(&result.context);
+            for effect in result.effects {
+                if let poodle_render::SelectEffect::ValueChanged { value } = effect {
+                    host.values.push(value);
+                }
+            }
+            drop(host);
+            *mount_i.lock().expect("mount lock") = build(Arc::clone(&host_i), Arc::clone(&mount_i));
+        }));
+        select(&spec, &RenderContext::new(&theme()), &handlers)
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(Host {
+            spec: SelectSpec::new(options()),
+            values: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 280.0, 420.0);
+        let trigger = select_trigger_focus_id("long");
+        let first = select_option_id("long", "0");
+        let last = select_option_id("long", "19");
+        let listbox = "select:long:listbox";
+        driver.wait_for_focus_handle(&trigger);
+        driver.pointer_activate_id(&trigger);
+        driver.draw_frame();
+        {
+            let tree = mounted.lock().expect("mount lock");
+            let panel = tree
+                .find(&|n| n.runtime_id.as_deref() == Some(listbox))
+                .expect("listbox");
+            assert_eq!(
+                panel.style.descriptor.layout.overflow_y,
+                LayoutOverflow::Scroll
+            );
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(&first).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&last).is_some());
+        driver.pointer_activate_id(&last);
+        assert!(
+            host.lock().expect("host lock").values.is_empty(),
+            "a row past max_height does not activate"
+        );
+        if !host.lock().expect("host lock").spec.current_open() {
+            driver.pointer_activate_id(&trigger);
+            driver.draw_frame();
+        }
+        // GPUI scroll offset is `[-max, 0]`. Negative pixel delta moves the
+        // viewport down the list.
+        driver.scroll_vertical_id(listbox, -800.0);
+        driver.pointer_activate_id(&last);
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.values.last().map(String::as_str),
+                Some("19"),
+                "wheel scrolling must bring the last enabled row into hit-test"
+            );
+            assert!(!host.spec.current_open());
+        }
     });
 }

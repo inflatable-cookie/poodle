@@ -1,8 +1,9 @@
 # g16.019 — Select Mounted Overlay Parity
 
-Status: ready
+Status: complete
 Opened: 2026-08-28
 Recompiled: 2026-08-28
+Completed: 2026-08-28
 Depends on: completed `g16.018` / merged PR #93
 Worker handoff:
 `../../handoffs/20260828-181625-g16-019-select-overlay-worker.md`
@@ -107,13 +108,13 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Execution Plan
 
-- [ ] **Batch 1 — editable native Select.** Replace the static search row with
+- [x] **Batch 1 — editable native Select.** Replace the static search row with
       existing Node editing channels; route query, navigation, commit, clear,
       dismissal, and focus through the landed machine and host rebuilds.
-- [ ] **Batch 2 — deferred overlay pointer repair.** Add a focused reproducer,
+- [x] **Batch 2 — deferred overlay pointer repair.** Add a focused reproducer,
       repair the smallest generic layer/hit-test seam, and remove the
       Pagination-era Select workaround.
-- [ ] **Batch 3 — mounted proof and evidence.** Update the curated GPUI
+- [x] **Batch 3 — mounted proof and evidence.** Update the curated GPUI
       specimen, add one named mounted Select regression covering two instances,
       move only the Select ledger cell, write one August execution log, and
       close the card/front doors.
@@ -155,22 +156,22 @@ Governing refs: `../../contracts/001-working-rules.md`,
 
 ## Acceptance Criteria
 
-- [ ] Real editable query, pointer selection, keyboard navigation/dismissal,
+- [x] Real editable query, pointer selection, keyboard navigation/dismissal,
       clear, and freeform commit rebuild host-owned Select state.
-- [ ] Searchable focus stays on the editor while highlight moves;
+- [x] Searchable focus stays on the editor while highlight moves;
       non-searchable focus stays on the trigger; closing follows the detailed
       focus-return/traversal contract.
-- [ ] Disabled control/options are inert; groups and stable instance identity
+- [x] Disabled control/options are inert; groups and stable instance identity
       remain coherent across two mounted instances.
-- [ ] Deferred option rows receive real pointer input after a bounded generic
+- [x] Deferred option rows receive real pointer input after a bounded generic
       backend repair; outside dismissal and nested-layer behavior do not
       regress.
-- [ ] The Pagination test-only Select ring/id workaround is removed and its
+- [x] The Pagination test-only Select ring/id workaround is removed and its
       mounted regression remains green.
-- [ ] Curated specimens remain human-facing.
-- [ ] The generated ledger changes only Select to 47 mounted / 127 missing;
+- [x] Curated specimens remain human-facing.
+- [x] The generated ledger changes only Select to 47 mounted / 127 missing;
       known-delta, visual, and broad accessibility totals do not move.
-- [ ] One August log records the exact native path, backend repair, mounted
+- [x] One August log records the exact native path, backend repair, mounted
       proof, validation, and non-claims.
 
 ## Writable Scope
@@ -235,8 +236,9 @@ preview/QA, release, tag, publication, or workflow-mutation selectors.
 
 ## Continuation
 
-Dispatch the linked worker handoff as the single active lane. The worker returns
-the exact editable-search path, key/focus/dismiss mapping, deferred-overlay
-reproducer and repair, removed Pagination workaround, named mounted regression,
-exact ledger totals, validation, and execution log. The worker does not choose
-the next lane or merge its PR.
+Complete. Ledger is 47 mounted / 127 missing. PR #94 review follow-up
+covers one-result blur, host-authored search caret (anchor/head),
+Home/End highlight, declared overlay overflow with a production long-menu
+cap, and overlay surface bounds. Next task is an orchestrator checkpoint
+after operator-authorized merge. Do not choose or compile another lane
+from this card.

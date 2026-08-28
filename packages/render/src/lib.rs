@@ -355,7 +355,10 @@ pub use resize_handle::{resize_handle, resize_handle_focus_id, ResizePhase};
 pub use scroll_shell::scroll_shell;
 pub use segmented_control::segmented_control;
 pub use poodle_headless::select::{SelectContext, SelectEffect, SelectEvent};
-pub use select::{select, SelectHandlers, SelectTransitionResult};
+pub use select::{
+    select, select_option_id, select_search_focus_id, select_trigger_focus_id, SelectHandlers,
+    SelectTransitionResult,
+};
 pub use selection_summary::{selection_summary, SelectionSummaryHandlers};
 pub use separator::separator;
 pub use settings_shell::{settings_shell, SettingsShellHandlers};

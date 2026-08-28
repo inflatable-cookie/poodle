@@ -226,20 +226,38 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
     // Overlay-layer membership: record this element's rendered bounds into
     // the layer registry so outside-interaction containment and relative
     // logical-bounds observation read real geometry.
-    if let Some(layer_id) = &node.interaction.dismiss_layer {
+    //
+    // Bounds key off the resolved element identity (`runtime_id` or `id`),
+    // not only `Node.id`. Deferred overlay rows often carry a stable
+    // runtime_id without a separate `id`; skipping them made pointer
+    // hit-testing fall back to a mount-box guess.
+    let layer_id = node
+        .interaction
+        .dismiss_layer
+        .clone()
+        .or_else(crate::current_dismiss_layer);
+    let in_dismiss_layer = layer_id.is_some();
+    if let Some(layer) = layer_id {
         let element_id = id.to_owned();
-        let layer = layer_id.clone();
-        el = el.child(
-            gpui::canvas(
-                move |bounds, _window, _cx| {
-                    super::layers::record_bounds(&element_id, &layer, bounds);
-                },
-                |_, _, _, _| {},
-            )
-            .absolute()
-            .size_full(),
-        );
-    } else if node.id.is_some() {
+        // Overlay surfaces pin all four insets instead of `size_full`.
+        // Percentage height on an auto-sized deferred box collapses Taffy's
+        // used height to padding; inset-0 fills the laid-out padding box
+        // without contributing to that height.
+        let canvas = gpui::canvas(
+            move |bounds, _window, _cx| {
+                super::layers::record_bounds(&element_id, &layer, bounds);
+            },
+            |_, _, _, _| {},
+        )
+        .absolute()
+        .top(px(0.0))
+        .left(px(0.0));
+        el = el.child(if node.style.overlay {
+            canvas.right(px(0.0)).bottom(px(0.0))
+        } else {
+            canvas.size_full()
+        });
+    } else if !id.is_empty() {
         let element_id = id.to_owned();
         el = el.child(
             gpui::canvas(
@@ -249,6 +267,8 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                 |_, _, _, _| {},
             )
             .absolute()
+            .top(px(0.0))
+            .left(px(0.0))
             .size_full(),
         );
     }
@@ -264,6 +284,17 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                 text: SharedString::from(text.clone()),
             }))
         });
+    }
+    // Non-focusable overlay members (option rows, disabled rows) must stop
+    // the window host from taking focus on press. That blur otherwise runs
+    // the open-state Close handler and unmounts the layer before click.
+    if !node.interaction.focusable && in_dismiss_layer {
+        el = el.on_mouse_down(
+            MouseButton::Left,
+            move |_event: &MouseDownEvent, window, _cx| {
+                window.prevent_default();
+            },
+        );
     }
     if node.interaction.disabled {
         record_probe_channel("semantic.disabled.blocked");

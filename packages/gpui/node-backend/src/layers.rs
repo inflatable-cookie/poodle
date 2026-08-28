@@ -54,6 +54,11 @@ thread_local! {
     /// Rendered bounds per element id, rebuilt each frame.
     static ELEMENT_BOUNDS: RefCell<std::collections::HashMap<String, Bounds<Pixels>>> =
         RefCell::new(std::collections::HashMap::new());
+    /// Which dismiss layer last painted each element. Deferred overlay rows
+    /// record here even when their rect has not yet been folded into the
+    /// layer's containment vec.
+    static ELEMENT_LAYERS: RefCell<std::collections::HashMap<String, String>> =
+        RefCell::new(std::collections::HashMap::new());
     /// Focus requests queued by component hosts (machine focus effects):
     /// applied by the target element's paint-time focus canvas, once.
     static FOCUS_REQUESTS: RefCell<std::collections::HashSet<String>> =
@@ -71,6 +76,7 @@ thread_local! {
 pub fn overlay_frame_begin() {
     LAYERS.with(|layers| layers.borrow_mut().clear());
     ELEMENT_BOUNDS.with(|bounds| bounds.borrow_mut().clear());
+    ELEMENT_LAYERS.with(|layers| layers.borrow_mut().clear());
     // The ring registry is frame observation with the same lifetime: a
     // focused node that vanished paints nothing this frame, and its entry
     // must not survive it.
@@ -104,6 +110,11 @@ pub fn take_focus_request(element_id: &str) -> bool {
 /// The rendered bounds of the element with this id, as of the last frame.
 pub fn bounds_for(element_id: &str) -> Option<Bounds<Pixels>> {
     ELEMENT_BOUNDS.with(|bounds| bounds.borrow().get(element_id).copied())
+}
+
+/// The dismiss layer the element last painted into, if any.
+pub fn layer_for_element(element_id: &str) -> Option<String> {
+    ELEMENT_LAYERS.with(|layers| layers.borrow().get(element_id).cloned())
 }
 
 /// Record paint bounds for a named element. Overlay members also go through
@@ -148,6 +159,11 @@ pub fn record_bounds(element_id: &str, layer_id: &str, bounds: Bounds<Pixels>) {
     ELEMENT_BOUNDS.with(|all| {
         all.borrow_mut().insert(element_id.to_owned(), bounds);
     });
+    ELEMENT_LAYERS.with(|layers| {
+        layers
+            .borrow_mut()
+            .insert(element_id.to_owned(), layer_id.to_owned());
+    });
     LAYERS.with(|layers| {
         let mut layers = layers.borrow_mut();
         if let Some(record) = layers.iter_mut().find(|record| record.id == layer_id) {
@@ -168,11 +184,27 @@ fn spared_by_ancestry(
     position: Point<Pixels>,
 ) -> std::collections::HashSet<String> {
     let mut spared = std::collections::HashSet::new();
-    for layer in layers {
-        if !layer.bounds.iter().any(|bounds| contains(position, bounds)) {
-            continue;
-        }
-        let mut current = Some(layer);
+    let mut hit_layers: std::collections::HashSet<String> = layers
+        .iter()
+        .filter(|layer| layer.bounds.iter().any(|bounds| contains(position, bounds)))
+        .map(|layer| layer.id.clone())
+        .collect();
+    ELEMENT_LAYERS.with(|element_layers| {
+        ELEMENT_BOUNDS.with(|bounds| {
+            let element_layers = element_layers.borrow();
+            let bounds = bounds.borrow();
+            for (element_id, layer_id) in element_layers.iter() {
+                if bounds
+                    .get(element_id)
+                    .is_some_and(|rect| contains(position, rect))
+                {
+                    hit_layers.insert(layer_id.clone());
+                }
+            }
+        });
+    });
+    for layer_id in hit_layers {
+        let mut current = layers.iter().find(|layer| layer.id == layer_id);
         while let Some(record) = current {
             if !spared.insert(record.id.clone()) {
                 break;
@@ -183,6 +215,16 @@ fn spared_by_ancestry(
         }
     }
     spared
+}
+
+/// Test helper: which layers a pointer at this position would spare.
+pub fn spared_layer_ids_at(position: Point<Pixels>) -> Vec<String> {
+    LAYERS.with(|layers| {
+        let layers = layers.borrow();
+        let mut ids: Vec<String> = spared_by_ancestry(&layers, position).into_iter().collect();
+        ids.sort();
+        ids
+    })
 }
 
 /// Escape: the innermost (last-registered) layer dismisses.
@@ -251,8 +293,8 @@ where
             crate::interaction::release_payload_session(cx);
         },
     )
-    .on_key_down(move |event: &KeyDownEvent, window, cx| {
-        match event.keystroke.key.as_str() {
+    .on_key_down(
+        move |event: &KeyDownEvent, window, cx| match event.keystroke.key.as_str() {
             "escape" => {
                 crate::interaction::cancel_payload_session(window, cx);
                 dismiss_innermost(cx);
@@ -266,6 +308,6 @@ where
                 cx.refresh_windows();
             }
             _ => {}
-        }
-    })
+        },
+    )
 }

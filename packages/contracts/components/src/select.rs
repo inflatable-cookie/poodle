@@ -80,6 +80,13 @@ pub struct SelectSpec {
     pub search_query: Option<String>,
     /// Host-authored highlighted option value. `None` means no highlight.
     pub highlighted_value: Option<String>,
+    /// Host-authored search-editor `anchor` as a character offset into
+    /// `search_query`. Independent of `search_selection_end`; a backward
+    /// selection has `end < start`.
+    pub search_selection_start: usize,
+    /// Host-authored search-editor `head` (the moving end) as a character
+    /// offset into `search_query`.
+    pub search_selection_end: usize,
 }
 
 impl Default for SelectSpec {
@@ -113,6 +120,8 @@ impl Default for SelectSpec {
             load_key: None,
             search_query: None,
             highlighted_value: None,
+            search_selection_start: 0,
+            search_selection_end: 0,
         }
     }
 }
@@ -287,12 +296,55 @@ impl SelectSpec {
     }
 
     pub fn with_search_query(mut self, query: impl Into<String>) -> Self {
-        self.search_query = Some(query.into());
+        let query = query.into();
+        let len = query.chars().count();
+        self.search_query = Some(query);
+        self.search_selection_start = len;
+        self.search_selection_end = len;
         self
     }
 
     pub fn with_highlighted_value(mut self, value: impl Into<String>) -> Self {
         self.highlighted_value = Some(value.into());
+        self
+    }
+
+    pub fn with_search_selection(mut self, start: usize, end: usize) -> Self {
+        self.search_selection_start = start;
+        self.search_selection_end = end;
+        self
+    }
+
+    /// Host-authored `(anchor, head)` pair, clamped to the current search
+    /// query without swapping direction.
+    pub fn search_selection(&self) -> (usize, usize) {
+        let len = self.search_query.as_deref().unwrap_or("").chars().count();
+        (
+            self.search_selection_start.min(len),
+            self.search_selection_end.min(len),
+        )
+    }
+
+    /// Ordered `(start, end)` pair for paint and range replacement.
+    pub fn search_selection_range(&self) -> (usize, usize) {
+        let (a, b) = self.search_selection();
+        (a.min(b), a.max(b))
+    }
+
+    /// Apply one complete transition context. Hosts rebuild from this rather
+    /// than merging individual fields: highlight events emit no effects.
+    pub fn applying_context(mut self, context: &SelectContext) -> Self {
+        self.value = if context.value.is_empty() {
+            None
+        } else {
+            Some(context.value.clone())
+        };
+        self.open = Some(context.open);
+        self.search_query = Some(context.query.clone());
+        self.highlighted_value = context.highlighted_value.clone();
+        let len = context.query.chars().count();
+        self.search_selection_start = self.search_selection_start.min(len);
+        self.search_selection_end = self.search_selection_end.min(len);
         self
     }
 

@@ -17,8 +17,9 @@ use poodle_headless::select::{
     select_transition, select_visible_options, SelectContext, SelectEffect, SelectEvent,
 };
 use poodle_node::{
-    ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, NodePosition, NodeRole, StylePatch,
+    ColorValue, CrossAxisAlignment, CursorHint, DismissReason, FocusRing, LayoutDirection,
+    LayoutOverflow, LayoutSizing, MainAxisAlignment, Node, NodeKey, NodePosition, NodeRole,
+    StylePatch,
 };
 use poodle_specs::{SelectSpec, ValidationState};
 
@@ -35,6 +36,9 @@ use crate::presentation::{
 pub struct SelectTransitionResult {
     pub context: SelectContext,
     pub effects: Vec<SelectEffect>,
+    /// Present when the compact search editor moved its caret or selection.
+    /// Independent of the shared query/value/open machine.
+    pub search_selection: Option<(usize, usize)>,
 }
 
 /// Host-owned native interaction for one Select instance.
@@ -73,16 +77,189 @@ fn select_part_id(scope: &str, part: &str) -> String {
     format!("select:{scope}:{part}")
 }
 
-fn select_option_id(scope: &str, value: &str) -> String {
+/// Backend identity of the trigger for one instance.
+pub fn select_trigger_focus_id(scope: &str) -> String {
+    select_part_id(scope, "trigger")
+}
+
+/// Backend identity of the compact search editor for one instance.
+pub fn select_search_focus_id(scope: &str) -> String {
+    select_part_id(scope, "search")
+}
+
+/// Backend identity of one option row for an instance.
+pub fn select_option_id(scope: &str, value: &str) -> String {
     format!("select:{scope}:option:{value}")
 }
 
+fn select_layer_id(scope: &str) -> String {
+    select_part_id(scope, "layer")
+}
+
+fn stamp_identity(node: &mut Node, id: String) {
+    node.id = Some(id.clone());
+    node.runtime_id = Some(id);
+}
+
+fn standard_focus_ring(ctx: &RenderContext<'_>) -> FocusRing {
+    FocusRing {
+        color: ctx.theme().resolve_color("color.accent.focusRing"),
+        width: ctx.theme().resolve_border_width("border.width.focus"),
+        offset: rem_to_px(0.125),
+    }
+}
+
 fn emit_select(spec: &SelectSpec, handlers: &SelectHandlers, event: SelectEvent) {
+    emit_select_with_selection(spec, handlers, event, None);
+}
+
+fn emit_select_with_selection(
+    spec: &SelectSpec,
+    handlers: &SelectHandlers,
+    event: SelectEvent,
+    search_selection: Option<(usize, usize)>,
+) {
     let Some(handler) = &handlers.on_transition else {
         return;
     };
     let (context, effects) = select_transition(spec.select_context(), event);
-    handler(SelectTransitionResult { context, effects });
+    handler(SelectTransitionResult {
+        context,
+        effects,
+        search_selection,
+    });
+}
+
+fn emit_search_selection(spec: &SelectSpec, handlers: &SelectHandlers, selection: (usize, usize)) {
+    let Some(handler) = &handlers.on_transition else {
+        return;
+    };
+    handler(SelectTransitionResult {
+        context: spec.select_context(),
+        effects: Vec::new(),
+        search_selection: Some(selection),
+    });
+}
+
+fn emit_blur(spec: &SelectSpec, handlers: &SelectHandlers) {
+    let Some(handler) = &handlers.on_transition else {
+        return;
+    };
+    let (committed, commit_effects) =
+        select_transition(spec.select_context(), SelectEvent::CommitFreeform);
+    let (context, close_effects) = if committed.open {
+        select_transition(committed, SelectEvent::Close)
+    } else {
+        (committed, Vec::new())
+    };
+    let mut effects = commit_effects;
+    effects.extend(close_effects);
+    handler(SelectTransitionResult {
+        context,
+        effects,
+        search_selection: None,
+    });
+}
+
+fn report_search_edit(
+    spec: &SelectSpec,
+    handlers: &SelectHandlers,
+    current: &str,
+    selection: (usize, usize),
+    outcome: poodle_headless::text_input::EditOutcome,
+) {
+    let next_selection = (outcome.state.anchor, outcome.state.head);
+    if let Some(next) = outcome.value {
+        if next != current {
+            emit_select_with_selection(
+                spec,
+                handlers,
+                SelectEvent::Query { query: next },
+                Some(next_selection),
+            );
+            return;
+        }
+    }
+    if next_selection != selection {
+        emit_search_selection(spec, handlers, next_selection);
+    }
+}
+
+fn emit_nav(spec: &SelectSpec, handlers: &SelectHandlers, key: NodeKey) {
+    match key {
+        NodeKey::ArrowUp => emit_select(spec, handlers, SelectEvent::HighlightPrev),
+        NodeKey::ArrowDown => emit_select(spec, handlers, SelectEvent::HighlightNext),
+        NodeKey::Home => emit_select(spec, handlers, SelectEvent::HighlightFirst),
+        NodeKey::End => emit_select(spec, handlers, SelectEvent::HighlightLast),
+        _ => {}
+    }
+}
+
+fn wire_dismiss(node: &mut Node, spec: &SelectSpec, handlers: &SelectHandlers) {
+    let layer = select_layer_id(&handlers.instance_scope);
+    node.interaction.dismiss_layer = Some(layer);
+    if handlers.on_transition.is_none() {
+        return;
+    }
+    let spec = spec.clone();
+    let handlers = handlers.clone();
+    let refuse_outside = !spec.dismiss_on_outside_interact;
+    node.interaction.on_dismiss = Some(Arc::new(move |reason| {
+        if reason == DismissReason::Outside && refuse_outside {
+            return;
+        }
+        emit_select(&spec, &handlers, SelectEvent::Close);
+    }));
+}
+
+fn wire_open_keys(
+    node: &mut Node,
+    spec: &SelectSpec,
+    handlers: &SelectHandlers,
+    focus_search: bool,
+) {
+    if spec.is_disabled || handlers.on_transition.is_none() {
+        return;
+    }
+    let spec_keys = spec.clone();
+    let handlers_keys = handlers.clone();
+    let search_id = select_search_focus_id(&handlers.instance_scope);
+    node.interaction.on_key = Some(Arc::new(move |key, _mods| {
+        match key {
+            NodeKey::ArrowUp | NodeKey::ArrowDown => {
+                emit_nav(&spec_keys, &handlers_keys, key);
+            }
+            NodeKey::Home | NodeKey::End if spec_keys.current_open() => {
+                emit_nav(&spec_keys, &handlers_keys, key);
+            }
+            _ => return None,
+        }
+        focus_search.then(|| search_id.clone())
+    }));
+    if spec.current_open() {
+        let spec_submit = spec.clone();
+        let handlers_submit = handlers.clone();
+        node.interaction.on_submit = Some(Arc::new(move || {
+            emit_select(
+                &spec_submit,
+                &handlers_submit,
+                SelectEvent::CommitHighlighted,
+            );
+        }));
+        let spec_cancel = spec.clone();
+        let handlers_cancel = handlers.clone();
+        node.interaction.on_cancel = Some(Arc::new(move || {
+            emit_select(&spec_cancel, &handlers_cancel, SelectEvent::Close);
+        }));
+        let spec_blur = spec.clone();
+        let handlers_blur = handlers.clone();
+        node.interaction.on_focus_change = Some(Arc::new(move |focused| {
+            if focused {
+                return;
+            }
+            emit_blur(&spec_blur, &handlers_blur);
+        }));
+    }
 }
 
 pub fn select(spec: &SelectSpec, ctx: &RenderContext<'_>, handlers: &SelectHandlers) -> Node {
@@ -184,7 +361,6 @@ pub fn select(spec: &SelectSpec, ctx: &RenderContext<'_>, handlers: &SelectHandl
     if !spec.current_open() {
         let mut trigger = trigger;
         trigger.style.min_width = Some(root_min_width);
-        trigger.runtime_id = Some(select_part_id(&handlers.instance_scope, "trigger"));
         return trigger;
     }
 
@@ -226,8 +402,6 @@ pub fn select(spec: &SelectSpec, ctx: &RenderContext<'_>, handlers: &SelectHandl
     if let Some(label) = spec.aria_label.as_deref() {
         root.a11y.label = Some(label.to_string());
     }
-    root.a11y.role = Some(NodeRole::ComboBox);
-    root.a11y.expanded = Some(spec.open.unwrap_or(false));
     root
 }
 
@@ -282,8 +456,24 @@ fn build_trigger(
             opacity: None,
         });
     }
-    el.interaction.focusable = true;
-    el.runtime_id = Some(select_part_id(&handlers.instance_scope, "trigger"));
+    let open = spec.current_open();
+    let searchable_editor = spec.searchable && open;
+    stamp_identity(&mut el, select_trigger_focus_id(&handlers.instance_scope));
+    if let Some(label) = spec.aria_label.as_deref() {
+        el.a11y.label = Some(label.to_string());
+    }
+    el.a11y.role = Some(NodeRole::ComboBox);
+    el.a11y.expanded = Some(open);
+    el.interaction.focusable = !is_disabled && !searchable_editor;
+    if el.interaction.focusable {
+        el.style.focus_ring = Some(standard_focus_ring(ctx));
+    }
+    if open {
+        wire_dismiss(&mut el, spec, handlers);
+    }
+    if !searchable_editor {
+        wire_open_keys(&mut el, spec, handlers, spec.searchable);
+    }
 
     if !is_disabled && handlers.on_transition.is_some() {
         let spec = spec.clone();
@@ -322,7 +512,10 @@ fn build_trigger(
         x.style.descriptor.text_color = Some(text_secondary);
         clear = clear.child(x);
 
-        clear.runtime_id = Some(select_part_id(&handlers.instance_scope, "clear"));
+        stamp_identity(
+            &mut clear,
+            select_part_id(&handlers.instance_scope, "clear"),
+        );
         clear.interaction.on_activate = Some(if handlers.on_transition.is_some() {
             let spec = spec.clone();
             let handlers = handlers.clone();
@@ -378,6 +571,29 @@ fn build_panel(
         .filter(|w| *w > 0.0)
         .unwrap_or(token_min_width);
     let max_height = ctx.theme().resolve_space("size.menu.maxHeight");
+    let current_value = spec.current_value();
+    let visible_values: Vec<String> = select_visible_options(&spec.select_context())
+        .into_iter()
+        .map(|option| option.value.clone())
+        .collect();
+    let filtered: Vec<&poodle_specs::ChoiceOption> = spec
+        .options
+        .iter()
+        .filter(|opt| visible_values.iter().any(|value| value == &opt.value))
+        .collect();
+    let header_py = rem_to_px(0.25);
+    let header_font = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+        effective_size,
+    )));
+    let content_height = estimated_panel_content_height(
+        spec,
+        &filtered,
+        panel_py,
+        row_height,
+        header_py,
+        header_font,
+        font_size,
+    );
 
     let mut panel = Node::container();
     {
@@ -394,8 +610,12 @@ fn build_panel(
         s.descriptor.corner_radii.bottom_left = surface_radius;
         s.min_width = Some(min_width);
         s.max_height = Some(max_height);
-        s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
-        s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+        // Taffy Hidden/Scroll on an auto-height overlay zeroes content unless
+        // max_height binds. Short menus stay Visible and content-sized; long
+        // menus set Scroll so the cap binds, matching the web listbox.
+        if max_height > 0.0 && content_height > max_height {
+            s.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
+        }
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.padding.top = panel_py;
         s.descriptor.layout.spacing.padding.bottom = panel_py;
@@ -408,51 +628,28 @@ fn build_panel(
         bottom: None,
     };
     panel.a11y.role = Some(NodeRole::ListBox);
-    panel.runtime_id = Some(select_part_id(&handlers.instance_scope, "listbox"));
+    stamp_identity(
+        &mut panel,
+        select_part_id(&handlers.instance_scope, "listbox"),
+    );
+    panel.interaction.dismiss_layer = Some(select_layer_id(&handlers.instance_scope));
 
     if spec.shows_search_input() {
-        let query = spec.search_query.as_deref().unwrap_or("");
-        let mut search_row = Node::container();
-        {
-            let s = &mut search_row.style;
-            s.descriptor.layout.direction = LayoutDirection::Row;
-            s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            s.descriptor.layout.spacing.gap = item_gap;
-            s.descriptor.layout.spacing.padding.left = pad_x;
-            s.descriptor.layout.spacing.padding.right = pad_x;
-            s.descriptor.layout.height = LayoutSizing::Fixed(row_height);
-        }
-        let mut glass = Node::icon("search", icon_size);
-        glass.style.descriptor.text_color = Some(icon_muted);
-        search_row = search_row.child(glass);
-
-        let mut q = if query.is_empty() {
-            let mut n = Node::text("Search…");
-            n.style.descriptor.text_color = Some(text_placeholder);
-            n
-        } else {
-            let mut n = Node::text(query);
-            n.style.descriptor.text_color = Some(text_primary);
-            n
-        };
-        q.style.text_size = Some(font_size);
-        q.style.descriptor.layout.width = LayoutSizing::Grow;
-        search_row = search_row.child(q);
-        search_row.runtime_id = Some(select_part_id(&handlers.instance_scope, "search"));
-
-        panel = panel.child(search_row);
+        panel = panel.child(build_search_row(
+            spec,
+            ctx,
+            text_primary,
+            text_placeholder,
+            font_size,
+            icon_size,
+            pad_x,
+            row_height,
+            item_gap,
+            icon_muted,
+            handlers,
+        ));
     }
 
-    let current_value = spec.current_value();
-    let visible_values: Vec<String> = select_visible_options(&spec.select_context())
-        .into_iter()
-        .map(|option| option.value.clone())
-        .collect();
-    let filtered: Vec<&poodle_specs::ChoiceOption> = spec
-        .options
-        .iter()
-        .filter(|opt| visible_values.iter().any(|value| value == &opt.value))
-        .collect();
     let accent = ctx.theme().resolve_color("color.accent.base");
     let highlight_fill = with_alpha(accent, 0.14);
 
@@ -479,21 +676,26 @@ fn build_panel(
 
         for group_key in &seen_groups {
             if let Some(ref name) = group_key {
-                let header_py = rem_to_px(0.25);
-                let header_font = rem_to_px(size_font_rem(resolve_supporting_visual_size(
-                    effective_size,
-                )));
-                let mut header = Node::text(name.as_str());
+                let mut header_label = Node::text(name.as_str());
                 {
-                    let s = &mut header.style;
+                    let s = &mut header_label.style;
                     s.descriptor.text_color = Some(text_secondary);
                     s.text_size = Some(header_font);
                     s.text_weight = Some(600);
+                }
+                let mut header = Node::container().child(header_label);
+                {
+                    let s = &mut header.style;
                     s.descriptor.layout.spacing.padding.left = pad_x;
                     s.descriptor.layout.spacing.padding.right = pad_x;
                     s.descriptor.layout.spacing.padding.top = header_py;
                     s.descriptor.layout.spacing.padding.bottom = header_py;
                 }
+                stamp_identity(
+                    &mut header,
+                    select_part_id(&handlers.instance_scope, &format!("group-{name}")),
+                );
+                header.interaction.dismiss_layer = Some(select_layer_id(&handlers.instance_scope));
                 panel = panel.child(header);
             }
 
@@ -517,13 +719,28 @@ fn build_panel(
                     s.descriptor.layout.spacing.gap = item_gap;
                     s.descriptor.layout.spacing.padding.left = pad_x;
                     s.descriptor.layout.spacing.padding.right = pad_x;
+                    s.flex_shrink_zero = true;
+                    s.fill_width = true;
                     s.descriptor.cursor = CursorHint::Pointer;
                     if is_highlighted {
                         s.descriptor.background = Some(highlight_fill);
+                    } else if !opt.is_disabled {
+                        s.hover = Some(StylePatch {
+                            background: Some(highlight_fill),
+                            border_color: None,
+                            text_color: None,
+                            opacity: None,
+                        });
                     }
                 }
-                row.interaction.focusable = true;
-                row.runtime_id = Some(select_option_id(&handlers.instance_scope, &opt.value));
+                stamp_identity(
+                    &mut row,
+                    select_option_id(&handlers.instance_scope, &opt.value),
+                );
+                // Pointer targets, not sequential or programmatic tab stops.
+                // Making them focusable steals trigger/editor focus on press
+                // and the open-state blur handler closes before commit.
+                row.interaction.dismiss_layer = Some(select_layer_id(&handlers.instance_scope));
                 row.a11y.role = Some(NodeRole::ListBoxOption);
                 row.a11y.label = Some(opt.label.clone());
                 row.a11y.selected = Some(is_selected);
@@ -576,7 +793,7 @@ fn build_panel(
                     let spec = spec.clone();
                     let handlers = handlers.clone();
                     let value = opt.value.clone();
-                    row.interaction.on_activate = Some(Arc::new(move || {
+                    let commit: Arc<dyn Fn() + Send + Sync> = Arc::new(move || {
                         emit_select(
                             &spec,
                             &handlers,
@@ -584,7 +801,8 @@ fn build_panel(
                                 value: value.clone(),
                             },
                         );
-                    }));
+                    });
+                    row.interaction.on_activate = Some(commit);
                 }
 
                 panel = panel.child(row);
@@ -593,6 +811,204 @@ fn build_panel(
     }
 
     panel
+}
+
+#[expect(
+    clippy::too_many_arguments,
+    reason = "search row keeps compact-editor metrics explicit"
+)]
+fn build_search_row(
+    spec: &SelectSpec,
+    ctx: &RenderContext<'_>,
+    text_primary: ColorValue,
+    text_placeholder: ColorValue,
+    font_size: f32,
+    icon_size: f32,
+    pad_x: f32,
+    row_height: f32,
+    item_gap: f32,
+    icon_muted: ColorValue,
+    handlers: &SelectHandlers,
+) -> Node {
+    let query = spec.search_query.clone().unwrap_or_default();
+    let showing_placeholder = query.is_empty();
+    let display = if showing_placeholder {
+        "Search…".to_string()
+    } else {
+        query.clone()
+    };
+    let (selection_start, selection_end) = spec.search_selection();
+    let search_id = select_search_focus_id(&handlers.instance_scope);
+    let value_id = format!("{search_id}-value");
+    let selection_fill = ctx.theme().resolve_color("color.accent.base");
+
+    let mut search_row = Node::container();
+    {
+        let s = &mut search_row.style;
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+        s.descriptor.layout.spacing.gap = item_gap;
+        s.descriptor.layout.spacing.padding.left = pad_x;
+        s.descriptor.layout.spacing.padding.right = pad_x;
+        s.descriptor.layout.height = LayoutSizing::Fixed(row_height);
+        s.descriptor.cursor = CursorHint::Text;
+        s.fill_width = true;
+        s.flex_shrink_zero = true;
+    }
+    stamp_identity(&mut search_row, search_id.clone());
+    search_row.interaction.dismiss_layer = Some(select_layer_id(&handlers.instance_scope));
+
+    let mut glass = Node::icon("search", icon_size);
+    glass.style.descriptor.text_color = Some(icon_muted);
+    search_row = search_row.child(glass);
+
+    let mut value = Node::text(display);
+    value.id = Some(value_id);
+    {
+        let s = &mut value.style;
+        s.descriptor.text_color = Some(if showing_placeholder {
+            text_placeholder
+        } else {
+            text_primary
+        });
+        s.text_size = Some(font_size);
+        s.descriptor.layout.width = LayoutSizing::Grow;
+        s.text_ellipsis = true;
+        s.no_wrap = true;
+        s.min_width = Some(0.0);
+    }
+
+    if !spec.is_disabled {
+        value = value.with_caret(
+            (selection_start, selection_end),
+            text_primary,
+            with_alpha(selection_fill, selection_fill.3 * 0.30),
+        );
+        if let Some(caret) = &mut value.caret {
+            caret.showing_placeholder = showing_placeholder;
+        }
+        search_row.caret = value.caret;
+    }
+    search_row = search_row.child(value);
+
+    if spec.is_disabled {
+        search_row.interaction.disabled = true;
+        return search_row;
+    }
+
+    search_row.interaction.focusable = true;
+    search_row.style.focus_ring = Some(standard_focus_ring(ctx));
+    wire_open_keys(&mut search_row, spec, handlers, false);
+
+    if handlers.on_transition.is_some() {
+        let current = query.clone();
+        let selection = (selection_start, selection_end);
+        let spec_select = spec.clone();
+        let handlers_select = handlers.clone();
+        let select_handler: Arc<
+            dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync,
+        > = Arc::new(move |start, end, granularity| {
+            let (start, end) = match granularity {
+                poodle_node::SelectGranularity::Character => (start, end),
+                poodle_node::SelectGranularity::Word => {
+                    let (a, _) = poodle_headless::text_input::word_range_at(&current, start);
+                    let (_, b) = poodle_headless::text_input::word_range_at(&current, end);
+                    (a, b)
+                }
+                poodle_node::SelectGranularity::Line => (0, current.chars().count()),
+            };
+            if (start, end) != selection {
+                emit_search_selection(&spec_select, &handlers_select, (start, end));
+            }
+        });
+        if let Some(value) = search_row.children.last_mut() {
+            value.interaction.on_select_range = Some(Arc::clone(&select_handler));
+        }
+        search_row.interaction.on_select_range = Some(select_handler);
+
+        let spec_edit = spec.clone();
+        let handlers_edit = handlers.clone();
+        let current = query.clone();
+        search_row.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
+            if matches!(key, "up" | "down" | "home" | "end") {
+                return;
+            }
+            let Some(outcome) = poodle_headless::text_input::edit_transition(
+                &current,
+                poodle_headless::text_input::EditState {
+                    anchor: selection_start,
+                    head: selection_end,
+                },
+                key,
+                mods.shift,
+                mods.accel,
+                None,
+            ) else {
+                return;
+            };
+            report_search_edit(&spec_edit, &handlers_edit, &current, selection, outcome);
+        }));
+        let spec_insert = spec.clone();
+        let handlers_insert = handlers.clone();
+        let current = query.clone();
+        search_row.interaction.on_edit_insert = Some(Arc::new(move |inserted: &str| {
+            let outcome = poodle_headless::text_input::insert_transition(
+                &current,
+                poodle_headless::text_input::EditState {
+                    anchor: selection_start,
+                    head: selection_end,
+                },
+                inserted,
+                None,
+            );
+            report_search_edit(&spec_insert, &handlers_insert, &current, selection, outcome);
+        }));
+        let spec_replace = spec.clone();
+        let handlers_replace = handlers.clone();
+        search_row.interaction.on_text_change = Some(Arc::new(move |next: &str| {
+            let len = next.chars().count();
+            emit_select_with_selection(
+                &spec_replace,
+                &handlers_replace,
+                SelectEvent::Query {
+                    query: next.to_string(),
+                },
+                Some((len, len)),
+            );
+        }));
+    }
+
+    search_row
+}
+
+fn estimated_panel_content_height(
+    spec: &SelectSpec,
+    filtered: &[&poodle_specs::ChoiceOption],
+    panel_py: f32,
+    row_height: f32,
+    header_py: f32,
+    header_font: f32,
+    font_size: f32,
+) -> f32 {
+    let mut height = panel_py * 2.0;
+    if spec.shows_search_input() {
+        height += row_height;
+    }
+    if filtered.is_empty() {
+        return height + rem_to_px(0.5) * 2.0 + font_size;
+    }
+    let mut seen_groups: Vec<Option<&str>> = Vec::new();
+    for option in filtered {
+        let key = option.group.as_deref();
+        if !seen_groups.contains(&key) {
+            seen_groups.push(key);
+            if key.is_some() {
+                height += header_py * 2.0 + header_font;
+            }
+        }
+        height += row_height;
+    }
+    height
 }
 
 /// Parse a CSS length ("12rem", "200px") to logical pixels; 0.0 on failure.
@@ -688,7 +1104,31 @@ mod tests {
             NodePosition::Absolute { top: Some(t), left: Some(0.0), .. } if t > 0.0
         ));
         assert_eq!(panel.a11y.role, Some(NodeRole::ListBox));
+        assert_eq!(
+            panel.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Visible,
+            "short menus stay content-sized"
+        );
         assert!(matches!(node.position, NodePosition::Relative));
+    }
+
+    #[test]
+    fn a_long_open_panel_declares_scroll_overflow() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let options = (0..20)
+            .map(|index| ChoiceOption::new(format!("o{index}"), format!("Option {index}")))
+            .collect();
+        let spec = SelectSpec::new(options).with_open(true);
+        let node = select(&spec, &ctx, &SelectHandlers::new("long"));
+        let panel = node
+            .find(&|n| n.style.overlay)
+            .expect("an overlay panel exists");
+        assert_eq!(
+            panel.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Scroll
+        );
+        assert!(panel.style.max_height.is_some());
     }
 
     #[test]
@@ -820,6 +1260,324 @@ mod tests {
         let node = select(&spec, &ctx, &SelectHandlers::new("ff"));
         assert!(!node.has_text("Search…"));
         assert!(!spec.shows_search_input());
+    }
+
+    fn select_with_sink(
+        spec: SelectSpec,
+        scope: &str,
+    ) -> (
+        Node,
+        Arc<std::sync::Mutex<Vec<(SelectContext, Vec<SelectEffect>, Option<(usize, usize)>)>>>,
+    ) {
+        let seen: Arc<
+            std::sync::Mutex<Vec<(SelectContext, Vec<SelectEffect>, Option<(usize, usize)>)>>,
+        > = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let handlers = SelectHandlers::new(scope).on_transition(Arc::new(move |result| {
+            sink.lock()
+                .unwrap()
+                .push((result.context, result.effects, result.search_selection));
+        }));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        (select(&spec, &ctx, &handlers), seen)
+    }
+
+    #[test]
+    fn searchable_open_search_row_is_a_real_editor() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_search_query("ba")
+            .with_open(true);
+        let (node, _) = select_with_sink(spec, "search-edit");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:search-edit:search"))
+            .expect("search editor");
+        assert!(search.interaction.focusable);
+        assert!(search.interaction.on_edit_key.is_some());
+        assert!(search.interaction.on_edit_insert.is_some());
+        assert!(search.interaction.on_submit.is_some());
+        assert!(search.interaction.on_cancel.is_some());
+        assert!(search.interaction.on_focus_change.is_some());
+        assert!(search.caret.is_some());
+        assert_eq!(search.id.as_deref(), Some("select:search-edit:search"));
+        assert!(search.style.focus_ring.is_some());
+        let trigger = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:search-edit:trigger"))
+            .expect("trigger");
+        assert!(
+            !trigger.interaction.focusable,
+            "searchable focus stays on the editor"
+        );
+        let option = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:search-edit:option:banana"))
+            .expect("option");
+        assert!(
+            !option.interaction.focusable,
+            "option rows are pointer targets, not independent tab stops"
+        );
+        assert!(option.a11y.tab_index.is_none());
+        assert!(option.interaction.on_activate.is_some());
+    }
+
+    #[test]
+    fn search_edit_reports_query_not_value() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_search_query("b")
+            .with_open(true);
+        let (node, seen) = select_with_sink(spec, "query");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:query:search"))
+            .expect("search editor");
+        search.interaction.on_edit_key.as_ref().expect("edit")(
+            "a",
+            poodle_node::NodeModifiers::default(),
+        );
+        let captured = seen.lock().unwrap();
+        assert_eq!(captured.len(), 1);
+        assert_eq!(captured[0].0.query, "ba");
+        assert_eq!(captured[0].0.value, "");
+        assert!(captured[0]
+            .1
+            .iter()
+            .any(|effect| matches!(effect, SelectEffect::QueryChanged { query } if query == "ba")));
+        assert!(captured[0]
+            .1
+            .iter()
+            .all(|effect| !matches!(effect, SelectEffect::ValueChanged { .. })));
+    }
+
+    #[test]
+    fn search_enter_commits_highlighted_and_escape_closes() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_open(true)
+            .with_highlighted_value("banana");
+        let (node, seen) = select_with_sink(spec, "commit");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:commit:search"))
+            .expect("search editor");
+        (search.interaction.on_submit.as_ref().expect("submit"))();
+        {
+            let captured = seen.lock().unwrap();
+            assert_eq!(captured[0].0.value, "banana");
+            assert!(!captured[0].0.open);
+        }
+        seen.lock().unwrap().clear();
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_open(true)
+            .with_value("apple");
+        let (node, seen) = select_with_sink(spec, "esc");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:esc:search"))
+            .expect("search editor");
+        (search.interaction.on_cancel.as_ref().expect("cancel"))();
+        let captured = seen.lock().unwrap();
+        assert!(!captured[0].0.open);
+        assert_eq!(captured[0].0.value, "apple");
+    }
+
+    #[test]
+    fn trigger_arrows_open_without_a_double_move() {
+        let spec = SelectSpec::new(fruit_options());
+        let (node, seen) = select_with_sink(spec, "arrows");
+        (node.interaction.on_key.as_ref().expect("keys"))(
+            NodeKey::ArrowDown,
+            poodle_node::NodeModifiers::default(),
+        );
+        let captured = seen.lock().unwrap();
+        assert!(captured[0].0.open);
+        assert_eq!(captured[0].0.highlighted_value.as_deref(), Some("apple"));
+    }
+
+    #[test]
+    fn open_non_searchable_keeps_focus_on_the_trigger() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_open(true)
+            .with_highlighted_value("apple");
+        let (node, seen) = select_with_sink(spec, "nav");
+        let trigger = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:nav:trigger"))
+            .expect("trigger");
+        assert!(trigger.interaction.focusable);
+        assert!(trigger.style.focus_ring.is_some());
+        (trigger.interaction.on_key.as_ref().expect("keys"))(
+            NodeKey::ArrowDown,
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(
+            seen.lock().unwrap()[0].0.highlighted_value.as_deref(),
+            Some("banana")
+        );
+    }
+
+    #[test]
+    fn trigger_and_panel_share_one_dismiss_layer() {
+        let spec = SelectSpec::new(fruit_options()).with_open(true);
+        let (node, seen) = select_with_sink(spec, "layer");
+        let trigger = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:layer:trigger"))
+            .expect("trigger");
+        let panel = node
+            .find(&|n| n.a11y.role == Some(NodeRole::ListBox))
+            .expect("panel");
+        assert_eq!(
+            trigger.interaction.dismiss_layer.as_deref(),
+            Some("select:layer:layer")
+        );
+        assert_eq!(
+            panel.interaction.dismiss_layer.as_deref(),
+            trigger.interaction.dismiss_layer.as_deref()
+        );
+        (trigger.interaction.on_dismiss.as_ref().expect("dismiss"))(DismissReason::Escape);
+        assert!(!seen.lock().unwrap()[0].0.open);
+    }
+
+    #[test]
+    fn control_blur_commits_freeform_only_when_allowed() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_freeform(true)
+            .with_search_query("mango")
+            .with_open(true);
+        let (node, seen) = select_with_sink(spec, "blur");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:blur:search"))
+            .expect("search editor");
+        (search.interaction.on_focus_change.as_ref().expect("blur"))(false);
+        let captured = seen.lock().unwrap();
+        assert_eq!(captured.len(), 1, "blur emits one transition result");
+        assert_eq!(captured[0].0.value, "mango");
+        assert!(!captured[0].0.open);
+        assert_eq!(captured[0].0.query, "mango");
+    }
+
+    #[test]
+    fn search_edit_keeps_host_authored_selection_and_inserts_in_the_middle() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_search_query("ban")
+            .with_search_selection(1, 1)
+            .with_open(true);
+        let (node, seen) = select_with_sink(spec, "caret");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:caret:search"))
+            .expect("search editor");
+        assert_eq!(
+            search.caret.map(|caret| caret.selection),
+            Some((1, 1)),
+            "search caret is host-authored, not forced to the end"
+        );
+        search.interaction.on_edit_key.as_ref().expect("edit")(
+            "x",
+            poodle_node::NodeModifiers::default(),
+        );
+        let captured = seen.lock().unwrap();
+        assert_eq!(captured.len(), 1);
+        assert_eq!(captured[0].0.query, "bxan");
+        assert_eq!(captured[0].2, Some((2, 2)));
+    }
+
+    #[test]
+    fn search_shift_arrow_keeps_a_backward_selection_after_rebuild() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_search_query("ban")
+            .with_search_selection(3, 1)
+            .with_open(true);
+        let (node, seen) = select_with_sink(spec, "back-sel");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:back-sel:search"))
+            .expect("search editor");
+        assert_eq!(
+            search.caret.map(|caret| caret.selection),
+            Some((3, 1)),
+            "host-authored backward selection is not normalized for edit"
+        );
+        search.interaction.on_edit_key.as_ref().expect("edit")(
+            "left",
+            poodle_node::NodeModifiers {
+                shift: true,
+                ..poodle_node::NodeModifiers::default()
+            },
+        );
+        let captured = seen.lock().unwrap();
+        assert_eq!(captured.len(), 1);
+        assert_eq!(captured[0].0.query, "ban");
+        assert_eq!(
+            captured[0].2,
+            Some((3, 0)),
+            "Shift+Arrow moves the head, not a swapped anchor"
+        );
+    }
+
+    #[test]
+    fn search_home_and_end_highlight_first_and_last_options() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_open(true)
+            .with_highlighted_value("banana");
+        let (node, seen) = select_with_sink(spec, "jump");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:jump:search"))
+            .expect("search editor");
+        (search.interaction.on_key.as_ref().expect("keys"))(
+            NodeKey::End,
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(
+            seen.lock().unwrap()[0].0.highlighted_value.as_deref(),
+            Some("cherry")
+        );
+        seen.lock().unwrap().clear();
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_open(true)
+            .with_highlighted_value("banana");
+        let (node, seen) = select_with_sink(spec, "jump-home");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:jump-home:search"))
+            .expect("search editor");
+        (search.interaction.on_key.as_ref().expect("keys"))(
+            NodeKey::Home,
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(
+            seen.lock().unwrap()[0].0.highlighted_value.as_deref(),
+            Some("apple")
+        );
+    }
+
+    #[test]
+    fn disabled_search_and_options_are_inert() {
+        let mut spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_open(true);
+        spec.is_disabled = true;
+        let handlers = SelectHandlers::new("dead").on_transition(Arc::new(|_| {}));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = select(&spec, &ctx, &handlers);
+        assert!(node.interaction.on_activate.is_none());
+        let search = node.find(&|n| n.runtime_id.as_deref() == Some("select:dead:search"));
+        if let Some(search) = search {
+            assert!(search.interaction.on_edit_key.is_none());
+            assert!(search.interaction.disabled);
+        }
+        let spec = SelectSpec::new(vec![ChoiceOption::new("apple", "Apple"), {
+            let mut banana = ChoiceOption::new("banana", "Banana");
+            banana.is_disabled = true;
+            banana
+        }])
+        .with_open(true);
+        let (node, _) = select_with_sink(spec, "opt");
+        let banana = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:opt:option:banana"))
+            .expect("disabled option");
+        assert!(banana.interaction.disabled);
+        assert!(banana.interaction.on_activate.is_none());
     }
 
     #[test]

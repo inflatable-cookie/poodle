@@ -47,7 +47,9 @@ behavior repairs without inventing another conformance authority.
   45 mounted / 129 missing. `g16.017` closed Rating's approved nullable /
   fractional Rust migration and one mounted GPUI cell; ledger 46 mounted /
   128 missing. `g16.018` converged Select's semantic machine and interfaces
-  without moving the ledger. Known-delta totals stay 115 / 60. No broader
+  without moving the ledger. `g16.019` closed native Select search, overlay
+  pointer targeting, and one mounted GPUI cell; ledger 47 mounted /
+  127 missing. Known-delta totals stay 115 / 60. No broader
   conformance programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
@@ -105,10 +107,9 @@ behavior repairs without inventing another conformance authority.
   `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
   `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
   `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
-  `019` is changes-requested on PR #94 at the current 46 mounted /
-  128 missing main baseline; `020` is a ready independent component
-  continuation audit. Dependable drag-and-drop is promoted separately through
-  architecture 011/spec 069.
+  `019` complete, PR pending, ledger 47 mounted / 127 missing; `020` is a
+  ready independent component continuation audit. Dependable drag-and-drop
+  is promoted separately through architecture 011/spec 069.
 
 ## Rules
 

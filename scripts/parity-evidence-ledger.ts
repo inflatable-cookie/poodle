@@ -99,6 +99,7 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   ModelConnectionCard: "model_connection_card_closes_and_returns_real_focus_to_the_disclosure",
   ModelCatalogueEditor: "model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window",
   Radio: "radio_selects_on_activate_and_does_not_uncheck_itself",
+  Select: "select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds",
   UpdateStatus: "update_status_confirm_then_install_through_the_real_tree",
   UpdateCenter: "update_center_hidden_presence_mounts_nothing_and_open_shows_status",
   SettingsShell: "settings_shell_navigates_and_refused_close_stays_open",

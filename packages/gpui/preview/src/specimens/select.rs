@@ -23,32 +23,69 @@ use poodle_adapter::ThemeProvider;
 use crate::specimens::specimen_axes::{density_key, size_key};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::{select, RenderContext, SelectEffect, SelectHandlers};
+use poodle_render::{
+    select, select_search_focus_id, select_trigger_focus_id, RenderContext, SelectHandlers,
+};
 use poodle_specs::{ChoiceOption, EyebrowSpec, SelectMode, SelectSpec};
 
 /// Build a node-tier Select with the specimen's transition wiring.
-/// Open changes flip `{id}-open`; value changes record `{id}-value`.
-fn node_select(id: &'static str, spec: SelectSpec, state: &AppState) -> AnyElement {
+/// The host applies the complete next context, then requests editor/trigger
+/// focus. Highlight events emit no effects, so effects-only wiring is not
+/// enough.
+fn node_select(id: &'static str, mut spec: SelectSpec, state: &AppState) -> AnyElement {
+    if let Some(query) = state.specimens.text.get(&format!("{id}-query")) {
+        spec.search_query = Some(query.clone());
+    }
+    spec.highlighted_value = state
+        .specimens
+        .text
+        .get(&format!("{id}-highlight"))
+        .cloned();
     let events = state.node_events.clone();
     let open_key = format!("{id}-open");
     let value_key = format!("{id}-value");
+    let query_key = format!("{id}-query");
+    let highlight_key = format!("{id}-highlight");
+    let trigger_id = select_trigger_focus_id(id);
+    let search_id = select_search_focus_id(id);
+    let searchable = spec.searchable;
+    let (search_anchor, search_head) = state
+        .specimens
+        .carets
+        .get(&format!("{id}-query"))
+        .copied()
+        .unwrap_or((spec.search_selection_start, spec.search_selection_end));
+    spec = spec.with_search_selection(search_anchor, search_head);
     let handlers = SelectHandlers::new(id).on_transition(Arc::new(move |result| {
-        for effect in &result.effects {
-            match effect {
-                SelectEffect::OpenChanged { open } => {
-                    events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
-                        key: open_key.clone(),
-                        value: *open,
-                    });
-                }
-                SelectEffect::ValueChanged { value } => {
-                    events.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                        key: value_key.clone(),
-                        value: value.clone(),
-                    });
-                }
-                SelectEffect::QueryChanged { .. } => {}
-            }
+        let mut queue = events.lock().unwrap();
+        queue.push(NodeSpecimenEvent::SetToggle {
+            key: open_key.clone(),
+            value: result.context.open,
+        });
+        queue.push(NodeSpecimenEvent::SetText {
+            key: value_key.clone(),
+            value: result.context.value.clone(),
+        });
+        queue.push(NodeSpecimenEvent::SetText {
+            key: query_key.clone(),
+            value: result.context.query.clone(),
+        });
+        queue.push(NodeSpecimenEvent::SetOptionalText {
+            key: highlight_key.clone(),
+            value: result.context.highlighted_value.clone(),
+        });
+        if let Some((start, end)) = result.search_selection {
+            queue.push(NodeSpecimenEvent::SetCaret {
+                key: query_key.clone(),
+                start,
+                end,
+            });
+        }
+        drop(queue);
+        if result.context.open && searchable {
+            poodle_gpui_node_backend::request_focus(&search_id);
+        } else {
+            poodle_gpui_node_backend::request_focus(&trigger_id);
         }
     }));
     let node = select(&spec, &RenderContext::new(&state.theme), &handlers);
@@ -209,9 +246,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         search = search.with_value(v.as_str());
                     }
                     let freeform_value = get_value("select-freeform-value");
+                    let freeform_query = get_value("select-freeform-query");
+                    let freeform_open = get_open("select-freeform-open");
                     let mut freeform = SelectSpec::new(framework_options.clone())
                         .with_placeholder("Type or select...")
-                        .with_open(get_open("select-freeform-open"));
+                        .with_open(freeform_open);
                     freeform.searchable = true;
                     freeform.freeform = true;
                     if let Some(ref v) = freeform_value {
@@ -246,17 +285,17 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 .flex_col()
                                 .gap(px(6.0))
                                 .child(node_select("select-freeform", freeform, state))
-                                .when(freeform_value.is_some(), |d| {
-                                    d.child(
-                                        div()
-                                            .text_sm()
-                                            .text_color(color_to_hsla(text_secondary))
-                                            .child(format!(
-                                                "Value: {}",
-                                                freeform_value.as_deref().unwrap_or("")
-                                            )),
-                                    )
-                                }),
+                                .child(
+                                    div()
+                                        .text_sm()
+                                        .text_color(color_to_hsla(text_secondary))
+                                        .child(format!(
+                                            "value: {} · query: {} · open: {}",
+                                            freeform_value.as_deref().unwrap_or("—"),
+                                            freeform_query.as_deref().unwrap_or("—"),
+                                            freeform_open
+                                        )),
+                                ),
                         )
                 }),
         )
