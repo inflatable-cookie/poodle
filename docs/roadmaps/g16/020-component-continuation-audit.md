@@ -250,7 +250,13 @@ The audit output is `component-continuation-register.md`; the evidence and
 method log is `../../logs/2026-08/20260828-g16-020-component-continuation-audit.md`.
 The register proves 175 Svelte exports, 174 portable native components, one
 MeterSurface native exclusion, and 175 unique ledger rows. It records merged
-PR #94 and the current 47 / 127 mounted total.
+PR #94 and the current 47 / 127 mounted total. Its class totals are 93
+closed, 69 evidence-only, 0 known repair, 3 decision-blocked, 7
+programme-owned, and 3 unknown; the candidate map has seven lanes and the
+no-current implementation lane holds 162 rows.
+
+The post-rebase historical indexes are 219 pre-audit August logs, excluding
+this audit log by the recorded boundary command, and 18 triage files.
 
 The branch was rebased onto current origin/main at `018943050`. The handoff's
 literal base SHA is invalid; short `69118d831` resolves to
