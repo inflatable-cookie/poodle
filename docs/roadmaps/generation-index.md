@@ -12,8 +12,7 @@ Updated: 2026-08-28
     `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
     `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
     `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
-    `019` merged in PR #94; `020` merged in PR #95; `021` complete in PR #96,
-    awaiting review;
+    `019` merged in PR #94; `020` merged in PR #95; `021` merged in PR #96;
     `022`–`028` planned behind ordered drag-and-drop dependencies; `029`
     compiled as the serial TimeInput continuation after `021`; `030` compiled
     as the approved NumberInput continuation after `029`; `031`–`032` compile
@@ -21,8 +20,7 @@ Updated: 2026-08-28
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: review and merge PR #96, the `g16.021` semantic kernel, then dispatch
-    `g16.029` from the landed base; `g16.030` follows only after TimeInput
+  - Next move: dispatch `g16.029`; `g16.030` follows only after TimeInput
     closes, then `g16.031`–`032` close the audited Fader/Knob/XYPad lane. Keep
     `032` away from drag card `025` because both edit Node/GPUI interaction
     routing. The legacy public drag-export migration is approved; later cards

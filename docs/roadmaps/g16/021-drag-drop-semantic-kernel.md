@@ -1,6 +1,6 @@
 # g16.021 — Drag-And-Drop Semantic Kernel
 
-Status: complete — PR #96 open for orchestrator review; not yet authorised to merge
+Status: complete — merged in PR #96
 Opened: 2026-08-28
 Depends on: merged `g16.020`; architecture 011 and spec 069 approved
 Governing refs: `../../architecture/011-drag-and-drop-substrate.md`,
@@ -223,9 +223,7 @@ card's.
 
 ## Continuation
 
-Return the exact paired API names, shared vector cases, focused and broad
-validation, unchanged ledger totals, and execution log to the orchestrator. Do
-not start `g16.022`. After the operator authorises the merge, the current
-runway dispatches `g16.029`; `g16.022` remains the next drag-programme card and
-is promoted when the orchestrator chooses it after the serial core/export
-tranche.
+The paired API names, shared vectors, validation, unchanged ledger totals, and
+execution log are recorded above. The current runway dispatches `g16.029`;
+`g16.022` remains the next drag-programme card and is promoted after the serial
+core/export tranche.

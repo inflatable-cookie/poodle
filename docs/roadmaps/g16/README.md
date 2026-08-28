@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.021 complete and under review; g16.029–032 compiled behind it
+Status: active — g16.021 merged; g16.029 next, with g16.030–032 behind it
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -51,7 +51,7 @@ stay maintained; backend admission is not part of the first card.
 18. [018 — Select semantic machine and interface convergence](018-select-semantic-machine-and-interface-convergence.md) — complete; merged in PR #93
 19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — complete; merged in PR #94
 20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
-21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — complete; PR #96 open for review
+21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — complete; merged in PR #96
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — planned; depends on 021
 23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — planned; clean public migration approved, depends on 022
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — planned; depends on 023
@@ -59,7 +59,7 @@ stay maintained; backend admission is not part of the first card.
 26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
-29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — planned; decision approved, dispatch after 021 merges
+29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — planned; decision approved, next dispatch
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — planned; decision approved, depends on 029
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — planned; bounded audit complete, depends on 030
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — planned; depends on 031 and must not overlap 025
