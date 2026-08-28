@@ -25,6 +25,10 @@
     opacity: var(--poodle-state-opacity-disabled);
   }
 
+  .poodle-time-input[aria-invalid="true"] {
+    border-color: var(--poodle-recipe-time-input-invalid-border, var(--poodle-color-status-danger));
+  }
+
   /* Size variants */
   .poodle-time-input[data-size="xs"] { --poodle-time-input-control-height: 1.5rem; font-size: 0.75rem; }
   .poodle-time-input[data-size="sm"] { --poodle-time-input-control-height: 1.75rem; font-size: 0.8125rem; }

@@ -56,4 +56,56 @@ describe("TimeInput (svelte)", () => {
     expect(input.dataset.size).toBe("lg");
     expect(input.dataset.density).toBe("compact");
   });
+
+  it("does not emit off-step or out-of-range native values and marks them invalid", async () => {
+    const onValueChange = vi.fn();
+    const { container } = render(TimeInput, {
+      props: { defaultValue: "09:00", step: 300, min: "08:00", max: "18:00", onValueChange },
+    });
+    const input = container.querySelector("input") as HTMLInputElement;
+
+    await fireEvent.input(input, { target: { value: "09:07" } });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(input.getAttribute("aria-invalid")).toBe("true");
+    expect(input.value).toBe("09:07");
+  });
+
+  it("reverts an invalid draft on blur and Escape without emitting", async () => {
+    const onValueChange = vi.fn();
+    const { container } = render(TimeInput, {
+      props: { defaultValue: "09:00", step: 300, min: "08:00", max: "18:00", onValueChange },
+    });
+    const input = container.querySelector("input") as HTMLInputElement;
+
+    await fireEvent.input(input, { target: { value: "09:07" } });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(input.getAttribute("aria-invalid")).toBe("true");
+
+    await fireEvent.blur(input);
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(input.value).toBe("09:00");
+    expect(input.hasAttribute("aria-invalid")).toBe(false);
+
+    await fireEvent.input(input, { target: { value: "09:07" } });
+    await fireEvent.keyDown(input, { key: "Escape" });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(input.value).toBe("09:00");
+  });
+
+  it("discards an invalid draft when the controlled value is replaced", async () => {
+    const onValueChange = vi.fn();
+    const { container, rerender } = render(TimeInput, {
+      props: { value: "09:00", step: 300, onValueChange },
+    });
+    const input = container.querySelector("input") as HTMLInputElement;
+
+    await fireEvent.input(input, { target: { value: "09:07" } });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(input.getAttribute("aria-invalid")).toBe("true");
+
+    await rerender({ value: "11:00", step: 300, onValueChange });
+    expect(input.value).toBe("11:00");
+    expect(input.hasAttribute("aria-invalid")).toBe(false);
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
 });

@@ -1,5 +1,12 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/time-input.css";
+  import {
+    timeInputContext,
+    timeInputInvalid,
+    timeInputTransition,
+    type TimeInputDraft,
+  } from "@inflatable-cookie/poodle-core";
+
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -39,6 +46,9 @@
 
   let uncontrolledValue = $state<string | null>(null);
   let seededDefaultValue = $state(false);
+  let localDraft = $state<TimeInputDraft | null>(null);
+  let nativeDraftText = $state<string | null>(null);
+  let lastControlledValue = $state<string | null | undefined>(undefined);
 
   $effect.pre(() => {
     if (!seededDefaultValue) {
@@ -47,21 +57,77 @@
     }
   });
 
+  $effect(() => {
+    if (value === undefined || value === lastControlledValue) {
+      return;
+    }
+
+    lastControlledValue = value;
+    localDraft = null;
+    nativeDraftText = null;
+  });
+
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const isControlled = $derived(value !== undefined);
-  const currentValue = $derived((isControlled ? value : uncontrolledValue) ?? "");
+  const committed = $derived((isControlled ? value : uncontrolledValue) ?? null);
+  const machineContext = $derived(
+    timeInputContext({
+      committed,
+      defaultValue,
+      draft: localDraft,
+      min,
+      max,
+      step,
+      disabled,
+    }),
+  );
+  const displayValue = $derived(nativeDraftText ?? committed ?? "");
+  const invalid = $derived(timeInputInvalid(machineContext));
 
-  function handleInput(event: Event): void {
-    const nextValue = (event.currentTarget as HTMLInputElement).value || null;
-
+  function commitEmitted(next: string | null): void {
     if (!isControlled) {
-      uncontrolledValue = nextValue;
+      uncontrolledValue = next;
     } else {
-      value = nextValue;
+      value = next;
+      lastControlledValue = next;
     }
 
-    onValueChange?.(nextValue);
+    onValueChange?.(next);
+  }
+
+  function handleInput(event: Event): void {
+    const text = (event.currentTarget as HTMLInputElement).value;
+    const result = timeInputTransition(machineContext, { type: "COMMIT_TEXT", text });
+    localDraft = result.context.draft;
+    nativeDraftText = result.context.draft === null ? null : text;
+
+    for (const effect of result.effects) {
+      commitEmitted(effect.value);
+    }
+  }
+
+  function revertDraft(type: "BLUR" | "ESCAPE"): void {
+    if (localDraft === null) {
+      return;
+    }
+
+    const result = timeInputTransition(machineContext, { type });
+    localDraft = result.context.draft;
+    nativeDraftText = null;
+  }
+
+  function handleBlur(): void {
+    revertDraft("BLUR");
+  }
+
+  function handleKeydown(event: KeyboardEvent): void {
+    if (event.key !== "Escape") {
+      return;
+    }
+
+    event.preventDefault();
+    revertDraft("ESCAPE");
   }
 </script>
 
@@ -71,13 +137,16 @@
   data-size={resolvedSize}
   data-density={resolvedDensity}
   type="time"
-  value={currentValue}
+  value={displayValue}
   {min}
   {max}
   {step}
   disabled={disabled}
+  aria-invalid={invalid ? "true" : undefined}
   aria-label={ariaLabel ?? undefined}
   aria-describedby={describedBy ?? undefined}
   oninput={handleInput}
+  onblur={handleBlur}
+  onkeydown={handleKeydown}
 />
 
