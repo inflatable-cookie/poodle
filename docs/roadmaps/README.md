@@ -54,13 +54,19 @@ behavior repairs without inventing another conformance authority.
   continuation register separates 93 closed, 69 evidence-only, 3
   decision-blocked, 7 programme-owned, and 3 unknown components, with no known
   repair at audit closeout. Architecture 011/spec 069 are now compiled as
-  `g16.021`–`g16.028`; the paired semantic kernel in `021` is dispatched.
+  `g16.021`–`g16.028`; the paired semantic kernel in `021` is in review.
   TimeInput's native editing decision is approved and compiled separately as
   `g16.029`, held serially behind `021` because their shared export/vector
   surfaces overlap. NumberInput's committed-number/raw-draft and clean callback
   decision is approved as `g16.030`, serial behind `029` for the same reason.
   Its promoted contract documents the runtime deltas, moving only that ledger
   axis to 116 present / 59 not-applicable; mounted totals stay 47 / 127.
+  A bounded Fader/Knob/XYPad audit then found real paired-machine, web gesture
+  lifetime, native mounting, and accessibility-projection defects. `g16.031`
+  closes paired semantics and Svelte/React lifecycle after `030`; `g16.032`
+  mounts the three controls through one bounded continuous-value Node event and
+  must not overlap drag card `025`. This work remains separate from payload
+  drag-and-drop.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other
@@ -123,9 +129,10 @@ behavior repairs without inventing another conformance authority.
   `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
   `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
   `019` complete, merged in PR #94, ledger 47 mounted / 127 missing; `020`
-  complete, merged in PR #95. Dependable drag-and-drop remains a separate
-  programme governed by architecture 011/spec 069 and compiled as `021`–`028`;
-  `021` is ready.
+  complete, merged in PR #95. `029`–`032` are compiled component-continuation
+  cards behind the active `021` dependency. Dependable drag-and-drop remains a
+  separate programme governed by architecture 011/spec 069 and compiled as
+  `021`–`028`; `021` is in review.
 
 ## Rules
 

@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.021 dispatched; g16.029–030 compiled behind it
+Status: active — g16.021 in review; g16.029–032 compiled behind it
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -51,7 +51,7 @@ stay maintained; backend admission is not part of the first card.
 18. [018 — Select semantic machine and interface convergence](018-select-semantic-machine-and-interface-convergence.md) — complete; merged in PR #93
 19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — complete; merged in PR #94
 20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
-21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — dispatched
+21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — in review
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — planned; depends on 021
 23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — planned; clean public migration approved, depends on 022
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — planned; depends on 023
@@ -61,6 +61,8 @@ stay maintained; backend admission is not part of the first card.
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — planned; decision approved, dispatch after 021 merges
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — planned; decision approved, depends on 029
+31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — planned; bounded audit complete, depends on 030
+32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — planned; depends on 031 and must not overlap 025
 
 ## Parallel Continuation
 
@@ -70,8 +72,10 @@ Two continuation programmes are now explicit:
   and returns seven bounded candidate lanes without mutating components or the
   ledger. Its [runway map](component-continuation-runway.md) separates decision,
   audit, programme, and no-current-work gates. The register contains 93 closed,
-  69 evidence-only, 3 decision-blocked, 7 programme-owned, and 3 unknown rows;
-  no known repair was ready at audit closeout.
+  69 evidence-only, 3 decision-blocked, 7 programme-owned, and 3 unknown rows
+  at audit closeout. Subsequent decisions and the bounded audio audit promote
+  five known repairs, leave one decision-blocked row, and clear the unknown
+  class without changing the 175-row denominator.
 - **Dependable drag-and-drop:** architecture 011 and spec 069 govern a separate
   cross-runtime programme covering touch, nested targets, cross-window
   transfer, inbound files, and drag-out. `g16.021`–`g16.028` compile that
@@ -85,7 +89,7 @@ PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
 the Select lane or changing those totals.
 
-The component-continuation lane now has two approved implementation plans.
+The component-continuation lane now has four approved implementation plans.
 TimeInput's segmented native editing model is authoritative in its contract and
 compiled as `g16.029`. NumberInput's typed committed value, optional raw draft,
 clean callback migration, and mounted editor are authoritative and compiled as
@@ -94,7 +98,12 @@ because they edit shared core/headless exports and the domain-vector corpus.
 Promoting NumberInput's explicit runtime deltas moves only that ledger axis from
 115 / 60 to 116 present / 59 not-applicable; mounted totals remain 47 / 127.
 EditableLabel still needs an operator-owned editing decision. Fader, Knob, and
-XYPad need a bounded interaction audit before any repair can be named. GPUI
+XYPad now have a completed bounded audit and two serial cards: `g16.031`
+aligns paired machines plus Svelte/React gesture and entry lifecycles;
+`g16.032` adds the missing continuous-value Node/GPUI seam and three mounted
+proofs. The old “visual-state-only Rust” description was inaccurate: Rust
+machines exist, but their fine movement and component distinctions drift and
+the native render path never mounts them. GPUI
 accessibility, cross-runtime visual comparison, motion learning, the Longhorn
 lab, and Jetstream admission remain separate programme choices rather than
 component cards.
