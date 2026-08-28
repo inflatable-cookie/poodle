@@ -50,7 +50,11 @@ behavior repairs without inventing another conformance authority.
   without moving the ledger. `g16.019` closed native Select search, overlay
   pointer targeting, and one mounted GPUI cell; ledger 47 mounted /
   127 missing. Known-delta totals stay 115 / 60. No broader
-  conformance programme is implied.
+  conformance programme is implied. PR #95 closed `g16.020`: its 175-row
+  continuation register separates 93 closed, 69 evidence-only, 3
+  decision-blocked, 7 programme-owned, and 3 unknown components, with no known
+  repair currently ready to dispatch. The next checkpoint compiles separate
+  component and dependable drag-and-drop runways from that evidence.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -107,9 +111,9 @@ behavior repairs without inventing another conformance authority.
   `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
   `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
   `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
-  `019` complete, merged in PR #94, ledger 47 mounted / 127 missing; `020` is a
-  ready independent component continuation audit. Dependable drag-and-drop
-  is promoted separately through architecture 011/spec 069.
+  `019` complete, merged in PR #94, ledger 47 mounted / 127 missing; `020`
+  complete, merged in PR #95. Dependable drag-and-drop remains a separate
+  programme governed by architecture 011/spec 069.
 
 ## Rules
 

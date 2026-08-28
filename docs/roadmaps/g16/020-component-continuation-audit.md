@@ -1,6 +1,6 @@
 # g16.020 — Component Continuation Audit
 
-Status: complete — audit register delivered; board baselines recorded
+Status: complete — merged in PR #95; audit register delivered
 Opened: 2026-08-28
 Depends on: completed `g16.001`, merged `g16.018` and `g16.019`; closeout
 reconciled after PR #94
@@ -269,9 +269,13 @@ locked dependencies. The final bootstrapped `effigy qa` also passed, including
 the dependency-sensitive icon check and the full headless repository board.
 The final committed range passed `git diff --check origin/main...HEAD`.
 
+PR #95 merged this audit on 2026-08-28 as commit `6b5dea505`. The orchestrator
+now owns compilation of the separate component-continuation and dependable
+drag-and-drop runways; this audit authorizes no implementation worker by
+itself.
+
 ## Continuation
 
-Return the completed register, candidate continuation map, audit log, exact
-validation, and PR URL to the orchestrator. Do not merge. The orchestrator
-reconciles the result with merged g16.019, the drag-and-drop programme, and
-the g16 front doors before selecting implementation cards.
+The completed register, candidate continuation map, and audit log are merged.
+The orchestrator reconciled the g16 front doors and now compiles implementation
+cards without merging the component and drag-and-drop programme boundaries.

@@ -1,6 +1,6 @@
 # g16.020 — Component Continuation Audit
 
-Status: audit complete — validation recorded below
+Status: complete — merged in PR #95
 Date: 2026-08-28
 Card: `docs/roadmaps/g16/020-component-continuation-audit.md`
 Register: `docs/roadmaps/g16/component-continuation-register.md`
@@ -127,3 +127,11 @@ bootstrap:
 
 All validation stays headless. No windowed, native visual, Jetstream,
 release, tag, publication, workflow, or sibling-repository selector was run.
+
+## Merge closeout
+
+PR #95 merged on 2026-08-28 as commit `6b5dea505`. The live ledger remains 47
+mounted / 127 missing; the audit changed no implementation or evidence cell.
+The next planning checkpoint compiles separate component-continuation and
+dependable drag-and-drop runways. Decision-blocked editing candidates remain
+unready until their operator choices are resolved.

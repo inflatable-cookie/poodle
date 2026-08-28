@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.019 merged; g16.020 ready
+Status: active — g16.020 merged; continuation runway compilation next
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -50,15 +50,17 @@ stay maintained; backend admission is not part of the first card.
 17. [017 — Rating nullable, fractional, and mounted parity](017-rating-nullable-fractional-and-mounted-parity.md) — complete; merged in PR #92
 18. [018 — Select semantic machine and interface convergence](018-select-semantic-machine-and-interface-convergence.md) — complete; merged in PR #93
 19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — complete; merged in PR #94
-20. [020 — Component continuation audit](020-component-continuation-audit.md) — ready; independent audit lane
+20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
 
 ## Parallel Continuation
 
 Two continuation programmes are now explicit:
 
-- **Component continuation:** `g16.020` audits the whole roster, reconciles
-  completed g15/g16 work including merged PR #94, and returns bounded candidate
-  lanes without mutating components or the ledger.
+- **Component continuation:** merged `g16.020` accounts for all 175 components
+  and returns seven bounded candidate lanes without mutating components or the
+  ledger. Its register separates 93 closed, 69 evidence-only, 3
+  decision-blocked, 7 programme-owned, and 3 unknown rows; no known repair is
+  currently ready to dispatch.
 - **Dependable drag-and-drop:** architecture 011 and spec 069 govern a separate
   cross-runtime programme covering touch, nested targets, cross-window
   transfer, inbound files, and drag-out. Its implementation runway is compiled
@@ -66,8 +68,8 @@ Two continuation programmes are now explicit:
   components as programme-owned rather than separate defects.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
-now current on `main`; the independent audit consumes that result without
-reopening the Select lane.
+now current on `main`; PR #95 merged the independent audit without reopening
+the Select lane or changing those totals.
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
@@ -245,6 +247,9 @@ mounted and 128 → 127 missing. Known-delta totals stay 115 / 60.
 
 ## Next Task
 
-Run independent `g16.020` from its committed Luna audit handoff. Reconcile its
-component continuation map with architecture 011/spec 069, then compile the two
-implementation runways without merging their ownership.
+Compile two separate implementation runways from the merged audit: component
+continuation from `component-continuation-register.md`, and dependable
+drag-and-drop from architecture 011/spec 069. Resolve the TimeInput and editing
+value-model decisions before marking those component lanes ready. Keep the
+drag programme's substrate and migration cards distinct. No implementation
+worker is ready until those cards are committed.
