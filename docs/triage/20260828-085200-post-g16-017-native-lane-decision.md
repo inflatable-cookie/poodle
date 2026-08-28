@@ -4,7 +4,7 @@ Status: resolved — two-card Select lane closed through `g16.019`
 Captured: 2026-08-28
 Resolved: 2026-08-28
 Source: merged `g16.017` / PR #92 and the 46 mounted / 128 missing ledger
-Closeout: `g16.018` merged in PR #93; `g16.019` complete, ledger 47 / 127
+Closeout: `g16.018` merged in PR #93; `g16.019` merged in PR #94, ledger 47 / 127
 
 ## Checkpoint
 

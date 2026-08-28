@@ -236,9 +236,9 @@ preview/QA, release, tag, publication, or workflow-mutation selectors.
 
 ## Continuation
 
-Complete. Ledger is 47 mounted / 127 missing. PR #94 review follow-up
+Complete; merged in PR #94. Ledger is 47 mounted / 127 missing. Review follow-up
 covers one-result blur, host-authored search caret (anchor/head),
 Home/End highlight, declared overlay overflow with a production long-menu
-cap, and overlay surface bounds. Next task is an orchestrator checkpoint
-after operator-authorized merge. Do not choose or compile another lane
-from this card.
+cap, and overlay surface bounds. Continuation belongs to the independent
+`g16.020` audit and the separate drag-and-drop programme. Do not choose or
+compile another lane from this card.

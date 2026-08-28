@@ -1,7 +1,7 @@
 # g16.019 — Select Mounted Overlay Parity
 
 Date: 2026-08-28
-Status: complete — PR #94, review follow-up applied
+Status: complete — merged in PR #94
 Branch: `t3code/select-overlay-worker-handoff`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-4f7abc53`
 Card: `docs/roadmaps/g16/019-select-mounted-overlay-parity.md`
@@ -162,3 +162,7 @@ Third review follow-up: the long-menu regression now requires a downward
 wheel (`-800`) to bring option 19 into hit-test and commit it. GPUI scroll
 offset is `[-max, 0]`; a positive delta from the top is a no-op. Rebased
 onto `origin/main`, keeping the `g16.020` audit lane on the front doors.
+
+Merged as PR #94 on 2026-08-28. The ledger is now current on `main` at 47
+mounted / 127 missing. Continuation moves to `g16.020` and the separately
+governed drag-and-drop programme.

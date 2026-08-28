@@ -107,7 +107,7 @@ behavior repairs without inventing another conformance authority.
   `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
   `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
   `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
-  `019` complete, PR pending, ledger 47 mounted / 127 missing; `020` is a
+  `019` complete, merged in PR #94, ledger 47 mounted / 127 missing; `020` is a
   ready independent component continuation audit. Dependable drag-and-drop
   is promoted separately through architecture 011/spec 069.
 

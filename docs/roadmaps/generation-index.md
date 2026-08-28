@@ -12,13 +12,13 @@ Updated: 2026-08-28
     `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
     `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
     `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
-    `019` complete, PR pending; `020` ready as an independent audit
+    `019` merged in PR #94; `020` ready as an independent audit
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: re-review and merge `g16.019`; keep the independent Luna audit
-    in `g16.020`. Reconcile its component continuation map alongside the
-    dependable drag-and-drop programme in architecture 011/spec 069.
+  - Next move: run the independent Luna audit in `g16.020`, then reconcile its
+    component continuation map alongside the dependable drag-and-drop
+    programme in architecture 011/spec 069.
 
 ## Latest Completed Track
 
