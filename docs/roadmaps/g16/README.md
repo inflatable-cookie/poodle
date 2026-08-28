@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.018 merged; g16.019 entry gate cleared
+Status: active — g16.018 merged; g16.019 ready
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -49,7 +49,7 @@ stay maintained; backend admission is not part of the first card.
 16. [016 — Pagination navigation, loading, and mounted parity](016-pagination-navigation-loading-and-mounted-parity.md) — complete; merged in PR #91
 17. [017 — Rating nullable, fractional, and mounted parity](017-rating-nullable-fractional-and-mounted-parity.md) — complete; merged in PR #92
 18. [018 — Select semantic machine and interface convergence](018-select-semantic-machine-and-interface-convergence.md) — complete; merged in PR #93
-19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — planned; entry gate cleared, worker handoff pending
+19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — ready
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
@@ -222,5 +222,6 @@ the exact mounted scope.
 
 ## Next Task
 
-Publish the concrete worker handoff for recompiled `g16.019`, then dispatch it
-as the single active lane.
+Dispatch ready `g16.019` from
+`../../handoffs/20260828-181625-g16-019-select-overlay-worker.md` as the single
+active lane.

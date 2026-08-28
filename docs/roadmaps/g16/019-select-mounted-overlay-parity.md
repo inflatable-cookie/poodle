@@ -1,9 +1,11 @@
 # g16.019 — Select Mounted Overlay Parity
 
-Status: planned — entry gate cleared; worker handoff pending
+Status: ready
 Opened: 2026-08-28
 Recompiled: 2026-08-28
 Depends on: completed `g16.018` / merged PR #93
+Worker handoff:
+`../../handoffs/20260828-181625-g16-019-select-overlay-worker.md`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/select.md`, `parity-evidence-ledger.md`
@@ -233,9 +235,8 @@ preview/QA, release, tag, publication, or workflow-mutation selectors.
 
 ## Continuation
 
-The orchestrator must publish a worker handoff from this recompiled card before
-changing status to ready. The worker returns the exact editable-search path,
-key/focus/dismiss mapping, deferred-overlay reproducer and repair, removed
-Pagination workaround, named mounted regression, exact ledger totals,
-validation, and execution log. The worker does not choose the next lane or
-merge its PR.
+Dispatch the linked worker handoff as the single active lane. The worker returns
+the exact editable-search path, key/focus/dismiss mapping, deferred-overlay
+reproducer and repair, removed Pagination workaround, named mounted regression,
+exact ledger totals, validation, and execution log. The worker does not choose
+the next lane or merge its PR.

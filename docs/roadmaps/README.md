@@ -105,8 +105,8 @@ behavior repairs without inventing another conformance authority.
   `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
   `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
   `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
-  `019` has cleared its entry gate and awaits a worker handoff at
-  46 mounted / 128 missing
+  `019` is ready from its committed worker handoff at 46 mounted /
+  128 missing; Select mounted overlay parity is next
 
 ## Rules
 
