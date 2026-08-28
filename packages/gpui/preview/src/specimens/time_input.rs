@@ -128,6 +128,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     TimeInput::from_spec(spec, theme).with_id("constrained")
                 }),
         )
+        // --- Seconds step ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Seconds step"),
+                    theme,
+                ))
+                .child({
+                    let mut spec = TimeInputSpec::new()
+                        .with_default_value("09:30:15")
+                        .with_step(15);
+                    spec.aria_label = Some("Cue time".to_string());
+                    TimeInput::from_spec(spec, theme).with_id("seconds")
+                }),
+        )
+        // --- Overnight ---
+        .child(
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(Eyebrow::from_spec(
+                    EyebrowSpec::new().with_content("Overnight"),
+                    theme,
+                ))
+                .child({
+                    let mut spec = TimeInputSpec::new()
+                        .with_default_value("23:30")
+                        .with_step(1800);
+                    spec.min = Some("22:00".to_string());
+                    spec.max = Some("06:00".to_string());
+                    spec.aria_label = Some("Quiet hours".to_string());
+                    TimeInput::from_spec(spec, theme).with_id("overnight")
+                }),
+        )
         // --- Disabled ---
         .child(
             div()

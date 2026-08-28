@@ -22,6 +22,14 @@
     <TimeInput id="office" defaultValue="09:00" min="08:00" max="18:00" ariaLabel="Office hours" />
   </SpecimenGroup>
 
+  <SpecimenGroup label="Seconds step">
+    <TimeInput id="cue-time" defaultValue="09:30:15" step={15} ariaLabel="Cue time" />
+  </SpecimenGroup>
+
+  <SpecimenGroup label="Overnight">
+    <TimeInput id="quiet-hours" defaultValue="23:30" min="22:00" max="06:00" step={1800} ariaLabel="Quiet hours" />
+  </SpecimenGroup>
+
   <SpecimenGroup label="Disabled">
     <TimeInput id="disabled-time" defaultValue="12:00" disabled ariaLabel="Disabled" />
   </SpecimenGroup>

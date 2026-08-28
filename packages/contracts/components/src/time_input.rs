@@ -53,6 +53,31 @@ impl TimeInputSpec {
         self
     }
 
+    pub fn with_value(mut self, value: impl Into<String>) -> Self {
+        self.value = Some(value.into());
+        self
+    }
+
+    pub fn with_min(mut self, min: impl Into<String>) -> Self {
+        self.min = Some(min.into());
+        self
+    }
+
+    pub fn with_max(mut self, max: impl Into<String>) -> Self {
+        self.max = Some(max.into());
+        self
+    }
+
+    pub fn with_disabled(mut self, is_disabled: bool) -> Self {
+        self.is_disabled = is_disabled;
+        self
+    }
+
+    pub fn with_aria_label(mut self, aria_label: impl Into<String>) -> Self {
+        self.aria_label = Some(aria_label.into());
+        self
+    }
+
     pub fn current_value(&self) -> Option<&str> {
         self.value.as_deref().or(self.default_value.as_deref())
     }
@@ -62,10 +87,11 @@ impl TimeInputSpec {
     }
 
     pub fn border_token(&self) -> &'static str {
-        // Contract §8 + Svelte: the time input border is always the default
-        // border color. There is no validation/invalid state in the contract
-        // or in TimeInput.svelte, so the border never recolors.
         semantic::COLOR_BORDER_DEFAULT
+    }
+
+    pub fn invalid_border_token(&self) -> &'static str {
+        semantic::COLOR_STATUS_DANGER
     }
 
     pub fn radius_token(&self) -> &'static str {

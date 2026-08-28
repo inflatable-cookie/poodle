@@ -28,14 +28,15 @@ use poodle_node::{
     ColorValue, DismissReason, LayoutDirection, LayoutOverflow, LayoutSizing, Node, NodeDropEvent,
     NodeKind, NodePosition, NodeRole,
 };
+use poodle_headless::time_input::{time_input_invalid, time_input_transition, TimeInputContext, TimeInputEvent};
 use poodle_render::{
     ui_presentation_provider, RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers,
-    TabsHandlers, ToggleGroupHandlers, TriStateSwitchHandlers,
+    TabsHandlers, TimeInputHandlers, ToggleGroupHandlers, TriStateSwitchHandlers,
 };
 use poodle_specs::{
     AccordionSelectionValue, AgentTranscriptSpec, ControlDensity, ControlSize, Orientation,
     PopoverSpec, RangeSliderSpec, RatingSpec, SliderSpec, TabActivationMode, TabDefinition,
-    TabsSpec, TriStateSwitchSpec, TriStateValue, UiPresentationProviderSpec,
+    TabsSpec, TimeInputSpec, TriStateSwitchSpec, TriStateValue, UiPresentationProviderSpec,
 };
 
 #[path = "../src/headless_driver.rs"]
@@ -8738,6 +8739,336 @@ fn duration_input_segments_edit_and_rebuild_the_host_spec() {
             take_events(&host.log),
             vec!["duration-before/focus:false", "duration-after/focus:true"]
         );
+    });
+}
+
+struct TimeRouting {
+    context: Mutex<TimeInputContext>,
+    last_emit: Mutex<Option<Option<String>>>,
+    log: EventLog,
+}
+
+fn time_host(committed: Option<&str>) -> TimeRouting {
+    TimeRouting {
+        context: Mutex::new(TimeInputContext {
+            committed: committed.map(str::to_string),
+            ..TimeInputContext::default()
+        }),
+        last_emit: Mutex::new(None),
+        log: event_log(),
+    }
+}
+
+fn time_routing_tree(host: &Arc<TimeRouting>, mounted: &Arc<Mutex<Node>>) -> Node {
+    let provider = theme();
+    let ctx = RenderContext::new(&provider);
+    let context = host.context.lock().expect("context").clone();
+    let spec = TimeInputSpec::new()
+        .with_aria_label("time")
+        .with_step(context.step as u32)
+        .with_disabled(context.disabled);
+    let mut spec = spec;
+    if let Some(value) = context.committed.as_deref() {
+        spec = spec.with_value(value);
+    }
+    if let Some(min) = context.min.as_deref() {
+        spec = spec.with_min(min);
+    }
+    if let Some(max) = context.max.as_deref() {
+        spec = spec.with_max(max);
+    }
+
+    let change_host = Arc::clone(host);
+    let change_mount = Arc::clone(mounted);
+    let time = poodle_render::time_input_with_handlers(
+        &spec,
+        &ctx,
+        &context,
+        TimeInputHandlers {
+            on_context: Some(Arc::new(move |next: TimeInputContext| {
+                *change_host.context.lock().expect("context") = next;
+                let tree = time_routing_tree(&change_host, &change_mount);
+                *change_mount.lock().expect("mount") = tree;
+            })),
+            on_value_change: Some({
+                let host = Arc::clone(host);
+                Arc::new(move |value: Option<String>| {
+                    *host.last_emit.lock().expect("emit") = Some(value.clone());
+                    note(
+                        &host.log,
+                        format!("time/change:{}", value.as_deref().unwrap_or("null")),
+                    );
+                })
+            }),
+        },
+    );
+
+    let after_host = Arc::clone(host);
+    let after_mount = Arc::clone(mounted);
+    let after_log = Arc::clone(&host.log);
+    let mut after = traversal_marker("time-after", &host.log, &ctx);
+    after.interaction.on_focus_change = Some(Arc::new(move |focused: bool| {
+        note(&after_log, format!("time-after/focus:{focused}"));
+        if !focused {
+            return;
+        }
+        let current = after_host.context.lock().expect("context").clone();
+        if current.draft.is_none() {
+            return;
+        }
+        let (next, effects) = time_input_transition(current, TimeInputEvent::Blur);
+        *after_host.context.lock().expect("context") = next;
+        for effect in effects {
+            let poodle_headless::time_input::TimeInputEffect::EmitValueChange { value } = effect;
+            *after_host.last_emit.lock().expect("emit") = Some(value.clone());
+            note(
+                &after_host.log,
+                format!("time/change:{}", value.as_deref().unwrap_or("null")),
+            );
+        }
+        let tree = time_routing_tree(&after_host, &after_mount);
+        *after_mount.lock().expect("mount") = tree;
+    }));
+
+    routing_column(vec![
+        traversal_marker("time-before", &host.log, &ctx),
+        time,
+        after,
+    ])
+}
+
+/// g16.029. TimeInput's segmented GPUI editor routes mounted key/focus
+/// dispatch through the shared machine: live commit, local invalid drafts,
+/// blur/Escape revert, clear, step, bounds, conditional seconds, replacement,
+/// Tab traversal, and disabled inertia.
+///
+/// Deliberately not claimed: IME, locale/12-hour presentation, picker overlays,
+/// native accessibility proof, visual comparison, or Jetstream admission.
+#[test]
+fn time_input_segmented_editor_commits_drafts_and_bounds() {
+    fn committed(host: &TimeRouting) -> Option<String> {
+        host.context.lock().expect("context").committed.clone()
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(time_host(Some("14:30")));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-time-before");
+        driver.focus_element("poodle-input-time-before");
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("1");
+        assert!(host.last_emit.lock().expect("emit").is_none());
+        assert!(time_input_invalid(&host.context.lock().expect("context")));
+
+        driver.dispatch_key_raw("5");
+        assert_eq!(committed(&host).as_deref(), Some("15:30"));
+        assert_eq!(
+            host.last_emit.lock().expect("emit").clone(),
+            Some(Some("15:30".into()))
+        );
+        assert!(!time_input_invalid(&host.context.lock().expect("context")));
+
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-input-time-after"),
+            Some(true)
+        );
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(time_host(Some("09:00")));
+        {
+            let mut context = host.context.lock().expect("context");
+            context.step = 300.0;
+            context.min = Some("08:00".into());
+            context.max = Some("18:00".into());
+        }
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-time-before");
+        driver.focus_element("poodle-input-time-before");
+
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("0");
+        driver.dispatch_key_raw("7");
+        assert!(host.last_emit.lock().expect("emit").is_none());
+        assert!(time_input_invalid(&host.context.lock().expect("context")));
+        assert_eq!(committed(&host).as_deref(), Some("09:00"));
+
+        driver.dispatch_key_raw("escape");
+        assert!(!time_input_invalid(&host.context.lock().expect("context")));
+        assert_eq!(committed(&host).as_deref(), Some("09:00"));
+        assert!(host.last_emit.lock().expect("emit").is_none());
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(time_host(Some("09:00")));
+        {
+            let mut context = host.context.lock().expect("context");
+            context.step = 300.0;
+        }
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-time-before");
+        driver.focus_element("poodle-input-time-before");
+
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("0");
+        driver.dispatch_key_raw("7");
+        assert!(time_input_invalid(&host.context.lock().expect("context")));
+
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-input-time-after"),
+            Some(true)
+        );
+        assert!(!time_input_invalid(&host.context.lock().expect("context")));
+        assert_eq!(committed(&host).as_deref(), Some("09:00"));
+        assert!(host.last_emit.lock().expect("emit").is_none());
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(time_host(Some("14:30")));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-time-before");
+        driver.focus_element("poodle-input-time-before");
+
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("up");
+        assert_eq!(committed(&host).as_deref(), Some("14:31"));
+
+        driver.dispatch_key_raw("backspace");
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("backspace");
+        assert_eq!(committed(&host).as_deref(), None);
+        assert_eq!(
+            host.last_emit.lock().expect("emit").clone(),
+            Some(None)
+        );
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(time_host(Some("23:30")));
+        {
+            let mut context = host.context.lock().expect("context");
+            context.min = Some("22:00".into());
+            context.max = Some("06:00".into());
+            context.step = 1800.0;
+        }
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-time-before");
+        driver.focus_element("poodle-input-time-before");
+
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("up");
+        assert_eq!(committed(&host).as_deref(), Some("00:00"));
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(time_host(Some("18:00")));
+        {
+            let mut context = host.context.lock().expect("context");
+            context.min = Some("08:00".into());
+            context.max = Some("18:00".into());
+        }
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-time-before");
+        driver.focus_element("poodle-input-time-before");
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("up");
+        assert_eq!(committed(&host).as_deref(), Some("18:00"));
+        assert!(
+            !take_events(&host.log).iter().any(|entry| entry.starts_with("time/change:")),
+            "linear max does not emit a duplicate bound step"
+        );
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(time_host(Some("09:30:00")));
+        host.context.lock().expect("context").step = 15.0;
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-time-before");
+        driver.focus_element("poodle-input-time-before");
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("up");
+        assert_eq!(committed(&host).as_deref(), Some("09:30:15"));
+
+        take_events(&host.log);
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-input-time-after"),
+            Some(true)
+        );
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(time_host(Some("14:30")));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-time-before");
+        driver.focus_element("poodle-input-time-before");
+
+        driver.dispatch_key_raw("tab");
+        driver.dispatch_key_raw("2");
+        assert!(time_input_invalid(&host.context.lock().expect("context")));
+
+        let (next, effects) = time_input_transition(
+            host.context.lock().expect("context").clone(),
+            TimeInputEvent::Replace {
+                value: Some("08:00".into()),
+            },
+        );
+        assert!(effects.is_empty());
+        *host.context.lock().expect("context") = next;
+        let tree = time_routing_tree(&host, &mounted);
+        *mounted.lock().expect("mount") = tree;
+        assert_eq!(committed(&host).as_deref(), Some("08:00"));
+        assert!(!time_input_invalid(&host.context.lock().expect("context")));
+        assert!(host.last_emit.lock().expect("emit").is_none());
+    });
+
+    run_headless(|cx| {
+        let host = Arc::new(time_host(Some("12:00")));
+        host.context.lock().expect("context").disabled = true;
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = time_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+        driver.wait_for_focus_handle("poodle-input-time-before");
+        driver.focus_element("poodle-input-time-before");
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-input-time-after"),
+            Some(true)
+        );
+        driver.dispatch_key_raw("up");
+        assert_eq!(committed(&host).as_deref(), Some("12:00"));
+        assert!(host.last_emit.lock().expect("emit").is_none());
     });
 }
 
