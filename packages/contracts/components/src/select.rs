@@ -296,6 +296,20 @@ impl SelectSpec {
         self
     }
 
+    /// Apply one complete transition context. Hosts rebuild from this rather
+    /// than merging individual fields: highlight events emit no effects.
+    pub fn applying_context(mut self, context: &SelectContext) -> Self {
+        self.value = if context.value.is_empty() {
+            None
+        } else {
+            Some(context.value.clone())
+        };
+        self.open = Some(context.open);
+        self.search_query = Some(context.query.clone());
+        self.highlighted_value = context.highlighted_value.clone();
+        self
+    }
+
     pub fn effective_value(&self) -> String {
         self.current_value().unwrap_or("").to_string()
     }
