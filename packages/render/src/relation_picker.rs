@@ -31,7 +31,7 @@ use crate::presentation::{
     relation_picker_item_x_rem, relation_picker_item_y_rem, relation_picker_list_gap_rem,
     relation_picker_title_size_rem, rem_to_px,
 };
-use crate::select::{composite_select_scope, select, SelectHandlers};
+use crate::select::{select, SelectHandlers};
 use crate::selection_summary::{selection_summary, SelectionSummaryHandlers};
 use crate::text_input::text_input;
 
@@ -41,8 +41,12 @@ const LABEL_WEIGHT: u16 = 500;
 /// Handlers mirror the GPUI target's names. No `on_query_change` /
 /// `on_filter_change`: both are typed, and the vocabulary raises no key
 /// events.
-#[derive(Default)]
+/// Host-owned native interaction for one RelationPicker instance.
+///
+/// `instance_id` is the lifetime-stable scope. It is not a web public prop, and
+/// the renderer never invents one from render order or selected value.
 pub struct RelationPickerHandlers {
+    pub instance_id: String,
     /// Fires with the candidate's id. The host resolves the click into the
     /// next selection — single- and multi-select are its policy.
     pub on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
@@ -53,7 +57,19 @@ pub struct RelationPickerHandlers {
     pub on_breadcrumb_click: Option<Arc<dyn Fn(usize) + Send + Sync>>,
     pub on_confirm: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
-    pub instance_id: Option<String>,
+}
+
+impl RelationPickerHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        Self {
+            instance_id: instance_id.into(),
+            on_select: None,
+            on_drill_enter: None,
+            on_breadcrumb_click: None,
+            on_confirm: None,
+            on_cancel: None,
+        }
+    }
 }
 
 fn all_radius(node: &mut Node, r: f32) {
@@ -406,15 +422,7 @@ fn build_search(
             filters_row = filters_row.child(select(
                 &select_spec,
                 ctx,
-                &SelectHandlers::new(format!(
-                    "{}:{}",
-                    composite_select_scope(
-                        handlers.instance_id.as_deref(),
-                        spec.aria_label.as_deref().or(Some(spec.title.as_str())),
-                        "relation-picker",
-                    ),
-                    filter.key
-                )),
+                &SelectHandlers::new(format!("{}:{}", handlers.instance_id, filter.key)),
             ));
         }
         col = col.child(filters_row);
@@ -603,22 +611,8 @@ mod tests {
                 "Kind",
                 vec![PickerFilterOption::new("primitive", "Primitive")],
             )]);
-        let left = relation_picker(
-            &spec,
-            &ctx,
-            RelationPickerHandlers {
-                instance_id: Some("picker-a".to_string()),
-                ..RelationPickerHandlers::default()
-            },
-        );
-        let right = relation_picker(
-            &spec,
-            &ctx,
-            RelationPickerHandlers {
-                instance_id: Some("picker-b".to_string()),
-                ..RelationPickerHandlers::default()
-            },
-        );
+        let left = relation_picker(&spec, &ctx, RelationPickerHandlers::new("picker-a"));
+        let right = relation_picker(&spec, &ctx, RelationPickerHandlers::new("picker-b"));
         let mut tree = Node::container();
         tree = tree.child(left).child(right);
         assert!(tree
