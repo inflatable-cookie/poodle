@@ -141,8 +141,7 @@ pub fn date_time_zone_picker(
         };
 
         // Time field — contract Field: "TIME" label above composed TimeInput.
-        let time_field_group =
-            field_group(field_label("Time", muted), time_field(&time_spec, ctx));
+        let time_field_group = field_group(field_label("Time", muted), time_field(&time_spec, ctx));
 
         // Time zone field — "TIME ZONE" label above composed TimeZoneSelect.
         let tz_field_group = field_group(
@@ -153,6 +152,7 @@ pub fn date_time_zone_picker(
                 TimeZoneSelectHandlers {
                     on_toggle: handlers.on_zone_toggle.clone(),
                     on_change: handlers.on_zone_change.clone(),
+                    instance_id: spec.aria_label.clone(),
                 },
             ),
         );

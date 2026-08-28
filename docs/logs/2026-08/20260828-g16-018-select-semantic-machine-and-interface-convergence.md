@@ -42,8 +42,9 @@ claimed.
 `packages/core/src/select.ts` and `packages/contracts/headless/src/select.rs`
 implement the same events (`OPEN`, `CLOSE`, `TOGGLE`, `QUERY`, `HIGHLIGHT`,
 `HIGHLIGHT_PREV`/`NEXT`/`FIRST`/`LAST`, `COMMIT_HIGHLIGHTED`, `COMMIT_OPTION`,
-`COMMIT_FREEFORM`, `CLEAR`) and ordered effects (`openChanged`, `queryChanged`,
-`valueChanged`). Shared vectors live in
+`COMMIT_FREEFORM`, `CLEAR`, `OPTIONS_CHANGED`) and ordered effects (`openChanged`, `queryChanged`,
+`valueChanged`). Query highlight is first enabled match; opening still prefers
+the selected option. Shared vectors live in
 `packages/contracts/headless/vectors/machines.json` under `select` and run in
 both conformance harnesses.
 
@@ -76,6 +77,15 @@ compile maintenance only.
 - no Jetstream admission, release, version, workflow, or downstream change
 
 `g16.019` remains planned and blocked on the merged substrate.
+
+## Review corrections
+
+QUERY highlight is the first enabled visible match, not the selected option.
+`OPTIONS_CHANGED` reconciles highlight after lazy loads without a second
+`queryChanged`. Composite Select scopes are instance-unique (BlockEditor uses
+`block.id`; Pagination, OrderBy, RelationPicker, and TimeZoneSelect take
+optional handler `instance_id` plus authored spec labels). Paired vectors
+cover `HIGHLIGHT_PREV`/`FIRST`/`LAST` and `OPTIONS_CHANGED`.
 
 ## Validation
 

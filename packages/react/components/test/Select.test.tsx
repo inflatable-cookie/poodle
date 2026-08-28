@@ -1,8 +1,8 @@
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { Select } from "../src/Select";
-import type { SelectItems } from "../src/types";
+import type { SelectItems, SelectLoadContext } from "../src/types";
 
 const options: SelectItems = [
   { value: "alpha", label: "Alpha" },
@@ -206,6 +206,79 @@ describe("Select (react) semantic machine", () => {
       el.getAttribute("data-highlighted"),
     );
     expect(highlighted).toEqual(["false", "false", "true"]);
+  });
+
+  it("highlights the first enabled query match even when the selected option also matches later", () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <Select
+        options={[
+          { value: "apple", label: "Apple" },
+          { value: "apricot", label: "Apricot" },
+        ]}
+        value="apricot"
+        searchable
+        native={false}
+        onValueChange={onValueChange}
+      />,
+    );
+
+    fireEvent.change(inputOf(container), { target: { value: "ap" } });
+    const highlighted = [...document.querySelectorAll('[role="option"]')].map((el) =>
+      el.getAttribute("data-highlighted"),
+    );
+    expect(highlighted).toEqual(["true", "false"]);
+
+    fireEvent.keyDown(inputOf(container), { key: "Enter" });
+    expect(onValueChange.mock.calls.map((call) => call[0])).toEqual(["apple"]);
+  });
+
+  it("reconciles lazy option results without a duplicate query callback", async () => {
+    const onQueryChange = vi.fn();
+    const onValueChange = vi.fn();
+    const loadOptions = vi.fn(async (context?: SelectLoadContext) => {
+      const query = context?.query;
+      await Promise.resolve();
+      if (query === "ap") {
+        return [
+          { value: "apple", label: "Apple" },
+          { value: "apricot", label: "Apricot" },
+        ];
+      }
+      return [
+        { value: "apricot", label: "Apricot" },
+        { value: "banana", label: "Banana" },
+      ];
+    });
+    const { container } = render(
+      <Select
+        loadOptions={loadOptions}
+        value="apricot"
+        searchable
+        native={false}
+        onQueryChange={onQueryChange}
+        onValueChange={onValueChange}
+      />,
+    );
+
+    fireEvent.change(inputOf(container), { target: { value: "ap" } });
+    expect(onQueryChange.mock.calls.map((call) => call[0])).toEqual(["ap"]);
+
+    await waitFor(() => {
+      expect([...document.querySelectorAll('[role="option"]')].map((el) => el.getAttribute("data-value"))).toEqual([
+        "apple",
+        "apricot",
+      ]);
+    });
+
+    const highlighted = [...document.querySelectorAll('[role="option"]')].map((el) =>
+      el.getAttribute("data-highlighted"),
+    );
+    expect(highlighted).toEqual(["true", "false"]);
+
+    fireEvent.keyDown(inputOf(container), { key: "Enter" });
+    expect(onValueChange.mock.calls.map((call) => call[0])).toEqual(["apple"]);
+    expect(onQueryChange.mock.calls.map((call) => call[0])).toEqual(["ap", "Apple"]);
   });
 
   it("does not emit a second toggle from clear", () => {

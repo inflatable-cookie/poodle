@@ -50,7 +50,8 @@ export type SelectEvent =
   | { type: "COMMIT_HIGHLIGHTED" }
   | { type: "COMMIT_OPTION"; value: string }
   | { type: "COMMIT_FREEFORM" }
-  | { type: "CLEAR" };
+  | { type: "CLEAR" }
+  | { type: "OPTIONS_CHANGED"; options: SelectOptionState[] };
 
 export type SelectEffect =
   | { type: "openChanged"; open: boolean }
@@ -154,6 +155,11 @@ export function selectCommittedQuery(context: SelectContext): string {
   }
 
   return context.options.find((option) => option.value === context.value)?.label ?? "";
+}
+
+/** Query and option-list highlight: first enabled visible option, else null. */
+export function selectQueryHighlightValue(context: SelectContext): string | null {
+  return selectEnabledVisibleValues(context)[0] ?? null;
 }
 
 /** Opening highlight: selected enabled visible option, else first enabled visible, else null. */
@@ -342,7 +348,7 @@ export function selectTransition(context: SelectContext, event: SelectEvent): Se
         query: event.query,
         open: true,
       };
-      next.highlightedValue = selectOpenHighlightValue(next);
+      next.highlightedValue = selectQueryHighlightValue(next);
 
       return { context: next, effects: orderedEffects(context, next, true) };
     }
@@ -386,6 +392,18 @@ export function selectTransition(context: SelectContext, event: SelectEvent): Se
       };
 
       return { context: next, effects: orderedEffects(context, next, true) };
+    }
+    case "OPTIONS_CHANGED": {
+      const next: SelectContext = {
+        ...context,
+        options: event.options,
+      };
+
+      if (next.open) {
+        next.highlightedValue = selectQueryHighlightValue(next);
+      }
+
+      return { context: next, effects: [] };
     }
   }
 }

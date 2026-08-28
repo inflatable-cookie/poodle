@@ -38,6 +38,7 @@ pub enum SelectEvent {
     CommitOption { value: String },
     CommitFreeform,
     Clear,
+    OptionsChanged { options: Vec<SelectOptionState> },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -82,6 +83,10 @@ pub fn select_committed_query(context: &SelectContext) -> String {
         .find(|option| option.value == context.value)
         .map(|option| option.label.clone())
         .unwrap_or_default()
+}
+
+pub fn select_query_highlight_value(context: &SelectContext) -> Option<String> {
+    select_enabled_visible_values(context).into_iter().next()
 }
 
 pub fn select_open_highlight_value(context: &SelectContext) -> Option<String> {
@@ -274,7 +279,7 @@ pub fn select_transition(
             let mut next = context.clone();
             next.query = query;
             next.open = true;
-            next.highlighted_value = select_open_highlight_value(&next);
+            next.highlighted_value = select_query_highlight_value(&next);
             let effects = ordered_effects(&context, &next, true);
             (next, effects)
         }
@@ -319,6 +324,14 @@ pub fn select_transition(
             };
             let effects = ordered_effects(&context, &next, true);
             (next, effects)
+        }
+        SelectEvent::OptionsChanged { options } => {
+            let mut next = context;
+            next.options = options;
+            if next.open {
+                next.highlighted_value = select_query_highlight_value(&next);
+            }
+            (next, Vec::new())
         }
     }
 }

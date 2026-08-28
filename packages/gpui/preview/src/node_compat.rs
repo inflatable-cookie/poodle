@@ -2605,6 +2605,7 @@ impl OrderBy {
             poodle_render::OrderByHandlers {
                 on_direction_toggle: self.on_direction_toggle,
                 on_remove: self.on_remove,
+                instance_id: None,
             },
         )
     }
@@ -5508,6 +5509,7 @@ impl TimeZoneSelect {
             poodle_render::TimeZoneSelectHandlers {
                 on_toggle: self.on_toggle,
                 on_change: None,
+                instance_id: None,
             },
         )
     }
@@ -7387,6 +7389,7 @@ impl IntoElement for Pagination {
             limit_open: self.limit_open,
             limit_open_change: self.on_limit_open_change,
             page_size_change: self.on_page_size_change,
+            instance_id: None,
         };
         poodle_gpui_node_backend::to_gpui(&poodle_render::pagination_with_handlers(
             &self.spec,

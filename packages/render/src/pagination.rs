@@ -40,6 +40,7 @@ pub struct PaginationHandlers {
     pub limit_open: bool,
     pub limit_open_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
     pub page_size_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
+    pub instance_id: Option<String>,
 }
 
 pub fn pagination(
@@ -497,7 +498,12 @@ fn build_limit_selector(
 
         let open_change = handlers.limit_open_change.clone();
         let size_change = handlers.page_size_change.clone();
-        let mut select_handlers = crate::SelectHandlers::new("pagination-limit");
+        let mut select_handlers =
+            crate::SelectHandlers::new(crate::select::composite_select_scope(
+                handlers.instance_id.as_deref(),
+                spec.aria_label.as_deref(),
+                "pagination-limit",
+            ));
         if open_change.is_some() || size_change.is_some() {
             select_handlers = select_handlers.on_transition(Arc::new(move |result| {
                 for effect in &result.effects {
@@ -613,6 +619,7 @@ mod tests {
             page_size_change: Some(Arc::new(move |size| {
                 size_sink.lock().expect("size lock").push(size);
             })),
+            instance_id: None,
         }
     }
 
@@ -900,5 +907,43 @@ mod tests {
             .expect("page-size option 25");
         option.interaction.on_activate.as_ref().unwrap().as_ref()();
         assert_eq!(*sizes.lock().expect("size lock"), [25]);
+    }
+
+    #[test]
+    fn two_paginations_do_not_share_select_runtime_ids() {
+        let spec = numbered_spec();
+        let left = render(
+            &spec,
+            &PaginationHandlers {
+                instance_id: Some("pager-a".to_string()),
+                ..wired_handlers(
+                    Arc::new(Mutex::new(Vec::new())),
+                    Arc::new(Mutex::new(Vec::new())),
+                    Arc::new(Mutex::new(Vec::new())),
+                    false,
+                )
+            },
+        );
+        let right = render(
+            &spec,
+            &PaginationHandlers {
+                instance_id: Some("pager-b".to_string()),
+                ..wired_handlers(
+                    Arc::new(Mutex::new(Vec::new())),
+                    Arc::new(Mutex::new(Vec::new())),
+                    Arc::new(Mutex::new(Vec::new())),
+                    false,
+                )
+            },
+        );
+        let mut tree = Node::container();
+        tree = tree.child(left).child(right);
+        let left_trigger = tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:pager-a:trigger"))
+            .expect("left limit trigger");
+        let right_trigger = tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:pager-b:trigger"))
+            .expect("right limit trigger");
+        assert_ne!(left_trigger.runtime_id, right_trigger.runtime_id);
     }
 }

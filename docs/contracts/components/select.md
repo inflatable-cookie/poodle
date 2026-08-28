@@ -205,7 +205,7 @@ flags, `clearValue`, `searchable`, `freeform`, and whole-control `disabled`.
 
 Events: `OPEN`, `CLOSE`, `TOGGLE`, `QUERY`, `HIGHLIGHT`, `HIGHLIGHT_PREV`,
 `HIGHLIGHT_NEXT`, `HIGHLIGHT_FIRST`, `HIGHLIGHT_LAST`, `COMMIT_HIGHLIGHTED`,
-`COMMIT_OPTION`, `COMMIT_FREEFORM`, `CLEAR`.
+`COMMIT_OPTION`, `COMMIT_FREEFORM`, `CLEAR`, `OPTIONS_CHANGED`.
 
 The result is the complete next state plus ordered effects:
 `openChanged(boolean)`, `queryChanged(string)`, `valueChanged(string)`.
@@ -218,7 +218,10 @@ Rules:
 - opening highlights the selected enabled visible option, otherwise the
   first enabled visible option; no enabled result means no highlight
 - query edit opens the list, filters case-insensitively, and highlights the
-  first enabled match; it never reports `onValueChange`
+  first enabled match even when the committed option also matches later; it
+  never reports `onValueChange`
+- option-list changes (`OPTIONS_CHANGED`) reconcile highlight the same way
+  while open and emit no effects; they do not open a closed Select
 - movement skips disabled options, clamps at the ends, and never wraps
 - Arrow Up/Down while closed opens first and does not also move twice
 - option commit reports a changed value, copies its label into query, and

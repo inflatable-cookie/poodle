@@ -9,6 +9,7 @@
     selectTransition,
     type SelectContext,
     type SelectEvent,
+    type SelectOptionState,
     type SelectResult,
   } from "@inflatable-cookie/poodle-core";
   import type { Snippet } from "svelte";
@@ -179,6 +180,14 @@
     return isSelectOptionDisabled(o);
   }
 
+  function optionStates(source: SelectItems): SelectOptionState[] {
+    return flattenOptions(source).map((option) => ({
+      value: option.value,
+      label: option.label,
+      disabled: isOptionDisabled(option),
+    }));
+  }
+
   async function startLoad(nextQuery = query): Promise<void> {
     const requestId = ++activeLoadRequestId;
     loadState = "loading";
@@ -194,6 +203,9 @@
       if (requestId !== activeLoadRequestId) return;
       loadedOptions = nextOptions;
       loadState = "loaded";
+      if (open) {
+        dispatch({ type: "OPTIONS_CHANGED", options: optionStates(nextOptions) });
+      }
     } catch (error) {
       if (requestId !== activeLoadRequestId) return;
       loadState = "error";

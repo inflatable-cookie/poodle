@@ -31,7 +31,7 @@ use crate::presentation::{
     relation_picker_item_x_rem, relation_picker_item_y_rem, relation_picker_list_gap_rem,
     relation_picker_title_size_rem, rem_to_px,
 };
-use crate::select::{select, SelectHandlers};
+use crate::select::{composite_select_scope, select, SelectHandlers};
 use crate::selection_summary::{selection_summary, SelectionSummaryHandlers};
 use crate::text_input::text_input;
 
@@ -53,6 +53,7 @@ pub struct RelationPickerHandlers {
     pub on_breadcrumb_click: Option<Arc<dyn Fn(usize) + Send + Sync>>,
     pub on_confirm: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub instance_id: Option<String>,
 }
 
 fn all_radius(node: &mut Node, r: f32) {
@@ -405,7 +406,15 @@ fn build_search(
             filters_row = filters_row.child(select(
                 &select_spec,
                 ctx,
-                &SelectHandlers::new(format!("relation-picker:{}", filter.key)),
+                &SelectHandlers::new(format!(
+                    "{}:{}",
+                    composite_select_scope(
+                        handlers.instance_id.as_deref(),
+                        spec.aria_label.as_deref().or(Some(spec.title.as_str())),
+                        "relation-picker",
+                    ),
+                    filter.key
+                )),
             ));
         }
         col = col.child(filters_row);
@@ -573,4 +582,50 @@ fn candidate_row(
     }
 
     row.child(copy)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::{PickerFilterConfig, PickerFilterOption, PickerItemSpec};
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn two_relation_pickers_do_not_share_select_runtime_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = RelationPickerSpec::new(vec![PickerItemSpec::new("btn", "Button")])
+            .with_filters(vec![PickerFilterConfig::new(
+                "kind",
+                "Kind",
+                vec![PickerFilterOption::new("primitive", "Primitive")],
+            )]);
+        let left = relation_picker(
+            &spec,
+            &ctx,
+            RelationPickerHandlers {
+                instance_id: Some("picker-a".to_string()),
+                ..RelationPickerHandlers::default()
+            },
+        );
+        let right = relation_picker(
+            &spec,
+            &ctx,
+            RelationPickerHandlers {
+                instance_id: Some("picker-b".to_string()),
+                ..RelationPickerHandlers::default()
+            },
+        );
+        let mut tree = Node::container();
+        tree = tree.child(left).child(right);
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:picker-a:kind:trigger"))
+            .is_some());
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:picker-b:kind:trigger"))
+            .is_some());
+    }
 }

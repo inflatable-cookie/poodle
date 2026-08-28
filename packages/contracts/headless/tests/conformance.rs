@@ -672,6 +672,9 @@ fn select_conformance() {
             },
             "COMMIT_FREEFORM" => SelectMachineEvent::CommitFreeform,
             "CLEAR" => SelectMachineEvent::Clear,
+            "OPTIONS_CHANGED" => SelectMachineEvent::OptionsChanged {
+                options: select_options_from(event_value),
+            },
             other => panic!("unknown select event {other}"),
         };
 

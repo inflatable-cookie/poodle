@@ -88,6 +88,7 @@ fn build_type_select(
     value: Option<&str>,
     disabled: bool,
     ctx: &RenderContext<'_>,
+    instance_scope: impl Into<String>,
 ) -> Node {
     let options: Vec<ChoiceOption> = spec
         .block_types
@@ -109,7 +110,7 @@ fn build_type_select(
         sel.value = Some(v.to_string());
     }
 
-    select(&sel, ctx, &SelectHandlers::new("block-editor-type"))
+    select(&sel, ctx, &SelectHandlers::new(instance_scope))
 }
 
 /// Render a single block's content by its type. Unknown types fall back to
@@ -329,6 +330,7 @@ pub fn block_editor_with_children(
                 Some(&block.block_type),
                 disabled,
                 ctx,
+                format!("block-editor:{}:type", block.id),
             )));
         }
 
@@ -377,7 +379,13 @@ pub fn block_editor_with_children(
                     radius_control,
                     disabled,
                 ))
-                .child(add_wrap.child(build_type_select(spec, None, disabled, ctx)));
+                .child(add_wrap.child(build_type_select(
+                    spec,
+                    None,
+                    disabled,
+                    ctx,
+                    format!("block-editor:{}:add", block.id),
+                )));
         }
 
         if can_remove && block_count > 1 {
@@ -471,4 +479,60 @@ pub fn block_editor_with_children(
         root.a11y.label = Some(spec.aria_label.clone());
     }
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::BlockTypeDefinition;
+    use std::collections::BTreeSet;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn runtime_ids(node: &Node) -> Vec<String> {
+        let mut ids = Vec::new();
+        fn walk(node: &Node, ids: &mut Vec<String>) {
+            if let Some(id) = &node.runtime_id {
+                ids.push(id.clone());
+            }
+            for child in &node.children {
+                walk(child, ids);
+            }
+        }
+        walk(node, &mut ids);
+        ids
+    }
+
+    #[test]
+    fn two_blocks_do_not_share_select_runtime_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = BlockEditorSpec::new()
+            .with_block_types(vec![
+                BlockTypeDefinition::new("paragraph", "Paragraph", "text"),
+                BlockTypeDefinition::new("heading", "Heading", "heading-1"),
+            ])
+            .with_blocks(vec![
+                EditorBlock::new("block-a", "paragraph"),
+                EditorBlock::new("block-b", "heading"),
+            ]);
+        let node = block_editor(&spec, &ctx);
+        let ids = runtime_ids(&node);
+        let unique: BTreeSet<_> = ids.iter().cloned().collect();
+        assert_eq!(ids.len(), unique.len(), "duplicate runtime_id in {ids:?}");
+        assert!(ids
+            .iter()
+            .any(|id| id == "select:block-editor:block-a:type:trigger"));
+        assert!(ids
+            .iter()
+            .any(|id| id == "select:block-editor:block-b:type:trigger"));
+        assert!(ids
+            .iter()
+            .any(|id| id == "select:block-editor:block-a:add:trigger"));
+        assert!(ids
+            .iter()
+            .any(|id| id == "select:block-editor:block-b:add:trigger"));
+    }
 }

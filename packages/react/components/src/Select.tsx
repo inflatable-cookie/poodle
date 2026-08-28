@@ -18,6 +18,7 @@ import {
   selectTransition,
   type SelectContext,
   type SelectEvent,
+  type SelectOptionState,
   type SelectResult,
 } from "@inflatable-cookie/poodle-core";
 
@@ -207,8 +208,18 @@ export function Select({
         ? await loadOptions({ query: nextQuery.trim() || undefined, value: stateRef.current.currentValue || null, loadKey })
         : [];
       if (requestId !== activeLoadRequestId.current) return;
+      const flattened = flattenSelectOptions(nextOptions as (SelectOption | SelectOptionGroup)[]) as SelectOption[];
+      const mapped: SelectOptionState[] = flattened.map((option) => ({
+        value: option.value,
+        label: option.label,
+        disabled: isSelectOptionDisabled(option),
+      }));
       setLoadedOptions(nextOptions);
       setLoadState("loaded");
+      stateRef.current = { ...stateRef.current, flatOptions: flattened };
+      if (stateRef.current.open) {
+        dispatch({ type: "OPTIONS_CHANGED", options: mapped }, machineContext({ options: mapped }));
+      }
     } catch (error) {
       if (requestId !== activeLoadRequestId.current) return;
       setLoadState("error");

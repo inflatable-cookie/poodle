@@ -15,7 +15,7 @@ use poodle_specs::TimeZoneSelectSpec;
 
 use crate::context::RenderContext;
 use crate::presentation::{rem_to_px, size_height_offset_rem, size_padding_x_offset_rem};
-use crate::select::{select, SelectHandlers};
+use crate::select::{composite_select_scope, select, SelectHandlers};
 
 /// Host callbacks: `on_toggle` (trigger) and `on_change` (chosen zone id),
 /// forwarded to the composed select.
@@ -23,6 +23,7 @@ use crate::select::{select, SelectHandlers};
 pub struct TimeZoneSelectHandlers {
     pub on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub instance_id: Option<String>,
 }
 
 pub fn time_zone_select(
@@ -36,11 +37,11 @@ pub fn time_zone_select(
     let select_spec = spec.to_select_spec();
     let toggle = handlers.on_toggle;
     let change = handlers.on_change;
-    let mut select_handlers = SelectHandlers::new(
-        spec.id
-            .clone()
-            .unwrap_or_else(|| "time-zone-select".to_string()),
-    );
+    let mut select_handlers = SelectHandlers::new(composite_select_scope(
+        handlers.instance_id.as_deref(),
+        spec.id.as_deref().or(spec.aria_label.as_deref()),
+        "time-zone-select",
+    ));
     if toggle.is_some() || change.is_some() {
         select_handlers = select_handlers.on_transition(Arc::new(move |result| {
             for effect in &result.effects {
@@ -134,4 +135,44 @@ pub fn time_zone_select(
         }
     }
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn two_time_zone_selects_do_not_share_runtime_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = TimeZoneSelectSpec::new();
+        let left = time_zone_select(
+            &spec,
+            &ctx,
+            TimeZoneSelectHandlers {
+                instance_id: Some("zone-a".to_string()),
+                ..TimeZoneSelectHandlers::default()
+            },
+        );
+        let right = time_zone_select(
+            &spec,
+            &ctx,
+            TimeZoneSelectHandlers {
+                instance_id: Some("zone-b".to_string()),
+                ..TimeZoneSelectHandlers::default()
+            },
+        );
+        let mut tree = Node::container();
+        tree = tree.child(left).child(right);
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:zone-a:trigger"))
+            .is_some());
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:zone-b:trigger"))
+            .is_some());
+    }
 }

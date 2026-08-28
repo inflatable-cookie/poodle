@@ -426,6 +426,205 @@
       }
     },
     {
+      "name": "query prefers the first enabled match even when the selected option also matches later",
+      "context": {
+        "value": "c",
+        "open": false,
+        "query": "",
+        "highlightedValue": null,
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": true,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "QUERY", "query": "e" },
+      "expect": {
+        "context": { "open": true, "query": "e", "highlightedValue": "a", "value": "c" },
+        "effects": [
+          { "type": "openChanged", "open": true },
+          { "type": "queryChanged", "query": "e" }
+        ]
+      }
+    },
+    {
+      "name": "options change while open reconciles highlight without effects",
+      "context": {
+        "value": "apricot",
+        "open": true,
+        "query": "ap",
+        "highlightedValue": null,
+        "options": [],
+        "clearValue": "",
+        "searchable": true,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": {
+        "type": "OPTIONS_CHANGED",
+        "options": [
+          { "value": "apple", "label": "Apple", "disabled": false },
+          { "value": "apricot", "label": "Apricot", "disabled": false }
+        ]
+      },
+      "expect": {
+        "context": {
+          "open": true,
+          "query": "ap",
+          "highlightedValue": "apple",
+          "value": "apricot"
+        },
+        "effects": []
+      }
+    },
+    {
+      "name": "options change while closed does not open",
+      "context": {
+        "value": "",
+        "open": false,
+        "query": "",
+        "highlightedValue": null,
+        "options": [],
+        "clearValue": "",
+        "searchable": true,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": {
+        "type": "OPTIONS_CHANGED",
+        "options": [{ "value": "a", "label": "Apple", "disabled": false }]
+      },
+      "expect": {
+        "context": { "open": false, "highlightedValue": null, "query": "" },
+        "effects": []
+      }
+    },
+    {
+      "name": "arrow prev while closed opens without a second move",
+      "context": {
+        "value": "c",
+        "open": false,
+        "query": "",
+        "highlightedValue": null,
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "HIGHLIGHT_PREV" },
+      "expect": {
+        "context": { "open": true, "highlightedValue": "c" },
+        "effects": [{ "type": "openChanged", "open": true }]
+      }
+    },
+    {
+      "name": "arrow prev skips disabled options and clamps without wrapping",
+      "context": {
+        "value": "c",
+        "open": true,
+        "query": "",
+        "highlightedValue": "c",
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "HIGHLIGHT_PREV" },
+      "expect": { "context": { "open": true, "highlightedValue": "a" }, "effects": [] }
+    },
+    {
+      "name": "home jumps to the first enabled option",
+      "context": {
+        "value": "c",
+        "open": true,
+        "query": "",
+        "highlightedValue": "c",
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "HIGHLIGHT_FIRST" },
+      "expect": { "context": { "highlightedValue": "a" }, "effects": [] }
+    },
+    {
+      "name": "end jumps to the last enabled option",
+      "context": {
+        "value": "a",
+        "open": true,
+        "query": "",
+        "highlightedValue": "a",
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "HIGHLIGHT_LAST" },
+      "expect": { "context": { "highlightedValue": "c" }, "effects": [] }
+    },
+    {
+      "name": "home while closed is inert",
+      "context": {
+        "value": "c",
+        "open": false,
+        "query": "",
+        "highlightedValue": null,
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "HIGHLIGHT_FIRST" },
+      "expect": { "context": { "open": false, "highlightedValue": null }, "effects": [] }
+    },
+    {
+      "name": "end while closed is inert",
+      "context": {
+        "value": "a",
+        "open": false,
+        "query": "",
+        "highlightedValue": null,
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "HIGHLIGHT_LAST" },
+      "expect": { "context": { "open": false, "highlightedValue": null }, "effects": [] }
+    },
+    {
       "name": "arrow next while closed opens without a second move",
       "context": {
         "value": "c",

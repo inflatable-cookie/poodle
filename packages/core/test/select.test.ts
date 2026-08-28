@@ -9,6 +9,7 @@ import {
   selectFreeformEnabled,
   selectOpenHighlightIndex,
   selectOpenHighlightValue,
+  selectQueryHighlightValue,
   selectTransition,
   type SelectContext,
 } from "../src/select.ts";
@@ -98,6 +99,18 @@ describe("select helpers", () => {
     ).toBeNull();
   });
 
+  test("query highlight is the first enabled visible option, even when the selected option also matches later", () => {
+    expect(selectQueryHighlightValue(ctx({ value: "c" }))).toBe("a");
+    expect(selectQueryHighlightValue(ctx({ value: "c", query: "ch" }))).toBe("c");
+    expect(
+      selectQueryHighlightValue(
+        ctx({
+          options: [{ value: "b", label: "Banana", disabled: true }],
+        }),
+      ),
+    ).toBeNull();
+  });
+
   test("committed query is the selected label, else empty", () => {
     expect(selectCommittedQuery(ctx({ value: "c" }))).toBe("Cherry");
     expect(selectCommittedQuery(ctx())).toBe("");
@@ -118,5 +131,51 @@ describe("selectTransition", () => {
   test("Home and End while closed are inert", () => {
     expect(selectTransition(ctx(), { type: "HIGHLIGHT_FIRST" }).effects).toEqual([]);
     expect(selectTransition(ctx(), { type: "HIGHLIGHT_LAST" }).effects).toEqual([]);
+  });
+
+  test("query prefers the first enabled match when the selected option also matches later", () => {
+    const result = selectTransition(ctx({ value: "c", searchable: true }), {
+      type: "QUERY",
+      query: "e",
+    });
+
+    expect(result.context.highlightedValue).toBe("a");
+    expect(result.context.value).toBe("c");
+  });
+
+  test("options change while open reconciles highlight without query or open effects", () => {
+    const result = selectTransition(
+      ctx({
+        value: "apricot",
+        open: true,
+        query: "ap",
+        highlightedValue: null,
+        options: [],
+        searchable: true,
+      }),
+      {
+        type: "OPTIONS_CHANGED",
+        options: [
+          { value: "apple", label: "Apple", disabled: false },
+          { value: "apricot", label: "Apricot", disabled: false },
+        ],
+      },
+    );
+
+    expect(result.context.open).toBe(true);
+    expect(result.context.query).toBe("ap");
+    expect(result.context.highlightedValue).toBe("apple");
+    expect(result.effects).toEqual([]);
+  });
+
+  test("options change while closed does not open", () => {
+    const result = selectTransition(ctx({ open: false, options: [] }), {
+      type: "OPTIONS_CHANGED",
+      options: [{ value: "a", label: "Apple", disabled: false }],
+    });
+
+    expect(result.context.open).toBe(false);
+    expect(result.context.highlightedValue).toBeNull();
+    expect(result.effects).toEqual([]);
   });
 });

@@ -602,6 +602,7 @@ export {
   selectVisibleOptions,
   selectEnabledVisibleValues,
   selectCommittedQuery,
+  selectQueryHighlightValue,
   selectOpenHighlightValue,
   selectTransition,
   type SelectOptionLike,
