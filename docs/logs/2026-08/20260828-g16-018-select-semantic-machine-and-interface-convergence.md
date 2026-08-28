@@ -82,10 +82,12 @@ compile maintenance only.
 
 QUERY highlight is the first enabled visible match, not the selected option.
 `OPTIONS_CHANGED` reconciles highlight after lazy loads without a second
-`queryChanged`. Composite Select scopes are instance-unique (BlockEditor uses
-`block.id`; Pagination, OrderBy, RelationPicker, and TimeZoneSelect take
-optional handler `instance_id` plus authored spec labels). Paired vectors
-cover `HIGHLIGHT_PREV`/`FIRST`/`LAST` and `OPTIONS_CHANGED`.
+`queryChanged`. Composite Select scopes are instance-unique: BlockEditor uses
+`block.id`; Pagination, OrderBy, RelationPicker, TimeZoneSelect, and
+DateTimeZonePicker require handler `instance_id` with no colliding fallback.
+GPUI wrappers and Jetstream preview construction take that identity the same
+way FilterBuilder does. Paired vectors cover `HIGHLIGHT_PREV`/`FIRST`/`LAST`
+and `OPTIONS_CHANGED`.
 
 ## Validation
 

@@ -72,19 +72,6 @@ fn select_option_id(scope: &str, value: &str) -> String {
     format!("select:{scope}:option:{value}")
 }
 
-pub(crate) fn composite_select_scope(
-    instance_id: Option<&str>,
-    authored: Option<&str>,
-    fallback: &str,
-) -> String {
-    instance_id
-        .map(str::trim)
-        .filter(|value| !value.is_empty())
-        .or_else(|| authored.map(str::trim).filter(|value| !value.is_empty()))
-        .unwrap_or(fallback)
-        .to_string()
-}
-
 fn emit_select(spec: &SelectSpec, handlers: &SelectHandlers, event: SelectEvent) {
     let Some(handler) = &handlers.on_transition else {
         return;
@@ -828,22 +815,5 @@ mod tests {
         let node = select(&spec, &ctx, &SelectHandlers::new("ff"));
         assert!(!node.has_text("Search…"));
         assert!(!spec.shows_search_input());
-    }
-
-    #[test]
-    fn composite_scope_prefers_instance_id_then_authored_label() {
-        assert_eq!(
-            composite_select_scope(Some("host"), Some("label"), "fallback"),
-            "host"
-        );
-        assert_eq!(
-            composite_select_scope(None, Some("label"), "fallback"),
-            "label"
-        );
-        assert_eq!(
-            composite_select_scope(Some(""), Some("label"), "fallback"),
-            "label"
-        );
-        assert_eq!(composite_select_scope(None, None, "fallback"), "fallback");
     }
 }

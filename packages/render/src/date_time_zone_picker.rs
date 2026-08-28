@@ -24,13 +24,28 @@ use crate::time_zone_select::{time_zone_select, TimeZoneSelectHandlers};
 
 /// Host callbacks: the shared picker trio plus zone toggle/change forwarded
 /// to the composed time-zone select.
-#[derive(Default)]
+///
+/// `instance_id` is the lifetime-stable scope for the nested TimeZoneSelect.
 pub struct DateTimeZonePickerHandlers {
+    pub instance_id: String,
     pub on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_select: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_navigate: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     pub on_zone_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_zone_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+}
+
+impl DateTimeZonePickerHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        Self {
+            instance_id: instance_id.into(),
+            on_toggle: None,
+            on_select: None,
+            on_navigate: None,
+            on_zone_toggle: None,
+            on_zone_change: None,
+        }
+    }
 }
 
 pub fn date_time_zone_picker(
@@ -152,7 +167,7 @@ pub fn date_time_zone_picker(
                 TimeZoneSelectHandlers {
                     on_toggle: handlers.on_zone_toggle.clone(),
                     on_change: handlers.on_zone_change.clone(),
-                    instance_id: spec.aria_label.clone(),
+                    instance_id: handlers.instance_id.clone(),
                 },
             ),
         );

@@ -100,6 +100,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_selection_mode(SelectionMode::Multiple)
                 .with_state(BrowseState::Ready),
             theme,
+            "relation-picker-1",
         ),
     ));
 
@@ -113,6 +114,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_selection_mode(SelectionMode::Single)
                 .with_state(BrowseState::Ready),
             theme,
+            "relation-picker-2",
         ),
     ));
 
@@ -125,6 +127,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_selection_mode(SelectionMode::Multiple)
                 .with_state(BrowseState::Loading),
             theme,
+            "relation-picker-3",
         ),
     ));
 
@@ -140,6 +143,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_selection_mode(SelectionMode::Multiple)
                 .with_state(BrowseState::Ready),
             theme,
+            "relation-picker-4",
         ),
     ));
 
@@ -156,6 +160,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_size_role(SemanticControlSizeRole::Chrome)
                 .with_density(ControlDensity::Comfortable),
             theme,
+            "relation-picker-5",
         ),
     ));
 
@@ -195,6 +200,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_show_footer(true)
                 .with_show_selection_summary(true),
             theme,
+            "relation-picker-6",
         ),
     ));
 
@@ -208,6 +214,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .with_selection_mode(SelectionMode::Multiple)
                 .with_state(BrowseState::Empty),
             theme,
+            "relation-picker-7",
         ),
     ));
 
@@ -232,6 +239,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_state(BrowseState::Ready)
                     .with_size(size),
                 theme,
+                "relation-picker-8",
             ),
         ));
     }
@@ -255,6 +263,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_state(BrowseState::Ready)
                     .with_density(density),
                 theme,
+                "relation-picker-9",
             ),
         ));
     }
