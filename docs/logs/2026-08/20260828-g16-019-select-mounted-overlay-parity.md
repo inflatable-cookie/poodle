@@ -140,3 +140,20 @@ Follow-up validation:
 - `select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds`
 - `pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard`
 - `git diff --check origin/main...HEAD`
+
+Second review follow-up:
+
+1. Search selection keeps `(anchor, head)` order. `search_selection_range()`
+   is paint/range only. Mounted Shift+Arrow after a backward rebuild shrinks
+   the head, not a swapped anchor.
+2. Home/End on the search row highlight first/last option. Mounted End →
+   cherry, Home → apple. Edit keys skip home/end so they do not move the
+   caret.
+3. Short Select menus stay Visible. Long menus set Scroll when estimated
+   content exceeds `size.menu.maxHeight`. GPUI now resolves that overlay
+   size token (it was 0). `a_long_select_menu_clips_overflowing_option_rows`
+   is a production Select: last row does not activate; wheel on the listbox
+   is the scroll path.
+
+Validation: render Select 28, GPUI overlay + Select + long clip + Pagination,
+GPUI overlay token mapping, `git diff --check`.

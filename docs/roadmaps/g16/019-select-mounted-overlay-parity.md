@@ -237,7 +237,8 @@ preview/QA, release, tag, publication, or workflow-mutation selectors.
 ## Continuation
 
 Complete. Ledger is 47 mounted / 127 missing. PR #94 review follow-up
-covers one-result blur, host-authored search caret, declared overlay
-overflow, and overlay surface bounds. Next task is an orchestrator
-checkpoint after operator-authorized merge. Do not choose or compile
-another lane from this card.
+covers one-result blur, host-authored search caret (anchor/head),
+Home/End highlight, declared overlay overflow with a production long-menu
+cap, and overlay surface bounds. Next task is an orchestrator checkpoint
+after operator-authorized merge. Do not choose or compile another lane
+from this card.

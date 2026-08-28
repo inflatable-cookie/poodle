@@ -18,7 +18,8 @@ use poodle_headless::select::{
 };
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, DismissReason, FocusRing, LayoutDirection,
-    LayoutSizing, MainAxisAlignment, Node, NodeKey, NodePosition, NodeRole, StylePatch,
+    LayoutOverflow, LayoutSizing, MainAxisAlignment, Node, NodeKey, NodePosition, NodeRole,
+    StylePatch,
 };
 use poodle_specs::{SelectSpec, ValidationState};
 
@@ -216,7 +217,6 @@ fn wire_open_keys(
     spec: &SelectSpec,
     handlers: &SelectHandlers,
     focus_search: bool,
-    home_end_highlight: bool,
 ) {
     if spec.is_disabled || handlers.on_transition.is_none() {
         return;
@@ -229,7 +229,7 @@ fn wire_open_keys(
             NodeKey::ArrowUp | NodeKey::ArrowDown => {
                 emit_nav(&spec_keys, &handlers_keys, key);
             }
-            NodeKey::Home | NodeKey::End if spec_keys.current_open() && home_end_highlight => {
+            NodeKey::Home | NodeKey::End if spec_keys.current_open() => {
                 emit_nav(&spec_keys, &handlers_keys, key);
             }
             _ => return None,
@@ -472,7 +472,7 @@ fn build_trigger(
         wire_dismiss(&mut el, spec, handlers);
     }
     if !searchable_editor {
-        wire_open_keys(&mut el, spec, handlers, spec.searchable, true);
+        wire_open_keys(&mut el, spec, handlers, spec.searchable);
     }
 
     if !is_disabled && handlers.on_transition.is_some() {
@@ -571,6 +571,29 @@ fn build_panel(
         .filter(|w| *w > 0.0)
         .unwrap_or(token_min_width);
     let max_height = ctx.theme().resolve_space("size.menu.maxHeight");
+    let current_value = spec.current_value();
+    let visible_values: Vec<String> = select_visible_options(&spec.select_context())
+        .into_iter()
+        .map(|option| option.value.clone())
+        .collect();
+    let filtered: Vec<&poodle_specs::ChoiceOption> = spec
+        .options
+        .iter()
+        .filter(|opt| visible_values.iter().any(|value| value == &opt.value))
+        .collect();
+    let header_py = rem_to_px(0.25);
+    let header_font = rem_to_px(size_font_rem(resolve_supporting_visual_size(
+        effective_size,
+    )));
+    let content_height = estimated_panel_content_height(
+        spec,
+        &filtered,
+        panel_py,
+        row_height,
+        header_py,
+        header_font,
+        font_size,
+    );
 
     let mut panel = Node::container();
     {
@@ -587,9 +610,12 @@ fn build_panel(
         s.descriptor.corner_radii.bottom_left = surface_radius;
         s.min_width = Some(min_width);
         s.max_height = Some(max_height);
-        // Visible: Taffy overflow:hidden on an auto-height overlay zeroes
-        // content height unless max_height binds. Short menus stay
-        // content-sized; the capped-overflow regression covers Hidden.
+        // Taffy Hidden/Scroll on an auto-height overlay zeroes content unless
+        // max_height binds. Short menus stay Visible and content-sized; long
+        // menus set Scroll so the cap binds, matching the web listbox.
+        if max_height > 0.0 && content_height > max_height {
+            s.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
+        }
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.padding.top = panel_py;
         s.descriptor.layout.spacing.padding.bottom = panel_py;
@@ -624,16 +650,6 @@ fn build_panel(
         ));
     }
 
-    let current_value = spec.current_value();
-    let visible_values: Vec<String> = select_visible_options(&spec.select_context())
-        .into_iter()
-        .map(|option| option.value.clone())
-        .collect();
-    let filtered: Vec<&poodle_specs::ChoiceOption> = spec
-        .options
-        .iter()
-        .filter(|opt| visible_values.iter().any(|value| value == &opt.value))
-        .collect();
     let accent = ctx.theme().resolve_color("color.accent.base");
     let highlight_fill = with_alpha(accent, 0.14);
 
@@ -660,10 +676,6 @@ fn build_panel(
 
         for group_key in &seen_groups {
             if let Some(ref name) = group_key {
-                let header_py = rem_to_px(0.25);
-                let header_font = rem_to_px(size_font_rem(resolve_supporting_visual_size(
-                    effective_size,
-                )));
                 let mut header_label = Node::text(name.as_str());
                 {
                     let s = &mut header_label.style;
@@ -825,7 +837,7 @@ fn build_search_row(
     } else {
         query.clone()
     };
-    let (selection_start, selection_end) = spec.search_selection_range();
+    let (selection_start, selection_end) = spec.search_selection();
     let search_id = select_search_focus_id(&handlers.instance_scope);
     let value_id = format!("{search_id}-value");
     let selection_fill = ctx.theme().resolve_color("color.accent.base");
@@ -841,6 +853,7 @@ fn build_search_row(
         s.descriptor.layout.height = LayoutSizing::Fixed(row_height);
         s.descriptor.cursor = CursorHint::Text;
         s.fill_width = true;
+        s.flex_shrink_zero = true;
     }
     stamp_identity(&mut search_row, search_id.clone());
     search_row.interaction.dismiss_layer = Some(select_layer_id(&handlers.instance_scope));
@@ -885,7 +898,7 @@ fn build_search_row(
 
     search_row.interaction.focusable = true;
     search_row.style.focus_ring = Some(standard_focus_ring(ctx));
-    wire_open_keys(&mut search_row, spec, handlers, false, false);
+    wire_open_keys(&mut search_row, spec, handlers, false);
 
     if handlers.on_transition.is_some() {
         let current = query.clone();
@@ -904,7 +917,7 @@ fn build_search_row(
                 }
                 poodle_node::SelectGranularity::Line => (0, current.chars().count()),
             };
-            if (start.min(end), start.max(end)) != selection {
+            if (start, end) != selection {
                 emit_search_selection(&spec_select, &handlers_select, (start, end));
             }
         });
@@ -917,7 +930,7 @@ fn build_search_row(
         let handlers_edit = handlers.clone();
         let current = query.clone();
         search_row.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
-            if matches!(key, "up" | "down") {
+            if matches!(key, "up" | "down" | "home" | "end") {
                 return;
             }
             let Some(outcome) = poodle_headless::text_input::edit_transition(
@@ -966,6 +979,36 @@ fn build_search_row(
     }
 
     search_row
+}
+
+fn estimated_panel_content_height(
+    spec: &SelectSpec,
+    filtered: &[&poodle_specs::ChoiceOption],
+    panel_py: f32,
+    row_height: f32,
+    header_py: f32,
+    header_font: f32,
+    font_size: f32,
+) -> f32 {
+    let mut height = panel_py * 2.0;
+    if spec.shows_search_input() {
+        height += row_height;
+    }
+    if filtered.is_empty() {
+        return height + rem_to_px(0.5) * 2.0 + font_size;
+    }
+    let mut seen_groups: Vec<Option<&str>> = Vec::new();
+    for option in filtered {
+        let key = option.group.as_deref();
+        if !seen_groups.contains(&key) {
+            seen_groups.push(key);
+            if key.is_some() {
+                height += header_py * 2.0 + header_font;
+            }
+        }
+        height += row_height;
+    }
+    height
 }
 
 /// Parse a CSS length ("12rem", "200px") to logical pixels; 0.0 on failure.
@@ -1061,7 +1104,31 @@ mod tests {
             NodePosition::Absolute { top: Some(t), left: Some(0.0), .. } if t > 0.0
         ));
         assert_eq!(panel.a11y.role, Some(NodeRole::ListBox));
+        assert_eq!(
+            panel.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Visible,
+            "short menus stay content-sized"
+        );
         assert!(matches!(node.position, NodePosition::Relative));
+    }
+
+    #[test]
+    fn a_long_open_panel_declares_scroll_overflow() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let options = (0..20)
+            .map(|index| ChoiceOption::new(format!("o{index}"), format!("Option {index}")))
+            .collect();
+        let spec = SelectSpec::new(options).with_open(true);
+        let node = select(&spec, &ctx, &SelectHandlers::new("long"));
+        let panel = node
+            .find(&|n| n.style.overlay)
+            .expect("an overlay panel exists");
+        assert_eq!(
+            panel.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Scroll
+        );
+        assert!(panel.style.max_height.is_some());
     }
 
     #[test]
@@ -1411,6 +1478,76 @@ mod tests {
         assert_eq!(captured.len(), 1);
         assert_eq!(captured[0].0.query, "bxan");
         assert_eq!(captured[0].2, Some((2, 2)));
+    }
+
+    #[test]
+    fn search_shift_arrow_keeps_a_backward_selection_after_rebuild() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_search_query("ban")
+            .with_search_selection(3, 1)
+            .with_open(true);
+        let (node, seen) = select_with_sink(spec, "back-sel");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:back-sel:search"))
+            .expect("search editor");
+        assert_eq!(
+            search.caret.map(|caret| caret.selection),
+            Some((3, 1)),
+            "host-authored backward selection is not normalized for edit"
+        );
+        search.interaction.on_edit_key.as_ref().expect("edit")(
+            "left",
+            poodle_node::NodeModifiers {
+                shift: true,
+                ..poodle_node::NodeModifiers::default()
+            },
+        );
+        let captured = seen.lock().unwrap();
+        assert_eq!(captured.len(), 1);
+        assert_eq!(captured[0].0.query, "ban");
+        assert_eq!(
+            captured[0].2,
+            Some((3, 0)),
+            "Shift+Arrow moves the head, not a swapped anchor"
+        );
+    }
+
+    #[test]
+    fn search_home_and_end_highlight_first_and_last_options() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_open(true)
+            .with_highlighted_value("banana");
+        let (node, seen) = select_with_sink(spec, "jump");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:jump:search"))
+            .expect("search editor");
+        (search.interaction.on_key.as_ref().expect("keys"))(
+            NodeKey::End,
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(
+            seen.lock().unwrap()[0].0.highlighted_value.as_deref(),
+            Some("cherry")
+        );
+        seen.lock().unwrap().clear();
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_open(true)
+            .with_highlighted_value("banana");
+        let (node, seen) = select_with_sink(spec, "jump-home");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:jump-home:search"))
+            .expect("search editor");
+        (search.interaction.on_key.as_ref().expect("keys"))(
+            NodeKey::Home,
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(
+            seen.lock().unwrap()[0].0.highlighted_value.as_deref(),
+            Some("apple")
+        );
     }
 
     #[test]

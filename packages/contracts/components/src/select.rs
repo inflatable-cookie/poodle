@@ -80,9 +80,12 @@ pub struct SelectSpec {
     pub search_query: Option<String>,
     /// Host-authored highlighted option value. `None` means no highlight.
     pub highlighted_value: Option<String>,
-    /// Host-authored caret/selection in the compact search editor, as
-    /// character offsets into `search_query`.
+    /// Host-authored search-editor `anchor` as a character offset into
+    /// `search_query`. Independent of `search_selection_end`; a backward
+    /// selection has `end < start`.
     pub search_selection_start: usize,
+    /// Host-authored search-editor `head` (the moving end) as a character
+    /// offset into `search_query`.
     pub search_selection_end: usize,
 }
 
@@ -312,11 +315,19 @@ impl SelectSpec {
         self
     }
 
-    /// Ordered `(start, end)` pair, clamped to the current search query.
-    pub fn search_selection_range(&self) -> (usize, usize) {
+    /// Host-authored `(anchor, head)` pair, clamped to the current search
+    /// query without swapping direction.
+    pub fn search_selection(&self) -> (usize, usize) {
         let len = self.search_query.as_deref().unwrap_or("").chars().count();
-        let a = self.search_selection_start.min(len);
-        let b = self.search_selection_end.min(len);
+        (
+            self.search_selection_start.min(len),
+            self.search_selection_end.min(len),
+        )
+    }
+
+    /// Ordered `(start, end)` pair for paint and range replacement.
+    pub fn search_selection_range(&self) -> (usize, usize) {
+        let (a, b) = self.search_selection();
         (a.min(b), a.max(b))
     }
 

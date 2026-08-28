@@ -330,8 +330,21 @@ impl<'a> HeadlessDriver<'a> {
 
     /// Scroll the mounted box through GPUI's real wheel dispatch.
     pub fn scroll_vertical(&mut self, delta_y: f32) {
+        self.scroll_vertical_at(mount_box_center(), delta_y);
+    }
+
+    /// Wheel at a named element's painted center, or the mount box if it has
+    /// no bounds yet.
+    pub fn scroll_vertical_id(&mut self, element_id: &str, delta_y: f32) {
+        let position = poodle_gpui_node_backend::bounds_for(element_id)
+            .map(|bounds| bounds.center())
+            .unwrap_or_else(mount_box_center);
+        self.scroll_vertical_at(position, delta_y);
+    }
+
+    fn scroll_vertical_at(&mut self, position: Point<Pixels>, delta_y: f32) {
         self.cx.simulate_event(ScrollWheelEvent {
-            position: mount_box_center(),
+            position,
             delta: ScrollDelta::Pixels(point(px(0.0), px(delta_y))),
             ..Default::default()
         });

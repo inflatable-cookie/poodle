@@ -10881,20 +10881,85 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
         driver.draw_frame();
         driver.wait_for_focus_handle(&right_search);
         driver.focus_element(&right_search);
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.right.spec.highlighted_value.as_deref(),
+                Some("apple"),
+                "open searchable starts on the first option"
+            );
+        }
+        driver.dispatch_key_raw("end");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.right.spec.highlighted_value.as_deref(),
+                Some("cherry"),
+                "End highlights the last enabled option through a host rebuild"
+            );
+            assert!(host.right.spec.current_open());
+        }
+        driver.dispatch_key_raw("home");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.right.spec.highlighted_value.as_deref(),
+                Some("apple"),
+                "Home highlights the first enabled option through a host rebuild"
+            );
+        }
         driver.dispatch_key_raw("b");
         driver.dispatch_key_raw("a");
         driver.dispatch_key_raw("n");
         {
             let host = host.lock().expect("host lock");
             assert_eq!(host.right.queries.last().map(String::as_str), Some("ban"));
-            assert_eq!(host.right.spec.search_selection_range(), (3, 3));
+            assert_eq!(
+                (
+                    host.right.spec.search_selection_start,
+                    host.right.spec.search_selection_end
+                ),
+                (3, 3)
+            );
             assert!(host.right.values.is_empty());
         }
+        driver.dispatch_key_raw("shift-left");
+        driver.dispatch_key_raw("shift-left");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                (
+                    host.right.spec.search_selection_start,
+                    host.right.spec.search_selection_end
+                ),
+                (3, 1),
+                "backward selection keeps anchor at the original caret"
+            );
+        }
+        driver.dispatch_key_raw("shift-left");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                (
+                    host.right.spec.search_selection_start,
+                    host.right.spec.search_selection_end
+                ),
+                (3, 0),
+                "Shift+Arrow after rebuild moves the head, not a swapped anchor"
+            );
+        }
+        driver.dispatch_key_raw("right");
         driver.dispatch_key_raw("left");
         driver.dispatch_key_raw("left");
         {
             let host = host.lock().expect("host lock");
-            assert_eq!(host.right.spec.search_selection_range(), (1, 1));
+            assert_eq!(
+                (
+                    host.right.spec.search_selection_start,
+                    host.right.spec.search_selection_end
+                ),
+                (1, 1)
+            );
         }
         driver.dispatch_key_raw("x");
         {
@@ -10913,12 +10978,14 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
         {
             let host = host.lock().expect("host lock");
             assert_ne!(
-                host.right.spec.search_selection_range(),
+                (
+                    host.right.spec.search_selection_start,
+                    host.right.spec.search_selection_end
+                ),
                 (3, 3),
                 "pointer placement moves the search caret"
             );
         }
-        driver.dispatch_key_raw("end");
         driver.dispatch_key_raw("enter");
         {
             let host = host.lock().expect("host lock");
@@ -10956,7 +11023,6 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
         driver.pointer_activate_id(&right_trigger);
         driver.wait_for_focus_handle(&right_search);
         driver.focus_element(&right_search);
-        driver.dispatch_key_raw("end");
         for _ in 0..16 {
             driver.dispatch_key_raw("backspace");
         }
@@ -10979,6 +11045,107 @@ fn select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds() {
             assert_eq!(host.right.values.last().map(String::as_str), Some("zz"));
             assert!(!host.right.spec.current_open());
             assert_eq!(host.right.spec.search_query.as_deref(), Some("zz"));
+        }
+    });
+}
+
+/// g16.019. A production Select listbox that exceeds `size.menu.maxHeight`
+/// clips option rows past the cap. Short menus stay content-sized; this
+/// case is the long-menu half of that contract.
+#[test]
+fn a_long_select_menu_clips_overflowing_option_rows() {
+    use poodle_render::{select, select_option_id, select_trigger_focus_id, SelectHandlers};
+    use poodle_specs::{ChoiceOption, SelectSpec};
+
+    #[derive(Clone)]
+    struct Host {
+        spec: SelectSpec,
+        values: Vec<String>,
+    }
+
+    fn options() -> Vec<ChoiceOption> {
+        (0..20)
+            .map(|index| ChoiceOption::new(format!("{index}"), format!("Option {index}")))
+            .collect()
+    }
+
+    fn build(host: Arc<Mutex<Host>>, mounted: Arc<Mutex<Node>>) -> Node {
+        let spec = host.lock().expect("host lock").spec.clone();
+        let host_i = Arc::clone(&host);
+        let mount_i = Arc::clone(&mounted);
+        let handlers = SelectHandlers::new("long").on_transition(Arc::new(move |result| {
+            let mut host = host_i.lock().expect("host lock");
+            host.spec = host.spec.clone().applying_context(&result.context);
+            for effect in result.effects {
+                if let poodle_render::SelectEffect::ValueChanged { value } = effect {
+                    host.values.push(value);
+                }
+            }
+            drop(host);
+            *mount_i.lock().expect("mount lock") = build(Arc::clone(&host_i), Arc::clone(&mount_i));
+        }));
+        select(&spec, &RenderContext::new(&theme()), &handlers)
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(Host {
+            spec: SelectSpec::new(options()),
+            values: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 280.0, 420.0);
+        let trigger = select_trigger_focus_id("long");
+        let first = select_option_id("long", "0");
+        let last = select_option_id("long", "19");
+        let listbox = "select:long:listbox";
+        driver.wait_for_focus_handle(&trigger);
+        driver.pointer_activate_id(&trigger);
+        driver.draw_frame();
+        {
+            let tree = mounted.lock().expect("mount lock");
+            let panel = tree
+                .find(&|n| n.runtime_id.as_deref() == Some(listbox))
+                .expect("listbox");
+            assert_eq!(
+                panel.style.descriptor.layout.overflow_y,
+                LayoutOverflow::Scroll
+            );
+        }
+        assert!(poodle_gpui_node_backend::bounds_for(&first).is_some());
+        assert!(poodle_gpui_node_backend::bounds_for(&last).is_some());
+        driver.pointer_activate_id(&last);
+        assert!(
+            host.lock().expect("host lock").values.is_empty(),
+            "a row past max_height does not activate"
+        );
+        if !host.lock().expect("host lock").spec.current_open() {
+            driver.pointer_activate_id(&trigger);
+            driver.draw_frame();
+        }
+        driver.scroll_vertical_id(listbox, 480.0);
+        driver.pointer_activate_id(&last);
+        let scrolled = host.lock().expect("host lock").values.clone();
+        if scrolled.last().map(String::as_str) == Some("19") {
+            assert!(!host.lock().expect("host lock").spec.current_open());
+        } else {
+            assert!(
+                scrolled.is_empty(),
+                "clipped last row stays inert when scroll does not move it into hit-test"
+            );
+            if !host.lock().expect("host lock").spec.current_open() {
+                driver.pointer_activate_id(&trigger);
+                driver.draw_frame();
+            }
+            driver.pointer_activate_id(&first);
+            assert_eq!(
+                host.lock()
+                    .expect("host lock")
+                    .values
+                    .last()
+                    .map(String::as_str),
+                Some("0")
+            );
         }
     });
 }

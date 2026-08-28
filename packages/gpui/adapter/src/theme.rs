@@ -259,6 +259,13 @@ impl GpuiThemeProvider {
             "size.list.grid.minItemWidth" => {
                 typed::semantic::SIZE_LIST_GRID_MIN_ITEM_WIDTH.as_f32()
             }
+            // Overlay dimensions. Unknown space tokens resolve to 0, which
+            // makes a Select listbox `max-height: 0` and collapses it.
+            "size.menu.maxHeight" => typed::semantic::SIZE_MENU_MAX_HEIGHT.as_f32(),
+            "size.menu.minWidth" => typed::semantic::SIZE_MENU_MIN_WIDTH.as_f32(),
+            "size.popover.maxWidth" => typed::semantic::SIZE_POPOVER_MAX_WIDTH.as_f32(),
+            "size.hoverCard.maxWidth" => typed::semantic::SIZE_HOVER_CARD_MAX_WIDTH.as_f32(),
+            "size.select.minWidth" => typed::semantic::SIZE_SELECT_MIN_WIDTH.as_f32(),
             "icon.size.default" => typed::semantic::ICON_SIZE_DEFAULT.as_f32(),
             // Typography sizes
             "typography.body.size" => typed::semantic::TYPOGRAPHY_BODY_SIZE.as_f32(),
@@ -384,6 +391,13 @@ mod tests {
         let space = theme.resolve_space(semantic::SPACE_STACK_MD);
         // 0.75rem = 12px
         assert_eq!(space, 12.0);
+    }
+
+    #[test]
+    fn overlay_size_tokens_do_not_resolve_to_zero() {
+        let theme = GpuiThemeProvider::default();
+        assert!(theme.resolve_space(semantic::SIZE_MENU_MAX_HEIGHT) > 0.0);
+        assert!(theme.resolve_space(semantic::SIZE_SELECT_MIN_WIDTH) > 0.0);
     }
 
     #[test]
