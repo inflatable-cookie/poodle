@@ -22,6 +22,9 @@
  * kind because the adapter already holds the session (target, position,
  * operation) and, for a terminal announcement, the `emitDropResult` that
  * immediately precedes it.
+ *
+ * Session identity is caller-supplied and single-use. See `DragSession.sessionId`
+ * — it is the one rule the kernel cannot enforce for you.
  */
 
 import type { TransitionResult } from "./machine";
@@ -93,6 +96,15 @@ export type DragAnnouncementKind =
   | "cancelled";
 
 export interface DragSession {
+  /**
+   * Caller-supplied and single-use. A `sessionId` must stay unique for as long
+   * as any asynchronous completion created for it can still arrive — in
+   * practice, for the lifetime of the surface. The kernel rejects a stale
+   * completion by comparing this id, so it has no way to tell two sessions
+   * apart that share one: reusing an id after a session ended, cancelled, and
+   * reset lets a late `PREPARED` from the first arm the second. Mint a fresh
+   * id for every `PREPARE`; never recycle one.
+   */
   sessionId: string;
   sourceId: string;
   subject: DragSubject;
@@ -108,6 +120,7 @@ export interface DragSessionContext {
 
 export type DragSessionEvent =
   | {
+      /** `sessionId` must be freshly minted; see `DragSession.sessionId`. */
       type: "PREPARE";
       sessionId: string;
       sourceId: string;

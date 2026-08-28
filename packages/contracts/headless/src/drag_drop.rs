@@ -16,6 +16,10 @@
 //! `Dragging -> Dropping`, and the terminal quartet only on the single
 //! transition into `Ended` or `Cancelled`. A repeat of any of those events
 //! arrives in a phase that no longer accepts it and is inert.
+//!
+//! Session identity is caller-supplied and single-use. See
+//! [`DragSession::session_id`] — it is the one rule the kernel cannot enforce
+//! for you.
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DragOperation {
@@ -101,6 +105,13 @@ pub enum DragAnnouncementKind {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DragSession {
+    /// Caller-supplied and single-use. A session id must stay unique for as
+    /// long as any asynchronous completion created for it can still arrive —
+    /// in practice, for the lifetime of the surface. The kernel rejects a
+    /// stale completion by comparing this id, so it has no way to tell two
+    /// sessions apart that share one: reusing an id after a session ended,
+    /// cancelled, and reset lets a late `Prepared` from the first arm the
+    /// second. Mint a fresh id for every `Prepare`; never recycle one.
     pub session_id: String,
     pub source_id: String,
     pub subject: DragSubject,
@@ -117,6 +128,7 @@ pub struct DragSessionContext {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DragSessionEvent {
+    /// `session_id` must be freshly minted; see [`DragSession::session_id`].
     Prepare {
         session_id: String,
         source_id: String,

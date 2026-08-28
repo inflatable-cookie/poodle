@@ -285,7 +285,7 @@ mounted and 128 → 127 missing. Known-delta totals stay 115 / 60.
 `g16.021` landed the drag programme's foundation: one renderer-neutral drag
 session implemented once per language pair (`packages/core/src/drag-drop.ts`
 and `poodle_headless::drag_drop`), proved by one hand-authored `dragDrop`
-corpus — 25 session cases over 141 ordered steps plus 7 arbitration cases —
+corpus — 25 session cases over 139 ordered steps plus 7 arbitration cases —
 that both conformance runners execute. Lifecycle, session identity, intent,
 cancellation, nested-target arbitration, exactly-once terminal effects, and the
 single-use session-id rule are settled. No adapter, component, or ledger cell

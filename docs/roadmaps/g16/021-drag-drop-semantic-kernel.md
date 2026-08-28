@@ -1,6 +1,6 @@
 # g16.021 — Drag-And-Drop Semantic Kernel
 
-Status: complete — PR #96 open for orchestrator review; merge is operator-authorised
+Status: complete — PR #96 open for orchestrator review; not yet authorised to merge
 Opened: 2026-08-28
 Depends on: merged `g16.020`; architecture 011 and spec 069 approved
 Governing refs: `../../architecture/011-drag-and-drop-substrate.md`,
@@ -184,14 +184,24 @@ from the core package root; `poodle_headless::drag_drop` is registered in the
 crate.
 
 Shared corpus: one hand-authored `dragDrop` section in
-`packages/contracts/headless/vectors/machines.json` — 24 session cases across
-132 ordered steps plus 7 arbitration cases — executed by both
+`packages/contracts/headless/vectors/machines.json` — 25 session cases across
+139 ordered steps plus 7 arbitration cases — executed by both
 `packages/core/test/conformance.test.ts` and `drag_drop_conformance` in
 `packages/contracts/headless/tests/conformance.rs`. No generator, schema, IR,
 runtime registry, or second evidence ledger was added.
 
+Session identity is caller-supplied and single-use: an id must stay unique for
+as long as any asynchronous completion created for it can still arrive. That is
+the one rule the kernel cannot enforce — it rejects a stale completion by
+comparing the id, so two sessions sharing one are indistinguishable to it. The
+rule is documented on `DragSession.sessionId` and `DragSession::session_id`, on
+both `PREPARE` variants, and in both module headers; no vector reuses an id
+across sessions; and `a completion for a reset session cannot arm its
+successor` proves that a late completion for a terminated-and-reset session is
+inert while its freshly-identified successor stays current.
+
 Validation: focused TypeScript (7) and Rust (5) drag tests; both vector
-runners; `effigy test:core` (858 tests), `effigy test:contracts`,
+runners; `effigy test:core` (859 tests), `effigy test:contracts`,
 `effigy check:parity-evidence-ledger`, `effigy ci:web`, `effigy ci:rust`,
 `effigy docs:check`, and `effigy qa` — all exit 0; `git diff --check
 origin/main...HEAD` clean. All headless.
@@ -206,12 +216,16 @@ to be covered by a shared vector both harnesses run. The gate's 16
 pre-existing findings on `origin/main` are unchanged; `dragDrop` adds none.
 
 Non-claims: no adapter, no component migration, no geometry, transport, file,
-or drag-out behaviour; `dock-external-drag` and `tabs-reorder` untouched; the
-public drag-export migration boundary remains an open operator decision.
+or drag-out behaviour. `dock-external-drag` and `tabs-reorder` are untouched:
+the approved clean public break deletes the old DOM-shaped helpers only after
+their mounted replacements pass, which is `g16.023`/`g16.026` work, not this
+card's.
 
 ## Continuation
 
 Return the exact paired API names, shared vector cases, focused and broad
 validation, unchanged ledger totals, and execution log to the orchestrator. Do
-not start `g16.022`. After operator-authorized merge, the orchestrator checks
-the landed kernel and promotes the web custom-surface substrate card.
+not start `g16.022`. After the operator authorises the merge, the current
+runway dispatches `g16.029`; `g16.022` remains the next drag-programme card and
+is promoted when the orchestrator chooses it after the serial core/export
+tranche.

@@ -1,6 +1,6 @@
 # g16.021 — Drag-And-Drop Semantic Kernel
 
-Status: complete — PR #96 open for orchestrator review; merge is operator-authorised
+Status: complete — PR #96 open for orchestrator review; not yet authorised to merge
 Date: 2026-08-28
 Card: `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
@@ -103,6 +103,28 @@ session (target, position, operation) and, for a terminal announcement, the
 `emitDropResult` immediately preceding it, so duplicating that state into the
 effect would create a second place for it to drift.
 
+## Session identity is single-use
+
+Stale-completion rejection compares the id an event was created for against the
+current session's. That makes id uniqueness a real precondition rather than a
+convenience: two sessions sharing one id are indistinguishable to the kernel,
+so a late `PREPARED` belonging to a finished session would arm its successor.
+The kernel cannot detect that — by construction it has nothing left to compare.
+
+So the rule is stated in the public API rather than assumed. Both module
+headers, `DragSession.sessionId` / `DragSession::session_id`, and both
+`PREPARE` variants say the id is caller-supplied and single-use, must stay
+unique for as long as any asynchronous completion created for it can still
+arrive, and must never be recycled after a session ends, cancels, or resets.
+
+The corpus no longer blesses the opposite. No vector reuses an id across
+sessions — the reset case now prepares its successor with a fresh id — and
+`a completion for a reset session cannot arm its successor` walks
+prepare → cancel → reset → prepare with a new id → late `PREPARED` and
+`PREPARE_DECLINED` for the first session, proving both are inert while the
+successor stays `preparing`, and that the successor still arms on its own
+completion.
+
 ## Nested-target arbitration
 
 `resolveDropTarget` / `resolve_drop_target` accepts already-measured
@@ -116,7 +138,7 @@ adapter collected its candidates in — proved in both languages.
 ## Shared vector coverage
 
 `packages/contracts/headless/vectors/machines.json` gains one hand-authored
-`dragDrop` section: **24 session cases across 132 ordered steps** and
+`dragDrop` section: **25 session cases across 139 ordered steps** and
 **7 arbitration cases**. No code generation, generated schema, IR, runtime
 registry, or second evidence ledger was added.
 
@@ -135,8 +157,9 @@ target, transport, and window loss; loss before pickup; Escape and explicit
 cancellation; repeated start, drop request, terminal result, and cleanup;
 activation outside `armed`; a drop request without an accepted intent;
 `dropping` refusing to return to `dragging`; stale events naming another
-session; and deepest-target, priority, stable-order, discarded-candidate, and
-no-eligible-target arbitration.
+session; a late completion for a terminated-and-reset session failing to arm
+its freshly-identified successor; and deepest-target, priority, stable-order,
+discarded-candidate, and no-eligible-target arbitration.
 
 ## Changed surfaces
 
@@ -176,11 +199,11 @@ dependencies:
 
 - focused TypeScript drag tests — pass, 7 tests;
 - focused Rust drag tests — pass, 5 of 155 `poodle-headless` unit tests;
-- shared TypeScript vector runner — pass, 103 cases in
-  `packages/core/test/conformance.test.ts` (31 of them `dragDrop`);
+- shared TypeScript vector runner — pass, 104 cases in
+  `packages/core/test/conformance.test.ts` (32 of them `dragDrop`);
 - shared Rust vector runner — pass, `drag_drop_conformance` among 12
   conformance tests;
-- `effigy test:core` — pass, 858 tests across 51 files (820 before this card);
+- `effigy test:core` — pass, 859 tests across 51 files (820 before this card);
 - `effigy test:contracts` — pass;
 - `effigy check:parity-evidence-ledger` — pass, 175 component evidence rows,
   47 mounted / 127 missing unchanged;
@@ -204,18 +227,38 @@ covered by `effigy bootstrap:deps`.
 - No adapter exists. Nothing here is wired to a pointer, touch, keyboard, DOM,
   GPUI, or transport surface, and no component uses it yet.
 - The existing `dock-external-drag` and `tabs-reorder` helpers are untouched.
-  Migrating or removing the old public drag exports is explicitly a later
-  card's decision and was not made here.
+  The approved clean public break deletes the old DOM-shaped helpers only after
+  their mounted replacements pass; that is `g16.023`/`g16.026` work, not this
+  card's.
 - No geometry, auto-scroll, preview, capture, cross-window transport, inbound
   file, or drag-out behaviour is implemented — only the semantics those
   adapters will report into.
 - No component evidence cell moved, and no ledger row changed.
 - Jetstream remains program-deferred; nothing here claims otherwise.
 
+## Review round one
+
+The orchestrator requested changes on 2026-08-28 and this branch was rebased
+onto `30037592` to answer them:
+
+- The branch had split at `bd86f460d` and conflicted with the newer planning
+  state. It now carries the approved clean Tabs/DockRegion migration boundary
+  and the compiled `g16.029`–`g16.030` serial lane. The card, this log, the
+  front doors, and the PR body no longer describe the migration decision as
+  open, no longer present `g16.022` as the immediate next dispatch, and no
+  longer claim the merge is authorised.
+- Session-identity lifetime was implicit, and one vector reused `s1` for a
+  second session — blessing exactly the reuse that lets a late completion arm a
+  successor. The rule is now stated in both public kernels, the reuse is gone,
+  and a new shared vector proves the late-completion case.
+
+`origin/main` moved the known-delta ledger axis from 115 / 60 to 116 / 59 while
+this branch was open. That axis is NumberInput's, not this card's; mounted
+totals remain 47 / 127 and this branch still changes no ledger row.
+
 ## Next
 
-`g16.022` — the drag-and-drop web custom-surface substrate — is the next card
-in the programme. It stays planned until this kernel is reviewed and merged,
-and until the public migration boundary in
-`docs/triage/20260828-221415-drag-drop-public-migration-boundary.md` is
-resolved by the operator.
+After the operator authorises this merge, the current runway dispatches
+`g16.029` (TimeInput). `g16.022` — the drag-and-drop web custom-surface
+substrate — remains the next drag-programme card and is promoted when the
+orchestrator chooses it after the serial core/export tranche.

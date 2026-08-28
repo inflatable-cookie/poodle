@@ -2401,6 +2401,31 @@
           {
             "event": {
               "type": "PREPARE",
+              "sessionId": "s3",
+              "sourceId": "src-c",
+              "subject": { "kind": "track", "id": "t3" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "session": { "sessionId": "s3" },
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s3",
+                "sourceId": "src-c",
+                "subject": { "kind": "track", "id": "t3" }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "a completion for a reset session cannot arm its successor",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
               "sessionId": "s1",
               "sourceId": "src-a",
               "subject": { "kind": "track", "id": "t1" },
@@ -2416,6 +2441,63 @@
                 "subject": { "kind": "track", "id": "t1" }
               }
             ]
+          },
+          {
+            "event": { "type": "CANCEL", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "explicit" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          },
+          {
+            "event": { "type": "RESET", "sessionId": "s1" },
+            "phase": "idle",
+            "session": null,
+            "effects": []
+          },
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s3",
+              "sourceId": "src-c",
+              "subject": { "kind": "track", "id": "t3" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "session": { "sessionId": "s3", "intent": null },
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s3",
+                "sourceId": "src-c",
+                "subject": { "kind": "track", "id": "t3" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "PREPARED", "sessionId": "s1" },
+            "phase": "preparing",
+            "session": { "sessionId": "s3" },
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARE_DECLINED", "sessionId": "s1" },
+            "phase": "preparing",
+            "session": { "sessionId": "s3" },
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARED", "sessionId": "s3" },
+            "phase": "armed",
+            "session": { "sessionId": "s3" },
+            "effects": []
           }
         ]
       },
