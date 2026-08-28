@@ -58,6 +58,7 @@ impl PaginationHandlers {
 pub fn pagination(
     spec: &PaginationSpec,
     ctx: &RenderContext<'_>,
+    instance_id: impl Into<String>,
     on_page_change: Option<Arc<dyn Fn(usize) + Send + Sync>>,
 ) -> Node {
     pagination_with_handlers(
@@ -65,7 +66,7 @@ pub fn pagination(
         ctx,
         &PaginationHandlers {
             page_change: on_page_change,
-            ..PaginationHandlers::new("pagination")
+            ..PaginationHandlers::new(instance_id)
         },
     )
 }
@@ -568,6 +569,7 @@ fn build_limit_selector(
     }
     let mut chevron = Node::icon("chevron-down", font_size);
     chevron.style.descriptor.text_color = Some(text_secondary);
+    select_box.runtime_id = Some(format!("select:{}:trigger", handlers.instance_id));
     let select_box = select_box
         .child(text(&page_size_label, text_primary))
         .child(chevron);
@@ -952,5 +954,22 @@ mod tests {
             .find(&|n| n.runtime_id.as_deref() == Some("select:pager-b:trigger"))
             .expect("right limit trigger");
         assert_ne!(left_trigger.runtime_id, right_trigger.runtime_id);
+    }
+
+    #[test]
+    fn public_pagination_path_does_not_share_select_runtime_ids() {
+        let spec = numbered_spec();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let left = pagination(&spec, &ctx, "pager-public-a", None);
+        let right = pagination(&spec, &ctx, "pager-public-b", None);
+        let mut tree = Node::container();
+        tree = tree.child(left).child(right);
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:pager-public-a:trigger"))
+            .is_some());
+        assert!(tree
+            .find(&|n| n.runtime_id.as_deref() == Some("select:pager-public-b:trigger"))
+            .is_some());
     }
 }

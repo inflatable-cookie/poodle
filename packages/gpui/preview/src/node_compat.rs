@@ -3557,14 +3557,20 @@ impl IntoElement for ListGrid {
 pub(crate) struct ListContainer {
     spec: ListContainerSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     content: Option<poodle_node::Node>,
 }
 
 impl ListContainer {
-    pub(crate) fn from_spec(spec: ListContainerSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: ListContainerSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
             content: None,
         }
     }
@@ -3587,6 +3593,7 @@ impl IntoElement for ListContainer {
             &self.spec,
             &RenderContext::new(&self.theme),
             slots,
+            self.instance_id,
             None,
         ))
     }
@@ -7817,14 +7824,20 @@ impl IntoElement for BlockEditor {
 pub(crate) struct LogList {
     spec: LogListSpec,
     theme: GpuiThemeProvider,
+    instance_id: String,
     on_clear_filters: Option<Arc<dyn Fn() + Send + Sync>>,
 }
 
 impl LogList {
-    pub(crate) fn from_spec(spec: LogListSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: LogListSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_id: instance_id.into(),
             on_clear_filters: None,
         }
     }
@@ -7839,7 +7852,12 @@ impl LogList {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::log_list(&self.spec, &RenderContext::new(&self.theme), self.on_clear_filters)
+        poodle_render::log_list(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.instance_id,
+            self.on_clear_filters,
+        )
     }
 }
 

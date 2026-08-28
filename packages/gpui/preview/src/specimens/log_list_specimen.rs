@@ -92,6 +92,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_entries(sample_entries())
                         .with_auto_scroll(true),
                     theme,
+                    "log-list-1",
                 )),
         )
         // -- Filtered (errors only) --
@@ -110,6 +111,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_filter_level("error")
                         .with_auto_scroll(true),
                     theme,
+                    "log-list-2",
                 )),
         )
         // -- Audit log (actor + resource links) --
@@ -127,6 +129,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_entries(audit_entries())
                         .with_auto_scroll(false),
                     theme,
+                    "log-list-3",
                 )),
         )
         // -- Audit log with filter toolbar + pagination --
@@ -155,6 +158,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_page_size(4)
                         .with_total(18),
                     theme,
+                    "log-list-4",
                 )),
         )
         // -- Audit log loading state --
@@ -170,6 +174,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child(LogList::from_spec(
                     LogListSpec::new().with_loading(true),
                     theme,
+                    "log-list-5",
                 )),
         )
         // -- Audit log error state --
@@ -186,6 +191,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     LogListSpec::new()
                         .with_error("Failed to load audit entries: request timed out"),
                     theme,
+                    "log-list-6",
                 )),
         )
         .into_any_element();
@@ -203,6 +209,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_auto_scroll(true)
                         .with_size(size),
                     theme,
+                    "log-list-7",
                 )
                 .into_any_element()
             })
@@ -213,6 +220,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_auto_scroll(true)
                         .with_density(density),
                     theme,
+                    "log-list-8",
                 )
                 .into_any_element()
             }),

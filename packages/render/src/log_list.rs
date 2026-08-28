@@ -33,8 +33,10 @@ use crate::spinner::spinner;
 pub fn log_list(
     spec: &LogListSpec,
     ctx: &RenderContext<'_>,
+    instance_id: impl Into<String>,
     on_clear_filters: Option<Arc<dyn Fn() + Send + Sync>>,
 ) -> Node {
+    let instance_id = instance_id.into();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
     let label_font = rem_to_px(size_font_rem(effective_size) - 0.0625);
@@ -272,6 +274,7 @@ pub fn log_list(
                         .with_standalone(true)
                         .with_aria_label("Log pagination"),
                     ctx,
+                    instance_id,
                     None,
                 ));
             el = el.child(footer);
@@ -482,7 +485,7 @@ mod tests {
     fn stream_rows_render_timestamp_level_and_message() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = log_list(&stream_spec(), &ctx, None);
+        let node = log_list(&stream_spec(), &ctx, "log-list", None);
         let runs = texts(&node);
         for expected in [
             "10:23:01",
@@ -506,7 +509,7 @@ mod tests {
     fn level_filter_drops_non_matching_rows() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = log_list(&stream_spec().with_filter_level("error"), &ctx, None);
+        let node = log_list(&stream_spec().with_filter_level("error"), &ctx, "log-list", None);
         let runs = texts(&node);
         assert!(runs.iter().any(|run| run == "Timeout"));
         assert!(!runs.iter().any(|run| run == "Server started"));
@@ -516,7 +519,7 @@ mod tests {
     fn text_filter_matches_the_message_case_insensitively() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = log_list(&stream_spec().with_filter_text("CACHE"), &ctx, None);
+        let node = log_list(&stream_spec().with_filter_text("CACHE"), &ctx, "log-list", None);
         let runs = texts(&node);
         assert!(runs.iter().any(|run| run == "Cache miss"));
         assert!(!runs.iter().any(|run| run == "Timeout"));
@@ -526,7 +529,7 @@ mod tests {
     fn max_entries_caps_the_rendered_rows() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = log_list(&stream_spec().with_max_entries(1), &ctx, None);
+        let node = log_list(&stream_spec().with_max_entries(1), &ctx, "log-list", None);
         let runs = texts(&node);
         assert!(runs.iter().any(|run| run == "Server started"));
         assert!(!runs.iter().any(|run| run == "Cache miss"));
@@ -536,7 +539,7 @@ mod tests {
     fn an_empty_stream_renders_the_empty_surface() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let node = log_list(&LogListSpec::new(), &ctx, None);
+        let node = log_list(&LogListSpec::new(), &ctx, "log-list", None);
         assert!(texts(&node).iter().any(|run| run == "No log entries"));
     }
 

@@ -650,8 +650,17 @@ pub fn js_list_grid(
     El(pr::list_grid(spec, &pr::RenderContext::new(theme), header, children))
 }
 
-pub fn js_log_list(spec: &LogListSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::log_list(spec, &pr::RenderContext::new(theme), None))
+pub fn js_log_list(
+    spec: &LogListSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
+) -> El {
+    El(pr::log_list(
+        spec,
+        &pr::RenderContext::new(theme),
+        instance_id,
+        None,
+    ))
 }
 
 pub fn js_markdown_editor(spec: &MarkdownEditorSpec, theme: &JetstreamThemeProvider) -> El {
@@ -786,8 +795,17 @@ pub fn js_page_loading(spec: &PageLoadingSpec, theme: &JetstreamThemeProvider) -
     El(pr::page_loading(spec, &pr::RenderContext::new(theme), None))
 }
 
-pub fn js_pagination(spec: &PaginationSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::pagination(spec, &pr::RenderContext::new(theme), None))
+pub fn js_pagination(
+    spec: &PaginationSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
+) -> El {
+    El(pr::pagination(
+        spec,
+        &pr::RenderContext::new(theme),
+        instance_id,
+        None,
+    ))
 }
 
 pub fn js_pagination_summary(spec: &PaginationSummarySpec, theme: &JetstreamThemeProvider) -> El {
@@ -1179,16 +1197,18 @@ pub fn js_list_card_with_slots(
 pub fn js_list_container(
     spec: &ListContainerSpec,
     theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
     content: Option<El>,
     filters: Option<El>,
     batch: Option<El>,
 ) -> El {
-    js_list_container_with_slots(spec, theme, content, filters, batch, None, None)
+    js_list_container_with_slots(spec, theme, instance_id, content, filters, batch, None, None)
 }
 
 pub fn js_list_container_with_slots(
     spec: &ListContainerSpec,
     theme: &JetstreamThemeProvider,
+    instance_id: impl Into<String>,
     content: Option<El>,
     filters: Option<El>,
     batch: Option<El>,
@@ -1208,6 +1228,7 @@ pub fn js_list_container_with_slots(
             actions: actions
                 .map(|el| Box::new(move |_| Node::from(el)) as pr::SlotBuilder<'static>),
         },
+        instance_id,
         None,
     ))
 }

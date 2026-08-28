@@ -128,22 +128,13 @@ Select is pinned.
 - generation stays at 46 mounted / 128 missing until that card is recompiled
   after merge
 
-## Stopped identity boundary
+## Approved composite identity
 
-Making default composite construction unique requires a source-breaking
-change to `OrderByHandlers`, `PaginationHandlers`, `RelationPickerHandlers`,
-`TimeZoneSelectHandlers`, and `DateTimeZonePickerHandlers`: required
-`instance_id`, no `Default`, and wrapper/`pagination(...)` signature
-changes. That is outside the approved Select handler break. The card stop
-condition and working rules require operator approval before that
-migration.
-
-The required-ID expansion was reverted. BlockEditor stays unique via
-`block.id`. Query highlight, `OPTIONS_CHANGED`, and navigation vectors
-stay. Default OrderBy, Pagination (including `pagination(...)` /
-`js_pagination`), RelationPicker, and TimeZoneSelect still collide when
-the host does not author a scope.
-
-Operator choice: approve that composite-handler break and re-apply it
-consistently (including `pagination(...)` and `js_pagination`), or leave
-default-construction identity for a later card.
+The operator approved the pre-1.0 breaking composite-handler migration.
+`OrderByHandlers`, `PaginationHandlers`, `RelationPickerHandlers`,
+`TimeZoneSelectHandlers`, and `DateTimeZonePickerHandlers` require
+`instance_id` and do not implement `Default`. `pagination(...)` and
+`js_pagination` take that scope. Composed callers (`list_container`,
+`log_list`) and GPUI/Jetstream wrappers pass it through. Pair-construction
+tests cover `PaginationHandlers::new` and the public `pagination(...)`
+path. No optional IDs, type-label fallbacks, or shared constants remain.
