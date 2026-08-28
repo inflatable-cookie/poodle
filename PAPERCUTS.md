@@ -1183,3 +1183,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   alive beyond the command's 30-second execution window with no final envelope.
   Make successful index completion terminate promptly or emit a diagnostic for
   the remaining work. Affects graph-assisted orchestrator checkpoints.
+
+- 2026-08-28 — g16.020 worker preflight found that the handoff's declared
+  `base_commit` (`69118d83173d3d69b284b5ecf6d7315dc43ae5a8`) is not a Git object;
+  the actual ancestor resolves from short `69118d831` to
+  `69118d83122e976d256af6033e57d1c8e6b1a9de`. Friction: dispatch validation
+  cannot verify the literal handoff value. Impact: workers need a manual
+  ancestry check before trusting the base. Fix: validate the full SHA when the
+  handoff is generated, or reject it before dispatch. Surface: Northstar
+  worker-pr-loop handoff validation.
