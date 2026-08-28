@@ -1,6 +1,6 @@
 # g16.021 — Drag-And-Drop Semantic Kernel
 
-Status: ready
+Status: complete — merged in PR #96
 Opened: 2026-08-28
 Depends on: merged `g16.020`; architecture 011 and spec 069 approved
 Governing refs: `../../architecture/011-drag-and-drop-substrate.md`,
@@ -97,30 +97,30 @@ second evidence ledger.
 
 ## Execution Plan
 
-- [ ] **Batch 1 — exact types and vectors.** Add the paired semantic types and
+- [x] **Batch 1 — exact types and vectors.** Add the paired semantic types and
       the shared `dragDrop` cases without platform fields.
-- [ ] **Batch 2 — TypeScript kernel.** Implement pure transition and arbitration
+- [x] **Batch 2 — TypeScript kernel.** Implement pure transition and arbitration
       functions in core, export them, and run the shared vectors.
-- [ ] **Batch 3 — Rust kernel.** Mirror the semantics in `poodle-headless` and
+- [x] **Batch 3 — Rust kernel.** Mirror the semantics in `poodle-headless` and
       run the same vectors through the existing Rust conformance runner.
-- [ ] **Batch 4 — closeout.** Record exact API names, vector coverage,
+- [x] **Batch 4 — closeout.** Record exact API names, vector coverage,
       validation, and non-claims in one August log. Leave every component and
       ledger row unchanged.
 
 ## Acceptance Criteria
 
-- [ ] TypeScript and Rust expose the same semantic distinctions without sharing
+- [x] TypeScript and Rust expose the same semantic distinctions without sharing
       renderer, shell, filesystem, or application types.
-- [ ] One fixture corpus proves matching states and ordered effects in both
+- [x] One fixture corpus proves matching states and ordered effects in both
       languages.
-- [ ] Stale asynchronous completion and every repeated terminal path are inert.
-- [ ] Exactly one start, drop request, terminal notification, and cleanup can be
+- [x] Stale asynchronous completion and every repeated terminal path are inert.
+- [x] Exactly one start, drop request, terminal notification, and cleanup can be
       emitted per session.
-- [ ] Nested target arbitration is deterministic and returns one intent.
-- [ ] No DOM, Svelte, React, GPUI, Jetstream, component, host bridge, file, or
+- [x] Nested target arbitration is deterministic and returns one intent.
+- [x] No DOM, Svelte, React, GPUI, Jetstream, component, host bridge, file, or
       visual implementation changes.
-- [ ] The parity ledger remains byte-stable at 47 mounted / 127 missing.
-- [ ] One August log records the landed kernel and leaves `g16.022` as the next
+- [x] The parity ledger remains byte-stable at 47 mounted / 127 missing.
+- [x] One August log records the landed kernel and leaves `g16.022` as the next
       drag programme card.
 
 ## Writable Scope
@@ -169,9 +169,61 @@ preview/QA, release, tag, publication, or workflow-mutation selectors.
 - Another component/evidence row changes, Jetstream admission is required, or
   validation needs a windowed selector, release mutation, or sibling repo.
 
+## Landed
+
+Log: `../../logs/2026-08/20260828-g16-021-drag-drop-semantic-kernel.md`.
+
+Paired entry points: `dragSessionTransition` / `drag_session_transition` and
+`resolveDropTarget` / `resolve_drop_target`, with the paired
+`DragOperation`, `DropPosition`, `DragSubject`, `DropIntent`,
+`DropEligibility`, `DragSessionPhase`, `DragCancelReason`,
+`DragTerminalOutcome`, `DragAnnouncementKind`, `DragSession`,
+`DragSessionContext`, `DragSessionEvent`, `DragSessionEffect`, and
+`DropTargetCandidate` vocabulary. `packages/core/src/drag-drop.ts` is exported
+from the core package root; `poodle_headless::drag_drop` is registered in the
+crate.
+
+Shared corpus: one hand-authored `dragDrop` section in
+`packages/contracts/headless/vectors/machines.json` — 25 session cases across
+139 ordered steps plus 7 arbitration cases — executed by both
+`packages/core/test/conformance.test.ts` and `drag_drop_conformance` in
+`packages/contracts/headless/tests/conformance.rs`. No generator, schema, IR,
+runtime registry, or second evidence ledger was added.
+
+Session identity is caller-supplied and single-use: an id must stay unique for
+as long as any asynchronous completion created for it can still arrive. That is
+the one rule the kernel cannot enforce — it rejects a stale completion by
+comparing the id, so two sessions sharing one are indistinguishable to it. The
+rule is documented on `DragSession.sessionId` and `DragSession::session_id`, on
+both `PREPARE` variants, and in both module headers; no vector reuses an id
+across sessions; and `a completion for a reset session cannot arm its
+successor` proves that a late completion for a terminated-and-reset session is
+inert while its freshly-identified successor stays current.
+
+Validation: focused TypeScript (7) and Rust (5) drag tests; both vector
+runners; `effigy test:core` (859 tests), `effigy test:contracts`,
+`effigy check:parity-evidence-ledger`, `effigy ci:web`, `effigy ci:rust`,
+`effigy docs:check`, and `effigy qa` — all exit 0; `git diff --check
+origin/main...HEAD` clean. All headless.
+
+Ledger: unchanged and byte-identical to `origin/main` at 47 mounted /
+127 missing. No component evidence cell moved.
+
+One edit falls outside the card's writable list and is deliberate:
+`packages/svelte/preview/scripts/machine-shape-drift.ts` gains one `PINNED`
+registry entry, because that gate requires a machine present in both runtimes
+to be covered by a shared vector both harnesses run. The gate's 16
+pre-existing findings on `origin/main` are unchanged; `dragDrop` adds none.
+
+Non-claims: no adapter, no component migration, no geometry, transport, file,
+or drag-out behaviour. `dock-external-drag` and `tabs-reorder` are untouched:
+the approved clean public break deletes the old DOM-shaped helpers only after
+their mounted replacements pass, which is `g16.023`/`g16.026` work, not this
+card's.
+
 ## Continuation
 
-Return the exact paired API names, shared vector cases, focused and broad
-validation, unchanged ledger totals, and execution log to the orchestrator. Do
-not start `g16.022`. After operator-authorized merge, the orchestrator checks
-the landed kernel and promotes the web custom-surface substrate card.
+The paired API names, shared vectors, validation, unchanged ledger totals, and
+execution log are recorded above. The current runway dispatches `g16.029`;
+`g16.022` remains the next drag-programme card and is promoted after the serial
+core/export tranche.

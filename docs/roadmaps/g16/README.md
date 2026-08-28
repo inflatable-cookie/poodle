@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.021 in review; g16.029–032 compiled behind it
+Status: active — g16.021 merged; g16.029 next, with g16.030–032 behind it
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -51,7 +51,7 @@ stay maintained; backend admission is not part of the first card.
 18. [018 — Select semantic machine and interface convergence](018-select-semantic-machine-and-interface-convergence.md) — complete; merged in PR #93
 19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — complete; merged in PR #94
 20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
-21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — in review
+21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — complete; merged in PR #96
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — planned; depends on 021
 23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — planned; clean public migration approved, depends on 022
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — planned; depends on 023
@@ -59,7 +59,7 @@ stay maintained; backend admission is not part of the first card.
 26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
-29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — planned; decision approved, dispatch after 021 merges
+29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — planned; decision approved, next dispatch
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — planned; decision approved, depends on 029
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — planned; bounded audit complete, depends on 030
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — planned; depends on 031 and must not overlap 025
@@ -80,10 +80,10 @@ Two continuation programmes are now explicit:
   cross-runtime programme covering touch, nested targets, cross-window
   transfer, inbound files, and drag-out. `g16.021`–`g16.028` compile that
   programme without scattering the seven dependent components into unrelated
-  repairs. The paired semantic kernel is dispatched. The clean Tabs and
-  DockRegion public migrations are approved; later cards remain gated by
-  landed dependencies and, for the host bridge, its exact post-kernel API
-  shape.
+  repairs. `g16.021` landed the paired semantic kernel and its shared
+  `dragDrop` vector corpus. The clean Tabs and DockRegion public migrations are
+  approved; later cards remain gated by landed dependencies and, for the host
+  bridge, its exact post-kernel API shape.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
@@ -282,9 +282,18 @@ deferred-overlay pointer repair, removal of Pagination's Select option-id
 workaround, and one named two-instance mounted regression. Ledger: 46 → 47
 mounted and 128 → 127 missing. Known-delta totals stay 115 / 60.
 
+`g16.021` landed the drag programme's foundation: one renderer-neutral drag
+session implemented once per language pair (`packages/core/src/drag-drop.ts`
+and `poodle_headless::drag_drop`), proved by one hand-authored `dragDrop`
+corpus — 25 session cases over 139 ordered steps plus 7 arbitration cases —
+that both conformance runners execute. Lifecycle, session identity, intent,
+cancellation, nested-target arbitration, exactly-once terminal effects, and the
+single-use session-id rule are settled. No adapter, component, or ledger cell
+moved.
+
 ## Next Task
 
-Review and merge the dispatched `g16.021` worker PR. Then publish `g16.029`'s
+Review `g16.021` in PR #96 and authorise its merge. Then publish `g16.029`'s
 worker handoff from the landed base; `g16.030` follows only after TimeInput
 closes. Keep `g16.022` planned until the orchestrator chooses it after the
 serial core/export tranche. The public

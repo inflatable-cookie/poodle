@@ -891,5 +891,1838 @@
       "event": { "type": "HIGHLIGHT", "value": "b" },
       "expect": { "context": { "highlightedValue": "a" }, "effects": [] }
     }
-  ]
+  ],
+  "dragDrop": {
+    "sessions": [
+      {
+        "name": "prepare, arm, activate, hover, drop, commit, cleanup, reset",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "session": {
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"],
+              "intent": null
+            },
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "session": { "intent": { "targetId": "list", "position": "before", "operation": "move" } },
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "DROP_REQUESTED", "sessionId": "s1" },
+            "phase": "dropping",
+            "effects": [
+              {
+                "type": "requestDrop",
+                "sessionId": "s1",
+                "intent": { "targetId": "list", "position": "before", "operation": "move" }
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DROP_COMMITTED",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "ended",
+            "session": {
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": {
+                  "status": "committed",
+                  "intent": { "targetId": "list", "position": "before", "operation": "move" }
+                }
+              },
+              { "type": "announce", "kind": "dropped" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "track", "id": "t1" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          },
+          {
+            "event": { "type": "RESET", "sessionId": "s1" },
+            "phase": "idle",
+            "session": null,
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "preparation decline cancels once and late completion is inert",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "PREPARE_DECLINED", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "preparation-declined" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          },
+          {
+            "event": { "type": "PREPARED", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARE_DECLINED", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": []
+          },
+          {
+            "event": { "type": "RESET", "sessionId": "s1" },
+            "phase": "idle",
+            "session": null,
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "preparation failure cancels once",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "PREPARE_FAILED", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "preparation-failed" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "supersession cancels the first session and prepares the second",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s2",
+              "sourceId": "src-b",
+              "subject": { "kind": "track", "id": "t2" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "session": {
+              "sessionId": "s2",
+              "sourceId": "src-b",
+              "subject": { "kind": "track", "id": "t2" },
+              "intent": null
+            },
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "superseded" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              { "type": "cleanupSession", "sessionId": "s1" },
+              {
+                "type": "prepareSession",
+                "sessionId": "s2",
+                "sourceId": "src-b",
+                "subject": { "kind": "track", "id": "t2" }
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s2",
+              "sourceId": "src-b",
+              "subject": { "kind": "track", "id": "t2" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "session A completion arriving after session B replaced it is inert",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s2",
+              "sourceId": "src-b",
+              "subject": { "kind": "track", "id": "t2" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "superseded" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              { "type": "cleanupSession", "sessionId": "s1" },
+              {
+                "type": "prepareSession",
+                "sessionId": "s2",
+                "sourceId": "src-b",
+                "subject": { "kind": "track", "id": "t2" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "PREPARED", "sessionId": "s1" },
+            "phase": "preparing",
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARE_DECLINED", "sessionId": "s1" },
+            "phase": "preparing",
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARED", "sessionId": "s2" },
+            "phase": "armed",
+            "session": { "sessionId": "s2" },
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "prepare with an operation the source does not allow is inert",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "link",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "idle",
+            "session": null,
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "activation is valid only from armed",
+        "steps": [
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "idle",
+            "session": null,
+            "effects": []
+          },
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "preparing",
+            "effects": []
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "repeated start is inert",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          { "event": { "type": "ACTIVATE", "sessionId": "s1" }, "phase": "dragging", "effects": [] }
+        ]
+      },
+      {
+        "name": "target enter, change, and leave",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "session": { "intent": { "targetId": "list", "position": "before", "operation": "move" } },
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": []
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "after", "operation": "move" }
+            },
+            "phase": "dragging",
+            "session": { "intent": { "targetId": "list", "position": "after", "operation": "move" } },
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "TARGET_CLEARED", "sessionId": "s1" },
+            "phase": "dragging",
+            "session": { "intent": null },
+            "effects": [{ "type": "announce", "kind": "intentCleared" }]
+          },
+          {
+            "event": { "type": "TARGET_CLEARED", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "operation change is limited to the source's allowed operations",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "OPERATION_CHANGED", "sessionId": "s1", "operation": "copy" },
+            "phase": "dragging",
+            "session": {
+              "operation": "copy",
+              "intent": { "targetId": "list", "position": "before", "operation": "copy" }
+            },
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "OPERATION_CHANGED", "sessionId": "s1", "operation": "copy" },
+            "phase": "dragging",
+            "effects": []
+          },
+          {
+            "event": { "type": "OPERATION_CHANGED", "sessionId": "s1", "operation": "link" },
+            "phase": "dragging",
+            "session": {
+              "operation": "copy",
+              "intent": { "targetId": "list", "position": "before", "operation": "copy" }
+            },
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "a target intent naming an unsupported operation is inert",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "link" }
+            },
+            "phase": "dragging",
+            "session": { "operation": "move", "intent": null },
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "drop request requires one accepted current intent and enters dropping once",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": { "type": "DROP_REQUESTED", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": []
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "DROP_REQUESTED", "sessionId": "s1" },
+            "phase": "dropping",
+            "effects": [
+              {
+                "type": "requestDrop",
+                "sessionId": "s1",
+                "intent": { "targetId": "list", "position": "before", "operation": "move" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "DROP_REQUESTED", "sessionId": "s1" },
+            "phase": "dropping",
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "a released pointer cannot return from dropping to dragging",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "DROP_REQUESTED", "sessionId": "s1" },
+            "phase": "dropping",
+            "effects": [
+              {
+                "type": "requestDrop",
+                "sessionId": "s1",
+                "intent": { "targetId": "list", "position": "before", "operation": "move" }
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "after", "operation": "move" }
+            },
+            "phase": "dropping",
+            "session": { "intent": { "targetId": "list", "position": "before", "operation": "move" } },
+            "effects": []
+          },
+          {
+            "event": { "type": "TARGET_CLEARED", "sessionId": "s1" },
+            "phase": "dropping",
+            "session": { "intent": { "targetId": "list", "position": "before", "operation": "move" } },
+            "effects": []
+          },
+          {
+            "event": { "type": "OPERATION_CHANGED", "sessionId": "s1", "operation": "copy" },
+            "phase": "dropping",
+            "session": { "operation": "move" },
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "drop-time rejection ends the session and repeats are inert",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "DROP_REQUESTED", "sessionId": "s1" },
+            "phase": "dropping",
+            "effects": [
+              {
+                "type": "requestDrop",
+                "sessionId": "s1",
+                "intent": { "targetId": "list", "position": "before", "operation": "move" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "DROP_REJECTED", "sessionId": "s1", "reason": "target-full" },
+            "phase": "ended",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "rejected", "reason": "target-full" }
+              },
+              { "type": "announce", "kind": "rejected" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "track", "id": "t1" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          },
+          {
+            "event": {
+              "type": "DROP_COMMITTED",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "ended",
+            "effects": []
+          },
+          {
+            "event": { "type": "DROP_REJECTED", "sessionId": "s1", "reason": "target-full" },
+            "phase": "ended",
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "drop failure ends the session",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "DROP_REQUESTED", "sessionId": "s1" },
+            "phase": "dropping",
+            "effects": [
+              {
+                "type": "requestDrop",
+                "sessionId": "s1",
+                "intent": { "targetId": "list", "position": "before", "operation": "move" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "DROP_FAILED", "sessionId": "s1" },
+            "phase": "ended",
+            "effects": [
+              { "type": "emitDropResult", "sessionId": "s1", "outcome": { "status": "failed" } },
+              { "type": "announce", "kind": "failed" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "track", "id": "t1" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "escape cancels a drag once",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "ESCAPE", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "escape" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "track", "id": "t1" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          },
+          { "event": { "type": "ESCAPE", "sessionId": "s1" }, "phase": "cancelled", "effects": [] }
+        ]
+      },
+      {
+        "name": "explicit cancellation cancels a drag",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "CANCEL", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "explicit" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "track", "id": "t1" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "source loss cancels the session",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "SOURCE_LOST", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "source-lost" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "track", "id": "t1" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "target loss cancels only when it names the current intent target",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "TARGET_LOST", "sessionId": "s1", "targetId": "other" },
+            "phase": "dragging",
+            "session": { "intent": { "targetId": "list", "position": "before", "operation": "move" } },
+            "effects": []
+          },
+          {
+            "event": { "type": "TARGET_LOST", "sessionId": "s1", "targetId": "list" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "target-lost" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "track", "id": "t1" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "transport loss cancels a pending drop",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "DROP_REQUESTED", "sessionId": "s1" },
+            "phase": "dropping",
+            "effects": [
+              {
+                "type": "requestDrop",
+                "sessionId": "s1",
+                "intent": { "targetId": "list", "position": "before", "operation": "move" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "TRANSPORT_LOST", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "transport-lost" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "track", "id": "t1" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "window loss cancels a pending drop",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "DROP_REQUESTED", "sessionId": "s1" },
+            "phase": "dropping",
+            "effects": [
+              {
+                "type": "requestDrop",
+                "sessionId": "s1",
+                "intent": { "targetId": "list", "position": "before", "operation": "move" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "WINDOW_LOST", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "window-lost" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "track", "id": "t1" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "loss before pickup emits no focus return",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "TRANSPORT_LOST", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "transport-lost" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "cleanup and reset happen at most once per session",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "dragging",
+            "effects": [{ "type": "announce", "kind": "intentChanged" }]
+          },
+          {
+            "event": { "type": "DROP_REQUESTED", "sessionId": "s1" },
+            "phase": "dropping",
+            "effects": [
+              {
+                "type": "requestDrop",
+                "sessionId": "s1",
+                "intent": { "targetId": "list", "position": "before", "operation": "move" }
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DROP_COMMITTED",
+              "sessionId": "s1",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "ended",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": {
+                  "status": "committed",
+                  "intent": { "targetId": "list", "position": "before", "operation": "move" }
+                }
+              },
+              { "type": "announce", "kind": "dropped" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "track", "id": "t1" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          },
+          {
+            "event": { "type": "RESET", "sessionId": "s1" },
+            "phase": "idle",
+            "session": null,
+            "effects": []
+          },
+          {
+            "event": { "type": "RESET", "sessionId": "s1" },
+            "phase": "idle",
+            "session": null,
+            "effects": []
+          },
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s3",
+              "sourceId": "src-c",
+              "subject": { "kind": "track", "id": "t3" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "session": { "sessionId": "s3" },
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s3",
+                "sourceId": "src-c",
+                "subject": { "kind": "track", "id": "t3" }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "a completion for a reset session cannot arm its successor",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "CANCEL", "sessionId": "s1" },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "explicit" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          },
+          {
+            "event": { "type": "RESET", "sessionId": "s1" },
+            "phase": "idle",
+            "session": null,
+            "effects": []
+          },
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s3",
+              "sourceId": "src-c",
+              "subject": { "kind": "track", "id": "t3" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "session": { "sessionId": "s3", "intent": null },
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s3",
+                "sourceId": "src-c",
+                "subject": { "kind": "track", "id": "t3" }
+              }
+            ]
+          },
+          {
+            "event": { "type": "PREPARED", "sessionId": "s1" },
+            "phase": "preparing",
+            "session": { "sessionId": "s3" },
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARE_DECLINED", "sessionId": "s1" },
+            "phase": "preparing",
+            "session": { "sessionId": "s3" },
+            "effects": []
+          },
+          {
+            "event": { "type": "PREPARED", "sessionId": "s3" },
+            "phase": "armed",
+            "session": { "sessionId": "s3" },
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "a stale event naming another session is inert",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "track", "id": "t1" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          { "event": { "type": "ACTIVATE", "sessionId": "s2" }, "phase": "armed", "effects": [] },
+          {
+            "event": {
+              "type": "TARGET_INTENT",
+              "sessionId": "s2",
+              "intent": { "targetId": "list", "position": "before", "operation": "move" }
+            },
+            "phase": "armed",
+            "effects": []
+          },
+          { "event": { "type": "ESCAPE", "sessionId": "s2" }, "phase": "armed", "effects": [] },
+          { "event": { "type": "RESET", "sessionId": "s2" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "track", "id": "t1" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          }
+        ]
+      }
+    ],
+    "arbitration": [
+      {
+        "name": "the deepest containing eligible target wins",
+        "candidates": [
+          {
+            "targetId": "root",
+            "depth": 0,
+            "order": 0,
+            "containsPoint": true,
+            "eligibility": {
+              "accepted": true,
+              "intent": { "targetId": "root", "position": "inside", "operation": "move" }
+            }
+          },
+          {
+            "targetId": "group",
+            "depth": 1,
+            "order": 1,
+            "containsPoint": true,
+            "eligibility": {
+              "accepted": true,
+              "intent": { "targetId": "group", "position": "inside", "operation": "move" }
+            }
+          },
+          {
+            "targetId": "row",
+            "depth": 2,
+            "order": 2,
+            "containsPoint": true,
+            "eligibility": {
+              "accepted": true,
+              "intent": { "targetId": "row", "position": "inside", "operation": "move" }
+            }
+          }
+        ],
+        "expect": { "intent": { "targetId": "row", "position": "inside", "operation": "move" } }
+      },
+      {
+        "name": "explicit priority breaks equal depth",
+        "candidates": [
+          {
+            "targetId": "left",
+            "depth": 1,
+            "order": 0,
+            "priority": 0,
+            "containsPoint": true,
+            "eligibility": {
+              "accepted": true,
+              "intent": { "targetId": "left", "position": "inside", "operation": "move" }
+            }
+          },
+          {
+            "targetId": "right",
+            "depth": 1,
+            "order": 1,
+            "priority": 5,
+            "containsPoint": true,
+            "eligibility": {
+              "accepted": true,
+              "intent": { "targetId": "right", "position": "inside", "operation": "move" }
+            }
+          }
+        ],
+        "expect": { "intent": { "targetId": "right", "position": "inside", "operation": "move" } }
+      },
+      {
+        "name": "registration order breaks equal depth and equal priority",
+        "candidates": [
+          {
+            "targetId": "first",
+            "depth": 1,
+            "order": 0,
+            "priority": 2,
+            "containsPoint": true,
+            "eligibility": {
+              "accepted": true,
+              "intent": { "targetId": "first", "position": "inside", "operation": "move" }
+            }
+          },
+          {
+            "targetId": "second",
+            "depth": 1,
+            "order": 1,
+            "priority": 2,
+            "containsPoint": true,
+            "eligibility": {
+              "accepted": true,
+              "intent": { "targetId": "second", "position": "inside", "operation": "move" }
+            }
+          }
+        ],
+        "expect": { "intent": { "targetId": "first", "position": "inside", "operation": "move" } }
+      },
+      {
+        "name": "non-containing candidates are discarded however deep",
+        "candidates": [
+          {
+            "targetId": "shallow",
+            "depth": 0,
+            "order": 0,
+            "containsPoint": true,
+            "eligibility": {
+              "accepted": true,
+              "intent": { "targetId": "shallow", "position": "inside", "operation": "move" }
+            }
+          },
+          {
+            "targetId": "deep",
+            "depth": 9,
+            "order": 1,
+            "containsPoint": false,
+            "eligibility": {
+              "accepted": true,
+              "intent": { "targetId": "deep", "position": "inside", "operation": "move" }
+            }
+          }
+        ],
+        "expect": { "intent": { "targetId": "shallow", "position": "inside", "operation": "move" } }
+      },
+      {
+        "name": "ineligible candidates are discarded however deep",
+        "candidates": [
+          {
+            "targetId": "shallow",
+            "depth": 0,
+            "order": 0,
+            "containsPoint": true,
+            "eligibility": {
+              "accepted": true,
+              "intent": { "targetId": "shallow", "position": "inside", "operation": "move" }
+            }
+          },
+          {
+            "targetId": "deep",
+            "depth": 9,
+            "order": 1,
+            "containsPoint": true,
+            "eligibility": { "accepted": false, "reason": "wrong kind" }
+          }
+        ],
+        "expect": { "intent": { "targetId": "shallow", "position": "inside", "operation": "move" } }
+      },
+      {
+        "name": "no eligible containing target returns no intent",
+        "candidates": [
+          {
+            "targetId": "a",
+            "depth": 0,
+            "order": 0,
+            "containsPoint": false,
+            "eligibility": {
+              "accepted": true,
+              "intent": { "targetId": "a", "position": "inside", "operation": "move" }
+            }
+          },
+          {
+            "targetId": "b",
+            "depth": 1,
+            "order": 1,
+            "containsPoint": true,
+            "eligibility": { "accepted": false, "reason": "disabled" }
+          }
+        ],
+        "expect": { "intent": null }
+      },
+      {
+        "name": "an empty candidate set returns no intent",
+        "candidates": [],
+        "expect": { "intent": null }
+      }
+    ]
+  }
 }

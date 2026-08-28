@@ -54,7 +54,8 @@ behavior repairs without inventing another conformance authority.
   continuation register separates 93 closed, 69 evidence-only, 3
   decision-blocked, 7 programme-owned, and 3 unknown components, with no known
   repair at audit closeout. Architecture 011/spec 069 are now compiled as
-  `g16.021`–`g16.028`; the paired semantic kernel in `021` is in review.
+  `g16.021`–`g16.028`; the paired semantic kernel in `021` landed with its
+  shared `dragDrop` vector corpus in PR #96.
   TimeInput's native editing decision is approved and compiled separately as
   `g16.029`, held serially behind `021` because their shared export/vector
   surfaces overlap. NumberInput's committed-number/raw-draft and clean callback
@@ -130,9 +131,9 @@ behavior repairs without inventing another conformance authority.
   `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
   `019` complete, merged in PR #94, ledger 47 mounted / 127 missing; `020`
   complete, merged in PR #95. `029`–`032` are compiled component-continuation
-  cards behind the active `021` dependency. Dependable drag-and-drop remains a
+  cards, with `029` next. Dependable drag-and-drop remains a
   separate programme governed by architecture 011/spec 069 and compiled as
-  `021`–`028`; `021` is in review.
+  `021`–`028`; `021` merged in PR #96.
 
 ## Rules
 
