@@ -11123,29 +11123,18 @@ fn a_long_select_menu_clips_overflowing_option_rows() {
             driver.pointer_activate_id(&trigger);
             driver.draw_frame();
         }
-        driver.scroll_vertical_id(listbox, 480.0);
+        // GPUI scroll offset is `[-max, 0]`. Negative pixel delta moves the
+        // viewport down the list.
+        driver.scroll_vertical_id(listbox, -800.0);
         driver.pointer_activate_id(&last);
-        let scrolled = host.lock().expect("host lock").values.clone();
-        if scrolled.last().map(String::as_str) == Some("19") {
-            assert!(!host.lock().expect("host lock").spec.current_open());
-        } else {
-            assert!(
-                scrolled.is_empty(),
-                "clipped last row stays inert when scroll does not move it into hit-test"
-            );
-            if !host.lock().expect("host lock").spec.current_open() {
-                driver.pointer_activate_id(&trigger);
-                driver.draw_frame();
-            }
-            driver.pointer_activate_id(&first);
+        {
+            let host = host.lock().expect("host lock");
             assert_eq!(
-                host.lock()
-                    .expect("host lock")
-                    .values
-                    .last()
-                    .map(String::as_str),
-                Some("0")
+                host.values.last().map(String::as_str),
+                Some("19"),
+                "wheel scrolling must bring the last enabled row into hit-test"
             );
+            assert!(!host.spec.current_open());
         }
     });
 }
