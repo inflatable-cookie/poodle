@@ -125,3 +125,23 @@ Select is pinned.
   Select proof belong to `g16.019`
 - generation stays at 46 mounted / 128 missing until that card is recompiled
   after merge
+
+## Stopped identity boundary
+
+Making default composite construction unique requires a source-breaking
+change to `OrderByHandlers`, `PaginationHandlers`, `RelationPickerHandlers`,
+`TimeZoneSelectHandlers`, and `DateTimeZonePickerHandlers`: required
+`instance_id`, no `Default`, and wrapper/`pagination(...)` signature
+changes. That is outside the approved Select handler break. The card stop
+condition and working rules require operator approval before that
+migration.
+
+The required-ID expansion was reverted. BlockEditor stays unique via
+`block.id`. Query highlight, `OPTIONS_CHANGED`, and navigation vectors
+stay. Default OrderBy, Pagination (including `pagination(...)` /
+`js_pagination`), RelationPicker, and TimeZoneSelect still collide when
+the host does not author a scope.
+
+Operator choice: approve that composite-handler break and re-apply it
+consistently (including `pagination(...)` and `js_pagination`), or leave
+default-construction identity for a later card.
