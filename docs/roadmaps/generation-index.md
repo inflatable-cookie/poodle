@@ -19,8 +19,9 @@ Updated: 2026-08-28
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
   - Next move: review and merge the `g16.021` semantic kernel, then promote
-    `g16.029` from the landed base. Resolve the legacy public drag-export
-    migration before the first component drag migration.
+    `g16.029` from the landed base. The legacy public drag-export migration is
+    approved; later cards still fix exact replacement API names from their
+    landed prerequisites.
 
 ## Latest Completed Track
 

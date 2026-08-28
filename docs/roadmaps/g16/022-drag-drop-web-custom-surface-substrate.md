@@ -94,5 +94,6 @@ Never run a windowed/native visual or Jetstream selector.
 ## Continuation
 
 After merge, promote `g16.023` for the first simple Poodle component
-migrations. Do not start migration while the public-export decision in
-`../../triage/20260828-221415-drag-drop-public-migration-boundary.md` is open.
+migrations. Its public-export decision is approved in
+`../../triage/20260828-221415-drag-drop-public-migration-boundary.md`; apply the
+clean removal only after the mounted substrate replacement passes.

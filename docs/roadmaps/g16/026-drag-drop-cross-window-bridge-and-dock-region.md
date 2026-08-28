@@ -1,9 +1,10 @@
 # g16.026 — Drag-And-Drop Cross-Window Bridge And DockRegion
 
-Status: planned — blocked on g16.025 and the DockRegion public migration decision
-Depends on: `025-drag-drop-rust-gpui-substrate.md`,
-`../../triage/20260828-221415-drag-drop-public-migration-boundary.md`
-Governing refs: architecture 011, spec 069, and the DockRegion contract
+Status: planned — public migration approved; depends on g16.025
+Depends on: `025-drag-drop-rust-gpui-substrate.md`
+Governing refs: architecture 011, spec 069, the resolved
+`../../triage/20260828-221415-drag-drop-public-migration-boundary.md`, and the
+DockRegion contract
 
 ## Goal
 
@@ -26,8 +27,15 @@ window topology, or durable layout authority into Poodle.
 - DockRegion preserves within-region reorder, zones, collapse, tab callbacks,
   and current mounted evidence while replacing its global side channel.
 
-Before ready status, resolve the old DockRegion exported controller/types. Use
-the approved clean public migration; no aliases or dual session paths.
+The public migration is locked. After the new opaque bridge passes, delete
+every old `DockExternalDrag*` and `DockExternalDrop*` export,
+`createDockExternalDragController`, `dockPanelDragSession`, their framework
+re-exports, and the DOM-shaped controller module. Preserve asynchronous
+prepare/cancel/revalidation as new paired host-bridge semantics, not as aliases
+or wrappers. Preserve `onPanelDrop`'s semantic purpose, make
+`PanelDragData.sourceZone` required, and remove the older-build fallback. Fix
+the exact new bridge names from the landed kernel/GPUI substrate before this
+card becomes ready.
 
 ## Acceptance Criteria
 
@@ -39,13 +47,16 @@ the approved clean public migration; no aliases or dual session paths.
 - [ ] Headless web multi-context and GPUI host-stub tests take no operator focus.
 - [ ] Poodle imports no Longhorn/shell package and owns no window transaction.
 - [ ] Existing DockRegion ledger claim remains honest; no unrelated row moves.
+- [ ] Active-source search proves the old controller, session side channel,
+      types, re-exports, and optional-source-zone fallback are absent.
 
 ## Writable Scope
 
 - focused core/headless bridge types and host simulators;
 - bounded native DataTransfer opaque-token adapter;
 - DockRegion web, render, GPUI, types, contracts, tests, and specimens;
-- old DockRegion external-drag modules/exports only under the operator decision;
+- deletion of the old DockRegion external-drag module, controller, session side
+  channel, types, and framework/root exports under the approved clean migration;
 - focused headless multi-context/native host-stub evidence;
 - this card, migration triage, one log, g16 closeout, and `PAPERCUTS.md`.
 
@@ -65,8 +76,8 @@ windowed/native visual or Jetstream selector.
   mutation to complete the bridge.
 - Longhorn-owned semantics need to be copied rather than represented by opaque
   host capabilities.
-- DockRegion cannot migrate without a compatibility path or public behavior
-  break not approved by the operator.
+- DockRegion cannot migrate without a compatibility path or a public behavior
+  break beyond the approved clean replacement.
 - Proof needs sibling-repository mutation or focus-taking automation.
 
 ## Continuation

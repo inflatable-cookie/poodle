@@ -394,6 +394,26 @@ those channels rather than discard working semantics.
 Migration happens in bounded waves. Old component-local session state and
 global side channels are deleted only after their mounted replacement passes.
 
+### Approved public migration boundary
+
+The operator approved a clean pre-1.0 replacement on 2026-08-28:
+
+- delete the DOM-shaped public Tabs reorder state/handlers and framework
+  re-export modules in the simple-reorder migration; retain only the existing
+  pure `applyReorder` semantic helper from the Tabs machine;
+- delete the old DockRegion `DockExternalDrag*` / `DockExternalDrop*` types,
+  controller, global `dockPanelDragSession`, and framework re-exports after the
+  opaque host bridge passes;
+- preserve useful prepare, cancellation, drop-time revalidation, and
+  `onPanelDrop` semantics through the new substrate rather than compatibility
+  names or DOM-shaped wrappers; and
+- make `PanelDragData.sourceZone` required during DockRegion migration and
+  remove its older-build fallback.
+
+Current public APIs stay documented until their mounted replacements land.
+There is no alias, deprecation wrapper, dual controller, or silent fallback
+period.
+
 ## Certification Matrix
 
 ### Pure machine
@@ -473,9 +493,11 @@ it. Cross-window and drag-out contracts shape the base even when their adapters
 land after the internal proof.
 
 The compiled runway is `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
-through `028-drag-drop-migration-and-certification-closeout.md`. Only `g16.021`
-is ready at compilation. Later cards remain planned until their landed
-dependency and named decision gates are reconciled by the orchestrator.
+through `028-drag-drop-migration-and-certification-closeout.md`. `g16.021` is
+the dispatched foundation. The public migration gate for `g16.023` and
+`g16.026` is resolved; later cards remain planned until their landed
+dependencies and any remaining API-shape gates are reconciled by the
+orchestrator.
 
 ## Non-goals
 

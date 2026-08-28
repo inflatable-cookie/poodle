@@ -1,10 +1,10 @@
 # g16.023 — Drag-And-Drop Simple Reorder Migrations
 
-Status: planned — blocked on g16.022 and the public migration decision
-Depends on: `022-drag-drop-web-custom-surface-substrate.md`,
-`../../triage/20260828-221415-drag-drop-public-migration-boundary.md`
-Governing refs: architecture 011, spec 069, and the Tabs and EditableList
-component contracts
+Status: planned — public migration approved; depends on g16.022
+Depends on: `022-drag-drop-web-custom-surface-substrate.md`
+Governing refs: architecture 011, spec 069, the resolved
+`../../triage/20260828-221415-drag-drop-public-migration-boundary.md`, and the
+Tabs and EditableList component contracts
 
 ## Goal
 
@@ -25,9 +25,12 @@ replaced component-local drag lifecycle.
 - Source and target state comes from the provider; no parallel local session or
   HTML `DataTransfer` side channel remains.
 
-Before ready status, the operator must decide the exported `tabs-reorder.ts`
-helpers under the named triage gate. Apply the approved clean migration; do not
-retain aliases, dual controllers, or fallback behavior.
+The public migration is locked: delete `ReorderState`, `createReorderState`,
+`handleDragStart`, `handleDragOver`, and `handleDrop`, the DOM-shaped
+`tabs-reorder.ts` module, its root exports, and both framework re-export files
+after the mounted substrate replacement passes. Retain `applyReorder` only as
+the existing pure semantic helper exported from `tabs.ts`; it is not an alias
+for the removed module. Do not retain dual controllers or fallback behavior.
 
 ## Acceptance Criteria
 
@@ -37,6 +40,9 @@ retain aliases, dual controllers, or fallback behavior.
 - [ ] Tabs callback order/result, EditableList editing controls, focus return,
       announcements, and specimens do not regress.
 - [ ] Replaced local session state and approved obsolete exports are removed.
+- [ ] Active-source search proves the removed helper names and component-local
+      re-export modules are gone while the semantic `applyReorder` export and
+      callback result remain.
 - [ ] No native implementation or parity-ledger cell changes.
 
 ## Writable Scope
@@ -45,8 +51,9 @@ retain aliases, dual controllers, or fallback behavior.
   curated specimens;
 - the landed web drag substrate and focused tests only for proven reusable
   defects;
-- `packages/core/src/tabs-reorder.ts` and root exports only according to the
-  recorded operator decision;
+- deletion of `packages/core/src/tabs-reorder.ts`, its obsolete root exports,
+  and the Svelte/React component-local re-export files under the approved clean
+  migration;
 - the Tabs/EditableList contracts only to document the substrate without
   changing public component semantics;
 - this card, the migration triage note, one execution log, g16 closeout, and

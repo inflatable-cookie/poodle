@@ -57,7 +57,10 @@ behavior repairs without inventing another conformance authority.
   `g16.021`–`g16.028`; the paired semantic kernel in `021` is dispatched.
   TimeInput's native editing decision is approved and compiled separately as
   `g16.029`, held serially behind `021` because their shared export/vector
-  surfaces overlap. Other component-continuation decisions remain separate.
+  surfaces overlap. The later Tabs/DockRegion drag migrations now have an
+  approved clean public break: old DOM-shaped helpers disappear only after
+  their mounted replacements pass, with no compatibility layer. Other
+  component-continuation decisions remain separate.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;

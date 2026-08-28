@@ -51,12 +51,12 @@ stay maintained; backend admission is not part of the first card.
 18. [018 — Select semantic machine and interface convergence](018-select-semantic-machine-and-interface-convergence.md) — complete; merged in PR #93
 19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — complete; merged in PR #94
 20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
-21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — ready
+21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — dispatched
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — planned; depends on 021
-23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — planned; depends on 022 and public migration decision
+23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — planned; clean public migration approved, depends on 022
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — planned; depends on 023
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — planned; depends on 024
-26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; depends on 025 and public migration decision
+26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — planned; decision approved, promote after 021 merges
@@ -70,13 +70,15 @@ Two continuation programmes are now explicit:
   ledger. Its [runway map](component-continuation-runway.md) separates decision,
   audit, programme, and no-current-work gates. The register contains 93 closed,
   69 evidence-only, 3 decision-blocked, 7 programme-owned, and 3 unknown rows;
-  no known repair is currently ready to dispatch.
+  no known repair was ready at audit closeout.
 - **Dependable drag-and-drop:** architecture 011 and spec 069 govern a separate
   cross-runtime programme covering touch, nested targets, cross-window
   transfer, inbound files, and drag-out. `g16.021`–`g16.028` compile that
   programme without scattering the seven dependent components into unrelated
-  repairs. Only the paired semantic kernel is ready; later cards remain gated
-  by landed dependencies and explicit public migration choices.
+  repairs. The paired semantic kernel is dispatched. The clean Tabs and
+  DockRegion public migrations are approved; later cards remain gated by
+  landed dependencies and, for the host bridge, its exact post-kernel API
+  shape.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
@@ -270,7 +272,6 @@ mounted and 128 → 127 missing. Known-delta totals stay 115 / 60.
 
 Review and merge the dispatched `g16.021` worker PR. Then promote `g16.029` and
 publish its worker handoff from the landed base. Keep `g16.022` planned until
-the orchestrator chooses it after the serial core/export tranche. Resolve the
-public drag migration boundary in
-`../../triage/20260828-221415-drag-drop-public-migration-boundary.md` before the
-first component drag migration.
+the orchestrator chooses it after the serial core/export tranche. The public
+drag migration boundary is resolved; reconcile the exact custom-surface and
+host-bridge API names only after their prerequisite kernels land.
