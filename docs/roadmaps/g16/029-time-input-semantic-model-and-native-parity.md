@@ -1,6 +1,6 @@
 # g16.029 — TimeInput Semantic Model And Native Parity
 
-Status: complete — awaiting merge
+Status: complete — awaiting merge in PR #97
 Opened: 2026-08-28
 Depends on: approved `docs/contracts/components/time-input.md`; merged
 `g16.021` before dispatch because both lanes edit shared core/headless exports

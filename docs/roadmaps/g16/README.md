@@ -294,7 +294,8 @@ moved.
 
 ## Next Task
 
-Review `g16.029` and authorise its merge. Then dispatch `g16.030` NumberInput.
+Review `g16.029` in PR #97 and authorise its merge. Then dispatch `g16.030`
+NumberInput.
 Keep `g16.022` planned until the orchestrator chooses it after the serial
 core/export tranche. The public drag migration boundary is resolved; reconcile
 the exact custom-surface and host-bridge API names only after their

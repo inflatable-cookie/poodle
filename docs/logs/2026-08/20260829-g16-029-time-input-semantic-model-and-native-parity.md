@@ -1,7 +1,8 @@
 # g16.029 — TimeInput Semantic Model And Native Parity
 
-Status: complete — awaiting merge
+Status: complete — awaiting merge in PR #97
 Date: 2026-08-29
+PR: https://github.com/inflatable-cookie/poodle/pull/97
 Branch: `t3code/time-input-native-parity`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-7a753199`
 Card: `docs/roadmaps/g16/029-time-input-semantic-model-and-native-parity.md`
