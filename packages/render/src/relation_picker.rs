@@ -61,8 +61,13 @@ pub struct RelationPickerHandlers {
 
 impl RelationPickerHandlers {
     pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "RelationPickerHandlers requires a non-empty lifetime-stable instance_id"
+        );
         Self {
-            instance_id: instance_id.into(),
+            instance_id,
             on_select: None,
             on_drill_enter: None,
             on_breadcrumb_click: None,
@@ -621,5 +626,13 @@ mod tests {
         assert!(tree
             .find(&|n| n.runtime_id.as_deref() == Some("select:picker-b:kind:trigger"))
             .is_some());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "RelationPickerHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn empty_instance_scope_is_rejected() {
+        let _ = RelationPickerHandlers::new("");
     }
 }

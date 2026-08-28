@@ -45,8 +45,13 @@ pub struct PaginationHandlers {
 
 impl PaginationHandlers {
     pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "PaginationHandlers requires a non-empty lifetime-stable instance_id"
+        );
         Self {
-            instance_id: instance_id.into(),
+            instance_id,
             page_change: None,
             limit_open: false,
             limit_open_change: None,
@@ -628,7 +633,7 @@ mod tests {
             page_size_change: Some(Arc::new(move |size| {
                 size_sink.lock().expect("size lock").push(size);
             })),
-            instance_id: "pagination-test".to_string(),
+            ..PaginationHandlers::new("pagination-test")
         }
     }
 
@@ -971,5 +976,35 @@ mod tests {
         assert!(tree
             .find(&|n| n.runtime_id.as_deref() == Some("select:pager-public-b:trigger"))
             .is_some());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "PaginationHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn empty_instance_scope_is_rejected() {
+        let _ = PaginationHandlers::new("");
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "PaginationHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn public_pagination_path_rejects_empty_instance_scope() {
+        let spec = numbered_spec();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let _ = pagination(&spec, &ctx, "", None);
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "PaginationHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn public_pagination_path_rejects_blank_instance_scope() {
+        let spec = numbered_spec();
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let _ = pagination(&spec, &ctx, "  \t", None);
     }
 }

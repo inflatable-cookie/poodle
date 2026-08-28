@@ -40,8 +40,13 @@ pub struct OrderByHandlers {
 
 impl OrderByHandlers {
     pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "OrderByHandlers requires a non-empty lifetime-stable instance_id"
+        );
         Self {
-            instance_id: instance_id.into(),
+            instance_id,
             on_direction_toggle: None,
             on_remove: None,
         }
@@ -477,5 +482,11 @@ mod tests {
         assert!(tree
             .find(&|n| n.runtime_id.as_deref() == Some("select:sort-b:trigger"))
             .is_some());
+    }
+
+    #[test]
+    #[should_panic(expected = "OrderByHandlers requires a non-empty lifetime-stable instance_id")]
+    fn empty_instance_scope_is_rejected() {
+        let _ = OrderByHandlers::new("");
     }
 }

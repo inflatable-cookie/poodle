@@ -29,8 +29,13 @@ pub struct TimeZoneSelectHandlers {
 
 impl TimeZoneSelectHandlers {
     pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "TimeZoneSelectHandlers requires a non-empty lifetime-stable instance_id"
+        );
         Self {
-            instance_id: instance_id.into(),
+            instance_id,
             on_toggle: None,
             on_change: None,
         }
@@ -167,5 +172,13 @@ mod tests {
         assert!(tree
             .find(&|n| n.runtime_id.as_deref() == Some("select:zone-b:trigger"))
             .is_some());
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "TimeZoneSelectHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn empty_instance_scope_is_rejected() {
+        let _ = TimeZoneSelectHandlers::new("");
     }
 }

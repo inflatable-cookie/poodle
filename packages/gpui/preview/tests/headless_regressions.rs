@@ -9874,7 +9874,7 @@ fn pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard(
                     *size_mount.lock().expect("mount lock") =
                         build(Arc::clone(&size_host), Arc::clone(&size_mount));
                 })),
-                instance_id: "pagination-limit".to_string(),
+                ..poodle_render::PaginationHandlers::new("pagination-limit")
             },
         );
         stamp_ids(&mut node);

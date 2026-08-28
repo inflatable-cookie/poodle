@@ -37,8 +37,13 @@ pub struct DateTimeZonePickerHandlers {
 
 impl DateTimeZonePickerHandlers {
     pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "DateTimeZonePickerHandlers requires a non-empty lifetime-stable instance_id"
+        );
         Self {
-            instance_id: instance_id.into(),
+            instance_id,
             on_toggle: None,
             on_select: None,
             on_navigate: None,
@@ -167,7 +172,7 @@ pub fn date_time_zone_picker(
                 TimeZoneSelectHandlers {
                     on_toggle: handlers.on_zone_toggle.clone(),
                     on_change: handlers.on_zone_change.clone(),
-                    instance_id: handlers.instance_id.clone(),
+                    ..TimeZoneSelectHandlers::new(handlers.instance_id.clone())
                 },
             ),
         );
@@ -252,4 +257,17 @@ pub fn date_time_zone_picker(
         }
     }
     root
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic(
+        expected = "DateTimeZonePickerHandlers requires a non-empty lifetime-stable instance_id"
+    )]
+    fn empty_instance_scope_is_rejected() {
+        let _ = DateTimeZonePickerHandlers::new("");
+    }
 }

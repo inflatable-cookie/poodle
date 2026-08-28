@@ -49,8 +49,13 @@ pub struct SelectHandlers {
 
 impl SelectHandlers {
     pub fn new(instance_scope: impl Into<String>) -> Self {
+        let instance_scope = instance_scope.into();
+        assert!(
+            !instance_scope.trim().is_empty(),
+            "SelectHandlers requires a non-empty lifetime-stable instance_scope"
+        );
         Self {
-            instance_scope: instance_scope.into(),
+            instance_scope,
             on_transition: None,
         }
     }
@@ -815,5 +820,17 @@ mod tests {
         let node = select(&spec, &ctx, &SelectHandlers::new("ff"));
         assert!(!node.has_text("Search…"));
         assert!(!spec.shows_search_input());
+    }
+
+    #[test]
+    #[should_panic(expected = "SelectHandlers requires a non-empty lifetime-stable instance_scope")]
+    fn empty_instance_scope_is_rejected() {
+        let _ = SelectHandlers::new("");
+    }
+
+    #[test]
+    #[should_panic(expected = "SelectHandlers requires a non-empty lifetime-stable instance_scope")]
+    fn blank_instance_scope_is_rejected() {
+        let _ = SelectHandlers::new("   ");
     }
 }

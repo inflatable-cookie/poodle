@@ -2613,9 +2613,9 @@ impl OrderBy {
             &self.spec,
             &RenderContext::new(&self.theme),
             poodle_render::OrderByHandlers {
-                instance_id: self.instance_id,
                 on_direction_toggle: self.on_direction_toggle,
                 on_remove: self.on_remove,
+                ..poodle_render::OrderByHandlers::new(self.instance_id)
             },
         )
     }
@@ -5425,12 +5425,8 @@ impl DateTimeZonePicker {
             &self.spec,
             &RenderContext::new(&self.theme),
             poodle_render::DateTimeZonePickerHandlers {
-                instance_id: self.instance_id,
                 on_toggle: self.on_toggle,
-                on_select: None,
-                on_navigate: None,
-                on_zone_toggle: None,
-                on_zone_change: None,
+                ..poodle_render::DateTimeZonePickerHandlers::new(self.instance_id)
             },
         )
     }
@@ -5540,9 +5536,8 @@ impl TimeZoneSelect {
             &self.spec,
             &RenderContext::new(&self.theme),
             poodle_render::TimeZoneSelectHandlers {
-                instance_id: self.instance_id,
                 on_toggle: self.on_toggle,
-                on_change: None,
+                ..poodle_render::TimeZoneSelectHandlers::new(self.instance_id)
             },
         )
     }
@@ -7424,11 +7419,11 @@ impl IntoElement for Pagination {
 
     fn into_element(self) -> Self::Element {
         let handlers = poodle_render::PaginationHandlers {
-            instance_id: self.instance_id,
             page_change: self.on_page_change,
             limit_open: self.limit_open,
             limit_open_change: self.on_limit_open_change,
             page_size_change: self.on_page_size_change,
+            ..poodle_render::PaginationHandlers::new(self.instance_id)
         };
         poodle_gpui_node_backend::to_gpui(&poodle_render::pagination_with_handlers(
             &self.spec,

@@ -137,4 +137,6 @@ The operator approved the pre-1.0 breaking composite-handler migration.
 `js_pagination` take that scope. Composed callers (`list_container`,
 `log_list`) and GPUI/Jetstream wrappers pass it through. Pair-construction
 tests cover `PaginationHandlers::new` and the public `pagination(...)`
-path. No optional IDs, type-label fallbacks, or shared constants remain.
+path. Empty and blank scopes are rejected at construction for Select and
+all five composite handlers. No optional IDs, type-label fallbacks, or
+shared constants remain.
