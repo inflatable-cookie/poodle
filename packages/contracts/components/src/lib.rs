@@ -87,7 +87,7 @@ mod text_input;
 mod text_link;
 mod theme_select;
 mod time_ago;
-mod time_field;
+mod time_input;
 mod time_zone_select;
 mod toggle_group;
 mod token_input;
@@ -307,7 +307,7 @@ pub use history_center::{HistoryCenterRejection, HistoryCenterSpec, HistoryCente
 pub use text_input::TextInputSpec;
 pub use text_link::{TextLinkSpec, TextLinkTone};
 pub use time_ago::{TimeAgoFutureFormat, TimeAgoSpec, TimeAgoTooltipFormat};
-pub use time_field::TimeFieldSpec;
+pub use time_input::TimeInputSpec;
 pub use time_zone_select::{
     default_time_zone_options, TimeZoneSelectSpec, TIME_ZONE_EMPTY_MESSAGE, TIME_ZONE_PLACEHOLDER,
 };
@@ -444,7 +444,7 @@ pub const SELECTION_FEEDBACK_DATE_EXPORTS: &[&str] = &[
     "CalendarSpec",
     "DatePickerSpec",
     "DateRangePickerSpec",
-    "TimeFieldSpec",
+    "TimeInputSpec",
     "DateTimePickerSpec",
     "DateTimeRangePickerSpec",
 ];
@@ -499,7 +499,7 @@ mod tests {
         ScrollShellSpec, SegmentedControlOption, SegmentedControlSpec, SelectSpec, SeparatorSpec,
         SliderSpec, StackSpec, StatusIndicatorSpec, StatusTone, SurfaceSpec, SurfaceTone,
         SwitchSpec, TabActivationMode,
-        TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec, TimeFieldSpec,
+        TabDefinition, TabStripItem, TabStripSpec, TabsSpec, TextInputSpec, TimeInputSpec,
         TooltipSpec, ValidationState,
     };
 
@@ -895,7 +895,7 @@ mod tests {
 
     #[test]
     fn time_and_date_time_specs_preserve_public_values() {
-        let time = TimeFieldSpec::new()
+        let time = TimeInputSpec::new()
             .with_default_value("09:30")
             .with_step(300);
         let date_time = DateTimeValue::new(

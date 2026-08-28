@@ -1145,7 +1145,10 @@ mod tests {
     fn split_view() {
         assert_eq!(
             a().render(
-                &SplitViewSpec::new("split-view:compile-check", poodle_specs::SplitOrientation::Horizontal),
+                &SplitViewSpec::new(
+                    "split-view:compile-check",
+                    poodle_specs::SplitOrientation::Horizontal
+                ),
                 &s(),
                 &t()
             )

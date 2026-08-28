@@ -10,7 +10,7 @@
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole};
 use poodle_specs::{
-    CalendarMode, CalendarSpec, DateRangeValue, DateTimeRangePickerSpec, TimeFieldSpec,
+    CalendarMode, CalendarSpec, DateRangeValue, DateTimeRangePickerSpec, TimeInputSpec,
 };
 
 use crate::calendar::{calendar, CalendarHandlers};
@@ -19,7 +19,7 @@ use crate::context::RenderContext;
 use crate::date_picker::DatePickerHandlers;
 use crate::picker_trigger::{picker_trigger, PickerTrigger};
 use crate::presentation::rem_to_px;
-use crate::time_field::time_field;
+use crate::time_input::time_input;
 
 pub fn date_time_range_picker(
     spec: &DateTimeRangePickerSpec,
@@ -102,7 +102,7 @@ pub fn date_time_range_picker(
         // Contract §8 Time Label: label-family, 0.6875rem, weight 600,
         // uppercase, text-secondary (the string is pre-uppercased).
         let time_section = |label: &str, time_val: Option<String>| -> Node {
-            let mut time_spec = TimeFieldSpec::new();
+            let mut time_spec = TimeInputSpec::new();
             time_spec.value = time_val;
             time_spec.is_disabled = spec.is_disabled;
 
@@ -118,7 +118,7 @@ pub fn date_time_range_picker(
             caption.style.descriptor.text_color = Some(muted);
             caption.style.text_size = Some(rem_to_px(0.6875));
             caption.style.text_weight = Some(600);
-            section.child(caption).child(time_field(&time_spec, ctx))
+            section.child(caption).child(time_input(&time_spec, ctx))
         };
 
         // Times Row — two equal columns for start/end; contract gap 0.75rem.

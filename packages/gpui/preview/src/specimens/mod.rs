@@ -63,7 +63,7 @@ mod date_range_picker;
 mod date_time_picker;
 mod date_time_range_picker;
 mod date_time_zone_picker;
-mod time_field;
+mod time_input;
 mod time_zone_select;
 
 // ── Feedback ──────────────────────────────────────────────
@@ -335,7 +335,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "number-input" => specimen_card("NumberInput", theme, number_input::render(state, cx)),
         "code-input" => specimen_card("CodeInput", theme, code_input::render(state, cx)),
         "toolbar" => specimen_card("Toolbar", theme, toolbar::render(state, cx)),
-        "time-input" => specimen_card("TimeInput", theme, time_field::render(state, cx)),
+        "time-input" => specimen_card("TimeInput", theme, time_input::render(state, cx)),
         "editable-label" => {
             specimen_card("EditableLabel", theme, editable_label::render(state, cx))
         }

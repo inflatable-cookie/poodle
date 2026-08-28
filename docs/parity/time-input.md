@@ -10,12 +10,12 @@
 
 - Contract: `docs/contracts/components/time-input.md`
 - Svelte (authoritative): `packages/svelte/components/src/TimeInput.svelte`
-- GPUI: `packages/gpui/components/src/primitives/time_field.rs`
-- Jetstream: `packages/jetstream/components/src/time_field.rs`
-- Spec: `packages/contracts/components/src/time_field.rs` (`TimeFieldSpec`)
-- Specimens: svelte `packages/svelte/preview/src/specimens/TimeInputSpecimen.svelte` · gpui `packages/gpui/preview/src/specimens/time_field.rs` · jetstream `packages/jetstream/preview/src/specimens/time_field.rs`
+- GPUI: `packages/gpui/preview/src/specimens/time_input.rs` via `poodle_render::time_input`
+- Jetstream: `packages/jetstream/preview/src/specimens/time_input.rs` via `poodle_render::time_input`
+- Spec: `packages/contracts/components/src/time_input.rs` (`TimeInputSpec`)
+- Specimens: svelte `packages/svelte/preview/src/specimens/TimeInputSpecimen.svelte` · gpui `packages/gpui/preview/src/specimens/time_input.rs` · jetstream `packages/jetstream/preview/src/specimens/time_input.rs`
 
-Filename mapping: contract + Svelte use `time-input`/`TimeInput`; both Rust impls and the spec use the legacy `time_field.rs` / `TimeFieldSpec` name. Same component (noted in spec file header and contract §"Rust Spec Note").
+Filename mapping: contract, Svelte, React, spec, and renderer all use `time-input` / `TimeInput` / `TimeInputSpec`.
 
 ## Contract ↔ Svelte
 

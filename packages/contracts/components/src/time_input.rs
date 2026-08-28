@@ -1,14 +1,12 @@
-//! `TimeFieldSpec` — spec for the `TimeInput` component. File is named
-//! `time_field.rs` (legacy name); the contract lives at
-//! `docs/contracts/components/time-input.md` and the Svelte component is
-//! `TimeInput.svelte`. Not an orphan — just a naming discrepancy.
+//! `TimeInputSpec` — spec for the `TimeInput` component.
+//! Contract: `docs/contracts/components/time-input.md`.
 
 use poodle_tokens::semantic;
 
 use crate::types::{ControlDensity, ControlSize, SemanticControlSizeRole};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct TimeFieldSpec {
+pub struct TimeInputSpec {
     pub value: Option<String>,
     pub default_value: Option<String>,
     pub min: Option<String>,
@@ -22,7 +20,7 @@ pub struct TimeFieldSpec {
     pub density: Option<ControlDensity>,
 }
 
-impl Default for TimeFieldSpec {
+impl Default for TimeInputSpec {
     fn default() -> Self {
         Self {
             value: None,
@@ -40,7 +38,7 @@ impl Default for TimeFieldSpec {
     }
 }
 
-impl TimeFieldSpec {
+impl TimeInputSpec {
     pub fn new() -> Self {
         Self::default()
     }

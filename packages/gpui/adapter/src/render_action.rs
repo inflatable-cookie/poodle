@@ -3,7 +3,7 @@
 //! Implements the adapter trait for:
 //! - ButtonSpec, IconButtonSpec
 //! - FieldSpec, TextInputSpec
-//! - FormActionsSpec, TimeFieldSpec
+//! - FormActionsSpec, TimeInputSpec
 //! - EditableLabelSpec, NumberInputSpec, CodeInputSpec, ToolbarSpec
 //!
 //! NOTE: `gpui_style` is built and mutated in every render fn as proof of token
@@ -15,7 +15,7 @@
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
     ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-    NumberInputSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
+    NumberInputSpec, TextInputSpec, TimeInputSpec, ToolbarSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -203,17 +203,17 @@ impl RenderComponent<FormActionsSpec> for GpuiAdapter {
     }
 }
 
-impl RenderComponent<TimeFieldSpec> for GpuiAdapter {
+impl RenderComponent<TimeInputSpec> for GpuiAdapter {
     type Target = GpuiTarget;
 
     fn render(
         &self,
-        _spec: &TimeFieldSpec,
+        _spec: &TimeInputSpec,
         style: &StyleDescriptor,
         _theme: &dyn ThemeProvider,
     ) -> GpuiElementHandle {
         let _gpui_style = map_style(style);
-        GpuiElementHandle::new("time-field", "TimeFieldSpec")
+        GpuiElementHandle::new("time-input", "TimeInputSpec")
     }
 }
 
@@ -320,7 +320,7 @@ mod tests {
     use poodle_adapter::RenderComponent;
     use poodle_specs::{
         ButtonSpec, CodeInputSpec, EditableLabelSpec, FieldSpec, FormActionsSpec, IconButtonSpec,
-        NumberInputSpec, TextInputSpec, TimeFieldSpec, ToolbarSpec,
+        NumberInputSpec, TextInputSpec, TimeInputSpec, ToolbarSpec,
     };
     use poodle_style::StyleDescriptor;
 
@@ -402,10 +402,10 @@ mod tests {
     }
 
     #[test]
-    fn render_time_field_produces_handle() {
+    fn render_time_input_produces_handle() {
         let a = adapter();
-        let handle = a.render(&TimeFieldSpec::new(), &style(), &theme());
-        assert_eq!(handle.spec_type, "TimeFieldSpec");
+        let handle = a.render(&TimeInputSpec::new(), &style(), &theme());
+        assert_eq!(handle.spec_type, "TimeInputSpec");
     }
 
     #[test]

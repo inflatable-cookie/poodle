@@ -42,7 +42,7 @@ use poodle_specs::{
     SkeletonSpec, SliderSpec, SpacerSpec, SpinnerSpec, SplitOrientation, SplitViewSpec, StackSpec,
     StateTileSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec, TabStripSpec,
     TableSpec, TabsSpec, TextInputSpec, TextLinkSpec, TextSpec, ThemeSelectSpec, TimeAgoSpec,
-    TimeFieldSpec, TimeZoneSelectSpec, ToastHostSpec, ToastStackSpec, TokenInputSpec,
+    TimeInputSpec, TimeZoneSelectSpec, ToastHostSpec, ToastStackSpec, TokenInputSpec,
     ToolCallGroupSpec, ToolCallSpec, ToolbarSpec, TooltipSpec, TreeSpec, TriStateSwitchSpec,
     TriStateValue, ValidationSummarySpec, VideoPlayerSpec,
 };
@@ -5440,15 +5440,15 @@ impl IntoElement for DateTimeZonePicker {
     }
 }
 
-pub(crate) struct TimeField {
-    spec: TimeFieldSpec,
+pub(crate) struct TimeInput {
+    spec: TimeInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
-impl TimeField {
-    pub(crate) fn from_spec(spec: TimeFieldSpec, theme: &GpuiThemeProvider) -> Self {
+impl TimeInput {
+    pub(crate) fn from_spec(spec: TimeInputSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
@@ -5479,15 +5479,15 @@ impl TimeField {
 
     fn into_node(self) -> poodle_node::Node {
         let mut node =
-            poodle_render::time_field_with_change(&self.spec, &RenderContext::new(&self.theme), self.on_change);
+            poodle_render::time_input_with_change(&self.spec, &RenderContext::new(&self.theme), self.on_change);
         if let Some(id) = self.id_suffix {
-            node.id = Some(format!("poodle-time-field-{id}"));
+            node.id = Some(format!("poodle-time-input-{id}"));
         }
         node
     }
 }
 
-impl IntoElement for TimeField {
+impl IntoElement for TimeInput {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {

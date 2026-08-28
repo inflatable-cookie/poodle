@@ -1,5 +1,5 @@
 use crate::app_state::{AppState, NodeSpecimenEvent};
-use crate::node_compat::{Eyebrow, TimeField};
+use crate::node_compat::{Eyebrow, TimeInput};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
@@ -7,7 +7,7 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
-use poodle_specs::{EyebrowSpec, TimeFieldSpec};
+use poodle_specs::{EyebrowSpec, TimeInputSpec};
 use std::sync::{Arc, Mutex};
 
 fn change_handler(
@@ -30,13 +30,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let default_value = state
         .specimens
         .text
-        .get("time-field-default")
+        .get("time-input-default")
         .cloned()
         .unwrap_or_default();
     let meeting_value = state
         .specimens
         .text
-        .get("time-field-meeting")
+        .get("time-input-meeting")
         .cloned()
         .unwrap_or_else(|| "14:30".to_string());
 
@@ -61,14 +61,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_col()
                         .gap(px(4.0))
                         .child({
-                            let mut spec = TimeFieldSpec::new();
+                            let mut spec = TimeInputSpec::new();
                             if !default_value.is_empty() {
                                 spec = spec.with_default_value(&default_value);
                             }
                             spec.aria_label = Some("Start time".to_string());
-                            TimeField::from_spec(spec, theme)
+                            TimeInput::from_spec(spec, theme)
                                 .with_id("default")
-                                .on_change(change_handler(&state.node_events, "time-field-default"))
+                                .on_change(change_handler(&state.node_events, "time-input-default"))
                         })
                         .when(!default_value.is_empty(), |d| {
                             d.child(
@@ -96,11 +96,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .flex_col()
                         .gap(px(4.0))
                         .child({
-                            let mut spec = TimeFieldSpec::new().with_default_value(&meeting_value);
+                            let mut spec = TimeInputSpec::new().with_default_value(&meeting_value);
                             spec.aria_label = Some("Meeting time".to_string());
-                            TimeField::from_spec(spec, theme)
+                            TimeInput::from_spec(spec, theme)
                                 .with_id("with-value")
-                                .on_change(change_handler(&state.node_events, "time-field-meeting"))
+                                .on_change(change_handler(&state.node_events, "time-input-meeting"))
                         })
                         .child(
                             div()
@@ -121,11 +121,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child({
-                    let mut spec = TimeFieldSpec::new().with_default_value("09:00");
+                    let mut spec = TimeInputSpec::new().with_default_value("09:00");
                     spec.min = Some("08:00".to_string());
                     spec.max = Some("18:00".to_string());
                     spec.aria_label = Some("Office hours".to_string());
-                    TimeField::from_spec(spec, theme).with_id("constrained")
+                    TimeInput::from_spec(spec, theme).with_id("constrained")
                 }),
         )
         // --- Disabled ---
@@ -139,9 +139,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child({
-                    let mut spec = TimeFieldSpec::new().with_default_value("12:00");
+                    let mut spec = TimeInputSpec::new().with_default_value("12:00");
                     spec.is_disabled = true;
-                    TimeField::from_spec(spec, theme).with_id("disabled")
+                    TimeInput::from_spec(spec, theme).with_id("disabled")
                 }),
         )
         .into_any_element();
@@ -149,21 +149,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     specimen_layout(
         state,
         cx,
-        "time-field",
+        "time-input",
         examples,
         SpecimenAxes::examples_only()
             .with_sizes(|size, theme: &GpuiThemeProvider| {
-                let mut spec = TimeFieldSpec::new().with_default_value("09:30");
+                let mut spec = TimeInputSpec::new().with_default_value("09:30");
                 spec.aria_label = Some("Time field".to_string());
-                TimeField::from_spec(spec, theme)
+                TimeInput::from_spec(spec, theme)
                     .with_id(format!("specimen-size-{:?}", size))
                     .size(size)
                     .into_any_element()
             })
             .with_densities(|density, theme: &GpuiThemeProvider| {
-                let mut spec = TimeFieldSpec::new().with_default_value("09:30");
+                let mut spec = TimeInputSpec::new().with_default_value("09:30");
                 spec.aria_label = Some("Time field".to_string());
-                TimeField::from_spec(spec, theme)
+                TimeInput::from_spec(spec, theme)
                     .with_id(format!("specimen-density-{:?}", density))
                     .with_density(density)
                     .into_any_element()

@@ -1,26 +1,25 @@
-//! TimeField — time input.
+//! TimeInput renderer.
 //!
-//! Contract: `docs/contracts/components/time-field.md`
-//! Ported from: `packages/jetstream/components/src/time_field.rs`.
+//! Contract: `docs/contracts/components/time-input.md`.
 //!
 //! There is no native input[type="time"], so the component renders a styled
 //! text display of the current time value ("HH:MM" placeholder when empty —
 //! the no-native-input substitute, contract §12).
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole, TextChangeHandler};
-use poodle_specs::TimeFieldSpec;
+use poodle_specs::TimeInputSpec;
 
 use crate::context::RenderContext;
 use crate::presentation::{
     rem_to_px, size_font_rem, size_height_offset_rem, size_padding_x_offset_rem,
 };
 
-pub fn time_field(spec: &TimeFieldSpec, ctx: &RenderContext<'_>) -> Node {
-    time_field_with_change(spec, ctx, None)
+pub fn time_input(spec: &TimeInputSpec, ctx: &RenderContext<'_>) -> Node {
+    time_input_with_change(spec, ctx, None)
 }
 
-pub fn time_field_with_change(
-    spec: &TimeFieldSpec,
+pub fn time_input_with_change(
+    spec: &TimeInputSpec,
     ctx: &RenderContext<'_>,
     on_change: Option<TextChangeHandler>,
 ) -> Node {
@@ -104,13 +103,13 @@ mod tests {
     }
 
     #[test]
-    fn editable_time_field_reports_replacement_text() {
+    fn editable_time_input_reports_replacement_text() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let observed = Arc::new(Mutex::new(String::new()));
         let capture = Arc::clone(&observed);
-        let node = time_field_with_change(
-            &TimeFieldSpec::new(),
+        let node = time_input_with_change(
+            &TimeInputSpec::new(),
             &ctx,
             Some(Arc::new(move |value| {
                 *capture.lock().unwrap() = value.to_string();
@@ -123,12 +122,12 @@ mod tests {
     }
 
     #[test]
-    fn disabled_time_field_is_not_editable() {
+    fn disabled_time_input_is_not_editable() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let mut spec = TimeFieldSpec::new();
+        let mut spec = TimeInputSpec::new();
         spec.is_disabled = true;
-        let node = time_field_with_change(&spec, &ctx, Some(Arc::new(|_| {})));
+        let node = time_input_with_change(&spec, &ctx, Some(Arc::new(|_| {})));
         assert!(node.interaction.on_text_change.is_none());
     }
 }

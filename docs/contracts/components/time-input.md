@@ -248,10 +248,11 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 
 - expected crate/module surface: `poodle_gpui::primitives::time_input`
 - Spec struct: `TimeInputSpec` in `poodle-specs`
+- Renderer: `poodle_render::time_input` / `time_input_with_change`
 - GPUI provides one segmented time-entry control because there is no native
   `input[type="time"]`
-- the legacy pre-1.0 `TimeFieldSpec` / `time_field` public surface is removed in
-  the same clean migration; no alias or compatibility wrapper remains
+- the pre-1.0 `TimeFieldSpec` / `time_field` public surface is gone; no alias or
+  compatibility wrapper remains
 - Must expose time value, min/max constraints, and step through accessibility tree
 - Focus ring treatment must match outline spec
 

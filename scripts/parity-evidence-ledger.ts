@@ -43,13 +43,13 @@ type LiveComponent = {
 const RUST_SPEC_OVERRIDES: Record<string, string> = {
   Callout: "CallOutSpec",
   StatusBar: "ShellStatusBarSpec",
-  TimeInput: "TimeFieldSpec",
+  TimeInput: "TimeInputSpec",
 };
 
 const RENDER_MODULE_OVERRIDES: Record<string, string> = {
   Box: "bx",
   StatusBar: "shell_status_bar",
-  TimeInput: "time_field",
+  TimeInput: "time_input",
   UiPresentationProvider: "context",
 };
 

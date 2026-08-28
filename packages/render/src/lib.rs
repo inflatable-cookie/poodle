@@ -168,7 +168,7 @@ pub mod text_input;
 pub mod text_link;
 pub mod theme_select;
 pub mod time_ago;
-pub mod time_field;
+pub mod time_input;
 pub mod time_zone_select;
 pub mod toast_host;
 pub mod toast_stack;
@@ -389,7 +389,7 @@ pub use text_input::{
 pub use text_link::text_link;
 pub use theme_select::{theme_select, theme_select_with_handlers, ThemeSelectHandlers};
 pub use time_ago::time_ago;
-pub use time_field::{time_field, time_field_with_change};
+pub use time_input::{time_input, time_input_with_change};
 pub use time_zone_select::{time_zone_select, TimeZoneSelectHandlers};
 pub use toast_host::toast_host;
 pub use toast_stack::{toast_stack, ToastStackHandlers};

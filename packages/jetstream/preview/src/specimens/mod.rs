@@ -137,7 +137,7 @@ pub mod text;
 pub mod text_input;
 pub mod text_link;
 pub mod time_ago;
-pub mod time_field;
+pub mod time_input;
 pub mod time_zone_select;
 pub mod toast_host;
 pub mod toast_stack;
@@ -497,7 +497,7 @@ pub fn render_specimen(
         "text-input" => Some(el(text_input::render(theme))),
         "text-link" => Some(el(text_link::render(theme))),
         "time-ago" => Some(el(time_ago::render(theme))),
-        "time-field" => Some(el(time_field::render(theme))),
+        "time-input" => Some(el(time_input::render(theme))),
         "time-zone-select" => Some(el(time_zone_select::render(theme))),
         "toast-host" => Some(el(toast_host::render(theme))),
         "toast-stack" => Some(el(toast_stack::render(theme))),
