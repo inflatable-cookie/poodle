@@ -238,26 +238,25 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         .or_else(crate::current_dismiss_layer);
     let in_dismiss_layer = layer_id.is_some();
     if let Some(layer) = layer_id {
-        // Overlay surfaces themselves skip this observer. A `size_full`
-        // absolute child of an auto-height deferred box collapses Taffy's
-        // used height to padding, so option-row hitboxes never cover the
-        // painted rows. Containment still comes from trigger and option
-        // canvases; the overlay's own occlude hitbox uses its laid-out size.
-        if !node.style.overlay {
-            let element_id = id.to_owned();
-            el = el.child(
-                gpui::canvas(
-                    move |bounds, _window, _cx| {
-                        super::layers::record_bounds(&element_id, &layer, bounds);
-                    },
-                    |_, _, _, _| {},
-                )
-                .absolute()
-                .top(px(0.0))
-                .left(px(0.0))
-                .size_full(),
-            );
-        }
+        let element_id = id.to_owned();
+        // Overlay surfaces pin all four insets instead of `size_full`.
+        // Percentage height on an auto-sized deferred box collapses Taffy's
+        // used height to padding; inset-0 fills the laid-out padding box
+        // without contributing to that height.
+        let canvas = gpui::canvas(
+            move |bounds, _window, _cx| {
+                super::layers::record_bounds(&element_id, &layer, bounds);
+            },
+            |_, _, _, _| {},
+        )
+        .absolute()
+        .top(px(0.0))
+        .left(px(0.0));
+        el = el.child(if node.style.overlay {
+            canvas.right(px(0.0)).bottom(px(0.0))
+        } else {
+            canvas.size_full()
+        });
     } else if !id.is_empty() {
         let element_id = id.to_owned();
         el = el.child(

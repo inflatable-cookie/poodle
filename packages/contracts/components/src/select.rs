@@ -80,6 +80,10 @@ pub struct SelectSpec {
     pub search_query: Option<String>,
     /// Host-authored highlighted option value. `None` means no highlight.
     pub highlighted_value: Option<String>,
+    /// Host-authored caret/selection in the compact search editor, as
+    /// character offsets into `search_query`.
+    pub search_selection_start: usize,
+    pub search_selection_end: usize,
 }
 
 impl Default for SelectSpec {
@@ -113,6 +117,8 @@ impl Default for SelectSpec {
             load_key: None,
             search_query: None,
             highlighted_value: None,
+            search_selection_start: 0,
+            search_selection_end: 0,
         }
     }
 }
@@ -287,13 +293,31 @@ impl SelectSpec {
     }
 
     pub fn with_search_query(mut self, query: impl Into<String>) -> Self {
-        self.search_query = Some(query.into());
+        let query = query.into();
+        let len = query.chars().count();
+        self.search_query = Some(query);
+        self.search_selection_start = len;
+        self.search_selection_end = len;
         self
     }
 
     pub fn with_highlighted_value(mut self, value: impl Into<String>) -> Self {
         self.highlighted_value = Some(value.into());
         self
+    }
+
+    pub fn with_search_selection(mut self, start: usize, end: usize) -> Self {
+        self.search_selection_start = start;
+        self.search_selection_end = end;
+        self
+    }
+
+    /// Ordered `(start, end)` pair, clamped to the current search query.
+    pub fn search_selection_range(&self) -> (usize, usize) {
+        let len = self.search_query.as_deref().unwrap_or("").chars().count();
+        let a = self.search_selection_start.min(len);
+        let b = self.search_selection_end.min(len);
+        (a.min(b), a.max(b))
     }
 
     /// Apply one complete transition context. Hosts rebuild from this rather
@@ -307,6 +331,9 @@ impl SelectSpec {
         self.open = Some(context.open);
         self.search_query = Some(context.query.clone());
         self.highlighted_value = context.highlighted_value.clone();
+        let len = context.query.chars().count();
+        self.search_selection_start = self.search_selection_start.min(len);
+        self.search_selection_end = self.search_selection_end.min(len);
         self
     }
 

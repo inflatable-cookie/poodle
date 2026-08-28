@@ -49,6 +49,13 @@ fn node_select(id: &'static str, mut spec: SelectSpec, state: &AppState) -> AnyE
     let trigger_id = select_trigger_focus_id(id);
     let search_id = select_search_focus_id(id);
     let searchable = spec.searchable;
+    let (search_anchor, search_head) = state
+        .specimens
+        .carets
+        .get(&format!("{id}-query"))
+        .copied()
+        .unwrap_or((spec.search_selection_start, spec.search_selection_end));
+    spec = spec.with_search_selection(search_anchor, search_head);
     let handlers = SelectHandlers::new(id).on_transition(Arc::new(move |result| {
         let mut queue = events.lock().unwrap();
         queue.push(NodeSpecimenEvent::SetToggle {
@@ -67,6 +74,13 @@ fn node_select(id: &'static str, mut spec: SelectSpec, state: &AppState) -> AnyE
             key: highlight_key.clone(),
             value: result.context.highlighted_value.clone(),
         });
+        if let Some((start, end)) = result.search_selection {
+            queue.push(NodeSpecimenEvent::SetCaret {
+                key: query_key.clone(),
+                start,
+                end,
+            });
+        }
         drop(queue);
         if result.context.open && searchable {
             poodle_gpui_node_backend::request_focus(&search_id);

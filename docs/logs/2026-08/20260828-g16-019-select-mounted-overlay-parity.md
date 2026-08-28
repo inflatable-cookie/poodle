@@ -1,7 +1,7 @@
 # g16.019 — Select Mounted Overlay Parity
 
 Date: 2026-08-28
-Status: complete — PR pending
+Status: complete — PR #94, review follow-up applied
 Branch: `t3code/select-overlay-worker-handoff`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-4f7abc53`
 Card: `docs/roadmaps/g16/019-select-mounted-overlay-parity.md`
@@ -114,3 +114,29 @@ Not run / blocked:
 - `effigy drift:roles` and Jetstream preview — deferred Jetstream sibling
   (`PAPERCUTS.md`)
 - `*-windowed` / native visual / release / workflow mutation — out of scope
+
+## Review follow-up
+
+PR review required four blockers; they are now in the same PR:
+
+1. Control blur emits one `SelectTransitionResult` (`CommitFreeform` then
+   `Close` only if still open). Renderer and mounted tests assert callback
+   count plus final value/query/open.
+2. Search caret/selection is host-authored on `SelectSpec` through the existing
+   edit/select-range channels. Mid-string insert, keyboard caret, pointer
+   placement, and Tab blur are in the mounted regression.
+3. Overlay overflow is applied again. `a_capped_deferred_overlay_clips_overflowing_rows`
+   covers Hidden + `max_height`. Select menus stay content-sized (Visible)
+   because Hidden on an auto-height overlay zeroes content unless max binds.
+4. Overlay surfaces record containment with inset-0 observers, not `size_full`.
+   A group-header click stays inside the layer.
+
+Follow-up validation:
+
+- `cargo test --lib -- select::` in `packages/render` (25 passed, including
+  one-result blur and mid-string search insert)
+- `a_deferred_overlay_row_receives_pointer_after_host_rebuild`
+- `a_capped_deferred_overlay_clips_overflowing_rows`
+- `select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds`
+- `pagination_navigation_limit_and_loading_through_mounted_pointer_and_keyboard`
+- `git diff --check origin/main...HEAD`

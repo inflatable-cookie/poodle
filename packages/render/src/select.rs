@@ -18,8 +18,7 @@ use poodle_headless::select::{
 };
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, DismissReason, FocusRing, LayoutDirection,
-    LayoutOverflow, LayoutSizing, MainAxisAlignment, Node, NodeKey, NodePosition, NodeRole,
-    StylePatch,
+    LayoutSizing, MainAxisAlignment, Node, NodeKey, NodePosition, NodeRole, StylePatch,
 };
 use poodle_specs::{SelectSpec, ValidationState};
 
@@ -36,6 +35,9 @@ use crate::presentation::{
 pub struct SelectTransitionResult {
     pub context: SelectContext,
     pub effects: Vec<SelectEffect>,
+    /// Present when the compact search editor moved its caret or selection.
+    /// Independent of the shared query/value/open machine.
+    pub search_selection: Option<(usize, usize)>,
 }
 
 /// Host-owned native interaction for one Select instance.
@@ -107,11 +109,79 @@ fn standard_focus_ring(ctx: &RenderContext<'_>) -> FocusRing {
 }
 
 fn emit_select(spec: &SelectSpec, handlers: &SelectHandlers, event: SelectEvent) {
+    emit_select_with_selection(spec, handlers, event, None);
+}
+
+fn emit_select_with_selection(
+    spec: &SelectSpec,
+    handlers: &SelectHandlers,
+    event: SelectEvent,
+    search_selection: Option<(usize, usize)>,
+) {
     let Some(handler) = &handlers.on_transition else {
         return;
     };
     let (context, effects) = select_transition(spec.select_context(), event);
-    handler(SelectTransitionResult { context, effects });
+    handler(SelectTransitionResult {
+        context,
+        effects,
+        search_selection,
+    });
+}
+
+fn emit_search_selection(spec: &SelectSpec, handlers: &SelectHandlers, selection: (usize, usize)) {
+    let Some(handler) = &handlers.on_transition else {
+        return;
+    };
+    handler(SelectTransitionResult {
+        context: spec.select_context(),
+        effects: Vec::new(),
+        search_selection: Some(selection),
+    });
+}
+
+fn emit_blur(spec: &SelectSpec, handlers: &SelectHandlers) {
+    let Some(handler) = &handlers.on_transition else {
+        return;
+    };
+    let (committed, commit_effects) =
+        select_transition(spec.select_context(), SelectEvent::CommitFreeform);
+    let (context, close_effects) = if committed.open {
+        select_transition(committed, SelectEvent::Close)
+    } else {
+        (committed, Vec::new())
+    };
+    let mut effects = commit_effects;
+    effects.extend(close_effects);
+    handler(SelectTransitionResult {
+        context,
+        effects,
+        search_selection: None,
+    });
+}
+
+fn report_search_edit(
+    spec: &SelectSpec,
+    handlers: &SelectHandlers,
+    current: &str,
+    selection: (usize, usize),
+    outcome: poodle_headless::text_input::EditOutcome,
+) {
+    let next_selection = (outcome.state.anchor, outcome.state.head);
+    if let Some(next) = outcome.value {
+        if next != current {
+            emit_select_with_selection(
+                spec,
+                handlers,
+                SelectEvent::Query { query: next },
+                Some(next_selection),
+            );
+            return;
+        }
+    }
+    if next_selection != selection {
+        emit_search_selection(spec, handlers, next_selection);
+    }
 }
 
 fn emit_nav(spec: &SelectSpec, handlers: &SelectHandlers, key: NodeKey) {
@@ -146,6 +216,7 @@ fn wire_open_keys(
     spec: &SelectSpec,
     handlers: &SelectHandlers,
     focus_search: bool,
+    home_end_highlight: bool,
 ) {
     if spec.is_disabled || handlers.on_transition.is_none() {
         return;
@@ -158,7 +229,7 @@ fn wire_open_keys(
             NodeKey::ArrowUp | NodeKey::ArrowDown => {
                 emit_nav(&spec_keys, &handlers_keys, key);
             }
-            NodeKey::Home | NodeKey::End if spec_keys.current_open() => {
+            NodeKey::Home | NodeKey::End if spec_keys.current_open() && home_end_highlight => {
                 emit_nav(&spec_keys, &handlers_keys, key);
             }
             _ => return None,
@@ -186,8 +257,7 @@ fn wire_open_keys(
             if focused {
                 return;
             }
-            emit_select(&spec_blur, &handlers_blur, SelectEvent::CommitFreeform);
-            emit_select(&spec_blur, &handlers_blur, SelectEvent::Close);
+            emit_blur(&spec_blur, &handlers_blur);
         }));
     }
 }
@@ -402,7 +472,7 @@ fn build_trigger(
         wire_dismiss(&mut el, spec, handlers);
     }
     if !searchable_editor {
-        wire_open_keys(&mut el, spec, handlers, spec.searchable);
+        wire_open_keys(&mut el, spec, handlers, spec.searchable, true);
     }
 
     if !is_disabled && handlers.on_transition.is_some() {
@@ -517,8 +587,9 @@ fn build_panel(
         s.descriptor.corner_radii.bottom_left = surface_radius;
         s.min_width = Some(min_width);
         s.max_height = Some(max_height);
-        s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
-        s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+        // Visible: Taffy overflow:hidden on an auto-height overlay zeroes
+        // content height unless max_height binds. Short menus stay
+        // content-sized; the capped-overflow regression covers Hidden.
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.padding.top = panel_py;
         s.descriptor.layout.spacing.padding.bottom = panel_py;
@@ -593,17 +664,26 @@ fn build_panel(
                 let header_font = rem_to_px(size_font_rem(resolve_supporting_visual_size(
                     effective_size,
                 )));
-                let mut header = Node::text(name.as_str());
+                let mut header_label = Node::text(name.as_str());
                 {
-                    let s = &mut header.style;
+                    let s = &mut header_label.style;
                     s.descriptor.text_color = Some(text_secondary);
                     s.text_size = Some(header_font);
                     s.text_weight = Some(600);
+                }
+                let mut header = Node::container().child(header_label);
+                {
+                    let s = &mut header.style;
                     s.descriptor.layout.spacing.padding.left = pad_x;
                     s.descriptor.layout.spacing.padding.right = pad_x;
                     s.descriptor.layout.spacing.padding.top = header_py;
                     s.descriptor.layout.spacing.padding.bottom = header_py;
                 }
+                stamp_identity(
+                    &mut header,
+                    select_part_id(&handlers.instance_scope, &format!("group-{name}")),
+                );
+                header.interaction.dismiss_layer = Some(select_layer_id(&handlers.instance_scope));
                 panel = panel.child(header);
             }
 
@@ -745,7 +825,7 @@ fn build_search_row(
     } else {
         query.clone()
     };
-    let caret_index = query.chars().count();
+    let (selection_start, selection_end) = spec.search_selection_range();
     let search_id = select_search_focus_id(&handlers.instance_scope);
     let value_id = format!("{search_id}-value");
     let selection_fill = ctx.theme().resolve_color("color.accent.base");
@@ -787,7 +867,7 @@ fn build_search_row(
 
     if !spec.is_disabled {
         value = value.with_caret(
-            (caret_index, caret_index),
+            (selection_start, selection_end),
             text_primary,
             with_alpha(selection_fill, selection_fill.3 * 0.30),
         );
@@ -805,21 +885,46 @@ fn build_search_row(
 
     search_row.interaction.focusable = true;
     search_row.style.focus_ring = Some(standard_focus_ring(ctx));
-    wire_open_keys(&mut search_row, spec, handlers, false);
+    wire_open_keys(&mut search_row, spec, handlers, false, false);
 
     if handlers.on_transition.is_some() {
+        let current = query.clone();
+        let selection = (selection_start, selection_end);
+        let spec_select = spec.clone();
+        let handlers_select = handlers.clone();
+        let select_handler: Arc<
+            dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync,
+        > = Arc::new(move |start, end, granularity| {
+            let (start, end) = match granularity {
+                poodle_node::SelectGranularity::Character => (start, end),
+                poodle_node::SelectGranularity::Word => {
+                    let (a, _) = poodle_headless::text_input::word_range_at(&current, start);
+                    let (_, b) = poodle_headless::text_input::word_range_at(&current, end);
+                    (a, b)
+                }
+                poodle_node::SelectGranularity::Line => (0, current.chars().count()),
+            };
+            if (start.min(end), start.max(end)) != selection {
+                emit_search_selection(&spec_select, &handlers_select, (start, end));
+            }
+        });
+        if let Some(value) = search_row.children.last_mut() {
+            value.interaction.on_select_range = Some(Arc::clone(&select_handler));
+        }
+        search_row.interaction.on_select_range = Some(select_handler);
+
         let spec_edit = spec.clone();
         let handlers_edit = handlers.clone();
         let current = query.clone();
         search_row.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
-            if matches!(key, "up" | "down" | "home" | "end") {
+            if matches!(key, "up" | "down") {
                 return;
             }
             let Some(outcome) = poodle_headless::text_input::edit_transition(
                 &current,
                 poodle_headless::text_input::EditState {
-                    anchor: caret_index,
-                    head: caret_index,
+                    anchor: selection_start,
+                    head: selection_end,
                 },
                 key,
                 mods.shift,
@@ -828,15 +933,7 @@ fn build_search_row(
             ) else {
                 return;
             };
-            if let Some(next) = outcome.value {
-                if next != current {
-                    emit_select(
-                        &spec_edit,
-                        &handlers_edit,
-                        SelectEvent::Query { query: next },
-                    );
-                }
-            }
+            report_search_edit(&spec_edit, &handlers_edit, &current, selection, outcome);
         }));
         let spec_insert = spec.clone();
         let handlers_insert = handlers.clone();
@@ -845,31 +942,25 @@ fn build_search_row(
             let outcome = poodle_headless::text_input::insert_transition(
                 &current,
                 poodle_headless::text_input::EditState {
-                    anchor: caret_index,
-                    head: caret_index,
+                    anchor: selection_start,
+                    head: selection_end,
                 },
                 inserted,
                 None,
             );
-            if let Some(next) = outcome.value {
-                if next != current {
-                    emit_select(
-                        &spec_insert,
-                        &handlers_insert,
-                        SelectEvent::Query { query: next },
-                    );
-                }
-            }
+            report_search_edit(&spec_insert, &handlers_insert, &current, selection, outcome);
         }));
         let spec_replace = spec.clone();
         let handlers_replace = handlers.clone();
         search_row.interaction.on_text_change = Some(Arc::new(move |next: &str| {
-            emit_select(
+            let len = next.chars().count();
+            emit_select_with_selection(
                 &spec_replace,
                 &handlers_replace,
                 SelectEvent::Query {
                     query: next.to_string(),
                 },
+                Some((len, len)),
             );
         }));
     }
@@ -1109,13 +1200,16 @@ mod tests {
         scope: &str,
     ) -> (
         Node,
-        Arc<std::sync::Mutex<Vec<(SelectContext, Vec<SelectEffect>)>>>,
+        Arc<std::sync::Mutex<Vec<(SelectContext, Vec<SelectEffect>, Option<(usize, usize)>)>>>,
     ) {
-        let seen: Arc<std::sync::Mutex<Vec<(SelectContext, Vec<SelectEffect>)>>> =
-            Arc::new(std::sync::Mutex::new(Vec::new()));
+        let seen: Arc<
+            std::sync::Mutex<Vec<(SelectContext, Vec<SelectEffect>, Option<(usize, usize)>)>>,
+        > = Arc::new(std::sync::Mutex::new(Vec::new()));
         let sink = Arc::clone(&seen);
         let handlers = SelectHandlers::new(scope).on_transition(Arc::new(move |result| {
-            sink.lock().unwrap().push((result.context, result.effects));
+            sink.lock()
+                .unwrap()
+                .push((result.context, result.effects, result.search_selection));
         }));
         let theme = theme();
         let ctx = RenderContext::new(&theme);
@@ -1287,8 +1381,36 @@ mod tests {
             .expect("search editor");
         (search.interaction.on_focus_change.as_ref().expect("blur"))(false);
         let captured = seen.lock().unwrap();
+        assert_eq!(captured.len(), 1, "blur emits one transition result");
         assert_eq!(captured[0].0.value, "mango");
         assert!(!captured[0].0.open);
+        assert_eq!(captured[0].0.query, "mango");
+    }
+
+    #[test]
+    fn search_edit_keeps_host_authored_selection_and_inserts_in_the_middle() {
+        let spec = SelectSpec::new(fruit_options())
+            .with_searchable(true)
+            .with_search_query("ban")
+            .with_search_selection(1, 1)
+            .with_open(true);
+        let (node, seen) = select_with_sink(spec, "caret");
+        let search = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:caret:search"))
+            .expect("search editor");
+        assert_eq!(
+            search.caret.map(|caret| caret.selection),
+            Some((1, 1)),
+            "search caret is host-authored, not forced to the end"
+        );
+        search.interaction.on_edit_key.as_ref().expect("edit")(
+            "x",
+            poodle_node::NodeModifiers::default(),
+        );
+        let captured = seen.lock().unwrap();
+        assert_eq!(captured.len(), 1);
+        assert_eq!(captured[0].0.query, "bxan");
+        assert_eq!(captured[0].2, Some((2, 2)));
     }
 
     #[test]
