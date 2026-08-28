@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.021 ready; component decisions remain gated
+Status: active — g16.021 dispatched; g16.029 compiled behind it
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -59,6 +59,7 @@ stay maintained; backend admission is not part of the first card.
 26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; depends on 025 and public migration decision
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
+29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — planned; decision approved, promote after 021 merges
 
 ## Parallel Continuation
 
@@ -81,8 +82,11 @@ PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
 the Select lane or changing those totals.
 
-The component-continuation lane has no known repair ready for implementation.
-TimeInput, NumberInput, and EditableLabel need operator-owned native editing
+The component-continuation lane now has one approved implementation plan:
+TimeInput's segmented native editing model is authoritative in its contract and
+compiled as `g16.029`. It remains serial behind the active `g16.021` worker
+because both cards edit shared core/headless exports and conformance fixtures.
+NumberInput and EditableLabel still need operator-owned native editing
 decisions. Fader, Knob, and XYPad need a bounded interaction audit before any
 repair can be named. GPUI accessibility, cross-runtime visual comparison,
 motion learning, the Longhorn lab, and Jetstream admission remain separate
@@ -264,8 +268,9 @@ mounted and 128 → 127 missing. Known-delta totals stay 115 / 60.
 
 ## Next Task
 
-Dispatch `g16.021` from its committed worker handoff. In parallel, resolve the
-TimeInput native-entry decision and the public migration boundary in
-`../../triage/20260828-221415-drag-drop-public-migration-boundary.md`. Do not
-promote `g16.022`, a component implementation card, or another programme until
-its named gate is closed.
+Review and merge the dispatched `g16.021` worker PR. Then promote `g16.029` and
+publish its worker handoff from the landed base. Keep `g16.022` planned until
+the orchestrator chooses it after the serial core/export tranche. Resolve the
+public drag migration boundary in
+`../../triage/20260828-221415-drag-drop-public-migration-boundary.md` before the
+first component drag migration.

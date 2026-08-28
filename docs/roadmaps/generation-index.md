@@ -12,14 +12,15 @@ Updated: 2026-08-28
     `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
     `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
     `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
-    `019` merged in PR #94; `020` merged in PR #95; `021` ready; `022`–`028`
-    planned behind ordered drag-and-drop dependencies
+    `019` merged in PR #94; `020` merged in PR #95; `021` dispatched;
+    `022`–`028` planned behind ordered drag-and-drop dependencies; `029`
+    compiled as the serial TimeInput continuation after `021`
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: dispatch `g16.021` semantic kernel. Resolve TimeInput native
-    entry and the legacy public drag-export migration before promoting their
-    dependent cards.
+  - Next move: review and merge the `g16.021` semantic kernel, then promote
+    `g16.029` from the landed base. Resolve the legacy public drag-export
+    migration before the first component drag migration.
 
 ## Latest Completed Track
 

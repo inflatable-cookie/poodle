@@ -1,6 +1,6 @@
 # TimeInput Native Editing Decision
 
-Status: open — operator decision required before a component card
+Status: resolved — approved and promoted into the TimeInput contract and g16.029
 Captured: 2026-08-28
 Source: g16 component-continuation planning while g16.021 runs
 
@@ -75,9 +75,9 @@ rename them to `TimeInputSpec` / `time_input` and migrate in-repository
 callers. The recommendation is a clean rename with no alias or compatibility
 wrapper.
 
-## Decision Needed
+## Decision
 
-Approve or revise this package:
+The operator approved this package on 2026-08-28:
 
 1. segmented 24-hour native editing with conditional seconds;
 2. adapter-owned drafts and valid-value-only callbacks;
@@ -85,7 +85,9 @@ Approve or revise this package:
 4. whole-second step plus overnight-range support; and
 5. clean `TimeFieldSpec` to `TimeInputSpec` Rust rename.
 
-After operator approval, promote the decision into
-`docs/contracts/components/time-input.md`, compile one bounded component card,
-and keep implementation serial with g16.021 because both lanes may touch
-paired TypeScript/Rust core exports and shared test infrastructure.
+The decision is now authoritative in
+`docs/contracts/components/time-input.md` and compiled as
+`docs/roadmaps/g16/029-time-input-semantic-model-and-native-parity.md`.
+Implementation remains serial with g16.021 because both lanes edit paired
+TypeScript/Rust core exports and shared conformance infrastructure. This triage
+note is historical context, not execution authority.

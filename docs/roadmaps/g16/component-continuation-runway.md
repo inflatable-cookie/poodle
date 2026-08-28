@@ -1,6 +1,6 @@
 # g16 Component Continuation Runway
 
-Status: active planning map — no component implementation card ready
+Status: active planning map — TimeInput decision promoted as g16.029
 Compiled: 2026-08-28
 Source: `component-continuation-register.md`
 
@@ -11,7 +11,7 @@ copy the register, change evidence, or turn a missing cell into a defect.
 
 | Order | Lane | Current state | Promotion gate |
 | ---: | --- | --- | --- |
-| 1 | TimeInput native entry | decision-blocked | choose native segment/value/draft behavior and update the component contract |
+| 1 | TimeInput native entry | planned as `g16.029` | approved contract; promote after `g16.021` merges because shared core/headless exports overlap |
 | 2 | NumberInput and EditableLabel editing models | decision-blocked | confirm NumberInput's typed committed value plus host-owned raw draft; separately resolve EditableLabel activation/draft/commit/focus |
 | 3 | Dependable drag-and-drop family | programme-owned | compiled separately as `g16.021`–`g16.028`; do not issue component-local drag repairs |
 | 4 | Fader, Knob, and XYPad interaction | unknown | run one bounded continuous-gesture audit before naming a repair |
@@ -21,11 +21,12 @@ copy the register, change evidence, or turn a missing cell into a defect.
 
 ## Next Component Decision
 
-TimeInput is first because it is independent of drag-and-drop and can become a
-bounded foundation card once native entry semantics are explicit. The web
-contract delegates to `<input type="time">`; GPUI has no equivalent native
-control. The operator must choose the native editing model before a worker can
-implement or claim mounted parity.
+TimeInput's native editing decision is approved. The contract now keeps its
+canonical time string, makes partial/invalid drafts adapter-owned, defines
+valid-value-only callbacks, whole-second stepping and overnight ranges, and
+requires a segmented 24-hour GPUI editor plus a clean Rust
+`TimeFieldSpec`→`TimeInputSpec` rename. `g16.029` contains the bounded
+implementation lane.
 
 NumberInput and EditableLabel remain behind separate value/draft decisions.
 The recommendation for NumberInput stays the recorded typed committed number
@@ -33,10 +34,11 @@ plus host-owned raw draft/empty state. That recommendation is not yet authority.
 
 ## Parallelism
 
-`g16.021` may run while the TimeInput decision is discussed: it touches the
-generic TypeScript/Rust semantic kernel and shared vectors, not component
-contracts or implementations. No other component, accessibility, visual,
-motion, Longhorn-lab, or Jetstream worker is ready from this map.
+`g16.021` remains the active worker. Do not dispatch `g16.029` beside it: both
+cards edit shared TypeScript/Rust exports and conformance infrastructure.
+Promote and dispatch `g16.029` after `g16.021` merges, before choosing another
+overlapping core lane. No accessibility, visual, motion, Longhorn-lab, or
+Jetstream worker is ready from this map.
 
 ## Promotion Rule
 

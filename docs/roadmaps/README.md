@@ -53,9 +53,11 @@ behavior repairs without inventing another conformance authority.
   conformance programme is implied. PR #95 closed `g16.020`: its 175-row
   continuation register separates 93 closed, 69 evidence-only, 3
   decision-blocked, 7 programme-owned, and 3 unknown components, with no known
-  repair currently ready to dispatch. Architecture 011/spec 069 are now
-  compiled as `g16.021`–`g16.028`; only the paired semantic kernel in `021` is
-  ready. Component-continuation decisions remain separate.
+  repair at audit closeout. Architecture 011/spec 069 are now compiled as
+  `g16.021`–`g16.028`; the paired semantic kernel in `021` is dispatched.
+  TimeInput's native editing decision is approved and compiled separately as
+  `g16.029`, held serially behind `021` because their shared export/vector
+  surfaces overlap. Other component-continuation decisions remain separate.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
