@@ -16,6 +16,7 @@ pub mod checkbox;
 pub mod color;
 pub mod date;
 pub mod disclosure;
+pub mod drag_drop;
 pub mod duration;
 pub mod file_upload;
 pub mod history_center;

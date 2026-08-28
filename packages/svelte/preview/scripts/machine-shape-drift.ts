@@ -106,6 +106,13 @@ const PINNED: Record<
     rsRunner: "packages/contracts/headless/tests/conformance.rs",
     rsEvidence: "fn toggle_group_conformance",
   },
+  dragDrop: {
+    file: "machines.json",
+    tsRunner: "packages/core/test/conformance.test.ts",
+    tsEvidence: "dragDrop",
+    rsRunner: "packages/contracts/headless/tests/conformance.rs",
+    rsEvidence: "fn drag_drop_conformance",
+  },
   switch: {
     file: "machines.json",
     tsRunner: "packages/core/test/conformance.test.ts",

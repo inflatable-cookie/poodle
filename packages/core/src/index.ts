@@ -667,4 +667,25 @@ export {
   type DockExternalDropEligibilityContext,
   type DockExternalDropTarget,
 } from "./dock-external-drag";
+
+export {
+  dragSessionTransition,
+  resolveDropTarget,
+  type DragAnnouncementKind,
+  type DragCancelReason,
+  type DragOperation,
+  type DragSession,
+  type DragSessionContext,
+  type DragSessionEffect,
+  type DragSessionEvent,
+  type DragSessionPhase,
+  type DragSessionResult,
+  type DragSubject,
+  type DragTerminalOutcome,
+  type DropEligibility,
+  type DropIntent,
+  type DropPosition,
+  type DropTargetCandidate,
+  type StandardDropPosition,
+} from "./drag-drop";
 export * from "./audio/index";
