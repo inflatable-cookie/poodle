@@ -1,6 +1,6 @@
 # g16.021 — Drag-And-Drop Semantic Kernel
 
-Status: complete — pushed for orchestrator review; merge is operator-authorised
+Status: complete — PR #96 open for orchestrator review; merge is operator-authorised
 Date: 2026-08-28
 Card: `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
