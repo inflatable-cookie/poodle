@@ -2,8 +2,8 @@
 
 Status: complete — audit register delivered; board baselines recorded
 Opened: 2026-08-28
-Depends on: completed `g16.001`, merged `g16.018`; does not depend on
-`g16.019` merge
+Depends on: completed `g16.001`, merged `g16.018` and `g16.019`; closeout
+reconciled after PR #94
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,
@@ -47,13 +47,10 @@ drag-and-drop substrate into unrelated component cards.
 - If the live denominator differs, stop and report the source change. Do not
   silently rewrite this audit, the ledger, or the expected count.
 
-PR #94 / `g16.019` is an active external input. Main remains authoritative:
-
-- if PR #94 is unmerged at audit closeout, record Select as an active
-  changes-requested lane and keep main's ledger totals;
-- if it merges before closeout, update the audit from the merged result; and
-- never copy PR #94's provisional 47 / 127 totals into current evidence while
-  main still reports 46 / 128.
+PR #94 / `g16.019` was an active external input during the audit. It merged
+before closeout, so the audit records the merged result: Select is closed and
+main reports 47 mounted / 127 missing. Provisional totals were not used before
+the merge.
 
 ## Audit Questions
 
@@ -211,8 +208,8 @@ unknown rather than filling a gap with plausible work.
       programme; no second drag-and-drop design appears.
 - [x] The continuation map contains no more than eight coherent candidate
       lanes with dependency, authority, evidence, and readiness stated.
-- [x] Select and ledger totals reflect merged main, with unmerged PR #94
-      described only as pending external work.
+- [x] Select and ledger totals reflect merged main, with PR #94 recorded as
+      merged and Select closed at the current 47 / 127 totals.
 - [x] No implementation, contract, specimen, ledger, generated report,
       workflow, release, or sibling-repository file changes.
 - [x] One August log records inventory method, counts, unresolved unknowns,
@@ -252,23 +249,23 @@ preview/QA, release, tag, publication, or workflow-mutation selectors.
 The audit output is `component-continuation-register.md`; the evidence and
 method log is `../../logs/2026-08/20260828-g16-020-component-continuation-audit.md`.
 The register proves 175 Svelte exports, 174 portable native components, one
-MeterSurface native exclusion, and 175 unique ledger rows. It keeps the live
-46 / 128 mounted total and records PR #94 only as pending external work.
+MeterSurface native exclusion, and 175 unique ledger rows. It records merged
+PR #94 and the current 47 / 127 mounted total.
 
-The handoff's literal base SHA is invalid; short `69118d831` resolves to
+The branch was rebased onto current origin/main at `018943050`. The handoff's
+literal base SHA is invalid; short `69118d831` resolves to
 `69118d83122e976d256af6033e57d1c8e6b1a9de`, the actual ancestor of this
 worktree's HEAD. The friction is recorded in `PAPERCUTS.md` and the audit log.
 
 Validation passed for the deterministic roster proof, parity-evidence ledger,
-and docs lint. `effigy docs:check` stopped at the existing React preview token
-package-alias failure; final `effigy qa` stopped at the existing
-lucide-static 1.35.0 versus manifest 1.31.0 mismatch. Both failures are
-recorded in the audit log and existing root papercuts. The final committed
-range passed `git diff --check origin/main...HEAD`.
+docs lint, and `effigy docs:check` after `effigy bootstrap:deps` installed the
+locked dependencies. The final bootstrapped `effigy qa` also passed, including
+the dependency-sensitive icon check and the full headless repository board.
+The final committed range passed `git diff --check origin/main...HEAD`.
 
 ## Continuation
 
 Return the completed register, candidate continuation map, audit log, exact
 validation, and PR URL to the orchestrator. Do not merge. The orchestrator
-reconciles the result with PR #94, the drag-and-drop programme, and the g16
-front doors before selecting implementation cards.
+reconciles the result with merged g16.019, the drag-and-drop programme, and
+the g16 front doors before selecting implementation cards.
