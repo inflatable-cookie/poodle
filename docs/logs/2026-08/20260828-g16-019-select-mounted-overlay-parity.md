@@ -157,3 +157,8 @@ Second review follow-up:
 
 Validation: render Select 28, GPUI overlay + Select + long clip + Pagination,
 GPUI overlay token mapping, `git diff --check`.
+
+Third review follow-up: the long-menu regression now requires a downward
+wheel (`-800`) to bring option 19 into hit-test and commit it. GPUI scroll
+offset is `[-max, 0]`; a positive delta from the top is a no-op. Rebased
+onto `origin/main`, keeping the `g16.020` audit lane on the front doors.
