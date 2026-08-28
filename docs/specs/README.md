@@ -1,7 +1,7 @@
 # Specs
 
 Status: active
-Updated: 2026-08-22
+Updated: 2026-08-28
 
 Specs define repository-wide rules that are broader than one component:
 tokens, artifact generation, parity evidence, accessibility, packaging,
@@ -46,6 +46,9 @@ Important current cross-cutting references include:
 - `068-batched-audio-meter-surface.md` — approved contract for the web
   MeterBus, AudioMeter surface mode, one-canvas MeterSurface, browser evidence,
   and the Canvas2D performance gate
+- `069-dependable-drag-and-drop-substrate.md` — approved cross-runtime
+  lifecycle, pointer/touch/keyboard sensors, host cross-window bridge, inbound
+  files, native drag-out, migration, and certification contract
 
 Specs are normative constraints, not task queues. Current execution status
 belongs in the roadmap.

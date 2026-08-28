@@ -1,7 +1,7 @@
 # Architecture
 
 Status: active
-Updated: 2026-08-23
+Updated: 2026-08-28
 
 Architecture documents define Poodle's stable ownership and runtime boundaries.
 They explain the current system; milestone sequencing belongs in roadmaps.
@@ -31,3 +31,6 @@ current delivery status.
 - [Native presentation construction context](010-native-presentation-construction-context.md)
   — accepted shared-Rust context, inheritance, composition, and explicit-
   override rules
+- [Drag and drop substrate](011-drag-and-drop-substrate.md) — semantic session
+  ownership, paired runtime machines, touch, cross-window host boundaries,
+  inbound files, and native file drag-out
