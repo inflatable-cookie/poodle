@@ -1,114 +1,306 @@
 # NumberInput
 
-Status: active
-Updated: 2026-07-10
+Status: active — approved clean migration pending `g16.030`
+Updated: 2026-08-28
 
 ## 1. Purpose
 
 - Component name: `NumberInput`
 - Layer: `foundation`
 
-`NumberInput` is Poodle's single public numeric-entry component.
+`NumberInput` edits one finite numeric value. Its public model separates the
+committed application value from the transient text a person is editing.
 
-It covers both:
+This is one numeric component, not a number-or-string union:
 
-- numeric bindings for direct number editing
-- string-form bindings for form workflows that need raw string values,
-  validation, or prefix/suffix presentation (currency, units)
+- the committed value is `number | null` on web and `Option<f64>` in Rust;
+- the optional draft channel carries raw text such as `"-"`, `"01.20"`, or an
+  empty field while editing; and
+- prefix/suffix text, validation, precision, and steppers decorate that numeric
+  model without changing its value type.
 
-This replaces the old split between `NumberEntry` and `NumberInput`.
+The pre-1.0 migration in `g16.030` removes the old string-value mode and the
+old source-specific step callbacks. No alias or compatibility path remains.
 
-## Public Contract
+## 2. Public Contract
 
-- Component name: `NumberInput`
-- Import: `@inflatable-cookie/poodle-svelte`
+- Web imports: `@inflatable-cookie/poodle-svelte` and
+  `@inflatable-cookie/poodle-react`
+- Rust spec: `poodle_specs::NumberInputSpec`
+- Shared renderer: `poodle_render::number_input`
 
-## Core Props
+### Core Props
 
-- `value: number | string | null | undefined`
-- `defaultValue: number | string | null`
-- `min: number | string | null`
-- `max: number | string | null`
-- `step: number | string | null`
-- `precision: number | null`
-- `prefix: string | null`
-- `suffix: string | null`
-- `validate: InputValidator | undefined`
-- `validationContext: unknown`
-- `validationState: ValidationState`
-- `showSteppers: boolean`
-- standard control props:
-  `id`, `name`, `placeholder`, `disabled`, `readOnly`, `required`,
-  `ariaLabel`, `describedBy`, `size`, `sizeRole`, `density`
+| Prop | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `value` | `number | null | undefined` | `undefined` | controlled committed value; `null` is committed empty |
+| `defaultValue` | `number | null` | `null` | initial committed value for uncontrolled web use |
+| `draftValue` | `string | null | undefined` | `undefined` | optional controlled raw draft; `null` means no draft override |
+| `min` | `number | null` | `null` | optional inclusive lower bound |
+| `max` | `number | null` | `null` | optional inclusive upper bound |
+| `step` | `number | null` | `null` | optional positive finite step; omitted means `1` |
+| `precision` | `number | null` | `null` | optional non-negative maximum fractional digits and fixed committed display scale |
+| `prefix` | `string | null` | `null` | non-value text before the editor |
+| `suffix` | `string | null` | `null` | non-value text after the editor |
+| `validate` | `InputValidator | undefined` | `undefined` | optional async validation of a committed canonical decimal string |
+| `validationContext` | `unknown` | `undefined` | host context forwarded to `validate` |
+| `validationState` | `ValidationState` | `"none"` | externally supplied validation presentation |
+| `showSteppers` | `boolean` | `false` | show increment/decrement buttons |
+
+Standard control props remain `id`, `name`, `placeholder`, `disabled`,
+`readOnly`, `required`, `ariaLabel`, `describedBy`, `size`, `sizeRole`, and
+`density`.
+
+`value`, `defaultValue`, `min`, `max`, and `step` do not accept strings.
+Non-finite committed values or bounds, non-positive/non-finite steps,
+non-integer/negative precision, and `min > max` are invalid authored
+configuration. The semantic machine reports invalid configuration and produces
+no mutation effect; adapters must not invent a replacement value.
+
+### Draft Ownership
+
+- With `draftValue` undefined, the web adapter owns the transient draft.
+- With `draftValue` authored, the host owns it and applies
+  `onDraftValueChange` results.
+- Rust's declarative spec carries `draft_value: Option<String>` and its host
+  wrapper stores draft/caret/focus state between rebuilds.
+- `draftValue=null` / `draft_value=None` renders the formatted committed value
+  or the placeholder when committed empty.
+- An external controlled-value replacement discards an uncontrolled draft. A
+  host echo of the value just emitted by the active edit does not erase that
+  edit's draft.
+
+The ownership mechanism may differ, but the observable draft/value transitions
+must match.
+
+## 3. Value And Draft Semantics
+
+### Portable Decimal Syntax
+
+Direct entry accepts a base-10 decimal with an optional leading minus sign,
+digits, and at most one `.` separator. Leading zeroes and a trailing decimal
+separator are allowed in the draft. Exponents, radix prefixes, grouping,
+locale separators, whitespace, `NaN`, and infinity are not portable syntax.
+
+`""`, `"-"`, `"."`, and `"-."` are incomplete drafts. Empty is also the
+explicit clear gesture; it emits committed `null` but remains raw draft text
+until commit or replacement.
+
+### Validity
+
+A complete draft can change the committed value only when it:
+
+1. parses to a finite base-10 number;
+2. contains no more fractional digits than `precision`, when present;
+3. falls within inclusive `min`/`max`; and
+4. aligns to `step`, anchored at `min` when present or zero otherwise.
+
+Step and precision checks use decimal-safe normalization in the paired shared
+semantics, not renderer-specific binary-float epsilon guesses.
+
+Incomplete, malformed, non-finite, over-precision, out-of-range, and off-step
+drafts remain visible while editing, expose invalid draft state, and emit no
+committed value.
+
+### Editing Transitions
+
+| Event | Result |
+| --- | --- |
+| raw text edit | report the exact draft; emit a value only when the complete draft is constraint-valid |
+| clear whole field | report draft `""` and committed `null` |
+| Enter on valid/current draft | resolve the draft and fire `onCommit` with the committed value |
+| Enter on unresolved draft | no value or commit callback; keep editing invalid draft |
+| blur on valid/current draft | resolve the draft and fire `onCommit` |
+| blur on unresolved draft | discard it and restore the last committed display; no value or commit callback |
+| Escape | discard the active draft and restore the last committed display; no value or commit callback |
+| external committed replacement | discard an uncontrolled draft and display the authored value |
+| Arrow Up/Down or stepper | step from a valid draft when present, otherwise committed value; report value, normalized draft, and commit |
+| Home/End | move to a finite valid minimum/maximum respectively; otherwise inert |
+| disabled/read-only interaction | inert through text, key, pointer, clear, and step routes |
+
+Direct editing never silently clamps or snaps. Step controls stop at bounds and
+never fire when their next result would be invalid. An empty step baseline is
+`min` when present or zero otherwise.
+
+When `precision` is present, a draft with too many fractional digits is invalid
+rather than silently rounded. Resolved committed values display with exactly
+that many digits; without precision they use the shortest canonical decimal
+form produced by the shared semantics.
 
 ### Behavior Machine
 
-Behavior classification: machine-backed via core machinery
+Behavior classification: machine-backed.
 
-Value semantics from `@inflatable-cookie/poodle-core`: `parseNumberish` (numeric
-coercion; empty and non-finite become null), `parseStep` (invalid or
-non-positive steps fall back to 1), `clampNullable` (optional min/max
-bounds), `validationStatusToState`. Increment/decrement, commit-on-blur,
-and async validation orchestration stay adapter-side.
+Paired pure TypeScript/Rust semantics own:
 
-## Callbacks
+- authored configuration validation;
+- decimal draft classification and parsing;
+- committed formatting and precision checks;
+- bound and step alignment;
+- increment/decrement/Home/End results;
+- clear, Enter, blur, Escape, and external replacement transitions; and
+- the resulting draft/value/commit effects.
 
-- `onValueChange`
-- `onValidationChange`
-- `onSubmit`
-- `onIncrement`
-- `onDecrement`
-- `onFocus`
-- `onBlur`
+Adapters own DOM/native events, focus and caret storage, drawing, async
+validation orchestration, and accessibility projection. The pure machine runs
+no callbacks, timers, focus operations, I/O, or renderer code.
 
-## Usage
+## 4. Callbacks
+
+| Callback | Payload | When it fires |
+| --- | --- | --- |
+| `onDraftValueChange` | `string | null` | every raw draft edit; `null` asks a controlled host to discard its draft override |
+| `onValueChange` | `number | null` | a distinct valid committed value forms, or the field is cleared |
+| `onCommit` | `number | null` | valid Enter/blur or a successful step action resolves the current value |
+| `onValidationChange` | validation result | async validation state changes for a committed value |
+| `onFocus` / `onBlur` | platform focus event | web-only focus observation; not portable value semantics |
+
+Callbacks are silent when the semantic result is unchanged, except
+`onCommit`, which reports an explicit valid commit boundary. Async `validate`
+runs only for a non-null committed value and receives its canonical decimal
+string. Empty returns validation to idle.
+
+The old `onSubmit`, `onIncrement`, and `onDecrement` callbacks are removed by
+the clean migration. `onCommit` replaces the useful persistence boundary;
+`onValueChange` already reports the result of a step.
+
+## 5. Usage
+
+### Ordinary Numeric Binding
 
 ```svelte
 <script lang="ts">
   import { NumberInput } from "@inflatable-cookie/poodle-svelte";
 
   let quantity: number | null = 1;
-  let formYear = "2026";
 </script>
 
 <NumberInput bind:value={quantity} min={0} max={100} showSteppers />
-<NumberInput bind:value={formYear} min={1900} max={2100} prefix="FY" />
-<NumberInput bind:value={weight} min={0} suffix="kg" />
 ```
 
-## Notes
+### Host-Owned Form Draft
 
-- numeric consumers receive `number | null`
-- string-form consumers round-trip string values while still getting numeric
-  input behavior
-- steppers, clamping, and precision are shared across both modes
-- leave `value` undefined to use uncontrolled mode seeded by `defaultValue`
-- pass `value={null}` for a controlled empty state
+```svelte
+<script lang="ts">
+  let year: number | null = 2026;
+  let yearDraft: string | null = null;
+</script>
 
-## 2. Accessibility
+<NumberInput
+  name="year"
+  bind:value={year}
+  bind:draftValue={yearDraft}
+  min={1900}
+  max={2100}
+/>
+```
 
-- root input: `role="spinbutton"`, `aria-valuenow`, `aria-valuemin`,
-  `aria-valuemax`
-- root input: an accessible name is **required** — `aria-label` from
-  `ariaLabel`, or an associated `<label>`. The component has no caption of its
-  own, so without one the control is announced as "spin button" and its value,
-  with nothing to say which quantity it holds. A `NumberInput` with no
-  accessible name is invalid usage, not a permitted default.
-- stepper buttons: `aria-label="Increment"` / `aria-label="Decrement"`
-- disabled state: `aria-disabled="true"` on root input
-- validation: `aria-invalid="true"` when validation state is error,
-  `aria-describedby` linked to validation message
-- keyboard: `ArrowUp` / `ArrowDown` to step, `Home` / `End` for min / max
-  when supported
-- focus: the field draws the ring when focus is inside (`box-shadow` 2px
-  `accent-focusRing` @28%); stepper buttons suppress their UA outline so
-  exactly one ring shows
+The rendered input's `name` submits its current text through ordinary browser
+form behavior. Consumers that need raw form state bind `draftValue`; they do
+not turn the committed value back into a string union.
 
-## Jetstream Notes
+## 6. Accessibility
 
-- `NumberInput::from_spec(spec, theme).on_increment(...).on_decrement(...)`.
-- Neither stepper fires at its bound: the contract disables the button there,
-  and a control that looks inert while still reporting is the defect this whole
-  roadmap item started from.
-- No typing events — the runtime delivers pointer events only, so the host owns
-  the editor and feeds the value back through the spec.
+- The editable root exposes spin-button semantics and requires an accessible
+  name from an associated label or `ariaLabel`.
+- `aria-valuenow` reflects the current constraint-valid draft when available,
+  otherwise the committed value; it is absent when committed empty and the
+  draft is unresolved.
+- `aria-valuemin` / `aria-valuemax` reflect finite authored bounds.
+- Unresolved drafts and external invalid state expose `aria-invalid="true"`.
+- Pending validation exposes `aria-busy="true"`.
+- `describedBy` maps to `aria-describedby`.
+- Stepper buttons are labelled Increment and Decrement and are disabled at
+  bounds, while read-only, or while the whole component is disabled.
+- The field owns one focus ring. Stepper focus must not draw a second competing
+  control ring.
+- GPUI exposes the editable node as `SpinButton`, projects current value and
+  finite bounds, and routes real text/key/focus dispatch through the node
+  backend.
+
+## 7. Layout And Presentation
+
+- The control stretches to its parent width and follows the shared control
+  size and density axes.
+- Prefix and suffix are presentation only and never become part of draft or
+  committed values.
+- Optional steppers occupy the trailing edge without changing the editor's
+  semantic identity.
+- Disabled, read-only, invalid, pending, and focused states use existing
+  semantic tokens and the component Recipe surface. No component-specific
+  theme colors are introduced by the value-model migration.
+
+## 8. Active-Cohort Notes
+
+### Svelte And React
+
+- Both adapters use the paired pure semantic machine.
+- Both keep an uncontrolled raw draft locally and support the same optional
+  controlled draft channel.
+- The input remains text-based with decimal input mode so partial drafts can be
+  represented consistently; adapters provide explicit spin-button semantics.
+- Controlled prop echoes do not erase an active draft, while genuinely
+  external replacement does.
+
+### Shared Rust And GPUI
+
+- `NumberInputSpec` uses optional committed/default values and an optional raw
+  draft; infinite sentinels are removed from public state.
+- Shared rendering produces one editable value node with text, selection,
+  focus, submit, cancel, and replacement-text channels rather than a static
+  label plus pointer-only steppers.
+- The GPUI host wrapper retains draft, selection, and focus between rebuilds
+  and applies the same transition results as web.
+- ColorPicker and FilterBuilder are regression consumers of the clean spec;
+  they do not get component-specific fallback behavior.
+
+### Jetstream
+
+Jetstream remains program-deferred. It receives only mechanical compile
+maintenance required by the renderer-neutral spec and handler migration.
+Typing or parity is not claimed until backend admission.
+
+## 9. Parity Checklist
+
+### Tier 1: Strict Parity
+
+- [ ] committed `number | null` and raw draft channels match
+- [ ] syntax, precision, bounds, and step validity match
+- [ ] live valid change, clear, Enter, blur, Escape, and external replacement match
+- [ ] Arrow/stepper/Home/End results and disabled/read-only inertia match
+- [ ] callback timing and payloads match
+- [ ] controlled and uncontrolled draft ownership produces the same observable result
+- [ ] accessible name, value, bounds, invalid, busy, and focus semantics match
+
+### Tier 2: Visual Parity
+
+- [ ] control geometry, affixes, steppers, validation, and focus treatment use the existing recipe/tokens
+- [ ] all size and density axes remain coherent
+
+### Tier 3: Implementation Freedom
+
+- [ ] DOM versus GPUI text/caret mechanisms remain adapter-owned
+- [ ] async validation scheduling remains adapter-owned behind the same callback boundary
+
+## 10. Known Deltas
+
+| Delta | Why Allowed | Approval Status | Follow-Up |
+| --- | --- | --- | --- |
+| focus event object callbacks are web-only | platform event objects are not portable value semantics | allowed | native exposes observable focus through its host/state channels |
+| Jetstream editing evidence is deferred | backend admission is program-deferred | allowed | do not report it as passing or complete |
+
+## 11. Migration Boundary
+
+The `g16.030` worker must inventory every in-repository string-value and old
+callback use, migrate Poodle's own composites/specimens/tests, and record a
+downstream migration table for inspected sibling consumers. It must not edit
+sibling repositories.
+
+Required clean removals:
+
+- string branches from `value`, `defaultValue`, `min`, `max`, and `step`;
+- value-mode inference and string-coercion helpers;
+- silent `parseStep(...)->1`, clamping, snapping, and numeric fallbacks for
+  invalid drafts/configuration;
+- `onSubmit`, `onIncrement`, and `onDecrement`; and
+- the static, concrete-`f64`, pointer-only native editor path.

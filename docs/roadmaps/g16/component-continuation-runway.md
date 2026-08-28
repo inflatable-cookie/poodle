@@ -1,6 +1,6 @@
 # g16 Component Continuation Runway
 
-Status: active planning map — TimeInput decision promoted as g16.029
+Status: active planning map — TimeInput and NumberInput decisions promoted
 Compiled: 2026-08-28
 Source: `component-continuation-register.md`
 
@@ -11,8 +11,8 @@ copy the register, change evidence, or turn a missing cell into a defect.
 
 | Order | Lane | Current state | Promotion gate |
 | ---: | --- | --- | --- |
-| 1 | TimeInput native entry | planned as `g16.029` | approved contract; promote after `g16.021` merges because shared core/headless exports overlap |
-| 2 | NumberInput and EditableLabel editing models | decision-blocked | confirm NumberInput's typed committed value plus host-owned raw draft; separately resolve EditableLabel activation/draft/commit/focus |
+| 1 | TimeInput native entry | planned as `g16.029` | approved contract; dispatch after `g16.021` merges because shared core/headless exports overlap |
+| 2 | NumberInput and EditableLabel editing models | NumberInput planned as `g16.030`; EditableLabel decision-blocked | complete `g16.029`, then execute the approved NumberInput committed-value/raw-draft migration; resolve EditableLabel separately |
 | 3 | Dependable drag-and-drop family | programme-owned | compiled separately as `g16.021`–`g16.028`; do not issue component-local drag repairs |
 | 4 | Fader, Knob, and XYPad interaction | unknown | run one bounded continuous-gesture audit before naming a repair |
 | 5 | GPUI accessibility evidence | programme choice | operator selects it as a programme and accepts the manual/runtime evidence boundary |
@@ -28,17 +28,21 @@ requires a segmented 24-hour GPUI editor plus a clean Rust
 `TimeFieldSpec`→`TimeInputSpec` rename. `g16.029` contains the bounded
 implementation lane.
 
-NumberInput and EditableLabel remain behind separate value/draft decisions.
-The recommendation for NumberInput stays the recorded typed committed number
-plus host-owned raw draft/empty state. That recommendation is not yet authority.
+NumberInput's clean value-model decision is approved. Its contract now uses a
+typed committed `number | null`, an optional raw-draft channel, valid-value-only
+changes, explicit commit/revert behavior, and no string-value or redundant
+step-source callbacks. `g16.030` contains the bounded clean migration and
+mounted proof. EditableLabel remains behind its separate
+activation/draft/commit/focus decision.
 
 ## Parallelism
 
 `g16.021` remains the active worker. Do not dispatch `g16.029` beside it: both
 cards edit shared TypeScript/Rust exports and conformance infrastructure.
-Promote and dispatch `g16.029` after `g16.021` merges, before choosing another
-overlapping core lane. No accessibility, visual, motion, Longhorn-lab, or
-Jetstream worker is ready from this map.
+Dispatch `g16.029` after `g16.021` merges, then dispatch `g16.030` only after
+TimeInput closes because both edit the same exports and domain-vector corpus.
+No accessibility, visual, motion, Longhorn-lab, or Jetstream worker is ready
+from this map.
 
 ## Promotion Rule
 

@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.021 dispatched; g16.029 compiled behind it
+Status: active — g16.021 dispatched; g16.029–030 compiled behind it
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -59,7 +59,8 @@ stay maintained; backend admission is not part of the first card.
 26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
-29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — planned; decision approved, promote after 021 merges
+29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — planned; decision approved, dispatch after 021 merges
+30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — planned; decision approved, depends on 029
 
 ## Parallel Continuation
 
@@ -84,23 +85,27 @@ PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
 the Select lane or changing those totals.
 
-The component-continuation lane now has one approved implementation plan:
+The component-continuation lane now has two approved implementation plans.
 TimeInput's segmented native editing model is authoritative in its contract and
-compiled as `g16.029`. It remains serial behind the active `g16.021` worker
-because both cards edit shared core/headless exports and conformance fixtures.
-NumberInput and EditableLabel still need operator-owned native editing
-decisions. Fader, Knob, and XYPad need a bounded interaction audit before any
-repair can be named. GPUI accessibility, cross-runtime visual comparison,
-motion learning, the Longhorn lab, and Jetstream admission remain separate
-programme choices rather than component cards.
+compiled as `g16.029`. NumberInput's typed committed value, optional raw draft,
+clean callback migration, and mounted editor are authoritative and compiled as
+`g16.030`. Both remain serial behind the active `g16.021` worker and each other
+because they edit shared core/headless exports and the domain-vector corpus.
+Promoting NumberInput's explicit runtime deltas moves only that ledger axis from
+115 / 60 to 116 present / 59 not-applicable; mounted totals remain 47 / 127.
+EditableLabel still needs an operator-owned editing decision. Fader, Knob, and
+XYPad need a bounded interaction audit before any repair can be named. GPUI
+accessibility, cross-runtime visual comparison, motion learning, the Longhorn
+lab, and Jetstream admission remain separate programme choices rather than
+component cards.
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
 
 - close bounded foundation behavior gaps where the web authority, Rust
   contract, and mounted proof can be made coherent in one card;
-- resolve editing value-model gates before implementing NumberInput or
-  EditableLabel parity;
+- execute the approved NumberInput value-model migration only after its serial
+  prerequisites, and resolve EditableLabel's separate gate before implementation;
 - repair composite selection/disclosure APIs such as Accordion only after
   their callback and state ownership are explicit;
 - choose a separate visual-comparison or native-accessibility programme only
@@ -270,8 +275,9 @@ mounted and 128 → 127 missing. Known-delta totals stay 115 / 60.
 
 ## Next Task
 
-Review and merge the dispatched `g16.021` worker PR. Then promote `g16.029` and
-publish its worker handoff from the landed base. Keep `g16.022` planned until
-the orchestrator chooses it after the serial core/export tranche. The public
+Review and merge the dispatched `g16.021` worker PR. Then publish `g16.029`'s
+worker handoff from the landed base; `g16.030` follows only after TimeInput
+closes. Keep `g16.022` planned until the orchestrator chooses it after the
+serial core/export tranche. The public
 drag migration boundary is resolved; reconcile the exact custom-surface and
 host-bridge API names only after their prerequisite kernels land.
