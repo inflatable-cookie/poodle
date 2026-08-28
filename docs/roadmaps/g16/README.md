@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.018 merged; g16.019 ready
+Status: active — g16.019 changes-requested; g16.020 ready in parallel
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -50,6 +50,24 @@ stay maintained; backend admission is not part of the first card.
 17. [017 — Rating nullable, fractional, and mounted parity](017-rating-nullable-fractional-and-mounted-parity.md) — complete; merged in PR #92
 18. [018 — Select semantic machine and interface convergence](018-select-semantic-machine-and-interface-convergence.md) — complete; merged in PR #93
 19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — ready
+20. [020 — Component continuation audit](020-component-continuation-audit.md) — ready; independent audit lane
+
+## Parallel Continuation
+
+Two continuation programmes are now explicit:
+
+- **Component continuation:** `g16.020` audits the whole roster, reconciles
+  completed g15/g16 work, and returns bounded candidate lanes. It may run while
+  PR #94 is repaired because it does not mutate components or the ledger.
+- **Dependable drag-and-drop:** architecture 011 and spec 069 govern a separate
+  cross-runtime programme covering touch, nested targets, cross-window
+  transfer, inbound files, and drag-out. Its implementation runway is compiled
+  after the current Select and audit checkpoints; the audit records dependent
+  components as programme-owned rather than separate defects.
+
+PR #94 remains the active Select implementation lane. Its review state does
+not block the independent audit, and the audit does not make PR #94's proposed
+ledger totals current before merge.
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
@@ -222,6 +240,7 @@ the exact mounted scope.
 
 ## Next Task
 
-Dispatch ready `g16.019` from
-`../../handoffs/20260828-181625-g16-019-select-overlay-worker.md` as the single
-active lane.
+PR #94 remains changes-requested for `g16.019`. Dispatch independent
+`g16.020` from its committed Luna audit handoff. After both return, reconcile
+the component continuation map with architecture 011/spec 069 and compile the
+two implementation runways without merging their ownership.
