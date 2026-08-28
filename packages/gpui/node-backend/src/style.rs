@@ -134,15 +134,22 @@ pub(super) fn apply_layout<E: Styled>(mut el: E, node: &Node) -> E {
     // Jetstream backend's combo chain becomes two direct emissions. Scroll
     // state lives on stateful elements (see `needs_state`); setting the
     // style fields directly is what the scroll helpers do internally.
-    match d.layout.overflow_x {
-        LayoutOverflow::Hidden => el = el.overflow_x_hidden(),
-        LayoutOverflow::Scroll => el.style().overflow.x = Some(gpui::Overflow::Scroll),
-        LayoutOverflow::Visible => {}
-    }
-    match d.layout.overflow_y {
-        LayoutOverflow::Hidden => el = el.overflow_y_hidden(),
-        LayoutOverflow::Scroll => el.style().overflow.y = Some(gpui::Overflow::Scroll),
-        LayoutOverflow::Visible => {}
+    //
+    // Overlay surfaces skip Taffy overflow. `overflow:hidden` on an
+    // auto-height absolute/deferred box collapses the laid-out size to
+    // padding, so option-row hitboxes clip away while paint canvases still
+    // record the unclipped children. `max_height` still caps the box.
+    if !node.style.overlay {
+        match d.layout.overflow_x {
+            LayoutOverflow::Hidden => el = el.overflow_x_hidden(),
+            LayoutOverflow::Scroll => el.style().overflow.x = Some(gpui::Overflow::Scroll),
+            LayoutOverflow::Visible => {}
+        }
+        match d.layout.overflow_y {
+            LayoutOverflow::Hidden => el = el.overflow_y_hidden(),
+            LayoutOverflow::Scroll => el.style().overflow.y = Some(gpui::Overflow::Scroll),
+            LayoutOverflow::Visible => {}
+        }
     }
     if let Some(v) = style.min_width {
         el = el.min_w(px(v));

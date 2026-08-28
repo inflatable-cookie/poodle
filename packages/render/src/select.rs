@@ -627,6 +627,8 @@ fn build_panel(
                     s.descriptor.layout.spacing.gap = item_gap;
                     s.descriptor.layout.spacing.padding.left = pad_x;
                     s.descriptor.layout.spacing.padding.right = pad_x;
+                    s.flex_shrink_zero = true;
+                    s.fill_width = true;
                     s.descriptor.cursor = CursorHint::Pointer;
                     if is_highlighted {
                         s.descriptor.background = Some(highlight_fill);
@@ -643,7 +645,9 @@ fn build_panel(
                     &mut row,
                     select_option_id(&handlers.instance_scope, &opt.value),
                 );
-                row.interaction.focusable = false;
+                // Pointer targets, not sequential or programmatic tab stops.
+                // Making them focusable steals trigger/editor focus on press
+                // and the open-state blur handler closes before commit.
                 row.interaction.dismiss_layer = Some(select_layer_id(&handlers.instance_scope));
                 row.a11y.role = Some(NodeRole::ListBoxOption);
                 row.a11y.label = Some(opt.label.clone());
@@ -697,7 +701,7 @@ fn build_panel(
                     let spec = spec.clone();
                     let handlers = handlers.clone();
                     let value = opt.value.clone();
-                    row.interaction.on_activate = Some(Arc::new(move || {
+                    let commit: Arc<dyn Fn() + Send + Sync> = Arc::new(move || {
                         emit_select(
                             &spec,
                             &handlers,
@@ -705,7 +709,8 @@ fn build_panel(
                                 value: value.clone(),
                             },
                         );
-                    }));
+                    });
+                    row.interaction.on_activate = Some(commit);
                 }
 
                 panel = panel.child(row);
@@ -1148,8 +1153,10 @@ mod tests {
             .expect("option");
         assert!(
             !option.interaction.focusable,
-            "options are pointer targets, not tab stops"
+            "option rows are pointer targets, not independent tab stops"
         );
+        assert!(option.a11y.tab_index.is_none());
+        assert!(option.interaction.on_activate.is_some());
     }
 
     #[test]

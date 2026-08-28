@@ -54,8 +54,8 @@ pub use tracked_scroll::{
 
 use interaction::apply_listeners;
 pub use layers::{
-    attach_overlay_host, bounds_for, dismiss_innermost, dismiss_layers_at, open_layer_count,
-    overlay_frame_begin, overlay_frame_end, request_focus,
+    attach_overlay_host, bounds_for, dismiss_innermost, dismiss_layers_at, layer_for_element,
+    open_layer_count, overlay_frame_begin, overlay_frame_end, request_focus, spared_layer_ids_at,
 };
 use style::{
     apply_cursor, apply_layout, apply_paint, apply_patch, apply_position, apply_state_patches,
@@ -132,6 +132,14 @@ thread_local! {
 pub fn reset_element_ids() {
     NEXT_ID.with(|next| next.set(0));
     NEXT_GESTURE_ID.with(|next| next.set(0));
+}
+
+/// Drop backend-owned focus handles. Call at the start of a new headless
+/// window so a previous mount's ids cannot short-circuit wait_for_focus_handle.
+pub fn reset_focus_registry() {
+    FOCUS_HANDLES.with(|handles| handles.borrow_mut().clear());
+    FOCUS_STATES.with(|states| states.borrow_mut().clear());
+    FOCUSED_FIELD.with(|field| *field.borrow_mut() = None);
 }
 
 /// Per-frame counter for gesture-drag identities.
@@ -513,6 +521,10 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
     if node.style.overlay {
         DEFERRED_SCOPE.with(|scope| scope.set(true));
     }
+    let previous_layer = CURRENT_DISMISS_LAYER.with(|layer| layer.borrow().clone());
+    if let Some(layer_id) = node.interaction.dismiss_layer.clone() {
+        CURRENT_DISMISS_LAYER.with(|layer| *layer.borrow_mut() = Some(layer_id));
+    }
     let element = if needs_state(node) {
         // Resolve the element id ONCE and use the same identity for the
         // element and every focus/ring registry: `element_id` mints a fresh
@@ -524,11 +536,19 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
         let el = base.id(id);
         let el = apply_shared(el, node, &id_string);
         let el = apply_listeners(el, node, &id_string);
+        // Deferred overlays paint later; without occlude, pointer events fall
+        // through to in-flow widgets that share the same window point.
+        let el = if node.style.overlay {
+            el.occlude()
+        } else {
+            el
+        };
         maybe_animated(el, node)
     } else {
         let el = apply_shared(base, node, "");
         maybe_animated(el, node)
     };
+    CURRENT_DISMISS_LAYER.with(|layer| *layer.borrow_mut() = previous_layer);
     if node.style.overlay {
         DEFERRED_SCOPE.with(|scope| scope.set(was_deferred));
         record_probe_channel("overlay.intent.painted");
@@ -566,6 +586,15 @@ fn needs_state(node: &Node) -> bool {
         || node.style.descriptor.layout.overflow_y == LayoutOverflow::Scroll
         // GPUI `.tooltip()` lives on StatefulInteractiveElement.
         || node.tooltip.as_deref().is_some_and(|text| !text.is_empty())
+        // Overlay surfaces must be stateful so they can occlude hit-testing
+        // and record containment bounds. `runtime_id` is a stable identity
+        // even when `Node.id` is unset.
+        || node.style.overlay
+        || node.runtime_id.is_some()
+}
+
+pub(crate) fn current_dismiss_layer() -> Option<String> {
+    CURRENT_DISMISS_LAYER.with(|layer| layer.borrow().clone())
 }
 
 /// The channels every box gets, in the Jetstream walk's order: layout,
@@ -603,6 +632,10 @@ thread_local! {
     /// draws within the enclosing deferred element instead of deferring
     /// again.
     static DEFERRED_SCOPE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    /// Dismiss-layer id inherited by descendants that do not declare their
+    /// own. Painted child bounds join the containment set so a pointer on a
+    /// deferred option row is inside, not an outside dismiss.
+    static CURRENT_DISMISS_LAYER: RefCell<Option<String>> = const { RefCell::new(None) };
     // The id of the node that currently holds focus, if any.
     static FOCUSED_FIELD: RefCell<Option<String>> = const { RefCell::new(None) };
     static FOCUS_HANDLES: RefCell<std::collections::HashMap<String, gpui::FocusHandle>> =
