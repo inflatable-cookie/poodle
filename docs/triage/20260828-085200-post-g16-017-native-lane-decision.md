@@ -80,7 +80,12 @@ The operator approved both parts on 2026-08-28:
 2. use query-per-edit / value-on-explicit-commit freeform semantics, repairing
    the current Svelte and React live-value behavior as a pre-1.0 break.
 
-`g16.018` owns semantic-machine and interface convergence. `g16.019` remains
-planned and blocked on the merged output of `g16.018`; it owns real editable
+`g16.018` owns semantic-machine and interface convergence and merged in PR
+#93. `g16.019` has been recompiled against that output; it owns real editable
 native search, deferred-overlay interaction, focus behavior, mounted proof, and
 the Select ledger-cell move.
+
+## Disposition
+
+The decision is fully promoted into the two roadmap cards. Keep this note as the
+resolved rationale; no open triage branch remains here.

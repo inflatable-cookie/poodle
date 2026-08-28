@@ -3,6 +3,7 @@
 Status: complete
 Opened: 2026-08-28
 Completed: 2026-08-28
+Merged: PR #93
 Depends on: merged `g16.017` / PR #92 and the resolved decision in
 `../../triage/20260828-085200-post-g16-017-native-lane-decision.md`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -257,4 +258,3 @@ correction, Rust migration, renderer/call-site preservation proof, unchanged
 ledger totals, validation, and execution log to the orchestrator. Do not start
 `g16.019`. After operator-authorized merge, the orchestrator rechecks the landed
 Select substrate and promotes the planned mounted-overlay card to ready.
-

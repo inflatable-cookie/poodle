@@ -1,7 +1,8 @@
 # g16.018 — Select Semantic Machine And Interface Convergence
 
 Date: 2026-08-28
-Status: complete — awaiting merge
+Status: complete — merged in PR #93
+Merge commit: `8d296ecfe6d3844369f67c08c3e25834adc78f4a`
 Branch: `t3code/13de1b7f`
 Card: `docs/roadmaps/g16/018-select-semantic-machine-and-interface-convergence.md`
 Source triage: `docs/triage/20260828-085200-post-g16-017-native-lane-decision.md`
@@ -76,7 +77,8 @@ compile maintenance only.
   TimeZoneSelect, or another composite
 - no Jetstream admission, release, version, workflow, or downstream change
 
-`g16.019` remains planned and blocked on the merged substrate.
+`g16.019` has been recompiled against the merged substrate. Its entry gate is
+clear; a concrete worker handoff is the remaining dispatch boundary.
 
 ## Review corrections
 
@@ -125,8 +127,7 @@ Select is pinned.
 
 - native search editing, overlay pointer targeting, focus return, and mounted
   Select proof belong to `g16.019`
-- generation stays at 46 mounted / 128 missing until that card is recompiled
-  after merge
+- generation stays at 46 mounted / 128 missing until that card lands
 
 ## Approved composite identity
 
