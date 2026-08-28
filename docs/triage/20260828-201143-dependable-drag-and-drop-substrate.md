@@ -164,6 +164,8 @@ The likely public surface needs:
 ## Promotion Route
 
 Promoted on 2026-08-28 into architecture 011 and spec 069. Roadmap compilation
-waits for the active Select lane to close and for the g16 continuation
-checkpoint to choose whether this becomes the next generation or a later
-bounded programme.
+completed after Select and the g16 continuation audit closed. The programme is
+now `g16.021`–`g16.028`; only the paired semantic kernel in `g16.021` is ready.
+The public migration boundary remains open in
+`20260828-221415-drag-drop-public-migration-boundary.md` and gates component
+and DockRegion migration cards.

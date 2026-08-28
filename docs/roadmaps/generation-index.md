@@ -12,14 +12,14 @@ Updated: 2026-08-28
     `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
     `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
     `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
-    `019` merged in PR #94; `020` merged in PR #95
+    `019` merged in PR #94; `020` merged in PR #95; `021` ready; `022`–`028`
+    planned behind ordered drag-and-drop dependencies
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: compile separate component-continuation and dependable
-    drag-and-drop implementation runways from the merged audit register and
-    architecture 011/spec 069. Resolve decision-blocked editing lanes before
-    dispatch.
+  - Next move: dispatch `g16.021` semantic kernel. Resolve TimeInput native
+    entry and the legacy public drag-export migration before promoting their
+    dependent cards.
 
 ## Latest Completed Track
 

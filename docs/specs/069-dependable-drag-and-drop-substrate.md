@@ -1,6 +1,6 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: approved for runway compilation
+Status: active — compiled as g16.021–g16.028; g16.021 ready
 Updated: 2026-08-28
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
@@ -472,6 +472,11 @@ Cards may split those batches further when file overlap or review size demands
 it. Cross-window and drag-out contracts shape the base even when their adapters
 land after the internal proof.
 
+The compiled runway is `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
+through `028-drag-drop-migration-and-certification-closeout.md`. Only `g16.021`
+is ready at compilation. Later cards remain planned until their landed
+dependency and named decision gates are reconciled by the orchestrator.
+
 ## Non-goals
 
 - application window topology, persistence, authorization, or mutation
@@ -491,4 +496,3 @@ land after the internal proof.
   <https://www.electronjs.org/docs/latest/tutorial/native-file-drag-drop>
 - Tauri inbound drag/drop events:
   <https://v2.tauri.app/reference/javascript/api/namespacewindow/#ondragdropevent>
-

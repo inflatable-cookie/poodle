@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.020 merged; continuation runway compilation next
+Status: active — g16.021 ready; component decisions remain gated
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -51,6 +51,14 @@ stay maintained; backend admission is not part of the first card.
 18. [018 — Select semantic machine and interface convergence](018-select-semantic-machine-and-interface-convergence.md) — complete; merged in PR #93
 19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — complete; merged in PR #94
 20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
+21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — ready
+22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — planned; depends on 021
+23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — planned; depends on 022 and public migration decision
+24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — planned; depends on 023
+25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — planned; depends on 024
+26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; depends on 025 and public migration decision
+27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
+28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 
 ## Parallel Continuation
 
@@ -58,18 +66,27 @@ Two continuation programmes are now explicit:
 
 - **Component continuation:** merged `g16.020` accounts for all 175 components
   and returns seven bounded candidate lanes without mutating components or the
-  ledger. Its register separates 93 closed, 69 evidence-only, 3
-  decision-blocked, 7 programme-owned, and 3 unknown rows; no known repair is
-  currently ready to dispatch.
+  ledger. Its [runway map](component-continuation-runway.md) separates decision,
+  audit, programme, and no-current-work gates. The register contains 93 closed,
+  69 evidence-only, 3 decision-blocked, 7 programme-owned, and 3 unknown rows;
+  no known repair is currently ready to dispatch.
 - **Dependable drag-and-drop:** architecture 011 and spec 069 govern a separate
   cross-runtime programme covering touch, nested targets, cross-window
-  transfer, inbound files, and drag-out. Its implementation runway is compiled
-  after the current Select and audit checkpoints; the audit records dependent
-  components as programme-owned rather than separate defects.
+  transfer, inbound files, and drag-out. `g16.021`–`g16.028` compile that
+  programme without scattering the seven dependent components into unrelated
+  repairs. Only the paired semantic kernel is ready; later cards remain gated
+  by landed dependencies and explicit public migration choices.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
 the Select lane or changing those totals.
+
+The component-continuation lane has no known repair ready for implementation.
+TimeInput, NumberInput, and EditableLabel need operator-owned native editing
+decisions. Fader, Knob, and XYPad need a bounded interaction audit before any
+repair can be named. GPUI accessibility, cross-runtime visual comparison,
+motion learning, the Longhorn lab, and Jetstream admission remain separate
+programme choices rather than component cards.
 
 The longer generation direction stays evidence-led rather than becoming a
 component-order checklist:
@@ -247,9 +264,8 @@ mounted and 128 → 127 missing. Known-delta totals stay 115 / 60.
 
 ## Next Task
 
-Compile two separate implementation runways from the merged audit: component
-continuation from `component-continuation-register.md`, and dependable
-drag-and-drop from architecture 011/spec 069. Resolve the TimeInput and editing
-value-model decisions before marking those component lanes ready. Keep the
-drag programme's substrate and migration cards distinct. No implementation
-worker is ready until those cards are committed.
+Dispatch `g16.021` from its committed worker handoff. In parallel, resolve the
+TimeInput native-entry decision and the public migration boundary in
+`../../triage/20260828-221415-drag-drop-public-migration-boundary.md`. Do not
+promote `g16.022`, a component implementation card, or another programme until
+its named gate is closed.

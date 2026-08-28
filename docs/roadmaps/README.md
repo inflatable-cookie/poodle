@@ -53,8 +53,9 @@ behavior repairs without inventing another conformance authority.
   conformance programme is implied. PR #95 closed `g16.020`: its 175-row
   continuation register separates 93 closed, 69 evidence-only, 3
   decision-blocked, 7 programme-owned, and 3 unknown components, with no known
-  repair currently ready to dispatch. The next checkpoint compiles separate
-  component and dependable drag-and-drop runways from that evidence.
+  repair currently ready to dispatch. Architecture 011/spec 069 are now
+  compiled as `g16.021`–`g16.028`; only the paired semantic kernel in `021` is
+  ready. Component-continuation decisions remain separate.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -113,7 +114,8 @@ behavior repairs without inventing another conformance authority.
   `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
   `019` complete, merged in PR #94, ledger 47 mounted / 127 missing; `020`
   complete, merged in PR #95. Dependable drag-and-drop remains a separate
-  programme governed by architecture 011/spec 069.
+  programme governed by architecture 011/spec 069 and compiled as `021`–`028`;
+  `021` is ready.
 
 ## Rules
 
