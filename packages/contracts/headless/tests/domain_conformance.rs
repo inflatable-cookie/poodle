@@ -498,11 +498,7 @@ fn duration_conformance() {
                     case["delta"].as_i64().unwrap(),
                     case["maxHours"].as_u64().unwrap() as u32,
                 );
-                assert_eq!(
-                    duration_value_to_json(result),
-                    *expect,
-                    "adjust {case}"
-                );
+                assert_eq!(duration_value_to_json(result), *expect, "adjust {case}");
             }
             "set" => {
                 let segment = match s(case, "segment") {
@@ -516,11 +512,7 @@ fn duration_conformance() {
                     case["raw"].as_i64().unwrap(),
                     case["maxHours"].as_u64().unwrap() as u32,
                 );
-                assert_eq!(
-                    duration_value_to_json(result),
-                    *expect,
-                    "set {case}"
-                );
+                assert_eq!(duration_value_to_json(result), *expect, "set {case}");
             }
             "pad" => {
                 let result = pad_duration_segment(case["value"].as_u64().unwrap() as u32);
@@ -542,7 +534,12 @@ fn nav_conformance() {
         let expect = &case["expect"];
         let disabled: Vec<bool> = case["disabled"]
             .as_array()
-            .map(|entries| entries.iter().map(|entry| entry.as_bool().unwrap_or(false)).collect())
+            .map(|entries| {
+                entries
+                    .iter()
+                    .map(|entry| entry.as_bool().unwrap_or(false))
+                    .collect()
+            })
             .unwrap_or_default();
 
         match op {
@@ -561,6 +558,211 @@ fn nav_conformance() {
                 assert_eq!(actual, *expect, "firstEnabled {case}");
             }
             other => panic!("unknown nav op {other}"),
+        }
+    }
+}
+
+// ── TimeInput ──
+
+#[test]
+fn time_input_conformance() {
+    use poodle_headless::time_input::*;
+
+    fn opt_string(value: &Value) -> Option<String> {
+        value.as_str().map(str::to_string)
+    }
+
+    fn parts_from(value: &Value) -> TimeParts {
+        TimeParts {
+            hour: value["hour"].as_u64().unwrap_or(0) as u32,
+            minute: value["minute"].as_u64().unwrap_or(0) as u32,
+            second: value["second"].as_u64().unwrap_or(0) as u32,
+        }
+    }
+
+    fn parts_json(parts: TimeParts) -> Value {
+        json!({
+            "hour": parts.hour,
+            "minute": parts.minute,
+            "second": parts.second,
+        })
+    }
+
+    fn draft_from(value: &Value) -> Option<TimeInputDraft> {
+        if value.is_null() {
+            return None;
+        }
+
+        Some(TimeInputDraft {
+            hour: value["hour"].as_str().unwrap_or("").to_string(),
+            minute: value["minute"].as_str().unwrap_or("").to_string(),
+            second: value["second"].as_str().unwrap_or("").to_string(),
+        })
+    }
+
+    fn context_from(value: &Value) -> TimeInputContext {
+        TimeInputContext {
+            committed: opt_string(&value["committed"]),
+            default_value: opt_string(&value["defaultValue"]),
+            draft: draft_from(&value["draft"]),
+            min: opt_string(&value["min"]),
+            max: opt_string(&value["max"]),
+            step: value["step"].as_f64().unwrap_or(60.0),
+            disabled: value["disabled"].as_bool().unwrap_or(false),
+        }
+    }
+
+    fn context_json(context: &TimeInputContext) -> Value {
+        json!({
+            "committed": context.committed,
+            "defaultValue": context.default_value,
+            "draft": context.draft.as_ref().map(|draft| json!({
+                "hour": draft.hour,
+                "minute": draft.minute,
+                "second": draft.second,
+            })),
+            "min": context.min,
+            "max": context.max,
+            "step": context.step,
+            "disabled": context.disabled,
+        })
+    }
+
+    fn segment_from(value: &str) -> TimeSegment {
+        match value {
+            "hour" => TimeSegment::Hour,
+            "minute" => TimeSegment::Minute,
+            _ => TimeSegment::Second,
+        }
+    }
+
+    fn event_from(value: &Value) -> TimeInputEvent {
+        match s(value, "type") {
+            "DIGIT" => TimeInputEvent::Digit {
+                segment: segment_from(s(value, "segment")),
+                digit: value["digit"].as_u64().unwrap_or(0) as u32,
+            },
+            "CLEAR_SEGMENT" => TimeInputEvent::ClearSegment {
+                segment: segment_from(s(value, "segment")),
+            },
+            "CLEAR_ALL" => TimeInputEvent::ClearAll,
+            "STEP" => TimeInputEvent::Step {
+                direction: value["direction"].as_i64().unwrap_or(1) as i32,
+            },
+            "BLUR" => TimeInputEvent::Blur,
+            "ESCAPE" => TimeInputEvent::Escape,
+            "REPLACE" => TimeInputEvent::Replace {
+                value: opt_string(&value["value"]),
+            },
+            "COMMIT_TEXT" => TimeInputEvent::CommitText {
+                text: s(value, "text").to_string(),
+            },
+            "SET_DISABLED" => TimeInputEvent::SetDisabled {
+                disabled: value["disabled"].as_bool().unwrap_or(false),
+            },
+            "SET_CONSTRAINTS" => TimeInputEvent::SetConstraints {
+                min: opt_string(&value["min"]),
+                max: opt_string(&value["max"]),
+                step: value["step"].as_f64().unwrap_or(60.0),
+                default_value: opt_string(&value["defaultValue"]),
+            },
+            other => panic!("unknown timeInput event {other}"),
+        }
+    }
+
+    fn effects_json(effects: &[TimeInputEffect]) -> Value {
+        Value::Array(
+            effects
+                .iter()
+                .map(|effect| match effect {
+                    TimeInputEffect::EmitValueChange { value } => json!({
+                        "type": "emitValueChange",
+                        "value": value,
+                    }),
+                })
+                .collect(),
+        )
+    }
+
+    for case in vectors()["timeInput"].as_array().unwrap() {
+        let op = s(case, "op");
+        let expect = &case["expect"];
+
+        match op {
+            "parse" => {
+                let result = parse_time(case["value"].as_str()).map(parts_json);
+                let actual = result.unwrap_or(Value::Null);
+                assert_eq!(actual, *expect, "parse {case}");
+            }
+            "format" => {
+                let result = format_time(
+                    parts_from(&case["parts"]),
+                    case["seconds"].as_bool().unwrap_or(false),
+                );
+                assert_eq!(result, expect.as_str().unwrap(), "format {case}");
+            }
+            "secondsVisible" => {
+                let result = time_seconds_visible(
+                    case["committed"].as_str(),
+                    case["defaultValue"].as_str(),
+                    case["min"].as_str(),
+                    case["max"].as_str(),
+                    case["step"].as_f64().unwrap_or(60.0),
+                );
+                assert_eq!(result, expect.as_bool().unwrap(), "secondsVisible {case}");
+            }
+            "inBounds" => {
+                let result = time_in_bounds(
+                    parts_from(&case["parts"]),
+                    case["min"].as_str(),
+                    case["max"].as_str(),
+                );
+                assert_eq!(result, expect.as_bool().unwrap(), "inBounds {case}");
+            }
+            "stepAligned" => {
+                let result = time_step_aligned(
+                    parts_from(&case["parts"]),
+                    case["min"].as_str(),
+                    case["step"].as_f64().unwrap_or(60.0),
+                );
+                assert_eq!(result, expect.as_bool().unwrap(), "stepAligned {case}");
+            }
+            "step" => {
+                let current = parse_time(case["current"].as_str()).map(time_to_seconds);
+                let min = case["min"].as_str();
+                let max = case["max"].as_str();
+                let step = case["step"].as_f64().unwrap_or(60.0);
+                let next = step_time_seconds(
+                    current,
+                    case["direction"].as_i64().unwrap_or(1) as i32,
+                    min,
+                    max,
+                    step,
+                );
+                let with_seconds =
+                    time_seconds_visible(case["current"].as_str(), None, min, max, step);
+                let actual = next
+                    .map(|seconds| json!(format_time(seconds_to_time(seconds), with_seconds)))
+                    .unwrap_or(Value::Null);
+                assert_eq!(actual, *expect, "step {case}");
+            }
+            "transition" => {
+                let (context, effects) = time_input_transition(
+                    context_from(&case["context"]),
+                    event_from(&case["event"]),
+                );
+                let actual = json!({
+                    "context": context_json(&context),
+                    "effects": effects_json(&effects),
+                    "invalid": time_input_invalid(&context),
+                });
+                assert_eq!(
+                    canonicalize(&actual),
+                    canonicalize(expect),
+                    "transition {case}"
+                );
+            }
+            other => panic!("unknown timeInput op {other}"),
         }
     }
 }

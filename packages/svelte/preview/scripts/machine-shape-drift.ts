@@ -162,6 +162,13 @@ const PINNED: Record<
     rsRunner: "packages/contracts/headless/tests/domain_conformance.rs",
     rsEvidence: "fn tree_conformance",
   },
+  timeInput: {
+    file: "domain.json",
+    tsRunner: "packages/core/test/domain-conformance.test.ts",
+    tsEvidence: "vectors.timeInput",
+    rsRunner: "packages/contracts/headless/tests/domain_conformance.rs",
+    rsEvidence: "fn time_input_conformance",
+  },
   agentTranscript: {
     file: "agent-transcript.json",
     tsRunner: "packages/core/test/agent-transcript-conformance.test.ts",
@@ -309,8 +316,14 @@ function pinningFindings(): Finding[] {
     if (entry.file !== "domain.json" && entry.file !== "machines.json") {
       // Whole-file pin (agent vectors): the file exists and both runners
       // reference it — checked below.
-    } else if (!vectorText.includes(`"${entry.file === "machines.json" ? name : name.toLowerCase()}"`)) {
-      findings.push({ module: name, detail: `no vector key for ${name} in ${entry.file}` });
+    } else {
+      const needles =
+        entry.file === "machines.json"
+          ? [`"${name}"`]
+          : [`"${name}"`, `"${name.toLowerCase()}"`];
+      if (!needles.some((needle) => vectorText.includes(needle))) {
+        findings.push({ module: name, detail: `no vector key for ${name} in ${entry.file}` });
+      }
     }
 
     const tsRunnerPath = path.join(repoRoot, entry.tsRunner);

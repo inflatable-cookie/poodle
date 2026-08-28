@@ -2173,5 +2173,1222 @@
       ],
       "expect": null
     }
+  ],
+  "timeInput": [
+    {
+      "op": "parse",
+      "name": "canonical minutes",
+      "value": "14:30",
+      "expect": {
+        "hour": 14,
+        "minute": 30,
+        "second": 0
+      }
+    },
+    {
+      "op": "parse",
+      "name": "canonical seconds",
+      "value": "14:30:05",
+      "expect": {
+        "hour": 14,
+        "minute": 30,
+        "second": 5
+      }
+    },
+    {
+      "op": "parse",
+      "name": "midnight",
+      "value": "00:00",
+      "expect": {
+        "hour": 0,
+        "minute": 0,
+        "second": 0
+      }
+    },
+    {
+      "op": "parse",
+      "name": "end of day",
+      "value": "23:59:59",
+      "expect": {
+        "hour": 23,
+        "minute": 59,
+        "second": 59
+      }
+    },
+    {
+      "op": "parse",
+      "name": "reject unpadded hour",
+      "value": "9:30",
+      "expect": null
+    },
+    {
+      "op": "parse",
+      "name": "reject unpadded minute",
+      "value": "14:3",
+      "expect": null
+    },
+    {
+      "op": "parse",
+      "name": "reject unpadded second",
+      "value": "14:30:0",
+      "expect": null
+    },
+    {
+      "op": "parse",
+      "name": "reject impossible hour",
+      "value": "24:00",
+      "expect": null
+    },
+    {
+      "op": "parse",
+      "name": "reject impossible minute",
+      "value": "14:60",
+      "expect": null
+    },
+    {
+      "op": "parse",
+      "name": "reject impossible second",
+      "value": "14:30:60",
+      "expect": null
+    },
+    {
+      "op": "parse",
+      "name": "reject fractional second",
+      "value": "14:30:00.5",
+      "expect": null
+    },
+    {
+      "op": "parse",
+      "name": "reject compact digits",
+      "value": "1430",
+      "expect": null
+    },
+    {
+      "op": "parse",
+      "name": "reject empty",
+      "value": "",
+      "expect": null
+    },
+    {
+      "op": "format",
+      "name": "without seconds",
+      "parts": {
+        "hour": 9,
+        "minute": 5,
+        "second": 7
+      },
+      "seconds": false,
+      "expect": "09:05"
+    },
+    {
+      "op": "format",
+      "name": "with seconds",
+      "parts": {
+        "hour": 9,
+        "minute": 5,
+        "second": 7
+      },
+      "seconds": true,
+      "expect": "09:05:07"
+    },
+    {
+      "op": "secondsVisible",
+      "name": "hidden at minute step",
+      "step": 60,
+      "committed": null,
+      "defaultValue": null,
+      "min": null,
+      "max": null,
+      "expect": false
+    },
+    {
+      "op": "secondsVisible",
+      "name": "from step below 60",
+      "step": 15,
+      "committed": null,
+      "defaultValue": null,
+      "min": null,
+      "max": null,
+      "expect": true
+    },
+    {
+      "op": "secondsVisible",
+      "name": "from committed seconds",
+      "step": 60,
+      "committed": "09:30:15",
+      "defaultValue": null,
+      "min": null,
+      "max": null,
+      "expect": true
+    },
+    {
+      "op": "secondsVisible",
+      "name": "from default seconds",
+      "step": 60,
+      "committed": null,
+      "defaultValue": "09:30:15",
+      "min": null,
+      "max": null,
+      "expect": true
+    },
+    {
+      "op": "secondsVisible",
+      "name": "from min seconds",
+      "step": 60,
+      "committed": null,
+      "defaultValue": null,
+      "min": "08:00:00",
+      "max": null,
+      "expect": true
+    },
+    {
+      "op": "secondsVisible",
+      "name": "from max seconds",
+      "step": 60,
+      "committed": null,
+      "defaultValue": null,
+      "min": null,
+      "max": "18:00:00",
+      "expect": true
+    },
+    {
+      "op": "inBounds",
+      "name": "unbounded",
+      "parts": {
+        "hour": 12,
+        "minute": 0,
+        "second": 0
+      },
+      "min": null,
+      "max": null,
+      "expect": true
+    },
+    {
+      "op": "inBounds",
+      "name": "linear inside",
+      "parts": {
+        "hour": 9,
+        "minute": 0,
+        "second": 0
+      },
+      "min": "08:00",
+      "max": "18:00",
+      "expect": true
+    },
+    {
+      "op": "inBounds",
+      "name": "linear below min",
+      "parts": {
+        "hour": 7,
+        "minute": 0,
+        "second": 0
+      },
+      "min": "08:00",
+      "max": "18:00",
+      "expect": false
+    },
+    {
+      "op": "inBounds",
+      "name": "linear max inclusive",
+      "parts": {
+        "hour": 18,
+        "minute": 0,
+        "second": 0
+      },
+      "min": "08:00",
+      "max": "18:00",
+      "expect": true
+    },
+    {
+      "op": "inBounds",
+      "name": "overnight evening",
+      "parts": {
+        "hour": 23,
+        "minute": 30,
+        "second": 0
+      },
+      "min": "22:00",
+      "max": "06:00",
+      "expect": true
+    },
+    {
+      "op": "inBounds",
+      "name": "overnight midnight",
+      "parts": {
+        "hour": 0,
+        "minute": 0,
+        "second": 0
+      },
+      "min": "22:00",
+      "max": "06:00",
+      "expect": true
+    },
+    {
+      "op": "inBounds",
+      "name": "overnight max inclusive",
+      "parts": {
+        "hour": 6,
+        "minute": 0,
+        "second": 0
+      },
+      "min": "22:00",
+      "max": "06:00",
+      "expect": true
+    },
+    {
+      "op": "inBounds",
+      "name": "overnight excluded gap",
+      "parts": {
+        "hour": 12,
+        "minute": 0,
+        "second": 0
+      },
+      "min": "22:00",
+      "max": "06:00",
+      "expect": false
+    },
+    {
+      "op": "stepAligned",
+      "name": "midnight grid",
+      "parts": {
+        "hour": 9,
+        "minute": 5,
+        "second": 0
+      },
+      "min": null,
+      "step": 300,
+      "expect": true
+    },
+    {
+      "op": "stepAligned",
+      "name": "midnight off grid",
+      "parts": {
+        "hour": 9,
+        "minute": 7,
+        "second": 0
+      },
+      "min": null,
+      "step": 300,
+      "expect": false
+    },
+    {
+      "op": "stepAligned",
+      "name": "min origin",
+      "parts": {
+        "hour": 8,
+        "minute": 0,
+        "second": 0
+      },
+      "min": "08:00",
+      "step": 300,
+      "expect": true
+    },
+    {
+      "op": "stepAligned",
+      "name": "min grid",
+      "parts": {
+        "hour": 8,
+        "minute": 5,
+        "second": 0
+      },
+      "min": "08:00",
+      "step": 300,
+      "expect": true
+    },
+    {
+      "op": "stepAligned",
+      "name": "min off grid",
+      "parts": {
+        "hour": 8,
+        "minute": 7,
+        "second": 0
+      },
+      "min": "08:00",
+      "step": 300,
+      "expect": false
+    },
+    {
+      "op": "stepAligned",
+      "name": "overnight midnight aligned",
+      "parts": {
+        "hour": 0,
+        "minute": 0,
+        "second": 0
+      },
+      "min": "22:00",
+      "step": 1800,
+      "expect": true
+    },
+    {
+      "op": "stepAligned",
+      "name": "overnight off grid",
+      "parts": {
+        "hour": 0,
+        "minute": 15,
+        "second": 0
+      },
+      "min": "22:00",
+      "step": 1800,
+      "expect": false
+    },
+    {
+      "op": "stepAligned",
+      "name": "invalid step",
+      "parts": {
+        "hour": 9,
+        "minute": 0,
+        "second": 0
+      },
+      "min": null,
+      "step": 0,
+      "expect": false
+    },
+    {
+      "op": "step",
+      "name": "unbounded wrap forward",
+      "current": "23:30",
+      "direction": 1,
+      "min": null,
+      "max": null,
+      "step": 1800,
+      "expect": "00:00"
+    },
+    {
+      "op": "step",
+      "name": "unbounded wrap backward",
+      "current": "00:00",
+      "direction": -1,
+      "min": null,
+      "max": null,
+      "step": 1800,
+      "expect": "23:30"
+    },
+    {
+      "op": "step",
+      "name": "linear stop at max",
+      "current": "18:00",
+      "direction": 1,
+      "min": "08:00",
+      "max": "18:00",
+      "step": 60,
+      "expect": "18:00"
+    },
+    {
+      "op": "step",
+      "name": "linear stop at min",
+      "current": "08:00",
+      "direction": -1,
+      "min": "08:00",
+      "max": "18:00",
+      "step": 60,
+      "expect": "08:00"
+    },
+    {
+      "op": "step",
+      "name": "linear clamp to max",
+      "current": "17:30",
+      "direction": 1,
+      "min": "08:00",
+      "max": "18:00",
+      "step": 1800,
+      "expect": "18:00"
+    },
+    {
+      "op": "step",
+      "name": "overnight wrap forward",
+      "current": "23:30",
+      "direction": 1,
+      "min": "22:00",
+      "max": "06:00",
+      "step": 1800,
+      "expect": "00:00"
+    },
+    {
+      "op": "step",
+      "name": "overnight wrap backward",
+      "current": "00:00",
+      "direction": -1,
+      "min": "22:00",
+      "max": "06:00",
+      "step": 1800,
+      "expect": "23:30"
+    },
+    {
+      "op": "step",
+      "name": "overnight stop at max",
+      "current": "06:00",
+      "direction": 1,
+      "min": "22:00",
+      "max": "06:00",
+      "step": 1800,
+      "expect": "06:00"
+    },
+    {
+      "op": "step",
+      "name": "overnight stop at min",
+      "current": "22:00",
+      "direction": -1,
+      "min": "22:00",
+      "max": "06:00",
+      "step": 1800,
+      "expect": "22:00"
+    },
+    {
+      "op": "step",
+      "name": "empty unbounded up",
+      "current": null,
+      "direction": 1,
+      "min": null,
+      "max": null,
+      "step": 60,
+      "expect": "00:00"
+    },
+    {
+      "op": "step",
+      "name": "empty unbounded down",
+      "current": null,
+      "direction": -1,
+      "min": null,
+      "max": null,
+      "step": 60,
+      "expect": "23:59"
+    },
+    {
+      "op": "step",
+      "name": "empty linear up",
+      "current": null,
+      "direction": 1,
+      "min": "08:00",
+      "max": "18:00",
+      "step": 60,
+      "expect": "08:00"
+    },
+    {
+      "op": "step",
+      "name": "empty linear down",
+      "current": null,
+      "direction": -1,
+      "min": "08:00",
+      "max": "18:00",
+      "step": 60,
+      "expect": "18:00"
+    },
+    {
+      "op": "step",
+      "name": "empty overnight up",
+      "current": null,
+      "direction": 1,
+      "min": "22:00",
+      "max": "06:00",
+      "step": 1800,
+      "expect": "22:00"
+    },
+    {
+      "op": "step",
+      "name": "empty overnight down",
+      "current": null,
+      "direction": -1,
+      "min": "22:00",
+      "max": "06:00",
+      "step": 1800,
+      "expect": "06:00"
+    },
+    {
+      "op": "transition",
+      "name": "partial hour digit",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "DIGIT",
+        "segment": "hour",
+        "digit": 1
+      },
+      "expect": {
+        "context": {
+          "committed": "14:30",
+          "defaultValue": null,
+          "draft": {
+            "hour": "1",
+            "minute": "30",
+            "second": "00"
+          },
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [],
+        "invalid": true
+      }
+    },
+    {
+      "op": "transition",
+      "name": "complete valid hour commit",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": {
+          "hour": "1",
+          "minute": "30",
+          "second": "00"
+        },
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "DIGIT",
+        "segment": "hour",
+        "digit": 5
+      },
+      "expect": {
+        "context": {
+          "committed": "15:30",
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [
+          {
+            "type": "emitValueChange",
+            "value": "15:30"
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "native complete commit",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "COMMIT_TEXT",
+        "text": "15:00"
+      },
+      "expect": {
+        "context": {
+          "committed": "15:00",
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [
+          {
+            "type": "emitValueChange",
+            "value": "15:00"
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "native empty clears",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "COMMIT_TEXT",
+        "text": ""
+      },
+      "expect": {
+        "context": {
+          "committed": null,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [
+          {
+            "type": "emitValueChange",
+            "value": null
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "invalid overnight draft",
+      "context": {
+        "committed": "23:00",
+        "defaultValue": null,
+        "draft": null,
+        "min": "22:00",
+        "max": "06:00",
+        "step": 1800,
+        "disabled": false
+      },
+      "event": {
+        "type": "COMMIT_TEXT",
+        "text": "12:00"
+      },
+      "expect": {
+        "context": {
+          "committed": "23:00",
+          "defaultValue": null,
+          "draft": {
+            "hour": "12",
+            "minute": "00",
+            "second": ""
+          },
+          "min": "22:00",
+          "max": "06:00",
+          "step": 1800,
+          "disabled": false
+        },
+        "effects": [],
+        "invalid": true
+      }
+    },
+    {
+      "op": "transition",
+      "name": "off-step draft",
+      "context": {
+        "committed": "09:00",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 300,
+        "disabled": false
+      },
+      "event": {
+        "type": "COMMIT_TEXT",
+        "text": "09:07"
+      },
+      "expect": {
+        "context": {
+          "committed": "09:00",
+          "defaultValue": null,
+          "draft": {
+            "hour": "09",
+            "minute": "07",
+            "second": ""
+          },
+          "min": null,
+          "max": null,
+          "step": 300,
+          "disabled": false
+        },
+        "effects": [],
+        "invalid": true
+      }
+    },
+    {
+      "op": "transition",
+      "name": "blur reverts draft",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": {
+          "hour": "1",
+          "minute": "30",
+          "second": "00"
+        },
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "BLUR"
+      },
+      "expect": {
+        "context": {
+          "committed": "14:30",
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "escape reverts draft",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": {
+          "hour": "1",
+          "minute": "30",
+          "second": "00"
+        },
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "ESCAPE"
+      },
+      "expect": {
+        "context": {
+          "committed": "14:30",
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "one segment clear",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "CLEAR_SEGMENT",
+        "segment": "minute"
+      },
+      "expect": {
+        "context": {
+          "committed": "14:30",
+          "defaultValue": null,
+          "draft": {
+            "hour": "14",
+            "minute": "",
+            "second": "00"
+          },
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [],
+        "invalid": true
+      }
+    },
+    {
+      "op": "transition",
+      "name": "whole control clear",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "CLEAR_ALL"
+      },
+      "expect": {
+        "context": {
+          "committed": null,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [
+          {
+            "type": "emitValueChange",
+            "value": null
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "replace discards draft",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": {
+          "hour": "1",
+          "minute": "30",
+          "second": "00"
+        },
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "REPLACE",
+        "value": "08:00"
+      },
+      "expect": {
+        "context": {
+          "committed": "08:00",
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "repeat blur inert",
+      "context": {
+        "committed": null,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "BLUR"
+      },
+      "expect": {
+        "context": {
+          "committed": null,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "repeat escape inert",
+      "context": {
+        "committed": null,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "ESCAPE"
+      },
+      "expect": {
+        "context": {
+          "committed": null,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "repeat clear inert",
+      "context": {
+        "committed": null,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "CLEAR_ALL"
+      },
+      "expect": {
+        "context": {
+          "committed": null,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "disabled digit inert",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": true
+      },
+      "event": {
+        "type": "DIGIT",
+        "segment": "hour",
+        "digit": 1
+      },
+      "expect": {
+        "context": {
+          "committed": "14:30",
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": true
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "disabled step inert",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": true
+      },
+      "event": {
+        "type": "STEP",
+        "direction": 1
+      },
+      "expect": {
+        "context": {
+          "committed": "14:30",
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": true
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "disabled clear inert",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": true
+      },
+      "event": {
+        "type": "CLEAR_ALL"
+      },
+      "expect": {
+        "context": {
+          "committed": "14:30",
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": true
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "disabled still accepts replace",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": true
+      },
+      "event": {
+        "type": "REPLACE",
+        "value": "08:00"
+      },
+      "expect": {
+        "context": {
+          "committed": "08:00",
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": true
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "step up unbounded",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "STEP",
+        "direction": 1
+      },
+      "expect": {
+        "context": {
+          "committed": "14:31",
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [
+          {
+            "type": "emitValueChange",
+            "value": "14:31"
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "step wrap unbounded",
+      "context": {
+        "committed": "23:59",
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "STEP",
+        "direction": 1
+      },
+      "expect": {
+        "context": {
+          "committed": "00:00",
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [
+          {
+            "type": "emitValueChange",
+            "value": "00:00"
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "clear last visible segments emits null",
+      "context": {
+        "committed": "14:30",
+        "defaultValue": null,
+        "draft": {
+          "hour": "14",
+          "minute": "",
+          "second": "00"
+        },
+        "min": null,
+        "max": null,
+        "step": 60,
+        "disabled": false
+      },
+      "event": {
+        "type": "CLEAR_SEGMENT",
+        "segment": "hour"
+      },
+      "expect": {
+        "context": {
+          "committed": null,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 60,
+          "disabled": false
+        },
+        "effects": [
+          {
+            "type": "emitValueChange",
+            "value": null
+          }
+        ],
+        "invalid": false
+      }
+    }
   ]
 }
