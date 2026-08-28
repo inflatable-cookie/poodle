@@ -109,7 +109,7 @@ fn build_type_select(
         sel.value = Some(v.to_string());
     }
 
-    select(&sel, ctx, &SelectHandlers::default())
+    select(&sel, ctx, &SelectHandlers::new("block-editor-type"))
 }
 
 /// Render a single block's content by its type. Unknown types fall back to
@@ -235,7 +235,10 @@ pub fn block_editor_with_children(
     // The web provider publishes the role-resolved size and resolved density;
     // host block bodies build inside that scope.
     let host_scope = ctx.scoped(effective_size, density);
-    let children: Vec<Node> = children.into_iter().map(|build| build(&host_scope)).collect();
+    let children: Vec<Node> = children
+        .into_iter()
+        .map(|build| build(&host_scope))
+        .collect();
 
     // ── Resolve chrome from tokens / contract recipe rems ───────────────────
     let fill = theme.resolve_color(spec.fill_token());

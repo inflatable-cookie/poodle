@@ -297,5 +297,400 @@
       "event": { "type": "TOGGLE", "nextChecked": false },
       "expect": { "context": { "checked": false }, "effects": [{ "type": "emitCheckedChange", "checked": false }] }
     }
+  ],
+  "select": [
+    {
+      "name": "disabled is inert",
+      "context": {
+        "value": "",
+        "open": false,
+        "query": "",
+        "highlightedValue": null,
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": true
+      },
+      "event": { "type": "TOGGLE" },
+      "expect": { "context": { "open": false, "value": "" }, "effects": [] }
+    },
+    {
+      "name": "opening highlights the selected enabled option",
+      "context": {
+        "value": "c",
+        "open": false,
+        "query": "",
+        "highlightedValue": null,
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "OPEN" },
+      "expect": {
+        "context": { "open": true, "highlightedValue": "c" },
+        "effects": [{ "type": "openChanged", "open": true }]
+      }
+    },
+    {
+      "name": "opening without a selection highlights the first enabled option",
+      "context": {
+        "value": "",
+        "open": false,
+        "query": "",
+        "highlightedValue": null,
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "OPEN" },
+      "expect": {
+        "context": { "open": true, "highlightedValue": "a" },
+        "effects": [{ "type": "openChanged", "open": true }]
+      }
+    },
+    {
+      "name": "opening with no enabled options has no highlight",
+      "context": {
+        "value": "",
+        "open": false,
+        "query": "",
+        "highlightedValue": null,
+        "options": [{ "value": "b", "label": "Banana", "disabled": true }],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "OPEN" },
+      "expect": {
+        "context": { "open": true, "highlightedValue": null },
+        "effects": [{ "type": "openChanged", "open": true }]
+      }
+    },
+    {
+      "name": "repeated open emits nothing",
+      "context": {
+        "value": "a",
+        "open": true,
+        "query": "",
+        "highlightedValue": "a",
+        "options": [{ "value": "a", "label": "Apple", "disabled": false }],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "OPEN" },
+      "expect": { "context": { "open": true, "highlightedValue": "a" }, "effects": [] }
+    },
+    {
+      "name": "query edit opens, reports query only, and highlights the first enabled match",
+      "context": {
+        "value": "",
+        "open": false,
+        "query": "",
+        "highlightedValue": null,
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": true,
+        "freeform": true,
+        "disabled": false
+      },
+      "event": { "type": "QUERY", "query": "ch" },
+      "expect": {
+        "context": { "open": true, "query": "ch", "highlightedValue": "c", "value": "" },
+        "effects": [
+          { "type": "openChanged", "open": true },
+          { "type": "queryChanged", "query": "ch" }
+        ]
+      }
+    },
+    {
+      "name": "arrow next while closed opens without a second move",
+      "context": {
+        "value": "c",
+        "open": false,
+        "query": "",
+        "highlightedValue": null,
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "HIGHLIGHT_NEXT" },
+      "expect": {
+        "context": { "open": true, "highlightedValue": "c" },
+        "effects": [{ "type": "openChanged", "open": true }]
+      }
+    },
+    {
+      "name": "movement skips disabled options and clamps without wrapping",
+      "context": {
+        "value": "a",
+        "open": true,
+        "query": "",
+        "highlightedValue": "a",
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "HIGHLIGHT_NEXT" },
+      "expect": { "context": { "open": true, "highlightedValue": "c" }, "effects": [] }
+    },
+    {
+      "name": "movement clamps at the last enabled option",
+      "context": {
+        "value": "c",
+        "open": true,
+        "query": "",
+        "highlightedValue": "c",
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "HIGHLIGHT_NEXT" },
+      "expect": { "context": { "highlightedValue": "c" }, "effects": [] }
+    },
+    {
+      "name": "option commit reports value, copies the label into query, and closes",
+      "context": {
+        "value": "",
+        "open": true,
+        "query": "",
+        "highlightedValue": "c",
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "COMMIT_OPTION", "value": "c" },
+      "expect": {
+        "context": { "value": "c", "query": "Cherry", "open": false, "highlightedValue": "c" },
+        "effects": [
+          { "type": "openChanged", "open": false },
+          { "type": "queryChanged", "query": "Cherry" },
+          { "type": "valueChanged", "value": "c" }
+        ]
+      }
+    },
+    {
+      "name": "enter with a highlighted option commits that option",
+      "context": {
+        "value": "a",
+        "open": true,
+        "query": "Apple",
+        "highlightedValue": "c",
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": true,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "COMMIT_HIGHLIGHTED" },
+      "expect": {
+        "context": { "value": "c", "query": "Cherry", "open": false },
+        "effects": [
+          { "type": "openChanged", "open": false },
+          { "type": "queryChanged", "query": "Cherry" },
+          { "type": "valueChanged", "value": "c" }
+        ]
+      }
+    },
+    {
+      "name": "repeated same-value commit while closed emits nothing",
+      "context": {
+        "value": "c",
+        "open": false,
+        "query": "Cherry",
+        "highlightedValue": "c",
+        "options": [{ "value": "c", "label": "Cherry", "disabled": false }],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "COMMIT_OPTION", "value": "c" },
+      "expect": { "context": { "value": "c", "open": false, "query": "Cherry" }, "effects": [] }
+    },
+    {
+      "name": "explicit freeform commit reports value when no option is highlighted",
+      "context": {
+        "value": "",
+        "open": true,
+        "query": "kiwi",
+        "highlightedValue": null,
+        "options": [{ "value": "a", "label": "Apple", "disabled": false }],
+        "clearValue": "",
+        "searchable": true,
+        "freeform": true,
+        "disabled": false
+      },
+      "event": { "type": "COMMIT_FREEFORM" },
+      "expect": {
+        "context": { "value": "kiwi", "query": "kiwi", "open": false, "highlightedValue": null },
+        "effects": [
+          { "type": "openChanged", "open": false },
+          { "type": "valueChanged", "value": "kiwi" }
+        ]
+      }
+    },
+    {
+      "name": "freeform commit is inert when an option is highlighted",
+      "context": {
+        "value": "",
+        "open": true,
+        "query": "ap",
+        "highlightedValue": "a",
+        "options": [{ "value": "a", "label": "Apple", "disabled": false }],
+        "clearValue": "",
+        "searchable": true,
+        "freeform": true,
+        "disabled": false
+      },
+      "event": { "type": "COMMIT_FREEFORM" },
+      "expect": { "context": { "value": "", "query": "ap", "open": true }, "effects": [] }
+    },
+    {
+      "name": "freeform without searchable cannot commit query as value",
+      "context": {
+        "value": "",
+        "open": true,
+        "query": "kiwi",
+        "highlightedValue": null,
+        "options": [{ "value": "a", "label": "Apple", "disabled": false }],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": true,
+        "disabled": false
+      },
+      "event": { "type": "COMMIT_FREEFORM" },
+      "expect": { "context": { "value": "", "query": "kiwi", "open": true }, "effects": [] }
+    },
+    {
+      "name": "close without a value change restores non-freeform query silently",
+      "context": {
+        "value": "a",
+        "open": true,
+        "query": "zzz",
+        "highlightedValue": "a",
+        "options": [{ "value": "a", "label": "Apple", "disabled": false }],
+        "clearValue": "",
+        "searchable": true,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "CLOSE" },
+      "expect": {
+        "context": { "open": false, "query": "Apple", "value": "a" },
+        "effects": [{ "type": "openChanged", "open": false }]
+      }
+    },
+    {
+      "name": "escape close leaves a freeform draft query",
+      "context": {
+        "value": "a",
+        "open": true,
+        "query": "kiw",
+        "highlightedValue": null,
+        "options": [{ "value": "a", "label": "Apple", "disabled": false }],
+        "clearValue": "",
+        "searchable": true,
+        "freeform": true,
+        "disabled": false
+      },
+      "event": { "type": "CLOSE" },
+      "expect": {
+        "context": { "open": false, "query": "kiw", "value": "a" },
+        "effects": [{ "type": "openChanged", "open": false }]
+      }
+    },
+    {
+      "name": "clear reports the effective clear value and resets query without toggling",
+      "context": {
+        "value": "a",
+        "open": true,
+        "query": "Apple",
+        "highlightedValue": "a",
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "c", "label": "Cherry", "disabled": false }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "CLEAR" },
+      "expect": {
+        "context": { "value": "", "query": "", "open": true, "highlightedValue": "a" },
+        "effects": [
+          { "type": "queryChanged", "query": "" },
+          { "type": "valueChanged", "value": "" }
+        ]
+      }
+    },
+    {
+      "name": "pointer highlight of a disabled option is inert",
+      "context": {
+        "value": "a",
+        "open": true,
+        "query": "",
+        "highlightedValue": "a",
+        "options": [
+          { "value": "a", "label": "Apple", "disabled": false },
+          { "value": "b", "label": "Banana", "disabled": true }
+        ],
+        "clearValue": "",
+        "searchable": false,
+        "freeform": false,
+        "disabled": false
+      },
+      "event": { "type": "HIGHLIGHT", "value": "b" },
+      "expect": { "context": { "highlightedValue": "a" }, "effects": [] }
+    }
   ]
 }

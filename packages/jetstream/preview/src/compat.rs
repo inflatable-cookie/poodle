@@ -904,7 +904,11 @@ pub fn js_segmented_control(spec: &SegmentedControlSpec, theme: &JetstreamThemeP
 }
 
 pub fn js_select(spec: &SelectSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::select(spec, &pr::RenderContext::new(theme), &pr::SelectHandlers::default()))
+    El(pr::select(
+        spec,
+        &pr::RenderContext::new(theme),
+        &pr::SelectHandlers::new(spec.id.clone().unwrap_or_else(|| "select".to_string())),
+    ))
 }
 
 pub fn js_selection_summary(spec: &SelectionSummarySpec, theme: &JetstreamThemeProvider) -> El {

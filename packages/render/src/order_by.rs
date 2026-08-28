@@ -35,11 +35,7 @@ pub struct OrderByHandlers {
     pub on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
 }
 
-pub fn order_by(
-    spec: &OrderBySpec,
-    ctx: &RenderContext<'_>,
-    handlers: OrderByHandlers,
-) -> Node {
+pub fn order_by(spec: &OrderBySpec, ctx: &RenderContext<'_>, handlers: OrderByHandlers) -> Node {
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
     // ── Size table (matches corrected contract §8) ────────────────────────────
@@ -371,7 +367,11 @@ pub fn order_by(
             let mut row = Node::container();
             row.style.descriptor.layout.direction = LayoutDirection::Row;
             row.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-            panel = panel.child(row.child(select(&select_spec, ctx, &SelectHandlers::default())));
+            panel = panel.child(row.child(select(
+                &select_spec,
+                ctx,
+                &SelectHandlers::new("order-by-add"),
+            )));
         }
 
         // Dialog surface chrome.
@@ -430,12 +430,16 @@ mod tests {
         let ctx = RenderContext::new(&theme);
         let spec = OrderBySpec::new().with_open(true);
         let node = order_by(&spec, &ctx, OrderByHandlers::default());
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_none());
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_none());
 
         // Refusal: the open surface carries the inert activation marker a
         // host keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
         let node = order_by(&refusing, &ctx, OrderByHandlers::default());
-        assert!(node.find(&|n| n.interaction.on_activate.is_some()).is_some());
+        assert!(node
+            .find(&|n| n.interaction.on_activate.is_some())
+            .is_some());
     }
 }

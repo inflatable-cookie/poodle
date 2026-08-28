@@ -28,6 +28,7 @@ pub mod nav;
 pub mod pagination;
 pub mod popover;
 pub mod rating;
+pub mod select;
 pub mod single_select;
 pub mod slider;
 pub mod switch;

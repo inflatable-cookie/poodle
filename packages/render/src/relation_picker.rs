@@ -388,8 +388,7 @@ fn build_search(
         let mut filters_row = Node::container();
         filters_row.style.descriptor.layout.direction = LayoutDirection::Row;
         filters_row.style.flex_wrap = true;
-        filters_row.style.descriptor.layout.spacing.gap =
-            rem_to_px(control_space_x_rem(density));
+        filters_row.style.descriptor.layout.spacing.gap = rem_to_px(control_space_x_rem(density));
         let mut filters_row = filters_row;
         for filter in &spec.filters {
             let options = filter
@@ -403,8 +402,11 @@ fn build_search(
                 .with_size_role(spec.size_role)
                 .with_density(density);
             select_spec.aria_label = Some(format!("{} filter", filter.label));
-            filters_row =
-                filters_row.child(select(&select_spec, ctx, &SelectHandlers::default()));
+            filters_row = filters_row.child(select(
+                &select_spec,
+                ctx,
+                &SelectHandlers::new(format!("relation-picker:{}", filter.key)),
+            ));
         }
         col = col.child(filters_row);
     }

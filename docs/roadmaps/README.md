@@ -46,8 +46,9 @@ behavior repairs without inventing another conformance authority.
   Pagination loading suppression and mounted navigation/limit proof; ledger
   45 mounted / 129 missing. `g16.017` closed Rating's approved nullable /
   fractional Rust migration and one mounted GPUI cell; ledger 46 mounted /
-  128 missing. Known-delta totals stay 115 / 60. No broader conformance
-  programme is implied.
+  128 missing. `g16.018` converged Select's semantic machine and interfaces
+  without moving the ledger. Known-delta totals stay 115 / 60. No broader
+  conformance programme is implied.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;

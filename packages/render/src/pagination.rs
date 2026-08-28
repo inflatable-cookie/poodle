@@ -495,24 +495,30 @@ fn build_limit_selector(
         // every page button. Use Select's public disabled field — do not fork it.
         select_spec.is_disabled = spec.is_loading;
 
-        let toggle = handlers.limit_open_change.as_ref().map(|handler| {
-            let handler = Arc::clone(handler);
-            let next = !handlers.limit_open;
-            Arc::new(move || handler(next)) as Arc<dyn Fn() + Send + Sync>
-        });
-        let change = handlers.page_size_change.as_ref().map(|handler| {
-            let handler = Arc::clone(handler);
-            Arc::new(move |value: &str| {
-                if let Ok(size) = value.parse::<usize>() {
-                    handler(size);
+        let open_change = handlers.limit_open_change.clone();
+        let size_change = handlers.page_size_change.clone();
+        let mut select_handlers = crate::SelectHandlers::new("pagination-limit");
+        if open_change.is_some() || size_change.is_some() {
+            select_handlers = select_handlers.on_transition(Arc::new(move |result| {
+                for effect in &result.effects {
+                    match effect {
+                        crate::SelectEffect::OpenChanged { open } => {
+                            if let Some(handler) = &open_change {
+                                handler(*open);
+                            }
+                        }
+                        crate::SelectEffect::ValueChanged { value } => {
+                            if let Some(handler) = &size_change {
+                                if let Ok(size) = value.parse::<usize>() {
+                                    handler(size);
+                                }
+                            }
+                        }
+                        crate::SelectEffect::QueryChanged { .. } => {}
+                    }
                 }
-            }) as Arc<dyn Fn(&str) + Send + Sync>
-        });
-        let select_handlers = crate::SelectHandlers {
-            toggle,
-            change,
-            clear: None,
-        };
+            }));
+        }
         let select_box = crate::select(&select_spec, ctx, &select_handlers);
 
         let mut row = Node::container();
@@ -667,7 +673,10 @@ mod tests {
         let node = render(&numbered_spec().with_loading(true), &handlers);
 
         let trigger = limit_trigger(&node);
-        assert!(trigger.interaction.disabled, "loading disables the Select trigger");
+        assert!(
+            trigger.interaction.disabled,
+            "loading disables the Select trigger"
+        );
         assert!(
             trigger.interaction.on_activate.is_none(),
             "loading Select must not report open changes"

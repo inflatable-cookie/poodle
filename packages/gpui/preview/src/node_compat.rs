@@ -3841,21 +3841,23 @@ impl IntoCompatNode for TextInput {
 pub(crate) struct Select {
     spec: SelectSpec,
     theme: GpuiThemeProvider,
+    instance_scope: String,
     id_suffix: Option<String>,
-    on_toggle: Option<Arc<dyn Fn() + Send + Sync>>,
-    on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
-    on_clear: Option<Arc<dyn Fn() + Send + Sync>>,
+    on_transition: Option<Arc<dyn Fn(poodle_render::SelectTransitionResult) + Send + Sync>>,
 }
 
 impl Select {
-    pub(crate) fn from_spec(spec: SelectSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: SelectSpec,
+        theme: &GpuiThemeProvider,
+        instance_scope: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
+            instance_scope: instance_scope.into(),
             id_suffix: None,
-            on_toggle: None,
-            on_change: None,
-            on_clear: None,
+            on_transition: None,
         }
     }
 
@@ -3865,15 +3867,11 @@ impl Select {
     }
 
     pub(crate) fn into_node_with(self, ctx: &RenderContext<'_>) -> poodle_node::Node {
-        let mut node = poodle_render::select(
-            &self.spec,
-            ctx,
-            &poodle_render::SelectHandlers {
-                toggle: self.on_toggle,
-                change: self.on_change,
-                clear: self.on_clear,
-            },
-        );
+        let mut handlers = poodle_render::SelectHandlers::new(self.instance_scope);
+        if let Some(on_transition) = self.on_transition {
+            handlers = handlers.on_transition(on_transition);
+        }
+        let mut node = poodle_render::select(&self.spec, ctx, &handlers);
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-select-{id}"));
         }

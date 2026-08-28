@@ -13,6 +13,9 @@
 
 use std::sync::Arc;
 
+use poodle_headless::select::{
+    select_transition, select_visible_options, SelectContext, SelectEffect, SelectEvent,
+};
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodePosition, NodeRole, StylePatch,
@@ -26,14 +29,55 @@ use crate::presentation::{
     size_padding_x_offset_rem,
 };
 
-/// Handlers a host wires to a select. The component does not own open state —
-/// the spec says whether the panel is drawn — so `toggle` reports the press
-/// and the host decides.
-#[derive(Default, Clone)]
+/// One atomic transition result. Hosts apply `context`, then dispatch from
+/// `effects` in order.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SelectTransitionResult {
+    pub context: SelectContext,
+    pub effects: Vec<SelectEffect>,
+}
+
+/// Host-owned native interaction for one Select instance.
+///
+/// `instance_scope` is the lifetime-stable scope. It is not a web public prop,
+/// and the renderer never invents one from render order or selected value.
+#[derive(Clone)]
 pub struct SelectHandlers {
-    pub toggle: Option<Arc<dyn Fn() + Send + Sync>>,
-    pub change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
-    pub clear: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub instance_scope: String,
+    pub on_transition: Option<Arc<dyn Fn(SelectTransitionResult) + Send + Sync>>,
+}
+
+impl SelectHandlers {
+    pub fn new(instance_scope: impl Into<String>) -> Self {
+        Self {
+            instance_scope: instance_scope.into(),
+            on_transition: None,
+        }
+    }
+
+    pub fn on_transition(
+        mut self,
+        handler: Arc<dyn Fn(SelectTransitionResult) + Send + Sync>,
+    ) -> Self {
+        self.on_transition = Some(handler);
+        self
+    }
+}
+
+fn select_part_id(scope: &str, part: &str) -> String {
+    format!("select:{scope}:{part}")
+}
+
+fn select_option_id(scope: &str, value: &str) -> String {
+    format!("select:{scope}:option:{value}")
+}
+
+fn emit_select(spec: &SelectSpec, handlers: &SelectHandlers, event: SelectEvent) {
+    let Some(handler) = &handlers.on_transition else {
+        return;
+    };
+    let (context, effects) = select_transition(spec.select_context(), event);
+    handler(SelectTransitionResult { context, effects });
 }
 
 pub fn select(spec: &SelectSpec, ctx: &RenderContext<'_>, handlers: &SelectHandlers) -> Node {
@@ -107,6 +151,7 @@ pub fn select(spec: &SelectSpec, ctx: &RenderContext<'_>, handlers: &SelectHandl
     let show_clear = spec.clearable && spec.current_value().is_some() && !spec.is_disabled;
 
     let trigger = build_trigger(
+        spec,
         &display_text,
         display_color,
         icon_muted,
@@ -134,6 +179,7 @@ pub fn select(spec: &SelectSpec, ctx: &RenderContext<'_>, handlers: &SelectHandl
     if !spec.current_open() {
         let mut trigger = trigger;
         trigger.style.min_width = Some(root_min_width);
+        trigger.runtime_id = Some(select_part_id(&handlers.instance_scope, "trigger"));
         return trigger;
     }
 
@@ -185,6 +231,7 @@ pub fn select(spec: &SelectSpec, ctx: &RenderContext<'_>, handlers: &SelectHandl
     reason = "trigger rendering keeps resolved state and token metrics explicit"
 )]
 fn build_trigger(
+    spec: &SelectSpec,
     display_text: &str,
     display_color: ColorValue,
     icon_muted: ColorValue,
@@ -231,10 +278,14 @@ fn build_trigger(
         });
     }
     el.interaction.focusable = true;
+    el.runtime_id = Some(select_part_id(&handlers.instance_scope, "trigger"));
 
-    if let (false, Some(handler)) = (is_disabled, &handlers.toggle) {
-        let handler = Arc::clone(handler);
-        el.interaction.on_activate = Some(Arc::new(move || handler()));
+    if !is_disabled && handlers.on_transition.is_some() {
+        let spec = spec.clone();
+        let handlers = handlers.clone();
+        el.interaction.on_activate = Some(Arc::new(move || {
+            emit_select(&spec, &handlers, SelectEvent::Toggle);
+        }));
     }
 
     let mut label = Node::text(display_text);
@@ -266,12 +317,13 @@ fn build_trigger(
         x.style.descriptor.text_color = Some(text_secondary);
         clear = clear.child(x);
 
-        clear.interaction.on_activate = Some(match &handlers.clear {
-            Some(handler) => {
-                let handler = Arc::clone(handler);
-                Arc::new(move || handler())
-            }
-            None => Arc::new(|| {}),
+        clear.runtime_id = Some(select_part_id(&handlers.instance_scope, "clear"));
+        clear.interaction.on_activate = Some(if handlers.on_transition.is_some() {
+            let spec = spec.clone();
+            let handlers = handlers.clone();
+            Arc::new(move || emit_select(&spec, &handlers, SelectEvent::Clear))
+        } else {
+            Arc::new(|| {})
         });
 
         el = el.child(clear);
@@ -351,6 +403,7 @@ fn build_panel(
         bottom: None,
     };
     panel.a11y.role = Some(NodeRole::ListBox);
+    panel.runtime_id = Some(select_part_id(&handlers.instance_scope, "listbox"));
 
     if spec.shows_search_input() {
         let query = spec.search_query.as_deref().unwrap_or("");
@@ -380,25 +433,23 @@ fn build_panel(
         q.style.text_size = Some(font_size);
         q.style.descriptor.layout.width = LayoutSizing::Grow;
         search_row = search_row.child(q);
+        search_row.runtime_id = Some(select_part_id(&handlers.instance_scope, "search"));
 
         panel = panel.child(search_row);
     }
 
     let current_value = spec.current_value();
-    let query_lower = spec.search_query.as_deref().map(|q| q.to_lowercase());
-
+    let visible_values: Vec<String> = select_visible_options(&spec.select_context())
+        .into_iter()
+        .map(|option| option.value.clone())
+        .collect();
     let filtered: Vec<&poodle_specs::ChoiceOption> = spec
         .options
         .iter()
-        .filter(|opt| {
-            if let Some(ref q) = query_lower {
-                if !q.is_empty() {
-                    return opt.label.to_lowercase().contains(q.as_str());
-                }
-            }
-            true
-        })
+        .filter(|opt| visible_values.iter().any(|value| value == &opt.value))
         .collect();
+    let accent = ctx.theme().resolve_color("color.accent.base");
+    let highlight_fill = with_alpha(accent, 0.14);
 
     if filtered.is_empty() {
         let mut empty = Node::text(&spec.empty_message);
@@ -445,6 +496,7 @@ fn build_panel(
                 let is_selected = current_value
                     .map(|v| v == opt.value.as_str())
                     .unwrap_or(false);
+                let is_highlighted = spec.highlighted_value.as_deref() == Some(opt.value.as_str());
 
                 let label_color = if opt.is_disabled {
                     text_secondary
@@ -461,8 +513,12 @@ fn build_panel(
                     s.descriptor.layout.spacing.padding.left = pad_x;
                     s.descriptor.layout.spacing.padding.right = pad_x;
                     s.descriptor.cursor = CursorHint::Pointer;
+                    if is_highlighted {
+                        s.descriptor.background = Some(highlight_fill);
+                    }
                 }
                 row.interaction.focusable = true;
+                row.runtime_id = Some(select_option_id(&handlers.instance_scope, &opt.value));
                 row.a11y.role = Some(NodeRole::ListBoxOption);
                 row.a11y.label = Some(opt.label.clone());
                 row.a11y.selected = Some(is_selected);
@@ -511,10 +567,19 @@ fn build_panel(
                     row.interaction.disabled = true;
                 }
 
-                if let (false, Some(handler)) = (opt.is_disabled, &handlers.change) {
-                    let handler = Arc::clone(handler);
+                if !opt.is_disabled && handlers.on_transition.is_some() {
+                    let spec = spec.clone();
+                    let handlers = handlers.clone();
                     let value = opt.value.clone();
-                    row.interaction.on_activate = Some(Arc::new(move || handler(&value)));
+                    row.interaction.on_activate = Some(Arc::new(move || {
+                        emit_select(
+                            &spec,
+                            &handlers,
+                            SelectEvent::CommitOption {
+                                value: value.clone(),
+                            },
+                        );
+                    }));
                 }
 
                 panel = panel.child(row);
@@ -560,7 +625,7 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = SelectSpec::new(fruit_options()).with_placeholder("Choose a fruit");
-        let node = select(&spec, &ctx, &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::new("test"));
         assert!(node.has_text("Choose a fruit"), "{:?}", node.texts());
         assert!(node.has_text("chevron-down"), "{:?}", node.texts());
         assert!(!node.has_text("Apple"), "options leaked when closed");
@@ -580,7 +645,7 @@ mod tests {
         let ctx = RenderContext::new(&theme);
         for (size, expected) in cases {
             let spec = SelectSpec::new(fruit_options()).with_size(size);
-            let node = select(&spec, &ctx, &SelectHandlers::default());
+            let node = select(&spec, &ctx, &SelectHandlers::new("test"));
             match node.style.descriptor.layout.height {
                 LayoutSizing::Fixed(h) => {
                     assert_eq!(h, expected, "height for {size:?}");
@@ -593,7 +658,7 @@ mod tests {
         let secondary =
             poodle_adapter::ThemeProvider::resolve_color(&theme, "color.text.secondary");
         let spec = SelectSpec::new(fruit_options()).with_placeholder("Choose a fruit");
-        let node = select(&spec, &ctx, &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::new("test"));
         let label = node
             .find(
                 &|n| matches!(&n.kind, poodle_node::NodeKind::Text { content } if content == "Choose a fruit"),
@@ -607,7 +672,7 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let spec = SelectSpec::new(fruit_options()).with_open(true);
-        let node = select(&spec, &ctx, &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::new("test"));
         assert!(node.has_text("Apple") && node.has_text("Banana") && node.has_text("Cherry"));
 
         let panel = node
@@ -626,10 +691,13 @@ mod tests {
         use std::sync::Mutex;
         let seen: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         let sink = Arc::clone(&seen);
-        let handlers = SelectHandlers {
-            change: Some(Arc::new(move |v: &str| sink.lock().unwrap().push(v.into()))),
-            ..Default::default()
-        };
+        let handlers = SelectHandlers::new("pick").on_transition(Arc::new(move |result| {
+            for effect in &result.effects {
+                if let SelectEffect::ValueChanged { value } = effect {
+                    sink.lock().unwrap().push(value.clone());
+                }
+            }
+        }));
         let spec = SelectSpec::new(fruit_options()).with_open(true);
         let theme = theme();
         let ctx = RenderContext::new(&theme);
@@ -646,10 +714,7 @@ mod tests {
 
     #[test]
     fn a_disabled_select_has_no_activation() {
-        let handlers = SelectHandlers {
-            toggle: Some(Arc::new(|| {})),
-            ..Default::default()
-        };
+        let handlers = SelectHandlers::new("disabled").on_transition(Arc::new(|_| {}));
         let spec = SelectSpec {
             is_disabled: true,
             ..SelectSpec::new(fruit_options())
@@ -669,7 +734,7 @@ mod tests {
             .with_searchable(true)
             .with_search_query("ban")
             .with_open(true);
-        let node = select(&spec, &ctx, &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::new("test"));
         assert!(node.has_text("Banana") && !node.has_text("Apple"));
 
         let spec = SelectSpec::new(fruit_options())
@@ -677,7 +742,7 @@ mod tests {
             .with_search_query("zzz")
             .with_empty_message("No matches")
             .with_open(true);
-        let node = select(&spec, &ctx, &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::new("test"));
         assert!(node.has_text("No matches"));
     }
 
@@ -687,7 +752,7 @@ mod tests {
         let ctx = RenderContext::new(&theme);
         // Web default `true` + open: the panel carries no refusal marker.
         let spec = SelectSpec::new(fruit_options()).with_open(true);
-        let node = select(&spec, &ctx, &SelectHandlers::default());
+        let node = select(&spec, &ctx, &SelectHandlers::new("test"));
         let panel = node
             .find(&|n| n.a11y.role == Some(poodle_node::NodeRole::ListBox))
             .expect("open panel");
@@ -696,10 +761,59 @@ mod tests {
         // Refusal: the open panel carries the inert activation marker a host
         // keys outside-dismissal on.
         let refusing = spec.with_dismiss_on_outside_interact(false);
-        let node = select(&refusing, &ctx, &SelectHandlers::default());
+        let node = select(&refusing, &ctx, &SelectHandlers::new("test"));
         let panel = node
             .find(&|n| n.a11y.role == Some(poodle_node::NodeRole::ListBox))
             .expect("open panel");
         assert!(panel.interaction.on_activate.is_some());
+    }
+
+    #[test]
+    fn instance_scopes_do_not_collide() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = SelectSpec::new(fruit_options())
+            .with_open(true)
+            .with_clearable(true)
+            .with_value("apple");
+        let left = select(&spec, &ctx, &SelectHandlers::new("one"));
+        let right = select(&spec, &ctx, &SelectHandlers::new("two"));
+        assert_eq!(
+            left.find(&|n| n.runtime_id.as_deref() == Some("select:one:trigger"))
+                .and_then(|n| n.runtime_id.clone()),
+            Some("select:one:trigger".to_string())
+        );
+        assert!(right
+            .find(&|n| n.runtime_id.as_deref() == Some("select:two:option:banana"))
+            .is_some());
+        assert!(left
+            .find(&|n| n.runtime_id.as_deref() == Some("select:two:trigger"))
+            .is_none());
+    }
+
+    #[test]
+    fn highlighted_option_is_projected() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = SelectSpec::new(fruit_options())
+            .with_open(true)
+            .with_highlighted_value("banana");
+        let node = select(&spec, &ctx, &SelectHandlers::new("hl"));
+        let banana = node
+            .find(&|n| n.runtime_id.as_deref() == Some("select:hl:option:banana"))
+            .expect("banana option");
+        assert!(banana.style.descriptor.background.is_some());
+    }
+
+    #[test]
+    fn freeform_alone_does_not_show_search() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = SelectSpec::new(fruit_options())
+            .with_freeform(true)
+            .with_open(true);
+        let node = select(&spec, &ctx, &SelectHandlers::new("ff"));
+        assert!(!node.has_text("Search…"));
+        assert!(!spec.shows_search_input());
     }
 }

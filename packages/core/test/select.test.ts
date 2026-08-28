@@ -5,7 +5,12 @@ import {
   filterSelectOptions,
   flattenSelectOptions,
   isSelectOptionDisabled,
+  selectCommittedQuery,
+  selectFreeformEnabled,
   selectOpenHighlightIndex,
+  selectOpenHighlightValue,
+  selectTransition,
+  type SelectContext,
 } from "../src/select.ts";
 
 const flat = [
@@ -53,5 +58,65 @@ describe("selectOpenHighlightIndex", () => {
     expect(selectOpenHighlightIndex(filtered, "c")).toBe(1);
     expect(selectOpenHighlightIndex(filtered, "zz")).toBe(0);
     expect(selectOpenHighlightIndex(filtered, null)).toBe(0);
+  });
+});
+
+function ctx(overrides: Partial<SelectContext> = {}): SelectContext {
+  return {
+    value: "",
+    open: false,
+    query: "",
+    highlightedValue: null,
+    options: [
+      { value: "a", label: "Apple", disabled: false },
+      { value: "b", label: "Banana", disabled: true },
+      { value: "c", label: "Cherry", disabled: false },
+    ],
+    clearValue: "",
+    searchable: false,
+    freeform: false,
+    disabled: false,
+    ...overrides,
+  };
+}
+
+describe("select helpers", () => {
+  test("freeform is effective only with searchable", () => {
+    expect(selectFreeformEnabled(ctx({ freeform: true }))).toBe(false);
+    expect(selectFreeformEnabled(ctx({ searchable: true, freeform: true }))).toBe(true);
+  });
+
+  test("open highlight uses the selected enabled option, else the first enabled, else null", () => {
+    expect(selectOpenHighlightValue(ctx({ value: "c" }))).toBe("c");
+    expect(selectOpenHighlightValue(ctx())).toBe("a");
+    expect(
+      selectOpenHighlightValue(
+        ctx({
+          options: [{ value: "b", label: "Banana", disabled: true }],
+        }),
+      ),
+    ).toBeNull();
+  });
+
+  test("committed query is the selected label, else empty", () => {
+    expect(selectCommittedQuery(ctx({ value: "c" }))).toBe("Cherry");
+    expect(selectCommittedQuery(ctx())).toBe("");
+  });
+});
+
+describe("selectTransition", () => {
+  test("query edits do not report value changes", () => {
+    const result = selectTransition(ctx({ searchable: true, freeform: true }), {
+      type: "QUERY",
+      query: "kiw",
+    });
+
+    expect(result.context.value).toBe("");
+    expect(result.effects.map((effect) => effect.type)).toEqual(["openChanged", "queryChanged"]);
+  });
+
+  test("Home and End while closed are inert", () => {
+    expect(selectTransition(ctx(), { type: "HIGHLIGHT_FIRST" }).effects).toEqual([]);
+    expect(selectTransition(ctx(), { type: "HIGHLIGHT_LAST" }).effects).toEqual([]);
   });
 });

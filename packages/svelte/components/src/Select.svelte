@@ -6,7 +6,10 @@
     isSelectOptionDisabled,
     layerContains,
     registerDismissLayer,
-    selectOpenHighlightIndex,
+    selectTransition,
+    type SelectContext,
+    type SelectEvent,
+    type SelectResult,
   } from "@inflatable-cookie/poodle-core";
   import type { Snippet } from "svelte";
 
@@ -103,7 +106,8 @@
   let inputElement: HTMLInputElement | null = $state(null);
   let open = $state(false);
   let query = $state("");
-  let highlightIndex = $state(0);
+  let highlightedValue = $state<string | null>(null);
+  let skipBlurCommit = $state(false);
   // Reported by the anchored action once the listbox is measured; the classes
   // below only need the side and the alignment, not the full placement.
   let resolvedPlacement = $state<OverlayPlacement>("bottom-start");
@@ -144,16 +148,19 @@
   const selectedOption = $derived(flatOptions.find((entry) => entry.value === currentValue) ?? null);
   const filteredOptions = $derived(
     searchable && query.length > 0
-      ? flatOptions.filter((entry) => !isOptionDisabled(entry) && entry.label.toLowerCase().includes(query.toLowerCase()))
-      : flatOptions.filter((entry) => !isOptionDisabled(entry))
+      ? flatOptions.filter((entry) => entry.label.toLowerCase().includes(query.toLowerCase()))
+      : flatOptions
   );
   const filteredGroups = $derived(
     searchable && query.length > 0 ? filterGroups(normalizedOptions, query) : normalizedOptions
   );
   const visibleGroups = $derived(isGrouped ? (filteredGroups as SelectOptionGroup[]) : []);
+  const highlightedOptionIndex = $derived(
+    highlightedValue === null ? -1 : filteredOptions.findIndex((entry) => entry.value === highlightedValue)
+  );
   const highlightedOptionId = $derived(
-    open && filteredOptions.length > 0 && highlightIndex >= 0
-      ? `${listboxId}-option-${highlightIndex}`
+    open && highlightedOptionIndex >= 0
+      ? `${listboxId}-option-${highlightedOptionIndex}`
       : undefined
   );
 
@@ -196,106 +203,162 @@
 
   // ── Native mode handlers ─────────────────────────────────────
 
+  function machineContext(): SelectContext {
+    return {
+      value: currentValue,
+      open,
+      query,
+      highlightedValue,
+      options: flatOptions.map((option) => ({
+        value: option.value,
+        label: option.label,
+        disabled: isOptionDisabled(option),
+      })),
+      clearValue,
+      searchable,
+      freeform,
+      disabled,
+    };
+  }
+
+  function applyResult(result: SelectResult): SelectContext {
+    open = result.context.open;
+    query = result.context.query;
+    highlightedValue = result.context.highlightedValue;
+
+    for (const effect of result.effects) {
+      if (effect.type === "openChanged") {
+        onOpenChange?.(effect.open);
+      } else if (effect.type === "queryChanged") {
+        if (useCustom && searchable) {
+          onQueryChange?.(effect.query);
+        }
+      } else if (effect.type === "valueChanged") {
+        if (value !== undefined) {
+          value = effect.value;
+        } else {
+          uncontrolledValue = effect.value;
+        }
+        onValueChange?.(effect.value);
+      }
+    }
+
+    return result.context;
+  }
+
+  function dispatch(event: SelectEvent, from = machineContext()): SelectContext {
+    return applyResult(selectTransition(from, event));
+  }
+
   function handleNativeChange(event: Event): void {
     const nextValue = (event.currentTarget as HTMLSelectElement).value;
-    commitValue(nextValue);
+    const option = flatOptions.find((entry) => entry.value === nextValue);
+
+    if (option) {
+      dispatch({ type: "COMMIT_OPTION", value: nextValue });
+    } else if (nextValue === clearValue) {
+      dispatch({ type: "CLEAR" });
+    }
   }
 
   // ── Custom mode handlers ─────────────────────────────────────
 
-  function commitValue(nextValue: string): void {
-    if (value !== undefined) {
-      value = nextValue;
-    } else {
-      uncontrolledValue = nextValue;
-    }
-    onValueChange?.(nextValue);
-  }
-
-  function setOpen(nextOpen: boolean): void {
-    open = nextOpen;
-    onOpenChange?.(nextOpen);
-
-    if (nextOpen) {
-      highlightIndex = selectOpenHighlightIndex(filteredOptions, selectedOption?.value ?? null);
-    }
-  }
-
   function selectOption(option: SelectOption): void {
-    if (isOptionDisabled(option)) return;
-    query = option.label;
-    commitValue(option.value);
-    setOpen(false);
+    dispatch({ type: "COMMIT_OPTION", value: option.value });
   }
 
   function handleTriggerClick(): void {
-    if (disabled) return;
-    setOpen(!open);
+    dispatch({ type: "TOGGLE" });
   }
 
   function handleSearchableIndicatorClick(event: MouseEvent): void {
     event.stopPropagation();
-    if (disabled) return;
-    setOpen(!open);
+    dispatch({ type: "TOGGLE" });
     inputElement?.focus();
   }
 
   function handleInputInput(event: Event): void {
-    query = (event.currentTarget as HTMLInputElement).value;
-    highlightIndex = 0;
-    if (!open) setOpen(true);
-    onQueryChange?.(query);
+    const nextQuery = (event.currentTarget as HTMLInputElement).value;
+    dispatch({ type: "QUERY", query: nextQuery });
 
     if (isLazy) {
-      void startLoad(query);
-    }
-
-    if (freeform) {
-      commitValue(query);
+      void startLoad(nextQuery);
     }
   }
 
   function handleKeydown(event: KeyboardEvent): void {
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      if (!open) { setOpen(true); return; }
-      highlightIndex = Math.min(highlightIndex + 1, filteredOptions.length - 1);
+      dispatch({ type: "HIGHLIGHT_NEXT" });
     }
 
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      if (!open) { setOpen(true); return; }
-      highlightIndex = Math.max(highlightIndex - 1, 0);
+      dispatch({ type: "HIGHLIGHT_PREV" });
     }
 
-    if (event.key === "Enter" && open && filteredOptions[highlightIndex]) {
+    if (event.key === "Enter" && open) {
       event.preventDefault();
-      selectOption(filteredOptions[highlightIndex]);
+      dispatch({ type: "COMMIT_HIGHLIGHTED" });
     }
 
     if (event.key === "Escape" && open) {
       event.preventDefault();
-      setOpen(false);
+      dispatch({ type: "CLOSE" });
+    }
+
+    if (event.key === "Tab" && open) {
+      skipBlurCommit = true;
+      dispatch({ type: "CLOSE" });
     }
 
     if (event.key === "Home" && open) {
       event.preventDefault();
-      highlightIndex = 0;
+      dispatch({ type: "HIGHLIGHT_FIRST" });
     }
 
     if (event.key === "End" && open) {
       event.preventDefault();
-      highlightIndex = Math.max(filteredOptions.length - 1, 0);
+      dispatch({ type: "HIGHLIGHT_LAST" });
     }
   }
 
   function handleClear(event: MouseEvent): void {
     event.stopPropagation();
-    query = "";
-    commitValue(clearValue);
+    dispatch({ type: "CLEAR" });
     if (isLazy) {
       void startLoad("");
     }
+  }
+
+  function handleControlFocusOut(event: FocusEvent): void {
+    if (
+      event.relatedTarget instanceof Node &&
+      layerContains(event.relatedTarget, rootElement, listboxElement)
+    ) {
+      return;
+    }
+
+    if (skipBlurCommit) {
+      skipBlurCommit = false;
+      if (open) {
+        dispatch({ type: "CLOSE" });
+      }
+      return;
+    }
+
+    const afterCommit = dispatch({ type: "COMMIT_FREEFORM" });
+    if (afterCommit.open) {
+      dispatch({ type: "CLOSE" }, afterCommit);
+    }
+  }
+
+  function handleOptionPointerDown(event: MouseEvent): void {
+    event.preventDefault();
+  }
+
+  function handleOptionEnter(option: SelectOption): void {
+    dispatch({ type: "HIGHLIGHT", value: option.value });
   }
 
   $effect(() => {
@@ -308,12 +371,6 @@
   $effect(() => {
     if (!open && !freeform) {
       query = hasSelection ? (selectedOption?.label ?? "") : "";
-    }
-  });
-
-  $effect(() => {
-    if (filteredOptions.length > 0 && highlightIndex >= filteredOptions.length) {
-      highlightIndex = 0;
     }
   });
 
@@ -342,7 +399,10 @@
       // The listbox is portalled out of the root, so both are "inside".
       contains: (target) => layerContains(target, rootElement, listboxElement),
       dismissOnOutsideInteract,
-      onDismiss: () => setOpen(false),
+      onDismiss: () => {
+        skipBlurCommit = true;
+        dispatch({ type: "CLOSE" });
+      },
       // Host-aware so a parent composite that registers around this Select
       // (child effects can run first) still becomes the parent layer.
       hostElement: rootElement,
@@ -363,6 +423,7 @@
     data-validation-state={validationState}
     data-has-clear={showClear}
     aria-invalid={validationState === "invalid" ? "true" : undefined}
+    onfocusout={handleControlFocusOut}
   >
     {#if searchable}
       <!-- Searchable: text input trigger -->
@@ -386,7 +447,7 @@
           aria-autocomplete="list"
           aria-activedescendant={highlightedOptionId}
           aria-describedby={describedBy ?? undefined}
-          onfocus={() => { if (!open) setOpen(true); }}
+          onfocus={() => { if (!open) dispatch({ type: "OPEN" }); }}
           oninput={handleInputInput}
           onkeydown={handleKeydown}
         />
@@ -503,16 +564,17 @@
                   data-value={option.value}
                   role="option"
                   aria-selected={currentValue === option.value ? "true" : "false"}
-                  data-highlighted={highlightIndex === flatIdx}
+                  data-highlighted={highlightedValue === option.value}
                   disabled={isOptionDisabled(option)}
-                    onmouseenter={() => (highlightIndex = flatIdx)}
+                    onmousedown={handleOptionPointerDown}
+                    onmouseenter={() => handleOptionEnter(option)}
                     onclick={() => selectOption(option)}
                   >
                     {#if optionSnippet}
                       <span class="poodle-select__option-content">
                         {@render optionSnippet({
                           option,
-                          highlighted: highlightIndex === flatIdx,
+                          highlighted: highlightedValue === option.value,
                           selected: currentValue === option.value,
                           index: flatIdx,
                         })}
@@ -551,16 +613,17 @@
                   data-value={option.value}
                   role="option"
                   aria-selected={currentValue === option.value ? "true" : "false"}
-                  data-highlighted={highlightIndex === flatIdx}
+                  data-highlighted={highlightedValue === option.value}
                   disabled={isOptionDisabled(option)}
-                    onmouseenter={() => (highlightIndex = flatIdx)}
+                    onmousedown={handleOptionPointerDown}
+                    onmouseenter={() => handleOptionEnter(option)}
                     onclick={() => selectOption(option)}
                   >
                     {#if optionSnippet}
                       <span class="poodle-select__option-content">
                         {@render optionSnippet({
                           option,
-                          highlighted: highlightIndex === flatIdx,
+                          highlighted: highlightedValue === option.value,
                           selected: currentValue === option.value,
                           index: flatIdx,
                         })}
@@ -592,16 +655,17 @@
               data-value={option.value}
               role="option"
               aria-selected={currentValue === option.value ? "true" : "false"}
-              data-highlighted={highlightIndex === index}
+              data-highlighted={highlightedValue === option.value}
               disabled={isOptionDisabled(option)}
-              onmouseenter={() => (highlightIndex = index)}
+              onmousedown={handleOptionPointerDown}
+              onmouseenter={() => handleOptionEnter(option)}
               onclick={() => selectOption(option)}
             >
               {#if optionSnippet}
                 <span class="poodle-select__option-content">
                   {@render optionSnippet({
                     option,
-                    highlighted: highlightIndex === index,
+                    highlighted: highlightedValue === option.value,
                     selected: currentValue === option.value,
                     index,
                   })}

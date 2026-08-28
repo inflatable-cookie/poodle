@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.018 ready; g16.019 planned
+Status: active — g16.018 complete; g16.019 planned
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -48,7 +48,7 @@ stay maintained; backend admission is not part of the first card.
 15. [015 — CollapseToggle disclosure and mounted parity](015-collapse-toggle-disclosure-and-mounted-parity.md) — complete; merged in PR #90
 16. [016 — Pagination navigation, loading, and mounted parity](016-pagination-navigation-loading-and-mounted-parity.md) — complete; merged in PR #91
 17. [017 — Rating nullable, fractional, and mounted parity](017-rating-nullable-fractional-and-mounted-parity.md) — complete; merged in PR #92
-18. [018 — Select semantic machine and interface convergence](018-select-semantic-machine-and-interface-convergence.md) — ready
+18. [018 — Select semantic machine and interface convergence](018-select-semantic-machine-and-interface-convergence.md) — complete
 19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — planned; blocked on merged g16.018
 
 The longer generation direction stays evidence-led rather than becoming a
@@ -220,6 +220,5 @@ against real native text entry, deferred-overlay input, and focus behavior.
 
 ## Next Task
 
-Dispatch ready `g16.018`. Do not start planned `g16.019` until `g16.018` is
-merged and the orchestrator recompiles its exact mounted-overlay scope against
-the landed Select API.
+Do not start planned `g16.019` until `g16.018` is merged and the orchestrator
+recompiles its exact mounted-overlay scope against the landed Select API.

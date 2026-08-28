@@ -13,6 +13,7 @@ import { disclosureTransition } from "../src/disclosure.ts";
 import { hoverTransition } from "../src/hover.ts";
 import { menuTransition } from "../src/menu.ts";
 import { modalTransition } from "../src/modal.ts";
+import { selectTransition } from "../src/select.ts";
 import { singleSelectTransition } from "../src/single-select.ts";
 import { sliderTransition } from "../src/slider.ts";
 import { switchTransition } from "../src/switch.ts";
@@ -56,6 +57,12 @@ function runMachine(machine: string, vector: VectorCase): void {
     }
     case "singleSelect": {
       const result = singleSelectTransition(context, event);
+      checkContextSubset(result.context as never, vector.expect.context);
+      expect(result.effects).toEqual(vector.expect.effects as never);
+      return;
+    }
+    case "select": {
+      const result = selectTransition(context, event);
       checkContextSubset(result.context as never, vector.expect.context);
       expect(result.effects).toEqual(vector.expect.effects as never);
       return;

@@ -285,6 +285,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         ])
                         .with_placeholder("Choose a template"),
                         theme,
+                        "dialog-form-template",
                     )
                     .with_id("dialog-form-template")
                     .into_compat_node(),
@@ -358,6 +359,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_placeholder("Choose a model")
                         .with_open(true),
                         theme,
+                        "dialog-overlay-model",
                     )
                     .with_id("dialog-overlay-model")
                     .into_compat_node(),

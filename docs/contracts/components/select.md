@@ -1,7 +1,7 @@
 # Select
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-28
 
 ## 1. Purpose
 
@@ -107,7 +107,7 @@ Updated: 2026-07-10
 | `clearable` | `boolean` | `false` | no | keeps the placeholder option selectable so callers can reset to `defaultValue` |
 | `valueLabel` | `string \| null` | `null` | no | temporary label for the current selection before lazy options load |
 | `searchable` | `boolean` | `false` | no | renders custom dropdown with search/filter text input instead of native select |
-| `freeform` | `boolean` | `false` | no | with `searchable`, query text becomes the value if no option is selected |
+| `freeform` | `boolean` | `false` | no | with `searchable=true`, query text becomes the value on explicit Enter or control-blur commit when no option is highlighted; `freeform` alone does not enable search or custom mode |
 | `native` | `boolean \| undefined` | `undefined` | no | explicit mode override: `true` forces native select, `false` forces custom dropdown, `undefined` uses auto-detection |
 | `emptyMessage` | `string` | `"No matches"` | no | text shown in custom dropdown when no options match the search query |
 | `loadOptions` | `SelectLoadOptions \| null` | `null` | no | unified async option loader; returns flat or grouped options |
@@ -115,8 +115,8 @@ Updated: 2026-07-10
 | `variant` | `"default" \| "ghost"` | `"default"` | no | visual variant; `"ghost"` strips border, background, box-shadow, padding, and min-height, but keeps the chevron indicator |
 | `menuMinWidth` | `string \| null` | `null` | no | minimum width for the dropdown listbox (e.g. `"12rem"`); when set, listbox uses `width: max-content` instead of matching trigger width, and viewport-aware horizontal anchor flipping occurs (right-anchors if menu would overflow right edge) |
 | `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: clicking outside the trigger and listbox closes the dropdown |
-| `onValueChange` | `((value: string) => void) \| undefined` | `undefined` | no | callback fired when the selected value changes |
-| `onQueryChange` | `((query: string) => void) \| undefined` | `undefined` | no | callback fired when the searchable query changes |
+| `onValueChange` | `((value: string) => void) \| undefined` | `undefined` | no | callback fired when the committed value changes: option selection, clear, or explicit freeform Enter/control-blur commit |
+| `onQueryChange` | `((query: string) => void) \| undefined` | `undefined` | no | callback fired when the searchable query changes; not fired for the internal non-freeform close reset |
 | `onOpenChange` | `((open: boolean) => void) \| undefined` | `undefined` | no | callback fired when the custom dropdown opens or closes |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
@@ -175,40 +175,76 @@ The component automatically determines whether to render a native `<select>` or 
 |-------|---------|-----------------|
 | value selected | user picks an option | `value` updates and `onValueChange` fires with selected option value |
 | placeholder shown | no value and placeholder set | placeholder option displayed, disabled in dropdown |
-| query active (custom) | user types in searchable input | options filtered by query, `onQueryChange` fires |
-| highlight tracked (custom) | ArrowDown/ArrowUp or hover | one option visually highlighted via `data-highlighted` |
-| value committed (custom) | Enter on highlighted option or click | `value` updates, dropdown closes |
-| dismissed (custom) | Escape or click outside | dropdown closes without changing value |
-| freeform commit (custom) | blur or Enter with no highlight, `freeform=true` | query text becomes the value |
+| query active (custom) | user types in searchable input | options filtered by query, `onQueryChange` fires; `onValueChange` does not fire |
+| highlight tracked (custom) | ArrowDown/ArrowUp or hover | one option visually highlighted via `data-highlighted`, keyed by option value |
+| value committed (custom) | Enter on highlighted option or click | `value` updates, query copies the option label, dropdown closes |
+| dismissed (custom) | Escape, Tab, or click outside | dropdown closes without changing value |
+| freeform commit (custom) | Enter or control-blur with no highlight, `searchable` and `freeform` | query text becomes the value; control-blur means focus left the whole Select including its portalled listbox |
 
 ### Behavior Machine
 
-Behavior classification: machine-backed via core machinery
+Behavior classification: machine-backed
 
-Select composes `@inflatable-cookie/poodle-core` machinery; lazy loading, query state,
-freeform mode, and native-mode delegation stay adapter-side.
+Select's committed value, open state, draft query, and highlighted option
+transition through `selectTransition` in `@inflatable-cookie/poodle-core` and
+the `poodle-headless` Select module. The two implementations are hand-ported
+and pinned by shared vectors. Adapters own async loading, snippets/render
+props, placement measurement, portals, DOM focus, and native focus requests.
 
-- Option lists: `flattenSelectOptions` (grouped or flat),
-  `filterSelectOptions` (enabled + case-insensitive label match),
-  `filterSelectGroups` (per-group filter, empty groups dropped),
-  `isSelectOptionDisabled` (honors `disabled` and `isDisabled`)
-- Open placement: `selectMenuPlacement` — flips above when under 280px
-  remain below the trigger; right-aligns a fixed min-width menu that would
-  overflow the right edge but fits against the trigger's right edge
-- Open highlight: `selectOpenHighlightIndex` — selected option when
-  present, else first
-- Dismissal: escape + outside interaction via the dismissable-layer stack
-  (innermost-first); the outside-interaction path is guarded by
-  `dismissOnOutsideInteract` (default `true`)
-- Keyboard highlight movement is clamp-based (no wrap) and operates on the
-  already-enabled filtered list — adapter-side by current behavior
+Transition state:
+
+- `value` — committed string; the effective clear value (`defaultValue` or
+  `""`) when nothing is selected
+- `open`
+- `query` — draft search text
+- `highlightedValue` — stable option value, or `null`
+
+Configuration carried with that state: the flat option list with disabled
+flags, `clearValue`, `searchable`, `freeform`, and whole-control `disabled`.
+`freeform` is effective only with `searchable=true`.
+
+Events: `OPEN`, `CLOSE`, `TOGGLE`, `QUERY`, `HIGHLIGHT`, `HIGHLIGHT_PREV`,
+`HIGHLIGHT_NEXT`, `HIGHLIGHT_FIRST`, `HIGHLIGHT_LAST`, `COMMIT_HIGHLIGHTED`,
+`COMMIT_OPTION`, `COMMIT_FREEFORM`, `CLEAR`.
+
+The result is the complete next state plus ordered effects:
+`openChanged(boolean)`, `queryChanged(string)`, `valueChanged(string)`.
+One input produces one atomic result. Adapters apply the next state, then
+dispatch existing public callbacks from those effects.
+
+Rules:
+
+- a disabled Select is inert
+- opening highlights the selected enabled visible option, otherwise the
+  first enabled visible option; no enabled result means no highlight
+- query edit opens the list, filters case-insensitively, and highlights the
+  first enabled match; it never reports `onValueChange`
+- movement skips disabled options, clamps at the ends, and never wraps
+- Arrow Up/Down while closed opens first and does not also move twice
+- option commit reports a changed value, copies its label into query, and
+  closes
+- Enter with a highlighted option commits that option
+- explicit freeform commit is accepted only when searchable + freeform, no
+  option is highlighted, and the query differs from the committed value
+- Escape, Tab, and outside close without changing value
+- non-freeform close restores query to the committed option label or empty;
+  that internal reset is not a user `onQueryChange` effect
+- clear reports the effective clear value, resets query, and does not emit
+  an open change
+- repeated open/value transitions with no semantic change emit no effects
+
+Option-list helpers remain available: `flattenSelectOptions`,
+`filterSelectOptions`, `filterSelectGroups`, `isSelectOptionDisabled`.
+Open placement is adapter-owned through the anchored overlay. Dismissal
+uses the dismissable-layer stack (innermost-first), guarded by
+`dismissOnOutsideInteract` (default `true`).
 
 ## 5. Callbacks
 
 | Callback | When It Fires | Payload | Notes |
 |----------|---------------|---------|-------|
-| `onValueChange` | user selects a different option | `value: string` | fires on native change or custom option commit |
-| `onQueryChange` | user types in searchable input | `query: string` | custom mode with `searchable` only; fires on every input change |
+| `onValueChange` | committed value changes | `value: string` | option selection, clear, or explicit freeform Enter/control-blur commit; not freeform keystrokes |
+| `onQueryChange` | user types in searchable input | `query: string` | custom mode with `searchable` only; fires on every input change; not the internal non-freeform close reset |
 | `onOpenChange` | dropdown opens or closes | `open: boolean` | custom mode only; fires on open and close transitions |
 
 ## 6. Accessibility
@@ -253,8 +289,8 @@ freeform mode, and native-mode delegation stay adapter-side.
 | `Escape` | closes dropdown without selecting |
 | `Home` | highlights first option |
 | `End` | highlights last option |
-| `Tab` | closes dropdown if open, exits control |
-| typing (searchable) | filters options, opens dropdown if closed |
+| `Tab` | closes dropdown if open without changing value, then exits control |
+| typing (searchable) | filters options, opens dropdown if closed, reports `onQueryChange` only |
 
 ### Focus And Announcement
 
@@ -448,7 +484,7 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 - Module-level `nextSelectId` counter generates unique ids for ARIA relationships (`aria-controls`, `aria-activedescendant`)
 - `aria-activedescendant` on the input/trigger tracks the currently highlighted option by referencing its stable id (`{listboxId}-option-{index}`)
 - Searchable mode: client-side filtering matches query against option labels (case-insensitive substring)
-- Freeform mode: when `freeform=true` and `searchable=true`, the query text becomes the selected value on commit if no option is highlighted
+- Freeform mode: when `freeform=true` and `searchable=true`, the query text becomes the selected value on Enter or control-blur if no option is highlighted; typing reports `onQueryChange` only
 - `data-variant` attribute on root reflects the `variant` prop; ghost variant strips all field chrome (border, background, shadow, padding, min-height) but keeps the chevron indicator on non-searchable triggers
 - `menuMinWidth` prop sets an inline `min-width` style on the listbox and switches it to `width: max-content` (class `select__listbox--auto-width`); on open, viewport-aware horizontal anchor flipping checks whether left-anchoring would overflow the right edge and applies `select__listbox--align-end` if so
 - Three named snippet props available in custom mode:
@@ -463,6 +499,8 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 
 - expected crate/module surface: `poodle_gpui::primitives::select`
 - GPUI must model the select as a trigger that opens a platform-appropriate option list
+- Host-owned `SelectSpec` carries value, open, query, and highlighted option; the renderer does not hide those
+- Native handlers require a stable `instance_scope` and one optional transition-result callback
 - Must expose selected value, expanded state, and option list through native accessibility tree
 - Recipe fallback chains use the component override when set and otherwise use
   the semantic-token default.
@@ -470,10 +508,12 @@ Applied when viewport-aware horizontal flipping determines the menu would overfl
 
 ## 10a. Jetstream Notes
 
-- `Select::from_spec(spec, theme).on_toggle(...).on_clear(...)`.
-- The clear pill takes a handler of its own, inert when unwired, so clearing
-  never also opens the panel it was clearing.
-- `on_change` carries the chosen option's value.
+- `SelectHandlers::new(instance_scope).on_transition(...)`.
+- Trigger, clear, and option activation run through `select_transition` and
+  report one atomic result (`openChanged` / `queryChanged` / `valueChanged`).
+- The clear pill is inert when unwired, so clearing never also opens the
+  panel it was clearing.
+- There is no legacy toggle/change/clear callback surface.
 
 ## 11. Parity Checklist
 

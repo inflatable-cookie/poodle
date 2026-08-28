@@ -34,15 +34,33 @@ pub fn time_zone_select(
     // (searchable always on, timezone empty message, mapped option list,
     // placeholder + value + size/density forwarded) and delegate.
     let select_spec = spec.to_select_spec();
-    let mut root = select(
-        &select_spec,
-        ctx,
-        &SelectHandlers {
-            toggle: handlers.on_toggle,
-            change: handlers.on_change,
-            clear: None,
-        },
+    let toggle = handlers.on_toggle;
+    let change = handlers.on_change;
+    let mut select_handlers = SelectHandlers::new(
+        spec.id
+            .clone()
+            .unwrap_or_else(|| "time-zone-select".to_string()),
     );
+    if toggle.is_some() || change.is_some() {
+        select_handlers = select_handlers.on_transition(Arc::new(move |result| {
+            for effect in &result.effects {
+                match effect {
+                    crate::SelectEffect::OpenChanged { .. } => {
+                        if let Some(handler) = &toggle {
+                            handler();
+                        }
+                    }
+                    crate::SelectEffect::ValueChanged { value } => {
+                        if let Some(handler) = &change {
+                            handler(value);
+                        }
+                    }
+                    crate::SelectEffect::QueryChanged { .. } => {}
+                }
+            }
+        }));
+    }
+    let mut root = select(&select_spec, ctx, &select_handlers);
 
     // The standalone GPUI tier predates the generic Select's translucent
     // trigger recipe. Preserve its public TimeZoneSelect treatment while

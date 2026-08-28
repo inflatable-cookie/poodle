@@ -597,8 +597,20 @@ export {
   filterSelectOptions,
   filterSelectGroups,
   selectOpenHighlightIndex,
+  selectFreeformEnabled,
+  selectMatchesQuery,
+  selectVisibleOptions,
+  selectEnabledVisibleValues,
+  selectCommittedQuery,
+  selectOpenHighlightValue,
+  selectTransition,
   type SelectOptionLike,
   type SelectGroupLike,
+  type SelectOptionState,
+  type SelectContext,
+  type SelectEvent,
+  type SelectEffect,
+  type SelectResult,
 } from "./select";
 
 export {

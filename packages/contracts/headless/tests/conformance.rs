@@ -12,6 +12,10 @@ use poodle_headless::disclosure::*;
 use poodle_headless::hover::*;
 use poodle_headless::menu::*;
 use poodle_headless::modal::*;
+use poodle_headless::select::{
+    select_transition, SelectContext as SelectMachineContext, SelectEffect as SelectMachineEffect,
+    SelectEvent as SelectMachineEvent, SelectOptionState,
+};
 use poodle_headless::single_select::*;
 use poodle_headless::slider::*;
 use poodle_headless::switch::*;
@@ -612,6 +616,92 @@ fn tabs_conformance() {
             effects,
             None,
             Some(json!({ "value": next.value, "focusIndex": next.focus_index })),
+        );
+    }
+}
+
+fn select_options_from(value: &Value) -> Vec<SelectOptionState> {
+    value["options"]
+        .as_array()
+        .map(|entries| {
+            entries
+                .iter()
+                .map(|entry| SelectOptionState {
+                    value: s(entry, "value").to_string(),
+                    label: s(entry, "label").to_string(),
+                    disabled: b(entry, "disabled"),
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+#[test]
+fn select_conformance() {
+    for case in vectors()["select"].as_array().unwrap() {
+        let ctx = &case["context"];
+        let context = SelectMachineContext {
+            value: s(ctx, "value").to_string(),
+            open: b(ctx, "open"),
+            query: s(ctx, "query").to_string(),
+            highlighted_value: opt_string(ctx, "highlightedValue"),
+            options: select_options_from(ctx),
+            clear_value: s(ctx, "clearValue").to_string(),
+            searchable: b(ctx, "searchable"),
+            freeform: b(ctx, "freeform"),
+            disabled: b(ctx, "disabled"),
+        };
+        let event_value = &case["event"];
+        let event = match s(event_value, "type") {
+            "OPEN" => SelectMachineEvent::Open,
+            "CLOSE" => SelectMachineEvent::Close,
+            "TOGGLE" => SelectMachineEvent::Toggle,
+            "QUERY" => SelectMachineEvent::Query {
+                query: s(event_value, "query").to_string(),
+            },
+            "HIGHLIGHT" => SelectMachineEvent::Highlight {
+                value: s(event_value, "value").to_string(),
+            },
+            "HIGHLIGHT_PREV" => SelectMachineEvent::HighlightPrev,
+            "HIGHLIGHT_NEXT" => SelectMachineEvent::HighlightNext,
+            "HIGHLIGHT_FIRST" => SelectMachineEvent::HighlightFirst,
+            "HIGHLIGHT_LAST" => SelectMachineEvent::HighlightLast,
+            "COMMIT_HIGHLIGHTED" => SelectMachineEvent::CommitHighlighted,
+            "COMMIT_OPTION" => SelectMachineEvent::CommitOption {
+                value: s(event_value, "value").to_string(),
+            },
+            "COMMIT_FREEFORM" => SelectMachineEvent::CommitFreeform,
+            "CLEAR" => SelectMachineEvent::Clear,
+            other => panic!("unknown select event {other}"),
+        };
+
+        let (next, effects) = select_transition(context, event);
+        let effects = effects
+            .iter()
+            .map(|effect| match effect {
+                SelectMachineEffect::OpenChanged { open } => {
+                    json!({ "type": "openChanged", "open": open })
+                }
+                SelectMachineEffect::QueryChanged { query } => {
+                    json!({ "type": "queryChanged", "query": query })
+                }
+                SelectMachineEffect::ValueChanged { value } => {
+                    json!({ "type": "valueChanged", "value": value })
+                }
+            })
+            .collect();
+
+        assert_case(
+            "select",
+            case,
+            effects,
+            None,
+            Some(json!({
+                "value": next.value,
+                "open": next.open,
+                "query": next.query,
+                "highlightedValue": next.highlighted_value,
+            })),
         );
     }
 }

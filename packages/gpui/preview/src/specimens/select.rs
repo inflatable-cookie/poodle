@@ -23,62 +23,45 @@ use poodle_adapter::ThemeProvider;
 use crate::specimens::specimen_axes::{density_key, size_key};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use poodle_gpui::GpuiThemeProvider;
-use poodle_render::{RenderContext, select, SelectHandlers};
+use poodle_render::{select, RenderContext, SelectEffect, SelectHandlers};
 use poodle_specs::{ChoiceOption, EyebrowSpec, SelectMode, SelectSpec};
 
-/// Build a node-tier Select with the specimen's toggle/change/clear wiring.
-/// Mirrors the old specimen's behavior: toggle flips `{id}-open`, change
-/// records `{id}-value` and closes, clear reports the default value ("").
+/// Build a node-tier Select with the specimen's transition wiring.
+/// Open changes flip `{id}-open`; value changes record `{id}-value`.
 fn node_select(id: &'static str, spec: SelectSpec, state: &AppState) -> AnyElement {
     let events = state.node_events.clone();
-
-    let toggle_key = format!("{}-open", id);
-    let toggle = {
-        let events = events.clone();
-        Arc::new(move || {
-            events
-                .lock()
-                .unwrap()
-                .push(NodeSpecimenEvent::Toggle(toggle_key.clone()));
-        })
-    };
-
-    let change_open_key = format!("{}-open", id);
-    let change_value_key = format!("{}-value", id);
-    let change = {
-        let events = events.clone();
-        Arc::new(move |value: &str| {
-            events.lock().unwrap().push(NodeSpecimenEvent::Change {
-                open_key: change_open_key.clone(),
-                value_key: change_value_key.clone(),
-                value: value.to_string(),
-            });
-        })
-    };
-
-    let clear_open_key = format!("{}-open", id);
-    let clear_value_key = format!("{}-value", id);
-    let clear_value = spec.default_value.clone().unwrap_or_default();
-    let clear = Arc::new(move || {
-        events.lock().unwrap().push(NodeSpecimenEvent::Change {
-            open_key: clear_open_key.clone(),
-            value_key: clear_value_key.clone(),
-            value: clear_value.clone(),
-        });
-    });
-
-    let handlers = SelectHandlers {
-        toggle: Some(toggle),
-        change: Some(change),
-        clear: Some(clear),
-    };
+    let open_key = format!("{id}-open");
+    let value_key = format!("{id}-value");
+    let handlers = SelectHandlers::new(id).on_transition(Arc::new(move |result| {
+        for effect in &result.effects {
+            match effect {
+                SelectEffect::OpenChanged { open } => {
+                    events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                        key: open_key.clone(),
+                        value: *open,
+                    });
+                }
+                SelectEffect::ValueChanged { value } => {
+                    events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                        key: value_key.clone(),
+                        value: value.clone(),
+                    });
+                }
+                SelectEffect::QueryChanged { .. } => {}
+            }
+        }
+    }));
     let node = select(&spec, &RenderContext::new(&state.theme), &handlers);
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
 /// A node-tier Select with no handlers (disabled / validation / sizes).
 fn node_select_static(spec: SelectSpec, state: &AppState) -> AnyElement {
-    let node = select(&spec, &RenderContext::new(&state.theme), &SelectHandlers::default());
+    let node = select(
+        &spec,
+        &RenderContext::new(&state.theme),
+        &SelectHandlers::new("select-static"),
+    );
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
@@ -370,6 +353,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_aria_label(format!("{} select", size_key(size)))
                         .with_size(size),
                     theme,
+                    format!("select-size-{}", size_key(size)),
                 )
                 .into_any_element()
             })
@@ -380,6 +364,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_aria_label(format!("{} select", density_key(density)))
                         .with_density(density),
                     theme,
+                    format!("select-density-{}", density_key(density)),
                 )
                 .into_any_element()
             }),
