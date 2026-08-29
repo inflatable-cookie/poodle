@@ -1,14 +1,20 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/number-input.css";
   import {
-    clampNullable,
-    parseNumberish,
-    parseStep,
+    formatNumberCommitted,
+    numberDraftConstraintValid,
+    numberInputContext,
+    numberInputDisplayText,
+    numberInputInvalid,
+    numberInputTransition,
+    parseNumberDecimal,
+    numberDecimalToNumber,
+    stepNumberValue,
     validationStatusToState,
+    type NumberInputEffect,
   } from "@inflatable-cookie/poodle-core";
 
   import { default as Icon } from "./Icon.svelte";
-  import { formatNumber, snapToStep } from "./internal";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
@@ -28,16 +34,17 @@
 
   interface Props {
     id?: string;
-    value?: number | string | null | undefined;
-    defaultValue?: number | string | null;
+    value?: number | null | undefined;
+    defaultValue?: number | null;
+    draftValue?: string | null | undefined;
     placeholder?: string | null;
     name?: string | undefined;
     disabled?: boolean;
     readOnly?: boolean;
     required?: boolean;
-    min?: number | string | null;
-    max?: number | string | null;
-    step?: number | string | null;
+    min?: number | null;
+    max?: number | null;
+    step?: number | null;
     precision?: number | null;
     ariaLabel?: string | null;
     describedBy?: string | null;
@@ -50,11 +57,10 @@
     size?: ControlSize | null;
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
-    onValueChange?: ((value: number | string | null) => void) | undefined;
+    onValueChange?: ((value: number | null) => void) | undefined;
+    onDraftValueChange?: ((draft: string | null) => void) | undefined;
     onValidationChange?: ((detail: NumberInputValidationChange) => void) | undefined;
-    onSubmit?: ((value: number | string | null) => void) | undefined;
-    onIncrement?: ((value: number | string | null) => void) | undefined;
-    onDecrement?: ((value: number | string | null) => void) | undefined;
+    onCommit?: ((value: number | null) => void) | undefined;
     onFocus?: ((event: FocusEvent) => void) | undefined;
     onBlur?: ((event: FocusEvent) => void) | undefined;
   }
@@ -63,8 +69,9 @@
 
   let {
     id = "",
-    value = $bindable<number | string | null | undefined>(undefined),
+    value = $bindable<number | null | undefined>(undefined),
     defaultValue = null,
+    draftValue = $bindable<string | null | undefined>(undefined),
     placeholder = null,
     name = undefined,
     disabled = false,
@@ -86,10 +93,9 @@
     sizeRole = "control",
     density = null,
     onValueChange = undefined,
+    onDraftValueChange = undefined,
     onValidationChange = undefined,
-    onSubmit = undefined,
-    onIncrement = undefined,
-    onDecrement = undefined,
+    onCommit = undefined,
     onFocus = undefined,
     onBlur = undefined,
   }: Props = $props();
@@ -98,48 +104,109 @@
   let validationMessage = $state("");
   let activeValidationKey = $state(0);
   let uncontrolledValue = $state<number | null>(null);
-  let draftValue = $state("");
-  let isEditing = $state(false);
+  let seededDefaultValue = $state(false);
+  let localDraft = $state<string | null>(null);
+  let lastControlledValue = $state<number | null | undefined>(undefined);
+  let lastEmittedValue = $state<number | null | undefined>(undefined);
 
-  const valueMode = $derived(inferValueMode(value, defaultValue));
-  const parsedValue = $derived(parseNumberish(value));
-  const parsedDefaultValue = $derived(parseNumberish(defaultValue));
-  const parsedMin = $derived(parseNumberish(min));
-  const parsedMax = $derived(parseNumberish(max));
-  const resolvedStep = $derived(parseStep(step));
+  $effect.pre(() => {
+    if (!seededDefaultValue) {
+      uncontrolledValue = defaultValue;
+      seededDefaultValue = true;
+    }
+  });
+
+  $effect(() => {
+    if (value === undefined || value === lastControlledValue) {
+      return;
+    }
+
+    const previous = lastControlledValue;
+    lastControlledValue = value;
+
+    if (previous !== undefined && value === lastEmittedValue) {
+      return;
+    }
+
+    if (draftValue === undefined) {
+      localDraft = null;
+    }
+
+    // Genuine external replacement (not first observe, not host echo): cancel
+    // any in-flight validation and validate the authored committed value.
+    if (previous !== undefined) {
+      void runValidation(value ?? null);
+    }
+  });
+
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const isControlled = $derived(value !== undefined);
-  const currentValue = $derived(isControlled ? parsedValue : uncontrolledValue);
-  const effectiveValidationState = $derived.by(() =>
-    validate ? validationStatusToState(internalValidationStatus, validationState) : validationState
+  const draftControlled = $derived(draftValue !== undefined);
+  const committed = $derived((isControlled ? value : uncontrolledValue) ?? null);
+  const activeDraft = $derived(draftControlled ? draftValue : localDraft);
+  const machineContext = $derived(
+    numberInputContext({
+      committed,
+      defaultValue,
+      draft: activeDraft ?? null,
+      min,
+      max,
+      step,
+      precision,
+      disabled,
+      readOnly,
+    }),
   );
-  const ariaInvalid = $derived(effectiveValidationState === "invalid" ? true : undefined);
+  const displayValue = $derived(numberInputDisplayText(machineContext));
+  const draftInvalid = $derived(numberInputInvalid(machineContext));
+  const effectiveValidationState = $derived.by(() =>
+    validate ? validationStatusToState(internalValidationStatus, validationState) : validationState,
+  );
+  const ariaInvalid = $derived(
+    draftInvalid || effectiveValidationState === "invalid" ? true : undefined,
+  );
   const ariaBusy = $derived(effectiveValidationState === "pending" ? true : undefined);
+  const ariaValueNow = $derived.by(() => {
+    if (activeDraft !== null && activeDraft !== undefined) {
+      if (
+        !numberDraftConstraintValid(activeDraft, min, max, step, precision)
+      ) {
+        return undefined;
+      }
 
-  $effect(() => {
-    if (!isControlled && uncontrolledValue === null && parsedDefaultValue !== null) {
-      uncontrolledValue = parsedDefaultValue;
+      const decimal = parseNumberDecimal(activeDraft);
+      return decimal === null ? undefined : numberDecimalToNumber(decimal);
     }
-  });
 
-  $effect(() => {
-    if (!isEditing) {
-      draftValue = formatNumber(currentValue, precision);
+    return committed === null ? undefined : committed;
+  });
+  const stepFrom = $derived.by(() => {
+    if (activeDraft !== null && activeDraft !== undefined) {
+      if (activeDraft === "") {
+        return null;
+      }
+
+      if (!numberDraftConstraintValid(activeDraft, min, max, step, precision)) {
+        return undefined;
+      }
+
+      const decimal = parseNumberDecimal(activeDraft);
+      return decimal === null ? undefined : numberDecimalToNumber(decimal);
     }
+
+    return committed;
   });
-
-  function inferValueMode(
-    currentValue: number | string | null | undefined,
-    initialValue: number | string | null,
-  ): "number" | "string" {
-    if (typeof currentValue === "string" || typeof initialValue === "string") return "string";
-    return "number";
-  }
-
-  function clampIfNeeded(nextValue: number): number {
-    return clampNullable(nextValue, parsedMin, parsedMax);
-  }
+  const canIncrement = $derived(
+    stepFrom === undefined
+      ? false
+      : stepNumberValue(stepFrom, 1, min, max, step, precision) !== null,
+  );
+  const canDecrement = $derived(
+    stepFrom === undefined
+      ? false
+      : stepNumberValue(stepFrom, -1, min, max, step, precision) !== null,
+  );
 
   function emitValidationChange(): void {
     onValidationChange?.({
@@ -149,18 +216,19 @@
     });
   }
 
-  async function runValidation(nextValue: number | string | null): Promise<void> {
-    const validationValue =
-      nextValue === null || nextValue === undefined ? "" : typeof nextValue === "number" ? String(nextValue) : nextValue;
+  async function runValidation(nextValue: number | null): Promise<void> {
+    // Invalidate any in-flight validation before the idle early-return so a
+    // clear/replacement cannot be overwritten by a stale resolve.
+    const validationKey = ++activeValidationKey;
 
-    if (!validate || validationValue.trim() === "") {
+    if (!validate || nextValue === null) {
       internalValidationStatus = "idle";
       validationMessage = "";
       emitValidationChange();
       return;
     }
 
-    const validationKey = ++activeValidationKey;
+    const validationValue = formatNumberCommitted(nextValue, precision);
     internalValidationStatus = "validating";
     validationMessage = "";
     emitValidationChange();
@@ -179,67 +247,73 @@
     }
   }
 
-  function coerceOutgoingValue(nextValue: number | null): number | string | null {
-    if (valueMode === "string") {
-      return nextValue === null ? "" : String(nextValue);
+  function applyDraft(next: string | null): void {
+    if (draftControlled) {
+      draftValue = next;
+    } else {
+      localDraft = next;
     }
 
-    return nextValue;
+    onDraftValueChange?.(next);
   }
 
-  function commitValue(nextValue: number | null): void {
+  function applyValue(next: number | null): void {
+    lastEmittedValue = next;
+
     if (!isControlled) {
-      uncontrolledValue = nextValue;
+      uncontrolledValue = next;
     } else {
-      value = coerceOutgoingValue(nextValue);
+      value = next;
+      lastControlledValue = next;
     }
 
-    const outgoingValue = coerceOutgoingValue(nextValue);
-    onValueChange?.(outgoingValue);
-    void runValidation(outgoingValue);
+    onValueChange?.(next);
+    void runValidation(next);
+  }
+
+  function applyEffects(effects: NumberInputEffect[]): void {
+    for (const effect of effects) {
+      switch (effect.type) {
+        case "emitDraftValueChange":
+          applyDraft(effect.draft);
+          break;
+        case "emitValueChange":
+          applyValue(effect.value);
+          break;
+        case "emitCommit":
+          onCommit?.(effect.value);
+          break;
+      }
+    }
+  }
+
+  function dispatch(
+    event:
+      | { type: "RAW_EDIT"; text: string }
+      | { type: "CLEAR" }
+      | { type: "ENTER" }
+      | { type: "BLUR" }
+      | { type: "ESCAPE" }
+      | { type: "STEP"; direction: 1 | -1 }
+      | { type: "HOME" }
+      | { type: "END" },
+  ): void {
+    const result = numberInputTransition(machineContext, event);
+
+    if (!draftControlled) {
+      localDraft = result.context.draft;
+    }
+
+    applyEffects(result.effects);
   }
 
   function handleInput(event: Event): void {
-    draftValue = (event.currentTarget as HTMLInputElement).value;
-
-    if (draftValue.trim() === "") {
-      commitValue(null);
-      return;
-    }
-
-    const parsedNextValue = Number(draftValue);
-
-    if (!Number.isNaN(parsedNextValue)) {
-      commitValue(parsedNextValue);
-    }
+    dispatch({ type: "RAW_EDIT", text: (event.currentTarget as HTMLInputElement).value });
   }
 
   function handleBlur(event: FocusEvent): void {
-    isEditing = false;
-
-    if (draftValue.trim() !== "") {
-      const parsedNextValue = Number(draftValue);
-
-      if (!Number.isNaN(parsedNextValue)) {
-        commitValue(clampIfNeeded(snapToStep(parsedNextValue, parsedMin ?? 0, resolvedStep)));
-      }
-    }
-
+    dispatch({ type: "BLUR" });
     onBlur?.(event);
-  }
-
-  function adjust(delta: number, eventName: "increment" | "decrement"): void {
-    const baseline = currentValue ?? parsedMin ?? 0;
-    const nextValue = clampIfNeeded(snapToStep(baseline + delta, parsedMin ?? 0, resolvedStep));
-    commitValue(nextValue);
-    draftValue = formatNumber(nextValue, precision);
-    const outgoingValue = coerceOutgoingValue(nextValue);
-    if (eventName === "increment") {
-      onIncrement?.(outgoingValue);
-      return;
-    }
-
-    onDecrement?.(outgoingValue);
   }
 </script>
 
@@ -261,7 +335,8 @@
       class="poodle-number-input__control"
       type="text"
       inputmode="decimal"
-      value={draftValue}
+      role="spinbutton"
+      value={displayValue}
       {placeholder}
       disabled={disabled}
       readonly={readOnly}
@@ -270,35 +345,66 @@
       aria-describedby={describedBy ?? undefined}
       aria-invalid={ariaInvalid}
       aria-busy={ariaBusy}
+      aria-valuenow={ariaValueNow}
+      aria-valuemin={min ?? undefined}
+      aria-valuemax={max ?? undefined}
       oninput={handleInput}
-      onfocus={(event) => {
-        isEditing = true;
-        onFocus?.(event);
-      }}
+      onfocus={(event) => onFocus?.(event)}
       onblur={handleBlur}
       onkeydown={(event) => {
         if (event.key === "Enter") {
-          onSubmit?.(coerceOutgoingValue(currentValue));
+          event.preventDefault();
+          dispatch({ type: "ENTER" });
+          return;
         }
 
-        if (event.key === "ArrowUp" && !readOnly) {
+        if (event.key === "Escape") {
           event.preventDefault();
-          adjust(resolvedStep, "increment");
+          dispatch({ type: "ESCAPE" });
+          return;
         }
 
-        if (event.key === "ArrowDown" && !readOnly) {
+        if (event.key === "ArrowUp") {
           event.preventDefault();
-          adjust(-resolvedStep, "decrement");
+          dispatch({ type: "STEP", direction: 1 });
+          return;
+        }
+
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          dispatch({ type: "STEP", direction: -1 });
+          return;
+        }
+
+        if (event.key === "Home") {
+          event.preventDefault();
+          dispatch({ type: "HOME" });
+          return;
+        }
+
+        if (event.key === "End") {
+          event.preventDefault();
+          dispatch({ type: "END" });
         }
       }}
     />
 
     {#if showSteppers}
       <div class="poodle-number-input__steppers">
-        <button type="button" disabled={disabled || readOnly} onclick={() => adjust(resolvedStep, "increment")}>
+        <button
+          type="button"
+          aria-label="Increment"
+          disabled={disabled || readOnly || !canIncrement}
+          onclick={() => dispatch({ type: "STEP", direction: 1 })}
+        >
           <Icon name="plus" />
         </button>
-        <button type="button" disabled={disabled || readOnly} onclick={() => adjust(-resolvedStep, "decrement")}>
+        <button
+          type="button"
+          aria-label="Decrement"
+          disabled={disabled || readOnly || !canDecrement}
+          onclick={() => dispatch({ type: "STEP", direction: -1 })}
+        >
           <Icon name="minus" />
         </button>
       </div>
@@ -309,4 +415,3 @@
     <span class="poodle-number-input__suffix">{suffix}</span>
   {/if}
 </div>
-

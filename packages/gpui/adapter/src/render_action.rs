@@ -427,7 +427,7 @@ mod tests {
     #[test]
     fn render_number_input_produces_handle() {
         let a = adapter();
-        let handle = a.render(&NumberInputSpec::new(42.0), &style(), &theme());
+        let handle = a.render(&NumberInputSpec::new(Some(42.0)), &style(), &theme());
         assert_eq!(handle.spec_type, "NumberInputSpec");
     }
 

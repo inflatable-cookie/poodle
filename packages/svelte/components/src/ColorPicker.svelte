@@ -274,22 +274,15 @@
     triggerHexInput = currentHex;
   }
 
-  function toNumericInputValue(value: string | number | null): number | null {
-    const nextValue = value;
-
-    if (nextValue === null || nextValue === "") {
+  function toNumericInputValue(value: number | null): number | null {
+    if (value === null || !Number.isFinite(value)) {
       return null;
     }
 
-    if (typeof nextValue === "number") {
-      return Number.isFinite(nextValue) ? nextValue : null;
-    }
-
-    const parsedValue = Number(nextValue);
-    return Number.isFinite(parsedValue) ? parsedValue : null;
+    return value;
   }
 
-  function onRgbChange(channel: "r" | "g" | "b", value: string | number | null): void {
+  function onRgbChange(channel: "r" | "g" | "b", value: number | null): void {
     const val = toNumericInputValue(value) ?? 0;
     const rgb = { ...currentRgb };
     rgb[channel] = val;
@@ -300,7 +293,7 @@
     commitColor();
   }
 
-  function onHslChange(channel: "h" | "s" | "l", value: string | number | null): void {
+  function onHslChange(channel: "h" | "s" | "l", value: number | null): void {
     const val = toNumericInputValue(value) ?? 0;
     const hsl = { ...currentHsl };
     hsl[channel] = val;
@@ -311,7 +304,7 @@
     commitColor();
   }
 
-  function onAlphaInputChange(value: string | number | null): void {
+  function onAlphaInputChange(value: number | null): void {
     alpha = (toNumericInputValue(value) ?? 100) / 100;
     commitColor();
   }

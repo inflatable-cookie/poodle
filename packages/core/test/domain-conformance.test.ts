@@ -75,6 +75,21 @@ import {
   type TimeInputEvent,
   type TimeParts,
 } from "../src/time-input.ts";
+import {
+  classifyNumberDraft,
+  formatNumberCommitted,
+  numberDecimalToNumber,
+  numberDraftConstraintValid,
+  numberInBounds,
+  numberInputConfigValid,
+  numberInputContext,
+  numberInputInvalid,
+  numberInputTransition,
+  numberStepAligned,
+  stepNumberValue,
+  type NumberInputContext,
+  type NumberInputEvent,
+} from "../src/number-input.ts";
 
 interface DomainVectors {
   date: DateCase[];
@@ -85,6 +100,7 @@ interface DomainVectors {
   duration: DurationCase[];
   nav: NavCase[];
   timeInput: TimeInputCase[];
+  numberInput: NumberInputCase[];
 }
 
 interface DateCase {
@@ -187,6 +203,21 @@ interface TimeInputCase {
   direction?: 1 | -1;
   context?: TimeInputContext;
   event?: TimeInputEvent;
+  expect: unknown;
+}
+
+interface NumberInputCase {
+  op: string;
+  name?: string;
+  value?: string | number | null;
+  min?: number | null;
+  max?: number | null;
+  step?: number | null;
+  precision?: number | null;
+  current?: number | null;
+  direction?: 1 | -1;
+  context?: NumberInputContext;
+  event?: NumberInputEvent;
   expect: unknown;
 }
 
@@ -593,6 +624,97 @@ describe("domain conformance: timeInput", () => {
         }
         default:
           throw new Error(`unknown timeInput op: ${case_.op}`);
+      }
+    });
+  }
+});
+
+describe("domain conformance: numberInput", () => {
+  for (const case_ of vectors.numberInput) {
+    test(`${case_.op}: ${case_.name ?? ""}`, () => {
+      switch (case_.op) {
+        case "classify": {
+          const classified = classifyNumberDraft(String(case_.value ?? ""));
+          const actual: {
+            kind: string;
+            fractionalDigits: number | null;
+            value?: number | null;
+          } = {
+            kind: classified.kind,
+            fractionalDigits: classified.fractionalDigits,
+            value: classified.decimal === null ? null : numberDecimalToNumber(classified.decimal),
+          };
+          // Oversized coefficients lose f64 exactness; vectors may omit
+          // `value` and assert draft kind / scale only.
+          if (!Object.prototype.hasOwnProperty.call(case_.expect as object, "value")) {
+            delete actual.value;
+          }
+          expect(actual).toEqual(case_.expect);
+          return;
+        }
+        case "configValid": {
+          expect(
+            numberInputConfigValid({
+              step: case_.step ?? null,
+              precision: case_.precision ?? null,
+              min: case_.min ?? null,
+              max: case_.max ?? null,
+            }),
+          ).toBe(case_.expect);
+          return;
+        }
+        case "inBounds": {
+          expect(numberInBounds(Number(case_.value), case_.min ?? null, case_.max ?? null)).toBe(case_.expect);
+          return;
+        }
+        case "stepAligned": {
+          expect(numberStepAligned(Number(case_.value), case_.min ?? null, case_.step ?? null)).toBe(case_.expect);
+          return;
+        }
+        case "draftValid": {
+          expect(
+            numberDraftConstraintValid(
+              String(case_.value ?? ""),
+              case_.min ?? null,
+              case_.max ?? null,
+              case_.step ?? null,
+              case_.precision ?? null,
+            ),
+          ).toBe(case_.expect);
+          return;
+        }
+        case "format": {
+          const value = case_.value === undefined ? null : (case_.value as number | null);
+          expect(formatNumberCommitted(value, case_.precision ?? null)).toBe(case_.expect);
+          return;
+        }
+        case "step": {
+          expect(
+            stepNumberValue(
+              case_.current ?? null,
+              case_.direction ?? 1,
+              case_.min ?? null,
+              case_.max ?? null,
+              case_.step ?? null,
+              case_.precision ?? null,
+            ),
+          ).toBe(case_.expect);
+          return;
+        }
+        case "transition": {
+          const result = numberInputTransition(
+            numberInputContext(case_.context as NumberInputContext),
+            case_.event as NumberInputEvent,
+          );
+          expect({
+            context: result.context,
+            effects: result.effects,
+            invalid: numberInputInvalid(result.context),
+          }).toEqual(case_.expect);
+          return;
+        }
+        default:
+          throw new Error(`unknown numberInput op: ${case_.op}`);
       }
     });
   }

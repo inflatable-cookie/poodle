@@ -17,11 +17,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Default (50)",
             secondary,
             div().w(300.0).child(js_number_input(
-                &NumberInputSpec::new(50.0)
+                &NumberInputSpec::new(Some(50.0))
                     .with_aria_label("Quantity 1")
-                    .with_min(0.0)
-                    .with_max(100.0)
-                    .with_step(1.0),
+                    .with_min(Some(0.0))
+                    .with_max(Some(100.0))
+                    .with_step(Some(1.0)),
                 theme,
             )),
         ))
@@ -30,11 +30,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "At min (0)",
             secondary,
             div().w(300.0).child(js_number_input(
-                &NumberInputSpec::new(0.0)
+                &NumberInputSpec::new(Some(0.0))
                     .with_aria_label("Quantity 2")
-                    .with_min(0.0)
-                    .with_max(100.0)
-                    .with_step(1.0),
+                    .with_min(Some(0.0))
+                    .with_max(Some(100.0))
+                    .with_step(Some(1.0)),
                 theme,
             )),
         ))
@@ -43,11 +43,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "At max (100)",
             secondary,
             div().w(300.0).child(js_number_input(
-                &NumberInputSpec::new(100.0)
+                &NumberInputSpec::new(Some(100.0))
                     .with_aria_label("Quantity 3")
-                    .with_min(0.0)
-                    .with_max(100.0)
-                    .with_step(1.0),
+                    .with_min(Some(0.0))
+                    .with_max(Some(100.0))
+                    .with_step(Some(1.0)),
                 theme,
             )),
         ))
@@ -56,10 +56,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Disabled",
             secondary,
             div().w(300.0).child(js_number_input(
-                &NumberInputSpec::new(42.0)
+                &NumberInputSpec::new(Some(42.0))
                     .with_aria_label("Quantity 4")
-                    .with_min(0.0)
-                    .with_max(100.0)
+                    .with_min(Some(0.0))
+                    .with_max(Some(100.0))
                     .with_disabled(true),
                 theme,
             )),
@@ -69,10 +69,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "Invalid state",
             secondary,
             div().w(300.0).child(js_number_input(
-                &NumberInputSpec::new(50.0)
+                &NumberInputSpec::new(Some(50.0))
                     .with_aria_label("Quantity 5")
-                    .with_min(0.0)
-                    .with_max(100.0)
+                    .with_min(Some(0.0))
+                    .with_max(Some(100.0))
                     .with_validation_state(ValidationState::Invalid),
                 theme,
             )),
@@ -82,10 +82,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "With prefix ($)",
             secondary,
             div().w(300.0).child(js_number_input(
-                &NumberInputSpec::new(42.50)
+                &NumberInputSpec::new(Some(42.50))
                     .with_aria_label("Quantity 6")
-                    .with_min(0.0)
-                    .with_max(1000.0)
+                    .with_min(Some(0.0))
+                    .with_max(Some(1000.0))
                     .with_prefix("$")
                     .with_precision(2),
                 theme,
@@ -96,10 +96,10 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "With suffix (px)",
             secondary,
             div().w(300.0).child(js_number_input(
-                &NumberInputSpec::new(16.0)
+                &NumberInputSpec::new(Some(16.0))
                     .with_aria_label("Quantity 7")
-                    .with_min(0.0)
-                    .with_max(100.0)
+                    .with_min(Some(0.0))
+                    .with_max(Some(100.0))
                     .with_suffix("px"),
                 theme,
             )),
@@ -109,11 +109,11 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             "With steppers",
             secondary,
             div().w(300.0).child(js_number_input(
-                &NumberInputSpec::new(3.0)
+                &NumberInputSpec::new(Some(3.0))
                     .with_aria_label("Quantity 8")
-                    .with_min(0.0)
-                    .with_max(10.0)
-                    .with_step(1.0)
+                    .with_min(Some(0.0))
+                    .with_max(Some(10.0))
+                    .with_step(Some(1.0))
                     .with_steppers(true),
                 theme,
             )),
@@ -127,7 +127,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .gap(8.0)
                 .child(
                     div().w(300.0).child(js_number_input(
-                        &NumberInputSpec::new(50.0)
+                        &NumberInputSpec::new(Some(50.0))
                             .with_aria_label("Quantity 9")
                             .with_size(ControlSize::Xs),
                         theme,
@@ -135,7 +135,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )
                 .child(
                     div().w(300.0).child(js_number_input(
-                        &NumberInputSpec::new(50.0)
+                        &NumberInputSpec::new(Some(50.0))
                             .with_aria_label("Quantity 10")
                             .with_size(ControlSize::Sm),
                         theme,
@@ -143,7 +143,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )
                 .child(
                     div().w(300.0).child(js_number_input(
-                        &NumberInputSpec::new(50.0)
+                        &NumberInputSpec::new(Some(50.0))
                             .with_aria_label("Quantity 11")
                             .with_size(ControlSize::Md),
                         theme,
@@ -151,7 +151,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )
                 .child(
                     div().w(300.0).child(js_number_input(
-                        &NumberInputSpec::new(50.0)
+                        &NumberInputSpec::new(Some(50.0))
                             .with_aria_label("Quantity 12")
                             .with_size(ControlSize::Lg),
                         theme,
@@ -159,7 +159,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )
                 .child(
                     div().w(300.0).child(js_number_input(
-                        &NumberInputSpec::new(50.0)
+                        &NumberInputSpec::new(Some(50.0))
                             .with_aria_label("Quantity 13")
                             .with_size(ControlSize::Xl),
                         theme,
@@ -175,7 +175,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .gap(8.0)
                 .child(
                     div().w(300.0).child(js_number_input(
-                        &NumberInputSpec::new(50.0)
+                        &NumberInputSpec::new(Some(50.0))
                             .with_aria_label("Quantity 14")
                             .with_density(ControlDensity::Compact),
                         theme,
@@ -183,7 +183,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )
                 .child(
                     div().w(300.0).child(js_number_input(
-                        &NumberInputSpec::new(50.0)
+                        &NumberInputSpec::new(Some(50.0))
                             .with_aria_label("Quantity 15")
                             .with_density(ControlDensity::Default),
                         theme,
@@ -191,7 +191,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 )
                 .child(
                     div().w(300.0).child(js_number_input(
-                        &NumberInputSpec::new(50.0)
+                        &NumberInputSpec::new(Some(50.0))
                             .with_aria_label("Quantity 16")
                             .with_density(ControlDensity::Comfortable),
                         theme,

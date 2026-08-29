@@ -236,9 +236,8 @@ export function FilterBuilder({
     clearAll();
   }
 
-  function setNumberOperand(next: number | string | null): void {
-    const parsed = next === null || next === "" ? Number.NaN : Number(next);
-    setDraftOperand({ kind: "number", value: parsed });
+  function setNumberOperand(next: number | null): void {
+    setDraftOperand({ kind: "number", value: next === null ? Number.NaN : next });
   }
 
   function toggleOption(optionValue: string, checked: boolean): void {
@@ -249,15 +248,13 @@ export function FilterBuilder({
     setDraftOperand({ kind: "options", values });
   }
 
-  function setRangeBound(bound: "min" | "max", next: number | string | null): void {
-    const parsed = next === null || next === "" ? null : Number(next);
-    const value = parsed !== null && Number.isNaN(parsed) ? null : parsed;
+  function setRangeBound(bound: "min" | "max", next: number | null): void {
     const base =
       draftOperand.kind === "range" ? draftOperand : { kind: "range" as const, min: null, max: null };
     setDraftOperand({
       kind: "range",
-      min: bound === "min" ? value : base.min,
-      max: bound === "max" ? value : base.max,
+      min: bound === "min" ? next : base.min,
+      max: bound === "max" ? next : base.max,
     });
   }
 
@@ -501,10 +498,10 @@ interface OperandEditorProps {
   rangeMax: number | null;
   onBoolean: (value: string) => void;
   onText: (value: string) => void;
-  onNumber: (value: number | string | null) => void;
+  onNumber: (value: number | null) => void;
   onEnum: (value: string) => void;
   onToggleOption: (value: string, checked: boolean) => void;
-  onRange: (bound: "min" | "max", value: number | string | null) => void;
+  onRange: (bound: "min" | "max", value: number | null) => void;
 }
 
 function FilterOperandEditor({

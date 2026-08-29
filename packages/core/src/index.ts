@@ -617,6 +617,35 @@ export {
 } from "./time-input";
 
 export {
+  classifyNumberDraft,
+  formatNumberCommitted,
+  formatNumberDecimal,
+  formatShortestDecimal,
+  numberDecimalToNumber,
+  numberDraftConstraintValid,
+  numberInBounds,
+  numberInputConfigValid,
+  numberInputContext,
+  numberInputDisplayText,
+  numberInputEffectiveStep,
+  numberInputInvalid,
+  numberInputTransition,
+  NUMBER_INPUT_MAX_PRECISION,
+  numberPrecisionOk,
+  numberStepAligned,
+  numberValueConstraintValid,
+  parseNumberDecimal,
+  stepNumberValue,
+  type NumberDecimal,
+  type NumberDraftClassification,
+  type NumberDraftKind,
+  type NumberInputContext,
+  type NumberInputEffect,
+  type NumberInputEvent,
+  type NumberInputResult,
+} from "./number-input";
+
+export {
   isSelectOptionDisabled,
   flattenSelectOptions,
   filterSelectOptions,

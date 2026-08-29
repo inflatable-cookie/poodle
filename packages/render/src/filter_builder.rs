@@ -148,8 +148,8 @@ fn operand_editor(
         }
         FilterOperandKind::Number => {
             let value = match operand {
-                FilterOperand::Number(n) if n.is_finite() => *n,
-                _ => 0.0,
+                FilterOperand::Number(n) if n.is_finite() => Some(*n),
+                _ => None,
             };
             number_input(
                 &NumberInputSpec::new(value)
@@ -227,7 +227,7 @@ fn operand_editor(
             sep.style.descriptor.text_color = Some(sep_color);
             row(rem_to_px(0.375))
                 .child(number_input(
-                    &NumberInputSpec::new(min.unwrap_or(0.0))
+                    &NumberInputSpec::new(min)
                         .with_size(size)
                         .with_density(density)
                         .with_disabled(disabled),
@@ -236,7 +236,7 @@ fn operand_editor(
                 ))
                 .child(sep)
                 .child(number_input(
-                    &NumberInputSpec::new(max.unwrap_or(0.0))
+                    &NumberInputSpec::new(max)
                         .with_size(size)
                         .with_density(density)
                         .with_disabled(disabled),

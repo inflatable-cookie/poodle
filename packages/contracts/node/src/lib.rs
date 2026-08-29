@@ -835,6 +835,12 @@ pub struct NodeA11y {
     pub value_max: Option<f64>,
     /// Human-readable value text for assistive technology (`aria-valuetext`).
     pub value_text: Option<String>,
+    /// Unresolved or externally invalid state (`aria-invalid`).
+    pub invalid: Option<bool>,
+    /// Pending async validation (`aria-busy`).
+    pub busy: Option<bool>,
+    /// Id list projected as `aria-describedby`.
+    pub described_by: Option<String>,
 }
 
 impl Node {
@@ -1006,6 +1012,9 @@ mod tests {
         assert_eq!(node.a11y.value_min, None);
         assert_eq!(node.a11y.value_max, None);
         assert_eq!(node.a11y.value_text, None);
+        assert_eq!(node.a11y.invalid, None);
+        assert_eq!(node.a11y.busy, None);
+        assert_eq!(node.a11y.described_by, None);
     }
 
     #[test]

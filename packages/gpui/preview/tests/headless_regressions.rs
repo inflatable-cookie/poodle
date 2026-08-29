@@ -9075,6 +9075,690 @@ fn time_input_segmented_editor_commits_drafts_and_bounds() {
     });
 }
 
+// ── g16.030 NumberInput mounted editing ────────────────────────────────────
+
+#[derive(Clone)]
+struct NumberFieldState {
+    name: String,
+    value: Option<f64>,
+    draft: Option<String>,
+    selection: (usize, usize),
+    is_focused: bool,
+    min: Option<f64>,
+    max: Option<f64>,
+    step: Option<f64>,
+    precision: Option<u16>,
+    show_steppers: bool,
+    is_disabled: bool,
+    is_read_only: bool,
+    validation_state: poodle_specs::ValidationState,
+}
+
+impl NumberFieldState {
+    fn new(name: &str, value: Option<f64>) -> Self {
+        let display = poodle_headless::number_input::format_number_committed(value, None);
+        let len = display.chars().count();
+        Self {
+            name: name.to_owned(),
+            value,
+            draft: None,
+            selection: (len, len),
+            is_focused: false,
+            min: None,
+            max: None,
+            step: None,
+            precision: None,
+            show_steppers: false,
+            is_disabled: false,
+            is_read_only: false,
+            validation_state: poodle_specs::ValidationState::None,
+        }
+    }
+
+    fn bounded(mut self, min: f64, max: f64) -> Self {
+        self.min = Some(min);
+        self.max = Some(max);
+        self
+    }
+
+    fn stepped(mut self, step: f64) -> Self {
+        self.step = Some(step);
+        self
+    }
+
+    fn precise(mut self, precision: u16) -> Self {
+        self.precision = Some(precision);
+        let display = poodle_headless::number_input::format_number_committed(
+            self.value,
+            Some(f64::from(precision)),
+        );
+        let len = display.chars().count();
+        self.selection = (len, len);
+        self
+    }
+
+    fn with_steppers(mut self) -> Self {
+        self.show_steppers = true;
+        self
+    }
+
+    fn disabled(mut self) -> Self {
+        self.is_disabled = true;
+        self
+    }
+
+    fn read_only(mut self) -> Self {
+        self.is_read_only = true;
+        self
+    }
+}
+
+struct NumberFieldHost {
+    fields: Mutex<Vec<NumberFieldState>>,
+    log: Mutex<Vec<String>>,
+}
+
+impl NumberFieldHost {
+    fn new(fields: Vec<NumberFieldState>) -> Arc<Self> {
+        Arc::new(Self {
+            fields: Mutex::new(fields),
+            log: Mutex::new(Vec::new()),
+        })
+    }
+
+    fn field(&self, name: &str) -> NumberFieldState {
+        self.fields
+            .lock()
+            .expect("fields")
+            .iter()
+            .find(|field| field.name == name)
+            .cloned()
+            .unwrap_or_else(|| panic!("{name} is mounted"))
+    }
+
+    fn take_log(&self) -> Vec<String> {
+        std::mem::take(&mut *self.log.lock().expect("log"))
+    }
+}
+
+fn number_field_id(name: &str) -> String {
+    format!("poodle-number-input-{name}")
+}
+
+fn number_field_inc_id(name: &str) -> String {
+    format!("poodle-number-input-{name}-inc")
+}
+
+fn number_field_apply(
+    host: &Arc<NumberFieldHost>,
+    mounted: &Arc<Mutex<Node>>,
+    name: &str,
+    entry: String,
+    mutate: impl FnOnce(&mut NumberFieldState),
+) {
+    {
+        let mut fields = host.fields.lock().expect("fields");
+        let field = fields
+            .iter_mut()
+            .find(|field| field.name == name)
+            .unwrap_or_else(|| panic!("{name} is mounted"));
+        mutate(field);
+    }
+    host.log.lock().expect("log").push(entry);
+    let next = number_field_tree(host, mounted);
+    *mounted.lock().expect("mount") = next;
+}
+
+fn number_field_handlers(
+    host: &Arc<NumberFieldHost>,
+    mounted: &Arc<Mutex<Node>>,
+    name: &str,
+) -> poodle_render::NumberInputHandlers {
+    macro_rules! sink {
+        () => {{
+            (Arc::clone(host), Arc::clone(mounted), name.to_owned())
+        }};
+    }
+    let (draft_host, draft_mount, draft_name) = sink!();
+    let (value_host, value_mount, value_name) = sink!();
+    let (commit_host, commit_mount, commit_name) = sink!();
+    let (select_host, select_mount, select_name) = sink!();
+    let (focus_host, focus_mount, focus_name) = sink!();
+
+    poodle_render::NumberInputHandlers {
+        on_draft_value_change: Some(Arc::new(move |draft: Option<String>| {
+            let label = match &draft {
+                Some(text) => format!("{draft_name}/draft:{text}"),
+                None => format!("{draft_name}/draft:null"),
+            };
+            number_field_apply(&draft_host, &draft_mount, &draft_name, label, |field| {
+                field.draft = draft;
+            });
+        })),
+        on_value_change: Some(Arc::new(move |value: Option<f64>| {
+            let label = match value {
+                Some(v) => format!("{value_name}/value:{v}"),
+                None => format!("{value_name}/value:null"),
+            };
+            number_field_apply(&value_host, &value_mount, &value_name, label, |field| {
+                field.value = value;
+            });
+        })),
+        on_commit: Some(Arc::new(move |value: Option<f64>| {
+            let label = match value {
+                Some(v) => format!("{commit_name}/commit:{v}"),
+                None => format!("{commit_name}/commit:null"),
+            };
+            number_field_apply(&commit_host, &commit_mount, &commit_name, label, |_| {});
+        })),
+        on_selection_change: Some(Arc::new(move |start: usize, end: usize| {
+            number_field_apply(
+                &select_host,
+                &select_mount,
+                &select_name,
+                format!("{select_name}/select:{start}-{end}"),
+                |field| field.selection = (start, end),
+            );
+        })),
+        on_focus_change: Some(Arc::new(move |focused: bool| {
+            number_field_apply(
+                &focus_host,
+                &focus_mount,
+                &focus_name,
+                format!("{focus_name}/focus:{focused}"),
+                |field| field.is_focused = focused,
+            );
+        })),
+    }
+}
+
+fn number_field_tree(host: &Arc<NumberFieldHost>, mounted: &Arc<Mutex<Node>>) -> Node {
+    let provider = theme();
+    let ctx = RenderContext::new(&provider);
+    let states = host.fields.lock().expect("fields").clone();
+
+    let mut column = Node::container();
+    column.id = Some(FIXTURE_ID.to_owned());
+    column.style.descriptor.layout.direction = LayoutDirection::Column;
+    column.style.descriptor.layout.spacing.gap = 8.0;
+    column.style.descriptor.layout.width = LayoutSizing::Fixed(360.0);
+
+    for state in &states {
+        let mut spec = poodle_specs::NumberInputSpec::new(state.value)
+            .with_id(&state.name)
+            .with_aria_label(&state.name)
+            .with_selection(state.selection.0, state.selection.1)
+            .with_focused(state.is_focused)
+            .with_disabled(state.is_disabled)
+            .with_read_only(state.is_read_only)
+            .with_steppers(state.show_steppers)
+            .with_validation_state(state.validation_state);
+        if let Some(draft) = &state.draft {
+            spec = spec.with_draft_value(Some(draft.clone()));
+        }
+        if let Some(min) = state.min {
+            spec = spec.with_min(Some(min));
+        }
+        if let Some(max) = state.max {
+            spec = spec.with_max(Some(max));
+        }
+        if let Some(step) = state.step {
+            spec = spec.with_step(Some(step));
+        }
+        if let Some(precision) = state.precision {
+            spec = spec.with_precision(precision);
+        }
+        column = column.child(poodle_render::number_input(
+            &spec,
+            &ctx,
+            number_field_handlers(host, mounted, &state.name),
+        ));
+    }
+    column
+}
+
+fn mount_number_fields<'a>(
+    cx: &'a mut TestAppContext,
+    host: &Arc<NumberFieldHost>,
+) -> (HeadlessDriver<'a>, Arc<Mutex<Node>>) {
+    let mounted = Arc::new(Mutex::new(Node::container()));
+    *mounted.lock().expect("mount") = number_field_tree(host, &mounted);
+    let driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
+    (driver, mounted)
+}
+
+fn mounted_number(mounted: &Arc<Mutex<Node>>, name: &str) -> Node {
+    mounted
+        .lock()
+        .expect("mount")
+        .find(&|node| node.id.as_deref() == Some(number_field_id(name).as_str()))
+        .cloned()
+        .unwrap_or_else(|| panic!("{name} is mounted"))
+}
+
+/// g16.030. NumberInput routes real mounted text/key/focus/pointer dispatch
+/// through the shared machine and specimen-owned rebuild state: valid edits,
+/// partial/invalid silence, clear, blur/Escape revert, Enter commit, fractional
+/// step, precision, bounds, Home/End, controlled replacement, identity, and
+/// disabled/read-only inertia.
+#[test]
+fn number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value() {
+    run_headless(|cx| {
+        let host = NumberFieldHost::new(vec![NumberFieldState::new("qty", Some(5.0)).bounded(0.0, 100.0)]);
+        let (mut driver, mounted) = mount_number_fields(cx, &host);
+        driver.wait_for_focus_handle(&number_field_id("qty"));
+        driver.focus_element(&number_field_id("qty"));
+        host.take_log();
+
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("1");
+        driver.dispatch_key_raw("2");
+        assert_eq!(host.field("qty").draft.as_deref(), Some("12"));
+        assert_eq!(host.field("qty").value, Some(12.0));
+        assert_eq!(
+            mounted_number(&mounted, "qty").a11y.value,
+            Some(12.0),
+            "the rebuilt spin-button projects the live value"
+        );
+        let log = host.take_log();
+        assert!(
+            log.iter().any(|entry| entry == "qty/value:12"),
+            "valid complete drafts emit value: {log:?}"
+        );
+    });
+}
+
+#[test]
+fn number_input_mounted_partial_and_invalid_drafts_emit_no_value() {
+    run_headless(|cx| {
+        let host = NumberFieldHost::new(vec![NumberFieldState::new("qty", Some(5.0)).bounded(0.0, 10.0)]);
+        let (mut driver, mounted) = mount_number_fields(cx, &host);
+        driver.wait_for_focus_handle(&number_field_id("qty"));
+        driver.focus_element(&number_field_id("qty"));
+        host.take_log();
+
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("-");
+        assert_eq!(host.field("qty").draft.as_deref(), Some("-"));
+        assert_eq!(host.field("qty").value, Some(5.0));
+        assert!(
+            !host.take_log().iter().any(|entry| entry.starts_with("qty/value:")),
+            "incomplete drafts stay silent on the value channel"
+        );
+        assert_eq!(mounted_number(&mounted, "qty").a11y.invalid, Some(true));
+
+        driver.dispatch_key_raw("escape");
+        host.take_log();
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("9");
+        assert_eq!(host.field("qty").value, Some(9.0));
+        host.take_log();
+        driver.dispatch_key_raw("9");
+        assert_eq!(host.field("qty").draft.as_deref(), Some("99"));
+        assert_eq!(host.field("qty").value, Some(9.0));
+        assert!(
+            !host.take_log().iter().any(|entry| entry.starts_with("qty/value:")),
+            "out-of-range complete drafts emit no further value"
+        );
+        assert_eq!(mounted_number(&mounted, "qty").a11y.invalid, Some(true));
+    });
+}
+
+#[test]
+fn number_input_mounted_empty_clear_emits_null_value() {
+    run_headless(|cx| {
+        let host = NumberFieldHost::new(vec![NumberFieldState::new("qty", Some(5.0))]);
+        let (mut driver, _mounted) = mount_number_fields(cx, &host);
+        driver.wait_for_focus_handle(&number_field_id("qty"));
+        driver.focus_element(&number_field_id("qty"));
+        host.take_log();
+
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("backspace");
+        assert_eq!(host.field("qty").draft.as_deref(), Some(""));
+        assert_eq!(host.field("qty").value, None);
+        let log = host.take_log();
+        assert!(
+            log.iter().any(|entry| entry == "qty/value:null"),
+            "clear emits committed null: {log:?}"
+        );
+    });
+}
+
+#[test]
+fn number_input_mounted_blur_and_escape_revert_unresolved_drafts() {
+    run_headless(|cx| {
+        let host = NumberFieldHost::new(vec![
+            NumberFieldState::new("qty", Some(5.0)),
+            NumberFieldState::new("other", Some(1.0)),
+        ]);
+        let (mut driver, _mounted) = mount_number_fields(cx, &host);
+        driver.wait_for_focus_handle(&number_field_id("qty"));
+        driver.focus_element(&number_field_id("qty"));
+        host.take_log();
+
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("-");
+        assert_eq!(host.field("qty").draft.as_deref(), Some("-"));
+        host.take_log();
+
+        driver.dispatch_key_raw("escape");
+        assert_eq!(host.field("qty").draft, None);
+        assert_eq!(host.field("qty").value, Some(5.0));
+        let log = host.take_log();
+        assert!(
+            log.iter().any(|entry| entry == "qty/draft:null"),
+            "Escape discards the draft: {log:?}"
+        );
+        assert!(
+            !log.iter().any(|entry| entry.starts_with("qty/value:") || entry.starts_with("qty/commit:")),
+            "Escape emits neither value nor commit: {log:?}"
+        );
+    });
+
+    run_headless(|cx| {
+        let host = NumberFieldHost::new(vec![
+            NumberFieldState::new("qty", Some(5.0)),
+            NumberFieldState::new("other", Some(1.0)),
+        ]);
+        let (mut driver, _mounted) = mount_number_fields(cx, &host);
+        driver.wait_for_focus_handle(&number_field_id("qty"));
+        driver.focus_element(&number_field_id("qty"));
+
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("-");
+        host.take_log();
+
+        driver.focus_element(&number_field_id("other"));
+        assert_eq!(host.field("qty").draft, None);
+        assert_eq!(host.field("qty").value, Some(5.0));
+        let log = host.take_log();
+        assert!(
+            log.iter().any(|entry| entry == "qty/draft:null"),
+            "blur discards unresolved drafts: {log:?}"
+        );
+        assert!(
+            !log.iter().any(|entry| entry.starts_with("qty/commit:")),
+            "blur on unresolved drafts does not commit: {log:?}"
+        );
+    });
+}
+
+#[test]
+fn number_input_mounted_enter_commits_resolved_value() {
+    run_headless(|cx| {
+        let host = NumberFieldHost::new(vec![NumberFieldState::new("qty", Some(5.0))]);
+        let (mut driver, _mounted) = mount_number_fields(cx, &host);
+        driver.wait_for_focus_handle(&number_field_id("qty"));
+        driver.focus_element(&number_field_id("qty"));
+        host.take_log();
+
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("8");
+        host.take_log();
+        driver.dispatch_key_raw("enter");
+        let log = host.take_log();
+        assert!(
+            log.iter().any(|entry| entry == "qty/commit:8"),
+            "Enter commits the resolved value: {log:?}"
+        );
+        assert_eq!(host.field("qty").value, Some(8.0));
+        assert_eq!(host.field("qty").draft, None);
+    });
+
+    run_headless(|cx| {
+        let host = NumberFieldHost::new(vec![NumberFieldState::new("qty", Some(5.0))]);
+        let (mut driver, _mounted) = mount_number_fields(cx, &host);
+        driver.wait_for_focus_handle(&number_field_id("qty"));
+        driver.focus_element(&number_field_id("qty"));
+
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("-");
+        host.take_log();
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.field("qty").draft.as_deref(), Some("-"));
+        assert_eq!(host.field("qty").value, Some(5.0));
+        assert!(
+            !host.take_log().iter().any(|entry| entry.starts_with("qty/commit:")),
+            "Enter on an unresolved draft stays silent"
+        );
+    });
+}
+
+#[test]
+fn number_input_mounted_fractional_step_precision_bounds_and_home_end() {
+    run_headless(|cx| {
+        let host = NumberFieldHost::new(vec![NumberFieldState::new("price", Some(1.00))
+            .bounded(0.0, 5.0)
+            .stepped(0.25)
+            .precise(2)
+            .with_steppers()]);
+        let (mut driver, mounted) = mount_number_fields(cx, &host);
+        driver.wait_for_focus_handle(&number_field_id("price"));
+        driver.focus_element(&number_field_id("price"));
+        host.take_log();
+
+        driver.dispatch_key_raw("up");
+        assert_eq!(host.field("price").value, Some(1.25));
+        let log = host.take_log();
+        assert!(
+            log.iter().any(|entry| entry == "price/commit:1.25"),
+            "a successful step commits: {log:?}"
+        );
+
+        driver.pointer_activate_id(&number_field_inc_id("price"));
+        assert_eq!(host.field("price").value, Some(1.5));
+
+        driver.focus_element(&number_field_id("price"));
+        driver.dispatch_key_raw("end");
+        assert_eq!(host.field("price").value, Some(5.0));
+        driver.dispatch_key_raw("home");
+        assert_eq!(host.field("price").value, Some(0.0));
+
+        host.take_log();
+        driver.focus_element(&number_field_id("price"));
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("1");
+        assert_eq!(host.field("price").value, Some(1.0));
+        host.take_log();
+        driver.dispatch_key_raw(".");
+        driver.dispatch_key_raw("2");
+        driver.dispatch_key_raw("3");
+        driver.dispatch_key_raw("4");
+        assert_eq!(host.field("price").draft.as_deref(), Some("1.234"));
+        assert_eq!(host.field("price").value, Some(1.0));
+        assert!(
+            !host.take_log().iter().any(|entry| entry.starts_with("price/value:")),
+            "over-precision drafts emit no further value"
+        );
+
+        let node = mounted_number(&mounted, "price");
+        assert_eq!(node.a11y.value_min, Some(0.0));
+        assert_eq!(node.a11y.value_max, Some(5.0));
+    });
+}
+
+#[test]
+fn number_input_mounted_controlled_replacement_discards_uncontrolled_draft() {
+    run_headless(|cx| {
+        let host = NumberFieldHost::new(vec![NumberFieldState::new("qty", Some(5.0))]);
+        let (mut driver, mounted) = mount_number_fields(cx, &host);
+        driver.wait_for_focus_handle(&number_field_id("qty"));
+        driver.focus_element(&number_field_id("qty"));
+
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("-");
+        assert_eq!(host.field("qty").draft.as_deref(), Some("-"));
+
+        number_field_apply(
+            &host,
+            &mounted,
+            "qty",
+            "qty/replace:9".into(),
+            |field| {
+                field.value = Some(9.0);
+                field.draft = None;
+                let display = poodle_headless::number_input::format_number_committed(Some(9.0), None);
+                let len = display.chars().count();
+                field.selection = (len, len);
+            },
+        );
+        assert_eq!(host.field("qty").value, Some(9.0));
+        assert_eq!(host.field("qty").draft, None);
+
+        host.take_log();
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("4");
+        assert_eq!(host.field("qty").value, Some(4.0));
+        assert_eq!(host.field("qty").draft.as_deref(), Some("4"));
+    });
+}
+
+#[test]
+fn number_input_mounted_two_instances_keep_independent_identity() {
+    run_headless(|cx| {
+        let host = NumberFieldHost::new(vec![
+            NumberFieldState::new("left", Some(3.0)),
+            NumberFieldState::new("right", Some(3.0)),
+        ]);
+        let (mut driver, _mounted) = mount_number_fields(cx, &host);
+        driver.wait_for_focus_handle(&number_field_id("left"));
+        driver.wait_for_focus_handle(&number_field_id("right"));
+
+        driver.focus_element(&number_field_id("left"));
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("7");
+        assert_eq!(host.field("left").value, Some(7.0));
+        assert_eq!(host.field("right").value, Some(3.0));
+
+        driver.focus_element(&number_field_id("right"));
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("8");
+        assert_eq!(host.field("left").value, Some(7.0));
+        assert_eq!(host.field("right").value, Some(8.0));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&number_field_id("left")),
+            Some(false),
+            "equal starting values do not merge focus identity"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&number_field_id("right")),
+            Some(true)
+        );
+    });
+}
+
+#[test]
+fn number_input_mounted_disabled_and_read_only_are_inert() {
+    run_headless(|cx| {
+        let host = NumberFieldHost::new(vec![
+            NumberFieldState::new("locked", Some(5.0)).disabled().with_steppers(),
+            NumberFieldState::new("frozen", Some(5.0)).read_only().with_steppers(),
+        ]);
+        let (mut driver, mounted) = mount_number_fields(cx, &host);
+
+        assert!(
+            poodle_gpui_node_backend::focus_handle_for(&number_field_id("locked")).is_none(),
+            "disabled fields are not focusable"
+        );
+        host.take_log();
+        driver.pointer_activate_id(&number_field_id("locked"));
+        driver.dispatch_key_raw("9");
+        driver.pointer_activate_id(&number_field_inc_id("locked"));
+        assert_eq!(host.field("locked").value, Some(5.0));
+        assert!(
+            host.take_log()
+                .into_iter()
+                .filter(|entry| entry.starts_with("locked/")
+                    && !entry.ends_with("/focus:true")
+                    && !entry.ends_with("/focus:false"))
+                .collect::<Vec<_>>()
+                .is_empty(),
+            "disabled reports no mutation"
+        );
+
+        driver.wait_for_focus_handle(&number_field_id("frozen"));
+        driver.focus_element(&number_field_id("frozen"));
+        host.take_log();
+        driver.dispatch_key_raw("9");
+        driver.dispatch_key_raw("up");
+        driver.pointer_activate_id(&number_field_inc_id("frozen"));
+        assert_eq!(host.field("frozen").value, Some(5.0));
+        assert_eq!(host.field("frozen").draft, None);
+        let log = host.take_log();
+        assert!(
+            !log.iter().any(|entry| entry.starts_with("frozen/value:")
+                || entry.starts_with("frozen/draft:")
+                || entry.starts_with("frozen/commit:")),
+            "read-only stays inert on text and step routes: {log:?}"
+        );
+
+        let frozen = mounted_number(&mounted, "frozen");
+        assert!(frozen.interaction.focusable);
+        assert!(frozen.interaction.on_text_change.is_none());
+    });
+}
+
+/// Accessibility surface for the mounted SpinButton: name, value, bounds,
+/// unresolved invalid, validation busy, stepper labels/bounds, and one focus
+/// treatment on the field root.
+#[test]
+fn number_input_mounted_accessibility_projects_spin_button_surface() {
+    run_headless(|cx| {
+        let mut pending = NumberFieldState::new("pending", Some(2.0)).bounded(0.0, 10.0);
+        pending.validation_state = poodle_specs::ValidationState::Pending;
+        pending.show_steppers = true;
+        let host = NumberFieldHost::new(vec![
+            NumberFieldState::new("qty", Some(3.0))
+                .bounded(0.0, 10.0)
+                .with_steppers(),
+            pending,
+        ]);
+        let (mut driver, mounted) = mount_number_fields(cx, &host);
+        driver.wait_for_focus_handle(&number_field_id("qty"));
+
+        let qty = mounted_number(&mounted, "qty");
+        assert_eq!(qty.a11y.role, Some(NodeRole::SpinButton));
+        assert_eq!(qty.a11y.label.as_deref(), Some("qty"));
+        assert_eq!(qty.a11y.value, Some(3.0));
+        assert_eq!(qty.a11y.value_min, Some(0.0));
+        assert_eq!(qty.a11y.value_max, Some(10.0));
+        assert!(qty.style.focus.is_some(), "the field owns one focus treatment");
+
+        let steppers = &qty.children[1];
+        let inc = &steppers.children[0];
+        let dec = &steppers.children[1];
+        assert_eq!(inc.a11y.label.as_deref(), Some("Increment"));
+        assert_eq!(dec.a11y.label.as_deref(), Some("Decrement"));
+        assert!(!inc.interaction.focusable);
+        assert!(!dec.interaction.focusable);
+        assert!(inc.style.focus.is_none());
+        assert!(dec.style.focus.is_none());
+        assert!(!inc.interaction.disabled);
+        assert!(!dec.interaction.disabled);
+
+        let pending_node = mounted_number(&mounted, "pending");
+        assert_eq!(pending_node.a11y.busy, Some(true));
+
+        driver.focus_element(&number_field_id("qty"));
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("-");
+        let invalid = mounted_number(&mounted, "qty");
+        assert_eq!(invalid.a11y.invalid, Some(true));
+        assert_eq!(invalid.a11y.value, None);
+
+        // At the authored max, Increment is blocked.
+        number_field_apply(&host, &mounted, "qty", "qty/bound".into(), |field| {
+            field.value = Some(10.0);
+            field.draft = None;
+            field.selection = (2, 2);
+        });
+        let at_max = mounted_number(&mounted, "qty");
+        let inc_at_max = &at_max.children[1].children[0];
+        assert!(inc_at_max.interaction.disabled, "Increment disables at max");
+    });
+}
+
 /// g16.008. EditableLabel still commits when Tab leaves it — but for the
 /// reason its contract gives: Tab moves focus, and the blur commits the draft
 /// once. Enter is the direct commit, Escape cancels, and neither leaves a

@@ -4,83 +4,95 @@ import { describe, expect, it, vi } from "vitest";
 import NumberInput from "../src/NumberInput.svelte";
 
 describe("NumberInput (svelte)", () => {
-  it("commits parsed numbers as the user types and null on empty input", async () => {
+  it("emits committed numbers for valid drafts and null on clear", async () => {
     const onValueChange = vi.fn();
-    const { container } = render(NumberInput, { props: { value: 5, onValueChange } });
+    const onDraftValueChange = vi.fn();
+    const { container } = render(NumberInput, {
+      props: { value: 5, onValueChange, onDraftValueChange },
+    });
     const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
 
     await fireEvent.input(control, { target: { value: "7" } });
+    expect(onDraftValueChange).toHaveBeenLastCalledWith("7");
     expect(onValueChange).toHaveBeenLastCalledWith(7);
 
     await fireEvent.input(control, { target: { value: "" } });
     expect(onValueChange).toHaveBeenLastCalledWith(null);
   });
 
-  it("clamps to max and snaps to the step on blur", async () => {
+  it("keeps invalid drafts visible without emitting or clamping", async () => {
     const onValueChange = vi.fn();
-    const over = render(NumberInput, {
-      props: { value: 5, min: 0, max: 10, step: 2, onValueChange },
+    const onCommit = vi.fn();
+    const { container } = render(NumberInput, {
+      props: { value: 5, min: 0, max: 10, step: 2, onValueChange, onCommit },
     });
-    const overControl = over.container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
-    await fireEvent.input(overControl, { target: { value: "14" } });
-    await fireEvent.blur(overControl);
-    expect(onValueChange).toHaveBeenLastCalledWith(10);
+    const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
 
-    const snap = render(NumberInput, {
-      props: { value: 5, min: 0, max: 10, step: 2, onValueChange },
-    });
-    const snapControl = snap.container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
-    await fireEvent.input(snapControl, { target: { value: "3" } });
-    await fireEvent.blur(snapControl);
-    expect(onValueChange).toHaveBeenLastCalledWith(4);
+    await fireEvent.input(control, { target: { value: "14" } });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(control.getAttribute("aria-invalid")).toBe("true");
+
+    await fireEvent.blur(control);
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(onCommit).not.toHaveBeenCalled();
+    expect(control.value).toBe("5");
   });
 
-  it("steps with arrow keys, reports increment/decrement, and honours readOnly", async () => {
+  it("steps with arrow keys, commits, and honours readOnly", async () => {
     const onValueChange = vi.fn();
-    const onIncrement = vi.fn();
-    const onDecrement = vi.fn();
+    const onCommit = vi.fn();
     const { container } = render(NumberInput, {
-      props: { defaultValue: 5, min: 0, max: 10, step: 1, onValueChange, onIncrement, onDecrement },
+      props: { defaultValue: 5, min: 0, max: 10, step: 1, onValueChange, onCommit },
     });
     const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
 
     await fireEvent.keyDown(control, { key: "ArrowUp" });
     expect(onValueChange).toHaveBeenLastCalledWith(6);
-    expect(onIncrement).toHaveBeenCalledWith(6);
+    expect(onCommit).toHaveBeenLastCalledWith(6);
 
     await fireEvent.keyDown(control, { key: "ArrowDown" });
     expect(onValueChange).toHaveBeenLastCalledWith(5);
-    expect(onDecrement).toHaveBeenCalledWith(5);
+    expect(onCommit).toHaveBeenLastCalledWith(5);
 
     const readOnly = render(NumberInput, {
-      props: { defaultValue: 5, readOnly: true, onValueChange, onIncrement },
+      props: { defaultValue: 5, readOnly: true, onValueChange, onCommit },
     });
     const readOnlyControl = readOnly.container.querySelector<HTMLInputElement>(
       ".poodle-number-input__control",
     ) as HTMLInputElement;
     await fireEvent.keyDown(readOnlyControl, { key: "ArrowUp" });
-    expect(onIncrement).toHaveBeenCalledTimes(1);
+    expect(onCommit).toHaveBeenCalledTimes(2);
   });
 
-  it("round-trips string values and renders prefix and suffix", async () => {
+  it("renders prefix and suffix and preserves incomplete drafts", async () => {
     const onValueChange = vi.fn();
+    const onDraftValueChange = vi.fn();
     const { container } = render(NumberInput, {
-      props: { value: "2026", prefix: "FY", suffix: "kg", onValueChange },
+      props: { value: 2026, prefix: "FY", suffix: "kg", onValueChange, onDraftValueChange },
     });
     expect(container.querySelector(".poodle-number-input__prefix")?.textContent).toBe("FY");
     expect(container.querySelector(".poodle-number-input__suffix")?.textContent).toBe("kg");
 
     const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
-    await fireEvent.input(control, { target: { value: "7" } });
-    expect(onValueChange).toHaveBeenCalledWith("7");
+    await fireEvent.input(control, { target: { value: "-" } });
+    expect(onDraftValueChange).toHaveBeenLastCalledWith("-");
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(control.getAttribute("role")).toBe("spinbutton");
   });
 
-  it("submits the current value on Enter", async () => {
-    const onSubmit = vi.fn();
-    const { container } = render(NumberInput, { props: { value: 5, onSubmit } });
+  it("commits on Enter and reverts unresolved drafts on Escape", async () => {
+    const onCommit = vi.fn();
+    const onValueChange = vi.fn();
+    const { container } = render(NumberInput, { props: { value: 5, onCommit, onValueChange } });
     const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
+
     await fireEvent.keyDown(control, { key: "Enter" });
-    expect(onSubmit).toHaveBeenCalledWith(5);
+    expect(onCommit).toHaveBeenCalledWith(5);
+
+    await fireEvent.input(control, { target: { value: "1e2" } });
+    await fireEvent.keyDown(control, { key: "Escape" });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(control.value).toBe("5");
   });
 
   it("maps validation state to aria attributes and reports async validation results", async () => {
@@ -113,5 +125,65 @@ describe("NumberInput (svelte)", () => {
     });
     const field = asyncCase.container.querySelector<HTMLElement>(".poodle-number-input__field");
     expect(field?.getAttribute("data-validation-state")).toBe("invalid");
+  });
+
+  it("ignores a stale async validation result after clear", async () => {
+    let release!: (result: { valid: boolean; message: string }) => void;
+    const validate = vi.fn(
+      () =>
+        new Promise<{ valid: boolean; message: string }>((resolve) => {
+          release = resolve;
+        }),
+    );
+    const onValidationChange = vi.fn();
+    const { container } = render(NumberInput, {
+      props: { value: 5, min: 0, max: 10, validate, onValidationChange },
+    });
+    const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
+
+    await fireEvent.input(control, { target: { value: "3" } });
+    await waitFor(() => expect(validate).toHaveBeenCalledTimes(1));
+    await fireEvent.input(control, { target: { value: "" } });
+    await waitFor(() => {
+      expect(onValidationChange).toHaveBeenCalledWith(expect.objectContaining({ status: "idle" }));
+    });
+
+    release({ valid: false, message: "stale" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(onValidationChange).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: "invalid", message: "stale" }),
+    );
+    const field = container.querySelector<HTMLElement>(".poodle-number-input__field");
+    expect(field?.getAttribute("data-validation-state")).not.toBe("invalid");
+  });
+
+  it("ignores a stale async validation result after external replacement", async () => {
+    const releases: Array<(result: { valid: boolean; message: string }) => void> = [];
+    const validate = vi.fn(
+      () =>
+        new Promise<{ valid: boolean; message: string }>((resolve) => {
+          releases.push(resolve);
+        }),
+    );
+    const onValidationChange = vi.fn();
+    const { container, rerender } = render(NumberInput, {
+      props: { value: 5, min: 0, max: 10, validate, onValidationChange },
+    });
+    const control = container.querySelector<HTMLInputElement>(
+      ".poodle-number-input__control",
+    ) as HTMLInputElement;
+
+    await fireEvent.input(control, { target: { value: "3" } });
+    await waitFor(() => expect(releases).toHaveLength(1));
+
+    await rerender({ value: 4, min: 0, max: 10, validate, onValidationChange });
+    await waitFor(() => expect(releases).toHaveLength(2));
+    expect(validate).toHaveBeenLastCalledWith("4", undefined);
+
+    releases[0]!({ valid: false, message: "stale" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(onValidationChange).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: "invalid", message: "stale" }),
+    );
   });
 });

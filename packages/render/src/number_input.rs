@@ -1,13 +1,20 @@
 //! NumberInput — numeric field with optional steppers and boxed affixes.
 //!
 //! Contract: `docs/contracts/components/number-input.md`
-//! Ported from: `packages/jetstream/components/src/number_input.rs`.
+//! Declares one editable SpinButton value node with text/selection/focus/
+//! submit/cancel/replacement channels. Value, draft, and commit effects come
+//! from `poodle_headless::number_input`. The GPUI host stores draft, caret,
+//! and focus between rebuilds and routes mounted dispatch through the same
+//! transition results as web.
 
 use std::sync::Arc;
 
+use poodle_headless::number_input::{
+    number_input_display_text, number_input_transition, NumberInputEffect, NumberInputEvent,
+};
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
-    MainAxisAlignment, Node, NodeRole,
+    MainAxisAlignment, Node, NodeRole, StylePatch, TextChangeHandler,
 };
 use poodle_specs::{NumberInputSpec, ValidationState};
 
@@ -18,12 +25,83 @@ use crate::presentation::{
     size_padding_x_offset_rem,
 };
 
-/// Host callbacks: increment / decrement presses. Bounds- or state-disabled
-/// steppers never fire.
-#[derive(Default)]
+const SELECTION_ALPHA: f32 = 0.30;
+
+/// Host callbacks matching the number-input machine effects, plus caret/focus
+/// channels the host stores between rebuilds.
+#[derive(Clone, Default)]
 pub struct NumberInputHandlers {
-    pub on_increment: Option<Arc<dyn Fn() + Send + Sync>>,
-    pub on_decrement: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_draft_value_change: Option<Arc<dyn Fn(Option<String>) + Send + Sync>>,
+    pub on_value_change: Option<Arc<dyn Fn(Option<f64>) + Send + Sync>>,
+    pub on_commit: Option<Arc<dyn Fn(Option<f64>) + Send + Sync>>,
+    pub on_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
+    pub on_focus_change: Option<Arc<dyn Fn(bool) + Send + Sync>>,
+}
+
+fn apply_effects(effects: &[NumberInputEffect], handlers: &NumberInputHandlers) {
+    for effect in effects {
+        match effect {
+            NumberInputEffect::EmitDraftValueChange { draft } => {
+                if let Some(on_draft) = &handlers.on_draft_value_change {
+                    on_draft(draft.clone());
+                }
+            }
+            NumberInputEffect::EmitValueChange { value } => {
+                if let Some(on_value) = &handlers.on_value_change {
+                    on_value(*value);
+                }
+            }
+            NumberInputEffect::EmitCommit { value } => {
+                if let Some(on_commit) = &handlers.on_commit {
+                    on_commit(*value);
+                }
+            }
+        }
+    }
+}
+
+fn dispatch_event(spec: &NumberInputSpec, event: NumberInputEvent, handlers: &NumberInputHandlers) {
+    let (next, effects) = number_input_transition(spec.to_context(), event);
+    apply_effects(&effects, handlers);
+    // Step/Home/End/Enter/Escape/Blur change the visible text without going
+    // through the text edit model, so the host caret has to follow the new
+    // display. Raw keystroke paths report their own selection afterward and
+    // overwrite this when the caret is not simply "end of field".
+    let next_display = number_input_display_text(&next);
+    if next_display != spec.display_text() {
+        let len = next_display.chars().count();
+        if let Some(on_selection) = &handlers.on_selection_change {
+            on_selection(len, len);
+        }
+    }
+}
+
+fn report_text_edit(
+    outcome: poodle_headless::text_input::EditOutcome,
+    current_text: &str,
+    selection: (usize, usize),
+    spec: &NumberInputSpec,
+    handlers: &NumberInputHandlers,
+) {
+    let moved = (outcome.state.anchor, outcome.state.head);
+    if let Some(next) = outcome.value {
+        if next != current_text {
+            dispatch_event(
+                spec,
+                NumberInputEvent::RawEdit { text: next.clone() },
+                handlers,
+            );
+            if let Some(on_selection) = &handlers.on_selection_change {
+                on_selection(moved.0, moved.1);
+            }
+            return;
+        }
+    }
+    if moved != selection {
+        if let Some(on_selection) = &handlers.on_selection_change {
+            on_selection(moved.0, moved.1);
+        }
+    }
 }
 
 /// A boxed prefix/suffix affix: bordered box with surface bg + muted text,
@@ -89,30 +167,56 @@ pub fn number_input(
     let radius = ctx.theme().resolve_radius(spec.radius_token());
     let fill = ctx.theme().resolve_color(spec.fill_token());
     let text_color = ctx.theme().resolve_color(spec.text_color_token());
+    let placeholder_color = ctx.theme().resolve_color(spec.placeholder_color_token());
     let stepper_icon_color = ctx.theme().resolve_color(spec.stepper_icon_color_token());
     // Boxed-affix chrome (border-default box + surface bg + muted text).
     let affix_text = ctx.theme().resolve_color(spec.affix_text_token());
     let affix_bg = ctx.theme().resolve_color(spec.affix_fill_token());
     let affix_border = ctx.theme().resolve_color(spec.affix_border_token());
     let disabled_opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
+    let selection_fill = ctx.theme().resolve_color("color.accent.base");
 
-    // The field border recolors per validation state.
-    let effective_border = match spec.validation_state {
-        ValidationState::Invalid => ctx.theme().resolve_color("color.status.danger"),
-        ValidationState::Valid => ctx.theme().resolve_color("color.status.success"),
-        ValidationState::Pending => ctx.theme().resolve_color("color.accent.base"),
-        ValidationState::None => border,
+    let invalid_draft = spec.is_invalid_draft();
+    let effective_border = match (invalid_draft, spec.validation_state) {
+        (true, _) | (_, ValidationState::Invalid) => {
+            ctx.theme().resolve_color("color.status.danger")
+        }
+        (_, ValidationState::Valid) => ctx.theme().resolve_color("color.status.success"),
+        (_, ValidationState::Pending) => ctx.theme().resolve_color("color.accent.base"),
+        (_, ValidationState::None) => border,
     };
 
-    let value = spec.clamped_value();
-    let value_text = match spec.precision {
-        Some(precision) => format!("{:.*}", precision as usize, value),
-        None => format!("{value}"),
+    let display_text = spec.display_text();
+    let showing_placeholder = display_text.is_empty();
+    let visible_text = if showing_placeholder {
+        spec.placeholder.as_deref().unwrap_or("").to_string()
+    } else {
+        display_text.clone()
+    };
+    let display_color = if showing_placeholder {
+        placeholder_color
+    } else {
+        text_color
     };
 
-    // Bounds checks for stepper button disabled state.
-    let at_min = !spec.min.is_infinite() && spec.value <= spec.min;
-    let at_max = !spec.max.is_infinite() && spec.value >= spec.max;
+    let field_id = match spec.id.as_deref() {
+        Some(id) => format!("poodle-number-input-{id}"),
+        None => {
+            let descriptor = [
+                spec.aria_label.as_deref(),
+                spec.placeholder.as_deref(),
+            ]
+            .into_iter()
+            .flatten()
+            .collect::<Vec<_>>()
+            .join("-");
+            if descriptor.is_empty() {
+                "poodle-number-input".to_string()
+            } else {
+                format!("poodle-number-input-{descriptor}")
+            }
+        }
+    };
 
     // ── Root container ─────────────────────────────────────────────────────
     let mut el = Node::container();
@@ -131,8 +235,6 @@ pub fn number_input(
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
         s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
-        // Old GPUI wrapper declares `.w_full()`; channel fields rely on that
-        // declaration when their parent distributes the three inputs.
         s.fill_width = true;
     }
 
@@ -142,7 +244,7 @@ pub fn number_input(
                    label: &str,
                    id: &str,
                    blocked: bool,
-                   handler: Option<Arc<dyn Fn() + Send + Sync>>|
+                   direction: i32|
      -> Node {
         let mut btn = Node::button("");
         btn.a11y.label = Some(label.to_string());
@@ -164,27 +266,32 @@ pub fn number_input(
             pad.top = 0.0;
             pad.bottom = 0.0;
         }
-        btn.interaction.focusable = true;
+        // Pointer-activatable only: the field root owns the one focus
+        // treatment. A focusable stepper would steal the root handle on click
+        // and fire blur/commit before the step landed.
+        btn.interaction.focusable = false;
         let mut glyph = Node::icon(icon, icon_size);
         glyph.style.descriptor.text_color = Some(stepper_icon_color);
         let mut btn = btn.child(glyph);
         if blocked {
             btn.style.descriptor.opacity = disabled_opacity;
             btn.interaction.disabled = true;
-        } else if let Some(handler) = handler {
-            btn.interaction.on_activate = Some(Arc::new(move || handler()));
+        } else {
+            let spec = spec.clone();
+            let handlers = handlers.clone();
+            btn.interaction.on_activate = Some(Arc::new(move || {
+                dispatch_event(&spec, NumberInputEvent::Step { direction }, &handlers);
+            }));
         }
         btn
     };
 
-    // ── Value row: the old GPUI tier's left-hand field area ────────────────
+    // ── Value row ──────────────────────────────────────────────────────────
     let mut value_row = Node::container();
     {
         let s = &mut value_row.style;
         s.descriptor.layout.direction = LayoutDirection::Row;
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
-        // Old GPUI/Svelte contract: affix↔value gap is a fixed 0.5rem,
-        // independent of the active density's inline token ladder.
         s.descriptor.layout.spacing.gap = rem_to_px(0.5);
         s.descriptor.layout.spacing.padding.left = pad_x;
         s.descriptor.layout.spacing.padding.right = pad_x;
@@ -193,7 +300,6 @@ pub fn number_input(
         s.min_width = Some(0.0);
     }
 
-    // Prefix affix (boxed: border + surface bg, inside left edge).
     if let Some(prefix) = &spec.prefix {
         value_row = value_row.child(affix_box(
             prefix,
@@ -207,24 +313,85 @@ pub fn number_input(
         ));
     }
 
-    // Value display.
-    let mut value = Node::text(&value_text);
+    // Editable value node (not a static label).
+    let mut value = Node::text(&visible_text);
+    value.id = Some(format!("{field_id}-value"));
     {
         let s = &mut value.style;
-        s.descriptor.text_color = Some(text_color);
+        s.descriptor.text_color = Some(display_color);
         s.text_size = Some(font_size);
         s.line_height = Some(1.4);
-        // The old GPUI tier uses `.flex_1()` for the value slot: grow and
-        // shrink from a zero basis, rather than intrinsic text width. That
-        // distinction only shows up when the field is one of several
-        // fractional channel inputs (ColorPicker's RGB/HSL rows).
         s.flex_grow = Some(1.0);
         s.flex_basis = Some(0.0);
         s.min_width = Some(0.0);
+        s.no_wrap = true;
+        s.text_ellipsis = true;
+    }
+
+    let mut value_caret = None;
+    let mut value_select: Option<
+        Arc<dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync>,
+    > = None;
+
+    if !spec.is_disabled {
+        let caret_color = if spec.is_read_only {
+            with_alpha(text_color, 0.0)
+        } else {
+            text_color
+        };
+        value = value.with_caret(
+            spec.selection_range(),
+            caret_color,
+            with_alpha(selection_fill, selection_fill.3 * SELECTION_ALPHA),
+        );
+        if let Some(caret) = &mut value.caret {
+            caret.showing_placeholder = showing_placeholder;
+        }
+        value_caret = value.caret;
+
+        if let Some(on_selection_change) = handlers.on_selection_change.clone() {
+            let text = display_text.clone();
+            let handler: Arc<dyn Fn(usize, usize, poodle_node::SelectGranularity) + Send + Sync> =
+                Arc::new(
+                    move |start: usize, end: usize, granularity: poodle_node::SelectGranularity| {
+                        let (start, end) = match granularity {
+                            poodle_node::SelectGranularity::Character => (start, end),
+                            poodle_node::SelectGranularity::Word => {
+                                let (a, _) =
+                                    poodle_headless::text_input::word_range_at(&text, start);
+                                let (_, b) = poodle_headless::text_input::word_range_at(&text, end);
+                                (a, b)
+                            }
+                            poodle_node::SelectGranularity::Line => (0, text.chars().count()),
+                        };
+                        on_selection_change(start, end);
+                    },
+                );
+            value.interaction.on_select_range = Some(Arc::clone(&handler));
+            value_select = Some(handler);
+        }
+
+        if !spec.is_read_only {
+            let text = display_text.clone();
+            let (start, end) = spec.selection_range();
+            let spec_owned = spec.clone();
+            let handlers_owned = handlers.clone();
+            value.interaction.on_edit_insert = Some(Arc::new(move |inserted: &str| {
+                let outcome = poodle_headless::text_input::insert_transition(
+                    &text,
+                    poodle_headless::text_input::EditState {
+                        anchor: start,
+                        head: end,
+                    },
+                    inserted,
+                    None,
+                );
+                report_text_edit(outcome, &text, (start, end), &spec_owned, &handlers_owned);
+            }));
+        }
     }
     value_row = value_row.child(value);
 
-    // Suffix affix (boxed, inside right edge).
     if let Some(suffix) = &spec.suffix {
         value_row = value_row.child(affix_box(
             suffix,
@@ -258,18 +425,118 @@ pub fn number_input(
             .child(stepper(
                 "plus",
                 "Increment",
-                "poodle-number-input-inc",
-                at_max || spec.is_disabled || spec.is_read_only,
-                handlers.on_increment.clone(),
+                &format!("{field_id}-inc"),
+                !spec.can_step(1),
+                1,
             ))
             .child(stepper(
                 "minus",
                 "Decrement",
-                "poodle-number-input-dec",
-                at_min || spec.is_disabled || spec.is_read_only,
-                handlers.on_decrement.clone(),
+                &format!("{field_id}-dec"),
+                !spec.can_step(-1),
+                -1,
             ));
         el = el.child(steppers);
+    }
+
+    el.id = Some(field_id);
+    el.interaction.focusable = true;
+
+    if !spec.is_disabled {
+        el.style.focus = Some(StylePatch {
+            background: None,
+            border_color: Some(ctx.theme().resolve_color(spec.focus_ring_color_token())),
+            text_color: None,
+            opacity: None,
+        });
+        el.caret = value_caret;
+        el.interaction.on_select_range = value_select;
+
+        let on_focus = handlers.on_focus_change.clone();
+        let spec_blur = spec.clone();
+        let handlers_blur = handlers.clone();
+        el.interaction.on_focus_change = Some(Arc::new(move |focused: bool| {
+            if let Some(on_focus) = &on_focus {
+                on_focus(focused);
+            }
+            if !focused {
+                dispatch_event(&spec_blur, NumberInputEvent::Blur, &handlers_blur);
+            }
+        }));
+
+        if !spec.is_read_only {
+            let text = display_text.clone();
+            let (start, end) = spec.selection_range();
+            let spec_keys = spec.clone();
+            let handlers_keys = handlers.clone();
+            el.interaction.on_edit_key = Some(Arc::new(move |key: &str, mods| {
+                let event = match key {
+                    "up" => Some(NumberInputEvent::Step { direction: 1 }),
+                    "down" => Some(NumberInputEvent::Step { direction: -1 }),
+                    "home" => Some(NumberInputEvent::Home),
+                    "end" => Some(NumberInputEvent::End),
+                    _ => None,
+                };
+                if let Some(event) = event {
+                    dispatch_event(&spec_keys, event, &handlers_keys);
+                    return;
+                }
+                let state = poodle_headless::text_input::EditState {
+                    anchor: start,
+                    head: end,
+                };
+                let Some(outcome) = poodle_headless::text_input::edit_transition(
+                    &text, state, key, mods.shift, mods.accel, None,
+                ) else {
+                    return;
+                };
+                report_text_edit(outcome, &text, (start, end), &spec_keys, &handlers_keys);
+            }));
+
+            let text = display_text.clone();
+            let (start, end) = spec.selection_range();
+            let spec_insert = spec.clone();
+            let handlers_insert = handlers.clone();
+            el.interaction.on_edit_insert = Some(Arc::new(move |inserted: &str| {
+                let outcome = poodle_headless::text_input::insert_transition(
+                    &text,
+                    poodle_headless::text_input::EditState {
+                        anchor: start,
+                        head: end,
+                    },
+                    inserted,
+                    None,
+                );
+                report_text_edit(outcome, &text, (start, end), &spec_insert, &handlers_insert);
+            }));
+
+            let replacement: TextChangeHandler = {
+                let spec_replace = spec.clone();
+                let handlers_replace = handlers.clone();
+                Arc::new(move |text: &str| {
+                    dispatch_event(
+                        &spec_replace,
+                        NumberInputEvent::RawEdit {
+                            text: text.to_string(),
+                        },
+                        &handlers_replace,
+                    );
+                })
+            };
+            el.interaction.on_text_change = Some(replacement);
+
+            let spec_submit = spec.clone();
+            let handlers_submit = handlers.clone();
+            el.interaction.on_submit = Some(Arc::new(move || {
+                dispatch_event(&spec_submit, NumberInputEvent::Enter, &handlers_submit);
+            }));
+
+            let spec_cancel = spec.clone();
+            let handlers_cancel = handlers.clone();
+            el.interaction.on_cancel = Some(Arc::new(move || {
+                dispatch_event(&spec_cancel, NumberInputEvent::Escape, &handlers_cancel);
+            }));
+        }
     }
 
     if spec.is_disabled {
@@ -283,5 +550,145 @@ pub fn number_input(
         }
     }
     el.a11y.role = Some(NodeRole::SpinButton);
+    if let Some(now) = spec.accessible_value_now() {
+        el.a11y.value = Some(now);
+        el.a11y.value_text = Some(spec.display_text());
+    }
+    el.a11y.value_min = spec.min;
+    el.a11y.value_max = spec.max;
+    let unresolved_invalid = invalid_draft || spec.validation_state == ValidationState::Invalid;
+    if unresolved_invalid {
+        el.a11y.invalid = Some(true);
+    }
+    if spec.validation_state == ValidationState::Pending {
+        el.a11y.busy = Some(true);
+    }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::context::RenderContext;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    #[test]
+    fn editable_spin_button_declares_edit_channels() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = number_input(
+            &NumberInputSpec::new(Some(5.0)).with_aria_label("Qty"),
+            &ctx,
+            NumberInputHandlers::default(),
+        );
+        assert_eq!(node.a11y.role, Some(NodeRole::SpinButton));
+        assert_eq!(node.a11y.value, Some(5.0));
+        assert_eq!(node.a11y.label.as_deref(), Some("Qty"));
+        assert!(node.interaction.focusable);
+        assert!(node.interaction.on_text_change.is_some());
+        assert!(node.interaction.on_edit_key.is_some());
+        assert!(node.interaction.on_edit_insert.is_some());
+        assert!(node.interaction.on_submit.is_some());
+        assert!(node.interaction.on_cancel.is_some());
+        assert!(node.interaction.on_focus_change.is_some());
+        assert!(node.caret.is_some());
+    }
+
+    #[test]
+    fn empty_committed_omits_valuenow_and_shows_placeholder() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = number_input(
+            &NumberInputSpec::new(None).with_placeholder("n"),
+            &ctx,
+            NumberInputHandlers::default(),
+        );
+        assert_eq!(node.a11y.value, None);
+        assert!(node.interaction.on_text_change.is_some());
+    }
+
+    #[test]
+    fn bounds_project_to_valuemin_max() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = number_input(
+            &NumberInputSpec::new(Some(3.0))
+                .with_min(Some(0.0))
+                .with_max(Some(10.0)),
+            &ctx,
+            NumberInputHandlers::default(),
+        );
+        assert_eq!(node.a11y.value_min, Some(0.0));
+        assert_eq!(node.a11y.value_max, Some(10.0));
+    }
+
+    #[test]
+    fn read_only_keeps_focus_but_drops_mutation_channels() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = number_input(
+            &NumberInputSpec::new(Some(1.0)).with_read_only(true),
+            &ctx,
+            NumberInputHandlers::default(),
+        );
+        assert!(node.interaction.focusable);
+        assert!(node.interaction.on_text_change.is_none());
+        assert!(node.interaction.on_edit_key.is_none());
+        assert!(node.caret.is_some());
+    }
+
+    #[test]
+    fn steppers_wire_machine_not_increment_callbacks() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let committed = Arc::new(std::sync::Mutex::new(None));
+        let committed_c = Arc::clone(&committed);
+        let node = number_input(
+            &NumberInputSpec::new(Some(1.0))
+                .with_min(Some(0.0))
+                .with_max(Some(10.0))
+                .with_steppers(true),
+            &ctx,
+            NumberInputHandlers {
+                on_value_change: Some(Arc::new(move |v| {
+                    *committed_c.lock().unwrap() = v;
+                })),
+                on_commit: Some(Arc::new(|_| {})),
+                ..NumberInputHandlers::default()
+            },
+        );
+        let steppers = &node.children[1];
+        let inc = &steppers.children[0];
+        assert!(!inc.interaction.focusable, "steppers stay out of focus order");
+        assert!(inc.style.focus.is_none());
+        assert!(node.style.focus.is_some(), "the field owns the focus treatment");
+        let activate = inc.interaction.on_activate.as_ref().expect("inc active");
+        activate();
+        assert_eq!(*committed.lock().unwrap(), Some(2.0));
+    }
+
+    #[test]
+    fn unresolved_draft_and_pending_validation_project_a11y_flags() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let invalid = number_input(
+            &NumberInputSpec::new(Some(1.0))
+                .with_draft_value(Some("-".into()))
+                .with_aria_label("Qty"),
+            &ctx,
+            NumberInputHandlers::default(),
+        );
+        assert_eq!(invalid.a11y.invalid, Some(true));
+        assert_eq!(invalid.a11y.value, None);
+
+        let busy = number_input(
+            &NumberInputSpec::new(Some(1.0)).with_validation_state(ValidationState::Pending),
+            &ctx,
+            NumberInputHandlers::default(),
+        );
+        assert_eq!(busy.a11y.busy, Some(true));
+    }
 }

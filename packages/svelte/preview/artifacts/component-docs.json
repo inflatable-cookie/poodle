@@ -7490,15 +7490,21 @@
       },
       {
         "name": "value",
-        "type": "number | string | null",
-        "default": "null",
-        "description": "Bindable value. Numeric bindings stay numeric; string-form bindings round-trip as strings."
+        "type": "number | null | undefined",
+        "default": "undefined",
+        "description": "Controlled committed value. null is committed empty; undefined means uncontrolled."
       },
       {
         "name": "defaultValue",
-        "type": "number | string | null",
+        "type": "number | null",
         "default": "null",
-        "description": "Initial value for uncontrolled mode."
+        "description": "Initial committed value for uncontrolled mode."
+      },
+      {
+        "name": "draftValue",
+        "type": "string | null | undefined",
+        "default": "undefined",
+        "description": "Optional controlled raw draft. undefined lets the adapter own the draft; null means no draft override."
       },
       {
         "name": "placeholder",
@@ -7534,31 +7540,37 @@
         "name": "min",
         "type": "number | null",
         "default": "null",
-        "description": "Minimum allowed value."
+        "description": "Optional inclusive lower bound."
       },
       {
         "name": "max",
         "type": "number | null",
         "default": "null",
-        "description": "Maximum allowed value."
+        "description": "Optional inclusive upper bound."
       },
       {
         "name": "step",
-        "type": "number | string | null",
+        "type": "number | null",
         "default": "null",
-        "description": "Step increment for value changes."
+        "description": "Optional positive finite step. Omitted means 1."
       },
       {
         "name": "precision",
         "type": "number | null",
         "default": "null",
-        "description": "Number of decimal places to display."
+        "description": "Optional non-negative maximum fractional digits and fixed committed display scale."
       },
       {
         "name": "prefix",
         "type": "string | null",
         "default": "null",
         "description": "Optional prefix chip rendered before the control."
+      },
+      {
+        "name": "suffix",
+        "type": "string | null",
+        "default": "null",
+        "description": "Optional suffix chip rendered after the control."
       },
       {
         "name": "validationState",
@@ -7570,7 +7582,7 @@
         "name": "validate",
         "type": "InputValidator | undefined",
         "default": "undefined",
-        "description": "Optional async/sync validator for string-form workflows."
+        "description": "Optional async validator for committed canonical decimal strings."
       },
       {
         "name": "validationContext",
@@ -7598,9 +7610,15 @@
       },
       {
         "name": "onValueChange",
-        "type": "((value: number | string | null) => void) | undefined",
+        "type": "((value: number | null) => void) | undefined",
         "default": "undefined",
-        "description": "Called when the value changes."
+        "description": "Called when a distinct valid committed value forms, or the field is cleared."
+      },
+      {
+        "name": "onDraftValueChange",
+        "type": "((draft: string | null) => void) | undefined",
+        "default": "undefined",
+        "description": "Called on every raw draft edit; null asks a controlled host to discard its draft override."
       },
       {
         "name": "onValidationChange",
@@ -7609,22 +7627,10 @@
         "description": "Called when validation status changes."
       },
       {
-        "name": "onSubmit",
-        "type": "((value: number | string | null) => void) | undefined",
+        "name": "onCommit",
+        "type": "((value: number | null) => void) | undefined",
         "default": "undefined",
-        "description": "Called when the value is submitted."
-      },
-      {
-        "name": "onIncrement",
-        "type": "((value: number | string | null) => void) | undefined",
-        "default": "undefined",
-        "description": "Called when the value is incremented."
-      },
-      {
-        "name": "onDecrement",
-        "type": "((value: number | string | null) => void) | undefined",
-        "default": "undefined",
-        "description": "Called when the value is decremented."
+        "description": "Called on valid Enter/blur or a successful step action."
       },
       {
         "name": "onFocus",

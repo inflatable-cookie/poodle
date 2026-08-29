@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.030 ready for dispatch
+Status: active — g16.030 complete on worker branch; awaiting review/merge
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -60,7 +60,7 @@ stay maintained; backend admission is not part of the first card.
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
-30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — ready; decision approved, dependency satisfied
+30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; awaiting review/merge; ledger 49 mounted / 125 missing
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — planned; bounded audit complete, depends on 030
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — planned; depends on 031 and must not overlap 025
 
@@ -95,9 +95,9 @@ closed as `g16.029`. NumberInput's typed committed value, optional raw draft,
 clean callback migration, and mounted editor are authoritative and compiled as
 `g16.030`. NumberInput stays serial behind TimeInput's merge because both edit
 shared core/headless exports and the domain-vector corpus.
-Promoting NumberInput's explicit runtime deltas moves only that ledger axis from
-115 / 60 to 116 present / 59 not-applicable; mounted totals stay 48 / 126 until
-that card lands.
+Promoting NumberInput's explicit runtime deltas moved only that ledger axis from
+115 / 60 to 116 present / 59 not-applicable; mounted totals are now 49 / 125
+after `g16.030`.
 EditableLabel still needs an operator-owned editing decision. Fader, Knob, and
 XYPad now have a completed bounded audit and two serial cards: `g16.031`
 aligns paired machines plus Svelte/React gesture and entry lifecycles;
@@ -294,8 +294,8 @@ moved.
 
 ## Next Task
 
-Dispatch `g16.030` NumberInput.
-Keep `g16.022` planned until the orchestrator chooses it after the serial
-core/export tranche. The public drag migration boundary is resolved; reconcile
-the exact custom-surface and host-bridge API names only after their
-prerequisite kernels land.
+Await operator-authorized merge of `g16.030`, then choose between `g16.022`
+and the continuous-audio cards. Keep `g16.022` planned until the orchestrator
+chooses it after the serial core/export tranche. The public drag migration
+boundary is resolved; reconcile the exact custom-surface and host-bridge API
+names only after their prerequisite kernels land.

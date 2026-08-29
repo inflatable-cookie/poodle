@@ -1,10 +1,21 @@
-import { useEffect, useRef, useState, type ChangeEvent, type FocusEvent } from "react";
-import { clampNullable, parseNumberish, parseStep, validationStatusToState } from "@inflatable-cookie/poodle-core";
+import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
+import {
+  formatNumberCommitted,
+  numberDecimalToNumber,
+  numberDraftConstraintValid,
+  numberInputContext,
+  numberInputDisplayText,
+  numberInputInvalid,
+  numberInputTransition,
+  parseNumberDecimal,
+  stepNumberValue,
+  validationStatusToState,
+  type NumberInputEffect,
+} from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/number-input.css";
 
 import { Icon } from "./Icon";
-import { formatNumber, snapToStep } from "./internal";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type {
   ControlDensity,
@@ -23,16 +34,17 @@ export interface NumberInputValidationChange {
 
 export interface NumberInputProps {
   id?: string;
-  value?: number | string | null;
-  defaultValue?: number | string | null;
+  value?: number | null;
+  defaultValue?: number | null;
+  draftValue?: string | null;
   placeholder?: string | null;
   name?: string;
   disabled?: boolean;
   readOnly?: boolean;
   required?: boolean;
-  min?: number | string | null;
-  max?: number | string | null;
-  step?: number | string | null;
+  min?: number | null;
+  max?: number | null;
+  step?: number | null;
   precision?: number | null;
   ariaLabel?: string | null;
   describedBy?: string | null;
@@ -45,19 +57,44 @@ export interface NumberInputProps {
   size?: ControlSize | null;
   sizeRole?: SemanticControlSizeRole;
   density?: ControlDensity | null;
-  onValueChange?: (value: number | string | null) => void;
+  onValueChange?: (value: number | null) => void;
+  onDraftValueChange?: (draft: string | null) => void;
   onValidationChange?: (detail: NumberInputValidationChange) => void;
-  onSubmit?: (value: number | string | null) => void;
-  onIncrement?: (value: number | string | null) => void;
-  onDecrement?: (value: number | string | null) => void;
+  onCommit?: (value: number | null) => void;
   onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
   onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
+}
+
+function draftNumeric(
+  draft: string | null | undefined,
+  min: number | null,
+  max: number | null,
+  step: number | null,
+  precision: number | null,
+): number | null | undefined {
+  // undefined = no draft channel → fall back to committed for a11y.
+  // null from this helper is unused; empty string means omit aria-valuenow.
+  if (draft === undefined) {
+    return null;
+  }
+
+  if (draft === null || draft === "") {
+    return undefined;
+  }
+
+  if (!numberDraftConstraintValid(draft, min, max, step, precision)) {
+    return undefined;
+  }
+
+  const decimal = parseNumberDecimal(draft);
+  return decimal === null ? undefined : numberDecimalToNumber(decimal);
 }
 
 export function NumberInput({
   id = "",
   value,
   defaultValue = null,
+  draftValue,
   placeholder = null,
   name,
   disabled = false,
@@ -79,60 +116,108 @@ export function NumberInput({
   sizeRole = "control",
   density = null,
   onValueChange,
+  onDraftValueChange,
   onValidationChange,
-  onSubmit,
-  onIncrement,
-  onDecrement,
+  onCommit,
   onFocus,
   onBlur,
 }: NumberInputProps) {
   const uiPresentation = useUiPresentation();
 
   const [internalValidationStatus, setInternalValidationStatus] = useState<InputValidationStatus>("idle");
-  const [uncontrolledValue, setUncontrolledValue] = useState<number | null>(() => parseNumberish(defaultValue));
-  const [draftValue, setDraftValue] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
+  const [uncontrolledValue, setUncontrolledValue] = useState<number | null>(defaultValue);
+  const [localDraft, setLocalDraft] = useState<string | null>(null);
+  const lastControlledValue = useRef<number | null | undefined>(undefined);
+  const lastEmittedValue = useRef<number | null | undefined>(undefined);
   const activeValidationKey = useRef(0);
   const validationMessageRef = useRef("");
 
-  const valueMode: "number" | "string" =
-    typeof value === "string" || typeof defaultValue === "string" ? "string" : "number";
-  const parsedValue = parseNumberish(value);
-  const parsedMin = parseNumberish(min);
-  const parsedMax = parseNumberish(max);
-  const resolvedStep = parseStep(step);
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
   const isControlled = value !== undefined;
-  const currentValue = isControlled ? parsedValue : uncontrolledValue;
+  const draftControlled = draftValue !== undefined;
+  const committed = (isControlled ? value : uncontrolledValue) ?? null;
+  const activeDraft = draftControlled ? draftValue : localDraft;
+
+  useEffect(() => {
+    if (value === undefined || value === lastControlledValue.current) {
+      return;
+    }
+
+    const previous = lastControlledValue.current;
+    lastControlledValue.current = value;
+
+    if (previous !== undefined && value === lastEmittedValue.current) {
+      return;
+    }
+
+    if (!draftControlled) {
+      setLocalDraft(null);
+    }
+
+    // Genuine external replacement (not first observe, not host echo): cancel
+    // any in-flight validation and validate the authored committed value.
+    if (previous !== undefined) {
+      void runValidation(value ?? null);
+    }
+  }, [value, draftControlled]);
+
+  const machineContext = numberInputContext({
+    committed,
+    defaultValue,
+    draft: activeDraft ?? null,
+    min,
+    max,
+    step,
+    precision,
+    disabled,
+    readOnly,
+  });
+  const displayValue = numberInputDisplayText(machineContext);
+  const draftInvalid = numberInputInvalid(machineContext);
   const effectiveValidationState = validate
     ? validationStatusToState(internalValidationStatus, validationState)
     : validationState;
-  const ariaInvalid = effectiveValidationState === "invalid" ? true : undefined;
+  const ariaInvalid = draftInvalid || effectiveValidationState === "invalid" ? true : undefined;
   const ariaBusy = effectiveValidationState === "pending" ? true : undefined;
-
-  useEffect(() => {
-    if (!isEditing) {
-      setDraftValue(formatNumber(currentValue, precision));
-    }
-  }, [isEditing, currentValue, precision]);
+  const draftNow = draftNumeric(activeDraft, min, max, step, precision);
+  // No draft → committed; empty/invalid draft → omit; valid draft → that value.
+  const ariaValueNow =
+    activeDraft === undefined || activeDraft === null
+      ? committed === null
+        ? undefined
+        : committed
+      : draftNow === undefined || draftNow === null
+        ? undefined
+        : draftNow;
+  const stepFrom =
+    activeDraft === null || activeDraft === undefined
+      ? committed
+      : activeDraft === ""
+        ? null
+        : draftNow;
+  const canIncrement =
+    stepFrom === undefined ? false : stepNumberValue(stepFrom, 1, min, max, step, precision) !== null;
+  const canDecrement =
+    stepFrom === undefined ? false : stepNumberValue(stepFrom, -1, min, max, step, precision) !== null;
 
   function emitValidationChange(status: InputValidationStatus, message: string): void {
     onValidationChange?.({ status, valid: status === "valid" || status === "idle", message });
   }
 
-  async function runValidation(nextValue: number | string | null): Promise<void> {
-    const validationValue =
-      nextValue === null || nextValue === undefined ? "" : typeof nextValue === "number" ? String(nextValue) : nextValue;
+  async function runValidation(nextValue: number | null): Promise<void> {
+    // Invalidate any in-flight validation before the idle early-return so a
+    // clear/replacement cannot be overwritten by a stale resolve.
+    const validationKey = ++activeValidationKey.current;
 
-    if (!validate || validationValue.trim() === "") {
+    if (!validate || nextValue === null) {
       setInternalValidationStatus("idle");
       validationMessageRef.current = "";
       emitValidationChange("idle", "");
       return;
     }
 
-    const validationKey = ++activeValidationKey.current;
+    const validationValue = formatNumberCommitted(nextValue, precision);
     setInternalValidationStatus("validating");
     validationMessageRef.current = "";
     emitValidationChange("validating", "");
@@ -152,63 +237,98 @@ export function NumberInput({
     }
   }
 
-  function clampIfNeeded(nextValue: number): number {
-    return clampNullable(nextValue, parsedMin, parsedMax);
-  }
-
-  function coerceOutgoingValue(nextValue: number | null): number | string | null {
-    if (valueMode === "string") {
-      return nextValue === null ? "" : String(nextValue);
-    }
-    return nextValue;
-  }
-
-  function commitValue(nextValue: number | null): void {
-    if (!isControlled) setUncontrolledValue(nextValue);
-    const outgoingValue = coerceOutgoingValue(nextValue);
-    onValueChange?.(outgoingValue);
-    void runValidation(outgoingValue);
-  }
-
-  function handleInput(event: ChangeEvent<HTMLInputElement>): void {
-    const next = event.currentTarget.value;
-    setDraftValue(next);
-
-    if (next.trim() === "") {
-      commitValue(null);
-      return;
+  function applyDraft(next: string | null): void {
+    if (!draftControlled) {
+      setLocalDraft(next);
     }
 
-    const parsedNextValue = Number(next);
-    if (!Number.isNaN(parsedNextValue)) {
-      commitValue(parsedNextValue);
-    }
+    onDraftValueChange?.(next);
   }
 
-  function handleBlur(event: FocusEvent<HTMLInputElement>): void {
-    setIsEditing(false);
+  function applyValue(next: number | null): void {
+    lastEmittedValue.current = next;
 
-    if (draftValue.trim() !== "") {
-      const parsedNextValue = Number(draftValue);
-      if (!Number.isNaN(parsedNextValue)) {
-        commitValue(clampIfNeeded(snapToStep(parsedNextValue, parsedMin ?? 0, resolvedStep)));
+    if (!isControlled) {
+      setUncontrolledValue(next);
+    } else {
+      lastControlledValue.current = next;
+    }
+
+    onValueChange?.(next);
+    void runValidation(next);
+  }
+
+  function applyEffects(effects: NumberInputEffect[]): void {
+    for (const effect of effects) {
+      switch (effect.type) {
+        case "emitDraftValueChange":
+          applyDraft(effect.draft);
+          break;
+        case "emitValueChange":
+          applyValue(effect.value);
+          break;
+        case "emitCommit":
+          onCommit?.(effect.value);
+          break;
       }
     }
-
-    onBlur?.(event);
   }
 
-  function adjust(delta: number, eventName: "increment" | "decrement"): void {
-    const baseline = currentValue ?? parsedMin ?? 0;
-    const nextValue = clampIfNeeded(snapToStep(baseline + delta, parsedMin ?? 0, resolvedStep));
-    commitValue(nextValue);
-    setDraftValue(formatNumber(nextValue, precision));
-    const outgoingValue = coerceOutgoingValue(nextValue);
-    if (eventName === "increment") {
-      onIncrement?.(outgoingValue);
+  function dispatch(
+    event:
+      | { type: "RAW_EDIT"; text: string }
+      | { type: "CLEAR" }
+      | { type: "ENTER" }
+      | { type: "BLUR" }
+      | { type: "ESCAPE" }
+      | { type: "STEP"; direction: 1 | -1 }
+      | { type: "HOME" }
+      | { type: "END" },
+  ): void {
+    const result = numberInputTransition(machineContext, event);
+
+    if (!draftControlled) {
+      setLocalDraft(result.context.draft);
+    }
+
+    applyEffects(result.effects);
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>): void {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      dispatch({ type: "ENTER" });
       return;
     }
-    onDecrement?.(outgoingValue);
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      dispatch({ type: "ESCAPE" });
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      dispatch({ type: "STEP", direction: 1 });
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      dispatch({ type: "STEP", direction: -1 });
+      return;
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      dispatch({ type: "HOME" });
+      return;
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      dispatch({ type: "END" });
+    }
   }
 
   return (
@@ -230,7 +350,8 @@ export function NumberInput({
           className="poodle-number-input__control"
           type="text"
           inputMode="decimal"
-          value={draftValue}
+          role="spinbutton"
+          value={displayValue}
           placeholder={placeholder ?? undefined}
           disabled={disabled}
           readOnly={readOnly}
@@ -239,33 +360,34 @@ export function NumberInput({
           aria-describedby={describedBy ?? undefined}
           aria-invalid={ariaInvalid}
           aria-busy={ariaBusy}
-          onChange={handleInput}
-          onFocus={(event) => {
-            setIsEditing(true);
-            onFocus?.(event);
+          aria-valuenow={ariaValueNow}
+          aria-valuemin={min ?? undefined}
+          aria-valuemax={max ?? undefined}
+          onChange={(event) => dispatch({ type: "RAW_EDIT", text: event.currentTarget.value })}
+          onFocus={onFocus}
+          onBlur={(event) => {
+            dispatch({ type: "BLUR" });
+            onBlur?.(event);
           }}
-          onBlur={handleBlur}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              onSubmit?.(coerceOutgoingValue(currentValue));
-            }
-            if (event.key === "ArrowUp" && !readOnly) {
-              event.preventDefault();
-              adjust(resolvedStep, "increment");
-            }
-            if (event.key === "ArrowDown" && !readOnly) {
-              event.preventDefault();
-              adjust(-resolvedStep, "decrement");
-            }
-          }}
+          onKeyDown={handleKeyDown}
         />
 
         {showSteppers ? (
           <div className="poodle-number-input__steppers">
-            <button type="button" disabled={disabled || readOnly} onClick={() => adjust(resolvedStep, "increment")}>
+            <button
+              type="button"
+              aria-label="Increment"
+              disabled={disabled || readOnly || !canIncrement}
+              onClick={() => dispatch({ type: "STEP", direction: 1 })}
+            >
               <Icon name="plus" />
             </button>
-            <button type="button" disabled={disabled || readOnly} onClick={() => adjust(-resolvedStep, "decrement")}>
+            <button
+              type="button"
+              aria-label="Decrement"
+              disabled={disabled || readOnly || !canDecrement}
+              onClick={() => dispatch({ type: "STEP", direction: -1 })}
+            >
               <Icon name="minus" />
             </button>
           </div>

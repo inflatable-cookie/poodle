@@ -1,6 +1,6 @@
 # g16.030 — NumberInput Value, Draft, And Mounted Parity
 
-Status: ready — decision approved; `g16.029` merged; worker handoff published
+Status: complete — awaiting review/merge
 Opened: 2026-08-28
 Depends on: merged `g16.021`, then completed `g16.029`; all three touch paired
 core/headless exports and the shared domain-vector corpus
@@ -110,60 +110,60 @@ registry, specimen matrix, or second evidence ledger.
 
 ## Execution Plan
 
-- [ ] **Batch 1 — paired semantics and vectors.** Land the pure TypeScript/Rust
+- [x] **Batch 1 — paired semantics and vectors.** Land the pure TypeScript/Rust
       model and shared vector corpus before changing adapters.
-- [ ] **Batch 2 — clean web migration.** Replace Svelte/React value unions,
+- [x] **Batch 2 — clean web migration.** Replace Svelte/React value unions,
       duplicated helpers, callback surface, and draft lifecycle; migrate
       Poodle-owned ColorPicker/FilterBuilder calls and focused tests.
-- [ ] **Batch 3 — clean Rust migration.** Replace concrete/infinite-sentinel
+- [x] **Batch 3 — clean Rust migration.** Replace concrete/infinite-sentinel
       spec state and source-specific handlers; migrate poodle-render and every
       in-repository caller without an alias.
-- [ ] **Batch 4 — mounted GPUI editor.** Route real replacement text,
+- [x] **Batch 4 — mounted GPUI editor.** Route real replacement text,
       selection, focus, Enter/Escape, arrows, Home/End, and steppers through the
       Node/GPUI backend and specimen-owned rebuild state.
-- [ ] **Batch 5 — specimens, migration evidence, and closeout.** Curate useful
+- [x] **Batch 5 — specimens, migration evidence, and closeout.** Curate useful
       numeric, empty, precision, bounded, stepper, invalid-draft, and disabled
       examples; record downstream migration shapes and exact evidence in one
       August log.
 
 ## Acceptance Criteria
 
-- [ ] TypeScript and Rust return identical classification, parsing, formatting,
+- [x] TypeScript and Rust return identical classification, parsing, formatting,
       validity, stepping, draft, value, and commit effects for the shared
       corpus.
-- [ ] Svelte and React expose only committed `number | null`, preserve exact
+- [x] Svelte and React expose only committed `number | null`, preserve exact
       controlled/uncontrolled drafts, and match callback timing through direct,
       clear, commit, revert, step, and replacement routes.
-- [ ] No old string-value/constraint union, value-mode inference,
+- [x] No old string-value/constraint union, value-mode inference,
       string-coercion branch, `onSubmit`, `onIncrement`, or `onDecrement`
       remains on active public or internal NumberInput surfaces.
-- [ ] `NumberInputSpec` represents empty committed state and raw draft without
+- [x] `NumberInputSpec` represents empty committed state and raw draft without
       concrete-zero or infinite-bound sentinels.
-- [ ] poodle-render declares one genuinely editable spin-button node; GPUI
+- [x] poodle-render declares one genuinely editable spin-button node; GPUI
       routes mounted text/key/focus/pointer dispatch and host rebuilds through
       the shared transition results.
-- [ ] Named mounted tests prove valid direct editing, partial/invalid no-emit,
+- [x] Named mounted tests prove valid direct editing, partial/invalid no-emit,
       empty clear, blur/Escape reversion, Enter commit, fractional step,
       precision, bounds, Home/End, controlled replacement, two-instance
       identity, and disabled/read-only inertia.
-- [ ] Accessibility tests prove name, current value, optional bounds,
+- [x] Accessibility tests prove name, current value, optional bounds,
       unresolved invalid state, validation busy state, stepper labels/bounds,
       and one component focus treatment.
-- [ ] ColorPicker and FilterBuilder remain green as regression consumers and do
+- [x] ColorPicker and FilterBuilder remain green as regression consumers and do
       not carry local NumberInput fallback semantics.
-- [ ] Human-facing Svelte, React, and GPUI specimens explain the useful modes
+- [x] Human-facing Svelte, React, and GPUI specimens explain the useful modes
       without becoming exhaustive conformance tables.
-- [ ] The migration evidence lists in-repository removals plus inspected
+- [x] The migration evidence lists in-repository removals plus inspected
       sibling patterns for Acowtancy, Jetstream, and Underlay; sibling repos are
       not edited.
-- [ ] Only NumberInput's GPUI mounted-behavior ledger cell moves from missing
+- [x] Only NumberInput's GPUI mounted-behavior ledger cell moves from missing
       to mounted. If `g16.029` closes at the expected 48 / 126 totals, this card
       moves them to 49 / 125; accessibility and visual-comparison cells do not
       move.
-- [ ] Known-delta totals stay at the contract-promotion baseline of 116 present
+- [x] Known-delta totals stay at the contract-promotion baseline of 116 present
       / 59 not-applicable; this implementation card does not claim a second
       delta movement.
-- [ ] Jetstream receives mechanical compile maintenance only and remains
+- [x] Jetstream receives mechanical compile maintenance only and remains
       deferred and unclaimed.
 
 ## Writable Scope
