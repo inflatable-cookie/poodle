@@ -608,20 +608,19 @@ fn build_channel_inputs(
     };
 
     let number = |id: &str, value: f64, min: f64, max: f64, aria: &str| -> Node {
-        let n = NumberInputSpec::new(value)
-            .with_min(min)
-            .with_max(max)
-            .with_step(1.0)
+        let n = NumberInputSpec::new(Some(value))
+            .with_min(Some(min))
+            .with_max(Some(max))
+            .with_step(Some(1.0))
+            .with_id(id)
             .with_aria_label(aria)
             .with_size(base_size)
             .with_density(density);
-        let mut input = number_input(
+        number_input(
             &n,
             ctx,
             crate::number_input::NumberInputHandlers::default(),
-        );
-        input.id = Some(id.to_string());
-        input
+        )
     };
     let alpha_field = |row: Node| -> Node {
         row.child(labelled(

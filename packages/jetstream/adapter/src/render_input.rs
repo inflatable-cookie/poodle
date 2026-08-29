@@ -253,7 +253,7 @@ mod tests {
 
     #[test]
     fn number_input_renders() {
-        let h = a().render(&NumberInputSpec::new(0.0), &s(), &t());
+        let h = a().render(&NumberInputSpec::new(Some(0.0)), &s(), &t());
         assert_eq!(h.node_id, "number-input");
         assert_eq!(h.spec_type, "NumberInputSpec");
         assert_eq!(h.widget_kind, WidgetKind::TextInput);
@@ -261,7 +261,7 @@ mod tests {
 
     #[test]
     fn number_input_disabled_renders() {
-        let spec = NumberInputSpec::new(5.0).with_disabled(true);
+        let spec = NumberInputSpec::new(Some(5.0)).with_disabled(true);
         let h = a().render(&spec, &s(), &t());
         assert_eq!(h.node_id, "number-input");
         assert_eq!(h.widget_kind, WidgetKind::TextInput);

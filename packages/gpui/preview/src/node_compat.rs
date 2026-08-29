@@ -5146,8 +5146,7 @@ pub(crate) struct NumberInput {
     spec: NumberInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
-    on_increment: Option<Arc<dyn Fn() + Send + Sync>>,
-    on_decrement: Option<Arc<dyn Fn() + Send + Sync>>,
+    handlers: poodle_render::NumberInputHandlers,
 }
 
 impl NumberInput {
@@ -5156,8 +5155,7 @@ impl NumberInput {
             spec,
             theme: theme.clone(),
             id_suffix: None,
-            on_increment: None,
-            on_decrement: None,
+            handlers: poodle_render::NumberInputHandlers::default(),
         }
     }
 
@@ -5171,13 +5169,24 @@ impl NumberInput {
         self
     }
 
-    pub(crate) fn on_increment(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.on_increment = Some(handler);
+    pub(crate) fn on_value_change(
+        mut self,
+        handler: Arc<dyn Fn(Option<f64>) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_value_change = Some(handler);
         self
     }
 
-    pub(crate) fn on_decrement(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
-        self.on_decrement = Some(handler);
+    pub(crate) fn on_draft_value_change(
+        mut self,
+        handler: Arc<dyn Fn(Option<String>) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_draft_value_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_commit(mut self, handler: Arc<dyn Fn(Option<f64>) + Send + Sync>) -> Self {
+        self.handlers.on_commit = Some(handler);
         self
     }
 
@@ -5185,10 +5194,7 @@ impl NumberInput {
         let mut node = poodle_render::number_input(
             &self.spec,
             &RenderContext::new(&self.theme),
-            poodle_render::NumberInputHandlers {
-                on_increment: self.on_increment,
-                on_decrement: self.on_decrement,
-            },
+            self.handlers,
         );
         if let Some(id) = self.id_suffix {
             node.id = Some(format!("poodle-number-input-{id}"));
