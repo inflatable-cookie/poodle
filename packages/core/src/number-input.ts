@@ -640,7 +640,7 @@ export function numberInputTransition(
     return idle(context);
   }
 
-  if (!numberInputConfigValid(context) && event.type !== "REPLACE") {
+  if (!numberInputConfigValid(context)) {
     return idle(context);
   }
 
