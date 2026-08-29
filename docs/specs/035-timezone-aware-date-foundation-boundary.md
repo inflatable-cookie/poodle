@@ -59,7 +59,7 @@ Timezone-aware primitives must preserve:
 
 `TimeZoneSelect` is the standalone timezone-value primitive.
 
-`DateTimeZonePicker` composes `Calendar`, `TimeField`, and
+`DateTimeZonePicker` composes `Calendar`, `TimeInput`, and
 `TimeZoneSelect` under one contract-owned value.
 
 Higher layers may wrap these primitives, but they should not replace the value

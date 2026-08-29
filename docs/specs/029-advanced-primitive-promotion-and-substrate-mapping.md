@@ -91,7 +91,7 @@ are still intentionally outside the current baseline.
 The next follow-on tranche promotes the smallest time-aware family into
 foundation:
 
-- `TimeField`
+- `TimeInput`
 - `DateTimePicker`
 
 These remain local-value surfaces only. Timezone-aware or scheduling semantics

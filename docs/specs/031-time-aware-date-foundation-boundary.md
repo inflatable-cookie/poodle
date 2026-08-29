@@ -14,7 +14,7 @@ promoting scheduling or timezone workflows into the primitive layer.
 
 The current time-aware foundation family is:
 
-- `TimeField`
+- `TimeInput`
 - `DateTimePicker`
 
 These cover generalized wall-clock entry and combined date-plus-time values
@@ -48,9 +48,9 @@ The following do not belong in foundation yet:
 
 ## Composition Rule
 
-`TimeField` is the standalone local time primitive.
+`TimeInput` is the standalone local time primitive.
 
-`DateTimePicker` composes `Calendar` and `TimeField` under one value contract.
+`DateTimePicker` composes `Calendar` and `TimeInput` under one value contract.
 
 Higher layers may wrap them, but they should not replace these value contracts
 with runtime-specific timestamp objects when local wall-clock values are what
@@ -74,7 +74,7 @@ decisions rather than incidental growth.
 
 ## Evidence
 
-- `docs/contracts/components/time-field.md`
+- `docs/contracts/components/time-input.md`
 - `docs/contracts/components/date-time-picker.md`
 - `docs/contracts/components/date-time-range-picker.md`
 - `docs/specs/030-date-selection-and-calendar-foundation-baseline.md`
