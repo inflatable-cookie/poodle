@@ -12,7 +12,7 @@ copy the register, change evidence, or turn a missing cell into a defect.
 | Order | Lane | Current state | Promotion gate |
 | ---: | --- | --- | --- |
 | 1 | TimeInput native entry | complete as `g16.029` | merged in PR #97; ledger 48 mounted / 126 missing |
-| 2 | NumberInput and EditableLabel editing models | NumberInput planned as `g16.030`; EditableLabel decision-blocked | execute the approved NumberInput committed-value/raw-draft migration; resolve EditableLabel separately |
+| 2 | NumberInput and EditableLabel editing models | NumberInput complete as `g16.030`; EditableLabel decision-blocked | merged in PR #98; resolve EditableLabel separately |
 | 3 | Dependable drag-and-drop family | programme-owned | compiled separately as `g16.021`–`g16.028`; do not issue component-local drag repairs |
 | 4 | Fader, Knob, and XYPad interaction | planned as `g16.031`–`g16.032` | run paired machine/web repair after `g16.030`, then native mounting; never overlap the Node/GPUI tranche with `g16.025` |
 | 5 | GPUI accessibility evidence | programme choice | operator selects it as a programme and accepts the manual/runtime evidence boundary |
@@ -27,11 +27,11 @@ valid-value-only callbacks, whole-second stepping and overnight ranges, and
 ships a segmented 24-hour GPUI editor plus a clean Rust `TimeInputSpec` /
 `time_input` rename.
 
-NumberInput's clean value-model decision is approved. Its contract now uses a
+NumberInput's clean value-model decision is complete. Its contract now uses a
 typed committed `number | null`, an optional raw-draft channel, valid-value-only
 changes, explicit commit/revert behavior, and no string-value or redundant
-step-source callbacks. `g16.030` contains the bounded clean migration and
-mounted proof. EditableLabel remains behind its separate
+step-source callbacks. `g16.030` delivered the bounded clean migration and
+mounted proof in PR #98. EditableLabel remains behind its separate
 activation/draft/commit/focus decision.
 
 The bounded Fader/Knob/XYPad audit is complete. The old register description
@@ -45,9 +45,8 @@ event and mounts all three in GPUI. Payload drag-and-drop remains separate.
 
 ## Parallelism
 
-`g16.029` is merged. Dispatch `g16.030` next.
-Dispatch `g16.031` only after `g16.030`; it touches the same core/headless
-exports and vector runner. `g16.032` follows `g16.031` and must not run beside
+`g16.029` and `g16.030` are merged. Dispatch `g16.031` now. `g16.032` follows
+`g16.031` and must not run beside
 `g16.025`, because both edit Node/GPUI interaction routing. No accessibility,
 visual, motion, Longhorn-lab, or Jetstream worker is ready from this map.
 

@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.030 complete on worker branch; awaiting review/merge
+Status: active — g16.030 merged; g16.031 ready to launch
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -60,8 +60,8 @@ stay maintained; backend admission is not part of the first card.
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
-30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; awaiting review/merge; ledger 49 mounted / 125 missing
-31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — planned; bounded audit complete, depends on 030
+30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
+31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — ready to launch; bounded audit complete, dependency 030 merged
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — planned; depends on 031 and must not overlap 025
 
 ## Parallel Continuation
@@ -294,8 +294,10 @@ moved.
 
 ## Next Task
 
-Await operator-authorized merge of `g16.030`, then choose between `g16.022`
-and the continuous-audio cards. Keep `g16.022` planned until the orchestrator
-chooses it after the serial core/export tranche. The public drag migration
-boundary is resolved; reconcile the exact custom-surface and host-bridge API
-names only after their prerequisite kernels land.
+Dispatch `g16.031` now. It is the next decision-complete component lane and no
+longer overlaps the serial NumberInput core/export tranche. Keep `g16.022`
+with the orchestrator until its landed-kernel review records the exact public
+web adapter surface; do not ask its worker to discover that API during
+implementation. After `g16.031` merges, promote `g16.032`; never overlap
+`g16.032` with drag card `g16.025` because both edit Node/GPUI interaction
+routing.

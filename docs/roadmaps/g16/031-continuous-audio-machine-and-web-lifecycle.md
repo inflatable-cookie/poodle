@@ -1,6 +1,6 @@
 # g16.031 — Continuous Audio Machine And Web Lifecycle
 
-Status: planned — audit complete; dispatch after `g16.030` closes
+Status: ready to launch — audit complete; `g16.030` merged in PR #98
 Opened: 2026-08-28
 Depends on: completed `g16.030`; this lane edits the same paired core/headless
 exports and shared machine-vector corpus

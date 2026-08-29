@@ -1,6 +1,6 @@
 # g16.030 — NumberInput Value, Draft, And Mounted Parity
 
-Status: complete — awaiting review/merge
+Status: complete — merged in PR #98
 Opened: 2026-08-28
 Depends on: merged `g16.021`, then completed `g16.029`; all three touch paired
 core/headless exports and the shared domain-vector corpus

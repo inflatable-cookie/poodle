@@ -58,9 +58,8 @@ behavior repairs without inventing another conformance authority.
   shared `dragDrop` vector corpus in PR #96.
   TimeInput's native editing decision closed and merged as `g16.029` (ledger
   48 mounted / 126 missing). NumberInput's committed-number/raw-draft and
-  clean callback migration closed as `g16.030` on the worker branch (ledger
-  49 mounted / 125 missing; known-delta axis already 116 present /
-  59 not-applicable). Awaiting review/merge.
+  clean callback migration merged as `g16.030` in PR #98 (ledger 49 mounted /
+  125 missing; known-delta axis 116 present / 59 not-applicable).
   A bounded Fader/Knob/XYPad audit then found real paired-machine, web gesture
   lifetime, native mounting, and accessibility-projection defects. `g16.031`
   closes paired semantics and Svelte/React lifecycle after `030` merges; `g16.032`
