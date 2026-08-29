@@ -7,6 +7,8 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-29 — `rustfmt` on a touched `packages/gpui/preview/tests/headless_regressions.rs` or specimen file rewrites the whole multi-thousand-line file. Format only the new function, or skip rustfmt on those paths. Hit while landing g16.032 Batch 1; recovered by restoring and re-applying the surgical edit.
+
 - 2026-08-29 — `scripts/gate-tree-guard.ts` keeps its snapshot at a fixed
   `os.tmpdir()` path shared by every worktree, and `--compare` deletes it. Two
   concurrent `effigy ci:web`/`qa` runs in different worktrees therefore fail

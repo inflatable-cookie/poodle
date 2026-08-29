@@ -22,11 +22,11 @@ use std::sync::{Arc, Mutex};
 // Explicit import only: `use gpui::*` would glob in gpui's `test` proc macro
 // and shadow the built-in `#[test]` attribute (gpui-macros 0.2.2's `test`
 // crashes on current rustc).
-use gpui::{point, px, Pixels, Point, TestAppContext};
+use gpui::{point, px, Modifiers, Pixels, Point, TestAppContext};
 use poodle_gpui::GpuiThemeProvider;
 use poodle_node::{
-    ColorValue, DismissReason, LayoutDirection, LayoutOverflow, LayoutSizing, Node, NodeDropEvent,
-    NodeKind, NodePosition, NodeRole,
+    ColorValue, ContinuousValuePhase, DismissReason, LayoutDirection, LayoutOverflow, LayoutSizing,
+    Node, NodeContinuousValueEvent, NodeDropEvent, NodeKind, NodePosition, NodeRole, NodeWheelEvent,
 };
 use poodle_headless::time_input::{time_input_invalid, time_input_transition, TimeInputContext, TimeInputEvent};
 use poodle_render::{
@@ -313,6 +313,123 @@ fn a_scrub_reports_change_while_dragging_and_commits_once_at_release() {
             ["valueChange", "valueChange", "valueCommit"],
         );
         assert_eq!(*value.lock().expect("value lock"), (20.0, 95.0));
+    });
+}
+
+/// g16.032. One renderer-neutral continuous-value gesture: press, moves,
+/// exactly one release or cancel. Wheel and double-activation are separate
+/// Node routes. Existing `on_scrub` stays on Slider/RangeSlider.
+#[test]
+fn a_continuous_value_gesture_releases_once_and_cancels_on_lost_host() {
+    fn fixture(
+        trace: Arc<Mutex<Vec<String>>>,
+        last: Arc<Mutex<Option<NodeContinuousValueEvent>>>,
+    ) -> Node {
+        let phases = Arc::clone(&trace);
+        let wheel_trace = Arc::clone(&trace);
+        let double_trace = Arc::clone(&trace);
+        let stored = Arc::clone(&last);
+        let mut node = Node::container();
+        node.id = Some(FIXTURE_ID.to_owned());
+        node.style.descriptor.layout.width = LayoutSizing::Fixed(160.0);
+        node.style.descriptor.layout.height = LayoutSizing::Fixed(60.0);
+        node.interaction.on_continuous_value = Some(Arc::new(move |event| {
+            *stored.lock().expect("event lock") = Some(*event);
+            phases
+                .lock()
+                .expect("trace lock")
+                .push(format!("{:?}", event.phase));
+        }));
+        node.interaction.on_wheel = Some(Arc::new(move |event: &NodeWheelEvent| {
+            wheel_trace
+                .lock()
+                .expect("trace lock")
+                .push(format!("wheel:{}:{}", event.dx, event.dy));
+        }));
+        node.interaction.on_double_activate = Some(Arc::new(move |_mods| {
+            double_trace
+                .lock()
+                .expect("trace lock")
+                .push("double".to_owned());
+        }));
+        node
+    }
+
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let last = Arc::new(Mutex::new(None));
+        let mounted = Arc::new(Mutex::new(fixture(Arc::clone(&trace), Arc::clone(&last))));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        let center = headless_driver::mount_box_center();
+        let outside = point(px(400.0), px(400.0));
+
+        driver.pointer_press(center);
+        // GPUI arms `on_drag` after the movement threshold; the first held
+        // move establishes the payload, the second is the captured Move.
+        driver.pointer_drag(point(center.x + px(8.0), center.y));
+        driver.pointer_drag(point(center.x + px(24.0), center.y));
+        driver.pointer_release(outside);
+        assert_eq!(
+            trace.lock().expect("trace lock").as_slice(),
+            ["Press", "Move", "Release"]
+        );
+        let released = last.lock().expect("event lock").expect("release event");
+        assert_eq!(released.phase, ContinuousValuePhase::Release);
+        assert!(released.x >= 0.0 && released.x <= 1.0);
+        assert!(released.y >= 0.0 && released.y <= 1.0);
+
+        trace.lock().expect("trace lock").clear();
+        driver.pointer_press(center);
+        driver.pointer_press(center);
+        assert_eq!(
+            trace.lock().expect("trace lock").as_slice(),
+            ["Press"],
+            "a second press while the gesture is open is inert"
+        );
+        driver.pointer_release(center);
+        assert_eq!(
+            trace.lock().expect("trace lock").as_slice(),
+            ["Press", "Release"]
+        );
+
+        trace.lock().expect("trace lock").clear();
+        driver.pointer_press(center);
+        *mounted.lock().expect("mount lock") = Node::container();
+        driver.draw_frame();
+        assert_eq!(
+            trace.lock().expect("trace lock").as_slice(),
+            ["Press", "Cancel"]
+        );
+        driver.draw_frame();
+        assert_eq!(
+            trace.lock().expect("trace lock").as_slice(),
+            ["Press", "Cancel"],
+            "lost-host cancel is exactly once"
+        );
+    });
+
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let last = Arc::new(Mutex::new(None));
+        let mut driver =
+            HeadlessDriver::new(cx, Arc::new(Mutex::new(fixture(Arc::clone(&trace), last))));
+        let center = headless_driver::mount_box_center();
+        driver.pointer_hover(center);
+        driver.scroll_vertical(-12.0);
+        driver.pointer_press_details(center, 2, Modifiers::none());
+        let events = trace.lock().expect("trace lock").clone();
+        assert!(
+            events.iter().any(|event| event.starts_with("wheel:")),
+            "wheel dispatch: {events:?}"
+        );
+        assert!(
+            events.iter().any(|event| event == "double"),
+            "double activation: {events:?}"
+        );
+        assert!(
+            !events.iter().any(|event| event == "Press"),
+            "double activation must not open a value gesture: {events:?}"
+        );
     });
 }
 

@@ -332,7 +332,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 },
                             ),
                         ),
-                        NodeKey::F2 | NodeKey::Delete => {}
+                        NodeKey::F2 | NodeKey::Delete | NodeKey::PageUp | NodeKey::PageDown => {}
                     }
                 })
             });

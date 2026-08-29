@@ -82,6 +82,7 @@ pub fn overlay_frame_begin() {
     // must not survive it.
     crate::clear_painted_rings();
     super::clear_painted_inset_shadows();
+    crate::interaction::prepare_continuous_value_frame();
 }
 
 /// End a rendered frame: drop focus requests the frame's paint never applied
@@ -89,6 +90,7 @@ pub fn overlay_frame_begin() {
 /// each draw; the production host's requests always target painted elements.
 pub fn overlay_frame_end() {
     FOCUS_REQUESTS.with(|requests| requests.borrow_mut().clear());
+    crate::interaction::sweep_lost_continuous_host();
 }
 
 /// Queue a focus request for the element with this id. The target element's

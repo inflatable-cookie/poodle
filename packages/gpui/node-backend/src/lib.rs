@@ -29,15 +29,15 @@ use gpui::{
     canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, size, svg,
     AnyElement, AnyView, App, AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla,
     InteractiveElement, IntoElement, KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent,
-    MouseUpEvent, ParentElement, PathBuilder, SharedString, Stateful,
-    StatefulInteractiveElement, StyleRefinement, Styled, StyledImage, Window,
+    MouseUpEvent, ParentElement, PathBuilder, ScrollDelta, ScrollWheelEvent, SharedString,
+    Stateful, StatefulInteractiveElement, StyleRefinement, Styled, StyledImage, Window,
 };
 use poodle_node::{
-    AnimEasing, AnimLoop, AnimProperty, ColorValue, CrossAxisAlignment, CursorHint, DropEdge,
-    FocusRing, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
-    NodeAnimation, NodeDragEvent, NodeDragPhase, NodeDropEvent, NodeKey, NodeKind, NodeModifiers,
-    NodePoint, NodePosition, NodeRole, ScrubAxis, ScrubPhase, SelectGranularity, StylePatch,
-    TextAlign,
+    AnimEasing, AnimLoop, AnimProperty, ColorValue, ContinuousValuePhase, CrossAxisAlignment,
+    CursorHint, DropEdge, FocusRing, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
+    MainAxisAlignment, Node, NodeAnimation, NodeContinuousValueEvent, NodeDragEvent, NodeDragPhase,
+    NodeDropEvent, NodeKey, NodeKind, NodeModifiers, NodePoint, NodePosition, NodeRole,
+    NodeWheelEvent, ScrubAxis, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
 };
 
 mod inset_shadow;
@@ -48,9 +48,7 @@ mod tracked_scroll;
 
 pub mod file_capability;
 
-pub use tracked_scroll::{
-    tracked_vertical_scroll, TrackedScrollOptions, TrackedScrollState,
-};
+pub use tracked_scroll::{tracked_vertical_scroll, TrackedScrollOptions, TrackedScrollState};
 
 use interaction::apply_listeners;
 pub use layers::{
@@ -140,6 +138,7 @@ pub fn reset_focus_registry() {
     FOCUS_HANDLES.with(|handles| handles.borrow_mut().clear());
     FOCUS_STATES.with(|states| states.borrow_mut().clear());
     FOCUSED_FIELD.with(|field| *field.borrow_mut() = None);
+    interaction::reset_continuous_value_session();
 }
 
 /// Per-frame counter for gesture-drag identities.
@@ -396,8 +395,7 @@ fn to_gpui_impl(node: &Node) -> AnyElement {
                     }
 
                     if fraction > 0.0 {
-                        let angle = -std::f32::consts::FRAC_PI_2
-                            + std::f32::consts::TAU * fraction;
+                        let angle = -std::f32::consts::FRAC_PI_2 + std::f32::consts::TAU * fraction;
                         let end = point(
                             center.x + px(radius * angle.cos()),
                             center.y + px(radius * angle.sin()),
@@ -458,6 +456,9 @@ where
         || node.interaction.on_activate.is_some()
         || node.interaction.on_text_change.is_some()
         || node.interaction.on_drag.is_some()
+        || node.interaction.on_continuous_value.is_some()
+        || node.interaction.on_wheel.is_some()
+        || node.interaction.on_double_activate.is_some()
         || !node.children.is_empty();
     if !needs_wrapper {
         return maybe_animated(el, node);
@@ -488,6 +489,9 @@ fn build_svg_leaf(node: &Node, el: gpui::Svg) -> AnyElement {
         || node.interaction.on_activate.is_some()
         || node.interaction.on_text_change.is_some()
         || node.interaction.on_drag.is_some()
+        || node.interaction.on_continuous_value.is_some()
+        || node.interaction.on_wheel.is_some()
+        || node.interaction.on_double_activate.is_some()
         || !node.children.is_empty()
         || node.id.is_some();
     if needs_wrapper {
@@ -538,11 +542,7 @@ fn build_box(node: &Node, base: Div) -> AnyElement {
         let el = apply_listeners(el, node, &id_string);
         // Deferred overlays paint later; without occlude, pointer events fall
         // through to in-flow widgets that share the same window point.
-        let el = if node.style.overlay {
-            el.occlude()
-        } else {
-            el
-        };
+        let el = if node.style.overlay { el.occlude() } else { el };
         maybe_animated(el, node)
     } else {
         let el = apply_shared(base, node, "");
@@ -573,6 +573,9 @@ fn needs_state(node: &Node) -> bool {
         || node.interaction.on_text_change.is_some()
         || node.interaction.on_drag.is_some()
         || node.interaction.on_scrub.is_some()
+        || node.interaction.on_continuous_value.is_some()
+        || node.interaction.on_wheel.is_some()
+        || node.interaction.on_double_activate.is_some()
         || node.interaction.on_select_range.is_some()
         || node.interaction.on_focus_change.is_some()
         || node.id.is_some()

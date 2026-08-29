@@ -264,20 +264,35 @@ impl<'a> HeadlessDriver<'a> {
 
     /// Pointer press (left button down) at the given position.
     pub fn pointer_press(&mut self, position: Point<Pixels>) {
+        self.pointer_press_details(position, 1, Modifiers::none());
+    }
+
+    /// Pointer press with an explicit click count and modifiers.
+    pub fn pointer_press_details(
+        &mut self,
+        position: Point<Pixels>,
+        click_count: usize,
+        modifiers: Modifiers,
+    ) {
         self.pointer_event(PlatformInput::MouseDown(MouseDownEvent {
             position,
-            modifiers: Modifiers::none(),
+            modifiers,
             button: MouseButton::Left,
-            click_count: 1,
+            click_count,
             first_mouse: false,
         }));
     }
 
     /// Pointer drag: a move while the left button is held.
     pub fn pointer_drag(&mut self, position: Point<Pixels>) {
+        self.pointer_drag_details(position, Modifiers::none());
+    }
+
+    /// Pointer drag with modifiers (Shift for fine movement).
+    pub fn pointer_drag_details(&mut self, position: Point<Pixels>, modifiers: Modifiers) {
         self.pointer_event(PlatformInput::MouseMove(MouseMoveEvent {
             position,
-            modifiers: Modifiers::none(),
+            modifiers,
             pressed_button: Some(MouseButton::Left),
         }));
     }
@@ -293,11 +308,21 @@ impl<'a> HeadlessDriver<'a> {
 
     /// Pointer release (left button up) at the given position.
     pub fn pointer_release(&mut self, position: Point<Pixels>) {
+        self.pointer_release_details(position, 1, Modifiers::none());
+    }
+
+    /// Pointer release with an explicit click count and modifiers.
+    pub fn pointer_release_details(
+        &mut self,
+        position: Point<Pixels>,
+        click_count: usize,
+        modifiers: Modifiers,
+    ) {
         self.pointer_event(PlatformInput::MouseUp(MouseUpEvent {
             position,
-            modifiers: Modifiers::none(),
+            modifiers,
             button: MouseButton::Left,
-            click_count: 1,
+            click_count,
         }));
     }
 
