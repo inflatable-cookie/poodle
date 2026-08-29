@@ -38,6 +38,9 @@ describe("audio control pointer lifecycle (svelte)", () => {
     await fireEvent.pointerMove(knob, { pointerId: 2, clientX: 50, clientY: 10 });
     await fireEvent.pointerMove(knob, { pointerId: 1, clientX: 50, clientY: 44 });
     await fireEvent.pointerUp(knob, { pointerId: 1 });
+    // A browser releases implicit capture after pointerup; that lost-capture
+    // event must not close the gesture a second time.
+    await fireEvent.lostPointerCapture(knob, { pointerId: 1 });
     await fireEvent.pointerUp(knob, { pointerId: 1 });
 
     expect(spies.onGestureBegin).toHaveBeenCalledTimes(1);

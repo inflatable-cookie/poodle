@@ -115,7 +115,7 @@ nine claims and the same traces:
 
 | Claim | Trace |
 | --- | --- |
-| Knob gesture with a refused second pointer | begin ×1, change `[0.6]`, commit `[0.6]`, end ×1 |
+| Knob gesture, refused second pointer, release, then the lost capture a release causes | begin ×1, change `[0.6]`, commit `[0.6]`, end ×1 |
 | Knob lost capture, twice, then release | begin ×1, end ×1 |
 | Knob teardown mid-gesture | begin ×1, commit `[0.5]`, end ×1 |
 | Fader cancel with stale ids | change `[0.25], [0.8]`, commit `[0.8]`, begin ×1, end ×1 |

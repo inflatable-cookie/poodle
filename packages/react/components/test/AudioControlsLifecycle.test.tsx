@@ -57,6 +57,9 @@ describe("audio control pointer lifecycle (react)", () => {
     fireEvent.pointerMove(knob, { pointerId: 2, clientX: 50, clientY: 10 });
     fireEvent.pointerMove(knob, { pointerId: 1, clientX: 50, clientY: 44 });
     fireEvent.pointerUp(knob, { pointerId: 1 });
+    // A browser releases implicit capture after pointerup; that lost-capture
+    // event must not close the gesture a second time.
+    fireEvent.lostPointerCapture(knob, { pointerId: 1 });
     fireEvent.pointerUp(knob, { pointerId: 1 });
 
     expect(spies.onGestureBegin).toHaveBeenCalledTimes(1);
