@@ -8,6 +8,12 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import {
+  createFaderContext, createKnobContext, faderPointToNorm, faderTransition,
+  knobPointToNorm, knobTransition,
+} from "../src/audio/value-controls.ts";
+import { hitTestCircle, hitTestRect } from "../src/audio/types.ts";
+import { createXYPadContext, xyPadPointToNorm, xyPadTransition } from "../src/audio/xy-pad.ts";
 import { checkboxTransition } from "../src/checkbox.ts";
 import { disclosureTransition } from "../src/disclosure.ts";
 import { dragSessionTransition, resolveDropTarget } from "../src/drag-drop.ts";
@@ -127,7 +133,7 @@ function runMachine(machine: string, vector: VectorCase): void {
 }
 
 for (const [machine, cases] of Object.entries(vectors)) {
-  if (machine === "description" || machine === "dragDrop") continue;
+  if (machine === "description" || machine === "dragDrop" || machine === "audioControls") continue;
 
   describe(`conformance: ${machine}`, () => {
     for (const vector of cases as VectorCase[]) {
@@ -202,6 +208,97 @@ describe("conformance: dragDrop arbitration", () => {
   for (const vector of dragDrop.arbitration) {
     test(vector.name, () => {
       expect(resolveDropTarget(vector.candidates as never)).toEqual(vector.expect.intent as never);
+    });
+  }
+});
+
+/**
+ * The continuous-audio controls make lifetime claims — one accepted begin, one
+ * terminal, rebase without a jump — so their cases are ordered step sequences
+ * over one context rather than single transitions. Every step pins the effects
+ * it emitted in order and, where the case claims it, a subset of the resulting
+ * context. The Rust mirror runs the same shape
+ * (packages/contracts/headless/tests/conformance.rs, audio_controls_conformance).
+ */
+interface AudioStep {
+  event: Record<string, unknown>;
+  context?: Record<string, unknown>;
+  effects: Record<string, unknown>[];
+}
+
+interface AudioVector {
+  name: string;
+  context: Record<string, unknown>;
+  steps: AudioStep[];
+}
+
+const audioControls = vectors.audioControls as {
+  knob: AudioVector[];
+  fader: AudioVector[];
+  xyPad: AudioVector[];
+  geometry: {
+    knob: { name: string; point: never; rect: never; expect: number }[];
+    fader: { name: string; point: never; rect: never; orientation: never; expect: number }[];
+    xyPad: { name: string; point: never; rect: never; expect: { xNorm: number; yNorm: number } }[];
+    hitTest: { name: string; shape: string; point: never; rect: never; expect: boolean }[];
+  };
+};
+
+function runAudioVectors<Context>(
+  control: string,
+  cases: AudioVector[],
+  create: (input: never) => Context,
+  transition: (context: Context, event: never) => { context: Context; effects: unknown[] },
+): void {
+  describe(`conformance: audioControls ${control}`, () => {
+    for (const vector of cases) {
+      test(vector.name, () => {
+        let context = create(vector.context as never);
+
+        vector.steps.forEach((step, index) => {
+          const label = `${vector.name} step ${index} (${String(step.event.type)})`;
+          const result = transition(context, step.event as never);
+
+          expect({ step: label, effects: result.effects }).toEqual({
+            step: label,
+            effects: step.effects,
+          } as never);
+
+          checkContextSubset(result.context as never, step.context);
+          context = result.context;
+        });
+      });
+    }
+  });
+}
+
+runAudioVectors("knob", audioControls.knob, createKnobContext, knobTransition);
+runAudioVectors("fader", audioControls.fader, createFaderContext, faderTransition);
+runAudioVectors("xyPad", audioControls.xyPad, createXYPadContext, xyPadTransition);
+
+describe("conformance: audioControls geometry", () => {
+  for (const vector of audioControls.geometry.knob) {
+    test(`knob: ${vector.name}`, () => {
+      expect(knobPointToNorm(vector.point, vector.rect)).toBe(vector.expect);
+    });
+  }
+
+  for (const vector of audioControls.geometry.fader) {
+    test(`fader: ${vector.name}`, () => {
+      expect(faderPointToNorm(vector.point, vector.rect, vector.orientation)).toBe(vector.expect);
+    });
+  }
+
+  for (const vector of audioControls.geometry.xyPad) {
+    test(`xyPad: ${vector.name}`, () => {
+      expect(xyPadPointToNorm(vector.point, vector.rect)).toEqual(vector.expect);
+    });
+  }
+
+  for (const vector of audioControls.geometry.hitTest) {
+    test(`hit test: ${vector.name}`, () => {
+      const hit = vector.shape === "circle" ? hitTestCircle : hitTestRect;
+      expect(hit(vector.point, vector.rect)).toBe(vector.expect);
     });
   }
 });

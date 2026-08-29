@@ -175,6 +175,31 @@ impl AudioControlVisualState {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum KnobDragMode {
+    /// Anchored pointer delta over `drag_sensitivity` logical pixels.
+    #[default]
+    Vertical,
+    /// Absolute position on the standard 270 degree sweep.
+    Circular,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum FaderOrientation {
+    #[default]
+    Vertical,
+    Horizontal,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ValueBound {
+    Min,
+    Max,
+}
+
+/// Shared scalar audio-control context. Mirrors the TypeScript
+/// `AudioValueContextBase` plus `AudioValueInteraction`
+/// (`packages/core/src/audio/value-controls.ts`).
 #[derive(Clone, Debug, PartialEq)]
 pub struct AudioValueContext {
     pub value: f64,
@@ -183,9 +208,17 @@ pub struct AudioValueContext {
     pub law: AudioValueLaw,
     pub default_value: f64,
     pub keyboard_step: f64,
-    pub automation: AutomationState,
-    pub disabled: bool,
+    pub format: AudioValueFormat,
+    pub hover: bool,
+    pub focus: bool,
     pub drag: DragState,
+    pub automation: AutomationState,
+    pub entry_open: bool,
+    /// Value anchored when the gesture began or last rebased.
+    pub drag_start_value: f64,
+    /// Pointer position anchored with `drag_start_value`.
+    pub drag_start_position: f64,
+    pub disabled: bool,
 }
 
 impl Default for AudioValueContext {
@@ -197,9 +230,15 @@ impl Default for AudioValueContext {
             law: AudioValueLaw::Linear,
             default_value: 0.0,
             keyboard_step: 0.01,
-            automation: AutomationState::None,
-            disabled: false,
+            format: AudioValueFormat::Number { decimals: 2 },
+            hover: false,
+            focus: false,
             drag: DragState::None,
+            automation: AutomationState::None,
+            entry_open: false,
+            drag_start_value: 0.0,
+            drag_start_position: 0.0,
+            disabled: false,
         }
     }
 }
@@ -213,131 +252,447 @@ impl AudioValueContext {
             self.law,
             !self.disabled,
         );
+        state.hover = self.hover;
+        state.focus = self.focus;
         state.drag = self.drag;
         state.automation = self.automation;
         state
+    }
+
+    pub fn value_text(&self) -> String {
+        format_value(self.value, self.format)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct KnobContext {
+    pub base: AudioValueContext,
+    pub drag_mode: KnobDragMode,
+    pub drag_sensitivity: f64,
+}
+
+impl Default for KnobContext {
+    fn default() -> Self {
+        Self {
+            base: AudioValueContext::default(),
+            drag_mode: KnobDragMode::Vertical,
+            drag_sensitivity: 160.0,
+        }
+    }
+}
+
+impl KnobContext {
+    pub fn visual_state(&self) -> AudioControlVisualState {
+        self.base.visual_state()
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct FaderContext {
+    pub base: AudioValueContext,
+    pub orientation: FaderOrientation,
+    /// Plain snap values.
+    pub detents: Vec<f64>,
+    /// Normalized snap radius.
+    pub detent_snap: f64,
+}
+
+impl Default for FaderContext {
+    fn default() -> Self {
+        Self {
+            base: AudioValueContext::default(),
+            orientation: FaderOrientation::Vertical,
+            detents: Vec::new(),
+            detent_snap: 0.015,
+        }
+    }
+}
+
+impl FaderContext {
+    pub fn visual_state(&self) -> AudioControlVisualState {
+        self.base.visual_state()
     }
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum AudioValueEvent {
-    GestureBegin {
+    Hover {
+        value: bool,
+    },
+    Focus {
+        value: bool,
+    },
+    SetAutomation {
+        value: AutomationState,
+    },
+    /// Host-owned value replacement. Not a user gesture, so it emits nothing.
+    SetValue {
+        value: f64,
+    },
+    DragBegin {
+        position: f64,
         fine: bool,
     },
-    SetNormalized {
+    /// Anchored pointer delta. Knob vertical mode only.
+    DragMove {
+        position: f64,
+        fine: bool,
+    },
+    /// Adapter-resolved normalized position. Knob circular mode and Fader.
+    DragSetNorm {
         value_norm: f64,
         fine: bool,
     },
-    Nudge {
+    DragEnd,
+    DragCancel,
+    Wheel {
+        direction: i8,
+        fine: bool,
+    },
+    Reset,
+    KeyNudge {
         direction: i8,
         multiplier: f64,
         fine: bool,
     },
-    Bound {
-        maximum: bool,
+    KeyBound {
+        bound: ValueBound,
     },
-    Reset,
+    EntryOpen,
+    EntryCancel,
     EntryCommit {
         text: String,
-        format: AudioValueFormat,
     },
-    GestureEnd,
-    GestureCancel,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum AudioValueEffect {
     ValueChange(f64),
     ValueCommit(f64),
     GestureBegin,
     GestureEnd,
+    RequestEntryFocus,
 }
 
-fn commit_value(
-    mut context: AudioValueContext,
-    value: f64,
-) -> (AudioValueContext, Vec<AudioValueEffect>) {
+/// Keys, bounds, reset, wheel, and valid type-in are atomic: one change plus
+/// one commit. They are never sustained pointer gestures.
+fn atomic_value(context: &mut AudioValueContext, value: f64) -> Vec<AudioValueEffect> {
     let value = constrain_value(value, context.min, context.max, context.law);
     context.value = value;
-    (
-        context,
-        vec![
-            AudioValueEffect::ValueChange(value),
-            AudioValueEffect::ValueCommit(value),
-        ],
-    )
+    vec![
+        AudioValueEffect::ValueChange(value),
+        AudioValueEffect::ValueCommit(value),
+    ]
 }
 
-pub fn audio_value_transition(
-    mut context: AudioValueContext,
-    event: AudioValueEvent,
-) -> (AudioValueContext, Vec<AudioValueEffect>) {
-    if context.disabled {
-        return (context, vec![]);
-    }
+/// Events shared by every scalar audio control. Returns `None` for the pointer
+/// events, which each control resolves through its own mapping.
+fn common_value_transition(
+    context: &mut AudioValueContext,
+    event: &AudioValueEvent,
+) -> Option<Vec<AudioValueEffect>> {
     match event {
-        AudioValueEvent::GestureBegin { fine } if context.drag == DragState::None => {
-            context.drag = if fine {
-                DragState::Fine
-            } else {
-                DragState::Coarse
-            };
-            (context, vec![AudioValueEffect::GestureBegin])
+        AudioValueEvent::Hover { value } => {
+            context.hover = *value;
+            Some(vec![])
         }
-        AudioValueEvent::GestureBegin { .. } => (context, vec![]),
-        AudioValueEvent::SetNormalized { value_norm, fine } => {
-            let current = normalize_value(context.value, context.min, context.max, context.law);
-            let norm = if fine {
-                current + (value_norm - current) * 0.1
-            } else {
-                value_norm
-            };
-            let value = denormalize_value(norm, context.min, context.max, context.law);
-            context.value = value;
-            context.drag = if fine {
-                DragState::Fine
-            } else {
-                DragState::Coarse
-            };
-            (context, vec![AudioValueEffect::ValueChange(value)])
+        AudioValueEvent::Focus { value } => {
+            context.focus = *value;
+            Some(vec![])
         }
-        AudioValueEvent::Nudge {
+        AudioValueEvent::SetAutomation { value } => {
+            context.automation = *value;
+            Some(vec![])
+        }
+        AudioValueEvent::SetValue { value } => {
+            context.value = constrain_value(*value, context.min, context.max, context.law);
+            Some(vec![])
+        }
+        AudioValueEvent::Reset => {
+            if context.disabled {
+                return Some(vec![]);
+            }
+            let value = context.default_value;
+            Some(atomic_value(context, value))
+        }
+        AudioValueEvent::Wheel { direction, fine } => {
+            if context.disabled {
+                return Some(vec![]);
+            }
+            let scale = if *fine { 0.1 } else { 1.0 };
+            let value = context.value + *direction as f64 * context.keyboard_step * scale;
+            Some(atomic_value(context, value))
+        }
+        AudioValueEvent::KeyNudge {
             direction,
             multiplier,
             fine,
         } => {
-            let scale = if fine { 0.1 } else { 1.0 };
-            let value = context.value
-                + direction.signum() as f64 * context.keyboard_step * multiplier.max(0.0) * scale;
-            commit_value(context, value)
+            if context.disabled {
+                return Some(vec![]);
+            }
+            let scale = if *fine { 0.1 } else { 1.0 };
+            let value =
+                context.value + *direction as f64 * context.keyboard_step * *multiplier * scale;
+            Some(atomic_value(context, value))
         }
-        AudioValueEvent::Bound { maximum } => {
-            let value = if maximum { context.max } else { context.min };
-            commit_value(context, value)
+        AudioValueEvent::KeyBound { bound } => {
+            if context.disabled {
+                return Some(vec![]);
+            }
+            let value = match bound {
+                ValueBound::Min => context.min,
+                ValueBound::Max => context.max,
+            };
+            Some(atomic_value(context, value))
         }
-        AudioValueEvent::Reset => {
-            let value = context.default_value;
-            commit_value(context, value)
+        AudioValueEvent::EntryOpen => {
+            if context.disabled {
+                return Some(vec![]);
+            }
+            context.entry_open = true;
+            Some(vec![AudioValueEffect::RequestEntryFocus])
         }
-        AudioValueEvent::EntryCommit { text, format } => match parse_value(&text, format) {
-            Some(value) => commit_value(context, value),
-            None => (context, vec![]),
-        },
-        AudioValueEvent::GestureEnd | AudioValueEvent::GestureCancel
-            if context.drag != DragState::None =>
-        {
-            context.drag = DragState::None;
-            let value = context.value;
-            (
-                context,
-                vec![
-                    AudioValueEffect::ValueCommit(value),
-                    AudioValueEffect::GestureEnd,
-                ],
-            )
+        AudioValueEvent::EntryCancel => {
+            context.entry_open = false;
+            Some(vec![])
         }
-        AudioValueEvent::GestureEnd | AudioValueEvent::GestureCancel => (context, vec![]),
+        AudioValueEvent::EntryCommit { text } => {
+            let parsed = parse_value(text, context.format);
+            let disabled = context.disabled;
+            context.entry_open = false;
+            match parsed {
+                Some(value) if !disabled => Some(atomic_value(context, value)),
+                _ => Some(vec![]),
+            }
+        }
+        _ => None,
     }
+}
+
+/// Accepts one pointer gesture. A second begin while one is open is inert, so
+/// `GestureBegin` and `GestureEnd` stay paired exactly once per gesture.
+fn begin_drag(context: &mut AudioValueContext, position: f64, fine: bool) -> Vec<AudioValueEffect> {
+    if context.disabled || context.drag != DragState::None {
+        return vec![];
+    }
+    context.drag = if fine {
+        DragState::Fine
+    } else {
+        DragState::Coarse
+    };
+    context.drag_start_value = context.value;
+    context.drag_start_position = position;
+    vec![AudioValueEffect::GestureBegin]
+}
+
+/// Terminal for an accepted gesture. Release and cancellation close it the same
+/// way and are inert once it is closed, so repeated, stale, lost-capture, and
+/// teardown terminals cannot duplicate the pair. A control disabled mid-gesture
+/// may still close: stranding it would latch host automation open.
+fn end_drag(context: &mut AudioValueContext) -> Vec<AudioValueEffect> {
+    if context.drag == DragState::None {
+        return vec![];
+    }
+    context.drag = DragState::None;
+    vec![
+        AudioValueEffect::ValueCommit(context.value),
+        AudioValueEffect::GestureEnd,
+    ]
+}
+
+/// Coarse/fine switching re-anchors at the current value and current pointer,
+/// so holding or releasing the modifier never jumps. The transition that flips
+/// the modifier only rebases; travel resumes from the next move.
+fn rebase_drag(context: &mut AudioValueContext, position: f64, fine: bool) -> bool {
+    let next = if fine {
+        DragState::Fine
+    } else {
+        DragState::Coarse
+    };
+    if context.drag == next {
+        return false;
+    }
+    context.drag = next;
+    context.drag_start_value = context.value;
+    context.drag_start_position = position;
+    true
+}
+
+/// A move is live only inside an accepted gesture on an enabled control.
+fn dragging(context: &AudioValueContext) -> bool {
+    !context.disabled && context.drag != DragState::None
+}
+
+pub fn knob_transition(
+    mut context: KnobContext,
+    event: AudioValueEvent,
+) -> (KnobContext, Vec<AudioValueEffect>) {
+    if let Some(effects) = common_value_transition(&mut context.base, &event) {
+        return (context, effects);
+    }
+    let effects = match event {
+        AudioValueEvent::DragBegin { position, fine } => {
+            begin_drag(&mut context.base, position, fine)
+        }
+        AudioValueEvent::DragMove { position, fine } => {
+            if context.drag_mode != KnobDragMode::Vertical || !dragging(&context.base) {
+                vec![]
+            } else if rebase_drag(&mut context.base, position, fine) {
+                vec![]
+            } else {
+                let base = &context.base;
+                let scale = if fine { 0.1 } else { 1.0 };
+                let start_norm =
+                    normalize_value(base.drag_start_value, base.min, base.max, base.law);
+                let norm = start_norm
+                    + ((base.drag_start_position - position) / context.drag_sensitivity.max(1.0))
+                        * scale;
+                let value = denormalize_value(norm, base.min, base.max, base.law);
+                context.base.value = value;
+                vec![AudioValueEffect::ValueChange(value)]
+            }
+        }
+        AudioValueEvent::DragSetNorm { value_norm, fine } => {
+            if context.drag_mode != KnobDragMode::Circular || !dragging(&context.base) {
+                vec![]
+            } else if rebase_drag(&mut context.base, value_norm, fine) {
+                vec![]
+            } else {
+                let base = &context.base;
+                let start_norm =
+                    normalize_value(base.drag_start_value, base.min, base.max, base.law);
+                let target = if fine {
+                    start_norm + (value_norm - base.drag_start_position) * 0.1
+                } else {
+                    value_norm
+                };
+                let value = denormalize_value(target, base.min, base.max, base.law);
+                context.base.value = value;
+                vec![AudioValueEffect::ValueChange(value)]
+            }
+        }
+        AudioValueEvent::DragEnd | AudioValueEvent::DragCancel => end_drag(&mut context.base),
+        _ => vec![],
+    };
+    (context, effects)
+}
+
+/// Nearest declared detent inside the normalized snap radius. The radius is
+/// inclusive and the first declared detent wins a tie, so two equidistant
+/// detents always resolve the same way.
+fn snap_fader_detent(context: &FaderContext, norm: f64) -> f64 {
+    let base = &context.base;
+    let mut best = norm;
+    let mut distance = f64::INFINITY;
+    for detent in &context.detents {
+        let detent_norm = normalize_value(*detent, base.min, base.max, base.law);
+        let candidate = (norm - detent_norm).abs();
+        if candidate <= context.detent_snap && candidate < distance {
+            best = detent_norm;
+            distance = candidate;
+        }
+    }
+    best
+}
+
+pub fn fader_transition(
+    mut context: FaderContext,
+    event: AudioValueEvent,
+) -> (FaderContext, Vec<AudioValueEffect>) {
+    if let Some(effects) = common_value_transition(&mut context.base, &event) {
+        return (context, effects);
+    }
+    let effects = match event {
+        AudioValueEvent::DragBegin { position, fine } => {
+            begin_drag(&mut context.base, position, fine)
+        }
+        AudioValueEvent::DragSetNorm { value_norm, fine } => {
+            if !dragging(&context.base) {
+                vec![]
+            } else if rebase_drag(&mut context.base, value_norm, fine) {
+                vec![]
+            } else {
+                let base = &context.base;
+                let start_norm =
+                    normalize_value(base.drag_start_value, base.min, base.max, base.law);
+                let target = if fine {
+                    start_norm + (value_norm - base.drag_start_position) * 0.1
+                } else {
+                    value_norm
+                };
+                let snapped = snap_fader_detent(&context, target);
+                let base = &context.base;
+                let value = denormalize_value(snapped, base.min, base.max, base.law);
+                context.base.value = value;
+                vec![AudioValueEffect::ValueChange(value)]
+            }
+        }
+        AudioValueEvent::DragEnd | AudioValueEvent::DragCancel => end_drag(&mut context.base),
+        _ => vec![],
+    };
+    (context, effects)
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct AudioPoint {
+    pub x: f64,
+    pub y: f64,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct AudioRect {
+    pub left: f64,
+    pub top: f64,
+    pub width: f64,
+    pub height: f64,
+}
+
+pub fn hit_test_rect(point: AudioPoint, rect: AudioRect) -> bool {
+    point.x >= rect.left
+        && point.x <= rect.left + rect.width
+        && point.y >= rect.top
+        && point.y <= rect.top + rect.height
+}
+
+pub fn hit_test_circle(point: AudioPoint, rect: AudioRect) -> bool {
+    let radius = rect.width.min(rect.height) / 2.0;
+    let center_x = rect.left + rect.width / 2.0;
+    let center_y = rect.top + rect.height / 2.0;
+    (point.x - center_x).hypot(point.y - center_y) <= radius
+}
+
+/// Standard 270 degree knob sweep: -135 degrees is zero and +135 degrees is one.
+pub fn knob_point_to_norm(point: AudioPoint, rect: AudioRect) -> f64 {
+    let x = point.x - (rect.left + rect.width / 2.0);
+    let y = point.y - (rect.top + rect.height / 2.0);
+    let mut degrees = y.atan2(x) * 180.0 / std::f64::consts::PI + 90.0;
+    if degrees < -180.0 {
+        degrees += 360.0;
+    }
+    if degrees > 180.0 {
+        degrees -= 360.0;
+    }
+    ((degrees + 135.0) / 270.0).clamp(0.0, 1.0)
+}
+
+pub fn fader_point_to_norm(point: AudioPoint, rect: AudioRect, orientation: FaderOrientation) -> f64 {
+    match orientation {
+        FaderOrientation::Horizontal => {
+            ((point.x - rect.left) / rect.width.max(1.0)).clamp(0.0, 1.0)
+        }
+        FaderOrientation::Vertical => {
+            1.0 - ((point.y - rect.top) / rect.height.max(1.0)).clamp(0.0, 1.0)
+        }
+    }
+}
+
+/// Normalized pad coordinates: x increases right and y increases upward.
+pub fn xy_pad_point_to_norm(point: AudioPoint, rect: AudioRect) -> (f64, f64) {
+    (
+        ((point.x - rect.left) / rect.width.max(1.0)).clamp(0.0, 1.0),
+        1.0 - ((point.y - rect.top) / rect.height.max(1.0)).clamp(0.0, 1.0),
+    )
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -1027,6 +1382,12 @@ pub struct XYPadVisualState {
     pub enabled: bool,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum XYPadAxis {
+    X,
+    Y,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct XYPadContext {
     pub x: f64,
@@ -1039,11 +1400,19 @@ pub struct XYPadContext {
     pub law_y: AudioValueLaw,
     pub default_x: f64,
     pub default_y: f64,
-    pub step_x: f64,
-    pub step_y: f64,
-    pub automation: AutomationState,
-    pub disabled: bool,
+    pub keyboard_step_x: f64,
+    pub keyboard_step_y: f64,
+    pub hover: bool,
+    pub focus: bool,
     pub drag: DragState,
+    pub automation: AutomationState,
+    /// Pair anchored when the gesture began or last rebased.
+    pub drag_start_x: f64,
+    pub drag_start_y: f64,
+    /// Normalized pointer position anchored with the start pair.
+    pub drag_start_norm_x: f64,
+    pub drag_start_norm_y: f64,
+    pub disabled: bool,
 }
 impl Default for XYPadContext {
     fn default() -> Self {
@@ -1058,11 +1427,17 @@ impl Default for XYPadContext {
             law_y: AudioValueLaw::Linear,
             default_x: 0.0,
             default_y: 0.0,
-            step_x: 0.01,
-            step_y: 0.01,
-            automation: AutomationState::None,
-            disabled: false,
+            keyboard_step_x: 0.01,
+            keyboard_step_y: 0.01,
+            hover: false,
+            focus: false,
             drag: DragState::None,
+            automation: AutomationState::None,
+            drag_start_x: 0.0,
+            drag_start_y: 0.0,
+            drag_start_norm_x: 0.0,
+            drag_start_norm_y: 0.0,
+            disabled: false,
         }
     }
 }
@@ -1073,32 +1448,60 @@ impl XYPadContext {
             y_norm: normalize_value(self.y, self.min_y, self.max_y, self.law_y),
             raw_x: self.x,
             raw_y: self.y,
-            hover: false,
-            focus: false,
+            hover: self.hover,
+            focus: self.focus,
             drag: self.drag,
             automation: self.automation,
             enabled: !self.disabled,
         }
     }
+
+    fn constrained(&self, x: f64, y: f64) -> (f64, f64) {
+        (
+            constrain_value(x, self.min_x, self.max_x, self.law_x),
+            constrain_value(y, self.min_y, self.max_y, self.law_y),
+        )
+    }
 }
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum XYPadEvent {
-    GestureBegin {
-        fine: bool,
+    /// Host-owned pair replacement. Not a user gesture, so it emits nothing.
+    SetValues {
+        x: f64,
+        y: f64,
     },
-    SetNormalized {
+    Hover {
+        value: bool,
+    },
+    Focus {
+        value: bool,
+    },
+    SetAutomation {
+        value: AutomationState,
+    },
+    DragBegin {
         x_norm: f64,
         y_norm: f64,
         fine: bool,
     },
-    Nudge {
-        x_direction: i8,
-        y_direction: i8,
+    DragMove {
+        x_norm: f64,
+        y_norm: f64,
         fine: bool,
     },
+    DragEnd,
+    DragCancel,
     Reset,
-    GestureEnd,
-    GestureCancel,
+    Nudge {
+        axis: XYPadAxis,
+        direction: i8,
+        multiplier: f64,
+        fine: bool,
+    },
+    Bound {
+        axis: XYPadAxis,
+        bound: ValueBound,
+    },
 }
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum XYPadEffect {
@@ -1107,107 +1510,195 @@ pub enum XYPadEffect {
     GestureBegin,
     GestureEnd,
 }
+
+/// Keys, bounds, and reset move the pair atomically: one change plus one
+/// commit carrying both axes. Axis values are never emitted separately.
+fn xy_atomic(context: &mut XYPadContext, x: f64, y: f64) -> Vec<XYPadEffect> {
+    let (x, y) = context.constrained(x, y);
+    context.x = x;
+    context.y = y;
+    vec![
+        XYPadEffect::ValueChange(x, y),
+        XYPadEffect::ValueCommit(x, y),
+    ]
+}
+
 pub fn xy_pad_transition(
     mut context: XYPadContext,
     event: XYPadEvent,
 ) -> (XYPadContext, Vec<XYPadEffect>) {
-    if context.disabled {
-        return (context, vec![]);
-    }
-    match event {
-        XYPadEvent::GestureBegin { fine } if context.drag == DragState::None => {
-            context.drag = if fine {
-                DragState::Fine
-            } else {
-                DragState::Coarse
-            };
-            (context, vec![XYPadEffect::GestureBegin])
+    let effects = match event {
+        XYPadEvent::SetValues { x, y } => {
+            let (x, y) = context.constrained(x, y);
+            context.x = x;
+            context.y = y;
+            vec![]
         }
-        XYPadEvent::SetNormalized {
+        XYPadEvent::Hover { value } => {
+            context.hover = value;
+            vec![]
+        }
+        XYPadEvent::Focus { value } => {
+            context.focus = value;
+            vec![]
+        }
+        XYPadEvent::SetAutomation { value } => {
+            context.automation = value;
+            vec![]
+        }
+        XYPadEvent::Reset => {
+            if context.disabled {
+                vec![]
+            } else {
+                let (x, y) = (context.default_x, context.default_y);
+                xy_atomic(&mut context, x, y)
+            }
+        }
+        // One accepted gesture at a time: a second begin cannot reopen or
+        // re-anchor an open one, so begin/end stay paired exactly once.
+        XYPadEvent::DragBegin {
             x_norm,
             y_norm,
             fine,
         } => {
-            let current_x = normalize_value(context.x, context.min_x, context.max_x, context.law_x);
-            let current_y = normalize_value(context.y, context.min_y, context.max_y, context.law_y);
-            let scale = if fine { 0.1 } else { 1.0 };
-            context.x = denormalize_value(
-                current_x + (x_norm - current_x) * scale,
-                context.min_x,
-                context.max_x,
-                context.law_x,
-            );
-            context.y = denormalize_value(
-                current_y + (y_norm - current_y) * scale,
-                context.min_y,
-                context.max_y,
-                context.law_y,
-            );
-            context.drag = if fine {
+            if context.disabled || context.drag != DragState::None {
+                vec![]
+            } else {
+                // A coarse press moves the pair to the accepted press
+                // position; a fine press only anchors.
+                let (x, y) = if fine {
+                    (context.x, context.y)
+                } else {
+                    context.constrained(
+                        denormalize_value(x_norm, context.min_x, context.max_x, context.law_x),
+                        denormalize_value(y_norm, context.min_y, context.max_y, context.law_y),
+                    )
+                };
+                context.x = x;
+                context.y = y;
+                context.drag = if fine {
+                    DragState::Fine
+                } else {
+                    DragState::Coarse
+                };
+                context.drag_start_x = x;
+                context.drag_start_y = y;
+                context.drag_start_norm_x = x_norm;
+                context.drag_start_norm_y = y_norm;
+                if fine {
+                    vec![XYPadEffect::GestureBegin]
+                } else {
+                    vec![XYPadEffect::GestureBegin, XYPadEffect::ValueChange(x, y)]
+                }
+            }
+        }
+        XYPadEvent::DragMove {
+            x_norm,
+            y_norm,
+            fine,
+        } => {
+            let next = if fine {
                 DragState::Fine
             } else {
                 DragState::Coarse
             };
-            let (x, y) = (context.x, context.y);
-            (context, vec![XYPadEffect::ValueChange(x, y)])
+            if context.disabled || context.drag == DragState::None {
+                vec![]
+            } else if next != context.drag {
+                // Modifier flip rebases both axes at the current pair and
+                // pointer; travel resumes from the next move.
+                context.drag = next;
+                context.drag_start_x = context.x;
+                context.drag_start_y = context.y;
+                context.drag_start_norm_x = x_norm;
+                context.drag_start_norm_y = y_norm;
+                vec![]
+            } else {
+                let start_x_norm = normalize_value(
+                    context.drag_start_x,
+                    context.min_x,
+                    context.max_x,
+                    context.law_x,
+                );
+                let start_y_norm = normalize_value(
+                    context.drag_start_y,
+                    context.min_y,
+                    context.max_y,
+                    context.law_y,
+                );
+                let target_x = if fine {
+                    start_x_norm + (x_norm - context.drag_start_norm_x) * 0.1
+                } else {
+                    x_norm
+                };
+                let target_y = if fine {
+                    start_y_norm + (y_norm - context.drag_start_norm_y) * 0.1
+                } else {
+                    y_norm
+                };
+                let (x, y) = context.constrained(
+                    denormalize_value(target_x, context.min_x, context.max_x, context.law_x),
+                    denormalize_value(target_y, context.min_y, context.max_y, context.law_y),
+                );
+                context.x = x;
+                context.y = y;
+                vec![XYPadEffect::ValueChange(x, y)]
+            }
+        }
+        // Release and cancellation close the gesture the same way and are inert
+        // once it is closed, so repeated, stale, lost-capture, and teardown
+        // terminals cannot duplicate the pair.
+        XYPadEvent::DragEnd | XYPadEvent::DragCancel => {
+            if context.drag == DragState::None {
+                vec![]
+            } else {
+                context.drag = DragState::None;
+                vec![
+                    XYPadEffect::ValueCommit(context.x, context.y),
+                    XYPadEffect::GestureEnd,
+                ]
+            }
         }
         XYPadEvent::Nudge {
-            x_direction,
-            y_direction,
+            axis,
+            direction,
+            multiplier,
             fine,
         } => {
-            let scale = if fine { 0.1 } else { 1.0 };
-            context.x = clamp_value(
-                context.x + x_direction as f64 * context.step_x * scale,
-                context.min_x,
-                context.max_x,
-            );
-            context.y = clamp_value(
-                context.y + y_direction as f64 * context.step_y * scale,
-                context.min_y,
-                context.max_y,
-            );
-            let (x, y) = (context.x, context.y);
-            (
-                context,
-                vec![
-                    XYPadEffect::ValueChange(x, y),
-                    XYPadEffect::ValueCommit(x, y),
-                ],
-            )
+            if context.disabled {
+                vec![]
+            } else {
+                let scale = if fine { 0.1 } else { 1.0 };
+                let (x, y) = match axis {
+                    XYPadAxis::X => (
+                        context.x
+                            + direction as f64 * context.keyboard_step_x * multiplier * scale,
+                        context.y,
+                    ),
+                    XYPadAxis::Y => (
+                        context.x,
+                        context.y
+                            + direction as f64 * context.keyboard_step_y * multiplier * scale,
+                    ),
+                };
+                xy_atomic(&mut context, x, y)
+            }
         }
-        XYPadEvent::Reset => {
-            context.x = constrain_value(
-                context.default_x,
-                context.min_x,
-                context.max_x,
-                context.law_x,
-            );
-            context.y = constrain_value(
-                context.default_y,
-                context.min_y,
-                context.max_y,
-                context.law_y,
-            );
-            let (x, y) = (context.x, context.y);
-            (
-                context,
-                vec![
-                    XYPadEffect::ValueChange(x, y),
-                    XYPadEffect::ValueCommit(x, y),
-                ],
-            )
+        XYPadEvent::Bound { axis, bound } => {
+            if context.disabled {
+                vec![]
+            } else {
+                let (x, y) = match (axis, bound) {
+                    (XYPadAxis::X, ValueBound::Min) => (context.min_x, context.y),
+                    (XYPadAxis::X, ValueBound::Max) => (context.max_x, context.y),
+                    (XYPadAxis::Y, ValueBound::Min) => (context.x, context.min_y),
+                    (XYPadAxis::Y, ValueBound::Max) => (context.x, context.max_y),
+                };
+                xy_atomic(&mut context, x, y)
+            }
         }
-        XYPadEvent::GestureEnd | XYPadEvent::GestureCancel if context.drag != DragState::None => {
-            context.drag = DragState::None;
-            let (x, y) = (context.x, context.y);
-            (
-                context,
-                vec![XYPadEffect::ValueCommit(x, y), XYPadEffect::GestureEnd],
-            )
-        }
-        _ => (context, vec![]),
-    }
+    };
+    (context, effects)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -2082,21 +2573,47 @@ mod tests {
         close(envelope_segment_value_at(&from, &to, 0.5), 0.125);
     }
 
+    fn knob(base: AudioValueContext) -> KnobContext {
+        KnobContext {
+            base,
+            ..Default::default()
+        }
+    }
+
     #[test]
-    fn scalar_machine_pairs_gestures_and_reuses_entry_parsing() {
-        let context = AudioValueContext {
+    fn knob_pairs_gestures_and_reuses_entry_parsing() {
+        let context = knob(AudioValueContext {
             value: 250.0,
             min: 0.0,
             max: 5000.0,
             default_value: 440.0,
             keyboard_step: 1.0,
+            format: AudioValueFormat::Milliseconds { decimals: 1 },
             ..Default::default()
-        };
-        let (context, effects) =
-            audio_value_transition(context, AudioValueEvent::GestureBegin { fine: true });
-        assert_eq!(context.drag, DragState::Fine);
+        });
+        let (context, effects) = knob_transition(
+            context,
+            AudioValueEvent::DragBegin {
+                position: 100.0,
+                fine: true,
+            },
+        );
+        assert_eq!(context.base.drag, DragState::Fine);
         assert_eq!(effects, vec![AudioValueEffect::GestureBegin]);
-        let (context, effects) = audio_value_transition(context, AudioValueEvent::GestureEnd);
+
+        // A second begin cannot reopen or re-anchor the accepted gesture.
+        let (context, effects) = knob_transition(
+            context,
+            AudioValueEvent::DragBegin {
+                position: 40.0,
+                fine: false,
+            },
+        );
+        assert!(effects.is_empty());
+        assert_eq!(context.base.drag, DragState::Fine);
+        assert_eq!(context.base.drag_start_position, 100.0);
+
+        let (context, effects) = knob_transition(context, AudioValueEvent::DragEnd);
         assert_eq!(
             effects,
             vec![
@@ -2104,14 +2621,219 @@ mod tests {
                 AudioValueEffect::GestureEnd
             ]
         );
-        let (context, _) = audio_value_transition(
+        // Repeated and stale terminals are inert.
+        let (context, effects) = knob_transition(context, AudioValueEvent::DragEnd);
+        assert!(effects.is_empty());
+        let (context, effects) = knob_transition(context, AudioValueEvent::DragCancel);
+        assert!(effects.is_empty());
+
+        let (context, _) = knob_transition(
             context,
             AudioValueEvent::EntryCommit {
                 text: "1.5 s".into(),
-                format: AudioValueFormat::Milliseconds { decimals: 1 },
             },
         );
-        assert_eq!(context.value, 1500.0);
+        assert_eq!(context.base.value, 1500.0);
+    }
+
+    #[test]
+    fn knob_modes_anchor_movement_and_rebase_without_jumps() {
+        let vertical = knob(AudioValueContext {
+            value: 0.5,
+            ..Default::default()
+        });
+        let (vertical, _) = knob_transition(
+            vertical,
+            AudioValueEvent::DragBegin {
+                position: 100.0,
+                fine: false,
+            },
+        );
+        let (vertical, effects) = knob_transition(
+            vertical,
+            AudioValueEvent::DragMove {
+                position: 84.0,
+                fine: false,
+            },
+        );
+        close(vertical.base.value, 0.6);
+        assert_eq!(effects, vec![AudioValueEffect::ValueChange(0.6)]);
+
+        // The transition that flips the modifier rebases only.
+        let (vertical, effects) = knob_transition(
+            vertical,
+            AudioValueEvent::DragMove {
+                position: 84.0,
+                fine: true,
+            },
+        );
+        assert!(effects.is_empty());
+        close(vertical.base.value, 0.6);
+        let (vertical, _) = knob_transition(
+            vertical,
+            AudioValueEvent::DragMove {
+                position: 68.0,
+                fine: true,
+            },
+        );
+        close(vertical.base.value, 0.61);
+
+        // Circular positions are inert in vertical mode and vice versa.
+        let (vertical, effects) = knob_transition(
+            vertical,
+            AudioValueEvent::DragSetNorm {
+                value_norm: 1.0,
+                fine: true,
+            },
+        );
+        assert!(effects.is_empty());
+        close(vertical.base.value, 0.61);
+
+        let circular = KnobContext {
+            base: AudioValueContext {
+                value: 0.5,
+                ..Default::default()
+            },
+            drag_mode: KnobDragMode::Circular,
+            ..Default::default()
+        };
+        let (circular, _) = knob_transition(
+            circular,
+            AudioValueEvent::DragBegin {
+                position: 0.5,
+                fine: true,
+            },
+        );
+        let (circular, _) = knob_transition(
+            circular,
+            AudioValueEvent::DragSetNorm {
+                value_norm: 1.0,
+                fine: true,
+            },
+        );
+        close(circular.base.value, 0.55);
+        let (circular, effects) = knob_transition(
+            circular,
+            AudioValueEvent::DragMove {
+                position: 0.0,
+                fine: true,
+            },
+        );
+        assert!(effects.is_empty());
+        close(circular.base.value, 0.55);
+    }
+
+    #[test]
+    fn fader_snaps_to_the_first_nearest_detent_and_maps_both_axes() {
+        let context = FaderContext {
+            base: AudioValueContext {
+                value: 0.4,
+                ..Default::default()
+            },
+            detents: vec![0.45, 0.55],
+            detent_snap: 0.05,
+            ..Default::default()
+        };
+        let (context, _) = fader_transition(
+            context,
+            AudioValueEvent::DragBegin {
+                position: 0.4,
+                fine: false,
+            },
+        );
+        // 0.5 is equidistant from both detents; the first declared wins.
+        let (context, effects) = fader_transition(
+            context,
+            AudioValueEvent::DragSetNorm {
+                value_norm: 0.5,
+                fine: false,
+            },
+        );
+        close(context.base.value, 0.45);
+        assert_eq!(effects, vec![AudioValueEffect::ValueChange(0.45)]);
+        // Outside the radius the raw position wins.
+        let (context, _) = fader_transition(
+            context,
+            AudioValueEvent::DragSetNorm {
+                value_norm: 0.2,
+                fine: false,
+            },
+        );
+        close(context.base.value, 0.2);
+
+        let rect = AudioRect {
+            left: 10.0,
+            top: 5.0,
+            width: 100.0,
+            height: 100.0,
+        };
+        let point = AudioPoint { x: 20.0, y: 25.0 };
+        close(
+            fader_point_to_norm(point, rect, FaderOrientation::Horizontal),
+            0.1,
+        );
+        close(
+            fader_point_to_norm(point, rect, FaderOrientation::Vertical),
+            0.8,
+        );
+        close(
+            knob_point_to_norm(
+                AudioPoint { x: 50.0, y: 0.0 },
+                AudioRect {
+                    left: 0.0,
+                    top: 0.0,
+                    width: 100.0,
+                    height: 100.0,
+                },
+            ),
+            0.5,
+        );
+    }
+
+    #[test]
+    fn disabled_scalar_controls_stay_inert_but_still_close_a_gesture() {
+        let context = knob(AudioValueContext {
+            value: 0.5,
+            disabled: true,
+            ..Default::default()
+        });
+        for event in [
+            AudioValueEvent::DragBegin {
+                position: 0.0,
+                fine: false,
+            },
+            AudioValueEvent::Wheel {
+                direction: 1,
+                fine: false,
+            },
+            AudioValueEvent::Reset,
+            AudioValueEvent::KeyBound {
+                bound: ValueBound::Max,
+            },
+            AudioValueEvent::EntryOpen,
+        ] {
+            let (next, effects) = knob_transition(context.clone(), event);
+            assert!(effects.is_empty());
+            close(next.base.value, 0.5);
+            assert_eq!(next.base.drag, DragState::None);
+        }
+
+        // A control disabled mid-gesture still terminates exactly once.
+        let open = knob(AudioValueContext {
+            value: 0.5,
+            drag: DragState::Coarse,
+            disabled: true,
+            ..Default::default()
+        });
+        let (closed, effects) = knob_transition(open, AudioValueEvent::DragCancel);
+        assert_eq!(
+            effects,
+            vec![
+                AudioValueEffect::ValueCommit(0.5),
+                AudioValueEffect::GestureEnd
+            ]
+        );
+        assert_eq!(closed.base.drag, DragState::None);
     }
 
     #[test]
@@ -2129,14 +2851,92 @@ mod tests {
         let (xy, effects) = xy_pad_transition(
             xy,
             XYPadEvent::Nudge {
-                x_direction: 1,
-                y_direction: 0,
+                axis: XYPadAxis::X,
+                direction: 1,
+                multiplier: 1.0,
                 fine: false,
             },
         );
         close(xy.x, 0.26);
         close(xy.y, 0.75);
         assert_eq!(effects.last(), Some(&XYPadEffect::ValueCommit(0.26, 0.75)));
+    }
+
+    #[test]
+    fn xy_pad_presses_at_position_then_anchors_fine_travel() {
+        let context = XYPadContext::default();
+        let (context, effects) = xy_pad_transition(
+            context,
+            XYPadEvent::DragBegin {
+                x_norm: 0.25,
+                y_norm: 0.75,
+                fine: false,
+            },
+        );
+        assert_eq!(
+            effects,
+            vec![
+                XYPadEffect::GestureBegin,
+                XYPadEffect::ValueChange(0.25, 0.75)
+            ]
+        );
+        assert_eq!(context.drag, DragState::Coarse);
+
+        // A second begin cannot reopen or re-anchor the accepted gesture.
+        let (context, effects) = xy_pad_transition(
+            context,
+            XYPadEvent::DragBegin {
+                x_norm: 0.9,
+                y_norm: 0.1,
+                fine: false,
+            },
+        );
+        assert!(effects.is_empty());
+        close(context.x, 0.25);
+
+        // The modifier flip rebases both axes; travel resumes from the next move.
+        let (context, effects) = xy_pad_transition(
+            context,
+            XYPadEvent::DragMove {
+                x_norm: 0.25,
+                y_norm: 0.75,
+                fine: true,
+            },
+        );
+        assert!(effects.is_empty());
+        let (context, _) = xy_pad_transition(
+            context,
+            XYPadEvent::DragMove {
+                x_norm: 0.75,
+                y_norm: 0.25,
+                fine: true,
+            },
+        );
+        close(context.x, 0.3);
+        close(context.y, 0.7);
+
+        let (context, effects) = xy_pad_transition(context, XYPadEvent::DragCancel);
+        assert_eq!(
+            effects,
+            vec![
+                XYPadEffect::ValueCommit(context.x, context.y),
+                XYPadEffect::GestureEnd
+            ]
+        );
+        let (_, effects) = xy_pad_transition(context, XYPadEvent::DragEnd);
+        assert!(effects.is_empty());
+
+        let (x_norm, y_norm) = xy_pad_point_to_norm(
+            AudioPoint { x: 60.0, y: 45.0 },
+            AudioRect {
+                left: 10.0,
+                top: 20.0,
+                width: 100.0,
+                height: 50.0,
+            },
+        );
+        close(x_norm, 0.5);
+        close(y_norm, 0.5);
     }
 
     #[test]

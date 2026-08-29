@@ -39,6 +39,7 @@ export type XYPadEvent =
   | { type: "DRAG_BEGIN"; xNorm: number; yNorm: number; fine: boolean }
   | { type: "DRAG_MOVE"; xNorm: number; yNorm: number; fine: boolean }
   | { type: "DRAG_END" }
+  | { type: "DRAG_CANCEL" }
   | { type: "RESET" }
   | { type: "NUDGE"; axis: "x" | "y"; direction: -1 | 1; multiplier?: number; fine?: boolean }
   | { type: "BOUND"; axis: "x" | "y"; bound: "min" | "max" };
@@ -82,7 +83,9 @@ export function xyPadTransition(context: XYPadContext, event: XYPadEvent): XYPad
     case "SET_AUTOMATION": return { context: { ...context, automation: event.value }, effects: [] };
     case "RESET": return context.disabled ? { context, effects: [] } : atomic(context, context.defaultX, context.defaultY);
     case "DRAG_BEGIN": {
-      if (context.disabled) return { context, effects: [] };
+      // One accepted gesture at a time: a second begin cannot reopen or
+      // re-anchor an open one, so begin/end stay paired exactly once.
+      if (context.disabled || context.drag !== "none") return { context, effects: [] };
       const drag: AudioDragState = event.fine ? "fine" : "coarse";
       const values = event.fine ? { x: context.x, y: context.y } : constrained(
         context,
@@ -116,7 +119,12 @@ export function xyPadTransition(context: XYPadContext, event: XYPadEvent): XYPad
       );
       return { context: { ...context, ...values }, effects: [{ type: "emitValueChange", ...values }] };
     }
-    case "DRAG_END": return context.drag === "none" ? { context, effects: [] } : {
+    // Release and cancellation close the gesture the same way, and both are
+    // inert once it is closed: repeated, stale, lost-capture, and teardown
+    // terminals cannot duplicate the pair. A control disabled mid-gesture may
+    // still close, because stranding it would latch host automation open.
+    case "DRAG_END":
+    case "DRAG_CANCEL": return context.drag === "none" ? { context, effects: [] } : {
       context: { ...context, drag: "none" },
       effects: [{ type: "emitValueCommit", x: context.x, y: context.y }, { type: "endGesture" }],
     };
