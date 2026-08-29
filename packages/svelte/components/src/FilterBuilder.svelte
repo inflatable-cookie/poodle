@@ -272,9 +272,8 @@
     draftOperand = { kind: "text", value: next };
   }
 
-  function setNumberOperand(next: number | string | null): void {
-    const parsed = next === null || next === "" ? Number.NaN : Number(next);
-    draftOperand = { kind: "number", value: parsed };
+  function setNumberOperand(next: number | null): void {
+    draftOperand = { kind: "number", value: next === null ? Number.NaN : next };
   }
 
   function setBooleanOperand(next: string): void {
@@ -289,11 +288,9 @@
     draftOperand = { kind: "options", values };
   }
 
-  function setRangeBound(bound: "min" | "max", next: number | string | null): void {
-    const parsed = next === null || next === "" ? null : Number(next);
-    const value = parsed !== null && Number.isNaN(parsed) ? null : parsed;
+  function setRangeBound(bound: "min" | "max", next: number | null): void {
     const base = draftOperand.kind === "range" ? draftOperand : { kind: "range" as const, min: null, max: null };
-    draftOperand = { kind: "range", min: bound === "min" ? value : base.min, max: bound === "max" ? value : base.max };
+    draftOperand = { kind: "range", min: bound === "min" ? next : base.min, max: bound === "max" ? next : base.max };
   }
 
   const booleanOperandValue = $derived(

@@ -4,75 +4,93 @@ import { describe, expect, it, vi } from "vitest";
 import { NumberInput } from "../src/NumberInput";
 
 describe("NumberInput (react)", () => {
-  it("commits parsed numbers as the user types and null on empty input", () => {
+  it("emits committed numbers for valid drafts and null on clear", () => {
     const onValueChange = vi.fn();
-    const { container } = render(<NumberInput value={5} onValueChange={onValueChange} />);
+    const onDraftValueChange = vi.fn();
+    const { container } = render(
+      <NumberInput value={5} onValueChange={onValueChange} onDraftValueChange={onDraftValueChange} />,
+    );
     const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
 
     fireEvent.change(control, { target: { value: "7" } });
+    expect(onDraftValueChange).toHaveBeenLastCalledWith("7");
     expect(onValueChange).toHaveBeenLastCalledWith(7);
 
     fireEvent.change(control, { target: { value: "" } });
     expect(onValueChange).toHaveBeenLastCalledWith(null);
   });
 
-  it("clamps to max and snaps to the step on blur", () => {
+  it("keeps invalid drafts visible without emitting or clamping", () => {
     const onValueChange = vi.fn();
-    const over = render(<NumberInput value={5} min={0} max={10} step={2} onValueChange={onValueChange} />);
-    const overControl = over.container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
-    fireEvent.change(overControl, { target: { value: "14" } });
-    fireEvent.blur(overControl);
-    expect(onValueChange).toHaveBeenLastCalledWith(10);
+    const onCommit = vi.fn();
+    const { container } = render(
+      <NumberInput value={5} min={0} max={10} step={2} onValueChange={onValueChange} onCommit={onCommit} />,
+    );
+    const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
 
-    const snap = render(<NumberInput value={5} min={0} max={10} step={2} onValueChange={onValueChange} />);
-    const snapControl = snap.container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
-    fireEvent.change(snapControl, { target: { value: "3" } });
-    fireEvent.blur(snapControl);
-    expect(onValueChange).toHaveBeenLastCalledWith(4);
+    fireEvent.change(control, { target: { value: "14" } });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(control.getAttribute("aria-invalid")).toBe("true");
+
+    fireEvent.blur(control);
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(onCommit).not.toHaveBeenCalled();
+    expect(control.value).toBe("5");
   });
 
-  it("steps with arrow keys, reports increment/decrement, and honours readOnly", () => {
+  it("steps with arrow keys, commits, and honours readOnly", () => {
     const onValueChange = vi.fn();
-    const onIncrement = vi.fn();
-    const onDecrement = vi.fn();
+    const onCommit = vi.fn();
     const { container } = render(
-      <NumberInput defaultValue={5} min={0} max={10} step={1} onValueChange={onValueChange} onIncrement={onIncrement} onDecrement={onDecrement} />,
+      <NumberInput defaultValue={5} min={0} max={10} step={1} onValueChange={onValueChange} onCommit={onCommit} />,
     );
     const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
 
     fireEvent.keyDown(control, { key: "ArrowUp" });
     expect(onValueChange).toHaveBeenLastCalledWith(6);
-    expect(onIncrement).toHaveBeenCalledWith(6);
+    expect(onCommit).toHaveBeenLastCalledWith(6);
 
     fireEvent.keyDown(control, { key: "ArrowDown" });
     expect(onValueChange).toHaveBeenLastCalledWith(5);
-    expect(onDecrement).toHaveBeenCalledWith(5);
+    expect(onCommit).toHaveBeenLastCalledWith(5);
 
-    const readOnly = render(<NumberInput defaultValue={5} readOnly onValueChange={onValueChange} onIncrement={onIncrement} />);
+    const readOnly = render(<NumberInput defaultValue={5} readOnly onValueChange={onValueChange} onCommit={onCommit} />);
     const readOnlyControl = readOnly.container.querySelector<HTMLInputElement>(
       ".poodle-number-input__control",
     ) as HTMLInputElement;
     fireEvent.keyDown(readOnlyControl, { key: "ArrowUp" });
-    expect(onIncrement).toHaveBeenCalledTimes(1);
+    expect(onCommit).toHaveBeenCalledTimes(2);
   });
 
-  it("round-trips string values and renders prefix and suffix", () => {
+  it("renders prefix and suffix and preserves incomplete drafts", () => {
     const onValueChange = vi.fn();
-    const { container } = render(<NumberInput value="2026" prefix="FY" suffix="kg" onValueChange={onValueChange} />);
+    const onDraftValueChange = vi.fn();
+    const { container } = render(
+      <NumberInput value={2026} prefix="FY" suffix="kg" onValueChange={onValueChange} onDraftValueChange={onDraftValueChange} />,
+    );
     expect(container.querySelector(".poodle-number-input__prefix")?.textContent).toBe("FY");
     expect(container.querySelector(".poodle-number-input__suffix")?.textContent).toBe("kg");
 
     const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
-    fireEvent.change(control, { target: { value: "7" } });
-    expect(onValueChange).toHaveBeenCalledWith("7");
+    fireEvent.change(control, { target: { value: "-" } });
+    expect(onDraftValueChange).toHaveBeenLastCalledWith("-");
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(control.getAttribute("role")).toBe("spinbutton");
   });
 
-  it("submits the current value on Enter", () => {
-    const onSubmit = vi.fn();
-    const { container } = render(<NumberInput value={5} onSubmit={onSubmit} />);
+  it("commits on Enter and reverts unresolved drafts on Escape", () => {
+    const onCommit = vi.fn();
+    const onValueChange = vi.fn();
+    const { container } = render(<NumberInput value={5} onCommit={onCommit} onValueChange={onValueChange} />);
     const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
+
     fireEvent.keyDown(control, { key: "Enter" });
-    expect(onSubmit).toHaveBeenCalledWith(5);
+    expect(onCommit).toHaveBeenCalledWith(5);
+
+    fireEvent.change(control, { target: { value: "1e2" } });
+    fireEvent.keyDown(control, { key: "Escape" });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(control.value).toBe("5");
   });
 
   it("maps validation state to aria attributes and reports async validation results", async () => {

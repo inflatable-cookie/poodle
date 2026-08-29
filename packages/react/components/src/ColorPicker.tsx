@@ -52,17 +52,12 @@ const modeOptions = [
   { value: "hsl", label: "HSL" },
 ];
 
-function toNumericInputValue(value: string | number | null): number | null {
-  if (value === null || value === "") {
+function toNumericInputValue(value: number | null): number | null {
+  if (value === null || !Number.isFinite(value)) {
     return null;
   }
 
-  if (typeof value === "number") {
-    return Number.isFinite(value) ? value : null;
-  }
-
-  const parsedValue = Number(value);
-  return Number.isFinite(parsedValue) ? parsedValue : null;
+  return value;
 }
 
 export function ColorPicker({
@@ -278,7 +273,7 @@ export function ColorPicker({
     applyHexText(event.currentTarget.value, setTriggerHexInput);
   }
 
-  function onRgbChange(channel: "r" | "g" | "b", nextValue: string | number | null): void {
+  function onRgbChange(channel: "r" | "g" | "b", nextValue: number | null): void {
     const val = toNumericInputValue(nextValue) ?? 0;
     const rgb = { ...currentRgb };
     rgb[channel] = val;
@@ -289,7 +284,7 @@ export function ColorPicker({
     commitColor(hsv.h, hsv.s, hsv.v);
   }
 
-  function onHslChange(channel: "h" | "s" | "l", nextValue: string | number | null): void {
+  function onHslChange(channel: "h" | "s" | "l", nextValue: number | null): void {
     const val = toNumericInputValue(nextValue) ?? 0;
     const hsl = { ...currentHsl };
     hsl[channel] = val;
@@ -300,7 +295,7 @@ export function ColorPicker({
     commitColor(hsv.h, hsv.s, hsv.v);
   }
 
-  function onAlphaInputChange(nextValue: string | number | null): void {
+  function onAlphaInputChange(nextValue: number | null): void {
     const nextAlpha = (toNumericInputValue(nextValue) ?? 100) / 100;
     setAlpha(nextAlpha);
     commitColor(hsvRef.current.h, hsvRef.current.s, hsvRef.current.v, nextAlpha);
