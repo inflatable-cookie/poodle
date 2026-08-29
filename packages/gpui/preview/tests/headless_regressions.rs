@@ -31,7 +31,7 @@ use poodle_node::{
 use poodle_headless::time_input::{time_input_invalid, time_input_transition, TimeInputContext, TimeInputEvent};
 use poodle_render::{
     ui_presentation_provider, RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers,
-    TabsHandlers, TimeInputHandlers, ToggleGroupHandlers, TriStateSwitchHandlers,
+    TabsHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, time_input_with_persistent_context,
 };
 use poodle_specs::{
     AccordionSelectionValue, AgentTranscriptSpec, ControlDensity, ControlSize, Orientation,
@@ -8743,17 +8743,17 @@ fn duration_input_segments_edit_and_rebuild_the_host_spec() {
 }
 
 struct TimeRouting {
-    context: Mutex<TimeInputContext>,
+    context: Arc<Mutex<TimeInputContext>>,
     last_emit: Mutex<Option<Option<String>>>,
     log: EventLog,
 }
 
 fn time_host(committed: Option<&str>) -> TimeRouting {
     TimeRouting {
-        context: Mutex::new(TimeInputContext {
+        context: Arc::new(Mutex::new(TimeInputContext {
             committed: committed.map(str::to_string),
             ..TimeInputContext::default()
-        }),
+        })),
         last_emit: Mutex::new(None),
         log: event_log(),
     }
@@ -8780,27 +8780,30 @@ fn time_routing_tree(host: &Arc<TimeRouting>, mounted: &Arc<Mutex<Node>>) -> Nod
 
     let change_host = Arc::clone(host);
     let change_mount = Arc::clone(mounted);
-    let time = poodle_render::time_input_with_handlers(
+    let live = Arc::clone(&host.context);
+    let time = time_input_with_persistent_context(
         &spec,
         &ctx,
-        &context,
-        TimeInputHandlers {
-            on_context: Some(Arc::new(move |next: TimeInputContext| {
-                *change_host.context.lock().expect("context") = next;
-                let tree = time_routing_tree(&change_host, &change_mount);
-                *change_mount.lock().expect("mount") = tree;
-            })),
-            on_value_change: Some({
-                let host = Arc::clone(host);
-                Arc::new(move |value: Option<String>| {
-                    *host.last_emit.lock().expect("emit") = Some(value.clone());
-                    note(
-                        &host.log,
-                        format!("time/change:{}", value.as_deref().unwrap_or("null")),
-                    );
-                })
-            }),
-        },
+        live,
+        Some({
+            let host = Arc::clone(host);
+            Arc::new(move |value: &str| {
+                let value = if value.is_empty() {
+                    None
+                } else {
+                    Some(value.to_string())
+                };
+                *host.last_emit.lock().expect("emit") = Some(value.clone());
+                note(
+                    &host.log,
+                    format!("time/change:{}", value.as_deref().unwrap_or("null")),
+                );
+            })
+        }),
+        Some(Arc::new(move |_next: TimeInputContext| {
+            let tree = time_routing_tree(&change_host, &change_mount);
+            *change_mount.lock().expect("mount") = tree;
+        })),
     );
 
     let after_host = Arc::clone(host);

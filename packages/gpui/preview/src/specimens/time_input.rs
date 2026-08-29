@@ -7,6 +7,7 @@ use gpui::prelude::FluentBuilder;
 use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_headless::time_input::TimeInputContext;
 use poodle_specs::{EyebrowSpec, TimeInputSpec};
 use std::sync::{Arc, Mutex};
 
@@ -21,6 +22,32 @@ fn change_handler(
             value: value.to_string(),
         });
     })
+}
+
+fn live_time_input(
+    state: &AppState,
+    key: &str,
+    spec: TimeInputSpec,
+    theme: &GpuiThemeProvider,
+    id: impl Into<String>,
+) -> TimeInput {
+    let live = {
+        let mut map = state.time_input_live.lock().expect("time input live");
+        map.entry(key.to_string())
+            .or_insert_with(|| Arc::new(Mutex::new(poodle_render::context_from_spec(&spec))))
+            .clone()
+    };
+    let events = Arc::clone(&state.node_events);
+    let text_key = key.to_string();
+    TimeInput::from_spec(spec, theme)
+        .with_id(id)
+        .with_context(live)
+        .on_context(Arc::new(move |next: TimeInputContext| {
+            events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                key: text_key.clone(),
+                value: next.committed.clone().unwrap_or_default(),
+            });
+        }))
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -66,8 +93,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                                 spec = spec.with_default_value(&default_value);
                             }
                             spec.aria_label = Some("Start time".to_string());
-                            TimeInput::from_spec(spec, theme)
-                                .with_id("default")
+                            live_time_input(state, "time-input-default", spec, theme, "default")
                                 .on_change(change_handler(&state.node_events, "time-input-default"))
                         })
                         .when(!default_value.is_empty(), |d| {
@@ -98,8 +124,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .child({
                             let mut spec = TimeInputSpec::new().with_default_value(&meeting_value);
                             spec.aria_label = Some("Meeting time".to_string());
-                            TimeInput::from_spec(spec, theme)
-                                .with_id("with-value")
+                            live_time_input(state, "time-input-meeting", spec, theme, "with-value")
                                 .on_change(change_handler(&state.node_events, "time-input-meeting"))
                         })
                         .child(
@@ -125,7 +150,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     spec.min = Some("08:00".to_string());
                     spec.max = Some("18:00".to_string());
                     spec.aria_label = Some("Office hours".to_string());
-                    TimeInput::from_spec(spec, theme).with_id("constrained")
+                    live_time_input(state, "time-input-constrained", spec, theme, "constrained")
                 }),
         )
         // --- Seconds step ---
@@ -143,7 +168,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         .with_default_value("09:30:15")
                         .with_step(15);
                     spec.aria_label = Some("Cue time".to_string());
-                    TimeInput::from_spec(spec, theme).with_id("seconds")
+                    live_time_input(state, "time-input-seconds", spec, theme, "seconds")
                 }),
         )
         // --- Overnight ---
@@ -163,7 +188,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     spec.min = Some("22:00".to_string());
                     spec.max = Some("06:00".to_string());
                     spec.aria_label = Some("Quiet hours".to_string());
-                    TimeInput::from_spec(spec, theme).with_id("overnight")
+                    live_time_input(state, "time-input-overnight", spec, theme, "overnight")
                 }),
         )
         // --- Disabled ---
@@ -179,7 +204,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .child({
                     let mut spec = TimeInputSpec::new().with_default_value("12:00");
                     spec.is_disabled = true;
-                    TimeInput::from_spec(spec, theme).with_id("disabled")
+                    live_time_input(state, "time-input-disabled", spec, theme, "disabled")
                 }),
         )
         .into_any_element();

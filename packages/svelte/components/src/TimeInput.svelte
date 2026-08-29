@@ -97,7 +97,17 @@
   }
 
   function handleInput(event: Event): void {
-    const text = (event.currentTarget as HTMLInputElement).value;
+    const input = event.currentTarget as HTMLInputElement;
+    const text = input.value;
+
+    // Native incomplete drafts report `value === ""` with `validity.badInput`.
+    // A deliberate clear reports empty without badInput.
+    if (text === "" && input.validity.badInput) {
+      localDraft = localDraft ?? { hour: "", minute: "", second: "" };
+      nativeDraftText = "";
+      return;
+    }
+
     const result = timeInputTransition(machineContext, { type: "COMMIT_TEXT", text });
     localDraft = result.context.draft;
     nativeDraftText = result.context.draft === null ? null : text;

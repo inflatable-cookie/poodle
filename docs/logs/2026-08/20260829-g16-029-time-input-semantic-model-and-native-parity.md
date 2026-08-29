@@ -81,6 +81,24 @@ traversal, and disabled inertia.
 Only TimeInput GPUI mounted behaviour: missing → mounted. Totals 48 / 126.
 GPUI accessibility stays manual. GPUI visual stays missing.
 
+## Review fixes (PR #97)
+
+Four contract failures from the orchestrator review, still on this PR:
+
+1. Stepping no longer clamps to a raw off-grid `min`/`max`. Last on-grid in
+   range is kept; empty step-down lands on that last on-grid value. Shared
+   vectors cover the linear and overnight cases.
+2. Web adapters distinguish native incomplete (`value === ""` +
+   `validity.badInput`) from a deliberate clear. Incomplete stays local,
+   marks invalid, and reverts; clear still emits `null`. Native
+   `input[type=time]` is kept.
+3. `time_input_with_change` / `TimeInput::from_spec` own a persistent
+   context cell. Specimens remount on context changes so a partial digit
+   keeps its draft and invalid border. The mounted regression drives
+   `time_input_with_persistent_context`.
+4. Active spec 052 and `docs/parity/time-input.md` now use `TimeInputSpec` /
+   `time-input` / `time_input.rs` only.
+
 ## Explicit non-claims
 
 - locale / 12-hour presentation

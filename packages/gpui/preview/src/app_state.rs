@@ -724,6 +724,13 @@ pub struct AppState {
     pub specimens: SpecimenState,
     /// Pending events from node-backed specimens; drained at render start.
     pub node_events: std::sync::Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
+    /// Live TimeInput machine context, keyed by specimen id, so incomplete
+    /// drafts survive a remount of the reusable editor path.
+    pub time_input_live: std::sync::Arc<
+        std::sync::Mutex<
+            HashMap<String, std::sync::Arc<std::sync::Mutex<poodle_headless::time_input::TimeInputContext>>>,
+        >,
+    >,
     pub tree: TreePreviewState,
     /// LicenceSeats specimen host state.
     pub licence_seats: LicencePreviewState,
@@ -774,6 +781,7 @@ impl AppState {
             token_inspector_query: String::new(),
             specimens: SpecimenState::new(),
             node_events: std::sync::Arc::new(std::sync::Mutex::new(Vec::new())),
+            time_input_live: std::sync::Arc::new(std::sync::Mutex::new(HashMap::new())),
             tree: TreePreviewState::new(),
             licence_seats: LicencePreviewState::mixed(),
             model_connection: ModelConnectionPreviewState::new(),

@@ -5,7 +5,7 @@
 //! of hour, minute, and conditional-second spin-button segments. Keys and
 //! digits run through `poodle_headless::time_input`.
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use poodle_headless::time_input::{
     format_time, parse_time, time_input_invalid, time_input_transition, time_seconds_visible,
@@ -23,6 +23,7 @@ use crate::presentation::{
 pub struct TimeInputHandlers {
     pub on_value_change: Option<Arc<dyn Fn(Option<String>) + Send + Sync>>,
     pub on_context: Option<Arc<dyn Fn(TimeInputContext) + Send + Sync>>,
+    pub live_context: Option<Arc<Mutex<TimeInputContext>>>,
 }
 
 pub fn time_input(spec: &TimeInputSpec, ctx: &RenderContext<'_>) -> Node {
@@ -35,18 +36,35 @@ pub fn time_input_with_change(
     ctx: &RenderContext<'_>,
     on_change: Option<TextChangeHandler>,
 ) -> Node {
-    let context = context_from_spec(spec);
+    time_input_with_persistent_context(
+        spec,
+        ctx,
+        Arc::new(Mutex::new(context_from_spec(spec))),
+        on_change,
+        None,
+    )
+}
+
+pub fn time_input_with_persistent_context(
+    spec: &TimeInputSpec,
+    ctx: &RenderContext<'_>,
+    live: Arc<Mutex<TimeInputContext>>,
+    on_change: Option<TextChangeHandler>,
+    on_context: Option<Arc<dyn Fn(TimeInputContext) + Send + Sync>>,
+) -> Node {
+    let context = live.lock().expect("time input context").clone();
     time_input_with_handlers(
         spec,
         ctx,
         &context,
         TimeInputHandlers {
+            live_context: Some(live),
             on_value_change: on_change.map(|handler| {
                 Arc::new(move |value: Option<String>| {
                     handler(&value.unwrap_or_default());
                 }) as Arc<dyn Fn(Option<String>) + Send + Sync>
             }),
-            on_context: None,
+            on_context,
         },
     )
 }
@@ -86,13 +104,19 @@ pub fn time_input_with_handlers(
     let (hour_text, minute_text, second_text) = segment_texts(context, show_seconds);
     let on_value_change = handlers.on_value_change.clone();
     let on_context = handlers.on_context.clone();
+    let live = handlers
+        .live_context
+        .clone()
+        .unwrap_or_else(|| Arc::new(Mutex::new(context.clone())));
 
     let dispatch = {
-        let context = context.clone();
+        let live = Arc::clone(&live);
         Arc::new(move |event: TimeInputEvent| {
-            let (next, effects) = time_input_transition(context.clone(), event);
+            let current = live.lock().expect("time input context").clone();
+            let (next, effects) = time_input_transition(current, event);
+            *live.lock().expect("time input context") = next.clone();
             if let Some(on_context) = &on_context {
-                on_context(next.clone());
+                on_context(next);
             }
             if let Some(on_value_change) = &on_value_change {
                 for effect in effects {
@@ -356,6 +380,7 @@ mod tests {
             TimeInputHandlers {
                 on_value_change: Some(Arc::new(move |value| sink.lock().unwrap().push(value))),
                 on_context: None,
+                live_context: None,
             },
         );
         (node, seen)
@@ -434,6 +459,33 @@ mod tests {
         let (node, _) = render(&spec, &context_from_spec(&spec));
         assert!(segments(&node).iter().all(|seg| !seg.interaction.focusable));
         assert!(node.interaction.disabled);
+    }
+
+    #[test]
+    fn a_partial_digit_survives_on_the_reusable_change_path() {
+        let spec = TimeInputSpec::new().with_default_value("14:30");
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let sink = Arc::clone(&seen);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = time_input_with_change(
+            &spec,
+            &ctx,
+            Some(Arc::new(move |value: &str| {
+                sink.lock().unwrap().push(value.to_string());
+            })),
+        );
+        let segs = segments(&node);
+        (segs[0].interaction.on_edit_key.as_ref().unwrap())(
+            "1",
+            poodle_node::NodeModifiers::default(),
+        );
+        assert!(seen.lock().unwrap().is_empty());
+        (segs[0].interaction.on_edit_key.as_ref().unwrap())(
+            "5",
+            poodle_node::NodeModifiers::default(),
+        );
+        assert_eq!(seen.lock().unwrap().last().cloned(), Some("15:30".into()));
     }
 
     #[test]

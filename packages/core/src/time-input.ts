@@ -199,6 +199,41 @@ function formatFromSeconds(seconds: number, withSeconds: boolean): string {
   return formatTime(secondsToTime(seconds), withSeconds);
 }
 
+function secondsConstraintValid(
+  seconds: number,
+  min: string | null,
+  max: string | null,
+  step: number,
+): boolean {
+  const wrapped = wrapSeconds(seconds);
+  const formatted = formatTime(secondsToTime(wrapped), true);
+
+  return timeConstraintValid(formatted, min, max, step);
+}
+
+function lastOnGridSeconds(min: string | null, max: string | null, step: number): number {
+  const origin = boundSeconds(min) ?? 0;
+  const high = boundSeconds(max) ?? SECONDS_PER_DAY - 1;
+  const remainder = ((high - origin) % step + step) % step;
+  const last = wrapSeconds(high - remainder);
+
+  if (secondsConstraintValid(last, min, max, step)) {
+    return last;
+  }
+
+  const minSeconds = boundSeconds(min);
+
+  if (minSeconds !== null && secondsConstraintValid(minSeconds, min, max, step)) {
+    return minSeconds;
+  }
+
+  return wrapSeconds(origin);
+}
+
+function firstOnGridSeconds(min: string | null): number {
+  return wrapSeconds(boundSeconds(min) ?? 0);
+}
+
 export function stepTimeSeconds(
   current: number | null,
   direction: 1 | -1,
@@ -210,52 +245,26 @@ export function stepTimeSeconds(
     return current;
   }
 
-  const minSeconds = boundSeconds(min);
-  const maxSeconds = boundSeconds(max);
-  const overnight = minSeconds !== null && maxSeconds !== null && minSeconds > maxSeconds;
-  const origin = minSeconds ?? 0;
-  let from = current;
-
-  if (from === null) {
-    if (direction > 0) {
-      from = origin - step;
-    } else if (maxSeconds !== null) {
-      from = maxSeconds + step;
-    } else if (minSeconds !== null) {
-      from = minSeconds + step;
-    } else {
-      from = 0;
-    }
+  if (current === null) {
+    return direction > 0 ? firstOnGridSeconds(min) : lastOnGridSeconds(min, max, step);
   }
 
-  const candidate = from + direction * step;
+  const minSeconds = boundSeconds(min);
+  const maxSeconds = boundSeconds(max);
+  const wrap =
+    (minSeconds === null && maxSeconds === null) ||
+    (minSeconds !== null && maxSeconds !== null && minSeconds > maxSeconds);
+  const candidate = wrap ? wrapSeconds(current + direction * step) : current + direction * step;
 
-  if (minSeconds === null && maxSeconds === null) {
+  if (secondsConstraintValid(candidate, min, max, step)) {
     return wrapSeconds(candidate);
   }
 
-  if (overnight && minSeconds !== null && maxSeconds !== null) {
-    const wrapped = wrapSeconds(candidate);
-
-    if (wrapped >= minSeconds || wrapped <= maxSeconds) {
-      return wrapped;
-    }
-
-    return direction > 0 ? maxSeconds : minSeconds;
+  if (secondsConstraintValid(current, min, max, step)) {
+    return wrapSeconds(current);
   }
 
-  const low = minSeconds ?? 0;
-  const high = maxSeconds ?? SECONDS_PER_DAY - 1;
-
-  if (candidate < low) {
-    return low;
-  }
-
-  if (candidate > high) {
-    return high;
-  }
-
-  return candidate;
+  return direction > 0 ? firstOnGridSeconds(min) : lastOnGridSeconds(min, max, step);
 }
 
 function showSeconds(context: TimeInputContext): boolean {
@@ -453,7 +462,13 @@ export function timeInputTransition(context: TimeInputContext, event: TimeInputE
         return { context: { ...context, draft: null }, effects: [] };
       }
 
-      return commitValue(context, formatFromSeconds(nextSeconds, showSeconds(context)));
+      const formatted = formatFromSeconds(nextSeconds, showSeconds(context));
+
+      if (!timeConstraintValid(formatted, context.min, context.max, context.step)) {
+        return { context: { ...context, draft: null }, effects: [] };
+      }
+
+      return commitValue(context, formatted);
     }
     case "BLUR":
     case "ESCAPE":

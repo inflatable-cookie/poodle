@@ -237,6 +237,9 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 - Native browser draft UI stays adapter-owned. Callbacks are gated through the
   shared value/constraint semantics so invalid or off-step values do not leak
   into the portable callback.
+- A native incomplete edit is `value === ""` with `validity.badInput`; it stays
+  a local draft, does not emit, and reverts on blur or Escape. An empty value
+  without `badInput` is a deliberate clear and emits `null`.
 - A browser validity failure uses the same derived invalid presentation and
   blur reversion as the custom native editor.
 - New appearance overrides must use component-scoped Recipe hooks with
@@ -248,7 +251,8 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 
 - expected crate/module surface: `poodle_gpui::primitives::time_input`
 - Spec struct: `TimeInputSpec` in `poodle-specs`
-- Renderer: `poodle_render::time_input` / `time_input_with_change`
+- Renderer: `poodle_render::time_input` / `time_input_with_change` /
+  `time_input_with_persistent_context`
 - GPUI provides one segmented time-entry control because there is no native
   `input[type="time"]`
 - the pre-1.0 `TimeFieldSpec` / `time_field` public surface is gone; no alias or

@@ -3,6 +3,15 @@ import { describe, expect, it, vi } from "vitest";
 
 import { TimeInput } from "../src/TimeInput";
 
+function stubValidity(input: HTMLInputElement, badInput: boolean): void {
+  Object.defineProperty(input, "validity", {
+    configurable: true,
+    get() {
+      return { badInput };
+    },
+  });
+}
+
 describe("TimeInput (react)", () => {
   it("renders a native time input with forwarded constraints", () => {
     const { container } = render(<TimeInput min="08:00" max="18:00" step={300} ariaLabel="Office hours" />);
@@ -31,6 +40,28 @@ describe("TimeInput (react)", () => {
 
     fireEvent.change(input, { target: { value: "" } });
     expect(onValueChange).toHaveBeenCalledWith(null);
+  });
+
+  it("keeps a native incomplete draft local and reverts it without emitting", () => {
+    const onValueChange = vi.fn();
+    const { container } = render(<TimeInput defaultValue="14:30" onValueChange={onValueChange} />);
+    const input = container.querySelector("input") as HTMLInputElement;
+    stubValidity(input, true);
+
+    fireEvent.change(input, { target: { value: "" } });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(input.getAttribute("aria-invalid")).toBe("true");
+
+    fireEvent.blur(input);
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(input.value).toBe("14:30");
+    expect(input.hasAttribute("aria-invalid")).toBe(false);
+
+    stubValidity(input, true);
+    fireEvent.change(input, { target: { value: "" } });
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(input.value).toBe("14:30");
   });
 
   it("stays controlled when value is supplied", () => {

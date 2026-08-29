@@ -391,7 +391,7 @@ pub use theme_select::{theme_select, theme_select_with_handlers, ThemeSelectHand
 pub use time_ago::time_ago;
 pub use time_input::{
     context_from_spec, time_input, time_input_with_change, time_input_with_handlers,
-    TimeInputHandlers,
+    time_input_with_persistent_context, TimeInputHandlers,
 };
 pub use time_zone_select::{time_zone_select, TimeZoneSelectHandlers};
 pub use toast_host::toast_host;

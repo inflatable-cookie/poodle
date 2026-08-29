@@ -2694,6 +2694,46 @@
       "expect": "06:00"
     },
     {
+      "op": "step",
+      "name": "linear off-grid max stays last on grid",
+      "current": "18:00",
+      "direction": 1,
+      "min": "08:00",
+      "max": "18:02",
+      "step": 300,
+      "expect": "18:00"
+    },
+    {
+      "op": "step",
+      "name": "empty linear down lands last on grid",
+      "current": null,
+      "direction": -1,
+      "min": "08:00",
+      "max": "18:02",
+      "step": 300,
+      "expect": "18:00"
+    },
+    {
+      "op": "step",
+      "name": "overnight off-grid max stays last on grid",
+      "current": "06:00",
+      "direction": 1,
+      "min": "22:00",
+      "max": "06:02",
+      "step": 1800,
+      "expect": "06:00"
+    },
+    {
+      "op": "step",
+      "name": "empty overnight down lands last on grid",
+      "current": null,
+      "direction": -1,
+      "min": "22:00",
+      "max": "06:02",
+      "step": 1800,
+      "expect": "06:00"
+    },
+    {
       "op": "transition",
       "name": "partial hour digit",
       "context": {
@@ -3348,6 +3388,36 @@
             "value": "00:00"
           }
         ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "step up does not emit an off-grid max",
+      "context": {
+        "committed": "18:00",
+        "defaultValue": null,
+        "draft": null,
+        "min": "08:00",
+        "max": "18:02",
+        "step": 300,
+        "disabled": false
+      },
+      "event": {
+        "type": "STEP",
+        "direction": 1
+      },
+      "expect": {
+        "context": {
+          "committed": "18:00",
+          "defaultValue": null,
+          "draft": null,
+          "min": "08:00",
+          "max": "18:02",
+          "step": 300,
+          "disabled": false
+        },
+        "effects": [],
         "invalid": false
       }
     },

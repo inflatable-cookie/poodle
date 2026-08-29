@@ -219,6 +219,31 @@ fn format_from_seconds(seconds: i64, with_seconds: bool) -> String {
     format_time(seconds_to_time(seconds), with_seconds)
 }
 
+fn seconds_constraint_valid(seconds: i64, min: Option<&str>, max: Option<&str>, step: f64) -> bool {
+    let formatted = format_from_seconds(wrap_seconds(seconds), true);
+    time_constraint_valid(Some(&formatted), min, max, step)
+}
+
+fn last_on_grid_seconds(min: Option<&str>, max: Option<&str>, step: i64) -> i64 {
+    let origin = bound_seconds(min).unwrap_or(0);
+    let high = bound_seconds(max).unwrap_or(SECONDS_PER_DAY - 1);
+    let remainder = ((high - origin) % step + step) % step;
+    let last = wrap_seconds(high - remainder);
+    if seconds_constraint_valid(last, min, max, step as f64) {
+        return last;
+    }
+    if let Some(min_seconds) = bound_seconds(min) {
+        if seconds_constraint_valid(min_seconds, min, max, step as f64) {
+            return min_seconds;
+        }
+    }
+    wrap_seconds(origin)
+}
+
+fn first_on_grid_seconds(min: Option<&str>) -> i64 {
+    wrap_seconds(bound_seconds(min).unwrap_or(0))
+}
+
 pub fn step_time_seconds(
     current: Option<i64>,
     direction: i32,
@@ -230,45 +255,38 @@ pub fn step_time_seconds(
         return current;
     }
 
-    let step = step as i64;
+    let step_secs = step as i64;
     let direction = i64::from(direction);
+    let Some(current) = current else {
+        return Some(if direction > 0 {
+            first_on_grid_seconds(min)
+        } else {
+            last_on_grid_seconds(min, max, step_secs)
+        });
+    };
+
     let min_seconds = bound_seconds(min);
     let max_seconds = bound_seconds(max);
-    let overnight =
-        matches!((min_seconds, max_seconds), (Some(min_s), Some(max_s)) if min_s > max_s);
-    let origin = min_seconds.unwrap_or(0);
-    let from = match current {
-        Some(seconds) => seconds,
-        None if direction > 0 => origin - step,
-        None => max_seconds
-            .or(min_seconds)
-            .map(|bound| bound + step)
-            .unwrap_or(0),
+    let wrap = (min_seconds.is_none() && max_seconds.is_none())
+        || matches!((min_seconds, max_seconds), (Some(min_s), Some(max_s)) if min_s > max_s);
+    let candidate = if wrap {
+        wrap_seconds(current + direction * step_secs)
+    } else {
+        current + direction * step_secs
     };
-    let candidate = from + direction * step;
 
-    if min_seconds.is_none() && max_seconds.is_none() {
+    if seconds_constraint_valid(candidate, min, max, step) {
         return Some(wrap_seconds(candidate));
     }
-
-    if overnight {
-        let wrapped = wrap_seconds(candidate);
-        if let (Some(min_seconds), Some(max_seconds)) = (min_seconds, max_seconds) {
-            if wrapped >= min_seconds || wrapped <= max_seconds {
-                return Some(wrapped);
-            }
-
-            return Some(if direction > 0 {
-                max_seconds
-            } else {
-                min_seconds
-            });
-        }
+    if seconds_constraint_valid(current, min, max, step) {
+        return Some(wrap_seconds(current));
     }
 
-    let low = min_seconds.unwrap_or(0);
-    let high = max_seconds.unwrap_or(SECONDS_PER_DAY - 1);
-    Some(candidate.clamp(low, high))
+    Some(if direction > 0 {
+        first_on_grid_seconds(min)
+    } else {
+        last_on_grid_seconds(min, max, step_secs)
+    })
 }
 
 fn show_seconds(context: &TimeInputContext) -> bool {
@@ -501,6 +519,17 @@ pub fn time_input_transition(context: TimeInputContext, event: TimeInputEvent) -
             };
 
             let formatted = format_from_seconds(next_seconds, show_seconds(&context));
+            if !time_constraint_valid(
+                Some(&formatted),
+                context.min.as_deref(),
+                context.max.as_deref(),
+                context.step,
+            ) {
+                let mut next = context;
+                next.draft = None;
+                return (next, Vec::new());
+            }
+
             commit_value(context, Some(formatted))
         }
         TimeInputEvent::Blur | TimeInputEvent::Escape => {
@@ -556,6 +585,22 @@ mod tests {
         assert_eq!(
             step_time_seconds(Some(22 * 3600), -1, Some("22:00"), Some("06:00"), 1800.0),
             Some(22 * 3600)
+        );
+        assert_eq!(
+            step_time_seconds(Some(18 * 3600), 1, Some("08:00"), Some("18:02"), 300.0),
+            Some(18 * 3600)
+        );
+        assert_eq!(
+            step_time_seconds(None, -1, Some("08:00"), Some("18:02"), 300.0),
+            Some(18 * 3600)
+        );
+        assert_eq!(
+            step_time_seconds(Some(6 * 3600), 1, Some("22:00"), Some("06:02"), 1800.0),
+            Some(6 * 3600)
+        );
+        assert_eq!(
+            step_time_seconds(None, -1, Some("22:00"), Some("06:02"), 1800.0),
+            Some(6 * 3600)
         );
     }
 

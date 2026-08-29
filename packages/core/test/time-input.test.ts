@@ -86,13 +86,28 @@ describe("stepping", () => {
     expect(stepTimeSeconds(22 * 3600, -1, "22:00", "06:00", 1800)).toBe(22 * 3600);
   });
 
-  test("empty start lands on origin or the opposite bound", () => {
+  test("empty start lands on origin or the last on-grid bound", () => {
     expect(stepTimeSeconds(null, 1, null, null, 60)).toBe(0);
     expect(stepTimeSeconds(null, -1, null, null, 60)).toBe(23 * 3600 + 59 * 60);
     expect(stepTimeSeconds(null, 1, "08:00", "18:00", 60)).toBe(8 * 3600);
     expect(stepTimeSeconds(null, -1, "08:00", "18:00", 60)).toBe(18 * 3600);
     expect(stepTimeSeconds(null, 1, "22:00", "06:00", 1800)).toBe(22 * 3600);
     expect(stepTimeSeconds(null, -1, "22:00", "06:00", 1800)).toBe(6 * 3600);
+  });
+
+  test("never emits an off-grid bound", () => {
+    expect(stepTimeSeconds(timeToSeconds({ hour: 18, minute: 0, second: 0 }), 1, "08:00", "18:02", 300)).toBe(
+      18 * 3600,
+    );
+    expect(timeConstraintValid("18:02", "08:00", "18:02", 300)).toBe(false);
+    expect(stepTimeSeconds(null, -1, "08:00", "18:02", 300)).toBe(18 * 3600);
+    expect(stepTimeSeconds(6 * 3600, 1, "22:00", "06:02", 1800)).toBe(6 * 3600);
+    expect(stepTimeSeconds(null, -1, "22:00", "06:02", 1800)).toBe(6 * 3600);
+
+    const atMax = timeInputContext({ committed: "18:00", min: "08:00", max: "18:02", step: 300 });
+    const stepped = timeInputTransition(atMax, { type: "STEP", direction: 1 });
+    expect(stepped.effects).toEqual([]);
+    expect(stepped.context.committed).toBe("18:00");
   });
 });
 
