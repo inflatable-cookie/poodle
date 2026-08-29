@@ -1,7 +1,7 @@
 # Knob
 
 Status: detailed contract
-Updated: 2026-08-10
+Updated: 2026-08-29
 
 ## 1. Purpose
 
@@ -54,19 +54,27 @@ mapping, hover/focus/drag state, pointer delta and circular angle mapping, fine
 adjustment, wheel changes, reset, keyboard nudges, and type-in commits.
 Adapters provide pointer coordinates and modifier facts, then execute effects.
 
-- Vertical drag up increases value; down decreases it.
+- Vertical drag up increases value; down decreases it, using anchored pointer
+  delta over `dragSensitivity`.
 - Circular drag maps the pointer angle over the standard 270 degree sweep.
-- Shift selects fine adjustment at one tenth sensitivity.
+- Each drag mode ignores the other mode's pointer input.
+- Shift selects fine adjustment at one tenth sensitivity. Switching modifier
+  re-anchors at the current value and pointer, so the value never jumps.
 - Wheel up increases and wheel down decreases.
 - Double-click restores `defaultValue`.
-- Enter opens type-in. Escape cancels. Enter or blur commits valid text.
+- Enter opens type-in. Enter commits valid text and Escape commits nothing;
+  both return focus to the root, and the blur that causes can neither commit
+  again nor reverse the result. An unresolved blur commits valid text.
 - Arrows nudge; Page Up/Down use ten steps; Home/End select bounds.
+- A disabled knob is inert on every route.
 
 ## 5. Callbacks
 
 `onValueChange` reports live changes. `onValueCommit` reports atomic changes
 and drag end. `onGestureBegin` and `onGestureEnd` pair exactly once around
-pointer drags.
+pointer drags. One primary pointer owns a drag; a second pointer-down is
+ignored. Release, cancellation, lost pointer capture, and adapter teardown all
+close an accepted drag through the same terminal, exactly once.
 
 ## 6. Accessibility
 

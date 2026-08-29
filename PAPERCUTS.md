@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-29 — `scripts/parity-evidence-ledger.ts` cites one focused test per
+  web surface and picks the alphabetically first matching file. Adding a
+  second focused test file for a component can silently move that citation and
+  fail `docs:check` with "ledger cell differs from live evidence". Either cite
+  every matching file or sort by a stated rule. Found while closing g16.031;
+  worked around by naming the new file after the cited one
+  (`AudioControlsLifecycle`).
+
 - 2026-08-29 — `effigy ci:rust` rustfmt-dirties dozens of unrelated
   `packages/render/src/*.rs` files in an otherwise clean worker tree. Revert
   the extra formatting or stop running crate-wide rustfmt from the CI board.

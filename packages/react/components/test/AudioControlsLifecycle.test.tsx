@@ -4,7 +4,7 @@
  * vectors; these tests prove the React adapter's own responsibilities —
  * primary-pointer ownership, capture loss, teardown, and entry focus
  * transitions — through real DOM events. The claims and expected traces mirror
- * packages/svelte/components/test/AudioControlLifecycle.svelte.test.ts.
+ * packages/svelte/components/test/AudioControlsLifecycle.svelte.test.ts.
  */
 
 import { act, fireEvent, render } from "@testing-library/react";

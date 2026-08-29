@@ -1,7 +1,7 @@
 # Fader
 
 Status: detailed contract
-Updated: 2026-08-10
+Updated: 2026-08-29
 
 ## 1. Purpose
 
@@ -51,16 +51,22 @@ detents, and explicit gesture state.
 ## 4. States And Behavior Machine
 
 Classification: machine-backed (`faderTransition`). Pointer position maps to
-normalized value on the active axis. Shift selects fine dragging. Detents snap
-within the declared normalized radius. Pointer start/end emit paired gesture
-effects and expose `drag = coarse|fine|none` in VisualState. Wheel, reset,
-keyboard, and type-in follow Knob semantics.
+normalized value on the active axis; orientation chooses the axis and never
+enters the value law. Shift selects fine dragging, and switching modifier
+re-anchors at the current value and pointer. Detents snap within the declared
+normalized radius; the radius is inclusive and the first declared detent wins
+an exact tie. Pointer start/end emit paired gesture effects and expose
+`drag = coarse|fine|none` in VisualState. Wheel, reset, keyboard, and type-in
+follow Knob semantics, including its Enter/Escape/blur entry closure. A
+disabled fader is inert on every route.
 
 ## 5. Callbacks
 
 `onValueChange` reports live changes. `onValueCommit` reports atomic changes
 and drag end. `onGestureBegin` and `onGestureEnd` pair exactly once around
-pointer drags.
+pointer drags. One primary pointer owns a drag; a second pointer-down is
+ignored. Release, cancellation, lost pointer capture, and adapter teardown all
+close an accepted drag through the same terminal, exactly once.
 
 ## 6. Accessibility
 

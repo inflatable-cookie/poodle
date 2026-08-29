@@ -4,7 +4,7 @@
  * vectors; these tests prove the Svelte adapter's own responsibilities —
  * primary-pointer ownership, capture loss, teardown, and entry focus
  * transitions — through real DOM events. The React mirror asserts the same
- * traces (packages/react/components/test/AudioControlLifecycle.test.tsx).
+ * traces (packages/react/components/test/AudioControlsLifecycle.test.tsx).
  */
 
 import { fireEvent, render } from "@testing-library/svelte";

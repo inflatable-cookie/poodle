@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.030 merged; g16.031 ready to launch
+Status: active — g16.031 implemented and awaiting operator review; g16.032 next
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -61,7 +61,7 @@ stay maintained; backend admission is not part of the first card.
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
-31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — ready to launch; bounded audit complete, dependency 030 merged
+31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; awaiting operator review; no ledger cell moved
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — planned; depends on 031 and must not overlap 025
 
 ## Parallel Continuation
@@ -292,12 +292,26 @@ cancellation, nested-target arbitration, exactly-once terminal effects, and the
 single-use session-id rule are settled. No adapter, component, or ledger cell
 moved.
 
+`g16.031` closed the first half of the continuous-audio repair. Knob, Fader,
+and XYPad now run one gesture model in both languages: one accepted begin, one
+shared terminal for release and cancellation, anchored coarse/fine rebase,
+Knob's vertical-versus-circular split, an inclusive detent radius with
+first-declared tie resolution, and XYPad's press-position and atomic-pair
+behaviour. A hand-authored `audioControls` corpus — 32 ordered cases over 158
+steps plus 17 geometry cases — runs through both conformance runners with no
+tolerance. All six web adapters now accept one primary pointer and close on
+cancel, lost capture, or teardown; Svelte Knob and Fader gained React's
+one-blur entry suppression. The only public web addition is a `DRAG_CANCEL`
+event on the two core event unions. Rust gained the `knob_transition` /
+`fader_transition` pair and the pointer-mapping helpers `g16.032` needs. No
+ledger cell moved.
+
 ## Next Task
 
-Dispatch `g16.031` now. It is the next decision-complete component lane and no
-longer overlaps the serial NumberInput core/export tranche. Keep `g16.022`
-with the orchestrator until its landed-kernel review records the exact public
-web adapter surface; do not ask its worker to discover that API during
-implementation. After `g16.031` merges, promote `g16.032`; never overlap
+Review and merge `g16.031`, then dispatch `g16.032` against the landed
+`knob_transition` / `fader_transition` / `xy_pad_transition` surfaces and the
+new Rust pointer-mapping helpers. Keep `g16.022` with the orchestrator until
+its landed-kernel review records the exact public web adapter surface; do not
+ask its worker to discover that API during implementation. Never overlap
 `g16.032` with drag card `g16.025` because both edit Node/GPUI interaction
 routing.
