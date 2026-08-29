@@ -535,42 +535,42 @@ pub fn knob_transition(
         AudioValueEvent::DragBegin { position, fine } => {
             begin_drag(&mut context.base, position, fine)
         }
+        // Vertical mapping: anchored pointer delta over `drag_sensitivity`.
         AudioValueEvent::DragMove { position, fine } => {
             if context.drag_mode != KnobDragMode::Vertical || !dragging(&context.base) {
-                vec![]
-            } else if rebase_drag(&mut context.base, position, fine) {
-                vec![]
-            } else {
-                let base = &context.base;
-                let scale = if fine { 0.1 } else { 1.0 };
-                let start_norm =
-                    normalize_value(base.drag_start_value, base.min, base.max, base.law);
-                let norm = start_norm
-                    + ((base.drag_start_position - position) / context.drag_sensitivity.max(1.0))
-                        * scale;
-                let value = denormalize_value(norm, base.min, base.max, base.law);
-                context.base.value = value;
-                vec![AudioValueEffect::ValueChange(value)]
+                return (context, vec![]);
             }
+            if rebase_drag(&mut context.base, position, fine) {
+                return (context, vec![]);
+            }
+            let base = &context.base;
+            let scale = if fine { 0.1 } else { 1.0 };
+            let start_norm = normalize_value(base.drag_start_value, base.min, base.max, base.law);
+            let norm = start_norm
+                + ((base.drag_start_position - position) / context.drag_sensitivity.max(1.0))
+                    * scale;
+            let value = denormalize_value(norm, base.min, base.max, base.law);
+            context.base.value = value;
+            vec![AudioValueEffect::ValueChange(value)]
         }
+        // Circular mapping: the adapter resolves the 270 degree sweep position.
         AudioValueEvent::DragSetNorm { value_norm, fine } => {
             if context.drag_mode != KnobDragMode::Circular || !dragging(&context.base) {
-                vec![]
-            } else if rebase_drag(&mut context.base, value_norm, fine) {
-                vec![]
-            } else {
-                let base = &context.base;
-                let start_norm =
-                    normalize_value(base.drag_start_value, base.min, base.max, base.law);
-                let target = if fine {
-                    start_norm + (value_norm - base.drag_start_position) * 0.1
-                } else {
-                    value_norm
-                };
-                let value = denormalize_value(target, base.min, base.max, base.law);
-                context.base.value = value;
-                vec![AudioValueEffect::ValueChange(value)]
+                return (context, vec![]);
             }
+            if rebase_drag(&mut context.base, value_norm, fine) {
+                return (context, vec![]);
+            }
+            let base = &context.base;
+            let start_norm = normalize_value(base.drag_start_value, base.min, base.max, base.law);
+            let target = if fine {
+                start_norm + (value_norm - base.drag_start_position) * 0.1
+            } else {
+                value_norm
+            };
+            let value = denormalize_value(target, base.min, base.max, base.law);
+            context.base.value = value;
+            vec![AudioValueEffect::ValueChange(value)]
         }
         AudioValueEvent::DragEnd | AudioValueEvent::DragCancel => end_drag(&mut context.base),
         _ => vec![],
@@ -607,26 +607,26 @@ pub fn fader_transition(
         AudioValueEvent::DragBegin { position, fine } => {
             begin_drag(&mut context.base, position, fine)
         }
+        // The adapter resolves the axis position through `fader_point_to_norm`.
         AudioValueEvent::DragSetNorm { value_norm, fine } => {
             if !dragging(&context.base) {
-                vec![]
-            } else if rebase_drag(&mut context.base, value_norm, fine) {
-                vec![]
-            } else {
-                let base = &context.base;
-                let start_norm =
-                    normalize_value(base.drag_start_value, base.min, base.max, base.law);
-                let target = if fine {
-                    start_norm + (value_norm - base.drag_start_position) * 0.1
-                } else {
-                    value_norm
-                };
-                let snapped = snap_fader_detent(&context, target);
-                let base = &context.base;
-                let value = denormalize_value(snapped, base.min, base.max, base.law);
-                context.base.value = value;
-                vec![AudioValueEffect::ValueChange(value)]
+                return (context, vec![]);
             }
+            if rebase_drag(&mut context.base, value_norm, fine) {
+                return (context, vec![]);
+            }
+            let base = &context.base;
+            let start_norm = normalize_value(base.drag_start_value, base.min, base.max, base.law);
+            let target = if fine {
+                start_norm + (value_norm - base.drag_start_position) * 0.1
+            } else {
+                value_norm
+            };
+            let snapped = snap_fader_detent(&context, target);
+            let base = &context.base;
+            let value = denormalize_value(snapped, base.min, base.max, base.law);
+            context.base.value = value;
+            vec![AudioValueEffect::ValueChange(value)]
         }
         AudioValueEvent::DragEnd | AudioValueEvent::DragCancel => end_drag(&mut context.base),
         _ => vec![],
@@ -676,7 +676,11 @@ pub fn knob_point_to_norm(point: AudioPoint, rect: AudioRect) -> f64 {
     ((degrees + 135.0) / 270.0).clamp(0.0, 1.0)
 }
 
-pub fn fader_point_to_norm(point: AudioPoint, rect: AudioRect, orientation: FaderOrientation) -> f64 {
+pub fn fader_point_to_norm(
+    point: AudioPoint,
+    rect: AudioRect,
+    orientation: FaderOrientation,
+) -> f64 {
     match orientation {
         FaderOrientation::Horizontal => {
             ((point.x - rect.left) / rect.width.max(1.0)).clamp(0.0, 1.0)
@@ -1671,14 +1675,12 @@ pub fn xy_pad_transition(
                 let scale = if fine { 0.1 } else { 1.0 };
                 let (x, y) = match axis {
                     XYPadAxis::X => (
-                        context.x
-                            + direction as f64 * context.keyboard_step_x * multiplier * scale,
+                        context.x + direction as f64 * context.keyboard_step_x * multiplier * scale,
                         context.y,
                     ),
                     XYPadAxis::Y => (
                         context.x,
-                        context.y
-                            + direction as f64 * context.keyboard_step_y * multiplier * scale,
+                        context.y + direction as f64 * context.keyboard_step_y * multiplier * scale,
                     ),
                 };
                 xy_atomic(&mut context, x, y)

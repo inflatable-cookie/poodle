@@ -1361,8 +1361,12 @@ fn xy_pad_event(value: &Value) -> XYPadEvent {
 
 fn audio_value_effect_json(effect: &AudioValueEffect) -> Value {
     match effect {
-        AudioValueEffect::ValueChange(value) => json!({ "type": "emitValueChange", "value": value }),
-        AudioValueEffect::ValueCommit(value) => json!({ "type": "emitValueCommit", "value": value }),
+        AudioValueEffect::ValueChange(value) => {
+            json!({ "type": "emitValueChange", "value": value })
+        }
+        AudioValueEffect::ValueCommit(value) => {
+            json!({ "type": "emitValueCommit", "value": value })
+        }
         AudioValueEffect::GestureBegin => json!({ "type": "beginGesture" }),
         AudioValueEffect::GestureEnd => json!({ "type": "endGesture" }),
         AudioValueEffect::RequestEntryFocus => json!({ "type": "requestEntryFocus" }),
