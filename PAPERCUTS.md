@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-29 — The Svelte package build strips a function parameter's type
+  annotation but leaves the optional marker, so `function f(id?: number)` in a
+  `.svelte` script ships as invalid JavaScript and breaks every consumer import
+  of that component. Nothing in the component suites catches it; only
+  `effigy test:web-pack-install` does. Use a default parameter instead, or make
+  the strip handle `?`. Found while closing g16.031.
+
 - 2026-08-29 — `scripts/parity-evidence-ledger.ts` cites one focused test per
   web surface and picks the alphabetically first matching file. Adding a
   second focused test file for a component can silently move that citation and

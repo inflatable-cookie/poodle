@@ -107,6 +107,11 @@ Svelte Knob and Fader gained React's one-blur suppression, and both frameworks
 now reset that flag whenever the entry opens, so a flag left set by an
 unmounted entry cannot swallow a later commit.
 
+The cancel guard takes a defaulted parameter rather than an optional one: the
+Svelte package build strips the type annotation but leaves the `?`, so the
+optional form shipped as invalid JavaScript. Only `effigy test:web-pack-install`
+catches that; the component suites compile from source and pass either way.
+
 ## Callback traces
 
 `packages/svelte/components/test/AudioControlsLifecycle.svelte.test.ts` and
