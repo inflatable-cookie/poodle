@@ -157,10 +157,19 @@ Focused: `packages/core` audio value-control, XY pad, and conformance suites;
 `packages/contracts/headless` lib and `conformance` tests; the two new mounted
 lifecycle suites.
 
-Board: `effigy test:core` (1081 pass), full `bunx vitest run` (361 files,
-3168 tests), `effigy ci:rust`, `effigy ci:web`, `effigy docs:check` including
-`check:parity-evidence-ledger`, contract/callback/spec/value-domain drift,
-`effigy qa`, and `git diff --check origin/main...HEAD`.
+Board, all confirmed by task exit code: `effigy test:core` (1081 pass),
+`effigy test:contracts`, `effigy ci:rust`, `effigy ci:web`, full
+`bunx vitest run` (334 web files, 2366 tests), `effigy docs:check` including
+`docs:lint`, `check:parity-evidence-ledger`, and the
+contract/callback/spec/value-domain drift gates, `effigy qa`, and
+`git diff --check origin/main...HEAD`. Nothing windowed, native-visual,
+Jetstream-preview, release, or workflow-mutating was run.
+
+`effigy test:web-pack-install` caught the one defect the component suites could
+not: the packaged Svelte build stripped the cancel guard's type annotation and
+left the optional marker, so `Fader`, `Knob`, and `XYPad` shipped invalid
+JavaScript to consumers. Fixed with a default parameter before the board went
+green.
 
 ## Next
 
