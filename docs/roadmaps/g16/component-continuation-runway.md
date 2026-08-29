@@ -11,8 +11,8 @@ copy the register, change evidence, or turn a missing cell into a defect.
 
 | Order | Lane | Current state | Promotion gate |
 | ---: | --- | --- | --- |
-| 1 | TimeInput native entry | complete as `g16.029` | awaiting merge; ledger 48 mounted / 126 missing |
-| 2 | NumberInput and EditableLabel editing models | NumberInput planned as `g16.030`; EditableLabel decision-blocked | complete `g16.029`, then execute the approved NumberInput committed-value/raw-draft migration; resolve EditableLabel separately |
+| 1 | TimeInput native entry | complete as `g16.029` | merged in PR #97; ledger 48 mounted / 126 missing |
+| 2 | NumberInput and EditableLabel editing models | NumberInput planned as `g16.030`; EditableLabel decision-blocked | execute the approved NumberInput committed-value/raw-draft migration; resolve EditableLabel separately |
 | 3 | Dependable drag-and-drop family | programme-owned | compiled separately as `g16.021`–`g16.028`; do not issue component-local drag repairs |
 | 4 | Fader, Knob, and XYPad interaction | planned as `g16.031`–`g16.032` | run paired machine/web repair after `g16.030`, then native mounting; never overlap the Node/GPUI tranche with `g16.025` |
 | 5 | GPUI accessibility evidence | programme choice | operator selects it as a programme and accepts the manual/runtime evidence boundary |
@@ -45,8 +45,7 @@ event and mounts all three in GPUI. Payload drag-and-drop remains separate.
 
 ## Parallelism
 
-`g16.029` is the active TimeInput worker. Dispatch `g16.030` only after
-TimeInput merges because both edit the same exports and domain-vector corpus.
+`g16.029` is merged. Dispatch `g16.030` next.
 Dispatch `g16.031` only after `g16.030`; it touches the same core/headless
 exports and vector runner. `g16.032` follows `g16.031` and must not run beside
 `g16.025`, because both edit Node/GPUI interaction routing. No accessibility,

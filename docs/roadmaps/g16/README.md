@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.029 complete, awaiting merge; g16.030 next
+Status: active — g16.029 merged; g16.030 next
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -59,7 +59,7 @@ stay maintained; backend admission is not part of the first card.
 26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
-29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; awaiting merge; ledger 48 mounted / 126 missing
+29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — planned; decision approved, depends on 029
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — planned; bounded audit complete, depends on 030
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — planned; depends on 031 and must not overlap 025
@@ -294,8 +294,7 @@ moved.
 
 ## Next Task
 
-Review `g16.029` in PR #97 and authorise its merge. Then dispatch `g16.030`
-NumberInput.
+Dispatch `g16.030` NumberInput.
 Keep `g16.022` planned until the orchestrator chooses it after the serial
 core/export tranche. The public drag migration boundary is resolved; reconcile
 the exact custom-surface and host-bridge API names only after their

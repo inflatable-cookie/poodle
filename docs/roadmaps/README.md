@@ -56,8 +56,8 @@ behavior repairs without inventing another conformance authority.
   repair at audit closeout. Architecture 011/spec 069 are now compiled as
   `g16.021`–`g16.028`; the paired semantic kernel in `021` landed with its
   shared `dragDrop` vector corpus in PR #96.
-  TimeInput's native editing decision closed as `g16.029` (ledger 48 mounted /
-  126 missing, awaiting merge). NumberInput's committed-number/raw-draft and
+  TimeInput's native editing decision closed and merged as `g16.029` (ledger
+  48 mounted / 126 missing). NumberInput's committed-number/raw-draft and
   clean callback decision is approved as `g16.030`, serial behind `029`. Its
   promoted contract documents the runtime deltas, moving only that ledger axis
   to 116 present / 59 not-applicable after NumberInput lands; mounted totals
