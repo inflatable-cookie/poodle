@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.031 merged in PR #99; g16.032 next
+Status: active — g16.032 ready to launch after g16.031 merged in PR #99
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -62,7 +62,7 @@ stay maintained; backend admission is not part of the first card.
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
-32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — planned; depends on 031 and must not overlap 025
+32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — ready; depends on merged 031 and must not overlap 025
 
 ## Parallel Continuation
 
@@ -308,10 +308,10 @@ ledger cell moved.
 
 ## Next Task
 
-Review and merge `g16.031`, then dispatch `g16.032` against the landed
-`knob_transition` / `fader_transition` / `xy_pad_transition` surfaces and the
-new Rust pointer-mapping helpers. Keep `g16.022` with the orchestrator until
-its landed-kernel review records the exact public web adapter surface; do not
-ask its worker to discover that API during implementation. Never overlap
+Dispatch `g16.032` against the landed `knob_transition` /
+`fader_transition` / `xy_pad_transition` surfaces and the new Rust
+pointer-mapping helpers. Keep `g16.022` with the orchestrator until its
+landed-kernel review records the exact public web adapter surface; do not ask
+its worker to discover that API during implementation. Never overlap
 `g16.032` with drag card `g16.025` because both edit Node/GPUI interaction
 routing.

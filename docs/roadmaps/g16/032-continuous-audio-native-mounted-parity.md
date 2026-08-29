@@ -1,6 +1,6 @@
 # g16.032 — Continuous Audio Native Mounted Parity
 
-Status: planned — depends on `g16.031`; do not overlap `g16.025`
+Status: ready — `g16.031` merged in PR #99; do not overlap `g16.025`
 Opened: 2026-08-28
 Depends on: completed `g16.031`; landed paired audio machines and callback
 effects
@@ -86,7 +86,9 @@ The production render path must:
 - route keyboard, wheel, double-click reset, and Knob/Fader type-in through
   the same machine;
 - keep VisualState as the sole drawing input; and
-- suppress every route when disabled.
+- reject every user-mutation route when disabled while preserving host value
+  replacement, automation state, focus/hover reporting, entry cancellation,
+  and the terminal of a gesture accepted while enabled.
 
 The GPUI specimens own explicit state and rebuild so interaction is visible.
 They are examples, not a hidden test matrix.
