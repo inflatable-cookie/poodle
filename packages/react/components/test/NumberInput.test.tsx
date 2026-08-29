@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { NumberInput } from "../src/NumberInput";
@@ -162,5 +162,37 @@ describe("NumberInput (react)", () => {
     );
     const field = container.querySelector<HTMLElement>(".poodle-number-input__field");
     expect(field?.getAttribute("data-validation-state")).not.toBe("invalid");
+  });
+
+  it("ignores a stale async validation result after external replacement", async () => {
+    const releases: Array<(result: { valid: boolean; message: string }) => void> = [];
+    const validate = vi.fn(
+      () =>
+        new Promise<{ valid: boolean; message: string }>((resolve) => {
+          releases.push(resolve);
+        }),
+    );
+    const onValidationChange = vi.fn();
+    const { rerender } = render(
+      <NumberInput value={5} min={0} max={10} validate={validate} onValidationChange={onValidationChange} />,
+    );
+    const control = document.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
+
+    fireEvent.change(control, { target: { value: "3" } });
+    await waitFor(() => expect(releases).toHaveLength(1));
+
+    rerender(
+      <NumberInput value={4} min={0} max={10} validate={validate} onValidationChange={onValidationChange} />,
+    );
+    await waitFor(() => expect(releases).toHaveLength(2));
+    expect(validate).toHaveBeenLastCalledWith("4", undefined);
+
+    await act(async () => {
+      releases[0]!({ valid: false, message: "stale" });
+      await Promise.resolve();
+    });
+    expect(onValidationChange).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: "invalid", message: "stale" }),
+    );
   });
 });

@@ -9087,7 +9087,7 @@ struct NumberFieldState {
     min: Option<f64>,
     max: Option<f64>,
     step: Option<f64>,
-    precision: Option<u8>,
+    precision: Option<u16>,
     show_steppers: bool,
     is_disabled: bool,
     is_read_only: bool,
@@ -9126,7 +9126,7 @@ impl NumberFieldState {
         self
     }
 
-    fn precise(mut self, precision: u8) -> Self {
+    fn precise(mut self, precision: u16) -> Self {
         self.precision = Some(precision);
         let display = poodle_headless::number_input::format_number_committed(
             self.value,

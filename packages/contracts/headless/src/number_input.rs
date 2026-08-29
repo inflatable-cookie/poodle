@@ -21,6 +21,10 @@ pub struct NumberInputContext {
     pub read_only: bool,
 }
 
+/// Maximum portable fractional scale. Enough to express any finite IEEE-754
+/// double without exponent syntax; larger values are invalid configuration.
+pub const NUMBER_INPUT_MAX_PRECISION: u32 = 324;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum NumberInputEvent {
     RawEdit { text: String },
@@ -118,7 +122,8 @@ pub fn number_input_config_valid(context: &NumberInputContext) -> bool {
     }
 
     if let Some(precision) = context.precision {
-        if !is_non_negative_integer(precision) {
+        if !is_non_negative_integer(precision) || precision > f64::from(NUMBER_INPUT_MAX_PRECISION)
+        {
             return false;
         }
     }

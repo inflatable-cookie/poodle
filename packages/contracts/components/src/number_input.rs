@@ -32,7 +32,8 @@ pub struct NumberInputSpec {
     pub is_required: bool,
     /// Number of decimal places for committed display / draft acceptance.
     /// `None` means shortest canonical form.
-    pub precision: Option<u8>,
+    /// Fractional scale; must be ≤ `NUMBER_INPUT_MAX_PRECISION` (324).
+    pub precision: Option<u16>,
     /// Placeholder text shown when committed empty and no draft.
     pub placeholder: Option<String>,
     /// Optional prefix label rendered inside the left edge of the
@@ -139,7 +140,7 @@ impl NumberInputSpec {
         self
     }
 
-    pub fn with_precision(mut self, precision: u8) -> Self {
+    pub fn with_precision(mut self, precision: u16) -> Self {
         self.precision = Some(precision);
         self
     }

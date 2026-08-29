@@ -3650,6 +3650,24 @@
     },
     {
       "op": "configValid",
+      "name": "precision at portable maximum",
+      "step": null,
+      "precision": 324,
+      "min": null,
+      "max": null,
+      "expect": true
+    },
+    {
+      "op": "configValid",
+      "name": "precision above portable maximum",
+      "step": null,
+      "precision": 325,
+      "min": null,
+      "max": null,
+      "expect": false
+    },
+    {
+      "op": "configValid",
       "name": "min greater than max",
       "step": null,
       "precision": null,

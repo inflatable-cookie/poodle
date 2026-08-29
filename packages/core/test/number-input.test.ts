@@ -4,6 +4,7 @@ import {
   classifyNumberDraft,
   formatNumberCommitted,
   formatShortestDecimal,
+  NUMBER_INPUT_MAX_PRECISION,
   numberDraftConstraintValid,
   numberInBounds,
   numberInputConfigValid,
@@ -51,6 +52,9 @@ describe("config, bounds, and step", () => {
     expect(numberInputConfigValid({ step: -1 })).toBe(false);
     expect(numberInputConfigValid({ precision: 1.5 })).toBe(false);
     expect(numberInputConfigValid({ precision: -1 })).toBe(false);
+    expect(numberInputConfigValid({ precision: NUMBER_INPUT_MAX_PRECISION })).toBe(true);
+    expect(numberInputConfigValid({ precision: NUMBER_INPUT_MAX_PRECISION + 1 })).toBe(false);
+    expect(numberInputConfigValid({ precision: Number.MAX_SAFE_INTEGER })).toBe(false);
     expect(numberInputConfigValid({ min: 5, max: 1 })).toBe(false);
     expect(numberInputConfigValid({ min: Number.NaN })).toBe(false);
     expect(numberInputConfigValid({ step: null, precision: 2 })).toBe(true);

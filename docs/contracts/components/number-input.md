@@ -39,7 +39,7 @@ old source-specific step callbacks. No alias or compatibility path remains.
 | `min` | `number | null` | `null` | optional inclusive lower bound |
 | `max` | `number | null` | `null` | optional inclusive upper bound |
 | `step` | `number | null` | `null` | optional positive finite step; omitted means `1` |
-| `precision` | `number | null` | `null` | optional non-negative maximum fractional digits and fixed committed display scale |
+| `precision` | `number | null` | `null` | optional non-negative maximum fractional digits and fixed committed display scale; max `324` |
 | `prefix` | `string | null` | `null` | non-value text before the editor |
 | `suffix` | `string | null` | `null` | non-value text after the editor |
 | `validate` | `InputValidator | undefined` | `undefined` | optional async validation of a committed canonical decimal string |
@@ -53,9 +53,11 @@ Standard control props remain `id`, `name`, `placeholder`, `disabled`,
 
 `value`, `defaultValue`, `min`, `max`, and `step` do not accept strings.
 Non-finite committed values or bounds, non-positive/non-finite steps,
-non-integer/negative precision, and `min > max` are invalid authored
-configuration. The semantic machine reports invalid configuration and produces
-no mutation effect; adapters must not invent a replacement value.
+non-integer/negative precision, precision above `324` (the maximum fractional
+scale needed to express a finite IEEE-754 double without exponent syntax), and
+`min > max` are invalid authored configuration. The semantic machine reports
+invalid configuration and produces no mutation effect; adapters must not invent
+a replacement value.
 
 ### Draft Ownership
 

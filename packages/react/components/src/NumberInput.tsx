@@ -154,6 +154,12 @@ export function NumberInput({
     if (!draftControlled) {
       setLocalDraft(null);
     }
+
+    // Genuine external replacement (not first observe, not host echo): cancel
+    // any in-flight validation and validate the authored committed value.
+    if (previous !== undefined) {
+      void runValidation(value ?? null);
+    }
   }, [value, draftControlled]);
 
   const machineContext = numberInputContext({

@@ -22,6 +22,12 @@ export interface NumberInputContext {
   readOnly: boolean;
 }
 
+/**
+ * Maximum portable fractional scale. Enough to express any finite IEEE-754
+ * double without exponent syntax; larger values are invalid configuration.
+ */
+export const NUMBER_INPUT_MAX_PRECISION = 324;
+
 export type NumberInputEvent =
   | { type: "RAW_EDIT"; text: string }
   | { type: "CLEAR" }
@@ -111,7 +117,10 @@ export function numberInputConfigValid(context: {
   }
 
   if (context.precision !== null && context.precision !== undefined) {
-    if (!isNonNegativeInteger(context.precision)) {
+    if (
+      !isNonNegativeInteger(context.precision) ||
+      context.precision > NUMBER_INPUT_MAX_PRECISION
+    ) {
       return false;
     }
   }

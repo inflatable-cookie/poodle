@@ -131,6 +131,12 @@
     if (draftValue === undefined) {
       localDraft = null;
     }
+
+    // Genuine external replacement (not first observe, not host echo): cancel
+    // any in-flight validation and validate the authored committed value.
+    if (previous !== undefined) {
+      void runValidation(value ?? null);
+    }
   });
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));

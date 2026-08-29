@@ -630,6 +630,7 @@ export {
   numberInputEffectiveStep,
   numberInputInvalid,
   numberInputTransition,
+  NUMBER_INPUT_MAX_PRECISION,
   numberPrecisionOk,
   numberStepAligned,
   numberValueConstraintValid,
