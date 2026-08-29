@@ -53,13 +53,33 @@
   const valueText = $derived(audioValueText(context));
   const detentNorms = $derived(detents.map((detent) => normalizeAudioValue(detent, min, max, law)));
 
+  function dispatch(effect: AudioValueEffect): void {
+    if (effect.type === "emitValueChange") { value = effect.value; onValueChange?.(effect.value); }
+    else if (effect.type === "emitValueCommit") { value = effect.value; onValueCommit?.(effect.value); }
+    else if (effect.type === "beginGesture") onGestureBegin?.();
+    else if (effect.type === "endGesture") onGestureEnd?.();
+    else if (effect.type === "requestEntryFocus") { entryDraft = valueText; skipEntryBlur = false; void tick().then(() => { entry?.focus(); entry?.select(); }); }
+  }
+
+  let effectBatches: AudioValueEffect[][] = [];
+  let drainingEffects = false;
+
+  /**
+   * Effect batches drain in order even when a host tears the control down from
+   * inside one of them. A teardown that lands mid-batch queues its terminal
+   * instead of interleaving, so no callback from the accepted transition can
+   * run after the terminal that teardown triggered.
+   */
   function runEffects(effects: AudioValueEffect[]): void {
-    for (const effect of effects) {
-      if (effect.type === "emitValueChange") { value = effect.value; onValueChange?.(effect.value); }
-      else if (effect.type === "emitValueCommit") { value = effect.value; onValueCommit?.(effect.value); }
-      else if (effect.type === "beginGesture") onGestureBegin?.();
-      else if (effect.type === "endGesture") onGestureEnd?.();
-      else if (effect.type === "requestEntryFocus") { entryDraft = valueText; skipEntryBlur = false; void tick().then(() => { entry?.focus(); entry?.select(); }); }
+    effectBatches.push(effects);
+    if (drainingEffects) return;
+    drainingEffects = true;
+    try {
+      for (let batch = effectBatches.shift(); batch; batch = effectBatches.shift()) {
+        for (const effect of batch) dispatch(effect);
+      }
+    } finally {
+      drainingEffects = false;
     }
   }
 

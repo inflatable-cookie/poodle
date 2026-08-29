@@ -84,6 +84,45 @@ describe("audio control pointer lifecycle (svelte)", () => {
     expect(spies.onValueCommit.mock.calls).toEqual([[0.5]]);
   });
 
+  it("Fader keeps its press batch in order when the host removes it from onGestureBegin", async () => {
+    // A coarse press emits `beginGesture` then `emitValueChange`. Tearing down
+    // from the first callback must not let the terminal overtake the second:
+    // the accepted transition's own effects come first, then the terminal.
+    const trace: string[] = [];
+    let removeHost: () => void = () => {};
+
+    const { getByRole, unmount } = render(Fader, { props: {
+      value: 0, orientation: "horizontal", ariaLabel: "Mix",
+      onGestureBegin: () => { trace.push("begin"); removeHost(); },
+      onValueChange: (next: number) => trace.push(`change:${next}`),
+      onValueCommit: (next: number) => trace.push(`commit:${next}`),
+      onGestureEnd: () => trace.push("end"),
+    } });
+    removeHost = unmount;
+    const fader = measurable(getByRole("slider", { name: "Mix" }));
+    await fireEvent.pointerDown(fader, { button: 0, pointerId: 1, clientX: 25, clientY: 50 });
+
+    expect(trace).toEqual(["begin", "change:0.25", "commit:0.25", "end"]);
+  });
+
+  it("XYPad keeps its press batch in order when the host removes it from onGestureBegin", async () => {
+    const trace: string[] = [];
+    let removeHost: () => void = () => {};
+
+    const { container, unmount } = render(XYPad, { props: {
+      x: 0, y: 0, ariaLabel: "Position",
+      onGestureBegin: () => { trace.push("begin"); removeHost(); },
+      onValueChange: (x: number, y: number) => trace.push(`change:${x},${y}`),
+      onValueCommit: (x: number, y: number) => trace.push(`commit:${x},${y}`),
+      onGestureEnd: () => trace.push("end"),
+    } });
+    removeHost = unmount;
+    const pad = measurable(container.querySelector<HTMLElement>("[data-scope='xy-pad']")!);
+    await fireEvent.pointerDown(pad, { button: 0, pointerId: 1, clientX: 25, clientY: 25 });
+
+    expect(trace).toEqual(["begin", "change:0.25,0.75", "commit:0.25,0.75", "end"]);
+  });
+
   it("Knob closes an open gesture exactly once on teardown", async () => {
     const spies = gestureSpies();
     const { getByRole, unmount } = render(Knob, { props: { value: 0.5, ariaLabel: "Gain", ...spies } });

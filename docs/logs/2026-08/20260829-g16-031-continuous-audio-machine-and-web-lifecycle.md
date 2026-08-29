@@ -115,6 +115,13 @@ Svelte package build strips the type annotation but leaves the `?`, so the
 optional form shipped as invalid JavaScript. Only `effigy test:web-pack-install`
 catches that; the component suites compile from source and pass either way.
 
+Effect batches drain in order. A teardown that lands inside one of them queues
+its terminal rather than interleaving, so no callback from the accepted
+transition can run after the terminal that teardown triggered. Without the
+queue a coarse press whose host removes the control from `onGestureBegin`
+reports `begin, commit, end, change`; with it both runtimes report
+`begin, change, commit, end`.
+
 Terminal cleanup resolves from an adapter-owned synchronous snapshot of the
 machine, written before any host callback runs, rather than from a render's
 context. Without it React strands a gesture whose host unmounts the control
@@ -129,13 +136,15 @@ removing the React snapshot fails it and nothing else.
 
 `packages/svelte/components/test/AudioControlsLifecycle.svelte.test.ts` and
 `packages/react/components/test/AudioControlsLifecycle.test.tsx` assert the same
-ten claims and the same traces:
+twelve claims and the same traces:
 
 | Claim | Trace |
 | --- | --- |
 | Knob gesture, refused second pointer, release, then the lost capture a release causes | begin ×1, change `[0.6]`, commit `[0.6]`, end ×1 |
 | Knob lost capture, twice, then release | begin ×1, end ×1 |
 | Knob host unmounts from `onGestureBegin` | begin ×1, commit `[0.5]`, end ×1 |
+| Fader host removes it from `onGestureBegin` on a coarse press | `begin, change:0.25, commit:0.25, end` |
+| XYPad host removes it from `onGestureBegin` on a coarse press | `begin, change:0.25,0.75, commit:0.25,0.75, end` |
 | Knob teardown mid-gesture | begin ×1, commit `[0.5]`, end ×1 |
 | Fader cancel with stale ids | change `[0.25], [0.8]`, commit `[0.8]`, begin ×1, end ×1 |
 | XYPad press with a refused second pointer | change `[0.25, 0.75], [0.5, 0.5]`, commit `[0.5, 0.5]`, begin ×1, end ×1 |
@@ -146,6 +155,12 @@ ten claims and the same traces:
 
 Each entry case pins the blur count as well as the commit count, so a pass
 cannot come from a blur that never fired.
+
+React carries one further case with no Svelte mirror: a host that removes the
+control with `flushSync` from inside `onGestureBegin`. React normally batches a
+host-state removal to after the handler, so its teardown is not re-entrant;
+that case forces the Svelte timing and pins the same ordered trace. Removing
+either runtime's batch queue fails its ordering case and nothing else.
 
 ## Contract reconciliation
 
@@ -178,6 +193,16 @@ Three blocking findings on head `ad27306a6`, all addressed:
 A follow-up `svelte-check` error in the new Svelte regression (a deferred
 `let view` binding widened the query return type) was fixed by destructuring
 the render result.
+
+### Second round
+
+One blocking finding on head `10f2c3a87`: the teardown regressions used a
+vertical Knob, whose accepted press emits only `beginGesture`. On a multi-effect
+press the re-entrant teardown emitted its terminal inside the batch, giving
+Svelte `begin, commit, end, change` against React's `begin, change, commit,
+end` — a real ordered-trace parity break. Both adapters now queue re-entrant
+effect batches, and mirrored coarse-press cases on Fader and XYPad assert the
+complete ordered trace rather than begin/end counts.
 
 ## Non-claims
 

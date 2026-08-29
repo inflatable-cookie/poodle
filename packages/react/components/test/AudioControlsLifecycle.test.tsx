@@ -8,6 +8,7 @@
  */
 
 import { act, fireEvent, render } from "@testing-library/react";
+import { flushSync } from "react-dom";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -110,6 +111,89 @@ describe("audio control pointer lifecycle (react)", () => {
     expect(spies.onGestureEnd).toHaveBeenCalledTimes(1);
     expect(spies.onValueCommit.mock.calls).toEqual([[0.5]]);
     expect(view.queryByRole("slider", { name: "Gain" })).toBeNull();
+  });
+
+  it("Fader keeps its press batch in order when the host removes it from onGestureBegin", () => {
+    // A coarse press emits `beginGesture` then `emitValueChange`. The terminal
+    // the teardown triggers must not overtake the second effect.
+    const trace: string[] = [];
+
+    function TeardownHost() {
+      const [shown, setShown] = useState(true);
+      const [value, setValue] = useState(0);
+      return shown
+        ? <Fader
+            value={value}
+            orientation="horizontal"
+            ariaLabel="Mix"
+            onGestureBegin={() => { trace.push("begin"); setShown(false); }}
+            onValueChange={(next: number) => { setValue(next); trace.push(`change:${next}`); }}
+            onValueCommit={(next: number) => trace.push(`commit:${next}`)}
+            onGestureEnd={() => trace.push("end")}
+          />
+        : null;
+    }
+
+    const view = render(<TeardownHost />);
+    const fader = measurable(view.getByRole("slider", { name: "Mix" }));
+    fireEvent.pointerDown(fader, { button: 0, pointerId: 1, clientX: 25, clientY: 50 });
+
+    expect(trace).toEqual(["begin", "change:0.25", "commit:0.25", "end"]);
+  });
+
+  it("XYPad keeps its press batch in order when the host removes it from onGestureBegin", () => {
+    const trace: string[] = [];
+
+    function TeardownHost() {
+      const [shown, setShown] = useState(true);
+      const [pair, setPair] = useState({ x: 0, y: 0 });
+      return shown
+        ? <XYPad
+            x={pair.x}
+            y={pair.y}
+            ariaLabel="Position"
+            onGestureBegin={() => { trace.push("begin"); setShown(false); }}
+            onValueChange={(x: number, y: number) => { setPair({ x, y }); trace.push(`change:${x},${y}`); }}
+            onValueCommit={(x: number, y: number) => trace.push(`commit:${x},${y}`)}
+            onGestureEnd={() => trace.push("end")}
+          />
+        : null;
+    }
+
+    const view = render(<TeardownHost />);
+    const pad = measurable(view.container.querySelector<HTMLElement>("[data-scope='xy-pad']")!);
+    fireEvent.pointerDown(pad, { button: 0, pointerId: 1, clientX: 25, clientY: 25 });
+
+    expect(trace).toEqual(["begin", "change:0.25,0.75", "commit:0.25,0.75", "end"]);
+  });
+
+  it("Fader keeps its press batch in order when the host removes it synchronously", () => {
+    // React normally batches a host-state removal to after the handler, so the
+    // teardown is not re-entrant. A host that forces it with `flushSync`
+    // reproduces the Svelte timing, and the batch must still drain in order.
+    const trace: string[] = [];
+
+    function TeardownHost() {
+      const [shown, setShown] = useState(true);
+      const [value, setValue] = useState(0);
+      return shown
+        ? <Fader
+            value={value}
+            orientation="horizontal"
+            ariaLabel="Mix"
+            onGestureBegin={() => { trace.push("begin"); flushSync(() => setShown(false)); }}
+            onValueChange={(next: number) => { setValue(next); trace.push(`change:${next}`); }}
+            onValueCommit={(next: number) => trace.push(`commit:${next}`)}
+            onGestureEnd={() => trace.push("end")}
+          />
+        : null;
+    }
+
+    const view = render(<TeardownHost />);
+    const fader = measurable(view.getByRole("slider", { name: "Mix" }));
+    fireEvent.pointerDown(fader, { button: 0, pointerId: 1, clientX: 25, clientY: 50 });
+
+    expect(trace).toEqual(["begin", "change:0.25", "commit:0.25", "end"]);
   });
 
   it("Knob closes an open gesture exactly once on teardown", () => {

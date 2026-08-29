@@ -215,6 +215,12 @@ acceptance and termination. Terminal cleanup resolves from the adapter's own
 synchronous machine snapshot, so a host that removes the control from inside a
 gesture callback still receives its end effect.
 
+Effects from one accepted transition are delivered in the order the machine
+returned them. When a host tears the control down from inside one of them, the
+terminal that teardown produces is delivered after that batch drains, never
+interleaved into it. A coarse press therefore always reports its value change
+before its terminal, whichever runtime the host removed the control from.
+
 A disabled control rejects every user mutation: pointer, wheel, keyboard,
 reset, and type-in commit are inert. Three routes deliberately remain live,
 because a disabled control still has to be driven and cleaned up by its host:

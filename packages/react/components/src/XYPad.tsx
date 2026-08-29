@@ -20,6 +20,8 @@ export function XYPad({ size, sizeRole, density, x, y, minX = 0, maxX = 1, minY 
   const root = useRef<HTMLDivElement>(null);
   const activePointer = useRef<number | null>(null);
   const cancelOnUnmount = useRef<(pointerId?: number | null) => void>(() => {});
+  const effectBatches = useRef<XYPadEffect[][]>([]);
+  const drainingEffects = useRef(false);
   /**
    * The machine state this adapter last produced, written before any host
    * callback runs. Terminal cleanup reads it rather than a render's `context`,
@@ -32,12 +34,28 @@ export function XYPad({ size, sizeRole, density, x, y, minX = 0, maxX = 1, minY 
   const currentY = y ?? uncontrolled.y;
   const context: XYPadContext = { ...machine, x: currentX, y: currentY, minX, maxX, minY, maxY, lawX, lawY, defaultX, defaultY, keyboardStepX, keyboardStepY, automation, disabled };
   const visualState = xyPadVisualState(context);
+  function dispatch(effect: XYPadEffect) {
+    if (effect.type === "emitValueChange" || effect.type === "emitValueCommit") {
+      setUncontrolled((current) => ({ x: x === undefined ? effect.x : current.x, y: y === undefined ? effect.y : current.y }));
+      if (effect.type === "emitValueChange") onValueChange?.(effect.x, effect.y); else onValueCommit?.(effect.x, effect.y);
+    } else if (effect.type === "beginGesture") onGestureBegin?.(); else onGestureEnd?.();
+  }
+  /**
+   * Effect batches drain in order even when a host tears the control down from
+   * inside one of them. A teardown that lands mid-batch queues its terminal
+   * instead of interleaving, so no callback from the accepted transition can
+   * run after the terminal that teardown triggered.
+   */
   function run(effects: XYPadEffect[]) {
-    for (const effect of effects) {
-      if (effect.type === "emitValueChange" || effect.type === "emitValueCommit") {
-        setUncontrolled((current) => ({ x: x === undefined ? effect.x : current.x, y: y === undefined ? effect.y : current.y }));
-        if (effect.type === "emitValueChange") onValueChange?.(effect.x, effect.y); else onValueCommit?.(effect.x, effect.y);
-      } else if (effect.type === "beginGesture") onGestureBegin?.(); else onGestureEnd?.();
+    effectBatches.current.push(effects);
+    if (drainingEffects.current) return;
+    drainingEffects.current = true;
+    try {
+      for (let batch = effectBatches.current.shift(); batch; batch = effectBatches.current.shift()) {
+        for (const effect of batch) dispatch(effect);
+      }
+    } finally {
+      drainingEffects.current = false;
     }
   }
   function commit(result: { context: XYPadContext; effects: Parameters<typeof run>[0] }) {

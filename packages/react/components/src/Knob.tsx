@@ -23,6 +23,8 @@ export function Knob({ size, sizeRole, density, value, min = 0, max = 1, law = {
   const activePointer = useRef<number | null>(null);
   const skipEntryBlur = useRef(false);
   const cancelOnUnmount = useRef<(pointerId?: number | null) => void>(() => {});
+  const effectBatches = useRef<AudioValueEffect[][]>([]);
+  const drainingEffects = useRef(false);
   /**
    * The machine state this adapter last produced, written before any host
    * callback runs. Terminal cleanup reads it rather than a render's `context`,
@@ -36,13 +38,29 @@ export function Knob({ size, sizeRole, density, value, min = 0, max = 1, law = {
   const visualState = knobVisualState(context);
   const valueText = audioValueText(context);
   useEffect(() => { if (context.entryOpen) { entry.current?.focus(); entry.current?.select(); } }, [context.entryOpen]);
+  function dispatch(effect: AudioValueEffect) {
+    if (effect.type === "emitValueChange") { if (value === undefined) setUncontrolled(effect.value); onValueChange?.(effect.value); }
+    else if (effect.type === "emitValueCommit") { if (value === undefined) setUncontrolled(effect.value); onValueCommit?.(effect.value); }
+    else if (effect.type === "beginGesture") onGestureBegin?.();
+    else if (effect.type === "endGesture") onGestureEnd?.();
+    else if (effect.type === "requestEntryFocus") { skipEntryBlur.current = false; setEntryDraft(valueText); }
+  }
+  /**
+   * Effect batches drain in order even when a host tears the control down from
+   * inside one of them. A teardown that lands mid-batch queues its terminal
+   * instead of interleaving, so no callback from the accepted transition can
+   * run after the terminal that teardown triggered.
+   */
   function run(effects: AudioValueEffect[]) {
-    for (const effect of effects) {
-      if (effect.type === "emitValueChange") { if (value === undefined) setUncontrolled(effect.value); onValueChange?.(effect.value); }
-      else if (effect.type === "emitValueCommit") { if (value === undefined) setUncontrolled(effect.value); onValueCommit?.(effect.value); }
-      else if (effect.type === "beginGesture") onGestureBegin?.();
-      else if (effect.type === "endGesture") onGestureEnd?.();
-      else if (effect.type === "requestEntryFocus") { skipEntryBlur.current = false; setEntryDraft(valueText); }
+    effectBatches.current.push(effects);
+    if (drainingEffects.current) return;
+    drainingEffects.current = true;
+    try {
+      for (let batch = effectBatches.current.shift(); batch; batch = effectBatches.current.shift()) {
+        for (const effect of batch) dispatch(effect);
+      }
+    } finally {
+      drainingEffects.current = false;
     }
   }
   function commit(result: { context: KnobContext; effects: Parameters<typeof run>[0] }) {

@@ -53,12 +53,32 @@
   const xText = $derived(formatAudioValue(x, formatX));
   const yText = $derived(formatAudioValue(y, formatY));
 
+  function dispatch(effect: XYPadEffect): void {
+    if (effect.type === "emitValueChange") { x = effect.x; y = effect.y; onValueChange?.(effect.x, effect.y); }
+    else if (effect.type === "emitValueCommit") { x = effect.x; y = effect.y; onValueCommit?.(effect.x, effect.y); }
+    else if (effect.type === "beginGesture") onGestureBegin?.();
+    else if (effect.type === "endGesture") onGestureEnd?.();
+  }
+
+  let effectBatches: XYPadEffect[][] = [];
+  let drainingEffects = false;
+
+  /**
+   * Effect batches drain in order even when a host tears the control down from
+   * inside one of them. A teardown that lands mid-batch queues its terminal
+   * instead of interleaving, so no callback from the accepted transition can
+   * run after the terminal that teardown triggered.
+   */
   function runEffects(effects: XYPadEffect[]): void {
-    for (const effect of effects) {
-      if (effect.type === "emitValueChange") { x = effect.x; y = effect.y; onValueChange?.(effect.x, effect.y); }
-      else if (effect.type === "emitValueCommit") { x = effect.x; y = effect.y; onValueCommit?.(effect.x, effect.y); }
-      else if (effect.type === "beginGesture") onGestureBegin?.();
-      else if (effect.type === "endGesture") onGestureEnd?.();
+    effectBatches.push(effects);
+    if (drainingEffects) return;
+    drainingEffects = true;
+    try {
+      for (let batch = effectBatches.shift(); batch; batch = effectBatches.shift()) {
+        for (const effect of batch) dispatch(effect);
+      }
+    } finally {
+      drainingEffects = false;
     }
   }
 
