@@ -6,9 +6,10 @@ import { SpecimenLayout } from "../SpecimenLayout";
 const controlStyle = { maxWidth: "20rem" } as const;
 
 export function NumberInputSpecimen() {
-  const [quantity, setQuantity] = useState<number | string | null>(1);
-  const [price, setPrice] = useState<number | string | null>(29.99);
-  const [ticketCode, setTicketCode] = useState<number | string | null>("12");
+  const [quantity, setQuantity] = useState<number | null>(1);
+  const [price, setPrice] = useState<number | null>(29.99);
+  const [empty, setEmpty] = useState<number | null>(null);
+  const [emptyDraft, setEmptyDraft] = useState<string | null>(null);
 
   return (
     <SpecimenLayout
@@ -32,7 +33,7 @@ export function NumberInputSpecimen() {
         </p>
       </SpecimenGroup>
 
-      <SpecimenGroup label="With Steppers">
+      <SpecimenGroup label="Precision And Steppers">
         <div style={controlStyle}>
           <NumberInput
             id="price"
@@ -40,30 +41,33 @@ export function NumberInputSpecimen() {
             min={0}
             step={0.01}
             precision={2}
+            prefix="$"
             showSteppers
             ariaLabel="Price"
             onValueChange={setPrice}
           />
         </div>
         <p>
-          Price: <strong>{price == null ? "none" : `$${Number(price).toFixed(2)}`}</strong>
+          Price: <strong>{price == null ? "none" : `$${price.toFixed(2)}`}</strong>
         </p>
       </SpecimenGroup>
 
-      <SpecimenGroup label="String Form Binding">
+      <SpecimenGroup label="Empty With Draft Channel">
         <div style={controlStyle}>
           <NumberInput
-            id="ticket-code"
-            value={ticketCode}
-            prefix="A"
-            min={1}
-            max={999}
-            ariaLabel="Ticket code"
-            onValueChange={setTicketCode}
+            id="empty-num"
+            value={empty}
+            draftValue={emptyDraft}
+            placeholder="Type a number"
+            ariaLabel="Optional amount"
+            onValueChange={setEmpty}
+            onDraftValueChange={setEmptyDraft}
           />
         </div>
         <p>
-          Ticket code: <strong>{ticketCode}</strong>
+          Value: <strong>{empty ?? "none"}</strong>
+          {" · "}
+          Draft: <strong>{emptyDraft === null ? "adapter-owned" : JSON.stringify(emptyDraft)}</strong>
         </p>
       </SpecimenGroup>
 
@@ -73,7 +77,7 @@ export function NumberInputSpecimen() {
         </div>
       </SpecimenGroup>
 
-      <SpecimenGroup label="Invalid">
+      <SpecimenGroup label="Invalid Presentation">
         <div style={controlStyle}>
           <NumberInput id="invalid-num" value={-5} min={0} ariaLabel="Invalid number" validationState="invalid" />
         </div>

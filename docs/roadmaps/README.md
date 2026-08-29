@@ -58,13 +58,12 @@ behavior repairs without inventing another conformance authority.
   shared `dragDrop` vector corpus in PR #96.
   TimeInput's native editing decision closed and merged as `g16.029` (ledger
   48 mounted / 126 missing). NumberInput's committed-number/raw-draft and
-  clean callback decision is approved as `g16.030`, serial behind `029`. Its
-  promoted contract documents the runtime deltas, moving only that ledger axis
-  to 116 present / 59 not-applicable after NumberInput lands; mounted totals
-  stay 48 / 126 until then.
+  clean callback migration closed as `g16.030` on the worker branch (ledger
+  49 mounted / 125 missing; known-delta axis already 116 present /
+  59 not-applicable). Awaiting review/merge.
   A bounded Fader/Knob/XYPad audit then found real paired-machine, web gesture
   lifetime, native mounting, and accessibility-projection defects. `g16.031`
-  closes paired semantics and Svelte/React lifecycle after `030`; `g16.032`
+  closes paired semantics and Svelte/React lifecycle after `030` merges; `g16.032`
   mounts the three controls through one bounded continuous-value Node event and
   must not overlap drag card `025`. This work remains separate from payload
   drag-and-drop.

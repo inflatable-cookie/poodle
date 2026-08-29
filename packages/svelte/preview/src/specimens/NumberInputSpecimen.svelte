@@ -5,7 +5,8 @@
 
   let quantity: number | null = $state(1);
   let price: number | null = $state(29.99);
-  let ticketCode = $state("12");
+  let empty: number | null = $state(null);
+  let emptyDraft: string | null = $state(null);
 </script>
 
 <SpecimenLayout>
@@ -22,7 +23,7 @@
     <p>Quantity: <strong>{quantity ?? "none"}</strong></p>
   </SpecimenGroup>
 
-  <SpecimenGroup label="With Steppers">
+  <SpecimenGroup label="Precision And Steppers">
     <div class="poodle-specimen__control">
       <NumberInput
         id="price"
@@ -30,6 +31,7 @@
         min={0}
         step={0.01}
         precision={2}
+        prefix="$"
         showSteppers
         ariaLabel="Price"
       />
@@ -37,18 +39,20 @@
     <p>Price: <strong>{price == null ? "none" : `$${price.toFixed(2)}`}</strong></p>
   </SpecimenGroup>
 
-  <SpecimenGroup label="String Form Binding">
+  <SpecimenGroup label="Empty With Draft Channel">
     <div class="poodle-specimen__control">
       <NumberInput
-        id="ticket-code"
-        bind:value={ticketCode}
-        prefix="A"
-        min={1}
-        max={999}
-        ariaLabel="Ticket code"
+        id="empty-num"
+        bind:value={empty}
+        bind:draftValue={emptyDraft}
+        placeholder="Type a number"
+        ariaLabel="Optional amount"
       />
     </div>
-    <p>Ticket code: <strong>{ticketCode}</strong></p>
+    <p>
+      Value: <strong>{empty ?? "none"}</strong>
+      · Draft: <strong>{emptyDraft === null ? "adapter-owned" : JSON.stringify(emptyDraft)}</strong>
+    </p>
   </SpecimenGroup>
 
   <SpecimenGroup label="Disabled">
@@ -57,7 +61,7 @@
     </div>
   </SpecimenGroup>
 
-  <SpecimenGroup label="Invalid">
+  <SpecimenGroup label="Invalid Presentation">
     <div class="poodle-specimen__control">
       <NumberInput id="invalid-num" value={-5} min={0} ariaLabel="Invalid number" validationState="invalid" />
     </div>

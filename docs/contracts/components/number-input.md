@@ -1,7 +1,7 @@
 # NumberInput
 
-Status: active — approved clean migration pending `g16.030`
-Updated: 2026-08-28
+Status: active — g16.030 value/draft/mounted parity landed
+Updated: 2026-08-29
 
 ## 1. Purpose
 
@@ -264,13 +264,13 @@ Typing or parity is not claimed until backend admission.
 
 ### Tier 1: Strict Parity
 
-- [ ] committed `number | null` and raw draft channels match
-- [ ] syntax, precision, bounds, and step validity match
-- [ ] live valid change, clear, Enter, blur, Escape, and external replacement match
-- [ ] Arrow/stepper/Home/End results and disabled/read-only inertia match
-- [ ] callback timing and payloads match
-- [ ] controlled and uncontrolled draft ownership produces the same observable result
-- [ ] accessible name, value, bounds, invalid, busy, and focus semantics match
+- [x] committed `number | null` and raw draft channels match
+- [x] syntax, precision, bounds, and step validity match
+- [x] live valid change, clear, Enter, blur, Escape, and external replacement match
+- [x] Arrow/stepper/Home/End results and disabled/read-only inertia match
+- [x] callback timing and payloads match
+- [x] controlled and uncontrolled draft ownership produces the same observable result
+- [x] accessible name, value, bounds, invalid, busy, and focus semantics match
 
 ### Tier 2: Visual Parity
 

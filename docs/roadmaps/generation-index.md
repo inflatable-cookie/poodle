@@ -15,13 +15,14 @@ Updated: 2026-08-29
     `019` merged in PR #94; `020` merged in PR #95; `021` merged in PR #96;
     `022`–`028` planned behind ordered drag-and-drop dependencies; `029`
     complete and merged (TimeInput native parity, ledger 48/126); `030`
-    compiled as the approved NumberInput continuation after `029`; `031`–`032`
+    complete on worker branch awaiting review/merge (NumberInput value/draft/
+    mounted parity, ledger 49/125); `031`–`032`
     compile paired/web and native continuous-audio repair after the bounded audit
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: dispatch `g16.030`, then `g16.031`–`032` close the audited
-    Fader/Knob/XYPad lane. Keep
+  - Next move: after `g16.030` merges, choose between `g16.022` and
+    `g16.031`–`032`. Keep
     `032` away from drag card `025` because both edit Node/GPUI interaction
     routing. The legacy public drag-export migration is approved; later cards
     still fix exact replacement API names from their landed prerequisites.
