@@ -22,6 +22,7 @@ export function Knob({ size, sizeRole, density, value, min = 0, max = 1, law = {
   const entry = useRef<HTMLInputElement>(null);
   const activePointer = useRef<number | null>(null);
   const skipEntryBlur = useRef(false);
+  const cancelOnUnmount = useRef<(pointerId?: number) => void>(() => {});
   const currentValue = value ?? uncontrolled;
   const context: KnobContext = { ...machine, value: currentValue, min, max, law, defaultValue, dragMode, dragSensitivity, keyboardStep, format, automation, disabled };
   const visualState = knobVisualState(context);
@@ -33,12 +34,14 @@ export function Knob({ size, sizeRole, density, value, min = 0, max = 1, law = {
       else if (effect.type === "emitValueCommit") { if (value === undefined) setUncontrolled(effect.value); onValueCommit?.(effect.value); }
       else if (effect.type === "beginGesture") onGestureBegin?.();
       else if (effect.type === "endGesture") onGestureEnd?.();
-      else if (effect.type === "requestEntryFocus") setEntryDraft(valueText);
+      else if (effect.type === "requestEntryFocus") { skipEntryBlur.current = false; setEntryDraft(valueText); }
     }
   }
   function send(event: Parameters<typeof knobTransition>[1]) { const result = knobTransition(context, event); setMachine(result.context); run(result.effects); }
   function pointerDown(event: PointerEvent<HTMLDivElement>) {
-    if (event.button !== 0 || disabled || !root.current) return;
+    // One primary pointer owns the gesture. A second pointer-down cannot
+    // replace the active pointer or open a second gesture.
+    if (event.button !== 0 || disabled || activePointer.current !== null || !root.current) return;
     const rect = root.current.getBoundingClientRect();
     if (!hitTestCircle({ x: event.clientX, y: event.clientY }, rect)) return;
     event.preventDefault(); activePointer.current = event.pointerId; root.current.setPointerCapture(event.pointerId);
@@ -56,7 +59,18 @@ export function Knob({ size, sizeRole, density, value, min = 0, max = 1, law = {
     if (dragMode === "circular") send({ type: "DRAG_SET_NORM", valueNorm: knobPointToNorm({ x: event.clientX, y: event.clientY }, root.current.getBoundingClientRect()), fine: event.shiftKey });
     else send({ type: "DRAG_MOVE", position: event.clientY, fine: event.shiftKey });
   }
-  function pointerEnd(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) { activePointer.current = null; send({ type: "DRAG_END" }); } }
+  function pointerUp(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) { activePointer.current = null; send({ type: "DRAG_END" }); } }
+  /**
+   * Pointer cancel, lost capture, and teardown all close the gesture the same
+   * way, so a captured gesture can never outlive its pointer or its component.
+   * A stale pointer id is ignored, and the machine makes a repeat inert.
+   */
+  function cancelGesture(pointerId?: number) {
+    if (activePointer.current === null || (pointerId !== undefined && activePointer.current !== pointerId)) return;
+    activePointer.current = null; send({ type: "DRAG_CANCEL" });
+  }
+  cancelOnUnmount.current = cancelGesture;
+  useEffect(() => () => cancelOnUnmount.current(), []);
   function keydown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key === "Enter") { event.preventDefault(); send({ type: "ENTRY_OPEN" }); return; }
     const directions: Record<string, -1 | 1> = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1, PageDown: -1, PageUp: 1 };
@@ -65,7 +79,7 @@ export function Knob({ size, sizeRole, density, value, min = 0, max = 1, law = {
     else if (event.key === "Home" || event.key === "End") { event.preventDefault(); send({ type: "KEY_BOUND", bound: event.key === "Home" ? "min" : "max" }); }
   }
   function wheel(event: WheelEvent<HTMLDivElement>) { event.preventDefault(); send({ type: "WHEEL", direction: event.deltaY < 0 ? 1 : -1, fine: event.shiftKey }); }
-  return <div ref={root} className="poodle-knob" data-size={presentation.size} data-density={presentation.density} role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ?? undefined} aria-valuemin={min} aria-valuemax={max} aria-valuenow={currentValue} aria-valuetext={valueText} aria-disabled={disabled} data-scope="knob" data-part="root" data-state={visualState.drag === "none" ? "idle" : visualState.drag} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onMouseEnter={() => send({ type: "HOVER", value: true })} onMouseLeave={() => send({ type: "HOVER", value: false })} onFocus={() => send({ type: "FOCUS", value: true })} onBlur={() => send({ type: "FOCUS", value: false })} onWheel={wheel} onDoubleClick={(event) => { event.preventDefault(); send({ type: "RESET" }); }} onKeyDown={keydown}>
+  return <div ref={root} className="poodle-knob" data-size={presentation.size} data-density={presentation.density} role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ?? undefined} aria-valuemin={min} aria-valuemax={max} aria-valuenow={currentValue} aria-valuetext={valueText} aria-disabled={disabled} data-scope="knob" data-part="root" data-state={visualState.drag === "none" ? "idle" : visualState.drag} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={(event) => cancelGesture(event.pointerId)} onLostPointerCapture={(event) => cancelGesture(event.pointerId)} onMouseEnter={() => send({ type: "HOVER", value: true })} onMouseLeave={() => send({ type: "HOVER", value: false })} onFocus={() => send({ type: "FOCUS", value: true })} onBlur={() => send({ type: "FOCUS", value: false })} onWheel={wheel} onDoubleClick={(event) => { event.preventDefault(); send({ type: "RESET" }); }} onKeyDown={keydown}>
     <KnobVisual visualState={visualState} />
     {context.entryOpen && <input ref={entry} className="poodle-knob__entry" aria-label={`${ariaLabel ?? "Knob"} value`} value={entryDraft} onChange={(event) => setEntryDraft(event.currentTarget.value)} onKeyDown={(event) => {
       if (event.key === "Enter") { event.preventDefault(); skipEntryBlur.current = true; send({ type: "ENTRY_COMMIT", text: entryDraft }); root.current?.focus(); }

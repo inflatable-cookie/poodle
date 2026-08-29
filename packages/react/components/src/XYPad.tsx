@@ -1,4 +1,4 @@
-import { useRef, useState, type FocusEvent, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent, type PointerEvent } from "react";
 import { createXYPadContext, formatAudioValue, linearValueLaw, xyPadPointToNorm, xyPadTransition, xyPadVisualState, type AudioAutomationState, type AudioValueFormat, type AudioValueLaw, type XYPadContext, type XYPadEffect } from "@inflatable-cookie/poodle-core";
 import "@inflatable-cookie/poodle-core/styles/xy-pad.css";
 import { XYPadVisual } from "./audio/XYPadVisual";
@@ -19,6 +19,7 @@ export function XYPad({ size, sizeRole, density, x, y, minX = 0, maxX = 1, minY 
   const [machine, setMachine] = useState(createXYPadContext);
   const root = useRef<HTMLDivElement>(null);
   const activePointer = useRef<number | null>(null);
+  const cancelOnUnmount = useRef<(pointerId?: number) => void>(() => {});
   const currentX = x ?? uncontrolled.x;
   const currentY = y ?? uncontrolled.y;
   const context: XYPadContext = { ...machine, x: currentX, y: currentY, minX, maxX, minY, maxY, lawX, lawY, defaultX, defaultY, keyboardStepX, keyboardStepY, automation, disabled };
@@ -33,9 +34,22 @@ export function XYPad({ size, sizeRole, density, x, y, minX = 0, maxX = 1, minY 
   }
   function send(event: Parameters<typeof xyPadTransition>[1]) { const result = xyPadTransition(context, event); setMachine(result.context); run(result.effects); }
   function norm(event: PointerEvent<HTMLDivElement>) { return xyPadPointToNorm({ x: event.clientX, y: event.clientY }, root.current!.getBoundingClientRect()); }
-  function pointerDown(event: PointerEvent<HTMLDivElement>) { if (event.button !== 0 || disabled || !root.current) return; event.preventDefault(); activePointer.current = event.pointerId; root.current.setPointerCapture(event.pointerId); send({ type: "DRAG_BEGIN", ...norm(event), fine: event.shiftKey }); }
+  // One primary pointer owns the gesture. A second pointer-down cannot replace
+  // the active pointer or open a second gesture.
+  function pointerDown(event: PointerEvent<HTMLDivElement>) { if (event.button !== 0 || disabled || activePointer.current !== null || !root.current) return; event.preventDefault(); activePointer.current = event.pointerId; root.current.setPointerCapture(event.pointerId); send({ type: "DRAG_BEGIN", ...norm(event), fine: event.shiftKey }); }
   function pointerMove(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) send({ type: "DRAG_MOVE", ...norm(event), fine: event.shiftKey }); }
-  function pointerEnd(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) { activePointer.current = null; send({ type: "DRAG_END" }); } }
+  function pointerUp(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) { activePointer.current = null; send({ type: "DRAG_END" }); } }
+  /**
+   * Pointer cancel, lost capture, and teardown all close the gesture the same
+   * way, so a captured gesture can never outlive its pointer or its component.
+   * A stale pointer id is ignored, and the machine makes a repeat inert.
+   */
+  function cancelGesture(pointerId?: number) {
+    if (activePointer.current === null || (pointerId !== undefined && activePointer.current !== pointerId)) return;
+    activePointer.current = null; send({ type: "DRAG_CANCEL" });
+  }
+  cancelOnUnmount.current = cancelGesture;
+  useEffect(() => () => cancelOnUnmount.current(), []);
   function axisKeydown(event: KeyboardEvent<HTMLDivElement>, axis: "x" | "y") {
     const negative = axis === "x" ? ["ArrowLeft", "ArrowDown", "PageDown"] : ["ArrowDown", "ArrowLeft", "PageDown"];
     const positive = axis === "x" ? ["ArrowRight", "ArrowUp", "PageUp"] : ["ArrowUp", "ArrowRight", "PageUp"];
@@ -43,7 +57,7 @@ export function XYPad({ size, sizeRole, density, x, y, minX = 0, maxX = 1, minY 
     else if (event.key === "Home" || event.key === "End") { event.preventDefault(); send({ type: "BOUND", axis, bound: event.key === "Home" ? "min" : "max" }); }
   }
   function blur(event: FocusEvent<HTMLDivElement>) { if (!root.current?.contains(event.relatedTarget as Node | null)) send({ type: "FOCUS", value: false }); }
-  return <div ref={root} className="poodle-xy-pad" data-size={presentation.size} data-density={presentation.density} role="group" aria-label={ariaLabel ?? undefined} aria-disabled={disabled} data-scope="xy-pad" data-part="root" onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onMouseEnter={() => send({ type: "HOVER", value: true })} onMouseLeave={() => send({ type: "HOVER", value: false })} onDoubleClick={() => send({ type: "RESET" })} onFocus={() => send({ type: "FOCUS", value: true })} onBlur={blur}>
+  return <div ref={root} className="poodle-xy-pad" data-size={presentation.size} data-density={presentation.density} role="group" aria-label={ariaLabel ?? undefined} aria-disabled={disabled} data-scope="xy-pad" data-part="root" onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={(event) => cancelGesture(event.pointerId)} onLostPointerCapture={(event) => cancelGesture(event.pointerId)} onMouseEnter={() => send({ type: "HOVER", value: true })} onMouseLeave={() => send({ type: "HOVER", value: false })} onDoubleClick={() => send({ type: "RESET" })} onFocus={() => send({ type: "FOCUS", value: true })} onBlur={blur}>
     <XYPadVisual visualState={visualState} />
     <div className="poodle-xy-pad__axis" role="slider" tabIndex={disabled ? undefined : 0} aria-label={`${ariaLabel ?? "XY pad"} X`} aria-valuemin={minX} aria-valuemax={maxX} aria-valuenow={currentX} aria-valuetext={formatAudioValue(currentX, formatX)} aria-disabled={disabled} onKeyDown={(event) => axisKeydown(event, "x")} />
     <div className="poodle-xy-pad__axis" role="slider" tabIndex={disabled ? undefined : 0} aria-label={`${ariaLabel ?? "XY pad"} Y`} aria-valuemin={minY} aria-valuemax={maxY} aria-valuenow={currentY} aria-valuetext={formatAudioValue(currentY, formatY)} aria-disabled={disabled} onKeyDown={(event) => axisKeydown(event, "y")} />

@@ -6,7 +6,7 @@
     type AudioValueEffect, type AudioValueFormat, type AudioValueLaw,
     type KnobContext,
   } from "@inflatable-cookie/poodle-core";
-  import { tick } from "svelte";
+  import { onDestroy, tick } from "svelte";
   import KnobVisual from "./audio/KnobVisual.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -39,6 +39,7 @@
   let entry = $state<HTMLInputElement>();
   let entryDraft = $state("");
   let activePointer: number | null = null;
+  let skipEntryBlur = false;
   const context = $derived<KnobContext>({ ...machine, value, min, max, law, defaultValue, dragMode, dragSensitivity, keyboardStep, format, automation, disabled });
   const visualState = $derived(knobVisualState(context));
   const valueText = $derived(audioValueText(context));
@@ -51,6 +52,7 @@
       else if (effect.type === "endGesture") onGestureEnd?.();
       else if (effect.type === "requestEntryFocus") {
         entryDraft = valueText;
+        skipEntryBlur = false;
         void tick().then(() => { entry?.focus(); entry?.select(); });
       }
     }
@@ -63,7 +65,9 @@
   }
 
   function pointerDown(event: PointerEvent): void {
-    if (event.button !== 0 || disabled) return;
+    // One primary pointer owns the gesture. A second pointer-down cannot
+    // replace the active pointer or open a second gesture.
+    if (event.button !== 0 || disabled || activePointer !== null) return;
     const rect = root.getBoundingClientRect();
     if (!hitTestCircle({ x: event.clientX, y: event.clientY }, rect)) return;
     event.preventDefault();
@@ -82,11 +86,24 @@
     } else send({ type: "DRAG_MOVE", position: event.clientY, fine: event.shiftKey });
   }
 
-  function pointerEnd(event: PointerEvent): void {
+  function pointerUp(event: PointerEvent): void {
     if (activePointer !== event.pointerId) return;
     activePointer = null;
     send({ type: "DRAG_END" });
   }
+
+  /**
+   * Pointer cancel, lost capture, and teardown all close the gesture the same
+   * way, so a captured gesture can never outlive its pointer or its component.
+   * A stale pointer id is ignored, and the machine makes a repeat inert.
+   */
+  function cancelGesture(pointerId?: number): void {
+    if (activePointer === null || (pointerId !== undefined && activePointer !== pointerId)) return;
+    activePointer = null;
+    send({ type: "DRAG_CANCEL" });
+  }
+
+  onDestroy(() => cancelGesture());
 
   function keydown(event: KeyboardEvent): void {
     if (event.key === "Enter") { event.preventDefault(); send({ type: "ENTRY_OPEN" }); return; }
@@ -97,8 +114,18 @@
   }
 
   function entryKeydown(event: KeyboardEvent): void {
-    if (event.key === "Enter") { event.preventDefault(); send({ type: "ENTRY_COMMIT", text: entryDraft }); root.focus(); }
-    else if (event.key === "Escape") { event.preventDefault(); send({ type: "ENTRY_CANCEL" }); root.focus(); }
+    if (event.key === "Enter") { event.preventDefault(); skipEntryBlur = true; send({ type: "ENTRY_COMMIT", text: entryDraft }); root.focus(); }
+    else if (event.key === "Escape") { event.preventDefault(); skipEntryBlur = true; send({ type: "ENTRY_CANCEL" }); root.focus(); }
+  }
+
+  /**
+   * Enter and Escape already resolved the entry and moved focus back to the
+   * root. The blur they cause must not commit a second time or reverse an
+   * Escape; only an unresolved blur commits the draft.
+   */
+  function entryBlur(): void {
+    if (skipEntryBlur) { skipEntryBlur = false; return; }
+    send({ type: "ENTRY_COMMIT", text: entryDraft });
   }
 </script>
 
@@ -120,8 +147,9 @@
   data-state={visualState.drag === "none" ? "idle" : visualState.drag}
   onpointerdown={pointerDown}
   onpointermove={pointerMove}
-  onpointerup={pointerEnd}
-  onpointercancel={pointerEnd}
+  onpointerup={pointerUp}
+  onpointercancel={(event) => cancelGesture(event.pointerId)}
+  onlostpointercapture={(event) => cancelGesture(event.pointerId)}
   onmouseenter={() => send({ type: "HOVER", value: true })}
   onmouseleave={() => send({ type: "HOVER", value: false })}
   onfocus={() => send({ type: "FOCUS", value: true })}
@@ -139,7 +167,7 @@
       value={entryDraft}
       oninput={(event) => entryDraft = event.currentTarget.value}
       onkeydown={entryKeydown}
-      onblur={() => send({ type: "ENTRY_COMMIT", text: entryDraft })}
+      onblur={entryBlur}
     />
   {/if}
 </div>

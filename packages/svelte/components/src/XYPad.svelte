@@ -5,6 +5,7 @@
     xyPadTransition, xyPadVisualState, type AudioAutomationState,
     type AudioValueFormat, type AudioValueLaw, type XYPadContext, type XYPadEffect,
   } from "@inflatable-cookie/poodle-core";
+  import { onDestroy } from "svelte";
   import XYPadVisual from "./audio/XYPadVisual.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -62,7 +63,9 @@
   }
 
   function pointerDown(event: PointerEvent): void {
-    if (event.button !== 0 || disabled) return;
+    // One primary pointer owns the gesture. A second pointer-down cannot
+    // replace the active pointer or open a second gesture.
+    if (event.button !== 0 || disabled || activePointer !== null) return;
     event.preventDefault(); activePointer = event.pointerId; root.setPointerCapture(event.pointerId);
     send({ type: "DRAG_BEGIN", ...pointerNorm(event), fine: event.shiftKey });
   }
@@ -72,10 +75,23 @@
     send({ type: "DRAG_MOVE", ...pointerNorm(event), fine: event.shiftKey });
   }
 
-  function pointerEnd(event: PointerEvent): void {
+  function pointerUp(event: PointerEvent): void {
     if (activePointer !== event.pointerId) return;
     activePointer = null; send({ type: "DRAG_END" });
   }
+
+  /**
+   * Pointer cancel, lost capture, and teardown all close the gesture the same
+   * way, so a captured gesture can never outlive its pointer or its component.
+   * A stale pointer id is ignored, and the machine makes a repeat inert.
+   */
+  function cancelGesture(pointerId?: number): void {
+    if (activePointer === null || (pointerId !== undefined && activePointer !== pointerId)) return;
+    activePointer = null;
+    send({ type: "DRAG_CANCEL" });
+  }
+
+  onDestroy(() => cancelGesture());
 
   function axisKeydown(event: KeyboardEvent, axis: "x" | "y"): void {
     const negative = axis === "x" ? ["ArrowLeft", "ArrowDown", "PageDown"] : ["ArrowDown", "ArrowLeft", "PageDown"];
@@ -100,8 +116,9 @@
   data-density={resolvedDensity}
   onpointerdown={pointerDown}
   onpointermove={pointerMove}
-  onpointerup={pointerEnd}
-  onpointercancel={pointerEnd}
+  onpointerup={pointerUp}
+  onpointercancel={(event) => cancelGesture(event.pointerId)}
+  onlostpointercapture={(event) => cancelGesture(event.pointerId)}
   onmouseenter={() => send({ type: "HOVER", value: true })}
   onmouseleave={() => send({ type: "HOVER", value: false })}
   ondblclick={() => send({ type: "RESET" })}
