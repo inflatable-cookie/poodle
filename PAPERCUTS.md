@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-29 — `scripts/gate-tree-guard.ts` keeps its snapshot at a fixed
+  `os.tmpdir()` path shared by every worktree, and `--compare` deletes it. Two
+  concurrent `effigy ci:web`/`qa` runs in different worktrees therefore fail
+  each other with "no snapshot found". Key the snapshot by repository root or
+  by a run id. Seen while closing g16.031; the same board passed on a rerun.
+
 - 2026-08-29 — The Svelte package build strips a function parameter's type
   annotation but leaves the optional marker, so `function f(id?: number)` in a
   `.svelte` script ships as invalid JavaScript and breaks every consumer import
