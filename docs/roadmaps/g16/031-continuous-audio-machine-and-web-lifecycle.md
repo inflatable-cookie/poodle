@@ -1,6 +1,6 @@
 # g16.031 — Continuous Audio Machine And Web Lifecycle
 
-Status: complete — PR #99 on `t3code/continuous-audio-web-lifecycle`;
+Status: complete — merged in PR #99;
 log `../../logs/2026-08/20260829-g16-031-continuous-audio-machine-and-web-lifecycle.md`
 Opened: 2026-08-28
 Depends on: completed `g16.030`; this lane edits the same paired core/headless
