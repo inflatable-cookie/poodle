@@ -3,12 +3,14 @@
 //! Contract: `docs/contracts/components/number-input.md`
 //! Declares one editable SpinButton value node with text/selection/focus/
 //! submit/cancel/replacement channels. Value, draft, and commit effects come
-//! from `poodle_headless::number_input`. Full GPUI mounted routing is Batch 4.
+//! from `poodle_headless::number_input`. The GPUI host stores draft, caret,
+//! and focus between rebuilds and routes mounted dispatch through the same
+//! transition results as web.
 
 use std::sync::Arc;
 
 use poodle_headless::number_input::{
-    number_input_transition, NumberInputEffect, NumberInputEvent,
+    number_input_display_text, number_input_transition, NumberInputEffect, NumberInputEvent,
 };
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutOverflow, LayoutSizing,
@@ -59,8 +61,19 @@ fn apply_effects(effects: &[NumberInputEffect], handlers: &NumberInputHandlers) 
 }
 
 fn dispatch_event(spec: &NumberInputSpec, event: NumberInputEvent, handlers: &NumberInputHandlers) {
-    let (_next, effects) = number_input_transition(spec.to_context(), event);
+    let (next, effects) = number_input_transition(spec.to_context(), event);
     apply_effects(&effects, handlers);
+    // Step/Home/End/Enter/Escape/Blur change the visible text without going
+    // through the text edit model, so the host caret has to follow the new
+    // display. Raw keystroke paths report their own selection afterward and
+    // overwrite this when the caret is not simply "end of field".
+    let next_display = number_input_display_text(&next);
+    if next_display != spec.display_text() {
+        let len = next_display.chars().count();
+        if let Some(on_selection) = &handlers.on_selection_change {
+            on_selection(len, len);
+        }
+    }
 }
 
 fn report_text_edit(
@@ -253,7 +266,10 @@ pub fn number_input(
             pad.top = 0.0;
             pad.bottom = 0.0;
         }
-        btn.interaction.focusable = true;
+        // Pointer-activatable only: the field root owns the one focus
+        // treatment. A focusable stepper would steal the root handle on click
+        // and fire blur/commit before the step landed.
+        btn.interaction.focusable = false;
         let mut glyph = Node::icon(icon, icon_size);
         glyph.style.descriptor.text_color = Some(stepper_icon_color);
         let mut btn = btn.child(glyph);
@@ -540,6 +556,13 @@ pub fn number_input(
     }
     el.a11y.value_min = spec.min;
     el.a11y.value_max = spec.max;
+    let unresolved_invalid = invalid_draft || spec.validation_state == ValidationState::Invalid;
+    if unresolved_invalid {
+        el.a11y.invalid = Some(true);
+    }
+    if spec.validation_state == ValidationState::Pending {
+        el.a11y.busy = Some(true);
+    }
     el
 }
 
@@ -639,8 +662,33 @@ mod tests {
         );
         let steppers = &node.children[1];
         let inc = &steppers.children[0];
+        assert!(!inc.interaction.focusable, "steppers stay out of focus order");
+        assert!(inc.style.focus.is_none());
+        assert!(node.style.focus.is_some(), "the field owns the focus treatment");
         let activate = inc.interaction.on_activate.as_ref().expect("inc active");
         activate();
         assert_eq!(*committed.lock().unwrap(), Some(2.0));
+    }
+
+    #[test]
+    fn unresolved_draft_and_pending_validation_project_a11y_flags() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let invalid = number_input(
+            &NumberInputSpec::new(Some(1.0))
+                .with_draft_value(Some("-".into()))
+                .with_aria_label("Qty"),
+            &ctx,
+            NumberInputHandlers::default(),
+        );
+        assert_eq!(invalid.a11y.invalid, Some(true));
+        assert_eq!(invalid.a11y.value, None);
+
+        let busy = number_input(
+            &NumberInputSpec::new(Some(1.0)).with_validation_state(ValidationState::Pending),
+            &ctx,
+            NumberInputHandlers::default(),
+        );
+        assert_eq!(busy.a11y.busy, Some(true));
     }
 }

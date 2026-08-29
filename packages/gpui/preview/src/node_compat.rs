@@ -5159,6 +5159,11 @@ impl NumberInput {
         }
     }
 
+    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.id_suffix = Some(id.into());
+        self
+    }
+
     pub(crate) fn size(mut self, size: ControlSize) -> Self {
         self.spec.size = Some(size);
         self
@@ -5187,6 +5192,19 @@ impl NumberInput {
 
     pub(crate) fn on_commit(mut self, handler: Arc<dyn Fn(Option<f64>) + Send + Sync>) -> Self {
         self.handlers.on_commit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_selection_change(
+        mut self,
+        handler: Arc<dyn Fn(usize, usize) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_selection_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_focus_change(mut self, handler: Arc<dyn Fn(bool) + Send + Sync>) -> Self {
+        self.handlers.on_focus_change = Some(handler);
         self
     }
 

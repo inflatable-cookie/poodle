@@ -7,22 +7,90 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{EyebrowSpec, NumberInputSpec, ValidationState};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
-fn value_handler(
-    events: &Arc<Mutex<Vec<NodeSpecimenEvent>>>,
+fn parse_committed(raw: &str) -> Option<f64> {
+    if raw.is_empty() {
+        None
+    } else {
+        raw.parse().ok()
+    }
+}
+
+fn live_number_input(
+    state: &AppState,
     key: &'static str,
-) -> Arc<dyn Fn(Option<f64>) + Send + Sync> {
-    let events = Arc::clone(events);
-    Arc::new(move |value: Option<f64>| {
-        let text = value
-            .map(|v| format!("{v}"))
-            .unwrap_or_default();
-        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
-            key: key.to_string(),
-            value: text,
-        });
-    })
+    mut spec: NumberInputSpec,
+    theme: &GpuiThemeProvider,
+) -> NumberInput {
+    // Host-owned draft/caret survive rebuilds the same way TextInput does:
+    // without them every keystroke reinserts at index 0 against the committed
+    // display and partial drafts vanish.
+    let draft_key = format!("{key}-draft");
+    if let Some(draft) = state.specimens.text.get(&draft_key) {
+        spec = spec.with_draft_value(Some(draft.clone()));
+    }
+    let (start, end) = state
+        .specimens
+        .carets
+        .get(key)
+        .copied()
+        .unwrap_or_default();
+    spec = spec.with_selection(start, end);
+    if state
+        .specimens
+        .toggles
+        .get(&format!("{key}-focused"))
+        .copied()
+        .unwrap_or(false)
+    {
+        spec = spec.with_focused(true);
+    }
+
+    let events = Arc::clone(&state.node_events);
+    let draft_events = Arc::clone(&state.node_events);
+    let caret_events = Arc::clone(&state.node_events);
+    let focus_events = Arc::clone(&state.node_events);
+    let commit_events = Arc::clone(&state.node_events);
+    let focus_key = format!("{key}-focused");
+    NumberInput::from_spec(spec, theme)
+        .on_value_change(Arc::new(move |value: Option<f64>| {
+            let text = value.map(|v| format!("{v}")).unwrap_or_default();
+            events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                key: key.to_string(),
+                value: text,
+            });
+        }))
+        .on_draft_value_change(Arc::new(move |draft: Option<String>| {
+            draft_events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetOptionalText {
+                    key: draft_key.clone(),
+                    value: draft,
+                });
+        }))
+        .on_selection_change(Arc::new(move |start: usize, end: usize| {
+            caret_events.lock().unwrap().push(NodeSpecimenEvent::SetCaret {
+                key: key.to_string(),
+                start,
+                end,
+            });
+        }))
+        .on_focus_change(Arc::new(move |focused: bool| {
+            focus_events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetToggle {
+                    key: focus_key.clone(),
+                    value: focused,
+                });
+        }))
+        .on_commit(Arc::new(move |_value: Option<f64>| {
+            // Commit is observable through value/draft rebuilds; keep the
+            // channel wired so the specimen host matches a real consumer.
+            let _ = &commit_events;
+        }))
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -35,11 +103,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("number-input-quantity")
         .cloned()
         .unwrap_or_else(|| "1".to_string());
-    let quantity: Option<f64> = if quantity_str.is_empty() {
-        None
-    } else {
-        Some(quantity_str.parse().unwrap_or(1.0))
-    };
+    let quantity = parse_committed(&quantity_str);
 
     let price_str = state
         .specimens
@@ -47,11 +111,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("number-input-price")
         .cloned()
         .unwrap_or_else(|| "29.99".to_string());
-    let price: Option<f64> = if price_str.is_empty() {
-        None
-    } else {
-        Some(price_str.parse().unwrap_or(29.99))
-    };
+    let price = parse_committed(&price_str);
 
     let examples = div()
         .flex()
@@ -69,18 +129,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    NumberInput::from_spec(
+                    live_number_input(
+                        state,
+                        "number-input-quantity",
                         NumberInputSpec::new(quantity)
+                            .with_id("quantity")
                             .with_min(Some(0.0))
                             .with_max(Some(100.0))
                             .with_steppers(true)
                             .with_aria_label("Quantity"),
                         theme,
                     )
-                    .on_value_change(value_handler(
-                        &state.node_events,
-                        "number-input-quantity",
-                    )),
+                    .with_id("quantity"),
                 )
                 .child(
                     div()
@@ -105,15 +165,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    NumberInput::from_spec(
+                    live_number_input(
+                        state,
+                        "number-input-price",
                         NumberInputSpec::new(price)
+                            .with_id("price")
                             .with_min(Some(0.0))
                             .with_step(Some(0.01))
                             .with_steppers(true)
                             .with_aria_label("Price"),
                         theme,
                     )
-                    .on_value_change(value_handler(&state.node_events, "number-input-price")),
+                    .with_id("price"),
                 )
                 .child(
                     div()
