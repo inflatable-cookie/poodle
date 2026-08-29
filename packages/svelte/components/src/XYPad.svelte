@@ -37,6 +37,14 @@
   let root: HTMLDivElement;
   let machine = $state(createXYPadContext());
   let activePointer: number | null = null;
+  /**
+   * The machine state this adapter last produced, written before any host
+   * callback runs. Terminal cleanup reads it rather than the reactive
+   * `context`, because a host that removes the control from inside
+   * `onGestureBegin` or `onValueChange` tears it down before that state is
+   * observable through the component's own reactive graph.
+   */
+  let live: XYPadContext = createXYPadContext();
   const context = $derived<XYPadContext>({
     ...machine, x, y, minX, maxX, minY, maxY, lawX, lawY, defaultX, defaultY,
     keyboardStepX, keyboardStepY, automation, disabled,
@@ -54,8 +62,19 @@
     }
   }
 
+  function commit(result: ReturnType<typeof xyPadTransition>): void {
+    live = result.context;
+    machine = result.context;
+    runEffects(result.effects);
+  }
+
   function send(event: Parameters<typeof xyPadTransition>[1]): void {
-    const result = xyPadTransition(context, event); machine = result.context; runEffects(result.effects);
+    commit(xyPadTransition(context, event));
+  }
+
+  /** Terminals resolve from the live snapshot, never from the reactive context. */
+  function terminate(type: "DRAG_END" | "DRAG_CANCEL"): void {
+    commit(xyPadTransition(live, { type }));
   }
 
   function pointerNorm(event: PointerEvent): { xNorm: number; yNorm: number } {
@@ -77,7 +96,7 @@
 
   function pointerUp(event: PointerEvent): void {
     if (activePointer !== event.pointerId) return;
-    activePointer = null; send({ type: "DRAG_END" });
+    activePointer = null; terminate("DRAG_END");
   }
 
   /**
@@ -88,7 +107,7 @@
   function cancelGesture(pointerId: number | null = null): void {
     if (activePointer === null || (pointerId !== null && activePointer !== pointerId)) return;
     activePointer = null;
-    send({ type: "DRAG_CANCEL" });
+    terminate("DRAG_CANCEL");
   }
 
   onDestroy(() => cancelGesture());

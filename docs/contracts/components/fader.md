@@ -57,8 +57,10 @@ re-anchors at the current value and pointer. Detents snap within the declared
 normalized radius; the radius is inclusive and the first declared detent wins
 an exact tie. Pointer start/end emit paired gesture effects and expose
 `drag = coarse|fine|none` in VisualState. Wheel, reset, keyboard, and type-in
-follow Knob semantics, including its Enter/Escape/blur entry closure. A
-disabled fader is inert on every route.
+follow Knob semantics, including its Enter/Escape/blur entry closure and its
+disabled rule: a disabled fader rejects every user mutation, while host value
+replacement, automation state, hover/focus reporting, entry cancellation, and
+the terminal of a gesture accepted while enabled stay live.
 
 ## 5. Callbacks
 

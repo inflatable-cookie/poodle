@@ -106,18 +106,6 @@ describe("fader and drag-number machines", () => {
     expect(faderTransition(context, { type: "DRAG_SET_NORM", valueNorm: midpoint + 0.1, fine: false }).context.value).not.toBeCloseTo(1000, 9);
   });
 
-  test("drag-number shares the one-begin, one-terminal gesture rules", () => {
-    let context = createDragNumberContext({ value: 10, min: 0, max: 20, dragSensitivity: 0.5 });
-    expect(dragNumberTransition(context, { type: "DRAG_MOVE", position: 110, fine: false }).effects).toEqual([]);
-    context = dragNumberTransition(context, { type: "DRAG_BEGIN", position: 100, fine: false }).context;
-    const second = dragNumberTransition(context, { type: "DRAG_BEGIN", position: 200, fine: false });
-    expect(second.effects).toEqual([]);
-    expect(second.context.dragStartPosition).toBe(100);
-    const cancelled = dragNumberTransition(second.context, { type: "DRAG_CANCEL" });
-    expect(cancelled.effects).toEqual([{ type: "emitValueCommit", value: 10 }, { type: "endGesture" }]);
-    expect(dragNumberTransition(cancelled.context, { type: "DRAG_END" }).effects).toEqual([]);
-  });
-
   test("drag-number emits live values then commits", () => {
     let context = createDragNumberContext({ value: 10, min: 0, max: 20, dragSensitivity: 0.5 });
     context = dragNumberTransition(context, { type: "DRAG_BEGIN", position: 100, fine: false }).context;

@@ -291,22 +291,30 @@ export function faderTransition(context: FaderContext, event: AudioValueEvent): 
   }
 }
 
+/**
+ * DragNumberField keeps the pre-`g16.031` lifecycle on purpose. Card 031 covers
+ * Knob, Fader, and XYPad only, and migrating this transition without its two
+ * web adapters would leave one control's machine and DOM handling disagreeing.
+ * It shares the value helpers below, not the one-begin/cancel rules.
+ */
 export function dragNumberTransition(context: DragNumberContext, event: AudioValueEvent): AudioValueResult<DragNumberContext> {
   const common = commonTransition(context, event);
   if (common) return common;
   switch (event.type) {
-    case "DRAG_BEGIN": return beginDrag(context, event.position, event.fine);
+    case "DRAG_BEGIN": return context.disabled ? { context, effects: [] } : {
+      context: { ...context, drag: event.fine ? "fine" : "coarse", dragStartValue: context.value, dragStartPosition: event.position },
+      effects: [{ type: "beginGesture" }],
+    };
     case "DRAG_MOVE": {
-      if (!dragging(context)) return { context, effects: [] };
+      if (context.disabled || context.drag === "none") return { context, effects: [] };
       const rebased = rebaseDrag(context, event.position, event.fine);
       if (rebased) return rebased;
       const scale = event.fine ? 0.1 : 1;
       const value = constrainAudioValue(context.dragStartValue + (event.position - context.dragStartPosition) * context.dragSensitivity * scale, context.min, context.max, context.law);
-      return { context: { ...context, value }, effects: [{ type: "emitValueChange", value }] };
+      return { context: { ...context, value, drag: event.fine ? "fine" : "coarse" }, effects: [{ type: "emitValueChange", value }] };
     }
     case "DRAG_SET_NORM": return { context, effects: [] };
-    case "DRAG_END":
-    case "DRAG_CANCEL": return endDrag(context);
+    case "DRAG_END": return endDrag(context);
     default: return { context, effects: [] };
   }
 }

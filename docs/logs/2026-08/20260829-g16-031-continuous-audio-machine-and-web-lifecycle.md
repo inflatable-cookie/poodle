@@ -25,8 +25,10 @@ behaviour; native mounted proof belongs to `g16.032`.
 - Release and cancellation are the same terminal and both are inert once the
   gesture is closed. Repeated terminals, stale pointers, lost capture, and
   teardown can neither strand nor duplicate the pair.
-- A control disabled mid-gesture still closes the gesture it accepted while
-  enabled. Every other route on a disabled control is inert.
+- A disabled control rejects every user mutation. Host value replacement,
+  automation state, hover/focus reporting, entry cancellation, and the terminal
+  of a gesture accepted while enabled stay live, each pinned by its own shared
+  case.
 - Coarse/fine switching re-anchors at the current value and current pointer.
   The transition that flips the modifier only rebases; travel resumes from the
   next sample. Rust no longer interpolates fine movement from the current
@@ -78,9 +80,9 @@ named transitions instead.
 
 | Group | Cases | Ordered steps |
 | --- | --- | --- |
-| knob | 13 | 70 |
-| fader | 9 | 44 |
-| xyPad | 10 | 44 |
+| knob | 14 | 75 |
+| fader | 10 | 48 |
+| xyPad | 11 | 48 |
 | geometry | 17 | — |
 
 Each case starts from the control's default context with listed overrides and
@@ -113,16 +115,27 @@ Svelte package build strips the type annotation but leaves the `?`, so the
 optional form shipped as invalid JavaScript. Only `effigy test:web-pack-install`
 catches that; the component suites compile from source and pass either way.
 
+Terminal cleanup resolves from an adapter-owned synchronous snapshot of the
+machine, written before any host callback runs, rather than from a render's
+context. Without it React strands a gesture whose host unmounts the control
+from inside `onGestureBegin`: React batches the begin render away, so cleanup
+saw `drag: "none"` and emitted no `onGestureEnd`. Svelte did not have the
+defect — its reactive context survives teardown — but now uses the same
+explicit storage, so the callback-parity claim covers this timing rather than
+resting on one framework's teardown order. Both suites carry the regression;
+removing the React snapshot fails it and nothing else.
+
 ## Callback traces
 
 `packages/svelte/components/test/AudioControlsLifecycle.svelte.test.ts` and
 `packages/react/components/test/AudioControlsLifecycle.test.tsx` assert the same
-nine claims and the same traces:
+ten claims and the same traces:
 
 | Claim | Trace |
 | --- | --- |
 | Knob gesture, refused second pointer, release, then the lost capture a release causes | begin ×1, change `[0.6]`, commit `[0.6]`, end ×1 |
 | Knob lost capture, twice, then release | begin ×1, end ×1 |
+| Knob host unmounts from `onGestureBegin` | begin ×1, commit `[0.5]`, end ×1 |
 | Knob teardown mid-gesture | begin ×1, commit `[0.5]`, end ×1 |
 | Fader cancel with stale ids | change `[0.25], [0.8]`, commit `[0.8]`, begin ×1, end ×1 |
 | XYPad press with a refused second pointer | change `[0.25, 0.75], [0.5, 0.5]`, commit `[0.5, 0.5]`, begin ×1, end ×1 |
@@ -148,8 +161,11 @@ their machine and callback sections.
 - no native mounting, Node vocabulary, renderer, or GPUI/Jetstream change;
 - no payload drag-and-drop dependency;
 - no public web prop, callback, or specimen change; specimens needed no repair;
-- DragNumberField shares the scalar helpers and its focused tests were extended,
-  but its native pairing is not claimed;
+- DragNumberField is untouched: `dragNumberTransition` is byte-identical to
+  `main`, and it keeps the pre-card lifecycle on purpose. It shares the value
+  helpers, not the one-begin/cancel rules, because migrating its machine
+  without its two web adapters would leave them disagreeing. Its repair belongs
+  to a later card;
 - no accessibility or visual-comparison claim.
 
 ## Validation

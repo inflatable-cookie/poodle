@@ -46,8 +46,10 @@ both laws atomically. A coarse press moves the pair to the accepted press
 position; a fine press only anchors. Shift selects fine movement at one tenth
 travel, and switching modifier re-anchors both axes at the current pair and
 pointer. Double-click restores the default pair. Axis sliders use arrows, Page
-Up/Down, Home, and End for independent keyboard edits. A disabled pad is inert
-on every route.
+Up/Down, Home, and End for independent keyboard edits. A disabled pad rejects
+every user mutation, while host pair replacement, automation state,
+hover/focus reporting, and the terminal of a gesture accepted while enabled
+stay live.
 
 ## 5. Callbacks
 

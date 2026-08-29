@@ -20,6 +20,14 @@ export function XYPad({ size, sizeRole, density, x, y, minX = 0, maxX = 1, minY 
   const root = useRef<HTMLDivElement>(null);
   const activePointer = useRef<number | null>(null);
   const cancelOnUnmount = useRef<(pointerId?: number | null) => void>(() => {});
+  /**
+   * The machine state this adapter last produced, written before any host
+   * callback runs. Terminal cleanup reads it rather than a render's `context`,
+   * because a host that unmounts the control from inside `onGestureBegin` or
+   * `onValueChange` tears down before React commits the render that opened the
+   * gesture.
+   */
+  const live = useRef<XYPadContext | null>(null);
   const currentX = x ?? uncontrolled.x;
   const currentY = y ?? uncontrolled.y;
   const context: XYPadContext = { ...machine, x: currentX, y: currentY, minX, maxX, minY, maxY, lawX, lawY, defaultX, defaultY, keyboardStepX, keyboardStepY, automation, disabled };
@@ -32,13 +40,20 @@ export function XYPad({ size, sizeRole, density, x, y, minX = 0, maxX = 1, minY 
       } else if (effect.type === "beginGesture") onGestureBegin?.(); else onGestureEnd?.();
     }
   }
-  function send(event: Parameters<typeof xyPadTransition>[1]) { const result = xyPadTransition(context, event); setMachine(result.context); run(result.effects); }
+  function commit(result: { context: XYPadContext; effects: Parameters<typeof run>[0] }) {
+    live.current = result.context;
+    setMachine(result.context);
+    run(result.effects);
+  }
+  function send(event: Parameters<typeof xyPadTransition>[1]) { commit(xyPadTransition(context, event)); }
+  /** Terminals resolve from the live snapshot, never from a render. */
+  function terminate(type: "DRAG_END" | "DRAG_CANCEL") { commit(xyPadTransition(live.current ?? context, { type })); }
   function norm(event: PointerEvent<HTMLDivElement>) { return xyPadPointToNorm({ x: event.clientX, y: event.clientY }, root.current!.getBoundingClientRect()); }
   // One primary pointer owns the gesture. A second pointer-down cannot replace
   // the active pointer or open a second gesture.
   function pointerDown(event: PointerEvent<HTMLDivElement>) { if (event.button !== 0 || disabled || activePointer.current !== null || !root.current) return; event.preventDefault(); activePointer.current = event.pointerId; root.current.setPointerCapture(event.pointerId); send({ type: "DRAG_BEGIN", ...norm(event), fine: event.shiftKey }); }
   function pointerMove(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) send({ type: "DRAG_MOVE", ...norm(event), fine: event.shiftKey }); }
-  function pointerUp(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) { activePointer.current = null; send({ type: "DRAG_END" }); } }
+  function pointerUp(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) { activePointer.current = null; terminate("DRAG_END"); } }
   /**
    * Pointer cancel, lost capture, and teardown all close the gesture the same
    * way, so a captured gesture can never outlive its pointer or its component.
@@ -46,7 +61,7 @@ export function XYPad({ size, sizeRole, density, x, y, minX = 0, maxX = 1, minY 
    */
   function cancelGesture(pointerId: number | null = null) {
     if (activePointer.current === null || (pointerId !== null && activePointer.current !== pointerId)) return;
-    activePointer.current = null; send({ type: "DRAG_CANCEL" });
+    activePointer.current = null; terminate("DRAG_CANCEL");
   }
   cancelOnUnmount.current = cancelGesture;
   useEffect(() => () => cancelOnUnmount.current(), []);

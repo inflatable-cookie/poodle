@@ -56,7 +56,11 @@ Keep architecture 008 and the three component contracts authoritative:
   press position, and applies anchored fine travel to both axes;
 - keys, bounds, reset, wheel, and valid type-in are atomic value-change plus
   value-commit operations, not pointer gestures; and
-- disabled controls are inert on every event route.
+- disabled controls reject every user mutation. Host value replacement,
+  automation state, hover/focus reporting, entry cancellation, and the terminal
+  of a gesture accepted while enabled stay live, and each exception is pinned
+  by its own shared case. (Corrected in review: the original wording claimed
+  inertia on every route, which neither core implements nor should.)
 
 Exact type and event names may follow local conventions. TypeScript and Rust
 must expose the same distinctions and ordered effects.
@@ -116,8 +120,8 @@ runtime registry, generated adapter, specimen matrix, or second ledger.
 
 ## Result
 
-The `audioControls` vector section carries 13 Knob, 9 Fader, and 10 XYPad
-ordered step cases over 158 steps plus 17 geometry cases, executed by both
+The `audioControls` vector section carries 14 Knob, 10 Fader, and 11 XYPad
+ordered step cases over 171 steps plus 17 geometry cases, executed by both
 machine-conformance runners with no tolerance. The only public web addition is
 the `DRAG_CANCEL` event on the two core event unions; Rust gained the
 `knob_transition` / `fader_transition` pair, entry and wheel routes, and the

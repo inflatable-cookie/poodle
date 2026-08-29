@@ -23,6 +23,14 @@ export function Fader({ size, sizeRole, density, value, min = 0, max = 1, law = 
   const activePointer = useRef<number | null>(null);
   const skipEntryBlur = useRef(false);
   const cancelOnUnmount = useRef<(pointerId?: number | null) => void>(() => {});
+  /**
+   * The machine state this adapter last produced, written before any host
+   * callback runs. Terminal cleanup reads it rather than a render's `context`,
+   * because a host that unmounts the control from inside `onGestureBegin` or
+   * `onValueChange` tears down before React commits the render that opened the
+   * gesture.
+   */
+  const live = useRef<FaderContext | null>(null);
   const currentValue = value ?? uncontrolled;
   const context: FaderContext = { ...machine, value: currentValue, min, max, law, orientation, detents, detentSnap, defaultValue, keyboardStep, format, automation, disabled };
   const visualState = faderVisualState(context);
@@ -38,7 +46,14 @@ export function Fader({ size, sizeRole, density, value, min = 0, max = 1, law = 
       else if (effect.type === "requestEntryFocus") { skipEntryBlur.current = false; setEntryDraft(valueText); }
     }
   }
-  function send(event: Parameters<typeof faderTransition>[1]) { const result = faderTransition(context, event); setMachine(result.context); run(result.effects); }
+  function commit(result: { context: FaderContext; effects: Parameters<typeof run>[0] }) {
+    live.current = result.context;
+    setMachine(result.context);
+    run(result.effects);
+  }
+  function send(event: Parameters<typeof faderTransition>[1]) { commit(faderTransition(context, event)); }
+  /** Terminals resolve from the live snapshot, never from a render. */
+  function terminate(type: "DRAG_END" | "DRAG_CANCEL") { commit(faderTransition(live.current ?? context, { type })); }
   function pointNorm(event: PointerEvent<HTMLDivElement>) { return faderPointToNorm({ x: event.clientX, y: event.clientY }, root.current!.getBoundingClientRect(), orientation); }
   function pointerDown(event: PointerEvent<HTMLDivElement>) {
     // One primary pointer owns the gesture. A second pointer-down cannot
@@ -48,10 +63,10 @@ export function Fader({ size, sizeRole, density, value, min = 0, max = 1, law = 
     const valueNorm = pointNorm(event);
     const begun = faderTransition(context, { type: "DRAG_BEGIN", position: valueNorm, fine: event.shiftKey });
     const moved = faderTransition(begun.context, { type: "DRAG_SET_NORM", valueNorm, fine: event.shiftKey });
-    setMachine(moved.context); run([...begun.effects, ...moved.effects]);
+    commit({ context: moved.context, effects: [...begun.effects, ...moved.effects] });
   }
   function pointerMove(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) send({ type: "DRAG_SET_NORM", valueNorm: pointNorm(event), fine: event.shiftKey }); }
-  function pointerUp(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) { activePointer.current = null; send({ type: "DRAG_END" }); } }
+  function pointerUp(event: PointerEvent<HTMLDivElement>) { if (activePointer.current === event.pointerId) { activePointer.current = null; terminate("DRAG_END"); } }
   /**
    * Pointer cancel, lost capture, and teardown all close the gesture the same
    * way, so a captured gesture can never outlive its pointer or its component.
@@ -59,7 +74,7 @@ export function Fader({ size, sizeRole, density, value, min = 0, max = 1, law = 
    */
   function cancelGesture(pointerId: number | null = null) {
     if (activePointer.current === null || (pointerId !== null && activePointer.current !== pointerId)) return;
-    activePointer.current = null; send({ type: "DRAG_CANCEL" });
+    activePointer.current = null; terminate("DRAG_CANCEL");
   }
   cancelOnUnmount.current = cancelGesture;
   useEffect(() => () => cancelOnUnmount.current(), []);

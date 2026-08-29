@@ -83,6 +83,35 @@ describe("audio control pointer lifecycle (react)", () => {
     expect(spies.onGestureEnd).toHaveBeenCalledTimes(1);
   });
 
+  it("Knob closes the gesture when the host unmounts it from onGestureBegin", () => {
+    // The host removes the control inside the begin callback, so React never
+    // commits the render that opened the gesture. The terminal must still run.
+    const spies = gestureSpies();
+
+    function TeardownHost() {
+      const [shown, setShown] = useState(true);
+      return shown
+        ? <Knob
+            value={0.5}
+            ariaLabel="Gain"
+            onValueChange={spies.onValueChange}
+            onValueCommit={spies.onValueCommit}
+            onGestureEnd={spies.onGestureEnd}
+            onGestureBegin={() => { spies.onGestureBegin(); setShown(false); }}
+          />
+        : null;
+    }
+
+    const view = render(<TeardownHost />);
+    const knob = measurable(view.getByRole("slider", { name: "Gain" }));
+    fireEvent.pointerDown(knob, { button: 0, pointerId: 1, clientX: 50, clientY: 60 });
+
+    expect(spies.onGestureBegin).toHaveBeenCalledTimes(1);
+    expect(spies.onGestureEnd).toHaveBeenCalledTimes(1);
+    expect(spies.onValueCommit.mock.calls).toEqual([[0.5]]);
+    expect(view.queryByRole("slider", { name: "Gain" })).toBeNull();
+  });
+
   it("Knob closes an open gesture exactly once on teardown", () => {
     const spies = gestureSpies();
     const view = render(<BoundKnob initial={0.5} ariaLabel="Gain" {...spies} />);

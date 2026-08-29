@@ -39,6 +39,14 @@
   let entry = $state<HTMLInputElement>();
   let entryDraft = $state("");
   let activePointer: number | null = null;
+  /**
+   * The machine state this adapter last produced, written before any host
+   * callback runs. Terminal cleanup reads it rather than the reactive
+   * `context`, because a host that removes the control from inside
+   * `onGestureBegin` or `onValueChange` tears it down before that state is
+   * observable through the component's own reactive graph.
+   */
+  let live: FaderContext = createFaderContext();
   let skipEntryBlur = false;
   const context = $derived<FaderContext>({ ...machine, value, min, max, law, orientation, detents, detentSnap, defaultValue, keyboardStep, format, automation, disabled });
   const visualState = $derived(faderVisualState(context));
@@ -55,8 +63,19 @@
     }
   }
 
+  function commit(result: ReturnType<typeof faderTransition>): void {
+    live = result.context;
+    machine = result.context;
+    runEffects(result.effects);
+  }
+
   function send(event: Parameters<typeof faderTransition>[1]): void {
-    const result = faderTransition(context, event); machine = result.context; runEffects(result.effects);
+    commit(faderTransition(context, event));
+  }
+
+  /** Terminals resolve from the live snapshot, never from the reactive context. */
+  function terminate(type: "DRAG_END" | "DRAG_CANCEL"): void {
+    commit(faderTransition(live, { type }));
   }
 
   function pointNorm(event: PointerEvent): number {
@@ -69,11 +88,15 @@
     if (event.button !== 0 || disabled || activePointer !== null) return;
     event.preventDefault(); activePointer = event.pointerId; root.setPointerCapture(event.pointerId);
     const valueNorm = pointNorm(event);
-    send({ type: "DRAG_BEGIN", position: valueNorm, fine: event.shiftKey });
-    send({ type: "DRAG_SET_NORM", valueNorm, fine: event.shiftKey });
+    // Begin and press position resolve in one commit, so a host that tears the
+    // control down from `onGestureBegin` never sees a second transition run
+    // against a destroyed component.
+    const begun = faderTransition(context, { type: "DRAG_BEGIN", position: valueNorm, fine: event.shiftKey });
+    const moved = faderTransition(begun.context, { type: "DRAG_SET_NORM", valueNorm, fine: event.shiftKey });
+    commit({ context: moved.context, effects: [...begun.effects, ...moved.effects] });
   }
   function pointerMove(event: PointerEvent): void { if (activePointer === event.pointerId) send({ type: "DRAG_SET_NORM", valueNorm: pointNorm(event), fine: event.shiftKey }); }
-  function pointerUp(event: PointerEvent): void { if (activePointer === event.pointerId) { activePointer = null; send({ type: "DRAG_END" }); } }
+  function pointerUp(event: PointerEvent): void { if (activePointer === event.pointerId) { activePointer = null; terminate("DRAG_END"); } }
 
   /**
    * Pointer cancel, lost capture, and teardown all close the gesture the same
@@ -83,7 +106,7 @@
   function cancelGesture(pointerId: number | null = null): void {
     if (activePointer === null || (pointerId !== null && activePointer !== pointerId)) return;
     activePointer = null;
-    send({ type: "DRAG_CANCEL" });
+    terminate("DRAG_CANCEL");
   }
 
   onDestroy(() => cancelGesture());

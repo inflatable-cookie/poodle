@@ -1130,6 +1130,27 @@ fn audio_format(value: Option<&Value>) -> AudioValueFormat {
     }
 }
 
+fn automation_state(name: &str) -> AutomationState {
+    match name {
+        "none" => AutomationState::None,
+        "touched" => AutomationState::Touched,
+        "latched" => AutomationState::Latched,
+        "writing" => AutomationState::Writing,
+        "read" => AutomationState::Read,
+        other => panic!("unknown automation state {other}"),
+    }
+}
+
+fn automation_state_json(state: AutomationState) -> Value {
+    json!(match state {
+        AutomationState::None => "none",
+        AutomationState::Touched => "touched",
+        AutomationState::Latched => "latched",
+        AutomationState::Writing => "writing",
+        AutomationState::Read => "read",
+    })
+}
+
 fn drag_state(name: &str) -> DragState {
     match name {
         "none" => DragState::None,
@@ -1172,7 +1193,10 @@ fn audio_value_context(value: &Value) -> AudioValueContext {
             .get("drag")
             .and_then(Value::as_str)
             .map_or(base.drag, drag_state),
-        automation: base.automation,
+        automation: value
+            .get("automation")
+            .and_then(Value::as_str)
+            .map_or(base.automation, automation_state),
         entry_open: b(value, "entryOpen"),
         drag_start_value: override_f(value, "dragStartValue", base.drag_start_value),
         drag_start_position: override_f(value, "dragStartPosition", base.drag_start_position),
@@ -1240,7 +1264,10 @@ fn xy_pad_context(value: &Value) -> XYPadContext {
             .get("drag")
             .and_then(Value::as_str)
             .map_or(base.drag, drag_state),
-        automation: base.automation,
+        automation: value
+            .get("automation")
+            .and_then(Value::as_str)
+            .map_or(base.automation, automation_state),
         drag_start_x: override_f(value, "dragStartX", base.drag_start_x),
         drag_start_y: override_f(value, "dragStartY", base.drag_start_y),
         drag_start_norm_x: override_f(value, "dragStartNormX", base.drag_start_norm_x),
@@ -1273,6 +1300,9 @@ fn audio_value_event(value: &Value) -> AudioValueEvent {
         },
         "FOCUS" => AudioValueEvent::Focus {
             value: b(value, "value"),
+        },
+        "SET_AUTOMATION" => AudioValueEvent::SetAutomation {
+            value: automation_state(s(value, "value")),
         },
         "SET_VALUE" => AudioValueEvent::SetValue {
             value: f(value, "value"),
@@ -1328,6 +1358,9 @@ fn xy_pad_event(value: &Value) -> XYPadEvent {
         },
         "FOCUS" => XYPadEvent::Focus {
             value: b(value, "value"),
+        },
+        "SET_AUTOMATION" => XYPadEvent::SetAutomation {
+            value: automation_state(s(value, "value")),
         },
         "DRAG_BEGIN" => XYPadEvent::DragBegin {
             x_norm: f(value, "xNorm"),
@@ -1422,6 +1455,7 @@ fn scalar_context_json(context: &AudioValueContext) -> Value {
         "entryOpen": context.entry_open,
         "hover": context.hover,
         "focus": context.focus,
+        "automation": automation_state_json(context.automation),
         "dragStartValue": context.drag_start_value,
         "dragStartPosition": context.drag_start_position,
     })
@@ -1496,6 +1530,7 @@ fn audio_controls_conformance() {
                 "drag": drag_state_json(next.drag),
                 "hover": next.hover,
                 "focus": next.focus,
+                "automation": automation_state_json(next.automation),
             });
             assert_audio_step(
                 "xyPad",

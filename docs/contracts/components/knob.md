@@ -66,7 +66,9 @@ Adapters provide pointer coordinates and modifier facts, then execute effects.
   both return focus to the root, and the blur that causes can neither commit
   again nor reverse the result. An unresolved blur commits valid text.
 - Arrows nudge; Page Up/Down use ten steps; Home/End select bounds.
-- A disabled knob is inert on every route.
+- A disabled knob rejects every user mutation. Host value replacement,
+  automation state, hover/focus reporting, entry cancellation, and the terminal
+  of a gesture accepted while enabled stay live.
 
 ## 5. Callbacks
 

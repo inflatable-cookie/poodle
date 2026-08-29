@@ -297,7 +297,7 @@ and XYPad now run one gesture model in both languages: one accepted begin, one
 shared terminal for release and cancellation, anchored coarse/fine rebase,
 Knob's vertical-versus-circular split, an inclusive detent radius with
 first-declared tie resolution, and XYPad's press-position and atomic-pair
-behaviour. A hand-authored `audioControls` corpus — 32 ordered cases over 158
+behaviour. A hand-authored `audioControls` corpus — 35 ordered cases over 171
 steps plus 17 geometry cases — runs through both conformance runners with no
 tolerance. All six web adapters now accept one primary pointer and close on
 cancel, lost capture, or teardown; Svelte Knob and Fader gained React's

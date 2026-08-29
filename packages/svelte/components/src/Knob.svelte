@@ -39,6 +39,14 @@
   let entry = $state<HTMLInputElement>();
   let entryDraft = $state("");
   let activePointer: number | null = null;
+  /**
+   * The machine state this adapter last produced, written before any host
+   * callback runs. Terminal cleanup reads it rather than the reactive
+   * `context`, because a host that removes the control from inside
+   * `onGestureBegin` or `onValueChange` tears it down before that state is
+   * observable through the component's own reactive graph.
+   */
+  let live: KnobContext = createKnobContext();
   let skipEntryBlur = false;
   const context = $derived<KnobContext>({ ...machine, value, min, max, law, defaultValue, dragMode, dragSensitivity, keyboardStep, format, automation, disabled });
   const visualState = $derived(knobVisualState(context));
@@ -58,10 +66,19 @@
     }
   }
 
-  function send(event: Parameters<typeof knobTransition>[1]): void {
-    const result = knobTransition(context, event);
+  function commit(result: ReturnType<typeof knobTransition>): void {
+    live = result.context;
     machine = result.context;
     runEffects(result.effects);
+  }
+
+  function send(event: Parameters<typeof knobTransition>[1]): void {
+    commit(knobTransition(context, event));
+  }
+
+  /** Terminals resolve from the live snapshot, never from the reactive context. */
+  function terminate(type: "DRAG_END" | "DRAG_CANCEL"): void {
+    commit(knobTransition(live, { type }));
   }
 
   function pointerDown(event: PointerEvent): void {
@@ -74,8 +91,14 @@
     activePointer = event.pointerId;
     root.setPointerCapture(event.pointerId);
     const circularNorm = knobPointToNorm({ x: event.clientX, y: event.clientY }, rect);
-    send({ type: "DRAG_BEGIN", position: dragMode === "circular" ? circularNorm : event.clientY, fine: event.shiftKey });
-    if (dragMode === "circular") send({ type: "DRAG_SET_NORM", valueNorm: circularNorm, fine: event.shiftKey });
+    // Begin and circular press position resolve in one commit, so a host that
+    // tears the control down from `onGestureBegin` never sees a second
+    // transition run against a destroyed component.
+    const begun = knobTransition(context, { type: "DRAG_BEGIN", position: dragMode === "circular" ? circularNorm : event.clientY, fine: event.shiftKey });
+    if (dragMode === "circular") {
+      const moved = knobTransition(begun.context, { type: "DRAG_SET_NORM", valueNorm: circularNorm, fine: event.shiftKey });
+      commit({ context: moved.context, effects: [...begun.effects, ...moved.effects] });
+    } else commit(begun);
   }
 
   function pointerMove(event: PointerEvent): void {
@@ -89,7 +112,7 @@
   function pointerUp(event: PointerEvent): void {
     if (activePointer !== event.pointerId) return;
     activePointer = null;
-    send({ type: "DRAG_END" });
+    terminate("DRAG_END");
   }
 
   /**
@@ -100,7 +123,7 @@
   function cancelGesture(pointerId: number | null = null): void {
     if (activePointer === null || (pointerId !== null && activePointer !== pointerId)) return;
     activePointer = null;
-    send({ type: "DRAG_CANCEL" });
+    terminate("DRAG_CANCEL");
   }
 
   onDestroy(() => cancelGesture());

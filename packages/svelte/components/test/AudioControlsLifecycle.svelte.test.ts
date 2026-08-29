@@ -64,6 +64,23 @@ describe("audio control pointer lifecycle (svelte)", () => {
     expect(spies.onGestureEnd).toHaveBeenCalledTimes(1);
   });
 
+  it("Knob closes the gesture when the host removes it from onGestureBegin", async () => {
+    // The host tears the control down inside the begin callback, before the
+    // component's own reactive state is observable anywhere else. The terminal
+    // must still run, and exactly once.
+    const spies = gestureSpies();
+    let view: ReturnType<typeof render>;
+    const onGestureBegin = vi.fn(() => { spies.onGestureBegin(); view.unmount(); });
+
+    view = render(Knob, { props: { value: 0.5, ariaLabel: "Gain", ...spies, onGestureBegin } });
+    const knob = measurable(view.getByRole("slider", { name: "Gain" }));
+    await fireEvent.pointerDown(knob, { button: 0, pointerId: 1, clientX: 50, clientY: 60 });
+
+    expect(spies.onGestureBegin).toHaveBeenCalledTimes(1);
+    expect(spies.onGestureEnd).toHaveBeenCalledTimes(1);
+    expect(spies.onValueCommit.mock.calls).toEqual([[0.5]]);
+  });
+
   it("Knob closes an open gesture exactly once on teardown", async () => {
     const spies = gestureSpies();
     const { getByRole, unmount } = render(Knob, { props: { value: 0.5, ariaLabel: "Gain", ...spies } });

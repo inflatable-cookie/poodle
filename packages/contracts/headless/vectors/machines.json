@@ -2726,7 +2726,7 @@
     ]
   },
   "audioControls": {
-    "description": "Continuous-audio gesture corpus for Knob, Fader, and XYPad (g16.031). Each case starts from the control's default context with the listed overrides, then runs ordered steps; every step pins the effects it emitted in order and, where the case claims it, a subset of the resulting context. Geometry cases pin the shared pointer mapping helpers.",
+    "description": "Continuous-audio gesture corpus for Knob, Fader, and XYPad (g16.031). Each case starts from the control's default context with the listed overrides, then runs ordered steps; every step pins the effects it emitted in order and, where the case claims it, a subset of the resulting context. Disabled cases are split on purpose: a disabled control rejects every user mutation, still accepts host and presentation routes, and still closes a gesture it accepted while enabled. Geometry cases pin the shared pointer mapping helpers.",
     "knob": [
       {
         "name": "vertical gesture: one begin, anchored coarse travel, one end",
@@ -3591,7 +3591,7 @@
         ]
       },
       {
-        "name": "a disabled knob is inert on every route",
+        "name": "a disabled knob rejects every user mutation",
         "context": {
           "value": 0.5,
           "disabled": true
@@ -3798,6 +3798,66 @@
             "context": {
               "hover": false,
               "focus": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "a disabled knob still accepts host and presentation routes",
+        "context": {
+          "value": 0.5,
+          "disabled": true,
+          "entryOpen": true
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "HOVER",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "hover": true
+            }
+          },
+          {
+            "event": {
+              "type": "FOCUS",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "focus": true
+            }
+          },
+          {
+            "event": {
+              "type": "SET_AUTOMATION",
+              "value": "writing"
+            },
+            "effects": [],
+            "context": {
+              "automation": "writing"
+            }
+          },
+          {
+            "event": {
+              "type": "SET_VALUE",
+              "value": 0.25
+            },
+            "effects": [],
+            "context": {
+              "value": 0.25
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_CANCEL"
+            },
+            "effects": [],
+            "context": {
+              "entryOpen": false,
+              "value": 0.25
             }
           }
         ]
@@ -4421,7 +4481,7 @@
         ]
       },
       {
-        "name": "a disabled fader is inert on every route",
+        "name": "a disabled fader rejects every user mutation",
         "context": {
           "value": 0.5,
           "disabled": true,
@@ -4528,6 +4588,56 @@
             "effects": [],
             "context": {
               "drag": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "a disabled fader still accepts host and presentation routes",
+        "context": {
+          "value": 0.5,
+          "disabled": true,
+          "entryOpen": true
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "HOVER",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "hover": true
+            }
+          },
+          {
+            "event": {
+              "type": "SET_AUTOMATION",
+              "value": "read"
+            },
+            "effects": [],
+            "context": {
+              "automation": "read"
+            }
+          },
+          {
+            "event": {
+              "type": "SET_VALUE",
+              "value": 0.9
+            },
+            "effects": [],
+            "context": {
+              "value": 0.9
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_CANCEL"
+            },
+            "effects": [],
+            "context": {
+              "entryOpen": false,
+              "value": 0.9
             }
           }
         ]
@@ -5151,7 +5261,7 @@
         ]
       },
       {
-        "name": "a disabled pad is inert on every route",
+        "name": "a disabled pad rejects every user mutation",
         "context": {
           "x": 0.5,
           "y": 0.5,
@@ -5306,6 +5416,58 @@
             "context": {
               "x": 1,
               "y": 0
+            }
+          }
+        ]
+      },
+      {
+        "name": "a disabled pad still accepts host and presentation routes",
+        "context": {
+          "x": 0.5,
+          "y": 0.5,
+          "disabled": true
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "HOVER",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "hover": true
+            }
+          },
+          {
+            "event": {
+              "type": "FOCUS",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "focus": true
+            }
+          },
+          {
+            "event": {
+              "type": "SET_AUTOMATION",
+              "value": "latched"
+            },
+            "effects": [],
+            "context": {
+              "automation": "latched"
+            }
+          },
+          {
+            "event": {
+              "type": "SET_VALUES",
+              "x": 0.25,
+              "y": 0.75
+            },
+            "effects": [],
+            "context": {
+              "x": 0.25,
+              "y": 0.75
             }
           }
         ]

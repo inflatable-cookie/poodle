@@ -211,9 +211,16 @@ cannot re-anchor it. Release and cancellation are the same terminal, and both
 are inert once the gesture is closed, so a repeated terminal, a stale pointer,
 lost pointer capture, or adapter teardown can neither strand nor duplicate the
 pair. Adapters own primary-pointer admission and capture; the machine owns
-acceptance and termination. A control disabled mid-gesture still closes the
-gesture it accepted while enabled, because stranding it would latch host
-automation open. Every other route on a disabled control is inert.
+acceptance and termination. Terminal cleanup resolves from the adapter's own
+synchronous machine snapshot, so a host that removes the control from inside a
+gesture callback still receives its end effect.
+
+A disabled control rejects every user mutation: pointer, wheel, keyboard,
+reset, and type-in commit are inert. Three routes deliberately remain live,
+because a disabled control still has to be driven and cleaned up by its host:
+host-owned value replacement, automation state, and hover/focus reporting still
+apply; an open entry can still be cancelled; and a gesture accepted while the
+control was enabled still closes through its terminal.
 
 Coarse and fine switching re-anchors at the current value and the current
 pointer position, so holding or releasing the modifier never jumps the value.
