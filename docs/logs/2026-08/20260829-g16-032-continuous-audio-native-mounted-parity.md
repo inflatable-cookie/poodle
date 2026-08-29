@@ -2,7 +2,7 @@
 
 Status: complete — awaiting review
 Date: 2026-08-29
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/100
 Branch: `t3code/continuous-audio-native-parity`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-03a3eccc`
 Card: `docs/roadmaps/g16/032-continuous-audio-native-mounted-parity.md`
