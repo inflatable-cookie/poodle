@@ -1,7 +1,8 @@
 # g16.030 — NumberInput Value, Draft, And Mounted Parity
 
-Status: complete — awaiting review/merge
+Status: complete — awaiting review/merge in PR #98
 Date: 2026-08-29
+PR: https://github.com/inflatable-cookie/poodle/pull/98
 Branch: `t3code/number-input-parity`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-1787d137`
 Card: `docs/roadmaps/g16/030-number-input-value-draft-and-mounted-parity.md`
