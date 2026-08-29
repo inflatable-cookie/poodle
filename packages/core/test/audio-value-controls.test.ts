@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { normalizeAudioValue } from "../src/audio/laws";
 import {
   createDragNumberContext,
   createFaderContext,
@@ -32,6 +33,19 @@ describe("knob machine", () => {
     expect(knobTransition(context, { type: "RESET" }).context.value).toBe(0.25);
     expect(knobTransition(context, { type: "KEY_NUDGE", direction: -1, multiplier: 10 }).context.value).toBe(0);
     expect(knobTransition(context, { type: "ENTRY_COMMIT", text: "75%" }).context.value).toBe(0.75);
+  });
+
+  test("logarithmic travel stays anchored to the gesture start", () => {
+    const law = { type: "logarithmic" } as const;
+    let context = createKnobContext({ value: 1000, min: 20, max: 50000, law, dragSensitivity: 100 });
+    context = knobTransition(context, { type: "DRAG_BEGIN", position: 100, fine: false }).context;
+    const startNorm = normalizeAudioValue(1000, 20, 50000, law);
+    const moved = knobTransition(context, { type: "DRAG_MOVE", position: 90, fine: false }).context;
+    expect(normalizeAudioValue(moved.value, 20, 50000, law)).toBeCloseTo(startNorm + 0.1, 9);
+    // Anchoring means the second sample is measured from the start, not the
+    // value the first sample produced.
+    const again = knobTransition(moved, { type: "DRAG_MOVE", position: 90, fine: false }).context;
+    expect(again.value).toBeCloseTo(moved.value, 9);
   });
 
   test("circular geometry maps the standard sweep", () => {
@@ -80,6 +94,16 @@ describe("fader and drag-number machines", () => {
     let context = createFaderContext({ value: 0.4 });
     context = faderTransition(context, { type: "DRAG_BEGIN", position: 0.4, fine: true }).context;
     expect(faderTransition(context, { type: "DRAG_SET_NORM", valueNorm: 0.9, fine: true }).context.value).toBeCloseTo(0.45, 12);
+  });
+
+  test("fader detents resolve through a non-linear law", () => {
+    // 1 kHz is the normalized midpoint of a 20 Hz .. 50 kHz logarithmic range.
+    const law = { type: "logarithmic" } as const;
+    let context = createFaderContext({ value: 200, min: 20, max: 50000, law, detents: [1000], detentSnap: 0.02 });
+    context = faderTransition(context, { type: "DRAG_BEGIN", position: 0, fine: false }).context;
+    const midpoint = normalizeAudioValue(1000, 20, 50000, law);
+    expect(faderTransition(context, { type: "DRAG_SET_NORM", valueNorm: midpoint + 0.01, fine: false }).context.value).toBeCloseTo(1000, 9);
+    expect(faderTransition(context, { type: "DRAG_SET_NORM", valueNorm: midpoint + 0.1, fine: false }).context.value).not.toBeCloseTo(1000, 9);
   });
 
   test("drag-number emits live values then commits", () => {

@@ -62,10 +62,11 @@ behavior repairs without inventing another conformance authority.
   125 missing; known-delta axis 116 present / 59 not-applicable).
   A bounded Fader/Knob/XYPad audit then found real paired-machine, web gesture
   lifetime, native mounting, and accessibility-projection defects. `g16.031`
-  closes paired semantics and Svelte/React lifecycle after `030` merges; `g16.032`
-  mounts the three controls through one bounded continuous-value Node event and
-  must not overlap drag card `025`. This work remains separate from payload
-  drag-and-drop.
+  closed paired semantics and the Svelte/React gesture and entry lifecycles
+  behind one hand-authored `audioControls` vector corpus, moving no ledger
+  cell; `g16.032` mounts the three controls through one bounded
+  continuous-value Node event and must not overlap drag card `025`. This work
+  remains separate from payload drag-and-drop.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other

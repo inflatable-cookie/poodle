@@ -7,6 +7,7 @@
 
 use serde_json::{json, Value};
 
+use poodle_headless::audio::*;
 use poodle_headless::checkbox::*;
 use poodle_headless::disclosure::*;
 use poodle_headless::drag_drop::*;
@@ -1046,6 +1047,551 @@ fn drag_drop_conformance() {
         assert_eq!(
             actual, case["expect"]["intent"],
             "dragDrop/{name}: intent"
+        );
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Continuous audio controls (g16.031)
+//
+// The continuous-audio controls make lifetime claims — one accepted begin, one
+// terminal, rebase without a jump — so their cases are ordered step sequences
+// over one context rather than single transitions. Every step pins the effects
+// it emitted in order and, where the case claims it, a subset of the resulting
+// context. The TypeScript mirror runs the same shape
+// (packages/core/test/conformance.test.ts).
+// ---------------------------------------------------------------------------
+
+fn audio_law(value: Option<&Value>) -> AudioValueLaw {
+    let Some(value) = value else {
+        return AudioValueLaw::Linear;
+    };
+    match s(value, "type") {
+        "linear" => AudioValueLaw::Linear,
+        "logarithmic" => AudioValueLaw::Logarithmic,
+        "exponential" => AudioValueLaw::Exponential {
+            exponent: f(value, "exponent"),
+        },
+        "bipolar-center" => AudioValueLaw::BipolarCenter {
+            center: f(value, "center"),
+        },
+        "stepped" => AudioValueLaw::Stepped {
+            step: f(value, "step"),
+            law: match audio_law(value.get("law")) {
+                AudioValueLaw::Logarithmic => ContinuousAudioValueLaw::Logarithmic,
+                AudioValueLaw::Exponential { exponent } => {
+                    ContinuousAudioValueLaw::Exponential { exponent }
+                }
+                AudioValueLaw::BipolarCenter { center } => {
+                    ContinuousAudioValueLaw::BipolarCenter { center }
+                }
+                _ => ContinuousAudioValueLaw::Linear,
+            },
+        },
+        other => panic!("unknown audio law {other}"),
+    }
+}
+
+fn audio_format(value: Option<&Value>) -> AudioValueFormat {
+    let Some(value) = value else {
+        return AudioValueFormat::Number { decimals: 2 };
+    };
+    let decimals = value
+        .get("decimals")
+        .and_then(Value::as_u64)
+        .map(|places| places as usize);
+    match s(value, "type") {
+        "number" => AudioValueFormat::Number {
+            decimals: decimals.unwrap_or(2),
+        },
+        "db" => AudioValueFormat::Db {
+            decimals: decimals.unwrap_or(1),
+        },
+        "hz" => AudioValueFormat::Hz {
+            decimals: decimals.unwrap_or(1),
+        },
+        "khz" => AudioValueFormat::Khz {
+            decimals: decimals.unwrap_or(2),
+        },
+        "percent" => AudioValueFormat::Percent {
+            decimals: decimals.unwrap_or(1),
+        },
+        "ratio" => AudioValueFormat::Ratio {
+            decimals: decimals.unwrap_or(2),
+        },
+        "milliseconds" => AudioValueFormat::Milliseconds {
+            decimals: decimals.unwrap_or(1),
+        },
+        "note" => AudioValueFormat::Note,
+        "semitones" => AudioValueFormat::Semitones {
+            decimals: decimals.unwrap_or(1),
+        },
+        other => panic!("unknown audio format {other}"),
+    }
+}
+
+fn automation_state(name: &str) -> AutomationState {
+    match name {
+        "none" => AutomationState::None,
+        "touched" => AutomationState::Touched,
+        "latched" => AutomationState::Latched,
+        "writing" => AutomationState::Writing,
+        "read" => AutomationState::Read,
+        other => panic!("unknown automation state {other}"),
+    }
+}
+
+fn automation_state_json(state: AutomationState) -> Value {
+    json!(match state {
+        AutomationState::None => "none",
+        AutomationState::Touched => "touched",
+        AutomationState::Latched => "latched",
+        AutomationState::Writing => "writing",
+        AutomationState::Read => "read",
+    })
+}
+
+fn drag_state(name: &str) -> DragState {
+    match name {
+        "none" => DragState::None,
+        "coarse" => DragState::Coarse,
+        "fine" => DragState::Fine,
+        other => panic!("unknown drag state {other}"),
+    }
+}
+
+fn drag_state_json(state: DragState) -> Value {
+    json!(match state {
+        DragState::None => "none",
+        DragState::Coarse => "coarse",
+        DragState::Fine => "fine",
+    })
+}
+
+fn override_f(value: &Value, key: &str, current: f64) -> f64 {
+    value.get(key).and_then(Value::as_f64).unwrap_or(current)
+}
+
+/// Case overrides applied over the control's default scalar context.
+fn audio_value_context(value: &Value) -> AudioValueContext {
+    let base = AudioValueContext::default();
+    AudioValueContext {
+        value: override_f(value, "value", base.value),
+        min: override_f(value, "min", base.min),
+        max: override_f(value, "max", base.max),
+        law: value
+            .get("law")
+            .map_or(base.law, |law| audio_law(Some(law))),
+        default_value: override_f(value, "defaultValue", base.default_value),
+        keyboard_step: override_f(value, "keyboardStep", base.keyboard_step),
+        format: value
+            .get("format")
+            .map_or(base.format, |format| audio_format(Some(format))),
+        hover: b(value, "hover"),
+        focus: b(value, "focus"),
+        drag: value
+            .get("drag")
+            .and_then(Value::as_str)
+            .map_or(base.drag, drag_state),
+        automation: value
+            .get("automation")
+            .and_then(Value::as_str)
+            .map_or(base.automation, automation_state),
+        entry_open: b(value, "entryOpen"),
+        drag_start_value: override_f(value, "dragStartValue", base.drag_start_value),
+        drag_start_position: override_f(value, "dragStartPosition", base.drag_start_position),
+        disabled: b(value, "disabled"),
+    }
+}
+
+fn knob_context(value: &Value) -> KnobContext {
+    let defaults = KnobContext::default();
+    KnobContext {
+        base: audio_value_context(value),
+        drag_mode: match value.get("dragMode").and_then(Value::as_str) {
+            Some("circular") => KnobDragMode::Circular,
+            Some("vertical") | None => KnobDragMode::Vertical,
+            Some(other) => panic!("unknown knob drag mode {other}"),
+        },
+        drag_sensitivity: override_f(value, "dragSensitivity", defaults.drag_sensitivity),
+    }
+}
+
+fn fader_context(value: &Value) -> FaderContext {
+    let defaults = FaderContext::default();
+    FaderContext {
+        base: audio_value_context(value),
+        orientation: fader_orientation(value.get("orientation").and_then(Value::as_str)),
+        detents: value
+            .get("detents")
+            .and_then(Value::as_array)
+            .map(|entries| entries.iter().filter_map(Value::as_f64).collect())
+            .unwrap_or(defaults.detents),
+        detent_snap: override_f(value, "detentSnap", defaults.detent_snap),
+    }
+}
+
+fn fader_orientation(name: Option<&str>) -> FaderOrientation {
+    match name {
+        Some("horizontal") => FaderOrientation::Horizontal,
+        Some("vertical") | None => FaderOrientation::Vertical,
+        Some(other) => panic!("unknown fader orientation {other}"),
+    }
+}
+
+fn xy_pad_context(value: &Value) -> XYPadContext {
+    let base = XYPadContext::default();
+    XYPadContext {
+        x: override_f(value, "x", base.x),
+        y: override_f(value, "y", base.y),
+        min_x: override_f(value, "minX", base.min_x),
+        max_x: override_f(value, "maxX", base.max_x),
+        min_y: override_f(value, "minY", base.min_y),
+        max_y: override_f(value, "maxY", base.max_y),
+        law_x: value
+            .get("lawX")
+            .map_or(base.law_x, |law| audio_law(Some(law))),
+        law_y: value
+            .get("lawY")
+            .map_or(base.law_y, |law| audio_law(Some(law))),
+        default_x: override_f(value, "defaultX", base.default_x),
+        default_y: override_f(value, "defaultY", base.default_y),
+        keyboard_step_x: override_f(value, "keyboardStepX", base.keyboard_step_x),
+        keyboard_step_y: override_f(value, "keyboardStepY", base.keyboard_step_y),
+        hover: b(value, "hover"),
+        focus: b(value, "focus"),
+        drag: value
+            .get("drag")
+            .and_then(Value::as_str)
+            .map_or(base.drag, drag_state),
+        automation: value
+            .get("automation")
+            .and_then(Value::as_str)
+            .map_or(base.automation, automation_state),
+        drag_start_x: override_f(value, "dragStartX", base.drag_start_x),
+        drag_start_y: override_f(value, "dragStartY", base.drag_start_y),
+        drag_start_norm_x: override_f(value, "dragStartNormX", base.drag_start_norm_x),
+        drag_start_norm_y: override_f(value, "dragStartNormY", base.drag_start_norm_y),
+        disabled: b(value, "disabled"),
+    }
+}
+
+fn value_bound(name: &str) -> ValueBound {
+    match name {
+        "min" => ValueBound::Min,
+        "max" => ValueBound::Max,
+        other => panic!("unknown bound {other}"),
+    }
+}
+
+fn xy_pad_axis(name: &str) -> XYPadAxis {
+    match name {
+        "x" => XYPadAxis::X,
+        "y" => XYPadAxis::Y,
+        other => panic!("unknown axis {other}"),
+    }
+}
+
+fn audio_value_event(value: &Value) -> AudioValueEvent {
+    let fine = b(value, "fine");
+    match s(value, "type") {
+        "HOVER" => AudioValueEvent::Hover {
+            value: b(value, "value"),
+        },
+        "FOCUS" => AudioValueEvent::Focus {
+            value: b(value, "value"),
+        },
+        "SET_AUTOMATION" => AudioValueEvent::SetAutomation {
+            value: automation_state(s(value, "value")),
+        },
+        "SET_VALUE" => AudioValueEvent::SetValue {
+            value: f(value, "value"),
+        },
+        "DRAG_BEGIN" => AudioValueEvent::DragBegin {
+            position: f(value, "position"),
+            fine,
+        },
+        "DRAG_MOVE" => AudioValueEvent::DragMove {
+            position: f(value, "position"),
+            fine,
+        },
+        "DRAG_SET_NORM" => AudioValueEvent::DragSetNorm {
+            value_norm: f(value, "valueNorm"),
+            fine,
+        },
+        "DRAG_END" => AudioValueEvent::DragEnd,
+        "DRAG_CANCEL" => AudioValueEvent::DragCancel,
+        "WHEEL" => AudioValueEvent::Wheel {
+            direction: f(value, "direction") as i8,
+            fine,
+        },
+        "RESET" => AudioValueEvent::Reset,
+        "KEY_NUDGE" => AudioValueEvent::KeyNudge {
+            direction: f(value, "direction") as i8,
+            multiplier: value
+                .get("multiplier")
+                .and_then(Value::as_f64)
+                .unwrap_or(1.0),
+            fine,
+        },
+        "KEY_BOUND" => AudioValueEvent::KeyBound {
+            bound: value_bound(s(value, "bound")),
+        },
+        "ENTRY_OPEN" => AudioValueEvent::EntryOpen,
+        "ENTRY_CANCEL" => AudioValueEvent::EntryCancel,
+        "ENTRY_COMMIT" => AudioValueEvent::EntryCommit {
+            text: s(value, "text").to_string(),
+        },
+        other => panic!("unknown audio value event {other}"),
+    }
+}
+
+fn xy_pad_event(value: &Value) -> XYPadEvent {
+    let fine = b(value, "fine");
+    match s(value, "type") {
+        "SET_VALUES" => XYPadEvent::SetValues {
+            x: f(value, "x"),
+            y: f(value, "y"),
+        },
+        "HOVER" => XYPadEvent::Hover {
+            value: b(value, "value"),
+        },
+        "FOCUS" => XYPadEvent::Focus {
+            value: b(value, "value"),
+        },
+        "SET_AUTOMATION" => XYPadEvent::SetAutomation {
+            value: automation_state(s(value, "value")),
+        },
+        "DRAG_BEGIN" => XYPadEvent::DragBegin {
+            x_norm: f(value, "xNorm"),
+            y_norm: f(value, "yNorm"),
+            fine,
+        },
+        "DRAG_MOVE" => XYPadEvent::DragMove {
+            x_norm: f(value, "xNorm"),
+            y_norm: f(value, "yNorm"),
+            fine,
+        },
+        "DRAG_END" => XYPadEvent::DragEnd,
+        "DRAG_CANCEL" => XYPadEvent::DragCancel,
+        "RESET" => XYPadEvent::Reset,
+        "NUDGE" => XYPadEvent::Nudge {
+            axis: xy_pad_axis(s(value, "axis")),
+            direction: f(value, "direction") as i8,
+            multiplier: value
+                .get("multiplier")
+                .and_then(Value::as_f64)
+                .unwrap_or(1.0),
+            fine,
+        },
+        "BOUND" => XYPadEvent::Bound {
+            axis: xy_pad_axis(s(value, "axis")),
+            bound: value_bound(s(value, "bound")),
+        },
+        other => panic!("unknown xy pad event {other}"),
+    }
+}
+
+fn audio_value_effect_json(effect: &AudioValueEffect) -> Value {
+    match effect {
+        AudioValueEffect::ValueChange(value) => {
+            json!({ "type": "emitValueChange", "value": value })
+        }
+        AudioValueEffect::ValueCommit(value) => {
+            json!({ "type": "emitValueCommit", "value": value })
+        }
+        AudioValueEffect::GestureBegin => json!({ "type": "beginGesture" }),
+        AudioValueEffect::GestureEnd => json!({ "type": "endGesture" }),
+        AudioValueEffect::RequestEntryFocus => json!({ "type": "requestEntryFocus" }),
+    }
+}
+
+fn xy_pad_effect_json(effect: &XYPadEffect) -> Value {
+    match effect {
+        XYPadEffect::ValueChange(x, y) => json!({ "type": "emitValueChange", "x": x, "y": y }),
+        XYPadEffect::ValueCommit(x, y) => json!({ "type": "emitValueCommit", "x": x, "y": y }),
+        XYPadEffect::GestureBegin => json!({ "type": "beginGesture" }),
+        XYPadEffect::GestureEnd => json!({ "type": "endGesture" }),
+    }
+}
+
+fn assert_audio_step(
+    control: &str,
+    name: &str,
+    index: usize,
+    step: &Value,
+    actual_effects: Vec<Value>,
+    actual_context: Value,
+) {
+    let event_type = s(&step["event"], "type");
+    let expected: Vec<Value> = step["effects"]
+        .as_array()
+        .cloned()
+        .unwrap_or_default()
+        .iter()
+        .map(canonicalize)
+        .collect();
+    let actual: Vec<Value> = actual_effects.iter().map(canonicalize).collect();
+    assert_eq!(
+        actual, expected,
+        "audioControls/{control}/{name} step {index} ({event_type}): effects"
+    );
+
+    if let Some(expected_context) = step.get("context").and_then(Value::as_object) {
+        for (key, value) in expected_context {
+            assert_eq!(
+                canonicalize(&actual_context[key]),
+                canonicalize(value),
+                "audioControls/{control}/{name} step {index} ({event_type}): context.{key}"
+            );
+        }
+    }
+}
+
+fn scalar_context_json(context: &AudioValueContext) -> Value {
+    json!({
+        "value": context.value,
+        "drag": drag_state_json(context.drag),
+        "entryOpen": context.entry_open,
+        "hover": context.hover,
+        "focus": context.focus,
+        "automation": automation_state_json(context.automation),
+        "dragStartValue": context.drag_start_value,
+        "dragStartPosition": context.drag_start_position,
+    })
+}
+
+fn point_from(value: &Value) -> AudioPoint {
+    AudioPoint {
+        x: f(value, "x"),
+        y: f(value, "y"),
+    }
+}
+
+fn rect_from(value: &Value) -> AudioRect {
+    AudioRect {
+        left: f(value, "left"),
+        top: f(value, "top"),
+        width: f(value, "width"),
+        height: f(value, "height"),
+    }
+}
+
+#[test]
+fn audio_controls_conformance() {
+    let vectors = vectors();
+    let audio = &vectors["audioControls"];
+
+    for case in audio["knob"].as_array().unwrap() {
+        let name = s(case, "name");
+        let mut context = knob_context(&case["context"]);
+
+        for (index, step) in case["steps"].as_array().unwrap().iter().enumerate() {
+            let (next, effects) = knob_transition(context, audio_value_event(&step["event"]));
+            assert_audio_step(
+                "knob",
+                name,
+                index,
+                step,
+                effects.iter().map(audio_value_effect_json).collect(),
+                scalar_context_json(&next.base),
+            );
+            context = next;
+        }
+    }
+
+    for case in audio["fader"].as_array().unwrap() {
+        let name = s(case, "name");
+        let mut context = fader_context(&case["context"]);
+
+        for (index, step) in case["steps"].as_array().unwrap().iter().enumerate() {
+            let (next, effects) = fader_transition(context, audio_value_event(&step["event"]));
+            assert_audio_step(
+                "fader",
+                name,
+                index,
+                step,
+                effects.iter().map(audio_value_effect_json).collect(),
+                scalar_context_json(&next.base),
+            );
+            context = next;
+        }
+    }
+
+    for case in audio["xyPad"].as_array().unwrap() {
+        let name = s(case, "name");
+        let mut context = xy_pad_context(&case["context"]);
+
+        for (index, step) in case["steps"].as_array().unwrap().iter().enumerate() {
+            let (next, effects) = xy_pad_transition(context, xy_pad_event(&step["event"]));
+            let actual_context = json!({
+                "x": next.x,
+                "y": next.y,
+                "drag": drag_state_json(next.drag),
+                "hover": next.hover,
+                "focus": next.focus,
+                "automation": automation_state_json(next.automation),
+            });
+            assert_audio_step(
+                "xyPad",
+                name,
+                index,
+                step,
+                effects.iter().map(xy_pad_effect_json).collect(),
+                actual_context,
+            );
+            context = next;
+        }
+    }
+
+    let geometry = &audio["geometry"];
+
+    for case in geometry["knob"].as_array().unwrap() {
+        let name = s(case, "name");
+        assert_eq!(
+            knob_point_to_norm(point_from(&case["point"]), rect_from(&case["rect"])),
+            f(case, "expect"),
+            "audioControls/geometry/knob/{name}"
+        );
+    }
+
+    for case in geometry["fader"].as_array().unwrap() {
+        let name = s(case, "name");
+        assert_eq!(
+            fader_point_to_norm(
+                point_from(&case["point"]),
+                rect_from(&case["rect"]),
+                fader_orientation(case.get("orientation").and_then(Value::as_str)),
+            ),
+            f(case, "expect"),
+            "audioControls/geometry/fader/{name}"
+        );
+    }
+
+    for case in geometry["xyPad"].as_array().unwrap() {
+        let name = s(case, "name");
+        let (x_norm, y_norm) =
+            xy_pad_point_to_norm(point_from(&case["point"]), rect_from(&case["rect"]));
+        assert_eq!(
+            json!({ "xNorm": x_norm, "yNorm": y_norm }),
+            canonicalize(&case["expect"]),
+            "audioControls/geometry/xyPad/{name}"
+        );
+    }
+
+    for case in geometry["hitTest"].as_array().unwrap() {
+        let name = s(case, "name");
+        let point = point_from(&case["point"]);
+        let rect = rect_from(&case["rect"]);
+        let hit = match s(case, "shape") {
+            "circle" => hit_test_circle(point, rect),
+            "rect" => hit_test_rect(point, rect),
+            other => panic!("unknown hit-test shape {other}"),
+        };
+        assert_eq!(
+            hit,
+            b(case, "expect"),
+            "audioControls/geometry/hitTest/{name}"
         );
     }
 }

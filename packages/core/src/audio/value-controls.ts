@@ -91,6 +91,7 @@ export type AudioValueEvent =
   | { type: "DRAG_MOVE"; position: number; fine: boolean }
   | { type: "DRAG_SET_NORM"; valueNorm: number; fine: boolean }
   | { type: "DRAG_END" }
+  | { type: "DRAG_CANCEL" }
   | { type: "WHEEL"; direction: -1 | 1; fine: boolean }
   | { type: "RESET" }
   | { type: "KEY_NUDGE"; direction: -1 | 1; multiplier?: number; fine?: boolean }
@@ -164,6 +165,14 @@ function commonTransition<T extends AudioValueContextBase>(context: T, event: Au
   }
 }
 
+/**
+ * Terminal for an accepted pointer gesture. Release and cancellation close it
+ * the same way — one commit, one `endGesture` — and both are inert once the
+ * gesture is closed, so a repeated, stale, lost-capture, or teardown terminal
+ * can never duplicate the pair. A control disabled mid-gesture may still
+ * close: the begin was accepted while it was enabled, and stranding the
+ * gesture would leave the host's automation latched open.
+ */
 function endDrag<T extends AudioValueContextBase>(context: T): AudioValueResult<T> {
   if (context.drag === "none") return { context, effects: [] };
   return { context: { ...context, drag: "none" }, effects: [
@@ -171,6 +180,28 @@ function endDrag<T extends AudioValueContextBase>(context: T): AudioValueResult<
   ] };
 }
 
+/**
+ * Accepts one pointer gesture. A second begin while one is open is inert, so
+ * `beginGesture` and `endGesture` stay paired exactly once per gesture.
+ */
+function beginDrag<T extends AudioValueContextBase>(context: T, position: number, fine: boolean): AudioValueResult<T> {
+  if (context.disabled || context.drag !== "none") return { context, effects: [] };
+  return {
+    context: {
+      ...context,
+      drag: fine ? "fine" : "coarse",
+      dragStartValue: context.value,
+      dragStartPosition: position,
+    },
+    effects: [{ type: "beginGesture" }],
+  };
+}
+
+/**
+ * Coarse/fine switching re-anchors at the current value and the current
+ * pointer, so holding or releasing the modifier never jumps. The transition
+ * that flips the modifier only rebases; travel resumes from the next move.
+ */
 function rebaseDrag<T extends AudioValueContextBase>(context: T, position: number, fine: boolean): AudioValueResult<T> | null {
   const nextDrag: AudioDragState = fine ? "fine" : "coarse";
   if (context.drag === nextDrag) return null;
@@ -185,46 +216,55 @@ function rebaseDrag<T extends AudioValueContextBase>(context: T, position: numbe
   };
 }
 
+/** A move is live only inside an accepted gesture on an enabled control. */
+function dragging(context: AudioValueContextBase): boolean {
+  return !context.disabled && context.drag !== "none";
+}
+
 export function knobTransition(context: KnobContext, event: AudioValueEvent): AudioValueResult<KnobContext> {
   const common = commonTransition(context, event);
   if (common) return common;
   switch (event.type) {
-    case "DRAG_BEGIN":
-      return context.disabled ? { context, effects: [] } : {
-        context: { ...context, drag: event.fine ? "fine" : "coarse", dragStartValue: context.value, dragStartPosition: event.position },
-        effects: [{ type: "beginGesture" }],
-      };
+    case "DRAG_BEGIN": return beginDrag(context, event.position, event.fine);
     case "DRAG_MOVE": {
-      if (context.disabled || context.drag === "none") return { context, effects: [] };
+      // Vertical mapping: anchored pointer delta over `dragSensitivity`.
+      if (context.dragMode !== "vertical" || !dragging(context)) return { context, effects: [] };
       const rebased = rebaseDrag(context, event.position, event.fine);
       if (rebased) return rebased;
       const scale = event.fine ? 0.1 : 1;
       const startNorm = normalizeAudioValue(context.dragStartValue, context.min, context.max, context.law);
       const norm = startNorm + ((context.dragStartPosition - event.position) / Math.max(context.dragSensitivity, 1)) * scale;
       const value = denormalizeAudioValue(norm, context.min, context.max, context.law);
-      return { context: { ...context, value, drag: event.fine ? "fine" : "coarse" }, effects: [{ type: "emitValueChange", value }] };
+      return { context: { ...context, value }, effects: [{ type: "emitValueChange", value }] };
     }
     case "DRAG_SET_NORM": {
-      if (context.disabled || context.drag === "none") return { context, effects: [] };
+      // Circular mapping: the adapter resolves the 270 degree sweep position.
+      if (context.dragMode !== "circular" || !dragging(context)) return { context, effects: [] };
       const rebased = rebaseDrag(context, event.valueNorm, event.fine);
       if (rebased) return rebased;
       const startNorm = normalizeAudioValue(context.dragStartValue, context.min, context.max, context.law);
       const target = event.fine ? startNorm + (event.valueNorm - context.dragStartPosition) * 0.1 : event.valueNorm;
       const value = denormalizeAudioValue(target, context.min, context.max, context.law);
-      return { context: { ...context, value, drag: event.fine ? "fine" : "coarse" }, effects: [{ type: "emitValueChange", value }] };
+      return { context: { ...context, value }, effects: [{ type: "emitValueChange", value }] };
     }
-    case "DRAG_END": return endDrag(context);
+    case "DRAG_END":
+    case "DRAG_CANCEL": return endDrag(context);
     default: return { context, effects: [] };
   }
 }
 
+/**
+ * Nearest declared detent inside the normalized snap radius. The radius is
+ * inclusive and the first declared detent wins a tie, so two detents that are
+ * equidistant from the pointer always resolve the same way.
+ */
 function snapFaderDetent(context: FaderContext, norm: number): number {
   let best = norm;
-  let distance = context.detentSnap;
+  let distance = Number.POSITIVE_INFINITY;
   for (const detent of context.detents) {
     const detentNorm = normalizeAudioValue(detent, context.min, context.max, context.law);
     const candidate = Math.abs(norm - detentNorm);
-    if (candidate <= distance) { best = detentNorm; distance = candidate; }
+    if (candidate <= context.detentSnap && candidate < distance) { best = detentNorm; distance = candidate; }
   }
   return best;
 }
@@ -233,25 +273,30 @@ export function faderTransition(context: FaderContext, event: AudioValueEvent): 
   const common = commonTransition(context, event);
   if (common) return common;
   switch (event.type) {
-    case "DRAG_BEGIN": return context.disabled ? { context, effects: [] } : {
-      context: { ...context, drag: event.fine ? "fine" : "coarse", dragStartValue: context.value, dragStartPosition: event.position },
-      effects: [{ type: "beginGesture" }],
-    };
+    case "DRAG_BEGIN": return beginDrag(context, event.position, event.fine);
     case "DRAG_SET_NORM": {
-      if (context.disabled || context.drag === "none") return { context, effects: [] };
+      // The adapter resolves the axis position through `faderPointToNorm`.
+      if (!dragging(context)) return { context, effects: [] };
       const rebased = rebaseDrag(context, event.valueNorm, event.fine);
       if (rebased) return rebased;
       const startNorm = normalizeAudioValue(context.dragStartValue, context.min, context.max, context.law);
       const target = event.fine ? startNorm + (event.valueNorm - context.dragStartPosition) * 0.1 : event.valueNorm;
       const value = denormalizeAudioValue(snapFaderDetent(context, target), context.min, context.max, context.law);
-      return { context: { ...context, value, drag: event.fine ? "fine" : "coarse" }, effects: [{ type: "emitValueChange", value }] };
+      return { context: { ...context, value }, effects: [{ type: "emitValueChange", value }] };
     }
     case "DRAG_MOVE": return { context, effects: [] };
-    case "DRAG_END": return endDrag(context);
+    case "DRAG_END":
+    case "DRAG_CANCEL": return endDrag(context);
     default: return { context, effects: [] };
   }
 }
 
+/**
+ * DragNumberField keeps the pre-`g16.031` lifecycle on purpose. Card 031 covers
+ * Knob, Fader, and XYPad only, and migrating this transition without its two
+ * web adapters would leave one control's machine and DOM handling disagreeing.
+ * It shares the value helpers below, not the one-begin/cancel rules.
+ */
 export function dragNumberTransition(context: DragNumberContext, event: AudioValueEvent): AudioValueResult<DragNumberContext> {
   const common = commonTransition(context, event);
   if (common) return common;

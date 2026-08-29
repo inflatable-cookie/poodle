@@ -5,6 +5,7 @@
     xyPadTransition, xyPadVisualState, type AudioAutomationState,
     type AudioValueFormat, type AudioValueLaw, type XYPadContext, type XYPadEffect,
   } from "@inflatable-cookie/poodle-core";
+  import { onDestroy } from "svelte";
   import XYPadVisual from "./audio/XYPadVisual.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -36,6 +37,14 @@
   let root: HTMLDivElement;
   let machine = $state(createXYPadContext());
   let activePointer: number | null = null;
+  /**
+   * The machine state this adapter last produced, written before any host
+   * callback runs. Terminal cleanup reads it rather than the reactive
+   * `context`, because a host that removes the control from inside
+   * `onGestureBegin` or `onValueChange` tears it down before that state is
+   * observable through the component's own reactive graph.
+   */
+  let live: XYPadContext = createXYPadContext();
   const context = $derived<XYPadContext>({
     ...machine, x, y, minX, maxX, minY, maxY, lawX, lawY, defaultX, defaultY,
     keyboardStepX, keyboardStepY, automation, disabled,
@@ -44,17 +53,48 @@
   const xText = $derived(formatAudioValue(x, formatX));
   const yText = $derived(formatAudioValue(y, formatY));
 
+  function dispatch(effect: XYPadEffect): void {
+    if (effect.type === "emitValueChange") { x = effect.x; y = effect.y; onValueChange?.(effect.x, effect.y); }
+    else if (effect.type === "emitValueCommit") { x = effect.x; y = effect.y; onValueCommit?.(effect.x, effect.y); }
+    else if (effect.type === "beginGesture") onGestureBegin?.();
+    else if (effect.type === "endGesture") onGestureEnd?.();
+  }
+
+  let effectBatches: XYPadEffect[][] = [];
+  let drainingEffects = false;
+
+  /**
+   * Effect batches drain in order even when a host tears the control down from
+   * inside one of them. A teardown that lands mid-batch queues its terminal
+   * instead of interleaving, so no callback from the accepted transition can
+   * run after the terminal that teardown triggered.
+   */
   function runEffects(effects: XYPadEffect[]): void {
-    for (const effect of effects) {
-      if (effect.type === "emitValueChange") { x = effect.x; y = effect.y; onValueChange?.(effect.x, effect.y); }
-      else if (effect.type === "emitValueCommit") { x = effect.x; y = effect.y; onValueCommit?.(effect.x, effect.y); }
-      else if (effect.type === "beginGesture") onGestureBegin?.();
-      else if (effect.type === "endGesture") onGestureEnd?.();
+    effectBatches.push(effects);
+    if (drainingEffects) return;
+    drainingEffects = true;
+    try {
+      for (let batch = effectBatches.shift(); batch; batch = effectBatches.shift()) {
+        for (const effect of batch) dispatch(effect);
+      }
+    } finally {
+      drainingEffects = false;
     }
   }
 
+  function commit(result: ReturnType<typeof xyPadTransition>): void {
+    live = result.context;
+    machine = result.context;
+    runEffects(result.effects);
+  }
+
   function send(event: Parameters<typeof xyPadTransition>[1]): void {
-    const result = xyPadTransition(context, event); machine = result.context; runEffects(result.effects);
+    commit(xyPadTransition(context, event));
+  }
+
+  /** Terminals resolve from the live snapshot, never from the reactive context. */
+  function terminate(type: "DRAG_END" | "DRAG_CANCEL"): void {
+    commit(xyPadTransition(live, { type }));
   }
 
   function pointerNorm(event: PointerEvent): { xNorm: number; yNorm: number } {
@@ -62,7 +102,9 @@
   }
 
   function pointerDown(event: PointerEvent): void {
-    if (event.button !== 0 || disabled) return;
+    // One primary pointer owns the gesture. A second pointer-down cannot
+    // replace the active pointer or open a second gesture.
+    if (event.button !== 0 || disabled || activePointer !== null) return;
     event.preventDefault(); activePointer = event.pointerId; root.setPointerCapture(event.pointerId);
     send({ type: "DRAG_BEGIN", ...pointerNorm(event), fine: event.shiftKey });
   }
@@ -72,10 +114,23 @@
     send({ type: "DRAG_MOVE", ...pointerNorm(event), fine: event.shiftKey });
   }
 
-  function pointerEnd(event: PointerEvent): void {
+  function pointerUp(event: PointerEvent): void {
     if (activePointer !== event.pointerId) return;
-    activePointer = null; send({ type: "DRAG_END" });
+    activePointer = null; terminate("DRAG_END");
   }
+
+  /**
+   * Pointer cancel, lost capture, and teardown all close the gesture the same
+   * way, so a captured gesture can never outlive its pointer or its component.
+   * A stale pointer id is ignored, and the machine makes a repeat inert.
+   */
+  function cancelGesture(pointerId: number | null = null): void {
+    if (activePointer === null || (pointerId !== null && activePointer !== pointerId)) return;
+    activePointer = null;
+    terminate("DRAG_CANCEL");
+  }
+
+  onDestroy(() => cancelGesture());
 
   function axisKeydown(event: KeyboardEvent, axis: "x" | "y"): void {
     const negative = axis === "x" ? ["ArrowLeft", "ArrowDown", "PageDown"] : ["ArrowDown", "ArrowLeft", "PageDown"];
@@ -100,8 +155,9 @@
   data-density={resolvedDensity}
   onpointerdown={pointerDown}
   onpointermove={pointerMove}
-  onpointerup={pointerEnd}
-  onpointercancel={pointerEnd}
+  onpointerup={pointerUp}
+  onpointercancel={(event) => cancelGesture(event.pointerId)}
+  onlostpointercapture={(event) => cancelGesture(event.pointerId)}
   onmouseenter={() => send({ type: "HOVER", value: true })}
   onmouseleave={() => send({ type: "HOVER", value: false })}
   ondblclick={() => send({ type: "RESET" })}

@@ -2724,5 +2724,3021 @@
         "expect": { "intent": null }
       }
     ]
+  },
+  "audioControls": {
+    "description": "Continuous-audio gesture corpus for Knob, Fader, and XYPad (g16.031). Each case starts from the control's default context with the listed overrides, then runs ordered steps; every step pins the effects it emitted in order and, where the case claims it, a subset of the resulting context. Disabled cases are split on purpose: a disabled control rejects every user mutation, still accepts host and presentation routes, and still closes a gesture it accepted while enabled. Geometry cases pin the shared pointer mapping helpers.",
+    "knob": [
+      {
+        "name": "vertical gesture: one begin, anchored coarse travel, one end",
+        "context": {
+          "value": 0.5
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 100,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ],
+            "context": {
+              "drag": "coarse",
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 84,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.6
+              }
+            ],
+            "context": {
+              "value": 0.6
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.6
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none",
+              "value": 0.6
+            }
+          }
+        ]
+      },
+      {
+        "name": "a repeated begin cannot reopen or re-anchor the gesture",
+        "context": {
+          "value": 0.5
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 100,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ],
+            "context": {
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 40,
+              "fine": true
+            },
+            "effects": [],
+            "context": {
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 84,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.6
+              }
+            ],
+            "context": {
+              "value": 0.6
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.6
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "stale moves, stale releases, and repeated termination are inert",
+        "context": {
+          "value": 0.25
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 50,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.25,
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_CANCEL"
+            },
+            "effects": [],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 100,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ],
+            "context": {
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.25
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 10,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.25
+            }
+          }
+        ]
+      },
+      {
+        "name": "cancellation closes the gesture once and cannot reopen it",
+        "context": {
+          "value": 0.5
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 100,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 84,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.6
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_CANCEL"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.6
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_CANCEL"
+            },
+            "effects": [],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [],
+            "context": {
+              "drag": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "coarse to fine and back rebases without a jump",
+        "context": {
+          "value": 0.5
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 100,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 84,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.6
+              }
+            ],
+            "context": {
+              "value": 0.6
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 84,
+              "fine": true
+            },
+            "effects": [],
+            "context": {
+              "value": 0.6,
+              "drag": "fine"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 68,
+              "fine": true
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.61
+              }
+            ],
+            "context": {
+              "value": 0.61
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 68,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.61,
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 52,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.71
+              }
+            ],
+            "context": {
+              "value": 0.71
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.71
+              },
+              {
+                "type": "endGesture"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "circular mode maps the sweep absolutely and ignores vertical travel",
+        "context": {
+          "value": 0.5,
+          "dragMode": "circular"
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 0.5,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ],
+            "context": {
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.75,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.75
+              }
+            ],
+            "context": {
+              "value": 0.75
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 20,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.75
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.75,
+              "fine": true
+            },
+            "effects": [],
+            "context": {
+              "value": 0.75,
+              "drag": "fine"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 1,
+              "fine": true
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.775
+              }
+            ],
+            "context": {
+              "value": 0.775
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.775
+              },
+              {
+                "type": "endGesture"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "vertical mode ignores circular sweep positions",
+        "context": {
+          "value": 0.5
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 100,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 1,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.5
+              },
+              {
+                "type": "endGesture"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "bipolar-center travel resolves through the declared center",
+        "context": {
+          "value": 0,
+          "min": -1,
+          "max": 1,
+          "law": {
+            "type": "bipolar-center",
+            "center": 0
+          },
+          "dragSensitivity": 100
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 100,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 75,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.5
+              }
+            ],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 125,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": -0.5
+              }
+            ],
+            "context": {
+              "value": -0.5
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": -0.5
+              },
+              {
+                "type": "endGesture"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "keys, page keys, bounds, wheel, and reset are atomic value operations",
+        "context": {
+          "value": 0.5,
+          "defaultValue": 0.25,
+          "keyboardStep": 0.01
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "KEY_NUDGE",
+              "direction": 1,
+              "multiplier": 1
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.51
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 0.51
+              }
+            ],
+            "context": {
+              "value": 0.51,
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "KEY_NUDGE",
+              "direction": 1,
+              "multiplier": 10
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.61
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 0.61
+              }
+            ],
+            "context": {
+              "value": 0.61
+            }
+          },
+          {
+            "event": {
+              "type": "KEY_NUDGE",
+              "direction": -1,
+              "multiplier": 1,
+              "fine": true
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.609
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 0.609
+              }
+            ],
+            "context": {
+              "value": 0.609
+            }
+          },
+          {
+            "event": {
+              "type": "KEY_BOUND",
+              "bound": "min"
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 0
+              }
+            ],
+            "context": {
+              "value": 0
+            }
+          },
+          {
+            "event": {
+              "type": "KEY_BOUND",
+              "bound": "max"
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 1
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 1
+              }
+            ],
+            "context": {
+              "value": 1
+            }
+          },
+          {
+            "event": {
+              "type": "WHEEL",
+              "direction": -1,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.99
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 0.99
+              }
+            ],
+            "context": {
+              "value": 0.99
+            }
+          },
+          {
+            "event": {
+              "type": "WHEEL",
+              "direction": 1,
+              "fine": true
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.991
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 0.991
+              }
+            ],
+            "context": {
+              "value": 0.991
+            }
+          },
+          {
+            "event": {
+              "type": "RESET"
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.25
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 0.25
+              }
+            ],
+            "context": {
+              "value": 0.25,
+              "drag": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "type-in opens, cancels, commits, and rejects invalid text",
+        "context": {
+          "value": 0.5,
+          "format": {
+            "type": "percent",
+            "decimals": 1
+          }
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "ENTRY_OPEN"
+            },
+            "effects": [
+              {
+                "type": "requestEntryFocus"
+              }
+            ],
+            "context": {
+              "entryOpen": true,
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_CANCEL"
+            },
+            "effects": [],
+            "context": {
+              "entryOpen": false,
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_OPEN"
+            },
+            "effects": [
+              {
+                "type": "requestEntryFocus"
+              }
+            ],
+            "context": {
+              "entryOpen": true
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_COMMIT",
+              "text": "75%"
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.75
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 0.75
+              }
+            ],
+            "context": {
+              "entryOpen": false,
+              "value": 0.75
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_OPEN"
+            },
+            "effects": [
+              {
+                "type": "requestEntryFocus"
+              }
+            ],
+            "context": {
+              "entryOpen": true
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_COMMIT",
+              "text": "not a number"
+            },
+            "effects": [],
+            "context": {
+              "entryOpen": false,
+              "value": 0.75
+            }
+          }
+        ]
+      },
+      {
+        "name": "a disabled knob rejects every user mutation",
+        "context": {
+          "value": 0.5,
+          "disabled": true
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 100,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "drag": "none",
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 84,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 1,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "WHEEL",
+              "direction": 1,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "KEY_NUDGE",
+              "direction": 1,
+              "multiplier": 10
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "KEY_BOUND",
+              "bound": "max"
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "RESET"
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_OPEN"
+            },
+            "effects": [],
+            "context": {
+              "entryOpen": false
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_COMMIT",
+              "text": "0.75"
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5,
+              "entryOpen": false
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [],
+            "context": {
+              "drag": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "a knob disabled mid-gesture still terminates exactly once",
+        "context": {
+          "value": 0.5,
+          "disabled": true,
+          "drag": "coarse"
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "position": 84,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5,
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_CANCEL"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.5
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_CANCEL"
+            },
+            "effects": [],
+            "context": {
+              "drag": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "hover, focus, and host value replacement emit nothing",
+        "context": {
+          "value": 0.5
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "HOVER",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "hover": true,
+              "focus": false
+            }
+          },
+          {
+            "event": {
+              "type": "FOCUS",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "hover": true,
+              "focus": true
+            }
+          },
+          {
+            "event": {
+              "type": "SET_VALUE",
+              "value": 2
+            },
+            "effects": [],
+            "context": {
+              "value": 1
+            }
+          },
+          {
+            "event": {
+              "type": "HOVER",
+              "value": false
+            },
+            "effects": [],
+            "context": {
+              "hover": false,
+              "focus": true
+            }
+          }
+        ]
+      },
+      {
+        "name": "a disabled knob still accepts host and presentation routes",
+        "context": {
+          "value": 0.5,
+          "disabled": true,
+          "entryOpen": true
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "HOVER",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "hover": true
+            }
+          },
+          {
+            "event": {
+              "type": "FOCUS",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "focus": true
+            }
+          },
+          {
+            "event": {
+              "type": "SET_AUTOMATION",
+              "value": "writing"
+            },
+            "effects": [],
+            "context": {
+              "automation": "writing"
+            }
+          },
+          {
+            "event": {
+              "type": "SET_VALUE",
+              "value": 0.25
+            },
+            "effects": [],
+            "context": {
+              "value": 0.25
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_CANCEL"
+            },
+            "effects": [],
+            "context": {
+              "entryOpen": false,
+              "value": 0.25
+            }
+          }
+        ]
+      }
+    ],
+    "fader": [
+      {
+        "name": "vertical axis gesture: press position, travel, release",
+        "context": {
+          "value": 0.25
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 0.25,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ],
+            "context": {
+              "drag": "coarse",
+              "value": 0.25
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.25,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.25
+              }
+            ],
+            "context": {
+              "value": 0.25
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.8,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.8
+              }
+            ],
+            "context": {
+              "value": 0.8
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.8
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "horizontal orientation resolves the same value from the same axis position",
+        "context": {
+          "value": 0.25,
+          "orientation": "horizontal"
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 0.25,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ],
+            "context": {
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.8,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.8
+              }
+            ],
+            "context": {
+              "value": 0.8
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.8
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "repeated begin, stale positions, and repeated end are inert",
+        "context": {
+          "value": 0.25
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.8,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.25
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 0.25,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 0.9,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.8,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.8
+              }
+            ],
+            "context": {
+              "value": 0.8
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.8
+              },
+              {
+                "type": "endGesture"
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": []
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.1,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.8
+            }
+          }
+        ]
+      },
+      {
+        "name": "detents snap inside the normalized radius and release outside it",
+        "context": {
+          "value": 0.4,
+          "detents": [
+            0.5
+          ],
+          "detentSnap": 0.05
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 0.4,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.47,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.5
+              }
+            ],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.2,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.2
+              }
+            ],
+            "context": {
+              "value": 0.2
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.2
+              },
+              {
+                "type": "endGesture"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "an exact detent tie resolves to the first declared detent",
+        "context": {
+          "value": 0.5,
+          "detents": [
+            0.25,
+            0.75
+          ],
+          "detentSnap": 0.5
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 0.5,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.5,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.25
+              }
+            ],
+            "context": {
+              "value": 0.25
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.625,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.75
+              }
+            ],
+            "context": {
+              "value": 0.75
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.75
+              },
+              {
+                "type": "endGesture"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "fine travel is one tenth of axis travel and rebases both ways",
+        "context": {
+          "value": 0.4
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 0.4,
+              "fine": true
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ],
+            "context": {
+              "drag": "fine"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.9,
+              "fine": true
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.45
+              }
+            ],
+            "context": {
+              "value": 0.45
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.9,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.45,
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.9,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0.9
+              }
+            ],
+            "context": {
+              "value": 0.9
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.9
+              },
+              {
+                "type": "endGesture"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "keys, bounds, wheel, reset, and type-in stay atomic on a fader",
+        "context": {
+          "value": -12,
+          "min": -60,
+          "max": 6,
+          "keyboardStep": 1,
+          "defaultValue": 0,
+          "format": {
+            "type": "db",
+            "decimals": 1
+          }
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "KEY_NUDGE",
+              "direction": 1,
+              "multiplier": 1
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": -11
+              },
+              {
+                "type": "emitValueCommit",
+                "value": -11
+              }
+            ],
+            "context": {
+              "value": -11
+            }
+          },
+          {
+            "event": {
+              "type": "KEY_NUDGE",
+              "direction": 1,
+              "multiplier": 10
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": -1
+              },
+              {
+                "type": "emitValueCommit",
+                "value": -1
+              }
+            ],
+            "context": {
+              "value": -1
+            }
+          },
+          {
+            "event": {
+              "type": "KEY_BOUND",
+              "bound": "min"
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": -60
+              },
+              {
+                "type": "emitValueCommit",
+                "value": -60
+              }
+            ],
+            "context": {
+              "value": -60
+            }
+          },
+          {
+            "event": {
+              "type": "KEY_BOUND",
+              "bound": "max"
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 6
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 6
+              }
+            ],
+            "context": {
+              "value": 6
+            }
+          },
+          {
+            "event": {
+              "type": "WHEEL",
+              "direction": -1,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 5
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 5
+              }
+            ],
+            "context": {
+              "value": 5
+            }
+          },
+          {
+            "event": {
+              "type": "RESET"
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": 0
+              },
+              {
+                "type": "emitValueCommit",
+                "value": 0
+              }
+            ],
+            "context": {
+              "value": 0
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_OPEN"
+            },
+            "effects": [
+              {
+                "type": "requestEntryFocus"
+              }
+            ],
+            "context": {
+              "entryOpen": true
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_COMMIT",
+              "text": "-6 dB"
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "value": -6
+              },
+              {
+                "type": "emitValueCommit",
+                "value": -6
+              }
+            ],
+            "context": {
+              "value": -6,
+              "entryOpen": false
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_COMMIT",
+              "text": "loud"
+            },
+            "effects": [],
+            "context": {
+              "value": -6
+            }
+          }
+        ]
+      },
+      {
+        "name": "a disabled fader rejects every user mutation",
+        "context": {
+          "value": 0.5,
+          "disabled": true,
+          "detents": [
+            0.5
+          ],
+          "detentSnap": 0.05
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "position": 0.2,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.2,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "WHEEL",
+              "direction": 1,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "RESET"
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_OPEN"
+            },
+            "effects": [],
+            "context": {
+              "entryOpen": false
+            }
+          }
+        ]
+      },
+      {
+        "name": "a fader disabled mid-gesture still terminates exactly once",
+        "context": {
+          "value": 0.5,
+          "disabled": true,
+          "drag": "coarse"
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_SET_NORM",
+              "valueNorm": 0.2,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "value": 0.5,
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "value": 0.5
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [],
+            "context": {
+              "drag": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "a disabled fader still accepts host and presentation routes",
+        "context": {
+          "value": 0.5,
+          "disabled": true,
+          "entryOpen": true
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "HOVER",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "hover": true
+            }
+          },
+          {
+            "event": {
+              "type": "SET_AUTOMATION",
+              "value": "read"
+            },
+            "effects": [],
+            "context": {
+              "automation": "read"
+            }
+          },
+          {
+            "event": {
+              "type": "SET_VALUE",
+              "value": 0.9
+            },
+            "effects": [],
+            "context": {
+              "value": 0.9
+            }
+          },
+          {
+            "event": {
+              "type": "ENTRY_CANCEL"
+            },
+            "effects": [],
+            "context": {
+              "entryOpen": false,
+              "value": 0.9
+            }
+          }
+        ]
+      }
+    ],
+    "xyPad": [
+      {
+        "name": "a coarse press moves the pair atomically at the accepted press position",
+        "context": {},
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "xNorm": 0.25,
+              "yNorm": 0.75,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              },
+              {
+                "type": "emitValueChange",
+                "x": 0.25,
+                "y": 0.75
+              }
+            ],
+            "context": {
+              "x": 0.25,
+              "y": 0.75,
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 0.5,
+              "yNorm": 0.25,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": 0.5,
+                "y": 0.25
+              }
+            ],
+            "context": {
+              "x": 0.5,
+              "y": 0.25
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "x": 0.5,
+                "y": 0.25
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none"
+            }
+          }
+        ]
+      },
+      {
+        "name": "a fine press anchors without moving the pair",
+        "context": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "xNorm": 0.25,
+              "yNorm": 0.75,
+              "fine": true
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              }
+            ],
+            "context": {
+              "x": 0.5,
+              "y": 0.5,
+              "drag": "fine"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 0.75,
+              "yNorm": 0.25,
+              "fine": true
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": 0.55,
+                "y": 0.45
+              }
+            ],
+            "context": {
+              "x": 0.55,
+              "y": 0.45
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "x": 0.55,
+                "y": 0.45
+              },
+              {
+                "type": "endGesture"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "repeated begin, stale moves, and repeated termination are inert",
+        "context": {},
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 0.5,
+              "yNorm": 0.5,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "x": 0,
+              "y": 0,
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": []
+          },
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "xNorm": 0.25,
+              "yNorm": 0.75,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              },
+              {
+                "type": "emitValueChange",
+                "x": 0.25,
+                "y": 0.75
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "xNorm": 0.9,
+              "yNorm": 0.1,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "x": 0.25,
+              "y": 0.75
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "x": 0.25,
+                "y": 0.75
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": []
+          },
+          {
+            "event": {
+              "type": "DRAG_CANCEL"
+            },
+            "effects": []
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 0.9,
+              "yNorm": 0.1,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "x": 0.25,
+              "y": 0.75
+            }
+          }
+        ]
+      },
+      {
+        "name": "cancellation closes the pair gesture once",
+        "context": {},
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "xNorm": 0.25,
+              "yNorm": 0.75,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              },
+              {
+                "type": "emitValueChange",
+                "x": 0.25,
+                "y": 0.75
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 0.5,
+              "yNorm": 0.5,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": 0.5,
+                "y": 0.5
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_CANCEL"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "x": 0.5,
+                "y": 0.5
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_CANCEL"
+            },
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "coarse and fine switching rebases both axes without a jump",
+        "context": {},
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "xNorm": 0.5,
+              "yNorm": 0.5,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              },
+              {
+                "type": "emitValueChange",
+                "x": 0.5,
+                "y": 0.5
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 0.5,
+              "yNorm": 0.5,
+              "fine": true
+            },
+            "effects": [],
+            "context": {
+              "x": 0.5,
+              "y": 0.5,
+              "drag": "fine"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 1,
+              "yNorm": 0,
+              "fine": true
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": 0.55,
+                "y": 0.45
+              }
+            ],
+            "context": {
+              "x": 0.55,
+              "y": 0.45
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 1,
+              "yNorm": 0,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "x": 0.55,
+              "y": 0.45,
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 1,
+              "yNorm": 0,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": 1,
+                "y": 0
+              }
+            ],
+            "context": {
+              "x": 1,
+              "y": 0
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "x": 1,
+                "y": 0
+              },
+              {
+                "type": "endGesture"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "independent laws map each axis on its own",
+        "context": {
+          "x": 0,
+          "y": 0,
+          "minX": -1,
+          "maxX": 1,
+          "lawX": {
+            "type": "bipolar-center",
+            "center": 0
+          },
+          "minY": 0,
+          "maxY": 4
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "xNorm": 0.75,
+              "yNorm": 0.25,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "beginGesture"
+              },
+              {
+                "type": "emitValueChange",
+                "x": 0.5,
+                "y": 1
+              }
+            ],
+            "context": {
+              "x": 0.5,
+              "y": 1
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 0.25,
+              "yNorm": 1,
+              "fine": false
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": -0.5,
+                "y": 4
+              }
+            ],
+            "context": {
+              "x": -0.5,
+              "y": 4
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_END"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "x": -0.5,
+                "y": 4
+              },
+              {
+                "type": "endGesture"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "axis keys, page keys, bounds, and reset commit the pair atomically",
+        "context": {
+          "x": 0.5,
+          "y": 0.5,
+          "defaultX": 0.2,
+          "defaultY": 0.8
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "NUDGE",
+              "axis": "x",
+              "direction": 1,
+              "multiplier": 1
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": 0.51,
+                "y": 0.5
+              },
+              {
+                "type": "emitValueCommit",
+                "x": 0.51,
+                "y": 0.5
+              }
+            ],
+            "context": {
+              "x": 0.51,
+              "y": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "NUDGE",
+              "axis": "y",
+              "direction": 1,
+              "multiplier": 10
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": 0.51,
+                "y": 0.6
+              },
+              {
+                "type": "emitValueCommit",
+                "x": 0.51,
+                "y": 0.6
+              }
+            ],
+            "context": {
+              "x": 0.51,
+              "y": 0.6
+            }
+          },
+          {
+            "event": {
+              "type": "NUDGE",
+              "axis": "x",
+              "direction": -1,
+              "multiplier": 1,
+              "fine": true
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": 0.509,
+                "y": 0.6
+              },
+              {
+                "type": "emitValueCommit",
+                "x": 0.509,
+                "y": 0.6
+              }
+            ],
+            "context": {
+              "x": 0.509
+            }
+          },
+          {
+            "event": {
+              "type": "BOUND",
+              "axis": "x",
+              "bound": "min"
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": 0,
+                "y": 0.6
+              },
+              {
+                "type": "emitValueCommit",
+                "x": 0,
+                "y": 0.6
+              }
+            ],
+            "context": {
+              "x": 0
+            }
+          },
+          {
+            "event": {
+              "type": "BOUND",
+              "axis": "y",
+              "bound": "max"
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": 0,
+                "y": 1
+              },
+              {
+                "type": "emitValueCommit",
+                "x": 0,
+                "y": 1
+              }
+            ],
+            "context": {
+              "y": 1
+            }
+          },
+          {
+            "event": {
+              "type": "RESET"
+            },
+            "effects": [
+              {
+                "type": "emitValueChange",
+                "x": 0.2,
+                "y": 0.8
+              },
+              {
+                "type": "emitValueCommit",
+                "x": 0.2,
+                "y": 0.8
+              }
+            ],
+            "context": {
+              "x": 0.2,
+              "y": 0.8
+            }
+          }
+        ]
+      },
+      {
+        "name": "a disabled pad rejects every user mutation",
+        "context": {
+          "x": 0.5,
+          "y": 0.5,
+          "disabled": true
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_BEGIN",
+              "xNorm": 0.25,
+              "yNorm": 0.75,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "x": 0.5,
+              "y": 0.5,
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 0.25,
+              "yNorm": 0.75,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "x": 0.5,
+              "y": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "NUDGE",
+              "axis": "x",
+              "direction": 1,
+              "multiplier": 1
+            },
+            "effects": [],
+            "context": {
+              "x": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "BOUND",
+              "axis": "x",
+              "bound": "max"
+            },
+            "effects": [],
+            "context": {
+              "x": 0.5
+            }
+          },
+          {
+            "event": {
+              "type": "RESET"
+            },
+            "effects": [],
+            "context": {
+              "x": 0.5,
+              "y": 0.5
+            }
+          }
+        ]
+      },
+      {
+        "name": "a pad disabled mid-gesture still terminates exactly once",
+        "context": {
+          "x": 0.5,
+          "y": 0.5,
+          "disabled": true,
+          "drag": "coarse"
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "DRAG_MOVE",
+              "xNorm": 0.25,
+              "yNorm": 0.75,
+              "fine": false
+            },
+            "effects": [],
+            "context": {
+              "x": 0.5,
+              "y": 0.5,
+              "drag": "coarse"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_CANCEL"
+            },
+            "effects": [
+              {
+                "type": "emitValueCommit",
+                "x": 0.5,
+                "y": 0.5
+              },
+              {
+                "type": "endGesture"
+              }
+            ],
+            "context": {
+              "drag": "none"
+            }
+          },
+          {
+            "event": {
+              "type": "DRAG_CANCEL"
+            },
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "hover, focus, and host pair replacement emit nothing",
+        "context": {
+          "x": 0.5,
+          "y": 0.5
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "HOVER",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "hover": true
+            }
+          },
+          {
+            "event": {
+              "type": "FOCUS",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "focus": true
+            }
+          },
+          {
+            "event": {
+              "type": "SET_VALUES",
+              "x": 2,
+              "y": -1
+            },
+            "effects": [],
+            "context": {
+              "x": 1,
+              "y": 0
+            }
+          }
+        ]
+      },
+      {
+        "name": "a disabled pad still accepts host and presentation routes",
+        "context": {
+          "x": 0.5,
+          "y": 0.5,
+          "disabled": true
+        },
+        "steps": [
+          {
+            "event": {
+              "type": "HOVER",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "hover": true
+            }
+          },
+          {
+            "event": {
+              "type": "FOCUS",
+              "value": true
+            },
+            "effects": [],
+            "context": {
+              "focus": true
+            }
+          },
+          {
+            "event": {
+              "type": "SET_AUTOMATION",
+              "value": "latched"
+            },
+            "effects": [],
+            "context": {
+              "automation": "latched"
+            }
+          },
+          {
+            "event": {
+              "type": "SET_VALUES",
+              "x": 0.25,
+              "y": 0.75
+            },
+            "effects": [],
+            "context": {
+              "x": 0.25,
+              "y": 0.75
+            }
+          }
+        ]
+      }
+    ],
+    "geometry": {
+      "knob": [
+        {
+          "name": "twelve o'clock is the middle of the sweep",
+          "point": {
+            "x": 50,
+            "y": 0
+          },
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 100,
+            "height": 100
+          },
+          "expect": 0.5
+        },
+        {
+          "name": "three o'clock is five sixths of the sweep",
+          "point": {
+            "x": 100,
+            "y": 50
+          },
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 100,
+            "height": 100
+          },
+          "expect": 0.8333333333333334
+        },
+        {
+          "name": "the upper right diagonal is two thirds of the sweep",
+          "point": {
+            "x": 100,
+            "y": 0
+          },
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 100,
+            "height": 100
+          },
+          "expect": 0.6666666666666666
+        },
+        {
+          "name": "past the end of the sweep clamps to one",
+          "point": {
+            "x": 50,
+            "y": 100
+          },
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 100,
+            "height": 100
+          },
+          "expect": 1
+        }
+      ],
+      "fader": [
+        {
+          "name": "horizontal position measures from the left edge",
+          "point": {
+            "x": 20,
+            "y": 25
+          },
+          "rect": {
+            "left": 10,
+            "top": 5,
+            "width": 100,
+            "height": 100
+          },
+          "orientation": "horizontal",
+          "expect": 0.1
+        },
+        {
+          "name": "vertical position measures upward from the bottom edge",
+          "point": {
+            "x": 20,
+            "y": 25
+          },
+          "rect": {
+            "left": 10,
+            "top": 5,
+            "width": 100,
+            "height": 100
+          },
+          "orientation": "vertical",
+          "expect": 0.8
+        },
+        {
+          "name": "before the horizontal track clamps to zero",
+          "point": {
+            "x": 5,
+            "y": 25
+          },
+          "rect": {
+            "left": 10,
+            "top": 5,
+            "width": 100,
+            "height": 100
+          },
+          "orientation": "horizontal",
+          "expect": 0
+        },
+        {
+          "name": "past the horizontal track clamps to one",
+          "point": {
+            "x": 200,
+            "y": 25
+          },
+          "rect": {
+            "left": 10,
+            "top": 5,
+            "width": 100,
+            "height": 100
+          },
+          "orientation": "horizontal",
+          "expect": 1
+        },
+        {
+          "name": "below the vertical track clamps to zero",
+          "point": {
+            "x": 20,
+            "y": 205
+          },
+          "rect": {
+            "left": 10,
+            "top": 5,
+            "width": 100,
+            "height": 100
+          },
+          "orientation": "vertical",
+          "expect": 0
+        }
+      ],
+      "xyPad": [
+        {
+          "name": "the pad centre is a half on both axes",
+          "point": {
+            "x": 60,
+            "y": 45
+          },
+          "rect": {
+            "left": 10,
+            "top": 20,
+            "width": 100,
+            "height": 50
+          },
+          "expect": {
+            "xNorm": 0.5,
+            "yNorm": 0.5
+          }
+        },
+        {
+          "name": "the top left corner is zero x and one y",
+          "point": {
+            "x": 0,
+            "y": 0
+          },
+          "rect": {
+            "left": 10,
+            "top": 20,
+            "width": 100,
+            "height": 50
+          },
+          "expect": {
+            "xNorm": 0,
+            "yNorm": 1
+          }
+        },
+        {
+          "name": "past the bottom right corner clamps to one x and zero y",
+          "point": {
+            "x": 200,
+            "y": 200
+          },
+          "rect": {
+            "left": 10,
+            "top": 20,
+            "width": 100,
+            "height": 50
+          },
+          "expect": {
+            "xNorm": 1,
+            "yNorm": 0
+          }
+        }
+      ],
+      "hitTest": [
+        {
+          "name": "the knob centre is inside its circle",
+          "shape": "circle",
+          "point": {
+            "x": 50,
+            "y": 50
+          },
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 100,
+            "height": 100
+          },
+          "expect": true
+        },
+        {
+          "name": "the circle edge is inside",
+          "shape": "circle",
+          "point": {
+            "x": 50,
+            "y": 0
+          },
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 100,
+            "height": 100
+          },
+          "expect": true
+        },
+        {
+          "name": "a square corner is outside the inscribed circle",
+          "shape": "circle",
+          "point": {
+            "x": 0,
+            "y": 0
+          },
+          "rect": {
+            "left": 0,
+            "top": 0,
+            "width": 100,
+            "height": 100
+          },
+          "expect": false
+        },
+        {
+          "name": "a point inside the pad rectangle hits",
+          "shape": "rect",
+          "point": {
+            "x": 20,
+            "y": 30
+          },
+          "rect": {
+            "left": 10,
+            "top": 20,
+            "width": 100,
+            "height": 50
+          },
+          "expect": true
+        },
+        {
+          "name": "a point left of the pad rectangle misses",
+          "shape": "rect",
+          "point": {
+            "x": 5,
+            "y": 30
+          },
+          "rect": {
+            "left": 10,
+            "top": 20,
+            "width": 100,
+            "height": 50
+          },
+          "expect": false
+        }
+      ]
+    }
   }
 }

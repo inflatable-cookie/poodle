@@ -1,7 +1,7 @@
 # XY Pad
 
 Status: detailed contract
-Updated: 2026-08-10
+Updated: 2026-08-29
 
 ## 1. Purpose
 
@@ -42,15 +42,23 @@ Updated: 2026-08-10
 ## 4. States And Behavior Machine
 
 Classification: machine-backed (`xyPadTransition`). Pointer position maps to
-both laws atomically. Shift selects fine movement at one tenth travel.
-Double-click restores the default pair. Axis sliders use arrows, Page Up/Down,
-Home, and End for independent keyboard edits.
+both laws atomically. A coarse press moves the pair to the accepted press
+position; a fine press only anchors. Shift selects fine movement at one tenth
+travel, and switching modifier re-anchors both axes at the current pair and
+pointer. Double-click restores the default pair. Axis sliders use arrows, Page
+Up/Down, Home, and End for independent keyboard edits. A disabled pad rejects
+every user mutation, while host pair replacement, automation state,
+hover/focus reporting, and the terminal of a gesture accepted while enabled
+stay live.
 
 ## 5. Callbacks
 
 Pair values are never emitted separately. Live drags emit `onValueChange`;
 atomic keys and reset plus drag end emit `onValueCommit`. `onGestureBegin` and
-`onGestureEnd` pair around drag.
+`onGestureEnd` pair exactly once around drag. One primary pointer owns a drag;
+a second pointer-down is ignored. Release, cancellation, lost pointer capture,
+and adapter teardown all close an accepted drag through the same terminal,
+exactly once.
 
 ## 6. Accessibility
 

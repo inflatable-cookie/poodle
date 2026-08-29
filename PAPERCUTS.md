@@ -7,6 +7,27 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-29 — `scripts/gate-tree-guard.ts` keeps its snapshot at a fixed
+  `os.tmpdir()` path shared by every worktree, and `--compare` deletes it. Two
+  concurrent `effigy ci:web`/`qa` runs in different worktrees therefore fail
+  each other with "no snapshot found". Key the snapshot by repository root or
+  by a run id. Seen while closing g16.031; the same board passed on a rerun.
+
+- 2026-08-29 — The Svelte package build strips a function parameter's type
+  annotation but leaves the optional marker, so `function f(id?: number)` in a
+  `.svelte` script ships as invalid JavaScript and breaks every consumer import
+  of that component. Nothing in the component suites catches it; only
+  `effigy test:web-pack-install` does. Use a default parameter instead, or make
+  the strip handle `?`. Found while closing g16.031.
+
+- 2026-08-29 — `scripts/parity-evidence-ledger.ts` cites one focused test per
+  web surface and picks the alphabetically first matching file. Adding a
+  second focused test file for a component can silently move that citation and
+  fail `docs:check` with "ledger cell differs from live evidence". Either cite
+  every matching file or sort by a stated rule. Found while closing g16.031;
+  worked around by naming the new file after the cited one
+  (`AudioControlsLifecycle`).
+
 - 2026-08-29 — `effigy ci:rust` rustfmt-dirties dozens of unrelated
   `packages/render/src/*.rs` files in an otherwise clean worker tree. Revert
   the extra formatting or stop running crate-wide rustfmt from the CI board.

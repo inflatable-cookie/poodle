@@ -1,7 +1,7 @@
 # 008 Audio Control Family
 
 Status: accepted
-Updated: 2026-08-14
+Updated: 2026-08-29
 Depends on: `006-headless-core-and-machine-model.md`,
 `007-appearance-recipe-contract.md`
 Source: Loophole `docs/research/poodle-instrument-rfc.md`
@@ -206,9 +206,45 @@ cancelled. `drag` in VisualState exposes the active coarse/fine phase. Wheel,
 keyboard, reset, and text commits are atomic value changes and commits; they
 do not pretend to be sustained pointer gestures.
 
+One gesture is open at a time. A second begin while one is open is inert and
+cannot re-anchor it. Release and cancellation are the same terminal, and both
+are inert once the gesture is closed, so a repeated terminal, a stale pointer,
+lost pointer capture, or adapter teardown can neither strand nor duplicate the
+pair. Adapters own primary-pointer admission and capture; the machine owns
+acceptance and termination. Terminal cleanup resolves from the adapter's own
+synchronous machine snapshot, so a host that removes the control from inside a
+gesture callback still receives its end effect.
+
+Effects from one accepted transition are delivered in the order the machine
+returned them. When a host tears the control down from inside one of them, the
+terminal that teardown produces is delivered after that batch drains, never
+interleaved into it. A coarse press therefore always reports its value change
+before its terminal, whichever runtime the host removed the control from.
+
+A disabled control rejects every user mutation: pointer, wheel, keyboard,
+reset, and type-in commit are inert. Three routes deliberately remain live,
+because a disabled control still has to be driven and cleaned up by its host:
+host-owned value replacement, automation state, and hover/focus reporting still
+apply; an open entry can still be cancelled; and a gesture accepted while the
+control was enabled still closes through its terminal.
+
+Coarse and fine switching re-anchors at the current value and the current
+pointer position, so holding or releasing the modifier never jumps the value.
+The transition that flips the modifier only rebases; travel resumes from the
+next pointer sample. Knob vertical mapping consumes anchored pointer delta over
+`dragSensitivity` and circular mapping consumes the absolute sweep position;
+each mode ignores the other's input. XYPad rebases both axes together and moves
+its pair atomically to the accepted press position.
+
 Fader detents are plain values. A value within the configured normalized snap
-distance resolves to the nearest detent. Gesture effects remain skin
-independent for later host-automation binding.
+distance resolves to the nearest detent. The radius is inclusive, and the first
+declared detent wins an exact tie. Gesture effects remain skin independent for
+later host-automation binding.
+
+`packages/core/src/audio/` and `packages/contracts/headless/` carry the same
+distinctions and the same ordered effects. The bounded `audioControls` section
+of `packages/contracts/headless/vectors/machines.json` is the paired evidence;
+both machine-conformance runners execute it.
 
 ## Meter Feed And Ballistics
 

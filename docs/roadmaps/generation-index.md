@@ -21,7 +21,8 @@ Updated: 2026-08-29
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: dispatch `g16.031`. Keep `g16.022` with the orchestrator until
+  - Next move: review and merge `g16.031`, then dispatch `g16.032` against its
+    landed paired transitions. Keep `g16.022` with the orchestrator until
     the landed-kernel review fixes its exact public web adapter surface. Keep
     `032` away from drag card `025` because both edit Node/GPUI interaction
     routing.

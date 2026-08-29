@@ -1,6 +1,7 @@
 # g16.031 — Continuous Audio Machine And Web Lifecycle
 
-Status: ready to launch — audit complete; `g16.030` merged in PR #98
+Status: complete — PR #99 on `t3code/continuous-audio-web-lifecycle`;
+log `../../logs/2026-08/20260829-g16-031-continuous-audio-machine-and-web-lifecycle.md`
 Opened: 2026-08-28
 Depends on: completed `g16.030`; this lane edits the same paired core/headless
 exports and shared machine-vector corpus
@@ -55,7 +56,11 @@ Keep architecture 008 and the three component contracts authoritative:
   press position, and applies anchored fine travel to both axes;
 - keys, bounds, reset, wheel, and valid type-in are atomic value-change plus
   value-commit operations, not pointer gestures; and
-- disabled controls are inert on every event route.
+- disabled controls reject every user mutation. Host value replacement,
+  automation state, hover/focus reporting, entry cancellation, and the terminal
+  of a gesture accepted while enabled stay live, and each exception is pinned
+  by its own shared case. (Corrected in review: the original wording claimed
+  inertia on every route, which neither core implements nor should.)
 
 Exact type and event names may follow local conventions. TypeScript and Rust
 must expose the same distinctions and ordered effects.
@@ -80,38 +85,48 @@ runtime registry, generated adapter, specimen matrix, or second ledger.
 
 ## Execution Plan
 
-- [ ] **Batch 1 — shared cases and paired cores.** Bring the TypeScript and
+- [x] **Batch 1 — shared cases and paired cores.** Bring the TypeScript and
       Rust contexts, events, transitions, and ordered effects onto the locked
       model and prove them against one corpus.
-- [ ] **Batch 2 — web pointer lifecycle.** Accept only one primary pointer,
+- [x] **Batch 2 — web pointer lifecycle.** Accept only one primary pointer,
       preserve capture ownership, close once on release/cancel/lost capture or
       teardown, and ignore stale pointer ids in Svelte and React.
-- [ ] **Batch 3 — web entry lifecycle.** Give Svelte Knob/Fader the same
+- [x] **Batch 3 — web entry lifecycle.** Give Svelte Knob/Fader the same
       Enter/Escape/blur suppression as React and test both adapters through
       actual entry focus transitions.
-- [ ] **Batch 4 — focused component proof.** Add mounted Svelte and React
+- [x] **Batch 4 — focused component proof.** Add mounted Svelte and React
       pointer/callback tests for all three controls and retain human-centred
       specimens unchanged unless a small stateful example repair is required.
-- [ ] **Batch 5 — closeout.** Record exact paired APIs, vectors, callback
+- [x] **Batch 5 — closeout.** Record exact paired APIs, vectors, callback
       traces, validation, non-claims, and the `g16.032` dependency in one log.
 
 ## Acceptance Criteria
 
-- [ ] TypeScript and Rust return identical contexts and ordered effects for
+- [x] TypeScript and Rust return identical contexts and ordered effects for
       the shared Knob, Fader, and XYPad cases.
-- [ ] Every accepted pointer gesture emits exactly one begin and one end;
+- [x] Every accepted pointer gesture emits exactly one begin and one end;
       repeated, stale, lost-capture, cancel, and teardown paths cannot strand
       or duplicate a gesture.
-- [ ] Fine-mode changes preserve continuity in both languages.
-- [ ] Fader detents, Knob modes, and XYPad press/atomic-pair behavior match the
+- [x] Fine-mode changes preserve continuity in both languages.
+- [x] Fader detents, Knob modes, and XYPad press/atomic-pair behavior match the
       three contracts in both cores.
-- [ ] Svelte and React produce the same pointer and callback traces.
-- [ ] Svelte Knob/Fader Enter commits once, Escape commits nothing, and the
+- [x] Svelte and React produce the same pointer and callback traces.
+- [x] Svelte Knob/Fader Enter commits once, Escape commits nothing, and the
       following blur cannot duplicate or reverse either result.
-- [ ] Existing public web props and callback names remain intact; no alias,
+- [x] Existing public web props and callback names remain intact; no alias,
       fallback, DOM-event public type, or drag-and-drop dependency is added.
-- [ ] No ledger cell moves. This card proves paired semantics and web adapter
+- [x] No ledger cell moves. This card proves paired semantics and web adapter
       behavior; native mounted proof belongs to `g16.032`.
+
+## Result
+
+The `audioControls` vector section carries 14 Knob, 10 Fader, and 11 XYPad
+ordered step cases over 171 steps plus 17 geometry cases, executed by both
+machine-conformance runners with no tolerance. The only public web addition is
+the `DRAG_CANCEL` event on the two core event unions; Rust gained the
+`knob_transition` / `fader_transition` pair, entry and wheel routes, and the
+pointer-mapping and hit-test helpers it had never carried. Specimens needed no
+repair.
 
 ## Writable Scope
 
