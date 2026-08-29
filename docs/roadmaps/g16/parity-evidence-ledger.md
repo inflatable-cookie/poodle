@@ -1,7 +1,7 @@
 # g16.001 — Active-Cohort Parity Evidence Ledger
 
 Status: current evidence snapshot
-Updated: 2026-08-29
+Updated: 2026-08-26
 Source: live public Svelte exports, generated portable catalogue, runtime registries, focused tests, and retained g15 evidence
 
 ## Purpose

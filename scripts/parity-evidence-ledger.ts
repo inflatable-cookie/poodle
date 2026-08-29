@@ -81,6 +81,10 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   TextInput: "text_input_controlled_editing_and_identity_rebuild_the_host_spec",
   DurationInput: "duration_input_segments_edit_and_rebuild_the_host_spec",
   TimeInput: "time_input_segmented_editor_commits_drafts_and_bounds",
+  NumberInput: [
+    "number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value",
+    "number_input_mounted_accessibility_projects_spin_button_surface",
+  ],
   Breadcrumbs: "breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard",
   IconButton: "icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard",
   Collapsible: "collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard",
