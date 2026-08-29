@@ -155,6 +155,30 @@ mode split, the inclusive detent radius with first-declared tie resolution, and
 the paired-vector location. Knob, Fader, and XY Pad contracts state the same in
 their machine and callback sections.
 
+## Orchestrator review, 2026-08-29
+
+Three blocking findings on head `ad27306a6`, all addressed:
+
+1. **React could strand a gesture.** The unmount callback closed over a
+   render's context; a host that removes the control from inside
+   `onGestureBegin` unmounts before React commits the render that opened the
+   gesture, so cleanup ran `DRAG_CANCEL` against `drag: "none"` and emitted no
+   `onGestureEnd`. Fixed by the live snapshot above, with the reproduction as a
+   regression in both suites.
+2. **DragNumberField was partially migrated.** `dragNumberTransition` is
+   restored byte-identical to `main` and its lifecycle test removed. Its repair
+   belongs to a later card, with both adapters.
+3. **"Disabled is inert on every route" was false.** Both cores deliberately
+   keep host and presentation routes and the gesture terminal. The card,
+   architecture 008, the three contracts, and this log now define disabled
+   *user-mutation* inertia and name the exceptions, and three new shared cases
+   pin them. Both runners carry automation state so `SET_AUTOMATION` is real
+   evidence rather than an untested claim.
+
+A follow-up `svelte-check` error in the new Svelte regression (a deferred
+`let view` binding widened the query return type) was fixed by destructuring
+the render result.
+
 ## Non-claims
 
 - no ledger cell moved and no evidence level changed;
