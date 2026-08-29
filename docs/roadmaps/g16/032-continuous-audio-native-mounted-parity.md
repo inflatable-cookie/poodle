@@ -1,6 +1,6 @@
 # g16.032 — Continuous Audio Native Mounted Parity
 
-Status: ready — `g16.031` merged in PR #99; do not overlap `g16.025`
+Status: complete — awaiting review; do not overlap `g16.025`
 Opened: 2026-08-28
 Depends on: completed `g16.031`; landed paired audio machines and callback
 effects
@@ -109,46 +109,46 @@ manual.
 
 ## Execution Plan
 
-- [ ] **Batch 1 — continuous-value Node event.** Add the event, backend
+- [x] **Batch 1 — continuous-value Node event.** Add the event, backend
       dispatch, capture/cancel lifetime, wheel/double activation, and focused
       backend tests while retaining Slider/RangeSlider/ResizeHandle behavior.
-- [ ] **Batch 2 — Fader mount.** Add handlers, machine-backed rebuild state,
+- [x] **Batch 2 — Fader mount.** Add handlers, machine-backed rebuild state,
       axis/detent/fine behavior, keyboard/wheel/reset/entry, accessibility,
       and one mounted regression.
-- [ ] **Batch 3 — Knob mount.** Add vertical/circular mapping, fine rebase,
+- [x] **Batch 3 — Knob mount.** Add vertical/circular mapping, fine rebase,
       keyboard/wheel/reset/entry, accessibility, and one mounted regression.
-- [ ] **Batch 4 — XYPad mount.** Add atomic two-axis press/move, fine rebase,
+- [x] **Batch 4 — XYPad mount.** Add atomic two-axis press/move, fine rebase,
       reset, independent keyboard sliders, accessibility children, and one
       mounted regression.
-- [ ] **Batch 5 — specimens and closeout.** Make the three GPUI specimen
+- [x] **Batch 5 — specimens and closeout.** Make the three GPUI specimen
       examples visibly stateful, update only the three mounted ledger cells,
       and record exact behavior, validation, and non-claims in one log.
 
 ## Acceptance Criteria
 
-- [ ] One accepted continuous-value gesture produces one press, zero or more
+- [x] One accepted continuous-value gesture produces one press, zero or more
       moves, and exactly one release or cancel, including outside-bounds and
       lost-host paths.
-- [ ] The Node event contains only normalized local position, logical-pixel
+- [x] The Node event contains only normalized local position, logical-pixel
       delta, phase, and modifiers; it has no payload drag/drop or runtime type.
-- [ ] Existing Slider, RangeSlider, and ResizeHandle mounted regressions stay
+- [x] Existing Slider, RangeSlider, and ResizeHandle mounted regressions stay
       green without migration.
-- [ ] Fader proves horizontal/vertical position, detents, fine rebase,
+- [x] Fader proves horizontal/vertical position, detents, fine rebase,
       keyboard, wheel, reset, type-in, callback ordering, disabled inertia,
       and full Slider accessibility through production GPUI dispatch.
-- [ ] Knob proves vertical/circular movement, fine rebase, keyboard, wheel,
+- [x] Knob proves vertical/circular movement, fine rebase, keyboard, wheel,
       reset, type-in, callback ordering, disabled inertia, and full Slider
       accessibility through production GPUI dispatch.
-- [ ] XYPad proves coarse press, atomic pair moves/commits, fine rebase, reset,
+- [x] XYPad proves coarse press, atomic pair moves/commits, fine rebase, reset,
       independent axis keys, disabled inertia, and two child Slider semantics
       through production GPUI dispatch.
-- [ ] Human-facing GPUI specimens visibly rebuild from interaction and remain
+- [x] Human-facing GPUI specimens visibly rebuild from interaction and remain
       aligned with the curated Svelte/React examples.
-- [ ] Only Fader, Knob, and XYPad GPUI mounted-behavior cells move from missing
+- [x] Only Fader, Knob, and XYPad GPUI mounted-behavior cells move from missing
       to mounted. Starting from the expected post-`g16.030` 49 / 125 total,
       the ledger becomes 52 mounted / 122 missing. Accessibility and visual
       comparison cells do not move.
-- [ ] Jetstream receives no behavior claim. Mechanical shared Rust compile
+- [x] Jetstream receives no behavior claim. Mechanical shared Rust compile
       maintenance is allowed only if the Node vocabulary requires it.
 
 ## Writable Scope

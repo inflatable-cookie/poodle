@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.032 ready to launch after g16.031 merged in PR #99
+Status: active — g16.032 complete, awaiting review; g16.031 merged in PR #99
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -62,7 +62,7 @@ stay maintained; backend admission is not part of the first card.
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
-32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — ready; depends on merged 031 and must not overlap 025
+32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete, awaiting review; ledger 52 mounted / 122 missing
 
 ## Parallel Continuation
 
@@ -101,10 +101,11 @@ after `g16.030`.
 EditableLabel still needs an operator-owned editing decision. Fader, Knob, and
 XYPad now have a completed bounded audit and two serial cards: `g16.031`
 aligns paired machines plus Svelte/React gesture and entry lifecycles;
-`g16.032` adds the missing continuous-value Node/GPUI seam and three mounted
-proofs. The old “visual-state-only Rust” description was inaccurate: Rust
-machines exist, but their fine movement and component distinctions drift and
-the native render path never mounts them. GPUI
+`g16.032` added the missing continuous-value Node/GPUI seam and three mounted
+proofs; ledger 49 → 52 mounted, 125 → 122 missing. The old “visual-state-only
+Rust” description was inaccurate: Rust machines exist, but their fine
+movement and component distinctions drifted until `g16.031`, and the native
+render path did not mount them until `g16.032`. GPUI
 accessibility, cross-runtime visual comparison, motion learning, the Longhorn
 lab, and Jetstream admission remain separate programme choices rather than
 component cards.
@@ -308,10 +309,8 @@ ledger cell moved.
 
 ## Next Task
 
-Dispatch `g16.032` against the landed `knob_transition` /
-`fader_transition` / `xy_pad_transition` surfaces and the new Rust
-pointer-mapping helpers. Keep `g16.022` with the orchestrator until its
-landed-kernel review records the exact public web adapter surface; do not ask
-its worker to discover that API during implementation. Never overlap
-`g16.032` with drag card `g16.025` because both edit Node/GPUI interaction
-routing.
+`g16.032` is implemented and awaiting review. After operator-authorized merge,
+the orchestrator chooses from `g16.022` (still gated on the landed-kernel
+web adapter surface) and the component-continuation runway. EditableLabel
+stays decision-blocked. Never overlap a Node/GPUI routing card with
+`g16.025`.

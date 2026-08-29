@@ -181,7 +181,8 @@ pub fn fader(spec: &FaderSpec, ctx: &RenderContext<'_>) -> Node {
     root = root.child(rail);
 
     for detent in &spec.detents {
-        let norm = detent.clamp(0.0, 1.0) as f32;
+        let norm = poodle_headless::audio::normalize_value(*detent, spec.min, spec.max, spec.law)
+            .clamp(0.0, 1.0) as f32;
         let mut mark = Node::container();
         mark.style.descriptor.background = Some(accent);
         mark.style.descriptor.layout.width =
@@ -519,6 +520,36 @@ pub fn xy_pad(spec: &XYPadSpec, ctx: &RenderContext<'_>) -> Node {
         (1.0 - state.y_norm as f32) * size - thumb_size / 2.0,
     );
     root.child(thumb)
+}
+
+pub fn fader_with_handlers(
+    spec: &FaderSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &crate::audio_handlers::FaderHandlers,
+) -> Node {
+    let mut node = fader(spec, ctx);
+    crate::audio_handlers::bind_fader(&mut node, spec, ctx, handlers);
+    node
+}
+
+pub fn knob_with_handlers(
+    spec: &KnobSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &crate::audio_handlers::KnobHandlers,
+) -> Node {
+    let mut node = knob(spec, ctx);
+    crate::audio_handlers::bind_knob(&mut node, spec, ctx, handlers);
+    node
+}
+
+pub fn xy_pad_with_handlers(
+    spec: &XYPadSpec,
+    ctx: &RenderContext<'_>,
+    handlers: &crate::audio_handlers::XYPadHandlers,
+) -> Node {
+    let mut node = xy_pad(spec, ctx);
+    crate::audio_handlers::bind_xy_pad(&mut node, spec, ctx, handlers);
+    node
 }
 
 pub fn audio_switch(spec: &AudioSwitchSpec, ctx: &RenderContext<'_>) -> Node {

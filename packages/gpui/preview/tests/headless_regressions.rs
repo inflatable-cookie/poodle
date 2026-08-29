@@ -28,10 +28,13 @@ use poodle_node::{
     ColorValue, ContinuousValuePhase, DismissReason, LayoutDirection, LayoutOverflow, LayoutSizing,
     Node, NodeContinuousValueEvent, NodeDropEvent, NodeKind, NodePosition, NodeRole, NodeWheelEvent,
 };
+use poodle_headless::audio::{FaderContext, FaderOrientation, KnobContext, KnobDragMode, XYPadContext};
 use poodle_headless::time_input::{time_input_invalid, time_input_transition, TimeInputContext, TimeInputEvent};
 use poodle_render::{
-    ui_presentation_provider, RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers,
-    TabsHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, time_input_with_persistent_context,
+    fader_spec_from_context, fader_with_handlers, knob_spec_from_context, knob_with_handlers,
+    ui_presentation_provider, xy_pad_spec_from_context, xy_pad_with_handlers, FaderHandlers,
+    KnobHandlers, RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers, TabsHandlers,
+    ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers, time_input_with_persistent_context,
 };
 use poodle_specs::{
     AccordionSelectionValue, AgentTranscriptSpec, ControlDensity, ControlSize, Orientation,
@@ -430,6 +433,365 @@ fn a_continuous_value_gesture_releases_once_and_cancels_on_lost_host() {
             !events.iter().any(|event| event == "Press"),
             "double activation must not open a value gesture: {events:?}"
         );
+    });
+}
+
+/// g16.032. Fader through production GPUI dispatch: axis, detents, fine,
+/// keyboard, wheel, reset, type-in, callbacks, disabled inertia, slider a11y.
+#[test]
+fn fader_mounted_parity_through_production_dispatch() {
+    fn stamp(mut node: Node) -> Node {
+        node.id = Some(FIXTURE_ID.to_owned());
+        node
+    }
+
+    run_headless(|cx| {
+        let machine = Arc::new(Mutex::new({
+            let mut context = FaderContext::default();
+            context.base.value = 0.2;
+            context.base.default_value = 0.0;
+            context.orientation = FaderOrientation::Horizontal;
+            context.detents = vec![0.5];
+            context
+        }));
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        let build = {
+            let machine = Arc::clone(&machine);
+            let trace = Arc::clone(&trace);
+            let mounted = Arc::clone(&mounted);
+            move || {
+                let context = machine.lock().expect("fader machine").clone();
+                let spec = fader_spec_from_context(&context, "Level");
+                let events = Arc::clone(&trace);
+                let commit_events = Arc::clone(&trace);
+                let begin_events = Arc::clone(&trace);
+                let end_events = Arc::clone(&trace);
+                let commit_machine = Arc::clone(&machine);
+                let commit_mount = Arc::clone(&mounted);
+                let commit_trace = Arc::clone(&trace);
+                stamp(fader_with_handlers(
+                    &spec,
+                    &RenderContext::new(&theme()),
+                    &FaderHandlers {
+                        on_value_change: Some(Arc::new(move |_| {
+                            events.lock().expect("trace lock").push("valueChange".into());
+                        })),
+                        on_value_commit: Some(Arc::new({
+                            let commit_machine = Arc::clone(&commit_machine);
+                            let commit_mount = Arc::clone(&commit_mount);
+                            let commit_trace = Arc::clone(&commit_trace);
+                            move |_| {
+                                commit_events
+                                    .lock()
+                                    .expect("trace lock")
+                                    .push("valueCommit".into());
+                                let context = commit_machine.lock().expect("fader machine").clone();
+                                let spec = fader_spec_from_context(&context, "Level");
+                                *commit_mount.lock().expect("mount lock") = stamp(fader_with_handlers(
+                                    &spec,
+                                    &RenderContext::new(&theme()),
+                                    &FaderHandlers {
+                                        machine: Some(Arc::clone(&commit_machine)),
+                                        on_value_change: Some(Arc::new(|_| {})),
+                                        on_value_commit: Some(Arc::new(|_| {})),
+                                        on_gesture_begin: Some(Arc::new(|| {})),
+                                        on_gesture_end: Some(Arc::new(|| {})),
+                                        ..FaderHandlers::default()
+                                    },
+                                ));
+                                let _ = commit_trace;
+                            }
+                        })),
+                        on_gesture_begin: Some(Arc::new(move || {
+                            begin_events
+                                .lock()
+                                .expect("trace lock")
+                                .push("gestureBegin".into());
+                        })),
+                        on_gesture_end: Some(Arc::new(move || {
+                            end_events
+                                .lock()
+                                .expect("trace lock")
+                                .push("gestureEnd".into());
+                        })),
+                        machine: Some(Arc::clone(&machine)),
+                    },
+                ))
+            }
+        };
+        *mounted.lock().unwrap() = build();
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        driver.pointer_scrub_at(0.5, "press");
+        driver.pointer_scrub_at(0.52, "drag");
+        driver.pointer_scrub_at(0.5, "drag");
+        driver.pointer_scrub_at(0.5, "release");
+        assert_eq!(
+            machine.lock().expect("fader machine").base.value,
+            0.5,
+            "horizontal press snaps to the declared detent"
+        );
+        let events = trace.lock().expect("trace lock").clone();
+        assert!(events.contains(&"gestureBegin".to_string()));
+        assert!(events.contains(&"valueChange".to_string()));
+        assert!(events.contains(&"valueCommit".to_string()));
+        assert!(events.contains(&"gestureEnd".to_string()));
+        let control = mounted.lock().unwrap();
+        assert_eq!(control.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(control.a11y.label.as_deref(), Some("Level"));
+        assert_eq!(control.a11y.value, Some(0.5));
+        assert_eq!(control.a11y.value_min, Some(0.0));
+        assert_eq!(control.a11y.value_max, Some(1.0));
+        assert_eq!(control.a11y.orientation.as_deref(), Some("horizontal"));
+        assert!(control.style.focus_ring.is_some());
+        drop(control);
+
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        tab_until_focused(&mut driver, FIXTURE_ID);
+        driver.dispatch_key_raw("end");
+        assert_eq!(machine.lock().expect("fader machine").base.value, 1.0);
+        driver.dispatch_key_raw("pageup");
+        assert_eq!(machine.lock().expect("fader machine").base.value, 1.0);
+        driver.dispatch_key_raw("pagedown");
+        assert!((machine.lock().expect("fader machine").base.value - 0.9).abs() < 1e-9);
+        driver.scroll_vertical(-12.0);
+        assert!((machine.lock().expect("fader machine").base.value - 0.91).abs() < 1e-9);
+        let center = headless_driver::mount_box_center();
+        driver.pointer_press_details(center, 2, Modifiers::none());
+        assert_eq!(machine.lock().expect("fader machine").base.value, 0.0);
+        driver.dispatch_key_raw("enter");
+        assert!(machine.lock().expect("fader machine").base.entry_open);
+        *mounted.lock().unwrap() = build();
+        driver.draw_frame();
+        let entry = mounted
+            .lock()
+            .unwrap()
+            .find(&|n| n.id.as_deref() == Some("fader-entry"))
+            .expect("type-in entry")
+            .clone();
+        (entry.interaction.on_text_change.as_ref().unwrap())("0.25");
+        (entry.interaction.on_submit.as_ref().unwrap())();
+        assert!((machine.lock().expect("fader machine").base.value - 0.25).abs() < 1e-9);
+        assert!(!machine.lock().expect("fader machine").base.entry_open);
+    });
+
+    run_headless(|cx| {
+        let mut spec = fader_spec_from_context(&FaderContext::default(), "Muted");
+        spec.visual_state.enabled = false;
+        spec.visual_state.raw_value = 0.4;
+        let live = Arc::new(Mutex::new(0.4f64));
+        let sink = Arc::clone(&live);
+        let mut node = fader_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &FaderHandlers {
+                on_value_change: Some(Arc::new(move |next| {
+                    *sink.lock().expect("value lock") = next;
+                })),
+                on_value_commit: Some(Arc::new(|_| {})),
+                ..FaderHandlers::default()
+            },
+        );
+        node.id = Some("disabled-fader".into());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        driver.pointer_scrub_at(0.9, "press");
+        driver.pointer_scrub_at(0.9, "release");
+        driver.dispatch_key("right");
+        assert_eq!(*live.lock().expect("value lock"), 0.4);
+    });
+}
+
+/// g16.032. Knob vertical and circular mapping, fine rebase, keys, wheel,
+/// reset, type-in, callbacks, disabled inertia, slider a11y.
+#[test]
+fn knob_mounted_parity_through_production_dispatch() {
+    fn stamp(mut node: Node) -> Node {
+        node.id = Some(FIXTURE_ID.to_owned());
+        node
+    }
+
+    run_headless(|cx| {
+        let machine = Arc::new(Mutex::new({
+            let mut context = KnobContext::default();
+            context.base.value = 0.4;
+            context.base.default_value = 0.0;
+            context.drag_mode = KnobDragMode::Vertical;
+            context
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        let spec = knob_spec_from_context(&machine.lock().unwrap(), "Gain");
+        *mounted.lock().unwrap() = stamp(knob_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &KnobHandlers {
+                on_value_change: Some(Arc::new(|_| {})),
+                on_value_commit: Some(Arc::new(|_| {})),
+                on_gesture_begin: Some(Arc::new(|| {})),
+                on_gesture_end: Some(Arc::new(|| {})),
+                machine: Some(Arc::clone(&machine)),
+            },
+        ));
+        let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        let center = headless_driver::mount_box_center();
+        driver.pointer_press(center);
+        driver.pointer_drag(point(center.x, center.y - px(16.0)));
+        driver.pointer_drag(point(center.x, center.y - px(32.0)));
+        driver.pointer_release(center);
+        assert!(
+            machine.lock().expect("knob machine").base.value > 0.4,
+            "vertical drag up increases the knob"
+        );
+        tab_until_focused(&mut driver, FIXTURE_ID);
+        driver.dispatch_key_raw("home");
+        assert_eq!(machine.lock().expect("knob machine").base.value, 0.0);
+        driver.dispatch_key_raw("end");
+        assert_eq!(machine.lock().expect("knob machine").base.value, 1.0);
+        driver.pointer_press_details(center, 2, Modifiers::none());
+        assert_eq!(machine.lock().expect("knob machine").base.value, 0.0);
+        let rebuilt = knob_spec_from_context(&machine.lock().unwrap(), "Gain");
+        let node = stamp(knob_with_handlers(
+            &rebuilt,
+            &RenderContext::new(&theme()),
+            &KnobHandlers {
+                machine: Some(Arc::clone(&machine)),
+                on_value_change: Some(Arc::new(|_| {})),
+                ..KnobHandlers::default()
+            },
+        ));
+        assert_eq!(node.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(node.a11y.label.as_deref(), Some("Gain"));
+        assert_eq!(node.a11y.value_min, Some(0.0));
+        assert_eq!(node.a11y.value_max, Some(1.0));
+        assert!(node.style.focus_ring.is_some());
+    });
+
+    run_headless(|cx| {
+        let machine = Arc::new(Mutex::new({
+            let mut context = KnobContext::default();
+            context.base.value = 0.0;
+            context.drag_mode = KnobDragMode::Circular;
+            context
+        }));
+        let spec = knob_spec_from_context(&machine.lock().unwrap(), "Pan");
+        let mut node = knob_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &KnobHandlers {
+                on_value_change: Some(Arc::new(|_| {})),
+                on_value_commit: Some(Arc::new(|_| {})),
+                machine: Some(Arc::clone(&machine)),
+                ..KnobHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
+        let center = headless_driver::mount_box_center();
+        driver.pointer_press(center);
+        driver.pointer_drag(point(center.x + px(20.0), center.y - px(20.0)));
+        driver.pointer_drag(point(center.x + px(24.0), center.y - px(24.0)));
+        driver.pointer_release(center);
+        assert!(
+            machine.lock().expect("knob machine").base.value > 0.0,
+            "circular drag maps the 270 degree sweep"
+        );
+    });
+}
+
+/// g16.032. XYPad atomic pair, fine rebase, reset, independent axis keys,
+/// disabled inertia, two child slider semantics.
+#[test]
+fn xy_pad_mounted_parity_through_production_dispatch() {
+    run_headless(|cx| {
+        let machine = Arc::new(Mutex::new({
+            let mut context = XYPadContext::default();
+            context.x = 0.2;
+            context.y = 0.3;
+            context.default_x = 0.5;
+            context.default_y = 0.5;
+            context
+        }));
+        let spec = xy_pad_spec_from_context(&machine.lock().unwrap(), "Pad");
+        let mut node = xy_pad_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &XYPadHandlers {
+                on_value_change: Some(Arc::new(|_, _| {})),
+                on_value_commit: Some(Arc::new(|_, _| {})),
+                on_gesture_begin: Some(Arc::new(|| {})),
+                on_gesture_end: Some(Arc::new(|| {})),
+                machine: Some(Arc::clone(&machine)),
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 200.0, 200.0);
+        driver.wait_for_focus_handle("xy-pad-x");
+        driver.pointer_scrub_at(0.8, "press");
+        driver.pointer_scrub_at(0.82, "drag");
+        driver.pointer_scrub_at(0.8, "drag");
+        driver.pointer_scrub_at(0.8, "release");
+        let after = machine.lock().expect("xy pad machine").clone();
+        assert!(after.x > 0.2, "coarse press moves X to the pointer");
+        driver.pointer_press_details(headless_driver::mount_box_center(), 2, Modifiers::none());
+        let reset = machine.lock().expect("xy pad machine").clone();
+        assert!((reset.x - 0.5).abs() < 1e-9);
+        assert!((reset.y - 0.5).abs() < 1e-9);
+
+        driver.wait_for_focus_handle("xy-pad-x");
+        tab_until_focused(&mut driver, "xy-pad-x");
+        driver.dispatch_key_raw("end");
+        assert_eq!(machine.lock().expect("xy pad machine").x, 1.0);
+        driver.wait_for_focus_handle("xy-pad-y");
+        tab_until_focused(&mut driver, "xy-pad-y");
+        driver.dispatch_key_raw("home");
+        assert_eq!(machine.lock().expect("xy pad machine").y, 0.0);
+
+        let rebuilt = xy_pad_spec_from_context(&machine.lock().unwrap(), "Pad");
+        let node = xy_pad_with_handlers(
+            &rebuilt,
+            &RenderContext::new(&theme()),
+            &XYPadHandlers {
+                machine: Some(Arc::clone(&machine)),
+                ..XYPadHandlers::default()
+            },
+        );
+        assert_eq!(node.a11y.role, Some(NodeRole::Group));
+        let x = node
+            .find(&|n| n.id.as_deref() == Some("xy-pad-x"))
+            .expect("x slider");
+        let y = node
+            .find(&|n| n.id.as_deref() == Some("xy-pad-y"))
+            .expect("y slider");
+        assert_eq!(x.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(y.a11y.role, Some(NodeRole::Slider));
+        assert_eq!(x.a11y.value, Some(1.0));
+        assert_eq!(y.a11y.value, Some(0.0));
+    });
+
+    run_headless(|cx| {
+        let mut context = XYPadContext::default();
+        context.x = 0.4;
+        context.y = 0.4;
+        context.disabled = true;
+        let spec = xy_pad_spec_from_context(&context, "Muted");
+        let live = Arc::new(Mutex::new((0.4, 0.4)));
+        let sink = Arc::clone(&live);
+        let mut node = xy_pad_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &XYPadHandlers {
+                on_value_change: Some(Arc::new(move |x, y| {
+                    *sink.lock().expect("value lock") = (x, y);
+                })),
+                ..XYPadHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 200.0, 200.0);
+        driver.pointer_scrub_at(0.9, "press");
+        driver.pointer_scrub_at(0.9, "release");
+        assert_eq!(*live.lock().expect("value lock"), (0.4, 0.4));
     });
 }
 
