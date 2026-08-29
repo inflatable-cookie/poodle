@@ -22,7 +22,7 @@ export function Knob({ size, sizeRole, density, value, min = 0, max = 1, law = {
   const entry = useRef<HTMLInputElement>(null);
   const activePointer = useRef<number | null>(null);
   const skipEntryBlur = useRef(false);
-  const cancelOnUnmount = useRef<(pointerId?: number) => void>(() => {});
+  const cancelOnUnmount = useRef<(pointerId?: number | null) => void>(() => {});
   const currentValue = value ?? uncontrolled;
   const context: KnobContext = { ...machine, value: currentValue, min, max, law, defaultValue, dragMode, dragSensitivity, keyboardStep, format, automation, disabled };
   const visualState = knobVisualState(context);
@@ -65,8 +65,8 @@ export function Knob({ size, sizeRole, density, value, min = 0, max = 1, law = {
    * way, so a captured gesture can never outlive its pointer or its component.
    * A stale pointer id is ignored, and the machine makes a repeat inert.
    */
-  function cancelGesture(pointerId?: number) {
-    if (activePointer.current === null || (pointerId !== undefined && activePointer.current !== pointerId)) return;
+  function cancelGesture(pointerId: number | null = null) {
+    if (activePointer.current === null || (pointerId !== null && activePointer.current !== pointerId)) return;
     activePointer.current = null; send({ type: "DRAG_CANCEL" });
   }
   cancelOnUnmount.current = cancelGesture;

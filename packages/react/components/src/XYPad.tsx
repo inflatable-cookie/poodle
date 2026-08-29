@@ -19,7 +19,7 @@ export function XYPad({ size, sizeRole, density, x, y, minX = 0, maxX = 1, minY 
   const [machine, setMachine] = useState(createXYPadContext);
   const root = useRef<HTMLDivElement>(null);
   const activePointer = useRef<number | null>(null);
-  const cancelOnUnmount = useRef<(pointerId?: number) => void>(() => {});
+  const cancelOnUnmount = useRef<(pointerId?: number | null) => void>(() => {});
   const currentX = x ?? uncontrolled.x;
   const currentY = y ?? uncontrolled.y;
   const context: XYPadContext = { ...machine, x: currentX, y: currentY, minX, maxX, minY, maxY, lawX, lawY, defaultX, defaultY, keyboardStepX, keyboardStepY, automation, disabled };
@@ -44,8 +44,8 @@ export function XYPad({ size, sizeRole, density, x, y, minX = 0, maxX = 1, minY 
    * way, so a captured gesture can never outlive its pointer or its component.
    * A stale pointer id is ignored, and the machine makes a repeat inert.
    */
-  function cancelGesture(pointerId?: number) {
-    if (activePointer.current === null || (pointerId !== undefined && activePointer.current !== pointerId)) return;
+  function cancelGesture(pointerId: number | null = null) {
+    if (activePointer.current === null || (pointerId !== null && activePointer.current !== pointerId)) return;
     activePointer.current = null; send({ type: "DRAG_CANCEL" });
   }
   cancelOnUnmount.current = cancelGesture;

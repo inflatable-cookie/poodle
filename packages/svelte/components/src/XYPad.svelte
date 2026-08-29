@@ -85,8 +85,8 @@
    * way, so a captured gesture can never outlive its pointer or its component.
    * A stale pointer id is ignored, and the machine makes a repeat inert.
    */
-  function cancelGesture(pointerId?: number): void {
-    if (activePointer === null || (pointerId !== undefined && activePointer !== pointerId)) return;
+  function cancelGesture(pointerId: number | null = null): void {
+    if (activePointer === null || (pointerId !== null && activePointer !== pointerId)) return;
     activePointer = null;
     send({ type: "DRAG_CANCEL" });
   }
