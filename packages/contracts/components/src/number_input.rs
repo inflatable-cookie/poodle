@@ -245,15 +245,19 @@ impl NumberInputSpec {
     /// Whether an increment/decrement from the active draft or committed
     /// value would produce a valid next result. Used to disable steppers
     /// without inventing a clamped value.
+    ///
+    /// Matches the transition machine: no draft → committed; empty draft →
+    /// null baseline; valid draft → parsed value; invalid draft → inert.
     pub fn can_step(&self, direction: i32) -> bool {
         let context = self.to_context();
         if context.disabled || context.read_only {
             return false;
         }
-        let baseline = self
-            .draft_value
-            .as_deref()
-            .and_then(|text| {
+
+        let baseline = match self.draft_value.as_deref() {
+            None => self.value,
+            Some("") => None,
+            Some(text) => {
                 if poodle_headless::number_input::number_draft_constraint_valid(
                     text,
                     self.min,
@@ -264,10 +268,11 @@ impl NumberInputSpec {
                     poodle_headless::number_input::parse_number_decimal(text)
                         .map(poodle_headless::number_input::number_decimal_to_number)
                 } else {
-                    None
+                    return false;
                 }
-            })
-            .or(self.value);
+            }
+        };
+
         step_number_value(
             baseline,
             direction,
@@ -419,6 +424,30 @@ mod tests {
             .with_step(Some(1.0));
         assert!(!at_max.can_step(1));
         assert!(at_max.can_step(-1));
+    }
+
+    #[test]
+    fn steppers_match_transition_baselines_for_empty_and_invalid_drafts() {
+        let empty_draft = NumberInputSpec::new(Some(5.0))
+            .with_min(Some(0.0))
+            .with_max(Some(10.0))
+            .with_step(Some(1.0))
+            .with_draft_value(Some(String::new()));
+        // Empty draft uses the null baseline (min), not committed 5.
+        assert!(empty_draft.can_step(1));
+        assert_eq!(
+            step_number_value(None, 1, Some(0.0), Some(10.0), Some(1.0), None),
+            Some(0.0)
+        );
+
+        let invalid_draft = NumberInputSpec::new(Some(5.0))
+            .with_min(Some(0.0))
+            .with_max(Some(10.0))
+            .with_step(Some(1.0))
+            .with_draft_value(Some("1e2".into()));
+        assert!(!invalid_draft.can_step(1));
+        assert!(!invalid_draft.can_step(-1));
+        assert_eq!(invalid_draft.accessible_value_now(), None);
     }
 
     #[test]

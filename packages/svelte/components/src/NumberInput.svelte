@@ -211,6 +211,10 @@
   }
 
   async function runValidation(nextValue: number | null): Promise<void> {
+    // Invalidate any in-flight validation before the idle early-return so a
+    // clear/replacement cannot be overwritten by a stale resolve.
+    const validationKey = ++activeValidationKey;
+
     if (!validate || nextValue === null) {
       internalValidationStatus = "idle";
       validationMessage = "";
@@ -219,7 +223,6 @@
     }
 
     const validationValue = formatNumberCommitted(nextValue, precision);
-    const validationKey = ++activeValidationKey;
     internalValidationStatus = "validating";
     validationMessage = "";
     emitValidationChange();

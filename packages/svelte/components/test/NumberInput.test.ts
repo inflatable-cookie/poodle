@@ -126,4 +126,34 @@ describe("NumberInput (svelte)", () => {
     const field = asyncCase.container.querySelector<HTMLElement>(".poodle-number-input__field");
     expect(field?.getAttribute("data-validation-state")).toBe("invalid");
   });
+
+  it("ignores a stale async validation result after clear", async () => {
+    let release!: (result: { valid: boolean; message: string }) => void;
+    const validate = vi.fn(
+      () =>
+        new Promise<{ valid: boolean; message: string }>((resolve) => {
+          release = resolve;
+        }),
+    );
+    const onValidationChange = vi.fn();
+    const { container } = render(NumberInput, {
+      props: { value: 5, min: 0, max: 10, validate, onValidationChange },
+    });
+    const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
+
+    await fireEvent.input(control, { target: { value: "3" } });
+    await waitFor(() => expect(validate).toHaveBeenCalledTimes(1));
+    await fireEvent.input(control, { target: { value: "" } });
+    await waitFor(() => {
+      expect(onValidationChange).toHaveBeenCalledWith(expect.objectContaining({ status: "idle" }));
+    });
+
+    release({ valid: false, message: "stale" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(onValidationChange).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: "invalid", message: "stale" }),
+    );
+    const field = container.querySelector<HTMLElement>(".poodle-number-input__field");
+    expect(field?.getAttribute("data-validation-state")).not.toBe("invalid");
+  });
 });

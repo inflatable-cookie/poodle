@@ -885,11 +885,16 @@ fn number_input_conformance() {
         match op {
             "classify" => {
                 let classified = classify_number_draft(s(case, "value"));
-                let actual = json!({
+                let mut actual = json!({
                     "kind": kind_str(classified.kind),
                     "fractionalDigits": classified.fractional_digits,
                     "value": classified.decimal.map(number_decimal_to_number),
                 });
+                // Oversized coefficients lose f64 exactness; vectors may omit
+                // `value` and assert draft kind / scale only.
+                if expect.get("value").is_none() {
+                    actual.as_object_mut().unwrap().remove("value");
+                }
                 assert_eq!(canonicalize(&actual), canonicalize(expect), "classify {case}");
             }
             "configValid" => {

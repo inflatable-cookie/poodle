@@ -60,15 +60,16 @@ pub enum NumberDraftKind {
     Complete,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct NumberDecimal {
     pub negative: bool,
-    /// Absolute integer coefficient; value = ± digits / 10^scale.
-    pub digits: i128,
+    /// Absolute digit coefficient (base 10), no leading zeros except `"0"`.
+    /// value = ± digits / 10^scale.
+    pub digits: String,
     pub scale: u32,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct NumberDraftClassification {
     pub kind: NumberDraftKind,
     pub decimal: Option<NumberDecimal>,
@@ -208,11 +209,10 @@ pub fn parse_number_decimal(text: &str) -> Option<NumberDecimal> {
     let frac_raw = parts.next().unwrap_or("");
     let int_part = if int_raw.is_empty() { "0" } else { int_raw };
     let digits_text = strip_leading_zeros(&format!("{int_part}{frac_raw}"));
-    let digits: i128 = digits_text.parse().ok()?;
 
     Some(NumberDecimal {
         negative: negative && digits_text != "0",
-        digits,
+        digits: digits_text,
         scale: frac_raw.len() as u32,
     })
 }
@@ -263,26 +263,284 @@ pub fn classify_number_draft(text: &str) -> NumberDraftClassification {
     }
 }
 
-fn pow10(exp: u32) -> Option<i128> {
-    let mut result: i128 = 1;
-    for _ in 0..exp {
-        result = result.checked_mul(10)?;
+fn cmp_unsigned_digits(a: &str, b: &str) -> std::cmp::Ordering {
+    let a = strip_leading_zeros(a);
+    let b = strip_leading_zeros(b);
+    match a.len().cmp(&b.len()) {
+        std::cmp::Ordering::Equal => a.cmp(&b),
+        ord => ord,
     }
-    Some(result)
 }
 
-fn rescale_digits(decimal: NumberDecimal, target_scale: u32) -> Option<i128> {
+fn add_unsigned_digits(a: &str, b: &str) -> String {
+    let a = a.as_bytes();
+    let b = b.as_bytes();
+    let mut i = a.len();
+    let mut j = b.len();
+    let mut carry = 0u8;
+    let mut out = Vec::with_capacity(a.len().max(b.len()) + 1);
+
+    while i > 0 || j > 0 || carry > 0 {
+        let da = if i > 0 {
+            i -= 1;
+            a[i] - b'0'
+        } else {
+            0
+        };
+        let db = if j > 0 {
+            j -= 1;
+            b[j] - b'0'
+        } else {
+            0
+        };
+        let sum = da + db + carry;
+        out.push(b'0' + (sum % 10));
+        carry = sum / 10;
+    }
+
+    out.reverse();
+    strip_leading_zeros(std::str::from_utf8(&out).unwrap_or("0"))
+}
+
+fn sub_unsigned_digits(a: &str, b: &str) -> String {
+    debug_assert!(cmp_unsigned_digits(a, b) != std::cmp::Ordering::Less);
+    let a = a.as_bytes();
+    let b = b.as_bytes();
+    let mut i = a.len();
+    let mut j = b.len();
+    let mut borrow = 0i8;
+    let mut out = Vec::with_capacity(a.len());
+
+    while i > 0 {
+        i -= 1;
+        let da = (a[i] - b'0') as i8;
+        let db = if j > 0 {
+            j -= 1;
+            (b[j] - b'0') as i8
+        } else {
+            0
+        };
+        let mut diff = da - db - borrow;
+        if diff < 0 {
+            diff += 10;
+            borrow = 1;
+        } else {
+            borrow = 0;
+        }
+        out.push(b'0' + diff as u8);
+    }
+
+    out.reverse();
+    strip_leading_zeros(std::str::from_utf8(&out).unwrap_or("0"))
+}
+
+/// Absolute decimal digit coefficient with sign. Mirrors TS `bigint` magnitudes.
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct SignedDigits {
+    negative: bool,
+    digits: String,
+}
+
+impl SignedDigits {
+    fn zero() -> Self {
+        Self {
+            negative: false,
+            digits: "0".to_string(),
+        }
+    }
+
+    fn from_parts(negative: bool, digits: String) -> Self {
+        let digits = strip_leading_zeros(&digits);
+        if digits == "0" {
+            Self::zero()
+        } else {
+            Self { negative, digits }
+        }
+    }
+
+    fn is_zero(&self) -> bool {
+        self.digits == "0"
+    }
+
+    fn is_negative(&self) -> bool {
+        self.negative && !self.is_zero()
+    }
+
+    fn is_positive(&self) -> bool {
+        !self.negative && !self.is_zero()
+    }
+
+    fn negate(self) -> Self {
+        if self.is_zero() {
+            self
+        } else {
+            Self {
+                negative: !self.negative,
+                digits: self.digits,
+            }
+        }
+    }
+
+    fn add(&self, other: &Self) -> Self {
+        match (self.negative, other.negative) {
+            (false, false) => Self::from_parts(false, add_unsigned_digits(&self.digits, &other.digits)),
+            (true, true) => Self::from_parts(true, add_unsigned_digits(&self.digits, &other.digits)),
+            (false, true) => match cmp_unsigned_digits(&self.digits, &other.digits) {
+                std::cmp::Ordering::Less => {
+                    Self::from_parts(true, sub_unsigned_digits(&other.digits, &self.digits))
+                }
+                std::cmp::Ordering::Greater => {
+                    Self::from_parts(false, sub_unsigned_digits(&self.digits, &other.digits))
+                }
+                std::cmp::Ordering::Equal => Self::zero(),
+            },
+            (true, false) => other.add(self),
+        }
+    }
+
+    fn sub(&self, other: &Self) -> Self {
+        self.add(&other.clone().negate())
+    }
+
+    fn mul_i32(&self, factor: i32) -> Self {
+        if factor == 0 || self.is_zero() {
+            return Self::zero();
+        }
+        let negative = self.negative ^ (factor < 0);
+        let abs_factor = factor.unsigned_abs();
+        if abs_factor == 1 {
+            return Self::from_parts(negative, self.digits.clone());
+        }
+
+        let mut acc = "0".to_string();
+        for _ in 0..abs_factor {
+            acc = add_unsigned_digits(&acc, &self.digits);
+        }
+        Self::from_parts(negative, acc)
+    }
+
+    fn mul(&self, other: &Self) -> Self {
+        if self.is_zero() || other.is_zero() {
+            return Self::zero();
+        }
+        Self::from_parts(
+            self.negative ^ other.negative,
+            mul_unsigned_digits(&self.digits, &other.digits),
+        )
+    }
+
+    /// Truncating remainder with dividend sign (JS BigInt `%`).
+    fn rem(&self, divisor: &Self) -> Self {
+        if divisor.is_zero() {
+            return Self::zero();
+        }
+
+        let q_digits = div_unsigned_digits(&self.digits, &divisor.digits);
+        let q = SignedDigits::from_parts(self.negative ^ divisor.negative, q_digits);
+        self.sub(&q.mul(divisor))
+    }
+}
+
+fn mul_unsigned_digits(a: &str, b: &str) -> String {
+    let a = strip_leading_zeros(a);
+    let b = strip_leading_zeros(b);
+    if a == "0" || b == "0" {
+        return "0".to_string();
+    }
+
+    let a = a.as_bytes();
+    let b = b.as_bytes();
+    let mut out = vec![0u32; a.len() + b.len()];
+
+    for (i, &da) in a.iter().rev().enumerate() {
+        for (j, &db) in b.iter().rev().enumerate() {
+            out[i + j] += u32::from(da - b'0') * u32::from(db - b'0');
+        }
+    }
+
+    let mut carry = 0u32;
+    for slot in &mut out {
+        let sum = *slot + carry;
+        *slot = sum % 10;
+        carry = sum / 10;
+    }
+
+    while out.last() == Some(&0) {
+        out.pop();
+    }
+    out.reverse();
+    if out.is_empty() {
+        return "0".to_string();
+    }
+    out.into_iter()
+        .map(|d| char::from(b'0' + d as u8))
+        .collect()
+}
+
+fn div_unsigned_digits(dividend: &str, divisor: &str) -> String {
+    let dividend = strip_leading_zeros(dividend);
+    let divisor = strip_leading_zeros(divisor);
+    if divisor == "0" {
+        return "0".to_string();
+    }
+    if cmp_unsigned_digits(&dividend, &divisor) == std::cmp::Ordering::Less {
+        return "0".to_string();
+    }
+    if divisor == "1" {
+        return dividend;
+    }
+
+    let mut quotient = String::new();
+    let mut remainder = String::new();
+
+    for ch in dividend.chars() {
+        remainder.push(ch);
+        remainder = strip_leading_zeros(&remainder);
+        let mut digit = 0u8;
+        while cmp_unsigned_digits(&remainder, &divisor) != std::cmp::Ordering::Less {
+            remainder = sub_unsigned_digits(&remainder, &divisor);
+            digit += 1;
+        }
+        if !quotient.is_empty() || digit > 0 {
+            quotient.push(char::from(b'0' + digit));
+        }
+    }
+
+    if quotient.is_empty() {
+        "0".to_string()
+    } else {
+        quotient
+    }
+}
+
+fn mul_pow10_digits(digits: &str, exp: u32) -> String {
+    if digits == "0" || exp == 0 {
+        return strip_leading_zeros(digits);
+    }
+    let mut out = strip_leading_zeros(digits);
+    out.extend(std::iter::repeat('0').take(exp as usize));
+    out
+}
+
+fn div_pow10_digits(digits: &str, exp: u32) -> String {
+    if exp == 0 {
+        return strip_leading_zeros(digits);
+    }
+    let digits = strip_leading_zeros(digits);
+    if exp as usize >= digits.len() {
+        return "0".to_string();
+    }
+    strip_leading_zeros(&digits[..digits.len() - exp as usize])
+}
+
+fn rescale_digits(decimal: &NumberDecimal, target_scale: u32) -> SignedDigits {
     let delta = target_scale as i32 - decimal.scale as i32;
     let magnitude = if delta >= 0 {
-        decimal.digits.checked_mul(pow10(delta as u32)?)?
+        mul_pow10_digits(&decimal.digits, delta as u32)
     } else {
-        decimal.digits / pow10((-delta) as u32)?
+        div_pow10_digits(&decimal.digits, (-delta) as u32)
     };
-    Some(if decimal.negative {
-        -magnitude
-    } else {
-        magnitude
-    })
+    SignedDigits::from_parts(decimal.negative, magnitude)
 }
 
 fn trim_trailing_zeros_and_dot(text: &str) -> String {
@@ -294,7 +552,11 @@ fn trim_trailing_zeros_and_dot(text: &str) -> String {
     if end > 0 && bytes[end - 1] == b'.' {
         end -= 1;
     }
-    text[..end].to_string()
+    if end == 0 {
+        "0".to_string()
+    } else {
+        text[..end].to_string()
+    }
 }
 
 fn decimal_from_number(value: f64) -> Option<NumberDecimal> {
@@ -312,12 +574,9 @@ fn common_scale(scales: &[u32]) -> u32 {
 pub fn format_number_decimal(decimal: NumberDecimal, precision: Option<f64>) -> String {
     if let Some(precision) = precision {
         let precision = precision as u32;
-        let Some(scaled) = rescale_digits(decimal, precision) else {
-            return String::new();
-        };
-        let negative = scaled < 0;
-        let abs = if negative { -scaled } else { scaled };
-        let raw = format!("{abs}");
+        let scaled = rescale_digits(&decimal, precision);
+        let negative = scaled.is_negative();
+        let raw = scaled.digits.clone();
         let pad = precision as usize + 1;
         let raw = if raw.len() < pad {
             format!("{:0>width$}", raw, width = pad)
@@ -340,17 +599,17 @@ pub fn format_number_decimal(decimal: NumberDecimal, precision: Option<f64>) -> 
         } else {
             format!("{int_part}.{frac_part}")
         };
-        if negative && abs != 0 {
+        if negative {
             format!("-{body}")
         } else {
             body
         }
     } else {
-        if decimal.digits == 0 {
+        if decimal.digits == "0" {
             return "0".to_string();
         }
 
-        let raw = format!("{}", decimal.digits);
+        let raw = decimal.digits.clone();
         let pad = decimal.scale as usize + 1;
         let raw = if raw.len() < pad {
             format!("{:0>width$}", raw, width = pad)
@@ -387,7 +646,53 @@ pub fn format_number_decimal(decimal: NumberDecimal, precision: Option<f64>) -> 
     }
 }
 
-/// Shortest canonical decimal for a finite number.
+/// Expand `to_string`-style scientific notation into portable base-10 decimal.
+fn expand_scientific_decimal(text: &str) -> Option<String> {
+    let e_pos = text.find(['e', 'E'])?;
+    let mantissa = &text[..e_pos];
+    let exp: i32 = text[e_pos + 1..].parse().ok()?;
+
+    let (int_part, frac_part) = match mantissa.split_once('.') {
+        Some((int_part, frac_part)) => (int_part, frac_part),
+        None => (mantissa, ""),
+    };
+
+    if int_part.is_empty()
+        || !int_part.bytes().all(|b| b.is_ascii_digit())
+        || !frac_part.bytes().all(|b| b.is_ascii_digit())
+    {
+        return None;
+    }
+
+    let digits = format!("{int_part}{frac_part}");
+    let point = int_part.len() as i32 + exp;
+
+    let expanded = if point <= 0 {
+        let zeros = usize::try_from(-point).ok()?;
+        format!("0.{}{digits}", "0".repeat(zeros))
+    } else {
+        let point = point as usize;
+        if point >= digits.len() {
+            format!("{digits}{}", "0".repeat(point - digits.len()))
+        } else {
+            format!("{}.{}", &digits[..point], &digits[point..])
+        }
+    };
+
+    let trimmed = if expanded.contains('.') {
+        trim_trailing_zeros_and_dot(&expanded)
+    } else {
+        expanded
+    };
+
+    Some(if trimmed.is_empty() {
+        "0".to_string()
+    } else {
+        trimmed
+    })
+}
+
+/// Shortest canonical decimal for a finite number. Never emits exponent syntax.
 pub fn format_shortest_decimal(value: f64) -> String {
     if !is_finite_number(value) {
         return String::new();
@@ -397,14 +702,18 @@ pub fn format_shortest_decimal(value: f64) -> String {
         return "0".to_string();
     }
 
+    let negative = value < 0.0;
     let abs = value.abs();
     let mut text = abs.to_string();
 
-    if text.contains('e') || text.contains('E') || (abs != 0.0 && (abs < 1e-6 || abs >= 1e21)) {
-        text = trim_trailing_zeros_and_dot(&format!("{abs:.16}"));
+    if text.contains('e') || text.contains('E') {
+        text = expand_scientific_decimal(&text).unwrap_or_default();
+        if text.is_empty() {
+            return String::new();
+        }
     }
 
-    if value < 0.0 {
+    if negative {
         format!("-{text}")
     } else {
         text
@@ -459,22 +768,16 @@ pub fn number_step_aligned(value: f64, min: Option<f64>, step: Option<f64>) -> b
         origin_decimal.scale,
         step_decimal.scale,
     ]);
-    let Some(value_digits) = rescale_digits(value_decimal, scale) else {
-        return false;
-    };
-    let Some(origin_digits) = rescale_digits(origin_decimal, scale) else {
-        return false;
-    };
-    let Some(step_digits) = rescale_digits(step_decimal, scale) else {
-        return false;
-    };
+    let value_digits = rescale_digits(&value_decimal, scale);
+    let origin_digits = rescale_digits(&origin_decimal, scale);
+    let step_digits = rescale_digits(&step_decimal, scale);
 
-    if step_digits == 0 {
+    if step_digits.is_zero() {
         return false;
     }
 
-    let delta = value_digits - origin_digits;
-    delta % step_digits == 0
+    let delta = value_digits.sub(&origin_digits);
+    delta.rem(&step_digits).is_zero()
 }
 
 pub fn number_precision_ok(fractional_digits: u32, precision: Option<f64>) -> bool {
@@ -563,22 +866,23 @@ fn last_on_grid(min: Option<f64>, max: f64, step: Option<f64>) -> Option<f64> {
         max_decimal.scale,
         step_decimal.scale,
     ]);
-    let origin_digits = rescale_digits(origin_decimal, scale)?;
-    let max_digits = rescale_digits(max_decimal, scale)?;
-    let step_digits = rescale_digits(step_decimal, scale)?;
+    let origin_digits = rescale_digits(&origin_decimal, scale);
+    let max_digits = rescale_digits(&max_decimal, scale);
+    let step_digits = rescale_digits(&step_decimal, scale);
 
-    if step_digits <= 0 {
+    if !step_digits.is_positive() {
         return None;
     }
 
-    let delta = max_digits - origin_digits;
-    let remainder = ((delta % step_digits) + step_digits) % step_digits;
-    let last_digits = max_digits - remainder;
-    let negative = last_digits < 0;
-    let abs = if negative { -last_digits } else { last_digits };
+    let delta = max_digits.sub(&origin_digits);
+    let remainder = delta
+        .rem(&step_digits)
+        .add(&step_digits)
+        .rem(&step_digits);
+    let last_digits = max_digits.sub(&remainder);
     let decimal = NumberDecimal {
-        negative,
-        digits: abs,
+        negative: last_digits.is_negative(),
+        digits: last_digits.digits,
         scale,
     };
     let value = number_decimal_to_number(decimal);
@@ -644,14 +948,12 @@ pub fn step_number_value(
 
     let precision_scale = precision.map(|p| p as u32).unwrap_or(0);
     let scale = common_scale(&[current_decimal.scale, step_decimal.scale, precision_scale]);
-    let current_digits = rescale_digits(current_decimal, scale)?;
-    let step_digits = rescale_digits(step_decimal, scale)?;
-    let next_digits = current_digits + i128::from(direction) * step_digits;
-    let negative = next_digits < 0;
-    let abs = if negative { -next_digits } else { next_digits };
+    let current_digits = rescale_digits(&current_decimal, scale);
+    let step_digits = rescale_digits(&step_decimal, scale);
+    let next_digits = current_digits.add(&step_digits.mul_i32(direction));
     let next = number_decimal_to_number(NumberDecimal {
-        negative,
-        digits: abs,
+        negative: next_digits.is_negative(),
+        digits: next_digits.digits,
         scale,
     });
 
@@ -1083,5 +1385,43 @@ mod tests {
             e,
             NumberInputEffect::EmitCommit { value: Some(v) } if *v == 0.0
         )));
+    }
+
+    #[test]
+    fn oversized_finite_draft_is_complete() {
+        let text = "1234567890123456789012345678901234567890";
+        let classified = classify_number_draft(text);
+        assert_eq!(classified.kind, NumberDraftKind::Complete);
+        let decimal = classified.decimal.expect("complete draft has decimal");
+        assert_eq!(decimal.digits, text);
+        assert_eq!(decimal.scale, 0);
+        assert!(!decimal.negative);
+    }
+
+    #[test]
+    fn format_shortest_decimal_expands_without_exponent() {
+        let large = format_shortest_decimal(1e21);
+        assert!(!large.contains('e') && !large.contains('E'));
+        assert_eq!(large, "1000000000000000000000");
+
+        assert_eq!(format_shortest_decimal(1e-17), "0.00000000000000001");
+
+        // Scientific `to_string` form must expand to portable decimal.
+        assert_eq!(
+            expand_scientific_decimal("1e+21").as_deref(),
+            Some("1000000000000000000000")
+        );
+        assert_eq!(
+            expand_scientific_decimal("1e-17").as_deref(),
+            Some("0.00000000000000001")
+        );
+        assert_eq!(
+            expand_scientific_decimal("1.5e+3").as_deref(),
+            Some("1500")
+        );
+        assert_eq!(
+            expand_scientific_decimal("1.23e-2").as_deref(),
+            Some("0.0123")
+        );
     }
 }

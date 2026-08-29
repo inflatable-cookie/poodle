@@ -124,4 +124,43 @@ describe("NumberInput (react)", () => {
     const field = asyncCase.container.querySelector<HTMLElement>(".poodle-number-input__field");
     expect(field?.getAttribute("data-validation-state")).toBe("invalid");
   });
+
+  it("omits aria-valuenow for a controlled empty draft", () => {
+    const { container } = render(<NumberInput value={5} draftValue="" ariaLabel="Amount" />);
+    const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
+    expect(control.value).toBe("");
+    expect(control.getAttribute("aria-valuenow")).toBeNull();
+  });
+
+  it("ignores a stale async validation result after clear", async () => {
+    let release!: (result: { valid: boolean; message: string }) => void;
+    const validate = vi.fn(
+      () =>
+        new Promise<{ valid: boolean; message: string }>((resolve) => {
+          release = resolve;
+        }),
+    );
+    const onValidationChange = vi.fn();
+    const { container } = render(
+      <NumberInput value={5} min={0} max={10} validate={validate} onValidationChange={onValidationChange} />,
+    );
+    const control = container.querySelector<HTMLInputElement>(".poodle-number-input__control") as HTMLInputElement;
+
+    fireEvent.change(control, { target: { value: "3" } });
+    await waitFor(() => expect(validate).toHaveBeenCalledTimes(1));
+    fireEvent.change(control, { target: { value: "" } });
+    await waitFor(() => {
+      expect(onValidationChange).toHaveBeenCalledWith(
+        expect.objectContaining({ status: "idle" }),
+      );
+    });
+
+    release({ valid: false, message: "stale" });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(onValidationChange).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: "invalid", message: "stale" }),
+    );
+    const field = container.querySelector<HTMLElement>(".poodle-number-input__field");
+    expect(field?.getAttribute("data-validation-state")).not.toBe("invalid");
+  });
 });

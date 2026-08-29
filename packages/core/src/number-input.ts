@@ -223,7 +223,7 @@ export function formatNumberDecimal(decimal: NumberDecimal, precision: number | 
   return decimal.negative ? `-${body}` : body;
 }
 
-/** Shortest canonical decimal for a finite number. */
+/** Shortest canonical decimal for a finite number. Never emits exponent syntax. */
 export function formatShortestDecimal(value: number): string {
   if (!isFiniteNumber(value)) {
     return "";
@@ -233,14 +233,31 @@ export function formatShortestDecimal(value: number): string {
     return "0";
   }
 
+  const negative = value < 0;
   const abs = Math.abs(value);
   let text = abs.toString();
 
-  if (text.includes("e") || text.includes("E")) {
-    text = abs.toFixed(16).replace(/\.?0+$/, "");
+  if (/e/i.test(text)) {
+    const match = /^(\d+)(?:\.(\d+))?e([+-]?\d+)$/i.exec(text);
+
+    if (match === null) {
+      return "";
+    }
+
+    const digits = `${match[1]}${match[2] ?? ""}`;
+    const exp = Number(match[3]);
+    const point = match[1]!.length + exp;
+
+    if (point <= 0) {
+      text = `0.${"0".repeat(-point)}${digits}`.replace(/0+$/, "").replace(/\.$/, "") || "0";
+    } else if (point >= digits.length) {
+      text = `${digits}${"0".repeat(point - digits.length)}`;
+    } else {
+      text = `${digits.slice(0, point)}.${digits.slice(point)}`.replace(/\.?0+$/, "");
+    }
   }
 
-  return value < 0 ? `-${text}` : text;
+  return negative ? `-${text}` : text;
 }
 
 export function formatNumberCommitted(value: number | null, precision: number | null): string {

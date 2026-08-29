@@ -1,6 +1,6 @@
 # NumberInput
 
-Status: active — g16.030 value/draft/mounted parity landed
+Status: active — g16.030 value/draft/mounted parity on worker PR; awaiting review/merge
 Updated: 2026-08-29
 
 ## 1. Purpose

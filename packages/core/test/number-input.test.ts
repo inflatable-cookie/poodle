@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
   classifyNumberDraft,
   formatNumberCommitted,
+  formatShortestDecimal,
   numberDraftConstraintValid,
   numberInBounds,
   numberInputConfigValid,
@@ -19,6 +20,7 @@ describe("draft classification", () => {
     expect(classifyNumberDraft("01.20").kind).toBe("complete");
     expect(classifyNumberDraft("-12.5").kind).toBe("complete");
     expect(classifyNumberDraft(".5").kind).toBe("complete");
+    expect(classifyNumberDraft("1234567890123456789012345678901234567890").kind).toBe("complete");
   });
 
   test("keeps empty, incomplete, and malformed drafts exact", () => {
@@ -31,6 +33,15 @@ describe("draft classification", () => {
     expect(classifyNumberDraft("0x10").kind).toBe("malformed");
     expect(classifyNumberDraft("1 2").kind).toBe("malformed");
     expect(classifyNumberDraft("NaN").kind).toBe("malformed");
+  });
+});
+
+describe("shortest decimal formatting", () => {
+  test("expands scientific notation to portable base-10 text", () => {
+    expect(formatShortestDecimal(1e21)).toBe("1000000000000000000000");
+    expect(formatShortestDecimal(1e-17)).toBe("0.00000000000000001");
+    expect(formatShortestDecimal(1e21)).not.toMatch(/e/i);
+    expect(formatShortestDecimal(1e-17)).not.toMatch(/e/i);
   });
 });
 

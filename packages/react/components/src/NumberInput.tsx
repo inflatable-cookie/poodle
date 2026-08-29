@@ -72,12 +72,14 @@ function draftNumeric(
   step: number | null,
   precision: number | null,
 ): number | null | undefined {
-  if (draft === null || draft === undefined) {
+  // undefined = no draft channel → fall back to committed for a11y.
+  // null from this helper is unused; empty string means omit aria-valuenow.
+  if (draft === undefined) {
     return null;
   }
 
-  if (draft === "") {
-    return null;
+  if (draft === null || draft === "") {
+    return undefined;
   }
 
   if (!numberDraftConstraintValid(draft, min, max, step, precision)) {
@@ -173,8 +175,21 @@ export function NumberInput({
   const ariaInvalid = draftInvalid || effectiveValidationState === "invalid" ? true : undefined;
   const ariaBusy = effectiveValidationState === "pending" ? true : undefined;
   const draftNow = draftNumeric(activeDraft, min, max, step, precision);
-  const ariaValueNow = draftNow === null ? (committed === null ? undefined : committed) : draftNow;
-  const stepFrom = activeDraft === null || activeDraft === undefined ? committed : draftNow;
+  // No draft → committed; empty/invalid draft → omit; valid draft → that value.
+  const ariaValueNow =
+    activeDraft === undefined || activeDraft === null
+      ? committed === null
+        ? undefined
+        : committed
+      : draftNow === undefined || draftNow === null
+        ? undefined
+        : draftNow;
+  const stepFrom =
+    activeDraft === null || activeDraft === undefined
+      ? committed
+      : activeDraft === ""
+        ? null
+        : draftNow;
   const canIncrement =
     stepFrom === undefined ? false : stepNumberValue(stepFrom, 1, min, max, step, precision) !== null;
   const canDecrement =
@@ -185,6 +200,10 @@ export function NumberInput({
   }
 
   async function runValidation(nextValue: number | null): Promise<void> {
+    // Invalidate any in-flight validation before the idle early-return so a
+    // clear/replacement cannot be overwritten by a stale resolve.
+    const validationKey = ++activeValidationKey.current;
+
     if (!validate || nextValue === null) {
       setInternalValidationStatus("idle");
       validationMessageRef.current = "";
@@ -193,7 +212,6 @@ export function NumberInput({
     }
 
     const validationValue = formatNumberCommitted(nextValue, precision);
-    const validationKey = ++activeValidationKey.current;
     setInternalValidationStatus("validating");
     validationMessageRef.current = "";
     emitValidationChange("validating", "");

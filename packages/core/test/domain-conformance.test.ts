@@ -635,11 +635,21 @@ describe("domain conformance: numberInput", () => {
       switch (case_.op) {
         case "classify": {
           const classified = classifyNumberDraft(String(case_.value ?? ""));
-          expect({
+          const actual: {
+            kind: string;
+            fractionalDigits: number | null;
+            value?: number | null;
+          } = {
             kind: classified.kind,
             fractionalDigits: classified.fractionalDigits,
             value: classified.decimal === null ? null : numberDecimalToNumber(classified.decimal),
-          }).toEqual(case_.expect);
+          };
+          // Oversized coefficients lose f64 exactness; vectors may omit
+          // `value` and assert draft kind / scale only.
+          if (!Object.prototype.hasOwnProperty.call(case_.expect as object, "value")) {
+            delete actual.value;
+          }
+          expect(actual).toEqual(case_.expect);
           return;
         }
         case "configValid": {

@@ -3603,6 +3603,25 @@
       }
     },
     {
+      "op": "classify",
+      "name": "coefficient beyond i128",
+      "value": "1234567890123456789012345678901234567890",
+      "expect": {
+        "kind": "complete",
+        "fractionalDigits": 0
+      }
+    },
+    {
+      "op": "classify",
+      "name": "very small finite draft",
+      "value": "0.00000000000000001",
+      "expect": {
+        "kind": "complete",
+        "fractionalDigits": 17,
+        "value": 1e-17
+      }
+    },
+    {
       "op": "configValid",
       "name": "omitted step and precision",
       "step": null,
@@ -3771,6 +3790,20 @@
       "value": null,
       "precision": null,
       "expect": ""
+    },
+    {
+      "op": "format",
+      "name": "large finite expands without exponent",
+      "value": 1e21,
+      "precision": null,
+      "expect": "1000000000000000000000"
+    },
+    {
+      "op": "format",
+      "name": "very small finite expands without exponent",
+      "value": 1e-17,
+      "precision": null,
+      "expect": "0.00000000000000001"
     },
     {
       "op": "step",
