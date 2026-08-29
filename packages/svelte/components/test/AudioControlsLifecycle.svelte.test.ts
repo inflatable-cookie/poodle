@@ -69,11 +69,14 @@ describe("audio control pointer lifecycle (svelte)", () => {
     // component's own reactive state is observable anywhere else. The terminal
     // must still run, and exactly once.
     const spies = gestureSpies();
-    let view: ReturnType<typeof render>;
-    const onGestureBegin = vi.fn(() => { spies.onGestureBegin(); view.unmount(); });
+    let removeHost: () => void = () => {};
+    const onGestureBegin = vi.fn(() => { spies.onGestureBegin(); removeHost(); });
 
-    view = render(Knob, { props: { value: 0.5, ariaLabel: "Gain", ...spies, onGestureBegin } });
-    const knob = measurable(view.getByRole("slider", { name: "Gain" }));
+    const { getByRole, unmount } = render(Knob, {
+      props: { value: 0.5, ariaLabel: "Gain", ...spies, onGestureBegin },
+    });
+    removeHost = unmount;
+    const knob = measurable(getByRole("slider", { name: "Gain" }));
     await fireEvent.pointerDown(knob, { button: 0, pointerId: 1, clientX: 50, clientY: 60 });
 
     expect(spies.onGestureBegin).toHaveBeenCalledTimes(1);
