@@ -45,7 +45,7 @@ event and mounts all three in GPUI. Payload drag-and-drop remains separate.
 
 ## Parallelism
 
-`g16.029` and `g16.030` are merged, and `g16.031` is implemented and awaiting
+`g16.029` and `g16.030` are merged, and `g16.031` is open in PR #99 for
 operator review. `g16.032` follows `g16.031` and must not run beside
 `g16.025`, because both edit Node/GPUI interaction routing. No accessibility,
 visual, motion, Longhorn-lab, or Jetstream worker is ready from this map.

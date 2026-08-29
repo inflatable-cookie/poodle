@@ -1,7 +1,8 @@
 # g16.031 — Continuous Audio Machine And Web Lifecycle
 
-Status: complete — awaiting operator review
+Status: complete — awaiting operator review in PR #99
 Date: 2026-08-29
+PR: https://github.com/inflatable-cookie/poodle/pull/99
 Branch: `t3code/continuous-audio-web-lifecycle`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-4f132f5e`
 Card: `docs/roadmaps/g16/031-continuous-audio-machine-and-web-lifecycle.md`
