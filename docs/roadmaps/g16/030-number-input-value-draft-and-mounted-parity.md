@@ -1,6 +1,6 @@
 # g16.030 — NumberInput Value, Draft, And Mounted Parity
 
-Status: planned — decision approved; dispatch after `g16.029` closes
+Status: ready — decision approved; `g16.029` merged; worker handoff published
 Opened: 2026-08-28
 Depends on: merged `g16.021`, then completed `g16.029`; all three touch paired
 core/headless exports and the shared domain-vector corpus
