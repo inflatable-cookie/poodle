@@ -3,7 +3,7 @@
      Placeholder, static "Open (calendar + time + zone)" (composes the real Calendar + TimeInput +
      TimeZoneSelect — no fake grid), Disabled, Sizes, Densities; both previews build clean
      (pass 42). -->
-<!-- pass 41: Jetstream overlay built — composes real Calendar + TimeField +
+<!-- pass 41: Jetstream overlay built — composes real Calendar + TimeInput +
      TimeZoneSelect (the recently-built js_time_zone_select), each in a labelled
      Field (mirrors GPUI + date_time_picker.rs). Indicator now size-scaled
      (date_picker_indicator_font_rem); min-width/gaps contract-exact rem; surface =
@@ -14,10 +14,10 @@
      border via color_mix. -->
 <!-- NOTE: the GPUI "overlay mockup / empty calendar box / hsla shadow / trigger segment /
      invented dividers" bullets in the GPUI-gap section below are STALE — all fixed in
-     pass 23 (composed Calendar+TimeField+TimeZoneSelect, elevation_overlay_shadow, trigger
+     pass 23 (composed Calendar+TimeInput+TimeZoneSelect, elevation_overlay_shadow, trigger
      cleanup). Pass 25: shared spec remodeled flat value/time_zone → structured
      ZonedDateTimeValue + props (placeholder/defaultValue/open/weekStartsOn/locale/
-     timeZoneOptions/ariaLabel); GPUI seeds Calendar/TimeField/TimeZoneSelect from the
+     timeZoneOptions/ariaLabel); GPUI seeds Calendar/TimeInput/TimeZoneSelect from the
      structured value (partial-value states now representable); Jetstream updated
      (build-unverified — renderer down). specs 53 pass, GPUI clean. Remaining GPUI:
      field-label typography + indicator glyph. -->
@@ -46,7 +46,7 @@
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [x] DONE **Value model remodeled.** `poodle-specs` now has `ZonedDateTimeValue { date, time, time_zone }` (`types.rs`) and `DateTimeZonePickerSpec.value: Option<ZonedDateTimeValue>` + `default_value` with `current_value()`/`is_placeholder()` accessors. GPUI seeds Calendar from `value.date`, TimeField from `value.time`, TimeZoneSelect from `value.time_zone` — partial values representable.
+- [x] DONE **Value model remodeled.** `poodle-specs` now has `ZonedDateTimeValue { date, time, time_zone }` (`types.rs`) and `DateTimeZonePickerSpec.value: Option<ZonedDateTimeValue>` + `default_value` with `current_value()`/`is_placeholder()` accessors. GPUI seeds Calendar from `value.date`, TimeInput from `value.time`, TimeZoneSelect from `value.time_zone` — partial values representable.
 - [x] DONE **Spec gained contract props.** Added `placeholder` (default `"Select date, time, and zone"`), `default_value`, `default_open`, `week_starts_on`, `locale`, `time_zone_options: Vec<TimeZoneOption>`, `aria_label` with `with_*` builders + `current_open()`, mirroring `DateTimeRangePickerSpec`. GPUI trigger uses `spec.placeholder` instead of a hardcoded string.
 - [ ] **Overlay is a hand-coded mockup.** Contract §2 requires composing `Calendar` + `TimeInput` + `TimeZoneSelect`. GPUI hand-builds a weekday row + empty `min_h(11.25rem)` placeholder for the calendar (`:200-226`), a plain text time line (`:229-245`), and a plain text timezone line (`:248-268`). No real primitives. Violates "No Mockups" — replace with composed Calendar/TimeInput/TimeZoneSelect.
 - [ ] Calendar body is an empty `div().min_h(px(rem_to_px(11.25)))` placeholder (`:226`) — literally a blank box. Remove once real Calendar composes in.
@@ -62,7 +62,7 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
 - [x] DONE (build-unverified) **Value model remodeled (shared spec).** Now reads `spec.current_value()` + `value.date/time/time_zone` and `spec.placeholder`; partial values representable. Renderer crate is down (external `encode.rs` break) so this is build-unverified — edits cross-checked against the new spec by reading.
 - [x] DONE (build-unverified) **Contract props added to shared spec.** Jetstream now uses `spec.placeholder`; the other props (`default_value`/`open`/`week_starts_on`/`locale`/`time_zone_options`/`aria_label`) exist on the spec for runtime wiring.
-- [x] **DONE: overlay built (composed primitives).** `js_date_time_zone_picker` now renders Surface → Body → Calendar + Fields → (TIME field, TIME ZONE field) when `current_open()`. Real `js_calendar` (seeded from `value.date`) + `js_time_field` (seeded from `value.time`) + `js_time_zone_select` (seeded from `value.time_zone`; host `time_zone_options` forwarded when non-empty), each in a labelled Field. Mirrors GPUI + the sibling `date_time_picker.rs`. Surface = elevated 98% over panel, border 72% alpha, `shadow_md()` preset. 8 render_probe tests cover the composition.
+- [x] **DONE: overlay built (composed primitives).** `js_date_time_zone_picker` now renders Surface → Body → Calendar + Fields → (TIME field, TIME ZONE field) when `current_open()`. Real `js_calendar` (seeded from `value.date`) + `js_time_input` (seeded from `value.time`) + `js_time_zone_select` (seeded from `value.time_zone`; host `time_zone_options` forwarded when non-empty), each in a labelled Field. Mirrors GPUI + the sibling `date_time_picker.rs`. Surface = elevated 98% over panel, border 72% alpha, `shadow_md()` preset. 8 render_probe tests cover the composition.
 - [x] **DONE: min-width / gaps are contract-exact rem.** `min_w(rem_to_px(18.0))` is the contract `18rem`; trigger `gap(rem_to_px(0.75))` is the contract trigger gap; Fields/Field gaps (`0.75`/`0.375`) and Body gap (`0.875`) are contract-exact. Not hardcode violations.
 - [x] **DONE: indicator size-scaled.** Uses `date_picker_indicator_font_rem` (xs 0.625 … xl 0.875). `chevron-down` icon vs Svelte's `▾` glyph is the established accepted icon substitution.
 - [ ] Hover blend `fill_c.mix(elevated_c, 0.14)` — contract hover is `color-mix(surface 86%, elevated)`; `0.14` = `1 − 0.86`, the inverted ratio the runtime `Color::mix` helper expects. Shared with every sibling picker; a named helper would be a cross-cutting cleanup.
@@ -73,11 +73,11 @@ Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 ## Specimen parity
 
 - Svelte covers: Default, With default value (`{ date, time, timeZone }`), Disabled; plus size and density snippets (`DateTimeZonePickerSpecimen.svelte`).
-- GPUI covers: Default (toggle-open, composed overlay), With default value, **Open (calendar + time + zone)** (static open), Disabled; plus size/density via `specimen_layout` (`date_time_zone_picker.rs`). Specimens construct structured `ZonedDateTimeValue::new(date, time, time_zone)` per the contract `{ date, time, timeZone }` shape (Disabled shows the placeholder per contract). — GPUI specimen complete; Calendar/TimeField/TimeZoneSelect compose for real (no fake grid). Jetstream pending engine recovery.
+- GPUI covers: Default (toggle-open, composed overlay), With default value, **Open (calendar + time + zone)** (static open), Disabled; plus size/density via `specimen_layout` (`date_time_zone_picker.rs`). Specimens construct structured `ZonedDateTimeValue::new(date, time, time_zone)` per the contract `{ date, time, timeZone }` shape (Disabled shows the placeholder per contract). — GPUI specimen complete; Calendar/TimeInput/TimeZoneSelect compose for real (no fake grid). Jetstream pending engine recovery.
 - Jetstream covers: With value, Placeholder, Disabled (`date_time_zone_picker.rs`) using structured `ZonedDateTimeValue` data. — missing: **size and density groups**; **open-overlay state** (trigger-only).
 
 ## Notes
 
 - `consv=gap` driver: same size-table divergence as the range picker (contract calc-heights + per-size padding vs Svelte absolute heights + density-only padding) plus the missing per-size indicator scale.
 - **Spec is the root problem here**, unlike the range picker. `DateTimeZonePickerSpec` is under-modeled: flat `value`/`time_zone` strings instead of `ZonedDateTimeValue`, and it lacks `placeholder`/`defaultValue`/`open`/`weekStartsOn`/`locale`/`timeZoneOptions`/`ariaLabel`. Both Rust targets and both specimens inherit the mismodel. Fix the spec first (add `ZonedDateTimeValue` + the missing fields), then the component/overlay work.
-- The historic GPUI mockup overlay scaffolding (blank calendar boxes, fake fields, dividers, action bars) was replaced in pass 23 — the open state composes the real `Calendar` + `TimeField` + `TimeZoneSelect`, each in a labelled Field. The static "Open (calendar + time + zone)" specimen group renders that real composed surface. This anti-pattern is resolved across both GPUI pickers (range and zone).
+- The historic GPUI mockup overlay scaffolding (blank calendar boxes, fake fields, dividers, action bars) was replaced in pass 23 — the open state composes the real `Calendar` + `TimeInput` + `TimeZoneSelect`, each in a labelled Field. The static "Open (calendar + time + zone)" specimen group renders that real composed surface. This anti-pattern is resolved across both GPUI pickers (range and zone).

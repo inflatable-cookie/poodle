@@ -4,12 +4,12 @@
 //! Ported from: `packages/jetstream/components/src/date_time_picker.rs`.
 //!
 //! Same shell as [`crate::date_picker::date_picker`]; the open surface stacks the composed
-//! calendar over a labelled time section (composed [`crate::time_field::time_field`]).
+//! calendar over a labelled time section (composed [`crate::time_input::time_input`]).
 //! Display text (contract §4): complete value → "date time"; partial → the
 //! prompt for the missing part; empty → placeholder.
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole};
-use poodle_specs::{CalendarSpec, DateTimePickerSpec, TimeFieldSpec};
+use poodle_specs::{CalendarSpec, DateTimePickerSpec, TimeInputSpec};
 
 use crate::calendar::{calendar, CalendarHandlers};
 use crate::color::{mix_linear, with_alpha};
@@ -17,7 +17,7 @@ use crate::context::RenderContext;
 use crate::date_picker::DatePickerHandlers;
 use crate::picker_trigger::{picker_trigger, PickerTrigger};
 use crate::presentation::rem_to_px;
-use crate::time_field::time_field;
+use crate::time_input::time_input;
 
 pub fn date_time_picker(
     spec: &DateTimePickerSpec,
@@ -68,7 +68,7 @@ pub fn date_time_picker(
     let mut root = root.child(trigger);
 
     // ── Overlay surface when open (contract §2 Surface → Body → Calendar +
-    //    Time Section). Composes the real calendar + time_field primitives. ──
+    //    Time Section). Composes the real calendar + time_input primitives. ──
     if spec.current_open() {
         // Composed Calendar (single), seeded from the picker's date.
         let mut cal_spec = CalendarSpec::new().with_week_start(spec.week_starts_on);
@@ -79,8 +79,8 @@ pub fn date_time_picker(
         }
         cal_spec.is_disabled = spec.is_disabled;
 
-        // Composed TimeInput (TimeField), seeded from the picker's time.
-        let mut time_spec = TimeFieldSpec::new();
+        // Composed TimeInput, seeded from the picker's time.
+        let mut time_spec = TimeInputSpec::new();
         time_spec.value = val.time.clone();
         time_spec.is_disabled = spec.is_disabled;
 
@@ -101,7 +101,7 @@ pub fn date_time_picker(
         }
         let time_section = time_section
             .child(time_label)
-            .child(time_field(&time_spec, ctx));
+            .child(time_input(&time_spec, ctx));
 
         // Body — vertical stack of Calendar + Time Section; gap 0.875rem.
         let mut body = Node::container();

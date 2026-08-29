@@ -146,7 +146,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "NumberInputSpec",
     "CodeInputSpec",
     "EditableLabelSpec",
-    "TimeFieldSpec",
+    "TimeInputSpec",
     // Selection
     "CheckboxSpec",
     "RadioGroupSpec",

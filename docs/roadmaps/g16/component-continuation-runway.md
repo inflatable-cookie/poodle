@@ -11,7 +11,7 @@ copy the register, change evidence, or turn a missing cell into a defect.
 
 | Order | Lane | Current state | Promotion gate |
 | ---: | --- | --- | --- |
-| 1 | TimeInput native entry | planned as `g16.029` | approved contract; dispatch after `g16.021` merges because shared core/headless exports overlap |
+| 1 | TimeInput native entry | complete as `g16.029` | awaiting merge; ledger 48 mounted / 126 missing |
 | 2 | NumberInput and EditableLabel editing models | NumberInput planned as `g16.030`; EditableLabel decision-blocked | complete `g16.029`, then execute the approved NumberInput committed-value/raw-draft migration; resolve EditableLabel separately |
 | 3 | Dependable drag-and-drop family | programme-owned | compiled separately as `g16.021`–`g16.028`; do not issue component-local drag repairs |
 | 4 | Fader, Knob, and XYPad interaction | planned as `g16.031`–`g16.032` | run paired machine/web repair after `g16.030`, then native mounting; never overlap the Node/GPUI tranche with `g16.025` |
@@ -21,12 +21,11 @@ copy the register, change evidence, or turn a missing cell into a defect.
 
 ## Next Component Decision
 
-TimeInput's native editing decision is approved. The contract now keeps its
-canonical time string, makes partial/invalid drafts adapter-owned, defines
+TimeInput's native editing decision is closed in `g16.029`. The contract keeps
+its canonical time string, makes partial/invalid drafts adapter-owned, defines
 valid-value-only callbacks, whole-second stepping and overnight ranges, and
-requires a segmented 24-hour GPUI editor plus a clean Rust
-`TimeFieldSpec`→`TimeInputSpec` rename. `g16.029` contains the bounded
-implementation lane.
+ships a segmented 24-hour GPUI editor plus a clean Rust `TimeInputSpec` /
+`time_input` rename.
 
 NumberInput's clean value-model decision is approved. Its contract now uses a
 typed committed `number | null`, an optional raw-draft channel, valid-value-only
@@ -46,10 +45,8 @@ event and mounts all three in GPUI. Payload drag-and-drop remains separate.
 
 ## Parallelism
 
-`g16.021` remains the active worker. Do not dispatch `g16.029` beside it: both
-cards edit shared TypeScript/Rust exports and conformance infrastructure.
-Dispatch `g16.029` after `g16.021` merges, then dispatch `g16.030` only after
-TimeInput closes because both edit the same exports and domain-vector corpus.
+`g16.029` is the active TimeInput worker. Dispatch `g16.030` only after
+TimeInput merges because both edit the same exports and domain-vector corpus.
 Dispatch `g16.031` only after `g16.030`; it touches the same core/headless
 exports and vector runner. `g16.032` follows `g16.031` and must not run beside
 `g16.025`, because both edit Node/GPUI interaction routing. No accessibility,

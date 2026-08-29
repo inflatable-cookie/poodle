@@ -168,7 +168,7 @@ pub mod text_input;
 pub mod text_link;
 pub mod theme_select;
 pub mod time_ago;
-pub mod time_field;
+pub mod time_input;
 pub mod time_zone_select;
 pub mod toast_host;
 pub mod toast_stack;
@@ -201,9 +201,7 @@ pub use agent_plan_record::{
 };
 pub use agent_question::{agent_question, AgentQuestionHandlers};
 pub use agent_question_record::agent_question_record;
-pub use agent_subagent::{
-    agent_subagent, agent_subagent_action_focus_id, AgentSubagentHandlers,
-};
+pub use agent_subagent::{agent_subagent, agent_subagent_action_focus_id, AgentSubagentHandlers};
 pub use agent_transcript::{agent_transcript, AgentTranscriptHandlers};
 pub use alert_dialog::{
     alert_dialog, alert_dialog_with_content, AlertDialogHandlers, DEFAULT_WORKING_LABEL,
@@ -255,9 +253,7 @@ pub use detail_section::detail_section;
 pub use detail_section_group::detail_section_group;
 pub use detail_shell::detail_shell;
 pub use dialog::{dialog, dialog_with_slots};
-pub use dock_region::{
-    dock_collapse_focus_id, dock_region, dock_tab_focus_id, DockRegionHandlers,
-};
+pub use dock_region::{dock_collapse_focus_id, dock_region, dock_tab_focus_id, DockRegionHandlers};
 pub use drawer::drawer;
 pub use duration_input::{duration_input, duration_input_with_handlers, DurationInputHandlers};
 pub use editable_label::{editable_label, editable_label_with_handlers, EditableLabelHandlers};
@@ -288,7 +284,9 @@ pub use icon_button::{icon_button, icon_button_with_handlers, IconButtonHandlers
 pub use icon_provider::icon_provider;
 pub use inline_list_section::inline_list_section;
 pub use inline_remediation::inline_remediation;
-pub use licence_activation::{licence_activation, licence_activation_with_slots, LicenceActivationHandlers};
+pub use licence_activation::{
+    licence_activation, licence_activation_with_slots, LicenceActivationHandlers,
+};
 pub use licence_seats::{licence_seats, LicenceSeatsHandlers};
 pub use licence_status::licence_status;
 pub use list_card::{list_card, ListCardSlots};
@@ -308,11 +306,6 @@ pub use meta_bar::{meta_bar, meta_bar_sep};
 pub use meta_item::meta_item;
 pub use meter::meter;
 pub use metric_tile::metric_tile;
-pub use model_connection_picker::{
-    model_connection_option_focus_id, model_connection_option_id, model_connection_picker,
-    model_connection_picker_search_id, model_connection_picker_with_slots,
-    ModelConnectionPickerHandlers, ModelConnectionPickerSlots,
-};
 pub use model_catalogue_editor::{
     model_catalogue_editor, model_catalogue_editor_with_slots, model_catalogue_handle_focus_id,
     model_catalogue_hidden_focus_id, ModelCatalogueEditorHandlers, ModelCatalogueEditorSlots,
@@ -320,6 +313,11 @@ pub use model_catalogue_editor::{
 pub use model_connection_card::{
     model_connection_card, model_connection_card_with_slots, ModelConnectionCardHandlers,
     ModelConnectionCardSlots,
+};
+pub use model_connection_picker::{
+    model_connection_option_focus_id, model_connection_option_id, model_connection_picker,
+    model_connection_picker_search_id, model_connection_picker_with_slots,
+    ModelConnectionPickerHandlers, ModelConnectionPickerSlots,
 };
 pub use model_connection_setup::{
     model_connection_setup, model_connection_setup_action_id,
@@ -338,7 +336,10 @@ pub use pagination_summary::pagination_summary;
 pub use password_requirements::password_requirements;
 pub use picker_shell::picker_shell;
 pub use pill::{pill, pill_with_remove};
-pub use popover::{popover, popover_surface, PopoverHandlers, POPOVER_ANCHOR_HEIGHT_PX, POPOVER_ANCHOR_WIDTH_PX};
+pub use poodle_headless::select::{SelectContext, SelectEffect, SelectEvent};
+pub use popover::{
+    popover, popover_surface, PopoverHandlers, POPOVER_ANCHOR_HEIGHT_PX, POPOVER_ANCHOR_WIDTH_PX,
+};
 pub use progress::progress;
 pub use radio::radio;
 pub use radio_group::{radio_group, RadioGroupHandlers};
@@ -354,7 +355,6 @@ pub use remediation_banner::{
 pub use resize_handle::{resize_handle, resize_handle_focus_id, ResizePhase};
 pub use scroll_shell::scroll_shell;
 pub use segmented_control::segmented_control;
-pub use poodle_headless::select::{SelectContext, SelectEffect, SelectEvent};
 pub use select::{
     select, select_option_id, select_search_focus_id, select_trigger_focus_id, SelectHandlers,
     SelectTransitionResult,
@@ -389,7 +389,10 @@ pub use text_input::{
 pub use text_link::text_link;
 pub use theme_select::{theme_select, theme_select_with_handlers, ThemeSelectHandlers};
 pub use time_ago::time_ago;
-pub use time_field::{time_field, time_field_with_change};
+pub use time_input::{
+    context_from_spec, time_input, time_input_with_change, time_input_with_handlers,
+    time_input_with_persistent_context, TimeInputHandlers,
+};
 pub use time_zone_select::{time_zone_select, TimeZoneSelectHandlers};
 pub use toast_host::toast_host;
 pub use toast_stack::{toast_stack, ToastStackHandlers};

@@ -14,7 +14,7 @@
      typography, body/time gaps) were already fixed in passes 17/22 — reclassified below. -->
 <!-- pass 22: overlay shadow now elevation_overlay_shadow() (token). -->
 <!-- pass 17: GPUI overlay rebuilt — fake 6×7 grid + "Today/Done" bar replaced with
-     composed Calendar::from_spec + TimeField; mock px literals removed; time-label
+     composed Calendar::from_spec + TimeInput; mock px literals removed; time-label
      typography (0.6875rem/600/uppercase) + body/time gaps (0.875/0.375rem) applied.
      Remaining GPUI: elevation-overlay shadow token (cross-cutting), indicator glyph. -->
 # Parity: DateTimePicker
@@ -40,8 +40,8 @@ Props, callbacks, ARIA, anatomy align. Size-table reconciled to Svelte. FIXED.
 
 ## GPUI gap (vs Svelte + contract)
 
-- [x] **DONE: overlay rebuilt to composed primitives.** Fake 6×7 grid + weekday header + fake Time box + invented Today/Done bar deleted; now `Calendar::from_spec(...)` (seeded from value.date/visible_month) + composed `TimeField` + contract Time label. Mock px literals removed; time-label typography + body/time gaps applied. Build clean.
-- accepted: the old "mock overlay" `px(rem_to_px(1.75))` cell heights / `gap(px(rem_to_px(0.125)))` / `h(px(1.0))` separator no longer exist — the mock was deleted in pass 17 when the overlay was rebuilt to composed `Calendar::from_spec` + `TimeField`. The surviving `rem_to_px(0.875)`/`rem_to_px(0.375)` body/time gaps and `rem_to_px(0.6875)` label size are contract-exact rem (NOT px literals).
+- [x] **DONE: overlay rebuilt to composed primitives.** Fake 6×7 grid + weekday header + fake Time box + invented Today/Done bar deleted; now `Calendar::from_spec(...)` (seeded from value.date/visible_month) + composed `TimeInput` + contract Time label. Mock px literals removed; time-label typography + body/time gaps applied. Build clean.
+- accepted: the old "mock overlay" `px(rem_to_px(1.75))` cell heights / `gap(px(rem_to_px(0.125)))` / `h(px(1.0))` separator no longer exist — the mock was deleted in pass 17 when the overlay was rebuilt to composed `Calendar::from_spec` + `TimeInput`. The surviving `rem_to_px(0.875)`/`rem_to_px(0.375)` body/time gaps and `rem_to_px(0.6875)` label size are contract-exact rem (NOT px literals).
 - [x] **DONE (pass 22):** Shadow literals replaced by `elevation_overlay_shadow()` (token-driven).
 - [x] **DONE:** Indicator was the `calendar` Icon; now `chevron-down` (contract §2/§8 disclosure chevron, matching the sibling date/time pickers).
 - [x] **DONE (pass 17):** Time label typography — now `0.6875rem`, weight SEMIBOLD, text-secondary, uppercased `"TIME"`. (`0.04em` tracking is a CSS-only refinement absent from GPUI's text API — accepted.)
@@ -50,7 +50,7 @@ Props, callbacks, ARIA, anatomy align. Size-table reconciled to Svelte. FIXED.
 
 ## Jetstream gap (vs Svelte + contract)
 
-- [x] **DONE:** Overlay + open-state handling built out. `js_date_time_picker` now reads `spec.current_open()` (additive spec resolver) and, when open, composes the REAL `js_calendar` (seeded from the value's date/visible-month) + a Time Section — contract Time Label (`0.6875rem`/600/secondary/uppercase) above the composed `js_time_field` (seeded from the value's time) — inside the sibling overlay surface (elevated-98%-over-panel bg, 72%-alpha border, `shadow_md` preset, panel padding). Body gap `0.875rem`, time-section gap `0.375rem`. No mockup.
+- [x] **DONE:** Overlay + open-state handling built out. `js_date_time_picker` now reads `spec.current_open()` (additive spec resolver) and, when open, composes the REAL `js_calendar` (seeded from the value's date/visible-month) + a Time Section — contract Time Label (`0.6875rem`/600/secondary/uppercase) above the composed `js_time_input` (seeded from the value's time) — inside the sibling overlay surface (elevated-98%-over-panel bg, 72%-alpha border, `shadow_md` preset, panel padding). Body gap `0.875rem`, time-section gap `0.375rem`. No mockup.
 - [x] **DONE:** Partial-value prompts now match Svelte — date set / no time → `"<date> Select time"`; time set / no date → `"Select date <time>"`; complete → `"<date> <time>"`; empty → placeholder.
 - accepted: Trigger gap is `rem_to_px(0.75)` — contract-exact rem (trigger gap `0.75rem`); not a px-literal violation. Indicator font now resolves from the per-size token ladder (`date_picker_indicator_font_rem`).
 - accepted: no ARIA channel for haspopup/expanded/dialog role.
@@ -64,5 +64,5 @@ Props, callbacks, ARIA, anatomy align. Size-table reconciled to Svelte. FIXED.
 
 ## Notes
 
-- The historic GPUI mock overlay was replaced in pass 17 — the open state now composes the real `Calendar` + `TimeField` (TimeInput). The static "Open (calendar + time)" specimen group renders that real composed surface for review. (This note previously flagged the mock overlay as the biggest defect; that defect is resolved.)
+- The historic GPUI mock overlay was replaced in pass 17 — the open state now composes the real `Calendar` + `TimeInput`. The static "Open (calendar + time)" specimen group renders that real composed surface for review. (This note previously flagged the mock overlay as the biggest defect; that defect is resolved.)
 - `consv=gap` driver: contract size-table per-size padding overrides (orthogonality violation, not in Svelte) plus undocumented partial-value prompt strings.

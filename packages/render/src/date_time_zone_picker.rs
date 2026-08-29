@@ -4,7 +4,7 @@
 //! Ported from: `packages/jetstream/components/src/date_time_zone_picker.rs`.
 //!
 //! Same shell as the sibling pickers; the open surface stacks the composed
-//! calendar over TIME and TIME ZONE fields (composed [`crate::time_field::time_field`] +
+//! calendar over TIME and TIME ZONE fields (composed [`crate::time_input::time_input`] +
 //! [`crate::time_zone_select::time_zone_select`]). The trigger folds the committed date / time /
 //! zone into one space-joined string; partial values display whichever fields
 //! are present.
@@ -12,14 +12,14 @@
 use std::sync::Arc;
 
 use poodle_node::{CrossAxisAlignment, LayoutDirection, Node, NodeRole};
-use poodle_specs::{CalendarSpec, DateTimeZonePickerSpec, TimeFieldSpec, TimeZoneSelectSpec};
+use poodle_specs::{CalendarSpec, DateTimeZonePickerSpec, TimeInputSpec, TimeZoneSelectSpec};
 
 use crate::calendar::{calendar, CalendarHandlers};
 use crate::color::{mix_linear, with_alpha};
 use crate::context::RenderContext;
 use crate::picker_trigger::{picker_trigger, PickerTrigger};
 use crate::presentation::rem_to_px;
-use crate::time_field::time_field;
+use crate::time_input::time_input;
 use crate::time_zone_select::{time_zone_select, TimeZoneSelectHandlers};
 
 /// Host callbacks: the shared picker trio plus zone toggle/change forwarded
@@ -126,8 +126,8 @@ pub fn date_time_zone_picker(
         }
         cal_spec.is_disabled = spec.is_disabled;
 
-        // Composed TimeInput (TimeField), seeded from the structured value's time.
-        let mut time_spec = TimeFieldSpec::new();
+        // Composed TimeInput, seeded from the structured value's time.
+        let mut time_spec = TimeInputSpec::new();
         time_spec.value = value.time.clone();
         time_spec.is_disabled = spec.is_disabled;
 
@@ -161,7 +161,7 @@ pub fn date_time_zone_picker(
         };
 
         // Time field — contract Field: "TIME" label above composed TimeInput.
-        let time_field_group = field_group(field_label("Time", muted), time_field(&time_spec, ctx));
+        let time_input_group = field_group(field_label("Time", muted), time_input(&time_spec, ctx));
 
         // Time zone field — "TIME ZONE" label above composed TimeZoneSelect.
         let tz_field_group = field_group(
@@ -185,7 +185,7 @@ pub fn date_time_zone_picker(
             s.descriptor.layout.direction = LayoutDirection::Column;
             s.descriptor.layout.spacing.gap = rem_to_px(0.75);
         }
-        let fields = fields.child(time_field_group).child(tz_field_group);
+        let fields = fields.child(time_input_group).child(tz_field_group);
 
         // Body — vertical stack of Calendar + Fields; gap 0.875rem.
         // Contract: the open picker surface is a `dialog` (stated on the body

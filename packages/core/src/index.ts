@@ -592,6 +592,31 @@ export {
 } from "./duration";
 
 export {
+  formatTime,
+  isPositiveWholeStep,
+  parseTime,
+  secondsToTime,
+  stepTimeSeconds,
+  timeConstraintValid,
+  timeHasSeconds,
+  timeInBounds,
+  timeInputContext,
+  timeInputInvalid,
+  timeInputTransition,
+  timeSecondsVisible,
+  timeStepAligned,
+  timeToSeconds,
+  wrapSeconds,
+  type TimeInputContext,
+  type TimeInputDraft,
+  type TimeInputEffect,
+  type TimeInputEvent,
+  type TimeInputResult,
+  type TimeParts,
+  type TimeSegment,
+} from "./time-input";
+
+export {
   isSelectOptionDisabled,
   flattenSelectOptions,
   filterSelectOptions,

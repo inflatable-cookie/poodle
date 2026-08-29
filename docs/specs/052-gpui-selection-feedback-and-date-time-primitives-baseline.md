@@ -29,7 +29,7 @@ The `g04.005` tranche extends `poodle-gpui-primitives` with:
 - `RangeCalendarSpec`
 - `DatePickerSpec`
 - `DateRangePickerSpec`
-- `TimeFieldSpec`
+- `TimeInputSpec`
 - `DateTimePickerSpec`
 - `DateTimeRangePickerSpec`
 
@@ -53,7 +53,7 @@ The crate must stay aligned to the existing foundation contracts for:
 - `range-calendar`
 - `date-picker`
 - `date-range-picker`
-- `time-field`
+- `time-input`
 - `date-time-picker`
 - `date-time-range-picker`
 
@@ -123,6 +123,6 @@ value posture as Svelte:
 - `packages/gpui/primitives/src/range_calendar.rs`
 - `packages/gpui/primitives/src/date_picker.rs`
 - `packages/gpui/primitives/src/date_range_picker.rs`
-- `packages/gpui/primitives/src/time_field.rs`
+- `packages/contracts/components/src/time_input.rs`
 - `packages/gpui/primitives/src/date_time_picker.rs`
 - `packages/gpui/primitives/src/date_time_range_picker.rs`

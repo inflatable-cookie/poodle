@@ -1,10 +1,10 @@
-//! TimeField specimen — with value, placeholder, min/max, sizes, densities, disabled.
+//! TimeInput specimen — with value, placeholder, min/max, sizes, densities, disabled.
 
-use crate::compat::js_time_field;
+use crate::compat::js_time_input;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{ControlDensity, ControlSize, TimeFieldSpec};
+use poodle_specs::{ControlDensity, ControlSize, TimeInputSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -16,8 +16,8 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         .child(group(
             "With value",
             secondary,
-            div().w(200.0).child(js_time_field(
-                &TimeFieldSpec::new().with_default_value("14:30"),
+            div().w(200.0).child(js_time_input(
+                &TimeInputSpec::new().with_default_value("14:30"),
                 theme,
             )),
         ))
@@ -27,15 +27,15 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             secondary,
             div()
                 .w(200.0)
-                .child(js_time_field(&TimeFieldSpec::new(), theme)),
+                .child(js_time_input(&TimeInputSpec::new(), theme)),
         ))
         // With min/max constraints
         .child(group(
             "With min/max constraints",
             secondary,
-            div().w(200.0).child(js_time_field(
+            div().w(200.0).child(js_time_input(
                 &{
-                    let mut s = TimeFieldSpec::new().with_default_value("09:00");
+                    let mut s = TimeInputSpec::new().with_default_value("09:00");
                     s.min = Some("08:00".to_string());
                     s.max = Some("18:00".to_string());
                     s
@@ -51,40 +51,40 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .flex_col()
                 .gap(8.0)
                 .child(
-                    div().w(200.0).child(js_time_field(
-                        &TimeFieldSpec::new()
+                    div().w(200.0).child(js_time_input(
+                        &TimeInputSpec::new()
                             .with_default_value("09:00")
                             .with_size(ControlSize::Xs),
                         theme,
                     )),
                 )
                 .child(
-                    div().w(200.0).child(js_time_field(
-                        &TimeFieldSpec::new()
+                    div().w(200.0).child(js_time_input(
+                        &TimeInputSpec::new()
                             .with_default_value("09:00")
                             .with_size(ControlSize::Sm),
                         theme,
                     )),
                 )
                 .child(
-                    div().w(200.0).child(js_time_field(
-                        &TimeFieldSpec::new()
+                    div().w(200.0).child(js_time_input(
+                        &TimeInputSpec::new()
                             .with_default_value("09:00")
                             .with_size(ControlSize::Md),
                         theme,
                     )),
                 )
                 .child(
-                    div().w(200.0).child(js_time_field(
-                        &TimeFieldSpec::new()
+                    div().w(200.0).child(js_time_input(
+                        &TimeInputSpec::new()
                             .with_default_value("09:00")
                             .with_size(ControlSize::Lg),
                         theme,
                     )),
                 )
                 .child(
-                    div().w(200.0).child(js_time_field(
-                        &TimeFieldSpec::new()
+                    div().w(200.0).child(js_time_input(
+                        &TimeInputSpec::new()
                             .with_default_value("09:00")
                             .with_size(ControlSize::Xl),
                         theme,
@@ -99,24 +99,24 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 .flex_col()
                 .gap(8.0)
                 .child(
-                    div().w(200.0).child(js_time_field(
-                        &TimeFieldSpec::new()
+                    div().w(200.0).child(js_time_input(
+                        &TimeInputSpec::new()
                             .with_default_value("09:00")
                             .with_density(ControlDensity::Compact),
                         theme,
                     )),
                 )
                 .child(
-                    div().w(200.0).child(js_time_field(
-                        &TimeFieldSpec::new()
+                    div().w(200.0).child(js_time_input(
+                        &TimeInputSpec::new()
                             .with_default_value("09:00")
                             .with_density(ControlDensity::Default),
                         theme,
                     )),
                 )
                 .child(
-                    div().w(200.0).child(js_time_field(
-                        &TimeFieldSpec::new()
+                    div().w(200.0).child(js_time_input(
+                        &TimeInputSpec::new()
                             .with_default_value("09:00")
                             .with_density(ControlDensity::Comfortable),
                         theme,
@@ -125,9 +125,9 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
         ))
         // Disabled
         .child(group("Disabled", secondary, {
-            let mut spec = TimeFieldSpec::new().with_default_value("16:45");
+            let mut spec = TimeInputSpec::new().with_default_value("16:45");
             spec.is_disabled = true;
-            div().w(200.0).child(js_time_field(&spec, theme))
+            div().w(200.0).child(js_time_input(&spec, theme))
         }))
 }
 

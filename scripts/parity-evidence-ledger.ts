@@ -43,13 +43,13 @@ type LiveComponent = {
 const RUST_SPEC_OVERRIDES: Record<string, string> = {
   Callout: "CallOutSpec",
   StatusBar: "ShellStatusBarSpec",
-  TimeInput: "TimeFieldSpec",
+  TimeInput: "TimeInputSpec",
 };
 
 const RENDER_MODULE_OVERRIDES: Record<string, string> = {
   Box: "bx",
   StatusBar: "shell_status_bar",
-  TimeInput: "time_field",
+  TimeInput: "time_input",
   UiPresentationProvider: "context",
 };
 
@@ -80,6 +80,7 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   Tabs: "tabs_drag_keyboard_and_identity_rebuild_the_host_spec",
   TextInput: "text_input_controlled_editing_and_identity_rebuild_the_host_spec",
   DurationInput: "duration_input_segments_edit_and_rebuild_the_host_spec",
+  TimeInput: "time_input_segmented_editor_commits_drafts_and_bounds",
   Breadcrumbs: "breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard",
   IconButton: "icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard",
   Collapsible: "collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard",

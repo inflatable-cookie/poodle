@@ -7,6 +7,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-29 — `effigy ci:rust` rustfmt-dirties dozens of unrelated
+  `packages/render/src/*.rs` files in an otherwise clean worker tree. Revert
+  the extra formatting or stop running crate-wide rustfmt from the CI board.
+  Found while closing g16.029.
+
 - 2026-08-27 — RESOLVED 2026-08-27. HistoryCenter never re-read props after
   OPEN, so a host that handed back new pages while the popover stayed open
   kept the OPEN-time copy. Already fixed: the Svelte/React adapters dispatch

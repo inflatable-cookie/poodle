@@ -1,6 +1,6 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-28
+Updated: 2026-08-29
 
 ## Active Track
 
@@ -14,13 +14,13 @@ Updated: 2026-08-28
     `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
     `019` merged in PR #94; `020` merged in PR #95; `021` merged in PR #96;
     `022`–`028` planned behind ordered drag-and-drop dependencies; `029`
-    compiled as the serial TimeInput continuation after `021`; `030` compiled
-    as the approved NumberInput continuation after `029`; `031`–`032` compile
-    paired/web and native continuous-audio repair after the bounded audit
+    complete, awaiting merge (TimeInput native parity, ledger 48/126); `030`
+    compiled as the approved NumberInput continuation after `029`; `031`–`032`
+    compile paired/web and native continuous-audio repair after the bounded audit
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: dispatch `g16.029`; `g16.030` follows only after TimeInput
+  - Next move: review and merge `g16.029`; dispatch `g16.030` after TimeInput
     closes, then `g16.031`–`032` close the audited Fader/Knob/XYPad lane. Keep
     `032` away from drag card `025` because both edit Node/GPUI interaction
     routing. The legacy public drag-export migration is approved; later cards

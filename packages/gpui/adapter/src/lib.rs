@@ -33,8 +33,8 @@ mod render_form_composites;
 mod render_informational;
 mod render_overlay;
 mod render_selection;
-mod render_structural;
 mod render_shell;
+mod render_structural;
 mod style_map;
 mod theme;
 
@@ -114,7 +114,7 @@ const SUPPORTED_PRIMITIVES: &[&str] = &[
     "FieldSpec",
     "TextInputSpec",
     "FormActionsSpec",
-    "TimeFieldSpec",
+    "TimeInputSpec",
     "EditableLabelSpec",
     "NumberInputSpec",
     "CodeInputSpec",
@@ -278,8 +278,10 @@ mod tests {
             SUPPORTED_PRIMITIVES.len() + SUPPORTED_COMPOSITES.len() + SUPPORTED_SHELL.len()
         );
         assert_eq!(adapter.supported_components().len(), 101);
-        assert!(adapter.supported_components().contains(&"TimeFieldSpec"));
-        assert!(adapter.supported_components().contains(&"MessageCenterSpec"));
+        assert!(adapter.supported_components().contains(&"TimeInputSpec"));
+        assert!(adapter
+            .supported_components()
+            .contains(&"MessageCenterSpec"));
         assert_eq!(adapter.unsupported_components().len(), 0);
     }
 

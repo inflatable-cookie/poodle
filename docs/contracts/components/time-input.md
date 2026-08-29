@@ -1,7 +1,7 @@
 # Time Input
 
 Status: detailed contract
-Updated: 2026-08-28
+Updated: 2026-08-29
 
 ## 1. Purpose
 
@@ -237,6 +237,9 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 - Native browser draft UI stays adapter-owned. Callbacks are gated through the
   shared value/constraint semantics so invalid or off-step values do not leak
   into the portable callback.
+- A native incomplete edit is `value === ""` with `validity.badInput`; it stays
+  a local draft, does not emit, and reverts on blur or Escape. An empty value
+  without `badInput` is a deliberate clear and emits `null`.
 - A browser validity failure uses the same derived invalid presentation and
   blur reversion as the custom native editor.
 - New appearance overrides must use component-scoped Recipe hooks with
@@ -248,10 +251,12 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 
 - expected crate/module surface: `poodle_gpui::primitives::time_input`
 - Spec struct: `TimeInputSpec` in `poodle-specs`
+- Renderer: `poodle_render::time_input` / `time_input_with_change` /
+  `time_input_with_persistent_context`
 - GPUI provides one segmented time-entry control because there is no native
   `input[type="time"]`
-- the legacy pre-1.0 `TimeFieldSpec` / `time_field` public surface is removed in
-  the same clean migration; no alias or compatibility wrapper remains
+- the pre-1.0 `TimeFieldSpec` / `time_field` public surface is gone; no alias or
+  compatibility wrapper remains
 - Must expose time value, min/max constraints, and step through accessibility tree
 - Focus ring treatment must match outline spec
 
@@ -259,13 +264,13 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 
 ### Tier 1: Strict Parity
 
-- [ ] value and onValueChange semantics match
-- [ ] min, max, step constraints match
-- [ ] canonical format, conditional seconds, overnight range, and step anchor match
-- [ ] incomplete/invalid drafts remain local and revert without callback
-- [ ] clearing, controlled replacement, and disabled inertia match
-- [ ] disabled state matches
-- [ ] accessible name from label or ariaLabel matches
+- [x] value and onValueChange semantics match
+- [x] min, max, step constraints match
+- [x] canonical format, conditional seconds, overnight range, and step anchor match
+- [x] incomplete/invalid drafts remain local and revert without callback
+- [x] clearing, controlled replacement, and disabled inertia match
+- [x] disabled state matches
+- [x] accessible name from label or ariaLabel matches
 - [ ] describedBy relationship matches
 
 ### Tier 2: Visual Parity
@@ -281,8 +286,8 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 
 ### Tier 3: Implementation Freedom
 
-- [ ] native time-entry UI vs GPUI custom time editing stays internal
-- [ ] transition timing is platform-owned
+- [x] native time-entry UI vs GPUI custom time editing stays internal
+- [x] transition timing is platform-owned
 
 ## 12. Known Deltas
 
@@ -345,7 +350,7 @@ Density adjusts horizontal padding only; it never changes height or vertical pad
 
 ## Rust Spec Migration
 
-The approved implementation tranche renames the legacy Rust
-`TimeFieldSpec` / `time_field` surface to `TimeInputSpec` / `time_input` and
-migrates every in-repository caller. Poodle is pre-1.0, so the old public names
-are removed without aliases, wrappers, or silent fallback.
+The landed implementation renamed the legacy Rust `TimeFieldSpec` /
+`time_field` surface to `TimeInputSpec` / `time_input` and migrated every
+in-repository caller. Poodle is pre-1.0, so the old public names are gone
+without aliases, wrappers, or silent fallback.

@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.021 merged; g16.029 next, with g16.030–032 behind it
+Status: active — g16.029 complete, awaiting merge; g16.030 next
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -59,7 +59,7 @@ stay maintained; backend admission is not part of the first card.
 26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
-29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — planned; decision approved, next dispatch
+29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; awaiting merge; ledger 48 mounted / 126 missing
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — planned; decision approved, depends on 029
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — planned; bounded audit complete, depends on 030
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — planned; depends on 031 and must not overlap 025
@@ -91,12 +91,13 @@ the Select lane or changing those totals.
 
 The component-continuation lane now has four approved implementation plans.
 TimeInput's segmented native editing model is authoritative in its contract and
-compiled as `g16.029`. NumberInput's typed committed value, optional raw draft,
+closed as `g16.029`. NumberInput's typed committed value, optional raw draft,
 clean callback migration, and mounted editor are authoritative and compiled as
-`g16.030`. Both remain serial behind the active `g16.021` worker and each other
-because they edit shared core/headless exports and the domain-vector corpus.
+`g16.030`. NumberInput stays serial behind TimeInput's merge because both edit
+shared core/headless exports and the domain-vector corpus.
 Promoting NumberInput's explicit runtime deltas moves only that ledger axis from
-115 / 60 to 116 present / 59 not-applicable; mounted totals remain 47 / 127.
+115 / 60 to 116 present / 59 not-applicable; mounted totals stay 48 / 126 until
+that card lands.
 EditableLabel still needs an operator-owned editing decision. Fader, Knob, and
 XYPad now have a completed bounded audit and two serial cards: `g16.031`
 aligns paired machines plus Svelte/React gesture and entry lifecycles;
@@ -293,9 +294,9 @@ moved.
 
 ## Next Task
 
-Review `g16.021` in PR #96 and authorise its merge. Then publish `g16.029`'s
-worker handoff from the landed base; `g16.030` follows only after TimeInput
-closes. Keep `g16.022` planned until the orchestrator chooses it after the
-serial core/export tranche. The public
-drag migration boundary is resolved; reconcile the exact custom-surface and
-host-bridge API names only after their prerequisite kernels land.
+Review `g16.029` in PR #97 and authorise its merge. Then dispatch `g16.030`
+NumberInput.
+Keep `g16.022` planned until the orchestrator chooses it after the serial
+core/export tranche. The public drag migration boundary is resolved; reconcile
+the exact custom-surface and host-bridge API names only after their
+prerequisite kernels land.

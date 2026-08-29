@@ -60,6 +60,21 @@ import {
   type DurationValue,
 } from "../src/duration.ts";
 import { findNextEnabledIndex, firstEnabledIndex } from "../src/nav.ts";
+import {
+  formatTime,
+  parseTime,
+  secondsToTime,
+  stepTimeSeconds,
+  timeInBounds,
+  timeInputInvalid,
+  timeInputTransition,
+  timeSecondsVisible,
+  timeStepAligned,
+  timeToSeconds,
+  type TimeInputContext,
+  type TimeInputEvent,
+  type TimeParts,
+} from "../src/time-input.ts";
 
 interface DomainVectors {
   date: DateCase[];
@@ -69,6 +84,7 @@ interface DomainVectors {
   treeNodes: JsonTreeNode[];
   duration: DurationCase[];
   nav: NavCase[];
+  timeInput: TimeInputCase[];
 }
 
 interface DateCase {
@@ -153,6 +169,24 @@ interface NavCase {
   disabled?: boolean[];
   startIndex?: number;
   direction?: number;
+  expect: unknown;
+}
+
+interface TimeInputCase {
+  op: string;
+  name?: string;
+  value?: string | null;
+  parts?: TimeParts;
+  seconds?: boolean;
+  step?: number;
+  committed?: string | null;
+  defaultValue?: string | null;
+  min?: string | null;
+  max?: string | null;
+  current?: string | null;
+  direction?: 1 | -1;
+  context?: TimeInputContext;
+  event?: TimeInputEvent;
   expect: unknown;
 }
 
@@ -481,6 +515,84 @@ describe("domain conformance: nav", () => {
         }
         default:
           throw new Error(`unknown nav op: ${case_.op}`);
+      }
+    });
+  }
+});
+
+describe("domain conformance: timeInput", () => {
+  for (const case_ of vectors.timeInput) {
+    test(`${case_.op}: ${case_.name ?? ""}`, () => {
+      switch (case_.op) {
+        case "parse": {
+          expect(parseTime(case_.value ?? null)).toEqual(case_.expect);
+          return;
+        }
+        case "format": {
+          expect(formatTime(case_.parts ?? { hour: 0, minute: 0, second: 0 }, case_.seconds === true)).toBe(
+            case_.expect,
+          );
+          return;
+        }
+        case "secondsVisible": {
+          expect(
+            timeSecondsVisible({
+              step: case_.step ?? 60,
+              committed: case_.committed ?? null,
+              defaultValue: case_.defaultValue ?? null,
+              min: case_.min ?? null,
+              max: case_.max ?? null,
+            }),
+          ).toBe(case_.expect);
+          return;
+        }
+        case "inBounds": {
+          expect(timeInBounds(case_.parts ?? { hour: 0, minute: 0, second: 0 }, case_.min ?? null, case_.max ?? null)).toBe(
+            case_.expect,
+          );
+          return;
+        }
+        case "stepAligned": {
+          expect(timeStepAligned(case_.parts ?? { hour: 0, minute: 0, second: 0 }, case_.min ?? null, case_.step ?? 60)).toBe(
+            case_.expect,
+          );
+          return;
+        }
+        case "step": {
+          const currentParts = case_.current === null || case_.current === undefined ? null : parseTime(case_.current);
+          const next = stepTimeSeconds(
+            currentParts === null ? null : timeToSeconds(currentParts),
+            case_.direction ?? 1,
+            case_.min ?? null,
+            case_.max ?? null,
+            case_.step ?? 60,
+          );
+          const formatted =
+            next === null
+              ? null
+              : formatTime(
+                  secondsToTime(next),
+                  timeSecondsVisible({
+                    committed: case_.current ?? null,
+                    min: case_.min ?? null,
+                    max: case_.max ?? null,
+                    step: case_.step ?? 60,
+                  }),
+                );
+          expect(formatted).toBe(case_.expect);
+          return;
+        }
+        case "transition": {
+          const result = timeInputTransition(case_.context as TimeInputContext, case_.event as TimeInputEvent);
+          expect({
+            context: result.context,
+            effects: result.effects,
+            invalid: timeInputInvalid(result.context),
+          }).toEqual(case_.expect);
+          return;
+        }
+        default:
+          throw new Error(`unknown timeInput op: ${case_.op}`);
       }
     });
   }

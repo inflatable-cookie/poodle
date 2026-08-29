@@ -1064,8 +1064,8 @@ pub fn js_time_ago(spec: &TimeAgoSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::time_ago(spec, &pr::RenderContext::new(theme)))
 }
 
-pub fn js_time_field(spec: &TimeFieldSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::time_field(spec, &pr::RenderContext::new(theme)))
+pub fn js_time_input(spec: &TimeInputSpec, theme: &JetstreamThemeProvider) -> El {
+    El(pr::time_input(spec, &pr::RenderContext::new(theme)))
 }
 
 pub fn js_time_zone_select(

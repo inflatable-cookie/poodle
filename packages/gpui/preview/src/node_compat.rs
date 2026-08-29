@@ -6,7 +6,7 @@
 //! in the shared contracts and renderer.
 
 use std::rc::Rc;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use gpui::{
     div, px, AnyElement, App, Hsla, InteractiveElement, IntoElement, KeyDownEvent, ParentElement,
@@ -42,7 +42,7 @@ use poodle_specs::{
     SkeletonSpec, SliderSpec, SpacerSpec, SpinnerSpec, SplitOrientation, SplitViewSpec, StackSpec,
     StateTileSpec, StatusIndicatorSpec, StepperSpec, SurfaceSpec, SwitchSpec, TabStripSpec,
     TableSpec, TabsSpec, TextInputSpec, TextLinkSpec, TextSpec, ThemeSelectSpec, TimeAgoSpec,
-    TimeFieldSpec, TimeZoneSelectSpec, ToastHostSpec, ToastStackSpec, TokenInputSpec,
+    TimeInputSpec, TimeZoneSelectSpec, ToastHostSpec, ToastStackSpec, TokenInputSpec,
     ToolCallGroupSpec, ToolCallSpec, ToolbarSpec, TooltipSpec, TreeSpec, TriStateSwitchSpec,
     TriStateValue, ValidationSummarySpec, VideoPlayerSpec,
 };
@@ -5440,20 +5440,24 @@ impl IntoElement for DateTimeZonePicker {
     }
 }
 
-pub(crate) struct TimeField {
-    spec: TimeFieldSpec,
+pub(crate) struct TimeInput {
+    spec: TimeInputSpec,
     theme: GpuiThemeProvider,
     id_suffix: Option<String>,
     on_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    live_context: Option<Arc<Mutex<poodle_headless::time_input::TimeInputContext>>>,
+    on_context: Option<Arc<dyn Fn(poodle_headless::time_input::TimeInputContext) + Send + Sync>>,
 }
 
-impl TimeField {
-    pub(crate) fn from_spec(spec: TimeFieldSpec, theme: &GpuiThemeProvider) -> Self {
+impl TimeInput {
+    pub(crate) fn from_spec(spec: TimeInputSpec, theme: &GpuiThemeProvider) -> Self {
         Self {
             spec,
             theme: theme.clone(),
             id_suffix: None,
             on_change: None,
+            live_context: None,
+            on_context: None,
         }
     }
 
@@ -5477,17 +5481,49 @@ impl TimeField {
         self
     }
 
+    pub(crate) fn with_context(
+        mut self,
+        live: Arc<Mutex<poodle_headless::time_input::TimeInputContext>>,
+    ) -> Self {
+        self.live_context = Some(live);
+        self
+    }
+
+    pub(crate) fn on_context(
+        mut self,
+        handler: Arc<dyn Fn(poodle_headless::time_input::TimeInputContext) + Send + Sync>,
+    ) -> Self {
+        self.on_context = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
-        let mut node =
-            poodle_render::time_field_with_change(&self.spec, &RenderContext::new(&self.theme), self.on_change);
+        let live = self.live_context.unwrap_or_else(|| {
+            Arc::new(Mutex::new(poodle_render::context_from_spec(&self.spec)))
+        });
+        {
+            let mut context = live.lock().expect("time input context");
+            context.min = self.spec.min.clone();
+            context.max = self.spec.max.clone();
+            context.step = f64::from(self.spec.step);
+            context.disabled = self.spec.is_disabled;
+            context.default_value = self.spec.default_value.clone();
+        }
+        let mut node = poodle_render::time_input_with_persistent_context(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            live,
+            self.on_change,
+            self.on_context,
+        );
         if let Some(id) = self.id_suffix {
-            node.id = Some(format!("poodle-time-field-{id}"));
+            node.id = Some(format!("poodle-time-input-{id}"));
         }
         node
     }
 }
 
-impl IntoElement for TimeField {
+impl IntoElement for TimeInput {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {

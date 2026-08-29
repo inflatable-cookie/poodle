@@ -1,11 +1,11 @@
 //! RenderComponent implementations for input primitives.
 //!
 //! g08.005: TextInputSpec, FieldSpec,
-//! NumberInputSpec, CodeInputSpec, EditableLabelSpec, TimeFieldSpec
+//! NumberInputSpec, CodeInputSpec, EditableLabelSpec, TimeInputSpec
 
 use poodle_adapter::{RenderComponent, ThemeProvider};
 use poodle_specs::{
-    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec, TextInputSpec, TimeFieldSpec,
+    CodeInputSpec, EditableLabelSpec, FieldSpec, NumberInputSpec, TextInputSpec, TimeInputSpec,
 };
 use poodle_style::StyleDescriptor;
 
@@ -180,18 +180,18 @@ impl RenderComponent<EditableLabelSpec> for JetstreamAdapter {
     }
 }
 
-impl RenderComponent<TimeFieldSpec> for JetstreamAdapter {
+impl RenderComponent<TimeInputSpec> for JetstreamAdapter {
     type Target = JetstreamTarget;
     fn render(
         &self,
-        _spec: &TimeFieldSpec,
+        _spec: &TimeInputSpec,
         style: &StyleDescriptor,
         _theme: &dyn ThemeProvider,
     ) -> JetstreamNodeHandle {
-        // TimeFieldSpec has no specific token methods — apply base style mapping
+        // TimeInputSpec has no specific token methods — apply base style mapping
         let mapped = map_style(style);
 
-        JetstreamNodeHandle::new("time-field", "TimeFieldSpec", WidgetKind::TextInput, mapped)
+        JetstreamNodeHandle::new("time-input", "TimeInputSpec", WidgetKind::TextInput, mapped)
     }
 }
 
@@ -299,10 +299,10 @@ mod tests {
     }
 
     #[test]
-    fn time_field_renders() {
-        let h = a().render(&TimeFieldSpec::new(), &s(), &t());
-        assert_eq!(h.node_id, "time-field");
-        assert_eq!(h.spec_type, "TimeFieldSpec");
+    fn time_input_renders() {
+        let h = a().render(&TimeInputSpec::new(), &s(), &t());
+        assert_eq!(h.node_id, "time-input");
+        assert_eq!(h.spec_type, "TimeInputSpec");
         assert_eq!(h.widget_kind, WidgetKind::TextInput);
     }
 }
