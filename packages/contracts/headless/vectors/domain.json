@@ -3460,5 +3460,1112 @@
         "invalid": false
       }
     }
+  ],
+  "numberInput": [
+    {
+      "op": "classify",
+      "name": "zero",
+      "value": "0",
+      "expect": {
+        "kind": "complete",
+        "fractionalDigits": 0,
+        "value": 0
+      }
+    },
+    {
+      "op": "classify",
+      "name": "leading zero fractional",
+      "value": "01.20",
+      "expect": {
+        "kind": "complete",
+        "fractionalDigits": 2,
+        "value": 1.2
+      }
+    },
+    {
+      "op": "classify",
+      "name": "negative",
+      "value": "-12.5",
+      "expect": {
+        "kind": "complete",
+        "fractionalDigits": 1,
+        "value": -12.5
+      }
+    },
+    {
+      "op": "classify",
+      "name": "leading period",
+      "value": ".5",
+      "expect": {
+        "kind": "complete",
+        "fractionalDigits": 1,
+        "value": 0.5
+      }
+    },
+    {
+      "op": "classify",
+      "name": "empty",
+      "value": "",
+      "expect": {
+        "kind": "empty",
+        "fractionalDigits": null,
+        "value": null
+      }
+    },
+    {
+      "op": "classify",
+      "name": "minus incomplete",
+      "value": "-",
+      "expect": {
+        "kind": "incomplete",
+        "fractionalDigits": null,
+        "value": null
+      }
+    },
+    {
+      "op": "classify",
+      "name": "period incomplete",
+      "value": ".",
+      "expect": {
+        "kind": "incomplete",
+        "fractionalDigits": null,
+        "value": null
+      }
+    },
+    {
+      "op": "classify",
+      "name": "minus period incomplete",
+      "value": "-.",
+      "expect": {
+        "kind": "incomplete",
+        "fractionalDigits": null,
+        "value": null
+      }
+    },
+    {
+      "op": "classify",
+      "name": "trailing period",
+      "value": "1.",
+      "expect": {
+        "kind": "incomplete",
+        "fractionalDigits": null,
+        "value": null
+      }
+    },
+    {
+      "op": "classify",
+      "name": "exponent",
+      "value": "1e2",
+      "expect": {
+        "kind": "malformed",
+        "fractionalDigits": null,
+        "value": null
+      }
+    },
+    {
+      "op": "classify",
+      "name": "radix",
+      "value": "0x10",
+      "expect": {
+        "kind": "malformed",
+        "fractionalDigits": null,
+        "value": null
+      }
+    },
+    {
+      "op": "classify",
+      "name": "whitespace",
+      "value": "1 2",
+      "expect": {
+        "kind": "malformed",
+        "fractionalDigits": null,
+        "value": null
+      }
+    },
+    {
+      "op": "classify",
+      "name": "nan text",
+      "value": "NaN",
+      "expect": {
+        "kind": "malformed",
+        "fractionalDigits": null,
+        "value": null
+      }
+    },
+    {
+      "op": "classify",
+      "name": "infinity text",
+      "value": "Infinity",
+      "expect": {
+        "kind": "malformed",
+        "fractionalDigits": null,
+        "value": null
+      }
+    },
+    {
+      "op": "configValid",
+      "name": "omitted step and precision",
+      "step": null,
+      "precision": null,
+      "min": null,
+      "max": null,
+      "expect": true
+    },
+    {
+      "op": "configValid",
+      "name": "invalid step zero",
+      "step": 0,
+      "precision": null,
+      "min": null,
+      "max": null,
+      "expect": false
+    },
+    {
+      "op": "configValid",
+      "name": "invalid precision",
+      "step": null,
+      "precision": 1.5,
+      "min": null,
+      "max": null,
+      "expect": false
+    },
+    {
+      "op": "configValid",
+      "name": "min greater than max",
+      "step": null,
+      "precision": null,
+      "min": 5,
+      "max": 1,
+      "expect": false
+    },
+    {
+      "op": "configValid",
+      "name": "valid fractional step",
+      "step": 0.1,
+      "precision": 1,
+      "min": 0,
+      "max": 10,
+      "expect": true
+    },
+    {
+      "op": "inBounds",
+      "name": "inside",
+      "value": 5,
+      "min": 0,
+      "max": 10,
+      "expect": true
+    },
+    {
+      "op": "inBounds",
+      "name": "above max",
+      "value": 11,
+      "min": 0,
+      "max": 10,
+      "expect": false
+    },
+    {
+      "op": "inBounds",
+      "name": "below min",
+      "value": -1,
+      "min": 0,
+      "max": 10,
+      "expect": false
+    },
+    {
+      "op": "stepAligned",
+      "name": "whole step at zero",
+      "value": 3,
+      "min": null,
+      "step": 1,
+      "expect": true
+    },
+    {
+      "op": "stepAligned",
+      "name": "fractional at zero",
+      "value": 0.3,
+      "min": null,
+      "step": 0.1,
+      "expect": true
+    },
+    {
+      "op": "stepAligned",
+      "name": "off fractional at zero",
+      "value": 0.3,
+      "min": null,
+      "step": 0.2,
+      "expect": false
+    },
+    {
+      "op": "stepAligned",
+      "name": "anchored at min",
+      "value": 1.2,
+      "min": 1,
+      "step": 0.1,
+      "expect": true
+    },
+    {
+      "op": "stepAligned",
+      "name": "off min grid",
+      "value": 1.25,
+      "min": 1,
+      "step": 0.1,
+      "expect": false
+    },
+    {
+      "op": "draftValid",
+      "name": "precision reject",
+      "value": "1.234",
+      "min": null,
+      "max": null,
+      "step": 0.001,
+      "precision": 2,
+      "expect": false
+    },
+    {
+      "op": "draftValid",
+      "name": "precision accept",
+      "value": "1.23",
+      "min": null,
+      "max": null,
+      "step": 0.01,
+      "precision": 2,
+      "expect": true
+    },
+    {
+      "op": "draftValid",
+      "name": "out of range",
+      "value": "11",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "precision": null,
+      "expect": false
+    },
+    {
+      "op": "draftValid",
+      "name": "off step",
+      "value": "1.5",
+      "min": null,
+      "max": null,
+      "step": 1,
+      "precision": null,
+      "expect": false
+    },
+    {
+      "op": "format",
+      "name": "shortest",
+      "value": 1.5,
+      "precision": null,
+      "expect": "1.5"
+    },
+    {
+      "op": "format",
+      "name": "fixed precision",
+      "value": 1.5,
+      "precision": 2,
+      "expect": "1.50"
+    },
+    {
+      "op": "format",
+      "name": "empty",
+      "value": null,
+      "precision": null,
+      "expect": ""
+    },
+    {
+      "op": "step",
+      "name": "from empty to zero",
+      "current": null,
+      "direction": 1,
+      "min": null,
+      "max": null,
+      "step": null,
+      "precision": null,
+      "expect": 0
+    },
+    {
+      "op": "step",
+      "name": "from empty to min",
+      "current": null,
+      "direction": 1,
+      "min": 5,
+      "max": 10,
+      "step": 1,
+      "precision": null,
+      "expect": 5
+    },
+    {
+      "op": "step",
+      "name": "stop at max",
+      "current": 10,
+      "direction": 1,
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "precision": null,
+      "expect": null
+    },
+    {
+      "op": "step",
+      "name": "fractional up",
+      "current": 1.2,
+      "direction": 1,
+      "min": null,
+      "max": null,
+      "step": 0.1,
+      "precision": 1,
+      "expect": 1.3
+    },
+    {
+      "op": "transition",
+      "name": "incomplete raw edit",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "RAW_EDIT",
+        "text": "-"
+      },
+      "expect": {
+        "context": {
+          "committed": 1,
+          "defaultValue": null,
+          "draft": "-",
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [
+          {
+            "type": "emitDraftValueChange",
+            "draft": "-"
+          }
+        ],
+        "invalid": true
+      }
+    },
+    {
+      "op": "transition",
+      "name": "valid live change",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "RAW_EDIT",
+        "text": "2"
+      },
+      "expect": {
+        "context": {
+          "committed": 2,
+          "defaultValue": null,
+          "draft": "2",
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [
+          {
+            "type": "emitDraftValueChange",
+            "draft": "2"
+          },
+          {
+            "type": "emitValueChange",
+            "value": 2
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "duplicate value silence",
+      "context": {
+        "committed": 2,
+        "defaultValue": null,
+        "draft": "2",
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "RAW_EDIT",
+        "text": "2"
+      },
+      "expect": {
+        "context": {
+          "committed": 2,
+          "defaultValue": null,
+          "draft": "2",
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "clear empty",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "CLEAR"
+      },
+      "expect": {
+        "context": {
+          "committed": null,
+          "defaultValue": null,
+          "draft": "",
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [
+          {
+            "type": "emitDraftValueChange",
+            "draft": ""
+          },
+          {
+            "type": "emitValueChange",
+            "value": null
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "enter commit",
+      "context": {
+        "committed": 2,
+        "defaultValue": null,
+        "draft": "2",
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "ENTER"
+      },
+      "expect": {
+        "context": {
+          "committed": 2,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [
+          {
+            "type": "emitDraftValueChange",
+            "draft": null
+          },
+          {
+            "type": "emitCommit",
+            "value": 2
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "enter unresolved inert",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": "1e2",
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "ENTER"
+      },
+      "expect": {
+        "context": {
+          "committed": 1,
+          "defaultValue": null,
+          "draft": "1e2",
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [],
+        "invalid": true
+      }
+    },
+    {
+      "op": "transition",
+      "name": "escape revert",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": "1e2",
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "ESCAPE"
+      },
+      "expect": {
+        "context": {
+          "committed": 1,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [
+          {
+            "type": "emitDraftValueChange",
+            "draft": null
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "blur revert unresolved",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": "1e2",
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "BLUR"
+      },
+      "expect": {
+        "context": {
+          "committed": 1,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [
+          {
+            "type": "emitDraftValueChange",
+            "draft": null
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "blur commit valid",
+      "context": {
+        "committed": 2,
+        "defaultValue": null,
+        "draft": "2",
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "BLUR"
+      },
+      "expect": {
+        "context": {
+          "committed": 2,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [
+          {
+            "type": "emitDraftValueChange",
+            "draft": null
+          },
+          {
+            "type": "emitCommit",
+            "value": 2
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "replace discards draft",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": "-",
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "REPLACE",
+        "value": 9
+      },
+      "expect": {
+        "context": {
+          "committed": 9,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [
+          {
+            "type": "emitDraftValueChange",
+            "draft": null
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "step commit",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 0.5,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "STEP",
+        "direction": 1
+      },
+      "expect": {
+        "context": {
+          "committed": 1.5,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 0.5,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [
+          {
+            "type": "emitValueChange",
+            "value": 1.5
+          },
+          {
+            "type": "emitCommit",
+            "value": 1.5
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "home to min",
+      "context": {
+        "committed": 5,
+        "defaultValue": null,
+        "draft": null,
+        "min": 0,
+        "max": 10,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "HOME"
+      },
+      "expect": {
+        "context": {
+          "committed": 0,
+          "defaultValue": null,
+          "draft": null,
+          "min": 0,
+          "max": 10,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [
+          {
+            "type": "emitValueChange",
+            "value": 0
+          },
+          {
+            "type": "emitCommit",
+            "value": 0
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "end to max",
+      "context": {
+        "committed": 5,
+        "defaultValue": null,
+        "draft": null,
+        "min": 0,
+        "max": 10,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "END"
+      },
+      "expect": {
+        "context": {
+          "committed": 10,
+          "defaultValue": null,
+          "draft": null,
+          "min": 0,
+          "max": 10,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [
+          {
+            "type": "emitValueChange",
+            "value": 10
+          },
+          {
+            "type": "emitCommit",
+            "value": 10
+          }
+        ],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "home inert without min",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "HOME"
+      },
+      "expect": {
+        "context": {
+          "committed": 1,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "disabled inert",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": true,
+        "readOnly": false
+      },
+      "event": {
+        "type": "STEP",
+        "direction": 1
+      },
+      "expect": {
+        "context": {
+          "committed": 1,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": true,
+          "readOnly": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "readOnly inert",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": true
+      },
+      "event": {
+        "type": "RAW_EDIT",
+        "text": "2"
+      },
+      "expect": {
+        "context": {
+          "committed": 1,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": true
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "repeat blur inert",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "BLUR"
+      },
+      "expect": {
+        "context": {
+          "committed": 1,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "repeat escape inert",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "ESCAPE"
+      },
+      "expect": {
+        "context": {
+          "committed": 1,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "repeat clear when already empty",
+      "context": {
+        "committed": null,
+        "defaultValue": null,
+        "draft": "",
+        "min": null,
+        "max": null,
+        "step": null,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "CLEAR"
+      },
+      "expect": {
+        "context": {
+          "committed": null,
+          "defaultValue": null,
+          "draft": "",
+          "min": null,
+          "max": null,
+          "step": null,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [],
+        "invalid": false
+      }
+    },
+    {
+      "op": "transition",
+      "name": "invalid config inert",
+      "context": {
+        "committed": 1,
+        "defaultValue": null,
+        "draft": null,
+        "min": null,
+        "max": null,
+        "step": 0,
+        "precision": null,
+        "disabled": false,
+        "readOnly": false
+      },
+      "event": {
+        "type": "STEP",
+        "direction": 1
+      },
+      "expect": {
+        "context": {
+          "committed": 1,
+          "defaultValue": null,
+          "draft": null,
+          "min": null,
+          "max": null,
+          "step": 0,
+          "precision": null,
+          "disabled": false,
+          "readOnly": false
+        },
+        "effects": [],
+        "invalid": true
+      }
+    }
   ]
 }

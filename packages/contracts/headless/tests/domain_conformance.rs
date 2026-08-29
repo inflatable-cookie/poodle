@@ -766,3 +766,206 @@ fn time_input_conformance() {
         }
     }
 }
+
+// ── NumberInput ──
+
+#[test]
+fn number_input_conformance() {
+    use poodle_headless::number_input::*;
+
+    fn opt_f64(value: &Value) -> Option<f64> {
+        if value.is_null() {
+            None
+        } else {
+            value.as_f64()
+        }
+    }
+
+    fn opt_string(value: &Value) -> Option<String> {
+        value.as_str().map(str::to_string)
+    }
+
+    fn context_from(value: &Value) -> NumberInputContext {
+        NumberInputContext {
+            committed: opt_f64(&value["committed"]),
+            default_value: opt_f64(&value["defaultValue"]),
+            draft: opt_string(&value["draft"]),
+            min: opt_f64(&value["min"]),
+            max: opt_f64(&value["max"]),
+            step: opt_f64(&value["step"]),
+            precision: opt_f64(&value["precision"]),
+            disabled: value["disabled"].as_bool().unwrap_or(false),
+            read_only: value["readOnly"].as_bool().unwrap_or(false),
+        }
+    }
+
+    fn context_json(context: &NumberInputContext) -> Value {
+        json!({
+            "committed": context.committed,
+            "defaultValue": context.default_value,
+            "draft": context.draft,
+            "min": context.min,
+            "max": context.max,
+            "step": context.step,
+            "precision": context.precision,
+            "disabled": context.disabled,
+            "readOnly": context.read_only,
+        })
+    }
+
+    fn event_from(value: &Value) -> NumberInputEvent {
+        match s(value, "type") {
+            "RAW_EDIT" => NumberInputEvent::RawEdit {
+                text: s(value, "text").to_string(),
+            },
+            "CLEAR" => NumberInputEvent::Clear,
+            "ENTER" => NumberInputEvent::Enter,
+            "BLUR" => NumberInputEvent::Blur,
+            "ESCAPE" => NumberInputEvent::Escape,
+            "STEP" => NumberInputEvent::Step {
+                direction: value["direction"].as_i64().unwrap_or(1) as i32,
+            },
+            "HOME" => NumberInputEvent::Home,
+            "END" => NumberInputEvent::End,
+            "REPLACE" => NumberInputEvent::Replace {
+                value: opt_f64(&value["value"]),
+            },
+            "SET_DISABLED" => NumberInputEvent::SetDisabled {
+                disabled: value["disabled"].as_bool().unwrap_or(false),
+            },
+            "SET_READ_ONLY" => NumberInputEvent::SetReadOnly {
+                read_only: value["readOnly"].as_bool().unwrap_or(false),
+            },
+            "SET_CONSTRAINTS" => NumberInputEvent::SetConstraints {
+                min: opt_f64(&value["min"]),
+                max: opt_f64(&value["max"]),
+                step: opt_f64(&value["step"]),
+                precision: opt_f64(&value["precision"]),
+                default_value: opt_f64(&value["defaultValue"]),
+            },
+            other => panic!("unknown numberInput event {other}"),
+        }
+    }
+
+    fn effects_json(effects: &[NumberInputEffect]) -> Value {
+        Value::Array(
+            effects
+                .iter()
+                .map(|effect| match effect {
+                    NumberInputEffect::EmitDraftValueChange { draft } => json!({
+                        "type": "emitDraftValueChange",
+                        "draft": draft,
+                    }),
+                    NumberInputEffect::EmitValueChange { value } => json!({
+                        "type": "emitValueChange",
+                        "value": value,
+                    }),
+                    NumberInputEffect::EmitCommit { value } => json!({
+                        "type": "emitCommit",
+                        "value": value,
+                    }),
+                })
+                .collect(),
+        )
+    }
+
+    fn kind_str(kind: NumberDraftKind) -> &'static str {
+        match kind {
+            NumberDraftKind::Empty => "empty",
+            NumberDraftKind::Incomplete => "incomplete",
+            NumberDraftKind::Malformed => "malformed",
+            NumberDraftKind::Complete => "complete",
+        }
+    }
+
+    for case in vectors()["numberInput"].as_array().unwrap() {
+        let op = s(case, "op");
+        let expect = &case["expect"];
+
+        match op {
+            "classify" => {
+                let classified = classify_number_draft(s(case, "value"));
+                let actual = json!({
+                    "kind": kind_str(classified.kind),
+                    "fractionalDigits": classified.fractional_digits,
+                    "value": classified.decimal.map(number_decimal_to_number),
+                });
+                assert_eq!(canonicalize(&actual), canonicalize(expect), "classify {case}");
+            }
+            "configValid" => {
+                let context = NumberInputContext {
+                    committed: None,
+                    default_value: None,
+                    draft: None,
+                    min: opt_f64(&case["min"]),
+                    max: opt_f64(&case["max"]),
+                    step: opt_f64(&case["step"]),
+                    precision: opt_f64(&case["precision"]),
+                    disabled: false,
+                    read_only: false,
+                };
+                let actual = number_input_config_valid(&context);
+                assert_eq!(actual, expect.as_bool().unwrap(), "configValid {case}");
+            }
+            "inBounds" => {
+                let actual = number_in_bounds(
+                    case["value"].as_f64().unwrap(),
+                    opt_f64(&case["min"]),
+                    opt_f64(&case["max"]),
+                );
+                assert_eq!(actual, expect.as_bool().unwrap(), "inBounds {case}");
+            }
+            "stepAligned" => {
+                let actual = number_step_aligned(
+                    case["value"].as_f64().unwrap(),
+                    opt_f64(&case["min"]),
+                    opt_f64(&case["step"]),
+                );
+                assert_eq!(actual, expect.as_bool().unwrap(), "stepAligned {case}");
+            }
+            "draftValid" => {
+                let actual = number_draft_constraint_valid(
+                    s(case, "value"),
+                    opt_f64(&case["min"]),
+                    opt_f64(&case["max"]),
+                    opt_f64(&case["step"]),
+                    opt_f64(&case["precision"]),
+                );
+                assert_eq!(actual, expect.as_bool().unwrap(), "draftValid {case}");
+            }
+            "format" => {
+                let actual = format_number_committed(opt_f64(&case["value"]), opt_f64(&case["precision"]));
+                assert_eq!(actual, expect.as_str().unwrap(), "format {case}");
+            }
+            "step" => {
+                let actual = step_number_value(
+                    opt_f64(&case["current"]),
+                    case["direction"].as_i64().unwrap_or(1) as i32,
+                    opt_f64(&case["min"]),
+                    opt_f64(&case["max"]),
+                    opt_f64(&case["step"]),
+                    opt_f64(&case["precision"]),
+                );
+                let actual = actual.map(|value| json!(value)).unwrap_or(Value::Null);
+                assert_eq!(canonicalize(&actual), canonicalize(expect), "step {case}");
+            }
+            "transition" => {
+                let (context, effects) = number_input_transition(
+                    context_from(&case["context"]),
+                    event_from(&case["event"]),
+                );
+                let actual = json!({
+                    "context": context_json(&context),
+                    "effects": effects_json(&effects),
+                    "invalid": number_input_invalid(&context),
+                });
+                assert_eq!(
+                    canonicalize(&actual),
+                    canonicalize(expect),
+                    "transition {case}"
+                );
+            }
+            other => panic!("unknown numberInput op {other}"),
+        }
+    }
+}
