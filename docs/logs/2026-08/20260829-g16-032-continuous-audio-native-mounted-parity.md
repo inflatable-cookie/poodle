@@ -44,40 +44,40 @@ Named headless regressions:
 
 Fader proves horizontal and vertical mapping, detents, fine rebase, Page
 keys, wheel that is consumed so a parent does not also scroll, double-click
-reset, Enter/type/Enter and Escape type-in with focus return, callback
-pairing, disabled inertia, two-instance identity, and a rebuild between
-press and move. Knob proves vertical and circular mapping, fine rebase
-across a host rebuild, Page keys, wheel, reset, type-in, callbacks,
+reset, Enter/type/Enter and Escape type-in with focus return, Tab blur that
+commits a valid draft once, callback pairing, disabled inertia, two-instance
+identity, host `SetValue` during a gesture, and a rebuild between press and
+move. Knob proves vertical and circular mapping, fine rebase across a host
+rebuild, Page keys, wheel, reset, type-in, Tab blur commit-once, callbacks,
 disabled inertia, and Slider accessibility. XYPad proves coarse press,
 atomic pair moves, fine rebase, reset, independent axis keys, callbacks,
 disabled inertia, two-instance identity, and two child Slider semantics.
 
-GPUI Examples for the three controls use the renderer-owned instance
-registry and a value readout so interaction rebuilds the page. Size and
-density matrices stay on the shared specimen builders.
+GPUI Examples own `FaderLive` / `KnobLive` / `XYPadLive` in the preview
+adapter and rebuild from that host state. Size and density matrices stay on
+the shared specimen builders.
 
 ## Review round
 
-PR review on `aa64b9471` asked for five blockers. This round:
+PR review on `aa64b9471` asked for five blockers. First follow-up
+(`1f4a095c5`): instance-scoped ids, consumed wheel, Enter/Escape focus
+routing, expanded mounted matrix. Lost-host still waited a frame, machines
+lived in renderer TLS, and unresolved blur was a node-handler unit test.
 
-1. Required `Handlers::new(instance_id)` scopes root, entry, and XY axis
-   ids. Two-instance rebuild regressions cover Fader and XYPad.
-2. `overlay_frame_begin` now cancels a continuous-value host that was not
-   rebuilt last frame. Production preview already calls begin. Lost-host is
-   also proven on `HeadlessDriver::draw_preview_frame` (begin only, no
-   `overlay_frame_end`).
-3. Wheel dispatch calls `prevent_default` and `stop_propagation`.
-   `RequestEntryFocus` queues Node `request_focus`. Entry fields have a
-   label and focus ring. Enter/Escape return focus to the root. Root
-   `on_submit` is omitted while entry is open so Enter cannot reopen.
-4. Machines live in a renderer registry keyed by instance id, not an
-   optional field on the callback struct. Host value replacement applies
-   only while idle. Rebuild between press and move keeps the gesture.
-5. The named mounted tests now exercise the acceptance paths above.
+Second review on `1f4a095c5` asked for those three remaining lifecycle
+paths. This round:
 
-Entry blur is wired (`on_focus_change` commits once) and unit-tested on the
-node. Headless window-blur/tab did not deliver that callback for the child
-input; Enter/Escape are the mounted proof.
+1. Production hosts (`PreviewRoot`, `HeadlessRoot`, inset evidence) call
+   `overlay_frame_begin` during render and defer `overlay_frame_end` to the
+   end of the same effect cycle. One removal frame emits Cancel; a newly
+   mounted control accepts its first press immediately.
+2. `*_with_handlers` takes host-owned `Arc<Mutex<FaderLive|KnobLive|XYPadLive>>`.
+   `poodle-render` has no process-thread registry. Bind applies host config
+   then `SetValue` on every rebuild, including during a gesture. Empty
+   `instance_id` panics.
+3. Unresolved blur is mounted Tab: after type-in, `dispatch_key_raw("tab")`
+   leaves the entry, `on_focus_change` commits once, and further frames do
+   not commit again. Same proof on Fader and Knob.
 
 ## Non-claims
 

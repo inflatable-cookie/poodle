@@ -214,10 +214,10 @@ pub use audio::{
     waveform_display, xy_pad, xy_pad_with_handlers,
 };
 pub use audio_handlers::{
-    audio_entry_id, audio_root_id, fader_context_from_spec, fader_retained_spec,
-    fader_spec_from_context, knob_context_from_spec, knob_retained_spec, knob_spec_from_context,
-    reset_audio_runtime, xy_pad_context_from_spec, xy_pad_retained_spec, xy_pad_spec_from_context,
-    xy_pad_x_id, xy_pad_y_id, FaderHandlers, KnobHandlers, XYPadHandlers,
+    audio_entry_id, audio_root_id, fader_context_from_spec, fader_spec_from_context,
+    knob_context_from_spec, knob_spec_from_context, xy_pad_context_from_spec,
+    xy_pad_spec_from_context, xy_pad_x_id, xy_pad_y_id, FaderHandlers, FaderLive, KnobHandlers,
+    KnobLive, XYPadHandlers, XYPadLive,
 };
 pub use audio_player::audio_player;
 pub use avatar::avatar;

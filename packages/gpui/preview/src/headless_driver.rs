@@ -55,7 +55,14 @@ impl Focusable for HeadlessRoot {
 }
 
 impl Render for HeadlessRoot {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        // Same production frame lifetime as PreviewRoot: begin at render,
+        // end after this effect cycle so a removed continuous-value host
+        // cancels in the removal frame without a next-frame delay.
+        poodle_gpui_node_backend::overlay_frame_begin();
+        cx.defer(|_cx| {
+            poodle_gpui_node_backend::overlay_frame_end();
+        });
         // The same per-frame reset the production root performs
         // (`main.rs`): without it, generated element ids mint fresh every
         // frame, and an unstamped node's identity — click state, focus
@@ -185,20 +192,15 @@ impl<'a> HeadlessDriver<'a> {
     /// frame boundary (layer registry, bounds, focus queue) is this draw.
     pub fn draw_frame(&mut self) {
         self.paint_frame();
-        // Focus requests the frame's paint never applied are stale (the
-        // target element never appeared).
-        poodle_gpui_node_backend::overlay_frame_end();
     }
 
-    /// One production preview frame: `overlay_frame_begin` then paint, with
-    /// no `overlay_frame_end`. Lost-host continuous-value cancel must work
-    /// on this path.
+    /// Same production frame lifetime as the preview root: `overlay_frame_begin`
+    /// during render and `overlay_frame_end` deferred to the end of this cycle.
     pub fn draw_preview_frame(&mut self) {
         self.paint_frame();
     }
 
     fn paint_frame(&mut self) {
-        poodle_gpui_node_backend::overlay_frame_begin();
         self.root.update(self.cx, |_root, cx| cx.notify());
         self.cx.update(|window, cx| {
             window.refresh();

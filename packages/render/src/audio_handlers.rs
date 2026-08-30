@@ -1,18 +1,16 @@
 //! Handler-backed Knob, Fader, and XYPad.
 //!
 //! Handler structs expose the four contract effects plus a required
-//! lifetime-stable `instance_id`. Machine state lives in a renderer-owned
-//! registry keyed by that id, not on the callback surface.
+//! lifetime-stable `instance_id`. Machine state lives in host-owned
+//! `AudioLive` / `XYPadLive` values the adapter passes into each bind.
 
-use std::cell::RefCell;
-use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use poodle_headless::audio::{
     fader_transition, format_value, knob_point_to_norm, knob_transition, xy_pad_transition,
-    AudioPoint, AudioRect, AudioValueContext, AudioValueEffect, AudioValueEvent, DragState,
-    FaderContext, FaderOrientation, KnobContext, KnobDragMode, ValueBound, XYPadAxis, XYPadContext,
-    XYPadEffect, XYPadEvent,
+    AudioPoint, AudioRect, AudioValueContext, AudioValueEffect, AudioValueEvent, FaderContext,
+    FaderOrientation, KnobContext, KnobDragMode, ValueBound, XYPadAxis, XYPadContext, XYPadEffect,
+    XYPadEvent,
 };
 use poodle_node::{
     ContinuousValuePhase, FocusRing, Node, NodeContinuousValueEvent, NodeKey, NodeRole,
@@ -31,21 +29,42 @@ enum PendingFocus {
     Root,
 }
 
-struct ScalarRuntime<C> {
-    machine: C,
+/// Host-owned adapter state for one Fader/Knob instance. The renderer borrows
+/// it for the bind; it does not retain a process-wide map.
+pub struct AudioLive<C> {
+    pub machine: C,
     draft: String,
     draft_replace: bool,
     pointer: f64,
     pending_focus: PendingFocus,
 }
 
-thread_local! {
-    static FADERS: RefCell<HashMap<String, Arc<Mutex<ScalarRuntime<FaderContext>>>>> =
-        RefCell::new(HashMap::new());
-    static KNOBS: RefCell<HashMap<String, Arc<Mutex<ScalarRuntime<KnobContext>>>>> =
-        RefCell::new(HashMap::new());
-    static PADS: RefCell<HashMap<String, Arc<Mutex<XYPadContext>>>> =
-        RefCell::new(HashMap::new());
+pub type FaderLive = AudioLive<FaderContext>;
+pub type KnobLive = AudioLive<KnobContext>;
+pub type XYPadLive = XYPadContext;
+
+impl FaderLive {
+    pub fn from_spec(spec: &FaderSpec) -> Self {
+        Self {
+            machine: fader_context_from_spec(spec),
+            draft: spec.entry_draft.clone(),
+            draft_replace: true,
+            pointer: 0.0,
+            pending_focus: PendingFocus::None,
+        }
+    }
+}
+
+impl KnobLive {
+    pub fn from_spec(spec: &KnobSpec) -> Self {
+        Self {
+            machine: knob_context_from_spec(spec),
+            draft: spec.entry_draft.clone(),
+            draft_replace: true,
+            pointer: spec.pointer_position,
+            pending_focus: PendingFocus::None,
+        }
+    }
 }
 
 fn audio_focus_ring(ctx: &RenderContext<'_>) -> FocusRing {
@@ -213,8 +232,13 @@ pub struct FaderHandlers {
 
 impl FaderHandlers {
     pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.is_empty(),
+            "native audio instance_id must be non-empty and lifetime-stable"
+        );
         Self {
-            instance_id: instance_id.into(),
+            instance_id,
             on_value_change: None,
             on_value_commit: None,
             on_gesture_begin: None,
@@ -255,8 +279,13 @@ pub struct KnobHandlers {
 
 impl KnobHandlers {
     pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.is_empty(),
+            "native audio instance_id must be non-empty and lifetime-stable"
+        );
         Self {
-            instance_id: instance_id.into(),
+            instance_id,
             on_value_change: None,
             on_value_commit: None,
             on_gesture_begin: None,
@@ -297,8 +326,13 @@ pub struct XYPadHandlers {
 
 impl XYPadHandlers {
     pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.is_empty(),
+            "native audio instance_id must be non-empty and lifetime-stable"
+        );
         Self {
-            instance_id: instance_id.into(),
+            instance_id,
             on_value_change: None,
             on_value_commit: None,
             on_gesture_begin: None,
@@ -381,10 +415,6 @@ fn apply_host_fader(machine: &mut FaderContext, spec: &FaderSpec) {
     machine.base.disabled = !spec.visual_state.enabled;
     machine.base.hover = spec.visual_state.hover;
     machine.base.automation = spec.visual_state.automation;
-    if machine.base.drag == DragState::None && !machine.base.entry_open {
-        machine.base.value = spec.visual_state.raw_value;
-        machine.base.focus = spec.visual_state.focus;
-    }
 }
 
 fn apply_host_knob(machine: &mut KnobContext, spec: &KnobSpec) {
@@ -399,10 +429,6 @@ fn apply_host_knob(machine: &mut KnobContext, spec: &KnobSpec) {
     machine.base.disabled = !spec.visual_state.enabled;
     machine.base.hover = spec.visual_state.hover;
     machine.base.automation = spec.visual_state.automation;
-    if machine.base.drag == DragState::None && !machine.base.entry_open {
-        machine.base.value = spec.visual_state.raw_value;
-        machine.base.focus = spec.visual_state.focus;
-    }
 }
 
 fn apply_host_xy(machine: &mut XYPadContext, spec: &XYPadSpec) {
@@ -419,109 +445,6 @@ fn apply_host_xy(machine: &mut XYPadContext, spec: &XYPadSpec) {
     machine.disabled = !spec.visual_state.enabled;
     machine.hover = spec.visual_state.hover;
     machine.automation = spec.visual_state.automation;
-    if machine.drag == DragState::None {
-        machine.x = spec.visual_state.raw_x;
-        machine.y = spec.visual_state.raw_y;
-        machine.focus = spec.visual_state.focus;
-    }
-}
-
-fn retain_fader(instance_id: &str, spec: &FaderSpec) -> Arc<Mutex<ScalarRuntime<FaderContext>>> {
-    FADERS.with(|slot| {
-        let mut map = slot.borrow_mut();
-        if let Some(existing) = map.get(instance_id) {
-            {
-                let mut runtime = existing.lock().expect("fader machine");
-                apply_host_fader(&mut runtime.machine, spec);
-            }
-            existing.clone()
-        } else {
-            let live = Arc::new(Mutex::new(ScalarRuntime {
-                machine: fader_context_from_spec(spec),
-                draft: spec.entry_draft.clone(),
-                draft_replace: true,
-                pointer: 0.0,
-                pending_focus: PendingFocus::None,
-            }));
-            map.insert(instance_id.to_owned(), Arc::clone(&live));
-            live
-        }
-    })
-}
-
-fn retain_knob(instance_id: &str, spec: &KnobSpec) -> Arc<Mutex<ScalarRuntime<KnobContext>>> {
-    KNOBS.with(|slot| {
-        let mut map = slot.borrow_mut();
-        if let Some(existing) = map.get(instance_id) {
-            {
-                let mut runtime = existing.lock().expect("knob machine");
-                apply_host_knob(&mut runtime.machine, spec);
-            }
-            existing.clone()
-        } else {
-            let live = Arc::new(Mutex::new(ScalarRuntime {
-                machine: knob_context_from_spec(spec),
-                draft: spec.entry_draft.clone(),
-                draft_replace: true,
-                pointer: spec.pointer_position,
-                pending_focus: PendingFocus::None,
-            }));
-            map.insert(instance_id.to_owned(), Arc::clone(&live));
-            live
-        }
-    })
-}
-
-fn retain_xy(instance_id: &str, spec: &XYPadSpec) -> Arc<Mutex<XYPadContext>> {
-    PADS.with(|slot| {
-        let mut map = slot.borrow_mut();
-        if let Some(existing) = map.get(instance_id) {
-            {
-                let mut machine = existing.lock().expect("xy pad machine");
-                apply_host_xy(&mut machine, spec);
-            }
-            existing.clone()
-        } else {
-            let live = Arc::new(Mutex::new(xy_pad_context_from_spec(spec)));
-            map.insert(instance_id.to_owned(), Arc::clone(&live));
-            live
-        }
-    })
-}
-
-/// Snapshot of the retained Fader machine, when one exists.
-pub fn fader_retained_spec(instance_id: &str, aria_label: impl Into<String>) -> Option<FaderSpec> {
-    FADERS.with(|slot| {
-        slot.borrow().get(instance_id).map(|live| {
-            fader_spec_from_context(&live.lock().expect("fader machine").machine, aria_label)
-        })
-    })
-}
-
-/// Snapshot of the retained Knob machine, when one exists.
-pub fn knob_retained_spec(instance_id: &str, aria_label: impl Into<String>) -> Option<KnobSpec> {
-    KNOBS.with(|slot| {
-        slot.borrow().get(instance_id).map(|live| {
-            knob_spec_from_context(&live.lock().expect("knob machine").machine, aria_label)
-        })
-    })
-}
-
-/// Snapshot of the retained XYPad machine, when one exists.
-pub fn xy_pad_retained_spec(instance_id: &str, aria_label: impl Into<String>) -> Option<XYPadSpec> {
-    PADS.with(|slot| {
-        slot.borrow()
-            .get(instance_id)
-            .map(|live| xy_pad_spec_from_context(&live.lock().expect("xy pad machine"), aria_label))
-    })
-}
-
-/// Drop retained machines. Tests use this so instance ids do not leak across
-/// cases; hosts do not need it for ordinary rebuilds.
-pub fn reset_audio_runtime() {
-    FADERS.with(|slot| slot.borrow_mut().clear());
-    KNOBS.with(|slot| slot.borrow_mut().clear());
-    PADS.with(|slot| slot.borrow_mut().clear());
 }
 
 pub fn knob_context_from_spec(spec: &KnobSpec) -> KnobContext {
@@ -653,10 +576,22 @@ pub fn bind_fader(
     spec: &FaderSpec,
     ctx: &RenderContext<'_>,
     handlers: &FaderHandlers,
+    live: &Arc<Mutex<FaderLive>>,
 ) {
     let instance_id = handlers.instance_id.as_str();
     node.id = Some(audio_root_id(instance_id));
-    let live = retain_fader(instance_id, spec);
+    {
+        let mut runtime = live.lock().expect("fader machine");
+        apply_host_fader(&mut runtime.machine, spec);
+    }
+    run_fader(
+        live,
+        AudioValueEvent::SetValue {
+            value: spec.visual_state.raw_value,
+        },
+        &ScalarHandlers::default(),
+    );
+    let live = Arc::clone(live);
     let (enabled, value, min, max, value_text, orientation, entry_open, pending) = {
         let runtime = live.lock().expect("fader machine");
         let machine = &runtime.machine;
@@ -682,6 +617,9 @@ pub fn bind_fader(
         enabled,
         enabled.then(|| audio_focus_ring(ctx)),
     );
+    if entry_open {
+        node.a11y.tab_index = Some(-1);
+    }
     if pending == PendingFocus::Root {
         node.interaction.request_focus = true;
         live.lock().expect("fader machine").pending_focus = PendingFocus::None;
@@ -709,7 +647,7 @@ pub fn bind_fader(
 }
 
 fn run_fader(
-    live: &Mutex<ScalarRuntime<FaderContext>>,
+    live: &Mutex<AudioLive<FaderContext>>,
     event: AudioValueEvent,
     handlers: &ScalarHandlers,
 ) {
@@ -739,7 +677,7 @@ fn run_fader(
 
 fn bind_fader_pointer(
     node: &mut Node,
-    live: Arc<Mutex<ScalarRuntime<FaderContext>>>,
+    live: Arc<Mutex<AudioLive<FaderContext>>>,
     handlers: ScalarHandlers,
     orientation: Orientation,
 ) {
@@ -785,7 +723,7 @@ fn bind_fader_pointer(
 
 fn bind_fader_wheel(
     node: &mut Node,
-    live: Arc<Mutex<ScalarRuntime<FaderContext>>>,
+    live: Arc<Mutex<AudioLive<FaderContext>>>,
     handlers: ScalarHandlers,
 ) {
     node.interaction.on_wheel = Some(Arc::new(move |event: &NodeWheelEvent| {
@@ -805,7 +743,7 @@ fn bind_fader_wheel(
 
 fn bind_fader_reset(
     node: &mut Node,
-    live: Arc<Mutex<ScalarRuntime<FaderContext>>>,
+    live: Arc<Mutex<AudioLive<FaderContext>>>,
     handlers: ScalarHandlers,
 ) {
     node.interaction.on_double_activate = Some(Arc::new(move |_mods| {
@@ -815,7 +753,7 @@ fn bind_fader_reset(
 
 fn bind_fader_keys(
     node: &mut Node,
-    live: Arc<Mutex<ScalarRuntime<FaderContext>>>,
+    live: Arc<Mutex<AudioLive<FaderContext>>>,
     handlers: ScalarHandlers,
     entry_open: bool,
 ) {
@@ -852,7 +790,7 @@ fn bind_fader_keys(
 fn bind_fader_entry(
     node: &mut Node,
     spec: &FaderSpec,
-    live: Arc<Mutex<ScalarRuntime<FaderContext>>>,
+    live: Arc<Mutex<AudioLive<FaderContext>>>,
     handlers: ScalarHandlers,
     ctx: &RenderContext<'_>,
     request_focus: bool,
@@ -949,10 +887,22 @@ pub fn bind_knob(
     spec: &KnobSpec,
     ctx: &RenderContext<'_>,
     handlers: &KnobHandlers,
+    live: &Arc<Mutex<KnobLive>>,
 ) {
     let instance_id = handlers.instance_id.as_str();
     node.id = Some(audio_root_id(instance_id));
-    let live = retain_knob(instance_id, spec);
+    {
+        let mut runtime = live.lock().expect("knob machine");
+        apply_host_knob(&mut runtime.machine, spec);
+    }
+    run_knob(
+        live,
+        AudioValueEvent::SetValue {
+            value: spec.visual_state.raw_value,
+        },
+        &ScalarHandlers::default(),
+    );
+    let live = Arc::clone(live);
     let (enabled, value, min, max, value_text, entry_open, pending) = {
         let runtime = live.lock().expect("knob machine");
         let machine = &runtime.machine;
@@ -977,6 +927,9 @@ pub fn bind_knob(
         enabled,
         enabled.then(|| audio_focus_ring(ctx)),
     );
+    if entry_open {
+        node.a11y.tab_index = Some(-1);
+    }
     if pending == PendingFocus::Root {
         node.interaction.request_focus = true;
         live.lock().expect("knob machine").pending_focus = PendingFocus::None;
@@ -1004,7 +957,7 @@ pub fn bind_knob(
 }
 
 fn run_knob(
-    live: &Mutex<ScalarRuntime<KnobContext>>,
+    live: &Mutex<AudioLive<KnobContext>>,
     event: AudioValueEvent,
     handlers: &ScalarHandlers,
 ) {
@@ -1034,7 +987,7 @@ fn run_knob(
 
 fn bind_knob_pointer(
     node: &mut Node,
-    live: Arc<Mutex<ScalarRuntime<KnobContext>>>,
+    live: Arc<Mutex<AudioLive<KnobContext>>>,
     handlers: ScalarHandlers,
 ) {
     node.interaction.on_continuous_value =
@@ -1120,7 +1073,7 @@ fn circular_norm(event: &NodeContinuousValueEvent) -> f64 {
 
 fn bind_knob_wheel(
     node: &mut Node,
-    live: Arc<Mutex<ScalarRuntime<KnobContext>>>,
+    live: Arc<Mutex<AudioLive<KnobContext>>>,
     handlers: ScalarHandlers,
 ) {
     node.interaction.on_wheel = Some(Arc::new(move |event: &NodeWheelEvent| {
@@ -1140,7 +1093,7 @@ fn bind_knob_wheel(
 
 fn bind_knob_reset(
     node: &mut Node,
-    live: Arc<Mutex<ScalarRuntime<KnobContext>>>,
+    live: Arc<Mutex<AudioLive<KnobContext>>>,
     handlers: ScalarHandlers,
 ) {
     node.interaction.on_double_activate = Some(Arc::new(move |_mods| {
@@ -1150,7 +1103,7 @@ fn bind_knob_reset(
 
 fn bind_knob_keys(
     node: &mut Node,
-    live: Arc<Mutex<ScalarRuntime<KnobContext>>>,
+    live: Arc<Mutex<AudioLive<KnobContext>>>,
     handlers: ScalarHandlers,
     entry_open: bool,
 ) {
@@ -1187,7 +1140,7 @@ fn bind_knob_keys(
 fn bind_knob_entry(
     node: &mut Node,
     spec: &KnobSpec,
-    live: Arc<Mutex<ScalarRuntime<KnobContext>>>,
+    live: Arc<Mutex<AudioLive<KnobContext>>>,
     handlers: ScalarHandlers,
     ctx: &RenderContext<'_>,
     request_focus: bool,
@@ -1279,6 +1232,7 @@ pub fn bind_xy_pad(
     spec: &XYPadSpec,
     ctx: &RenderContext<'_>,
     handlers: &XYPadHandlers,
+    live: &Arc<Mutex<XYPadLive>>,
 ) {
     let instance_id = handlers.instance_id.as_str();
     node.id = Some(audio_root_id(instance_id));
@@ -1289,7 +1243,19 @@ pub fn bind_xy_pad(
     node.interaction.focusable = false;
     node.a11y.tab_index = None;
     node.style.focus_ring = None;
-    let live = retain_xy(instance_id, spec);
+    {
+        let mut machine = live.lock().expect("xy pad machine");
+        apply_host_xy(&mut machine, spec);
+    }
+    run_xy(
+        live,
+        XYPadEvent::SetValues {
+            x: spec.visual_state.raw_x,
+            y: spec.visual_state.raw_y,
+        },
+        handlers,
+    );
+    let live = Arc::clone(live);
     bind_xy_pointer(node, Arc::clone(&live), handlers);
     bind_xy_reset(node, Arc::clone(&live), handlers);
     let ring = enabled.then(|| audio_focus_ring(ctx));
@@ -1446,7 +1412,7 @@ fn bind_xy_axis_keys(
 mod tests {
     use super::*;
     use poodle_adapter::ThemeProvider;
-    use poodle_headless::audio::AudioValueLaw;
+    use poodle_headless::audio::{AudioValueLaw, DragState};
 
     struct Theme;
     impl ThemeProvider for Theme {
@@ -1469,18 +1435,23 @@ mod tests {
 
     #[test]
     fn instance_ids_scope_roots_and_entry() {
-        reset_audio_runtime();
         let theme = Theme;
         let ctx = RenderContext::new(&theme);
+        let left_spec = FaderSpec::new(0.2, 0.0, 1.0, AudioValueLaw::Linear);
+        let right_spec = FaderSpec::new(0.8, 0.0, 1.0, AudioValueLaw::Linear);
+        let left_live = Arc::new(Mutex::new(FaderLive::from_spec(&left_spec)));
+        let right_live = Arc::new(Mutex::new(FaderLive::from_spec(&right_spec)));
         let left = crate::audio::fader_with_handlers(
-            &FaderSpec::new(0.2, 0.0, 1.0, AudioValueLaw::Linear),
+            &left_spec,
             &ctx,
             &FaderHandlers::new("left"),
+            &left_live,
         );
         let right = crate::audio::fader_with_handlers(
-            &FaderSpec::new(0.8, 0.0, 1.0, AudioValueLaw::Linear),
+            &right_spec,
             &ctx,
             &FaderHandlers::new("right"),
+            &right_live,
         );
         assert_eq!(left.id.as_deref(), Some("left"));
         assert_eq!(right.id.as_deref(), Some("right"));
@@ -1488,13 +1459,13 @@ mod tests {
     }
 
     #[test]
-    fn host_value_applies_only_when_idle() {
-        reset_audio_runtime();
+    fn host_replacement_applies_during_a_gesture() {
         let theme = Theme;
         let ctx = RenderContext::new(&theme);
         let spec = FaderSpec::new(0.2, 0.0, 1.0, AudioValueLaw::Linear);
-        let handlers = FaderHandlers::new("idle-host");
-        let mut node = crate::audio::fader_with_handlers(&spec, &ctx, &handlers);
+        let live = Arc::new(Mutex::new(FaderLive::from_spec(&spec)));
+        let handlers = FaderHandlers::new("host-replace");
+        let mut node = crate::audio::fader_with_handlers(&spec, &ctx, &handlers, &live);
         (node.interaction.on_continuous_value.as_ref().unwrap())(&NodeContinuousValueEvent {
             phase: ContinuousValuePhase::Press,
             x: 0.5,
@@ -1505,11 +1476,14 @@ mod tests {
         });
         let mut replaced = spec.clone();
         replaced.visual_state.raw_value = 0.9;
-        node = crate::audio::fader_with_handlers(&replaced, &ctx, &handlers);
-        let during = fader_retained_spec("idle-host", "Level").unwrap();
+        node = crate::audio::fader_with_handlers(&replaced, &ctx, &handlers, &live);
         assert!(
-            (during.visual_state.raw_value - 0.9).abs() > 0.1,
-            "host replacement must not wipe an open drag"
+            (live.lock().expect("fader machine").machine.base.value - 0.9).abs() < 1e-9,
+            "SetValue stays live during a gesture"
+        );
+        assert_ne!(
+            live.lock().expect("fader machine").machine.base.drag,
+            DragState::None
         );
         (node.interaction.on_continuous_value.as_ref().unwrap())(&NodeContinuousValueEvent {
             phase: ContinuousValuePhase::Release,
@@ -1519,40 +1493,11 @@ mod tests {
             delta_y: 0.0,
             modifiers: poodle_node::NodeModifiers::default(),
         });
-        replaced.visual_state.raw_value = 0.1;
-        let _ = crate::audio::fader_with_handlers(&replaced, &ctx, &handlers);
-        let idle = fader_retained_spec("idle-host", "Level").unwrap();
-        assert!((idle.visual_state.raw_value - 0.1).abs() < 1e-9);
     }
 
     #[test]
-    fn entry_blur_commits_once() {
-        reset_audio_runtime();
-        let theme = Theme;
-        let ctx = RenderContext::new(&theme);
-        let handlers = FaderHandlers::new("blur-host");
-        let node = crate::audio::fader_with_handlers(
-            &FaderSpec::new(0.2, 0.0, 1.0, AudioValueLaw::Linear),
-            &ctx,
-            &handlers,
-        );
-        (node.interaction.on_submit.as_ref().unwrap())();
-        let open = crate::audio::fader_with_handlers(
-            &fader_retained_spec("blur-host", "Level").unwrap(),
-            &ctx,
-            &handlers,
-        );
-        let entry = open
-            .find(&|n| n.id.as_deref() == Some("blur-host:entry"))
-            .expect("entry");
-        (entry.interaction.on_text_change.as_ref().unwrap())("0.4");
-        (entry.interaction.on_focus_change.as_ref().unwrap())(false);
-        let committed = fader_retained_spec("blur-host", "Level").unwrap();
-        assert!(!committed.entry_open);
-        assert!((committed.visual_state.raw_value - 0.4).abs() < 1e-9);
-        let closed = crate::audio::fader_with_handlers(&committed, &ctx, &handlers);
-        assert!(closed
-            .find(&|n| n.id.as_deref() == Some("blur-host:entry"))
-            .is_none());
+    #[should_panic(expected = "non-empty")]
+    fn empty_instance_id_is_rejected() {
+        let _ = FaderHandlers::new("");
     }
 }

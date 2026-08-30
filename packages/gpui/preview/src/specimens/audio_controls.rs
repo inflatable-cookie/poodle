@@ -6,15 +6,17 @@
 //! page admits both axis panes. Knob, Fader, and XYPad Examples bind
 //! instance-scoped handlers so interaction rebuilds the page.
 
-use std::sync::Arc;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 use gpui::*;
 use poodle_headless::audio::{AudioValueLaw, FaderOrientation};
 use poodle_render::audio_specimens::AudioSpecimen;
 use poodle_render::{
-    fader_retained_spec, fader_with_handlers, knob_retained_spec, knob_with_handlers,
-    xy_pad_retained_spec, xy_pad_with_handlers, FaderHandlers, KnobHandlers, RenderContext,
-    XYPadHandlers,
+    fader_spec_from_context, fader_with_handlers, knob_spec_from_context, knob_with_handlers,
+    xy_pad_context_from_spec, xy_pad_spec_from_context, xy_pad_with_handlers, FaderHandlers,
+    FaderLive, KnobHandlers, KnobLive, RenderContext, XYPadHandlers, XYPadLive,
 };
 use poodle_specs::{FaderSpec, KnobSpec, Orientation, XYPadSpec};
 
@@ -28,16 +30,66 @@ fn to_element(node: poodle_node::Node) -> AnyElement {
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
+thread_local! {
+    static FADERS: RefCell<HashMap<String, Arc<Mutex<FaderLive>>>> = RefCell::new(HashMap::new());
+    static KNOBS: RefCell<HashMap<String, Arc<Mutex<KnobLive>>>> = RefCell::new(HashMap::new());
+    static PADS: RefCell<HashMap<String, Arc<Mutex<XYPadLive>>>> = RefCell::new(HashMap::new());
+}
+
+fn fader_live(key: &str, orientation: FaderOrientation) -> Arc<Mutex<FaderLive>> {
+    FADERS.with(|slot| {
+        slot.borrow_mut()
+            .entry(key.to_owned())
+            .or_insert_with(|| {
+                let mut spec = FaderSpec::new(0.65, 0.0, 1.0, AudioValueLaw::Linear);
+                spec.orientation = match orientation {
+                    FaderOrientation::Vertical => Orientation::Vertical,
+                    FaderOrientation::Horizontal => Orientation::Horizontal,
+                };
+                Arc::new(Mutex::new(FaderLive::from_spec(&spec)))
+            })
+            .clone()
+    })
+}
+
+fn knob_live(key: &str) -> Arc<Mutex<KnobLive>> {
+    KNOBS.with(|slot| {
+        slot.borrow_mut()
+            .entry(key.to_owned())
+            .or_insert_with(|| {
+                let spec = KnobSpec::new(0.6, 0.0, 1.0, AudioValueLaw::Linear);
+                Arc::new(Mutex::new(KnobLive::from_spec(&spec)))
+            })
+            .clone()
+    })
+}
+
+fn pad_live(key: &str) -> Arc<Mutex<XYPadLive>> {
+    PADS.with(|slot| {
+        slot.borrow_mut()
+            .entry(key.to_owned())
+            .or_insert_with(|| {
+                let mut spec = XYPadSpec::new(poodle_headless::audio::XYPadVisualState {
+                    x_norm: 0.4,
+                    y_norm: 0.6,
+                    raw_x: 0.4,
+                    raw_y: 0.6,
+                    hover: false,
+                    focus: false,
+                    drag: poodle_headless::audio::DragState::None,
+                    automation: poodle_headless::audio::AutomationState::None,
+                    enabled: true,
+                });
+                spec.aria_label = "Pad".into();
+                Arc::new(Mutex::new(xy_pad_context_from_spec(&spec)))
+            })
+            .clone()
+    })
+}
+
 fn live_fader(state: &AppState, key: &str, orientation: FaderOrientation) -> AnyElement {
-    let spec = fader_retained_spec(key, "Fader").unwrap_or_else(|| {
-        let mut spec = FaderSpec::new(0.65, 0.0, 1.0, AudioValueLaw::Linear);
-        spec.orientation = match orientation {
-            FaderOrientation::Vertical => Orientation::Vertical,
-            FaderOrientation::Horizontal => Orientation::Horizontal,
-        };
-        spec.aria_label = "Fader".into();
-        spec
-    });
+    let live = fader_live(key, orientation);
+    let spec = fader_spec_from_context(&live.lock().expect("fader machine").machine, "Fader");
     let events = Arc::clone(&state.node_events);
     let value_key = key.to_owned();
     to_element(fader_with_handlers(
@@ -49,15 +101,13 @@ fn live_fader(state: &AppState, key: &str, orientation: FaderOrientation) -> Any
                 value: format!("{value:.2}"),
             });
         })),
+        &live,
     ))
 }
 
 fn live_knob(state: &AppState, key: &str) -> AnyElement {
-    let spec = knob_retained_spec(key, "Knob").unwrap_or_else(|| {
-        let mut spec = KnobSpec::new(0.6, 0.0, 1.0, AudioValueLaw::Linear);
-        spec.aria_label = "Knob".into();
-        spec
-    });
+    let live = knob_live(key);
+    let spec = knob_spec_from_context(&live.lock().expect("knob machine").machine, "Knob");
     let events = Arc::clone(&state.node_events);
     let value_key = key.to_owned();
     to_element(knob_with_handlers(
@@ -69,25 +119,13 @@ fn live_knob(state: &AppState, key: &str) -> AnyElement {
                 value: format!("{value:.2}"),
             });
         })),
+        &live,
     ))
 }
 
 fn live_pad(state: &AppState, key: &str) -> AnyElement {
-    let spec = xy_pad_retained_spec(key, "Pad").unwrap_or_else(|| {
-        let mut spec = XYPadSpec::new(poodle_headless::audio::XYPadVisualState {
-            x_norm: 0.4,
-            y_norm: 0.6,
-            raw_x: 0.4,
-            raw_y: 0.6,
-            hover: false,
-            focus: false,
-            drag: poodle_headless::audio::DragState::None,
-            automation: poodle_headless::audio::AutomationState::None,
-            enabled: true,
-        });
-        spec.aria_label = "Pad".into();
-        spec
-    });
+    let live = pad_live(key);
+    let spec = xy_pad_spec_from_context(&live.lock().expect("xy pad machine"), "Pad");
     let events = Arc::clone(&state.node_events);
     let value_key = key.to_owned();
     to_element(xy_pad_with_handlers(
@@ -99,6 +137,7 @@ fn live_pad(state: &AppState, key: &str) -> AnyElement {
                 value: format!("{x:.2},{y:.2}"),
             });
         })),
+        &live,
     ))
 }
 

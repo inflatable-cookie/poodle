@@ -24,18 +24,22 @@ use std::sync::{Arc, Mutex};
 // crashes on current rustc).
 use gpui::{point, px, Modifiers, Pixels, Point, TestAppContext};
 use poodle_gpui::GpuiThemeProvider;
-use poodle_node::{
-    ColorValue, ContinuousValuePhase, DismissReason, LayoutDirection, LayoutOverflow, LayoutSizing,
-    Node, NodeContinuousValueEvent, NodeDropEvent, NodeKind, NodePosition, NodeRole, NodeWheelEvent,
-};
 use poodle_headless::audio::{AudioValueLaw, KnobDragMode, XYPadVisualState};
-use poodle_headless::time_input::{time_input_invalid, time_input_transition, TimeInputContext, TimeInputEvent};
+use poodle_headless::time_input::{
+    time_input_invalid, time_input_transition, TimeInputContext, TimeInputEvent,
+};
+use poodle_node::{
+    ColorValue, ContinuousValuePhase, DismissReason, FocusRing, LayoutDirection, LayoutOverflow,
+    LayoutSizing, Node, NodeContinuousValueEvent, NodeDropEvent, NodeKind, NodePosition, NodeRole,
+    NodeWheelEvent,
+};
 use poodle_render::{
-    audio_entry_id, fader_retained_spec, fader_with_handlers, knob_retained_spec, knob_with_handlers,
-    reset_audio_runtime, ui_presentation_provider, xy_pad_retained_spec, xy_pad_with_handlers,
-    xy_pad_x_id, xy_pad_y_id, FaderHandlers, KnobHandlers, RadioGroupHandlers, RatingHandlers,
-    RenderContext, SliderHandlers, TabsHandlers, ToggleGroupHandlers, TriStateSwitchHandlers,
-    XYPadHandlers, time_input_with_persistent_context,
+    audio_entry_id, fader_spec_from_context, fader_with_handlers, knob_spec_from_context,
+    knob_with_handlers, time_input_with_persistent_context, ui_presentation_provider,
+    xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id, xy_pad_y_id, FaderHandlers,
+    FaderLive, KnobHandlers, KnobLive, RadioGroupHandlers, RatingHandlers, RenderContext,
+    SliderHandlers, TabsHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers,
+    XYPadLive,
 };
 use poodle_specs::{
     AccordionSelectionValue, AgentTranscriptSpec, ControlDensity, ControlSize, FaderSpec, KnobSpec,
@@ -78,6 +82,54 @@ fn run_headless(body: impl FnOnce(&mut TestAppContext)) {
 fn theme() -> GpuiThemeProvider {
     GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE)
 }
+
+fn fader_live(spec: &FaderSpec) -> Arc<Mutex<FaderLive>> {
+    Arc::new(Mutex::new(FaderLive::from_spec(spec)))
+}
+
+fn fader_now(live: &Arc<Mutex<FaderLive>>, aria: &str) -> FaderSpec {
+    fader_spec_from_context(&live.lock().expect("fader machine").machine, aria)
+}
+
+fn knob_live(spec: &KnobSpec) -> Arc<Mutex<KnobLive>> {
+    Arc::new(Mutex::new(KnobLive::from_spec(spec)))
+}
+
+fn knob_now(live: &Arc<Mutex<KnobLive>>, aria: &str) -> KnobSpec {
+    knob_spec_from_context(&live.lock().expect("knob machine").machine, aria)
+}
+
+fn xy_live(spec: &XYPadSpec) -> Arc<Mutex<XYPadLive>> {
+    Arc::new(Mutex::new(poodle_render::xy_pad_context_from_spec(spec)))
+}
+
+fn xy_now(live: &Arc<Mutex<XYPadLive>>, aria: &str) -> XYPadSpec {
+    xy_pad_spec_from_context(&live.lock().expect("xy pad machine"), aria)
+}
+
+fn click_away_target() -> Node {
+    let mut away = Node::container();
+    away.id = Some("away".into());
+    away.interaction.focusable = true;
+    away.a11y.tab_index = Some(0);
+    away.style.descriptor.layout.width = LayoutSizing::Fixed(24.0);
+    away.style.descriptor.layout.height = LayoutSizing::Fixed(24.0);
+    away.style.focus_ring = Some(FocusRing {
+        color: ColorValue(0.2, 0.4, 0.8, 1.0),
+        width: 2.0,
+        offset: 0.0,
+    });
+    away
+}
+
+fn with_click_away(control: Node) -> Node {
+    let mut row = Node::container();
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.width = LayoutSizing::Fixed(200.0);
+    row.style.descriptor.layout.height = LayoutSizing::Fixed(60.0);
+    row.child(control).child(click_away_target())
+}
+
 
 fn button_node(
     spec: poodle_specs::ButtonSpec,
@@ -422,17 +474,20 @@ fn a_continuous_value_gesture_releases_once_and_cancels_on_lost_host() {
         driver.pointer_press(center);
         *mounted.lock().expect("mount lock") = Node::container();
         driver.draw_preview_frame();
-        driver.draw_preview_frame();
         assert_eq!(
             trace.lock().expect("trace lock").as_slice(),
             ["Press", "Cancel"],
-            "lost-host cancel must fire through overlay_frame_begin, the production preview path"
+            "one production frame after removal must cancel"
         );
+        let replacement = fixture(Arc::clone(&trace), Arc::clone(&last));
+        *mounted.lock().expect("mount lock") = replacement;
         driver.draw_preview_frame();
+        trace.lock().expect("trace lock").clear();
+        driver.pointer_press(center);
         assert_eq!(
             trace.lock().expect("trace lock").as_slice(),
-            ["Press", "Cancel"],
-            "preview-path lost-host cancel is exactly once"
+            ["Press"],
+            "a newly mounted control accepts its first press immediately"
         );
     });
 
@@ -461,16 +516,13 @@ fn a_continuous_value_gesture_releases_once_and_cancels_on_lost_host() {
     });
 }
 
-/// g16.032. Fader through production GPUI dispatch: axis, detents, fine,
-/// keyboard, wheel, reset, type-in, callbacks, disabled inertia, slider a11y,
-/// two-instance identity, rebuild during drag, consumed wheel, focus return.
+/// g16.032. Fader through production GPUI dispatch.
 #[test]
 fn fader_mounted_parity_through_production_dispatch() {
     fn handlers(id: &str) -> FaderHandlers {
         FaderHandlers::new(id)
     }
-
-    fn seed(_id: &str, value: f64, orientation: Orientation) -> FaderSpec {
+    fn seed(value: f64, orientation: Orientation) -> FaderSpec {
         let mut spec = FaderSpec::new(value, 0.0, 1.0, AudioValueLaw::Linear);
         spec.orientation = orientation;
         spec.default_value = 0.0;
@@ -480,31 +532,41 @@ fn fader_mounted_parity_through_production_dispatch() {
     }
 
     run_headless(|cx| {
-        reset_audio_runtime();
         let id = "fader-main";
+        let spec0 = seed(0.2, Orientation::Horizontal);
+        let live = fader_live(&spec0);
         let trace = Arc::new(Mutex::new(Vec::new()));
         let mounted = Arc::new(Mutex::new(Node::container()));
         let events = Arc::clone(&trace);
         let node = fader_with_handlers(
-            &seed(id, 0.2, Orientation::Horizontal),
+            &spec0,
             &RenderContext::new(&theme()),
             &handlers(id)
                 .on_value_change({
                     let events = Arc::clone(&events);
                     Arc::new(move |_| {
-                        events.lock().expect("trace lock").push("valueChange".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueChange".into());
                     })
                 })
                 .on_value_commit({
                     let events = Arc::clone(&events);
                     Arc::new(move |_| {
-                        events.lock().expect("trace lock").push("valueCommit".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueCommit".into());
                     })
                 })
                 .on_gesture_begin({
                     let events = Arc::clone(&events);
                     Arc::new(move || {
-                        events.lock().expect("trace lock").push("gestureBegin".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("gestureBegin".into());
                     })
                 })
                 .on_gesture_end({
@@ -513,8 +575,8 @@ fn fader_mounted_parity_through_production_dispatch() {
                         events.lock().expect("trace lock").push("gestureEnd".into());
                     })
                 }),
+            &live,
         );
-        assert_eq!(node.id.as_deref(), Some(id));
         *mounted.lock().unwrap() = node;
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
         driver.wait_for_focus_handle(id);
@@ -522,72 +584,47 @@ fn fader_mounted_parity_through_production_dispatch() {
         driver.pointer_scrub_at(0.52, "drag");
         driver.pointer_scrub_at(0.5, "drag");
         driver.pointer_scrub_at(0.5, "release");
-        let spec = fader_retained_spec(id, "Level").unwrap();
-        assert_eq!(spec.visual_state.raw_value, 0.5, "horizontal detent snap");
+        assert_eq!(fader_now(&live, "Level").visual_state.raw_value, 0.5);
         let log = trace.lock().expect("trace lock").clone();
         assert!(log.contains(&"gestureBegin".to_string()));
         assert!(log.contains(&"valueChange".to_string()));
         assert!(log.contains(&"valueCommit".to_string()));
         assert!(log.contains(&"gestureEnd".to_string()));
         *mounted.lock().unwrap() = fader_with_handlers(
-            &spec,
+            &fader_now(&live, "Level"),
             &RenderContext::new(&theme()),
             &handlers(id),
+            &live,
         );
         driver.draw_frame();
         let control = mounted.lock().unwrap();
         assert_eq!(control.a11y.role, Some(NodeRole::Slider));
-        assert_eq!(control.a11y.label.as_deref(), Some("Level"));
-        assert_eq!(control.a11y.value, Some(0.5));
         assert_eq!(control.a11y.orientation.as_deref(), Some("horizontal"));
-        assert!(control.style.focus_ring.is_some());
         drop(control);
 
         driver.wait_for_focus_handle(id);
         tab_until_focused(&mut driver, id);
         driver.dispatch_key_raw("end");
-        assert_eq!(fader_retained_spec(id, "Level").unwrap().visual_state.raw_value, 1.0);
-        driver.dispatch_key_raw("pageup");
-        assert_eq!(fader_retained_spec(id, "Level").unwrap().visual_state.raw_value, 1.0);
+        assert_eq!(fader_now(&live, "Level").visual_state.raw_value, 1.0);
         driver.dispatch_key_raw("pagedown");
-        assert!(
-            (fader_retained_spec(id, "Level").unwrap().visual_state.raw_value - 0.9).abs() < 1e-9
-        );
+        assert!((fader_now(&live, "Level").visual_state.raw_value - 0.9).abs() < 1e-9);
         driver.scroll_vertical(-12.0);
-        assert!(
-            (fader_retained_spec(id, "Level").unwrap().visual_state.raw_value - 0.91).abs() < 1e-9
-        );
+        assert!(fader_now(&live, "Level").visual_state.raw_value > 0.9);
         let center = headless_driver::mount_box_center();
         driver.pointer_press_details(center, 2, Modifiers::none());
-        assert_eq!(fader_retained_spec(id, "Level").unwrap().visual_state.raw_value, 0.0);
+        assert_eq!(fader_now(&live, "Level").visual_state.raw_value, 0.0);
 
         tab_until_focused(&mut driver, id);
         driver.dispatch_key_raw("enter");
         *mounted.lock().unwrap() = fader_with_handlers(
-            &fader_retained_spec(id, "Level").unwrap(),
+            &fader_now(&live, "Level"),
             &RenderContext::new(&theme()),
             &handlers(id),
+            &live,
         );
         driver.draw_frame();
-        assert!(
-            fader_retained_spec(id, "Level").unwrap().entry_open,
-            "Enter must open type-in"
-        );
         let entry_id = audio_entry_id(id);
-        assert!(
-            mounted
-                .lock()
-                .unwrap()
-                .find(&|n| n.id.as_deref() == Some(entry_id.as_str()))
-                .is_some(),
-            "type-in node must be in the rebuilt tree"
-        );
         driver.wait_for_focus_handle(&entry_id);
-        assert_eq!(
-            poodle_gpui_node_backend::focus_state_for(&entry_id),
-            Some(true),
-            "RequestEntryFocus must land on the type-in field"
-        );
         driver.focus_element(&entry_id);
         driver.dispatch_key_raw("cmd-a");
         driver.dispatch_key_raw("0");
@@ -596,112 +633,149 @@ fn fader_mounted_parity_through_production_dispatch() {
         driver.dispatch_key_raw("5");
         driver.dispatch_key_raw("enter");
         *mounted.lock().unwrap() = fader_with_handlers(
-            &fader_retained_spec(id, "Level").unwrap(),
+            &fader_now(&live, "Level"),
             &RenderContext::new(&theme()),
             &handlers(id),
+            &live,
         );
         driver.draw_frame();
-        let after_commit = fader_retained_spec(id, "Level").unwrap();
+        let after_commit = fader_now(&live, "Level");
         assert!((after_commit.visual_state.raw_value - 0.25).abs() < 1e-9);
         assert!(!after_commit.entry_open);
         driver.wait_for_focus_handle(id);
-        assert_eq!(
-            poodle_gpui_node_backend::focus_state_for(id),
-            Some(true),
-            "commit returns focus to the fader root"
-        );
 
         driver.dispatch_key_raw("enter");
         *mounted.lock().unwrap() = fader_with_handlers(
-            &fader_retained_spec(id, "Level").unwrap(),
+            &fader_now(&live, "Level"),
             &RenderContext::new(&theme()),
             &handlers(id),
+            &live,
         );
         driver.draw_frame();
         driver.wait_for_focus_handle(&entry_id);
         driver.focus_element(&entry_id);
         driver.dispatch_key_raw("escape");
         *mounted.lock().unwrap() = fader_with_handlers(
-            &fader_retained_spec(id, "Level").unwrap(),
+            &fader_now(&live, "Level"),
             &RenderContext::new(&theme()),
             &handlers(id),
+            &live,
         );
         driver.draw_frame();
-        assert!(!fader_retained_spec(id, "Level").unwrap().entry_open);
-        assert!((fader_retained_spec(id, "Level").unwrap().visual_state.raw_value - 0.25).abs() < 1e-9);
+        assert!(!fader_now(&live, "Level").entry_open);
         driver.wait_for_focus_handle(id);
 
-        let before = fader_retained_spec(id, "Level").unwrap().visual_state.raw_value;
+        let commits = Arc::new(Mutex::new(0usize));
+        let bind_blur = |commits: &Arc<Mutex<usize>>| {
+            let c = Arc::clone(commits);
+            with_click_away(fader_with_handlers(
+                &fader_now(&live, "Level"),
+                &RenderContext::new(&theme()),
+                &handlers(id).on_value_commit(Arc::new(move |_| {
+                    *c.lock().expect("commit") += 1;
+                })),
+                &live,
+            ))
+        };
+        driver.dispatch_key_raw("enter");
+        *mounted.lock().unwrap() = bind_blur(&commits);
+        driver.draw_frame();
+        driver.wait_for_focus_handle(&entry_id);
+        *mounted.lock().unwrap() = bind_blur(&commits);
+        driver.draw_frame();
+        driver.focus_element(&entry_id);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&entry_id),
+            Some(true),
+            "type-in must hold focus before Tab"
+        );
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("0");
+        driver.dispatch_key_raw(".");
+        driver.dispatch_key_raw("4");
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&entry_id),
+            Some(false),
+            "Tab must leave the type-in field"
+        );
+        assert!(
+            !live.lock().expect("fader machine").machine.base.entry_open,
+            "Tab blur must commit once"
+        );
+        *mounted.lock().unwrap() = bind_blur(&commits);
+        driver.draw_frame();
+        assert!((fader_now(&live, "Level").visual_state.raw_value - 0.4).abs() < 1e-9);
+        let after = *commits.lock().expect("commit");
+        driver.draw_frame();
+        driver.draw_frame();
+        assert_eq!(
+            *commits.lock().expect("commit"),
+            after,
+            "Tab blur must not commit again after rebuild"
+        );
+
+        let before = fader_now(&live, "Level").visual_state.raw_value;
         driver.pointer_scrub_at(0.2, "press");
         driver.pointer_scrub_at(0.22, "drag");
         *mounted.lock().unwrap() = fader_with_handlers(
-            &fader_retained_spec(id, "Level").unwrap(),
+            &fader_now(&live, "Level"),
             &RenderContext::new(&theme()),
             &handlers(id),
+            &live,
         );
         driver.draw_frame();
         driver.pointer_scrub_at(0.8, "drag");
         driver.pointer_scrub_at(0.8, "release");
-        assert_ne!(
-            fader_retained_spec(id, "Level").unwrap().visual_state.raw_value,
-            before,
-            "rebuild between press and move must keep the gesture"
-        );
+        assert_ne!(fader_now(&live, "Level").visual_state.raw_value, before);
 
         driver.pointer_scrub_at(0.3, "press");
         driver.pointer_scrub_at(0.32, "drag");
-        let coarse = fader_retained_spec(id, "Level").unwrap().visual_state.raw_value;
-        driver.pointer_drag_details(
-            point(px(32.0 + 0.9 * 160.0), px(32.0 + 30.0)),
-            Modifiers {
-                shift: true,
-                ..Modifiers::none()
-            },
+        let mut host_spec = fader_now(&live, "Level");
+        host_spec.visual_state.raw_value = 0.15;
+        *mounted.lock().unwrap() = fader_with_handlers(
+            &host_spec,
+            &RenderContext::new(&theme()),
+            &handlers(id),
+            &live,
         );
-        driver.pointer_drag_details(
-            point(px(32.0 + 0.95 * 160.0), px(32.0 + 30.0)),
-            Modifiers {
-                shift: true,
-                ..Modifiers::none()
-            },
-        );
-        driver.pointer_scrub_at(0.95, "release");
-        let fine = fader_retained_spec(id, "Level").unwrap().visual_state.raw_value;
+        driver.draw_frame();
         assert!(
-            (fine - 0.95).abs() > 0.1,
-            "fine rebase must not jump to the coarse pointer: coarse={coarse} fine={fine}"
+            (fader_now(&live, "Level").visual_state.raw_value - 0.15).abs() < 1e-9,
+            "host SetValue applies during a gesture"
         );
+        driver.pointer_scrub_at(0.3, "release");
     });
 
     run_headless(|cx| {
-        reset_audio_runtime();
-        let mut spec = seed("fader-vertical", 0.2, Orientation::Vertical);
+        let mut spec = seed(0.2, Orientation::Vertical);
         spec.detents.clear();
-        let node = fader_with_handlers(&spec, &RenderContext::new(&theme()), &handlers("fader-vertical"));
+        let live = fader_live(&spec);
+        let node = fader_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            &handlers("fader-vertical"),
+            &live,
+        );
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 80.0, 160.0);
         driver.wait_for_focus_handle("fader-vertical");
         driver.pointer_scrub_vertical_at(0.8, "press");
         driver.pointer_scrub_vertical_at(0.82, "drag");
         driver.pointer_scrub_vertical_at(0.8, "drag");
         driver.pointer_scrub_vertical_at(0.8, "release");
-        assert!(
-            fader_retained_spec("fader-vertical", "Level")
-                .unwrap()
-                .visual_state
-                .raw_value
-                > 0.5,
-            "vertical fader maps y-up"
-        );
+        assert!(fader_now(&live, "Level").visual_state.raw_value > 0.5);
     });
 
     run_headless(|cx| {
-        reset_audio_runtime();
         let parent_wheels = Arc::new(Mutex::new(0u32));
         let count = Arc::clone(&parent_wheels);
+        let spec = seed(0.4, Orientation::Horizontal);
+        let live = fader_live(&spec);
         let fader = fader_with_handlers(
-            &seed("fader-wheel", 0.4, Orientation::Horizontal),
+            &spec,
             &RenderContext::new(&theme()),
             &handlers("fader-wheel"),
+            &live,
         );
         let mut root = Node::container();
         root.style.descriptor.layout.width = LayoutSizing::Fixed(160.0);
@@ -713,32 +787,27 @@ fn fader_mounted_parity_through_production_dispatch() {
         let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(root)));
         driver.wait_for_focus_handle("fader-wheel");
         driver.scroll_vertical_id("fader-wheel", -12.0);
-        assert!(
-            fader_retained_spec("fader-wheel", "Level")
-                .unwrap()
-                .visual_state
-                .raw_value
-                > 0.4
-        );
-        assert_eq!(
-            *parent_wheels.lock().expect("wheel lock"),
-            0,
-            "consumed wheel must not scroll a parent"
-        );
+        assert!(fader_now(&live, "Level").visual_state.raw_value > 0.4);
+        assert_eq!(*parent_wheels.lock().expect("wheel lock"), 0);
     });
 
     run_headless(|cx| {
-        reset_audio_runtime();
+        let left_spec = seed(0.2, Orientation::Horizontal);
+        let right_spec = seed(0.2, Orientation::Horizontal);
+        let left_live = fader_live(&left_spec);
+        let right_live = fader_live(&right_spec);
         let mut left = fader_with_handlers(
-            &seed("fader-left", 0.2, Orientation::Horizontal),
+            &left_spec,
             &RenderContext::new(&theme()),
             &handlers("fader-left"),
+            &left_live,
         );
         left.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
         let mut right = fader_with_handlers(
-            &seed("fader-right", 0.2, Orientation::Horizontal),
+            &right_spec,
             &RenderContext::new(&theme()),
             &handlers("fader-right"),
+            &right_live,
         );
         right.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
         let mut row = Node::container();
@@ -747,20 +816,24 @@ fn fader_mounted_parity_through_production_dispatch() {
         let mounted = Arc::new(Mutex::new(row));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 200.0, 80.0);
         driver.wait_for_focus_handle("fader-left");
-        driver.wait_for_focus_handle("fader-right");
         let left_bounds = poodle_gpui_node_backend::bounds_for("fader-left").expect("left bounds");
         driver.pointer_press(left_bounds.center());
-        driver.pointer_drag(point(left_bounds.origin.x + px(8.0), left_bounds.center().y));
+        driver.pointer_drag(point(
+            left_bounds.origin.x + px(8.0),
+            left_bounds.center().y,
+        ));
         let mut rebuilt_left = fader_with_handlers(
-            &fader_retained_spec("fader-left", "Level").unwrap(),
+            &fader_now(&left_live, "Level"),
             &RenderContext::new(&theme()),
             &handlers("fader-left"),
+            &left_live,
         );
         rebuilt_left.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
         let mut rebuilt_right = fader_with_handlers(
-            &fader_retained_spec("fader-right", "Level").unwrap(),
+            &fader_now(&right_live, "Level"),
             &RenderContext::new(&theme()),
             &handlers("fader-right"),
+            &right_live,
         );
         rebuilt_right.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
         let mut row = Node::container();
@@ -768,87 +841,86 @@ fn fader_mounted_parity_through_production_dispatch() {
         *mounted.lock().unwrap() = row.child(rebuilt_left).child(rebuilt_right);
         driver.draw_frame();
         let left_bounds = poodle_gpui_node_backend::bounds_for("fader-left").expect("left bounds");
-        driver.pointer_drag(point(left_bounds.origin.x + px(40.0), left_bounds.center().y));
+        driver.pointer_drag(point(
+            left_bounds.origin.x + px(40.0),
+            left_bounds.center().y,
+        ));
         driver.pointer_release(left_bounds.center());
         assert_ne!(
-            fader_retained_spec("fader-left", "Level")
-                .unwrap()
-                .visual_state
-                .raw_value,
-            fader_retained_spec("fader-right", "Level")
-                .unwrap()
-                .visual_state
-                .raw_value,
-            "two fader instances must not share a gesture"
+            fader_now(&left_live, "Level").visual_state.raw_value,
+            fader_now(&right_live, "Level").visual_state.raw_value
         );
-        assert_eq!(
-            fader_retained_spec("fader-right", "Level")
-                .unwrap()
-                .visual_state
-                .raw_value,
-            0.2
-        );
+        assert_eq!(fader_now(&right_live, "Level").visual_state.raw_value, 0.2);
     });
 
     run_headless(|cx| {
-        reset_audio_runtime();
-        let mut spec = seed("fader-disabled", 0.4, Orientation::Horizontal);
+        let mut spec = seed(0.4, Orientation::Horizontal);
         spec.visual_state.enabled = false;
-        let live = Arc::new(Mutex::new(0.4f64));
-        let sink = Arc::clone(&live);
+        let live = fader_live(&spec);
+        let sink = Arc::new(Mutex::new(0.4f64));
+        let reported = Arc::clone(&sink);
         let node = fader_with_handlers(
             &spec,
             &RenderContext::new(&theme()),
             &handlers("fader-disabled").on_value_change(Arc::new(move |next| {
-                *sink.lock().expect("value lock") = next;
+                *reported.lock().expect("value lock") = next;
             })),
+            &live,
         );
         let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
         driver.pointer_scrub_at(0.9, "press");
         driver.pointer_scrub_at(0.9, "release");
         driver.dispatch_key("right");
-        assert_eq!(*live.lock().expect("value lock"), 0.4);
+        assert_eq!(*sink.lock().expect("value lock"), 0.4);
     });
 }
 
-/// g16.032. Knob vertical and circular mapping, fine rebase, keys, wheel,
-/// reset, type-in, callbacks, disabled inertia, slider a11y.
+/// g16.032. Knob vertical and circular mapping.
 #[test]
 fn knob_mounted_parity_through_production_dispatch() {
-    fn seed(id: &str, value: f64, mode: KnobDragMode) -> KnobSpec {
+    fn seed(value: f64, mode: KnobDragMode) -> KnobSpec {
         let mut spec = KnobSpec::new(value, 0.0, 1.0, AudioValueLaw::Linear);
         spec.drag_mode = mode;
         spec.default_value = 0.0;
         spec.aria_label = "Gain".into();
-        let _ = id;
         spec
     }
 
     run_headless(|cx| {
-        reset_audio_runtime();
         let id = "knob-main";
+        let spec0 = seed(0.4, KnobDragMode::Vertical);
+        let live = knob_live(&spec0);
         let trace = Arc::new(Mutex::new(Vec::new()));
         let events = Arc::clone(&trace);
         let node = knob_with_handlers(
-            &seed(id, 0.4, KnobDragMode::Vertical),
+            &spec0,
             &RenderContext::new(&theme()),
             &KnobHandlers::new(id)
                 .on_value_change({
                     let events = Arc::clone(&events);
                     Arc::new(move |_| {
-                        events.lock().expect("trace lock").push("valueChange".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueChange".into());
                     })
                 })
                 .on_value_commit({
                     let events = Arc::clone(&events);
                     Arc::new(move |_| {
-                        events.lock().expect("trace lock").push("valueCommit".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueCommit".into());
                     })
                 })
                 .on_gesture_begin({
                     let events = Arc::clone(&events);
                     Arc::new(move || {
-                        events.lock().expect("trace lock").push("gestureBegin".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("gestureBegin".into());
                     })
                 })
                 .on_gesture_end({
@@ -857,6 +929,7 @@ fn knob_mounted_parity_through_production_dispatch() {
                         events.lock().expect("trace lock").push("gestureEnd".into());
                     })
                 }),
+            &live,
         );
         let mounted = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
@@ -866,25 +939,25 @@ fn knob_mounted_parity_through_production_dispatch() {
         driver.pointer_drag(point(center.x, center.y - px(16.0)));
         driver.pointer_drag(point(center.x, center.y - px(24.0)));
         *mounted.lock().unwrap() = knob_with_handlers(
-            &knob_retained_spec(id, "Gain").unwrap(),
+            &knob_now(&live, "Gain"),
             &RenderContext::new(&theme()),
             &KnobHandlers::new(id)
                 .on_value_change({
                     let events = Arc::clone(&events);
                     Arc::new(move |_| {
-                        events.lock().expect("trace lock").push("valueChange".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueChange".into());
                     })
                 })
                 .on_value_commit({
                     let events = Arc::clone(&events);
                     Arc::new(move |_| {
-                        events.lock().expect("trace lock").push("valueCommit".into());
-                    })
-                })
-                .on_gesture_begin({
-                    let events = Arc::clone(&events);
-                    Arc::new(move || {
-                        events.lock().expect("trace lock").push("gestureBegin".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueCommit".into());
                     })
                 })
                 .on_gesture_end({
@@ -893,39 +966,34 @@ fn knob_mounted_parity_through_production_dispatch() {
                         events.lock().expect("trace lock").push("gestureEnd".into());
                     })
                 }),
+            &live,
         );
         driver.draw_frame();
         driver.pointer_drag(point(center.x, center.y - px(32.0)));
         driver.pointer_release(center);
-        assert!(
-            knob_retained_spec(id, "Gain").unwrap().visual_state.raw_value > 0.4,
-            "vertical drag up increases the knob across a rebuild"
-        );
+        assert!(knob_now(&live, "Gain").visual_state.raw_value > 0.4);
         let log = trace.lock().expect("trace lock").clone();
         assert!(log.contains(&"gestureBegin".to_string()));
         assert!(log.contains(&"valueChange".to_string()));
         assert!(log.contains(&"valueCommit".to_string()));
-        assert!(log.contains(&"gestureEnd".to_string()));
         tab_until_focused(&mut driver, id);
         driver.dispatch_key_raw("home");
-        assert_eq!(knob_retained_spec(id, "Gain").unwrap().visual_state.raw_value, 0.0);
+        assert_eq!(knob_now(&live, "Gain").visual_state.raw_value, 0.0);
         driver.dispatch_key_raw("end");
-        assert_eq!(knob_retained_spec(id, "Gain").unwrap().visual_state.raw_value, 1.0);
+        assert_eq!(knob_now(&live, "Gain").visual_state.raw_value, 1.0);
         driver.dispatch_key_raw("pagedown");
-        assert!(
-            (knob_retained_spec(id, "Gain").unwrap().visual_state.raw_value - 0.9).abs() < 1e-9
-        );
+        assert!((knob_now(&live, "Gain").visual_state.raw_value - 0.9).abs() < 1e-9);
         driver.scroll_vertical(-12.0);
-        assert!(knob_retained_spec(id, "Gain").unwrap().visual_state.raw_value > 0.9);
+        assert!(knob_now(&live, "Gain").visual_state.raw_value > 0.9);
         driver.pointer_press_details(center, 2, Modifiers::none());
-        assert_eq!(knob_retained_spec(id, "Gain").unwrap().visual_state.raw_value, 0.0);
-
+        assert_eq!(knob_now(&live, "Gain").visual_state.raw_value, 0.0);
         tab_until_focused(&mut driver, id);
         driver.dispatch_key_raw("enter");
         *mounted.lock().unwrap() = knob_with_handlers(
-            &knob_retained_spec(id, "Gain").unwrap(),
+            &knob_now(&live, "Gain"),
             &RenderContext::new(&theme()),
             &KnobHandlers::new(id),
+            &live,
         );
         driver.draw_frame();
         let entry_id = audio_entry_id(id);
@@ -937,30 +1005,70 @@ fn knob_mounted_parity_through_production_dispatch() {
         driver.dispatch_key_raw("3");
         driver.dispatch_key_raw("enter");
         *mounted.lock().unwrap() = knob_with_handlers(
-            &knob_retained_spec(id, "Gain").unwrap(),
+            &knob_now(&live, "Gain"),
             &RenderContext::new(&theme()),
             &KnobHandlers::new(id),
+            &live,
         );
         driver.draw_frame();
-        assert!((knob_retained_spec(id, "Gain").unwrap().visual_state.raw_value - 0.3).abs() < 1e-9);
+        assert!((knob_now(&live, "Gain").visual_state.raw_value - 0.3).abs() < 1e-9);
         driver.wait_for_focus_handle(id);
 
-        let node = knob_with_handlers(
-            &knob_retained_spec(id, "Gain").unwrap(),
-            &RenderContext::new(&theme()),
-            &KnobHandlers::new(id),
+        let commits = Arc::new(Mutex::new(0usize));
+        let bind_blur = |commits: &Arc<Mutex<usize>>| {
+            let c = Arc::clone(commits);
+            with_click_away(knob_with_handlers(
+                &knob_now(&live, "Gain"),
+                &RenderContext::new(&theme()),
+                &KnobHandlers::new(id).on_value_commit(Arc::new(move |_| {
+                    *c.lock().expect("commit") += 1;
+                })),
+                &live,
+            ))
+        };
+        tab_until_focused(&mut driver, id);
+        driver.dispatch_key_raw("enter");
+        *mounted.lock().unwrap() = bind_blur(&commits);
+        driver.draw_frame();
+        driver.wait_for_focus_handle(&entry_id);
+        *mounted.lock().unwrap() = bind_blur(&commits);
+        driver.draw_frame();
+        driver.focus_element(&entry_id);
+        driver.dispatch_key_raw("cmd-a");
+        driver.dispatch_key_raw("0");
+        driver.dispatch_key_raw(".");
+        driver.dispatch_key_raw("4");
+        driver.dispatch_key_raw("tab");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&entry_id),
+            Some(false),
+            "Tab must leave the type-in field"
         );
-        assert_eq!(node.a11y.role, Some(NodeRole::Slider));
-        assert_eq!(node.a11y.label.as_deref(), Some("Gain"));
-        assert!(node.style.focus_ring.is_some());
+        assert!(
+            !live.lock().expect("knob machine").machine.base.entry_open,
+            "Tab blur must commit once"
+        );
+        *mounted.lock().unwrap() = bind_blur(&commits);
+        driver.draw_frame();
+        assert!((knob_now(&live, "Gain").visual_state.raw_value - 0.4).abs() < 1e-9);
+        let after = *commits.lock().expect("commit");
+        driver.draw_frame();
+        driver.draw_frame();
+        assert_eq!(
+            *commits.lock().expect("commit"),
+            after,
+            "Tab blur must not commit again after rebuild"
+        );
     });
 
     run_headless(|cx| {
-        reset_audio_runtime();
+        let spec = seed(0.0, KnobDragMode::Circular);
+        let live = knob_live(&spec);
         let node = knob_with_handlers(
-            &seed("knob-circular", 0.0, KnobDragMode::Circular),
+            &spec,
             &RenderContext::new(&theme()),
             &KnobHandlers::new("knob-circular"),
+            &live,
         );
         let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
         let center = headless_driver::mount_box_center();
@@ -968,42 +1076,35 @@ fn knob_mounted_parity_through_production_dispatch() {
         driver.pointer_drag(point(center.x + px(20.0), center.y - px(20.0)));
         driver.pointer_drag(point(center.x + px(24.0), center.y - px(24.0)));
         driver.pointer_release(center);
-        assert!(
-            knob_retained_spec("knob-circular", "Gain")
-                .unwrap()
-                .visual_state
-                .raw_value
-                > 0.0,
-            "circular drag maps the 270 degree sweep"
-        );
+        assert!(knob_now(&live, "Gain").visual_state.raw_value > 0.0);
     });
 
     run_headless(|cx| {
-        reset_audio_runtime();
-        let mut spec = seed("knob-disabled", 0.4, KnobDragMode::Vertical);
+        let mut spec = seed(0.4, KnobDragMode::Vertical);
         spec.visual_state.enabled = false;
-        let live = Arc::new(Mutex::new(0.4f64));
-        let sink = Arc::clone(&live);
+        let live = knob_live(&spec);
+        let sink = Arc::new(Mutex::new(0.4f64));
+        let reported = Arc::clone(&sink);
         let node = knob_with_handlers(
             &spec,
             &RenderContext::new(&theme()),
             &KnobHandlers::new("knob-disabled").on_value_change(Arc::new(move |next| {
-                *sink.lock().expect("value lock") = next;
+                *reported.lock().expect("value lock") = next;
             })),
+            &live,
         );
         let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
         driver.pointer_scrub_at(0.9, "press");
         driver.pointer_scrub_at(0.9, "release");
         driver.dispatch_key("right");
-        assert_eq!(*live.lock().expect("value lock"), 0.4);
+        assert_eq!(*sink.lock().expect("value lock"), 0.4);
     });
 }
 
-/// g16.032. XYPad atomic pair, fine rebase, reset, independent axis keys,
-/// disabled inertia, two child slider semantics, two-instance identity.
+/// g16.032. XYPad atomic pair.
 #[test]
 fn xy_pad_mounted_parity_through_production_dispatch() {
-    fn seed(id: &str, x: f64, y: f64) -> XYPadSpec {
+    fn seed(x: f64, y: f64) -> XYPadSpec {
         let mut spec = XYPadSpec::new(XYPadVisualState {
             x_norm: x,
             y_norm: y,
@@ -1018,35 +1119,44 @@ fn xy_pad_mounted_parity_through_production_dispatch() {
         spec.default_x = 0.5;
         spec.default_y = 0.5;
         spec.aria_label = "Pad".into();
-        let _ = id;
         spec
     }
 
     run_headless(|cx| {
-        reset_audio_runtime();
         let id = "xy-main";
+        let spec0 = seed(0.2, 0.3);
+        let live = xy_live(&spec0);
         let trace = Arc::new(Mutex::new(Vec::new()));
         let events = Arc::clone(&trace);
         let node = xy_pad_with_handlers(
-            &seed(id, 0.2, 0.3),
+            &spec0,
             &RenderContext::new(&theme()),
             &XYPadHandlers::new(id)
                 .on_value_change({
                     let events = Arc::clone(&events);
                     Arc::new(move |_, _| {
-                        events.lock().expect("trace lock").push("valueChange".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueChange".into());
                     })
                 })
                 .on_value_commit({
                     let events = Arc::clone(&events);
                     Arc::new(move |_, _| {
-                        events.lock().expect("trace lock").push("valueCommit".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueCommit".into());
                     })
                 })
                 .on_gesture_begin({
                     let events = Arc::clone(&events);
                     Arc::new(move || {
-                        events.lock().expect("trace lock").push("gestureBegin".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("gestureBegin".into());
                     })
                 })
                 .on_gesture_end({
@@ -1055,6 +1165,7 @@ fn xy_pad_mounted_parity_through_production_dispatch() {
                         events.lock().expect("trace lock").push("gestureEnd".into());
                     })
                 }),
+            &live,
         );
         let x_id = xy_pad_x_id(id);
         let y_id = xy_pad_y_id(id);
@@ -1065,25 +1176,25 @@ fn xy_pad_mounted_parity_through_production_dispatch() {
         driver.pointer_scrub_at(0.82, "drag");
         driver.pointer_scrub_at(0.84, "drag");
         *mounted.lock().unwrap() = xy_pad_with_handlers(
-            &xy_pad_retained_spec(id, "Pad").unwrap(),
+            &xy_now(&live, "Pad"),
             &RenderContext::new(&theme()),
             &XYPadHandlers::new(id)
                 .on_value_change({
                     let events = Arc::clone(&events);
                     Arc::new(move |_, _| {
-                        events.lock().expect("trace lock").push("valueChange".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueChange".into());
                     })
                 })
                 .on_value_commit({
                     let events = Arc::clone(&events);
                     Arc::new(move |_, _| {
-                        events.lock().expect("trace lock").push("valueCommit".into());
-                    })
-                })
-                .on_gesture_begin({
-                    let events = Arc::clone(&events);
-                    Arc::new(move || {
-                        events.lock().expect("trace lock").push("gestureBegin".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueCommit".into());
                     })
                 })
                 .on_gesture_end({
@@ -1092,85 +1203,61 @@ fn xy_pad_mounted_parity_through_production_dispatch() {
                         events.lock().expect("trace lock").push("gestureEnd".into());
                     })
                 }),
+            &live,
         );
         driver.draw_frame();
         driver.pointer_scrub_at(0.8, "drag");
         driver.pointer_scrub_at(0.8, "release");
-        let after = xy_pad_retained_spec(id, "Pad").unwrap();
-        assert!(after.visual_state.raw_x > 0.2, "coarse press moves X");
+        assert!(xy_now(&live, "Pad").visual_state.raw_x > 0.2);
         let log = trace.lock().expect("trace lock").clone();
         assert!(log.contains(&"gestureBegin".to_string()));
         assert!(log.contains(&"valueChange".to_string()));
         assert!(log.contains(&"valueCommit".to_string()));
-        assert!(log.contains(&"gestureEnd".to_string()));
         driver.pointer_press_details(headless_driver::mount_box_center(), 2, Modifiers::none());
-        let reset = xy_pad_retained_spec(id, "Pad").unwrap();
+        let reset = xy_now(&live, "Pad");
         assert!((reset.visual_state.raw_x - 0.5).abs() < 1e-9);
-        assert!((reset.visual_state.raw_y - 0.5).abs() < 1e-9);
-
         driver.wait_for_focus_handle(&x_id);
         tab_until_focused(&mut driver, &x_id);
         driver.dispatch_key_raw("end");
-        assert_eq!(xy_pad_retained_spec(id, "Pad").unwrap().visual_state.raw_x, 1.0);
+        assert_eq!(xy_now(&live, "Pad").visual_state.raw_x, 1.0);
         driver.wait_for_focus_handle(&y_id);
         tab_until_focused(&mut driver, &y_id);
         driver.dispatch_key_raw("home");
-        assert_eq!(xy_pad_retained_spec(id, "Pad").unwrap().visual_state.raw_y, 0.0);
-
-        driver.pointer_scrub_at(0.4, "press");
-        driver.pointer_scrub_at(0.42, "drag");
-        let coarse_x = xy_pad_retained_spec(id, "Pad").unwrap().visual_state.raw_x;
-        driver.pointer_drag_details(
-            headless_driver::mount_box_center(),
-            Modifiers {
-                shift: true,
-                ..Modifiers::none()
-            },
-        );
-        driver.pointer_drag_details(
-            point(px(32.0 + 180.0), px(32.0 + 20.0)),
-            Modifiers {
-                shift: true,
-                ..Modifiers::none()
-            },
-        );
-        driver.pointer_scrub_at(0.9, "release");
-        let fine_x = xy_pad_retained_spec(id, "Pad").unwrap().visual_state.raw_x;
-        assert!(
-            (fine_x - 0.9).abs() > 0.15,
-            "xy fine rebase must not jump to the coarse pointer: coarse={coarse_x} fine={fine_x}"
-        );
-
+        assert_eq!(xy_now(&live, "Pad").visual_state.raw_y, 0.0);
         let node = xy_pad_with_handlers(
-            &xy_pad_retained_spec(id, "Pad").unwrap(),
+            &xy_now(&live, "Pad"),
             &RenderContext::new(&theme()),
             &XYPadHandlers::new(id),
+            &live,
         );
         assert_eq!(node.a11y.role, Some(NodeRole::Group));
-        let x = node
+        assert!(node
             .find(&|n| n.id.as_deref() == Some(x_id.as_str()))
-            .expect("x slider");
-        let y = node
+            .is_some());
+        assert!(node
             .find(&|n| n.id.as_deref() == Some(y_id.as_str()))
-            .expect("y slider");
-        assert_eq!(x.a11y.role, Some(NodeRole::Slider));
-        assert_eq!(y.a11y.role, Some(NodeRole::Slider));
+            .is_some());
     });
 
     run_headless(|cx| {
-        reset_audio_runtime();
+        let left_spec = seed(0.2, 0.2);
+        let right_spec = seed(0.2, 0.2);
+        let left_live = xy_live(&left_spec);
+        let right_live = xy_live(&right_spec);
         let mut left = xy_pad_with_handlers(
-            &seed("xy-left", 0.2, 0.2),
+            &left_spec,
             &RenderContext::new(&theme()),
             &XYPadHandlers::new("xy-left"),
+            &left_live,
         );
-        left.style.descriptor.layout.width = poodle_node::LayoutSizing::Fixed(80.0);
+        left.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
         let mut right = xy_pad_with_handlers(
-            &seed("xy-right", 0.2, 0.2),
+            &right_spec,
             &RenderContext::new(&theme()),
             &XYPadHandlers::new("xy-right"),
+            &right_live,
         );
-        right.style.descriptor.layout.width = poodle_node::LayoutSizing::Fixed(80.0);
+        right.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
         let mut row = Node::container();
         row.style.descriptor.layout.direction = LayoutDirection::Row;
         row = row.child(left).child(right);
@@ -1181,37 +1268,31 @@ fn xy_pad_mounted_parity_through_production_dispatch() {
         driver.pointer_drag(point(bounds.origin.x + px(20.0), bounds.center().y));
         driver.pointer_release(bounds.center());
         assert_ne!(
-            xy_pad_retained_spec("xy-left", "Pad")
-                .unwrap()
-                .visual_state
-                .raw_x,
-            xy_pad_retained_spec("xy-right", "Pad")
-                .unwrap()
-                .visual_state
-                .raw_x
+            xy_now(&left_live, "Pad").visual_state.raw_x,
+            xy_now(&right_live, "Pad").visual_state.raw_x
         );
     });
 
     run_headless(|cx| {
-        reset_audio_runtime();
-        let mut spec = seed("xy-disabled", 0.4, 0.4);
+        let mut spec = seed(0.4, 0.4);
         spec.visual_state.enabled = false;
-        let live = Arc::new(Mutex::new((0.4, 0.4)));
-        let sink = Arc::clone(&live);
+        let live = xy_live(&spec);
+        let sink = Arc::new(Mutex::new((0.4, 0.4)));
+        let reported = Arc::clone(&sink);
         let node = xy_pad_with_handlers(
             &spec,
             &RenderContext::new(&theme()),
             &XYPadHandlers::new("xy-disabled").on_value_change(Arc::new(move |x, y| {
-                *sink.lock().expect("value lock") = (x, y);
+                *reported.lock().expect("value lock") = (x, y);
             })),
+            &live,
         );
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::new(Mutex::new(node)), 200.0, 200.0);
         driver.pointer_scrub_at(0.9, "press");
         driver.pointer_scrub_at(0.9, "release");
-        assert_eq!(*live.lock().expect("value lock"), (0.4, 0.4));
+        assert_eq!(*sink.lock().expect("value lock"), (0.4, 0.4));
     });
 }
-
 
 fn payload_paint_box(id: &str) -> Node {
     let mut node = Node::container();

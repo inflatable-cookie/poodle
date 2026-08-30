@@ -460,7 +460,8 @@ pub fn envelope_editor(spec: &EnvelopeEditorSpec, ctx: &RenderContext<'_>) -> No
                 point_size
             },
         );
-        handle.style.descriptor.background = Some(ctx.theme().resolve_color("color.background.elevated"));
+        handle.style.descriptor.background =
+            Some(ctx.theme().resolve_color("color.background.elevated"));
         handle.style.descriptor.border.width = 2.0;
         handle.style.descriptor.border.color = accent;
         handle.a11y.role = Some(NodeRole::Slider);
@@ -511,7 +512,8 @@ pub fn xy_pad(spec: &XYPadSpec, ctx: &RenderContext<'_>) -> Node {
     root = root.child(y_trace);
     let mut thumb = Node::container();
     circle(&mut thumb, thumb_size);
-    thumb.style.descriptor.background = Some(ctx.theme().resolve_color("color.background.elevated"));
+    thumb.style.descriptor.background =
+        Some(ctx.theme().resolve_color("color.background.elevated"));
     thumb.style.descriptor.border.width = 2.0;
     thumb.style.descriptor.border.color = accent;
     absolute(
@@ -526,9 +528,10 @@ pub fn fader_with_handlers(
     spec: &FaderSpec,
     ctx: &RenderContext<'_>,
     handlers: &crate::audio_handlers::FaderHandlers,
+    live: &std::sync::Arc<std::sync::Mutex<crate::audio_handlers::FaderLive>>,
 ) -> Node {
     let mut node = fader(spec, ctx);
-    crate::audio_handlers::bind_fader(&mut node, spec, ctx, handlers);
+    crate::audio_handlers::bind_fader(&mut node, spec, ctx, handlers, live);
     node
 }
 
@@ -536,9 +539,10 @@ pub fn knob_with_handlers(
     spec: &KnobSpec,
     ctx: &RenderContext<'_>,
     handlers: &crate::audio_handlers::KnobHandlers,
+    live: &std::sync::Arc<std::sync::Mutex<crate::audio_handlers::KnobLive>>,
 ) -> Node {
     let mut node = knob(spec, ctx);
-    crate::audio_handlers::bind_knob(&mut node, spec, ctx, handlers);
+    crate::audio_handlers::bind_knob(&mut node, spec, ctx, handlers, live);
     node
 }
 
@@ -546,9 +550,10 @@ pub fn xy_pad_with_handlers(
     spec: &XYPadSpec,
     ctx: &RenderContext<'_>,
     handlers: &crate::audio_handlers::XYPadHandlers,
+    live: &std::sync::Arc<std::sync::Mutex<crate::audio_handlers::XYPadLive>>,
 ) -> Node {
     let mut node = xy_pad(spec, ctx);
-    crate::audio_handlers::bind_xy_pad(&mut node, spec, ctx, handlers);
+    crate::audio_handlers::bind_xy_pad(&mut node, spec, ctx, handlers, live);
     node
 }
 
@@ -794,11 +799,12 @@ pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, ctx: &RenderContext<'_>) -> Nod
             let mut node = Node::container();
             node.style.descriptor.layout.width = LayoutSizing::Fixed(cell_width);
             node.style.descriptor.layout.height = LayoutSizing::Fixed(cell_height);
-            node.style.descriptor.background = Some(ctx.theme().resolve_color(if cell.cell.enabled {
-                "color.background.elevated"
-            } else {
-                "color.background.canvas"
-            }));
+            node.style.descriptor.background =
+                Some(ctx.theme().resolve_color(if cell.cell.enabled {
+                    "color.background.elevated"
+                } else {
+                    "color.background.canvas"
+                }));
             node.style.descriptor.border.width = if cell.focused { 2.0 } else { 1.0 };
             node.style.descriptor.border.color = ctx.theme().resolve_color("color.border.default");
             node.a11y.role = Some(NodeRole::Cell);
@@ -814,7 +820,8 @@ pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, ctx: &RenderContext<'_>) -> Nod
             let mut zero = Node::container();
             zero.style.descriptor.layout.width = LayoutSizing::Fixed(1.0);
             zero.style.descriptor.layout.height = LayoutSizing::Fixed(cell_height * 0.64);
-            zero.style.descriptor.background = Some(ctx.theme().resolve_color("color.border.default"));
+            zero.style.descriptor.background =
+                Some(ctx.theme().resolve_color("color.border.default"));
             absolute(
                 &mut zero,
                 cell.zero_norm as f32 * cell_width,
@@ -827,12 +834,13 @@ pub fn mod_matrix_grid(spec: &ModMatrixGridSpec, ctx: &RenderContext<'_>) -> Nod
                 amount.style.descriptor.layout.width = LayoutSizing::Fixed(amount_width);
                 amount.style.descriptor.layout.height =
                     LayoutSizing::Fixed(density_metric(density, [2.0, 4.0, 6.0]));
-                amount.style.descriptor.background =
-                    Some(ctx.theme().resolve_color(if cell.amount_norm < cell.zero_norm {
+                amount.style.descriptor.background = Some(ctx.theme().resolve_color(
+                    if cell.amount_norm < cell.zero_norm {
                         "color.status.danger"
                     } else {
                         "color.accent.base"
-                    }));
+                    },
+                ));
                 absolute(
                     &mut amount,
                     cell.fill_start_norm as f32 * cell_width,

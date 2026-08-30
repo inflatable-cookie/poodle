@@ -69,20 +69,19 @@ thread_local! {
 /// frame, and the boundary is the host's render pass — not a `to_gpui` call,
 /// because a real page converts many components independently per frame.
 ///
-/// Also finalizes the previous frame's continuous-value session: a gesture
-/// whose owner was not rebuilt last frame emits cancel exactly once. That is
-/// the production lost-host path; [`overlay_frame_end`] still exists for
-/// unused focus-request cleanup after paint.
+/// Prepares this paint: layer/bounds registries restart, and the open
+/// continuous-value session is marked unpainted so a host that is not rebuilt
+/// can cancel after paint. [`overlay_frame_end`] is the same-cycle lost-host
+/// sweep; this begin-time sweep is only a safety net for a previous cycle that
+/// never ended.
 ///
 /// The focus queue is NOT cleared here: focus requests made between frames
 /// (machine effects from event dispatch) must survive until the next frame's
 /// paint applies them. [`overlay_frame_end`] drops whatever was never
 /// applied.
 pub fn overlay_frame_begin() {
-    // Close the previous frame's continuous-value host before this frame's
-    // paint. Production hosts already call begin; they do not need a separate
-    // after-paint hook for lost-host cancel. A session that painted last
-    // frame stays open until this frame fails to rebuild it.
+    // Safety net for a previous cycle that never called overlay_frame_end.
+    // Same-frame lost-host cancel is overlay_frame_end after this paint.
     crate::interaction::sweep_lost_continuous_host();
     LAYERS.with(|layers| layers.borrow_mut().clear());
     ELEMENT_BOUNDS.with(|bounds| bounds.borrow_mut().clear());
@@ -95,9 +94,10 @@ pub fn overlay_frame_begin() {
     crate::interaction::prepare_continuous_value_frame();
 }
 
-/// End a rendered frame: drop focus requests the frame's paint never applied
-/// (the target element never appeared). Called by the headless driver after
-/// each draw; the production host's requests always target painted elements.
+/// End a rendered frame: drop unused focus requests, then cancel a
+/// continuous-value gesture whose owner was not rebuilt in this paint.
+/// Production hosts defer this to the end of the same effect cycle as
+/// [`overlay_frame_begin`] so removal cancels without a next-frame delay.
 pub fn overlay_frame_end() {
     FOCUS_REQUESTS.with(|requests| requests.borrow_mut().clear());
     crate::interaction::sweep_lost_continuous_host();
