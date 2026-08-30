@@ -1,0 +1,51 @@
+/* Custom-surface drag overlay, live region, and source/target posture.
+   Not a portable component sheet — the provider is a substrate. */
+
+.poodle-drag-drop-provider {
+  position: relative;
+}
+
+.poodle-drag-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 90;
+}
+
+.poodle-drag-preview {
+  position: absolute;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--poodle-radius-control, 0.25rem);
+  background: var(--poodle-color-surface-raised, Canvas);
+  color: var(--poodle-color-fg-default, CanvasText);
+  border: 0.0625rem solid var(--poodle-color-border-subtle, GrayText);
+  box-shadow: var(--poodle-shadow-overlay, 0 0.5rem 1rem color-mix(in srgb, CanvasText 16%, transparent));
+  white-space: nowrap;
+}
+
+.poodle-drag-live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.poodle-drag-drop-provider [data-poodle-drag-source="dragging"],
+.poodle-drag-drop-provider [data-poodle-drag-source="dropping"] {
+  opacity: 0.55;
+}
+
+.poodle-drag-drop-provider [data-poodle-drop-target="accepted"] {
+  outline: 0.125rem solid var(--poodle-color-accent-base, Highlight);
+  outline-offset: -0.125rem;
+}
+
+.poodle-drag-drop-provider [data-poodle-drop-target="rejected"] {
+  outline: 0.125rem dashed var(--poodle-color-danger-base, crimson);
+  outline-offset: -0.125rem;
+}

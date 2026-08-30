@@ -197,6 +197,15 @@ export { Tabs, type TabsProps, type TabsItem } from "./Tabs";
 export { Text, type TextProps } from "./Text";
 export { TextLink, type TextLinkProps } from "./TextLink";
 export { UiPresentationProvider, useUiPresentation, resolveSemanticControlSize, resolveSupportingVisualSize, type UiPresentationContextValue } from "./presentation";
+export {
+  DragDropProvider,
+  useDragDrop,
+  useDragSource,
+  useDropTarget,
+  type DragDropProviderProps,
+  type SourcePropGetter,
+  type TargetPropGetter,
+} from "./drag-drop";
 export { resolveIconNodes } from "./icon-registry";
 export * from "./types";
 export { AgentMessage, type AgentMessageProps } from "./AgentMessage";

@@ -23,6 +23,16 @@ import type { ControlSize, ControlDensity, SelectOption } from "@inflatable-cook
 
 Peer dependencies: `react` and `react-dom` `>=18` (built and verified on 19).
 
+Custom-surface drag and drop is a substrate, not a catalogue component:
+
+```ts
+import { DragDropProvider, useDragDrop, useDragSource, useDropTarget } from "@inflatable-cookie/poodle-react";
+```
+
+`useDragSource` / `useDropTarget` return stable prop getters that compose
+consumer refs and handlers. The provider owns one overlay and one polite live
+region.
+
 ## Setup
 
 Three things wire a consuming app up.

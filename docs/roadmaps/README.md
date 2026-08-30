@@ -66,8 +66,9 @@ behavior repairs without inventing another conformance authority.
   behind one hand-authored `audioControls` vector corpus, moving no ledger
   cell; `g16.032` mounts the three controls through one bounded
   continuous-value Node event (ledger 52 mounted / 122 missing), merged in PR
-  #100. This work remains separate from payload drag-and-drop. `g16.022` is now
-  ready as the next drag-programme card over the landed semantic kernel.
+  #100. This work remains separate from payload drag-and-drop. `g16.022`
+  landed the web custom-surface substrate over that kernel; `g16.023` is the
+  next drag-programme card after merge.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other

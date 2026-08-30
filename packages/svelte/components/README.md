@@ -58,6 +58,15 @@ Types are available from the root or the `/types` subpath:
 import type { ControlSize, ControlDensity, SelectOption } from "@inflatable-cookie/poodle-svelte";
 ```
 
+Custom-surface drag and drop is a substrate, not a catalogue component:
+
+```ts
+import { DragDropProvider, useDragDrop } from "@inflatable-cookie/poodle-svelte";
+```
+
+`useDragDrop` returns a snapshot store plus `dragSource` / `dropTarget`
+actions. The provider owns one overlay and one polite live region.
+
 ## Stability Notes
 
 - public entry points are the package root and `./types`

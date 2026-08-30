@@ -9,6 +9,7 @@ export const FROZEN_COMPONENT_COUNT = 175;
 const REACT_NON_COMPONENT_ROOT_EXPORTS = [
   "AnchoredSurface",
   "DEFAULT_COMPRESSION",
+  "DragDropProvider",
   "MenuSurface",
   "PillContext",
   "ThemeControllerProvider",
@@ -23,6 +24,9 @@ const REACT_NON_COMPONENT_ROOT_EXPORTS = [
   "resolveIconNodes",
   "resolveSemanticControlSize",
   "resolveSupportingVisualSize",
+  "useDragDrop",
+  "useDragSource",
+  "useDropTarget",
   "usePillContext",
   "useThemeController",
   "useUiPresentation",

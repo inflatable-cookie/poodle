@@ -118,6 +118,17 @@ export { default as Tooltip } from "./Tooltip.svelte";
 export { default as TriStateSwitch } from "./TriStateSwitch.svelte";
 export { default as Menubar } from "./Menubar.svelte";
 export { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
+export { DragDropProvider, useDragDrop } from "./drag-drop";
+export type {
+  DragActivationConstraints,
+  DragAnnouncementEvent,
+  DragDropCommitResult,
+  DragDropController,
+  DragDropSnapshot,
+  DragPreviewSnapshot,
+  DragSourceRegistration,
+  DropTargetRegistration,
+} from "./drag-drop";
 export { default as VideoPlayer } from "./VideoPlayer.svelte";
 export { default as DateTimeZonePicker } from "./DateTimeZonePicker.svelte";
 export {

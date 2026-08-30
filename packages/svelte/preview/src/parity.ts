@@ -747,6 +747,14 @@ const packageSurfaceCoverageGroups: PackageSurfaceCoverageGroup[] = [
   {
     packageName: "@inflatable-cookie/poodle-svelte",
     kind: "helper",
+    status: "contract-only",
+    sectionIds: [],
+    note: "Same-document drag-drop substrate. Mounted custom-surface tests and headless Chromium/WebKit probes cover it; it is not a catalogue component and does not join the 175-row ledger.",
+    exportNames: ["DragDropProvider", "useDragDrop"],
+  },
+  {
+    packageName: "@inflatable-cookie/poodle-svelte",
+    kind: "helper",
     status: "previewed",
     sectionIds: ["media-suite"],
     note: "Media workflow helper exports support browse-panel pagination, upload orchestration, and hash-based deduplication.",

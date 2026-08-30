@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Poodle drag-drop substrate fixture</title>
+    <style>
+      body { font-family: sans-serif; margin: 0; }
+      #scroller {
+        height: 240px;
+        overflow: auto;
+        border: 1px solid #888;
+        margin: 16px;
+      }
+      #spacer { height: 160px; }
+      #source, #target {
+        width: 160px;
+        padding: 12px;
+        margin: 16px;
+        border: 1px solid #444;
+      }
+      #source { background: #eee; }
+      #target { background: #f7f7f7; min-height: 48px; }
+      #probe { margin: 16px; font-family: monospace; }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="scroller">
+        <div id="spacer"></div>
+        <button type="button" id="source">Alpha</button>
+        <div id="target">List</div>
+        <div id="spacer"></div>
+      </div>
+      <button type="button" id="shift">Shift target</button>
+      <div id="probe" data-phase="idle" data-captured="false" data-drop=""></div>
+      <div id="overlay" class="poodle-drag-overlay" aria-hidden="true"></div>
+      <div id="live" class="poodle-drag-live-region" aria-live="polite"></div>
+    </div>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

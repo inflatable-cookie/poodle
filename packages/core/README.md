@@ -34,6 +34,37 @@ no code change in it.
 | `/tokens/control-size-<size>.css` | One control-size mode |
 | `/icons` | Icon types and Poodle's scoped default Lucide set |
 
+## Custom-surface drag and drop
+
+Same-document pointer, touch, and keyboard drag is a core controller plus
+idiomatic Svelte/React bindings. It is not a portable component and does not
+add a ledger row.
+
+```ts
+import { createDragDropController } from "@inflatable-cookie/poodle-core";
+
+const controller = createDragDropController();
+const disconnect = controller.connect(root);
+controller.registerSource(sourceEl, {
+  sourceId: "clip-1",
+  subject: { kind: "clip", id: "clip-1" },
+  allowedOperations: ["move"],
+  label: "Intro clip",
+});
+controller.registerTarget(listEl, {
+  targetId: "timeline",
+  acceptedKinds: ["clip"],
+  label: "Timeline",
+  resolvePosition: () => "inside",
+  canDrop: (intent) => ({ accepted: true, intent }),
+  onDrop: (intent) => ({ status: "committed" }),
+});
+```
+
+Framework packages export `DragDropProvider`. Svelte uses `useDragDrop()`
+actions; React uses `useDragSource` / `useDropTarget` prop getters. See spec
+069 and architecture 011.
+
 ## Web Setup
 
 Import base tokens and the modes your application can select:

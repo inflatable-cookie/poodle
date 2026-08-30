@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.032 merged in PR #100; g16.022 ready
+Status: active — g16.022 in PR #101; g16.023 next after merge
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -52,7 +52,7 @@ stay maintained; backend admission is not part of the first card.
 19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — complete; merged in PR #94
 20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
 21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — complete; merged in PR #96
-22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — ready; depends on merged 021
+22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — complete; PR #101
 23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — planned; clean public migration approved, depends on 022
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — planned; depends on 023
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — planned; depends on 024
@@ -81,9 +81,10 @@ Two continuation programmes are now explicit:
   transfer, inbound files, and drag-out. `g16.021`–`g16.028` compile that
   programme without scattering the seven dependent components into unrelated
   repairs. `g16.021` landed the paired semantic kernel and its shared
-  `dragDrop` vector corpus. The clean Tabs and DockRegion public migrations are
-  approved; later cards remain gated by landed dependencies and, for the host
-  bridge, its exact post-kernel API shape.
+  `dragDrop` vector corpus. `g16.022` landed the same-document web custom-surface
+  controller and Svelte/React bindings. The clean Tabs and DockRegion public
+  migrations are approved; later cards remain gated by landed dependencies and,
+  for the host bridge, its exact post-kernel API shape.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
@@ -309,7 +310,9 @@ ledger cell moved.
 
 ## Next Task
 
-`g16.032` merged in PR #100. `g16.022` is the single next task: expose the
-landed drag session kernel through the decided Svelte and React custom-surface
-API. EditableLabel stays decision-blocked. `g16.023` remains gated on the
-mounted web substrate; `g16.025` remains serial behind the earlier drag cards.
+`g16.022` landed the same-document web custom-surface substrate over the
+g16.021 kernel: one provider-scoped DOM controller, idiomatic Svelte actions
+and React prop getters, and headless Chromium/WebKit evidence. No ledger cell
+moved. After merge, promote `g16.023` for the first simple Poodle component
+migrations. EditableLabel stays decision-blocked. `g16.025` remains serial
+behind the earlier drag cards.
