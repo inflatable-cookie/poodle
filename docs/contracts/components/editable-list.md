@@ -202,7 +202,10 @@ is not session authority.
 
 After keyboard reorder, focus follows the moved item to its new position via `requestAnimationFrame` and `querySelector`.
 
-When `windowSize` is enabled, `ensureIndexVisible()` adjusts the page window so the moved item remains visible, allowing continuous keyboard reordering across page boundaries.
+When `windowSize` is enabled, keyboard reorder uses ordered logical targets for
+the complete item list. Hidden pages stay addressable without paging or
+unmounting the source during the session. After commit, `ensureIndexVisible()`
+reveals the moved item.
 
 ### Focus
 

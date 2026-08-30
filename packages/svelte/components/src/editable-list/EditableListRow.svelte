@@ -71,6 +71,7 @@
     label: item.label ?? item.id,
     disabled: !canDrag,
     handle: canDrag && !embeddedHandle ? ".poodle-editable-list__handle" : undefined,
+    keyboardOrder: index,
     onDragStart,
     onDragEnd,
   });

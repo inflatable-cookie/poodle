@@ -128,6 +128,10 @@ export type {
   DragPreviewSnapshot,
   DragSourceRegistration,
   DropTargetRegistration,
+  KeyboardDropDirection,
+  KeyboardDropTargetHandle,
+  KeyboardDropTargetRegistration,
+  KeyboardPositionResolverInput,
 } from "./drag-drop";
 export { default as VideoPlayer } from "./VideoPlayer.svelte";
 export { default as DateTimeZonePicker } from "./DateTimeZonePicker.svelte";

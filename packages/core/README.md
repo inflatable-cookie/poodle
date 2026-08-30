@@ -59,11 +59,20 @@ controller.registerTarget(listEl, {
   canDrop: (intent) => ({ accepted: true, intent }),
   onDrop: (intent) => ({ status: "committed" }),
 });
+controller.registerKeyboardTarget({
+  targetId: "clip-2",
+  acceptedKinds: ["clip"],
+  label: "Verse clip",
+  order: 1,
+  resolvePosition: (input) => (input.direction === "previous" ? "before" : "after"),
+  canDrop: (intent) => ({ accepted: true, intent }),
+  onDrop: () => ({ status: "committed" }),
+});
 ```
 
 Framework packages export `DragDropProvider`. Svelte uses `useDragDrop()`
-actions; React uses `useDragSource` / `useDropTarget` prop getters. See spec
-069 and architecture 011.
+actions plus a logical keyboard-target helper; React uses `useDragSource` /
+`useDropTarget` / `useKeyboardDropTarget`. See spec 069 and architecture 011.
 
 ## Web Setup
 

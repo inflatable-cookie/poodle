@@ -2,6 +2,7 @@ import { fireEvent, render } from "@testing-library/svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import EditableList from "../src/EditableList.svelte";
+import EditableListEmbeddedFixture from "./EditableListEmbeddedFixture.svelte";
 
 const items = [
   { id: "a", label: "Alpha" },
@@ -21,6 +22,24 @@ function asRect(top: number): DOMRect {
     bottom: top + 32,
     toJSON: () => ({}),
   } as DOMRect;
+}
+
+function pointer(
+  type: "pointerdown" | "pointermove" | "pointerup",
+  init: PointerEventInit,
+): PointerEvent {
+  return new PointerEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    pointerId: 1,
+    pointerType: "mouse",
+    button: 0,
+    buttons: type === "pointerdown" || type === "pointermove" ? 1 : 0,
+    isPrimary: true,
+    clientX: 0,
+    clientY: 0,
+    ...init,
+  });
 }
 
 function stackRows(container: HTMLElement): HTMLElement[] {
@@ -127,6 +146,50 @@ describe("EditableList (svelte)", () => {
     expect(reordered.map((item) => item.id)).toEqual(["b", "a", "c"]);
   });
 
+  it("reorders upward with keyboard previous as before", async () => {
+    const onReorder = vi.fn();
+    const { container } = render(EditableList, { props: { items, onReorder } });
+    const rows = stackRows(container);
+    rows[1].focus();
+
+    await fireEvent.keyDown(rows[1], { key: " " });
+    await fireEvent.keyDown(rows[1], { key: "ArrowUp" });
+    await fireEvent.keyDown(rows[1], { key: " " });
+
+    expect((onReorder.mock.calls[0][0] as typeof items).map((item) => item.id)).toEqual(["b", "a", "c"]);
+  });
+
+  it("reorders across a windowSize boundary without paging first", async () => {
+    const onReorder = vi.fn();
+    const { container } = render(EditableList, { props: { items, windowSize: 2, onReorder } });
+    const rows = stackRows(container);
+    expect(rows).toHaveLength(2);
+    rows[1].focus();
+
+    await fireEvent.keyDown(rows[1], { key: " " });
+    await fireEvent.keyDown(rows[1], { key: "ArrowDown" });
+    await fireEvent.keyDown(rows[1], { key: " " });
+
+    expect((onReorder.mock.calls[0][0] as typeof items).map((item) => item.id)).toEqual(["a", "c", "b"]);
+  });
+
+  it("reorders backward across a windowSize boundary from the second page", async () => {
+    const onReorder = vi.fn();
+    const { container } = render(EditableList, { props: { items, windowSize: 2, onReorder } });
+    const next = [...container.querySelectorAll("button")].find((button) =>
+      button.textContent?.includes("Next"),
+    ) as HTMLButtonElement;
+    await fireEvent.click(next);
+    const rows = stackRows(container);
+    rows[0].focus();
+
+    await fireEvent.keyDown(rows[0], { key: " " });
+    await fireEvent.keyDown(rows[0], { key: "ArrowUp" });
+    await fireEvent.keyDown(rows[0], { key: " " });
+
+    expect((onReorder.mock.calls[0][0] as typeof items).map((item) => item.id)).toEqual(["a", "c", "b"]);
+  });
+
   it("reorders with a pointer drag from the handle", async () => {
     const onReorder = vi.fn();
     const { container } = render(EditableList, { props: { items, onReorder } });
@@ -141,24 +204,36 @@ describe("EditableList (svelte)", () => {
     expect((onReorder.mock.calls[0][0] as typeof items).map((item) => item.id)).toEqual(["b", "c", "a"]);
   });
 
-  it("reorders with a touch-like pointer", async () => {
+  it("reorders with a touch hold", async () => {
+    vi.useFakeTimers();
     const onReorder = vi.fn();
     const { container } = render(EditableList, { props: { items, onReorder } });
     const rows = stackRows(container);
     const handle = rows[0].querySelector(".poodle-editable-list__handle") as HTMLElement;
 
-    await fireEvent.pointerDown(handle, {
-      button: 0,
-      pointerId: 1,
-      pointerType: "pen",
-      clientX: 20,
-      clientY: 20,
-    });
-    await fireEvent.pointerMove(handle, { pointerId: 1, pointerType: "pen", clientX: 20, clientY: 110 });
-    await fireEvent.pointerUp(handle, { pointerId: 1, pointerType: "pen", clientX: 20, clientY: 110 });
+    handle.dispatchEvent(pointer("pointerdown", { pointerType: "touch", clientX: 20, clientY: 20 }));
+    vi.advanceTimersByTime(250);
+    handle.dispatchEvent(pointer("pointermove", { pointerType: "touch", clientX: 20, clientY: 110 }));
+    handle.dispatchEvent(pointer("pointerup", { pointerType: "touch", clientX: 20, clientY: 110 }));
 
     expect(onReorder).toHaveBeenCalledTimes(1);
     expect((onReorder.mock.calls[0][0] as typeof items).map((item) => item.id)).toEqual(["b", "c", "a"]);
+  });
+
+  it("cancels touch when movement exceeds tolerance before the hold", async () => {
+    vi.useFakeTimers();
+    const onReorder = vi.fn();
+    const { container } = render(EditableList, { props: { items, onReorder } });
+    const rows = stackRows(container);
+    const handle = rows[0].querySelector(".poodle-editable-list__handle") as HTMLElement;
+
+    handle.dispatchEvent(pointer("pointerdown", { pointerType: "touch", clientX: 20, clientY: 20 }));
+    handle.dispatchEvent(pointer("pointermove", { pointerType: "touch", clientX: 20, clientY: 40 }));
+    vi.advanceTimersByTime(250);
+    handle.dispatchEvent(pointer("pointerup", { pointerType: "touch", clientX: 20, clientY: 40 }));
+
+    expect(onReorder).not.toHaveBeenCalled();
+    expect(rows[0].hasAttribute("data-poodle-drag-source")).toBe(false);
   });
 
   it("cancels a keyboard grab on Escape without reordering", async () => {
@@ -189,6 +264,24 @@ describe("EditableList (svelte)", () => {
 
     expect(onReorder).not.toHaveBeenCalled();
     expect(onRemove).toHaveBeenCalledWith("a");
+    expect(rows[0].hasAttribute("data-poodle-drag-source")).toBe(false);
+  });
+
+  it("does not start an embedded-handle drag from editing or action descendants", async () => {
+    const onReorder = vi.fn();
+    const { container } = render(EditableListEmbeddedFixture, { props: { items, onReorder } });
+    const rows = stackRows(container);
+    const editor = container.querySelector('[data-testid="edit-a"]') as HTMLElement;
+    const action = container.querySelector('[data-testid="action-a"]') as HTMLElement;
+
+    editor.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    editor.dispatchEvent(pointer("pointermove", { clientX: 20, clientY: 110 }));
+    editor.dispatchEvent(pointer("pointerup", { clientX: 20, clientY: 110 }));
+    action.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    action.dispatchEvent(pointer("pointermove", { clientX: 20, clientY: 110 }));
+    action.dispatchEvent(pointer("pointerup", { clientX: 20, clientY: 110 }));
+
+    expect(onReorder).not.toHaveBeenCalled();
     expect(rows[0].hasAttribute("data-poodle-drag-source")).toBe(false);
   });
 

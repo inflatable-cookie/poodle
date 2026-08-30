@@ -7,6 +7,8 @@ import type {
   DragDropSnapshot,
   DragSourceRegistration,
   DropTargetRegistration,
+  KeyboardDropTargetHandle,
+  KeyboardDropTargetRegistration,
 } from "@inflatable-cookie/poodle-core";
 
 const POODLE_DRAG_DROP = Symbol("poodle-drag-drop");
@@ -24,6 +26,7 @@ export function useDragDrop(): {
   cancel: () => void;
   dragSource: Action<HTMLElement, DragSourceRegistration>;
   dropTarget: Action<HTMLElement, DropTargetRegistration>;
+  keyboardDropTarget: (registration: KeyboardDropTargetRegistration) => KeyboardDropTargetHandle;
 } {
   const ctx = getContext<DragDropContextValue | undefined>(POODLE_DRAG_DROP);
   if (!ctx) {
@@ -72,10 +75,14 @@ export function useDragDrop(): {
     };
   };
 
+  const keyboardDropTarget = (registration: KeyboardDropTargetRegistration): KeyboardDropTargetHandle =>
+    ctx.controller.registerKeyboardTarget(registration);
+
   return {
     snapshot,
     cancel: () => ctx.controller.cancel(),
     dragSource,
     dropTarget,
+    keyboardDropTarget,
   };
 }

@@ -1,6 +1,6 @@
 # g16.023 — EditableList Simple Reorder Migration
 
-Status: ready — PR #104 revision authorised after logical-target planning correction
+Status: complete — PR #104 revision awaiting re-review
 Depends on: `022-drag-drop-web-custom-surface-substrate.md`
 Governing refs: architecture 011, spec 069, the resolved
 `../../triage/20260830-180816-tabs-drag-host-bridge-sequencing.md`, and the
@@ -38,18 +38,18 @@ part of DockRegion's external-drag bridge and must migrate with that consumer.
 
 ## Acceptance Criteria
 
-- [ ] Svelte and React EditableList consume the shared substrate.
-- [ ] Mouse, pen, real touch, keyboard, cancellation, source removal, target
+- [x] Svelte and React EditableList consume the shared substrate.
+- [x] Mouse, pen, real touch, keyboard, cancellation, source removal, target
       removal, and disabled inertia have mounted proof in both runtimes.
-- [ ] Keyboard reorder moves both directions in an ordinary list and across
+- [x] Keyboard reorder moves both directions in an ordinary list and across
       both `windowSize` boundaries without paging or unmounting the source
       before commit.
-- [ ] Resulting-order callbacks, editing controls, selection, focus return,
+- [x] Resulting-order callbacks, editing controls, selection, focus return,
       announcements, and curated specimens do not regress.
-- [ ] Active-source search proves EditableList's local `dragstart`, `dragover`,
+- [x] Active-source search proves EditableList's local `dragstart`, `dragover`,
       `drop`, `dragend`, `DataTransfer`, and parallel drag state are absent.
-- [ ] Existing custom-surface controller/provider evidence remains green.
-- [ ] Tabs, DockRegion, native implementations, and parity-ledger cells do not
+- [x] Existing custom-surface controller/provider evidence remains green.
+- [x] Tabs, DockRegion, native implementations, and parity-ledger cells do not
       change.
 
 ## Writable Scope

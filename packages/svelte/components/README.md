@@ -65,7 +65,8 @@ import { DragDropProvider, useDragDrop } from "@inflatable-cookie/poodle-svelte"
 ```
 
 `useDragDrop` returns a snapshot store plus `dragSource` / `dropTarget`
-actions. The provider owns one overlay and one polite live region.
+actions and a `keyboardDropTarget` helper for element-free ordered keyboard
+targets. The provider owns one overlay and one polite live region.
 
 ## Stability Notes
 

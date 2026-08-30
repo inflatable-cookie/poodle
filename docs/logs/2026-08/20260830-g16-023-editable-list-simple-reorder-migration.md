@@ -1,8 +1,8 @@
 # g16.023 — EditableList Simple Reorder Migration
 
-Status: complete — PR pending
+Status: complete — PR #104 revision
 Date: 2026-08-30
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/104
 Card: `docs/roadmaps/g16/023-drag-drop-simple-reorder-migrations.md`
 Handoff: `docs/handoffs/20260830-182242-g16-023-editable-list-reorder.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
@@ -13,52 +13,52 @@ Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-c5d3d67c`
 
 ## Outcome
 
-Svelte and React EditableList now consume the g16.022 web drag substrate.
-Each enabled reorderable row registers as one source/target pair. Pointer,
-touch-like pointer, and keyboard commit through one `applyReorder` result
-path and still report the complete next item order. HTML `dragstart` /
-`dragover` / `drop` / `dragend` / `DataTransfer` and the local
-`draggingIndex` / `dropTargetIndex` / `grabbedIndex` session are gone.
+Svelte and React EditableList consume the g16.022 web drag substrate. Each
+enabled reorderable row registers as one DOM source/target pair. The complete
+item order is also registered as element-free logical keyboard targets, so
+windowed keyboard reorder can address hidden pages without paging or unmounting
+the source. Pointer, touch, and keyboard commit through one `applyReorder`
+path and still report the complete next item order. HTML drag is gone.
 
 The public component API is unchanged. Tabs, DockRegion, Tree, native
 runtimes, and the parity-evidence ledger were not edited. Ledger remains
 52 mounted / 122 missing.
 
-## Substrate repairs the migration proved
+## Review revision
 
-Two reusable controller defects showed up on per-row list targets:
+PR #104 review required four fixes. The operator approved logical keyboard
+targets. This revision:
 
-- Keyboard arrows now start from the source's spatial neighbour rather than
-  wrapping to the first/last eligible target.
-- Pointer activation ignores interactive descendants (buttons, inputs,
-  links) unless that descendant is the registered handle.
+- adds `registerKeyboardTarget` / `keyboardOrder` and paired Svelte/React
+  bindings;
+- proves ordinary ArrowUp (`before`) and both `windowSize` boundaries;
+- replaces pen-named tests with genuine `pointerType: "touch"` hold-to-reorder
+  and pre-hold cancel;
+- treats `contenteditable` without `"false"` as interactive and proves
+  `embeddedHandle` editing/action descendants do not start a drag;
+- rebases onto `f986280ba`.
 
 ## Behaviour that is now true
 
-- A dedicated handle is the pointer sensor when present. Embedded-handle
-  rows use the whole row; remove buttons and other interactive descendants
+- A dedicated handle is the pointer sensor when present. Embedded-handle rows
+  use the whole row; buttons, inputs, links, and contenteditable descendants
   do not start a drag.
-- Disabled and non-reorderable rows register as disabled and stay inert.
-- Keyboard Space/Enter picks up, arrows move drop intent, Space/Enter
-  drops, Escape cancels. Idle arrows move focus. Focus returns to the
-  moved row.
+- Disabled and non-reorderable rows stay inert.
+- Keyboard Space/Enter picks up, arrows move intent, Space/Enter drops,
+  Escape cancels. Logical `previous`/`next` map to `before`/`after`.
 - `onReorder` / `onChange` still receive the complete next array.
-- Curated specimens are unchanged.
 
 ## Evidence
 
-- Framework-free: `test/headless-dom/drag-drop-controller.test.ts` (30),
-  including relative keyboard intent and interactive-descendant skip.
-- Svelte: `packages/svelte/components/test/EditableList.test.ts` (16).
-- React: `packages/react/components/test/EditableList.test.tsx` (16).
+- Framework-free: `test/headless-dom/drag-drop-controller.test.ts` (34).
+- Svelte: `packages/svelte/components/test/EditableList.test.ts` (21).
+- React: `packages/react/components/test/EditableList.test.tsx` (21).
 - Custom-surface preservation: Svelte and React `DragDropProvider` tests.
 - Chromium and WebKit: `effigy test:drag-drop-browser`.
 - Active-source search: no EditableList `dragstart`, `dragover`, `drop`,
   `dragend`, or `DataTransfer`.
-- `effigy docs:callback-drift`, `docs:capability-drift`, `docs:spec-drift`.
-- `effigy ci:web`.
-- `effigy docs:check`, `effigy check:parity-evidence-ledger`, `effigy qa`,
-  and `git diff --check origin/main...HEAD` recorded at closeout.
+- `effigy ci:web`, `effigy docs:check`, `effigy check:parity-evidence-ledger`,
+  `effigy qa`, and `git diff --check origin/main...HEAD` recorded at closeout.
 
 ## Continuation
 

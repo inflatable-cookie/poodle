@@ -12,6 +12,7 @@ import {
   createDragDropController,
   type DragSourceRegistration,
   type DropTargetRegistration,
+  type KeyboardDropTargetRegistration,
 } from "../../packages/core/src";
 
 const SOURCE_BOX = { x: 10, y: 10, width: 80, height: 20 };
@@ -79,6 +80,23 @@ function targetReg(overrides: Partial<DropTargetRegistration> = {}): DropTargetR
     label: "List",
     resolvePosition: () => "inside",
     canDrop: (intent) => ({ accepted: true, intent }),
+    onDrop: () => ({ status: "committed" }),
+    ...overrides,
+  };
+}
+
+function keyboardTargetReg(
+  overrides: Partial<KeyboardDropTargetRegistration> = {},
+): KeyboardDropTargetRegistration {
+  return {
+    targetId: "dst",
+    acceptedKinds: ["item"],
+    label: "List",
+    order: 0,
+    resolvePosition: (input) =>
+      input.direction === "previous" || input.direction === "first" ? "before" : "after",
+    canDrop: (intent, subject) =>
+      subject.id === intent.targetId ? { accepted: false, reason: "self" } : { accepted: true, intent },
     onDrop: () => ({ status: "committed" }),
     ...overrides,
   };
@@ -351,6 +369,87 @@ describe("createDragDropController", () => {
     button.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
     button.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
     expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
+  it("does not start a pointer drag from a bare contenteditable descendant", () => {
+    const row = layout(document.createElement("div"), SOURCE_BOX);
+    const editor = document.createElement("div");
+    editor.setAttribute("contenteditable", "");
+    editor.textContent = "Edit me";
+    row.append(editor);
+    root.replaceChildren(row, targetEl);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(row, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    editor.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    editor.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
+  it("uses logical keyboard order and distinct previous/next positions", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const rowA = layout(document.createElement("div"), { x: 10, y: 10, width: 80, height: 20 });
+    const rowB = layout(document.createElement("div"), { x: 10, y: 40, width: 80, height: 20 });
+    rowA.tabIndex = 0;
+    rowB.tabIndex = 0;
+    root.replaceChildren(rowA, rowB);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(
+      rowB,
+      sourceReg({ sourceId: "b", subject: { kind: "item", id: "b" }, label: "Beta", keyboardOrder: 1 }),
+    );
+    controller.registerTarget(rowA, targetReg({ targetId: "a", label: "Alpha" }));
+    controller.registerTarget(rowB, targetReg({ targetId: "b", label: "Beta" }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "a", label: "Alpha", order: 0, onDrop }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "b", label: "Beta", order: 1, onDrop }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "c", label: "Gamma", order: 2, onDrop }));
+    rowB.focus();
+
+    rowB.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("c");
+    expect(controller.getSnapshot().session?.intent?.position).toBe("after");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(onDrop).toHaveBeenCalledWith({ targetId: "c", position: "after", operation: "move" });
+
+    rowB.focus();
+    rowB.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("a");
+    expect(controller.getSnapshot().session?.intent?.position).toBe("before");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(onDrop).toHaveBeenLastCalledWith({ targetId: "a", position: "before", operation: "move" });
+    controller.destroy();
+  });
+
+  it("cancels logical keyboard intent when that registration is removed", () => {
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    const logical = controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "hidden", order: 1 }));
+    sourceEl.focus();
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("hidden");
+    logical.unregister();
+    expect(onEnd.mock.calls[0]?.[0]).toEqual({ status: "cancelled", reason: "target-lost" });
+    controller.destroy();
+  });
+
+  it("rejects duplicate logical target ids while allowing a shared DOM id", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerTarget(targetEl, targetReg({ targetId: "shared" }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "shared", order: 0 }));
+    expect(() => controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "shared", order: 1 }))).toThrow(
+      /Duplicate keyboard drop target id/,
+    );
     controller.destroy();
   });
 

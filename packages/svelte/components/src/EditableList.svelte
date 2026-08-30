@@ -11,6 +11,7 @@
 
   import { default as Button } from "./Button.svelte";
   import DragDropProvider from "./DragDropProvider.svelte";
+  import EditableListKeyboardTargets from "./editable-list/EditableListKeyboardTargets.svelte";
   import EditableListRow from "./editable-list/EditableListRow.svelte";
   import { default as TextInput } from "./TextInput.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
@@ -331,6 +332,7 @@
     {/if}
 
     <DragDropProvider describeAnnouncement={() => null}>
+      <EditableListKeyboardTargets {items} {reorderable} {isUnavailable} onDrop={handleDrop} />
       <ul
         class="poodle-editable-list"
         class:poodle-editable-list--embedded-handle={embeddedHandle}

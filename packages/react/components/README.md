@@ -26,11 +26,12 @@ Peer dependencies: `react` and `react-dom` `>=18` (built and verified on 19).
 Custom-surface drag and drop is a substrate, not a catalogue component:
 
 ```ts
-import { DragDropProvider, useDragDrop, useDragSource, useDropTarget } from "@inflatable-cookie/poodle-react";
+import { DragDropProvider, useDragDrop, useDragSource, useDropTarget, useKeyboardDropTarget } from "@inflatable-cookie/poodle-react";
 ```
 
 `useDragSource` / `useDropTarget` return stable prop getters that compose
-consumer refs and handlers. The provider owns one overlay and one polite live
+consumer refs and handlers. `useKeyboardDropTarget` registers an element-free
+ordered keyboard target. The provider owns one overlay and one polite live
 region.
 
 ## Setup

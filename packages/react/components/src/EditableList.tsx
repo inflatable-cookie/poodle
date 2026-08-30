@@ -10,7 +10,7 @@ import {
 import "@inflatable-cookie/poodle-core/styles/editable-list.css";
 
 import { Button } from "./Button";
-import { DragDropProvider, useDragDrop, useDragSource, useDropTarget } from "./drag-drop";
+import { DragDropProvider, useDragDrop, useDragSource, useDropTarget, useKeyboardDropTarget } from "./drag-drop";
 import { IconButton } from "./IconButton";
 import { resolveSemanticControlSize, UiPresentationProvider, useUiPresentation } from "./presentation";
 import { TextInput } from "./TextInput";
@@ -108,6 +108,7 @@ function EditableListRow<T extends EditableListItemLike>({
     label: item.label ?? item.id,
     disabled: !canDrag,
     handle: canDrag && !embeddedHandle ? ".poodle-editable-list__handle" : undefined,
+    keyboardOrder: index,
     onDragStart,
     onDragEnd,
   });
@@ -180,6 +181,32 @@ function EditableListRow<T extends EditableListItemLike>({
       ) : null}
     </li>
   );
+}
+
+function EditableListKeyboardTarget<T extends EditableListItemLike>({
+  item,
+  index,
+  disabled,
+  onDrop,
+}: {
+  item: T;
+  index: number;
+  disabled: boolean;
+  onDrop: (intent: DropIntent) => DragDropCommitResult;
+}) {
+  useKeyboardDropTarget({
+    targetId: item.id,
+    acceptedKinds: ["poodle.editable-list"],
+    disabled,
+    label: item.label ?? item.id,
+    order: index,
+    resolvePosition: (input) =>
+      input.direction === "previous" || input.direction === "first" ? "before" : "after",
+    canDrop: (intent, subject) =>
+      subject.id === intent.targetId ? { accepted: false, reason: "self" } : { accepted: true, intent },
+    onDrop,
+  });
+  return null;
 }
 
 export function EditableList<T extends EditableListItemLike>({
@@ -438,6 +465,15 @@ export function EditableList<T extends EditableListItemLike>({
         ) : null}
 
         <DragDropProvider describeAnnouncement={() => null}>
+          {items.map((item, index) => (
+            <EditableListKeyboardTarget
+              key={`keyboard-${item.id}`}
+              item={item}
+              index={index}
+              disabled={!reorderable || isUnavailable}
+              onDrop={handleDrop}
+            />
+          ))}
           <ul
             className={`poodle-editable-list${embeddedHandle ? " poodle-editable-list--embedded-handle" : ""}`}
             role="listbox"
