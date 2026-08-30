@@ -218,8 +218,7 @@ pre-existing findings on `origin/main` are unchanged; `dragDrop` adds none.
 Non-claims: no adapter, no component migration, no geometry, transport, file,
 or drag-out behaviour. `dock-external-drag` and `tabs-reorder` are untouched:
 the approved clean public break deletes the old DOM-shaped helpers only after
-their mounted replacements pass, which is `g16.023`/`g16.026` work, not this
-card's.
+their mounted replacements pass, which is `g16.026` work, not this card's.
 
 ## Continuation
 

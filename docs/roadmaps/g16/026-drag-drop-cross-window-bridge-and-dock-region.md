@@ -1,16 +1,17 @@
-# g16.026 — Drag-And-Drop Cross-Window Bridge And DockRegion
+# g16.026 — Drag-And-Drop Cross-Window Bridge, Tabs, And DockRegion
 
 Status: planned — public migration approved; depends on g16.025
 Depends on: `025-drag-drop-rust-gpui-substrate.md`
 Governing refs: architecture 011, spec 069, the resolved
-`../../triage/20260828-221415-drag-drop-public-migration-boundary.md`, and the
-DockRegion contract
+`../../triage/20260828-221415-drag-drop-public-migration-boundary.md`,
+`../../triage/20260830-180816-tabs-drag-host-bridge-sequencing.md`, and the Tabs
+and DockRegion contracts
 
 ## Goal
 
 Implement the capability-based host bridge for same-application cross-window
-transfer and migrate DockRegion without importing Longhorn, Tauri, Electron,
-window topology, or durable layout authority into Poodle.
+transfer and migrate Tabs plus DockRegion without importing Longhorn, Tauri,
+Electron, window topology, or durable layout authority into Poodle.
 
 ## Required Boundary
 
@@ -24,11 +25,17 @@ window topology, or durable layout authority into Poodle.
   mutation, rollback, expiry, and recovery.
 - Cross-window keyboard movement uses a host target picker. Touch capability is
   advertised only when the host can observe it outside the source window.
+- Tabs moves its internal reorder path to the landed substrate and replaces its
+  DOM-event host callbacks with the new semantic preparation/terminal bridge.
 - DockRegion preserves within-region reorder, zones, collapse, tab callbacks,
   and current mounted evidence while replacing its global side channel.
 
-The public migration is locked. After the new opaque bridge passes, delete
-every old `DockExternalDrag*` and `DockExternalDrop*` export,
+The public migration is locked. After Tabs and the new opaque bridge pass,
+delete `ReorderState`, `createReorderState`, `handleDragStart`,
+`handleDragOver`, `handleDrop`, the DOM-shaped `tabs-reorder.ts` module, its
+root exports, and both framework re-export files. Retain only the existing pure
+`applyReorder` helper from `tabs.ts`. Also delete every old `DockExternalDrag*`
+and `DockExternalDrop*` export,
 `createDockExternalDragController`, `dockPanelDragSession`, their framework
 re-exports, and the DOM-shaped controller module. Preserve asynchronous
 prepare/cancel/revalidation as new paired host-bridge semantics, not as aliases
@@ -40,6 +47,8 @@ card becomes ready.
 ## Acceptance Criteria
 
 - [ ] Paired TypeScript/Rust bridge contracts carry only opaque authority.
+- [ ] Svelte and React Tabs preserve reorder results, keyboard behavior, focus,
+      disabled inertia, and curated specimens on the shared substrate.
 - [ ] A deterministic host simulator proves prepare, moving target geometry,
       stale lease, rejection, commit, cancel, window close, and late completion.
 - [ ] Svelte, React, and GPUI DockRegion projections preserve component
@@ -54,6 +63,8 @@ card becomes ready.
 
 - focused core/headless bridge types and host simulators;
 - bounded native DataTransfer opaque-token adapter;
+- Tabs web implementations, contracts, tests, specimens, and deletion of the
+  obsolete Tabs reorder module and exports after replacement proof;
 - DockRegion web, render, GPUI, types, contracts, tests, and specimens;
 - deletion of the old DockRegion external-drag module, controller, session side
   channel, types, and framework/root exports under the approved clean migration;

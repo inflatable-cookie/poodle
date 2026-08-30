@@ -14,7 +14,8 @@ Updated: 2026-08-30
     `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
     `019` merged in PR #94; `020` merged in PR #95; `021` merged in PR #96;
     `022` merged in PR #101 (web custom-surface substrate, no ledger movement);
-    `023` blocked on Tabs host-bridge sequencing; `024`–`028` planned behind ordered drag-and-drop dependencies;
+    `023` ready as the EditableList simple-reorder proof; `024`–`028` planned
+    behind ordered drag-and-drop dependencies;
     `029` complete and merged (TimeInput native parity, ledger 48/126); `030`
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
@@ -22,8 +23,8 @@ Updated: 2026-08-30
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: resolve the `g16.023` Tabs/DockRegion sequencing decision, then
-    dispatch the narrowed ready card. Component continuation is paused at the separate
+  - Next move: dispatch narrowed `g16.023` for the EditableList simple-reorder
+    migration. Component continuation is paused at the separate
     EditableLabel decision gate. Keep Node/GPUI routing cards away from drag
     card `025`.
 

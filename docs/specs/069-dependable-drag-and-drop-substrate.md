@@ -477,8 +477,9 @@ global side channels are deleted only after their mounted replacement passes.
 The operator approved a clean pre-1.0 replacement on 2026-08-28:
 
 - delete the DOM-shaped public Tabs reorder state/handlers and framework
-  re-export modules in the simple-reorder migration; retain only the existing
-  pure `applyReorder` semantic helper from the Tabs machine;
+  re-export modules when Tabs and DockRegion migrate together in the
+  cross-window host-bridge lane; retain only the existing pure `applyReorder`
+  semantic helper from the Tabs machine;
 - delete the old DockRegion `DockExternalDrag*` / `DockExternalDrop*` types,
   controller, global `dockPanelDragSession`, and framework re-exports after the
   opaque host bridge passes;
@@ -558,10 +559,11 @@ Roadmap compilation should keep these dependency edges:
 1. inventory and contract vectors;
 2. paired semantic machines;
 3. internal web pointer/touch/keyboard substrate and custom-surface API;
-4. simple reorder proof in Tabs and EditableList;
+4. simple reorder proof in EditableList;
 5. nested intent and auto-scroll proof in Tree;
 6. Rust/GPUI convergence;
-7. Longhorn-shaped cross-window bridge and DockRegion migration;
+7. Tabs host-preparation migration, Longhorn-shaped cross-window bridge, and
+   DockRegion migration;
 8. inbound files plus Electron/Tauri drag-out adapters;
 9. remaining component migrations and deletion of bespoke controllers; and
 10. cross-runtime and host certification.
@@ -572,8 +574,8 @@ land after the internal proof.
 
 The compiled runway is `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
 through `028-drag-drop-migration-and-certification-closeout.md`. `g16.021` is
-the dispatched foundation. The public migration gate for `g16.023` and
-`g16.026` is resolved; later cards remain planned until their landed
+the dispatched foundation. The public migration gate for `g16.026` is
+resolved; later cards remain planned until their landed
 dependencies and any remaining API-shape gates are reconciled by the
 orchestrator.
 

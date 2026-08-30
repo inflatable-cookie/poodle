@@ -119,7 +119,6 @@ Never run a windowed/native visual or Jetstream selector.
 
 ## Continuation
 
-`g16.023` is the next drag lane, but its Tabs/DockRegion host-bridge sequencing
-must be resolved before dispatch. Its public-export decision is approved in
-`../../triage/20260828-221415-drag-drop-public-migration-boundary.md`; apply the
-clean removal only after the mounted substrate replacement passes.
+`g16.023` is ready as the first EditableList migration. Tabs and its public
+DOM-shaped helpers stay in place until the DockRegion host bridge lands in
+`g16.026`.

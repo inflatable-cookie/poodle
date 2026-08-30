@@ -68,7 +68,8 @@ behavior repairs without inventing another conformance authority.
   continuous-value Node event (ledger 52 mounted / 122 missing), merged in PR
   #100. This work remains separate from payload drag-and-drop. `g16.022`
   landed the web custom-surface substrate over that kernel in PR #101;
-  `g16.023` is next but blocked on Tabs/DockRegion host-bridge sequencing.
+  `g16.023` is ready as the EditableList simple-reorder proof. Tabs now moves
+  with its DockRegion host-bridge consumer in `g16.026`.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other

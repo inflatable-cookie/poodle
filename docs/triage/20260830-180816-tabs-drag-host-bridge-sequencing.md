@@ -1,6 +1,6 @@
 # Tabs Drag Host-Bridge Sequencing
 
-Status: open — operator decision required before g16.023 dispatch
+Status: resolved — option 1 approved and promoted
 Captured: 2026-08-30
 Source: g16.023 dispatch-readiness check after PR #101
 
@@ -29,14 +29,13 @@ programme exists to remove.
    violates the no-dual-controller and clean-migration decisions and is not
    recommended.
 
-## Recommendation
+## Decision
 
-Choose option 1. It preserves a small real-component proof now, keeps Tree and
-the native substrate runway moving, and revises Tabs only when its actual
-DockRegion consumer can migrate in the same bounded host-bridge lane.
+The operator approved option 1 on 2026-08-30. `g16.023` is narrowed to
+EditableList. Tabs moves to `g16.026`, where its actual DockRegion consumer and
+the opaque cross-window bridge migrate in one bounded lane.
 
 ## Promotion Route
 
-After operator approval, revise spec 069's migration order, narrow `g16.023`
-to EditableList, and make the Tabs migration explicit in `g16.026`. Then mark
-`g16.023` ready and create its worker handoff. Until then it remains blocked.
+Promoted into spec 069, `g16.023`, `g16.026`, and the g16/front-door runway.
+This note is historical context, not an open gate.

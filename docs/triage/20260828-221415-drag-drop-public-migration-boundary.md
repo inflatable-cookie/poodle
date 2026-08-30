@@ -1,6 +1,6 @@
 # Drag-And-Drop Public Migration Boundary
 
-Status: resolved — clean migration approved and promoted into spec 069, g16.023, and g16.026
+Status: resolved — clean migration approved and promoted into spec 069 and g16.026
 Captured: 2026-08-28
 Source: g16 post-audit runway compilation
 
@@ -56,7 +56,8 @@ The two surfaces are not equally valuable:
 The operator approved one explicit break across the later migration cards on
 2026-08-28:
 
-1. In `g16.023`, delete the public DOM-shaped Tabs reorder helpers and both
+1. In `g16.026`, migrate Tabs' reorder and host-preparation seams alongside
+   DockRegion, then delete the public DOM-shaped Tabs reorder helpers and both
    framework re-export files. Retain `applyReorder` only as the existing pure
    semantic helper from `tabs.ts`; do not retain an alias for the old module.
 2. In `g16.026`, delete every `DockExternalDrag*` / `DockExternalDrop*` export,
@@ -84,7 +85,9 @@ exports.
 
 ## Promotion Route
 
-The decision is authoritative in spec 069, `g16.023`, and `g16.026`. The
-current component contracts and exports remain truthful until the replacement
-cards land. Each migration card removes its old public surface only after the
-mounted replacement passes. This note is historical context, not an open gate.
+The decision is authoritative in spec 069 and `g16.026`. `g16.023` now proves
+the simple-reorder substrate through EditableList without touching Tabs or its
+DockRegion consumers. The current component contracts and exports remain
+truthful until the replacement card lands. The migration card removes its old
+public surface only after the mounted replacement passes. This note is
+historical context, not an open gate.

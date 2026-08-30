@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.022 merged in PR #101; g16.023 sequencing blocked
+Status: active — g16.023 ready for dispatch
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -53,10 +53,10 @@ stay maintained; backend admission is not part of the first card.
 20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
 21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — complete; merged in PR #96
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — complete; merged in PR #101
-23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — blocked; resolve Tabs host-bridge sequencing
+23. [023 — EditableList simple reorder migration](023-drag-drop-simple-reorder-migrations.md) — ready
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — planned; depends on 023
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — planned; depends on 024
-26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
+26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
@@ -83,8 +83,10 @@ Two continuation programmes are now explicit:
   repairs. `g16.021` landed the paired semantic kernel and its shared
   `dragDrop` vector corpus. `g16.022` landed the same-document web custom-surface
   controller and Svelte/React bindings. The clean Tabs and DockRegion public
-  migrations are approved; later cards remain gated by landed dependencies and,
-  for the host bridge, its exact post-kernel API shape.
+  migrations are approved. EditableList proves simple reorder in `g16.023`;
+  Tabs migrates with its real DockRegion consumer in `g16.026`. Later cards
+  remain gated by landed dependencies and the host bridge's exact post-kernel
+  API shape.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
@@ -313,6 +315,7 @@ ledger cell moved.
 `g16.022` landed the same-document web custom-surface substrate over the
 g16.021 kernel in PR #101: one provider-scoped DOM controller, idiomatic Svelte
 actions and React prop getters, and headless Chromium/WebKit evidence. No
-ledger cell moved. `g16.023` is next, but its Tabs/DockRegion host-bridge
-sequencing needs an operator decision before dispatch. EditableLabel stays
-decision-blocked. `g16.025` remains serial behind the earlier drag cards.
+ledger cell moved. The operator resolved the Tabs/DockRegion sequencing gate:
+`g16.023` is ready as the bounded EditableList migration, while Tabs moves with
+DockRegion in `g16.026`. EditableLabel stays decision-blocked. `g16.025`
+remains serial behind the earlier drag cards.
