@@ -1,7 +1,8 @@
 # g16.022 — Drag-And-Drop Web Custom-Surface Substrate
 
-Status: complete
+Status: complete — PR #101
 Date: 2026-08-30
+PR: https://github.com/inflatable-cookie/poodle/pull/101
 Card: `docs/roadmaps/g16/022-drag-drop-web-custom-surface-substrate.md`
 Handoff: `docs/handoffs/20260830-153354-g16-022-drag-drop-web-substrate.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
@@ -81,6 +82,7 @@ join the frozen 175-component denominator.
   `test/drag-drop/probe.ts` — capture, preview cleanup, shifted-target
   geometry, touch-before-hold, keyboard focus return.
 - `effigy ci:web` passed. Ledger still 175 rows / 52 mounted / 122 missing.
+- `effigy docs:check` and `effigy qa` passed.
 
 ## Non-claims
 

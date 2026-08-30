@@ -1,6 +1,6 @@
 # g16.022 — Drag-And-Drop Web Custom-Surface Substrate
 
-Status: complete
+Status: complete — PR #101
 Opened: 2026-08-28
 Depends on: `021-drag-drop-semantic-kernel.md`
 Governing refs: `../../architecture/011-drag-and-drop-substrate.md`,
