@@ -447,6 +447,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   let dropGeneration = 0;
   let lastOutcome: DragTerminalOutcome | undefined;
   let keyboardSourceId: string | null = null;
+  let keyboardLogicalSession = false;
   let keyboardTargetIndex = -1;
 
   const documentListeners: Array<[string, EventListener, AddEventListenerOptions | boolean | undefined]> = [];
@@ -707,6 +708,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         dropGeneration += 1;
         keyboardSourceId = null;
         keyboardTargetIndex = -1;
+        keyboardLogicalSession = false;
         lastKeyboardDirection = null;
         lastOutcome = undefined;
         return [];
@@ -796,6 +798,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
     const sessionId = createSessionId();
     inputKind = kind;
+    keyboardLogicalSession = kind === "keyboard" && matchingLogicalKeyboard(source);
     pointerPosition = { x, y };
     dispatch({
       type: "PREPARE",
@@ -959,13 +962,17 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     return false;
   }
 
-  function usesLogicalKeyboard(source?: SourceEntry | null): boolean {
+  function matchingLogicalKeyboard(source?: SourceEntry | null): boolean {
     const kind = source?.registration.subject.kind;
     return source?.registration.keyboardOrder !== undefined && kind !== undefined && hasMatchingLogicalTarget(kind);
   }
 
+  function usesLogicalKeyboard(): boolean {
+    return keyboardLogicalSession;
+  }
+
   function targetForAnnouncement(targetId: string): KeyboardTargetEntry | TargetEntry | undefined {
-    if (inputKind === "keyboard" && usesLogicalKeyboard(currentSource())) {
+    if (inputKind === "keyboard" && usesLogicalKeyboard()) {
       return keyboardTargets.get(targetId) ?? targets.get(targetId);
     }
     return targets.get(targetId);
@@ -976,7 +983,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     canDrop: DropTargetRegistration["canDrop"];
     onDrop: DropTargetRegistration["onDrop"];
   } | null {
-    if (inputKind === "keyboard" && usesLogicalKeyboard(currentSource())) {
+    if (inputKind === "keyboard" && usesLogicalKeyboard()) {
       const logical = keyboardTargets.get(intent.targetId);
       if (!logical) return null;
       return logical.registration;
@@ -997,7 +1004,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
 
     let accepted: DropIntent = intent;
-    if (inputKind === "keyboard" && usesLogicalKeyboard(currentSource())) {
+    if (inputKind === "keyboard" && usesLogicalKeyboard()) {
       const logical = keyboardTargets.get(intent.targetId);
       const direction = lastKeyboardDirection ?? "next";
       const position = logical
@@ -1410,7 +1417,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       return;
     }
 
-    if (usesLogicalKeyboard(source)) {
+    if (usesLogicalKeyboard()) {
       onLogicalKeyboardMove(event, session, source);
       return;
     }
@@ -1484,6 +1491,10 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       rejectedTargetId = null;
       rejectedReason = undefined;
       if (session.intent) dispatch({ type: "TARGET_CLEARED", sessionId: session.sessionId });
+      else {
+        projectAttributes();
+        notify();
+      }
       return;
     }
     const intent: DropIntent = {
@@ -1687,7 +1698,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function unregisterTarget(id: string): void {
     const entry = targets.get(id);
     if (!entry) return;
-    if (!(inputKind === "keyboard" && usesLogicalKeyboard(currentSource()) && keyboardTargets.has(id))) {
+    if (!(inputKind === "keyboard" && usesLogicalKeyboard() && keyboardTargets.has(id))) {
       loseIntentTarget(id);
     }
     entry.element.removeAttribute(TARGET_ATTR);
@@ -1702,7 +1713,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function unregisterKeyboardTarget(id: string): void {
     const entry = keyboardTargets.get(id);
     if (!entry) return;
-    if (inputKind === "keyboard" && usesLogicalKeyboard(currentSource())) {
+    if (inputKind === "keyboard" && usesLogicalKeyboard()) {
       loseIntentTarget(id);
     }
     keyboardTargets.delete(id);
@@ -1882,7 +1893,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
             phase === "dropping" &&
             context.session?.intent?.targetId === id &&
             inputKind === "keyboard" &&
-            usesLogicalKeyboard(currentSource())
+            usesLogicalKeyboard()
           ) {
             dispatch({
               type: "DROP_REJECTED",

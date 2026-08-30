@@ -513,6 +513,93 @@ describe("createDragDropController", () => {
     controller.destroy();
   });
 
+  it("keeps a spatial keyboard drop on the DOM registry after a matching logical target is added", () => {
+    const onDomDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onLogicalDrop = vi.fn(() => ({ status: "committed" as const }));
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0 }));
+    controller.registerTarget(targetEl, targetReg({ targetId: "shared", onDrop: onDomDrop }));
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("shared");
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "shared", label: "Keyboard List", order: 0, onDrop: onLogicalDrop }),
+    );
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    expect(onDomDrop).toHaveBeenCalledTimes(1);
+    expect(onLogicalDrop).not.toHaveBeenCalled();
+    controller.destroy();
+  });
+
+  it("keeps an async logical drop on the logical registry after acceptedKinds change", async () => {
+    let finish: (value: { status: "committed" }) => void = () => {};
+    const pending = new Promise<{ status: "committed" }>((resolve) => {
+      finish = resolve;
+    });
+    const onDomDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    controller.registerTarget(targetEl, targetReg({ targetId: "shared", onDrop: onDomDrop }));
+    const logical = controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "shared", order: 1, onDrop: () => pending }),
+    );
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(controller.getSnapshot().phase).toBe("dropping");
+
+    logical.update(keyboardTargetReg({ targetId: "shared", acceptedKinds: ["clip"], order: 1, onDrop: () => pending }));
+    finish({ status: "committed" });
+    await pending;
+    await Promise.resolve();
+    expect(onDomDrop).not.toHaveBeenCalled();
+    expect(onEnd.mock.calls.at(-1)?.[0]).toEqual({
+      status: "committed",
+      intent: { targetId: "shared", position: "after", operation: "move" },
+    });
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
+  it("clears a rejected logical snapshot when the next resolver returns null", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0 }));
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({
+        targetId: "blocked",
+        order: 1,
+        canDrop: () => ({ accepted: false, reason: "occupied" }),
+      }),
+    );
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({
+        targetId: "gap",
+        order: 2,
+        resolvePosition: () => null,
+      }),
+    );
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("blocked");
+    expect(controller.getSnapshot().targetPosture).toBe("rejected");
+    expect(controller.getSnapshot().rejectedReason).toBe("occupied");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBeNull();
+    expect(controller.getSnapshot().targetPosture).toBeNull();
+    expect(controller.getSnapshot().rejectedReason).toBeUndefined();
+    controller.destroy();
+  });
+
   it("clears logical intent when the next resolver returns null", () => {
     const onDrop = vi.fn(() => ({ status: "committed" as const }));
     const onEnd = vi.fn();
