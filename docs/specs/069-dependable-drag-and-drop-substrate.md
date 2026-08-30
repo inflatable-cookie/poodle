@@ -1,6 +1,6 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: active — compiled as g16.021–g16.028; g16.021 merged, g16.022 ready
+Status: active — compiled as g16.021–g16.028; g16.021 merged, g16.022 landed
 Updated: 2026-08-30
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
@@ -200,10 +200,13 @@ The paired public registration names are:
 
 - `DragSourceRegistration`: `sourceId`, opaque `subject`, `allowedOperations`,
   initial `operation`, `disabled`, required accessible `label`, optional
-  `instructions`, per-pointer `activation`, `onDragStart`, and `onDragEnd`;
-- `DropTargetRegistration`: `targetId`, accepted subject kinds, `disabled`,
-  `priority`, required accessible `label`, `resolvePosition`, `canDrop`, and
-  `onDrop`; and
+  `instructions`, optional `handle` (`Element` or a selector inside the
+  source), per-pointer `activation` (`DragActivationConstraints`),
+  `onDragStart`, and `onDragEnd`;
+- `DropTargetRegistration`: `targetId`, `acceptedKinds`, `disabled`,
+  `priority`, required accessible `label`, `resolvePosition`
+  (`DragPositionResolverInput` → `DropPosition | null`), `canDrop` (boolean or
+  `DropEligibility`), and `onDrop`; and
 - `DragDropCommitResult`: committed, rejected with an optional reason, or
   failed with an optional reason. `onDrop` may return it synchronously or by
   promise. The controller rechecks `canDrop` before invoking it and maps one

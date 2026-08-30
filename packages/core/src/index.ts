@@ -742,4 +742,25 @@ export {
   type DropTargetCandidate,
   type StandardDropPosition,
 } from "./drag-drop";
+export {
+  createDragDropController,
+  type DragActivationConstraints,
+  type DragActivationDistance,
+  type DragActivationHold,
+  type DragAnnouncementEvent,
+  type DragDropCapabilities,
+  type DragDropCommitResult,
+  type DragDropController,
+  type DragDropControllerOptions,
+  type DragDropSnapshot,
+  type DragDropTargetPosture,
+  type DragInputKind,
+  type DragPointerPosition,
+  type DragPositionResolverInput,
+  type DragPreviewSnapshot,
+  type DragSourceHandle,
+  type DragSourceRegistration,
+  type DropTargetHandle,
+  type DropTargetRegistration,
+} from "./dom/drag-drop-controller";
 export * from "./audio/index";

@@ -123,11 +123,11 @@
     "summary": [
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
-        "exportCount": 212,
+        "exportCount": 214,
         "componentCount": 175,
-        "helperCount": 37,
+        "helperCount": 39,
         "previewedCount": 212,
-        "contractOnlyCount": 0
+        "contractOnlyCount": 2
       }
     ],
     "exports": [
@@ -897,6 +897,15 @@
         "sectionTitles": [
           "Headers, dock orchestration, and workspace shell posture"
         ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "DragDropProvider",
+        "kind": "helper",
+        "status": "contract-only",
+        "note": "Same-document drag-drop substrate. Mounted custom-surface tests and headless Chromium/WebKit probes cover it; it is not a catalogue component and does not join the 175-row ledger.",
+        "sectionIds": [],
+        "sectionTitles": []
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
@@ -2827,6 +2836,15 @@
         "sectionTitles": [
           "Preview framing, embeds, and fallback posture"
         ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "useDragDrop",
+        "kind": "helper",
+        "status": "contract-only",
+        "note": "Same-document drag-drop substrate. Mounted custom-surface tests and headless Chromium/WebKit probes cover it; it is not a catalogue component and does not join the 175-row ledger.",
+        "sectionIds": [],
+        "sectionTitles": []
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",

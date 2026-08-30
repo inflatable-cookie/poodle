@@ -1,6 +1,6 @@
 # g16.022 — Drag-And-Drop Web Custom-Surface Substrate
 
-Status: ready
+Status: complete
 Opened: 2026-08-28
 Depends on: `021-drag-drop-semantic-kernel.md`
 Governing refs: `../../architecture/011-drag-and-drop-substrate.md`,
@@ -59,29 +59,29 @@ provider.
 
 ## Acceptance Criteria
 
-- [ ] Public Svelte and React custom-surface APIs are documented and exported.
-- [ ] Mounted fixtures prove pointer, touch-like pointer, keyboard, rejection,
+- [x] Public Svelte and React custom-surface APIs are documented and exported.
+- [x] Mounted fixtures prove pointer, touch-like pointer, keyboard, rejection,
       cancellation, unmount, and two independent provider scopes.
-- [ ] Chromium and WebKit headless probes prove capture, geometry invalidation,
+- [x] Chromium and WebKit headless probes prove capture, geometry invalidation,
       touch/scroll arbitration, preview cleanup, and focus restoration.
-- [ ] The substrate uses g16.021 transitions rather than duplicating session
+- [x] The substrate uses g16.021 transitions rather than duplicating session
       state in framework adapters.
-- [ ] Examples remain human-facing; exhaustive sensor cases live in tests or a
+- [x] Examples remain human-facing; exhaustive sensor cases live in tests or a
       dedicated conformance tab.
-- [ ] No existing component or ledger row changes.
+- [x] No existing component or ledger row changes.
 
 ## Execution Plan
 
-- [ ] **Batch 1 — DOM controller.** Implement the controller, registrations,
+- [x] **Batch 1 — DOM controller.** Implement the controller, registrations,
       pointer/touch/keyboard sensors, cached geometry, effect runner, snapshots,
       exact cleanup, and focused framework-free tests over the g16.021 kernel.
-- [ ] **Batch 2 — Svelte adapter.** Add provider/context, source and target
+- [x] **Batch 2 — Svelte adapter.** Add provider/context, source and target
       actions, overlay/live region, exports, and a mounted custom-surface
       fixture with two independent scopes.
-- [ ] **Batch 3 — React adapter.** Add the equivalent provider/hooks/prop
+- [x] **Batch 3 — React adapter.** Add the equivalent provider/hooks/prop
       getters, composed refs/handlers, exports, and the same mounted fixture
       behavior without forcing Svelte syntax onto React.
-- [ ] **Batch 4 — browser evidence and closeout.** Prove Chromium/WebKit
+- [x] **Batch 4 — browser evidence and closeout.** Prove Chromium/WebKit
       capture, touch arbitration, geometry invalidation, rejection, focus
       return, unmount cleanup, and preview cleanup; update docs/logs without
       moving a component ledger cell.

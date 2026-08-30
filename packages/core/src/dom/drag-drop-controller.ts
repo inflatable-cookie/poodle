@@ -1,0 +1,1490 @@
+/**
+ * Same-document drag-and-drop web controller.
+ *
+ * Architecture: docs/architecture/011-drag-and-drop-substrate.md.
+ * Spec: docs/specs/069-dependable-drag-and-drop-substrate.md.
+ *
+ * Owns pointer/keyboard sensors, cached geometry, effect execution, and
+ * presentation snapshots. Session phase, arbitration, and exactly-once
+ * terminals stay in `dragSessionTransition` / `resolveDropTarget`.
+ */
+
+import {
+  dragSessionTransition,
+  resolveDropTarget,
+  type DragAnnouncementKind,
+  type DragOperation,
+  type DragSession,
+  type DragSessionContext,
+  type DragSessionEffect,
+  type DragSessionEvent,
+  type DragSessionPhase,
+  type DragSubject,
+  type DragTerminalOutcome,
+  type DropEligibility,
+  type DropIntent,
+  type DropPosition,
+  type DropTargetCandidate,
+} from "../drag-drop";
+
+export type DragInputKind = "mouse" | "pen" | "touch" | "keyboard";
+
+export interface DragPointerPosition {
+  readonly x: number;
+  readonly y: number;
+}
+
+export interface DragActivationDistance {
+  readonly distance: number;
+}
+
+export interface DragActivationHold {
+  readonly holdMs: number;
+  readonly tolerance: number;
+}
+
+export interface DragActivationConstraints {
+  readonly mouse?: DragActivationDistance;
+  readonly pen?: DragActivationDistance;
+  readonly touch?: DragActivationHold;
+}
+
+export interface DragPositionResolverInput {
+  readonly x: number;
+  readonly y: number;
+  readonly rect: DOMRectReadOnly;
+  readonly subject: DragSubject;
+  readonly operation: DragOperation;
+  readonly inputKind: DragInputKind;
+}
+
+export type DragDropCommitResult =
+  | { status: "committed" }
+  | { status: "rejected"; reason?: string }
+  | { status: "failed"; reason?: string };
+
+export interface DragSourceRegistration {
+  readonly sourceId: string;
+  readonly subject: DragSubject;
+  readonly allowedOperations: readonly DragOperation[];
+  readonly operation?: DragOperation;
+  readonly disabled?: boolean;
+  readonly label: string;
+  readonly instructions?: string;
+  readonly handle?: Element | string;
+  readonly activation?: DragActivationConstraints;
+  readonly onDragStart?: (session: DragSession) => void;
+  readonly onDragEnd?: (outcome: DragTerminalOutcome) => void;
+}
+
+export interface DropTargetRegistration {
+  readonly targetId: string;
+  readonly acceptedKinds: readonly string[];
+  readonly disabled?: boolean;
+  readonly priority?: number;
+  readonly label: string;
+  readonly resolvePosition: (input: DragPositionResolverInput) => DropPosition | null;
+  readonly canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
+  readonly onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
+}
+
+export interface DragSourceHandle {
+  update(registration: DragSourceRegistration): void;
+  unregister(): void;
+}
+
+export interface DropTargetHandle {
+  update(registration: DropTargetRegistration): void;
+  unregister(): void;
+}
+
+export interface DragPreviewSnapshot {
+  readonly sourceId: string;
+  readonly subject: DragSubject;
+  readonly operation: DragOperation;
+  readonly x: number;
+  readonly y: number;
+  readonly label: string;
+}
+
+export type DragDropTargetPosture = "accepted" | "rejected" | null;
+
+export interface DragDropSnapshot {
+  readonly phase: DragSessionPhase;
+  readonly session: DragSession | null;
+  readonly inputKind: DragInputKind | null;
+  readonly pointer: DragPointerPosition | null;
+  readonly sourceId: string | null;
+  readonly targetId: string | null;
+  readonly targetPosture: DragDropTargetPosture;
+  readonly rejectedReason: string | undefined;
+  readonly preview: DragPreviewSnapshot | null;
+  readonly announcement: string | null;
+}
+
+export interface DragAnnouncementEvent {
+  readonly kind: DragAnnouncementKind;
+  readonly sourceLabel: string;
+  readonly targetLabel?: string;
+  readonly position?: DropPosition;
+  readonly operation?: DragOperation;
+  readonly reason?: string;
+}
+
+export interface DragDropCapabilities {
+  readonly pointer: boolean;
+  readonly touch: boolean;
+  readonly keyboard: boolean;
+}
+
+export interface DragDropControllerOptions {
+  readonly describeAnnouncement?: (event: DragAnnouncementEvent) => string | null;
+  readonly createSessionId?: () => string;
+}
+
+export interface DragDropController {
+  readonly capabilities: DragDropCapabilities;
+  connect(root: Element): () => void;
+  registerSource(element: Element, registration: DragSourceRegistration): DragSourceHandle;
+  registerTarget(element: Element, registration: DropTargetRegistration): DropTargetHandle;
+  getSnapshot(): DragDropSnapshot;
+  subscribe(listener: () => void): () => void;
+  invalidateLayout(): void;
+  cancel(): void;
+  destroy(): void;
+}
+
+const DEFAULT_MOUSE_DISTANCE = 4;
+const DEFAULT_PEN_DISTANCE = 4;
+const DEFAULT_TOUCH_HOLD_MS = 250;
+const DEFAULT_TOUCH_TOLERANCE = 12;
+const ANNOUNCE_THROTTLE_MS = 400;
+const PREVIEW_OFFSET = 12;
+
+const CAPABILITIES: DragDropCapabilities = Object.freeze({
+  pointer: true,
+  touch: true,
+  keyboard: true,
+});
+
+const SOURCE_ATTR = "data-poodle-drag-source";
+const TARGET_ATTR = "data-poodle-drop-target";
+const POSITION_ATTR = "data-poodle-drop-position";
+const TOUCH_ACTION = "touch-action";
+
+interface CachedRect {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+  readonly left: number;
+}
+
+interface SourceEntry {
+  element: Element;
+  registration: DragSourceRegistration;
+  order: number;
+  restoredTabIndex: string | null;
+  nativeDraggable: string | null;
+}
+
+interface TargetEntry {
+  element: Element;
+  registration: DropTargetRegistration;
+  order: number;
+}
+
+interface PointerGesture {
+  pointerId: number;
+  pointerType: DragInputKind;
+  originX: number;
+  originY: number;
+  x: number;
+  y: number;
+  sourceId: string;
+  sessionId: string;
+  activated: boolean;
+  holdTimer: ReturnType<typeof setTimeout> | null;
+  captureElement: Element | null;
+  restoredTouchAction: string | null;
+}
+
+let sessionSeq = 0;
+
+function defaultSessionId(): string {
+  sessionSeq += 1;
+  const uuid = globalThis.crypto?.randomUUID?.();
+  return uuid ?? `poodle-drag-${sessionSeq}`;
+}
+
+function asInputKind(pointerType: string): DragInputKind {
+  if (pointerType === "touch" || pointerType === "pen") return pointerType;
+  return "mouse";
+}
+
+function distance(ax: number, ay: number, bx: number, by: number): number {
+  return Math.hypot(bx - ax, by - ay);
+}
+
+function copyRect(rect: DOMRectReadOnly): CachedRect {
+  return {
+    x: rect.x,
+    y: rect.y,
+    width: rect.width,
+    height: rect.height,
+    top: rect.top,
+    right: rect.right,
+    bottom: rect.bottom,
+    left: rect.left,
+  };
+}
+
+function containsPoint(rect: CachedRect, x: number, y: number): boolean {
+  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+}
+
+function eventPath(event: Event): EventTarget[] {
+  const path: EventTarget[] = [];
+  if (typeof event.composedPath === "function") {
+    for (const node of event.composedPath()) {
+      if (node !== undefined) path.push(node);
+    }
+    if (path.length > 0) return path;
+  }
+
+  let node: Node | null = event.target as Node | null;
+  while (node) {
+    path.push(node);
+    node = node.parentNode;
+  }
+  return path;
+}
+
+function isDisabled(element: Element): boolean {
+  return element.hasAttribute("disabled") || element.getAttribute("aria-disabled") === "true";
+}
+
+function freezeSnapshot(snapshot: DragDropSnapshot): DragDropSnapshot {
+  if (snapshot.session) Object.freeze(snapshot.session);
+  if (snapshot.pointer) Object.freeze(snapshot.pointer);
+  if (snapshot.preview) Object.freeze(snapshot.preview);
+  return Object.freeze(snapshot);
+}
+
+function emptySnapshot(phase: DragSessionPhase, session: DragSession | null): DragDropSnapshot {
+  return freezeSnapshot({
+    phase,
+    session: session ? Object.freeze({ ...session, allowedOperations: [...session.allowedOperations] }) : null,
+    inputKind: null,
+    pointer: null,
+    sourceId: session?.sourceId ?? null,
+    targetId: session?.intent?.targetId ?? null,
+    targetPosture: null,
+    rejectedReason: undefined,
+    preview: null,
+    announcement: null,
+  });
+}
+
+function defaultAnnouncement(event: DragAnnouncementEvent): string {
+  switch (event.kind) {
+    case "pickup":
+      return `Picked up ${event.sourceLabel}`;
+    case "intentChanged":
+      return event.targetLabel
+        ? `${event.sourceLabel}, ${event.position ?? "over"} ${event.targetLabel}`
+        : `${event.sourceLabel} over a drop target`;
+    case "intentCleared":
+      return `${event.sourceLabel}, no drop target`;
+    case "dropped":
+      return event.targetLabel
+        ? `Dropped ${event.sourceLabel} on ${event.targetLabel}`
+        : `Dropped ${event.sourceLabel}`;
+    case "rejected":
+      return event.reason ? `Drop rejected: ${event.reason}` : "Drop rejected";
+    case "failed":
+      return event.reason ? `Drop failed: ${event.reason}` : "Drop failed";
+    case "cancelled":
+      return `Cancelled dragging ${event.sourceLabel}`;
+  }
+}
+
+function eligibilityFromCanDrop(
+  result: boolean | DropEligibility,
+  intent: DropIntent,
+): DropEligibility {
+  if (typeof result === "boolean") {
+    return result ? { accepted: true, intent } : { accepted: false };
+  }
+  return result;
+}
+
+function resolveHandle(element: Element, handle: Element | string | undefined): Element {
+  if (handle === undefined) return element;
+  if (typeof handle === "string") {
+    return (element as Element).querySelector(handle) ?? element;
+  }
+  return handle;
+}
+
+function activationFor(
+  registration: DragSourceRegistration,
+  kind: DragInputKind,
+): DragActivationDistance | DragActivationHold {
+  const authored = registration.activation;
+  if (kind === "touch") {
+    return {
+      holdMs: authored?.touch?.holdMs ?? DEFAULT_TOUCH_HOLD_MS,
+      tolerance: authored?.touch?.tolerance ?? DEFAULT_TOUCH_TOLERANCE,
+    };
+  }
+  if (kind === "pen") {
+    return { distance: authored?.pen?.distance ?? DEFAULT_PEN_DISTANCE };
+  }
+  return { distance: authored?.mouse?.distance ?? DEFAULT_MOUSE_DISTANCE };
+}
+
+export function createDragDropController(options: DragDropControllerOptions = {}): DragDropController {
+  const createSessionId = options.createSessionId ?? defaultSessionId;
+  let describeAnnouncement = options.describeAnnouncement;
+
+  let destroyed = false;
+  let connectedRoot: Element | null = null;
+  let connectedDocument: Document | null = null;
+  let connectedWindow: Window | null = null;
+
+  let phase: DragSessionPhase = "idle";
+  let context: DragSessionContext = { session: null };
+  let inputKind: DragInputKind | null = null;
+  let pointerPosition: DragPointerPosition | null = null;
+  let announcement: string | null = null;
+  let rejectedReason: string | undefined;
+  let rejectedTargetId: string | null = null;
+  let lastAnnounceAt = 0;
+  let pendingIntentAnnouncement: DragAnnouncementEvent | null = null;
+  let announceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const sources = new Map<string, SourceEntry>();
+  const sourcesByElement = new Map<Element, string>();
+  const targets = new Map<string, TargetEntry>();
+  const targetsByElement = new Map<Element, string>();
+  let nextOrder = 0;
+
+  const rects = new Map<Element, CachedRect>();
+  let layoutDirty = true;
+
+  const listeners = new Set<() => void>();
+  let snapshot = emptySnapshot("idle", null);
+
+  let gesture: PointerGesture | null = null;
+  let moveFrame: number | null = null;
+  let pendingMove: { x: number; y: number } | null = null;
+  let dropGeneration = 0;
+  let lastOutcome: DragTerminalOutcome | undefined;
+  let keyboardSourceId: string | null = null;
+  let keyboardTargetIndex = -1;
+
+  const documentListeners: Array<[string, EventListener, AddEventListenerOptions | boolean | undefined]> = [];
+
+  function assertLive(): void {
+    if (destroyed) {
+      throw new Error("DragDropController has been destroyed");
+    }
+  }
+
+  function notify(): void {
+    snapshot = buildSnapshot();
+    for (const listener of listeners) listener();
+  }
+
+  function currentSource(): SourceEntry | undefined {
+    const id = context.session?.sourceId;
+    return id === undefined ? undefined : sources.get(id);
+  }
+
+  function currentTarget(): TargetEntry | undefined {
+    const id = context.session?.intent?.targetId;
+    return id === undefined ? undefined : targets.get(id);
+  }
+
+  function measure(element: Element): CachedRect {
+    const cached = rects.get(element);
+    if (!layoutDirty && cached) return cached;
+    const next = copyRect(element.getBoundingClientRect());
+    rects.set(element, next);
+    return next;
+  }
+
+  function refreshLayout(): void {
+    if (!layoutDirty) return;
+    rects.clear();
+    for (const source of sources.values()) measure(source.element);
+    for (const target of targets.values()) measure(target.element);
+    layoutDirty = false;
+  }
+
+  function targetDepth(element: Element): number {
+    let depth = 0;
+    let current: Element | null = element.parentElement;
+    while (current) {
+      if (targetsByElement.has(current)) depth += 1;
+      current = current.parentElement;
+    }
+    return depth;
+  }
+
+  function projectAttributes(): void {
+    const session = context.session;
+    const activeSourceId = session?.sourceId ?? null;
+    const acceptedId = phase === "dragging" || phase === "dropping" ? session?.intent?.targetId ?? null : null;
+
+    for (const [id, source] of sources) {
+      if (activeSourceId === id && (phase === "preparing" || phase === "armed" || phase === "dragging" || phase === "dropping")) {
+        source.element.setAttribute(SOURCE_ATTR, phase);
+      } else {
+        source.element.removeAttribute(SOURCE_ATTR);
+      }
+    }
+
+    for (const [id, target] of targets) {
+      if (acceptedId === id) {
+        target.element.setAttribute(TARGET_ATTR, "accepted");
+        const position = session?.intent?.position;
+        if (position !== undefined) target.element.setAttribute(POSITION_ATTR, position);
+        else target.element.removeAttribute(POSITION_ATTR);
+      } else if (rejectedTargetId === id) {
+        target.element.setAttribute(TARGET_ATTR, "rejected");
+        target.element.removeAttribute(POSITION_ATTR);
+      } else {
+        target.element.removeAttribute(TARGET_ATTR);
+        target.element.removeAttribute(POSITION_ATTR);
+      }
+    }
+  }
+
+  function buildSnapshot(): DragDropSnapshot {
+    const session = context.session
+      ? Object.freeze({
+          ...context.session,
+          allowedOperations: Object.freeze([...context.session.allowedOperations]),
+          subject: Object.freeze({ ...context.session.subject }),
+          intent: context.session.intent ? Object.freeze({ ...context.session.intent }) : null,
+        })
+      : null;
+
+    const source = session ? sources.get(session.sourceId) : undefined;
+    const dragging = phase === "dragging" || phase === "dropping";
+    const preview =
+      dragging && session && pointerPosition
+        ? Object.freeze({
+            sourceId: session.sourceId,
+            subject: session.subject,
+            operation: session.operation,
+            x: pointerPosition.x + PREVIEW_OFFSET,
+            y: pointerPosition.y + PREVIEW_OFFSET,
+            label: source?.registration.label ?? session.subject.id,
+          })
+        : null;
+
+    let targetPosture: DragDropTargetPosture = null;
+    if (dragging && session?.intent) targetPosture = "accepted";
+    else if (dragging && rejectedTargetId) targetPosture = "rejected";
+
+    return freezeSnapshot({
+      phase,
+      session,
+      inputKind,
+      pointer: pointerPosition ? Object.freeze({ ...pointerPosition }) : null,
+      sourceId: session?.sourceId ?? null,
+      targetId: session?.intent?.targetId ?? rejectedTargetId,
+      targetPosture,
+      rejectedReason,
+      preview,
+      announcement,
+    });
+  }
+
+  function announce(kind: DragAnnouncementKind, outcome?: DragTerminalOutcome): void {
+    const session = context.session;
+    const source = session ? sources.get(session.sourceId) : undefined;
+    const target = session?.intent ? targets.get(session.intent.targetId) : undefined;
+    const reason =
+      outcome && (outcome.status === "rejected" || outcome.status === "failed" || outcome.status === "cancelled")
+        ? "reason" in outcome
+          ? outcome.reason
+          : undefined
+        : rejectedReason;
+
+    const event: DragAnnouncementEvent = {
+      kind,
+      sourceLabel: source?.registration.label ?? session?.subject.id ?? "item",
+      targetLabel: target?.registration.label,
+      position: session?.intent?.position,
+      operation: session?.operation,
+      reason,
+    };
+
+    const throttle = kind === "intentChanged" && inputKind !== "keyboard";
+    if (throttle) {
+      pendingIntentAnnouncement = event;
+      const now = Date.now();
+      const wait = Math.max(0, ANNOUNCE_THROTTLE_MS - (now - lastAnnounceAt));
+      if (announceTimer !== null) return;
+      announceTimer = setTimeout(() => {
+        announceTimer = null;
+        const pending = pendingIntentAnnouncement;
+        pendingIntentAnnouncement = null;
+        if (pending) publishAnnouncement(pending);
+      }, wait);
+      return;
+    }
+
+    if (announceTimer !== null) {
+      clearTimeout(announceTimer);
+      announceTimer = null;
+      pendingIntentAnnouncement = null;
+    }
+    publishAnnouncement(event);
+  }
+
+  function publishAnnouncement(event: DragAnnouncementEvent): void {
+    const text = describeAnnouncement ? describeAnnouncement(event) : defaultAnnouncement(event);
+    if (text === null) return;
+    announcement = text;
+    lastAnnounceAt = Date.now();
+  }
+
+  function dispatch(event: DragSessionEvent): void {
+    if (destroyed) return;
+
+    const queue: DragSessionEvent[] = [event];
+    let changed = false;
+
+    while (queue.length > 0) {
+      const next = queue.shift();
+      if (next === undefined) break;
+
+      const result = dragSessionTransition(phase, context, next);
+      const inert =
+        result.state === phase && result.context === context && result.effects.length === 0;
+      if (inert) continue;
+
+      phase = result.state;
+      context = result.context;
+      changed = true;
+
+      for (const effect of result.effects) {
+        for (const follow of runEffect(effect)) queue.push(follow);
+      }
+
+      if (phase === "ended" || phase === "cancelled") {
+        const sessionId = context.session?.sessionId ?? next.sessionId;
+        queue.push({ type: "RESET", sessionId });
+      }
+    }
+
+    if (phase === "idle") {
+      rejectedReason = undefined;
+      rejectedTargetId = null;
+      if (gesture === null && keyboardSourceId === null) {
+        inputKind = null;
+        pointerPosition = null;
+      }
+    }
+
+    if (changed) {
+      projectAttributes();
+      notify();
+    }
+  }
+
+  function runEffect(effect: DragSessionEffect): DragSessionEvent[] {
+    switch (effect.type) {
+      case "prepareSession":
+        return [{ type: "PREPARED", sessionId: effect.sessionId }];
+
+      case "emitDragStart": {
+        const source = sources.get(effect.sourceId);
+        const session = context.session;
+        if (source && session) source.registration.onDragStart?.(session);
+        return [];
+      }
+
+      case "requestDrop":
+        requestDrop(effect.sessionId, effect.intent);
+        return [];
+
+      case "emitDropResult": {
+        lastOutcome = effect.outcome;
+        const source = currentSource();
+        source?.registration.onDragEnd?.(effect.outcome);
+        if (effect.outcome.status === "rejected") {
+          rejectedReason = effect.outcome.reason;
+        }
+        return [];
+      }
+
+      case "announce":
+        announce(effect.kind, lastOutcome);
+        return [];
+
+      case "returnFocus":
+        returnFocus(effect.subject);
+        return [];
+
+      case "cleanupSession":
+        releasePointerHardware();
+        gesture = null;
+        dropGeneration += 1;
+        keyboardSourceId = null;
+        keyboardTargetIndex = -1;
+        lastOutcome = undefined;
+        return [];
+    }
+  }
+
+  function returnFocus(subject: DragSubject): void {
+    const source = currentSource();
+    const surviving = source?.element;
+    if (surviving instanceof HTMLElement && surviving.isConnected) {
+      surviving.focus();
+      return;
+    }
+
+    for (const entry of sources.values()) {
+      if (entry.registration.subject.kind === subject.kind && entry.registration.subject.id === subject.id) {
+        if (entry.element instanceof HTMLElement && entry.element.isConnected) {
+          entry.element.focus();
+          return;
+        }
+      }
+    }
+  }
+
+  function releasePointerHardware(): void {
+    if (moveFrame !== null && connectedWindow) {
+      connectedWindow.cancelAnimationFrame(moveFrame);
+      moveFrame = null;
+    }
+    pendingMove = null;
+
+    if (gesture?.holdTimer !== null && gesture?.holdTimer !== undefined) {
+      clearTimeout(gesture.holdTimer);
+      gesture.holdTimer = null;
+    }
+
+    if (gesture?.captureElement instanceof HTMLElement) {
+      if (gesture.restoredTouchAction === null) gesture.captureElement.style.removeProperty(TOUCH_ACTION);
+      else if (gesture.restoredTouchAction) {
+        gesture.captureElement.style.setProperty(TOUCH_ACTION, gesture.restoredTouchAction);
+      }
+
+      if (typeof gesture.captureElement.releasePointerCapture === "function") {
+        try {
+          gesture.captureElement.releasePointerCapture(gesture.pointerId);
+        } catch {
+          // Capture may already have been released by the browser.
+        }
+      }
+    }
+
+    if (connectedDocument?.body) {
+      connectedDocument.body.style.removeProperty("user-select");
+    }
+  }
+
+  function abandonUnarmedGesture(): void {
+    releasePointerHardware();
+    gesture = null;
+    inputKind = null;
+    pointerPosition = null;
+  }
+
+  function beginSession(source: SourceEntry, kind: DragInputKind, x: number, y: number): string {
+    const operation = source.registration.operation ?? source.registration.allowedOperations[0];
+    if (operation === undefined) {
+      throw new Error(`Source "${source.registration.sourceId}" has no allowed operations`);
+    }
+
+    const sessionId = createSessionId();
+    inputKind = kind;
+    pointerPosition = { x, y };
+    dispatch({
+      type: "PREPARE",
+      sessionId,
+      sourceId: source.registration.sourceId,
+      subject: source.registration.subject,
+      operation,
+      allowedOperations: source.registration.allowedOperations,
+    });
+    return sessionId;
+  }
+
+  function armAndActivate(
+    source: SourceEntry,
+    kind: DragInputKind,
+    x: number,
+    y: number,
+    captureElement: Element | null,
+    pointerId: number | null,
+  ): void {
+    const sessionId = beginSession(source, kind, x, y);
+    if (gesture) gesture.sessionId = sessionId;
+    activate(sessionId, captureElement, pointerId);
+  }
+
+  function activate(sessionId: string, captureElement: Element | null, pointerId: number | null): void {
+    dispatch({ type: "ACTIVATE", sessionId });
+    if (phase !== "dragging") return;
+
+    if (connectedDocument?.body) {
+      connectedDocument.body.style.setProperty("user-select", "none");
+    }
+
+    if (captureElement instanceof HTMLElement && pointerId !== null) {
+      const restored = captureElement.style.getPropertyValue(TOUCH_ACTION) || null;
+      captureElement.style.setProperty(TOUCH_ACTION, "none");
+      if (typeof captureElement.setPointerCapture === "function") {
+        try {
+          captureElement.setPointerCapture(pointerId);
+        } catch {
+          // jsdom and some test doubles do not implement capture.
+        }
+      }
+      if (gesture) {
+        gesture.activated = true;
+        gesture.captureElement = captureElement;
+        gesture.restoredTouchAction = restored;
+      }
+      notify();
+    }
+  }
+
+  function evaluateTarget(
+    entry: TargetEntry,
+    x: number,
+    y: number,
+    subject: DragSubject,
+    operation: DragOperation,
+    kind: DragInputKind,
+  ): { candidate: DropTargetCandidate; rejected?: { reason?: string } } {
+    const rect = measure(entry.element);
+    const inside = containsPoint(rect, x, y);
+    const position = inside
+      ? entry.registration.resolvePosition({
+          x,
+          y,
+          rect: rect as DOMRectReadOnly,
+          subject,
+          operation,
+          inputKind: kind,
+        })
+      : null;
+
+    let eligibility: DropEligibility = { accepted: false };
+    if (
+      position !== null &&
+      !entry.registration.disabled &&
+      entry.registration.acceptedKinds.includes(subject.kind)
+    ) {
+      const intent: DropIntent = {
+        targetId: entry.registration.targetId,
+        position,
+        operation,
+      };
+      eligibility = eligibilityFromCanDrop(entry.registration.canDrop(intent, subject), intent);
+    }
+
+    return {
+      candidate: {
+        targetId: entry.registration.targetId,
+        depth: targetDepth(entry.element),
+        order: entry.order,
+        priority: entry.registration.priority,
+        containsPoint: inside && position !== null,
+        eligibility,
+      },
+      rejected:
+        inside && position !== null && eligibility.accepted === false
+          ? { reason: eligibility.reason }
+          : undefined,
+    };
+  }
+
+  function hitTest(x: number, y: number): void {
+    const session = context.session;
+    if (!session || phase !== "dragging" || inputKind === null) return;
+
+    refreshLayout();
+    const candidates: DropTargetCandidate[] = [];
+    let rejected: { targetId: string; reason?: string } | null = null;
+
+    for (const entry of targets.values()) {
+      const { candidate, rejected: local } = evaluateTarget(
+        entry,
+        x,
+        y,
+        session.subject,
+        session.operation,
+        inputKind,
+      );
+      candidates.push(candidate);
+      if (local && rejected === null) {
+        rejected = { targetId: entry.registration.targetId, reason: local.reason };
+      }
+    }
+
+    const intent = resolveDropTarget(candidates);
+    rejectedTargetId = intent ? null : rejected?.targetId ?? null;
+    rejectedReason = intent ? undefined : rejected?.reason;
+
+    if (intent) {
+      dispatch({ type: "TARGET_INTENT", sessionId: session.sessionId, intent });
+    } else if (session.intent) {
+      dispatch({ type: "TARGET_CLEARED", sessionId: session.sessionId });
+    } else if (
+      snapshot.targetPosture !== (rejectedTargetId ? "rejected" : null) ||
+      snapshot.rejectedReason !== rejectedReason ||
+      snapshot.targetId !== rejectedTargetId
+    ) {
+      projectAttributes();
+      notify();
+    }
+  }
+
+  function requestDrop(sessionId: string, intent: DropIntent): void {
+    const generation = dropGeneration;
+    const session = context.session;
+    const target = targets.get(intent.targetId);
+
+    if (!session || session.sessionId !== sessionId || !target || target.registration.disabled) {
+      dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
+      return;
+    }
+
+    refreshLayout();
+    const pointer = pointerPosition ?? { x: 0, y: 0 };
+    const { candidate } = evaluateTarget(
+      target,
+      pointer.x,
+      pointer.y,
+      session.subject,
+      intent.operation,
+      inputKind ?? "mouse",
+    );
+
+    const eligibility = candidate.eligibility;
+    if (eligibility.accepted === false) {
+      dispatch({
+        type: "DROP_REJECTED",
+        sessionId,
+        reason: eligibility.reason,
+      });
+      return;
+    }
+
+    const accepted = eligibility.intent;
+
+    try {
+      const result = target.registration.onDrop(accepted);
+      if (result !== undefined && typeof (result as Promise<DragDropCommitResult>).then === "function") {
+        void Promise.resolve(result).then(
+          (commit) => {
+            if (generation !== dropGeneration) return;
+            applyCommit(sessionId, accepted, commit);
+          },
+          (error: unknown) => {
+            if (generation !== dropGeneration) return;
+            dispatch({
+              type: "DROP_FAILED",
+              sessionId,
+              reason: error instanceof Error ? error.message : String(error),
+            });
+          },
+        );
+        return;
+      }
+
+      applyCommit(sessionId, accepted, result as DragDropCommitResult);
+    } catch (error) {
+      dispatch({
+        type: "DROP_FAILED",
+        sessionId,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  function applyCommit(sessionId: string, intent: DropIntent, commit: DragDropCommitResult): void {
+    if (commit.status === "committed") {
+      dispatch({ type: "DROP_COMMITTED", sessionId, intent });
+      return;
+    }
+    if (commit.status === "rejected") {
+      dispatch({ type: "DROP_REJECTED", sessionId, reason: commit.reason });
+      return;
+    }
+    dispatch({ type: "DROP_FAILED", sessionId, reason: commit.reason });
+  }
+
+  function sourceFromEvent(event: Event): SourceEntry | null {
+    for (const node of eventPath(event)) {
+      if (!(node instanceof Element)) continue;
+      const id = sourcesByElement.get(node);
+      if (id === undefined) continue;
+      const entry = sources.get(id);
+      if (!entry || entry.registration.disabled || isDisabled(entry.element)) continue;
+      const handle = resolveHandle(entry.element, entry.registration.handle);
+      const target = event.target;
+      if (target instanceof Node && !handle.contains(target) && handle !== target) continue;
+      return entry;
+    }
+    return null;
+  }
+
+  function isPrimaryPointer(event: PointerEvent): boolean {
+    if (event.pointerType === "touch") return event.isPrimary !== false;
+    return event.button === 0;
+  }
+
+  function onPointerDown(event: Event): void {
+    if (!(event instanceof PointerEvent)) return;
+    if (!isPrimaryPointer(event)) return;
+    if (gesture || phase !== "idle") return;
+
+    const source = sourceFromEvent(event);
+    if (!source) return;
+    if (connectedRoot && !connectedRoot.contains(source.element) && connectedRoot !== source.element) {
+      return;
+    }
+
+    const kind = asInputKind(event.pointerType);
+    const handle = resolveHandle(source.element, source.registration.handle);
+    const sessionId = createSessionId();
+    inputKind = kind;
+    pointerPosition = { x: event.clientX, y: event.clientY };
+    gesture = {
+      pointerId: event.pointerId,
+      pointerType: kind,
+      originX: event.clientX,
+      originY: event.clientY,
+      x: event.clientX,
+      y: event.clientY,
+      sourceId: source.registration.sourceId,
+      sessionId,
+      activated: false,
+      holdTimer: null,
+      captureElement: null,
+      restoredTouchAction: null,
+    };
+
+    if (kind === "touch") {
+      const touch = activationFor(source.registration, "touch") as DragActivationHold;
+      gesture.holdTimer = setTimeout(() => {
+        if (!gesture || gesture.sessionId !== sessionId || gesture.activated) return;
+        armAndActivate(source, kind, gesture.x, gesture.y, handle, event.pointerId);
+        if (gesture) hitTest(gesture.x, gesture.y);
+      }, touch.holdMs);
+      return;
+    }
+
+    // Mouse/pen wait for distance. Do not capture yet so scrolling/selection
+    // still win on a tap.
+  }
+
+  function flushMove(x: number, y: number): void {
+    if (!gesture) return;
+    gesture.x = x;
+    gesture.y = y;
+    pointerPosition = { x, y };
+
+    if (!gesture.activated) {
+      const source = sources.get(gesture.sourceId);
+      if (!source) return;
+      const kind = gesture.pointerType;
+      const origin = { x: gesture.originX, y: gesture.originY };
+      const travelled = distance(origin.x, origin.y, x, y);
+
+      if (kind === "touch") {
+        const touch = activationFor(source.registration, "touch") as DragActivationHold;
+        if (travelled > touch.tolerance) {
+          abandonUnarmedGesture();
+        }
+        return;
+      }
+
+      const constraint = activationFor(source.registration, kind) as DragActivationDistance;
+      if (travelled >= constraint.distance) {
+        const handle = resolveHandle(source.element, source.registration.handle);
+        armAndActivate(source, kind, x, y, handle, gesture.pointerId);
+        hitTest(x, y);
+      }
+      return;
+    }
+
+    hitTest(x, y);
+  }
+
+  function onPointerMove(event: Event): void {
+    if (!(event instanceof PointerEvent) || !gesture || event.pointerId !== gesture.pointerId) return;
+
+    if (gesture.activated) {
+      event.preventDefault();
+    }
+
+    pendingMove = { x: event.clientX, y: event.clientY };
+    if (!connectedWindow) {
+      flushMove(event.clientX, event.clientY);
+      return;
+    }
+    if (moveFrame !== null) return;
+
+    moveFrame = -1;
+    const frame = connectedWindow.requestAnimationFrame(() => {
+      moveFrame = null;
+      const pending = pendingMove;
+      pendingMove = null;
+      if (pending) flushMove(pending.x, pending.y);
+    });
+    if (moveFrame === -1) moveFrame = frame;
+  }
+
+  function onPointerUp(event: Event): void {
+    if (!(event instanceof PointerEvent) || !gesture || event.pointerId !== gesture.pointerId) return;
+
+    if (pendingMove) {
+      flushMove(pendingMove.x, pendingMove.y);
+      pendingMove = null;
+    } else {
+      pointerPosition = { x: event.clientX, y: event.clientY };
+      gesture.x = event.clientX;
+      gesture.y = event.clientY;
+    }
+
+    const sessionId = gesture.sessionId;
+    const activated = gesture.activated;
+    const intent = context.session?.intent;
+
+    if (!activated) {
+      abandonUnarmedGesture();
+      return;
+    }
+
+    releasePointerHardware();
+    gesture = null;
+
+    if (intent) {
+      dispatch({ type: "DROP_REQUESTED", sessionId });
+      return;
+    }
+
+    dispatch({ type: "CANCEL", sessionId });
+  }
+
+  function onPointerCancel(event: Event): void {
+    if (!(event instanceof PointerEvent) || !gesture || event.pointerId !== gesture.pointerId) return;
+    if (!gesture.activated) {
+      abandonUnarmedGesture();
+      return;
+    }
+    const sessionId = gesture.sessionId;
+    dispatch({ type: "TRANSPORT_LOST", sessionId });
+  }
+
+  function onLostCapture(event: Event): void {
+    if (!(event instanceof PointerEvent) || !gesture || event.pointerId !== gesture.pointerId) return;
+    if (!gesture.activated) return;
+    const sessionId = gesture.sessionId;
+    dispatch({ type: "TRANSPORT_LOST", sessionId });
+  }
+
+  function onVisibility(): void {
+    if (!connectedDocument || connectedDocument.visibilityState !== "hidden") return;
+    const sessionId = context.session?.sessionId;
+    if (!sessionId) return;
+    dispatch({ type: "WINDOW_LOST", sessionId });
+  }
+
+  function onScrollOrResize(): void {
+    layoutDirty = true;
+    if (phase === "dragging" && pointerPosition) {
+      hitTest(pointerPosition.x, pointerPosition.y);
+    }
+  }
+
+  function spatialTargets(): TargetEntry[] {
+    refreshLayout();
+    return [...targets.values()].sort((left, right) => {
+      const a = measure(left.element);
+      const b = measure(right.element);
+      if (a.top !== b.top) return a.top - b.top;
+      if (a.left !== b.left) return a.left - b.left;
+      return left.order - right.order;
+    });
+  }
+
+  function eligibleKeyboardTargets(subject: DragSubject, operation: DragOperation): TargetEntry[] {
+    const listed: TargetEntry[] = [];
+    for (const entry of spatialTargets()) {
+      const rect = measure(entry.element);
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const { candidate } = evaluateTarget(entry, x, y, subject, operation, "keyboard");
+      if (candidate.eligibility.accepted) listed.push(entry);
+    }
+    return listed;
+  }
+
+  function applyKeyboardIntent(entry: TargetEntry, session: DragSession): void {
+    const rect = measure(entry.element);
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    pointerPosition = { x, y };
+    const { candidate } = evaluateTarget(entry, x, y, session.subject, session.operation, "keyboard");
+    if (candidate.eligibility.accepted) {
+      rejectedTargetId = null;
+      rejectedReason = undefined;
+      dispatch({ type: "TARGET_INTENT", sessionId: session.sessionId, intent: candidate.eligibility.intent });
+    }
+  }
+
+  function focusedSource(): SourceEntry | null {
+    const active = connectedDocument?.activeElement;
+    if (!(active instanceof Element)) return null;
+    const id = sourcesByElement.get(active);
+    if (id === undefined) return null;
+    const entry = sources.get(id);
+    if (!entry || entry.registration.disabled) return null;
+    return entry;
+  }
+
+  function onKeyDown(event: Event): void {
+    if (!(event instanceof KeyboardEvent)) return;
+
+    if (event.key === "Escape" && context.session) {
+      event.preventDefault();
+      dispatch({ type: "ESCAPE", sessionId: context.session.sessionId });
+      return;
+    }
+
+    if (phase === "idle") {
+      if (event.key !== " " && event.key !== "Enter") return;
+      const source = focusedSource();
+      if (!source) return;
+      event.preventDefault();
+      const rect = measure(source.element);
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const sessionId = beginSession(source, "keyboard", x, y);
+      activate(sessionId, null, null);
+      keyboardSourceId = source.registration.sourceId;
+      keyboardTargetIndex = -1;
+      return;
+    }
+
+    if (phase !== "dragging" || inputKind !== "keyboard" || !context.session) return;
+
+    const session = context.session;
+    const listed = eligibleKeyboardTargets(session.subject, session.operation);
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      if (session.intent) dispatch({ type: "DROP_REQUESTED", sessionId: session.sessionId });
+      else dispatch({ type: "CANCEL", sessionId: session.sessionId });
+      return;
+    }
+
+    if (listed.length === 0) return;
+
+    let next = keyboardTargetIndex;
+    if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+      event.preventDefault();
+      next = Math.min(listed.length - 1, keyboardTargetIndex + 1);
+      if (keyboardTargetIndex < 0) next = 0;
+    } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+      event.preventDefault();
+      next = Math.max(0, keyboardTargetIndex - 1);
+      if (keyboardTargetIndex < 0) next = listed.length - 1;
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      next = 0;
+    } else if (event.key === "End") {
+      event.preventDefault();
+      next = listed.length - 1;
+    } else {
+      return;
+    }
+
+    const entry = listed[next];
+    if (!entry) return;
+    keyboardTargetIndex = next;
+    applyKeyboardIntent(entry, session);
+  }
+
+  function onNativeDragStart(event: Event): void {
+    if (!(event instanceof DragEvent)) return;
+    if (!sourceFromEvent(event)) return;
+    event.preventDefault();
+  }
+
+  function bindDocument(doc: Document, win: Window): void {
+    const add = (
+      type: string,
+      listener: EventListener,
+      options?: AddEventListenerOptions | boolean,
+    ) => {
+      doc.addEventListener(type, listener, options);
+      documentListeners.push([type, listener, options]);
+    };
+
+    add("pointerdown", onPointerDown, true);
+    add("pointermove", onPointerMove, true);
+    add("pointerup", onPointerUp, true);
+    add("pointercancel", onPointerCancel, true);
+    add("lostpointercapture", onLostCapture, true);
+    add("keydown", onKeyDown, true);
+    add("dragstart", onNativeDragStart, true);
+    add("scroll", onScrollOrResize, true);
+    add("visibilitychange", onVisibility);
+
+    win.addEventListener("resize", onScrollOrResize);
+    documentListeners.push(["resize", onScrollOrResize as EventListener, undefined]);
+  }
+
+  function unbindDocument(): void {
+    if (!connectedDocument) {
+      documentListeners.length = 0;
+      return;
+    }
+
+    for (const [type, listener, options] of documentListeners) {
+      if (type === "resize" && connectedWindow) {
+        connectedWindow.removeEventListener("resize", listener);
+      } else {
+        connectedDocument.removeEventListener(type, listener, options);
+      }
+    }
+    documentListeners.length = 0;
+  }
+
+  function applySourceDom(entry: SourceEntry): void {
+    const element = entry.element;
+    if (element instanceof HTMLElement) {
+      if (!element.hasAttribute("tabindex") && element.tabIndex < 0) {
+        entry.restoredTabIndex = null;
+        element.tabIndex = 0;
+      }
+      if (!element.getAttribute("aria-label") && !element.textContent?.trim()) {
+        element.setAttribute("aria-label", entry.registration.label);
+      }
+      if (entry.registration.instructions) {
+        element.setAttribute("aria-description", entry.registration.instructions);
+      }
+    }
+    if (entry.nativeDraggable === null && element.hasAttribute("draggable")) {
+      entry.nativeDraggable = element.getAttribute("draggable");
+    }
+    element.setAttribute("draggable", "false");
+  }
+
+  function restoreSourceDom(entry: SourceEntry): void {
+    const element = entry.element;
+    element.removeAttribute(SOURCE_ATTR);
+    if (entry.restoredTabIndex === null) element.removeAttribute("tabindex");
+    else element.setAttribute("tabindex", entry.restoredTabIndex);
+    if (element.getAttribute("aria-label") === entry.registration.label && !element.textContent?.trim()) {
+      element.removeAttribute("aria-label");
+    }
+    element.removeAttribute("aria-description");
+    if (entry.nativeDraggable === null) element.removeAttribute("draggable");
+    else element.setAttribute("draggable", entry.nativeDraggable);
+  }
+
+  function unregisterSource(id: string): void {
+    const entry = sources.get(id);
+    if (!entry) return;
+    if (context.session?.sourceId === id && phase !== "idle" && phase !== "ended" && phase !== "cancelled") {
+      dispatch({ type: "SOURCE_LOST", sessionId: context.session.sessionId });
+    }
+    restoreSourceDom(entry);
+    sources.delete(id);
+    sourcesByElement.delete(entry.element);
+    rects.delete(entry.element);
+    layoutDirty = true;
+  }
+
+  function unregisterTarget(id: string): void {
+    const entry = targets.get(id);
+    if (!entry) return;
+    if (context.session?.intent?.targetId === id && (phase === "dragging" || phase === "dropping")) {
+      dispatch({ type: "TARGET_LOST", sessionId: context.session.sessionId, targetId: id });
+    }
+    entry.element.removeAttribute(TARGET_ATTR);
+    entry.element.removeAttribute(POSITION_ATTR);
+    targets.delete(id);
+    targetsByElement.delete(entry.element);
+    rects.delete(entry.element);
+    layoutDirty = true;
+  }
+
+  return {
+    capabilities: CAPABILITIES,
+
+    connect(root: Element): () => void {
+      assertLive();
+      if (connectedRoot) {
+        throw new Error("DragDropController is already connected");
+      }
+
+      const doc = root.ownerDocument;
+      const win = doc.defaultView;
+      if (!win) {
+        throw new Error("DragDropController.connect requires a window");
+      }
+
+      connectedRoot = root;
+      connectedDocument = doc;
+      connectedWindow = win;
+      bindDocument(doc, win);
+
+      return () => {
+        if (connectedRoot !== root) return;
+        if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
+        unbindDocument();
+        connectedRoot = null;
+        connectedDocument = null;
+        connectedWindow = null;
+      };
+    },
+
+    registerSource(element: Element, registration: DragSourceRegistration): DragSourceHandle {
+      assertLive();
+      if (sources.has(registration.sourceId)) {
+        throw new Error(`Duplicate drag source id "${registration.sourceId}"`);
+      }
+      if (sourcesByElement.has(element)) {
+        throw new Error("Element is already registered as a drag source");
+      }
+
+      const entry: SourceEntry = {
+        element,
+        registration,
+        order: nextOrder++,
+        restoredTabIndex: element.getAttribute("tabindex"),
+        nativeDraggable: element.getAttribute("draggable"),
+      };
+      sources.set(registration.sourceId, entry);
+      sourcesByElement.set(element, registration.sourceId);
+      applySourceDom(entry);
+      layoutDirty = true;
+
+      let live = true;
+      return {
+        update(next: DragSourceRegistration) {
+          if (!live) return;
+          if (next.sourceId !== entry.registration.sourceId && sources.has(next.sourceId)) {
+            throw new Error(`Duplicate drag source id "${next.sourceId}"`);
+          }
+          if (next.sourceId !== entry.registration.sourceId) {
+            sources.delete(entry.registration.sourceId);
+            sources.set(next.sourceId, entry);
+            sourcesByElement.set(element, next.sourceId);
+          }
+          const wasDisabled = entry.registration.disabled;
+          entry.registration = next;
+          applySourceDom(entry);
+          if (!wasDisabled && next.disabled && context.session?.sourceId === next.sourceId) {
+            dispatch({ type: "SOURCE_LOST", sessionId: context.session.sessionId });
+          }
+          layoutDirty = true;
+        },
+        unregister() {
+          if (!live) return;
+          live = false;
+          unregisterSource(entry.registration.sourceId);
+        },
+      };
+    },
+
+    registerTarget(element: Element, registration: DropTargetRegistration): DropTargetHandle {
+      assertLive();
+      if (targets.has(registration.targetId)) {
+        throw new Error(`Duplicate drop target id "${registration.targetId}"`);
+      }
+      if (targetsByElement.has(element)) {
+        throw new Error("Element is already registered as a drop target");
+      }
+
+      const entry: TargetEntry = {
+        element,
+        registration,
+        order: nextOrder++,
+      };
+      targets.set(registration.targetId, entry);
+      targetsByElement.set(element, registration.targetId);
+      layoutDirty = true;
+
+      let live = true;
+      return {
+        update(next: DropTargetRegistration) {
+          if (!live) return;
+          if (next.targetId !== entry.registration.targetId && targets.has(next.targetId)) {
+            throw new Error(`Duplicate drop target id "${next.targetId}"`);
+          }
+          if (next.targetId !== entry.registration.targetId) {
+            targets.delete(entry.registration.targetId);
+            targets.set(next.targetId, entry);
+            targetsByElement.set(element, next.targetId);
+          }
+          entry.registration = next;
+          layoutDirty = true;
+        },
+        unregister() {
+          if (!live) return;
+          live = false;
+          unregisterTarget(entry.registration.targetId);
+        },
+      };
+    },
+
+    getSnapshot() {
+      return snapshot;
+    },
+
+    subscribe(listener: () => void): () => void {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+
+    invalidateLayout() {
+      layoutDirty = true;
+      if (phase === "dragging" && pointerPosition) hitTest(pointerPosition.x, pointerPosition.y);
+    },
+
+    cancel() {
+      if (!context.session) return;
+      dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
+    },
+
+    destroy() {
+      if (destroyed) return;
+      if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
+      for (const id of [...sources.keys()]) unregisterSource(id);
+      for (const id of [...targets.keys()]) unregisterTarget(id);
+      unbindDocument();
+      if (announceTimer !== null) clearTimeout(announceTimer);
+      releasePointerHardware();
+      gesture = null;
+      listeners.clear();
+      connectedRoot = null;
+      connectedDocument = null;
+      connectedWindow = null;
+      destroyed = true;
+    },
+  };
+}
