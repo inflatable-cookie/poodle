@@ -84,7 +84,10 @@ component-level, and an application has to opt into them **once**, at its root:
 
 Both live on `attach_overlay_host`, whose name predates the traversal it now
 also carries. Its companion, `overlay_frame_begin`, marks the frame boundary
-the layer registry, painted bounds, and focus queue are rebuilt at.
+the layer registry, painted bounds, and focus queue are rebuilt at, and
+finalizes the previous frame's continuous-value session so a removed control
+cancels exactly once. Call `overlay_frame_end` after paint when the host can
+(the headless driver does); lost-host cancel does not depend on it.
 
 ```rust
 use gpui::{div, Context, IntoElement, ParentElement, Render, Styled, Window};

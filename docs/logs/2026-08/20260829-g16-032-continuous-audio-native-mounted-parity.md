@@ -42,16 +42,42 @@ Named headless regressions:
 - `knob_mounted_parity_through_production_dispatch`
 - `xy_pad_mounted_parity_through_production_dispatch`
 
-Fader proves horizontal position, detent snap, keyboard including Page
-Up/Down, wheel, double-click reset, type-in, callback pairing, disabled
-inertia, and Slider accessibility. Knob proves vertical and circular
-mapping, Home/End, reset, and Slider accessibility. XYPad proves coarse
-press, reset, independent axis keys, disabled inertia, and two child Slider
-semantics under a labelled Group.
+Fader proves horizontal and vertical mapping, detents, fine rebase, Page
+keys, wheel that is consumed so a parent does not also scroll, double-click
+reset, Enter/type/Enter and Escape type-in with focus return, callback
+pairing, disabled inertia, two-instance identity, and a rebuild between
+press and move. Knob proves vertical and circular mapping, fine rebase
+across a host rebuild, Page keys, wheel, reset, type-in, callbacks,
+disabled inertia, and Slider accessibility. XYPad proves coarse press,
+atomic pair moves, fine rebase, reset, independent axis keys, callbacks,
+disabled inertia, two-instance identity, and two child Slider semantics.
 
-GPUI Examples for the three controls own live machines and a value readout
-so interaction rebuilds the page. Size and density matrices stay on the
-shared specimen builders.
+GPUI Examples for the three controls use the renderer-owned instance
+registry and a value readout so interaction rebuilds the page. Size and
+density matrices stay on the shared specimen builders.
+
+## Review round
+
+PR review on `aa64b9471` asked for five blockers. This round:
+
+1. Required `Handlers::new(instance_id)` scopes root, entry, and XY axis
+   ids. Two-instance rebuild regressions cover Fader and XYPad.
+2. `overlay_frame_begin` now cancels a continuous-value host that was not
+   rebuilt last frame. Production preview already calls begin. Lost-host is
+   also proven on `HeadlessDriver::draw_preview_frame` (begin only, no
+   `overlay_frame_end`).
+3. Wheel dispatch calls `prevent_default` and `stop_propagation`.
+   `RequestEntryFocus` queues Node `request_focus`. Entry fields have a
+   label and focus ring. Enter/Escape return focus to the root. Root
+   `on_submit` is omitted while entry is open so Enter cannot reopen.
+4. Machines live in a renderer registry keyed by instance id, not an
+   optional field on the callback struct. Host value replacement applies
+   only while idle. Rebuild between press and move keeps the gesture.
+5. The named mounted tests now exercise the acceptance paths above.
+
+Entry blur is wired (`on_focus_change` commits once) and unit-tested on the
+node. Headless window-blur/tab did not deliver that callback for the child
+input; Enter/Escape are the mounted proof.
 
 ## Non-claims
 

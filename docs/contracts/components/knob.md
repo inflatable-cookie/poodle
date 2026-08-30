@@ -114,8 +114,10 @@ helpers and shares `knob.css`. `KnobVisual` accepts only VisualState.
 
 The GPUI specimen drives the Rust knob machine and passes its serializable
 VisualState to the shared node renderer. The adapter owns pointer geometry
-from Node `on_continuous_value`, focus, keys, `on_wheel`, `on_double_activate`
-reset, and accessibility exposure.
+from Node `on_continuous_value`, focus, keys, consumed `on_wheel`,
+`on_double_activate` reset, and accessibility exposure. Native construction
+requires `KnobHandlers::new(instance_id)` with a lifetime-stable instance
+scope for root and entry identity.
 
 ## 10a. Jetstream Notes
 

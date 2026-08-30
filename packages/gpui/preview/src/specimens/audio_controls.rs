@@ -3,21 +3,20 @@
 //! Content comes from `poodle_render::audio_specimens`, which is shared with
 //! Jetstream; the Examples / Sizes / Densities structure around it is GPUI's
 //! own. Every one of these controls takes both `size` and `density`, so every
-//! page admits both axis panes. Knob, Fader, and XYPad Examples own live
-//! machines so interaction rebuilds the page.
+//! page admits both axis panes. Knob, Fader, and XYPad Examples bind
+//! instance-scoped handlers so interaction rebuilds the page.
 
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use gpui::*;
-use poodle_headless::audio::{FaderContext, FaderOrientation, KnobContext, XYPadContext};
+use poodle_headless::audio::{AudioValueLaw, FaderOrientation};
 use poodle_render::audio_specimens::AudioSpecimen;
 use poodle_render::{
-    fader_spec_from_context, fader_with_handlers, knob_spec_from_context, knob_with_handlers,
-    xy_pad_spec_from_context, xy_pad_with_handlers, FaderHandlers, KnobHandlers, RenderContext,
+    fader_retained_spec, fader_with_handlers, knob_retained_spec, knob_with_handlers,
+    xy_pad_retained_spec, xy_pad_with_handlers, FaderHandlers, KnobHandlers, RenderContext,
     XYPadHandlers,
 };
+use poodle_specs::{FaderSpec, KnobSpec, Orientation, XYPadSpec};
 
 use crate::app_state::{AppState, NodeSpecimenEvent};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
@@ -29,125 +28,77 @@ fn to_element(node: poodle_node::Node) -> AnyElement {
     poodle_gpui_node_backend::to_gpui(&node)
 }
 
-thread_local! {
-    static FADERS: RefCell<HashMap<String, Arc<Mutex<FaderContext>>>> =
-        RefCell::new(HashMap::new());
-    static KNOBS: RefCell<HashMap<String, Arc<Mutex<KnobContext>>>> =
-        RefCell::new(HashMap::new());
-    static PADS: RefCell<HashMap<String, Arc<Mutex<XYPadContext>>>> =
-        RefCell::new(HashMap::new());
-}
-
-fn fader_machine(key: &str, seed: impl FnOnce() -> FaderContext) -> Arc<Mutex<FaderContext>> {
-    FADERS.with(|machines| {
-        machines
-            .borrow_mut()
-            .entry(key.to_owned())
-            .or_insert_with(|| Arc::new(Mutex::new(seed())))
-            .clone()
-    })
-}
-
-fn knob_machine(key: &str, seed: impl FnOnce() -> KnobContext) -> Arc<Mutex<KnobContext>> {
-    KNOBS.with(|machines| {
-        machines
-            .borrow_mut()
-            .entry(key.to_owned())
-            .or_insert_with(|| Arc::new(Mutex::new(seed())))
-            .clone()
-    })
-}
-
-fn pad_machine(key: &str, seed: impl FnOnce() -> XYPadContext) -> Arc<Mutex<XYPadContext>> {
-    PADS.with(|machines| {
-        machines
-            .borrow_mut()
-            .entry(key.to_owned())
-            .or_insert_with(|| Arc::new(Mutex::new(seed())))
-            .clone()
-    })
-}
-
 fn live_fader(state: &AppState, key: &str, orientation: FaderOrientation) -> AnyElement {
-    let machine = fader_machine(key, || {
-        let mut context = FaderContext::default();
-        context.base.value = 0.65;
-        context.orientation = orientation;
-        context
+    let spec = fader_retained_spec(key, "Fader").unwrap_or_else(|| {
+        let mut spec = FaderSpec::new(0.65, 0.0, 1.0, AudioValueLaw::Linear);
+        spec.orientation = match orientation {
+            FaderOrientation::Vertical => Orientation::Vertical,
+            FaderOrientation::Horizontal => Orientation::Horizontal,
+        };
+        spec.aria_label = "Fader".into();
+        spec
     });
-    let spec = fader_spec_from_context(&machine.lock().expect("fader machine"), "Fader");
     let events = Arc::clone(&state.node_events);
     let value_key = key.to_owned();
     to_element(fader_with_handlers(
         &spec,
         &RenderContext::new(&state.theme),
-        &FaderHandlers {
-            on_value_change: Some(Arc::new(move |value| {
-                events.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                    key: value_key.clone(),
-                    value: format!("{value:.2}"),
-                });
-            })),
-            on_value_commit: Some(Arc::new(|_| {})),
-            on_gesture_begin: Some(Arc::new(|| {})),
-            on_gesture_end: Some(Arc::new(|| {})),
-            machine: Some(machine),
-        },
+        &FaderHandlers::new(key).on_value_change(Arc::new(move |value| {
+            events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                key: value_key.clone(),
+                value: format!("{value:.2}"),
+            });
+        })),
     ))
 }
 
 fn live_knob(state: &AppState, key: &str) -> AnyElement {
-    let machine = knob_machine(key, || {
-        let mut context = KnobContext::default();
-        context.base.value = 0.6;
-        context
+    let spec = knob_retained_spec(key, "Knob").unwrap_or_else(|| {
+        let mut spec = KnobSpec::new(0.6, 0.0, 1.0, AudioValueLaw::Linear);
+        spec.aria_label = "Knob".into();
+        spec
     });
-    let spec = knob_spec_from_context(&machine.lock().expect("knob machine"), "Knob");
     let events = Arc::clone(&state.node_events);
     let value_key = key.to_owned();
     to_element(knob_with_handlers(
         &spec,
         &RenderContext::new(&state.theme),
-        &KnobHandlers {
-            on_value_change: Some(Arc::new(move |value| {
-                events.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                    key: value_key.clone(),
-                    value: format!("{value:.2}"),
-                });
-            })),
-            on_value_commit: Some(Arc::new(|_| {})),
-            on_gesture_begin: Some(Arc::new(|| {})),
-            on_gesture_end: Some(Arc::new(|| {})),
-            machine: Some(machine),
-        },
+        &KnobHandlers::new(key).on_value_change(Arc::new(move |value| {
+            events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                key: value_key.clone(),
+                value: format!("{value:.2}"),
+            });
+        })),
     ))
 }
 
 fn live_pad(state: &AppState, key: &str) -> AnyElement {
-    let machine = pad_machine(key, || {
-        let mut context = XYPadContext::default();
-        context.x = 0.4;
-        context.y = 0.6;
-        context
+    let spec = xy_pad_retained_spec(key, "Pad").unwrap_or_else(|| {
+        let mut spec = XYPadSpec::new(poodle_headless::audio::XYPadVisualState {
+            x_norm: 0.4,
+            y_norm: 0.6,
+            raw_x: 0.4,
+            raw_y: 0.6,
+            hover: false,
+            focus: false,
+            drag: poodle_headless::audio::DragState::None,
+            automation: poodle_headless::audio::AutomationState::None,
+            enabled: true,
+        });
+        spec.aria_label = "Pad".into();
+        spec
     });
-    let spec = xy_pad_spec_from_context(&machine.lock().expect("xy pad machine"), "Pad");
     let events = Arc::clone(&state.node_events);
     let value_key = key.to_owned();
     to_element(xy_pad_with_handlers(
         &spec,
         &RenderContext::new(&state.theme),
-        &XYPadHandlers {
-            on_value_change: Some(Arc::new(move |x, y| {
-                events.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                    key: value_key.clone(),
-                    value: format!("{x:.2},{y:.2}"),
-                });
-            })),
-            on_value_commit: Some(Arc::new(|_, _| {})),
-            on_gesture_begin: Some(Arc::new(|| {})),
-            on_gesture_end: Some(Arc::new(|| {})),
-            machine: Some(machine),
-        },
+        &XYPadHandlers::new(key).on_value_change(Arc::new(move |x, y| {
+            events.lock().unwrap().push(NodeSpecimenEvent::SetText {
+                key: value_key.clone(),
+                value: format!("{x:.2},{y:.2}"),
+            });
+        })),
     ))
 }
 

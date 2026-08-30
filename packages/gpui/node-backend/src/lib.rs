@@ -188,7 +188,8 @@ pub fn to_gpui(node: &Node) -> AnyElement {
     // frame-scoped registries are cleared by the host's overlay_frame_begin
     // once per rendered frame (the production preview and the conformance
     // driver both call it), so a real page's multiple conversions all land
-    // in the same frame's registry.
+    // in the same frame's registry. overlay_frame_begin also cancels a
+    // continuous-value gesture whose owner was not rebuilt last frame.
     layers::collect_layers(node, None);
     to_gpui_impl(node)
 }

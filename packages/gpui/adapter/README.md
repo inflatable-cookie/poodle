@@ -69,7 +69,7 @@ drag cleanup are all document-level defaults, so an application opts into them
 once at its root:
 
 ```rust
-poodle_gpui_node_backend::overlay_frame_begin();   // once per rendered frame
+poodle_gpui_node_backend::overlay_frame_begin();   // once per rendered frame; also cancels a lost continuous-value host
 poodle_gpui_node_backend::reset_element_ids();     // once per rendered frame
 
 poodle_gpui_node_backend::attach_overlay_host(     // once per window

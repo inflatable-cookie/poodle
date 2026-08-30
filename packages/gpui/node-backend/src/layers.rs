@@ -69,11 +69,21 @@ thread_local! {
 /// frame, and the boundary is the host's render pass — not a `to_gpui` call,
 /// because a real page converts many components independently per frame.
 ///
+/// Also finalizes the previous frame's continuous-value session: a gesture
+/// whose owner was not rebuilt last frame emits cancel exactly once. That is
+/// the production lost-host path; [`overlay_frame_end`] still exists for
+/// unused focus-request cleanup after paint.
+///
 /// The focus queue is NOT cleared here: focus requests made between frames
 /// (machine effects from event dispatch) must survive until the next frame's
 /// paint applies them. [`overlay_frame_end`] drops whatever was never
 /// applied.
 pub fn overlay_frame_begin() {
+    // Close the previous frame's continuous-value host before this frame's
+    // paint. Production hosts already call begin; they do not need a separate
+    // after-paint hook for lost-host cancel. A session that painted last
+    // frame stays open until this frame fails to rebuild it.
+    crate::interaction::sweep_lost_continuous_host();
     LAYERS.with(|layers| layers.borrow_mut().clear());
     ELEMENT_BOUNDS.with(|bounds| bounds.borrow_mut().clear());
     ELEMENT_LAYERS.with(|layers| layers.borrow_mut().clear());

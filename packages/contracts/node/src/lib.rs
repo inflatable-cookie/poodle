@@ -692,7 +692,13 @@ pub struct Interaction {
     pub on_continuous_value: Option<Arc<dyn Fn(&NodeContinuousValueEvent) + Send + Sync>>,
     /// Wheel intent while the pointer is over this node. Direction is
     /// normalized; the component maps it through its own step/fine rules.
+    /// Installing this handler asks the backend to consume the wheel so a
+    /// parent scroll container does not also move.
     pub on_wheel: Option<Arc<dyn Fn(&NodeWheelEvent) + Send + Sync>>,
+    /// Queue backend focus for this node on the next paint. Used by machine
+    /// effects such as type-in open/close; the backend applies it once the
+    /// element exists.
+    pub request_focus: bool,
     /// Double activation (reset on Knob, Fader, XYPad). Fired instead of a
     /// new continuous-value press when the backend sees a second click.
     pub on_double_activate: Option<Arc<dyn Fn(NodeModifiers) + Send + Sync>>,

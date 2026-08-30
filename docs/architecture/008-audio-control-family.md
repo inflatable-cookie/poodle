@@ -171,7 +171,8 @@ without hiding machine access in drawing code.
 DOM adapters own pointer capture, wheel cancellation, focus, keyboard event
 translation, and ARIA. Native adapters own the equivalent pointer, focus,
 keyboard, accessibility-tree, and host-lifecycle translation through Node
-`on_continuous_value`, `on_wheel`, and `on_double_activate`. Core hit-test
+`on_continuous_value`, `on_wheel`, and `on_double_activate`. Native `on_wheel`
+consumes the wheel so a parent scroll container does not also move. Core hit-test
 helpers operate on geometry values only. Later skins may replace renderer
 components or node builders without changing those paths.
 

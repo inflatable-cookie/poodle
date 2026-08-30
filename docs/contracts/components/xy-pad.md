@@ -92,7 +92,9 @@ React runs the same atomic two-axis machine and passes only VisualState to
 
 The adapter maps pointer geometry from Node `on_continuous_value` (x right,
 y up) before transition and exposes two slider accessibility children.
-Reset uses `on_double_activate`. The shared renderer consumes one atomic
+Reset uses `on_double_activate`. Native construction requires
+`XYPadHandlers::new(instance_id)` with a lifetime-stable instance scope for
+the group and both axis sliders. The shared renderer consumes one atomic
 VisualState.
 
 ## 10a. Jetstream Notes

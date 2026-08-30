@@ -162,6 +162,9 @@ fn release_continuous(
 }
 
 pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
+    if node.interaction.request_focus {
+        super::layers::request_focus(id);
+    }
     // A disabled control is not focusable: gpui would otherwise take focus on
     // pointer-down, and a browser never focuses a disabled control. The focus
     // tracking canvas below still attaches (the patch may exist), so blur and
@@ -236,8 +239,10 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                     // overlay host) is applied here, in the paint pass, once
                     // the target element exists and has a handle.
                     if super::layers::take_focus_request(&id) {
-                        handle.focus(window);
-                        cx.refresh_windows();
+                        if !handle.is_focused(window) {
+                            handle.focus(window);
+                            cx.refresh_windows();
+                        }
                     }
                     let now = handle.is_focused(window);
                     let changed = FOCUS_STATES.with(|states| {
@@ -964,7 +969,7 @@ fn apply_continuous_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
     }
 
     if let Some(handler) = wheel {
-        el = el.on_scroll_wheel(move |event: &ScrollWheelEvent, _window, cx| {
+        el = el.on_scroll_wheel(move |event: &ScrollWheelEvent, window, cx| {
             if disabled {
                 return;
             }
@@ -976,6 +981,8 @@ fn apply_continuous_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                 dy,
                 modifiers: node_modifiers(&event.modifiers),
             });
+            window.prevent_default();
+            cx.stop_propagation();
             cx.refresh_windows();
         });
     }

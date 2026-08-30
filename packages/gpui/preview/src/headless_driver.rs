@@ -184,6 +184,20 @@ impl<'a> HeadlessDriver<'a> {
     /// repaint and the backend observations are deterministic. The overlay
     /// frame boundary (layer registry, bounds, focus queue) is this draw.
     pub fn draw_frame(&mut self) {
+        self.paint_frame();
+        // Focus requests the frame's paint never applied are stale (the
+        // target element never appeared).
+        poodle_gpui_node_backend::overlay_frame_end();
+    }
+
+    /// One production preview frame: `overlay_frame_begin` then paint, with
+    /// no `overlay_frame_end`. Lost-host continuous-value cancel must work
+    /// on this path.
+    pub fn draw_preview_frame(&mut self) {
+        self.paint_frame();
+    }
+
+    fn paint_frame(&mut self) {
         poodle_gpui_node_backend::overlay_frame_begin();
         self.root.update(self.cx, |_root, cx| cx.notify());
         self.cx.update(|window, cx| {
@@ -191,9 +205,6 @@ impl<'a> HeadlessDriver<'a> {
             let _ = window.draw(cx);
         });
         self.cx.run_until_parked();
-        // Focus requests the frame's paint never applied are stale (the
-        // target element never appeared).
-        poodle_gpui_node_backend::overlay_frame_end();
     }
 
     /// Drain the executor until every task is parked.
