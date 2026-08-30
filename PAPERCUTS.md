@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-30 — `smoke:gpui-window-capture` failed once in `effigy qa` on
+  `an_empty_or_malformed_batch_manifest_is_rejected`, then passed in isolation
+  and on the next qa run. The smoke script only prints the last three cargo
+  lines, so the real assertion is lost. Keep the full cargo stderr on failure.
+  Hit while repairing g16.024.
+
 - 2026-08-30 — `parity-evidence-ledger` resolves a React source as the first
   existing path among `Name`, `Name.tsx`, … On a case-insensitive volume,
   `src/tree/` matches `Tree` before `Tree.tsx`, so adding an internal helper

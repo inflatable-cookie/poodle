@@ -498,8 +498,11 @@ None.
   tabindex over visible treeitems (`tabindex=0` on the active item, `-1`
   elsewhere); selection/keyboard handlers live on the `treeitem`, which
   `stopPropagation`s so nested items do not double-fire. Reorder registers the
-  row with the shared drag substrate so Space/Enter keep tree selection and
-  activate semantics
+  row as the drag source and the `treeitem` as the nested drop target so
+  Space/Enter keep tree selection/activate and ancestor/descendant rows can
+  share a pointer. Geometry still comes from the row. The twisty is marked
+  `data-poodle-no-drag` so expansion is not a drag source. Alt+↑/↓ still
+  calls `onReorder` directly; it does not open a shared drag session.
 - virtualized windows pin the active source row until the session ends; they
   do not page or unmount it mid-drag
 - implementation-only details: expansion is uncontrolled-capable via internal

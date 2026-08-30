@@ -365,6 +365,7 @@ function TreeView({
         <span
           className="poodle-tree__twisty"
           data-expanded={open ? "true" : undefined}
+          data-poodle-no-drag=""
           onClick={(event) => {
             event.stopPropagation();
             if (node.isDisabled) return;
@@ -470,7 +471,7 @@ function TreeView({
           {Array.from({ length: depth }, (_, i) => (
             <span key={i} className="poodle-tree__indent" aria-hidden="true" />
           ))}
-          <span className="poodle-tree__twisty" aria-hidden="true" />
+          <span className="poodle-tree__twisty" data-poodle-no-drag="" aria-hidden="true" />
           <span className="poodle-tree__spinner">
             <Spinner size="xs" ariaLabel="Loading" />
           </span>

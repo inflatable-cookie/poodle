@@ -355,6 +355,23 @@ describe("createDragDropController", () => {
     controller.destroy();
   });
 
+  it("does not start a pointer drag from a data-poodle-no-drag descendant", () => {
+    const row = layout(document.createElement("div"), SOURCE_BOX);
+    const twisty = document.createElement("span");
+    twisty.setAttribute("data-poodle-no-drag", "");
+    row.append(twisty);
+    root.replaceChildren(row, targetEl);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(row, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    twisty.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    twisty.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
   it("does not start a pointer drag from an interactive descendant of a whole-row source", () => {
     const row = layout(document.createElement("div"), SOURCE_BOX);
     const button = document.createElement("button");
@@ -1300,6 +1317,101 @@ describe("createDragDropController", () => {
     frames.splice(0).forEach((frame) => frame(now));
     expect(outerState.scrollTop).toBe(outerAfterInnerExhausted);
     expect(controller.getSnapshot().phase).toBe("idle");
+
+    document.elementFromPoint = originalFromPoint;
+    controller.destroy();
+  });
+
+  it("stops the auto-scroll frame on leave and exhaustion, then restarts on re-entry", () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    let nextId = 1;
+    let now = 1000;
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      const id = nextId++;
+      frames.set(id, callback);
+      return id;
+    });
+    vi.stubGlobal("cancelAnimationFrame", (id: number) => {
+      frames.delete(id);
+    });
+    function flush(): void {
+      const pending = [...frames.values()];
+      frames.clear();
+      pending.forEach((frame) => frame(now));
+    }
+    function drain(): void {
+      for (let i = 0; i < 8 && frames.size > 0; i += 1) {
+        now += 16;
+        flush();
+      }
+    }
+
+    const innerState = { scrollTop: 80, scrollHeight: 300, clientHeight: 80 };
+    const inner = document.createElement("div");
+    inner.style.overflow = "auto";
+    layout(inner, { x: 10, y: 10, width: 180, height: 80 });
+    Object.defineProperty(inner, "scrollTop", {
+      configurable: true,
+      get: () => innerState.scrollTop,
+      set: (value: number) => {
+        innerState.scrollTop = value;
+      },
+    });
+    Object.defineProperty(inner, "scrollHeight", { configurable: true, get: () => innerState.scrollHeight });
+    Object.defineProperty(inner, "clientHeight", { configurable: true, get: () => innerState.clientHeight });
+    inner.append(targetEl);
+    root.append(inner);
+    layout(targetEl, { x: 20, y: 20, width: 80, height: 20 });
+
+    const originalFromPoint = document.elementFromPoint.bind(document);
+    document.elementFromPoint = () => inner;
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg({ autoScroll: true }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 50 }));
+    flush();
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    now += 16;
+    flush();
+    expect(frames.size).toBe(0);
+
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 14 }));
+    now += 16;
+    flush();
+    now += 16;
+    flush();
+    expect(innerState.scrollTop).toBeLessThan(80);
+    expect(frames.size).toBeGreaterThan(0);
+
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 50 }));
+    drain();
+    expect(frames.size).toBe(0);
+    const afterLeave = innerState.scrollTop;
+    now += 16;
+    flush();
+    expect(frames.size).toBe(0);
+    expect(innerState.scrollTop).toBe(afterLeave);
+
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 14 }));
+    now += 16;
+    flush();
+    now += 16;
+    flush();
+    expect(innerState.scrollTop).toBeLessThan(afterLeave);
+    expect(frames.size).toBeGreaterThan(0);
+
+    innerState.scrollTop = 0;
+    drain();
+    expect(frames.size).toBe(0);
+    const exhausted = innerState.scrollTop;
+    now += 16;
+    flush();
+    expect(frames.size).toBe(0);
+    expect(innerState.scrollTop).toBe(exhausted);
 
     document.elementFromPoint = originalFromPoint;
     controller.destroy();

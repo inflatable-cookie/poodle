@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.023 merged; g16.024 complete, pending merge
+Status: active — g16.023 merged; g16.024 pending review in PR #107
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -313,8 +313,8 @@ ledger cell moved.
 
 ## Next Task
 
-`g16.024` migrates Tree onto the shared web drag substrate: nested
-before/inside/after intent, drop-time revalidation, and nearest-container
-auto-scroll. No ledger cell moved. Tabs still moves with DockRegion in
-`g16.026`, EditableLabel stays decision-blocked, and `g16.025` is next for
-the shared Rust and GPUI runtime.
+`g16.024` is in PR #107 pending review. Tree nested intent, auto-scroll, and
+paired adapter proofs stay on that branch until operator-authorized merge.
+`g16.025` is next after merge for the shared Rust and GPUI runtime. Tabs still
+moves with DockRegion in `g16.026`. EditableLabel stays decision-blocked. No
+ledger cell moved.

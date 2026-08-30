@@ -48,7 +48,9 @@ function layoutTree(container: HTMLElement): Map<string, HTMLElement> {
   const rows = new Map<string, HTMLElement>();
   for (const [index, item] of [...container.querySelectorAll<HTMLElement>('[role="treeitem"][data-value]')].entries()) {
     const row = item.querySelector<HTMLElement>(".poodle-tree__row") ?? item;
-    row.getBoundingClientRect = () => asRect(10 + index * 40);
+    const rect = asRect(10 + index * 40);
+    item.getBoundingClientRect = () => rect;
+    row.getBoundingClientRect = () => rect;
     row.setPointerCapture = vi.fn();
     row.releasePointerCapture = vi.fn();
     item.setPointerCapture = vi.fn();
@@ -194,6 +196,110 @@ describe("Tree row metadata (react)", () => {
       document.dispatchEvent(pointer("pointerup", { clientY: 90 }));
     });
     expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("prefers a nested descendant when ancestor and descendant both contain the pointer", () => {
+    const onReorder = vi.fn();
+    const { container } = render(
+      <Tree nodes={nested} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const srcItem = container.querySelector<HTMLElement>('[data-value="src"]')!;
+    const childItem = container.querySelector<HTMLElement>('[data-value="a.ts"]')!;
+    srcItem.getBoundingClientRect = () => asRect(10, 80);
+    rows.get("src")!.getBoundingClientRect = () => asRect(10, 80);
+    childItem.getBoundingClientRect = () => asRect(50, 40);
+    rows.get("a.ts")!.getBoundingClientRect = () => asRect(50, 40);
+
+    drag(rows.get("docs")!, 70);
+    expect(onReorder).toHaveBeenCalledTimes(1);
+    expect(onReorder).toHaveBeenCalledWith("docs", "a.ts", "after");
+  });
+
+  it("rejects a drop when the live target is disabled or removed before release", () => {
+    const onReorder = vi.fn();
+    const view = render(
+      <Tree nodes={nested} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(view.container);
+    const source = rows.get("a.ts")!;
+    const target = rows.get("docs")!;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: 54 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: target.getBoundingClientRect().top + 8 }));
+    });
+    view.rerender(
+      <Tree
+        nodes={[nested[0]!, { value: "docs", label: "docs", isBranch: true, isDisabled: true }]}
+        expandedValues={["src", "lib"]}
+        reorderable
+        onReorder={onReorder}
+      />,
+    );
+    layoutTree(view.container);
+    act(() => {
+      document.dispatchEvent(pointer("pointerup", { clientY: 178 }));
+    });
+    expect(onReorder).not.toHaveBeenCalled();
+
+    const live = layoutTree(view.container);
+    act(() => {
+      live.get("a.ts")!.dispatchEvent(pointer("pointerdown", { clientY: 54 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: 178 }));
+    });
+    view.rerender(
+      <Tree nodes={[nested[0]!]} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />,
+    );
+    act(() => {
+      document.dispatchEvent(pointer("pointerup", { clientY: 178 }));
+    });
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("revalidates live Tree state at drop so a newly illegal nest does not commit", () => {
+    const onReorder = vi.fn();
+    const view = render(
+      <Tree nodes={nested} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(view.container);
+    const source = rows.get("docs")!;
+    const target = rows.get("src")!;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: source.getBoundingClientRect().top + 4 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: target.getBoundingClientRect().top + 20 }));
+    });
+    view.rerender(
+      <Tree
+        nodes={[{ value: "docs", label: "docs", isBranch: true, children: [nested[0]!] }]}
+        expandedValues={["src", "lib", "docs"]}
+        reorderable
+        onReorder={onReorder}
+      />,
+    );
+    layoutTree(view.container);
+    act(() => {
+      document.dispatchEvent(pointer("pointerup", { clientY: 30 }));
+    });
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("does not start a drag from the expansion twisty", () => {
+    const onReorder = vi.fn();
+    const onExpandedChange = vi.fn();
+    const { container } = render(
+      <Tree nodes={nested} reorderable onReorder={onReorder} onExpandedChange={onExpandedChange} />,
+    );
+    layoutTree(container);
+    const twisty = container.querySelector<HTMLElement>('[data-value="src"] .poodle-tree__twisty')!;
+    act(() => {
+      twisty.dispatchEvent(pointer("pointerdown", { clientY: 14 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: 90 }));
+      document.dispatchEvent(pointer("pointerup", { clientY: 90 }));
+    });
+    expect(onReorder).not.toHaveBeenCalled();
+
+    fireEvent.click(twisty);
+    expect(onExpandedChange).toHaveBeenCalledWith(["src"]);
   });
 
   it("pins a virtualized source so it is not unmounted mid-drag", () => {

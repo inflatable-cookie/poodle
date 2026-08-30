@@ -463,6 +463,7 @@
   <span
     class="poodle-tree__twisty"
     data-expanded={open ? "true" : undefined}
+    data-poodle-no-drag=""
     onclick={(event) => handleTwistyClick(node, event)}
     aria-hidden="true"
   >
@@ -593,7 +594,7 @@
       {#each Array.from({ length: depth }) as _, i (i)}
         <span class="poodle-tree__indent" aria-hidden="true"></span>
       {/each}
-      <span class="poodle-tree__twisty" aria-hidden="true"></span>
+      <span class="poodle-tree__twisty" data-poodle-no-drag="" aria-hidden="true"></span>
       <span class="poodle-tree__spinner"><Spinner size="xs" ariaLabel="Loading" /></span>
       <span class="poodle-tree__label poodle-tree__label--muted">Loading…</span>
     </div>

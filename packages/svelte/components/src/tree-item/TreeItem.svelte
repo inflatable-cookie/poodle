@@ -65,6 +65,7 @@
 
   const { dragSource, dropTarget } = useDragDrop();
   const canDrag = $derived(reorderable && !node.isDisabled && !editing);
+  let rowEl: HTMLElement | undefined;
 
   const sourceRegistration = $derived<DragSourceRegistration>({
     sourceId: node.value,
@@ -81,12 +82,14 @@
     acceptedKinds: ["poodle.tree"],
     disabled: !canDrag,
     label: node.label,
-    resolvePosition: (input) =>
-      resolveNestedDropPosition({
+    resolvePosition: (input) => {
+      const rect = rowEl?.getBoundingClientRect() ?? input.rect;
+      return resolveNestedDropPosition({
         y: input.y,
-        rect: input.rect,
+        rect,
         kind: isTreeBranch(node) ? "container" : "item",
-      }),
+      });
+    },
     canDrop: (intent, subject) =>
       treeCanAcceptDrop(nodes, subject.id, intent.targetId)
         ? { accepted: true, intent }
@@ -111,8 +114,9 @@
   ondblclick={onDblClick}
   oncontextmenu={onContextMenu}
   onkeydown={onKeyDown}
+  use:dropTarget={targetRegistration}
 >
-  <div class="poodle-tree__row" use:dragSource={sourceRegistration} use:dropTarget={targetRegistration}>
+  <div class="poodle-tree__row" bind:this={rowEl} use:dragSource={sourceRegistration}>
     {@render row()}
   </div>
   {#if showGroup && group}

@@ -382,8 +382,9 @@ function canPointerCapture(element: Element): boolean {
   return typeof (element as HTMLElement).setPointerCapture === "function";
 }
 
+const NO_DRAG_ATTR = "data-poodle-no-drag";
 const INTERACTIVE_SELECTOR =
-  "button, input, textarea, select, a[href], [role='button'], [contenteditable]:not([contenteditable='false'])";
+  `button, input, textarea, select, a[href], [role='button'], [contenteditable]:not([contenteditable='false']), [${NO_DRAG_ATTR}]`;
 
 function resolveHandle(element: Element, handle: Element | string | undefined): Element {
   if (handle === undefined) return element;
@@ -1003,27 +1004,30 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     let sync = true;
     const frame = connectedWindow.requestAnimationFrame((now) => {
       if (autoScrollFrame === -1 || autoScrollFrame === frame) autoScrollFrame = null;
-      onAutoScrollFrame(now);
-      if (!sync && autoScrollRunning) scheduleAutoScroll();
+      const keepGoing = onAutoScrollFrame(now);
+      if (!sync && keepGoing) scheduleAutoScroll();
     });
     sync = false;
     if (autoScrollFrame === -1) autoScrollFrame = frame;
   }
 
-  function onAutoScrollFrame(now: number): void {
+  function onAutoScrollFrame(now: number): boolean {
     if (!autoScrollRunning || phase !== "dragging" || !pointerPosition) {
       stopAutoScroll();
-      return;
+      return false;
     }
     const dt = lastAutoScrollTs === null ? 16 : Math.min(Math.max(now - lastAutoScrollTs, 0), 64);
-    if (dt === 0) return;
+    if (dt === 0) return true;
     lastAutoScrollTs = now;
     const owners = collectAutoScrollCandidates();
     const intent = resolveAutoScroll(owners, pointerPosition, dt);
-    if (intent && applyAutoScroll(intent.id, intent.dx, intent.dy, owners)) {
-      layoutDirty = true;
-      hitTest(pointerPosition.x, pointerPosition.y);
+    if (!intent || !applyAutoScroll(intent.id, intent.dx, intent.dy, owners)) {
+      lastAutoScrollTs = null;
+      return false;
     }
+    layoutDirty = true;
+    hitTest(pointerPosition.x, pointerPosition.y);
+    return true;
   }
 
   function evaluateTarget(
@@ -1471,6 +1475,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
     if (phase === "dragging" && pointerPosition) {
       hitTest(pointerPosition.x, pointerPosition.y);
+      scheduleAutoScroll();
     }
   }
 

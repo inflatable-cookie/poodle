@@ -1,4 +1,4 @@
-import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
+import { useRef, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import {
   isTreeBranch,
   resolveNestedDropPosition,
@@ -59,6 +59,7 @@ export function TreeItem({
   onKeyDown,
 }: TreeItemProps) {
   const canDrag = reorderable && !node.isDisabled && !editing;
+  const rowRef = useRef<HTMLDivElement | null>(null);
   const { getSourceProps } = useDragSource({
     sourceId: node.value,
     subject: { kind: "poodle.tree", id: node.value },
@@ -73,12 +74,14 @@ export function TreeItem({
     acceptedKinds: ["poodle.tree"],
     disabled: !canDrag,
     label: node.label,
-    resolvePosition: (input) =>
-      resolveNestedDropPosition({
+    resolvePosition: (input) => {
+      const rect = rowRef.current?.getBoundingClientRect() ?? input.rect;
+      return resolveNestedDropPosition({
         y: input.y,
-        rect: input.rect,
+        rect,
         kind: isTreeBranch(node) ? "container" : "item",
-      }),
+      });
+    },
     canDrop: (intent, subject) =>
       treeCanAcceptDrop(nodes, subject.id, intent.targetId)
         ? { accepted: true, intent }
@@ -86,11 +89,18 @@ export function TreeItem({
     onDrop,
   });
 
-  const rowProps = getSourceProps(getTargetProps({ className: "poodle-tree__row" }));
+  const itemProps = getTargetProps({
+    className: "poodle-tree__item",
+    onClick,
+    onDoubleClick,
+    onContextMenu,
+    onKeyDown,
+  });
+  const rowProps = getSourceProps({ className: "poodle-tree__row", ref: rowRef });
 
   return (
     <div
-      className="poodle-tree__item"
+      {...itemProps}
       role="treeitem"
       data-value={node.value}
       data-branch={branch ? "true" : undefined}
@@ -101,10 +111,6 @@ export function TreeItem({
       aria-selected={selected}
       aria-expanded={branch ? open : undefined}
       aria-disabled={node.isDisabled ? true : undefined}
-      onClick={onClick}
-      onDoubleClick={onDoubleClick}
-      onContextMenu={onContextMenu}
-      onKeyDown={onKeyDown}
     >
       <div {...rowProps}>{row}</div>
       {showGroup ? (
