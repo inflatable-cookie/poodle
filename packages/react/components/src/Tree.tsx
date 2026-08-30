@@ -26,10 +26,11 @@ import {
 import "@inflatable-cookie/poodle-core/styles/tree.css";
 
 import { Checkbox } from "./Checkbox";
-import { DragDropProvider } from "./drag-drop";
+import { DragDropProvider, useDragDrop } from "./drag-drop";
 import { Icon } from "./Icon";
 import { Spinner } from "./Spinner";
 import { TreeItem } from "./tree-item/TreeItem";
+import { TreeKeyboardTargets } from "./tree-item/TreeKeyboardTargets";
 import type {
   ControlDensity,
   ControlSize,
@@ -119,6 +120,7 @@ function TreeView({
   onActivate,
 }: TreeProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const { requestKeyboardDrop } = useDragDrop();
 
   // Bindable pairs: controlled when prop provided, internal otherwise.
   const [internalSelected, setInternalSelected] = useState<string[]>([]);
@@ -252,7 +254,12 @@ function TreeView({
     if (!sibs) return;
     const move = treeSiblingReorderTarget(sibs, node.value, dir);
     if (!move) return;
-    onReorder?.(node.value, move.target, move.position);
+    requestKeyboardDrop({
+      sourceId: node.value,
+      targetId: move.target,
+      position: move.position,
+    });
+    focusRow(node.value);
   }
 
   function handleDragStart(session: DragSession): void {
@@ -439,6 +446,7 @@ function TreeView({
         muted={Boolean(node.isMuted)}
         focused={effectiveFocus === node.value}
         reorderable={reorderable}
+        keyboardOrder={visibleRows.findIndex((row) => row.node.value === node.value)}
         editing={isEditing(node.value)}
         showGroup={Boolean(group)}
         row={rowMarkup(node, depth, branch, open)}
@@ -496,6 +504,14 @@ function TreeView({
   }
 
   return (
+    <>
+    <TreeKeyboardTargets
+      rows={visibleRows}
+      nodes={nodes}
+      reorderable={reorderable}
+      editingValue={editingValue}
+      onDrop={handleDrop}
+    />
     <div
       ref={rootRef}
       className="poodle-tree"
@@ -520,5 +536,6 @@ function TreeView({
         nodes.map((node) => renderNode(node, 0, null))
       )}
     </div>
+    </>
   );
 }

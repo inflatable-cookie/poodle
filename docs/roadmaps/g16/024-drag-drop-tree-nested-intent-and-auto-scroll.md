@@ -34,8 +34,7 @@ virtualization, and its authored move callback.
       mouse/keyboard geometry, nested auto-scroll, and cleanup, with its lack
       of native touch injection stated explicitly.
 - [x] Tree's existing public callbacks and non-drag interactions are preserved.
-      Alt+↑/↓ still calls `onReorder` directly; routing that one-keystroke
-      sibling move through the shared session is a planning question.
+      Alt+↑/↓ is a one-keystroke sibling move through `requestKeyboardDrop`.
 - [x] Bespoke Tree drag state is removed; shared substrate tests remain green.
 - [x] No native or ledger claim changes.
 
@@ -86,16 +85,6 @@ check. Never use a windowed/native visual or Jetstream selector.
   announcements, and focus return; deterministic geometry and auto-scroll unit
   tests; native touch hold-versus-scroll in headless Chromium; touch-shaped
   hold/tolerance plus real geometry/auto-scroll/cleanup in headless WebKit.
-
-## Planning questions
-
-- Keyboard: the landed controller cannot express one-keystroke Alt+↑/↓ sibling
-  reorder (semantic intent, live `canDrop`, controller commit/terminal,
-  announce/focus) without a new public command surface. Tree still calls
-  `onReorder` directly. Do not add a Tree-only fake lifecycle.
-- WebKit: the headless probe's touch route is synthetic PointerEvents and is
-  not native hold-versus-scroll proof. Chromium uses CDP
-  `Input.synthesizeScrollGesture`.
 
 ## Continuation
 

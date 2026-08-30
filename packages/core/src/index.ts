@@ -782,6 +782,7 @@ export {
   type DragSourceRegistration,
   type DropTargetHandle,
   type DropTargetRegistration,
+  type KeyboardDropCommand,
   type KeyboardDropDirection,
   type KeyboardDropTargetHandle,
   type KeyboardDropTargetRegistration,

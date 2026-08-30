@@ -725,6 +725,131 @@ describe("createDragDropController", () => {
     again.destroy();
   });
 
+  it("requestKeyboardDrop commits through the ordinary keyboard lifecycle", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onStart = vi.fn();
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(
+      sourceEl,
+      sourceReg({ keyboardOrder: 0, onDragStart: onStart, onDragEnd: onEnd }),
+    );
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "dst", order: 1, onDrop, label: "List" }));
+    sourceEl.focus();
+
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(true);
+    expect(onStart).toHaveBeenCalledTimes(1);
+    expect(onDrop).toHaveBeenCalledWith({ targetId: "dst", position: "after", operation: "move" });
+    expect(onEnd).toHaveBeenCalledWith({
+      status: "committed",
+      intent: { targetId: "dst", position: "after", operation: "move" },
+    });
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(controller.getSnapshot().announcement).toBe("Dropped Alpha on List");
+    expect(document.activeElement).toBe(sourceEl);
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop prefers a live logical target over a DOM target with the same id", () => {
+    const logicalDrop = vi.fn(() => ({ status: "committed" as const }));
+    const domDrop = vi.fn(() => ({ status: "committed" as const }));
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0 }));
+    controller.registerTarget(targetEl, targetReg({ targetId: "shared", onDrop: domDrop }));
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "shared", order: 1, onDrop: logicalDrop, label: "Logical" }),
+    );
+
+    expect(
+      controller.requestKeyboardDrop({ sourceId: "src", targetId: "shared", position: "before" }),
+    ).toBe(true);
+    expect(logicalDrop).toHaveBeenCalledTimes(1);
+    expect(domDrop).not.toHaveBeenCalled();
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop returns false without a session when the registration is missing, disabled, mismatched, or busy", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "dst", order: 1, onDrop }));
+
+    expect(controller.requestKeyboardDrop({ sourceId: "missing", targetId: "dst", position: "after" })).toBe(false);
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "missing", position: "after" })).toBe(false);
+
+    const disabled = controller.registerSource(
+      layout(document.createElement("button"), SOURCE_BOX),
+      sourceReg({ sourceId: "off", subject: { kind: "item", id: "off" }, label: "Off", disabled: true }),
+    );
+    expect(controller.requestKeyboardDrop({ sourceId: "off", targetId: "dst", position: "after" })).toBe(false);
+    disabled.unregister();
+
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "other", acceptedKinds: ["file"], order: 2, onDrop }),
+    );
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "other", position: "after" })).toBe(false);
+
+    sourceEl.focus();
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(false);
+    controller.cancel();
+    expect(onDrop).not.toHaveBeenCalled();
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop revalidates canDrop and rejects without invoking onDrop", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({
+        targetId: "dst",
+        order: 1,
+        onDrop,
+        canDrop: () => ({ accepted: false, reason: "blocked" }),
+      }),
+    );
+
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(true);
+    expect(onDrop).not.toHaveBeenCalled();
+    expect(onEnd).toHaveBeenCalledWith({ status: "rejected", reason: "blocked" });
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop rejects an async drop when the logical target is disabled or removed before commit", async () => {
+    let finish: (value: { status: "committed" }) => void = () => {};
+    const pending = new Promise<{ status: "committed" }>((resolve) => {
+      finish = resolve;
+    });
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    const handle = controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "dst", order: 1, onDrop: () => pending }),
+    );
+
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(true);
+    expect(controller.getSnapshot().phase).toBe("dropping");
+    handle.update(keyboardTargetReg({ targetId: "dst", order: 1, onDrop: () => pending, disabled: true }));
+    expect(onEnd.mock.calls.at(-1)?.[0]).toEqual({ status: "rejected", reason: "target-unavailable" });
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    finish({ status: "committed" });
+    await pending;
+    await Promise.resolve();
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
   it("cancels an active session on Escape", () => {
     const onEnd = vi.fn();
     const controller = createDragDropController();

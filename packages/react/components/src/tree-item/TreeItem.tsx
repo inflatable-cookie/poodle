@@ -23,6 +23,7 @@ export interface TreeItemProps {
   muted: boolean;
   focused: boolean;
   reorderable: boolean;
+  keyboardOrder: number;
   editing: boolean;
   showGroup: boolean;
   row: ReactNode;
@@ -46,6 +47,7 @@ export function TreeItem({
   muted,
   focused,
   reorderable,
+  keyboardOrder,
   editing,
   showGroup,
   row,
@@ -66,6 +68,7 @@ export function TreeItem({
     allowedOperations: ["move"],
     label: node.label,
     disabled: !canDrag,
+    keyboardOrder,
     onDragStart,
     onDragEnd,
   });

@@ -10,6 +10,7 @@ export type {
   DragPreviewSnapshot,
   DragSourceRegistration,
   DropTargetRegistration,
+  KeyboardDropCommand,
   KeyboardDropDirection,
   KeyboardDropTargetHandle,
   KeyboardDropTargetRegistration,

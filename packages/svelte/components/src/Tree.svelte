@@ -1,6 +1,7 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/tree.css";
   import {
+    createDragDropController,
     findTreeNode,
     flattenVisibleTreeRows,
     isTreeBranch,
@@ -15,12 +16,13 @@
     type DragTerminalOutcome,
     type DropIntent,
   } from "@inflatable-cookie/poodle-core";
-  import { untrack } from "svelte";
+  import { onDestroy, untrack } from "svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Checkbox } from "./Checkbox.svelte";
   import { default as Spinner } from "./Spinner.svelte";
   import DragDropProvider from "./DragDropProvider.svelte";
   import TreeItem from "./tree-item/TreeItem.svelte";
+  import TreeKeyboardTargets from "./tree-item/TreeKeyboardTargets.svelte";
   import type {
     ControlDensity,
     ControlSize,
@@ -68,6 +70,9 @@
   }
 
   type DropPosition = "before" | "after" | "inside";
+
+  const dragController = createDragDropController();
+  onDestroy(() => dragController.destroy());
 
   let {
     nodes = [],
@@ -252,7 +257,12 @@
     if (!sibs) return;
     const move = treeSiblingReorderTarget(sibs, node.value, dir);
     if (!move) return;
-    onReorder?.(node.value, move.target, move.position);
+    dragController.requestKeyboardDrop({
+      sourceId: node.value,
+      targetId: move.target,
+      position: move.position,
+    });
+    focusRow(node.value);
   }
 
   // Flattened visible rows drive keyboard navigation and range selection.
@@ -421,7 +431,8 @@
   }
 </script>
 
-<DragDropProvider>
+<DragDropProvider controller={dragController}>
+  <TreeKeyboardTargets rows={visibleRows} {nodes} {reorderable} {editingValue} onDrop={handleDrop} />
   <div
     bind:this={rootEl}
     class="poodle-tree"
@@ -534,6 +545,7 @@
     muted={Boolean(node.isMuted)}
     focused={effectiveFocus === node.value}
     {reorderable}
+    keyboardOrder={visibleRows.findIndex((row) => row.node.value === node.value)}
     editing={isEditing(node.value)}
     onDrop={handleDrop}
     onDragStart={handleDragStart}
@@ -567,6 +579,7 @@
     muted={Boolean(node.isMuted)}
     focused={effectiveFocus === node.value}
     {reorderable}
+    keyboardOrder={visibleRows.findIndex((row) => row.node.value === node.value)}
     editing={isEditing(node.value)}
     onDrop={handleDrop}
     onDragStart={handleDragStart}

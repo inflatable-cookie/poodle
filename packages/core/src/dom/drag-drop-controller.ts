@@ -117,6 +117,12 @@ export interface KeyboardDropTargetRegistration {
   readonly onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
 }
 
+export interface KeyboardDropCommand {
+  readonly sourceId: string;
+  readonly targetId: string;
+  readonly position: DropPosition;
+}
+
 export interface DragSourceHandle {
   update(registration: DragSourceRegistration): void;
   unregister(): void;
@@ -182,6 +188,7 @@ export interface DragDropController {
   registerSource(element: Element, registration: DragSourceRegistration): DragSourceHandle;
   registerTarget(element: Element, registration: DropTargetRegistration): DropTargetHandle;
   registerKeyboardTarget(registration: KeyboardDropTargetRegistration): KeyboardDropTargetHandle;
+  requestKeyboardDrop(command: KeyboardDropCommand): boolean;
   getSnapshot(): DragDropSnapshot;
   subscribe(listener: () => void): () => void;
   invalidateLayout(): void;
@@ -1142,6 +1149,42 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     return source?.registration.keyboardOrder !== undefined && kind !== undefined && hasMatchingLogicalTarget(kind);
   }
 
+  function requestKeyboardDrop(command: KeyboardDropCommand): boolean {
+    if (destroyed || phase !== "idle") return false;
+    const source = sources.get(command.sourceId);
+    if (!source || source.registration.disabled || isDisabled(source.element)) return false;
+    if (source.registration.allowedOperations.length === 0) return false;
+
+    const logical = keyboardTargets.get(command.targetId);
+    const dom = targets.get(command.targetId);
+    const registration = logical?.registration ?? dom?.registration;
+    if (!registration || registration.disabled) return false;
+    if (!registration.acceptedKinds.includes(source.registration.subject.kind)) return false;
+
+    const rect = measure(source.element);
+    const sessionId = beginSession(source, "keyboard", rect.left + rect.width / 2, rect.top + rect.height / 2);
+    keyboardLogicalSession = logical !== undefined;
+    keyboardSourceId = source.registration.sourceId;
+    lastKeyboardDirection = null;
+    activate(sessionId, null, null);
+    const session = context.session;
+    if (!session || session.sessionId !== sessionId) return false;
+
+    const operation = session.operation;
+    const intent: DropIntent = {
+      targetId: command.targetId,
+      position: command.position,
+      operation,
+    };
+    dispatch({ type: "TARGET_INTENT", sessionId, intent });
+    if (context.session?.intent) {
+      dispatch({ type: "DROP_REQUESTED", sessionId });
+    } else {
+      dispatch({ type: "CANCEL", sessionId });
+    }
+    return true;
+  }
+
   function usesLogicalKeyboard(): boolean {
     return keyboardLogicalSession;
   }
@@ -1181,17 +1224,20 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     let accepted: DropIntent = intent;
     if (inputKind === "keyboard" && usesLogicalKeyboard()) {
       const logical = keyboardTargets.get(intent.targetId);
-      const direction = lastKeyboardDirection ?? "next";
-      const position = logical
-        ? logical.registration.resolvePosition({
-            direction,
-            subject: session.subject,
-            operation: session.operation,
-          })
-        : intent.position;
-      if (position === null) {
-        dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
-        return;
+      let position = intent.position;
+      if (lastKeyboardDirection !== null) {
+        const resolved = logical
+          ? logical.registration.resolvePosition({
+              direction: lastKeyboardDirection,
+              subject: session.subject,
+              operation: session.operation,
+            })
+          : intent.position;
+        if (resolved === null) {
+          dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
+          return;
+        }
+        position = resolved;
       }
       const revalidated: DropIntent = {
         targetId: intent.targetId,
@@ -2040,6 +2086,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         },
       };
     },
+
+    requestKeyboardDrop,
 
     registerKeyboardTarget(registration: KeyboardDropTargetRegistration): KeyboardDropTargetHandle {
       assertLive();

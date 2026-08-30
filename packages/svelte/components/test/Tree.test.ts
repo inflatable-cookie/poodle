@@ -169,6 +169,32 @@ describe("Tree row metadata", () => {
     expect(onReorder).toHaveBeenCalledWith("a.ts", "lib", "after");
   });
 
+  it("does not Alt+Arrow reorder onto a disabled sibling", async () => {
+    const onReorder = vi.fn();
+    const { container } = render(Tree, {
+      props: {
+        nodes: [
+          {
+            value: "src",
+            label: "src",
+            children: [
+              { value: "a.ts", label: "a.ts" },
+              { value: "lib", label: "lib", isDisabled: true },
+            ],
+          },
+        ],
+        expandedValues: ["src"],
+        reorderable: true,
+        onReorder,
+      },
+    });
+    layoutTree(container);
+    const item = container.querySelector<HTMLElement>('[data-value="a.ts"]')!;
+    item.focus();
+    await fireEvent.keyDown(item, { key: "ArrowDown", altKey: true });
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
   it("does not start a drag from a checkbox or rename field", async () => {
     const onReorder = vi.fn();
     const { container } = render(Tree, {

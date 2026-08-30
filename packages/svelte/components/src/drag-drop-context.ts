@@ -7,6 +7,7 @@ import type {
   DragDropSnapshot,
   DragSourceRegistration,
   DropTargetRegistration,
+  KeyboardDropCommand,
   KeyboardDropTargetHandle,
   KeyboardDropTargetRegistration,
 } from "@inflatable-cookie/poodle-core";
@@ -24,6 +25,7 @@ export function setDragDrop(value: DragDropContextValue): void {
 export function useDragDrop(): {
   snapshot: Readable<DragDropSnapshot>;
   cancel: () => void;
+  requestKeyboardDrop: (command: KeyboardDropCommand) => boolean;
   dragSource: Action<HTMLElement, DragSourceRegistration>;
   dropTarget: Action<HTMLElement, DropTargetRegistration>;
   keyboardDropTarget: (registration: KeyboardDropTargetRegistration) => KeyboardDropTargetHandle;
@@ -81,6 +83,7 @@ export function useDragDrop(): {
   return {
     snapshot,
     cancel: () => ctx.controller.cancel(),
+    requestKeyboardDrop: (command) => ctx.controller.requestKeyboardDrop(command),
     dragSource,
     dropTarget,
     keyboardDropTarget,

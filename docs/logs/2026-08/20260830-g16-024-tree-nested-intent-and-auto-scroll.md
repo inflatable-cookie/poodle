@@ -27,12 +27,13 @@ and unmount still stop it.
 
 Public `onReorder(from, to, position)` is unchanged. Selection, expansion,
 rename, checkboxes, and Svelte virtualization remain. The twisty is marked
-`data-poodle-no-drag` so expansion is not a row drag. Alt+↑/↓ still calls
-`onReorder` directly; the landed controller has no one-keystroke command that
-can express that contract without a new public surface. Virtual windows pin
-the active source so it cannot unmount mid-session. Tabs, DockRegion, native
-runtimes, and the parity-evidence ledger were not edited. Ledger remains 52
-mounted / 122 missing.
+`data-poodle-no-drag` so expansion is not a row drag. Alt+↑/↓ resolves the
+sibling with `treeSiblingReorderTarget` and calls `requestKeyboardDrop` over
+the visible logical target catalogue. Space/Enter stay Tree
+selection/activation. Virtual windows pin the active source so it cannot
+unmount mid-session. Tabs, DockRegion, native runtimes, and the
+parity-evidence ledger were not edited. Ledger remains 52 mounted / 122
+missing.
 
 ## Review oracle
 
@@ -50,25 +51,18 @@ mounted / 122 missing.
 - Active cancellation while scrolling: controller cancel plus browser Escape.
 - Virtualization: pinned source stays mounted after a window jump.
 - Terminal cleanup: `cleanupSession` stops the auto-scroll frame.
-
-## Planning questions returned, not locally invented
-
-- Keyboard: Alt+↑/↓ is still a direct `onReorder`. The controller keyboard
-  path is Space/Enter pickup, arrow cycling, Space/Enter commit. Tree already
-  uses Space/Enter for WAI-ARIA selection/activate, and the existing Alt+Arrow
-  contract is one keystroke. A Tree-only fake lifecycle was not added. If the
-  substrate needs a public one-shot command, that is an orchestrator promotion.
-- WebKit: `test/drag-drop/probe.ts` still uses synthetic PointerEvents for
-  WebKit touch and disclaims native scroll proof. Chromium uses the CDP
-  scroll-gesture path. No local workaround claims genuine WebKit hold-versus-
-  scroll.
+- Alt+↑/↓: paired Tree tests plus controller `requestKeyboardDrop` proofs for
+  eligibility, logical-target authority, async disable, callbacks,
+  announcements, and focus return.
+- WebKit: probe labels synthetic touch as not native scroll proof; Chromium
+  CDP proves native hold-versus-scroll.
 
 ## Evidence
 
 - Framework-free geometry: `packages/core/test/drag-drop-geometry.test.ts`.
 - Framework-free auto-scroll: `packages/core/test/drag-drop-auto-scroll.test.ts`.
-- Controller nested auto-scroll plus leave/exhaustion/re-entry:
-  `test/headless-dom/drag-drop-controller.test.ts`.
+- Controller nested auto-scroll, leave/exhaustion/re-entry, and
+  `requestKeyboardDrop`: `test/headless-dom/drag-drop-controller.test.ts`.
 - Svelte: `packages/svelte/components/test/Tree.test.ts`.
 - React: `packages/react/components/test/Tree.test.tsx`.
 - Chromium and WebKit: `effigy test:drag-drop-browser` (WebKit touch remains

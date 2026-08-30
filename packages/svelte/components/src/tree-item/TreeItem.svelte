@@ -26,6 +26,7 @@
     muted: boolean;
     focused: boolean;
     reorderable: boolean;
+    keyboardOrder: number;
     editing: boolean;
     row: Snippet;
     group?: Snippet;
@@ -50,6 +51,7 @@
     muted,
     focused,
     reorderable,
+    keyboardOrder,
     editing,
     row,
     group,
@@ -73,6 +75,7 @@
     allowedOperations: ["move"],
     label: node.label,
     disabled: !canDrag,
+    keyboardOrder,
     onDragStart,
     onDragEnd,
   });

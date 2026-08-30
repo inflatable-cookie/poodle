@@ -80,11 +80,14 @@ Updated: 2026-08-30
 - **Reorder** (`reorderable` + `onReorder`): rows are draggable; a drop fires
   `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`
   (computed from pointer Y within the target row; `inside` only for branches).
-  Alt+↑/↓ moves the focused node among siblings. The shared `reorder_nodes(nodes,
-  from, to, position)` helper performs the move (no-op for self / missing /
-  dropping into own subtree). Svelte and React use the shared web drag
-  substrate (pointer/touch on the row, no HTML `DataTransfer`). GPUI uses
-  `on_drag`/`on_drop`/`drag_over`; Jetstream tracks mouse down→up over rows.
+  Alt+↑/↓ moves the focused node among siblings through
+  `requestKeyboardDrop` over the visible logical target catalogue; it does
+  not call `onReorder` directly. Space/Enter remain selection/activation.
+  The shared `reorder_nodes(nodes, from, to, position)` helper performs the
+  move (no-op for self / missing / dropping into own subtree). Svelte and
+  React use the shared web drag substrate (pointer/touch on the row, no HTML
+  `DataTransfer`). GPUI uses `on_drag`/`on_drop`/`drag_over`; Jetstream tracks
+  mouse down→up over rows.
 
 ## 3. Props And Inputs
 
@@ -217,7 +220,7 @@ helpers `visible_rows` / `next_visible` / `prev_visible` / `parent_of`.
 | Enter | Select focused item (replace) and fire `onActivate` |
 | Space | Toggle focused item in the selection set |
 | F2 | Start inline rename of the focused item |
-| Alt+Up / Alt+Down | Move the focused item among its siblings (when `reorderable`) |
+| Alt+Up / Alt+Down | One-keystroke sibling move through `requestKeyboardDrop` (when `reorderable`) |
 | Shift+Down / Shift+Up | Move focus and extend the selection range |
 | Ctrl/Cmd+Click, Ctrl/Cmd+Space | Toggle the item in the selection set |
 | Shift+Click | Select the contiguous visible range from the anchor |
@@ -501,8 +504,8 @@ None.
   row as the drag source and the `treeitem` as the nested drop target so
   Space/Enter keep tree selection/activate and ancestor/descendant rows can
   share a pointer. Geometry still comes from the row. The twisty is marked
-  `data-poodle-no-drag` so expansion is not a drag source. Alt+↑/↓ still
-  calls `onReorder` directly; it does not open a shared drag session.
+  `data-poodle-no-drag` so expansion is not a drag source. Visible rows
+  register as logical keyboard targets; Alt+↑/↓ calls `requestKeyboardDrop`.
 - virtualized windows pin the active source row until the session ends; they
   do not page or unmount it mid-drag
 - implementation-only details: expansion is uncontrolled-capable via internal
