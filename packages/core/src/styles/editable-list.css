@@ -157,8 +157,15 @@
     box-shadow: var(--poodle-recipe-editable-list-focus-item-shadow, 0 0 0 var(--poodle-border-width-focus) var(--poodle-color-accent-focusRing));
   }
 
-  .poodle-editable-list__item--dragging {
+  .poodle-editable-list__item--dragging,
+  .poodle-drag-drop-provider .poodle-editable-list__item[data-poodle-drag-source="dragging"],
+  .poodle-drag-drop-provider .poodle-editable-list__item[data-poodle-drag-source="dropping"] {
     opacity: 0.4;
+  }
+
+  .poodle-drag-drop-provider .poodle-editable-list__item[data-poodle-drop-target="accepted"],
+  .poodle-drag-drop-provider .poodle-editable-list__item[data-poodle-drop-target="rejected"] {
+    outline: none;
   }
 
   .poodle-editable-list__item--drop-target,

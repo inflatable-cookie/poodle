@@ -1,10 +1,18 @@
 <script lang="ts" generics="T extends { id: string; label?: string }">
   import "@inflatable-cookie/poodle-core/styles/editable-list.css";
-  import { applyReorder, listReorderKeyIntent } from "@inflatable-cookie/poodle-core";
+  import {
+    applyReorder,
+    type DragDropCommitResult,
+    type DragSession,
+    type DragTerminalOutcome,
+    type DropIntent,
+  } from "@inflatable-cookie/poodle-core";
   import { onDestroy, type Snippet } from "svelte";
 
   import { default as Button } from "./Button.svelte";
-  import { default as IconButton } from "./IconButton.svelte";
+  import DragDropProvider from "./DragDropProvider.svelte";
+  import EditableListKeyboardTargets from "./editable-list/EditableListKeyboardTargets.svelte";
+  import EditableListRow from "./editable-list/EditableListRow.svelte";
   import { default as TextInput } from "./TextInput.svelte";
   import { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
@@ -79,10 +87,8 @@
   const uiPresentation = getUiPresentation();
 
   let newItemText = $state("");
-  let draggingIndex = $state<number | null>(null);
-  let dropTargetIndex = $state<number | null>(null);
-  let grabbedIndex = $state<number | null>(null);
   let lastMovedId = $state<string | null>(null);
+  let activeSourceId = $state<string | null>(null);
   let windowPageIndex = $state(0);
   let liveMessage = $state("");
   let clearLastMovedTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
@@ -155,6 +161,14 @@
     }, 1400);
   }
 
+  function destinationIndex(fromIndex: number, toIndex: number, position: string, count: number): number {
+    let dest = position === "after" ? toIndex + 1 : toIndex;
+    if (fromIndex < dest) dest -= 1;
+    if (dest < 0) return 0;
+    if (dest >= count) return Math.max(0, count - 1);
+    return dest;
+  }
+
   function moveItem(fromIndex: number, toIndex: number): void {
     if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
     if (fromIndex >= items.length || toIndex >= items.length) return;
@@ -167,78 +181,49 @@
     ensureIndexVisible(toIndex);
     markLastMoved(moved.id);
     announce(`Moved ${moved.label ?? moved.id} to position ${toIndex + 1} of ${updated.length}.`);
+    requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>(`[data-reorder-index="${toIndex}"]`)?.focus();
+    });
   }
 
-  function handleDragStart(event: DragEvent, index: number): void {
-    if (isUnavailable) return;
-    draggingIndex = index;
-    dropTargetIndex = index;
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", String(index));
+  function handleDragStart(session: DragSession): void {
+    activeSourceId = session.subject.id;
+    const current = items.find((entry) => entry.id === session.subject.id);
+    announce(
+      `Grabbed ${current?.label ?? session.subject.id}. Use arrow keys to move, Escape to cancel.`,
+    );
+  }
+
+  function handleDrop(intent: DropIntent): DragDropCommitResult {
+    const fromIndex = items.findIndex((entry) => entry.id === activeSourceId);
+    const toIndex = items.findIndex((entry) => entry.id === intent.targetId);
+    if (fromIndex < 0 || toIndex < 0) return { status: "rejected", reason: "missing-item" };
+    const dest = destinationIndex(fromIndex, toIndex, String(intent.position), items.length);
+    if (dest !== fromIndex) moveItem(fromIndex, dest);
+    return { status: "committed" };
+  }
+
+  function handleDragEnd(outcome: DragTerminalOutcome): void {
+    if (outcome.status === "cancelled" && outcome.reason === "escape") {
+      announce("Cancelled keyboard move.");
     }
+    activeSourceId = null;
   }
 
-  function handleDragOver(event: DragEvent, index: number): void {
-    if (isUnavailable || draggingIndex === null) return;
-    event.preventDefault();
-    dropTargetIndex = index;
-  }
+  function handleIdleKeydown(event: KeyboardEvent, index: number): void {
+    if (isUnavailable || activeSourceId !== null) return;
+    if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
 
-  function handleDrop(event: DragEvent, index: number): void {
+    const next = event.key === "ArrowDown" ? index + 1 : index - 1;
     event.preventDefault();
-    if (draggingIndex !== null && draggingIndex !== index) {
-      moveItem(draggingIndex, index);
+    if (next < 0 || next >= items.length) {
+      announce("Reached list boundary.");
+      return;
     }
-    draggingIndex = null;
-    dropTargetIndex = null;
-  }
-
-  function handleDragEnd(): void {
-    draggingIndex = null;
-    dropTargetIndex = null;
-  }
-
-  function handleKeydown(event: KeyboardEvent, index: number): void {
-    if (isUnavailable) return;
-
-    const intent = listReorderKeyIntent(event.key, index, grabbedIndex, items.length);
-
-    if (!intent) return;
-
-    event.preventDefault();
-
-    switch (intent.type) {
-      case "grab":
-        grabbedIndex = index;
-        announce(
-          `Grabbed ${items[index]?.label ?? items[index]?.id ?? "item"}. Use arrow keys to move, Escape to cancel.`,
-        );
-        break;
-      case "drop":
-        grabbedIndex = null;
-        announce("Dropped item.");
-        break;
-      case "cancelGrab":
-        grabbedIndex = null;
-        announce("Cancelled keyboard move.");
-        break;
-      case "boundary":
-        announce("Reached list boundary.");
-        break;
-      case "move": {
-        moveItem(intent.from, intent.to);
-        if (grabbedIndex !== null) {
-          grabbedIndex = intent.to;
-        }
-
-        requestAnimationFrame(() => {
-          const element = document.querySelector<HTMLElement>(`[data-reorder-index="${intent.to}"]`);
-          element?.focus();
-        });
-        break;
-      }
-    }
+    ensureIndexVisible(next);
+    requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>(`[data-reorder-index="${next}"]`)?.focus();
+    });
   }
 
   function addItem(): void {
@@ -277,7 +262,6 @@
 
   function handleCancel(): void {
     if (!onCancel || isUnavailable) return;
-    grabbedIndex = null;
     onCancel();
   }
 
@@ -347,75 +331,40 @@
       </div>
     {/if}
 
-    <ul
-      class="poodle-editable-list"
-      class:poodle-editable-list--embedded-handle={embeddedHandle}
-      role="listbox"
-      aria-label={ariaLabel}
-      data-disabled={isUnavailable}
-      data-size={resolvedSize}
-      data-density={resolvedDensity}
-    >
-      {#each visibleItems as reorderItem, localIndex (reorderItem.id)}
-        {@const index = windowStart + localIndex}
-        <li
-          class="poodle-editable-list__item"
-          class:poodle-editable-list__item--dragging={draggingIndex === index}
-          class:poodle-editable-list__item--drop-target={dropTargetIndex === index && draggingIndex !== index}
-          class:poodle-editable-list__item--grabbed={grabbedIndex === index}
-          class:poodle-editable-list__item--last-moved={lastMovedId === reorderItem.id}
-          class:poodle-editable-list__item--embedded-handle={embeddedHandle}
-          role="option"
-          tabindex={isUnavailable ? -1 : 0}
-          aria-selected="false"
-          aria-label={`Reorder ${reorderItem.label ?? reorderItem.id}. Position ${index + 1} of ${items.length}. Press space to grab, then arrow keys to move.`}
-          data-reorder-index={index}
-          draggable={reorderable && !isUnavailable}
-          ondragstart={(event) => handleDragStart(event, index)}
-          ondragover={(event) => handleDragOver(event, index)}
-          ondrop={(event) => handleDrop(event, index)}
-          ondragend={handleDragEnd}
-          onkeydown={(event) => handleKeydown(event, index)}
-        >
-          {#if reorderable && !embeddedHandle}
-            <span class="poodle-editable-list__handle" aria-hidden="true">
-              <svg viewBox="0 0 16 16" fill="currentColor">
-                <circle cx="5" cy="4" r="1.25" />
-                <circle cx="11" cy="4" r="1.25" />
-                <circle cx="5" cy="8" r="1.25" />
-                <circle cx="11" cy="8" r="1.25" />
-                <circle cx="5" cy="12" r="1.25" />
-                <circle cx="11" cy="12" r="1.25" />
-              </svg>
-            </span>
-          {/if}
-          <span class="poodle-editable-list__content">
-            {#if item}
-              {@render item(reorderItem)}
-            {:else}
-              {reorderItem.label ?? reorderItem.id}
-            {/if}
-          </span>
-          {#if showRemove}
-            <div class="poodle-editable-list__remove poodle-editable-list__remove--danger-on-hover">
-              <IconButton
-                icon="x"
-                variant="ghost"
-                size={resolvedSize}
-                sizeRole="chrome"
-                density={resolvedDensity}
-                disabled={isUnavailable}
-                ariaLabel={`Remove ${reorderItem.label ?? reorderItem.id}`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  removeItem(reorderItem.id);
-                }}
-              />
-            </div>
-          {/if}
-        </li>
-      {/each}
-    </ul>
+    <DragDropProvider describeAnnouncement={() => null}>
+      <EditableListKeyboardTargets {items} {reorderable} {isUnavailable} onDrop={handleDrop} />
+      <ul
+        class="poodle-editable-list"
+        class:poodle-editable-list--embedded-handle={embeddedHandle}
+        role="listbox"
+        aria-label={ariaLabel}
+        data-disabled={isUnavailable}
+        data-size={resolvedSize}
+        data-density={resolvedDensity}
+      >
+        {#each visibleItems as reorderItem, localIndex (reorderItem.id)}
+          {@const index = windowStart + localIndex}
+          <EditableListRow
+            item={reorderItem}
+            {index}
+            total={items.length}
+            {reorderable}
+            {embeddedHandle}
+            {isUnavailable}
+            {showRemove}
+            lastMoved={lastMovedId === reorderItem.id}
+            {resolvedSize}
+            {resolvedDensity}
+            itemSnippet={item}
+            onDrop={handleDrop}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onRemove={removeItem}
+            onIdleKeydown={handleIdleKeydown}
+          />
+        {/each}
+      </ul>
+    </DragDropProvider>
 
     {#if canAdd}
       <div class="poodle-editable-list__add">

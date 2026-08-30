@@ -22,6 +22,8 @@ import {
   type DragSourceRegistration,
   type DropTargetHandle,
   type DropTargetRegistration,
+  type KeyboardDropTargetHandle,
+  type KeyboardDropTargetRegistration,
 } from "@inflatable-cookie/poodle-core";
 
 export type {
@@ -33,6 +35,10 @@ export type {
   DragPreviewSnapshot,
   DragSourceRegistration,
   DropTargetRegistration,
+  KeyboardDropDirection,
+  KeyboardDropTargetHandle,
+  KeyboardDropTargetRegistration,
+  KeyboardPositionResolverInput,
 } from "@inflatable-cookie/poodle-core";
 
 interface DragDropContextValue {
@@ -228,6 +234,34 @@ export function useDropTarget(registration: DropTargetRegistration): {
 
   return {
     getTargetProps,
+    accepted: ctx.snapshot.targetId === registration.targetId && ctx.snapshot.targetPosture === "accepted",
+    rejected: ctx.snapshot.targetId === registration.targetId && ctx.snapshot.targetPosture === "rejected",
+  };
+}
+
+export function useKeyboardDropTarget(registration: KeyboardDropTargetRegistration): {
+  accepted: boolean;
+  rejected: boolean;
+} {
+  const ctx = useDragDropContext();
+  const handleRef = useRef<KeyboardDropTargetHandle | null>(null);
+  const registrationRef = useRef(registration);
+  registrationRef.current = registration;
+
+  useLayoutEffect(() => {
+    const handle = ctx.controller.registerKeyboardTarget(registrationRef.current);
+    handleRef.current = handle;
+    return () => {
+      handle.unregister();
+      handleRef.current = null;
+    };
+  }, [ctx.controller, registration.targetId]);
+
+  useLayoutEffect(() => {
+    handleRef.current?.update(registration);
+  });
+
+  return {
     accepted: ctx.snapshot.targetId === registration.targetId && ctx.snapshot.targetPosture === "accepted",
     rejected: ctx.snapshot.targetId === registration.targetId && ctx.snapshot.targetPosture === "rejected",
   };

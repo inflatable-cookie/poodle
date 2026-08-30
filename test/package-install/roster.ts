@@ -27,6 +27,7 @@ const REACT_NON_COMPONENT_ROOT_EXPORTS = [
   "useDragDrop",
   "useDragSource",
   "useDropTarget",
+  "useKeyboardDropTarget",
   "usePillContext",
   "useThemeController",
   "useUiPresentation",

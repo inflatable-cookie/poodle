@@ -12,6 +12,7 @@ import {
   createDragDropController,
   type DragSourceRegistration,
   type DropTargetRegistration,
+  type KeyboardDropTargetRegistration,
 } from "../../packages/core/src";
 
 const SOURCE_BOX = { x: 10, y: 10, width: 80, height: 20 };
@@ -79,6 +80,23 @@ function targetReg(overrides: Partial<DropTargetRegistration> = {}): DropTargetR
     label: "List",
     resolvePosition: () => "inside",
     canDrop: (intent) => ({ accepted: true, intent }),
+    onDrop: () => ({ status: "committed" }),
+    ...overrides,
+  };
+}
+
+function keyboardTargetReg(
+  overrides: Partial<KeyboardDropTargetRegistration> = {},
+): KeyboardDropTargetRegistration {
+  return {
+    targetId: "dst",
+    acceptedKinds: ["item"],
+    label: "List",
+    order: 0,
+    resolvePosition: (input) =>
+      input.direction === "previous" || input.direction === "first" ? "before" : "after",
+    canDrop: (intent, subject) =>
+      subject.id === intent.targetId ? { accepted: false, reason: "self" } : { accepted: true, intent },
     onDrop: () => ({ status: "committed" }),
     ...overrides,
   };
@@ -300,6 +318,394 @@ describe("createDragDropController", () => {
     expect(controller.getSnapshot().phase).toBe("idle");
     expect(document.activeElement).toBe(sourceEl);
     controller.destroy();
+  });
+
+  it("moves keyboard intent from the source rather than wrapping to the first target", () => {
+    const rowA = layout(document.createElement("div"), { x: 10, y: 10, width: 80, height: 20 });
+    const rowB = layout(document.createElement("div"), { x: 10, y: 40, width: 80, height: 20 });
+    const rowC = layout(document.createElement("div"), { x: 10, y: 70, width: 80, height: 20 });
+    rowA.tabIndex = 0;
+    root.replaceChildren(rowA, rowB, rowC);
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const rowTarget = (id: string): DropTargetRegistration =>
+      targetReg({
+        targetId: id,
+        label: id,
+        resolvePosition: (input) => (input.y < input.rect.top + input.rect.height / 2 ? "before" : "after"),
+        canDrop: (intent, subject) =>
+          subject.id === intent.targetId ? { accepted: false, reason: "self" } : { accepted: true, intent },
+        onDrop,
+      });
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(rowB, sourceReg({ sourceId: "b", subject: { kind: "item", id: "b" }, label: "Beta" }));
+    controller.registerTarget(rowA, rowTarget("a"));
+    controller.registerTarget(rowB, rowTarget("b"));
+    controller.registerTarget(rowC, rowTarget("c"));
+    rowB.focus();
+
+    rowB.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("c");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("c");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(onDrop).toHaveBeenCalledWith({ targetId: "c", position: "after", operation: "move" });
+    controller.destroy();
+  });
+
+  it("does not start a pointer drag from an interactive descendant of a whole-row source", () => {
+    const row = layout(document.createElement("div"), SOURCE_BOX);
+    const button = document.createElement("button");
+    button.textContent = "Remove";
+    row.append(button);
+    root.replaceChildren(row, targetEl);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(row, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    button.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    button.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
+  it("does not start a pointer drag from a bare contenteditable descendant", () => {
+    const row = layout(document.createElement("div"), SOURCE_BOX);
+    const editor = document.createElement("div");
+    editor.setAttribute("contenteditable", "");
+    editor.textContent = "Edit me";
+    row.append(editor);
+    root.replaceChildren(row, targetEl);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(row, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    editor.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    editor.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
+  it("uses logical keyboard order and distinct previous/next positions", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const rowA = layout(document.createElement("div"), { x: 10, y: 10, width: 80, height: 20 });
+    const rowB = layout(document.createElement("div"), { x: 10, y: 40, width: 80, height: 20 });
+    rowA.tabIndex = 0;
+    rowB.tabIndex = 0;
+    root.replaceChildren(rowA, rowB);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(
+      rowB,
+      sourceReg({ sourceId: "b", subject: { kind: "item", id: "b" }, label: "Beta", keyboardOrder: 1 }),
+    );
+    controller.registerTarget(rowA, targetReg({ targetId: "a", label: "Alpha" }));
+    controller.registerTarget(rowB, targetReg({ targetId: "b", label: "Beta" }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "a", label: "Alpha", order: 0, onDrop }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "b", label: "Beta", order: 1, onDrop }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "c", label: "Gamma", order: 2, onDrop }));
+    rowB.focus();
+
+    rowB.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("c");
+    expect(controller.getSnapshot().session?.intent?.position).toBe("after");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(onDrop).toHaveBeenCalledWith({ targetId: "c", position: "after", operation: "move" });
+
+    rowB.focus();
+    rowB.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("a");
+    expect(controller.getSnapshot().session?.intent?.position).toBe("before");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(onDrop).toHaveBeenLastCalledWith({ targetId: "a", position: "before", operation: "move" });
+    controller.destroy();
+  });
+
+  it("cancels logical keyboard intent when that registration is removed", () => {
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    const logical = controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "hidden", order: 1 }));
+    sourceEl.focus();
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("hidden");
+    logical.unregister();
+    expect(onEnd.mock.calls[0]?.[0]).toEqual({ status: "cancelled", reason: "target-lost" });
+    controller.destroy();
+  });
+
+  it("rejects duplicate logical target ids while allowing a shared DOM id", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerTarget(targetEl, targetReg({ targetId: "shared" }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "shared", order: 0 }));
+    expect(() => controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "shared", order: 1 }))).toThrow(
+      /Duplicate keyboard drop target id/,
+    );
+    controller.destroy();
+  });
+
+  it("uses spatial keyboard when logical targets do not match the source kind", () => {
+    const onDomDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onLogicalDrop = vi.fn(() => ({ status: "committed" as const }));
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0 }));
+    controller.registerTarget(targetEl, targetReg({ onDrop: onDomDrop }));
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({
+        targetId: "clip",
+        acceptedKinds: ["clip"],
+        label: "Clip",
+        order: 0,
+        onDrop: onLogicalDrop,
+      }),
+    );
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("dst");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(onDomDrop).toHaveBeenCalledTimes(1);
+    expect(onLogicalDrop).not.toHaveBeenCalled();
+    controller.destroy();
+  });
+
+  it("announces the DOM target during pointer drag when a logical target shares the id", () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0 }));
+    controller.registerTarget(targetEl, targetReg({ targetId: "shared", label: "DOM List" }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "shared", label: "Keyboard List", order: 0 }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    vi.advanceTimersByTime(400);
+    expect(controller.getSnapshot().announcement).toBe("Alpha, inside DOM List");
+    expect(controller.getSnapshot().announcement).not.toContain("Keyboard List");
+    controller.destroy();
+  });
+
+  it("announces the logical target during keyboard drag when a DOM target shares the id", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0 }));
+    controller.registerTarget(targetEl, targetReg({ targetId: "shared", label: "DOM List" }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "shared", label: "Keyboard List", order: 1 }));
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("shared");
+    expect(controller.getSnapshot().announcement).toBe("Alpha, after Keyboard List");
+    expect(controller.getSnapshot().announcement).not.toContain("DOM List");
+    controller.destroy();
+  });
+
+  it("keeps a spatial keyboard drop on the DOM registry after a matching logical target is added", () => {
+    const onDomDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onLogicalDrop = vi.fn(() => ({ status: "committed" as const }));
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0 }));
+    controller.registerTarget(targetEl, targetReg({ targetId: "shared", onDrop: onDomDrop }));
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("shared");
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "shared", label: "Keyboard List", order: 0, onDrop: onLogicalDrop }),
+    );
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    expect(onDomDrop).toHaveBeenCalledTimes(1);
+    expect(onLogicalDrop).not.toHaveBeenCalled();
+    controller.destroy();
+  });
+
+  it("keeps an async logical drop on the logical registry after acceptedKinds change", async () => {
+    let finish: (value: { status: "committed" }) => void = () => {};
+    const pending = new Promise<{ status: "committed" }>((resolve) => {
+      finish = resolve;
+    });
+    const onDomDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    controller.registerTarget(targetEl, targetReg({ targetId: "shared", onDrop: onDomDrop }));
+    const logical = controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "shared", order: 1, onDrop: () => pending }),
+    );
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(controller.getSnapshot().phase).toBe("dropping");
+
+    logical.update(keyboardTargetReg({ targetId: "shared", acceptedKinds: ["clip"], order: 1, onDrop: () => pending }));
+    finish({ status: "committed" });
+    await pending;
+    await Promise.resolve();
+    expect(onDomDrop).not.toHaveBeenCalled();
+    expect(onEnd.mock.calls.at(-1)?.[0]).toEqual({
+      status: "committed",
+      intent: { targetId: "shared", position: "after", operation: "move" },
+    });
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
+  it("clears a rejected logical snapshot when the next resolver returns null", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0 }));
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({
+        targetId: "blocked",
+        order: 1,
+        canDrop: () => ({ accepted: false, reason: "occupied" }),
+      }),
+    );
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({
+        targetId: "gap",
+        order: 2,
+        resolvePosition: () => null,
+      }),
+    );
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("blocked");
+    expect(controller.getSnapshot().targetPosture).toBe("rejected");
+    expect(controller.getSnapshot().rejectedReason).toBe("occupied");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBeNull();
+    expect(controller.getSnapshot().targetPosture).toBeNull();
+    expect(controller.getSnapshot().rejectedReason).toBeUndefined();
+    controller.destroy();
+  });
+
+  it("clears logical intent when the next resolver returns null", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "keep", order: 1, onDrop }));
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({
+        targetId: "gap",
+        order: 2,
+        resolvePosition: () => null,
+        onDrop,
+      }),
+    );
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("keep");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().session?.intent).toBeNull();
+    expect(controller.getSnapshot().targetId).toBeNull();
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    expect(onDrop).not.toHaveBeenCalled();
+    expect(onEnd.mock.calls.at(-1)?.[0]).toEqual({ status: "cancelled", reason: "explicit" });
+    controller.destroy();
+  });
+
+  it("does not commit a logical target disabled before drop", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    const logical = controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "hidden", order: 1, onDrop }),
+    );
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("hidden");
+    logical.update(keyboardTargetReg({ targetId: "hidden", order: 1, onDrop, disabled: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    expect(onDrop).not.toHaveBeenCalled();
+    expect(onEnd.mock.calls.at(-1)?.[0]).toEqual({ status: "rejected", reason: "target-unavailable" });
+    controller.destroy();
+  });
+
+  it("rejects an async logical drop when the target is disabled or unregistered before commit", async () => {
+    let finish: (value: { status: "committed" }) => void = () => {};
+    const pending = new Promise<{ status: "committed" }>((resolve) => {
+      finish = resolve;
+    });
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    const handle = controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "hidden", order: 1, onDrop: () => pending }),
+    );
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(controller.getSnapshot().phase).toBe("dropping");
+
+    handle.update(keyboardTargetReg({ targetId: "hidden", order: 1, onDrop: () => pending, disabled: true }));
+    expect(onEnd.mock.calls.at(-1)?.[0]).toEqual({ status: "rejected", reason: "target-unavailable" });
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    finish({ status: "committed" });
+    await pending;
+    await Promise.resolve();
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+
+    let finishAgain: (value: { status: "committed" }) => void = () => {};
+    const pendingAgain = new Promise<{ status: "committed" }>((resolve) => {
+      finishAgain = resolve;
+    });
+    const onEndAgain = vi.fn();
+    const again = createDragDropController();
+    again.connect(root);
+    again.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEndAgain }));
+    const live = again.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "hidden", order: 1, onDrop: () => pendingAgain }),
+    );
+    sourceEl.focus();
+
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    live.unregister();
+    expect(onEndAgain.mock.calls.at(-1)?.[0]).toEqual({
+      status: "rejected",
+      reason: "target-unavailable",
+    });
+
+    finishAgain({ status: "committed" });
+    await pendingAgain;
+    await Promise.resolve();
+    expect(again.getSnapshot().phase).toBe("idle");
+    again.destroy();
   });
 
   it("cancels an active session on Escape", () => {

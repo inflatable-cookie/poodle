@@ -762,5 +762,9 @@ export {
   type DragSourceRegistration,
   type DropTargetHandle,
   type DropTargetRegistration,
+  type KeyboardDropDirection,
+  type KeyboardDropTargetHandle,
+  type KeyboardDropTargetRegistration,
+  type KeyboardPositionResolverInput,
 } from "./dom/drag-drop-controller";
 export * from "./audio/index";

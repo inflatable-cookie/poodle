@@ -202,6 +202,7 @@ export {
   useDragDrop,
   useDragSource,
   useDropTarget,
+  useKeyboardDropTarget,
   type DragDropProviderProps,
   type SourcePropGetter,
   type TargetPropGetter,

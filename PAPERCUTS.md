@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-30 — Svelte smoke and axe globs are `src/*.svelte`, so every
+  top-level `.svelte` file is treated as a public component. An internal
+  helper at that path (`EditableListRow`) failed both suites because it
+  required `DragDropProvider`. Keep internal Svelte helpers in a
+  subdirectory. Hit while closing g16.023.
+
 - 2026-08-30 — A separate PR thread checked the orchestrator-owned primary
   checkout off `main` and onto its worker commit while a handoff was being
   written. The committed worker branch was safe, but validation ran against

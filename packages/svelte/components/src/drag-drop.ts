@@ -10,4 +10,8 @@ export type {
   DragPreviewSnapshot,
   DragSourceRegistration,
   DropTargetRegistration,
+  KeyboardDropDirection,
+  KeyboardDropTargetHandle,
+  KeyboardDropTargetRegistration,
+  KeyboardPositionResolverInput,
 } from "@inflatable-cookie/poodle-core";
