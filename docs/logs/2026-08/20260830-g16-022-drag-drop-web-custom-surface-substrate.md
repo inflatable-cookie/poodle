@@ -18,7 +18,8 @@ surfaces. One provider-scoped DOM controller runs Pointer Events (mouse, pen,
 touch) and a keyboard sensor, caches geometry, executes kernel effects, and
 projects an immutable snapshot. Svelte and React bind that controller
 idiomatically. Headless Chromium and WebKit prove capture, geometry
-invalidation, touch/scroll arbitration, preview cleanup, and focus return.
+invalidation, preview cleanup, and focus return. Chromium additionally proves
+native touch/scroll arbitration; WebKit's touch checks are synthetic.
 
 No component, contract, token, native runtime, or ledger row changed. The
 parity evidence ledger stays at 52 mounted / 122 missing.
