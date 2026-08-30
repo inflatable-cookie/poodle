@@ -15,6 +15,9 @@ pub struct ContextMenuSpec {
     /// Omitted (`None`) inherits from the presentation context; an explicit
     /// value always wins.
     pub density: Option<ControlDensity>,
+    /// When false, the consumer owns invocation and supplies controlled
+    /// open + anchor. Matches Svelte `trigger` (default `true`).
+    pub trigger: bool,
 }
 
 impl Default for ContextMenuSpec {
@@ -26,6 +29,7 @@ impl Default for ContextMenuSpec {
             size: None,
             size_role: SemanticControlSizeRole::Chrome,
             density: None,
+            trigger: true,
         }
     }
 }
@@ -83,6 +87,11 @@ impl ContextMenuSpec {
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = Some(density);
+        self
+    }
+
+    pub fn with_trigger(mut self, trigger: bool) -> Self {
+        self.trigger = trigger;
         self
     }
 }
