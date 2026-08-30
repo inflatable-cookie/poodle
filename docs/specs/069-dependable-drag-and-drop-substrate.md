@@ -1,7 +1,7 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: active — compiled as g16.021–g16.028; g16.021 ready
-Updated: 2026-08-28
+Status: active — compiled as g16.021–g16.028; g16.021 merged, g16.022 ready
+Updated: 2026-08-30
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
 `../contracts/components/tabs.md`,
@@ -174,6 +174,81 @@ The web pointer sensor uses Pointer Events. It must:
   state exactly once; and
 - handle `pointercancel`, lost capture, visibility loss, source unmount, and
   target unmount.
+
+## Public Web Custom-Surface API
+
+`g16.022` exposes one framework-free DOM controller from
+`@inflatable-cookie/poodle-core`:
+
+- `createDragDropController(options?) -> DragDropController`;
+- `DragDropController.connect(root) -> cleanup`, with one connected root and
+  its owner document per controller;
+- `registerSource(element, registration) -> DragSourceHandle` and
+  `registerTarget(element, registration) -> DropTargetHandle`;
+- `getSnapshot()`, `subscribe(listener)`, `invalidateLayout()`, `cancel()`, and
+  idempotent `destroy()`;
+- immutable `capabilities` for pointer, touch, and keyboard on this internal
+  transport; and
+- handles with `update(registration)` and idempotent `unregister()`.
+
+There is no default controller, document-global registry, or module singleton.
+Two providers in one document own independent controllers and sessions.
+Connecting the same controller twice, duplicate live source ids, and duplicate
+live target ids are errors rather than last-writer-wins behavior.
+
+The paired public registration names are:
+
+- `DragSourceRegistration`: `sourceId`, opaque `subject`, `allowedOperations`,
+  initial `operation`, `disabled`, required accessible `label`, optional
+  `instructions`, per-pointer `activation`, `onDragStart`, and `onDragEnd`;
+- `DropTargetRegistration`: `targetId`, accepted subject kinds, `disabled`,
+  `priority`, required accessible `label`, `resolvePosition`, `canDrop`, and
+  `onDrop`; and
+- `DragDropCommitResult`: committed, rejected with an optional reason, or
+  failed with an optional reason. `onDrop` may return it synchronously or by
+  promise. The controller rechecks `canDrop` before invoking it and maps one
+  result into the existing kernel terminal event.
+
+`resolvePosition` receives the adapter-owned point, cached target rectangle,
+current subject, operation, and input kind. It returns a semantic
+`DropPosition` or `null`. `canDrop` receives the resulting intent and live
+subject; it cannot mutate. DOM geometry never enters `DragSession` or
+`DropIntent`.
+
+`DragActivationConstraints` has explicit mouse, pen, and touch entries. Mouse
+and pen activate by distance. Touch activates only after its hold delay while
+movement remains within tolerance; movement outside tolerance before the hold
+cancels the candidate and leaves scrolling untouched. Pointer capture and
+`touch-action` narrow to the registered source/handle only after activation.
+
+`DragDropSnapshot` is an immutable presentation read containing the semantic
+phase/session plus adapter-owned input kind, pointer position where present,
+active source/target ids, accepted/rejected target posture, and current
+preview position. It exposes no controller maps, elements, listeners, timers,
+observers, or mutable machine context. `DragPreviewSnapshot` is the subset
+passed to custom preview renderers.
+
+Default announcements use the required source and target labels. A single
+`describeAnnouncement(event)` option may replace the text for pickup, intent,
+clear, committed, rejected, failed, and cancelled observations. The event is a
+read-only description; it is not a second lifecycle callback.
+
+Svelte exports `DragDropProvider` and `useDragDrop`. The hook returns the
+provider snapshot store, `cancel`, and `dragSource` / `dropTarget` actions.
+Actions own register, reactive update, and unregister for their element.
+
+React exports `DragDropProvider`, `useDragDrop`, `useDragSource`, and
+`useDropTarget`. The source and target hooks return stable
+`getSourceProps` / `getTargetProps` prop getters plus read-only local posture.
+The getters compose consumer handlers and refs; they do not overwrite them.
+
+Both providers accept an optional explicit controller, a custom preview
+renderer, `describeAnnouncement`, and children. They render one overlay and
+one polite live region for their own controller. Provider unmount cancels one
+active session, unregisters every source and target, restores focus when the
+source survives, removes every document listener/observer/timer/attribute, and
+destroys an internally-created controller exactly once. An injected controller
+is disconnected but not destroyed.
 
 Mouse, pen, and touch differ only in default activation constraints. Components
 may choose a dedicated handle. Poodle does not attach document-wide

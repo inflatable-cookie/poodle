@@ -1,6 +1,6 @@
 # g16.032 — Continuous Audio Native Mounted Parity
 
-Status: complete — awaiting review; do not overlap `g16.025`
+Status: complete — merged in PR #100; do not overlap `g16.025`
 Opened: 2026-08-28
 Depends on: completed `g16.031`; landed paired audio machines and callback
 effects

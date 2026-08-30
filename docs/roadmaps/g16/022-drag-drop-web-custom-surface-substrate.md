@@ -1,6 +1,7 @@
 # g16.022 — Drag-And-Drop Web Custom-Surface Substrate
 
-Status: planned — promote after g16.021 lands and public adapter shape is fixed
+Status: ready
+Opened: 2026-08-28
 Depends on: `021-drag-drop-semantic-kernel.md`
 Governing refs: `../../architecture/011-drag-and-drop-substrate.md`,
 `../../specs/069-dependable-drag-and-drop-substrate.md`,
@@ -17,21 +18,29 @@ Do not migrate an existing Poodle component in this card. The proof is a small
 custom consumer fixture in each web runtime so the substrate is genuinely
 public rather than component-private.
 
-## Readiness Gate
+## Locked Public Surface
 
-Before this card becomes ready, record the exact public surface after reviewing
-the landed g16.021 types. It must include:
+Spec 069 fixes the public surface after review of the landed g16.021 types. The
+worker implements, documents, and exports:
 
-- one document-scoped controller/provider;
-- stable source and target registrations;
-- idiomatic Svelte action/context and React hook/prop-getter adapters;
-- custom preview and accessible-description inputs;
-- capability and active-session reads that do not expose mutable internals; and
-- teardown/unregister semantics.
+- core `createDragDropController` and the exact controller, registration,
+  handle, snapshot, activation, announcement, preview, capability, and commit
+  result types named in spec 069;
+- Svelte `DragDropProvider` / `useDragDrop`, with `dragSource` and `dropTarget`
+  actions;
+- React `DragDropProvider` / `useDragDrop` / `useDragSource` /
+  `useDropTarget`, with stable prop getters; and
+- one provider-owned overlay and polite live region, optional custom preview,
+  default label-based announcements, and `describeAnnouncement` override.
 
 Svelte and React need equivalent semantics, not artificially identical syntax.
 No DOM node, framework event, or global singleton belongs in core semantic
 state.
+
+Registration identity is strict: duplicate live ids fail, handles update in
+place, unregister is idempotent, and two providers in one document stay
+independent. An injected controller is disconnected but not destroyed by its
+provider.
 
 ## Required Behavior
 
@@ -60,6 +69,22 @@ state.
 - [ ] Examples remain human-facing; exhaustive sensor cases live in tests or a
       dedicated conformance tab.
 - [ ] No existing component or ledger row changes.
+
+## Execution Plan
+
+- [ ] **Batch 1 — DOM controller.** Implement the controller, registrations,
+      pointer/touch/keyboard sensors, cached geometry, effect runner, snapshots,
+      exact cleanup, and focused framework-free tests over the g16.021 kernel.
+- [ ] **Batch 2 — Svelte adapter.** Add provider/context, source and target
+      actions, overlay/live region, exports, and a mounted custom-surface
+      fixture with two independent scopes.
+- [ ] **Batch 3 — React adapter.** Add the equivalent provider/hooks/prop
+      getters, composed refs/handlers, exports, and the same mounted fixture
+      behavior without forcing Svelte syntax onto React.
+- [ ] **Batch 4 — browser evidence and closeout.** Prove Chromium/WebKit
+      capture, touch arbitration, geometry invalidation, rejection, focus
+      return, unmount cleanup, and preview cleanup; update docs/logs without
+      moving a component ledger cell.
 
 ## Writable Scope
 

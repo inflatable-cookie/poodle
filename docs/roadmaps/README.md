@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-29
+Updated: 2026-08-30
 
 Roadmaps record Poodle's executable milestone work. `g15` completed the full
 v0.2.x release programme: the roster and parity baseline, failed v0.2.0
@@ -65,9 +65,9 @@ behavior repairs without inventing another conformance authority.
   closed paired semantics and the Svelte/React gesture and entry lifecycles
   behind one hand-authored `audioControls` vector corpus, moving no ledger
   cell; `g16.032` mounts the three controls through one bounded
-  continuous-value Node event (ledger 52 mounted / 122 missing) and must not
-  overlap drag card `025`. This work remains separate from payload
-  drag-and-drop.
+  continuous-value Node event (ledger 52 mounted / 122 missing), merged in PR
+  #100. This work remains separate from payload drag-and-drop. `g16.022` is now
+  ready as the next drag-programme card over the landed semantic kernel.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other
@@ -130,10 +130,10 @@ behavior repairs without inventing another conformance authority.
   `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
   `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
   `019` complete, merged in PR #94, ledger 47 mounted / 127 missing; `020`
-  complete, merged in PR #95. `029`–`032` are compiled component-continuation
-  cards, with `029` next. Dependable drag-and-drop remains a
+  complete, merged in PR #95. `029`–`032` are complete component-continuation
+  cards. Dependable drag-and-drop remains a
   separate programme governed by architecture 011/spec 069 and compiled as
-  `021`–`028`; `021` merged in PR #96.
+  `021`–`028`; `021` merged in PR #96 and `022` is ready.
 
 ## Rules
 

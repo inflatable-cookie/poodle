@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.032 complete, awaiting review; g16.031 merged in PR #99
+Status: active — g16.032 merged in PR #100; g16.022 ready
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -52,7 +52,7 @@ stay maintained; backend admission is not part of the first card.
 19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — complete; merged in PR #94
 20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
 21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — complete; merged in PR #96
-22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — planned; depends on 021
+22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — ready; depends on merged 021
 23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — planned; clean public migration approved, depends on 022
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — planned; depends on 023
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — planned; depends on 024
@@ -62,7 +62,7 @@ stay maintained; backend admission is not part of the first card.
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
-32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete, awaiting review; ledger 52 mounted / 122 missing
+32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete; merged in PR #100; ledger 52 mounted / 122 missing
 
 ## Parallel Continuation
 
@@ -309,8 +309,7 @@ ledger cell moved.
 
 ## Next Task
 
-`g16.032` is implemented and awaiting review. After operator-authorized merge,
-the orchestrator chooses from `g16.022` (still gated on the landed-kernel
-web adapter surface) and the component-continuation runway. EditableLabel
-stays decision-blocked. Never overlap a Node/GPUI routing card with
-`g16.025`.
+`g16.032` merged in PR #100. `g16.022` is the single next task: expose the
+landed drag session kernel through the decided Svelte and React custom-surface
+API. EditableLabel stays decision-blocked. `g16.023` remains gated on the
+mounted web substrate; `g16.025` remains serial behind the earlier drag cards.

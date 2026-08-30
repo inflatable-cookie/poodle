@@ -1,8 +1,9 @@
 # g16.032 — Continuous Audio Native Mounted Parity
 
-Status: complete — awaiting review
+Status: complete — merged in PR #100
 Date: 2026-08-29
 PR: https://github.com/inflatable-cookie/poodle/pull/100
+Merge: `e39c5ab1aec97d939ae1788c1b0152b74acbb06c`
 Branch: `t3code/continuous-audio-native-parity`
 Worktree: `/Users/tom/.t3/worktrees/poodle/t3code-03a3eccc`
 Card: `docs/roadmaps/g16/032-continuous-audio-native-mounted-parity.md`

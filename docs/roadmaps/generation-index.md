@@ -1,6 +1,6 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-29
+Updated: 2026-08-30
 
 ## Active Track
 
@@ -16,15 +16,15 @@ Updated: 2026-08-29
     `022`–`028` planned behind ordered drag-and-drop dependencies; `029`
     complete and merged (TimeInput native parity, ledger 48/126); `030`
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
-    `031` merged in PR #99; `032` complete and awaiting review (continuous
-    audio native mounted parity, ledger 52/122)
+    `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
+    mounted parity, ledger 52/122)
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: after operator-authorized merge of `g16.032`, choose from
-    `g16.022` (still gated on the landed-kernel web adapter surface) and the
-    component-continuation runway. Keep Node/GPUI routing cards away from
-    drag card `025`.
+  - Next move: dispatch ready `g16.022`, the web custom-surface adapter over
+    the landed drag kernel. Component continuation is paused at the separate
+    EditableLabel decision gate. Keep Node/GPUI routing cards away from drag
+    card `025`.
 
 ## Latest Completed Track
 
