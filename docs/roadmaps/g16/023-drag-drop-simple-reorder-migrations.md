@@ -1,6 +1,6 @@
 # g16.023 — Drag-And-Drop Simple Reorder Migrations
 
-Status: planned — public migration approved; depends on g16.022
+Status: ready — public migration approved; g16.022 merged in PR #101
 Depends on: `022-drag-drop-web-custom-surface-substrate.md`
 Governing refs: architecture 011, spec 069, the resolved
 `../../triage/20260828-221415-drag-drop-public-migration-boundary.md`, and the

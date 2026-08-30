@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.022 in PR #101; g16.023 next after merge
+Status: active — g16.022 merged in PR #101; g16.023 ready
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -52,8 +52,8 @@ stay maintained; backend admission is not part of the first card.
 19. [019 — Select mounted overlay parity](019-select-mounted-overlay-parity.md) — complete; merged in PR #94
 20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
 21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — complete; merged in PR #96
-22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — complete; PR #101
-23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — planned; clean public migration approved, depends on 022
+22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — complete; merged in PR #101
+23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — ready; clean public migration approved
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — planned; depends on 023
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — planned; depends on 024
 26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
@@ -311,8 +311,8 @@ ledger cell moved.
 ## Next Task
 
 `g16.022` landed the same-document web custom-surface substrate over the
-g16.021 kernel: one provider-scoped DOM controller, idiomatic Svelte actions
-and React prop getters, and headless Chromium/WebKit evidence. No ledger cell
-moved. After merge, promote `g16.023` for the first simple Poodle component
+g16.021 kernel in PR #101: one provider-scoped DOM controller, idiomatic Svelte
+actions and React prop getters, and headless Chromium/WebKit evidence. No
+ledger cell moved. `g16.023` is ready for the first simple Poodle component
 migrations. EditableLabel stays decision-blocked. `g16.025` remains serial
 behind the earlier drag cards.

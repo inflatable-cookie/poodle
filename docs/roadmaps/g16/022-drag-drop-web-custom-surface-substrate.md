@@ -63,7 +63,8 @@ provider.
 - [x] Mounted fixtures prove pointer, touch-like pointer, keyboard, rejection,
       cancellation, unmount, and two independent provider scopes.
 - [x] Chromium and WebKit headless probes prove capture, geometry invalidation,
-      touch/scroll arbitration, preview cleanup, and focus restoration.
+      preview cleanup, and focus restoration. Chromium additionally proves
+      native touch/scroll arbitration; WebKit touch evidence is synthetic.
 - [x] The substrate uses g16.021 transitions rather than duplicating session
       state in framework adapters.
 - [x] Examples remain human-facing; exhaustive sensor cases live in tests or a
@@ -118,7 +119,7 @@ Never run a windowed/native visual or Jetstream selector.
 
 ## Continuation
 
-After merge, promote `g16.023` for the first simple Poodle component
-migrations. Its public-export decision is approved in
+`g16.023` is ready for the first simple Poodle component migrations. Its
+public-export decision is approved in
 `../../triage/20260828-221415-drag-drop-public-migration-boundary.md`; apply the
 clean removal only after the mounted substrate replacement passes.

@@ -67,8 +67,8 @@ behavior repairs without inventing another conformance authority.
   cell; `g16.032` mounts the three controls through one bounded
   continuous-value Node event (ledger 52 mounted / 122 missing), merged in PR
   #100. This work remains separate from payload drag-and-drop. `g16.022`
-  landed the web custom-surface substrate over that kernel; `g16.023` is the
-  next drag-programme card after merge.
+  landed the web custom-surface substrate over that kernel in PR #101;
+  `g16.023` is ready as the next drag-programme card.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other
