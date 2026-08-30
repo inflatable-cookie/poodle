@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.023 PR #104 revision in flight
+Status: active — g16.023 merged; g16.024 ready
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -53,8 +53,8 @@ stay maintained; backend admission is not part of the first card.
 20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
 21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — complete; merged in PR #96
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — complete; merged in PR #101
-23. [023 — EditableList simple reorder migration](023-drag-drop-simple-reorder-migrations.md) — revision in flight; logical keyboard targets approved after review
-24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — planned; depends on 023
+23. [023 — EditableList simple reorder migration](023-drag-drop-simple-reorder-migrations.md) — complete; merged in PR #104
+24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — ready
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — planned; depends on 024
 26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
@@ -312,11 +312,9 @@ ledger cell moved.
 
 ## Next Task
 
-`g16.022` landed the same-document web custom-surface substrate over the
-g16.021 kernel in PR #101: one provider-scoped DOM controller, idiomatic Svelte
-actions and React prop getters, and headless Chromium/WebKit evidence. No
-ledger cell moved. The operator resolved the Tabs/DockRegion sequencing gate:
-`g16.023` is in PR #104 revision with the approved logical keyboard target
-extension, while Tabs moves with
-DockRegion in `g16.026`. EditableLabel stays decision-blocked. `g16.025`
-remains serial behind the earlier drag cards.
+`g16.023` merged in PR #104. EditableList now consumes the shared web drag
+substrate in Svelte and React, including ordered logical keyboard targets for
+windowed reorder; no ledger cell moved. `g16.024` is ready to prove Tree's
+nested before/inside/after intent and shared auto-scroll lifecycle. Tabs still
+moves with DockRegion in `g16.026`, EditableLabel stays decision-blocked, and
+`g16.025` remains serial behind Tree.

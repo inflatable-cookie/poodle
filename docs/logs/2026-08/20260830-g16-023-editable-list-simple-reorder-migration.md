@@ -1,8 +1,9 @@
 # g16.023 — EditableList Simple Reorder Migration
 
-Status: complete — PR #104 revision
+Status: complete — merged in PR #104
 Date: 2026-08-30
 PR: https://github.com/inflatable-cookie/poodle/pull/104
+Merge commit: `42e534942b9505a6fba83bbf88f806986ff2d0b5`
 Card: `docs/roadmaps/g16/023-drag-drop-simple-reorder-migrations.md`
 Handoff: `docs/handoffs/20260830-182242-g16-023-editable-list-reorder.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
@@ -68,5 +69,5 @@ blockers on `4eed71875` and `0fb68f0b0`. This head:
 
 ## Continuation
 
-After operator-authorized merge, promote `g16.024` for Tree nested intent
-and auto-scroll. Tabs stays with DockRegion in `g16.026`.
+`g16.024` is promoted for Tree nested intent and auto-scroll. Tabs stays with
+DockRegion in `g16.026`.

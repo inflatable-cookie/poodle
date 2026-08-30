@@ -1,6 +1,6 @@
 # g16.023 — EditableList Simple Reorder Migration
 
-Status: complete — PR #104 revision awaiting re-review
+Status: complete — merged in PR #104
 Depends on: `022-drag-drop-web-custom-surface-substrate.md`
 Governing refs: architecture 011, spec 069, the resolved
 `../../triage/20260830-180816-tabs-drag-host-bridge-sequencing.md`, and the

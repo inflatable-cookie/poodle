@@ -1,6 +1,6 @@
 # g16.024 — Drag-And-Drop Tree Nested Intent And Auto-Scroll
 
-Status: planned — depends on the simple web migration
+Status: ready
 Depends on: `023-drag-drop-simple-reorder-migrations.md`
 Governing refs: architecture 011, spec 069, and
 `../../contracts/components/tree.md`
@@ -58,6 +58,23 @@ check. Never use a windowed/native visual or Jetstream selector.
   resolver.
 - Virtualization cannot preserve stable ids without a broader Tree rewrite.
 - Scope expands into native, DockRegion, external files, or another component.
+
+## Review Oracle
+
+- **Invariant:** one active Tree drag has one deepest eligible semantic target,
+  one before/inside/after intent, and at most one nearest scroll owner; every
+  terminal path stops scrolling and revalidates the live target before commit.
+- **Smallest adversarial counterexample:** drag one row across a nested parent
+  boundary while the inner and outer containers can both scroll. Move through
+  before, inside, and after zones, disable or remove the inner target before
+  release, then cancel a second drag while edge scrolling is active.
+- **Expected failure/stop:** ancestor and descendant both become active, intent
+  flickers at a zone boundary, both containers scroll, a removed target commits,
+  or any timer/frame continues after leave, cancellation, drop, or unmount.
+- **Required proof:** paired Tree mounted tests for arbitration, all positions,
+  revalidation, removal, virtualization, and non-drag behavior; deterministic
+  geometry and auto-scroll unit tests; genuine touch hold-versus-scroll in
+  headless Chromium and WebKit.
 
 ## Continuation
 
