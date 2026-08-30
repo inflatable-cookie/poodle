@@ -1,8 +1,8 @@
 # g16.024 — Tree Nested Intent And Auto-Scroll
 
-Status: complete — pending PR
+Status: complete — pending review
 Date: 2026-08-30
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/107
 Card: `docs/roadmaps/g16/024-drag-drop-tree-nested-intent-and-auto-scroll.md`
 Handoff: `docs/handoffs/20260830-213507-g16-024-tree-nested-autoscroll.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,

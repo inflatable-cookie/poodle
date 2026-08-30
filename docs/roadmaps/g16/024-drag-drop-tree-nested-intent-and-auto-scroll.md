@@ -1,6 +1,6 @@
 # g16.024 — Drag-And-Drop Tree Nested Intent And Auto-Scroll
 
-Status: complete — pending PR
+Status: complete — pending review in PR #107
 Depends on: `023-drag-drop-simple-reorder-migrations.md`
 Governing refs: architecture 011, spec 069, and
 `../../contracts/components/tree.md`
