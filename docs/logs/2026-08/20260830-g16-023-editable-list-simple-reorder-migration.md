@@ -26,14 +26,17 @@ runtimes, and the parity-evidence ledger were not edited. Ledger remains
 
 ## Review revision
 
-PR #104 review required four fixes. The operator approved logical keyboard
-targets. This revision:
+PR #104 review required four component findings, then three substrate
+blockers on `4eed71875`. This head:
 
+- selects logical keyboard mode by a matching subject kind, not registry
+  size, and announces by the active sensor;
+- clears stale intent when a logical resolver returns `null`;
+- proves logical disable-before-drop and async revalidation;
 - adds `registerKeyboardTarget` / `keyboardOrder` and paired Svelte/React
   bindings;
 - proves ordinary ArrowUp (`before`) and both `windowSize` boundaries;
-- replaces pen-named tests with genuine `pointerType: "touch"` hold-to-reorder
-  and pre-hold cancel;
+- uses genuine `pointerType: "touch"` hold-to-reorder and pre-hold cancel;
 - treats `contenteditable` without `"false"` as interactive and proves
   `embeddedHandle` editing/action descendants do not start a drag;
 - rebases onto `f986280ba`.
@@ -50,7 +53,7 @@ targets. This revision:
 
 ## Evidence
 
-- Framework-free: `test/headless-dom/drag-drop-controller.test.ts` (34).
+- Framework-free: `test/headless-dom/drag-drop-controller.test.ts` (40).
 - Svelte: `packages/svelte/components/test/EditableList.test.ts` (21).
 - React: `packages/react/components/test/EditableList.test.tsx` (21).
 - Custom-surface preservation: Svelte and React `DragDropProvider` tests.

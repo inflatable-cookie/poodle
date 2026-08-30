@@ -574,9 +574,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function announce(kind: DragAnnouncementKind, outcome?: DragTerminalOutcome): void {
     const session = context.session;
     const source = session ? sources.get(session.sourceId) : undefined;
-    const target = session?.intent
-      ? (keyboardTargets.get(session.intent.targetId) ?? targets.get(session.intent.targetId))
-      : undefined;
+    const target = session?.intent ? targetForAnnouncement(session.intent.targetId) : undefined;
     const reason =
       outcome && (outcome.status === "rejected" || outcome.status === "failed" || outcome.status === "cancelled")
         ? "reason" in outcome
@@ -954,8 +952,23 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
   }
 
+  function hasMatchingLogicalTarget(kind: string): boolean {
+    for (const entry of keyboardTargets.values()) {
+      if (entry.registration.acceptedKinds.includes(kind)) return true;
+    }
+    return false;
+  }
+
   function usesLogicalKeyboard(source?: SourceEntry | null): boolean {
-    return source?.registration.keyboardOrder !== undefined && keyboardTargets.size > 0;
+    const kind = source?.registration.subject.kind;
+    return source?.registration.keyboardOrder !== undefined && kind !== undefined && hasMatchingLogicalTarget(kind);
+  }
+
+  function targetForAnnouncement(targetId: string): KeyboardTargetEntry | TargetEntry | undefined {
+    if (inputKind === "keyboard" && usesLogicalKeyboard(currentSource())) {
+      return keyboardTargets.get(targetId) ?? targets.get(targetId);
+    }
+    return targets.get(targetId);
   }
 
   function liveDropRegistration(intent: DropIntent): {
@@ -1467,7 +1480,12 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       subject: session.subject,
       operation: session.operation,
     });
-    if (position === null) return;
+    if (position === null) {
+      rejectedTargetId = null;
+      rejectedReason = undefined;
+      if (session.intent) dispatch({ type: "TARGET_CLEARED", sessionId: session.sessionId });
+      return;
+    }
     const intent: DropIntent = {
       targetId: entry.registration.targetId,
       position,
