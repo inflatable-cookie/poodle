@@ -139,6 +139,14 @@ The target may reject the subject with a reason suitable for presentation or
 announcement. Eligibility is checked again at commit. Hover acceptance never
 authorizes durable mutation.
 
+DOM geometry is pointer evidence, not the complete keyboard catalogue. A
+paged or windowed component may register element-free logical keyboard targets
+with stable order and direction-aware position resolution. Pointer and touch
+hit-testing ignore them. Keyboard intent reuses their normal eligibility,
+announcement, commit, removal, and terminal paths, so an unmounted destination
+does not require fake DOM or a component-owned drag lifecycle. The active
+source remains mounted until the session ends; layout paging follows commit.
+
 ## Touch Boundary
 
 Touch is part of the first contract, not a later compatibility layer. The
@@ -234,4 +242,3 @@ consumer.
 
 Rejected. Files are the interoperable boundary for desktops and DAWs. Custom
 formats remain negotiated extensions rather than implied portability.
-

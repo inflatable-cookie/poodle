@@ -185,6 +185,9 @@ The web pointer sensor uses Pointer Events. It must:
   its owner document per controller;
 - `registerSource(element, registration) -> DragSourceHandle` and
   `registerTarget(element, registration) -> DropTargetHandle`;
+- `registerKeyboardTarget(registration) -> KeyboardDropTargetHandle` for an
+  ordered semantic target that has no DOM element and never participates in
+  pointer hit-testing;
 - `getSnapshot()`, `subscribe(listener)`, `invalidateLayout()`, `cancel()`, and
   idempotent `destroy()`;
 - immutable `capabilities` for pointer, touch, and keyboard on this internal
@@ -202,11 +205,15 @@ The paired public registration names are:
   initial `operation`, `disabled`, required accessible `label`, optional
   `instructions`, optional `handle` (`Element` or a selector inside the
   source), per-pointer `activation` (`DragActivationConstraints`),
-  `onDragStart`, and `onDragEnd`;
+  optional `keyboardOrder`, `onDragStart`, and `onDragEnd`;
 - `DropTargetRegistration`: `targetId`, `acceptedKinds`, `disabled`,
   `priority`, required accessible `label`, `resolvePosition`
   (`DragPositionResolverInput` → `DropPosition | null`), `canDrop` (boolean or
-  `DropEligibility`), and `onDrop`; and
+  `DropEligibility`), and `onDrop`;
+- `KeyboardDropTargetRegistration`: the same target id, accepted kinds,
+  disabled posture, priority, label, `canDrop`, and `onDrop`, plus a stable
+  numeric `order` and `resolvePosition` over `previous | next | first | last`,
+  subject, and operation rather than a DOM rectangle; and
 - `DragDropCommitResult`: committed, rejected with an optional reason, or
   failed with an optional reason. `onDrop` may return it synchronously or by
   promise. The controller rechecks `canDrop` before invoking it and maps one
@@ -217,6 +224,22 @@ current subject, operation, and input kind. It returns a semantic
 `DropPosition` or `null`. `canDrop` receives the resulting intent and live
 subject; it cannot mutate. DOM geometry never enters `DragSession` or
 `DropIntent`.
+
+When a keyboard source declares `keyboardOrder` and matching logical keyboard
+targets exist, keyboard traversal uses that ordered registry. `previous` and
+`next` are distinct resolver inputs; a linear list normally maps them to
+`before` and `after`. `first` and `last` remain explicit rather than being
+inferred from a synthetic centre point. A logical target and a mounted DOM
+target may share a `targetId`: the logical registration is keyboard authority,
+the DOM registration is pointer/touch authority, and each registry rejects
+duplicates within itself. Without logical targets, the existing spatial DOM
+keyboard path remains available to custom surfaces.
+
+Logical target removal clears or rejects its live intent by the same phase
+rules as DOM target removal. Drop revalidates the logical registration before
+calling `onDrop`. Source removal still cancels the session. Components do not
+page or unmount the active source during intent navigation; after commit they
+may reveal the resulting index.
 
 `DragActivationConstraints` has explicit mouse, pen, and touch entries. Mouse
 and pen activate by distance. Touch activates only after its hold delay while
@@ -237,13 +260,16 @@ clear, committed, rejected, failed, and cancelled observations. The event is a
 read-only description; it is not a second lifecycle callback.
 
 Svelte exports `DragDropProvider` and `useDragDrop`. The hook returns the
-provider snapshot store, `cancel`, and `dragSource` / `dropTarget` actions.
-Actions own register, reactive update, and unregister for their element.
+provider snapshot store, `cancel`, `dragSource` / `dropTarget` actions, and a
+logical-keyboard-target registration helper whose handle owns reactive update
+and unregister. DOM actions continue to own their element registrations.
 
-React exports `DragDropProvider`, `useDragDrop`, `useDragSource`, and
-`useDropTarget`. The source and target hooks return stable
-`getSourceProps` / `getTargetProps` prop getters plus read-only local posture.
-The getters compose consumer handlers and refs; they do not overwrite them.
+React exports `DragDropProvider`, `useDragDrop`, `useDragSource`,
+`useDropTarget`, and `useKeyboardDropTarget`. The DOM source and target hooks
+return stable `getSourceProps` / `getTargetProps` prop getters plus read-only
+local posture. The getters compose consumer handlers and refs; they do not
+overwrite them. The logical hook registers no element and follows normal hook
+cleanup.
 
 Both providers accept an optional explicit controller, a custom preview
 renderer, `describeAnnouncement`, and children. They render one overlay and

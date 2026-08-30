@@ -5,7 +5,7 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: ready-to-launch
+status: revision-authorised
 owner: Poodle drag-and-drop substrate
 created: 2026-08-30
 updated: 2026-08-30
@@ -23,8 +23,10 @@ bridge, so Tabs now moves with that real consumer in `g16.026`.
 
 This worker owns the corrected `g16.023`: migrate EditableList in Svelte and
 React from component-local HTML drag-and-drop to the landed Poodle substrate.
-It is one bounded implementation card and needs no copied transcript or second
-prompt.
+PR #104 stopped correctly when review exposed that mounted-only keyboard
+targets cannot preserve windowed reorder. The operator chose the orchestrator's
+logical-target recommendation. This same worker may now revise PR #104 against
+the promoted architecture/spec/card decision.
 
 ## Why It Matters
 
@@ -38,15 +40,16 @@ bridge. A clean result establishes the migration pattern Tree can build on.
 
 - **Repository:** `/Users/tom/Dev/projects/poodle`
 - **Planning branch:** `main`
-- **Planning base commit:** `c08d1cc04fa76a46fadb3d8f193b056069f03f2d`
-- **Pushed main verification:** local `HEAD` and `origin/main` both equalled the
-  planning base before this handoff was created.
-- **Planning checkout:** clean at the planning base.
+- **Planning base commit:** `1d1d0937c077f32a2491cec614a9f167b41796bd`
+- **Planning base meaning:** current `main` before this revised handoff and its
+  logical-target decision are committed. The worker must fetch and rebase onto
+  the newer commit containing this tracked revision before continuing.
+- **Planning checkout:** clean at the planning base before this revision.
 - **Worker mode:** implementation worker dispatched by the orchestrator; this
   handoff activates the worker-only worktree preflight.
-- **Planning artifacts included at the base:** PR #101 closeout; revised spec
-  069 migration order; resolved Tabs/DockRegion sequencing note; ready
-  `g16.023`; and updated g16/front-door continuation state.
+- **Planning artifacts included at the revision:** the logical keyboard target
+  architecture/spec decision, revised card 023 review oracle, resolved
+  Tabs/DockRegion sequencing note, and updated g16/front-door state.
 - **Worker branch:** use the launcher-provided clean non-`main` branch;
   suggested manual fallback is `t3code/g16-023-editable-list-reorder`.
 - **Worker worktree:** harness-managed. Do not create a second worktree when
@@ -84,8 +87,9 @@ bridge. A clean result establishes the migration pattern Tree can build on.
   `effigy check:parity-evidence-ledger`; one final headless `effigy qa`; and
   `git diff --check origin/main...HEAD`.
 - **PR base/head:** `main` to the selected worker branch.
-- **PR URL:** pending.
-- **Review state:** awaiting implementation, then orchestrator review.
+- **PR URL:** <https://github.com/inflatable-cookie/poodle/pull/104>.
+- **Review state:** changes required; planning blocker resolved, implementation
+  revision authorised for all four posted findings.
 - **Merge authorisation:** none. The worker must not merge.
 
 ## Boundaries
@@ -96,7 +100,8 @@ Keep this run inside card 023:
   pointer, touch, and keyboard reorder; one resulting-order path; editing and
   action-button arbitration; disabled/non-reorderable inertia; focus and
   announcements; focused tests and specimens; removal of EditableList-local
-  HTML drag state/handlers; evidence and closeout.
+  HTML drag state/handlers; the approved element-free ordered logical keyboard
+  target registration plus paired bindings; evidence and closeout.
 - **Out of scope:** Tabs, `tabs-reorder.ts`, DockRegion, Tree, other drag
   components, nested placement, auto-scroll, Rust/Node/GPUI/Jetstream,
   cross-window transport, DataTransfer bridge work, inbound files, drag-out,
@@ -112,9 +117,10 @@ Keep this run inside card 023:
   pre-activation touch scrolling. Disabled and non-reorderable rows stay inert.
 - Reuse the landed provider/controller/kernel. Do not fork the lifecycle into
   an EditableList-specific controller or duplicate semantic session state.
-- If the migration exposes a genuine reusable substrate defect, repair and
-  prove only that defect. Stop if it requires a public API or architecture
-  change.
+- Implement only the promoted logical keyboard target API in architecture 011,
+  spec 069, and card 023. It is keyboard-only, element-free, ordered, and
+  direction-aware; it reuses target eligibility and commit. Stop on any wider
+  public API or architecture change.
 - Work only in the selected clean worker worktree. Never edit the
   orchestrator's planning checkout or an unrelated dirty checkout.
 - Do not merge the PR. Merge remains a separate operator-authorised action.
@@ -132,7 +138,13 @@ Keep this run inside card 023:
 - **Decisions and preferences:** preserve human-facing specimens; exhaustive
   sensor cases belong in focused tests. Touch is first-class. Keyboard uses the
   same semantic result path. Result callbacks report the complete next item
-  order. No HTML `DataTransfer` authority remains inside EditableList.
+  order. No HTML `DataTransfer` authority remains inside EditableList. Windowed
+  keyboard keeps its public cross-page behavior through logical targets; the
+  component must not page or unmount its source before drop.
+- **Review correction:** the current centre-point keyboard resolver always
+  produces `after`, so ArrowUp needs explicit previous-direction proof even
+  outside windowed mode. The approved registry covers every item, not only the
+  hidden page.
 - **Open tensions:** row composition includes text editing and action buttons,
   so source handles and event composition need deliberate boundaries. A
   component-owned provider is acceptable only if it stays provider-scoped and
@@ -149,9 +161,9 @@ host-preparation callbacks are intentionally untouched until `g16.026`.
 
 ## Suggested Next Move
 
-Read this file from the top. Before broad repository reads, run the four-command
-worktree safety preflight below. Once the selected worktree is verified against
-pushed `main`, read `AGENTS.md`, card 023, the g16 README, architecture 011,
+Read this file from the top. The original worktree preflight is already closed.
+Fetch and rebase PR #104 onto pushed `main`, then read `AGENTS.md`, card 023,
+the g16 README, architecture 011,
 spec 069, the EditableList contract, the sequencing note, the g16.022 execution
 log, and the repo-local Effigy skill.
 
@@ -181,9 +193,9 @@ handlers mechanically.
    a unique worktree/branch below it from `origin/main`. Never use `/tmp`,
    `TMPDIR`, or a guessed path; never clean, reset, stash over, or discard an
    existing checkout.
-4. From the selected worktree, fetch origin and confirm `HEAD == origin/main`.
-   Confirm `git merge-base --is-ancestor
-   c08d1cc04fa76a46fadb3d8f193b056069f03f2d HEAD` succeeds. Confirm this
+4. This is an existing PR revision. From the selected worktree, fetch origin,
+   rebase the branch onto `origin/main`, and confirm `git merge-base
+   --is-ancestor 1d1d0937c077f32a2491cec614a9f167b41796bd HEAD` succeeds. Confirm this
    repository-relative handoff exists in the selected `HEAD`, load it with
    `git show HEAD:docs/handoffs/20260830-182242-g16-023-editable-list-reorder.md`,
    and compare it with the absolute dispatch file. Stop if they differ; the
@@ -228,8 +240,9 @@ handlers mechanically.
 The orchestrator will review the PR independently against the current head,
 card, canonical refs, diff, checks, mounted fixtures, and browser evidence.
 Because worker and orchestrator share a GitHub identity, the orchestrator posts
-the verdict as a PR comment. Requested changes: none yet. The operator must
-explicitly authorise any merge.
+the verdict as a PR comment. The four findings in the existing changes-required
+comment remain open until the revised head is independently cleared. The
+operator must explicitly authorise any merge.
 
 - **Closeout refs:** card 023, its August execution log, the EditableList
   contract, g16 README, roadmap front door, generation index, unchanged parity
