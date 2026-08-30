@@ -72,36 +72,43 @@ join the frozen 175-component denominator.
   `target-unavailable`. Cleanup of listeners, overlay, attributes, timers, and
   capture runs once.
 - Pre-activation hold/distance candidates die on disconnect, cancel,
-  unregister, disable, visibility loss, and Escape. They never enter the
-  kernel.
+  unregister, disable, visibility loss, Escape, and native scroll. They
+  never enter the kernel.
 - Pointer capture works on any `Element` with `setPointerCapture` (HTML and
   SVG). After activation, non-passive `touchmove` `preventDefault` keeps a
   scroller from cancelling the gesture.
-- Authored `tabindex` / `aria-label` / `aria-description` / `draggable` /
-  `user-select` restore exactly. Post-destroy handles are inert.
+- Authored `tabindex` / `aria-label` / `aria-description` / `draggable` restore
+  exactly. `user-select: none` is applied to the connected root, not the
+  document body, so two live controllers cannot clobber each other.
+  Post-destroy handles are inert. Source and target ids are immutable on a
+  live handle; identity change unregister/registers.
 - React ownership is frozen at first render. Owned controllers destroy on a
   microtask so StrictMode remount can reconnect. Injected controllers never
-  destroy. Source/target registration follows the host node.
+  destroy. Source/target registration follows the host node and id.
 
 ## Evidence
 
-- Framework-free: `test/headless-dom/drag-drop-controller.test.ts` (25).
+- Framework-free: `test/headless-dom/drag-drop-controller.test.ts` (28).
 - Svelte mounted fixture: `packages/svelte/components/test/DragDropProvider.test.ts`
-  plus `DragDropCustomSurface.svelte` (7).
+  plus `DragDropCustomSurface.svelte` (7). Svelte actions re-register when
+  source/target id changes.
 - React mounted fixture: `packages/react/components/test/DragDropProvider.test.tsx`
-  plus `DragDropCustomSurface.tsx` (11), including StrictMode, injected
-  ownership, and host replacement.
+  plus `DragDropCustomSurface.tsx` (12), including StrictMode, injected
+  ownership, host replacement, and source-id identity change.
 - Chromium and WebKit: `effigy test:drag-drop-browser` /
-  `test/drag-drop/probe.ts` — real mouse input and `hasPointerCapture`,
-  outside-source routing, both sides of touch hold vs scroll, automatic
-  scroll/resize invalidation, keyboard focus return.
+  `test/drag-drop/probe.ts` — real mouse input, `hasPointerCapture`,
+  outside-source routing, `onDrop` commit, automatic scroll/resize
+  invalidation, keyboard commit + focus return. Chromium CDP touch proves
+  native pre-hold pan (scroller actually moves) and post-hold activation.
+  WebKit has no hold/move touch protocol; its touch checks are synthetic
+  PointerEvents and are not native scroll proof.
 
 ## Review repair
 
-PR #101 review (comment on `d3d91f179`) blocked on eight findings. All eight
-are closed in this follow-up: candidate lifetime, release hit-testing, async
-drop disable/unregister, live-region notify, React StrictMode/ownership/host
-node, exact restore, SVG capture, and real browser evidence.
+PR #101 review (comment on `d3d91f179`) blocked on eight findings, then
+re-review at `60c3402af` left three: immutable handle ids, scope-safe
+`user-select`, and honest Chromium/WebKit touch-scroll evidence. All eleven
+are closed.
 
 Repair validation: focused controller/Svelte/React tests, Chromium/WebKit
 probe, `effigy ci:web`, `effigy docs:check`, `effigy check:parity-evidence-ledger`,

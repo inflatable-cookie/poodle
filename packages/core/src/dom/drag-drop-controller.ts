@@ -409,7 +409,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   const documentListeners: Array<[string, EventListener, AddEventListenerOptions | boolean | undefined]> = [];
   let resizeObserver: ResizeObserver | null = null;
-  let restoredBodyUserSelect: string | null | undefined;
+  let restoredRootUserSelect: string | null | undefined;
 
   function assertLive(): void {
     if (destroyed) {
@@ -716,14 +716,20 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       }
     }
 
-    if (connectedDocument?.body && restoredBodyUserSelect !== undefined) {
-      if (restoredBodyUserSelect === null || restoredBodyUserSelect === "") {
-        connectedDocument.body.style.removeProperty("user-select");
+    restoreRootUserSelect();
+  }
+
+  function restoreRootUserSelect(): void {
+    if (!connectedRoot || restoredRootUserSelect === undefined) return;
+    const style = styledElement(connectedRoot);
+    if (style) {
+      if (restoredRootUserSelect === null || restoredRootUserSelect === "") {
+        style.style.removeProperty("user-select");
       } else {
-        connectedDocument.body.style.setProperty("user-select", restoredBodyUserSelect);
+        style.style.setProperty("user-select", restoredRootUserSelect);
       }
-      restoredBodyUserSelect = undefined;
     }
+    restoredRootUserSelect = undefined;
   }
 
   function abandonUnarmedGesture(): void {
@@ -778,9 +784,10 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
     if (gesture) gesture.activated = true;
 
-    if (connectedDocument?.body && restoredBodyUserSelect === undefined) {
-      restoredBodyUserSelect = connectedDocument.body.style.getPropertyValue("user-select");
-      connectedDocument.body.style.setProperty("user-select", "none");
+    const rootStyle = connectedRoot ? styledElement(connectedRoot) : null;
+    if (rootStyle && restoredRootUserSelect === undefined) {
+      restoredRootUserSelect = rootStyle.style.getPropertyValue("user-select");
+      rootStyle.style.setProperty("user-select", "none");
     }
 
     if (captureElement && pointerId !== null) {
@@ -1170,6 +1177,9 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   function onScrollOrResize(): void {
     layoutDirty = true;
+    if (gesture && !gesture.activated) {
+      stopCandidate();
+    }
     if (phase === "dragging" && pointerPosition) {
       hitTest(pointerPosition.x, pointerPosition.y);
     }
@@ -1492,20 +1502,18 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       return {
         update(next: DragSourceRegistration) {
           if (!live || destroyed) return;
-          if (next.sourceId !== entry.registration.sourceId && sources.has(next.sourceId)) {
-            throw new Error(`Duplicate drag source id "${next.sourceId}"`);
-          }
           if (next.sourceId !== entry.registration.sourceId) {
-            sources.delete(entry.registration.sourceId);
-            sources.set(next.sourceId, entry);
-            sourcesByElement.set(element, next.sourceId);
+            throw new Error(
+              `Drag source id "${entry.registration.sourceId}" is immutable on a live handle`,
+            );
           }
+          const id = entry.registration.sourceId;
           const wasDisabled = entry.registration.disabled;
           entry.registration = next;
           applySourceDom(entry);
           if (!wasDisabled && next.disabled) {
-            if (gesture?.sourceId === next.sourceId) stopCandidate();
-            if (context.session?.sourceId === next.sourceId) {
+            if (gesture?.sourceId === id) stopCandidate();
+            if (context.session?.sourceId === id) {
               dispatch({ type: "SOURCE_LOST", sessionId: context.session.sessionId });
             }
           }
@@ -1543,23 +1551,16 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       return {
         update(next: DropTargetRegistration) {
           if (!live || destroyed) return;
-          if (next.targetId !== entry.registration.targetId && targets.has(next.targetId)) {
-            throw new Error(`Duplicate drop target id "${next.targetId}"`);
-          }
           if (next.targetId !== entry.registration.targetId) {
-            targets.delete(entry.registration.targetId);
-            targets.set(next.targetId, entry);
-            targetsByElement.set(element, next.targetId);
+            throw new Error(
+              `Drop target id "${entry.registration.targetId}" is immutable on a live handle`,
+            );
           }
+          const id = entry.registration.targetId;
           const wasDisabled = entry.registration.disabled;
           entry.registration = next;
           layoutDirty = true;
-          if (
-            !wasDisabled &&
-            next.disabled &&
-            phase === "dropping" &&
-            context.session?.intent?.targetId === next.targetId
-          ) {
+          if (!wasDisabled && next.disabled && phase === "dropping" && context.session?.intent?.targetId === id) {
             dispatch({
               type: "DROP_REJECTED",
               sessionId: context.session.sessionId,

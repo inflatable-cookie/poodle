@@ -35,10 +35,17 @@ export function useDragDrop(): {
   );
 
   const dragSource: Action<HTMLElement, DragSourceRegistration> = (node, registration) => {
-    const handle = ctx.controller.registerSource(node, registration);
+    let current = registration;
+    let handle = ctx.controller.registerSource(node, current);
     return {
       update(next) {
-        handle.update(next);
+        if (next.sourceId !== current.sourceId) {
+          handle.unregister();
+          handle = ctx.controller.registerSource(node, next);
+        } else {
+          handle.update(next);
+        }
+        current = next;
       },
       destroy() {
         handle.unregister();
@@ -47,10 +54,17 @@ export function useDragDrop(): {
   };
 
   const dropTarget: Action<HTMLElement, DropTargetRegistration> = (node, registration) => {
-    const handle = ctx.controller.registerTarget(node, registration);
+    let current = registration;
+    let handle = ctx.controller.registerTarget(node, current);
     return {
       update(next) {
-        handle.update(next);
+        if (next.targetId !== current.targetId) {
+          handle.unregister();
+          handle = ctx.controller.registerTarget(node, next);
+        } else {
+          handle.update(next);
+        }
+        current = next;
       },
       destroy() {
         handle.unregister();

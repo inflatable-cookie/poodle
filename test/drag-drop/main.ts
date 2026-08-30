@@ -37,7 +37,10 @@ controller.registerTarget(target, {
   label: "List",
   resolvePosition: () => "inside",
   canDrop: (intent) => ({ accepted: true, intent }),
-  onDrop: (): DragDropCommitResult => ({ status: "committed" }),
+  onDrop: (intent): DragDropCommitResult => {
+    probe.dataset.drop = `${intent.targetId}:${intent.position}:${intent.operation}`;
+    return { status: "committed" };
+  },
 });
 
 function paint(): void {

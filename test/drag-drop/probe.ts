@@ -1,10 +1,13 @@
 /**
  * Headless Chromium + WebKit evidence for the drag-drop web substrate.
  *
- * Mouse uses Playwright's real input. Chromium touch uses CDP
- * Input.dispatchTouchEvent. WebKit has no hold/move touch protocol, so touch
- * there is dispatched at document.elementFromPoint with real hold timing — not
- * replayed onto #source.
+ * Mouse uses Playwright's real input on both engines and asserts the fixture
+ * `onDrop` result. Chromium pre-hold scroll uses CDP
+ * Input.synthesizeScrollGesture (dispatchTouchEvent does not pan this
+ * headless compositor) and asserts the scroller actually moved. Chromium
+ * post-hold drag uses dispatchTouchEvent. WebKit Playwright exposes no
+ * hold/move touch protocol, so WebKit touch is synthetic PointerEvents at
+ * elementFromPoint — controller hold/tolerance only, not native scroll proof.
  *
  *   bun test/drag-drop/probe.ts --browser=chromium
  *   bun test/drag-drop/probe.ts --browser=webkit
@@ -183,10 +186,11 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   await page.mouse.up();
   const afterPhase = await waitProbe(page, "phase", "idle");
   const afterPreview = await page.locator(".poodle-drag-preview").count();
+  const dropped = await probeAttr(page, "drop");
   check(
-    `${name}: preview and session clear after drop`,
-    afterPhase === "idle" && afterPreview === 0,
-    `phase=${afterPhase} preview=${afterPreview}`,
+    `${name}: mouse drop commits onDrop`,
+    afterPhase === "idle" && afterPreview === 0 && dropped === "list:inside:move",
+    `phase=${afterPhase} preview=${afterPreview} drop=${dropped}`,
   );
 
   await page.reload({ waitUntil: "load" });
@@ -228,17 +232,37 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   await page.reload({ waitUntil: "load" });
   await page.locator("#source").waitFor();
   const start = center(await box(page, "#source"));
-  await touchAt(page, cdp, "touchStart", start.x, start.y);
-  await touchAt(page, cdp, "touchMove", start.x, start.y + 40);
-  await page.waitForTimeout(350);
-  const touchPhase = await probeAttr(page, "phase");
-  const touchCaptured = await probeAttr(page, "captured");
-  await touchAt(page, cdp, "touchEnd", start.x, start.y + 40);
-  check(
-    `${name}: touch scroll wins before hold`,
-    touchPhase === "idle" && touchCaptured !== "true",
-    `phase=${touchPhase} captured=${touchCaptured}`,
-  );
+  if (cdp) {
+    const beforeScroll = await page.locator("#scroller").evaluate((node) => (node as HTMLElement).scrollTop);
+    await touchAt(page, cdp, "touchStart", start.x, start.y);
+    await cdp.send("Input.synthesizeScrollGesture", {
+      x: start.x,
+      y: start.y,
+      xDistance: 0,
+      yDistance: -160,
+    });
+    await page.waitForTimeout(350);
+    const afterScroll = await page.locator("#scroller").evaluate((node) => (node as HTMLElement).scrollTop);
+    const touchPhase = await probeAttr(page, "phase");
+    const touchCaptured = await probeAttr(page, "captured");
+    await touchAt(page, cdp, "touchEnd", start.x, start.y);
+    check(
+      `${name}: native scroll before hold moves the scroller and does not activate`,
+      touchPhase === "idle" && touchCaptured !== "true" && afterScroll > beforeScroll,
+      `phase=${touchPhase} captured=${touchCaptured} scroll=${beforeScroll}->${afterScroll}`,
+    );
+  } else {
+    await touchAt(page, cdp, "touchStart", start.x, start.y);
+    await touchAt(page, cdp, "touchMove", start.x, start.y + 40);
+    await page.waitForTimeout(350);
+    const touchPhase = await probeAttr(page, "phase");
+    await touchAt(page, cdp, "touchEnd", start.x, start.y + 40);
+    check(
+      `${name}: synthetic touch movement beyond tolerance stays idle (WebKit has no native hold/move touch protocol; not scroll proof)`,
+      touchPhase === "idle",
+      `phase=${touchPhase}`,
+    );
+  }
 
   await page.reload({ waitUntil: "load" });
   await page.locator("#source").waitFor();
@@ -262,7 +286,9 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   const heldTarget = await probeAttr(page, "target");
   await touchAt(page, cdp, "touchEnd", drop.x, drop.y);
   check(
-    `${name}: touch hold activates, then routes over the target`,
+    cdp
+      ? `${name}: native touch hold activates, then routes over the target`
+      : `${name}: synthetic touch hold activates, then routes over the target (WebKit has no native hold/move touch protocol)`,
     heldPhase === "dragging" && heldPosture === "accepted" && heldTarget === "list",
     `phase=${heldPhase} posture=${heldPosture} target=${heldTarget}`,
   );
@@ -275,7 +301,12 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   await page.keyboard.press("Enter");
   const focused = await page.evaluate(() => document.activeElement?.id ?? "");
   const idle = await probeAttr(page, "phase");
-  check(`${name}: keyboard drop restores focus`, focused === "source" && idle === "idle", `focus=${focused} phase=${idle}`);
+  const keyboardDrop = await probeAttr(page, "drop");
+  check(
+    `${name}: keyboard drop commits and restores focus`,
+    focused === "source" && idle === "idle" && keyboardDrop === "list:inside:move",
+    `focus=${focused} phase=${idle} drop=${keyboardDrop}`,
+  );
 }
 
 for (const [name, type] of engines) {

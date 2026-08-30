@@ -216,6 +216,28 @@ describe("createDragDropController", () => {
     controller.destroy();
   });
 
+  it("lets a native scroll before the hold cancel the candidate", () => {
+    vi.useFakeTimers();
+    const onStart = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(
+      sourceEl,
+      sourceReg({
+        onDragStart: onStart,
+        activation: { touch: { holdMs: 250, tolerance: 8 } },
+      }),
+    );
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { pointerType: "touch", clientX: 20, clientY: 20 }));
+    root.dispatchEvent(new Event("scroll", { bubbles: true }));
+    vi.advanceTimersByTime(300);
+    expect(onStart).not.toHaveBeenCalled();
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
   it("lets touch scrolling win when movement exceeds tolerance before the hold", () => {
     vi.useFakeTimers();
     const onStart = vi.fn();
@@ -613,6 +635,7 @@ describe("createDragDropController", () => {
     sourceEl.setAttribute("aria-description", "Hint");
     sourceEl.setAttribute("draggable", "true");
     document.body.style.setProperty("user-select", "text");
+    root.style.setProperty("user-select", "auto");
 
     const controller = createDragDropController();
     controller.connect(root);
@@ -623,13 +646,15 @@ describe("createDragDropController", () => {
 
     sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
     sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
-    expect(document.body.style.getPropertyValue("user-select")).toBe("none");
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    expect(document.body.style.getPropertyValue("user-select")).toBe("text");
 
     handle.unregister();
     expect(sourceEl.getAttribute("tabindex")).toBe("2");
     expect(sourceEl.getAttribute("aria-label")).toBe("Mine");
     expect(sourceEl.getAttribute("aria-description")).toBe("Hint");
     expect(sourceEl.getAttribute("draggable")).toBe("true");
+    expect(root.style.getPropertyValue("user-select")).toBe("auto");
     expect(document.body.style.getPropertyValue("user-select")).toBe("text");
 
     const again = controller.registerSource(sourceEl, sourceReg());
@@ -639,6 +664,109 @@ describe("createDragDropController", () => {
     again.unregister();
     expect(sourceEl.getAttribute("aria-label")).toBe("Mine");
     expect(sourceEl.getAttribute("draggable")).toBe("true");
+    document.body.style.removeProperty("user-select");
+    root.style.removeProperty("user-select");
+  });
+
+  it("treats source and target ids as immutable on a live handle", () => {
+    const onEnd = vi.fn();
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const controller = createDragDropController();
+    controller.connect(root);
+    const sourceHandle = controller.registerSource(sourceEl, sourceReg({ onDragEnd: onEnd }));
+    const targetHandle = controller.registerTarget(targetEl, targetReg({ onDrop }));
+
+    expect(() => sourceHandle.update(sourceReg({ sourceId: "renamed", onDragEnd: onEnd }))).toThrow(
+      /immutable/,
+    );
+    expect(() => targetHandle.update(targetReg({ targetId: "renamed", onDrop }))).toThrow(/immutable/);
+
+    vi.useFakeTimers();
+    sourceEl.dispatchEvent(pointer("pointerdown", { pointerType: "touch", clientX: 20, clientY: 20 }));
+    sourceHandle.unregister();
+    const afterCandidate = controller.registerSource(sourceEl, sourceReg({ sourceId: "renamed", onDragEnd: onEnd }));
+    vi.advanceTimersByTime(300);
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(onEnd).not.toHaveBeenCalled();
+    afterCandidate.unregister();
+    vi.useRealTimers();
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    });
+
+    const active = controller.registerSource(sourceEl, sourceReg({ onDragEnd: onEnd }));
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    expect(controller.getSnapshot().preview?.label).toBe("Alpha");
+    active.unregister();
+    expect(onEnd).toHaveBeenCalledWith({ status: "cancelled", reason: "source-lost" });
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    const keyboard = controller.registerSource(sourceEl, sourceReg({ onDragEnd: onEnd, label: "Keys" }));
+    sourceEl.focus();
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    keyboard.unregister();
+    expect(onEnd).toHaveBeenCalledWith({ status: "cancelled", reason: "source-lost" });
+
+    const next = controller.registerSource(sourceEl, sourceReg({ sourceId: "renamed", label: "Beta", onDragEnd: onEnd }));
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
+    expect(onDrop).toHaveBeenCalledTimes(1);
+    expect(onEnd.mock.calls.at(-1)?.[0]).toEqual({
+      status: "committed",
+      intent: { targetId: "dst", position: "inside", operation: "move" },
+    });
+    next.unregister();
+    controller.destroy();
+  });
+
+  it("keeps overlapping controllers from clobbering user-select", () => {
+    document.body.style.setProperty("user-select", "text");
+    const rootB = document.createElement("div");
+    const sourceB = layout(document.createElement("button"), SOURCE_BOX);
+    sourceB.textContent = "Beta";
+    const targetB = layout(document.createElement("div"), TARGET_BOX);
+    rootB.append(sourceB, targetB);
+    document.body.append(rootB);
+
+    const first = createDragDropController();
+    const second = createDragDropController();
+    first.connect(root);
+    second.connect(rootB);
+    first.registerSource(sourceEl, sourceReg());
+    first.registerTarget(targetEl, targetReg());
+    second.registerSource(sourceB, sourceReg({ sourceId: "src-b", label: "Beta" }));
+    second.registerTarget(targetB, targetReg({ targetId: "dst-b" }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { pointerId: 1, clientX: 20, clientY: 20 }));
+    sourceEl.dispatchEvent(pointer("pointermove", { pointerId: 1, clientX: 30, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    expect(rootB.style.getPropertyValue("user-select")).toBe("");
+    expect(document.body.style.getPropertyValue("user-select")).toBe("text");
+
+    sourceB.dispatchEvent(pointer("pointerdown", { pointerId: 2, clientX: 20, clientY: 20 }));
+    sourceB.dispatchEvent(pointer("pointermove", { pointerId: 2, clientX: 30, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    expect(rootB.style.getPropertyValue("user-select")).toBe("none");
+
+    document.dispatchEvent(pointer("pointerup", { pointerId: 1, clientX: 30, clientY: 20 }));
+    expect(first.getSnapshot().phase).toBe("idle");
+    expect(second.getSnapshot().phase).toBe("dragging");
+    expect(root.style.getPropertyValue("user-select")).toBe("");
+    expect(rootB.style.getPropertyValue("user-select")).toBe("none");
+    expect(document.body.style.getPropertyValue("user-select")).toBe("text");
+
+    sourceB.dispatchEvent(pointer("pointerup", { pointerId: 2, clientX: 30, clientY: 20 }));
+    expect(second.getSnapshot().phase).toBe("idle");
+    expect(rootB.style.getPropertyValue("user-select")).toBe("");
+    expect(document.body.style.getPropertyValue("user-select")).toBe("text");
+
+    first.destroy();
+    second.destroy();
     document.body.style.removeProperty("user-select");
   });
 

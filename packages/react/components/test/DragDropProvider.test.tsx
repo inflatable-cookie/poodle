@@ -288,4 +288,57 @@ describe("DragDropProvider (react)", () => {
     expect(onDrop).toHaveBeenCalledTimes(1);
     expect(target).toBeTruthy();
   });
+
+  it("re-registers when the source id changes", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+
+    function SwapId() {
+      const [id, setId] = useState("a");
+      const { getSourceProps } = useDragSource({
+        sourceId: id,
+        subject: { kind: "item", id },
+        allowedOperations: ["move"],
+        label: "Alpha",
+        onDragEnd: onEnd,
+      });
+      const { getTargetProps } = useDropTarget({
+        targetId: "list",
+        acceptedKinds: ["item"],
+        label: "List",
+        resolvePosition: () => "inside",
+        canDrop: (intent) => ({ accepted: true, intent }),
+        onDrop,
+      });
+      return (
+        <>
+          <button type="button" data-testid="src" {...getSourceProps()}>
+            Alpha
+          </button>
+          <button type="button" data-testid="rename" onClick={() => setId("renamed")}>
+            rename
+          </button>
+          <div data-testid="dst" {...getTargetProps()} />
+        </>
+      );
+    }
+
+    const view = render(
+      <DragDropProvider>
+        <SwapId />
+      </DragDropProvider>,
+    );
+    const source = measurable(view.getByTestId("src"), SOURCE);
+    measurable(view.getByTestId("dst"), TARGET);
+
+    fireEvent.pointerDown(source, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(source, { pointerId: 1, clientX: 30, clientY: 90 });
+    fireEvent.click(view.getByTestId("rename"));
+    expect(onEnd).toHaveBeenCalledWith({ status: "cancelled", reason: "source-lost" });
+
+    fireEvent.pointerDown(source, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(source, { pointerId: 1, clientX: 30, clientY: 90 });
+    fireEvent.pointerUp(source, { pointerId: 1, clientX: 30, clientY: 90 });
+    expect(onDrop).toHaveBeenCalledTimes(1);
+  });
 });
