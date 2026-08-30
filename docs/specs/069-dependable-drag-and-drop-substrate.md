@@ -188,6 +188,9 @@ The web pointer sensor uses Pointer Events. It must:
 - `registerKeyboardTarget(registration) -> KeyboardDropTargetHandle` for an
   ordered semantic target that has no DOM element and never participates in
   pointer hit-testing;
+- `requestKeyboardDrop(command) -> boolean` for an established one-keystroke
+  component shortcut that already knows its semantic source, target, and
+  position;
 - `getSnapshot()`, `subscribe(listener)`, `invalidateLayout()`, `cancel()`, and
   idempotent `destroy()`;
 - immutable `capabilities` for pointer, touch, and keyboard on this internal
@@ -213,7 +216,9 @@ The paired public registration names are:
 - `KeyboardDropTargetRegistration`: the same target id, accepted kinds,
   disabled posture, priority, label, `canDrop`, and `onDrop`, plus a stable
   numeric `order` and `resolvePosition` over `previous | next | first | last`,
-  subject, and operation rather than a DOM rectangle; and
+  subject, and operation rather than a DOM rectangle;
+- `KeyboardDropCommand`: `sourceId`, `targetId`, and semantic `position`; the
+  source registration supplies the subject and operation; and
 - `DragDropCommitResult`: committed, rejected with an optional reason, or
   failed with an optional reason. `onDrop` may return it synchronously or by
   promise. The controller rechecks `canDrop` before invoking it and maps one
@@ -240,6 +245,17 @@ rules as DOM target removal. Drop revalidates the logical registration before
 calling `onDrop`. Source removal still cancels the session. Components do not
 page or unmount the active source during intent navigation; after commit they
 may reveal the resulting index.
+
+`requestKeyboardDrop` starts only from idle with a live enabled source and a
+matching live target. A matching logical keyboard target is authoritative when
+present; otherwise the DOM target is used. The command creates an ordinary
+keyboard session, runs the target's current `canDrop`, invokes its normal
+`onDrop`, and reaches the same announcement, focus-return, async revalidation,
+and terminal cleanup as pickup-mode keyboard input. It returns `true` when the
+command entered that lifecycle, not when an asynchronous drop eventually
+commits. A missing, disabled, mismatched, or busy registration returns `false`
+without creating a partial session. Framework bindings expose the same method
+from their existing drag-drop context surface.
 
 `DragActivationConstraints` has explicit mouse, pen, and touch entries. Mouse
 and pen activate by distance. Touch activates only after its hold delay while
@@ -315,6 +331,22 @@ The baseline interaction is:
 
 The component contract may choose a more familiar established pattern, but it
 must use the same semantic session and commit path.
+
+Tree keeps its established Alt+Up/Down one-keystroke sibling move. It registers
+its complete visible row catalogue as logical keyboard targets, resolves the
+sibling target and before/after position with its pure Tree helper, and calls
+`requestKeyboardDrop`; it does not call `onReorder` directly. Space and Enter
+remain Tree selection/activation keys and do not enter pickup mode.
+
+### Headless browser evidence boundary
+
+Chromium's CDP leg proves native touch scrolling wins before hold and native
+touch drag owns the gesture after hold. Playwright's desktop WebKit transport
+cannot inject a native touch-move/scroll gesture. Its headless leg therefore
+proves touch-shaped Pointer Event hold/tolerance behavior plus real WebKit
+mouse/keyboard geometry, auto-scroll, and cleanup. It must say that this is not
+native touch-scroll proof. Native WKWebView/iOS touch scrolling remains an
+integration-certification item; it does not block the bounded Tree migration.
 
 Announcements include pickup, current position/target, rejection reason,
 successful drop, and cancellation. They are throttled so pointer motion does

@@ -28,8 +28,10 @@ virtualization, and its authored move callback.
 
 - [ ] Paired mounted web tests cover nested arbitration, all three positions,
       rejection, drop-time revalidation, virtualization, and target removal.
-- [ ] Touch hold versus scroll and nested auto-scroll pass in Chromium and
-      WebKit headlessly.
+- [ ] Chromium headless proves native touch hold-versus-scroll and nested
+      auto-scroll. WebKit headless proves touch-shaped hold/tolerance plus real
+      mouse/keyboard geometry, nested auto-scroll, and cleanup, with its lack
+      of native touch injection stated explicitly.
 - [ ] Tree's existing public callbacks and non-drag interactions are preserved.
 - [ ] Bespoke Tree drag state is removed; shared substrate tests remain green.
 - [ ] No native or ledger claim changes.
@@ -40,6 +42,9 @@ virtualization, and its authored move callback.
   contracts, and curated specimens;
 - the web substrate's geometry/auto-scroll modules and focused tests;
 - headless browser fixtures/selectors needed for this proof;
+- the bounded `requestKeyboardDrop` controller command, paired framework
+  exposure, logical Tree targets, and focused lifecycle tests required to keep
+  Alt+Up/Down on the shared session;
 - this card, one log, g16 closeout, and `PAPERCUTS.md`.
 
 Do not edit other components, Rust/GPUI, host/file transports, package versions,
@@ -72,9 +77,12 @@ check. Never use a windowed/native visual or Jetstream selector.
   flickers at a zone boundary, both containers scroll, a removed target commits,
   or any timer/frame continues after leave, cancellation, drop, or unmount.
 - **Required proof:** paired Tree mounted tests for arbitration, all positions,
-  revalidation, removal, virtualization, and non-drag behavior; deterministic
-  geometry and auto-scroll unit tests; genuine touch hold-versus-scroll in
-  headless Chromium and WebKit.
+  revalidation, removal, virtualization, non-drag behavior, and Alt+Up/Down
+  through `requestKeyboardDrop`; controller command tests for live eligibility,
+  logical-target authority, async removal/disable, terminal callbacks,
+  announcements, and focus return; deterministic geometry and auto-scroll unit
+  tests; native touch hold-versus-scroll in headless Chromium; touch-shaped
+  hold/tolerance plus real geometry/auto-scroll/cleanup in headless WebKit.
 
 ## Continuation
 

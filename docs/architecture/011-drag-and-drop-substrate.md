@@ -147,6 +147,14 @@ announcement, commit, removal, and terminal paths, so an unmounted destination
 does not require fake DOM or a component-owned drag lifecycle. The active
 source remains mounted until the session ends; layout paging follows commit.
 
+An established component shortcut may express a complete semantic move in one
+keystroke rather than entering pickup mode. The web controller accepts that as
+an explicit keyboard drop command over a live registered source and DOM or
+logical target. It still creates the normal semantic session, revalidates the
+target, runs the normal commit/terminal callbacks, announces the result, and
+returns focus. The command is not a direct callback shortcut or a second
+component-owned lifecycle.
+
 ## Touch Boundary
 
 Touch is part of the first contract, not a later compatibility layer. The
@@ -202,6 +210,10 @@ Certification is layered:
 - mounted Svelte and React tests dispatch real pointer, touch-like pointer,
   and keyboard events;
 - Chromium and WebKit prove web geometry, capture, scrolling, and cleanup;
+  Chromium additionally proves compositor-native touch hold-versus-scroll.
+  Desktop Playwright WebKit has no native touch-move injection, so its headless
+  leg proves touch-shaped Pointer Event hold/tolerance behavior and must label
+  that limitation rather than claiming native touch scrolling;
 - mounted GPUI tests prove native pointer and keyboard dispatch;
 - a host-controlled multi-window fixture proves preparation, opaque-token
   transfer, target revalidation, commit, and cancellation without taking

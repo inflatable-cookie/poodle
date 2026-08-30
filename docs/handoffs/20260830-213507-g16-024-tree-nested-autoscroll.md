@@ -5,7 +5,7 @@ handoff_mode: worker-pr-loop
 worker_mode: implementation
 dispatch_authority: orchestrator
 handoff: single-file-path-only
-status: ready-to-launch
+status: revision-authorised
 owner: Poodle drag-and-drop substrate
 created: 2026-08-30
 updated: 2026-08-30
@@ -46,6 +46,9 @@ transport work forward.
 - **Planning artifacts included at the base:** architecture 011, spec 069,
   completed card 023 and its log, ready card 024 with review oracle, and the
   g16/front-door continuation state.
+- **Review planning amendment:** the orchestrator promoted a bounded
+  `requestKeyboardDrop` command and narrowed the WebKit touch-evidence claim on
+  current pushed `main`. The existing PR must fetch and rebase before revision.
 - **Worker branch:** suggested manual fallback
   `t3code/g16-024-tree-nested-autoscroll`; use a clean launcher-provided
   non-`main` branch when supplied.
@@ -87,7 +90,8 @@ transport work forward.
   headless `effigy qa`; and `git diff --check origin/main...HEAD`.
 - **PR base/head:** `main` to the selected worker branch.
 - **PR URL:** pending.
-- **Review state:** awaiting implementation and orchestrator review.
+- **Review state:** changes requested; execution repairs accepted, bounded
+  keyboard-command revision authorised.
 - **Merge authorisation:** none. The worker must not merge.
 
 ## Boundaries
@@ -106,6 +110,9 @@ transport work forward.
 - Preserve Tree's current `onReorder(from, to, position)` contract and its
   selection, expansion, rename, checkbox, context-menu, keyboard-navigation,
   disabled, and Svelte virtualization behavior.
+- Preserve Alt+Up/Down as a one-keystroke sibling move, but route it through the
+  shared `requestKeyboardDrop` lifecycle over Tree's complete visible logical
+  target catalogue. Space and Enter remain Tree selection/activation keys.
 - Reuse the landed provider/controller/kernel. Do not create Tree-owned drag
   session state, an auto-scroll timer in Tree, fake hidden DOM targets, or an
   HTML `DataTransfer` fallback.
@@ -132,6 +139,13 @@ transport work forward.
   before activation; keyboard reaches the same intent/commit path; semantic
   positions are `before`, `inside`, and `after`; nearest-scroll ownership and
   exactly-once cleanup belong to the shared web substrate.
+- **Review decisions:** `requestKeyboardDrop({ sourceId, targetId, position })`
+  is the bounded public command for established one-shot shortcuts. It starts
+  the ordinary keyboard lifecycle and returns whether that lifecycle started;
+  it is not a direct component callback. Chromium proves native touch
+  hold-versus-scroll. Desktop Playwright WebKit proves touch-shaped
+  hold/tolerance plus real mouse/keyboard geometry, auto-scroll, and cleanup;
+  it must not be described as native touch-scroll proof.
 - **Open tensions:** Svelte virtualization may unmount targets during a
   session, and nested containers can both be scrollable. Stable ids,
   invalidation, and source lifetime must remain coherent without a Tree-local
@@ -148,13 +162,13 @@ outside this lane.
 
 ## Suggested Next Move
 
-Run the Completion Protocol preflight before broad reads. Then read
+Fetch and rebase this PR branch onto current pushed `main`, then run the
+Completion Protocol revision preflight before broad reads. Read
 `AGENTS.md`, the g16 milestone, card 024, architecture 011, spec 069, the Tree
 contract, the card 023 execution log, and the repo-local Effigy skill. Inspect
-both Tree implementations and their focused tests before editing. Map current
-drag state, virtual-row identity, editing/action arbitration, scroll ownership,
-and callback paths, then implement the reusable geometry/auto-scroll tranche
-before migrating both adapters.
+the promoted command contract before editing. Keep the accepted execution
+repairs stable. Implement the controller command, paired framework exposure,
+logical Tree targets, Alt+Up/Down routing, and focused lifecycle/browser proof.
 
 ## Completion Protocol
 
@@ -174,8 +188,9 @@ before migrating both adapters.
    and create a unique worktree/branch below it from `origin/main`. Never use
    `/tmp`, `TMPDIR`, or a guessed path; never clean, reset, stash over, or
    discard an existing checkout.
-4. From the selected worktree, fetch origin and confirm `HEAD == origin/main`,
-   confirm `git merge-base --is-ancestor
+4. From the selected existing PR worktree, fetch origin, rebase the branch onto
+   current `origin/main`, confirm `git merge-base --is-ancestor origin/main
+   HEAD`, confirm `git merge-base --is-ancestor
    1067ed1e9f5108f1491aa536ed89b8fcd41f7392 HEAD`, and confirm
    `docs/handoffs/20260830-213507-g16-024-tree-nested-autoscroll.md` exists in
    that `HEAD`. Load it with `git show HEAD:<relative-path>` and compare it
@@ -187,8 +202,10 @@ before migrating both adapters.
 
 ### While you work
 
-- Execute card 024 in coherent implementation/test chunks, not arbitrary model
-  turns.
+- Execute only the authorised keyboard-command revision and its proof in
+  coherent implementation/test chunks. Preserve the accepted auto-scroll,
+  twisty exclusion, arbitration, and lifecycle repairs unless integration
+  exposes a concrete defect.
 - Own reproduction, diagnosis, implementation, cleanup, tests, evidence, and
   PR creation inside the card. A Svelte-only or React-only migration is not a
   complete result.
@@ -205,8 +222,8 @@ before migrating both adapters.
    including Chromium and WebKit.
 2. Falsify the diff against card 024's review oracle: nested inner/outer scroll
    containers, all three positions, disable/removal before release, active
-   cancellation, virtualization, drop-time revalidation, and terminal cleanup.
-   Map each claim to proof.
+   cancellation, virtualization, drop-time revalidation, terminal cleanup, and
+   Alt+Up/Down through the ordinary keyboard lifecycle. Map each claim to proof.
 3. Update card 024, one August execution log, the Tree contract where behavior
    changed, g16/front-door continuation state, and unchanged ledger evidence.
 4. Run `git diff --check origin/main...HEAD`, commit meaningful chunks, push the
@@ -226,7 +243,10 @@ comment. Requested changes must stay on this branch. A planning change returns
 to planning before implementation revision. The operator must explicitly
 authorise merge.
 
-- **Requested changes:** none.
+- **Requested changes:** rebase onto the promoted planning amendment; add
+  `requestKeyboardDrop` and paired framework exposure; move Tree Alt+Up/Down to
+  that lifecycle over logical targets; add the required focused proof; keep the
+  WebKit evidence claim within the documented headless boundary.
 - **Closeout refs:** card 024, its August execution log, Tree contract, g16
   README, roadmap front door, unchanged parity ledger/checker, and the single
   next-task state.
