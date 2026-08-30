@@ -3,13 +3,13 @@
 Unified Svelte component library for Poodle. All components in a single
 `@inflatable-cookie/poodle-svelte` package.
 
-`0.2.2` is a preview-channel npm release. Breaking changes may still ship in
+`0.2.3` is a preview-channel npm release. Breaking changes may still ship in
 `0.x` minor releases; no `stable` channel exists yet, so pin an exact version
-and read the [release notes](https://github.com/inflatable-cookie/poodle/blob/main/docs/release-notes/0.2.2.md) before
+and read the [release notes](https://github.com/inflatable-cookie/poodle/blob/main/docs/release-notes/0.2.3.md) before
 upgrading. `0.1.0` was the first registry version. The `0.2.0` workflow stopped
-before publication and `0.2.1` replaced it. `0.2.2` is a patch over `0.2.1`
-that corrects Poodle's public Rust GPUI dependency identity; this package
-carries no code change in it.
+before publication and `0.2.1` replaced it. `0.2.2` corrected Poodle's public
+Rust GPUI dependency identity. `0.2.3` adds triggerless `ContextMenu`
+composition.
 
 ## Setup
 
@@ -17,15 +17,15 @@ Install the package and its `@inflatable-cookie/poodle-core` peer, which
 carries tokens, styles, behavior, and icons:
 
 ```sh
-bun add @inflatable-cookie/poodle-svelte@0.2.2 @inflatable-cookie/poodle-core@0.2.2
-# or: npm install @inflatable-cookie/poodle-svelte@0.2.2 @inflatable-cookie/poodle-core@0.2.2
+bun add @inflatable-cookie/poodle-svelte@0.2.3 @inflatable-cookie/poodle-core@0.2.3
+# or: npm install @inflatable-cookie/poodle-svelte@0.2.3 @inflatable-cookie/poodle-core@0.2.3
 ```
 
 ```json
 {
   "dependencies": {
-    "@inflatable-cookie/poodle-core": "0.2.2",
-    "@inflatable-cookie/poodle-svelte": "0.2.2"
+    "@inflatable-cookie/poodle-core": "0.2.3",
+    "@inflatable-cookie/poodle-svelte": "0.2.3"
   }
 }
 ```

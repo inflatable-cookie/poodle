@@ -9,6 +9,17 @@ so minor releases may contain documented breaking changes.
 
 Nothing yet.
 
+## [0.2.3] - 2026-08-30
+
+### Added
+
+- **Triggerless `ContextMenu` overlay.** `trigger={false}` omits the
+  invocation button so a tree row, list card, or canvas that already owns
+  contextmenu / Shift+F10 can drive a controlled `open` + `anchorPoint`.
+  `menuTransition` still owns the overlay lifecycle. Default slotted-trigger
+  composition is unchanged. Svelte is the reference; React matches.
+  [0.2.3 release notes](docs/release-notes/0.2.3.md).
+
 ## [0.2.2] - 2026-08-24
 
 ### Fixed
@@ -246,6 +257,7 @@ complete migration checklist.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.2.3]: docs/release-notes/0.2.3.md
 [0.2.2]: docs/release-notes/0.2.2.md
 [0.2.1]: docs/release-notes/0.2.1.md
 [0.2.0]: docs/release-notes/0.2.0.md

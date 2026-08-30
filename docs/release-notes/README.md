@@ -20,6 +20,8 @@ exists yet.
 
 ## Versions
 
+- [0.2.3](0.2.3.md) — 2026-08-30 — triggerless `ContextMenu` overlay
+  composition (`trigger={false}`)
 - [0.2.2](0.2.2.md) — 2026-08-24 — corrects the `0.2.1` public GPUI
   dependency-identity defect; restores crates.io GPUI 0.2.2 and replaces
   fork-only offscreen capture with a non-activating window diagnostic
