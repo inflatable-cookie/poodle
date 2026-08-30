@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.022 merged in PR #101; g16.023 ready
+Status: active — g16.022 merged in PR #101; g16.023 sequencing blocked
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -53,7 +53,7 @@ stay maintained; backend admission is not part of the first card.
 20. [020 — Component continuation audit](020-component-continuation-audit.md) — complete; merged in PR #95
 21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — complete; merged in PR #96
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — complete; merged in PR #101
-23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — ready; clean public migration approved
+23. [023 — Drag-and-drop simple reorder migrations](023-drag-drop-simple-reorder-migrations.md) — blocked; resolve Tabs host-bridge sequencing
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — planned; depends on 023
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — planned; depends on 024
 26. [026 — Drag-and-drop cross-window bridge and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
@@ -313,6 +313,6 @@ ledger cell moved.
 `g16.022` landed the same-document web custom-surface substrate over the
 g16.021 kernel in PR #101: one provider-scoped DOM controller, idiomatic Svelte
 actions and React prop getters, and headless Chromium/WebKit evidence. No
-ledger cell moved. `g16.023` is ready for the first simple Poodle component
-migrations. EditableLabel stays decision-blocked. `g16.025` remains serial
-behind the earlier drag cards.
+ledger cell moved. `g16.023` is next, but its Tabs/DockRegion host-bridge
+sequencing needs an operator decision before dispatch. EditableLabel stays
+decision-blocked. `g16.025` remains serial behind the earlier drag cards.

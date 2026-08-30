@@ -1,10 +1,18 @@
 # g16.023 — Drag-And-Drop Simple Reorder Migrations
 
-Status: ready — public migration approved; g16.022 merged in PR #101
+Status: blocked — Tabs host-bridge sequencing needs an operator decision
 Depends on: `022-drag-drop-web-custom-surface-substrate.md`
 Governing refs: architecture 011, spec 069, the resolved
 `../../triage/20260828-221415-drag-drop-public-migration-boundary.md`, and the
 Tabs and EditableList component contracts
+
+## Planning Blocker
+
+Tabs' public DOM drag callbacks are still consumed by DockRegion's external
+drag bridge. Removing HTML drag authority while preserving those callbacks and
+leaving DockRegion untouched is contradictory. Resolve
+`../../triage/20260830-180816-tabs-drag-host-bridge-sequencing.md` before
+dispatch.
 
 ## Goal
 
