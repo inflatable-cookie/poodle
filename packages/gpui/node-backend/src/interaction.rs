@@ -2,7 +2,169 @@
 
 use super::*;
 
+struct ContinuousValueSession {
+    owner_id: String,
+    last_window: (f32, f32),
+    last_norm: (f32, f32),
+    handler: Arc<dyn Fn(&NodeContinuousValueEvent) + Send + Sync>,
+    painted: bool,
+}
+
+thread_local! {
+    static CONTINUOUS_VALUE: RefCell<Option<ContinuousValueSession>> = const { RefCell::new(None) };
+}
+
+pub(crate) fn reset_continuous_value_session() {
+    CONTINUOUS_VALUE.with(|slot| *slot.borrow_mut() = None);
+}
+
+pub(crate) fn prepare_continuous_value_frame() {
+    CONTINUOUS_VALUE.with(|slot| {
+        if let Some(session) = slot.borrow_mut().as_mut() {
+            session.painted = false;
+        }
+    });
+}
+
+/// If a continuous-value node was not rebuilt this frame, the host is gone:
+/// emit cancel exactly once. Nested refreshes that still paint the owner
+/// keep the gesture open.
+pub(crate) fn sweep_lost_continuous_host() {
+    let pending = CONTINUOUS_VALUE.with(|slot| {
+        let mut slot = slot.borrow_mut();
+        if slot.as_ref().is_some_and(|session| session.painted) {
+            return None;
+        }
+        slot.take().map(|session| {
+            (
+                session.handler,
+                NodeContinuousValueEvent {
+                    phase: ContinuousValuePhase::Cancel,
+                    x: session.last_norm.0,
+                    y: session.last_norm.1,
+                    delta_x: 0.0,
+                    delta_y: 0.0,
+                    modifiers: NodeModifiers::default(),
+                },
+            )
+        })
+    });
+    if let Some((handler, event)) = pending {
+        handler(&event);
+    }
+}
+
+fn retain_continuous_handler(
+    owner_id: &str,
+    handler: Arc<dyn Fn(&NodeContinuousValueEvent) + Send + Sync>,
+) {
+    CONTINUOUS_VALUE.with(|slot| {
+        if let Some(session) = slot.borrow_mut().as_mut() {
+            if session.owner_id == owner_id {
+                session.handler = handler;
+                session.painted = true;
+            }
+        }
+    });
+}
+
+fn continuous_is_open() -> bool {
+    CONTINUOUS_VALUE.with(|slot| slot.borrow().is_some())
+}
+
+fn begin_continuous(
+    owner_id: String,
+    window: (f32, f32),
+    norm: (f32, f32),
+    modifiers: NodeModifiers,
+    handler: Arc<dyn Fn(&NodeContinuousValueEvent) + Send + Sync>,
+) {
+    if continuous_is_open() {
+        return;
+    }
+    handler(&NodeContinuousValueEvent {
+        phase: ContinuousValuePhase::Press,
+        x: norm.0,
+        y: norm.1,
+        delta_x: 0.0,
+        delta_y: 0.0,
+        modifiers,
+    });
+    CONTINUOUS_VALUE.with(|slot| {
+        *slot.borrow_mut() = Some(ContinuousValueSession {
+            owner_id,
+            last_window: window,
+            last_norm: norm,
+            handler,
+            painted: true,
+        });
+    });
+}
+
+fn move_continuous(
+    window: (f32, f32),
+    bounds: gpui::Bounds<gpui::Pixels>,
+    modifiers: NodeModifiers,
+) {
+    let pending = CONTINUOUS_VALUE.with(|slot| {
+        let mut slot = slot.borrow_mut();
+        let session = slot.as_mut()?;
+        let norm = continuous_local(window, bounds);
+        let event = NodeContinuousValueEvent {
+            phase: ContinuousValuePhase::Move,
+            x: norm.0,
+            y: norm.1,
+            delta_x: window.0 - session.last_window.0,
+            delta_y: session.last_window.1 - window.1,
+            modifiers,
+        };
+        session.last_window = window;
+        session.last_norm = norm;
+        Some((Arc::clone(&session.handler), event))
+    });
+    if let Some((handler, event)) = pending {
+        handler(&event);
+    }
+}
+
+fn release_continuous(
+    owner_id: &str,
+    window: (f32, f32),
+    bounds: gpui::Bounds<gpui::Pixels>,
+    modifiers: NodeModifiers,
+) {
+    let pending = CONTINUOUS_VALUE.with(|slot| {
+        let mut slot = slot.borrow_mut();
+        if !slot
+            .as_ref()
+            .is_some_and(|session| session.owner_id == owner_id)
+        {
+            return None;
+        }
+        slot.take().map(|session| {
+            let norm = continuous_local(window, bounds);
+            (
+                session.handler,
+                NodeContinuousValueEvent {
+                    phase: ContinuousValuePhase::Release,
+                    x: norm.0,
+                    y: norm.1,
+                    delta_x: window.0 - session.last_window.0,
+                    delta_y: session.last_window.1 - window.1,
+                    modifiers,
+                },
+            )
+        })
+    });
+    if let Some((handler, event)) = pending {
+        handler(&event);
+    }
+}
+
 pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
+    if node.interaction.request_focus {
+        super::layers::request_focus(id);
+    }
     // A disabled control is not focusable: gpui would otherwise take focus on
     // pointer-down, and a browser never focuses a disabled control. The focus
     // tracking canvas below still attaches (the patch may exist), so blur and
@@ -77,8 +239,10 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                     // overlay host) is applied here, in the paint pass, once
                     // the target element exists and has a handle.
                     if super::layers::take_focus_request(&id) {
-                        handle.focus(window);
-                        cx.refresh_windows();
+                        if !handle.is_focused(window) {
+                            handle.focus(window);
+                            cx.refresh_windows();
+                        }
                     }
                     let now = handle.is_focused(window);
                     let changed = FOCUS_STATES.with(|states| {
@@ -649,8 +813,181 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                 },
             );
     }
+    el = apply_continuous_listeners(el, node, id);
     el = apply_selection_listeners(el, node);
     apply_drop_listeners(el, node, id)
+}
+
+/// Captured continuous-value, wheel, and double-activation routes.
+///
+/// GPUI 0.2.2 supplies captured moves through `on_drag_move`, release outside
+/// the node through `on_mouse_up_out`, and wheel through `on_scroll_wheel`.
+/// Unique lifetime lives in a thread-local session so a rebuild cannot admit
+/// a second press or drop a terminal.
+fn apply_continuous_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
+    let continuous = node.interaction.on_continuous_value.clone();
+    let wheel = node.interaction.on_wheel.clone();
+    let double_activate = node.interaction.on_double_activate.clone();
+    if continuous.is_none() && wheel.is_none() && double_activate.is_none() {
+        return el;
+    }
+
+    let disabled = node.interaction.disabled;
+    if let Some(handler) = continuous.clone() {
+        retain_continuous_handler(id, handler);
+    }
+
+    let track: Rc<RefCell<Option<gpui::Bounds<gpui::Pixels>>>> = Rc::new(RefCell::new(None));
+    if continuous.is_some() {
+        let track_paint = track.clone();
+        el = el.child(
+            gpui::canvas(
+                move |bounds, _window, _cx| {
+                    *track_paint.borrow_mut() = Some(bounds);
+                },
+                |_, _, _, _| {},
+            )
+            .absolute()
+            .size_full(),
+        );
+    }
+
+    if continuous.is_some() || double_activate.is_some() {
+        let press = continuous.clone();
+        let double = double_activate;
+        let track_down = track.clone();
+        let owner = id.to_owned();
+        el = el.on_mouse_down(
+            MouseButton::Left,
+            move |event: &MouseDownEvent, _window, cx| {
+                if event.click_count >= 2 {
+                    if let Some(double) = &double {
+                        if !disabled {
+                            double(node_modifiers(&event.modifiers));
+                            cx.refresh_windows();
+                        }
+                    }
+                    return;
+                }
+                let Some(handler) = &press else {
+                    return;
+                };
+                if disabled {
+                    return;
+                }
+                let Some(bounds) = *track_down.borrow() else {
+                    return;
+                };
+                let window = window_point(event.position);
+                begin_continuous(
+                    owner.clone(),
+                    window,
+                    continuous_local(window, bounds),
+                    node_modifiers(&event.modifiers),
+                    Arc::clone(handler),
+                );
+                cx.refresh_windows();
+            },
+        );
+    }
+
+    if continuous.is_some() {
+        let track_move = track.clone();
+        let track_captured = track.clone();
+        let track_up = track.clone();
+        let track_up_out = track.clone();
+        let owner_up = id.to_owned();
+        let owner_out = id.to_owned();
+        let gesture_id = next_gesture_id();
+        el = el
+            .on_mouse_move(move |event: &MouseMoveEvent, _window, cx| {
+                if !event.dragging() || cx.has_active_drag() {
+                    return;
+                }
+                if !continuous_is_open() {
+                    return;
+                }
+                let Some(bounds) = *track_move.borrow() else {
+                    return;
+                };
+                move_continuous(
+                    window_point(event.position),
+                    bounds,
+                    node_modifiers(&event.modifiers),
+                );
+                cx.refresh_windows();
+            })
+            .on_drag(NodeGestureDrag(gesture_id.clone()), |_, _, _window, cx| {
+                cx.new(|_| EmptyDragPreview)
+            })
+            .on_drag_move::<NodeGestureDrag>(move |event, _window, cx| {
+                if event.drag(cx).0 != gesture_id {
+                    return;
+                }
+                if !continuous_is_open() {
+                    return;
+                }
+                let bounds = (*track_captured.borrow()).unwrap_or(event.bounds);
+                move_continuous(
+                    window_point(event.event.position),
+                    bounds,
+                    node_modifiers(&event.event.modifiers),
+                );
+                cx.refresh_windows();
+            })
+            .on_mouse_up(
+                MouseButton::Left,
+                move |event: &MouseUpEvent, _window, cx| {
+                    let Some(bounds) = *track_up.borrow() else {
+                        return;
+                    };
+                    release_continuous(
+                        &owner_up,
+                        window_point(event.position),
+                        bounds,
+                        node_modifiers(&event.modifiers),
+                    );
+                    cx.refresh_windows();
+                },
+            )
+            .on_mouse_up_out(
+                MouseButton::Left,
+                move |event: &MouseUpEvent, _window, cx| {
+                    let bounds = match *track_up_out.borrow() {
+                        Some(bounds) => bounds,
+                        None => return,
+                    };
+                    release_continuous(
+                        &owner_out,
+                        window_point(event.position),
+                        bounds,
+                        node_modifiers(&event.modifiers),
+                    );
+                    cx.refresh_windows();
+                },
+            );
+    }
+
+    if let Some(handler) = wheel {
+        el = el.on_scroll_wheel(move |event: &ScrollWheelEvent, window, cx| {
+            if disabled {
+                return;
+            }
+            let Some((dx, dy)) = wheel_direction(event.delta) else {
+                return;
+            };
+            handler(&NodeWheelEvent {
+                dx,
+                dy,
+                modifiers: node_modifiers(&event.modifiers),
+            });
+            window.prevent_default();
+            cx.stop_propagation();
+            cx.refresh_windows();
+        });
+    }
+
+    el
 }
 
 /// Collapse gpui's platform modifier pair onto the vocabulary's single
@@ -671,6 +1008,8 @@ fn node_key(key: &str) -> Option<NodeKey> {
         "right" => NodeKey::ArrowRight,
         "home" => NodeKey::Home,
         "end" => NodeKey::End,
+        "pageup" => NodeKey::PageUp,
+        "pagedown" => NodeKey::PageDown,
         "space" => NodeKey::Space,
         "f2" => NodeKey::F2,
         "delete" => NodeKey::Delete,
@@ -961,6 +1300,43 @@ mod payload_edge_tests {
     }
 }
 
+fn window_point(position: gpui::Point<gpui::Pixels>) -> (f32, f32) {
+    (position.x.into(), position.y.into())
+}
+
+/// Normalized local position: x right, y up, both clamped to 0..=1.
+fn continuous_local(window: (f32, f32), bounds: gpui::Bounds<gpui::Pixels>) -> (f32, f32) {
+    let left: f32 = bounds.origin.x.into();
+    let top: f32 = bounds.origin.y.into();
+    let width: f32 = bounds.size.width.into();
+    let height: f32 = bounds.size.height.into();
+    let x = if width <= 0.0 {
+        0.0
+    } else {
+        ((window.0 - left) / width).clamp(0.0, 1.0)
+    };
+    let y = if height <= 0.0 {
+        0.0
+    } else {
+        (1.0 - (window.1 - top) / height).clamp(0.0, 1.0)
+    };
+    (x, y)
+}
+
+fn wheel_direction(delta: ScrollDelta) -> Option<(f32, f32)> {
+    let (x, y): (f32, f32) = match delta {
+        ScrollDelta::Pixels(point) => (point.x.into(), point.y.into()),
+        ScrollDelta::Lines(point) => (point.x, point.y),
+    };
+    if x == 0.0 && y == 0.0 {
+        return None;
+    }
+    Some((
+        if x == 0.0 { 0.0 } else { x.signum() },
+        if y == 0.0 { 0.0 } else { -y.signum() },
+    ))
+}
+
 /// Where the pointer sits along `bounds` on the declared axis, clamped to
 /// 0.0..=1.0. Horizontal is left → right; vertical is bottom → top.
 fn scrub_fraction(
@@ -1094,5 +1470,92 @@ mod scrub_axis_tests {
             scrub_fraction(point(px(10.0), px(0.0)), bounds, ScrubAxis::Vertical),
             1.0
         );
+    }
+
+    #[test]
+    fn continuous_local_is_right_and_up() {
+        let bounds = track();
+        let bottom_left = continuous_local((10.0, 220.0), bounds);
+        let top_right = continuous_local((110.0, 20.0), bounds);
+        let center = continuous_local((60.0, 120.0), bounds);
+        assert!((bottom_left.0 - 0.0).abs() < 1e-6);
+        assert!((bottom_left.1 - 0.0).abs() < 1e-6);
+        assert!((top_right.0 - 1.0).abs() < 1e-6);
+        assert!((top_right.1 - 1.0).abs() < 1e-6);
+        assert!((center.0 - 0.5).abs() < 1e-6);
+        assert!((center.1 - 0.5).abs() < 1e-6);
+    }
+
+    #[test]
+    fn wheel_up_is_positive_dy() {
+        assert_eq!(
+            wheel_direction(ScrollDelta::Lines(point(0.0, -1.0))),
+            Some((0.0, 1.0))
+        );
+        assert_eq!(
+            wheel_direction(ScrollDelta::Lines(point(0.0, 1.0))),
+            Some((0.0, -1.0))
+        );
+        assert_eq!(wheel_direction(ScrollDelta::Lines(point(0.0, 0.0))), None);
+    }
+
+    #[test]
+    fn one_continuous_gesture_then_exactly_one_terminal() {
+        reset_continuous_value_session();
+        let phases = std::sync::Mutex::new(Vec::new());
+        let phases = std::sync::Arc::new(phases);
+        let log = std::sync::Arc::clone(&phases);
+        let handler: Arc<dyn Fn(&NodeContinuousValueEvent) + Send + Sync> =
+            Arc::new(move |event: &NodeContinuousValueEvent| {
+                log.lock().expect("phase log").push(event.phase);
+            });
+        begin_continuous(
+            "knob".into(),
+            (10.0, 20.0),
+            (0.0, 1.0),
+            NodeModifiers::default(),
+            Arc::clone(&handler),
+        );
+        begin_continuous(
+            "knob".into(),
+            (20.0, 20.0),
+            (0.1, 1.0),
+            NodeModifiers::default(),
+            Arc::clone(&handler),
+        );
+        release_continuous("other", (20.0, 20.0), track(), NodeModifiers::default());
+        release_continuous("knob", (60.0, 120.0), track(), NodeModifiers::default());
+        release_continuous("knob", (60.0, 120.0), track(), NodeModifiers::default());
+        assert_eq!(
+            *phases.lock().expect("phase log"),
+            [ContinuousValuePhase::Press, ContinuousValuePhase::Release]
+        );
+        reset_continuous_value_session();
+    }
+
+    #[test]
+    fn a_lost_host_cancels_once() {
+        reset_continuous_value_session();
+        let phases = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let log = std::sync::Arc::clone(&phases);
+        let handler: Arc<dyn Fn(&NodeContinuousValueEvent) + Send + Sync> =
+            Arc::new(move |event: &NodeContinuousValueEvent| {
+                log.lock().expect("phase log").push(event.phase);
+            });
+        begin_continuous(
+            "fader".into(),
+            (10.0, 20.0),
+            (0.0, 1.0),
+            NodeModifiers::default(),
+            handler,
+        );
+        prepare_continuous_value_frame();
+        sweep_lost_continuous_host();
+        sweep_lost_continuous_host();
+        assert_eq!(
+            *phases.lock().expect("phase log"),
+            [ContinuousValuePhase::Press, ContinuousValuePhase::Cancel]
+        );
+        reset_continuous_value_session();
     }
 }

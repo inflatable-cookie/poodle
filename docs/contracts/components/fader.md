@@ -104,8 +104,12 @@ receives only VisualState, orientation, and normalized detent positions.
 
 ## 10. GPUI Notes
 
-The adapter maps track-relative pointer positions before calling the Rust
-machine. The shared renderer receives VisualState and serializable geometry.
+The adapter maps track-relative pointer positions from Node
+`on_continuous_value` (normalized local x/y, y-up) before calling the Rust
+machine. Wheel uses `on_wheel` and is consumed. Reset uses `on_double_activate`.
+Native construction requires `FaderHandlers::new(instance_id)` with a
+lifetime-stable instance scope for root, entry, and capture identity. The
+shared renderer receives VisualState and serializable geometry.
 
 ## 10a. Jetstream Notes
 

@@ -84,15 +84,18 @@ component-level, and an application has to opt into them **once**, at its root:
 
 Both live on `attach_overlay_host`, whose name predates the traversal it now
 also carries. Its companion, `overlay_frame_begin`, marks the frame boundary
-the layer registry, painted bounds, and focus queue are rebuilt at.
+the layer registry, painted bounds, and focus queue are rebuilt at. Defer
+`overlay_frame_end` to the end of the same effect cycle so a removed control
+cancels in the removal frame.
 
 ```rust
 use gpui::{div, Context, IntoElement, ParentElement, Render, Styled, Window};
 
 impl Render for AppRoot {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         // Once per rendered frame, before any node is converted.
         poodle_gpui_node_backend::overlay_frame_begin();
+        cx.defer(|_cx| poodle_gpui_node_backend::overlay_frame_end());
         // Restart the generated-id counter so a node that declares no id keeps
         // the same ElementId across the frames a real click spans.
         poodle_gpui_node_backend::reset_element_ids();

@@ -217,11 +217,14 @@ struct InsetEvidenceRoot {
 }
 
 impl Render for InsetEvidenceRoot {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         // The same frame boundary the preview and the headless driver use:
         // the layer, bounds, and painted-band registries are rebuilt once per
         // rendered frame.
         poodle_gpui_node_backend::overlay_frame_begin();
+        cx.defer(|_cx| {
+            poodle_gpui_node_backend::overlay_frame_end();
+        });
         poodle_gpui_node_backend::reset_element_ids();
         let element: AnyElement = poodle_gpui_node_backend::to_gpui(&self.node);
         poodle_gpui_node_backend::attach_overlay_host(

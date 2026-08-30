@@ -383,7 +383,12 @@ impl Render for PreviewRoot {
         // The overlay host's frame boundary: the layer registry, bounds, and
         // focus queue are rebuilt once per rendered frame, not per converted
         // component — the same boundary the headless test driver uses.
+        // overlay_frame_end is deferred to the end of this effect cycle so a
+        // removed continuous-value host cancels in the same frame.
         poodle_gpui_node_backend::overlay_frame_begin();
+        cx.defer(|_cx| {
+            poodle_gpui_node_backend::overlay_frame_end();
+        });
         // Apply interactions node-backed specimens reported since the last frame.
         let specimen_changed = self.state.drain_node_events();
         if specimen_changed {

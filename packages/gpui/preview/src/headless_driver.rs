@@ -55,7 +55,14 @@ impl Focusable for HeadlessRoot {
 }
 
 impl Render for HeadlessRoot {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        // Same production frame lifetime as PreviewRoot: begin at render,
+        // end after this effect cycle so a removed continuous-value host
+        // cancels in the removal frame without a next-frame delay.
+        poodle_gpui_node_backend::overlay_frame_begin();
+        cx.defer(|_cx| {
+            poodle_gpui_node_backend::overlay_frame_end();
+        });
         // The same per-frame reset the production root performs
         // (`main.rs`): without it, generated element ids mint fresh every
         // frame, and an unstamped node's identity — click state, focus
@@ -184,16 +191,22 @@ impl<'a> HeadlessDriver<'a> {
     /// repaint and the backend observations are deterministic. The overlay
     /// frame boundary (layer registry, bounds, focus queue) is this draw.
     pub fn draw_frame(&mut self) {
-        poodle_gpui_node_backend::overlay_frame_begin();
+        self.paint_frame();
+    }
+
+    /// Same production frame lifetime as the preview root: `overlay_frame_begin`
+    /// during render and `overlay_frame_end` deferred to the end of this cycle.
+    pub fn draw_preview_frame(&mut self) {
+        self.paint_frame();
+    }
+
+    fn paint_frame(&mut self) {
         self.root.update(self.cx, |_root, cx| cx.notify());
         self.cx.update(|window, cx| {
             window.refresh();
             let _ = window.draw(cx);
         });
         self.cx.run_until_parked();
-        // Focus requests the frame's paint never applied are stale (the
-        // target element never appeared).
-        poodle_gpui_node_backend::overlay_frame_end();
     }
 
     /// Drain the executor until every task is parked.
@@ -264,20 +277,35 @@ impl<'a> HeadlessDriver<'a> {
 
     /// Pointer press (left button down) at the given position.
     pub fn pointer_press(&mut self, position: Point<Pixels>) {
+        self.pointer_press_details(position, 1, Modifiers::none());
+    }
+
+    /// Pointer press with an explicit click count and modifiers.
+    pub fn pointer_press_details(
+        &mut self,
+        position: Point<Pixels>,
+        click_count: usize,
+        modifiers: Modifiers,
+    ) {
         self.pointer_event(PlatformInput::MouseDown(MouseDownEvent {
             position,
-            modifiers: Modifiers::none(),
+            modifiers,
             button: MouseButton::Left,
-            click_count: 1,
+            click_count,
             first_mouse: false,
         }));
     }
 
     /// Pointer drag: a move while the left button is held.
     pub fn pointer_drag(&mut self, position: Point<Pixels>) {
+        self.pointer_drag_details(position, Modifiers::none());
+    }
+
+    /// Pointer drag with modifiers (Shift for fine movement).
+    pub fn pointer_drag_details(&mut self, position: Point<Pixels>, modifiers: Modifiers) {
         self.pointer_event(PlatformInput::MouseMove(MouseMoveEvent {
             position,
-            modifiers: Modifiers::none(),
+            modifiers,
             pressed_button: Some(MouseButton::Left),
         }));
     }
@@ -293,11 +321,21 @@ impl<'a> HeadlessDriver<'a> {
 
     /// Pointer release (left button up) at the given position.
     pub fn pointer_release(&mut self, position: Point<Pixels>) {
+        self.pointer_release_details(position, 1, Modifiers::none());
+    }
+
+    /// Pointer release with an explicit click count and modifiers.
+    pub fn pointer_release_details(
+        &mut self,
+        position: Point<Pixels>,
+        click_count: usize,
+        modifiers: Modifiers,
+    ) {
         self.pointer_event(PlatformInput::MouseUp(MouseUpEvent {
             position,
-            modifiers: Modifiers::none(),
+            modifiers,
             button: MouseButton::Left,
-            click_count: 1,
+            click_count,
         }));
     }
 

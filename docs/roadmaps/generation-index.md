@@ -16,16 +16,15 @@ Updated: 2026-08-29
     `022`–`028` planned behind ordered drag-and-drop dependencies; `029`
     complete and merged (TimeInput native parity, ledger 48/126); `030`
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
-    `031` merged in PR #99 and `032` is ready to launch, completing the
-    paired/web then native continuous-audio repair after the bounded audit
+    `031` merged in PR #99; `032` complete and awaiting review (continuous
+    audio native mounted parity, ledger 52/122)
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: dispatch `g16.032` against the paired transitions landed by
-    `g16.031`. Keep `g16.022` with the orchestrator until
-    the landed-kernel review fixes its exact public web adapter surface. Keep
-    `032` away from drag card `025` because both edit Node/GPUI interaction
-    routing.
+  - Next move: after operator-authorized merge of `g16.032`, choose from
+    `g16.022` (still gated on the landed-kernel web adapter surface) and the
+    component-continuation runway. Keep Node/GPUI routing cards away from
+    drag card `025`.
 
 ## Latest Completed Track
 

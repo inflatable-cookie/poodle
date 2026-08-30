@@ -24,6 +24,7 @@ pub mod agent_transcript;
 pub mod alert_dialog;
 pub mod app_header;
 pub mod audio;
+pub mod audio_handlers;
 pub mod audio_player;
 pub mod audio_specimens;
 pub mod avatar;
@@ -208,8 +209,15 @@ pub use alert_dialog::{
 };
 pub use app_header::app_header;
 pub use audio::{
-    audio_meter, audio_switch, drag_number_field, envelope_editor, fader, gain_reduction_meter,
-    keyboard, knob, mod_matrix_grid, value_readout, waveform_display, xy_pad,
+    audio_meter, audio_switch, drag_number_field, envelope_editor, fader, fader_with_handlers,
+    gain_reduction_meter, keyboard, knob, knob_with_handlers, mod_matrix_grid, value_readout,
+    waveform_display, xy_pad, xy_pad_with_handlers,
+};
+pub use audio_handlers::{
+    audio_entry_id, audio_root_id, fader_context_from_spec, fader_spec_from_context,
+    knob_context_from_spec, knob_spec_from_context, xy_pad_context_from_spec,
+    xy_pad_spec_from_context, xy_pad_x_id, xy_pad_y_id, FaderHandlers, FaderLive, KnobHandlers,
+    KnobLive, XYPadHandlers, XYPadLive,
 };
 pub use audio_player::audio_player;
 pub use avatar::avatar;

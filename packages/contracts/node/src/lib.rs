@@ -450,6 +450,54 @@ pub struct NodeDragEvent {
     pub delta_y: f32,
 }
 
+/// Which part of a captured continuous-value gesture an event belongs to.
+///
+/// Distinct from [`ScrubPhase`]: a 2D value control needs a cancel distinct
+/// from release (lost host, adapter teardown) and never reports a 1D
+/// fraction. The backend admits one press, then moves, then exactly one
+/// [`Self::Release`] or [`Self::Cancel`].
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum ContinuousValuePhase {
+    #[default]
+    Press,
+    Move,
+    Release,
+    Cancel,
+}
+
+/// A captured continuous-value gesture, in the vocabulary's terms.
+///
+/// The backend owns measurement and pointer capture. The component receives
+/// only:
+/// - a phase;
+/// - the pointer's position normalized to the receiving node's local
+///   rectangle, with x increasing right and y increasing up;
+/// - the per-dispatch logical-pixel delta on those same axes (y-up);
+/// - the modifiers held for this dispatch.
+///
+/// No DOM, GPUI, window, pointer-id, payload, file, or application type.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct NodeContinuousValueEvent {
+    pub phase: ContinuousValuePhase,
+    pub x: f32,
+    pub y: f32,
+    pub delta_x: f32,
+    pub delta_y: f32,
+    pub modifiers: NodeModifiers,
+}
+
+/// Wheel intent: a normalized direction plus the modifiers held.
+///
+/// `dx`/`dy` are -1, 0, or 1. `dy` is positive for wheel-up (the same y-up
+/// sense as [`NodeContinuousValueEvent`]), so a value control that increases
+/// on wheel-up can add `dy` without flipping the backend's raw delta.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct NodeWheelEvent {
+    pub dx: f32,
+    pub dy: f32,
+    pub modifiers: NodeModifiers,
+}
+
 /// Modifier state at the moment of an interaction.
 ///
 /// `accel` is the platform's "toggle one of many" modifier — Cmd on macOS,
@@ -490,6 +538,10 @@ pub enum NodeKey {
     ArrowRight,
     Home,
     End,
+    /// Ten-step nudge on value controls (Knob, Fader, XYPad axis sliders).
+    PageUp,
+    /// Ten-step nudge in the opposite direction of [`Self::PageUp`].
+    PageDown,
     Space,
     F2,
     /// Close/delete on a focused item (closable tabs, for example).
@@ -627,6 +679,29 @@ pub struct Interaction {
     /// Axis used to derive the scrub fraction. Horizontal is left-to-right;
     /// vertical is bottom-to-top. Must be set whenever `on_scrub` is set.
     pub scrub_axis: ScrubAxis,
+    /// Captured continuous-value gesture for 2D / delta-mapped controls
+    /// (Knob, Fader, XYPad). Prefer this over [`Self::on_scrub`] when the
+    /// value is not a single-axis fraction, and over [`Self::on_drag`] when
+    /// the gesture must close.
+    ///
+    /// The backend installs at most one of these handlers per node, admits
+    /// one primary pointer, captures beyond the node's bounds, and emits
+    /// exactly one [`ContinuousValuePhase::Release`] or
+    /// [`ContinuousValuePhase::Cancel`]. A second press while a gesture is
+    /// open is inert.
+    pub on_continuous_value: Option<Arc<dyn Fn(&NodeContinuousValueEvent) + Send + Sync>>,
+    /// Wheel intent while the pointer is over this node. Direction is
+    /// normalized; the component maps it through its own step/fine rules.
+    /// Installing this handler asks the backend to consume the wheel so a
+    /// parent scroll container does not also move.
+    pub on_wheel: Option<Arc<dyn Fn(&NodeWheelEvent) + Send + Sync>>,
+    /// Queue backend focus for this node on the next paint. Used by machine
+    /// effects such as type-in open/close; the backend applies it once the
+    /// element exists.
+    pub request_focus: bool,
+    /// Double activation (reset on Knob, Fader, XYPad). Fired instead of a
+    /// new continuous-value press when the backend sees a second click.
+    pub on_double_activate: Option<Arc<dyn Fn(NodeModifiers) + Send + Sync>>,
     /// Activation that needs the modifier state — multi-select lists, where
     /// Shift extends the range and the platform accel toggles one item. When
     /// set the backend calls this INSTEAD of `on_activate`, so a node wires
@@ -1059,9 +1134,47 @@ mod tests {
     }
 
     #[test]
+    fn continuous_value_intents_are_opt_in() {
+        let node = Node::container();
+        assert!(node.interaction.on_continuous_value.is_none());
+        assert!(node.interaction.on_wheel.is_none());
+        assert!(node.interaction.on_double_activate.is_none());
+    }
+
+    #[test]
+    fn a_continuous_value_event_carries_only_local_geometry() {
+        let event = NodeContinuousValueEvent {
+            phase: ContinuousValuePhase::Press,
+            x: 0.25,
+            y: 0.75,
+            delta_x: 2.0,
+            delta_y: -3.0,
+            modifiers: NodeModifiers {
+                shift: true,
+                ..NodeModifiers::default()
+            },
+        };
+        assert_eq!(event.phase, ContinuousValuePhase::Press);
+        assert_eq!(event.x, 0.25);
+        assert_eq!(event.y, 0.75);
+        assert!(event.modifiers.shift);
+        assert!(!event.modifiers.accel);
+        assert!(!event.modifiers.alt);
+        let wheel = NodeWheelEvent {
+            dx: 0.0,
+            dy: 1.0,
+            modifiers: NodeModifiers::default(),
+        };
+        assert_eq!(wheel.dy, 1.0);
+    }
+
+    #[test]
     fn delete_is_a_named_command_key() {
         assert_ne!(NodeKey::Delete, NodeKey::Space);
         assert_ne!(NodeKey::Delete, NodeKey::F2);
+        assert_ne!(NodeKey::PageUp, NodeKey::PageDown);
+        assert_ne!(NodeKey::PageUp, NodeKey::Home);
+        assert_ne!(NodeKey::PageDown, NodeKey::End);
     }
 }
 

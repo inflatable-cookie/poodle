@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-28
+Updated: 2026-08-29
 
 Roadmaps record Poodle's executable milestone work. `g15` completed the full
 v0.2.x release programme: the roster and parity baseline, failed v0.2.0
@@ -65,8 +65,9 @@ behavior repairs without inventing another conformance authority.
   closed paired semantics and the Svelte/React gesture and entry lifecycles
   behind one hand-authored `audioControls` vector corpus, moving no ledger
   cell; `g16.032` mounts the three controls through one bounded
-  continuous-value Node event and must not overlap drag card `025`. This work
-  remains separate from payload drag-and-drop.
+  continuous-value Node event (ledger 52 mounted / 122 missing) and must not
+  overlap drag card `025`. This work remains separate from payload
+  drag-and-drop.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other
