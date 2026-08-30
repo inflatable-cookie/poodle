@@ -1,7 +1,7 @@
 # Tree
 
 Status: detailed contract
-Updated: 2026-07-25
+Updated: 2026-08-30
 
 ## 1. Purpose
 
@@ -79,10 +79,11 @@ Updated: 2026-07-25
   renders the menu as a positioned overlay routed by token.
 - **Reorder** (`reorderable` + `onReorder`): rows are draggable; a drop fires
   `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`
-  (computed from pointer Y within the target; `inside` only for branches).
+  (computed from pointer Y within the target row; `inside` only for branches).
   Alt+↑/↓ moves the focused node among siblings. The shared `reorder_nodes(nodes,
   from, to, position)` helper performs the move (no-op for self / missing /
-  dropping into own subtree). Svelte uses HTML5 drag; GPUI uses
+  dropping into own subtree). Svelte and React use the shared web drag
+  substrate (pointer/touch on the row, no HTML `DataTransfer`). GPUI uses
   `on_drag`/`on_drop`/`drag_over`; Jetstream tracks mouse down→up over rows.
 
 ## 3. Props And Inputs
@@ -495,8 +496,12 @@ None.
   snippet `renderNode(node, depth)` so nesting is internal — no public `TreeItem`
 - wrapper strategy: `role="tree"` root with `aria-multiselectable`; roving
   tabindex over visible treeitems (`tabindex=0` on the active item, `-1`
-  elsewhere); pointer + keyboard handlers live on the `treeitem`, which
-  `stopPropagation`s so nested items do not double-fire
+  elsewhere); selection/keyboard handlers live on the `treeitem`, which
+  `stopPropagation`s so nested items do not double-fire. Reorder registers the
+  row with the shared drag substrate so Space/Enter keep tree selection and
+  activate semantics
+- virtualized windows pin the active source row until the session ends; they
+  do not page or unmount it mid-drag
 - implementation-only details: expansion is uncontrolled-capable via internal
   `$state` seeded from `defaultExpandedValues`; controlled when `expandedValues`
   is non-null. Selection anchor is tracked for Shift range selection

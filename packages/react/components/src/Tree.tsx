@@ -2,9 +2,9 @@ import {
   useEffect,
   useRef,
   useState,
-  type DragEvent,
   type KeyboardEvent,
   type MouseEvent,
+  type ReactNode,
   type UIEvent,
 } from "react";
 import {
@@ -17,13 +17,19 @@ import {
   treeSiblingReorderTarget,
   treeToggleCheck,
   treeVirtualWindow,
+  type DragDropCommitResult,
+  type DragSession,
+  type DragTerminalOutcome,
+  type DropIntent,
 } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/tree.css";
 
 import { Checkbox } from "./Checkbox";
+import { DragDropProvider } from "./drag-drop";
 import { Icon } from "./Icon";
 import { Spinner } from "./Spinner";
+import { TreeItem } from "./tree-item/TreeItem";
 import type {
   ControlDensity,
   ControlSize,
@@ -74,7 +80,15 @@ type Row = { node: TreeNode; depth: number; parent: string | null };
 
 const ROW_PX: Record<string, number> = { xs: 22, sm: 24, md: 28, lg: 32, xl: 36 };
 
-export function Tree({
+export function Tree(props: TreeProps) {
+  return (
+    <DragDropProvider>
+      <TreeView {...props} />
+    </DragDropProvider>
+  );
+}
+
+function TreeView({
   nodes = [],
   selectedValues: selectedValuesProp,
   expandedValues = null,
@@ -119,9 +133,8 @@ export function Tree({
 
   const [focusedValue, setFocusedValue] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState("");
-  const [dragValue, setDragValue] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<string | null>(null);
-  const [dropPosition, setDropPosition] = useState<TreeDropPosition>("after");
+  const [activeSourceId, setActiveSourceId] = useState<string | null>(null);
+  const activeSourceIdRef = useRef<string | null>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const renameInputRef = useRef<HTMLInputElement | null>(null);
   const anchorValue = useRef<string | null>(null);
@@ -141,7 +154,15 @@ export function Tree({
       ? focusedValue
       : (selectedValues.find((v) => visibleRows.some((r) => r.node.value === v)) ?? visibleRows[0]?.node.value ?? null);
 
-  const virtualWindow = treeVirtualWindow(visibleRows.length, rowHeightPx, scrollTop, virtualHeight);
+  const pinIndex = activeSourceId ? visibleRows.findIndex((row) => row.node.value === activeSourceId) : null;
+  const virtualWindow = treeVirtualWindow(
+    visibleRows.length,
+    rowHeightPx,
+    scrollTop,
+    virtualHeight,
+    6,
+    pinIndex,
+  );
 
   /** Whether any node in the whole tree can expand. */
   const hasAnyBranch = (list: TreeNode[]): boolean =>
@@ -234,6 +255,30 @@ export function Tree({
     onReorder?.(node.value, move.target, move.position);
   }
 
+  function handleDragStart(session: DragSession): void {
+    activeSourceIdRef.current = session.subject.id;
+    setActiveSourceId(session.subject.id);
+  }
+
+  function handleDragEnd(_outcome: DragTerminalOutcome): void {
+    activeSourceIdRef.current = null;
+    setActiveSourceId(null);
+  }
+
+  function isTreeDropPosition(position: DropIntent["position"]): position is TreeDropPosition {
+    return position === "before" || position === "after" || position === "inside";
+  }
+
+  function handleDrop(intent: DropIntent): DragDropCommitResult {
+    const from = activeSourceIdRef.current;
+    if (!from || !isTreeDropPosition(intent.position)) {
+      return { status: "rejected", reason: "unavailable" };
+    }
+    if (from === intent.targetId) return { status: "rejected", reason: "self" };
+    onReorder?.(from, intent.targetId, intent.position);
+    return { status: "committed" };
+  }
+
   function startRename(node: TreeNode): void {
     if (node.isDisabled) return;
     setEditing(node.value);
@@ -313,7 +358,7 @@ export function Tree({
   function rowMarkup(node: TreeNode, depth: number, branch: boolean, open: boolean) {
     const cs = showCheckboxes ? treeCheckState(node, checkedValues) : null;
     return (
-      <div className="poodle-tree__row">
+      <>
         {Array.from({ length: depth }, (_, i) => (
           <span key={i} className="poodle-tree__indent" data-guide={showGuides ? "true" : undefined} aria-hidden="true" />
         ))}
@@ -373,78 +418,49 @@ export function Tree({
             {node.endLabel ? <span className="poodle-tree__end-label">{node.endLabel}</span> : null}
           </>
         )}
-      </div>
+      </>
     );
   }
 
-  function itemProps(node: TreeNode, depth: number, parent: string | null, branch: boolean, open: boolean) {
-    return {
-      className: "poodle-tree__item",
-      role: "treeitem" as const,
-      "data-value": node.value,
-      "data-branch": branch ? "true" : undefined,
-      "data-selected": isSelected(node.value) ? "true" : undefined,
-      "data-muted": node.isMuted ? "true" : undefined,
-      "data-drop": dropTarget === node.value ? dropPosition : undefined,
-      draggable: reorderable && !node.isDisabled && !isEditing(node.value),
-      tabIndex: effectiveFocus === node.value ? 0 : -1,
-      "aria-level": depth + 1,
-      "aria-selected": isSelected(node.value),
-      "aria-expanded": branch ? open : undefined,
-      "aria-disabled": node.isDisabled ? true : undefined,
-      onClick: (event: MouseEvent) => handleRowClick(node, event),
-      onDoubleClick: (event: MouseEvent) => {
-        event.stopPropagation();
-        if (node.isDisabled) return;
-        onActivate?.(node.value);
-      },
-      onContextMenu: (event: MouseEvent) => {
-        if (!onContextMenu) return;
-        event.preventDefault();
-        event.stopPropagation();
-        setFocusedValue(node.value);
-        onContextMenu(node.value, event.clientX, event.clientY);
-      },
-      onDragStart: (event: DragEvent) => {
-        if (!reorderable || node.isDisabled) return;
-        setDragValue(node.value);
-        if (event.dataTransfer) {
-          event.dataTransfer.effectAllowed = "move";
-          event.dataTransfer.setData("text/plain", node.value);
-        }
-      },
-      onDragOver: (event: DragEvent) => {
-        if (!reorderable || !dragValue || dragValue === node.value) return;
-        event.preventDefault();
-        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-        const ratio = rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
-        const pos: TreeDropPosition = isTreeBranch(node)
-          ? ratio < 0.25
-            ? "before"
-            : ratio > 0.75
-              ? "after"
-              : "inside"
-          : ratio < 0.5
-            ? "before"
-            : "after";
-        setDropTarget(node.value);
-        setDropPosition(pos);
-      },
-      onDrop: (event: DragEvent) => {
-        if (!reorderable || !dragValue) return;
-        event.preventDefault();
-        const from = dragValue;
-        const pos = dropPosition;
-        setDragValue(null);
-        setDropTarget(null);
-        if (from !== node.value) onReorder?.(from, node.value, pos);
-      },
-      onDragEnd: () => {
-        setDragValue(null);
-        setDropTarget(null);
-      },
-      onKeyDown: (event: KeyboardEvent) => handleKeydown({ node, depth, parent }, event),
-    };
+  function treeItem(node: TreeNode, depth: number, parent: string | null, group?: ReactNode) {
+    const branch = isTreeBranch(node);
+    const open = branch && isExpanded(node.value);
+    return (
+      <TreeItem
+        key={node.value}
+        node={node}
+        nodes={nodes}
+        depth={depth}
+        parent={parent}
+        branch={branch}
+        open={open}
+        selected={isSelected(node.value)}
+        muted={Boolean(node.isMuted)}
+        focused={effectiveFocus === node.value}
+        reorderable={reorderable}
+        editing={isEditing(node.value)}
+        showGroup={Boolean(group)}
+        row={rowMarkup(node, depth, branch, open)}
+        group={group}
+        onDrop={handleDrop}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onClick={(event) => handleRowClick(node, event)}
+        onDoubleClick={(event) => {
+          event.stopPropagation();
+          if (node.isDisabled) return;
+          onActivate?.(node.value);
+        }}
+        onContextMenu={(event) => {
+          if (!onContextMenu) return;
+          event.preventDefault();
+          event.stopPropagation();
+          setFocusedValue(node.value);
+          onContextMenu(node.value, event.clientX, event.clientY);
+        }}
+        onKeyDown={(event) => handleKeydown({ node, depth, parent }, event)}
+      />
+    );
   }
 
   function loadingRow(depth: number) {
@@ -467,22 +483,15 @@ export function Tree({
   function renderNode(node: TreeNode, depth: number, parent: string | null) {
     const branch = isTreeBranch(node);
     const open = branch && isExpanded(node.value);
-    return (
-      <div key={node.value} {...itemProps(node, depth, parent, branch, open)}>
-        {rowMarkup(node, depth, branch, open)}
-        {branch && open ? (
-          node.children?.length ? (
-            <div className="poodle-tree__group" role="group">
-              {node.children.map((child) => renderNode(child, depth + 1, node.value))}
-            </div>
-          ) : isLoading(node.value) ? (
-            <div className="poodle-tree__group" role="group">
-              {loadingRow(depth + 1)}
-            </div>
-          ) : null
-        ) : null}
-      </div>
-    );
+    const group =
+      branch && open
+        ? node.children?.length
+          ? node.children.map((child) => renderNode(child, depth + 1, node.value))
+          : isLoading(node.value)
+            ? loadingRow(depth + 1)
+            : undefined
+        : undefined;
+    return treeItem(node, depth, parent, group);
   }
 
   return (
@@ -503,15 +512,7 @@ export function Tree({
       {virtualized ? (
         <div className="poodle-tree__viewport" style={{ height: `${virtualWindow.totalHeight}px` }}>
           <div className="poodle-tree__window" style={{ transform: `translateY(${virtualWindow.offsetY}px)` }}>
-            {windowRows.map((row) => {
-              const branch = isTreeBranch(row.node);
-              const open = branch && isExpanded(row.node.value);
-              return (
-                <div key={row.node.value} {...itemProps(row.node, row.depth, row.parent, branch, open)}>
-                  {rowMarkup(row.node, row.depth, branch, open)}
-                </div>
-              );
-            })}
+            {windowRows.map((row) => treeItem(row.node, row.depth, row.parent))}
           </div>
         </div>
       ) : (

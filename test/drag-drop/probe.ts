@@ -307,6 +307,51 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
     focused === "source" && idle === "idle" && keyboardDrop === "list:inside:move",
     `focus=${focused} phase=${idle} drop=${keyboardDrop}`,
   );
+
+  await page.reload({ waitUntil: "load" });
+  await page.locator("#nested-source").waitFor();
+  await page.locator("#inner-scroll").evaluate((node) => {
+    (node as HTMLElement).scrollTop = 80;
+  });
+  await page.locator("#outer-scroll").evaluate((node) => {
+    (node as HTMLElement).scrollTop = 40;
+  });
+  const nestedStart = center(await box(page, "#nested-source"));
+  const innerBox = await box(page, "#inner-scroll");
+  const readScroll = async (id: string): Promise<number> =>
+    page.locator(id).evaluate((node) => (node as HTMLElement).scrollTop);
+  const innerBefore = await readScroll("#inner-scroll");
+  const outerBefore = await readScroll("#outer-scroll");
+  await page.mouse.move(nestedStart.x, nestedStart.y);
+  await page.mouse.down();
+  await page.mouse.move(nestedStart.x + 20, nestedStart.y, { steps: 6 });
+  const activated = await waitProbe(page, "phase", "dragging");
+  const edge = { x: innerBox.x + Math.min(80, innerBox.width / 2), y: innerBox.y + 8 };
+  await page.mouse.move(edge.x, edge.y, { steps: 6 });
+  await frames(page, 3);
+  const innerDuring = await readScroll("#inner-scroll");
+  const outerDuring = await readScroll("#outer-scroll");
+  await page.locator("#inner-scroll").evaluate((node) => {
+    const el = node as HTMLElement;
+    el.scrollTop = 0;
+  });
+  await frames(page, 12);
+  const outerAfterInnerStop = await readScroll("#outer-scroll");
+  await page.keyboard.press("Escape");
+  const cancelledPhase = await waitProbe(page, "phase", "idle");
+  const outerAfterCancel = await readScroll("#outer-scroll");
+  await frames(page, 8);
+  const outerHeld = await readScroll("#outer-scroll");
+  check(
+    `${name}: nested auto-scroll prefers the inner container, then the outer, and stops on cancel`,
+    activated === "dragging" &&
+      innerDuring < innerBefore &&
+      outerDuring === outerBefore &&
+      outerAfterInnerStop < outerBefore &&
+      cancelledPhase === "idle" &&
+      outerHeld === outerAfterCancel,
+    `inner=${innerBefore}->${innerDuring} outer=${outerBefore}->${outerDuring}->${outerAfterInnerStop} cancel=${cancelledPhase} held=${outerHeld}`,
+  );
 }
 
 for (const [name, type] of engines) {

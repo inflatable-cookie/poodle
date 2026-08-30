@@ -411,6 +411,8 @@ export {
   treeSiblingReorderTarget,
   treeKeydownIntent,
   treeVirtualWindow,
+  treeSubtreeContains,
+  treeCanAcceptDrop,
   type TreeNodeLike,
   type TreeRow,
   type TreeCheckState,
@@ -742,6 +744,24 @@ export {
   type DropTargetCandidate,
   type StandardDropPosition,
 } from "./drag-drop";
+export {
+  resolveNestedDropPosition,
+  type NestedDropKind,
+  type NestedDropPositionInput,
+  type NestedDropRect,
+} from "./dom/drag-drop-geometry";
+export {
+  canScrollHorizontal,
+  canScrollVertical,
+  resolveAutoScroll,
+  DEFAULT_AUTO_SCROLL_EDGE,
+  type AutoScrollCandidate,
+  type AutoScrollDelta,
+  type AutoScrollEdgeConfig,
+  type AutoScrollMetrics,
+  type AutoScrollPointer,
+  type AutoScrollRect,
+} from "./dom/drag-drop-auto-scroll";
 export {
   createDragDropController,
   type DragActivationConstraints,

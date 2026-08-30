@@ -1,6 +1,6 @@
 # g16.024 — Drag-And-Drop Tree Nested Intent And Auto-Scroll
 
-Status: ready
+Status: complete — pending PR
 Depends on: `023-drag-drop-simple-reorder-migrations.md`
 Governing refs: architecture 011, spec 069, and
 `../../contracts/components/tree.md`
@@ -26,15 +26,15 @@ virtualization, and its authored move callback.
 
 ## Acceptance Criteria
 
-- [ ] Paired mounted web tests cover nested arbitration, all three positions,
+- [x] Paired mounted web tests cover nested arbitration, all three positions,
       rejection, drop-time revalidation, virtualization, and target removal.
-- [ ] Chromium headless proves native touch hold-versus-scroll and nested
+- [x] Chromium headless proves native touch hold-versus-scroll and nested
       auto-scroll. WebKit headless proves touch-shaped hold/tolerance plus real
       mouse/keyboard geometry, nested auto-scroll, and cleanup, with its lack
       of native touch injection stated explicitly.
-- [ ] Tree's existing public callbacks and non-drag interactions are preserved.
-- [ ] Bespoke Tree drag state is removed; shared substrate tests remain green.
-- [ ] No native or ledger claim changes.
+- [x] Tree's existing public callbacks and non-drag interactions are preserved.
+- [x] Bespoke Tree drag state is removed; shared substrate tests remain green.
+- [x] No native or ledger claim changes.
 
 ## Writable Scope
 

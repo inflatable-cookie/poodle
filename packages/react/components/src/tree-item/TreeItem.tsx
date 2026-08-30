@@ -1,0 +1,117 @@
+import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
+import {
+  isTreeBranch,
+  resolveNestedDropPosition,
+  treeCanAcceptDrop,
+  type DragDropCommitResult,
+  type DragSession,
+  type DragTerminalOutcome,
+  type DropIntent,
+} from "@inflatable-cookie/poodle-core";
+
+import { useDragSource, useDropTarget } from "../drag-drop";
+import type { TreeNode } from "../types";
+
+export interface TreeItemProps {
+  node: TreeNode;
+  nodes: TreeNode[];
+  depth: number;
+  parent: string | null;
+  branch: boolean;
+  open: boolean;
+  selected: boolean;
+  muted: boolean;
+  focused: boolean;
+  reorderable: boolean;
+  editing: boolean;
+  showGroup: boolean;
+  row: ReactNode;
+  group?: ReactNode;
+  onDrop: (intent: DropIntent) => DragDropCommitResult;
+  onDragStart: (session: DragSession) => void;
+  onDragEnd: (outcome: DragTerminalOutcome) => void;
+  onClick: (event: MouseEvent) => void;
+  onDoubleClick: (event: MouseEvent) => void;
+  onContextMenu: (event: MouseEvent) => void;
+  onKeyDown: (event: KeyboardEvent) => void;
+}
+
+export function TreeItem({
+  node,
+  nodes,
+  depth,
+  branch,
+  open,
+  selected,
+  muted,
+  focused,
+  reorderable,
+  editing,
+  showGroup,
+  row,
+  group,
+  onDrop,
+  onDragStart,
+  onDragEnd,
+  onClick,
+  onDoubleClick,
+  onContextMenu,
+  onKeyDown,
+}: TreeItemProps) {
+  const canDrag = reorderable && !node.isDisabled && !editing;
+  const { getSourceProps } = useDragSource({
+    sourceId: node.value,
+    subject: { kind: "poodle.tree", id: node.value },
+    allowedOperations: ["move"],
+    label: node.label,
+    disabled: !canDrag,
+    onDragStart,
+    onDragEnd,
+  });
+  const { getTargetProps } = useDropTarget({
+    targetId: node.value,
+    acceptedKinds: ["poodle.tree"],
+    disabled: !canDrag,
+    label: node.label,
+    resolvePosition: (input) =>
+      resolveNestedDropPosition({
+        y: input.y,
+        rect: input.rect,
+        kind: isTreeBranch(node) ? "container" : "item",
+      }),
+    canDrop: (intent, subject) =>
+      treeCanAcceptDrop(nodes, subject.id, intent.targetId)
+        ? { accepted: true, intent }
+        : { accepted: false, reason: subject.id === intent.targetId ? "self" : "subtree" },
+    onDrop,
+  });
+
+  const rowProps = getSourceProps(getTargetProps({ className: "poodle-tree__row" }));
+
+  return (
+    <div
+      className="poodle-tree__item"
+      role="treeitem"
+      data-value={node.value}
+      data-branch={branch ? "true" : undefined}
+      data-selected={selected ? "true" : undefined}
+      data-muted={muted ? "true" : undefined}
+      tabIndex={focused ? 0 : -1}
+      aria-level={depth + 1}
+      aria-selected={selected}
+      aria-expanded={branch ? open : undefined}
+      aria-disabled={node.isDisabled ? true : undefined}
+      onClick={onClick}
+      onDoubleClick={onDoubleClick}
+      onContextMenu={onContextMenu}
+      onKeyDown={onKeyDown}
+    >
+      <div {...rowProps}>{row}</div>
+      {showGroup ? (
+        <div className="poodle-tree__group" role="group">
+          {group}
+        </div>
+      ) : null}
+    </div>
+  );
+}

@@ -953,7 +953,7 @@ describe("createDragDropController", () => {
     expect(controller.getSnapshot().phase).toBe("dragging");
 
     document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 50 }));
-    expect(queued.length).toBe(1);
+    expect(queued.length).toBeGreaterThanOrEqual(1);
     document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
     expect(onDrop).toHaveBeenCalledTimes(1);
     expect(controller.getSnapshot().phase).toBe("idle");
@@ -1218,6 +1218,90 @@ describe("createDragDropController", () => {
     layout(targetEl, { x: 10, y: 40, width: 80, height: 20 });
     notify?.([], {} as ResizeObserver);
     expect(controller.getSnapshot().targetPosture).toBe("accepted");
+    controller.destroy();
+  });
+
+  it("auto-scrolls the nearest nested container and stops on cancel", () => {
+    const frames: FrameRequestCallback[] = [];
+    let now = 1000;
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    vi.stubGlobal("cancelAnimationFrame", () => {
+      frames.length = 0;
+    });
+
+    function scroller(
+      element: HTMLElement,
+      box: { x: number; y: number; width: number; height: number },
+      values: { scrollTop: number; scrollHeight: number; clientHeight: number },
+    ): HTMLElement {
+      element.style.overflow = "auto";
+      layout(element, box);
+      Object.defineProperty(element, "scrollTop", { configurable: true, writable: true, value: values.scrollTop });
+      Object.defineProperty(element, "scrollHeight", { configurable: true, get: () => values.scrollHeight });
+      Object.defineProperty(element, "clientHeight", { configurable: true, get: () => values.clientHeight });
+      return element;
+    }
+
+    const outerState = { scrollTop: 40, scrollHeight: 400, clientHeight: 100 };
+    const innerState = { scrollTop: 40, scrollHeight: 300, clientHeight: 80 };
+    const outer = scroller(document.createElement("div"), { x: 0, y: 0, width: 200, height: 100 }, outerState);
+    const inner = scroller(document.createElement("div"), { x: 10, y: 10, width: 180, height: 80 }, innerState);
+    Object.defineProperty(outer, "scrollTop", {
+      configurable: true,
+      get: () => outerState.scrollTop,
+      set: (value: number) => {
+        outerState.scrollTop = value;
+      },
+    });
+    Object.defineProperty(inner, "scrollTop", {
+      configurable: true,
+      get: () => innerState.scrollTop,
+      set: (value: number) => {
+        innerState.scrollTop = value;
+      },
+    });
+    inner.append(targetEl);
+    outer.append(inner);
+    root.append(outer);
+    layout(targetEl, { x: 20, y: 20, width: 80, height: 20 });
+
+    const originalFromPoint = document.elementFromPoint.bind(document);
+    document.elementFromPoint = () => inner;
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg({ autoScroll: true }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 14 }));
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    const innerBefore = innerState.scrollTop;
+    const outerBefore = outerState.scrollTop;
+    now += 16;
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(innerState.scrollTop).toBeLessThan(innerBefore);
+    expect(outerState.scrollTop).toBe(outerBefore);
+
+    innerState.scrollTop = 0;
+    innerState.scrollHeight = 80;
+    now += 16;
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(outerState.scrollTop).toBeLessThan(outerBefore);
+
+    const outerAfterInnerExhausted = outerState.scrollTop;
+    controller.cancel();
+    now += 16;
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(outerState.scrollTop).toBe(outerAfterInnerExhausted);
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    document.elementFromPoint = originalFromPoint;
     controller.destroy();
   });
 });

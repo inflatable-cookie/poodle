@@ -9,6 +9,12 @@
  * terminals stay in `dragSessionTransition` / `resolveDropTarget`.
  */
 
+import { collectScrollParents } from "./anchor";
+import {
+  resolveAutoScroll,
+  type AutoScrollCandidate,
+  type AutoScrollMetrics,
+} from "./drag-drop-auto-scroll";
 import {
   dragSessionTransition,
   resolveDropTarget,
@@ -87,6 +93,8 @@ export interface DropTargetRegistration {
   readonly resolvePosition: (input: DragPositionResolverInput) => DropPosition | null;
   readonly canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
   readonly onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
+  /** When true, this element is an auto-scroll owner in addition to overflow ancestors. */
+  readonly autoScroll?: boolean;
 }
 
 export type KeyboardDropDirection = "previous" | "next" | "first" | "last";
@@ -390,6 +398,43 @@ function interactiveHost(target: EventTarget | null): Element | null {
   return target.closest(INTERACTIVE_SELECTOR);
 }
 
+const SCROLL_OVERFLOW = /(auto|scroll|overlay)/;
+
+function hitElementFromPoint(doc: Document, x: number, y: number): Element | null {
+  const stack =
+    typeof doc.elementsFromPoint === "function" ? doc.elementsFromPoint(x, y) : [doc.elementFromPoint(x, y)];
+  for (const node of stack) {
+    if (!(node instanceof Element)) continue;
+    if (node.classList.contains("poodle-drag-overlay") || node.classList.contains("poodle-drag-preview")) {
+      continue;
+    }
+    const style = node.ownerDocument.defaultView?.getComputedStyle(node);
+    if (style?.pointerEvents === "none") continue;
+    return node;
+  }
+  return null;
+}
+
+function isScrollOwner(element: Element): element is HTMLElement {
+  if (!(element instanceof HTMLElement)) return false;
+  const style = element.ownerDocument.defaultView?.getComputedStyle(element);
+  if (!style) return false;
+  return SCROLL_OVERFLOW.test(`${style.overflowY} ${style.overflowX} ${style.overflow}`);
+}
+
+function measureScrollMetrics(element: HTMLElement): AutoScrollMetrics {
+  const rect = element.getBoundingClientRect();
+  return {
+    scrollTop: element.scrollTop,
+    scrollLeft: element.scrollLeft,
+    scrollHeight: element.scrollHeight,
+    scrollWidth: element.scrollWidth,
+    clientHeight: element.clientHeight,
+    clientWidth: element.clientWidth,
+    rect: { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left },
+  };
+}
+
 function activationFor(
   registration: DragSourceRegistration,
   kind: DragInputKind,
@@ -444,6 +489,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   let gesture: PointerGesture | null = null;
   let moveFrame: number | null = null;
   let pendingMove: { x: number; y: number } | null = null;
+  let autoScrollFrame: number | null = null;
+  let autoScrollRunning = false;
+  let lastAutoScrollTs: number | null = null;
+  const scrollOwnerIds = new WeakMap<Element, string>();
+  let scrollOwnerSeq = 0;
   let dropGeneration = 0;
   let lastOutcome: DragTerminalOutcome | undefined;
   let keyboardSourceId: string | null = null;
@@ -703,6 +753,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         return [];
 
       case "cleanupSession":
+        stopAutoScroll();
         releasePointerHardware();
         gesture = null;
         dropGeneration += 1;
@@ -778,6 +829,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   }
 
   function abandonUnarmedGesture(): void {
+    stopAutoScroll();
     releasePointerHardware();
     gesture = null;
     inputKind = null;
@@ -852,7 +904,126 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         gesture.restoredTouchAction = restored;
       }
     }
+    startAutoScroll();
     notify();
+  }
+
+  function scrollOwnerId(element: Element): string {
+    const existing = scrollOwnerIds.get(element);
+    if (existing) return existing;
+    scrollOwnerSeq += 1;
+    const id = `scroll-${scrollOwnerSeq}`;
+    scrollOwnerIds.set(element, id);
+    return id;
+  }
+
+  function scrollOwnerDepth(element: Element): number {
+    let depth = isScrollOwner(element) ? 1 : 0;
+    let current: HTMLElement | null = element.parentElement;
+    while (current) {
+      if (isScrollOwner(current)) depth += 1;
+      current = current.parentElement;
+    }
+    return depth;
+  }
+
+  function considerScrollOwner(
+    element: Element | null,
+    seen: Set<Element>,
+    list: Array<AutoScrollCandidate & { element: HTMLElement }>,
+    explicit = false,
+  ): void {
+    if (!(element instanceof HTMLElement) || seen.has(element)) return;
+    if (!explicit && !isScrollOwner(element)) return;
+    seen.add(element);
+    list.push({
+      id: scrollOwnerId(element),
+      depth: scrollOwnerDepth(element),
+      metrics: measureScrollMetrics(element),
+      element,
+    });
+  }
+
+  function collectAutoScrollCandidates(): Array<AutoScrollCandidate & { element: HTMLElement }> {
+    const seen = new Set<Element>();
+    const list: Array<AutoScrollCandidate & { element: HTMLElement }> = [];
+    const origins: Array<Element | null> = [];
+
+    if (connectedDocument && pointerPosition) {
+      origins.push(hitElementFromPoint(connectedDocument, pointerPosition.x, pointerPosition.y));
+    }
+    origins.push(connectedRoot);
+    for (const target of targets.values()) {
+      if (target.registration.autoScroll) origins.push(target.element);
+    }
+
+    for (const origin of origins) {
+      const explicit = origin instanceof Element && [...targets.values()].some((target) => target.registration.autoScroll && target.element === origin);
+      considerScrollOwner(origin, seen, list, explicit);
+      if (origin instanceof Element) {
+        for (const parent of collectScrollParents(origin)) {
+          considerScrollOwner(parent, seen, list);
+        }
+      }
+    }
+
+    const scrolling = connectedDocument?.scrollingElement ?? null;
+    considerScrollOwner(scrolling, seen, list);
+    return list;
+  }
+
+  function applyAutoScroll(id: string, dx: number, dy: number, owners: Array<AutoScrollCandidate & { element: HTMLElement }>): boolean {
+    const owner = owners.find((entry) => entry.id === id);
+    if (!owner) return false;
+    const beforeTop = owner.element.scrollTop;
+    const beforeLeft = owner.element.scrollLeft;
+    if (dy !== 0) owner.element.scrollTop = beforeTop + dy;
+    if (dx !== 0) owner.element.scrollLeft = beforeLeft + dx;
+    return owner.element.scrollTop !== beforeTop || owner.element.scrollLeft !== beforeLeft;
+  }
+
+  function stopAutoScroll(): void {
+    autoScrollRunning = false;
+    lastAutoScrollTs = null;
+    if (autoScrollFrame !== null && connectedWindow) {
+      connectedWindow.cancelAnimationFrame(autoScrollFrame);
+    }
+    autoScrollFrame = null;
+  }
+
+  function startAutoScroll(): void {
+    if (phase !== "dragging" || inputKind === "keyboard") return;
+    autoScrollRunning = true;
+    scheduleAutoScroll();
+  }
+
+  function scheduleAutoScroll(): void {
+    if (!autoScrollRunning || autoScrollFrame !== null || !connectedWindow) return;
+    autoScrollFrame = -1;
+    let sync = true;
+    const frame = connectedWindow.requestAnimationFrame((now) => {
+      if (autoScrollFrame === -1 || autoScrollFrame === frame) autoScrollFrame = null;
+      onAutoScrollFrame(now);
+      if (!sync && autoScrollRunning) scheduleAutoScroll();
+    });
+    sync = false;
+    if (autoScrollFrame === -1) autoScrollFrame = frame;
+  }
+
+  function onAutoScrollFrame(now: number): void {
+    if (!autoScrollRunning || phase !== "dragging" || !pointerPosition) {
+      stopAutoScroll();
+      return;
+    }
+    const dt = lastAutoScrollTs === null ? 16 : Math.min(Math.max(now - lastAutoScrollTs, 0), 64);
+    if (dt === 0) return;
+    lastAutoScrollTs = now;
+    const owners = collectAutoScrollCandidates();
+    const intent = resolveAutoScroll(owners, pointerPosition, dt);
+    if (intent && applyAutoScroll(intent.id, intent.dx, intent.dy, owners)) {
+      layoutDirty = true;
+      hitTest(pointerPosition.x, pointerPosition.y);
+    }
   }
 
   function evaluateTarget(
@@ -1206,6 +1377,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
 
     hitTest(x, y);
+    if (gesture?.activated) scheduleAutoScroll();
   }
 
   function suppressScroll(event: Event): void {
@@ -1747,6 +1919,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
       return () => {
         if (connectedRoot !== root) return;
+        stopAutoScroll();
         stopCandidate();
         if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
         unbindDocument();
@@ -1928,6 +2101,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     },
 
     cancel() {
+      stopAutoScroll();
       stopCandidate();
       if (!context.session) return;
       dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
@@ -1935,6 +2109,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
     destroy() {
       if (destroyed) return;
+      stopAutoScroll();
       stopCandidate();
       if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
       for (const id of [...sources.keys()]) unregisterSource(id);

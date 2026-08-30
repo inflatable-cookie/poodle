@@ -69,7 +69,8 @@ behavior repairs without inventing another conformance authority.
   #100. This work remains separate from payload drag-and-drop. `g16.022`
   landed the web custom-surface substrate over that kernel in PR #101;
   `g16.023` merged in PR #104 with ordered logical keyboard targets preserving
-  windowed reorder. `g16.024` is ready for Tree nested intent and auto-scroll.
+  windowed reorder. `g16.024` migrates Tree nested intent and auto-scroll onto
+  the shared web substrate.
   Tabs now moves with its DockRegion host-bridge consumer in `g16.026`.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after

@@ -7,6 +7,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-30 — `parity-evidence-ledger` resolves a React source as the first
+  existing path among `Name`, `Name.tsx`, … On a case-insensitive volume,
+  `src/tree/` matches `Tree` before `Tree.tsx`, so adding an internal helper
+  directory with that name rewrites the Tree/React ledger cell. Name internal
+  folders away from the public component (`tree-item/`, not `tree/`). Hit
+  while closing g16.024.
+
 - 2026-08-30 — Svelte smoke and axe globs are `src/*.svelte`, so every
   top-level `.svelte` file is treated as a public component. An internal
   helper at that path (`EditableListRow`) failed both suites because it

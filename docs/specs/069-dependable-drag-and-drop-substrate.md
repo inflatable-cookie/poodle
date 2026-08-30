@@ -1,6 +1,6 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: active — compiled as g16.021–g16.028; g16.021 merged, g16.022 landed
+Status: active — compiled as g16.021–g16.028; g16.021–g16.023 merged, g16.024 landed
 Updated: 2026-08-30
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
