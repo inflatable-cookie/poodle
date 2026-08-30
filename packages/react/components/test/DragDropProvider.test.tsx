@@ -3,7 +3,10 @@
  */
 
 import { fireEvent, render } from "@testing-library/react";
+import { StrictMode, useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { createDragDropController } from "@inflatable-cookie/poodle-core";
 
 import { DragDropProvider, useDragSource, useDropTarget } from "../src/drag-drop";
 import { DragDropCustomSurface } from "./DragDropCustomSurface";
@@ -173,5 +176,116 @@ describe("DragDropProvider (react)", () => {
       </DragDropProvider>,
     );
     expect(seen[0]).toBe(view.getByRole("button", { name: "Alpha" }));
+  });
+
+  it("survives StrictMode remount without destroying the live controller", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const view = render(
+      <StrictMode>
+        <DragDropCustomSurface onDropA={onDrop} />
+      </StrictMode>,
+    );
+    const { source } = layout(view.container);
+
+    fireEvent.pointerDown(source, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(source, { pointerId: 1, clientX: 30, clientY: 90 });
+    fireEvent.pointerUp(source, { pointerId: 1, clientX: 30, clientY: 90 });
+
+    expect(onDrop).toHaveBeenCalledTimes(1);
+  });
+
+  it("disconnects an injected controller on unmount without destroying it", () => {
+    const controller = createDragDropController();
+    const destroy = vi.spyOn(controller, "destroy");
+
+    function Source() {
+      const { getSourceProps } = useDragSource({
+        sourceId: "a",
+        subject: { kind: "item", id: "a" },
+        allowedOperations: ["move"],
+        label: "Alpha",
+      });
+      return <button type="button" {...getSourceProps()}>Alpha</button>;
+    }
+
+    function Target() {
+      const { getTargetProps } = useDropTarget({
+        targetId: "list",
+        acceptedKinds: ["item"],
+        label: "List",
+        resolvePosition: () => "inside",
+        canDrop: (intent) => ({ accepted: true, intent }),
+        onDrop: () => ({ status: "committed" }),
+      });
+      return <div {...getTargetProps()} />;
+    }
+
+    const view = render(
+      <DragDropProvider controller={controller}>
+        <Source />
+        <Target />
+      </DragDropProvider>,
+    );
+    view.unmount();
+    expect(destroy).not.toHaveBeenCalled();
+    const host = document.createElement("div");
+    document.body.append(host);
+    const disconnect = controller.connect(host);
+    disconnect();
+    controller.destroy();
+    host.remove();
+  });
+
+  it("re-registers when the host node is replaced", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+
+    function Swap() {
+      const [asDiv, setAsDiv] = useState(false);
+      const { getSourceProps } = useDragSource({
+        sourceId: "a",
+        subject: { kind: "item", id: "a" },
+        allowedOperations: ["move"],
+        label: "Alpha",
+      });
+      const { getTargetProps } = useDropTarget({
+        targetId: "list",
+        acceptedKinds: ["item"],
+        label: "List",
+        resolvePosition: () => "inside",
+        canDrop: (intent) => ({ accepted: true, intent }),
+        onDrop,
+      });
+      const Tag = asDiv ? "div" : "button";
+      return (
+        <>
+          <Tag data-testid="src" {...getSourceProps()}>Alpha</Tag>
+          <button type="button" data-testid="swap" onClick={() => setAsDiv(true)}>
+            swap
+          </button>
+          <div data-testid="dst" {...getTargetProps()} />
+        </>
+      );
+    }
+
+    const view = render(
+      <DragDropProvider>
+        <Swap />
+      </DragDropProvider>,
+    );
+    const first = measurable(view.getByTestId("src"), SOURCE);
+    expect(first.getAttribute("draggable")).toBe("false");
+    fireEvent.click(view.getByTestId("swap"));
+    expect(first.hasAttribute("draggable")).toBe(false);
+
+    const second = measurable(view.getByTestId("src"), SOURCE);
+    const target = measurable(view.getByTestId("dst"), TARGET);
+    expect(second.tagName).toBe("DIV");
+    expect(second.getAttribute("draggable")).toBe("false");
+
+    fireEvent.pointerDown(second, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(second, { pointerId: 1, clientX: 30, clientY: 90 });
+    fireEvent.pointerUp(second, { pointerId: 1, clientX: 30, clientY: 90 });
+    expect(onDrop).toHaveBeenCalledTimes(1);
+    expect(target).toBeTruthy();
   });
 });

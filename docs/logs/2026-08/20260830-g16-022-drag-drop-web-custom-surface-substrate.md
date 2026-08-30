@@ -68,21 +68,44 @@ join the frozen 175-component denominator.
 - Geometry is measured and cached; `invalidateLayout`, scroll, and resize
   remeasure. There is no per-target timer.
 - `onDrop` may be sync or a promise. Late results naming a cancelled session
-  are inert. Cleanup of listeners, overlay, attributes, timers, and capture
-  runs once.
+  are inert. A target disabled or unregistered while dropping rejects
+  `target-unavailable`. Cleanup of listeners, overlay, attributes, timers, and
+  capture runs once.
+- Pre-activation hold/distance candidates die on disconnect, cancel,
+  unregister, disable, visibility loss, and Escape. They never enter the
+  kernel.
+- Pointer capture works on any `Element` with `setPointerCapture` (HTML and
+  SVG). After activation, non-passive `touchmove` `preventDefault` keeps a
+  scroller from cancelling the gesture.
+- Authored `tabindex` / `aria-label` / `aria-description` / `draggable` /
+  `user-select` restore exactly. Post-destroy handles are inert.
+- React ownership is frozen at first render. Owned controllers destroy on a
+  microtask so StrictMode remount can reconnect. Injected controllers never
+  destroy. Source/target registration follows the host node.
 
 ## Evidence
 
-- Framework-free: `test/headless-dom/drag-drop-controller.test.ts` (18).
+- Framework-free: `test/headless-dom/drag-drop-controller.test.ts` (25).
 - Svelte mounted fixture: `packages/svelte/components/test/DragDropProvider.test.ts`
   plus `DragDropCustomSurface.svelte` (7).
 - React mounted fixture: `packages/react/components/test/DragDropProvider.test.tsx`
-  plus `DragDropCustomSurface.tsx` (8).
+  plus `DragDropCustomSurface.tsx` (11), including StrictMode, injected
+  ownership, and host replacement.
 - Chromium and WebKit: `effigy test:drag-drop-browser` /
-  `test/drag-drop/probe.ts` — capture, preview cleanup, shifted-target
-  geometry, touch-before-hold, keyboard focus return.
-- `effigy ci:web` passed. Ledger still 175 rows / 52 mounted / 122 missing.
-- `effigy docs:check` and `effigy qa` passed.
+  `test/drag-drop/probe.ts` — real mouse input and `hasPointerCapture`,
+  outside-source routing, both sides of touch hold vs scroll, automatic
+  scroll/resize invalidation, keyboard focus return.
+
+## Review repair
+
+PR #101 review (comment on `d3d91f179`) blocked on eight findings. All eight
+are closed in this follow-up: candidate lifetime, release hit-testing, async
+drop disable/unregister, live-region notify, React StrictMode/ownership/host
+node, exact restore, SVG capture, and real browser evidence.
+
+Repair validation: focused controller/Svelte/React tests, Chromium/WebKit
+probe, `effigy ci:web`, `effigy docs:check`, `effigy check:parity-evidence-ledger`,
+`effigy qa`, `git diff --check origin/main...HEAD`. Ledger still 175 rows.
 
 ## Non-claims
 

@@ -34,10 +34,13 @@ function asRect(box: { x: number; y: number; width: number; height: number }): D
   } as DOMRect;
 }
 
-function layout(element: HTMLElement, box: { x: number; y: number; width: number; height: number }): HTMLElement {
-  element.getBoundingClientRect = () => asRect(box);
-  element.setPointerCapture = vi.fn();
-  element.releasePointerCapture = vi.fn();
+function layout<T extends Element>(
+  element: T,
+  box: { x: number; y: number; width: number; height: number },
+): T {
+  (element as HTMLElement).getBoundingClientRect = () => asRect(box);
+  (element as HTMLElement).setPointerCapture = vi.fn();
+  (element as HTMLElement).releasePointerCapture = vi.fn();
   return element;
 }
 
@@ -441,6 +444,245 @@ describe("createDragDropController", () => {
 
     layout(targetEl, { x: 10, y: 40, width: 80, height: 20 });
     controller.invalidateLayout();
+    expect(controller.getSnapshot().targetPosture).toBe("accepted");
+    controller.destroy();
+  });
+
+  it("abandons a pre-activation hold on disconnect, cancel, unregister, disable, visibility, and Escape", () => {
+    vi.useFakeTimers();
+    const onStart = vi.fn();
+    const touch = { activation: { touch: { holdMs: 250, tolerance: 8 } }, onDragStart: onStart };
+
+    function press() {
+      const controller = createDragDropController();
+      const disconnect = controller.connect(root);
+      const handle = controller.registerSource(sourceEl, sourceReg(touch));
+      controller.registerTarget(targetEl, targetReg());
+      sourceEl.dispatchEvent(pointer("pointerdown", { pointerType: "touch", clientX: 20, clientY: 20 }));
+      expect(controller.getSnapshot().phase).toBe("idle");
+      return { controller, handle, disconnect };
+    }
+
+    const disconnected = press();
+    disconnected.disconnect();
+    vi.advanceTimersByTime(300);
+    expect(onStart).not.toHaveBeenCalled();
+    disconnected.controller.destroy();
+
+    const cancelled = press();
+    cancelled.controller.cancel();
+    vi.advanceTimersByTime(300);
+    expect(onStart).not.toHaveBeenCalled();
+    cancelled.controller.destroy();
+
+    const unregistered = press();
+    unregistered.handle.unregister();
+    vi.advanceTimersByTime(300);
+    expect(onStart).not.toHaveBeenCalled();
+    unregistered.controller.destroy();
+
+    const disabled = press();
+    disabled.handle.update(sourceReg({ ...touch, disabled: true }));
+    vi.advanceTimersByTime(300);
+    expect(onStart).not.toHaveBeenCalled();
+    disabled.controller.destroy();
+
+    const hidden = press();
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
+    document.dispatchEvent(new Event("visibilitychange"));
+    vi.advanceTimersByTime(300);
+    expect(onStart).not.toHaveBeenCalled();
+    hidden.controller.destroy();
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "visible" });
+
+    const escaped = press();
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    vi.advanceTimersByTime(300);
+    expect(onStart).not.toHaveBeenCalled();
+    expect(escaped.controller.getSnapshot().announcement).toBeNull();
+    escaped.controller.destroy();
+  });
+
+  it("re-hit-tests the pointer-up coordinates, not a queued move", () => {
+    const queued: FrameRequestCallback[] = [];
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      queued.push(callback);
+      return queued.length;
+    });
+    vi.stubGlobal("cancelAnimationFrame", () => {
+      queued.length = 0;
+    });
+
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg({ onDrop }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    queued.splice(0).forEach((callback) => callback(0));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 50 }));
+    expect(queued.length).toBe(1);
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
+    expect(onDrop).toHaveBeenCalledTimes(1);
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
+  it("rejects an async drop when the target is disabled or unregistered before commit", async () => {
+    let finish: (value: { status: "committed" }) => void = () => {};
+    const pending = new Promise<{ status: "committed" }>((resolve) => {
+      finish = resolve;
+    });
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ onDragEnd: onEnd }));
+    const handle = controller.registerTarget(targetEl, targetReg({ onDrop: () => pending }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("dropping");
+
+    handle.update(targetReg({ onDrop: () => pending, disabled: true }));
+    expect(onEnd.mock.calls.at(-1)?.[0]).toEqual({ status: "rejected", reason: "target-unavailable" });
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    finish({ status: "committed" });
+    await pending;
+    await Promise.resolve();
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+
+    let finishAgain: (value: { status: "committed" }) => void = () => {};
+    const pendingAgain = new Promise<{ status: "committed" }>((resolve) => {
+      finishAgain = resolve;
+    });
+    const onEndAgain = vi.fn();
+    const again = createDragDropController();
+    again.connect(root);
+    again.registerSource(sourceEl, sourceReg({ onDragEnd: onEndAgain }));
+    const live = again.registerTarget(targetEl, targetReg({ onDrop: () => pendingAgain }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
+    live.unregister();
+    expect(onEndAgain.mock.calls.at(-1)?.[0]).toEqual({
+      status: "rejected",
+      reason: "target-unavailable",
+    });
+
+    finishAgain({ status: "committed" });
+    await pendingAgain;
+    await Promise.resolve();
+    expect(again.getSnapshot().phase).toBe("idle");
+    again.destroy();
+  });
+
+  it("publishes throttled intent and rejection announcements into the snapshot", () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(
+      targetEl,
+      targetReg({ canDrop: () => ({ accepted: false, reason: "occupied" }) }),
+    );
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    expect(controller.getSnapshot().announcement).toBe("Picked up Alpha");
+
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().targetPosture).toBe("rejected");
+    expect(controller.getSnapshot().announcement).toBe("Picked up Alpha");
+
+    vi.advanceTimersByTime(400);
+    expect(controller.getSnapshot().announcement).toBe("Drop rejected: occupied");
+    controller.destroy();
+  });
+
+  it("restores authored source attributes and ignores post-destroy handles", () => {
+    sourceEl.setAttribute("tabindex", "2");
+    sourceEl.setAttribute("aria-label", "Mine");
+    sourceEl.setAttribute("aria-description", "Hint");
+    sourceEl.setAttribute("draggable", "true");
+    document.body.style.setProperty("user-select", "text");
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    const handle = controller.registerSource(sourceEl, sourceReg({ instructions: "Drag me" }));
+    controller.registerTarget(targetEl, targetReg());
+    expect(sourceEl.getAttribute("draggable")).toBe("false");
+    expect(sourceEl.getAttribute("aria-description")).toBe("Drag me");
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    expect(document.body.style.getPropertyValue("user-select")).toBe("none");
+
+    handle.unregister();
+    expect(sourceEl.getAttribute("tabindex")).toBe("2");
+    expect(sourceEl.getAttribute("aria-label")).toBe("Mine");
+    expect(sourceEl.getAttribute("aria-description")).toBe("Hint");
+    expect(sourceEl.getAttribute("draggable")).toBe("true");
+    expect(document.body.style.getPropertyValue("user-select")).toBe("text");
+
+    const again = controller.registerSource(sourceEl, sourceReg());
+    controller.destroy();
+    expect(sourceEl.getAttribute("tabindex")).toBe("2");
+    again.update(sourceReg({ label: "Mutated" }));
+    again.unregister();
+    expect(sourceEl.getAttribute("aria-label")).toBe("Mine");
+    expect(sourceEl.getAttribute("draggable")).toBe("true");
+    document.body.style.removeProperty("user-select");
+  });
+
+  it("captures an SVG source after activation", () => {
+    const svg = layout(
+      document.createElementNS("http://www.w3.org/2000/svg", "rect"),
+      SOURCE_BOX,
+    );
+    root.replaceChildren(svg, targetEl);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(svg, sourceReg({ label: "Shape" }));
+    controller.registerTarget(targetEl, targetReg());
+
+    svg.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    svg.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    expect((svg as SVGRectElement).setPointerCapture).toHaveBeenCalledWith(1);
+    controller.destroy();
+  });
+
+  it("re-hit-tests when ResizeObserver reports a target size change", () => {
+    let notify: ResizeObserverCallback | null = null;
+    class MockObserver {
+      constructor(callback: ResizeObserverCallback) {
+        notify = callback;
+      }
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    }
+    vi.stubGlobal("ResizeObserver", MockObserver);
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 50 }));
+    expect(controller.getSnapshot().targetPosture).not.toBe("accepted");
+
+    layout(targetEl, { x: 10, y: 40, width: 80, height: 20 });
+    notify?.([], {} as ResizeObserver);
     expect(controller.getSnapshot().targetPosture).toBe("accepted");
     controller.destroy();
   });

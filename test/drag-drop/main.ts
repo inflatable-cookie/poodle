@@ -12,12 +12,14 @@ const overlay = document.getElementById("overlay") as HTMLElement;
 const live = document.getElementById("live") as HTMLElement;
 const shift = document.getElementById("shift") as HTMLButtonElement;
 
-const originalCapture = source.setPointerCapture.bind(source);
-source.setPointerCapture = (id: number) => {
-  source.dataset.probeCaptured = "true";
+source.addEventListener("gotpointercapture", (event) => {
+  const pointer = event as PointerEvent;
   probe.dataset.captured = "true";
-  originalCapture(id);
-};
+  probe.dataset.captureId = String(pointer.pointerId);
+});
+source.addEventListener("lostpointercapture", () => {
+  probe.dataset.captured = "false";
+});
 
 const controller = createDragDropController();
 controller.connect(root);
@@ -43,7 +45,8 @@ function paint(): void {
   probe.dataset.phase = snapshot.phase;
   probe.dataset.target = snapshot.targetId ?? "";
   probe.dataset.posture = snapshot.targetPosture ?? "";
-  probe.dataset.captured = source.dataset.probeCaptured ?? "false";
+  const captured = [0, 1, 2, 3, 4, 5, 6, 7].some((id) => source.hasPointerCapture(id));
+  probe.dataset.captured = captured ? "true" : "false";
   probe.textContent = `${snapshot.phase} ${snapshot.targetId ?? ""} ${snapshot.announcement ?? ""}`;
 
   overlay.replaceChildren();
@@ -63,8 +66,8 @@ controller.subscribe(paint);
 paint();
 
 shift.addEventListener("click", () => {
-  target.style.transform = "translate(96px, 0)";
-  controller.invalidateLayout();
+  target.style.minHeight = "160px";
+  target.style.width = "280px";
 });
 
 (window as unknown as { __poodleDrag: typeof controller }).__poodleDrag = controller;

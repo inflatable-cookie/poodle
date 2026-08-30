@@ -1,11 +1,16 @@
 /**
  * Headless Chromium + WebKit evidence for the drag-drop web substrate.
  *
+ * Mouse uses Playwright's real input. Chromium touch uses CDP
+ * Input.dispatchTouchEvent. WebKit has no hold/move touch protocol, so touch
+ * there is dispatched at document.elementFromPoint with real hold timing — not
+ * replayed onto #source.
+ *
  *   bun test/drag-drop/probe.ts --browser=chromium
  *   bun test/drag-drop/probe.ts --browser=webkit
  */
 
-import { chromium, webkit, type BrowserType, type Page } from "playwright";
+import { chromium, webkit, type BrowserType, type CDPSession, type Page } from "playwright";
 import { fileURLToPath } from "node:url";
 
 const browserFlag = process.argv.find((arg) => arg.startsWith("--browser="))?.slice("--browser=".length);
@@ -73,66 +78,110 @@ async function box(page: Page, selector: string): Promise<{ x: number; y: number
   return handle;
 }
 
-async function dispatchPointer(
+function center(rect: { x: number; y: number; width: number; height: number }): { x: number; y: number } {
+  return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+}
+
+async function probeAttr(page: Page, name: string): Promise<string> {
+  return (await page.locator("#probe").getAttribute(`data-${name}`)) ?? "";
+}
+
+async function waitProbe(page: Page, name: string, expected: string, timeout = 2_000): Promise<string> {
+  try {
+    await page.waitForFunction(
+      ({ name, expected }) => document.querySelector("#probe")?.getAttribute(`data-${name}`) === expected,
+      { name, expected },
+      { timeout },
+    );
+  } catch {
+    // Fall through and report the actual value.
+  }
+  return probeAttr(page, name);
+}
+
+async function dispatchAtPoint(
   page: Page,
   type: "pointerdown" | "pointermove" | "pointerup",
-  selector: string,
-  clientX: number,
-  clientY: number,
-  pointerType = "mouse",
-  pointerId = 1,
+  x: number,
+  y: number,
+  pointerType: string,
+  pointerId: number,
 ): Promise<void> {
   await page.evaluate(
-    ({ type, selector, clientX, clientY, pointerType, pointerId }) => {
-      const node = document.querySelector(selector);
-      if (!(node instanceof HTMLElement)) throw new Error(`missing ${selector}`);
+    ({ type, x, y, pointerType, pointerId }) => {
+      const node = document.elementFromPoint(x, y) ?? document.body;
       node.dispatchEvent(
         new PointerEvent(type, {
           bubbles: true,
           cancelable: true,
+          composed: true,
           pointerId,
           pointerType,
           isPrimary: true,
           button: 0,
           buttons: type === "pointerup" ? 0 : 1,
-          clientX,
-          clientY,
+          clientX: x,
+          clientY: y,
+          view: window,
         }),
       );
     },
-    { type, selector, clientX, clientY, pointerType, pointerId },
+    { type, x, y, pointerType, pointerId },
   );
 }
 
-async function run(page: Page, name: string): Promise<void> {
+async function touchAt(
+  page: Page,
+  cdp: CDPSession | null,
+  type: "touchStart" | "touchMove" | "touchEnd",
+  x: number,
+  y: number,
+): Promise<void> {
+  if (cdp) {
+    await cdp.send("Input.dispatchTouchEvent", {
+      type,
+      touchPoints: type === "touchEnd" ? [] : [{ x, y }],
+    });
+    return;
+  }
+  const pointerType = "touch";
+  const pointerId = 7;
+  if (type === "touchStart") await dispatchAtPoint(page, "pointerdown", x, y, pointerType, pointerId);
+  else if (type === "touchMove") await dispatchAtPoint(page, "pointermove", x, y, pointerType, pointerId);
+  else await dispatchAtPoint(page, "pointerup", x, y, pointerType, pointerId);
+}
+
+async function run(page: Page, name: string, cdp: CDPSession | null): Promise<void> {
   await page.goto(url, { waitUntil: "load" });
   await page.locator("#source").waitFor();
 
-  const source = await box(page, "#source");
-  const target = await box(page, "#target");
-  const sx = source.x + source.width / 2;
-  const sy = source.y + source.height / 2;
-  const tx = target.x + target.width / 2;
-  const ty = target.y + target.height / 2;
+  const source = center(await box(page, "#source"));
+  const target = center(await box(page, "#target"));
 
-  await dispatchPointer(page, "pointerdown", "#source", sx, sy);
-  await dispatchPointer(page, "pointermove", "#source", sx + 24, sy);
-  await frames(page);
-  const captured = await page.locator("#probe").getAttribute("data-captured");
-  const phase = await page.locator("#probe").getAttribute("data-phase");
+  await page.mouse.move(source.x, source.y);
+  await page.mouse.down();
+  await page.mouse.move(source.x + 28, source.y, { steps: 8 });
+  const phase = await waitProbe(page, "phase", "dragging");
+  const captured = await waitProbe(page, "captured", "true");
   check(
-    `${name}: pointer capture after activation`,
-    captured === "true" && phase === "dragging",
+    `${name}: real mouse capture after activation`,
+    phase === "dragging" && captured === "true",
     `captured=${captured} phase=${phase}`,
   );
 
-  await dispatchPointer(page, "pointermove", "#source", tx, ty);
+  await page.mouse.move(target.x, target.y, { steps: 10 });
   await frames(page);
   const preview = await page.locator(".poodle-drag-preview").count();
-  check(`${name}: preview visible while dragging`, preview === 1, `count=${preview}`);
+  const posture = await probeAttr(page, "posture");
+  const hoverTarget = await probeAttr(page, "target");
+  check(
+    `${name}: captured drag routes over the target, not the source`,
+    preview === 1 && posture === "accepted" && hoverTarget === "list",
+    `preview=${preview} posture=${posture} target=${hoverTarget}`,
+  );
 
-  await dispatchPointer(page, "pointerup", "#source", tx, ty);
-  const afterPhase = await page.locator("#probe").getAttribute("data-phase");
+  await page.mouse.up();
+  const afterPhase = await waitProbe(page, "phase", "idle");
   const afterPreview = await page.locator(".poodle-drag-preview").count();
   check(
     `${name}: preview and session clear after drop`,
@@ -142,31 +191,80 @@ async function run(page: Page, name: string): Promise<void> {
 
   await page.reload({ waitUntil: "load" });
   await page.locator("#source").waitFor();
-  await page.click("#shift");
+  const origin = center(await box(page, "#source"));
+  const targetBox = await box(page, "#target");
+  const miss = { x: targetBox.x + targetBox.width + 48, y: targetBox.y + Math.min(12, targetBox.height / 2) };
+  await page.mouse.move(origin.x, origin.y);
+  await page.mouse.down();
+  await page.mouse.move(origin.x + 28, origin.y, { steps: 6 });
+  await waitProbe(page, "phase", "dragging");
+  await page.mouse.move(miss.x, miss.y, { steps: 8 });
   await frames(page);
-  const shifted = await box(page, "#target");
-  const origin = await box(page, "#source");
-  const ox = origin.x + origin.width / 2;
-  const oy = origin.y + origin.height / 2;
-  await dispatchPointer(page, "pointerdown", "#source", ox, oy);
-  await dispatchPointer(page, "pointermove", "#source", ox + 24, oy);
-  await dispatchPointer(page, "pointermove", "#source", shifted.x + shifted.width / 2, shifted.y + shifted.height / 2);
+  const missed = await probeAttr(page, "posture");
+  await page.evaluate((width) => {
+    const node = document.getElementById("target");
+    if (node) node.style.width = `${width}px`;
+  }, miss.x - targetBox.x + 40);
+  await frames(page, 6);
+  const afterResize = await probeAttr(page, "posture");
+  const targetCenter = center(await box(page, "#target"));
+  await page.mouse.move(targetCenter.x, targetCenter.y, { steps: 6 });
   await frames(page);
-  const posture = await page.locator("#probe").getAttribute("data-posture");
-  await dispatchPointer(page, "pointerup", "#source", shifted.x + shifted.width / 2, shifted.y + shifted.height / 2);
-  check(`${name}: geometry invalidation follows a moved target`, posture === "accepted", `posture=${posture}`);
+  await waitProbe(page, "posture", "accepted");
+  await page.evaluate(() => {
+    const scroller = document.getElementById("scroller");
+    if (!scroller) return;
+    scroller.scrollTop += 220;
+  });
+  await frames(page, 6);
+  const afterScroll = await probeAttr(page, "posture");
+  await page.mouse.up();
+  check(
+    `${name}: resize/scroll re-hit-test without invalidateLayout`,
+    missed !== "accepted" && afterResize === "accepted" && afterScroll !== "accepted",
+    `miss=${missed} resized=${afterResize} scrolled=${afterScroll}`,
+  );
 
   await page.reload({ waitUntil: "load" });
   await page.locator("#source").waitFor();
-  const start = await box(page, "#source");
-  await dispatchPointer(page, "pointerdown", "#source", start.x + start.width / 2, start.y + start.height / 2, "touch", 7);
-  await dispatchPointer(page, "pointermove", "#source", start.x + start.width / 2, start.y + start.height / 2 + 40, "touch", 7);
-  const touchPhase = await page.locator("#probe").getAttribute("data-phase");
-  const touchCaptured = await page.locator("#probe").getAttribute("data-captured");
+  const start = center(await box(page, "#source"));
+  await touchAt(page, cdp, "touchStart", start.x, start.y);
+  await touchAt(page, cdp, "touchMove", start.x, start.y + 40);
+  await page.waitForTimeout(350);
+  const touchPhase = await probeAttr(page, "phase");
+  const touchCaptured = await probeAttr(page, "captured");
+  await touchAt(page, cdp, "touchEnd", start.x, start.y + 40);
   check(
     `${name}: touch scroll wins before hold`,
-    touchPhase === "idle" && touchCaptured === "false",
+    touchPhase === "idle" && touchCaptured !== "true",
     `phase=${touchPhase} captured=${touchCaptured}`,
+  );
+
+  await page.reload({ waitUntil: "load" });
+  await page.locator("#source").waitFor();
+  const hold = center(await box(page, "#source"));
+  const drop = center(await box(page, "#target"));
+  await touchAt(page, cdp, "touchStart", hold.x, hold.y);
+  await page.waitForTimeout(350);
+  const heldPhase = await waitProbe(page, "phase", "dragging", 1_000);
+  const steps = 8;
+  for (let i = 1; i <= steps; i++) {
+    await touchAt(
+      page,
+      cdp,
+      "touchMove",
+      hold.x + ((drop.x - hold.x) * i) / steps,
+      hold.y + ((drop.y - hold.y) * i) / steps,
+    );
+  }
+  await frames(page);
+  const heldPosture = await probeAttr(page, "posture");
+  const heldTarget = await probeAttr(page, "target");
+  await touchAt(page, cdp, "touchEnd", drop.x, drop.y);
+  check(
+    `${name}: touch hold activates, then routes over the target`,
+    heldPhase === "dragging" && heldPosture === "accepted" && heldTarget === "list",
+    `phase=${heldPhase} posture=${heldPosture} target=${heldTarget}`,
   );
 
   await page.reload({ waitUntil: "load" });
@@ -176,16 +274,22 @@ async function run(page: Page, name: string): Promise<void> {
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
   const focused = await page.evaluate(() => document.activeElement?.id ?? "");
-  const idle = await page.locator("#probe").getAttribute("data-phase");
+  const idle = await probeAttr(page, "phase");
   check(`${name}: keyboard drop restores focus`, focused === "source" && idle === "idle", `focus=${focused} phase=${idle}`);
 }
 
 for (const [name, type] of engines) {
   console.log(`\n=== ${name} ===`);
   const browser = await type.launch();
-  const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+  const context = await browser.newContext({
+    viewport: { width: 800, height: 600 },
+    hasTouch: true,
+  });
+  const page = await context.newPage();
+  let cdp: CDPSession | null = null;
   try {
-    await run(page, name);
+    if (name === "chromium") cdp = await context.newCDPSession(page);
+    await run(page, name, cdp);
   } catch (error) {
     failures += 1;
     console.log(`  FAIL  ${name}: ${error instanceof Error ? error.message : String(error)}`);

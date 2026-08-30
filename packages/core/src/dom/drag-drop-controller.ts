@@ -187,8 +187,12 @@ interface SourceEntry {
   element: Element;
   registration: DragSourceRegistration;
   order: number;
-  restoredTabIndex: string | null;
-  nativeDraggable: string | null;
+  authoredTabIndex: string | null;
+  authoredAriaLabel: string | null;
+  authoredAriaDescription: string | null;
+  authoredDraggable: string | null;
+  addedTabIndex: boolean;
+  addedAriaLabel: boolean;
 }
 
 interface TargetEntry {
@@ -322,6 +326,22 @@ function eligibilityFromCanDrop(
   return result;
 }
 
+function styledElement(element: Element): (Element & { style: CSSStyleDeclaration }) | null {
+  return "style" in element ? (element as Element & { style: CSSStyleDeclaration }) : null;
+}
+
+function isFocusableHost(element: Element): element is HTMLElement | SVGElement {
+  return element instanceof HTMLElement || element instanceof SVGElement;
+}
+
+function focusHost(element: Element): void {
+  if (isFocusableHost(element)) element.focus();
+}
+
+function canPointerCapture(element: Element): boolean {
+  return typeof (element as HTMLElement).setPointerCapture === "function";
+}
+
 function resolveHandle(element: Element, handle: Element | string | undefined): Element {
   if (handle === undefined) return element;
   if (typeof handle === "string") {
@@ -388,6 +408,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   let keyboardTargetIndex = -1;
 
   const documentListeners: Array<[string, EventListener, AddEventListenerOptions | boolean | undefined]> = [];
+  let resizeObserver: ResizeObserver | null = null;
+  let restoredBodyUserSelect: string | null | undefined;
 
   function assertLive(): void {
     if (destroyed) {
@@ -527,7 +549,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       reason,
     };
 
-    const throttle = kind === "intentChanged" && inputKind !== "keyboard";
+    const throttle =
+      inputKind !== "keyboard" && (kind === "intentChanged" || kind === "rejected");
     if (throttle) {
       pendingIntentAnnouncement = event;
       const now = Date.now();
@@ -555,6 +578,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     if (text === null) return;
     announcement = text;
     lastAnnounceAt = Date.now();
+    notify();
   }
 
   function dispatch(event: DragSessionEvent): void {
@@ -649,15 +673,15 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function returnFocus(subject: DragSubject): void {
     const source = currentSource();
     const surviving = source?.element;
-    if (surviving instanceof HTMLElement && surviving.isConnected) {
-      surviving.focus();
+    if (surviving?.isConnected) {
+      focusHost(surviving);
       return;
     }
 
     for (const entry of sources.values()) {
       if (entry.registration.subject.kind === subject.kind && entry.registration.subject.id === subject.id) {
-        if (entry.element instanceof HTMLElement && entry.element.isConnected) {
-          entry.element.focus();
+        if (entry.element.isConnected) {
+          focusHost(entry.element);
           return;
         }
       }
@@ -676,23 +700,29 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       gesture.holdTimer = null;
     }
 
-    if (gesture?.captureElement instanceof HTMLElement) {
-      if (gesture.restoredTouchAction === null) gesture.captureElement.style.removeProperty(TOUCH_ACTION);
-      else if (gesture.restoredTouchAction) {
-        gesture.captureElement.style.setProperty(TOUCH_ACTION, gesture.restoredTouchAction);
-      }
-
-      if (typeof gesture.captureElement.releasePointerCapture === "function") {
-        try {
-          gesture.captureElement.releasePointerCapture(gesture.pointerId);
-        } catch {
-          // Capture may already have been released by the browser.
-        }
+    const captureStyle = gesture?.captureElement ? styledElement(gesture.captureElement) : null;
+    if (captureStyle) {
+      if (gesture?.restoredTouchAction === null) captureStyle.style.removeProperty(TOUCH_ACTION);
+      else if (gesture?.restoredTouchAction) {
+        captureStyle.style.setProperty(TOUCH_ACTION, gesture.restoredTouchAction);
       }
     }
 
-    if (connectedDocument?.body) {
-      connectedDocument.body.style.removeProperty("user-select");
+    if (gesture?.captureElement && canPointerCapture(gesture.captureElement)) {
+      try {
+        (gesture.captureElement as HTMLElement).releasePointerCapture(gesture.pointerId);
+      } catch {
+        // Capture may already have been released by the browser.
+      }
+    }
+
+    if (connectedDocument?.body && restoredBodyUserSelect !== undefined) {
+      if (restoredBodyUserSelect === null || restoredBodyUserSelect === "") {
+        connectedDocument.body.style.removeProperty("user-select");
+      } else {
+        connectedDocument.body.style.setProperty("user-select", restoredBodyUserSelect);
+      }
+      restoredBodyUserSelect = undefined;
     }
   }
 
@@ -701,6 +731,12 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     gesture = null;
     inputKind = null;
     pointerPosition = null;
+  }
+
+  function stopCandidate(): void {
+    if (gesture && !gesture.activated) {
+      abandonUnarmedGesture();
+    }
   }
 
   function beginSession(source: SourceEntry, kind: DragInputKind, x: number, y: number): string {
@@ -740,27 +776,30 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     dispatch({ type: "ACTIVATE", sessionId });
     if (phase !== "dragging") return;
 
-    if (connectedDocument?.body) {
+    if (gesture) gesture.activated = true;
+
+    if (connectedDocument?.body && restoredBodyUserSelect === undefined) {
+      restoredBodyUserSelect = connectedDocument.body.style.getPropertyValue("user-select");
       connectedDocument.body.style.setProperty("user-select", "none");
     }
 
-    if (captureElement instanceof HTMLElement && pointerId !== null) {
-      const restored = captureElement.style.getPropertyValue(TOUCH_ACTION) || null;
-      captureElement.style.setProperty(TOUCH_ACTION, "none");
-      if (typeof captureElement.setPointerCapture === "function") {
+    if (captureElement && pointerId !== null) {
+      const style = styledElement(captureElement);
+      const restored = style?.style.getPropertyValue(TOUCH_ACTION) || null;
+      style?.style.setProperty(TOUCH_ACTION, "none");
+      if (canPointerCapture(captureElement)) {
         try {
-          captureElement.setPointerCapture(pointerId);
+          (captureElement as HTMLElement).setPointerCapture(pointerId);
         } catch {
           // jsdom and some test doubles do not implement capture.
         }
       }
       if (gesture) {
-        gesture.activated = true;
         gesture.captureElement = captureElement;
         gesture.restoredTouchAction = restored;
       }
-      notify();
     }
+    notify();
   }
 
   function evaluateTarget(
@@ -845,6 +884,9 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       dispatch({ type: "TARGET_INTENT", sessionId: session.sessionId, intent });
     } else if (session.intent) {
       dispatch({ type: "TARGET_CLEARED", sessionId: session.sessionId });
+      if (rejectedTargetId) {
+        announce("rejected", { status: "rejected", reason: rejectedReason });
+      }
     } else if (
       snapshot.targetPosture !== (rejectedTargetId ? "rejected" : null) ||
       snapshot.rejectedReason !== rejectedReason ||
@@ -852,6 +894,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     ) {
       projectAttributes();
       notify();
+      if (rejectedTargetId) {
+        announce("rejected", { status: "rejected", reason: rejectedReason });
+      }
+    } else if (rejectedTargetId) {
+      announce("rejected", { status: "rejected", reason: rejectedReason });
     }
   }
 
@@ -919,6 +966,12 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   }
 
   function applyCommit(sessionId: string, intent: DropIntent, commit: DragDropCommitResult): void {
+    const liveTarget = targets.get(intent.targetId);
+    if (!liveTarget || liveTarget.registration.disabled) {
+      dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
+      return;
+    }
+
     if (commit.status === "committed") {
       dispatch({ type: "DROP_COMMITTED", sessionId, intent });
       return;
@@ -962,7 +1015,6 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
 
     const kind = asInputKind(event.pointerType);
-    const handle = resolveHandle(source.element, source.registration.handle);
     const sessionId = createSessionId();
     inputKind = kind;
     pointerPosition = { x: event.clientX, y: event.clientY };
@@ -984,8 +1036,12 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     if (kind === "touch") {
       const touch = activationFor(source.registration, "touch") as DragActivationHold;
       gesture.holdTimer = setTimeout(() => {
+        if (destroyed || !connectedRoot) return;
         if (!gesture || gesture.sessionId !== sessionId || gesture.activated) return;
-        armAndActivate(source, kind, gesture.x, gesture.y, handle, event.pointerId);
+        const live = sources.get(source.registration.sourceId);
+        if (!live || live.registration.disabled) return;
+        const capture = resolveHandle(live.element, live.registration.handle);
+        armAndActivate(live, kind, gesture.x, gesture.y, capture, event.pointerId);
         if (gesture) hitTest(gesture.x, gesture.y);
       }, touch.holdMs);
       return;
@@ -1028,6 +1084,10 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     hitTest(x, y);
   }
 
+  function suppressScroll(event: Event): void {
+    if (gesture?.activated) event.preventDefault();
+  }
+
   function onPointerMove(event: Event): void {
     if (!(event instanceof PointerEvent) || !gesture || event.pointerId !== gesture.pointerId) return;
 
@@ -1055,14 +1115,13 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function onPointerUp(event: Event): void {
     if (!(event instanceof PointerEvent) || !gesture || event.pointerId !== gesture.pointerId) return;
 
-    if (pendingMove) {
-      flushMove(pendingMove.x, pendingMove.y);
-      pendingMove = null;
-    } else {
-      pointerPosition = { x: event.clientX, y: event.clientY };
-      gesture.x = event.clientX;
-      gesture.y = event.clientY;
+    pendingMove = null;
+    if (moveFrame !== null && connectedWindow) {
+      connectedWindow.cancelAnimationFrame(moveFrame);
+      moveFrame = null;
     }
+    flushMove(event.clientX, event.clientY);
+    if (!gesture) return;
 
     const sessionId = gesture.sessionId;
     const activated = gesture.activated;
@@ -1103,6 +1162,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   function onVisibility(): void {
     if (!connectedDocument || connectedDocument.visibilityState !== "hidden") return;
+    stopCandidate();
     const sessionId = context.session?.sessionId;
     if (!sessionId) return;
     dispatch({ type: "WINDOW_LOST", sessionId });
@@ -1164,9 +1224,16 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function onKeyDown(event: Event): void {
     if (!(event instanceof KeyboardEvent)) return;
 
-    if (event.key === "Escape" && context.session) {
-      event.preventDefault();
-      dispatch({ type: "ESCAPE", sessionId: context.session.sessionId });
+    if (event.key === "Escape") {
+      if (gesture && !gesture.activated) {
+        event.preventDefault();
+        abandonUnarmedGesture();
+        return;
+      }
+      if (context.session) {
+        event.preventDefault();
+        dispatch({ type: "ESCAPE", sessionId: context.session.sessionId });
+      }
       return;
     }
 
@@ -1241,10 +1308,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     };
 
     add("pointerdown", onPointerDown, true);
-    add("pointermove", onPointerMove, true);
+    add("pointermove", onPointerMove, { capture: true, passive: false });
     add("pointerup", onPointerUp, true);
     add("pointercancel", onPointerCancel, true);
     add("lostpointercapture", onLostCapture, true);
+    add("touchmove", suppressScroll, { capture: true, passive: false });
     add("keydown", onKeyDown, true);
     add("dragstart", onNativeDragStart, true);
     add("scroll", onScrollOrResize, true);
@@ -1272,20 +1340,30 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   function applySourceDom(entry: SourceEntry): void {
     const element = entry.element;
-    if (element instanceof HTMLElement) {
-      if (!element.hasAttribute("tabindex") && element.tabIndex < 0) {
-        entry.restoredTabIndex = null;
-        element.tabIndex = 0;
-      }
-      if (!element.getAttribute("aria-label") && !element.textContent?.trim()) {
-        element.setAttribute("aria-label", entry.registration.label);
-      }
-      if (entry.registration.instructions) {
-        element.setAttribute("aria-description", entry.registration.instructions);
-      }
+    if (
+      !entry.addedTabIndex &&
+      entry.authoredTabIndex === null &&
+      isFocusableHost(element) &&
+      element.tabIndex < 0
+    ) {
+      entry.addedTabIndex = true;
+      element.tabIndex = 0;
     }
-    if (entry.nativeDraggable === null && element.hasAttribute("draggable")) {
-      entry.nativeDraggable = element.getAttribute("draggable");
+    if (
+      !entry.addedAriaLabel &&
+      entry.authoredAriaLabel === null &&
+      !element.getAttribute("aria-label") &&
+      !element.textContent?.trim()
+    ) {
+      entry.addedAriaLabel = true;
+      element.setAttribute("aria-label", entry.registration.label);
+    }
+    if (entry.registration.instructions) {
+      element.setAttribute("aria-description", entry.registration.instructions);
+    } else if (entry.authoredAriaDescription === null) {
+      element.removeAttribute("aria-description");
+    } else {
+      element.setAttribute("aria-description", entry.authoredAriaDescription);
     }
     element.setAttribute("draggable", "false");
   }
@@ -1293,23 +1371,29 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function restoreSourceDom(entry: SourceEntry): void {
     const element = entry.element;
     element.removeAttribute(SOURCE_ATTR);
-    if (entry.restoredTabIndex === null) element.removeAttribute("tabindex");
-    else element.setAttribute("tabindex", entry.restoredTabIndex);
-    if (element.getAttribute("aria-label") === entry.registration.label && !element.textContent?.trim()) {
-      element.removeAttribute("aria-label");
+    if (entry.addedTabIndex) {
+      if (entry.authoredTabIndex === null) element.removeAttribute("tabindex");
+      else element.setAttribute("tabindex", entry.authoredTabIndex);
     }
-    element.removeAttribute("aria-description");
-    if (entry.nativeDraggable === null) element.removeAttribute("draggable");
-    else element.setAttribute("draggable", entry.nativeDraggable);
+    if (entry.addedAriaLabel) {
+      if (entry.authoredAriaLabel === null) element.removeAttribute("aria-label");
+      else element.setAttribute("aria-label", entry.authoredAriaLabel);
+    }
+    if (entry.authoredAriaDescription === null) element.removeAttribute("aria-description");
+    else element.setAttribute("aria-description", entry.authoredAriaDescription);
+    if (entry.authoredDraggable === null) element.removeAttribute("draggable");
+    else element.setAttribute("draggable", entry.authoredDraggable);
   }
 
   function unregisterSource(id: string): void {
     const entry = sources.get(id);
     if (!entry) return;
+    if (gesture?.sourceId === id) stopCandidate();
     if (context.session?.sourceId === id && phase !== "idle" && phase !== "ended" && phase !== "cancelled") {
       dispatch({ type: "SOURCE_LOST", sessionId: context.session.sessionId });
     }
     restoreSourceDom(entry);
+    resizeObserver?.unobserve(entry.element);
     sources.delete(id);
     sourcesByElement.delete(entry.element);
     rects.delete(entry.element);
@@ -1319,11 +1403,20 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function unregisterTarget(id: string): void {
     const entry = targets.get(id);
     if (!entry) return;
-    if (context.session?.intent?.targetId === id && (phase === "dragging" || phase === "dropping")) {
-      dispatch({ type: "TARGET_LOST", sessionId: context.session.sessionId, targetId: id });
+    if (context.session?.intent?.targetId === id) {
+      if (phase === "dropping") {
+        dispatch({
+          type: "DROP_REJECTED",
+          sessionId: context.session.sessionId,
+          reason: "target-unavailable",
+        });
+      } else if (phase === "dragging") {
+        dispatch({ type: "TARGET_LOST", sessionId: context.session.sessionId, targetId: id });
+      }
     }
     entry.element.removeAttribute(TARGET_ATTR);
     entry.element.removeAttribute(POSITION_ATTR);
+    resizeObserver?.unobserve(entry.element);
     targets.delete(id);
     targetsByElement.delete(entry.element);
     rects.delete(entry.element);
@@ -1349,11 +1442,20 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       connectedDocument = doc;
       connectedWindow = win;
       bindDocument(doc, win);
+      if (typeof ResizeObserver === "function") {
+        resizeObserver = new ResizeObserver(() => onScrollOrResize());
+        resizeObserver.observe(root);
+        for (const source of sources.values()) resizeObserver.observe(source.element);
+        for (const target of targets.values()) resizeObserver.observe(target.element);
+      }
 
       return () => {
         if (connectedRoot !== root) return;
+        stopCandidate();
         if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
         unbindDocument();
+        resizeObserver?.disconnect();
+        resizeObserver = null;
         connectedRoot = null;
         connectedDocument = null;
         connectedWindow = null;
@@ -1373,18 +1475,23 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         element,
         registration,
         order: nextOrder++,
-        restoredTabIndex: element.getAttribute("tabindex"),
-        nativeDraggable: element.getAttribute("draggable"),
+        authoredTabIndex: element.getAttribute("tabindex"),
+        authoredAriaLabel: element.getAttribute("aria-label"),
+        authoredAriaDescription: element.getAttribute("aria-description"),
+        authoredDraggable: element.getAttribute("draggable"),
+        addedTabIndex: false,
+        addedAriaLabel: false,
       };
       sources.set(registration.sourceId, entry);
       sourcesByElement.set(element, registration.sourceId);
       applySourceDom(entry);
+      resizeObserver?.observe(element);
       layoutDirty = true;
 
       let live = true;
       return {
         update(next: DragSourceRegistration) {
-          if (!live) return;
+          if (!live || destroyed) return;
           if (next.sourceId !== entry.registration.sourceId && sources.has(next.sourceId)) {
             throw new Error(`Duplicate drag source id "${next.sourceId}"`);
           }
@@ -1396,14 +1503,18 @@ export function createDragDropController(options: DragDropControllerOptions = {}
           const wasDisabled = entry.registration.disabled;
           entry.registration = next;
           applySourceDom(entry);
-          if (!wasDisabled && next.disabled && context.session?.sourceId === next.sourceId) {
-            dispatch({ type: "SOURCE_LOST", sessionId: context.session.sessionId });
+          if (!wasDisabled && next.disabled) {
+            if (gesture?.sourceId === next.sourceId) stopCandidate();
+            if (context.session?.sourceId === next.sourceId) {
+              dispatch({ type: "SOURCE_LOST", sessionId: context.session.sessionId });
+            }
           }
           layoutDirty = true;
         },
         unregister() {
           if (!live) return;
           live = false;
+          if (destroyed) return;
           unregisterSource(entry.registration.sourceId);
         },
       };
@@ -1425,12 +1536,13 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       };
       targets.set(registration.targetId, entry);
       targetsByElement.set(element, registration.targetId);
+      resizeObserver?.observe(element);
       layoutDirty = true;
 
       let live = true;
       return {
         update(next: DropTargetRegistration) {
-          if (!live) return;
+          if (!live || destroyed) return;
           if (next.targetId !== entry.registration.targetId && targets.has(next.targetId)) {
             throw new Error(`Duplicate drop target id "${next.targetId}"`);
           }
@@ -1439,12 +1551,26 @@ export function createDragDropController(options: DragDropControllerOptions = {}
             targets.set(next.targetId, entry);
             targetsByElement.set(element, next.targetId);
           }
+          const wasDisabled = entry.registration.disabled;
           entry.registration = next;
           layoutDirty = true;
+          if (
+            !wasDisabled &&
+            next.disabled &&
+            phase === "dropping" &&
+            context.session?.intent?.targetId === next.targetId
+          ) {
+            dispatch({
+              type: "DROP_REJECTED",
+              sessionId: context.session.sessionId,
+              reason: "target-unavailable",
+            });
+          }
         },
         unregister() {
           if (!live) return;
           live = false;
+          if (destroyed) return;
           unregisterTarget(entry.registration.targetId);
         },
       };
@@ -1467,12 +1593,14 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     },
 
     cancel() {
+      stopCandidate();
       if (!context.session) return;
       dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
     },
 
     destroy() {
       if (destroyed) return;
+      stopCandidate();
       if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
       for (const id of [...sources.keys()]) unregisterSource(id);
       for (const id of [...targets.keys()]) unregisterTarget(id);

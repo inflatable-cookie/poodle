@@ -71,12 +71,16 @@ export function DragDropProvider({
   preview,
   children,
 }: DragDropProviderProps) {
-  const owned = controller === undefined;
-  const [ctrl] = useState(() => controller ?? createDragDropController({ describeAnnouncement }));
+  const ownedRef = useRef(controller === undefined);
+  const [ctrl] = useState(() =>
+    ownedRef.current ? createDragDropController({ describeAnnouncement }) : controller!,
+  );
   const rootRef = useRef<HTMLDivElement>(null);
   const [snapshot, setSnapshot] = useState(() => ctrl.getSnapshot());
+  const connectGenerationRef = useRef(0);
 
   useLayoutEffect(() => {
+    const generation = ++connectGenerationRef.current;
     const unsub = ctrl.subscribe(() => setSnapshot(ctrl.getSnapshot()));
     const root = rootRef.current;
     if (!root) {
@@ -87,9 +91,14 @@ export function DragDropProvider({
     return () => {
       unsub();
       disconnect();
-      if (owned) ctrl.destroy();
+      if (!ownedRef.current) return;
+      const owned = ctrl;
+      queueMicrotask(() => {
+        if (connectGenerationRef.current !== generation) return;
+        owned.destroy();
+      });
     };
-  }, [ctrl, owned]);
+  }, [ctrl]);
 
   const previewStyle: CSSProperties | undefined = snapshot.preview
     ? { left: snapshot.preview.x, top: snapshot.preview.y }
@@ -147,13 +156,12 @@ export function useDragSource(registration: DragSourceRegistration): {
   phase: DragDropSnapshot["phase"];
 } {
   const ctx = useDragDropContext();
-  const nodeRef = useRef<HTMLElement | null>(null);
+  const [node, setNode] = useState<HTMLElement | null>(null);
   const handleRef = useRef<DragSourceHandle | null>(null);
   const registrationRef = useRef(registration);
   registrationRef.current = registration;
 
   useLayoutEffect(() => {
-    const node = nodeRef.current;
     if (!node) return;
     const handle = ctx.controller.registerSource(node, registrationRef.current);
     handleRef.current = handle;
@@ -161,7 +169,7 @@ export function useDragSource(registration: DragSourceRegistration): {
       handle.unregister();
       handleRef.current = null;
     };
-  }, [ctx.controller, registration.sourceId]);
+  }, [ctx.controller, registration.sourceId, node]);
 
   useLayoutEffect(() => {
     handleRef.current?.update(registration);
@@ -171,9 +179,7 @@ export function useDragSource(registration: DragSourceRegistration): {
     const { ref, onKeyDown, ...rest } = props;
     return {
       ...rest,
-      ref: composeRefs(ref, (node) => {
-        nodeRef.current = node;
-      }),
+      ref: composeRefs(ref, (el) => setNode(el)),
       onKeyDown: composeHandler(onKeyDown),
     };
   }, []);
@@ -192,13 +198,12 @@ export function useDropTarget(registration: DropTargetRegistration): {
   rejected: boolean;
 } {
   const ctx = useDragDropContext();
-  const nodeRef = useRef<HTMLElement | null>(null);
+  const [node, setNode] = useState<HTMLElement | null>(null);
   const handleRef = useRef<DropTargetHandle | null>(null);
   const registrationRef = useRef(registration);
   registrationRef.current = registration;
 
   useLayoutEffect(() => {
-    const node = nodeRef.current;
     if (!node) return;
     const handle = ctx.controller.registerTarget(node, registrationRef.current);
     handleRef.current = handle;
@@ -206,7 +211,7 @@ export function useDropTarget(registration: DropTargetRegistration): {
       handle.unregister();
       handleRef.current = null;
     };
-  }, [ctx.controller, registration.targetId]);
+  }, [ctx.controller, registration.targetId, node]);
 
   useLayoutEffect(() => {
     handleRef.current?.update(registration);
@@ -216,9 +221,7 @@ export function useDropTarget(registration: DropTargetRegistration): {
     const { ref, onKeyDown, ...rest } = props;
     return {
       ...rest,
-      ref: composeRefs(ref, (node) => {
-        nodeRef.current = node;
-      }),
+      ref: composeRefs(ref, (el) => setNode(el)),
       onKeyDown: composeHandler(onKeyDown),
     };
   }, []);
