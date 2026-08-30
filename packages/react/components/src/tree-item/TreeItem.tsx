@@ -99,7 +99,7 @@ export function TreeItem({
     onContextMenu,
     onKeyDown,
   });
-  const rowProps = getSourceProps({ className: "poodle-tree__row", ref: rowRef });
+  const rowProps = getSourceProps({ className: "poodle-tree__row", ref: rowRef, tabIndex: -1 });
 
   return (
     <div

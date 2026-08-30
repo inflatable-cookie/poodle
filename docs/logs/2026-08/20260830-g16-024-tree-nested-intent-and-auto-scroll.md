@@ -30,10 +30,13 @@ rename, checkboxes, and Svelte virtualization remain. The twisty is marked
 `data-poodle-no-drag` so expansion is not a row drag. Alt+↑/↓ resolves the
 sibling with `treeSiblingReorderTarget` and calls `requestKeyboardDrop` over
 the visible logical target catalogue. Space/Enter stay Tree
-selection/activation. Virtual windows pin the active source so it cannot
-unmount mid-session. Tabs, DockRegion, native runtimes, and the
-parity-evidence ledger were not edited. Ledger remains 52 mounted / 122
-missing.
+selection/activation. A command-origin drop revalidates the authored intent
+against the selected live registration, logical first then DOM, without
+pointer hit-testing. Reorderable rows keep `tabindex=-1` so the treeitem
+remains the only roving tab stop; Alt+↑/↓ returns focus to that treeitem.
+Virtual windows pin the active source so it cannot unmount mid-session. Tabs,
+DockRegion, native runtimes, and the parity-evidence ledger were not edited.
+Ledger remains 52 mounted / 122 missing.
 
 ## Review oracle
 
@@ -52,8 +55,10 @@ missing.
 - Virtualization: pinned source stays mounted after a window jump.
 - Terminal cleanup: `cleanupSession` stops the auto-scroll frame.
 - Alt+↑/↓: paired Tree tests plus controller `requestKeyboardDrop` proofs for
-  eligibility, logical-target authority, async disable, callbacks,
-  announcements, and focus return.
+  eligibility, distant DOM-only targets, disabled DOM targets, logical-over-DOM
+  precedence, command-path async disable/unregister, announcements, and
+  treeitem focus return. One roving treeitem tab stop; inner rows are not
+  tabbable.
 - WebKit: probe labels synthetic touch as not native scroll proof; Chromium
   CDP proves native hold-versus-scroll.
 

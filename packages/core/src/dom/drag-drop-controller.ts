@@ -505,6 +505,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   let dropGeneration = 0;
   let lastOutcome: DragTerminalOutcome | undefined;
   let keyboardSourceId: string | null = null;
+  let keyboardCommandSession = false;
   let keyboardLogicalSession = false;
   let keyboardTargetIndex = -1;
 
@@ -768,6 +769,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         keyboardSourceId = null;
         keyboardTargetIndex = -1;
         keyboardLogicalSession = false;
+        keyboardCommandSession = false;
         lastKeyboardDirection = null;
         lastOutcome = undefined;
         return [];
@@ -1159,11 +1161,13 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     const dom = targets.get(command.targetId);
     const registration = logical?.registration ?? dom?.registration;
     if (!registration || registration.disabled) return false;
+    if (!logical && dom && isDisabled(dom.element)) return false;
     if (!registration.acceptedKinds.includes(source.registration.subject.kind)) return false;
 
     const rect = measure(source.element);
     const sessionId = beginSession(source, "keyboard", rect.left + rect.width / 2, rect.top + rect.height / 2);
     keyboardLogicalSession = logical !== undefined;
+    keyboardCommandSession = true;
     keyboardSourceId = source.registration.sourceId;
     lastKeyboardDirection = null;
     activate(sessionId, null, null);
@@ -1201,14 +1205,26 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     canDrop: DropTargetRegistration["canDrop"];
     onDrop: DropTargetRegistration["onDrop"];
   } | null {
-    if (inputKind === "keyboard" && usesLogicalKeyboard()) {
+    if (keyboardCommandSession || (inputKind === "keyboard" && usesLogicalKeyboard())) {
       const logical = keyboardTargets.get(intent.targetId);
-      if (!logical) return null;
-      return logical.registration;
+      if (logical) return logical.registration;
+      if (keyboardCommandSession) {
+        const dom = targets.get(intent.targetId);
+        return dom?.registration ?? null;
+      }
+      return null;
     }
     const target = targets.get(intent.targetId);
     if (!target) return null;
     return target.registration;
+  }
+
+  function commandTargetUnavailable(intent: DropIntent): boolean {
+    const logical = keyboardTargets.get(intent.targetId);
+    if (logical) return Boolean(logical.registration.disabled);
+    const dom = targets.get(intent.targetId);
+    if (!dom) return true;
+    return Boolean(dom.registration.disabled) || isDisabled(dom.element);
   }
 
   function requestDrop(sessionId: string, intent: DropIntent): void {
@@ -1222,7 +1238,18 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
 
     let accepted: DropIntent = intent;
-    if (inputKind === "keyboard" && usesLogicalKeyboard()) {
+    if (keyboardCommandSession) {
+      if (commandTargetUnavailable(intent)) {
+        dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
+        return;
+      }
+      const eligibility = eligibilityFromCanDrop(registration.canDrop(intent, session.subject), intent);
+      if (eligibility.accepted === false) {
+        dispatch({ type: "DROP_REJECTED", sessionId, reason: eligibility.reason });
+        return;
+      }
+      accepted = eligibility.intent;
+    } else if (inputKind === "keyboard" && usesLogicalKeyboard()) {
       const logical = keyboardTargets.get(intent.targetId);
       let position = intent.position;
       if (lastKeyboardDirection !== null) {
@@ -1310,7 +1337,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   function applyCommit(sessionId: string, intent: DropIntent, commit: DragDropCommitResult): void {
     const liveTarget = liveDropRegistration(intent);
-    if (!liveTarget || liveTarget.disabled) {
+    if (!liveTarget || liveTarget.disabled || (keyboardCommandSession && commandTargetUnavailable(intent))) {
       dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
       return;
     }

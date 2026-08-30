@@ -119,7 +119,7 @@
   onkeydown={onKeyDown}
   use:dropTarget={targetRegistration}
 >
-  <div class="poodle-tree__row" bind:this={rowEl} use:dragSource={sourceRegistration}>
+  <div class="poodle-tree__row" bind:this={rowEl} tabindex="-1" use:dragSource={sourceRegistration}>
     {@render row()}
   </div>
   {#if showGroup && group}

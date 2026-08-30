@@ -850,6 +850,85 @@ describe("createDragDropController", () => {
     controller.destroy();
   });
 
+  it("requestKeyboardDrop commits a distant DOM-only target with the authored position", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ onDragEnd: onEnd }));
+    controller.registerTarget(targetEl, targetReg({ onDrop }));
+
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(true);
+    expect(onDrop).toHaveBeenCalledWith({ targetId: "dst", position: "after", operation: "move" });
+    expect(onEnd).toHaveBeenCalledWith({
+      status: "committed",
+      intent: { targetId: "dst", position: "after", operation: "move" },
+    });
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop returns false for a disabled DOM target", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg({ onDrop, disabled: true }));
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "inside" })).toBe(false);
+
+    const live = layout(document.createElement("div"), TARGET_BOX);
+    live.setAttribute("aria-disabled", "true");
+    root.append(live);
+    controller.registerTarget(live, targetReg({ targetId: "aria", onDrop }));
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "aria", position: "inside" })).toBe(false);
+    expect(onDrop).not.toHaveBeenCalled();
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop rejects an async DOM drop when the target is disabled or unregistered before commit", async () => {
+    let finish: (value: { status: "committed" }) => void = () => {};
+    const pending = new Promise<{ status: "committed" }>((resolve) => {
+      finish = resolve;
+    });
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ onDragEnd: onEnd }));
+    const handle = controller.registerTarget(targetEl, targetReg({ onDrop: () => pending }));
+
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "inside" })).toBe(true);
+    expect(controller.getSnapshot().phase).toBe("dropping");
+    handle.update(targetReg({ onDrop: () => pending, disabled: true }));
+    expect(onEnd.mock.calls.at(-1)?.[0]).toEqual({ status: "rejected", reason: "target-unavailable" });
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    finish({ status: "committed" });
+    await pending;
+    await Promise.resolve();
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+
+    let finishAgain: (value: { status: "committed" }) => void = () => {};
+    const pendingAgain = new Promise<{ status: "committed" }>((resolve) => {
+      finishAgain = resolve;
+    });
+    const onEndAgain = vi.fn();
+    const again = createDragDropController();
+    again.connect(root);
+    again.registerSource(sourceEl, sourceReg({ onDragEnd: onEndAgain }));
+    const live = again.registerTarget(targetEl, targetReg({ onDrop: () => pendingAgain }));
+    expect(again.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "inside" })).toBe(true);
+    live.unregister();
+    expect(onEndAgain.mock.calls.at(-1)?.[0]).toEqual({
+      status: "rejected",
+      reason: "target-unavailable",
+    });
+    finishAgain({ status: "committed" });
+    await pendingAgain;
+    await Promise.resolve();
+    expect(again.getSnapshot().phase).toBe("idle");
+    again.destroy();
+  });
+
   it("cancels an active session on Escape", () => {
     const onEnd = vi.fn();
     const controller = createDragDropController();

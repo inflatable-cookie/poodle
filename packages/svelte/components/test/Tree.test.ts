@@ -167,6 +167,25 @@ describe("Tree row metadata", () => {
 
     await fireEvent.keyDown(item, { key: "ArrowDown", altKey: true });
     expect(onReorder).toHaveBeenCalledWith("a.ts", "lib", "after");
+    expect(document.activeElement).toBe(item);
+  });
+
+  it("keeps one roving treeitem tab stop when rows are reorderable", async () => {
+    const onReorder = vi.fn();
+    const { container } = render(Tree, {
+      props: { nodes: nested, expandedValues: ["src"], reorderable: true, onReorder },
+    });
+    const items = [...container.querySelectorAll<HTMLElement>('[role="treeitem"][data-value]')];
+    const rows = [...container.querySelectorAll<HTMLElement>(".poodle-tree__row")];
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((row) => row.tabIndex < 0)).toBe(true);
+    expect(items.filter((item) => item.tabIndex >= 0)).toHaveLength(1);
+
+    const item = container.querySelector<HTMLElement>('[data-value="a.ts"]')!;
+    item.focus();
+    await fireEvent.keyDown(item, { key: "ArrowDown", altKey: true });
+    expect(onReorder).toHaveBeenCalledWith("a.ts", "lib", "after");
+    expect(document.activeElement).toBe(item);
   });
 
   it("does not Alt+Arrow reorder onto a disabled sibling", async () => {
