@@ -1,5 +1,5 @@
 import { fireEvent, render } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { EditableList } from "../src/EditableList";
 
@@ -9,7 +9,44 @@ const items = [
   { id: "c", label: "Gamma" },
 ];
 
+function asRect(top: number): DOMRect {
+  return {
+    x: 10,
+    y: top,
+    width: 200,
+    height: 32,
+    top,
+    left: 10,
+    right: 210,
+    bottom: top + 32,
+    toJSON: () => ({}),
+  } as DOMRect;
+}
+
+function stackRows(container: HTMLElement): HTMLElement[] {
+  const rows = [...container.querySelectorAll('[role="option"]')] as HTMLElement[];
+  for (const [index, row] of rows.entries()) {
+    row.getBoundingClientRect = () => asRect(10 + index * 40);
+    row.setPointerCapture = vi.fn();
+    row.releasePointerCapture = vi.fn();
+  }
+  return rows;
+}
+
 describe("EditableList (react)", () => {
+  beforeEach(() => {
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    });
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
   it("renders a labelled listbox of reorderable items", () => {
     const { container } = render(<EditableList items={items} ariaLabel="Tags" />);
     const list = container.querySelector(".poodle-editable-list") as HTMLElement;
@@ -19,7 +56,7 @@ describe("EditableList (react)", () => {
     const rows = [...container.querySelectorAll('[role="option"]')];
     expect(rows.length).toBe(3);
     expect(rows[0].getAttribute("aria-label")).toContain("Reorder Alpha. Position 1 of 3.");
-    expect(rows[0].getAttribute("draggable")).toBe("true");
+    expect(rows[0].getAttribute("draggable")).toBe("false");
     expect(container.querySelectorAll(".poodle-editable-list__handle").length).toBe(3);
   });
 
@@ -70,7 +107,8 @@ describe("EditableList (react)", () => {
   it("reorders with keyboard grab, move, and drop", () => {
     const onReorder = vi.fn();
     const { container } = render(<EditableList items={items} onReorder={onReorder} />);
-    const rows = [...container.querySelectorAll('[role="option"]')];
+    const rows = stackRows(container);
+    rows[0].focus();
 
     fireEvent.keyDown(rows[0], { key: " " });
     fireEvent.keyDown(rows[0], { key: "ArrowDown" });
@@ -79,6 +117,119 @@ describe("EditableList (react)", () => {
     expect(onReorder).toHaveBeenCalledTimes(1);
     const reordered = onReorder.mock.calls[0][0] as typeof items;
     expect(reordered.map((item) => item.id)).toEqual(["b", "a", "c"]);
+  });
+
+  it("reorders with a pointer drag from the handle", () => {
+    const onReorder = vi.fn();
+    const { container } = render(<EditableList items={items} onReorder={onReorder} />);
+    const rows = stackRows(container);
+    const handle = rows[0].querySelector(".poodle-editable-list__handle") as HTMLElement;
+
+    fireEvent.pointerDown(handle, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 20, clientY: 110 });
+    fireEvent.pointerUp(handle, { pointerId: 1, clientX: 20, clientY: 110 });
+
+    expect(onReorder).toHaveBeenCalledTimes(1);
+    expect((onReorder.mock.calls[0][0] as typeof items).map((item) => item.id)).toEqual(["b", "c", "a"]);
+  });
+
+  it("reorders with a touch-like pointer", () => {
+    const onReorder = vi.fn();
+    const { container } = render(<EditableList items={items} onReorder={onReorder} />);
+    const rows = stackRows(container);
+    const handle = rows[0].querySelector(".poodle-editable-list__handle") as HTMLElement;
+
+    fireEvent.pointerDown(handle, {
+      button: 0,
+      pointerId: 1,
+      pointerType: "pen",
+      clientX: 20,
+      clientY: 20,
+    });
+    fireEvent.pointerMove(handle, { pointerId: 1, pointerType: "pen", clientX: 20, clientY: 110 });
+    fireEvent.pointerUp(handle, { pointerId: 1, pointerType: "pen", clientX: 20, clientY: 110 });
+
+    expect(onReorder).toHaveBeenCalledTimes(1);
+    expect((onReorder.mock.calls[0][0] as typeof items).map((item) => item.id)).toEqual(["b", "c", "a"]);
+  });
+
+  it("cancels a keyboard grab on Escape without reordering", () => {
+    const onReorder = vi.fn();
+    const { container } = render(<EditableList items={items} onReorder={onReorder} />);
+    const rows = stackRows(container);
+    rows[0].focus();
+
+    fireEvent.keyDown(rows[0], { key: " " });
+    fireEvent.keyDown(rows[0], { key: "ArrowDown" });
+    fireEvent.keyDown(rows[0], { key: "Escape" });
+
+    expect(onReorder).not.toHaveBeenCalled();
+    expect(rows[0].hasAttribute("data-poodle-drag-source")).toBe(false);
+  });
+
+  it("does not drag from a remove button", () => {
+    const onReorder = vi.fn();
+    const onRemove = vi.fn();
+    const { container } = render(
+      <EditableList items={items} editable onReorder={onReorder} onRemove={onRemove} />,
+    );
+    const rows = stackRows(container);
+    const remove = container.querySelector('button[aria-label="Remove Alpha"]') as HTMLButtonElement;
+
+    fireEvent.pointerDown(remove, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(remove, { pointerId: 1, clientX: 20, clientY: 110 });
+    fireEvent.pointerUp(remove, { pointerId: 1, clientX: 20, clientY: 110 });
+    fireEvent.click(remove);
+
+    expect(onReorder).not.toHaveBeenCalled();
+    expect(onRemove).toHaveBeenCalledWith("a");
+    expect(rows[0].hasAttribute("data-poodle-drag-source")).toBe(false);
+  });
+
+  it("keeps disabled rows inert to pointer and keyboard sensors", () => {
+    const onReorder = vi.fn();
+    const { container } = render(<EditableList items={items} disabled onReorder={onReorder} />);
+    const rows = stackRows(container);
+    const handle = rows[0].querySelector(".poodle-editable-list__handle") as HTMLElement;
+    rows[0].focus();
+
+    fireEvent.pointerDown(handle, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 20, clientY: 110 });
+    fireEvent.pointerUp(handle, { pointerId: 1, clientX: 20, clientY: 110 });
+    fireEvent.keyDown(rows[0], { key: " " });
+    fireEvent.keyDown(rows[0], { key: "ArrowDown" });
+
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("cancels when the dragging source is removed", () => {
+    const onReorder = vi.fn();
+    const { container, rerender } = render(<EditableList items={items} onReorder={onReorder} />);
+    const rows = stackRows(container);
+    const handle = rows[0].querySelector(".poodle-editable-list__handle") as HTMLElement;
+
+    fireEvent.pointerDown(handle, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 20, clientY: 50 });
+    expect(rows[0].getAttribute("data-poodle-drag-source")).toBe("dragging");
+
+    rerender(<EditableList items={items.slice(1)} onReorder={onReorder} />);
+    expect(onReorder).not.toHaveBeenCalled();
+    expect(container.querySelector("[data-poodle-drag-source]")).toBeNull();
+  });
+
+  it("cancels when the current target is removed", () => {
+    const onReorder = vi.fn();
+    const { container, rerender } = render(<EditableList items={items} onReorder={onReorder} />);
+    const rows = stackRows(container);
+    const handle = rows[0].querySelector(".poodle-editable-list__handle") as HTMLElement;
+
+    fireEvent.pointerDown(handle, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 20, clientY: 110 });
+    expect(rows[2].getAttribute("data-poodle-drop-target")).toBe("accepted");
+
+    rerender(<EditableList items={items.slice(0, 2)} onReorder={onReorder} />);
+    expect(onReorder).not.toHaveBeenCalled();
+    expect(container.querySelector("[data-poodle-drop-target]")).toBeNull();
   });
 
   it("shows the counter and hides the add row at maxItems", () => {

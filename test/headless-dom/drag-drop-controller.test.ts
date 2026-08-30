@@ -302,6 +302,58 @@ describe("createDragDropController", () => {
     controller.destroy();
   });
 
+  it("moves keyboard intent from the source rather than wrapping to the first target", () => {
+    const rowA = layout(document.createElement("div"), { x: 10, y: 10, width: 80, height: 20 });
+    const rowB = layout(document.createElement("div"), { x: 10, y: 40, width: 80, height: 20 });
+    const rowC = layout(document.createElement("div"), { x: 10, y: 70, width: 80, height: 20 });
+    rowA.tabIndex = 0;
+    root.replaceChildren(rowA, rowB, rowC);
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const rowTarget = (id: string): DropTargetRegistration =>
+      targetReg({
+        targetId: id,
+        label: id,
+        resolvePosition: (input) => (input.y < input.rect.top + input.rect.height / 2 ? "before" : "after"),
+        canDrop: (intent, subject) =>
+          subject.id === intent.targetId ? { accepted: false, reason: "self" } : { accepted: true, intent },
+        onDrop,
+      });
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(rowB, sourceReg({ sourceId: "b", subject: { kind: "item", id: "b" }, label: "Beta" }));
+    controller.registerTarget(rowA, rowTarget("a"));
+    controller.registerTarget(rowB, rowTarget("b"));
+    controller.registerTarget(rowC, rowTarget("c"));
+    rowB.focus();
+
+    rowB.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("c");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    expect(controller.getSnapshot().targetId).toBe("c");
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(onDrop).toHaveBeenCalledWith({ targetId: "c", position: "after", operation: "move" });
+    controller.destroy();
+  });
+
+  it("does not start a pointer drag from an interactive descendant of a whole-row source", () => {
+    const row = layout(document.createElement("div"), SOURCE_BOX);
+    const button = document.createElement("button");
+    button.textContent = "Remove";
+    row.append(button);
+    root.replaceChildren(row, targetEl);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(row, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    button.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    button.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
   it("cancels an active session on Escape", () => {
     const onEnd = vi.fn();
     const controller = createDragDropController();

@@ -342,12 +342,20 @@ function canPointerCapture(element: Element): boolean {
   return typeof (element as HTMLElement).setPointerCapture === "function";
 }
 
+const INTERACTIVE_SELECTOR =
+  "button, input, textarea, select, a[href], [role='button'], [contenteditable='true']";
+
 function resolveHandle(element: Element, handle: Element | string | undefined): Element {
   if (handle === undefined) return element;
   if (typeof handle === "string") {
     return (element as Element).querySelector(handle) ?? element;
   }
   return handle;
+}
+
+function interactiveHost(target: EventTarget | null): Element | null {
+  if (!(target instanceof Element)) return null;
+  return target.closest(INTERACTIVE_SELECTOR);
 }
 
 function activationFor(
@@ -1000,6 +1008,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       const handle = resolveHandle(entry.element, entry.registration.handle);
       const target = event.target;
       if (target instanceof Node && !handle.contains(target) && handle !== target) continue;
+      const interactive = interactiveHost(target);
+      if (interactive && interactive !== handle) continue;
       return entry;
     }
     return null;
@@ -1208,6 +1218,32 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     return listed;
   }
 
+  function spatialCompare(left: CachedRect, right: CachedRect): number {
+    if (left.top !== right.top) return left.top - right.top;
+    if (left.left !== right.left) return left.left - right.left;
+    return 0;
+  }
+
+  function firstTargetAfterSource(listed: TargetEntry[], source: SourceEntry | undefined): number {
+    if (!source) return listed.length > 0 ? 0 : -1;
+    const origin = measure(source.element);
+    for (let index = 0; index < listed.length; index += 1) {
+      const entry = listed[index];
+      if (entry && spatialCompare(measure(entry.element), origin) > 0) return index;
+    }
+    return -1;
+  }
+
+  function firstTargetBeforeSource(listed: TargetEntry[], source: SourceEntry | undefined): number {
+    if (!source) return listed.length - 1;
+    const origin = measure(source.element);
+    for (let index = listed.length - 1; index >= 0; index -= 1) {
+      const entry = listed[index];
+      if (entry && spatialCompare(measure(entry.element), origin) < 0) return index;
+    }
+    return -1;
+  }
+
   function applyKeyboardIntent(entry: TargetEntry, session: DragSession): void {
     const rect = measure(entry.element);
     const x = rect.left + rect.width / 2;
@@ -1276,21 +1312,34 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
     if (listed.length === 0) return;
 
+    const source = keyboardSourceId ? sources.get(keyboardSourceId) : undefined;
     let next = keyboardTargetIndex;
-    if (event.key === "ArrowDown" || event.key === "ArrowRight") {
-      event.preventDefault();
-      next = Math.min(listed.length - 1, keyboardTargetIndex + 1);
-      if (keyboardTargetIndex < 0) next = 0;
-    } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
-      event.preventDefault();
-      next = Math.max(0, keyboardTargetIndex - 1);
-      if (keyboardTargetIndex < 0) next = listed.length - 1;
-    } else if (event.key === "Home") {
+    if (event.key === "Home") {
       event.preventDefault();
       next = 0;
     } else if (event.key === "End") {
       event.preventDefault();
       next = listed.length - 1;
+    } else if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+      event.preventDefault();
+      if (keyboardTargetIndex < 0) {
+        next = firstTargetAfterSource(listed, source);
+        if (next < 0) return;
+      } else if (keyboardTargetIndex >= listed.length - 1) {
+        return;
+      } else {
+        next = keyboardTargetIndex + 1;
+      }
+    } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+      event.preventDefault();
+      if (keyboardTargetIndex < 0) {
+        next = firstTargetBeforeSource(listed, source);
+        if (next < 0) return;
+      } else if (keyboardTargetIndex <= 0) {
+        return;
+      } else {
+        next = keyboardTargetIndex - 1;
+      }
     } else {
       return;
     }

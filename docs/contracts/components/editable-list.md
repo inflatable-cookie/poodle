@@ -1,7 +1,7 @@
 # EditableList
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-08-30
 
 ## 1. Purpose
 
@@ -50,7 +50,7 @@ Updated: 2026-07-10
 | Window Nav | `<div>` | conditional | Flex row with previous/next buttons and page label; shown when `windowSize` is active |
 | Window Label | `<span>` | conditional | "Page X of Y · Items A-B of N" text |
 | List | `<ul>` | yes | `role="listbox"`, `aria-label`, flex column with gap |
-| Item | `<li>` | yes (per item) | `role="option"`, `tabindex="0"`, `draggable`, `aria-selected="false"`, `data-reorder-index` |
+| Item | `<li>` | yes (per item) | `role="option"`, `tabindex="0"`, `aria-selected="false"`, `data-reorder-index`; reorderable rows register as a paired Poodle drag source/target rather than HTML `draggable` |
 | Handle | `<span>` | conditional | 6-dot grip icon, `aria-hidden="true"`, cursor grab; shown when `reorderable` and not `embeddedHandle` |
 | Content | `<span>` | yes (per item) | Flex-grow content area, renders slot or `item.label` fallback to `item.id` |
 | Remove | `<div>` + IconButton | conditional | Wrapper div (`--danger-on-hover`) around a ghost `IconButton` (icon `x`, `sizeRole="chrome"`); shown when `editable` or `removable`. The X icon is `aria-hidden`; the button carries `aria-label="Remove {label}"` |
@@ -134,7 +134,7 @@ view uses `windowStart` offset for correct global indexing.
 | default | -- | Transparent background, transparent border |
 | hover | Mouse over item | `elevated 82%` over transparent background blend |
 | focus | Focus-visible on item | `accent-focusRing` border-color + `box-shadow` ring (`border-width-focus`) |
-| dragging | Item being dragged (HTML5 DnD) | 40% opacity on the dragged item |
+| dragging | Item being dragged via the Poodle web drag substrate | 40% opacity on the dragged item |
 | drop-target | Dragging over another item | `accent-base 56%` border, `accent-base 10%` tinted background |
 | grabbed | Item grabbed via keyboard (Space/Enter) | Same visual as drop-target (`--grabbed`/`--last-moved` share it) |
 | disabled | `disabled=true` or `submitting=true` | `state-opacity-disabled` on list, `pointer-events: none` via `tabindex="-1"` |
@@ -156,11 +156,12 @@ view uses `windowStart` offset for correct global indexing.
 
 Behavior classification: machine-backed via shared machinery
 
-Machine-backed via core machinery (g11 extraction sweep): keyboard
-grab-and-move resolves through `listReorderKeyIntent` (Space/Enter grab
-and drop, Escape cancel, arrow moves with boundary reporting) and item
-moves use the shared `applyReorder`. Announcements, focus, and drag DOM
-plumbing stay adapter-side.
+Machine-backed via core machinery: pointer, touch, and keyboard reorder
+share one drop path. Web runtimes register each enabled reorderable row as
+a Poodle drag source/target and commit through `applyReorder`. Keyboard
+pickup, intent, drop, and Escape use that same session. Announcements,
+focus return, and row composition stay adapter-side. HTML `DataTransfer`
+is not session authority.
 
 ## 5. Callbacks
 
@@ -192,10 +193,10 @@ plumbing stay adapter-side.
 
 | Key | Action |
 |-----|--------|
-| `Space` / `Enter` | Toggle grab state on focused item (grab or drop) |
-| `ArrowUp` | Move grabbed item up one position, or focus previous item |
-| `ArrowDown` | Move grabbed item down one position, or focus next item |
-| `Escape` | Cancel keyboard grab mode |
+| `Space` / `Enter` | Pick up the focused reorderable item, or drop it on the current intent |
+| `ArrowUp` | Move drop intent to the previous row while dragging, or focus the previous item when idle |
+| `ArrowDown` | Move drop intent to the next row while dragging, or focus the next item when idle |
+| `Escape` | Cancel the active drag session |
 | `Enter` (in input) | Adds the current text as a new item (prevents default form submission) |
 | `Tab` | Navigates between items, input, add button, and remove buttons |
 
@@ -469,22 +470,28 @@ Layout-only wrapper; the composed primary `Button` (disabled when the input is e
 
 - Generic component: `<script lang="ts" generics="T extends { id: string; label?: string }">`
 - Wraps in `UiPresentationProvider` to propagate resolved size and density
-- Uses native HTML5 drag-and-drop API (`dragstart`, `dragover`, `drop`, `dragend`)
-- `event.dataTransfer.effectAllowed = "move"` for correct drag cursor
+- Uses the Poodle web drag substrate (`DragDropProvider` plus per-row source/target registration). Pointer Events and the keyboard sensor own the session; HTML `dragstart` / `DataTransfer` are not used
+- A dedicated handle is the pointer sensor when present; embedded-handle rows use the whole row and ignore interactive descendants (remove buttons, inputs)
 - `moveItem(fromIndex, toIndex)` splices and re-inserts; calls `onReorder` and `onChange`; calls `ensureIndexVisible()` for windowed mode; announces move via live region
 - Keyboard reordering uses `requestAnimationFrame` to focus the moved item after DOM update via `querySelector('[data-reorder-index="${targetIndex}"]')`
-- `grabbedIndex` tracks keyboard grab state; visual class `--grabbed` applied
+- Keyboard grab posture is the substrate dragging snapshot (`--grabbed`); drop-target and dragging classes follow provider source/target ids
 - `isUnavailable` computed from `disabled || submitting`
 - `showWorkflowChrome` computed from `onSubmit !== null || onCancel !== null`
 - `isLongList` computed from `longListThreshold` and item count
 - Windowed mode: `visibleItems = items.slice(windowStart, windowEnd)`, global index = `windowStart + localIndex`
 - Items keyed by `item.id` for stable Svelte `{#each}` rendering
 - `handleSubmit()` awaits `onSubmit()` when dirty and available
-- `handleCancel()` calls `onCancel()` and resets `grabbedIndex`
+- `handleCancel()` calls `onCancel()`
 - New item IDs generated with `Date.now()` + random suffix
 - Input `keydown` handler prevents default on Enter to avoid form submission
 - Remove button uses `stopPropagation` to prevent drag initiation
 - `item` slot uses Svelte 5 `Snippet` type
+
+## 9a. React Notes
+
+React matches the Svelte web contract through the same provider-scoped
+controller. Rows use `useDragSource` / `useDropTarget`. The public
+`onReorder` / `onChange` payload remains the complete next item order.
 
 ## 10. GPUI Notes
 
