@@ -23,6 +23,12 @@
     size?: ControlSize | null;
     density?: ControlDensity | null;
     dismissOnOutsideInteract?: boolean;
+    /**
+     * When false, the consumer owns invocation (tree row, canvas, etc.) and
+     * supplies controlled `open` + `anchorPoint`. No tab-stop button is
+     * rendered; `menuTransition` still owns open/close/dismiss/action.
+     */
+    trigger?: boolean;
     onOpenChange?: ((open: boolean) => void) | undefined;
     onAction?: ((value: string) => void) | undefined;
     children?: Snippet<[]>;
@@ -38,6 +44,7 @@
     size = null,
     density = null,
     dismissOnOutsideInteract = true,
+    trigger = true,
     onOpenChange = undefined,
     onAction = undefined,
     children,
@@ -143,19 +150,7 @@
   });
 </script>
 
-<div
-  class="poodle-context-menu"
-  bind:this={rootElement}
-  data-size={resolvedSize}
-  data-density={resolvedDensity}
-  role="button"
-  tabindex="0"
-  aria-haspopup="menu"
-  oncontextmenu={handleContextMenu}
-  onkeydown={handleTriggerKeydown}
->
-  {@render children?.()}
-
+{#snippet overlay()}
   {#if isOpen && currentAnchorPoint}
     <MenuSurface
       bind:this={surface}
@@ -170,4 +165,23 @@
       onAction={(value) => send({ type: "ACTION", value })}
     />
   {/if}
-</div>
+{/snippet}
+
+{#if trigger}
+  <div
+    class="poodle-context-menu"
+    bind:this={rootElement}
+    data-size={resolvedSize}
+    data-density={resolvedDensity}
+    role="button"
+    tabindex="0"
+    aria-haspopup="menu"
+    oncontextmenu={handleContextMenu}
+    onkeydown={handleTriggerKeydown}
+  >
+    {@render children?.()}
+    {@render overlay()}
+  </div>
+{:else}
+  {@render overlay()}
+{/if}

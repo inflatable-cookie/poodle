@@ -1011,6 +1011,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "open", type: "boolean | null", default: "null", description: "Controlled open state." },
       { name: "defaultOpen", type: "boolean", default: "false", description: "Initial open state for uncontrolled mode." },
       { name: "anchorPoint", type: "{ x: number; y: number } | null", default: "null", description: "Anchor position for programmatic opening." },
+      { name: "trigger", type: "boolean", default: "true", description: "When false, the consumer owns invocation and supplies controlled open + anchorPoint; no tab-stop button is rendered." },
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the context menu." },
     ],
     slots: [

@@ -26,8 +26,8 @@ Updated: 2026-07-10
 
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
-| Root | yes | state owner, wraps invocation target | position context |
-| Invocation Target | yes | element that spawns the menu via contextmenu event | focus context |
+| Root | when `trigger` | state owner, wraps invocation target | position context |
+| Invocation Target | when `trigger` | element that spawns the menu via contextmenu event | focus context |
 | Overlay | conditional | positioned command list at pointer/keyboard anchor | surface, elevation, border, radius |
 | Item | yes | actionable or selectable row | text, hover, focus, disabled state |
 | Meta | no | shortcut label column | secondary text, code font |
@@ -47,6 +47,7 @@ Updated: 2026-07-10
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `density` | `"compact" \| "default" \| "comfortable" \| null` | `null` | no | explicit density override for item spacing; when null, resolves from inherited presentation |
 | `dismissOnOutsideInteract` | `boolean` | `true` | no | outside dismissal: a mousedown outside the overlay closes the menu |
+| `trigger` | `boolean` | `true` | no | when false, the consumer owns invocation and supplies controlled `open` + `anchorPoint`; no tab-stop button is rendered |
 | `ariaLabel` | `string \| null` | `null` | no | optional menu label |
 
 ### Type Definitions
@@ -69,6 +70,9 @@ MenuItem: {
 - uncontrolled: `open` is null, uses `defaultOpen` as initial state
 - the invocation target and anchor point are external inputs; the menu does not
   own context selection itself
+- `trigger={false}` is the overlay-only composition: tree rows, list cards, and
+  canvas selections already own contextmenu / Shift+F10. `menuTransition` still
+  owns open, dismiss, action, and first-item focus. The root button is omitted.
 
 ## 4. States
 

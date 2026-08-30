@@ -287,6 +287,7 @@
         />
       </div>
       <ContextMenu
+        trigger={false}
         bind:open={menuOpen}
         anchorPoint={menuAnchor}
         items={menuItems}

@@ -10,7 +10,7 @@ release but stays source-only until it has a downstream consumer and a runtime
 behaviour denominator of its own; the name stays reserved under the claimed
 scope. `@inflatable-cookie/poodle-core` and `@inflatable-cookie/poodle-svelte`
 are the published preview-channel packages. Consume React through a workspace
-or file dependency, paired with a matching `0.2.2` core.
+or file dependency, paired with a matching `0.2.3` core.
 
 ## Public Surface
 

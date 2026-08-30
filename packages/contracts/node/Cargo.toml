@@ -1,6 +1,6 @@
 [package]
 name = "poodle-node"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 license = "MIT"
 rust-version = "1.95"
@@ -12,9 +12,9 @@ keywords = ["design-system", "render-tree", "ui"]
 publish = false
 
 [dependencies]
-poodle-layout = { version = "0.2.2", path = "../layout" }
-poodle-style = { version = "0.2.2", path = "../style" }
-poodle-tokens = { version = "0.2.2", path = "../tokens" }
+poodle-layout = { version = "0.2.3", path = "../layout" }
+poodle-style = { version = "0.2.3", path = "../style" }
+poodle-tokens = { version = "0.2.3", path = "../tokens" }
 
 [package.metadata.poodle]
 public-intent = true
