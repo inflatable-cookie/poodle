@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-30 — A separate PR thread checked the orchestrator-owned primary
+  checkout off `main` and onto its worker commit while a handoff was being
+  written. The committed worker branch was safe, but validation ran against
+  the wrong source until the orchestrator restored `main`. Worker and review
+  helpers must never use the primary planning checkout for PR checkout.
+
 - 2026-08-30 — Vite is not hoisted at the repo root, so a fixture
   `vite.config.ts` cannot `import { defineConfig } from "vite"` and
   `import { createServer } from "vite"` fails from `test/`. Use a plain config
