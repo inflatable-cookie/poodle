@@ -25,7 +25,7 @@
 
 ## Contract ↔ Svelte
 
-All contract props (`items`, `open`, `defaultOpen`, `anchorPoint`, `size`, `sizeRole`, `density`, `ariaLabel`) and callbacks (`onOpenChange`, `onAction`) are present in Svelte with matching types/defaults. Root carries `role="button"`, `tabindex="0"`, `aria-haspopup="menu"`, `data-size`, `data-density`; overlay handled by MenuSurface. No divergence.
+All contract props (`items`, `open`, `defaultOpen`, `anchorPoint`, `size`, `sizeRole`, `density`, `trigger`, `ariaLabel`) and callbacks (`onOpenChange`, `onAction`) are present in Svelte with matching types/defaults. Root carries `role="button"`, `tabindex="0"`, `aria-haspopup="menu"`, `data-size`, `data-density` when `trigger` is true; `trigger={false}` omits that host and renders only MenuSurface. No divergence.
 
 - `items` is required in contract §3 but Svelte defaults to `[]` (safe fallback). Cosmetic only — no fix needed.
 

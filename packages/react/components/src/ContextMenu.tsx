@@ -29,6 +29,12 @@ export interface ContextMenuProps {
   size?: ControlSize | null;
   density?: ControlDensity | null;
   dismissOnOutsideInteract?: boolean;
+  /**
+   * When false, the consumer owns invocation (tree row, canvas, etc.) and
+   * supplies controlled `open` + `anchorPoint`. No tab-stop button is
+   * rendered; `menuTransition` still owns open/close/dismiss/action.
+   */
+  trigger?: boolean;
   onOpenChange?: ((open: boolean) => void) | undefined;
   onAction?: ((value: string) => void) | undefined;
   children?: ReactNode;
@@ -44,6 +50,7 @@ export function ContextMenu({
   size = null,
   density = null,
   dismissOnOutsideInteract = true,
+  trigger = true,
   onOpenChange = undefined,
   onAction = undefined,
   children,
@@ -136,6 +143,25 @@ export function ContextMenu({
     });
   }, [isOpen, dismissOnOutsideInteract]);
 
+  const overlay =
+    isOpen && currentAnchorPoint ? (
+      <MenuSurface
+        ref={surfaceRef}
+        items={items}
+        ariaLabel={ariaLabel}
+        size={resolvedSize}
+        density={resolvedDensity}
+        anchor={anchor}
+        placement="bottom-start"
+        offset={0}
+        onAction={(value) => send({ type: "ACTION", value })}
+      />
+    ) : null;
+
+  if (!trigger) {
+    return overlay;
+  }
+
   return (
     <div
       ref={rootRef}
@@ -149,20 +175,7 @@ export function ContextMenu({
       onKeyDown={handleTriggerKeydown}
     >
       {children}
-
-      {isOpen && currentAnchorPoint ? (
-        <MenuSurface
-          ref={surfaceRef}
-          items={items}
-          ariaLabel={ariaLabel}
-          size={resolvedSize}
-          density={resolvedDensity}
-          anchor={anchor}
-          placement="bottom-start"
-          offset={0}
-          onAction={(value) => send({ type: "ACTION", value })}
-        />
-      ) : null}
+      {overlay}
     </div>
   );
 }

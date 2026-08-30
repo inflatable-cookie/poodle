@@ -346,6 +346,7 @@ export function TreeSpecimen() {
             />
           </div>
           <ContextMenu
+            trigger={false}
             open={menuOpen}
             onOpenChange={setMenuOpen}
             anchorPoint={menuAnchor}

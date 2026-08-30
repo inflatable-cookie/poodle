@@ -37,3 +37,32 @@ describe("ContextMenu (react) dismissOnOutsideInteract", () => {
     expect(surfaceOf()).not.toBeNull();
   });
 });
+
+describe("ContextMenu (react) triggerless overlay", () => {
+  const surfaceOf = () => document.querySelector(".poodle-menu-surface") as HTMLElement;
+
+  it("does not render a tab-stop host when trigger is false", () => {
+    const { container } = render(
+      <ContextMenu items={items} trigger={false} open={false} anchorPoint={{ x: 12, y: 8 }} />,
+    );
+    expect(container.querySelector(".poodle-context-menu")).toBeNull();
+    expect(container.querySelector("[role='button']")).toBeNull();
+    expect(surfaceOf()).toBeNull();
+  });
+
+  it("opens a controlled overlay without an invocation button", () => {
+    render(
+      <ContextMenu
+        items={items}
+        trigger={false}
+        open
+        anchorPoint={{ x: 12, y: 8 }}
+        ariaLabel="Row actions"
+      />,
+    );
+    expect(document.querySelector(".poodle-context-menu")).toBeNull();
+    expect(surfaceOf()).not.toBeNull();
+    expect(surfaceOf().getAttribute("role")).toBe("menu");
+    expect(surfaceOf().getAttribute("aria-label")).toBe("Row actions");
+  });
+});
