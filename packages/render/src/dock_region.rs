@@ -32,6 +32,13 @@ pub struct DockRegionHandlers {
     /// Stable native instance scope. Two docks with the same tab values
     /// would otherwise share one backend focus handle.
     pub instance_id: Option<String>,
+    /// Host preparation for a panel that may leave this window.
+    ///
+    /// The source half of the split, attached to each tab this region renders.
+    /// The window half — projection, commit, accessible picking — is installed
+    /// on the runtime's own drag controller by the host, because it outlives
+    /// any one region and arrives with no local source at all.
+    pub cross_window_drag_source: Option<Arc<dyn poodle_node::CrossWindowDragSourceBridge>>,
     /// A panel from another zone landed on this region.
     ///
     /// Semantic only: the panel's own id, the edge and zone it came from, and
@@ -235,6 +242,7 @@ pub fn dock_region(
                 label,
             );
             source.allowed_operations = crate::drag_drop::move_only();
+            source.cross_window_source_bridge = handlers.cross_window_drag_source.clone();
             tab_btn.interaction.drag_source = Some(source);
 
             tab_btn

@@ -21,6 +21,14 @@
 
 use std::sync::Arc;
 
+pub use poodle_headless::cross_window_drag::{
+    CrossWindowAbort, CrossWindowCleanup, CrossWindowCommitComplete, CrossWindowDragCapabilities,
+    CrossWindowDragCommitRequest, CrossWindowDragInputKind, CrossWindowDragPrepareRequest,
+    CrossWindowDragProjection, CrossWindowDragReceipt, CrossWindowDragSourceBridge,
+    CrossWindowDragTargetBridge, CrossWindowDragTargetEvent, CrossWindowDragTransport,
+    CrossWindowPrepareComplete, CrossWindowTerminal, DragDropCommitResult,
+    CROSS_WINDOW_DRAG_MIME_TYPE, CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
+};
 pub use poodle_headless::drag_drop::{
     DragAnnouncementKind, DragCancelReason, DragOperation, DragSession, DragSessionPhase,
     DragSubject, DragTerminalOutcome, DropEligibility, DropIntent, DropPosition,
@@ -176,6 +184,14 @@ pub struct NodeDragSource {
     /// Opt-in keyboard pickup, and the origin for ordered logical traversal.
     /// A source that omits it leaves Space and Enter to the host component.
     pub keyboard_order: Option<i32>,
+    /// Host preparation for a drag that may leave this window.
+    ///
+    /// Optional and per source, because a lease belongs to the subject being
+    /// dragged — which is the half of the split the *source* owns. The window
+    /// half (projection, commit, accessible picking) is installed on the
+    /// runtime's controller instead, because it outlives any one subject and
+    /// arrives with no local source at all.
+    pub cross_window_source_bridge: Option<Arc<dyn CrossWindowDragSourceBridge>>,
     pub on_drag_start: Option<NodeDragStartHandler>,
     pub on_drag_end: Option<NodeDragEndHandler>,
 }
@@ -192,6 +208,7 @@ impl NodeDragSource {
             label: label.into(),
             instructions: None,
             keyboard_order: None,
+            cross_window_source_bridge: None,
             on_drag_start: None,
             on_drag_end: None,
         }

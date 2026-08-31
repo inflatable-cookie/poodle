@@ -49,16 +49,20 @@ use gpui::{
     StatefulInteractiveElement, Styled, Window,
 };
 use poodle_headless::drag_drop::{
-    drag_session_transition, resolve_drop_target, DragAnnouncementKind,
+    drag_session_transition, resolve_drop_target, DragAnnouncementKind, DragCancelReason,
     DragOperation, DragSession, DragSessionContext, DragSessionEffect, DragSessionEvent,
     DragSessionPhase, DragSubject, DragTerminalOutcome, DropEligibility, DropIntent, DropPosition,
     DropTargetCandidate,
 };
 use poodle_node::{
-    Node, NodeDragCapabilities, NodeDragInputKind, NodeDragSource, NodeDropCommit,
-    NodeDropCommitEvent, NodeDropIntentEvent, NodeDropPositionInput, NodeDropTarget,
-    NodeKeyboardDropDirection, NodeKeyboardPositionInput,
+    CrossWindowAbort, CrossWindowCleanup, CrossWindowDragCommitRequest, CrossWindowDragProjection,
+    CrossWindowDragReceipt, CrossWindowDragSourceBridge, CrossWindowDragTargetBridge,
+    CrossWindowDragTargetEvent, CrossWindowDragTransport, DragDropCommitResult, Node,
+    NodeDragCapabilities, NodeDragInputKind, NodeDragSource, NodeDropCommit, NodeDropCommitEvent,
+    NodeDropIntentEvent, NodeDropPositionInput, NodeDropTarget, NodeKeyboardDropDirection,
+    NodeKeyboardPositionInput,
 };
+use std::sync::Arc;
 
 /// What crates.io GPUI 0.2.2 certifies for this transport.
 ///
@@ -230,8 +234,85 @@ struct ControllerState {
     /// A terminal ran without a window in reach; the next windowed handler
     /// clears GPUI's own drag state.
     pending_stop_active_drag: bool,
+    /// This window's incoming host bridge, when the consumer installed one.
+    cross_window_target: Option<Arc<dyn CrossWindowDragTargetBridge>>,
+    /// The subscription's teardown, held for the controller's lifetime.
+    cross_window_unsubscribe: Option<CrossWindowCleanup>,
+    /// The outgoing host transaction, when a bridged source is in play.
+    cross_window_source: Option<CrossWindowSourceTransaction>,
+    /// The incoming host transaction this window is currently projecting.
+    cross_window_projection: Option<CrossWindowTargetTransaction>,
+    /// Host answers that arrived without an `App` in reach.
+    ///
+    /// A host callback fires from wherever the host happens to be — an
+    /// asynchronous lease, another window's event, a socket — and executing a
+    /// kernel event needs `&mut App`. The frame boundary is the one place this
+    /// controller reliably has one, so answers queue here and drain there, the
+    /// same reason `pending_stop_active_drag` exists.
+    ///
+    /// Shared and lockable rather than owned, because it is the *only* thing a
+    /// host callback captures. The controller is an `Rc` and cannot cross a
+    /// thread; a channel can.
+    cross_window_inbox: CrossWindowInbox,
     preview: Option<PreviewRenderer>,
     describe_announcement: Option<AnnouncementRenderer>,
+}
+
+/// One source's live host transaction.
+///
+/// Held beside the kernel session rather than inside it: the kernel owns
+/// lifecycle and knows nothing about transports, and a receipt must survive
+/// independently of which phase the session happens to be in when the host
+/// answers.
+struct CrossWindowSourceTransaction {
+    session_id: String,
+    source_id: String,
+    bridge: Arc<dyn CrossWindowDragSourceBridge>,
+    /// The channel the host watches to stop work this session no longer wants.
+    abort: CrossWindowAbort,
+    receipt: Option<CrossWindowDragReceipt>,
+    stop_terminal: Option<CrossWindowCleanup>,
+    /// The host already delivered its authoritative terminal for this receipt.
+    settled: bool,
+    /// The gesture reached its activation threshold before the receipt armed.
+    pending_activation: bool,
+}
+
+/// The incoming host transaction this window is projecting.
+struct CrossWindowTargetTransaction {
+    session_id: String,
+    receipt: CrossWindowDragReceipt,
+    projection: CrossWindowDragProjection,
+    /// Covers the commit and the target pick alike: both are requests this
+    /// window can abandon while the host is still working on them.
+    abort: CrossWindowAbort,
+    /// A commit is in flight; a second drop cannot start another.
+    committing: bool,
+}
+
+/// The queue a host callback posts into, and the controller drains.
+type CrossWindowInbox = Arc<std::sync::Mutex<VecDeque<CrossWindowMessage>>>;
+
+/// A host answer waiting for a frame.
+enum CrossWindowMessage {
+    /// A source preparation resolved: a receipt, or a decline.
+    Prepared {
+        session_id: String,
+        receipt: Option<CrossWindowDragReceipt>,
+    },
+    /// The host's authoritative terminal for an outgoing transaction.
+    SourceTerminal {
+        session_id: String,
+        outcome: DragTerminalOutcome,
+    },
+    /// The window bridge published something.
+    Target(CrossWindowDragTargetEvent),
+    /// A commit came back from the host.
+    Commit {
+        session_id: String,
+        intent: DropIntent,
+        result: DragDropCommitResult,
+    },
 }
 
 /// One provider's drag session, registries, and native input translation.
@@ -318,6 +399,11 @@ impl DragDropController {
                 keyboard_origin: None,
                 suppress_activation: std::collections::BTreeSet::new(),
                 pending_stop_active_drag: false,
+                cross_window_target: None,
+                cross_window_unsubscribe: None,
+                cross_window_source: None,
+                cross_window_projection: None,
+                cross_window_inbox: CrossWindowInbox::default(),
                 preview: None,
                 describe_announcement: None,
             })),
@@ -431,6 +517,737 @@ impl DragDropController {
         }
     }
 
+
+    // ── Cross-window host bridge ───────────────────────────────────────────
+
+    /// Install this window's incoming host bridge.
+    ///
+    /// Per window, not per source: a projection arrives with no local source at
+    /// all and outlives any one subject. The subscription is held for the
+    /// controller's lifetime and torn down on `destroy`.
+    ///
+    /// Host answers are queued rather than executed where they arrive. A host
+    /// callback fires from wherever the host happens to be, and running a
+    /// kernel event needs `&mut App`; the frame boundary is where this
+    /// controller reliably has one.
+    pub fn set_cross_window_target_bridge(&self, bridge: Arc<dyn CrossWindowDragTargetBridge>) {
+        if bridge.capabilities().keyboard_target_picker
+            && !bridge.pick_target(
+                CrossWindowDragReceipt {
+                    protocol_version: 0,
+                    token: String::new(),
+                },
+                CrossWindowAbort::new(),
+                Box::new(|_| {}),
+            )
+        {
+            panic!("cross-window target bridge advertises keyboard_target_picker but implements no pick_target");
+        }
+
+        let inbox = self.inbox();
+        let unsubscribe = bridge.subscribe(Box::new(move |event| {
+            inbox
+                .lock()
+                .expect("cross-window inbox")
+                .push_back(CrossWindowMessage::Target(event));
+        }));
+
+        let mut state = self.state.borrow_mut();
+        if let Some(previous) = state.cross_window_unsubscribe.take() {
+            previous();
+        }
+        state.cross_window_target = Some(bridge);
+        state.cross_window_unsubscribe = Some(unsubscribe);
+    }
+
+    fn inbox(&self) -> CrossWindowInbox {
+        Arc::clone(&self.state.borrow().cross_window_inbox)
+    }
+
+    /// Whether this host can carry the input kind in hand.
+    ///
+    /// Capability is resolved before the affordance claims support. A `false`
+    /// answer is not a failure — the source falls back to the runtime's own
+    /// immediate preparation and stays a perfectly good local drag.
+    fn cross_window_carries(
+        bridge: &Arc<dyn CrossWindowDragSourceBridge>,
+        kind: NodeDragInputKind,
+    ) -> bool {
+        let capabilities = bridge.capabilities();
+        match kind {
+            NodeDragInputKind::Keyboard => capabilities.keyboard_target_picker,
+            NodeDragInputKind::Touch => capabilities.touch,
+            _ => capabilities.pointer,
+        }
+    }
+
+    /// Ask the host for a lease, without letting the answer arm the wrong
+    /// session.
+    ///
+    /// The completion is bound to the session it was created for and to the
+    /// abort channel handed out with it. A receipt that arrives after
+    /// supersession is handed straight back rather than dropped on the floor,
+    /// because the host allocated something for it.
+    fn begin_cross_window_preparation(
+        &self,
+        session_id: &str,
+        source: &NodeDragSource,
+        bridge: Arc<dyn CrossWindowDragSourceBridge>,
+    ) {
+        let abort = CrossWindowAbort::new();
+        {
+            let mut state = self.state.borrow_mut();
+            state.cross_window_source = Some(CrossWindowSourceTransaction {
+                session_id: session_id.to_owned(),
+                source_id: source.source_id.clone(),
+                bridge: Arc::clone(&bridge),
+                abort: abort.clone(),
+                receipt: None,
+                stop_terminal: None,
+                settled: false,
+                pending_activation: false,
+            });
+        }
+
+        let request = poodle_node::CrossWindowDragPrepareRequest {
+            session_id: session_id.to_owned(),
+            source_id: source.source_id.clone(),
+            subject: source.subject.clone(),
+            operation: source.operation,
+            allowed_operations: source.allowed_operations.clone(),
+        };
+
+        let inbox = self.inbox();
+        let session = session_id.to_owned();
+        bridge.prepare(
+            request,
+            abort,
+            Box::new(move |receipt| {
+                inbox
+                    .lock()
+                    .expect("cross-window inbox")
+                    .push_back(CrossWindowMessage::Prepared {
+                        session_id: session,
+                        receipt,
+                    });
+            }),
+        );
+    }
+
+    /// The gesture is live: install the one authoritative terminal
+    /// subscription.
+    ///
+    /// Its callback is the only thing here that can end a cross-window session
+    /// with a drop result. A native drag end or a pointer release cannot, which
+    /// is why the host owns this subscription rather than the runtime.
+    fn start_cross_window_transport(&self, session_id: &str) {
+        let (bridge, receipt) = {
+            let state = self.state.borrow();
+            let Some(transaction) = state.cross_window_source.as_ref() else {
+                return;
+            };
+            if transaction.session_id != session_id
+                || transaction.stop_terminal.is_some()
+                || transaction.settled
+            {
+                return;
+            }
+            let Some(receipt) = transaction.receipt.clone() else {
+                return;
+            };
+            (Arc::clone(&transaction.bridge), receipt)
+        };
+
+        let inbox = self.inbox();
+        let session = session_id.to_owned();
+        let stop = bridge.start(
+            receipt,
+            CrossWindowDragTransport::WindowCapture,
+            Box::new(move |outcome| {
+                inbox
+                    .lock()
+                    .expect("cross-window inbox")
+                    .push_back(CrossWindowMessage::SourceTerminal {
+                        session_id: session.clone(),
+                        outcome,
+                    });
+            }),
+        );
+
+        let mut state = self.state.borrow_mut();
+        if let Some(transaction) = state.cross_window_source.as_mut() {
+            if transaction.session_id == session_id {
+                transaction.stop_terminal = Some(stop);
+                return;
+            }
+        }
+        // The session moved on while the host was starting; close it again.
+        drop(state);
+        stop();
+    }
+
+    /// Release the outgoing host transaction exactly once, on the single
+    /// terminal.
+    ///
+    /// `cancel` runs only while the receipt is still live: a host that already
+    /// reported its own terminal has closed the transaction, and telling it to
+    /// cancel afterwards would be a second command against one session id.
+    fn release_cross_window_source(&self, reason: DragCancelReason) {
+        let Some(transaction) = self.state.borrow_mut().cross_window_source.take() else {
+            return;
+        };
+        transaction.abort.abort(reason);
+        if let Some(stop) = transaction.stop_terminal {
+            stop();
+        }
+        if let (Some(receipt), false) = (transaction.receipt, transaction.settled) {
+            transaction.bridge.cancel(receipt, reason);
+        }
+    }
+
+    fn release_cross_window_projection(&self, reason: DragCancelReason) {
+        if let Some(transaction) = self.state.borrow_mut().cross_window_projection.take() {
+            transaction.abort.abort(reason);
+        }
+    }
+
+    /// Drain everything the host said since the last frame.
+    ///
+    /// Ordering is preserved, and each message is re-checked against the live
+    /// session as it is applied: a queue is not a licence to act on stale news.
+    fn drain_cross_window(&self, cx: &mut App) {
+        loop {
+            let Some(message) = self
+                .inbox()
+                .lock()
+                .expect("cross-window inbox")
+                .pop_front()
+            else {
+                return;
+            };
+            match message {
+                CrossWindowMessage::Prepared {
+                    session_id,
+                    receipt,
+                } => self.apply_prepared(&session_id, receipt, cx),
+                CrossWindowMessage::SourceTerminal {
+                    session_id,
+                    outcome,
+                } => self.apply_source_terminal(&session_id, outcome, cx),
+                CrossWindowMessage::Target(event) => self.apply_target_event(event, cx),
+                CrossWindowMessage::Commit {
+                    session_id,
+                    intent,
+                    result,
+                } => self.apply_cross_window_commit(&session_id, intent, result, cx),
+            }
+        }
+    }
+
+    fn apply_prepared(
+        &self,
+        session_id: &str,
+        receipt: Option<CrossWindowDragReceipt>,
+        cx: &mut App,
+    ) {
+        let stale = {
+            let state = self.state.borrow();
+            state
+                .cross_window_source
+                .as_ref()
+                .is_none_or(|transaction| {
+                    transaction.session_id != session_id || transaction.abort.is_aborted()
+                })
+        };
+
+        if stale {
+            // The host still allocated something for a session that no longer
+            // exists. Hand it back rather than leak it.
+            if let Some(receipt) = receipt.filter(|receipt| receipt.is_valid()) {
+                let bridge = self
+                    .state
+                    .borrow()
+                    .cross_window_target
+                    .as_ref()
+                    .map(|_| ())
+                    .and(None::<Arc<dyn CrossWindowDragSourceBridge>>);
+                let _ = bridge;
+                if let Some(source) = self.late_source_bridge(session_id) {
+                    source.cancel(receipt, DragCancelReason::Superseded);
+                }
+            }
+            return;
+        }
+
+        match receipt {
+            None => {
+                self.dispatch(
+                    DragSessionEvent::PrepareDeclined {
+                        session_id: session_id.to_owned(),
+                    },
+                    cx,
+                );
+            }
+            Some(receipt) if !receipt.is_valid() => {
+                self.dispatch(
+                    DragSessionEvent::PrepareFailed {
+                        session_id: session_id.to_owned(),
+                    },
+                    cx,
+                );
+            }
+            Some(receipt) => {
+                let activate = {
+                    let mut state = self.state.borrow_mut();
+                    let Some(transaction) = state.cross_window_source.as_mut() else {
+                        return;
+                    };
+                    transaction.receipt = Some(receipt);
+                    transaction.pending_activation
+                };
+                self.dispatch(
+                    DragSessionEvent::Prepared {
+                        session_id: session_id.to_owned(),
+                    },
+                    cx,
+                );
+                if activate {
+                    self.dispatch(
+                        DragSessionEvent::Activate {
+                            session_id: session_id.to_owned(),
+                        },
+                        cx,
+                    );
+                    self.start_cross_window_transport(session_id);
+                }
+            }
+        }
+    }
+
+    /// The bridge of a transaction that has already been released.
+    ///
+    /// Only used to hand a late receipt back. The registry is rebuilt every
+    /// frame, so the source registration is the durable place to find it.
+    fn late_source_bridge(&self, _session_id: &str) -> Option<Arc<dyn CrossWindowDragSourceBridge>> {
+        let state = self.state.borrow();
+        state
+            .active_source
+            .as_ref()
+            .and_then(|(source, _)| source.cross_window_source_bridge.clone())
+    }
+
+    fn apply_source_terminal(
+        &self,
+        session_id: &str,
+        outcome: DragTerminalOutcome,
+        cx: &mut App,
+    ) {
+        {
+            let mut state = self.state.borrow_mut();
+            let Some(transaction) = state.cross_window_source.as_mut() else {
+                return;
+            };
+            if transaction.session_id != session_id || transaction.settled {
+                return;
+            }
+            transaction.settled = true;
+        }
+        self.dispatch(
+            DragSessionEvent::HostTerminal {
+                session_id: session_id.to_owned(),
+                outcome,
+            },
+            cx,
+        );
+    }
+
+    fn apply_target_event(&self, event: CrossWindowDragTargetEvent, cx: &mut App) {
+        match event {
+            CrossWindowDragTargetEvent::Projection { projection } => {
+                self.apply_projection(projection, cx)
+            }
+            CrossWindowDragTargetEvent::Left { receipt } => {
+                let matching = {
+                    let state = self.state.borrow();
+                    state
+                        .cross_window_projection
+                        .as_ref()
+                        .is_some_and(|live| live.receipt == receipt)
+                };
+                if !matching {
+                    return;
+                }
+                let session_id = self
+                    .state
+                    .borrow()
+                    .cross_window_projection
+                    .as_ref()
+                    .map(|live| live.session_id.clone());
+                if let Some(session_id) = session_id {
+                    self.state.borrow_mut().rejected = None;
+                    self.dispatch(DragSessionEvent::TargetCleared { session_id }, cx);
+                }
+            }
+            CrossWindowDragTargetEvent::Cancelled { receipt, reason } => {
+                let session_id = {
+                    let state = self.state.borrow();
+                    state
+                        .cross_window_projection
+                        .as_ref()
+                        .filter(|live| live.receipt == receipt)
+                        .map(|live| live.session_id.clone())
+                };
+                let Some(session_id) = session_id else {
+                    return;
+                };
+                self.release_cross_window_projection(reason);
+                self.dispatch(
+                    DragSessionEvent::HostTerminal {
+                        session_id,
+                        outcome: DragTerminalOutcome::Cancelled { reason },
+                    },
+                    cx,
+                );
+            }
+        }
+    }
+
+    /// Begin, update, or refuse the one incoming host transaction.
+    ///
+    /// A local gesture always wins: the user's own pointer or keyboard owns
+    /// this controller, and a projection arriving mid-drag would otherwise
+    /// supersede a drag the user is still making.
+    fn apply_projection(&self, projection: CrossWindowDragProjection, cx: &mut App) {
+        if !projection.receipt.is_valid() {
+            return;
+        }
+
+        let live = {
+            let state = self.state.borrow();
+            state
+                .cross_window_projection
+                .as_ref()
+                .map(|live| (live.session_id.clone(), live.receipt.clone()))
+        };
+
+        if let Some((session_id, receipt)) = live {
+            if receipt == projection.receipt {
+                if self.active_session_id().as_deref() != Some(session_id.as_str()) {
+                    return;
+                }
+                if let Some(transaction) = self.state.borrow_mut().cross_window_projection.as_mut() {
+                    transaction.projection = projection.clone();
+                }
+                self.resolve_projected_intent(&session_id, &projection, cx);
+                return;
+            }
+            self.release_cross_window_projection(DragCancelReason::Superseded);
+        }
+
+        if self.is_active() || self.state.borrow().cross_window_source.is_some() {
+            return;
+        }
+
+        let session_id = {
+            let mut state = self.state.borrow_mut();
+            state.next_session += 1;
+            format!("gpui-drag-{}-{}", state.id, state.next_session)
+        };
+        let abort = CrossWindowAbort::new();
+        self.state.borrow_mut().cross_window_projection = Some(CrossWindowTargetTransaction {
+            session_id: session_id.clone(),
+            receipt: projection.receipt.clone(),
+            projection: projection.clone(),
+            abort: abort.clone(),
+            committing: false,
+        });
+
+        self.state.borrow_mut().input_kind = Some(match projection.input_kind {
+            poodle_node::CrossWindowDragInputKind::Keyboard => NodeDragInputKind::Keyboard,
+            poodle_node::CrossWindowDragInputKind::Touch => NodeDragInputKind::Touch,
+            // The host reports a pointer class; this window never observed the
+            // device, so there is no finer identity honestly available.
+            poodle_node::CrossWindowDragInputKind::Pointer => NodeDragInputKind::Mouse,
+        });
+        self.dispatch(
+            DragSessionEvent::Prepare {
+                session_id: session_id.clone(),
+                source_id: projection.source_id.clone(),
+                subject: projection.subject.clone(),
+                operation: projection.operation,
+                allowed_operations: vec![projection.operation],
+            },
+            cx,
+        );
+        self.dispatch(
+            DragSessionEvent::Prepared {
+                session_id: session_id.clone(),
+            },
+            cx,
+        );
+        self.dispatch(
+            DragSessionEvent::Activate {
+                session_id: session_id.clone(),
+            },
+            cx,
+        );
+        if self.active_session_id().as_deref() != Some(session_id.as_str()) {
+            self.release_cross_window_projection(DragCancelReason::TransportLost);
+            return;
+        }
+
+        self.resolve_projected_intent(&session_id, &projection, cx);
+        self.maybe_pick_target(&session_id, &projection);
+    }
+
+    /// Re-run this window's own gates over a host-supplied projection.
+    ///
+    /// The host decided *which* target the gesture is over; it does not decide
+    /// whether that target will take it. Kind, disabled posture, and the
+    /// consumer's eligibility resolver are state the host cannot see, and they
+    /// run on every projection and again at commit.
+    fn resolve_projected_intent(
+        &self,
+        session_id: &str,
+        projection: &CrossWindowDragProjection,
+        cx: &mut App,
+    ) {
+        let (Some(target_id), Some(position)) =
+            (projection.target_id.clone(), projection.position.clone())
+        else {
+            self.state.borrow_mut().rejected = None;
+            self.dispatch(
+                DragSessionEvent::TargetCleared {
+                    session_id: session_id.to_owned(),
+                },
+                cx,
+            );
+            return;
+        };
+
+        let intent = DropIntent {
+            target_id: target_id.clone(),
+            position,
+            operation: projection.operation,
+        };
+
+        let registration = self
+            .state
+            .borrow()
+            .targets
+            .get(&target_id)
+            .map(|record| record.registration.clone());
+
+        let eligibility = match &registration {
+            Some(registration) => eligibility_for(registration, &intent, &projection.subject),
+            None => DropEligibility::Rejected {
+                reason: Some("That target is not in this window".to_string()),
+            },
+        };
+
+        match eligibility {
+            DropEligibility::Accepted { intent } => {
+                self.state.borrow_mut().rejected = None;
+                self.dispatch(
+                    DragSessionEvent::TargetIntent {
+                        session_id: session_id.to_owned(),
+                        intent,
+                    },
+                    cx,
+                );
+            }
+            DropEligibility::Rejected { reason } => {
+                if registration.is_some() {
+                    self.state.borrow_mut().rejected = Some((target_id, reason));
+                } else {
+                    self.state.borrow_mut().rejected = None;
+                }
+                self.dispatch(
+                    DragSessionEvent::TargetCleared {
+                        session_id: session_id.to_owned(),
+                    },
+                    cx,
+                );
+            }
+        }
+    }
+
+    /// The accessible cross-window route.
+    ///
+    /// The picker is bound to the exact receipt it is picking for, so a
+    /// projection that comes back naming another transaction is refused rather
+    /// than trusted. It runs the same revalidation and commit the pointer takes;
+    /// a second keyboard-only path would be a second transaction.
+    fn maybe_pick_target(&self, session_id: &str, projection: &CrossWindowDragProjection) {
+        if projection.input_kind != poodle_node::CrossWindowDragInputKind::Keyboard {
+            return;
+        }
+        let (bridge, receipt, abort) = {
+            let state = self.state.borrow();
+            let Some(bridge) = state.cross_window_target.clone() else {
+                return;
+            };
+            if !bridge.capabilities().keyboard_target_picker {
+                return;
+            }
+            let Some(transaction) = state.cross_window_projection.as_ref() else {
+                return;
+            };
+            (
+                bridge,
+                transaction.receipt.clone(),
+                transaction.abort.clone(),
+            )
+        };
+
+        let inbox = self.inbox();
+        let expected = receipt.clone();
+        bridge.pick_target(
+            receipt,
+            abort.clone(),
+            Box::new(move |picked| {
+                let Some(picked) = picked else { return };
+                // Bound to the receipt it was asked for: a projection naming
+                // another transaction is refused rather than trusted, and an
+                // abandoned pick is inert even if the host still answers.
+                if abort.is_aborted() || picked.receipt != expected {
+                    return;
+                }
+                inbox.lock().expect("cross-window inbox").push_back(
+                    CrossWindowMessage::Target(CrossWindowDragTargetEvent::Projection {
+                        projection: picked,
+                    }),
+                );
+            }),
+        );
+        let _ = session_id;
+    }
+
+    /// Ask the host to make the projected drop durable, after this window has
+    /// re-checked its own gates one last time.
+    fn request_cross_window_commit(&self, session_id: &str, intent: DropIntent, cx: &mut App) {
+        let (bridge, receipt, abort, subject) = {
+            let state = self.state.borrow();
+            let Some(bridge) = state.cross_window_target.clone() else {
+                self.state.borrow_mut();
+                return;
+            };
+            let Some(transaction) = state.cross_window_projection.as_ref() else {
+                return;
+            };
+            if transaction.session_id != session_id || transaction.committing {
+                return;
+            }
+            let Some(session) = state.context.session.as_ref() else {
+                return;
+            };
+            (
+                bridge,
+                transaction.receipt.clone(),
+                transaction.abort.clone(),
+                session.subject.clone(),
+            )
+        };
+
+        let registration = self
+            .state
+            .borrow()
+            .targets
+            .get(&intent.target_id)
+            .map(|record| record.registration.clone());
+        let Some(registration) = registration else {
+            self.dispatch(
+                DragSessionEvent::DropRejected {
+                    session_id: session_id.to_owned(),
+                    reason: Some("That target is no longer in this window".to_string()),
+                },
+                cx,
+            );
+            return;
+        };
+        let intent = match eligibility_for(&registration, &intent, &subject) {
+            DropEligibility::Accepted { intent } => intent,
+            DropEligibility::Rejected { reason } => {
+                self.dispatch(
+                    DragSessionEvent::DropRejected {
+                        session_id: session_id.to_owned(),
+                        reason,
+                    },
+                    cx,
+                );
+                return;
+            }
+        };
+
+        if let Some(transaction) = self.state.borrow_mut().cross_window_projection.as_mut() {
+            transaction.committing = true;
+        }
+
+        let inbox = self.inbox();
+        let session = session_id.to_owned();
+        let committed_intent = intent.clone();
+        let guard = abort.clone();
+        bridge.commit(
+            CrossWindowDragCommitRequest {
+                receipt,
+                subject,
+                intent,
+            },
+            abort,
+            Box::new(move |result| {
+                // An abandoned commit is inert even when the host answers it.
+                if guard.is_aborted() {
+                    return;
+                }
+                inbox
+                    .lock()
+                    .expect("cross-window inbox")
+                    .push_back(CrossWindowMessage::Commit {
+                        session_id: session,
+                        intent: committed_intent,
+                        result,
+                    });
+            }),
+        );
+    }
+
+    fn apply_cross_window_commit(
+        &self,
+        session_id: &str,
+        intent: DropIntent,
+        result: DragDropCommitResult,
+        cx: &mut App,
+    ) {
+        let live = {
+            let state = self.state.borrow();
+            state
+                .cross_window_projection
+                .as_ref()
+                .is_some_and(|transaction| {
+                    transaction.session_id == session_id && !transaction.abort.is_aborted()
+                })
+        };
+        if !live || self.active_session_id().as_deref() != Some(session_id) {
+            return;
+        }
+
+        let event = match result {
+            DragDropCommitResult::Committed => DragSessionEvent::DropCommitted {
+                session_id: session_id.to_owned(),
+                intent,
+            },
+            DragDropCommitResult::Rejected { reason } => DragSessionEvent::DropRejected {
+                session_id: session_id.to_owned(),
+                reason,
+            },
+            DragDropCommitResult::Failed { reason } => DragSessionEvent::DropFailed {
+                session_id: session_id.to_owned(),
+                reason,
+            },
+        };
+        self.dispatch(event, cx);
+    }
+
     // ── Frame boundary ─────────────────────────────────────────────────────
 
     /// Start a build pass: registrations made from here until [`Self::frame_end`]
@@ -451,6 +1268,10 @@ impl DragDropController {
     /// surviving session then re-resolves against the new registrations, so an
     /// eligibility change with no pointer motion still moves the intent.
     fn frame_end(&self, window: &mut Window, cx: &mut App) {
+        // Host answers first: a projection or a terminal that arrived since the
+        // last frame is news about *this* frame's session, and the sweep below
+        // decides what survived.
+        self.drain_cross_window(cx);
         FRAME_CONTROLLER.with(|current| {
             let mut current = current.borrow_mut();
             if current
@@ -476,8 +1297,16 @@ impl DragDropController {
             // the third matters most: a rebuild that reuses one `source_id`
             // for a new row would otherwise leave the old subject dragging and
             // let it commit against the new tree.
+            // An incoming host projection has no local source by construction:
+            // the drag started in another window. Sweeping it as a lost source
+            // would cancel every cross-window session on its first frame.
+            let projected = state
+                .cross_window_projection
+                .as_ref()
+                .map(|transaction| transaction.session_id.clone());
             let stale_source = session
                 .as_ref()
+                .filter(|session| projected.as_deref() != Some(session.session_id.as_str()))
                 .filter(|session| {
                     state.sources.get(&session.source_id).is_none_or(|record| {
                         record.registration.disabled
@@ -599,6 +1428,17 @@ impl DragDropController {
     /// Used only when the provider that owned them is gone: the tree that
     /// declared them will never build again, so keeping them would leave a
     /// registry describing elements that are not on screen.
+    /// Release this controller's host bridges. Idempotent.
+    fn release_cross_window(&self) {
+        let unsubscribe = self.state.borrow_mut().cross_window_unsubscribe.take();
+        if let Some(unsubscribe) = unsubscribe {
+            unsubscribe();
+        }
+        self.release_cross_window_source(DragCancelReason::TransportLost);
+        self.release_cross_window_projection(DragCancelReason::TransportLost);
+        self.inbox().lock().expect("cross-window inbox").clear();
+    }
+
     fn forget_registrations(&self) {
         let mut state = self.state.borrow_mut();
         state.sources.clear();
@@ -704,6 +1544,26 @@ impl DragDropController {
         if self.state.borrow().phase != DragSessionPhase::Preparing {
             return false;
         }
+
+        // A source with a host bridge stays in `Preparing` until its own
+        // receipt arms. Activating first would advertise a transfer the host
+        // has not agreed to, and the receipt is what `start` needs.
+        if let Some(bridge) = registration
+            .cross_window_source_bridge
+            .clone()
+            .filter(|bridge| Self::cross_window_carries(bridge, kind))
+        {
+            self.begin_cross_window_preparation(&session_id, &registration, bridge);
+            if let Some(transaction) = self.state.borrow_mut().cross_window_source.as_mut() {
+                if transaction.session_id == session_id {
+                    transaction.pending_activation = true;
+                }
+            }
+            // The host may have answered synchronously.
+            self.drain_cross_window(cx);
+            return self.state.borrow().phase == DragSessionPhase::Dragging;
+        }
+
         self.dispatch(
             DragSessionEvent::Prepared {
                 session_id: session_id.clone(),
@@ -791,9 +1651,52 @@ impl DragDropController {
         if self.state.borrow().input_kind != Some(NodeDragInputKind::Mouse) {
             return;
         }
+
+        // An incoming projection is the host's geometry, not this window's: the
+        // release is the local observation that the drop happened, and the
+        // projected intent is the one to commit. Re-hit-testing here would
+        // overrule the host with bounds it never used.
+        let projected = self
+            .state
+            .borrow()
+            .cross_window_projection
+            .as_ref()
+            .is_some_and(|transaction| transaction.session_id == session_id);
+        if projected {
+            let has_intent = self
+                .state
+                .borrow()
+                .context
+                .session
+                .as_ref()
+                .is_some_and(|session| session.intent.is_some());
+            if has_intent {
+                self.dispatch(DragSessionEvent::DropRequested { session_id }, cx);
+            }
+            // With no accepted target the host owns what happens next; a local
+            // cancellation would end a transaction this window does not own.
+            self.sync_intent_notifications();
+            return;
+        }
+
         let (x, y): (f32, f32) = (position.x.into(), position.y.into());
         self.state.borrow_mut().pointer = Some((x, y));
         self.resolve_pointer_intent(x, y, cx);
+
+        // Once the host has started this transaction, release is not a result.
+        // The terminal subscription is the authority, and inventing a local
+        // commit here would be exactly the inference the boundary forbids.
+        let host_owns_terminal = self
+            .state
+            .borrow()
+            .cross_window_source
+            .as_ref()
+            .is_some_and(|transaction| {
+                transaction.session_id == session_id && transaction.stop_terminal.is_some()
+            });
+        if host_owns_terminal {
+            return;
+        }
 
         let has_intent = self
             .state
@@ -1078,7 +1981,20 @@ impl DragDropController {
                 }
             }
             DragSessionEffect::RequestDrop { session_id, intent } => {
-                queue.push_back(self.commit(&session_id, intent));
+                // An incoming host transaction revalidates semantically and
+                // commits through the bridge; this window never had a local
+                // source for it and must not invent a local commit.
+                let projected = self
+                    .state
+                    .borrow()
+                    .cross_window_projection
+                    .as_ref()
+                    .is_some_and(|transaction| transaction.session_id == session_id);
+                if projected {
+                    self.request_cross_window_commit(&session_id, intent, cx);
+                } else {
+                    queue.push_back(self.commit(&session_id, intent));
+                }
             }
             DragSessionEffect::EmitDropResult { outcome, .. } => {
                 let handler = {
@@ -1111,6 +2027,28 @@ impl DragDropController {
                 }
             }
             DragSessionEffect::CleanupSession { session_id } => {
+                let reason = match self.state.borrow().last_outcome.as_ref() {
+                    Some(DragTerminalOutcome::Cancelled { reason }) => *reason,
+                    _ => DragCancelReason::Explicit,
+                };
+                let owns_source = self
+                    .state
+                    .borrow()
+                    .cross_window_source
+                    .as_ref()
+                    .is_some_and(|transaction| transaction.session_id == session_id);
+                if owns_source {
+                    self.release_cross_window_source(reason);
+                }
+                let owns_projection = self
+                    .state
+                    .borrow()
+                    .cross_window_projection
+                    .as_ref()
+                    .is_some_and(|transaction| transaction.session_id == session_id);
+                if owns_projection {
+                    self.release_cross_window_projection(reason);
+                }
                 self.clear_intent_notification();
                 {
                     let mut state = self.state.borrow_mut();
@@ -1636,6 +2574,7 @@ impl DragDropWindowHost {
             // the runtime's own drag. Forgetting the controller first would
             // leave nothing to drain.
             controller.cancel(cx);
+            controller.release_cross_window();
             controller.forget_registrations();
             controller.drain_pending_stop(window, cx);
         }

@@ -173,6 +173,108 @@ pub struct CrossWindowDragCommitRequest {
     pub intent: DropIntent,
 }
 
+/// The renderer-neutral counterpart of `AbortSignal`.
+///
+/// TypeScript hands the host an `AbortSignal` with every asynchronous request,
+/// and that is not decoration: a preparation that is superseded, a commit whose
+/// window closed, and a target pick the user escaped all have to reach the host
+/// so it can stop work and release whatever it allocated. A completion callback
+/// can replace a promise; it cannot replace the channel that runs the other
+/// way.
+///
+/// Cheap to clone, and every clone is the same signal. Aborting is idempotent:
+/// the first reason wins and listeners run exactly once, so a late second
+/// cancellation cannot double-release a host's resources.
+#[derive(Clone, Default)]
+pub struct CrossWindowAbort {
+    state: std::sync::Arc<std::sync::Mutex<AbortState>>,
+}
+
+#[derive(Default)]
+struct AbortState {
+    reason: Option<DragCancelReason>,
+    listeners: Vec<Box<dyn FnOnce(DragCancelReason) + Send>>,
+}
+
+impl std::fmt::Debug for CrossWindowAbort {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("CrossWindowAbort")
+            .field("reason", &self.reason())
+            .finish()
+    }
+}
+
+impl CrossWindowAbort {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Whether this request has been abandoned.
+    pub fn is_aborted(&self) -> bool {
+        self.reason().is_some()
+    }
+
+    /// Why it was abandoned, if it was.
+    pub fn reason(&self) -> Option<DragCancelReason> {
+        self.state.lock().expect("abort state").reason
+    }
+
+    /// Abandon the request. The first reason wins; later calls are inert.
+    pub fn abort(&self, reason: DragCancelReason) {
+        let listeners = {
+            let mut state = self.state.lock().expect("abort state");
+            if state.reason.is_some() {
+                return;
+            }
+            state.reason = Some(reason);
+            std::mem::take(&mut state.listeners)
+        };
+        for listener in listeners {
+            listener(reason);
+        }
+    }
+
+    /// Run `listener` when the request is abandoned, or immediately when it
+    /// already has been. Called at most once either way.
+    pub fn on_abort(&self, listener: impl FnOnce(DragCancelReason) + Send + 'static) {
+        let already = {
+            let mut state = self.state.lock().expect("abort state");
+            match state.reason {
+                Some(reason) => Some(reason),
+                None => {
+                    state.listeners.push(Box::new(listener));
+                    return;
+                }
+            }
+        };
+        if let Some(reason) = already {
+            listener(reason);
+        }
+    }
+}
+
+/// The completion a host calls once its lease is allocated, or declined.
+///
+/// A callback rather than a future: this crate is renderer-neutral and runs
+/// inside a single-threaded frame loop with no executor to await on.
+///
+/// `Send`, because a bridge is stored on a registration that must cross
+/// threads, so anything a host holds on to must too. An adapter therefore
+/// hands the host a channel rather than a closure over its own controller —
+/// which is the right shape anyway, since a host may answer from wherever its
+/// lease actually resolves.
+pub type CrossWindowPrepareComplete = Box<dyn FnOnce(Option<CrossWindowDragReceipt>) + Send>;
+
+/// The one authoritative terminal subscription a `start` installs.
+pub type CrossWindowTerminal = Box<dyn Fn(DragTerminalOutcome) + Send>;
+
+/// The host's answer to one revalidated commit request.
+pub type CrossWindowCommitComplete = Box<dyn FnOnce(DragDropCommitResult) + Send>;
+
+/// A subscription's own teardown, run exactly once.
+pub type CrossWindowCleanup = Box<dyn FnOnce() + Send>;
+
 /// Per draggable source.
 ///
 /// `prepare` runs on the accepted pre-drag gesture, *before* activation, so a
@@ -184,7 +286,7 @@ pub struct CrossWindowDragCommitRequest {
 /// `start` installs the one authoritative terminal subscription and returns
 /// its cleanup. A native drag end or pointer release never manufactures a
 /// committed result — only the terminal callback does.
-pub trait CrossWindowDragSourceBridge {
+pub trait CrossWindowDragSourceBridge: Send + Sync {
     fn capabilities(&self) -> CrossWindowDragCapabilities;
 
     /// Allocate the host transaction. `complete` receives `None` for a decline
@@ -193,7 +295,8 @@ pub trait CrossWindowDragSourceBridge {
     fn prepare(
         &self,
         request: CrossWindowDragPrepareRequest,
-        complete: Box<dyn FnOnce(Option<CrossWindowDragReceipt>)>,
+        abort: CrossWindowAbort,
+        complete: CrossWindowPrepareComplete,
     );
 
     /// The gesture is live under `transport`. Returns the subscription's own
@@ -202,8 +305,8 @@ pub trait CrossWindowDragSourceBridge {
         &self,
         receipt: CrossWindowDragReceipt,
         transport: CrossWindowDragTransport,
-        on_terminal: Box<dyn Fn(DragTerminalOutcome)>,
-    ) -> Box<dyn FnOnce()>;
+        on_terminal: CrossWindowTerminal,
+    ) -> CrossWindowCleanup;
 
     /// Idempotent at the boundary, and called only while the receipt is still
     /// live.
@@ -218,21 +321,34 @@ pub trait CrossWindowDragSourceBridge {
 /// `keyboard_target_picker` is true and reaches the same revalidation, commit,
 /// announcement, and terminal path as the pointer route — a second
 /// keyboard-only callback would be a second transaction.
-pub trait CrossWindowDragTargetBridge {
+pub trait CrossWindowDragTargetBridge: Send + Sync {
     fn capabilities(&self) -> CrossWindowDragCapabilities;
 
-    fn subscribe(&self, listener: Box<dyn Fn(CrossWindowDragTargetEvent)>) -> Box<dyn FnOnce()>;
+    fn subscribe(
+        &self,
+        listener: Box<dyn Fn(CrossWindowDragTargetEvent) + Send>,
+    ) -> CrossWindowCleanup;
 
     fn commit(
         &self,
         request: CrossWindowDragCommitRequest,
-        complete: Box<dyn FnOnce(DragDropCommitResult)>,
+        abort: CrossWindowAbort,
+        complete: CrossWindowCommitComplete,
     );
 
-    /// The accessible cross-window route. `None` when the host advertises no
-    /// keyboard picker; a `Some` implementation must be present exactly when
-    /// [`CrossWindowDragCapabilities::keyboard_target_picker`] is true.
-    fn pick_target(&self, _complete: Box<dyn FnOnce(Option<CrossWindowDragProjection>)>) -> bool {
+    /// The accessible cross-window route.
+    ///
+    /// Takes the exact receipt it is picking for, so a projection that comes
+    /// back naming a different transaction can be refused rather than trusted,
+    /// and the same abort channel as every other request. Returns `false` when
+    /// the host implements no picker; an implementation must be present exactly
+    /// when [`CrossWindowDragCapabilities::keyboard_target_picker`] is true.
+    fn pick_target(
+        &self,
+        _receipt: CrossWindowDragReceipt,
+        _abort: CrossWindowAbort,
+        _complete: Box<dyn FnOnce(Option<CrossWindowDragProjection>) + Send>,
+    ) -> bool {
         false
     }
 }
@@ -270,5 +386,46 @@ mod tests {
         assert_eq!(receipt(1, "a"), receipt(1, "a"));
         assert_ne!(receipt(1, "a"), receipt(1, "b"));
         assert_ne!(receipt(1, "a"), receipt(2, "a"));
+    }
+
+    /// The abort channel is what a host watches to stop work it has started.
+    /// The first reason wins and listeners run once, so a second cancellation
+    /// cannot make a host release the same lease twice.
+    #[test]
+    fn aborting_is_idempotent_and_keeps_the_first_reason() {
+        let abort = CrossWindowAbort::new();
+        let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+
+        let recorder = std::sync::Arc::clone(&seen);
+        abort.on_abort(move |reason| recorder.lock().expect("seen").push(reason));
+
+        assert!(!abort.is_aborted());
+        abort.abort(DragCancelReason::Superseded);
+        abort.abort(DragCancelReason::WindowLost);
+
+        assert!(abort.is_aborted());
+        assert_eq!(abort.reason(), Some(DragCancelReason::Superseded));
+        assert_eq!(
+            *seen.lock().expect("seen"),
+            vec![DragCancelReason::Superseded],
+            "one abort, one notification"
+        );
+    }
+
+    /// A listener attached after the fact still runs, once, with the reason
+    /// that was recorded — a host that registers late must not simply miss it.
+    #[test]
+    fn a_late_listener_runs_immediately_with_the_recorded_reason() {
+        let abort = CrossWindowAbort::new();
+        abort.abort(DragCancelReason::TransportLost);
+
+        let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let recorder = std::sync::Arc::clone(&seen);
+        abort.on_abort(move |reason| recorder.lock().expect("seen").push(reason));
+
+        assert_eq!(
+            *seen.lock().expect("seen"),
+            vec![DragCancelReason::TransportLost]
+        );
     }
 }

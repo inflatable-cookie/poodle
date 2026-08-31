@@ -7771,6 +7771,7 @@ pub(crate) struct DockRegion {
     on_collapse_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
     instance_id: Option<String>,
     on_panel_drop: Option<Arc<dyn Fn(&poodle_render::DockPanelDrop) + Send + Sync>>,
+    cross_window_drag_source: Option<Arc<dyn poodle_node::CrossWindowDragSourceBridge>>,
 }
 
 impl DockRegion {
@@ -7780,6 +7781,7 @@ impl DockRegion {
             theme: theme.clone(),
             content: None,
             on_panel_drop: None,
+            cross_window_drag_source: None,
             on_tab_change: None,
             on_collapse_toggle: None,
             instance_id: None,
@@ -7806,6 +7808,14 @@ impl DockRegion {
         self
     }
 
+    pub(crate) fn cross_window_drag_source(
+        mut self,
+        bridge: Arc<dyn poodle_node::CrossWindowDragSourceBridge>,
+    ) -> Self {
+        self.cross_window_drag_source = Some(bridge);
+        self
+    }
+
     pub(crate) fn on_panel_drop(
         mut self,
         handler: Arc<dyn Fn(&poodle_render::DockPanelDrop) + Send + Sync>,
@@ -7820,6 +7830,7 @@ impl DockRegion {
             on_collapse_toggle: self.on_collapse_toggle,
             instance_id: self.instance_id,
             on_panel_drop: self.on_panel_drop,
+            cross_window_drag_source: self.cross_window_drag_source,
         };
         poodle_render::dock_region(&self.spec, &RenderContext::new(&self.theme), self.content, handlers)
     }
