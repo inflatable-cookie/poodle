@@ -3792,6 +3792,7 @@ dependencies = [
 name = "poodle-node"
 version = "0.2.3"
 dependencies = [
+ "poodle-headless",
  "poodle-layout",
  "poodle-style",
  "poodle-tokens",

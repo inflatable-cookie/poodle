@@ -32,7 +32,7 @@
 
 use std::cell::RefCell;
 
-use gpui::{App, Bounds, KeyDownEvent, MouseButton, MouseDownEvent, MouseUpEvent, Pixels, Point};
+use gpui::{App, Bounds, KeyDownEvent, MouseButton, MouseDownEvent, Pixels, Point};
 use poodle_node::{DismissHandler, DismissReason};
 
 /// One registered overlay layer for the current frame.
@@ -278,11 +278,14 @@ pub fn dismiss_layers_at(position: Point<Pixels>, cx: &mut App) {
 
 /// Attach the window-level host listeners to a root element: every
 /// pointer-down is routed through the layer registry (outside dismissal) and
-/// Escape dismisses the innermost layer. The same root also ends an unfinished
-/// payload-drag session on mouse-up (after a zone `on_drop` has already taken
-/// a successful drop) and on Escape. The production preview root and the
-/// conformance mount host use this wiring, so overlay dismissal and payload
-/// cleanup behave identically in the real runtime and the headless driver.
+/// Escape dismisses the innermost layer. The production preview root and the
+/// conformance mount host use this wiring, so overlay dismissal behaves
+/// identically in the real runtime and the headless driver.
+///
+/// Drag-and-drop release and cancellation are NOT here. They belong to the
+/// [`crate::DragDropController`] that owns the session, because a
+/// window-global handler cannot tell two providers' sessions apart — which is
+/// exactly the collision the old backend-global payload session had.
 ///
 /// Tab lives here too, for the same reason Escape does: it is a document-level
 /// default action, not something a focused control decides. gpui ships the
@@ -299,16 +302,9 @@ where
             dismiss_layers_at(event.position, cx);
         },
     )
-    .on_mouse_up(
-        MouseButton::Left,
-        move |_event: &MouseUpEvent, _window, cx| {
-            crate::interaction::release_payload_session(cx);
-        },
-    )
     .on_key_down(
         move |event: &KeyDownEvent, window, cx| match event.keystroke.key.as_str() {
             "escape" => {
-                crate::interaction::cancel_payload_session(window, cx);
                 dismiss_innermost(cx);
             }
             "tab" => {

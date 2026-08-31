@@ -97,6 +97,10 @@ struct PreviewRoot {
     catalogue_sidebar: Entity<CatalogueSidebar>,
     component_page_list: ListState,
     component_page_key: Option<ComponentPageKey>,
+    /// This window's drag-and-drop controller. The preview app is one
+    /// provider, so every reorderable specimen on the page shares one session
+    /// and none of them can start a second while the first is open.
+    drag: poodle_gpui_node_backend::DragDropController,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -356,6 +360,7 @@ impl PreviewRoot {
             catalogue_sidebar,
             component_page_list: ListState::new(3, ListAlignment::Top, px(256.0)),
             component_page_key: None,
+            drag: poodle_gpui_node_backend::DragDropController::new(),
         }
     }
 }
@@ -427,6 +432,13 @@ impl Render for PreviewRoot {
         // reach gpui's own sequential focus traversal (the same wiring the
         // headless mount host uses), so production dismissal and keyboard
         // traversal execute through the real event tree.
+        //
+        // The drag provider wraps it: every drag source and drop target built
+        // below registers with this window's own controller, and the
+        // controller — not a backend global — owns capture, hit testing,
+        // release, and cancellation.
+        let drag = self.drag.clone();
+        poodle_gpui_node_backend::drag_drop_provider(&drag, || {
         poodle_gpui_node_backend::attach_overlay_host(
             div()
                 .size_full()
@@ -479,6 +491,7 @@ impl Render for PreviewRoot {
             // containers get a definite content-mask for hit testing.
             .child(self.render_section_content(content_h, cx)),
         )
+        })
     }
 }
 

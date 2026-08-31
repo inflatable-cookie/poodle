@@ -178,8 +178,13 @@ and disclosure transition for the hidden section.
   (`packages/contracts/components/src/model_catalogue_editor.rs`),
   `poodle_render::model_catalogue_editor`, GPUI specimen
   `packages/gpui/preview/src/specimens/model_catalogue_editor_specimen.rs`.
-- Pointer drag uses the vocabulary's `drag_payload`/`drop_zone` mechanics;
-  explicit and keyboard moves remain and emit the same payloads.
+- Pointer drag runs on the shared drag-and-drop substrate (architecture 011,
+  spec 069): the reorder handle registers a `NodeDragSource` and every unlocked
+  row a `NodeDropTarget`, and the GPUI `DragDropController` owns the session,
+  hit testing, cancellation, and exactly-once cleanup. The subject kind is
+  scoped to the catalogue instance and a row dropped onto itself is rejected.
+  The explicit and keyboard grab/move route is unchanged and emits the same
+  order payload.
 
 ### Native Binding
 

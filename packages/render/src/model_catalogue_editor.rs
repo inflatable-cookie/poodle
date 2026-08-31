@@ -31,7 +31,7 @@ use poodle_headless::model_connection::{
 };
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
-    NodeKey, NodeRole, StylePatch,
+    NodeDropCommit, NodeKey, NodeRole, StylePatch,
 };
 use poodle_specs::{
     ButtonVariant, CallOutSpec, CalloutAnnounceMode, CollapsibleSpec, ControlSize, EmptyStateSpec,
@@ -79,6 +79,15 @@ pub struct ModelCatalogueEditorHandlers {
 /// The backend-state id of one row's reorder handle: the instance scope when
 /// the host supplied one, else the semantic id. Focus requests name this,
 /// because it is what the backend keys focus handles by.
+/// Per-instance drag scope, matching the focus-id scoping right below: two
+/// mounted catalogues must not share source or target identity.
+fn drag_scope(handlers: &ModelCatalogueEditorHandlers) -> String {
+    match handlers.instance_id.as_deref() {
+        Some(instance) => format!("model-catalogue-editor:{instance}"),
+        None => "model-catalogue-editor".to_string(),
+    }
+}
+
 pub fn model_catalogue_handle_focus_id(instance_id: Option<&str>, item_id: &str) -> String {
     match instance_id {
         Some(scope) => format!("model-catalogue-editor:{scope}:{item_id}:handle"),
@@ -534,7 +543,15 @@ fn shown_row(
         }
 
         if spec.is_drag_enabled {
-            handle.interaction.drag_payload = Some(item.id.clone());
+            crate::drag_drop::attach_source(
+                &mut handle,
+                true,
+                crate::drag_drop::reorder_source(
+                    &drag_scope(handlers),
+                    &item.id,
+                    &item.label,
+                ),
+            );
         }
     }
 
@@ -755,29 +772,34 @@ fn shown_row(
     row.roles
         .insert("dropTarget".to_string(), is_drop_target.to_string());
 
-    // Every row is a drop zone, so a dragged handle can land on any of them.
+    // Every row is a drop target, so a dragged handle can land on any of them.
     if spec.is_drag_enabled && !locked {
-        row.interaction.drop_zone = true;
+        let mut target =
+            crate::drag_drop::reorder_target(&drag_scope(handlers), &item.id, &item.label);
         if let Some(handler) = &handlers.on_drop_target_change {
             let handler = Arc::clone(handler);
             let id = item.id.clone();
             let leave = Arc::clone(&handler);
-            row.interaction.on_drop_hover = Some(Arc::new(move |_event| handler(Some(&id))));
-            row.interaction.on_drop_leave = Some(Arc::new(move || leave(None)));
+            target.on_intent = Some(Arc::new(move |_event| handler(Some(&id))));
+            target.on_intent_cleared = Some(Arc::new(move || leave(None)));
         }
         let handlers = Arc::clone(handlers);
         let shown_ids = shown_ids.to_vec();
         let move_to = move_to.clone();
-        row.interaction.on_drop = Some(Arc::new(move |event: &poodle_node::NodeDropEvent| {
+        target.on_drop = Some(Arc::new(move |event| {
             if let Some(handler) = &handlers.on_drop_target_change {
                 handler(None);
             }
             grab(&handlers, None);
-            let Some(from) = shown_ids.iter().position(|id| id == &event.payload) else {
-                return;
+            let Some(from) = shown_ids.iter().position(|id| id == &event.subject.id) else {
+                return NodeDropCommit::Rejected {
+                    reason: Some("The dragged model is no longer shown".to_string()),
+                };
             };
             move_to(from, index);
+            NodeDropCommit::Committed
         }));
+        crate::drag_drop::attach_target(&mut row, true, target);
     }
 
     row.child(handle).child(identity).child(utilities)
@@ -1127,9 +1149,11 @@ mod tests {
             model_catalogue_editor(&spec(), &RenderContext::new(&theme()), recorder.handlers());
 
         let handle = named(&node, "Frontier Alpha, position 1 of 4");
+        let source = handle.interaction.drag_source.as_ref().expect("source");
+        assert_eq!(source.subject.id, "model-alpha");
         assert_eq!(
-            handle.interaction.drag_payload.as_deref(),
-            Some("model-alpha")
+            source.source_id,
+            "model-catalogue-editor:source:model-alpha"
         );
 
         let row = node
@@ -1141,11 +1165,16 @@ mod tests {
                     .is_some()
             })
             .expect("the third row");
-        assert!(row.interaction.drop_zone);
-        (row.interaction.on_drop.as_ref().expect("drop"))(&poodle_node::NodeDropEvent {
-            payload: "model-alpha".to_string(),
-            edge: poodle_node::DropEdge::Inside,
+        let target = row.interaction.drop_target.clone().expect("target");
+        let commit = (target.on_drop.as_ref().expect("drop"))(&poodle_node::NodeDropCommitEvent {
+            subject: crate::drag_drop::reorder_subject("model-catalogue-editor", "model-alpha"),
+            intent: poodle_node::DropIntent {
+                target_id: target.target_id.clone(),
+                position: poodle_node::DROP_POSITION_AFTER.to_string(),
+                operation: poodle_node::DragOperation::Move,
+            },
         });
+        assert_eq!(commit, poodle_node::NodeDropCommit::Committed);
 
         assert_eq!(
             recorder.orders.lock().unwrap().as_slice(),
@@ -1166,7 +1195,7 @@ mod tests {
             ModelCatalogueEditorHandlers::default(),
         );
         let handle = named(&node, "Frontier Alpha, position 1 of 4");
-        assert!(handle.interaction.drag_payload.is_none());
+        assert!(handle.interaction.drag_source.is_none());
         assert!(handle.interaction.on_key.is_some());
         assert!(handle.interaction.on_activate.is_some());
         assert!(

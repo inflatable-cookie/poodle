@@ -1,6 +1,6 @@
 # g16.025 — Drag-And-Drop Rust And GPUI Substrate
 
-Status: ready — stock-GPUI desktop capability boundary approved 2026-08-31
+Status: implemented 2026-08-31 — PR #108 open, review rounds 1-3 addressed
 Depends on: `024-drag-drop-tree-nested-intent-and-auto-scroll.md`
 Governing refs: architecture 011, spec 069, the Node/render architecture, and
 the Tabs, EditableList, Tree, and ModelCatalogueEditor contracts
@@ -48,18 +48,70 @@ synthesis. Do not add a GPUI fork or platform input beneath GPUI.
 
 ## Acceptance Criteria
 
-- [ ] Custom Rust/GPUI source and target fixtures use the same semantic kernel.
-- [ ] Mounted tests cover mouse, keyboard, Escape/explicit cancellation,
+- [x] Custom Rust/GPUI source and target fixtures use the same semantic kernel.
+- [x] Mounted tests cover mouse, keyboard, Escape/explicit cancellation,
       release outside, rebuild, nested arbitration, and two independent
       sessions through real GPUI dispatch.
-- [ ] Capability tests prove the exact stock-GPUI matrix and reject any pen,
+- [x] Capability tests prove the exact stock-GPUI matrix and reject any pen,
       touch, or device-cancel claim based only on mouse synthesis.
-- [ ] Tabs and ModelCatalogueEditor preserve their existing mounted claims.
-- [ ] EditableList and Tree move to mounted only if named real-dispatch tests
-      prove their complete authored behavior; ledger changes are limited to
-      those honest cells.
-- [ ] Deferred Jetstream construction consumes renderer-neutral shape only and
+- [x] Tabs and ModelCatalogueEditor preserve their existing mounted claims.
+- [x] Neither EditableList nor Tree moves; both stay `missing`, and the
+      ledger is unchanged. EditableList registers no drag source or target and
+      its rows carry no element identity to drive. Tree's contract puts
+      Alt+Up/Down sibling reorder on the component, but the native renderer
+      reports those keys through `on_key` and the host executes them, so that
+      authored behavior does not run through the shared semantic session. A
+      mounted claim would be incomplete, and intercepting the keys here would
+      change what `on_key` reports — a public callback change, which is a stop
+      condition for this card. Tree's mounted regression lands anyway as
+      substrate evidence; the cell moves in the card that migrates the
+      keyboard route.
+- [x] Deferred Jetstream construction consumes renderer-neutral shape only and
       remains labelled deferred; no Jetstream preview/QA runs.
+
+## Outcome
+
+Delivered. The full account — capability matrix, design decisions, review
+oracle, and evidence — is
+`docs/logs/2026-08/20260831-g16-025-drag-drop-rust-gpui-substrate.md`.
+
+Public surfaces added: `poodle_node::drag` (`NodeDragSource`,
+`NodeDropTarget`, `NodeDragCapabilities`, and their resolver/handler types),
+`poodle_render::drag_drop` builders, and
+`poodle_gpui_node_backend::{DragDropController, drag_drop_provider,
+GPUI_DRAG_CAPABILITIES, NativeDragPayload, DragDropSnapshot,
+DragPreviewSnapshot, DragAnnouncementEvent}`.
+
+Public surfaces removed, with no shim: `Interaction::drag_payload`,
+`drop_zone`, `on_drag_start`, `on_drag_end`, `on_drop_hover`,
+`on_drop_leave`, `on_drop`, and `NodeDropEvent`. `DropEdge` is retained as the
+closed component-callback shorthand. No component's public callback changed.
+
+The shared Rust kernel needed no extension: no defect surfaced under mounted
+native dispatch.
+
+Ledger: unchanged at 52 mounted / 122 missing.
+
+## Review Rounds
+
+Round 1 named six gaps, round 2 named three more, round 3 named two. All eleven
+are closed on this branch; the log records each fix and its mounted
+counterexample.
+
+Round 3 also reverted the provider-unmount mechanism a self-audit had added:
+the gap is real, but closing it needs window ownership, which `g16.026` owns.
+That card now carries the requirement and both counterexamples.
+
+Two changed observable behavior on purpose: a self-drop is now *rejected*
+rather than silently accepted, and a reorder surface is ineligible for another
+surface's rows.
+
+No component public callback changed. Round 1 added two optional
+`TreeHandlers` fields to unlatch Tree's drop indicator after cancellation;
+round 2 ruled that a new public field crosses this card's stop condition, so
+they are reverted. The latched indicator is recorded as Tree's native gap in
+its contract, asserted in the mounted regression, and carried to the card that
+migrates Tree's keyboard route.
 
 ## Writable Scope
 

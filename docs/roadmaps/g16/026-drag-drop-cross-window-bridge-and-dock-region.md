@@ -58,6 +58,37 @@ card becomes ready.
 - [ ] Existing DockRegion ledger claim remains honest; no unrelated row moves.
 - [ ] Active-source search proves the old controller, session side channel,
       types, re-exports, and optional-source-zone fallback are absent.
+- [ ] GPUI provider unmount closes an active session and drops that provider's
+      registrations. Carried from `g16.025` (see below).
+
+## Carried From g16.025 — Provider Unmount
+
+A GPUI `DragDropController`'s own per-frame sweep is the only thing that can
+close a session it holds, and an unmounted provider never sweeps again. A host
+that removes a provider mid-drag therefore keeps a `Dragging` session with live
+registrations and no terminal callback, so the consumer's own drag state
+latches with nothing left to clear it. Spec 069 makes provider unmount a
+cancellation.
+
+`g16.025` proved the gap and then reverted its fix: closing it needs a host
+frame boundary that knows which window owns which controller, and window
+ownership is this card's subject. Two proofs are required, and the first is the
+one that sank the earlier attempt:
+
+- **Two windows, no false cancel.** A thread-global "did this controller sweep
+  this frame" mark is wrong: rendering window A resets and sweeps controllers
+  owned by window B, so an active drag in B is cancelled merely because B did
+  not render during A's frame. Prove two windows with independent live sessions
+  survive each other's frames.
+- **Native drag actually stops.** A terminal reached with no provider left has
+  no controller host to drain `pending_stop_active_drag`, so semantic idle and
+  empty registries are not enough — prove GPUI's own active drag and preview
+  are cleared too.
+
+Whatever integration lands must reach every consumer, not only the in-repo
+preview: `docs/guides/gpui-developer-guide.md` and
+`packages/gpui/adapter/README.md` document the root wiring, and a boundary that
+only the preview calls is a claim the guides quietly miss.
 
 ## Writable Scope
 

@@ -34,12 +34,13 @@ use gpui::{
 };
 use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, ContinuousValuePhase, CrossAxisAlignment,
-    CursorHint, DropEdge, FocusRing, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
+    CursorHint, FocusRing, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeAnimation, NodeContinuousValueEvent, NodeDragEvent, NodeDragPhase,
-    NodeDropEvent, NodeKey, NodeKind, NodeModifiers, NodePoint, NodePosition, NodeRole,
+    NodeKey, NodeKind, NodeModifiers, NodePoint, NodePosition,
     NodeWheelEvent, ScrubAxis, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
 };
 
+mod drag;
 mod inset_shadow;
 mod interaction;
 mod layers;
@@ -51,6 +52,11 @@ pub mod file_capability;
 pub use tracked_scroll::{tracked_vertical_scroll, TrackedScrollOptions, TrackedScrollState};
 
 use interaction::apply_listeners;
+pub use drag::{
+    drag_drop_provider, DragAnnouncementEvent, DragDropController, DragDropSnapshot,
+    DragDropTargetPosture,
+    DragPreviewSnapshot, NativeDragPayload, ANNOUNCEMENT_LOG_LIMIT, GPUI_DRAG_CAPABILITIES,
+};
 pub use layers::{
     attach_overlay_host, bounds_for, dismiss_innermost, dismiss_layers_at, layer_for_element,
     open_layer_count, overlay_frame_begin, overlay_frame_end, request_focus, spared_layer_ids_at,
@@ -191,6 +197,10 @@ pub fn to_gpui(node: &Node) -> AnyElement {
     // in the same frame's registry. overlay_frame_begin also cancels a
     // continuous-value gesture whose owner was not rebuilt last frame.
     layers::collect_layers(node, None);
+    // Drop-target nesting depth is a fact about the tree, so it is read from
+    // the tree — before the build, while the parent/child relation still
+    // exists. Paint order and measured rectangles cannot recover it.
+    drag::collect_drop_depths(node);
     to_gpui_impl(node)
 }
 
@@ -569,8 +579,8 @@ fn needs_state(node: &Node) -> bool {
         || node.interaction.on_activate_modified.is_some()
         || node.interaction.on_context.is_some()
         || node.interaction.on_key.is_some()
-        || node.interaction.drag_payload.is_some()
-        || node.interaction.drop_zone
+        || node.interaction.drag_source.is_some()
+        || node.interaction.drop_target.is_some()
         || node.interaction.on_text_change.is_some()
         || node.interaction.on_drag.is_some()
         || node.interaction.on_scrub.is_some()
@@ -782,6 +792,14 @@ fn tracks_focus(node: &Node) -> bool {
     node.interaction.on_focus_change.is_some()
         || node.style.focus_ring.is_some()
         || (node.interaction.focusable && node.style.focus.is_some())
+        // A source that opted into keyboard pickup must be observably focused,
+        // or the controller can never tell which source a Space or Enter
+        // belongs to and the keyboard route silently does nothing.
+        || node
+            .interaction
+            .drag_source
+            .as_ref()
+            .is_some_and(|source| source.keyboard_order.is_some())
 }
 
 pub(crate) fn element_id_string(node: &Node) -> String {

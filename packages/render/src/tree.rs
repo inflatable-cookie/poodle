@@ -16,7 +16,8 @@ use std::sync::Arc;
 
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, DropEdge, LayoutDirection, LayoutSizing,
-    MainAxisAlignment, Node, NodeKey, NodeModifiers, NodePoint, NodePosition, NodeRole,
+    MainAxisAlignment, Node, NodeDropCommit, NodeKey, NodeModifiers, NodePoint, NodePosition,
+    NodeRole,
 };
 use poodle_specs::{
     CheckState, CheckboxSpec, ControlDensity, ControlSize, DropPosition, SpinnerSpec, TreeNode,
@@ -28,6 +29,10 @@ use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::{rem_to_px, size_font_rem};
 use crate::spinner::spinner;
+
+/// Drag scope for Tree registrations. Tree already names its rows globally
+/// (`tree:{value}`), so its source and target ids follow the same identity.
+const TREE_DRAG_SCOPE: &str = "tree";
 
 /// Host callback for keyboard commands on a focused tree row.
 pub type TreeKeyHandler = Arc<dyn Fn(&str, NodeKey, NodeModifiers) + Send + Sync>;
@@ -329,25 +334,52 @@ fn render_row(
         }));
     }
 
-    // Reorder: every row is both a source and a zone, so a row can be dropped
-    // onto any other. The backend derives the edge from the row's own bounds.
+    // Reorder: every row is both a source and a target, so a row can be
+    // dropped onto any other. The band rule lives in the shared builder and
+    // the controller hands it a fraction of this row's own bounds — the
+    // component still never sees a coordinate.
     if !node.is_disabled && m.reorderable {
-        row.interaction.drag_payload = Some(node.value.clone());
-        row.interaction.drop_zone = true;
+        let value = node.value.clone();
+        crate::drag_drop::attach_source(
+            &mut row,
+            true,
+            crate::drag_drop::reorder_source(TREE_DRAG_SCOPE, &value, &node.label),
+        );
+
+        // Every tree row can take an `inside` drop: nesting is what the
+        // component is for, so the band splits in thirds rather than halves.
+        let mut target =
+            crate::drag_drop::nested_target(TREE_DRAG_SCOPE, &value, &node.label, true);
         if let Some(handler) = &handlers.on_drag_over {
             let handler = Arc::clone(handler);
-            let value = node.value.clone();
-            row.interaction.on_drop_hover = Some(Arc::new(move |event| {
-                handler(&event.payload, &value, event.edge)
+            let over = value.clone();
+            target.on_intent = Some(Arc::new(move |event| {
+                if let Some(edge) = crate::drag_drop::edge_from_position(&event.position) {
+                    handler(&event.subject.id, &over, edge);
+                }
             }));
         }
         if let Some(handler) = &handlers.on_reorder {
             let handler = Arc::clone(handler);
-            let value = node.value.clone();
-            row.interaction.on_drop = Some(Arc::new(move |event| {
-                handler(&event.payload, &value, event.edge)
+            let over = value.clone();
+            target.on_drop = Some(Arc::new(move |event| {
+                match crate::drag_drop::edge_from_position(&event.intent.position) {
+                    Some(edge) => {
+                        handler(&event.subject.id, &over, edge);
+                        NodeDropCommit::Committed
+                    }
+                    // A consumer-defined placement this contract has no edge
+                    // for is refused rather than silently rounded to Inside.
+                    None => NodeDropCommit::Rejected {
+                        reason: Some(format!(
+                            "Tree does not place a row at `{}`",
+                            event.intent.position
+                        )),
+                    },
+                }
             }));
         }
+        crate::drag_drop::attach_target(&mut row, true, target);
     }
 
     // Indent cells (left border draws the ancestor guide line).

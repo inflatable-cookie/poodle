@@ -84,15 +84,22 @@ web-platform escape hatches and do not cross into the portable Rust spec.
 Shared Rust preserves the observable lifecycle through semantic
 `TabsHandlers`: drag start/end carry the tab value, drop-target change carries
 the hovered tab value or `None`, and reorder carries the complete next value
-order. The node/backend seam carries opaque payload ids and semantic drop
-edges only; it never exposes pointer coordinates to the component.
+order. The node/backend seam carries an opaque semantic subject and a
+resolved drop position only; it never exposes pointer coordinates to the
+component.
 
-For native payload drags, start fires once after the backend's drag threshold.
-Hover is delivered only to the hit drop zone, leave clears that target, and a
-successful drop reports the last edge computed while hovering. Drop/reorder
-fires before end; release outside a zone or Escape ends as cancellation. End
-fires exactly once in every case so host-owned `dragValue` and
-`dropTargetValue` cannot latch.
+Native reorder runs on the shared drag-and-drop substrate (architecture 011,
+spec 069). Each enabled tab registers a `NodeDragSource` and a flat
+`NodeDropTarget` whose band rule reads the horizontal fraction of the tab's own
+bounds, and the GPUI `DragDropController` owns the session. A tab's subject
+kind is scoped to its instance, so one tab set is never an eligible target for
+another's rows, and a tab dropped onto itself is rejected rather than reported
+as its own drop target. Start fires once after the runtime's drag threshold. Exactly one target holds the current
+intent at a time; the previous one is always told it stopped, which is what
+`on_drop_target_change(None)` reports. Reorder fires before end; release
+outside every target, Escape, and a host rebuild that removes the dragged tab
+all end as cancellation. End fires exactly once in every case, so host-owned
+`dragValue` and `dropTargetValue` cannot latch.
 
 ### TabItem Type
 

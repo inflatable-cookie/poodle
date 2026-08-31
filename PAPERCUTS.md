@@ -7,6 +7,19 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-08-31 — `poodle-gpui-node-backend` converts every child through the
+  PUBLIC `to_gpui` entry, so any pre-walk that entry performs restarts at the
+  subtree root once per node. `collect_layers` survives that by deduping;
+  a new depth pre-walk did not, and silently flattened every nested drop
+  target to depth zero. Give `to_gpui` a private recursion entry, or make the
+  re-entry explicit in its doc comment. Hit while building g16.025.
+
+- 2026-08-31 — `scripts/parity-evidence-ledger.ts` hard-codes the ledger's
+  `Updated:` line, and its reproduction test compares the whole document. Any
+  cell move needs the same date edited in two files or the test fails on a
+  header line rather than on evidence. Derive it from the newest evidence, or
+  exclude the header from the comparison. Hit while closing g16.025.
+
 - 2026-08-30 — `smoke:gpui-window-capture` failed once in `effigy qa` on
   `an_empty_or_malformed_batch_manifest_is_rejected`, then passed in isolation
   and on the next qa run. The smoke script only prints the last three cargo

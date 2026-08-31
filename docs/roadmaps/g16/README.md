@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.024 merged; g16.025 ready
+Status: active — g16.024 merged; g16.025 implemented, review pending
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -55,7 +55,7 @@ stay maintained; backend admission is not part of the first card.
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — complete; merged in PR #101
 23. [023 — EditableList simple reorder migration](023-drag-drop-simple-reorder-migrations.md) — complete; merged in PR #104
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — complete; merged in PR #107
-25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — ready; stock-GPUI desktop capability boundary approved
+25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — implemented; PR #108 open, review rounds 1-3 addressed; ledger unchanged at 52 mounted / 122 missing
 26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
@@ -84,7 +84,12 @@ Two continuation programmes are now explicit:
   `dragDrop` vector corpus. `g16.022` landed the same-document web custom-surface
   controller and Svelte/React bindings. The clean Tabs and DockRegion public
   migrations are approved. EditableList proves simple reorder in `g16.023`;
-  Tree proves nested intent and auto-scroll in `g16.024`. Tabs migrates with
+  Tree proves nested intent and auto-scroll in `g16.024`. `g16.025` projects the
+  same kernel through renderer-neutral Node registrations and a public GPUI
+  `DragDropController`, deletes the backend-global payload session, and
+  publishes an immutable stock-GPUI capability matrix — mouse, keyboard, and
+  in-window capture certified; pen, touch, and device-originated cancel
+  unsupported. Tabs migrates with
   its real DockRegion consumer in `g16.026`. Later cards
   remain gated by landed dependencies and the host bridge's exact post-kernel
   API shape.
