@@ -23,6 +23,7 @@ import {
   type DragSourceRegistration,
   type DropTargetHandle,
   type DropTargetRegistration,
+  type InboundFileHostBridge,
   type KeyboardDropCommand,
   type KeyboardDropTargetHandle,
   type KeyboardDropTargetRegistration,
@@ -44,8 +45,24 @@ export type {
   DragDropController,
   DragDropSnapshot,
   DragPreviewSnapshot,
+  DragExportBridge,
+  DragExportCapabilities,
+  DragExportForm,
+  DragExportPrepareRequest,
+  DragExportSnapshot,
+  DragExportState,
+  DragExportTerminal,
   DragSourceRegistration,
+  DropCommitContext,
   DropTargetRegistration,
+  InboundFileBatch,
+  InboundFileCapabilities,
+  InboundFileConstraints,
+  InboundFileEvent,
+  InboundFileHostBridge,
+  InboundFileOutcome,
+  InboundFileReceipt,
+  PreparedFileExport,
   KeyboardDropCommand,
   KeyboardDropDirection,
   KeyboardDropTargetHandle,
@@ -85,6 +102,13 @@ export interface DragDropProviderProps {
    * supplied, because that controller already owns its own bridge.
    */
   crossWindowTargetBridge?: CrossWindowDragTargetBridge;
+  /**
+   * Inbound external files for this document. Ignored when an explicit
+   * `controller` is supplied, because that controller already owns its own
+   * bridge, and exclusive by construction: the bridge names the one transport
+   * that owns inbound files here.
+   */
+  inboundFileBridge?: InboundFileHostBridge;
   preview?: (snapshot: DragPreviewSnapshot) => ReactNode;
   children?: ReactNode;
 }
@@ -93,13 +117,18 @@ export function DragDropProvider({
   controller,
   describeAnnouncement,
   crossWindowTargetBridge,
+  inboundFileBridge,
   preview,
   children,
 }: DragDropProviderProps) {
   const ownedRef = useRef(controller === undefined);
   const [ctrl] = useState(() =>
     ownedRef.current
-      ? createDragDropController({ describeAnnouncement, crossWindowTargetBridge })
+      ? createDragDropController({
+          describeAnnouncement,
+          crossWindowTargetBridge,
+          inboundFileBridge,
+        })
       : controller!,
   );
   const rootRef = useRef<HTMLDivElement>(null);
