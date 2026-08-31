@@ -519,7 +519,22 @@ host protocol, but it cannot change the normalized receipt shape or make
 Svelte and React `DragDropProvider` pass an optional
 `crossWindowTargetBridge` to their controller. `DragSourceRegistration` gains
 optional `crossWindowSourceBridge`; Tabs exposes the same semantic prop and
-drops `onDragPrepare`, `onDragStart`, and `onDragEnd`. DockRegion replaces
+drops `onDragPrepare`, `onDragStart`, and `onDragEnd`. Tabs also exposes
+optional `dragSubjectKind`: absent means an instance-scoped family, while an
+explicit value lets an owning composite use a shared semantic family.
+`TabItem.value` remains the subject id. Source and target registration ids are
+always scoped to the Tabs instance, so repeated tab values in sibling strips do
+not collide in an ambient controller. The renderer-neutral `TabsSpec` carries
+the same optional semantic kind.
+
+Tabs joins the nearest ambient provider and owns a private controller when none
+exists. Its default instance kind keeps ordinary sibling Tabs mutually
+ineligible even under one provider. With an explicit shared kind, each reorder
+target must reject a subject id absent from that Tabs instance during
+eligibility, not only at commit, so an eligible ancestor composite target can
+win nested arbitration.
+
+DockRegion replaces
 `externalDragSource` / `externalDropTarget` with
 `crossWindowDragSource` / `crossWindowDropTarget`. The latter names the
 window-owned bridge; local same-document panel drops continue to use
@@ -534,6 +549,13 @@ when a common provider owns both registrations; consumers that need that
 behavior wrap them in one provider. Two independently self-provided regions do
 not discover each other, and no MIME, module singleton, or global registry
 restores that link implicitly.
+
+For a flexible DockRegion strip, the composite passes
+`poodle.dock-panel` as `dragSubjectKind` and maps each public panel value to a
+Tabs-internal subject id containing panel id, source edge, and required source
+zone. DockRegion decodes at every public callback boundary. The encoded value
+is substrate identity only: it cannot leak through active-value, close,
+reorder, or `onPanelDrop` results.
 
 On GPUI, `DragDropWindowHost` is an ordinary value owned one-per-window.
 `drag_drop_window_host(&host, || root)` establishes that window's provider
@@ -689,6 +711,10 @@ The operator approved a clean pre-1.0 replacement on 2026-08-28:
   re-export modules when Tabs and DockRegion migrate together in the
   cross-window host-bridge lane; retain only the existing pure `applyReorder`
   semantic helper from the Tabs machine;
+- add optional renderer-neutral `Tabs.dragSubjectKind`, with instance-scoped
+  default behavior, ambient-provider participation, collision-free
+  registration ids, and foreign-subject eligibility rejection as the bounded
+  composition seam required by DockRegion;
 - delete the old DockRegion `DockExternalDrag*` / `DockExternalDrop*` types,
   controller, global `dockPanelDragSession`, and framework re-exports after the
   opaque host bridge passes;

@@ -116,10 +116,15 @@ const WEB_ONLY_PROPS = new Set([
   // Renders the platform `<select>` instead of the custom listbox. There is no
   // native equivalent to defer to, so the flag has nothing to mean off the web.
   "native",
-  // DockRegion's external transfer seam is native HTML DataTransfer plumbing.
-  // Native renderers receive host drag/session events through their own event
-  // loops; copying browser callbacks into DockRegionSpec would make behavior
-  // look like renderer-neutral data.
+  // Cross-window bridges are host capabilities rather than renderer-neutral
+  // component data. Native hosts own equivalent traits at their window/source
+  // integration boundary; copying trait objects into Specs would make host
+  // authority look serializable.
+  "crossWindowDragSource",
+  "crossWindowDropTarget",
+  "crossWindowSourceBridge",
+  // Retained only until g16.026 replaces the old DockRegion contract on the
+  // worker branch; remove these two names in that same migration.
   "externalDragSource",
   "externalDropTarget",
   // AppHeader's bindable `element` escape hatch (g13-b014). Exposes the raw
@@ -166,7 +171,11 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
  * adding one means a prop shipped to the web without reaching the shared spec
  * surface, which is the thing this gate exists to stop.
  */
-const OPEN_GAPS: Record<string, string[]> = {};
+const OPEN_GAPS: Record<string, string[]> = {
+  // g16.026 contract-first planning base. Remove when TabsSpec carries the
+  // accepted renderer-neutral subject-family seam.
+  tabs: ["dragSubjectKind"],
+};
 
 /**
  * Contract prop -> Spec field, where the two deliberately differ. The prop IS

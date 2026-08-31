@@ -1,7 +1,7 @@
 # Tabs
 
 Status: detailed contract
-Updated: 2026-08-26
+Updated: 2026-08-31
 
 ## 1. Purpose
 
@@ -63,6 +63,7 @@ Updated: 2026-08-26
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `reorderable` | `boolean` | `false` | no | enables drag-and-drop and keyboard reorder |
+| `dragSubjectKind` | `string \| null` | `null` | no | semantic drag family used by an owning composite; `null` creates a kind scoped to this Tabs instance |
 | `collapseWhenOverflow` | `boolean` | `false` | no | when the tablist overflows its container, collapse the tabs into a `Menu` affordance |
 | `overflowStrategy` | `"collapse" \| "shed"` | `"collapse"` | no | `collapse` is the single threshold into a `Menu`; `shed` gives up decoration first |
 | `shed` | `("icon" \| "count")[]` | `["icon", "count"]` | no | which parts to give up, in order, when `overflowStrategy` is `shed` |
@@ -75,26 +76,31 @@ Updated: 2026-08-26
 | `onValueChange` | `(value: string) => void` | `undefined` | no | callback fired when the active tab changes |
 | `onReorder` | `(items: string[]) => void` | `undefined` | no | callback fired when tabs are reordered |
 | `onClose` | `(value: string) => void` | `undefined` | no | callback fired when a tab close is requested |
-| `onDragPrepare` | `(value: string, event: PointerEvent) => void` | `undefined` | no | primary pointer-down seam for an owning composite that must prepare before native `dragstart` |
-| `onDragStart` | `(value: string, event: DragEvent) => void` | `undefined` | no | native drag-start seam after Tabs has established local reorder state |
-| `onDragEnd` | `(value: string, event: DragEvent) => void` | `undefined` | no | native drag-end seam before Tabs clears the dragged value |
+| `crossWindowSourceBridge` | `CrossWindowDragSourceBridge \| undefined` | `undefined` | no | semantic host preparation and terminal bridge for a tab that may leave this window; only an opaque receipt crosses the bounded transport |
 
-The DOM event objects on `onDragPrepare`, `onDragStart`, and `onDragEnd` are
-web-platform escape hatches and do not cross into the portable Rust spec.
-Shared Rust preserves the observable lifecycle through semantic
+The old DOM-shaped `onDragPrepare`, `onDragStart`, and `onDragEnd` escape
+hatches are deleted by g16.026. `crossWindowSourceBridge` owns asynchronous host
+preparation and the authoritative terminal result without exposing a browser
+event. Shared Rust preserves the observable lifecycle through semantic
 `TabsHandlers`: drag start/end carry the tab value, drop-target change carries
 the hovered tab value or `None`, and reorder carries the complete next value
 order. The node/backend seam carries an opaque semantic subject and a
 resolved drop position only; it never exposes pointer coordinates to the
 component.
 
-Native reorder runs on the shared drag-and-drop substrate (architecture 011,
-spec 069). Each enabled tab registers a `NodeDragSource` and a flat
+Reorder runs on the shared drag-and-drop substrate (architecture 011, spec
+069). A Tabs joins the nearest ambient provider and creates a private controller
+otherwise. Each enabled tab registers a source and a flat
 `NodeDropTarget` whose band rule reads the horizontal fraction of the tab's own
-bounds, and the GPUI `DragDropController` owns the session. A tab's subject
-kind is scoped to its instance, so one tab set is never an eligible target for
-another's rows, and a tab dropped onto itself is rejected rather than reported
-as its own drop target. Start fires once after the runtime's drag threshold. Exactly one target holds the current
+bounds. `dragSubjectKind=null` creates an instance-scoped subject family, so
+ordinary tab sets never accept one another even under the same provider. An
+explicit kind lets a composite share a semantic family; `TabItem.value` is the
+subject id, while source and target registration ids remain instance-scoped to
+avoid ambient-controller collisions. A Tabs reorder target rejects a subject
+whose id is absent from its own item set during eligibility, allowing an
+eligible ancestor composite target to win. A tab dropped onto itself is
+rejected rather than reported as its own drop target. Start fires once after
+the runtime's drag threshold. Exactly one target holds the current
 intent at a time; the previous one is always told it stopped, which is what
 `on_drop_target_change(None)` reports. Reorder fires before end; release
 outside every target, Escape, and a host rebuild that removes the dragged tab
@@ -331,9 +337,6 @@ not shared services.
 | `onValueChange` | active tab changes | `string` | called on click, or on focus when `activationMode="automatic"` |
 | `onReorder` | tab order changes | `string[]` | new value order array |
 | `onClose` | close button clicked or Delete key on closable tab | `string` | tab value being closed |
-| `onDragPrepare` | primary pointer down on an enabled reorderable tab | `string`, `PointerEvent` | lets an owning composite start asynchronous work before native `dragstart`; does not replace Tabs reorder |
-| `onDragStart` | native drag starts | `string`, `DragEvent` | runs after Tabs writes its private same-region reorder payload |
-| `onDragEnd` | native drag ends | `string`, `DragEvent` | runs once for the value captured at drag start |
 
 On shared Rust, the corresponding handler signatures omit DOM events and
 carry only semantic values. `on_reorder` receives the complete next order;

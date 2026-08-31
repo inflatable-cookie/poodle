@@ -1,7 +1,8 @@
 # g16.026 — Drag-And-Drop Cross-Window Bridge, Tabs, And DockRegion
 
 Status: in progress — Paseo worker dispatched from pushed main; public migration,
-paired bridge API, and GPUI window ownership fixed
+paired bridge API, Tabs subject-family composition, and GPUI window ownership
+fixed
 Depends on: `025-drag-drop-rust-gpui-substrate.md`
 Governing refs: architecture 011, spec 069, and the Tabs and DockRegion
 contracts
@@ -35,6 +36,10 @@ controller-wide bridge.
   React providers accept `crossWindowTargetBridge`.
 - Tabs replaces `onDragPrepare`, `onDragStart`, and `onDragEnd` with optional
   `crossWindowSourceBridge`.
+- Tabs also exposes optional `dragSubjectKind`. Its default stays scoped to the
+  Tabs instance. An explicit kind lets an owning composite place the strip in a
+  shared semantic family without taking over Tabs reorder. `TabItem.value` is
+  the semantic subject id; renderer registration ids remain instance-scoped.
 - DockRegion replaces `externalDragSource` / `externalDropTarget` with
   `crossWindowDragSource` / `crossWindowDropTarget`. Local panel moves retain
   `canAcceptPanel` / `onPanelDrop`; a host receipt commits through the target
@@ -64,6 +69,16 @@ The full field/method contract is spec 069's Cross-Window Host Bridge section.
   advertised only when the host can observe it outside the source window.
 - Tabs moves its internal reorder path to the landed substrate and replaces its
   DOM-event host callbacks with the new semantic preparation/terminal bridge.
+- Tabs joins the nearest ambient drag provider and owns a private controller
+  otherwise. Plain Tabs remain isolated by their instance-scoped default
+  subject kind and registration ids. Its reorder targets reject a same-kind
+  subject absent from their own item set, allowing an accepted ancestor
+  composite target to win instead of swallowing a foreign drop.
+- DockRegion passes `poodle.dock-panel` as the strip's subject kind. It encodes
+  panel id, source edge, and required source zone into the Tabs-internal subject
+  id and decodes every value/callback at the DockRegion boundary; that internal
+  encoding must never leak through its public tab, close, reorder, or panel-drop
+  results.
 - DockRegion preserves within-region reorder, zones, collapse, tab callbacks,
   and current mounted evidence while replacing its global side channel.
 - GPUI consumers own one `DragDropWindowHost` per window and wrap their root in
@@ -98,9 +113,12 @@ or wrappers. Preserve `onPanelDrop`'s semantic purpose, make
    simulator. The adapter carries only the normalized receipt; no host record,
    panel data, geometry, event, or mutable session enters the payload.
 4. Migrate Svelte and React Tabs to the shared pointer/keyboard substrate plus
-   `crossWindowSourceBridge`. Preserve reorder, focus, disabled, close,
-   overflow, specimens, and keyboard behavior; then delete the old DOM-shaped
-   reorder helpers and framework re-exports.
+   `crossWindowSourceBridge` and `dragSubjectKind`. Join an ambient provider or
+   self-provide, scope registration ids independently of semantic subject ids,
+   and make foreign same-kind subjects fall through its reorder targets.
+   Preserve reorder, focus, disabled, close, overflow, specimens, and keyboard
+   behavior; carry the semantic prop through `TabsSpec`; then delete the old
+   DOM-shaped reorder helpers and framework re-exports.
 5. Migrate Svelte and React DockRegion. Keep static/flexible local reorder,
    zones, collapse, callbacks, and projection, but replace the external
    controller and `dockPanelDragSession` with the split bridge. Make
@@ -133,6 +151,10 @@ or wrappers. Preserve `onPanelDrop`'s semantic purpose, make
       envelopes.
 - [ ] Svelte and React Tabs preserve reorder results, keyboard behavior, focus,
       disabled inertia, and curated specimens on the shared substrate.
+- [ ] Plain Tabs remain instance-isolated under a common provider, while an
+      explicit `dragSubjectKind` composes with an ancestor target without
+      leaking or colliding registration ids; shared Rust carries the same
+      semantic input.
 - [ ] A deterministic host simulator proves prepare, moving target geometry,
       stale lease, rejection, commit, cancel, window close, and late completion.
 - [ ] Svelte, React, and GPUI DockRegion projections preserve component
@@ -198,6 +220,7 @@ registered under its own root. Its end-of-frame element reaches `Window` and
 | Keyboard is the same transaction | picker returns a target that becomes stale before commit | normal revalidation rejects; no arrow-key window simulation or second callback path appears |
 | Touch claims are capability-bound | host cannot observe touch outside the source window | internal touch remains true; cross-window touch advertises false and never starts |
 | Local reorder stays independent | ordinary Tabs has no source bridge or the host declines | pointer and Alt+Arrow reorder still use the shared local lifecycle with no native payload |
+| Tabs composition does not capture a foreign subject | two Tabs instances share one provider and subject kind; the dragged subject id belongs only to A, while B sits inside an accepting composite target | B's reorder targets reject it during eligibility, the composite target wins, and no B reorder callback fires; ordinary Tabs with no explicit kind remain mutually ineligible |
 | DockRegion has no hidden local bus | two sibling regions mount first under one provider, then without one | the shared-provider pair cross-drops once; the self-provided pair keeps local reorder and exposes no cross-region target |
 | Two GPUI windows are isolated | A renders while B has an active controller and provider | A's frame cannot cancel, prune, or stop B |
 | Provider unmount stops the real GPUI drag | B's provider disappears mid-drag | B reaches semantic idle, registrations and preview vanish, and GPUI reports no active native drag |
