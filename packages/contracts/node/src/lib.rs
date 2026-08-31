@@ -27,7 +27,7 @@ use std::sync::Arc;
 pub mod drag;
 
 pub use drag::{
-    CrossWindowAbort, CrossWindowCleanup, CrossWindowCommitComplete, CrossWindowDragCapabilities,
+    DragHostAbort, DragHostCleanup, CrossWindowCommitComplete, CrossWindowDragCapabilities,
     CrossWindowDragCommitRequest, CrossWindowDragInputKind, CrossWindowDragPrepareRequest,
     CrossWindowDragProjection, CrossWindowDragReceipt, CrossWindowDragSourceBridge,
     CrossWindowDragTargetBridge, CrossWindowDragTargetEvent, CrossWindowDragTransport,

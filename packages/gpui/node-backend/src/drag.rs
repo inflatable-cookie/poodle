@@ -55,7 +55,7 @@ use poodle_headless::drag_drop::{
     DropTargetCandidate,
 };
 use poodle_node::{
-    CrossWindowAbort, CrossWindowCleanup, CrossWindowDragCommitRequest, CrossWindowDragProjection,
+    DragHostAbort, DragHostCleanup, CrossWindowDragCommitRequest, CrossWindowDragProjection,
     CrossWindowDragReceipt, CrossWindowDragSourceBridge, CrossWindowDragTargetBridge,
     CrossWindowDragTargetEvent, CrossWindowDragTransport, DragDropCommitResult, Node,
     NodeDragCapabilities, NodeDragInputKind, NodeDragSource, NodeDropCommit, NodeDropCommitEvent,
@@ -245,7 +245,7 @@ struct ControllerState {
     /// time rather than at post time.
     cross_window_target_generation: u64,
     /// The subscription's teardown, held for the controller's lifetime.
-    cross_window_unsubscribe: Option<CrossWindowCleanup>,
+    cross_window_unsubscribe: Option<DragHostCleanup>,
     /// The outgoing host transaction, when a bridged source is in play.
     cross_window_source: Option<CrossWindowSourceTransaction>,
     /// The incoming host transaction this window is currently projecting.
@@ -286,9 +286,9 @@ struct CrossWindowSourceTransaction {
     session_id: String,
     bridge: Arc<dyn CrossWindowDragSourceBridge>,
     /// The channel the host watches to stop work this session no longer wants.
-    abort: CrossWindowAbort,
+    abort: DragHostAbort,
     receipt: Option<CrossWindowDragReceipt>,
-    stop_terminal: Option<CrossWindowCleanup>,
+    stop_terminal: Option<DragHostCleanup>,
     /// The host already delivered its authoritative terminal for this receipt.
     settled: bool,
     /// The gesture reached its activation threshold before the receipt armed.
@@ -309,7 +309,7 @@ struct CrossWindowTargetTransaction {
     projection: CrossWindowDragProjection,
     /// Covers the commit and the target pick alike: both are requests this
     /// window can abandon while the host is still working on them.
-    abort: CrossWindowAbort,
+    abort: DragHostAbort,
     /// A commit is in flight; a second drop cannot start another.
     committing: bool,
 }
@@ -721,7 +721,7 @@ impl DragDropController {
         source: &NodeDragSource,
         bridge: Arc<dyn CrossWindowDragSourceBridge>,
     ) {
-        let abort = CrossWindowAbort::new();
+        let abort = DragHostAbort::new();
         {
             let mut state = self.state.borrow_mut();
             state.cross_window_source = Some(CrossWindowSourceTransaction {
@@ -1085,7 +1085,7 @@ impl DragDropController {
             state.next_session += 1;
             format!("gpui-drag-{}-{}", state.id, state.next_session)
         };
-        let abort = CrossWindowAbort::new();
+        let abort = DragHostAbort::new();
         self.state.borrow_mut().cross_window_projection = Some(CrossWindowTargetTransaction {
             session_id: session_id.clone(),
             receipt: projection.receipt.clone(),

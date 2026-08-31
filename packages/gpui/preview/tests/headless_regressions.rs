@@ -1934,7 +1934,7 @@ struct HostLog {
 }
 
 type PendingPrepare = (
-    poodle_node::CrossWindowAbort,
+    poodle_node::DragHostAbort,
     poodle_node::CrossWindowPrepareComplete,
 );
 
@@ -1945,12 +1945,12 @@ struct HostStubState {
     terminal: Option<poodle_node::CrossWindowTerminal>,
     listener: Option<Box<dyn Fn(poodle_node::CrossWindowDragTargetEvent) + Send>>,
     pending_commit: Option<(
-        poodle_node::CrossWindowAbort,
+        poodle_node::DragHostAbort,
         poodle_node::CrossWindowCommitComplete,
     )>,
     pending_pick: Option<(
         poodle_node::CrossWindowDragReceipt,
-        poodle_node::CrossWindowAbort,
+        poodle_node::DragHostAbort,
         Box<dyn FnOnce(Option<poodle_node::CrossWindowDragProjection>) + Send>,
     )>,
 }
@@ -2053,7 +2053,7 @@ impl poodle_node::CrossWindowDragSourceBridge for HostStub {
     fn prepare(
         &self,
         request: poodle_node::CrossWindowDragPrepareRequest,
-        abort: poodle_node::CrossWindowAbort,
+        abort: poodle_node::DragHostAbort,
         complete: poodle_node::CrossWindowPrepareComplete,
     ) {
         let mut state = self.state.lock().expect("host state");
@@ -2066,7 +2066,7 @@ impl poodle_node::CrossWindowDragSourceBridge for HostStub {
         receipt: poodle_node::CrossWindowDragReceipt,
         transport: poodle_node::CrossWindowDragTransport,
         on_terminal: poodle_node::CrossWindowTerminal,
-    ) -> poodle_node::CrossWindowCleanup {
+    ) -> poodle_node::DragHostCleanup {
         let token = receipt.token.clone();
         {
             let mut state = self.state.lock().expect("host state");
@@ -2107,7 +2107,7 @@ impl poodle_node::CrossWindowDragTargetBridge for HostStub {
     fn subscribe(
         &self,
         listener: Box<dyn Fn(poodle_node::CrossWindowDragTargetEvent) + Send>,
-    ) -> poodle_node::CrossWindowCleanup {
+    ) -> poodle_node::DragHostCleanup {
         self.state.lock().expect("host state").listener = Some(listener);
         let stub = self.clone();
         Box::new(move || {
@@ -2118,7 +2118,7 @@ impl poodle_node::CrossWindowDragTargetBridge for HostStub {
     fn commit(
         &self,
         request: poodle_node::CrossWindowDragCommitRequest,
-        abort: poodle_node::CrossWindowAbort,
+        abort: poodle_node::DragHostAbort,
         complete: poodle_node::CrossWindowCommitComplete,
     ) {
         let mut state = self.state.lock().expect("host state");
@@ -2132,7 +2132,7 @@ impl poodle_node::CrossWindowDragTargetBridge for HostStub {
     fn pick_target(
         &self,
         receipt: poodle_node::CrossWindowDragReceipt,
-        abort: poodle_node::CrossWindowAbort,
+        abort: poodle_node::DragHostAbort,
         complete: Box<dyn FnOnce(Option<poodle_node::CrossWindowDragProjection>) + Send>,
     ) -> bool {
         if !self.keyboard_picker {

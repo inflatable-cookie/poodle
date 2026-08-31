@@ -22,7 +22,7 @@
 use std::sync::Arc;
 
 pub use poodle_headless::cross_window_drag::{
-    CrossWindowAbort, CrossWindowCleanup, CrossWindowCommitComplete, CrossWindowDragCapabilities,
+    DragHostAbort, DragHostCleanup, CrossWindowCommitComplete, CrossWindowDragCapabilities,
     CrossWindowDragCommitRequest, CrossWindowDragInputKind, CrossWindowDragPrepareRequest,
     CrossWindowDragProjection, CrossWindowDragReceipt, CrossWindowDragSourceBridge,
     CrossWindowDragTargetBridge, CrossWindowDragTargetEvent, CrossWindowDragTransport,

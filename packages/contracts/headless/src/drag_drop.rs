@@ -708,6 +708,100 @@ pub fn resolve_drop_target(candidates: &[DropTargetCandidate]) -> Option<DropInt
     best_intent.cloned()
 }
 
+/// The renderer-neutral counterpart of `AbortSignal`.
+///
+/// TypeScript hands every host bridge an `AbortSignal` with every
+/// asynchronous request, and that is not decoration: a preparation that is
+/// superseded, a commit whose window closed, a target pick the user escaped,
+/// and a file materialization nobody is waiting for any more all have to reach
+/// the host so it can stop work and release whatever it allocated. A completion
+/// callback can replace a promise; it cannot replace the channel that runs the
+/// other way.
+///
+/// Shared by every host bridge in the substrate — cross-window transfer and
+/// external file export both abandon requests for the same reasons, and two
+/// copies of one channel would be two places for the idempotence rule to
+/// drift.
+///
+/// Cheap to clone, and every clone is the same signal. Aborting is idempotent:
+/// the first reason wins and listeners run exactly once, so a late second
+/// cancellation cannot double-release a host's resources.
+#[derive(Clone, Default)]
+pub struct DragHostAbort {
+    state: std::sync::Arc<std::sync::Mutex<AbortState>>,
+}
+
+#[derive(Default)]
+struct AbortState {
+    reason: Option<DragCancelReason>,
+    listeners: Vec<Box<dyn FnOnce(DragCancelReason) + Send>>,
+}
+
+impl std::fmt::Debug for DragHostAbort {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("DragHostAbort")
+            .field("reason", &self.reason())
+            .finish()
+    }
+}
+
+impl DragHostAbort {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Whether this request has been abandoned.
+    pub fn is_aborted(&self) -> bool {
+        self.reason().is_some()
+    }
+
+    /// Why it was abandoned, if it was.
+    pub fn reason(&self) -> Option<DragCancelReason> {
+        self.state.lock().expect("abort state").reason
+    }
+
+    /// Abandon the request. The first reason wins; later calls are inert.
+    pub fn abort(&self, reason: DragCancelReason) {
+        let listeners = {
+            let mut state = self.state.lock().expect("abort state");
+            if state.reason.is_some() {
+                return;
+            }
+            state.reason = Some(reason);
+            std::mem::take(&mut state.listeners)
+        };
+        for listener in listeners {
+            listener(reason);
+        }
+    }
+
+    /// Run `listener` when the request is abandoned, or immediately when it
+    /// already has been. Called at most once either way.
+    pub fn on_abort(&self, listener: impl FnOnce(DragCancelReason) + Send + 'static) {
+        let already = {
+            let mut state = self.state.lock().expect("abort state");
+            match state.reason {
+                Some(reason) => Some(reason),
+                None => {
+                    state.listeners.push(Box::new(listener));
+                    return;
+                }
+            }
+        };
+        if let Some(reason) = already {
+            listener(reason);
+        }
+    }
+}
+
+/// A subscription's own teardown, run exactly once.
+///
+/// Shared by every host bridge: a cross-window terminal subscription, an
+/// export's native drag, and an inbound host's event stream all hand back the
+/// same shape.
+pub type DragHostCleanup = Box<dyn FnOnce() + Send>;
+
 #[cfg(test)]
 mod tests {
     //! The claims the shared vectors cannot state.
