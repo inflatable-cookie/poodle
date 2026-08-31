@@ -20,13 +20,16 @@ Updated: 2026-08-31
     `029` complete and merged (TimeInput native parity, ledger 48/126); `030`
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
-    mounted parity, ledger 52/122)
+    mounted parity, ledger 52/122); `033` is reserved behind `026` for the
+    HistoryCenter rejection surface and packed v3 HistoryEntry proof, with a
+    public API decision required before dispatch
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: review and close the in-flight `g16.026` worker PR, then promote
-    `g16.027` from the landed bridge. Component continuation remains paused at
-    the separate EditableLabel decision gate.
+  - Next move: review and close the in-flight `g16.026` worker PR. Then resolve
+    `g16.033`'s structured-code-versus-host-message gate before dispatch while
+    keeping `g16.027` as the next ordered drag card. Component continuation
+    remains paused at the separate EditableLabel decision gate.
 
 ## Latest Completed Track
 

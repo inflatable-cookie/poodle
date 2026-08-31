@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.026 implementation in progress
+Status: active — g16.026 implementation in progress; g16.033 reserved
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -63,6 +63,7 @@ stay maintained; backend admission is not part of the first card.
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete; merged in PR #100; ledger 52 mounted / 122 missing
+33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — reserved after 026; public API decision required before dispatch; package-type source is already fixed, publication/pin movement stays separate
 
 ## Parallel Continuation
 
@@ -94,6 +95,12 @@ Two continuation programmes are now explicit:
   roles, the bounded opaque receipt codec, and one `DragDropWindowHost` per
   GPUI window. Tabs migrates with its real DockRegion consumer. Later cards
   remain gated by landed dependencies.
+- **Portfolio papercut follow-on:** `g16.033` is reserved behind the in-flight
+  `g16.026` shared-file tranche. It gives HistoryCenter distinct Poodle-owned
+  deletion-refusal semantics and adds packed-package proof for the already-fixed
+  v3 `HistoryEntry` export. Keyboard vertical geometry remains design-deferred;
+  Longhorn's `AlreadyAtTarget` wire code remains an undispatched API decision.
+  The card does not displace ordered drag card `g16.027`.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening

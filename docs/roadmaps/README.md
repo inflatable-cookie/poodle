@@ -80,6 +80,11 @@ behavior repairs without inventing another conformance authority.
   unsupported debt no mouse fixture may flip. It merged in PR #108 after four
   review rounds; no ledger cell moved. Tabs now moves with its DockRegion
   host-bridge consumer in the in-flight `g16.026` worker lane.
+  `g16.033` is reserved behind that shared-file tranche for HistoryCenter's
+  Poodle-owned rejection surface and packed v3 `HistoryEntry` proof. It is not
+  dispatchable until the public rejection shape is chosen; Keyboard vertical
+  geometry and Longhorn's `AlreadyAtTarget` wire code remain separate deferred
+  decisions.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other
@@ -143,7 +148,8 @@ behavior repairs without inventing another conformance authority.
   `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
   `019` complete, merged in PR #94, ledger 47 mounted / 127 missing; `020`
   complete, merged in PR #95. `029`–`032` are complete component-continuation
-  cards. Dependable drag-and-drop remains a
+  cards. `033` is the reserved HistoryCenter portfolio-papercut follow-on.
+  Dependable drag-and-drop remains a
   separate programme governed by architecture 011/spec 069 and compiled as
   `021`–`028`; `021`–`025` are merged, and `026` is the next planning gate.
 

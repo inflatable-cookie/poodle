@@ -1,6 +1,7 @@
 # g16 Component Continuation Runway
 
-Status: active planning map — TimeInput, NumberInput, and continuous audio complete
+Status: active planning map — TimeInput, NumberInput, and continuous audio complete;
+HistoryCenter portfolio follow-on reserved separately as `g16.033`
 Compiled: 2026-08-28
 Source: `component-continuation-register.md`
 
@@ -48,6 +49,11 @@ and mounted all three in GPUI. Payload drag-and-drop remains separate.
 `g16.029`–`g16.032` are merged. No accessibility, visual, motion,
 Longhorn-lab, or Jetstream worker is ready from this map. EditableLabel remains
 decision-blocked rather than becoming an implementation card by default.
+
+The Loophole portfolio refresh reserves `g16.033` after `g16.026`. It is not a
+new row selected by the 175-component audit and is not ready until the public
+HistoryCenter rejection shape is chosen. The existing Svelte v3 `HistoryEntry`
+source fix is evidence to preserve, not another implementation lane.
 
 ## Promotion Rule
 
