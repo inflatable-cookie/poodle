@@ -1,6 +1,6 @@
 # g16.027 — Drag-And-Drop Inbound Files And Drag-Out
 
-Status: planned — depends on the host bridge
+Status: ready — host bridge merged in PR #113
 Depends on: `026-drag-drop-cross-window-bridge-and-dock-region.md`
 Governing refs: architecture 011 and spec 069
 

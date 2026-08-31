@@ -1,6 +1,6 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: active — compiled as g16.021–g16.028; g16.021–g16.025 merged; g16.026 is ready
+Status: active — compiled as g16.021–g16.028; g16.021–g16.026 merged; g16.027 is ready
 Updated: 2026-08-31
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
@@ -813,10 +813,9 @@ land after the internal proof.
 
 The compiled runway is `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
 through `028-drag-drop-migration-and-certification-closeout.md`.
-`g16.021`–`g16.025` are merged. The public migration, split source/window
-bridge API, bounded DataTransfer envelope, and window-owned GPUI provider seam
-are fixed for `g16.026`; that card is ready. Later cards remain planned behind
-their landed dependencies.
+`g16.021`–`g16.026` are merged. The inbound-file and file-drag-out boundary is
+fixed for `g16.027`; that card is ready. `g16.028` remains planned behind its
+landed dependency.
 
 ## Non-goals
 
