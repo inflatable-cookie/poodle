@@ -253,7 +253,13 @@
   }
 
   /* Drag-and-drop states */
-  .poodle-tabs__item[draggable="true"] {
+
+  /* The provider wraps the root; contents keeps the tabs the layout box. */
+  .poodle-drag-drop-provider:has(> .poodle-tabs) {
+    display: contents;
+  }
+
+  .poodle-tabs__item[data-reorderable] {
     cursor: grab;
   }
 
@@ -264,6 +270,17 @@
   .poodle-tabs__item[data-drop-target] {
     box-shadow: var(--poodle-recipe-tabs-drop-target-item-shadow, inset 0 0 0 0.125rem var(--poodle-color-accent-base));
     border-radius: var(--poodle-radius-control);
+  }
+
+  /* The substrate's generic source/target treatment is the default for a
+     custom surface. Tabs draws its own, on the item rather than the button,
+     so the generic one is turned off here rather than doubled. */
+  .poodle-tabs .poodle-tabs__tab[data-poodle-drag-source] {
+    opacity: 1;
+  }
+
+  .poodle-tabs .poodle-tabs__item[data-poodle-drop-target] {
+    outline: none;
   }
 
   /* ── Tab button ── */

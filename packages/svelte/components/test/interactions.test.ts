@@ -11,6 +11,46 @@ import { asSnippet } from "./snippet";
 // Interaction wiring: the @inflatable-cookie/poodle-core machines have their own suite; these
 // assert the Svelte binding actually drives a click through to the documented
 // callback (the machine -> DOM -> event round trip).
+function layoutStrip(container: HTMLElement): void {
+  [...container.querySelectorAll<HTMLElement>(".poodle-tabs__item")].forEach((item, index) => {
+    const rect = {
+      x: index * 100,
+      y: 0,
+      width: 100,
+      height: 30,
+      top: 0,
+      left: index * 100,
+      right: index * 100 + 100,
+      bottom: 30,
+      toJSON() {
+        return this;
+      },
+    } as DOMRect;
+    item.getBoundingClientRect = () => rect;
+    const tab = item.querySelector<HTMLElement>(".poodle-tabs__tab");
+    if (tab) {
+      tab.getBoundingClientRect = () => rect;
+      tab.setPointerCapture = vi.fn();
+      tab.releasePointerCapture = vi.fn();
+      tab.hasPointerCapture = () => false;
+    }
+  });
+}
+
+function dragPointer(type: string, x: number, y: number): PointerEvent {
+  return new PointerEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    pointerId: 1,
+    pointerType: "mouse",
+    button: 0,
+    buttons: type === "pointerup" ? 0 : 1,
+    isPrimary: true,
+    clientX: x,
+    clientY: y,
+  });
+}
+
 describe("svelte interaction", () => {
   it("Checkbox fires onCheckedChange(true) on click", async () => {
     const onCheckedChange = vi.fn();
@@ -127,16 +167,9 @@ describe("svelte interaction", () => {
     expect(open).not.toBeNull();
   });
 
-  it("Tabs reorders and preserves the dragged value through dragend", async () => {
+  it("Tabs reorders through the shared substrate with no native payload", async () => {
     const onReorder = vi.fn();
-    const onDragEnd = vi.fn();
-    const onDragStart = vi.fn((_value: string, event: DragEvent) => {
-      event.dataTransfer?.setData(
-        "application/x-poodle-panel-drag",
-        "panel-payload",
-      );
-    });
-    const { getAllByRole } = render(Tabs, {
+    const { container, getAllByRole } = render(Tabs, {
       props: {
         items: [
           { value: "surface-1", label: "Surface 1" },
@@ -144,22 +177,21 @@ describe("svelte interaction", () => {
         ],
         reorderable: true,
         onReorder,
-        onDragStart,
-        onDragEnd,
       },
     });
-    const [firstTab, secondTab] = getAllByRole("tab");
-    const secondItem = secondTab.parentElement!;
-    const dataTransfer = new DataTransfer();
+    const [firstTab] = getAllByRole("tab");
+    layoutStrip(container);
 
-    await fireEvent.dragStart(firstTab, { dataTransfer });
-    await fireEvent.dragOver(secondItem, { dataTransfer });
-    await fireEvent.drop(secondItem, { dataTransfer });
-    await fireEvent.dragEnd(firstTab, { dataTransfer });
+    await fireEvent(firstTab, dragPointer("pointerdown", 50, 15));
+    await fireEvent(document, dragPointer("pointermove", 150, 15));
+    await fireEvent(document, dragPointer("pointerup", 150, 15));
 
-    expect(dataTransfer.types).toContain("application/x-poodle-panel-drag");
     expect(onReorder).toHaveBeenCalledWith(["surface-2", "surface-1"]);
-    expect(onDragEnd).toHaveBeenCalledWith("surface-1", expect.any(DragEvent));
+    // Local reorder writes nothing to the platform: the native envelope is
+    // the cross-window transport's, and a plain reorder has no host.
+    for (const tab of getAllByRole("tab")) {
+      expect(tab.getAttribute("draggable")).toBe("false");
+    }
   });
 
   it("DockRegion tab drags expose the panel transfer payload", async () => {

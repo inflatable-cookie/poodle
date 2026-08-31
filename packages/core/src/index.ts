@@ -577,14 +577,6 @@ export * from "./embed-input";
 export * from "./file-upload";
 
 export {
-  createReorderState,
-  handleDragStart,
-  handleDragOver,
-  handleDrop,
-  type ReorderState,
-} from "./tabs-reorder";
-
-export {
   durationTotalSeconds,
   adjustDurationSegment,
   setDurationSegment,
