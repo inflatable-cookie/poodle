@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-30
+Updated: 2026-08-31
 
 Roadmaps record Poodle's executable milestone work. `g15` completed the full
 v0.2.x release programme: the roster and parity baseline, failed v0.2.0
@@ -71,14 +71,15 @@ behavior repairs without inventing another conformance authority.
   `g16.023` merged in PR #104 with ordered logical keyboard targets preserving
   windowed reorder. `g16.024` merged in PR #107 with Tree nested intent,
   demand-driven auto-scroll, live drop revalidation, and semantic focus
-  ownership on the shared web substrate. `g16.025` projects that kernel through
+  ownership on the shared web substrate. `g16.025` projected that kernel through
   renderer-neutral `poodle-node` registrations, shared `poodle-render`
   builders, and a public GPUI `DragDropController`, replacing the
   backend-global payload session so two providers own two sessions; its
   crates.io GPUI 0.2.2 capability matrix is immutable — mouse, keyboard, and
   in-window capture certified; pen, touch, and device-originated cancel remain
-  unsupported debt no mouse fixture may flip. No ledger cell moved.
-  Tabs now moves with its DockRegion host-bridge consumer in `g16.026`.
+  unsupported debt no mouse fixture may flip. It merged in PR #108 after four
+  review rounds; no ledger cell moved. Tabs now moves with its DockRegion
+  host-bridge consumer in `g16.026`.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other
@@ -144,7 +145,7 @@ behavior repairs without inventing another conformance authority.
   complete, merged in PR #95. `029`–`032` are complete component-continuation
   cards. Dependable drag-and-drop remains a
   separate programme governed by architecture 011/spec 069 and compiled as
-  `021`–`028`; `021` merged in PR #96 and `022` is ready.
+  `021`–`028`; `021`–`025` are merged, and `026` is the next planning gate.
 
 ## Rules
 

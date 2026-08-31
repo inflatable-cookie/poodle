@@ -1,6 +1,6 @@
 # g16.026 — Drag-And-Drop Cross-Window Bridge, Tabs, And DockRegion
 
-Status: planned — public migration approved; depends on g16.025
+Status: planned — dependency merged and public migration approved; exact paired bridge API still needs orchestrator promotion before dispatch
 Depends on: `025-drag-drop-rust-gpui-substrate.md`
 Governing refs: architecture 011, spec 069, the resolved
 `../../triage/20260828-221415-drag-drop-public-migration-boundary.md`,

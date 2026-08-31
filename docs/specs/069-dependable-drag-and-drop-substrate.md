@@ -1,7 +1,7 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: active — compiled as g16.021–g16.028; g16.021–g16.024 merged; g16.025 ready
-Updated: 2026-08-30
+Status: active — compiled as g16.021–g16.028; g16.021–g16.025 merged; g16.026 is the next planning gate
+Updated: 2026-08-31
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
 `../contracts/components/tabs.md`,
@@ -649,11 +649,11 @@ it. Cross-window and drag-out contracts shape the base even when their adapters
 land after the internal proof.
 
 The compiled runway is `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
-through `028-drag-drop-migration-and-certification-closeout.md`. `g16.021` is
-the dispatched foundation. The public migration gate for `g16.026` is
-resolved; later cards remain planned until their landed
-dependencies and any remaining API-shape gates are reconciled by the
-orchestrator.
+through `028-drag-drop-migration-and-certification-closeout.md`.
+`g16.021`–`g16.025` are merged. The public migration gate for `g16.026` is
+resolved, but its exact paired host-bridge API and window-owned GPUI
+provider-unmount integration still need orchestrator promotion before worker
+dispatch. Later cards remain planned behind their landed dependencies.
 
 ## Non-goals
 

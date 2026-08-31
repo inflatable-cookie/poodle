@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.024 merged; g16.025 implemented, review pending
+Status: active — g16.025 merged; g16.026 is the next planning gate
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -55,8 +55,8 @@ stay maintained; backend admission is not part of the first card.
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — complete; merged in PR #101
 23. [023 — EditableList simple reorder migration](023-drag-drop-simple-reorder-migrations.md) — complete; merged in PR #104
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — complete; merged in PR #107
-25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — implemented; PR #108 open, review rounds 1-3 addressed; ledger unchanged at 52 mounted / 122 missing
-26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
+25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — complete; merged in PR #108 after four orchestrator review rounds; ledger unchanged at 52 mounted / 122 missing
+26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; dependency landed and clean public migration approved, but the exact paired host-bridge API must be fixed before dispatch
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
@@ -84,12 +84,13 @@ Two continuation programmes are now explicit:
   `dragDrop` vector corpus. `g16.022` landed the same-document web custom-surface
   controller and Svelte/React bindings. The clean Tabs and DockRegion public
   migrations are approved. EditableList proves simple reorder in `g16.023`;
-  Tree proves nested intent and auto-scroll in `g16.024`. `g16.025` projects the
+  Tree proves nested intent and auto-scroll in `g16.024`. `g16.025` projected the
   same kernel through renderer-neutral Node registrations and a public GPUI
   `DragDropController`, deletes the backend-global payload session, and
   publishes an immutable stock-GPUI capability matrix — mouse, keyboard, and
   in-window capture certified; pen, touch, and device-originated cancel
-  unsupported. Tabs migrates with
+  unsupported, and merged in PR #108 after the unsafe provider-unmount sweep
+  was removed. Tabs migrates with
   its real DockRegion consumer in `g16.026`. Later cards
   remain gated by landed dependencies and the host bridge's exact post-kernel
   API shape.
@@ -318,11 +319,14 @@ ledger cell moved.
 
 ## Next Task
 
-`g16.024` merged in PR #107. Tree now proves nested intent, demand-driven
-auto-scroll, live drop revalidation, one-shot Alt+Arrow movement, and semantic
-focus ownership through the shared web substrate. No ledger cell moved.
-`g16.025` is ready. Stock GPUI 0.2.2 certifies mouse, keyboard, and its
-in-window capture-equivalent drag route. Pen, touch, and device-originated
-pointer cancellation remain explicit unsupported debt; mouse synthesis is not
-evidence. Tabs still moves with DockRegion in `g16.026`. EditableLabel stays
-decision-blocked.
+`g16.025` merged in PR #108. Stock GPUI 0.2.2 now certifies mouse, keyboard,
+and its in-window capture-equivalent drag route; pen, touch, and
+device-originated pointer cancellation remain explicit unsupported debt. No
+ledger cell moved.
+
+The next orchestrator checkpoint is `g16.026`. Before dispatch, reconcile the
+exact paired TypeScript/Rust host-bridge API against the landed web and GPUI
+controllers, and choose a window-owned provider-unmount integration that
+cannot cancel a controller belonging to another window. Tabs and DockRegion
+still migrate together under the approved clean public break. EditableLabel
+stays decision-blocked.

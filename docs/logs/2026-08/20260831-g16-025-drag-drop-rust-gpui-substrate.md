@@ -1,6 +1,6 @@
 # g16.025 — Drag-And-Drop Rust And GPUI Substrate
 
-Status: implemented — PR #108 open; review rounds 1, 2, and 3 addressed
+Status: complete — merged in PR #108 after four orchestrator review rounds
 Date: 2026-08-31
 PR: https://github.com/inflatable-cookie/poodle/pull/108
 Card: `docs/roadmaps/g16/025-drag-drop-rust-gpui-substrate.md`
@@ -317,9 +317,15 @@ Round 3 then ruled on all four; the outcome is recorded there.
 
 ## Continuation
 
+Round 4 independently re-ran the focused native, Rust, docs, and full headless
+boards, confirmed the rejected-target snapshot and removal of the unsafe host
+sweep, and approved PR #108. It merged as
+`7a39f3c6d143784838e3e5cae4f05d9331c08f85`.
+
 `g16.026` — the cross-window host bridge, the Tabs public migration, and
-DockRegion — is next. It also carries two named requirements from here: GPUI
-provider unmount (with the two-window false-cancel and native-active-drag
-proofs), and Tree's keyboard route plus its clear/terminal callback. Jetstream construction consumes the renderer-neutral
-registrations only and remains deferred; no Jetstream preview or QA selector
-was run or claimed.
+DockRegion — is next. It carries GPUI provider unmount with the two-window
+false-cancel and native-active-drag proofs. Tree's keyboard route and
+clear/terminal callback remain a separate component-migration gap; they are not
+silently part of `g16.026`. Jetstream construction consumes the
+renderer-neutral registrations only and remains deferred; no Jetstream preview
+or QA selector was run or claimed.

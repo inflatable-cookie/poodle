@@ -1,6 +1,6 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-30
+Updated: 2026-08-31
 
 ## Active Track
 
@@ -14,8 +14,8 @@ Updated: 2026-08-30
     `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
     `019` merged in PR #94; `020` merged in PR #95; `021` merged in PR #96;
     `022` merged in PR #101 (web custom-surface substrate, no ledger movement);
-    `023` in PR #104 revision after logical keyboard target approval; `024`–`028` planned
-    behind ordered drag-and-drop dependencies;
+    `023` merged in PR #104; `024` merged in PR #107; `025` merged in PR #108;
+    `026`–`028` remain behind ordered drag-and-drop dependencies;
     `029` complete and merged (TimeInput native parity, ledger 48/126); `030`
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
@@ -23,10 +23,9 @@ Updated: 2026-08-30
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: revise and re-review PR #104 for `g16.023`. Component
-    continuation is paused at the separate
-    EditableLabel decision gate. Keep Node/GPUI routing cards away from drag
-    card `025`.
+  - Next move: promote `g16.026` by fixing the exact paired host-bridge API and
+    window-owned GPUI provider-unmount seam, then dispatch it. Component
+    continuation remains paused at the separate EditableLabel decision gate.
 
 ## Latest Completed Track
 

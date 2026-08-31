@@ -1,6 +1,6 @@
 # g16.025 — Drag-And-Drop Rust And GPUI Substrate
 
-Status: implemented 2026-08-31 — PR #108 open, review rounds 1-3 addressed
+Status: complete 2026-08-31 — merged in PR #108 after four orchestrator review rounds
 Depends on: `024-drag-drop-tree-nested-intent-and-auto-scroll.md`
 Governing refs: architecture 011, spec 069, the Node/render architecture, and
 the Tabs, EditableList, Tree, and ModelCatalogueEditor contracts
@@ -94,9 +94,10 @@ Ledger: unchanged at 52 mounted / 122 missing.
 
 ## Review Rounds
 
-Round 1 named six gaps, round 2 named three more, round 3 named two. All eleven
-are closed on this branch; the log records each fix and its mounted
-counterexample.
+Round 1 named six gaps, round 2 named three more, and round 3 named two. All
+eleven closed before round 4 independently re-ran the focused native, Rust,
+docs, and full headless boards and approved the PR for merge. The log records
+each fix and its mounted counterexample.
 
 Round 3 also reverted the provider-unmount mechanism a self-audit had added:
 the gap is real, but closing it needs window ownership, which `g16.026` owns.
