@@ -2,7 +2,7 @@
 
 Status: delivered — under review
 Date: 2026-08-31
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/115
 Card: `docs/roadmaps/g16/027-drag-drop-inbound-files-and-drag-out.md`
 Handoff: `docs/handoffs/20260831-180228-g16-027-inbound-files-drag-out.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,

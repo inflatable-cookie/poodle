@@ -1,6 +1,6 @@
 # g16.027 — Drag-And-Drop Inbound Files And Drag-Out
 
-Status: complete — delivered on `codex/g16-027-inbound-files-drag-out`, under review
+Status: complete — delivered in PR #115, under review
 Depends on: `026-drag-drop-cross-window-bridge-and-dock-region.md`
 Governing refs: architecture 011 and spec 069
 

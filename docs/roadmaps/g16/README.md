@@ -58,7 +58,7 @@ stay maintained; backend admission is not part of the first card.
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — complete; merged in PR #107
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — complete; merged in PR #108 after four orchestrator review rounds; ledger unchanged at 52 mounted / 122 missing
 26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — complete; merged in PR #113 after two Northstar review rounds; split source/window bridge, bounded opaque receipt, clean public migration, Tabs subject-family seam, and window-owned GPUI provider census
-27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — delivered on `codex/g16-027-inbound-files-drag-out`, under review; paired export/inbound contracts, the web and GPUI boundaries, curated specimens, and a new engine probe leg
+27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — delivered in PR #115, under review; paired export/inbound contracts, the web and GPUI boundaries, curated specimens, and a new engine probe leg
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
@@ -348,8 +348,7 @@ requires one common `DragDropProvider`, per the operator decision recorded in
 spec 069. `g16.033` remains reserved until the operator chooses structured rejection
 codes or a host-owned message; EditableLabel stays decision-blocked.
 
-`g16.027` is delivered on `codex/g16-027-inbound-files-drag-out` and awaiting
-review. Both external-file boundaries are paired and wired end to end: an
+`g16.027` is delivered in PR #115 and awaiting review. Both external-file boundaries are paired and wired end to end: an
 export prepares an opaque receipt on the pre-drag gesture and the host runs
 the operating system's drag, while inbound batches become ordinary sessions
 under one subject kind, validated before eligibility and again at the drop.
