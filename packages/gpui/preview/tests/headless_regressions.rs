@@ -29,8 +29,10 @@ use poodle_headless::time_input::{
     time_input_invalid, time_input_transition, TimeInputContext, TimeInputEvent,
 };
 use poodle_node::{
-    ColorValue, ContinuousValuePhase, DismissReason, FocusRing, LayoutDirection, LayoutOverflow,
-    LayoutSizing, Node, NodeContinuousValueEvent, NodeDropEvent, NodeKind, NodePosition, NodeRole,
+    ColorValue, ContinuousValuePhase, DismissReason, DragSession, DragSessionPhase, DragSubject,
+    DragTerminalOutcome, FocusRing, LayoutDirection, LayoutOverflow, LayoutSizing, Node,
+    NodeContinuousValueEvent, NodeDragInputKind, NodeDragSource, NodeDropCommit,
+    NodeDropCommitEvent, NodeDropIntentEvent, NodeDropTarget, NodeKind, NodePosition, NodeRole,
     NodeWheelEvent,
 };
 use poodle_render::{
@@ -1311,245 +1313,813 @@ fn payload_frac(id: &str, x_frac: f32, y_frac: f32) -> Point<Pixels> {
     )
 }
 
-fn payload_lifecycle_tree(trace: &Arc<Mutex<Vec<String>>>, disabled_source: bool) -> Node {
-    let push = |label: &'static str| {
-        let trace = Arc::clone(trace);
-        Arc::new(move |payload: &str| {
-            trace
-                .lock()
-                .expect("trace lock")
-                .push(format!("{label}:{payload}"));
-        }) as Arc<dyn Fn(&str) + Send + Sync>
-    };
-    let push_drop = |label: &'static str| {
-        let trace = Arc::clone(trace);
-        Arc::new(move |event: &NodeDropEvent| {
-            trace
-                .lock()
-                .expect("trace lock")
-                .push(format!("{label}:{}:{:?}", event.payload, event.edge));
-        }) as Arc<dyn Fn(&NodeDropEvent) + Send + Sync>
-    };
-    let push_leave = |label: &'static str| {
-        let trace = Arc::clone(trace);
-        Arc::new(move || {
-            trace.lock().expect("trace lock").push(label.to_owned());
-        }) as Arc<dyn Fn() + Send + Sync>
-    };
+// ── Custom drag-and-drop surfaces on the shared kernel (g16.025) ──────────
+//
+// The substrate must work without a Poodle composite: these fixtures are the
+// consumer-built sources and targets a host writes from the public
+// registration vocabulary, driven through real mounted GPUI dispatch. Direct
+// handler invocation would prove none of it.
 
-    let mut source = payload_paint_box("payload-source");
-    source.interaction.disabled = disabled_source;
-    source.interaction.drag_payload = Some("alpha".to_owned());
-    source.interaction.on_drag_start = Some(push("start"));
-    source.interaction.on_drag_end = Some(push("end"));
+const CUSTOM_SUBJECT_KIND: &str = "custom.row";
 
-    let mut zone_a = payload_paint_box("payload-zone-a");
-    zone_a.interaction.drop_zone = true;
-    zone_a.interaction.on_drop_hover = Some(push_drop("hover-a"));
-    zone_a.interaction.on_drop_leave = Some(push_leave("leave-a"));
-    zone_a.interaction.on_drop = Some(push_drop("drop-a"));
+fn custom_subject(id: &str) -> DragSubject {
+    DragSubject {
+        kind: CUSTOM_SUBJECT_KIND.to_string(),
+        id: id.to_string(),
+    }
+}
 
-    let mut zone_b = payload_paint_box("payload-zone-b");
-    zone_b.interaction.drop_zone = true;
-    zone_b.interaction.on_drop_hover = Some(push_drop("hover-b"));
-    zone_b.interaction.on_drop_leave = Some(push_leave("leave-b"));
-    zone_b.interaction.on_drop = Some(push_drop("drop-b"));
+fn push_trace(trace: &Arc<Mutex<Vec<String>>>, entry: String) {
+    trace.lock().expect("trace lock").push(entry);
+}
+
+fn describe_outcome(outcome: &DragTerminalOutcome) -> String {
+    match outcome {
+        DragTerminalOutcome::Committed { intent } => {
+            format!("committed:{}:{}", intent.target_id, intent.position)
+        }
+        DragTerminalOutcome::Rejected { reason } => {
+            format!("rejected:{}", reason.clone().unwrap_or_default())
+        }
+        DragTerminalOutcome::Failed { reason } => {
+            format!("failed:{}", reason.clone().unwrap_or_default())
+        }
+        DragTerminalOutcome::Cancelled { reason } => format!("cancelled:{reason:?}"),
+    }
+}
+
+/// A consumer-built drag source: opaque subject, accessible name, keyboard
+/// pickup opted in, and traced start/terminal callbacks.
+fn traced_source(id: &str, label: &str, trace: &Arc<Mutex<Vec<String>>>) -> NodeDragSource {
+    let mut source = NodeDragSource::new(id, custom_subject(id), label);
+    source.keyboard_order = Some(0);
+    let start = Arc::clone(trace);
+    source.on_drag_start = Some(Arc::new(move |session: &DragSession| {
+        push_trace(&start, format!("start:{}", session.subject.id));
+    }));
+    let end = Arc::clone(trace);
+    source.on_drag_end = Some(Arc::new(move |outcome: &DragTerminalOutcome| {
+        push_trace(&end, format!("end:{}", describe_outcome(outcome)));
+    }));
+    source
+}
+
+/// A consumer-built drop target. `accepts_inside` picks the band rule; the
+/// commit result is whatever `commit` returns, so a fixture can prove the
+/// rejected and failed terminals as well as the committed one.
+fn traced_target(
+    id: &str,
+    label: &str,
+    trace: &Arc<Mutex<Vec<String>>>,
+    accepts_inside: bool,
+    order: i32,
+    commit: NodeDropCommit,
+) -> NodeDropTarget {
+    let mut target = NodeDropTarget::new(id, CUSTOM_SUBJECT_KIND, label);
+    target.resolve_position = Some(poodle_render::vertical_band_resolver(accepts_inside));
+    target.keyboard_order = Some(order);
+    target.resolve_keyboard_position = Some(poodle_render::linear_keyboard_resolver());
+
+    let intent_trace = Arc::clone(trace);
+    let intent_id = id.to_string();
+    target.on_intent = Some(Arc::new(move |event: &NodeDropIntentEvent| {
+        push_trace(
+            &intent_trace,
+            format!("intent:{intent_id}:{}:{}", event.position, event.subject.id),
+        );
+    }));
+    let cleared_trace = Arc::clone(trace);
+    let cleared_id = id.to_string();
+    target.on_intent_cleared = Some(Arc::new(move || {
+        push_trace(&cleared_trace, format!("cleared:{cleared_id}"));
+    }));
+    let drop_trace = Arc::clone(trace);
+    let drop_id = id.to_string();
+    target.on_drop = Some(Arc::new(move |event: &NodeDropCommitEvent| {
+        push_trace(
+            &drop_trace,
+            format!(
+                "drop:{drop_id}:{}:{}",
+                event.intent.position, event.subject.id
+            ),
+        );
+        commit.clone()
+    }));
+    target
+}
+
+fn drag_box(id: &str, width: f32, height: f32) -> Node {
+    let mut node = Node::container();
+    node.id = Some(id.to_owned());
+    node.style.descriptor.layout.width = LayoutSizing::Fixed(width);
+    node.style.descriptor.layout.height = LayoutSizing::Fixed(height);
+    node.style.descriptor.background = Some(ColorValue(0.2, 0.3, 0.4, 1.0));
+    node
+}
+
+/// Source plus two flat sibling targets — the smallest complete surface.
+fn custom_drag_tree(trace: &Arc<Mutex<Vec<String>>>, disabled_source: bool) -> Node {
+    custom_drag_tree_with(trace, disabled_source, NodeDropCommit::Committed, true)
+}
+
+fn custom_drag_tree_with(
+    trace: &Arc<Mutex<Vec<String>>>,
+    disabled_source: bool,
+    commit: NodeDropCommit,
+    zone_b_present: bool,
+) -> Node {
+    let mut source = drag_box("custom-source", 80.0, 80.0);
+    source.interaction.focusable = true;
+    source.a11y.tab_index = Some(0);
+    if !disabled_source {
+        source.interaction.drag_source = Some(traced_source("custom-source", "Alpha", trace));
+    }
+
+    let mut zone_a = drag_box("custom-zone-a", 80.0, 80.0);
+    zone_a.interaction.drop_target = Some(traced_target(
+        "custom-zone-a",
+        "Zone A",
+        trace,
+        false,
+        1,
+        commit.clone(),
+    ));
 
     let mut row = Node::container();
-    row.id = Some("payload-row".to_owned());
+    row.id = Some("custom-row".to_owned());
     row.style.descriptor.layout.direction = LayoutDirection::Row;
     row.style.descriptor.layout.width = LayoutSizing::Fixed(240.0);
     row.style.descriptor.layout.height = LayoutSizing::Fixed(80.0);
-    row.child(source).child(zone_a).child(zone_b)
+    let mut row = row.child(source).child(zone_a);
+    if zone_b_present {
+        let mut zone_b = drag_box("custom-zone-b", 80.0, 80.0);
+        zone_b.interaction.drop_target = Some(traced_target(
+            "custom-zone-b",
+            "Zone B",
+            trace,
+            false,
+            2,
+            commit,
+        ));
+        row = row.child(zone_b);
+    }
+    row
 }
 
-/// g16.006. The reusable payload/drop seam reports one start after GPUI's
-/// drag threshold, hit-tested hover/leave, a drop with the retained edge,
-/// and exactly one end — including outside release and Escape — on stock
-/// GPUI. Direct handler invocation is not evidence.
+fn trace_of(trace: &Arc<Mutex<Vec<String>>>) -> Vec<String> {
+    trace.lock().expect("trace lock").clone()
+}
+
+fn count_starting_with(events: &[String], prefix: &str) -> usize {
+    events
+        .iter()
+        .filter(|event| event.starts_with(prefix))
+        .count()
+}
+
+/// g16.025. A custom Rust/GPUI surface runs the shared semantic kernel: one
+/// start after the runtime drag threshold, one current intent carrying the
+/// resolved band, one revalidated commit, and exactly one terminal — through
+/// real mounted mouse dispatch.
 #[test]
-fn payload_lifecycle_hit_tests_retains_edge_and_ends_once() {
+fn a_custom_surface_runs_the_shared_kernel_from_pickup_to_commit() {
     run_headless(|cx| {
         let trace = Arc::new(Mutex::new(Vec::new()));
-        let node = Arc::new(Mutex::new(payload_lifecycle_tree(&trace, false)));
+        let node = Arc::new(Mutex::new(custom_drag_tree(&trace, false)));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
         driver.draw_frame();
+        let controller = driver.drag();
 
-        let source = payload_frac("payload-source", 0.5, 0.5);
+        let source = payload_frac("custom-source", 0.5, 0.5);
         driver.pointer_press(source);
         driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
         assert_eq!(
-            trace.lock().expect("trace lock").as_slice(),
-            ["start:alpha"],
-            "start fires once after the runtime drag threshold"
+            trace_of(&trace),
+            ["start:custom-source"],
+            "start fires once, after the runtime drag threshold"
         );
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
 
-        driver.pointer_drag(payload_frac("payload-zone-a", 0.5, 0.1));
-        driver.pointer_drag(payload_frac("payload-zone-b", 0.5, 0.5));
-        let events = trace.lock().expect("trace lock").clone();
+        // Upper half of a flat target is `before`, lower half `after`; moving
+        // between bands on ONE target must re-report the intent.
+        driver.pointer_drag(payload_frac("custom-zone-a", 0.5, 0.25));
+        driver.pointer_drag(payload_frac("custom-zone-a", 0.5, 0.75));
+        let events = trace_of(&trace);
         assert!(
-            events
-                .iter()
-                .any(|event| event.starts_with("hover-a:alpha:Before")),
-            "the hit zone receives the before-band edge: {events:?}"
+            events.contains(&"intent:custom-zone-a:before:custom-source".to_owned()),
+            "{events:?}"
         );
         assert!(
-            events.contains(&"leave-a".to_owned()),
-            "leaving zone A fires leave: {events:?}"
+            events.contains(&"intent:custom-zone-a:after:custom-source".to_owned()),
+            "{events:?}"
         );
-        assert!(
-            events
-                .iter()
-                .any(|event| event.starts_with("hover-b:alpha:")),
-            "the new hit zone receives hover: {events:?}"
-        );
-        assert!(
-            !events
-                .iter()
-                .any(|event| event.starts_with("hover-b:") && event.contains("hover-a")),
-            "capture-wide moves must not deliver hover to a miss: {events:?}"
-        );
-        let hover_b_count = events
-            .iter()
-            .filter(|event| event.starts_with("hover-b:"))
-            .count();
-        let hover_a_after_leave = events
-            .iter()
-            .skip_while(|event| *event != "leave-a")
-            .filter(|event| event.starts_with("hover-a:"))
-            .count();
-        assert!(hover_b_count >= 1);
         assert_eq!(
-            hover_a_after_leave, 0,
-            "zone A must not keep receiving hover after leave"
+            controller.snapshot().target_id.as_deref(),
+            Some("custom-zone-a")
         );
-    });
 
-    run_headless(|cx| {
-        let trace = Arc::new(Mutex::new(Vec::new()));
-        let node = Arc::new(Mutex::new(payload_lifecycle_tree(&trace, false)));
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
-        driver.draw_frame();
+        // Moving to the neighbour clears the first target exactly once.
+        driver.pointer_drag(payload_frac("custom-zone-b", 0.5, 0.75));
+        let events = trace_of(&trace);
+        assert_eq!(
+            count_starting_with(&events, "cleared:custom-zone-a"),
+            1,
+            "{events:?}"
+        );
+        assert!(
+            events.contains(&"intent:custom-zone-b:after:custom-source".to_owned()),
+            "{events:?}"
+        );
 
-        let source = payload_frac("payload-source", 0.5, 0.5);
-        driver.pointer_press(source);
-        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
-        driver.pointer_drag(payload_frac("payload-zone-a", 0.5, 0.1));
-        driver.pointer_release(payload_frac("payload-zone-a", 0.5, 0.1));
-
-        let events = trace.lock().expect("trace lock").clone();
-        let start = events.iter().position(|event| event == "start:alpha");
+        driver.pointer_release(payload_frac("custom-zone-b", 0.5, 0.75));
+        let events = trace_of(&trace);
+        let start = events.iter().position(|e| e == "start:custom-source");
         let drop = events
             .iter()
-            .position(|event| event == "drop-a:alpha:Before");
-        let end = events.iter().position(|event| event == "end:alpha");
-        assert!(start.is_some(), "start: {events:?}");
+            .position(|e| e == "drop:custom-zone-b:after:custom-source");
+        let end = events
+            .iter()
+            .position(|e| e == "end:committed:custom-zone-b:after");
+        assert!(start < drop && drop < end, "{events:?}");
+        assert_eq!(count_starting_with(&events, "end:"), 1, "{events:?}");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+
+        // A later release must not produce a second terminal.
+        driver.pointer_release(payload_frac("custom-zone-b", 0.5, 0.75));
         assert_eq!(
-            drop.map(|index| events[index].as_str()),
-            Some("drop-a:alpha:Before"),
-            "drop reuses the last hover edge, not Inside: {events:?}"
-        );
-        assert!(end.is_some(), "end: {events:?}");
-        assert!(
-            start < drop && drop < end,
-            "successful drop ordering is start → drop → end: {events:?}"
-        );
-        assert_eq!(
-            events.iter().filter(|event| *event == "end:alpha").count(),
+            count_starting_with(&trace_of(&trace), "end:"),
             1,
-            "end fires exactly once on drop: {events:?}"
-        );
-        driver.pointer_release(payload_frac("payload-zone-a", 0.5, 0.5));
-        assert_eq!(
-            trace
-                .lock()
-                .expect("trace lock")
-                .iter()
-                .filter(|event| *event == "end:alpha")
-                .count(),
-            1,
-            "a later mouse-up must not emit a second end"
+            "a release after the session ended is inert"
         );
     });
+}
 
+/// g16.025. Release outside every target is cancellation, not a drop, and it
+/// still ends exactly once. `on_drag_move` is capture-phase and hitbox-free,
+/// so the session keeps receiving movement well outside the source — the
+/// observable result `in_window_capture` claims.
+#[test]
+fn releasing_outside_every_target_cancels_once_and_commits_nothing() {
     run_headless(|cx| {
         let trace = Arc::new(Mutex::new(Vec::new()));
-        let node = Arc::new(Mutex::new(payload_lifecycle_tree(&trace, false)));
+        let node = Arc::new(Mutex::new(custom_drag_tree(&trace, false)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        let source = payload_frac("custom-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("custom-zone-a", 0.5, 0.75));
+        driver.pointer_drag(point(px(4.0), px(4.0)));
+        assert_eq!(
+            controller.snapshot().pointer,
+            Some((4.0, 4.0)),
+            "movement outside every target still reaches the session"
+        );
+        driver.pointer_release(point(px(4.0), px(4.0)));
+
+        let events = trace_of(&trace);
+        assert!(events.contains(&"cleared:custom-zone-a".to_owned()), "{events:?}");
+        assert_eq!(count_starting_with(&events, "drop:"), 0, "{events:?}");
+        assert_eq!(
+            count_starting_with(&events, "end:cancelled:"),
+            1,
+            "{events:?}"
+        );
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+    });
+}
+
+/// g16.025. Escape cancels once; a second Escape is inert because the phase no
+/// longer accepts it — exactly-once is a property of the lifecycle, not of a
+/// guard flag the adapter maintains.
+#[test]
+fn escape_cancels_once_and_a_second_escape_is_inert() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(custom_drag_tree(&trace, false)));
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
         driver.draw_frame();
 
-        let source = payload_frac("payload-source", 0.5, 0.5);
+        let source = payload_frac("custom-source", 0.5, 0.5);
         driver.pointer_press(source);
         driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
-        driver.pointer_drag(payload_frac("payload-zone-a", 0.5, 0.5));
-        driver.pointer_drag(point(px(8.0), px(8.0)));
-        driver.pointer_release(point(px(8.0), px(8.0)));
-
-        let events = trace.lock().expect("trace lock").clone();
-        assert!(events.contains(&"start:alpha".to_owned()), "{events:?}");
-        assert!(events.contains(&"leave-a".to_owned()), "{events:?}");
-        assert!(
-            !events.iter().any(|event| event.starts_with("drop-")),
-            "outside release is cancellation, not drop: {events:?}"
-        );
-        assert_eq!(
-            events.iter().filter(|event| *event == "end:alpha").count(),
-            1,
-            "outside release ends once: {events:?}"
-        );
-    });
-
-    run_headless(|cx| {
-        let trace = Arc::new(Mutex::new(Vec::new()));
-        let node = Arc::new(Mutex::new(payload_lifecycle_tree(&trace, false)));
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
-        driver.draw_frame();
-
-        let source = payload_frac("payload-source", 0.5, 0.5);
-        driver.pointer_press(source);
-        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
-        driver.pointer_drag(payload_frac("payload-zone-b", 0.5, 0.9));
+        driver.pointer_drag(payload_frac("custom-zone-b", 0.5, 0.75));
         driver.dispatch_key("escape");
 
-        let events = trace.lock().expect("trace lock").clone();
-        assert!(events.contains(&"start:alpha".to_owned()), "{events:?}");
-        assert!(events.contains(&"leave-b".to_owned()), "{events:?}");
-        assert!(
-            !events.iter().any(|event| event.starts_with("drop-")),
-            "Escape is cancellation: {events:?}"
-        );
+        let events = trace_of(&trace);
+        assert!(events.contains(&"cleared:custom-zone-b".to_owned()), "{events:?}");
+        assert_eq!(count_starting_with(&events, "drop:"), 0, "{events:?}");
         assert_eq!(
-            events.iter().filter(|event| *event == "end:alpha").count(),
+            count_starting_with(&events, "end:cancelled:Escape"),
             1,
-            "Escape ends once: {events:?}"
+            "{events:?}"
         );
+
         driver.dispatch_key("escape");
         assert_eq!(
-            trace
-                .lock()
-                .expect("trace lock")
-                .iter()
-                .filter(|event| *event == "end:alpha")
-                .count(),
+            count_starting_with(&trace_of(&trace), "end:"),
             1,
-            "a second Escape must not emit another end"
+            "a repeated Escape must not emit another terminal"
         );
     });
+}
+
+/// g16.025. Nested overlapping targets: the deepest live one wins, and when it
+/// stops being eligible the shallower ancestor takes the intent — without a
+/// pointer move, because a rebuild is enough to change eligibility.
+#[test]
+fn nested_targets_arbitrate_deepest_first_and_follow_a_live_eligibility_change() {
+    fn nested_tree(trace: &Arc<Mutex<Vec<String>>>, inner_enabled: bool) -> Node {
+        let mut source = drag_box("nested-source", 60.0, 60.0);
+        source.interaction.drag_source = Some(traced_source("nested-source", "Alpha", trace));
+
+        let mut inner = drag_box("nested-inner", 90.0, 60.0);
+        let mut inner_target =
+            traced_target("nested-inner", "Inner", trace, false, 2, NodeDropCommit::Committed);
+        inner_target.disabled = !inner_enabled;
+        // Priority deliberately favours the OUTER target: depth must beat
+        // priority, or a nested surface can never take its own drop.
+        inner_target.priority = -50;
+        inner.interaction.drop_target = Some(inner_target);
+
+        let mut outer = drag_box("nested-outer", 90.0, 60.0);
+        let mut outer_target =
+            traced_target("nested-outer", "Outer", trace, false, 1, NodeDropCommit::Committed);
+        outer_target.priority = 50;
+        outer.interaction.drop_target = Some(outer_target);
+        let outer = outer.child(inner);
+
+        let mut row = Node::container();
+        row.id = Some("nested-row".to_owned());
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(150.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(60.0);
+        row.child(source).child(outer)
+    }
 
     run_headless(|cx| {
         let trace = Arc::new(Mutex::new(Vec::new()));
-        let node = Arc::new(Mutex::new(payload_lifecycle_tree(&trace, true)));
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        let node = Arc::new(Mutex::new(nested_tree(&trace, true)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 200.0, 80.0);
         driver.draw_frame();
+        let controller = driver.drag();
 
-        let source = payload_frac("payload-source", 0.5, 0.5);
+        let source = payload_frac("nested-source", 0.5, 0.5);
         driver.pointer_press(source);
         driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
-        driver.pointer_drag(payload_frac("payload-zone-a", 0.5, 0.5));
-        driver.pointer_release(payload_frac("payload-zone-a", 0.5, 0.5));
+        driver.pointer_drag(payload_frac("nested-inner", 0.5, 0.75));
+
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("nested-inner"),
+            "the deepest live target wins even against a higher-priority ancestor"
+        );
+
+        // Rebuild with the inner target disabled: the intent must move to the
+        // surviving ancestor without any further pointer input.
+        *node.lock().expect("mount lock") = nested_tree(&trace, false);
+        driver.draw_frame();
+
+        let snapshot = controller.snapshot();
+        assert_eq!(
+            snapshot.target_id.as_deref(),
+            Some("nested-outer"),
+            "a live eligibility change re-arbitrates: {:?}",
+            trace_of(&trace)
+        );
+        assert_eq!(snapshot.phase, DragSessionPhase::Dragging);
+
+        driver.pointer_release(payload_frac("nested-inner", 0.5, 0.75));
+        let events = trace_of(&trace);
+        assert_eq!(
+            count_starting_with(&events, "drop:nested-inner"),
+            0,
+            "a stale target must never commit: {events:?}"
+        );
+        assert_eq!(
+            count_starting_with(&events, "drop:nested-outer"),
+            1,
+            "{events:?}"
+        );
+        assert_eq!(count_starting_with(&events, "end:"), 1, "{events:?}");
+    });
+}
+
+/// g16.025. Removing the active source mid-drag cancels the session once and
+/// commits nothing. Host rebuild is the ordinary path here: a source that did
+/// not re-register this frame is gone, and the kernel's `SourceLost` closes it.
+#[test]
+fn removing_the_dragged_source_during_a_rebuild_cancels_once() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(custom_drag_tree(&trace, false)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        let source = payload_frac("custom-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("custom-zone-a", 0.5, 0.75));
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+
+        // Same tree, no source registration: the host rebuilt without it.
+        *node.lock().expect("mount lock") = custom_drag_tree(&trace, true);
+        driver.draw_frame();
+
+        let events = trace_of(&trace);
+        assert_eq!(
+            count_starting_with(&events, "end:cancelled:SourceLost"),
+            1,
+            "{events:?}"
+        );
+        assert!(events.contains(&"cleared:custom-zone-a".to_owned()), "{events:?}");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+
+        driver.pointer_release(payload_frac("custom-zone-a", 0.5, 0.75));
+        let events = trace_of(&trace);
+        assert_eq!(count_starting_with(&events, "drop:"), 0, "{events:?}");
+        assert_eq!(count_starting_with(&events, "end:"), 1, "{events:?}");
+    });
+}
+
+/// g16.025. Removing the target that holds the current intent takes the
+/// kernel's `TargetLost` path: cancelled once, nothing committed.
+#[test]
+fn removing_the_current_target_during_a_rebuild_cancels_once() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(custom_drag_tree(&trace, false)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        let source = payload_frac("custom-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("custom-zone-b", 0.5, 0.75));
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("custom-zone-b")
+        );
+
+        *node.lock().expect("mount lock") =
+            custom_drag_tree_with(&trace, false, NodeDropCommit::Committed, false);
+        driver.draw_frame();
+
+        let events = trace_of(&trace);
+        assert_eq!(
+            count_starting_with(&events, "end:cancelled:TargetLost"),
+            1,
+            "{events:?}"
+        );
+        assert_eq!(count_starting_with(&events, "drop:"), 0, "{events:?}");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+    });
+}
+
+/// g16.025. Two providers in one window own two sessions. A drag started in
+/// one must not move, clear, or commit anything in the other, and the second
+/// provider must stay idle throughout.
+#[test]
+fn two_providers_own_independent_sessions() {
+    run_headless(|cx| {
+        let left_trace = Arc::new(Mutex::new(Vec::new()));
+        let right_trace = Arc::new(Mutex::new(Vec::new()));
+        let left_controller = poodle_gpui_node_backend::DragDropController::new();
+        let right_controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let left_node = Arc::new(Mutex::new(scoped_drag_tree("left", &left_trace)));
+        let right_node = Arc::new(Mutex::new(scoped_drag_tree("right", &right_trace)));
+
+        let build = {
+            let left_controller = left_controller.clone();
+            let right_controller = right_controller.clone();
+            let left_node = Arc::clone(&left_node);
+            let right_node = Arc::clone(&right_node);
+            Rc::new(move || {
+                let left = left_node.lock().expect("left lock").clone();
+                let right = right_node.lock().expect("right lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _, Styled as _};
+                gpui::div()
+                    .flex()
+                    .flex_col()
+                    .child(
+                        poodle_gpui_node_backend::drag_drop_provider(&left_controller, || {
+                            gpui::div().child(poodle_gpui_node_backend::to_gpui(&left))
+                        }),
+                    )
+                    .child(
+                        poodle_gpui_node_backend::drag_drop_provider(&right_controller, || {
+                            gpui::div().child(poodle_gpui_node_backend::to_gpui(&right))
+                        }),
+                    )
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        assert_ne!(left_controller.id(), right_controller.id());
+
+        let source = payload_frac("left-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("left-zone-a", 0.5, 0.75));
+
+        assert_eq!(left_controller.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(
+            right_controller.snapshot().phase,
+            DragSessionPhase::Idle,
+            "a neighbouring provider must not join someone else's gesture"
+        );
+
+        // Move over the OTHER provider's target. It is not in this session's
+        // registry, so no intent may resolve and its callbacks stay silent.
+        driver.pointer_drag(payload_frac("right-zone-a", 0.5, 0.75));
+        assert_eq!(
+            left_controller.snapshot().target_id, None,
+            "a target in another provider is not a candidate"
+        );
         assert!(
-            trace.lock().expect("trace lock").is_empty(),
-            "a disabled source is inert"
+            trace_of(&right_trace).is_empty(),
+            "{:?}",
+            trace_of(&right_trace)
+        );
+
+        driver.pointer_release(payload_frac("right-zone-a", 0.5, 0.75));
+        let left = trace_of(&left_trace);
+        assert_eq!(count_starting_with(&left, "end:cancelled:"), 1, "{left:?}");
+        assert!(trace_of(&right_trace).is_empty());
+        assert_eq!(right_controller.snapshot().phase, DragSessionPhase::Idle);
+
+        // The second provider still works afterwards, with its own session id.
+        let right_source = payload_frac("right-source", 0.5, 0.5);
+        driver.pointer_press(right_source);
+        driver.pointer_drag(point(px(f32::from(right_source.x) + 4.0), right_source.y));
+        driver.pointer_drag(payload_frac("right-zone-a", 0.5, 0.75));
+        driver.pointer_release(payload_frac("right-zone-a", 0.5, 0.75));
+
+        let right = trace_of(&right_trace);
+        assert_eq!(
+            count_starting_with(&right, "drop:right-zone-a:after"),
+            1,
+            "{right:?}"
+        );
+        assert_eq!(count_starting_with(&right, "end:"), 1, "{right:?}");
+        assert_eq!(
+            count_starting_with(&trace_of(&left_trace), "end:"),
+            1,
+            "the first provider's session must not reopen"
+        );
+    });
+}
+
+/// A source and two targets under one id prefix, so two providers can mount
+/// structurally identical surfaces without sharing an element id.
+fn scoped_drag_tree(scope: &str, trace: &Arc<Mutex<Vec<String>>>) -> Node {
+    let source_id = format!("{scope}-source");
+    let zone_id = format!("{scope}-zone-a");
+
+    let mut source = drag_box(&source_id, 60.0, 40.0);
+    source.interaction.focusable = true;
+    source.a11y.tab_index = Some(0);
+    source.interaction.drag_source = Some(traced_source(&source_id, "Alpha", trace));
+
+    let mut zone = drag_box(&zone_id, 60.0, 40.0);
+    zone.interaction.drop_target = Some(traced_target(
+        &zone_id,
+        "Zone A",
+        trace,
+        false,
+        1,
+        NodeDropCommit::Committed,
+    ));
+
+    let mut row = Node::container();
+    row.id = Some(format!("{scope}-row"));
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+    row.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+    row.child(source).child(zone)
+}
+
+/// g16.025. The keyboard route creates the same semantic session as the
+/// pointer: pickup on a focused opted-in source, ordered traversal, one
+/// revalidated commit, and the same terminal cleanup. It never calls the
+/// component handler directly.
+#[test]
+fn keyboard_pickup_traversal_and_drop_use_the_same_session() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(custom_drag_tree(&trace, false)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.wait_for_focus_handle("custom-source");
+        driver.focus_element("custom-source");
+        let controller = driver.drag();
+
+        driver.dispatch_key_raw("space");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(
+            controller.snapshot().input_kind,
+            Some(NodeDragInputKind::Keyboard)
+        );
+        assert_eq!(trace_of(&trace), ["start:custom-source"]);
+
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("custom-zone-a"),
+            "the first Next step lands on the first ordered target"
+        );
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("custom-zone-b")
+        );
+        driver.dispatch_key_raw("up");
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("custom-zone-a")
+        );
+        driver.dispatch_key_raw("end");
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("custom-zone-b"),
+            "End is explicit, not inferred from a synthetic point"
+        );
+
+        driver.dispatch_key_raw("enter");
+        let events = trace_of(&trace);
+        assert_eq!(
+            count_starting_with(&events, "drop:custom-zone-b:after"),
+            1,
+            "{events:?}"
+        );
+        assert_eq!(
+            count_starting_with(&events, "end:committed:"),
+            1,
+            "{events:?}"
+        );
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+
+        let announcements = controller.announcements();
+        assert!(
+            announcements.first().is_some_and(|text| text.contains("Picked up Alpha")),
+            "{announcements:?}"
+        );
+        assert!(
+            announcements.last().is_some_and(|text| text.starts_with("Dropped Alpha")),
+            "{announcements:?}"
+        );
+    });
+}
+
+/// g16.025. A target that rejects at commit time is a terminal rejection, not
+/// a silent no-op: the drop handler ran, nothing committed, the session ended
+/// once, and the reason reaches the announcement.
+#[test]
+fn a_rejected_commit_ends_the_session_with_its_reason() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(custom_drag_tree_with(
+            &trace,
+            false,
+            NodeDropCommit::Rejected {
+                reason: Some("Zone is locked".to_string()),
+            },
+            true,
+        )));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        let source = payload_frac("custom-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("custom-zone-a", 0.5, 0.75));
+        driver.pointer_release(payload_frac("custom-zone-a", 0.5, 0.75));
+
+        let events = trace_of(&trace);
+        assert_eq!(
+            count_starting_with(&events, "drop:custom-zone-a:after"),
+            1,
+            "{events:?}"
+        );
+        assert_eq!(
+            count_starting_with(&events, "end:rejected:Zone is locked"),
+            1,
+            "{events:?}"
+        );
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert!(
+            controller
+                .announcements()
+                .iter()
+                .any(|text| text.contains("Zone is locked")),
+            "{:?}",
+            controller.announcements()
+        );
+    });
+}
+
+/// g16.025. The capability matrix is a statement about crates.io GPUI 0.2.2,
+/// not about the fixture. Driving a complete mouse drag must leave `pen`,
+/// `touch`, and `device_cancel` false and report the input kind honestly as
+/// mouse: synthesized mouse input is never evidence for a device the crate
+/// does not expose.
+#[test]
+fn a_mouse_fixture_cannot_make_an_unsupported_capability_true() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(custom_drag_tree(&trace, false)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        let before = controller.capabilities();
+        assert_eq!(before, poodle_gpui_node_backend::GPUI_DRAG_CAPABILITIES);
+
+        let source = payload_frac("custom-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("custom-zone-a", 0.5, 0.75));
+        assert_eq!(
+            controller.snapshot().input_kind,
+            Some(NodeDragInputKind::Mouse),
+            "a synthesized mouse gesture reports itself as mouse"
+        );
+        driver.pointer_release(payload_frac("custom-zone-a", 0.5, 0.75));
+
+        let after = controller.capabilities();
+        assert_eq!(after, before, "capabilities are immutable");
+        assert!(after.mouse && after.keyboard && after.in_window_capture);
+        assert!(
+            !after.pen && !after.touch && !after.device_cancel,
+            "stock GPUI 0.2.2 exposes no pen identity, touch contact, or device cancel"
+        );
+    });
+}
+
+/// g16.025. A disabled source registers nothing, so no press, threshold, or
+/// release can open a session.
+#[test]
+fn a_source_without_a_registration_is_completely_inert() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(custom_drag_tree(&trace, true)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        let source = payload_frac("custom-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("custom-zone-a", 0.5, 0.75));
+        driver.pointer_release(payload_frac("custom-zone-a", 0.5, 0.75));
+
+        assert!(trace_of(&trace).is_empty(), "{:?}", trace_of(&trace));
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert!(controller.source_ids().is_empty());
+        assert_eq!(controller.target_ids().len(), 2);
+    });
+}
+
+/// g16.025. Duplicate live ids are errors, not last-writer-wins: the second
+/// registration is refused and recorded, so two rows sharing an id cannot
+/// silently steal one another's callbacks.
+#[test]
+fn a_duplicate_live_target_id_is_recorded_and_refused() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let mut row = custom_drag_tree(&trace, false);
+        let mut clash = drag_box("custom-zone-clash", 40.0, 40.0);
+        clash.interaction.drop_target = Some(traced_target(
+            "custom-zone-a",
+            "Clashing zone",
+            &trace,
+            false,
+            3,
+            NodeDropCommit::Committed,
+        ));
+        row = row.child(clash);
+
+        let node = Arc::new(Mutex::new(row));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 320.0, 100.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        assert_eq!(controller.target_ids().len(), 2, "the clash is refused");
+        assert!(
+            controller
+                .conflicts()
+                .iter()
+                .any(|entry| entry.contains("duplicate live drop target id `custom-zone-a`")),
+            "{:?}",
+            controller.conflicts()
         );
     });
 }
@@ -13132,5 +13702,250 @@ fn a_long_select_menu_clips_overflowing_option_rows() {
             );
             assert!(!host.spec.current_open());
         }
+    });
+}
+
+/// g16.025. Tree's complete authored native behaviour through real mounted
+/// GPUI dispatch: row selection, twisty expand/collapse, a keyboard command,
+/// and the drag route it now takes through the shared substrate — hovered
+/// intent with the nested band, a committed reorder, and a cancelled one that
+/// changes nothing. Every step drives real input and asserts the host spec the
+/// component rebuilt from.
+#[test]
+fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
+    use poodle_render::TreeHandlers;
+    use poodle_specs::{DropPosition as TreeDropPosition, TreeNode, TreeSpec};
+
+    #[derive(Clone)]
+    struct TreeHost {
+        nodes: Vec<TreeNode>,
+        selected: Vec<String>,
+        expanded: Vec<String>,
+        drag: Option<String>,
+        drop_target: Option<String>,
+        drop_position: TreeDropPosition,
+        reorders: Vec<(String, String, poodle_node::DropEdge)>,
+        keys: Vec<String>,
+    }
+
+    fn nodes() -> Vec<TreeNode> {
+        vec![
+            TreeNode::new("alpha", "Alpha"),
+            TreeNode::new("bravo", "Bravo").with_children(vec![TreeNode::new("bravo-1", "Bravo 1")]),
+            TreeNode::new("charlie", "Charlie"),
+        ]
+    }
+
+    fn spec_of(host: &TreeHost) -> TreeSpec {
+        TreeSpec::new(host.nodes.clone())
+            .with_selected_values(host.selected.clone())
+            .with_expanded_values(host.expanded.clone())
+            .with_reorderable(true)
+            .with_drag(
+                host.drag.clone(),
+                host.drop_target.clone(),
+                host.drop_position,
+            )
+            .with_aria_label("Files")
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(TreeHost {
+            nodes: nodes(),
+            selected: Vec::new(),
+            expanded: Vec::new(),
+            drag: None,
+            drop_target: None,
+            drop_position: TreeDropPosition::After,
+            reorders: Vec::new(),
+            keys: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+
+        fn build(host: &Arc<Mutex<TreeHost>>, mounted: &Arc<Mutex<Node>>) -> Node {
+            let rebuild = {
+                let host = Arc::clone(host);
+                let mounted = Arc::clone(mounted);
+                move || {
+                    let next = build(&host, &mounted);
+                    *mounted.lock().expect("mount lock") = next;
+                }
+            };
+            let spec = spec_of(&host.lock().expect("host lock"));
+            poodle_render::tree(
+                &spec,
+                &RenderContext::new(&theme()),
+                TreeHandlers {
+                    on_select: Some({
+                        let host = Arc::clone(host);
+                        let rebuild = rebuild.clone();
+                        Arc::new(move |value: &str| {
+                            host.lock().expect("host lock").selected = vec![value.to_owned()];
+                            rebuild();
+                        })
+                    }),
+                    on_toggle_expand: Some({
+                        let host = Arc::clone(host);
+                        let rebuild = rebuild.clone();
+                        Arc::new(move |value: &str| {
+                            {
+                                let mut host = host.lock().expect("host lock");
+                                if let Some(index) =
+                                    host.expanded.iter().position(|open| open == value)
+                                {
+                                    host.expanded.remove(index);
+                                } else {
+                                    host.expanded.push(value.to_owned());
+                                }
+                            }
+                            rebuild();
+                        })
+                    }),
+                    on_key: Some({
+                        let host = Arc::clone(host);
+                        Arc::new(move |value: &str, key, _mods| {
+                            host.lock()
+                                .expect("host lock")
+                                .keys
+                                .push(format!("{value}:{key:?}"));
+                        })
+                    }),
+                    on_drag_over: Some({
+                        let host = Arc::clone(host);
+                        let rebuild = rebuild.clone();
+                        Arc::new(move |dragged: &str, over: &str, edge| {
+                            {
+                                let mut host = host.lock().expect("host lock");
+                                host.drag = Some(dragged.to_owned());
+                                host.drop_target = Some(over.to_owned());
+                                host.drop_position = match edge {
+                                    poodle_node::DropEdge::Before => TreeDropPosition::Before,
+                                    poodle_node::DropEdge::Inside => TreeDropPosition::Inside,
+                                    poodle_node::DropEdge::After => TreeDropPosition::After,
+                                };
+                            }
+                            rebuild();
+                        })
+                    }),
+                    on_reorder: Some({
+                        let host = Arc::clone(host);
+                        let rebuild = rebuild.clone();
+                        Arc::new(move |dragged: &str, over: &str, edge| {
+                            {
+                                let mut host = host.lock().expect("host lock");
+                                host.reorders
+                                    .push((dragged.to_owned(), over.to_owned(), edge));
+                                let from = host
+                                    .nodes
+                                    .iter()
+                                    .position(|node| node.value == dragged);
+                                let to = host.nodes.iter().position(|node| node.value == over);
+                                if let (Some(from), Some(to)) = (from, to) {
+                                    let moved = host.nodes.remove(from);
+                                    let mut index = host
+                                        .nodes
+                                        .iter()
+                                        .position(|node| node.value == over)
+                                        .unwrap_or(to);
+                                    if edge == poodle_node::DropEdge::After {
+                                        index += 1;
+                                    }
+                                    host.nodes.insert(index, moved);
+                                }
+                                host.drag = None;
+                                host.drop_target = None;
+                            }
+                            rebuild();
+                        })
+                    }),
+                    ..TreeHandlers::default()
+                },
+            )
+        }
+
+        *mounted.lock().expect("mount lock") = build(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 260.0, 180.0);
+        driver.draw_frame();
+
+        // ── Selection through the real row listener ──
+        driver.pointer_activate_id("tree:charlie");
+        assert_eq!(host.lock().expect("host lock").selected, ["charlie"]);
+
+        // ── Twisty expands, and the revealed child is a real row ──
+        driver.pointer_activate_id("tree-twisty:bravo");
+        assert_eq!(host.lock().expect("host lock").expanded, ["bravo"]);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("tree:bravo-1").is_some(),
+            "the expanded branch's child paints as its own row"
+        );
+
+        // ── A keyboard command reaches the host with the row it landed on ──
+        //
+        // Tree rows are sequential tab stops without a backend-owned focus
+        // handle (they declare no focus ring or focus-change observer), so the
+        // route in is GPUI's own traversal — the native counterpart of Tab.
+        driver.focus_next_tab_stop();
+        driver.dispatch_key_raw("down");
+        {
+            let keys = host.lock().expect("host lock").keys.clone();
+            assert_eq!(keys.len(), 1, "one keystroke, one report: {keys:?}");
+            let (value, key) = keys[0].split_once(':').expect("value:key");
+            assert!(
+                ["alpha", "bravo", "bravo-1", "charlie"].contains(&value),
+                "the key is reported for the row that actually holds focus: {keys:?}"
+            );
+            assert_eq!(
+                key, "ArrowDown",
+                "a navigation key reaches the host as a key, not as a focus move the                  component invented"
+            );
+        }
+
+        // ── Cancelled drag: hovered intent appears, then nothing commits ──
+        let alpha = payload_frac("tree:alpha", 0.5, 0.5);
+        driver.pointer_press(alpha);
+        driver.pointer_drag(point(px(f32::from(alpha.x) + 4.0), alpha.y));
+        driver.pointer_drag(payload_frac("tree:charlie", 0.5, 0.5));
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.drag.as_deref(), Some("alpha"));
+            assert_eq!(host.drop_target.as_deref(), Some("charlie"));
+            assert_eq!(
+                host.drop_position,
+                TreeDropPosition::Inside,
+                "a tree row's middle band is a nested placement, not a sibling one"
+            );
+        }
+        driver.dispatch_key("escape");
+        {
+            let host = host.lock().expect("host lock");
+            assert!(host.reorders.is_empty(), "Escape commits nothing");
+            assert_eq!(
+                host.nodes.iter().map(|node| node.value.as_str()).collect::<Vec<_>>(),
+                ["alpha", "bravo", "charlie"]
+            );
+        }
+
+        // ── Committed drag: the bottom band is `after`, and the host reorders ──
+        let alpha = payload_frac("tree:alpha", 0.5, 0.5);
+        driver.pointer_press(alpha);
+        driver.pointer_drag(point(px(f32::from(alpha.x) + 4.0), alpha.y));
+        driver.pointer_drag(payload_frac("tree:charlie", 0.5, 0.9));
+        driver.pointer_release(payload_frac("tree:charlie", 0.5, 0.9));
+
+        let host = host.lock().expect("host lock");
+        assert_eq!(
+            host.reorders,
+            [(
+                "alpha".to_string(),
+                "charlie".to_string(),
+                poodle_node::DropEdge::After
+            )],
+            "exactly one reorder, carrying the resolved band"
+        );
+        assert_eq!(
+            host.nodes.iter().map(|node| node.value.as_str()).collect::<Vec<_>>(),
+            ["bravo", "charlie", "alpha"]
+        );
+        assert!(host.drag.is_none() && host.drop_target.is_none());
     });
 }

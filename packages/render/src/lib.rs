@@ -65,6 +65,7 @@ pub mod detail_section_group;
 pub mod detail_shell;
 pub mod dialog;
 pub mod dock_region;
+pub mod drag_drop;
 pub mod drawer;
 pub mod duration_input;
 pub mod editable_label;
@@ -262,6 +263,11 @@ pub use detail_section_group::detail_section_group;
 pub use detail_shell::detail_shell;
 pub use dialog::{dialog, dialog_with_slots};
 pub use dock_region::{dock_collapse_focus_id, dock_region, dock_tab_focus_id, DockRegionHandlers};
+pub use drag_drop::{
+    attach_source, attach_target, edge_from_position, horizontal_band_resolver, linear_keyboard_resolver, move_only,
+    nested_target, position_for_fraction, position_from_edge, rejects_self, reorder_source,
+    reorder_subject, reorder_target, vertical_band_resolver, REORDER_SUBJECT_KIND,
+};
 pub use drawer::drawer;
 pub use duration_input::{duration_input, duration_input_with_handlers, DurationInputHandlers};
 pub use editable_label::{editable_label, editable_label_with_handlers, EditableLabelHandlers};

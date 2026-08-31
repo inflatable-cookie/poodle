@@ -15,7 +15,7 @@ use std::sync::Arc;
 
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node, NodeKey, NodeRole, ShadowLayer, StylePatch,
+    Node, NodeDropCommit, NodeKey, NodeRole, ShadowLayer, StylePatch,
 };
 use poodle_specs::{ActiveEdge, ActiveFill, Orientation, TabActivationMode, TabVariant, TabsSpec};
 
@@ -43,6 +43,17 @@ pub struct TabsHandlers {
     /// tabsets with the same values must never share backend focus handles.
     pub instance_id: Option<String>,
     pub has_panel: bool,
+}
+
+/// Per-instance drag scope. Two mounted tab sets with the same values must
+/// not mint one source or target id — the controller treats a duplicate live
+/// id as an error rather than last-writer-wins.
+fn drag_scope(handlers: &TabsHandlers) -> String {
+    handlers
+        .instance_id
+        .as_deref()
+        .map(|scope| format!("tabs:{scope}"))
+        .unwrap_or_else(|| "tabs".to_string())
 }
 
 fn tab_list_runtime_id(handlers: &TabsHandlers) -> Option<String> {
@@ -395,22 +406,35 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
         return;
     }
     node.style.descriptor.cursor = CursorHint::Grab;
-    node.interaction.drag_payload = Some(tab.value.clone());
-    node.interaction.drop_zone = true;
+    let scope = drag_scope(handlers);
+    let value = tab.value.clone();
+
+    // Source. `on_drag_start` and `on_drag_end` keep their `Fn(&str)` shape:
+    // the tab value IS the subject id, so the row's own value answers both
+    // without the terminal outcome having to carry a subject back.
+    let mut source = crate::drag_drop::reorder_source(&scope, &value, &tab.label);
     if let Some(handler) = &handlers.on_drag_start {
         let handler = Arc::clone(handler);
-        node.interaction.on_drag_start = Some(Arc::new(move |payload| handler(payload)));
+        source.on_drag_start = Some(Arc::new(move |session| handler(&session.subject.id)));
     }
     if let Some(handler) = &handlers.on_drag_end {
         let handler = Arc::clone(handler);
-        node.interaction.on_drag_end = Some(Arc::new(move |payload| handler(payload)));
+        let value = value.clone();
+        source.on_drag_end = Some(Arc::new(move |_outcome| handler(&value)));
     }
+    crate::drag_drop::attach_source(node, true, source);
+
+    // Target. A tab bar reorders along its main axis, so the band rule reads
+    // the horizontal fraction; the drop itself reorders onto this tab's index
+    // and does not branch on the band.
+    let mut target = crate::drag_drop::reorder_target(&scope, &value, &tab.label);
+    target.resolve_position = Some(crate::drag_drop::horizontal_band_resolver(false));
     if let Some(handler) = &handlers.on_drop_target_change {
         let hover = Arc::clone(handler);
-        let value = tab.value.clone();
-        node.interaction.on_drop_hover = Some(Arc::new(move |_event| hover(Some(&value))));
+        let value = value.clone();
+        target.on_intent = Some(Arc::new(move |_event| hover(Some(&value))));
         let leave = Arc::clone(handler);
-        node.interaction.on_drop_leave = Some(Arc::new(move || leave(None)));
+        target.on_intent_cleared = Some(Arc::new(move || leave(None)));
     }
     let items = tabs_items(spec);
     let reorderable = spec.is_reorderable;
@@ -418,9 +442,14 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
     let on_focus = handlers.on_focus.clone();
     let instance_id = handlers.instance_id.clone();
     let to_index = index;
-    node.interaction.on_drop = Some(Arc::new(move |event| {
-        let Some(from_index) = items.iter().position(|item| item.value == event.payload) else {
-            return;
+    target.on_drop = Some(Arc::new(move |event| {
+        let Some(from_index) = items
+            .iter()
+            .position(|item| item.value == event.subject.id)
+        else {
+            return NodeDropCommit::Rejected {
+                reason: Some("The dragged tab is no longer in this tab set".to_string()),
+            };
         };
         let context = poodle_headless::tabs::TabsContext {
             items: items.clone(),
@@ -446,7 +475,9 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
             on_focus.as_ref(),
             true,
         );
+        NodeDropCommit::Committed
     }));
+    crate::drag_drop::attach_target(node, true, target);
 }
 
 fn wire_collection_semantics(
@@ -1255,18 +1286,56 @@ mod tests {
     }
 
     #[test]
-    fn reorderable_tabs_publish_payload_and_drop_zones() {
+    fn reorderable_tabs_register_a_scoped_source_and_target() {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let root = tabs(&reorder_spec(), &ctx, None, None);
         let a = tab_of(&root, "a");
-        assert_eq!(a.interaction.drag_payload.as_deref(), Some("a"));
-        assert!(a.interaction.drop_zone);
+        let source = a.interaction.drag_source.as_ref().expect("source");
+        assert_eq!(source.source_id, "tabs:source:a");
+        assert_eq!(source.subject.id, "a");
+        assert_eq!(source.subject.kind, crate::drag_drop::REORDER_SUBJECT_KIND);
+        assert_eq!(
+            a.interaction
+                .drop_target
+                .as_ref()
+                .expect("target")
+                .target_id,
+            "tabs:target:a"
+        );
         assert_eq!(a.style.descriptor.cursor, CursorHint::Grab);
         let disabled = tab_of(&root, "c");
-        assert!(disabled.interaction.drag_payload.is_none());
-        assert!(!disabled.interaction.drop_zone);
+        assert!(disabled.interaction.drag_source.is_none());
+        assert!(disabled.interaction.drop_target.is_none());
         assert!(disabled.interaction.on_key.is_none());
+    }
+
+    /// A tab bar runs along its main axis, so the band rule must read the
+    /// horizontal fraction. Reading the vertical one would answer `before`
+    /// for the whole strip and make every pointer reorder identical.
+    #[test]
+    fn the_tab_band_rule_reads_the_horizontal_fraction() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let root = tabs(&reorder_spec(), &ctx, None, None);
+        let target = tab_of(&root, "a").interaction.drop_target.clone().expect("target");
+        let resolve = target.resolve_position.expect("resolver");
+        let input = |x: f32, y: f32| poodle_node::NodeDropPositionInput {
+            fraction_x: x,
+            fraction_y: y,
+            subject: crate::drag_drop::reorder_subject("b"),
+            operation: poodle_node::DragOperation::Move,
+            input_kind: poodle_node::NodeDragInputKind::Mouse,
+        };
+
+        assert_eq!(
+            resolve(&input(0.1, 0.9)).as_deref(),
+            Some(poodle_node::DROP_POSITION_BEFORE)
+        );
+        assert_eq!(
+            resolve(&input(0.9, 0.1)).as_deref(),
+            Some(poodle_node::DROP_POSITION_AFTER)
+        );
     }
 
     #[test]
@@ -1292,11 +1361,16 @@ mod tests {
                 ..TabsHandlers::default()
             },
         );
-        let target = tab_of(&root, "d");
-        (target.interaction.on_drop.as_ref().expect("drop"))(&poodle_node::NodeDropEvent {
-            payload: "a".to_owned(),
-            edge: poodle_node::DropEdge::After,
+        let target = tab_of(&root, "d").interaction.drop_target.clone().expect("target");
+        let commit = (target.on_drop.as_ref().expect("drop"))(&poodle_node::NodeDropCommitEvent {
+            subject: crate::drag_drop::reorder_subject("a"),
+            intent: poodle_node::DropIntent {
+                target_id: target.target_id.clone(),
+                position: poodle_node::DROP_POSITION_AFTER.to_string(),
+                operation: poodle_node::DragOperation::Move,
+            },
         });
+        assert_eq!(commit, poodle_node::NodeDropCommit::Committed);
         assert_eq!(
             orders.lock().unwrap().as_slice(),
             [vec![

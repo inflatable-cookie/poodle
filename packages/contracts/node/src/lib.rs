@@ -24,6 +24,18 @@
 use std::fmt;
 use std::sync::Arc;
 
+pub mod drag;
+
+pub use drag::{
+    DragAnnouncementKind, DragCancelReason, DragOperation, DragSession, DragSessionPhase,
+    DragSubject, DragTerminalOutcome, DropEligibility, DropIntent, DropPosition,
+    NodeDragCapabilities, NodeDragEndHandler, NodeDragInputKind, NodeDragSource,
+    NodeDragStartHandler, NodeDropCommit, NodeDropCommitHandler, NodeDropEligibilityResolver,
+    NodeDropCommitEvent, NodeDropIntentClearedHandler, NodeDropIntentEvent, NodeDropIntentHandler,
+    NodeDropPositionInput, NodeDropPositionResolver, NodeDropTarget, NodeKeyboardDropDirection,
+    NodeKeyboardPositionInput, NodeKeyboardPositionResolver, DROP_POSITION_AFTER,
+    DROP_POSITION_BEFORE, DROP_POSITION_INSIDE,
+};
 pub use poodle_layout::{
     CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutOverflow, LayoutSizing,
     MainAxisAlignment,
@@ -548,27 +560,20 @@ pub enum NodeKey {
     Delete,
 }
 
-/// Where a drop lands relative to the zone it is over.
+/// Where a drop lands relative to the target it is over — the three-value
+/// shorthand a reorder component's public callback speaks.
+///
+/// The semantic session carries the open [`DropPosition`] string, because a
+/// consumer may define its own placements. A component whose contract only
+/// ever has before / inside / after keeps this closed enum on its own
+/// callbacks and maps at the edge (`poodle_render::drag_drop`), so the
+/// substrate stays open while the component contract stays exact.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum DropEdge {
     Before,
     #[default]
     Inside,
     After,
-}
-
-/// A drag hovering or released over a drop zone.
-///
-/// The backend hit-tests zones and derives `edge` from where the pointer sits
-/// within the zone node's OWN bounds — geometry the backend already holds. The
-/// component names its zones and receives a semantic edge, so this does not
-/// reopen the delta-only rule on [`NodeDragEvent`]: no coordinate reaches the
-/// component here either.
-#[derive(Clone, Debug)]
-pub struct NodeDropEvent {
-    /// The [`Interaction::drag_payload`] of the node the gesture started on.
-    pub payload: String,
-    pub edge: DropEdge,
 }
 
 /// Handler for an activation (click, enter key, tap). Payload is captured by
@@ -729,26 +734,15 @@ pub struct Interaction {
     /// component chooses the semantic destination; the backend owns the
     /// actual platform focus operation.
     pub on_key: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
-    /// Marks this node as a drag source carrying an opaque payload id. The
-    /// component chooses the id; the backend only carries it back.
-    pub drag_payload: Option<String>,
-    /// Marks this node as a drop zone for `drag_payload` gestures.
-    pub drop_zone: bool,
-    /// Fires once after the backend drag threshold, with the payload id.
-    pub on_drag_start: Option<Arc<dyn Fn(&str) + Send + Sync>>,
-    /// Fires exactly once after a successful drop or cancellation, with the
-    /// payload id captured at start.
-    pub on_drag_end: Option<Arc<dyn Fn(&str) + Send + Sync>>,
-    /// Fires repeatedly while a drag hovers this zone — drives the drop
-    /// indicator. The backend delivers this only while the pointer is inside
-    /// this zone's own bounds.
-    pub on_drop_hover: Option<Arc<dyn Fn(&NodeDropEvent) + Send + Sync>>,
-    /// Fires when this zone stops being the active drop target — the pointer
-    /// left its bounds, another zone became the target, or the gesture ended.
-    pub on_drop_leave: Option<Arc<dyn Fn() + Send + Sync>>,
-    /// Fires once when a drag is released over this zone. `edge` is the last
-    /// edge computed during hover, not a default.
-    pub on_drop: Option<Arc<dyn Fn(&NodeDropEvent) + Send + Sync>>,
+    /// Registers this node as a semantic drag source with the runtime's drag
+    /// controller. Identity, subject, allowed operations, accessible name, and
+    /// the start/terminal callbacks live in the registration; the gesture that
+    /// activates it does not.
+    pub drag_source: Option<NodeDragSource>,
+    /// Registers this node as a semantic drop target. The controller measures
+    /// it, arbitrates it against every other live target, and hands the
+    /// registration's resolvers a fraction of its own bounds — never a point.
+    pub drop_target: Option<NodeDropTarget>,
 }
 
 /// Accessibility roles the ported components have needed so far. Grows with
@@ -1121,16 +1115,14 @@ mod tests {
         assert!(matches!(&found.unwrap().kind, NodeKind::Text { content } if content == "go"));
     }
 
+    /// An ordinary node is neither a source nor a target. A default that
+    /// registered anything would put every container into the controller's
+    /// arbitration set and make "deepest live target" meaningless.
     #[test]
-    fn payload_lifecycle_intents_are_opt_in() {
+    fn drag_registrations_are_opt_in() {
         let node = Node::container();
-        assert!(node.interaction.drag_payload.is_none());
-        assert!(!node.interaction.drop_zone);
-        assert!(node.interaction.on_drag_start.is_none());
-        assert!(node.interaction.on_drag_end.is_none());
-        assert!(node.interaction.on_drop_hover.is_none());
-        assert!(node.interaction.on_drop_leave.is_none());
-        assert!(node.interaction.on_drop.is_none());
+        assert!(node.interaction.drag_source.is_none());
+        assert!(node.interaction.drop_target.is_none());
     }
 
     #[test]

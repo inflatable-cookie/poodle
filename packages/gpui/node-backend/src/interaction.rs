@@ -815,7 +815,7 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
     }
     el = apply_continuous_listeners(el, node, id);
     el = apply_selection_listeners(el, node);
-    apply_drop_listeners(el, node, id)
+    crate::drag::apply_drag_listeners(el, node, id)
 }
 
 /// Captured continuous-value, wheel, and double-activation routes.
@@ -1052,254 +1052,6 @@ fn apply_selection_listeners(mut el: Stateful<Div>, node: &Node) -> Stateful<Div
     el
 }
 
-/// One backend-owned payload-drag session. Shared by the production overlay
-/// host and the headless mount host so start/leave/drop/end stay ordered and
-/// end fires exactly once on every path — including release outside a zone
-/// and Escape — without a component-specific global or a GPUI fork.
-struct PayloadSession {
-    payload: String,
-    end: Option<Arc<dyn Fn(&str) + Send + Sync>>,
-    current_zone: Option<String>,
-    current_leave: Option<Arc<dyn Fn() + Send + Sync>>,
-    last_edge: DropEdge,
-    ended: bool,
-    dropped: bool,
-}
-
-thread_local! {
-    static PAYLOAD_SESSION: RefCell<Option<PayloadSession>> = const { RefCell::new(None) };
-}
-
-fn finish_payload_session(session: &mut PayloadSession, cx: &mut App) {
-    if session.ended {
-        return;
-    }
-    session.ended = true;
-    if let Some(leave) = session.current_leave.take() {
-        leave();
-    }
-    session.current_zone = None;
-    if let Some(end) = session.end.take() {
-        end(&session.payload);
-    }
-    cx.refresh_windows();
-}
-
-fn begin_payload_session(
-    payload: String,
-    start: Option<Arc<dyn Fn(&str) + Send + Sync>>,
-    end: Option<Arc<dyn Fn(&str) + Send + Sync>>,
-    cx: &mut App,
-) {
-    PAYLOAD_SESSION.with(|session| {
-        let mut slot = session.borrow_mut();
-        if let Some(existing) = slot.as_mut() {
-            finish_payload_session(existing, cx);
-        }
-        *slot = Some(PayloadSession {
-            payload: payload.clone(),
-            end,
-            current_zone: None,
-            current_leave: None,
-            last_edge: DropEdge::default(),
-            ended: false,
-            dropped: false,
-        });
-        if let Some(start) = start {
-            start(&payload);
-        }
-    });
-    cx.refresh_windows();
-}
-
-fn payload_session_move(
-    zone_id: &str,
-    hit: bool,
-    edge: DropEdge,
-    hover: Option<&Arc<dyn Fn(&NodeDropEvent) + Send + Sync>>,
-    leave: Option<&Arc<dyn Fn() + Send + Sync>>,
-    cx: &mut App,
-) {
-    PAYLOAD_SESSION.with(|session| {
-        let mut slot = session.borrow_mut();
-        let Some(session) = slot.as_mut() else {
-            return;
-        };
-        if session.ended {
-            return;
-        }
-        if hit {
-            if session.current_zone.as_deref() != Some(zone_id) {
-                if let Some(previous) = session.current_leave.take() {
-                    previous();
-                }
-                session.current_zone = Some(zone_id.to_owned());
-                session.current_leave = leave.cloned();
-            }
-            session.last_edge = edge;
-            if let Some(hover) = hover {
-                hover(&NodeDropEvent {
-                    payload: session.payload.clone(),
-                    edge,
-                });
-            }
-            cx.refresh_windows();
-        } else if session.current_zone.as_deref() == Some(zone_id) {
-            if let Some(previous) = session.current_leave.take() {
-                previous();
-            }
-            session.current_zone = None;
-            cx.refresh_windows();
-        }
-    });
-}
-
-fn payload_session_drop(drop: &Arc<dyn Fn(&NodeDropEvent) + Send + Sync>, cx: &mut App) {
-    PAYLOAD_SESSION.with(|session| {
-        let mut slot = session.borrow_mut();
-        let Some(session) = slot.as_mut() else {
-            return;
-        };
-        if session.ended {
-            return;
-        }
-        session.dropped = true;
-        drop(&NodeDropEvent {
-            payload: session.payload.clone(),
-            edge: session.last_edge,
-        });
-        finish_payload_session(session, cx);
-    });
-}
-
-/// End an unfinished payload session as cancellation. Called from the shared
-/// root host on mouse-up after the zone `on_drop` bubble (so a successful
-/// drop has already ended the session) and when no zone was hit.
-pub(crate) fn release_payload_session(cx: &mut App) {
-    PAYLOAD_SESSION.with(|session| {
-        let mut slot = session.borrow_mut();
-        let Some(active) = slot.as_mut() else {
-            return;
-        };
-        if active.ended || active.dropped {
-            return;
-        }
-        finish_payload_session(active, cx);
-    });
-}
-
-/// Escape cancellation: end the session once, then stop stock GPUI's drag so
-/// the preview does not linger. Returns whether a live payload session was
-/// cancelled.
-pub(crate) fn cancel_payload_session(window: &mut Window, cx: &mut App) -> bool {
-    let cancelled = PAYLOAD_SESSION.with(|session| {
-        let mut slot = session.borrow_mut();
-        let Some(active) = slot.as_mut() else {
-            return false;
-        };
-        if active.ended {
-            return false;
-        }
-        finish_payload_session(active, cx);
-        true
-    });
-    if cancelled {
-        cx.stop_active_drag(window);
-    }
-    cancelled
-}
-
-/// Drag sources and drop zones.
-///
-/// The edge is derived here, from the zone's own bounds, and only the
-/// resulting `DropEdge` reaches the component — the vocabulary's rule that a
-/// component never sees layout stays intact. Hover is hit-tested against those
-/// same bounds because GPUI's `on_drag_move` is type-wide: every zone hears
-/// every payload move.
-fn apply_drop_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> Stateful<Div> {
-    if let Some(payload) = &node.interaction.drag_payload {
-        let payload = NodeDragPayload {
-            id: payload.clone(),
-        };
-        let start = node.interaction.on_drag_start.clone();
-        let end = node.interaction.on_drag_end.clone();
-        let payload_id = payload.id.clone();
-        el = el.on_drag(payload, move |_payload, _offset, _window, cx| {
-            // gpui requires a preview entity; the drop indicator is drawn by
-            // the component from its own `on_drop_hover` state, so this is
-            // deliberately empty. The constructor is stock GPUI's drag-start
-            // boundary (after the 2px threshold).
-            begin_payload_session(payload_id.clone(), start.clone(), end.clone(), cx);
-            cx.new(|_| EmptyDragPreview)
-        });
-    }
-    if !node.interaction.drop_zone {
-        return el;
-    }
-    // A branch zone accepts an "inside" drop; a leaf only takes before/after.
-    let accepts_inside = node.a11y.role == Some(NodeRole::TreeItem) || node.children.is_empty();
-    let zone_id = id.to_owned();
-    let hover = node.interaction.on_drop_hover.clone();
-    let leave = node.interaction.on_drop_leave.clone();
-    el = el.on_drag_move::<NodeDragPayload>(move |event, _window, cx| {
-        let hit = event.bounds.contains(&event.event.position);
-        let height = f32::from(event.bounds.size.height).max(1.0);
-        let rel = f32::from(event.event.position.y - event.bounds.origin.y) / height;
-        payload_session_move(
-            &zone_id,
-            hit,
-            edge_for(rel, accepts_inside),
-            hover.as_ref(),
-            leave.as_ref(),
-            cx,
-        );
-    });
-    if let Some(handler) = &node.interaction.on_drop {
-        let drop = handler.clone();
-        el = el.on_drop::<NodeDragPayload>(move |_payload, _window, cx| {
-            payload_session_drop(&drop, cx);
-        });
-    }
-    el
-}
-
-/// Split a zone's height into before / inside / after bands. A zone that
-/// cannot take an inside drop splits in half instead of thirds.
-fn edge_for(rel: f32, accepts_inside: bool) -> DropEdge {
-    if accepts_inside {
-        if rel < 0.25 {
-            DropEdge::Before
-        } else if rel > 0.75 {
-            DropEdge::After
-        } else {
-            DropEdge::Inside
-        }
-    } else if rel < 0.5 {
-        DropEdge::Before
-    } else {
-        DropEdge::After
-    }
-}
-
-#[cfg(test)]
-mod payload_edge_tests {
-    use super::{edge_for, DropEdge};
-
-    #[test]
-    fn a_zone_that_accepts_inside_keeps_before_and_after_bands() {
-        assert_eq!(edge_for(0.1, true), DropEdge::Before);
-        assert_eq!(edge_for(0.5, true), DropEdge::Inside);
-        assert_eq!(edge_for(0.9, true), DropEdge::After);
-    }
-
-    #[test]
-    fn a_leaf_zone_never_collapses_to_the_default_inside_edge() {
-        assert_eq!(edge_for(0.25, false), DropEdge::Before);
-        assert_eq!(edge_for(0.5, false), DropEdge::After);
-        assert_ne!(edge_for(0.5, false), DropEdge::default());
-    }
-}
-
 fn window_point(position: gpui::Point<gpui::Pixels>) -> (f32, f32) {
     (position.x.into(), position.y.into())
 }
@@ -1366,8 +1118,8 @@ fn scrub_fraction(
     }
 }
 
-/// Payload for gesture drags (scrub, resize) — distinct from
-/// `NodeDragPayload`, so a scrub never lands in a drop zone.
+/// Payload for gesture drags (scrub, resize) — distinct from the drag
+/// controller's `NativeDragPayload`, so a scrub never joins a drag session.
 ///
 /// It carries the originating element's id because `on_drag_move` is dispatched
 /// by drag *type*: every gesture-draggable node in the window hears every
@@ -1375,12 +1127,6 @@ fn scrub_fraction(
 /// until each listener started checking that the gesture began on itself.
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct NodeGestureDrag(String);
-
-/// The dragged node's opaque id, carried through gpui's drag channel.
-#[derive(Clone, Debug)]
-struct NodeDragPayload {
-    id: String,
-}
 
 /// gpui requires a preview entity for every drag; components draw their own
 /// indicator, so this renders nothing.

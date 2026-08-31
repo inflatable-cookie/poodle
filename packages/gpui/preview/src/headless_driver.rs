@@ -46,6 +46,11 @@ pub struct HeadlessRoot {
     pub focus: FocusHandle,
     box_width: f32,
     box_height: f32,
+    /// The mount host's own drag controller. Production hosts wrap their root
+    /// in exactly one provider; a regression that needs two independent
+    /// sessions mounts two provider elements instead (see
+    /// `HeadlessContent::Element`).
+    pub drag: poodle_gpui_node_backend::DragDropController,
 }
 
 impl Focusable for HeadlessRoot {
@@ -68,31 +73,50 @@ impl Render for HeadlessRoot {
         // frame, and an unstamped node's identity — click state, focus
         // handle, ring registry key — changes between frames.
         poodle_gpui_node_backend::reset_element_ids();
-        let content = match &self.content {
-            HeadlessContent::Node(node) => {
-                let node = node.lock().expect("node lock").clone();
-                poodle_gpui_node_backend::to_gpui(&node)
-            }
-            HeadlessContent::Element(build) => build(),
-        };
         // The window-level overlay host: every pointer press and Escape is
         // routed through the node backend's layer registry (generic — no
         // component identifier here), so overlay dismissal executes through
         // the real event tree. The production preview root uses the same
         // wiring, so dismissal behaves identically here and in the real app.
-        poodle_gpui_node_backend::attach_overlay_host(
-            div().size_full().track_focus(&self.focus).child(
-                div()
-                    .w(px(self.box_width))
-                    .h(px(self.box_height))
-                    .ml(px(MOUNT_BOX_LEFT))
-                    .mt(px(MOUNT_BOX_TOP))
-                    .flex()
-                    .items_center()
-                    .justify_center()
-                    .child(content),
-            ),
-        )
+        // The drag provider wraps the overlay host, exactly as the production
+        // preview root does: every source and target built below belongs to
+        // this host's controller, and release, Escape, keyboard, and the
+        // rebuild sweep run through it rather than a backend global.
+        let box_width = self.box_width;
+        let box_height = self.box_height;
+        let focus = self.focus.clone();
+        // The node tree is converted INSIDE the provider closure: drag sources
+        // and drop targets register while this controller is current, and a
+        // conversion that happened before the push would register with nobody.
+        let content = match &self.content {
+            HeadlessContent::Node(node) => {
+                let node = Arc::clone(node);
+                HeadlessContent::Node(node)
+            }
+            HeadlessContent::Element(build) => HeadlessContent::Element(Rc::clone(build)),
+        };
+        poodle_gpui_node_backend::drag_drop_provider(&self.drag, || {
+            let content = match &content {
+                HeadlessContent::Node(node) => {
+                    let node = node.lock().expect("node lock").clone();
+                    poodle_gpui_node_backend::to_gpui(&node)
+                }
+                HeadlessContent::Element(build) => build(),
+            };
+            poodle_gpui_node_backend::attach_overlay_host(
+                div().size_full().track_focus(&focus).child(
+                    div()
+                        .w(px(box_width))
+                        .h(px(box_height))
+                        .ml(px(MOUNT_BOX_LEFT))
+                        .mt(px(MOUNT_BOX_TOP))
+                        .flex()
+                        .items_center()
+                        .justify_center()
+                        .child(content),
+                ),
+            )
+        })
     }
 }
 
@@ -132,6 +156,7 @@ impl<'a> HeadlessDriver<'a> {
                 focus: cx.focus_handle(),
                 box_width,
                 box_height,
+                drag: poodle_gpui_node_backend::DragDropController::new(),
             };
             window.refresh();
             root
@@ -157,6 +182,7 @@ impl<'a> HeadlessDriver<'a> {
                 focus: cx.focus_handle(),
                 box_width: MOUNT_BOX_WIDTH,
                 box_height: MOUNT_BOX_HEIGHT,
+                drag: poodle_gpui_node_backend::DragDropController::new(),
             };
             window.refresh();
             root
@@ -171,6 +197,12 @@ impl<'a> HeadlessDriver<'a> {
         };
         driver.draw_frame();
         driver
+    }
+
+    /// The mount host's drag controller — the one every source and target in
+    /// a mounted node tree registers with.
+    pub fn drag(&mut self) -> poodle_gpui_node_backend::DragDropController {
+        self.cx.update(|_window, cx| self.root.read(cx).drag.clone())
     }
 
     /// Swap in a new node and repaint.
