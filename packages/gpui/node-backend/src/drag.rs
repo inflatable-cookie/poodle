@@ -268,7 +268,9 @@ struct ControllerState {
     /// explicitly permits — would leave an otherwise idle window sitting in
     /// `Preparing` until some unrelated interaction happened to draw a frame.
     /// The sender is `Send + Sync`; the task that receives on it lives on the
-    /// main thread and owns the `Rc` controller.
+    /// main thread and holds a `Weak` handle it upgrades per wake. A strong
+    /// handle there would be a cycle — this field owns the sender, so the
+    /// stream could never end.
     wake: Option<CrossWindowWaker>,
     preview: Option<PreviewRenderer>,
     describe_announcement: Option<AnnouncementRenderer>,
@@ -282,7 +284,6 @@ struct ControllerState {
 /// answers.
 struct CrossWindowSourceTransaction {
     session_id: String,
-    source_id: String,
     bridge: Arc<dyn CrossWindowDragSourceBridge>,
     /// The channel the host watches to stop work this session no longer wants.
     abort: CrossWindowAbort,
@@ -656,7 +657,8 @@ impl DragDropController {
     /// thread. It posts to the inbox and sends on this channel; the task below
     /// runs on the main thread, drains with a real `App`, and asks for a frame
     /// so the result is painted. `App::spawn` gives the task an `AsyncApp`,
-    /// which is why the controller — an `Rc` — can be captured at all.
+    /// which is what lets it reach the controller at all — through a `Weak`
+    /// handle upgraded per wake, never a strong clone.
     fn ensure_wake(&self, cx: &mut App) {
         if self.state.borrow().wake.is_some() {
             return;
@@ -724,7 +726,6 @@ impl DragDropController {
             let mut state = self.state.borrow_mut();
             state.cross_window_source = Some(CrossWindowSourceTransaction {
                 session_id: session_id.to_owned(),
-                source_id: source.source_id.clone(),
                 bridge: Arc::clone(&bridge),
                 abort: abort.clone(),
                 receipt: None,
