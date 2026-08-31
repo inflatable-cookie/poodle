@@ -1,0 +1,29 @@
+{
+  "worktree": {
+    "setup": "effigy skill run --path \"${NORTHSTAR_SKILL_PATH:-$HOME/.agents/skills/northstar}\" paseo:worktree -- prepare && effigy bootstrap:deps && effigy skill run --path \"${NORTHSTAR_SKILL_PATH:-$HOME/.agents/skills/northstar}\" paseo:worktree -- link",
+    "teardown": "effigy skill run --path \"${NORTHSTAR_SKILL_PATH:-$HOME/.agents/skills/northstar}\" paseo:worktree -- unlink"
+  },
+  "scripts": {
+    "qa": { "command": "effigy qa" },
+    "docs": { "command": "effigy docs:check" },
+    "docs-dev": {
+      "command": "bun run --cwd packages/svelte/preview dev -- --port \"$PASEO_PORT\" --strictPort",
+      "type": "service",
+      "port": 4173
+    }
+  },
+  "metadataGeneration": {
+    "title": {
+      "instructions": "Name the bounded Poodle outcome in three to seven words. Prefer the component, runtime, or generation-card language already used in the repo."
+    },
+    "branchName": {
+      "instructions": "Use worker/<short-kebab-case-outcome> for implementation workers. Use research/<short-kebab-topic> for research-only docs. Keep the name short and outcome-shaped."
+    },
+    "commitMessage": {
+      "instructions": "Use a Conventional Commit subject: <type>(<scope>): <imperative outcome>. Prefer feat, fix, docs, or chore. For generation-card work, use the card id as scope (for example g16.026). Omit the scope when it adds no signal."
+    },
+    "pullRequest": {
+      "instructions": "Lead with the shipped outcome. Name the governing contract, component, or generation card. State affected runtimes, validation evidence, and unresolved items. Keep the PR focused on one coherent outcome. Do not claim merge authority."
+    }
+  }
+}
