@@ -1,6 +1,6 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: active — compiled as g16.021–g16.028; g16.021–g16.024 merged; g16.025 at readiness gate
+Status: active — compiled as g16.021–g16.028; g16.021–g16.024 merged; g16.025 ready
 Updated: 2026-08-30
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
@@ -12,10 +12,12 @@ Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 ## Purpose
 
 Define a predictable drag-and-drop framework for Poodle components and
-consumer-built surfaces. It must support mouse, pen, touch, keyboard,
-same-document movement, nested targets, auto-scroll, same-application
-cross-window transfer, inbound files, and native file drag-out in browser,
-Electron, Tauri, and GPUI contexts.
+consumer-built surfaces. It must support same-document movement, nested
+targets, auto-scroll, same-application cross-window transfer, inbound files,
+and native file drag-out. Web adapters in browsers, Electron, and Tauri
+webviews support mouse, pen-shaped pointers, touch, and keyboard. The stock
+GPUI adapter consumes the same semantic lifecycle through the input
+capabilities crates.io GPUI actually exposes.
 
 The framework removes repeated event choreography. It does not centralize
 application mutation or window authority.
@@ -26,8 +28,9 @@ application mutation or window authority.
   TypeScript for Svelte/React and Rust for shared native composition.
 - One public custom-surface substrate per active runtime, not only internal
   helpers for Poodle components.
-- Internal pointer and keyboard sensors, including touch from the first
-  delivery.
+- Web pointer and keyboard sensors, including touch from the first delivery;
+  native adapters publish their real input capabilities rather than inferring
+  support from synthesized mouse events.
 - Deterministic nested target selection, edge intent, drag preview, focus,
   announcements, and auto-scroll.
 - Explicit adapters for host-owned cross-window transfer, native inbound file
@@ -301,14 +304,14 @@ source survives, removes every document listener/observer/timer/attribute, and
 destroys an internally-created controller exactly once. An injected controller
 is disconnected but not destroyed.
 
-Mouse, pen, and touch differ only in default activation constraints. Components
-may choose a dedicated handle. Poodle does not attach document-wide
-`touch-action:none`.
+On web, mouse, pen, and touch differ only in default activation constraints.
+Components may choose a dedicated handle. Poodle does not attach
+document-wide `touch-action:none`.
 
 ## Touch And Scroll
 
-Touch is required in the first implementation. Defaults should favor scrolling
-until intent is clear:
+Touch is required in the first web implementation. Defaults should favor
+scrolling until intent is clear:
 
 - a handle may use a small distance threshold;
 - a whole-row source should normally use a short hold plus movement tolerance;
@@ -584,7 +587,11 @@ period.
 
 ### Mounted native
 
-- GPUI pointer and keyboard pickup, hover, intent, drop, cancel, and rebuild;
+- GPUI mouse and keyboard pickup, hover, intent, drop, cancel, and rebuild;
+- stock `on_drag_move` proves the in-window capture-equivalent result;
+- the adapter advertises pen, touch, and device-originated pointer cancel as
+  unsupported on crates.io GPUI 0.2.2; tests must not infer them from mouse
+  synthesis;
 - two independent sessions cannot collide;
 - source/target disappearance is safe; and
 - renderer-neutral Rust outputs remain consumable by deferred Jetstream.

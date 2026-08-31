@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.024 merged; g16.025 awaits its GPUI input-capability readiness gate
+Status: active — g16.024 merged; g16.025 ready
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -55,7 +55,7 @@ stay maintained; backend admission is not part of the first card.
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — complete; merged in PR #101
 23. [023 — EditableList simple reorder migration](023-drag-drop-simple-reorder-migrations.md) — complete; merged in PR #104
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — complete; merged in PR #107
-25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — planned; depends on 024
+25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — ready; stock-GPUI desktop capability boundary approved
 26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
@@ -316,7 +316,8 @@ ledger cell moved.
 `g16.024` merged in PR #107. Tree now proves nested intent, demand-driven
 auto-scroll, live drop revalidation, one-shot Alt+Arrow movement, and semantic
 focus ownership through the shared web substrate. No ledger cell moved.
-`g16.025` is next, but is not dispatch-ready until its readiness gate records
-the mouse, pen, touch, pointer-cancel, capture, and keyboard capabilities
-actually exposed by crates.io GPUI 0.2.2. Tabs still moves with DockRegion in
-`g16.026`. EditableLabel stays decision-blocked.
+`g16.025` is ready. Stock GPUI 0.2.2 certifies mouse, keyboard, and its
+in-window capture-equivalent drag route. Pen, touch, and device-originated
+pointer cancellation remain explicit unsupported debt; mouse synthesis is not
+evidence. Tabs still moves with DockRegion in `g16.026`. EditableLabel stays
+decision-blocked.

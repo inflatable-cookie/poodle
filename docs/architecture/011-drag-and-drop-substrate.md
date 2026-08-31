@@ -67,8 +67,17 @@ replacement cross-runtime conformance authority.
 
 Same-document pointer and keyboard movement uses a Poodle-owned transport.
 Web uses Pointer Events and explicit pointer capture rather than HTML Drag and
-Drop. GPUI uses its native pointer dispatch. Touch, mouse, pen, and keyboard
-drive the same session and target-selection rules.
+Drop. Its first delivery certifies touch, mouse, pen-shaped pointers, and
+keyboard against the same session and target-selection rules.
+
+GPUI uses stock crates.io input rather than a fork or a second OS input
+backend. GPUI 0.2.2 certifies mouse and keyboard. Its typed `on_drag_move`
+route supplies the observable in-window capture result, while Escape, release,
+host rebuild, and explicit host cancellation close the session. The crate does
+not expose touch contacts, pen identity, or a device-originated pointer-cancel
+event, so the GPUI adapter advertises those capabilities as unsupported. Mouse
+synthesis is not pen or touch evidence. This is declared active-runtime debt;
+the semantic session and target-selection rules do not fork around it.
 
 This transport covers reorder, nested placement, application-local movement,
 previews, auto-scroll, and cancellation. It does not pretend to follow a
@@ -214,7 +223,9 @@ Certification is layered:
   Desktop Playwright WebKit has no native touch-move injection, so its headless
   leg proves touch-shaped Pointer Event hold/tolerance behavior and must label
   that limitation rather than claiming native touch scrolling;
-- mounted GPUI tests prove native pointer and keyboard dispatch;
+- mounted GPUI tests prove native mouse and keyboard dispatch plus the stock
+  `on_drag_move` capture-equivalent path. They do not claim pen, touch, or
+  device-cancel support from mouse synthesis;
 - a host-controlled multi-window fixture proves preparation, opaque-token
   transfer, target revalidation, commit, and cancellation without taking
   operator focus; and
