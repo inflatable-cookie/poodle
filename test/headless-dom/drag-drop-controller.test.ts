@@ -298,11 +298,30 @@ describe("createDragDropController", () => {
     controller.destroy();
   });
 
+  it("does not pick up from Space or Enter unless the source declares keyboardOrder", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+    sourceEl.focus();
+
+    const space = new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true });
+    sourceEl.dispatchEvent(space);
+    expect(space.defaultPrevented).toBe(false);
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    const enter = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+    sourceEl.dispatchEvent(enter);
+    expect(enter.defaultPrevented).toBe(false);
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
   it("picks up from the keyboard, moves intent, and drops", () => {
     const onDrop = vi.fn(() => ({ status: "committed" as const }));
     const controller = createDragDropController();
     controller.connect(root);
-    controller.registerSource(sourceEl, sourceReg());
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0 }));
     controller.registerTarget(targetEl, targetReg({ onDrop }));
     sourceEl.focus();
 
@@ -339,7 +358,10 @@ describe("createDragDropController", () => {
 
     const controller = createDragDropController();
     controller.connect(root);
-    controller.registerSource(rowB, sourceReg({ sourceId: "b", subject: { kind: "item", id: "b" }, label: "Beta" }));
+    controller.registerSource(
+      rowB,
+      sourceReg({ sourceId: "b", subject: { kind: "item", id: "b" }, label: "Beta", keyboardOrder: 0 }),
+    );
     controller.registerTarget(rowA, rowTarget("a"));
     controller.registerTarget(rowB, rowTarget("b"));
     controller.registerTarget(rowC, rowTarget("c"));
@@ -352,6 +374,23 @@ describe("createDragDropController", () => {
     expect(controller.getSnapshot().targetId).toBe("c");
     root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     expect(onDrop).toHaveBeenCalledWith({ targetId: "c", position: "after", operation: "move" });
+    controller.destroy();
+  });
+
+  it("does not start a pointer drag from a data-poodle-no-drag descendant", () => {
+    const row = layout(document.createElement("div"), SOURCE_BOX);
+    const twisty = document.createElement("span");
+    twisty.setAttribute("data-poodle-no-drag", "");
+    row.append(twisty);
+    root.replaceChildren(row, targetEl);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(row, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    twisty.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    twisty.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("idle");
     controller.destroy();
   });
 
@@ -708,6 +747,210 @@ describe("createDragDropController", () => {
     again.destroy();
   });
 
+  it("requestKeyboardDrop commits through the ordinary keyboard lifecycle", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onStart = vi.fn();
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(
+      sourceEl,
+      sourceReg({ keyboardOrder: 0, onDragStart: onStart, onDragEnd: onEnd }),
+    );
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "dst", order: 1, onDrop, label: "List" }));
+    sourceEl.focus();
+
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(true);
+    expect(onStart).toHaveBeenCalledTimes(1);
+    expect(onDrop).toHaveBeenCalledWith({ targetId: "dst", position: "after", operation: "move" });
+    expect(onEnd).toHaveBeenCalledWith({
+      status: "committed",
+      intent: { targetId: "dst", position: "after", operation: "move" },
+    });
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(controller.getSnapshot().announcement).toBe("Dropped Alpha on List");
+    expect(document.activeElement).toBe(sourceEl);
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop prefers a live logical target over a DOM target with the same id", () => {
+    const logicalDrop = vi.fn(() => ({ status: "committed" as const }));
+    const domDrop = vi.fn(() => ({ status: "committed" as const }));
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0 }));
+    controller.registerTarget(targetEl, targetReg({ targetId: "shared", onDrop: domDrop }));
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "shared", order: 1, onDrop: logicalDrop, label: "Logical" }),
+    );
+
+    expect(
+      controller.requestKeyboardDrop({ sourceId: "src", targetId: "shared", position: "before" }),
+    ).toBe(true);
+    expect(logicalDrop).toHaveBeenCalledTimes(1);
+    expect(domDrop).not.toHaveBeenCalled();
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop returns false without a session when the registration is missing, disabled, mismatched, or busy", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    controller.registerKeyboardTarget(keyboardTargetReg({ targetId: "dst", order: 1, onDrop }));
+
+    expect(controller.requestKeyboardDrop({ sourceId: "missing", targetId: "dst", position: "after" })).toBe(false);
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "missing", position: "after" })).toBe(false);
+
+    const disabled = controller.registerSource(
+      layout(document.createElement("button"), SOURCE_BOX),
+      sourceReg({ sourceId: "off", subject: { kind: "item", id: "off" }, label: "Off", disabled: true }),
+    );
+    expect(controller.requestKeyboardDrop({ sourceId: "off", targetId: "dst", position: "after" })).toBe(false);
+    disabled.unregister();
+
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "other", acceptedKinds: ["file"], order: 2, onDrop }),
+    );
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "other", position: "after" })).toBe(false);
+
+    sourceEl.focus();
+    sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(false);
+    controller.cancel();
+    expect(onDrop).not.toHaveBeenCalled();
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop revalidates canDrop and rejects without invoking onDrop", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    controller.registerKeyboardTarget(
+      keyboardTargetReg({
+        targetId: "dst",
+        order: 1,
+        onDrop,
+        canDrop: () => ({ accepted: false, reason: "blocked" }),
+      }),
+    );
+
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(true);
+    expect(onDrop).not.toHaveBeenCalled();
+    expect(onEnd).toHaveBeenCalledWith({ status: "rejected", reason: "blocked" });
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop rejects an async drop when the logical target is disabled or removed before commit", async () => {
+    let finish: (value: { status: "committed" }) => void = () => {};
+    const pending = new Promise<{ status: "committed" }>((resolve) => {
+      finish = resolve;
+    });
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0, onDragEnd: onEnd }));
+    const handle = controller.registerKeyboardTarget(
+      keyboardTargetReg({ targetId: "dst", order: 1, onDrop: () => pending }),
+    );
+
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(true);
+    expect(controller.getSnapshot().phase).toBe("dropping");
+    handle.update(keyboardTargetReg({ targetId: "dst", order: 1, onDrop: () => pending, disabled: true }));
+    expect(onEnd.mock.calls.at(-1)?.[0]).toEqual({ status: "rejected", reason: "target-unavailable" });
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    finish({ status: "committed" });
+    await pending;
+    await Promise.resolve();
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop commits a distant DOM-only target with the authored position", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ onDragEnd: onEnd }));
+    controller.registerTarget(targetEl, targetReg({ onDrop }));
+
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(true);
+    expect(onDrop).toHaveBeenCalledWith({ targetId: "dst", position: "after", operation: "move" });
+    expect(onEnd).toHaveBeenCalledWith({
+      status: "committed",
+      intent: { targetId: "dst", position: "after", operation: "move" },
+    });
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop returns false for a disabled DOM target", () => {
+    const onDrop = vi.fn(() => ({ status: "committed" as const }));
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg({ onDrop, disabled: true }));
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "inside" })).toBe(false);
+
+    const live = layout(document.createElement("div"), TARGET_BOX);
+    live.setAttribute("aria-disabled", "true");
+    root.append(live);
+    controller.registerTarget(live, targetReg({ targetId: "aria", onDrop }));
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "aria", position: "inside" })).toBe(false);
+    expect(onDrop).not.toHaveBeenCalled();
+    controller.destroy();
+  });
+
+  it("requestKeyboardDrop rejects an async DOM drop when the target is disabled or unregistered before commit", async () => {
+    let finish: (value: { status: "committed" }) => void = () => {};
+    const pending = new Promise<{ status: "committed" }>((resolve) => {
+      finish = resolve;
+    });
+    const onEnd = vi.fn();
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ onDragEnd: onEnd }));
+    const handle = controller.registerTarget(targetEl, targetReg({ onDrop: () => pending }));
+
+    expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "inside" })).toBe(true);
+    expect(controller.getSnapshot().phase).toBe("dropping");
+    handle.update(targetReg({ onDrop: () => pending, disabled: true }));
+    expect(onEnd.mock.calls.at(-1)?.[0]).toEqual({ status: "rejected", reason: "target-unavailable" });
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    finish({ status: "committed" });
+    await pending;
+    await Promise.resolve();
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+
+    let finishAgain: (value: { status: "committed" }) => void = () => {};
+    const pendingAgain = new Promise<{ status: "committed" }>((resolve) => {
+      finishAgain = resolve;
+    });
+    const onEndAgain = vi.fn();
+    const again = createDragDropController();
+    again.connect(root);
+    again.registerSource(sourceEl, sourceReg({ onDragEnd: onEndAgain }));
+    const live = again.registerTarget(targetEl, targetReg({ onDrop: () => pendingAgain }));
+    expect(again.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "inside" })).toBe(true);
+    live.unregister();
+    expect(onEndAgain.mock.calls.at(-1)?.[0]).toEqual({
+      status: "rejected",
+      reason: "target-unavailable",
+    });
+    finishAgain({ status: "committed" });
+    await pendingAgain;
+    await Promise.resolve();
+    expect(again.getSnapshot().phase).toBe("idle");
+    again.destroy();
+  });
+
   it("cancels an active session on Escape", () => {
     const onEnd = vi.fn();
     const controller = createDragDropController();
@@ -953,7 +1196,7 @@ describe("createDragDropController", () => {
     expect(controller.getSnapshot().phase).toBe("dragging");
 
     document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 50 }));
-    expect(queued.length).toBe(1);
+    expect(queued.length).toBeGreaterThanOrEqual(1);
     document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
     expect(onDrop).toHaveBeenCalledTimes(1);
     expect(controller.getSnapshot().phase).toBe("idle");
@@ -1110,7 +1353,10 @@ describe("createDragDropController", () => {
     expect(onEnd).toHaveBeenCalledWith({ status: "cancelled", reason: "source-lost" });
     expect(controller.getSnapshot().phase).toBe("idle");
 
-    const keyboard = controller.registerSource(sourceEl, sourceReg({ onDragEnd: onEnd, label: "Keys" }));
+    const keyboard = controller.registerSource(
+      sourceEl,
+      sourceReg({ onDragEnd: onEnd, label: "Keys", keyboardOrder: 0 }),
+    );
     sourceEl.focus();
     sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
     expect(controller.getSnapshot().phase).toBe("dragging");
@@ -1218,6 +1464,185 @@ describe("createDragDropController", () => {
     layout(targetEl, { x: 10, y: 40, width: 80, height: 20 });
     notify?.([], {} as ResizeObserver);
     expect(controller.getSnapshot().targetPosture).toBe("accepted");
+    controller.destroy();
+  });
+
+  it("auto-scrolls the nearest nested container and stops on cancel", () => {
+    const frames: FrameRequestCallback[] = [];
+    let now = 1000;
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    vi.stubGlobal("cancelAnimationFrame", () => {
+      frames.length = 0;
+    });
+
+    function scroller(
+      element: HTMLElement,
+      box: { x: number; y: number; width: number; height: number },
+      values: { scrollTop: number; scrollHeight: number; clientHeight: number },
+    ): HTMLElement {
+      element.style.overflow = "auto";
+      layout(element, box);
+      Object.defineProperty(element, "scrollTop", { configurable: true, writable: true, value: values.scrollTop });
+      Object.defineProperty(element, "scrollHeight", { configurable: true, get: () => values.scrollHeight });
+      Object.defineProperty(element, "clientHeight", { configurable: true, get: () => values.clientHeight });
+      return element;
+    }
+
+    const outerState = { scrollTop: 40, scrollHeight: 400, clientHeight: 100 };
+    const innerState = { scrollTop: 40, scrollHeight: 300, clientHeight: 80 };
+    const outer = scroller(document.createElement("div"), { x: 0, y: 0, width: 200, height: 100 }, outerState);
+    const inner = scroller(document.createElement("div"), { x: 10, y: 10, width: 180, height: 80 }, innerState);
+    Object.defineProperty(outer, "scrollTop", {
+      configurable: true,
+      get: () => outerState.scrollTop,
+      set: (value: number) => {
+        outerState.scrollTop = value;
+      },
+    });
+    Object.defineProperty(inner, "scrollTop", {
+      configurable: true,
+      get: () => innerState.scrollTop,
+      set: (value: number) => {
+        innerState.scrollTop = value;
+      },
+    });
+    inner.append(targetEl);
+    outer.append(inner);
+    root.append(outer);
+    layout(targetEl, { x: 20, y: 20, width: 80, height: 20 });
+
+    const originalFromPoint = document.elementFromPoint.bind(document);
+    document.elementFromPoint = () => inner;
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg({ autoScroll: true }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 14 }));
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    const innerBefore = innerState.scrollTop;
+    const outerBefore = outerState.scrollTop;
+    now += 16;
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(innerState.scrollTop).toBeLessThan(innerBefore);
+    expect(outerState.scrollTop).toBe(outerBefore);
+
+    innerState.scrollTop = 0;
+    innerState.scrollHeight = 80;
+    now += 16;
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(outerState.scrollTop).toBeLessThan(outerBefore);
+
+    const outerAfterInnerExhausted = outerState.scrollTop;
+    controller.cancel();
+    now += 16;
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(outerState.scrollTop).toBe(outerAfterInnerExhausted);
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    document.elementFromPoint = originalFromPoint;
+    controller.destroy();
+  });
+
+  it("stops the auto-scroll frame on leave and exhaustion, then restarts on re-entry", () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    let nextId = 1;
+    let now = 1000;
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      const id = nextId++;
+      frames.set(id, callback);
+      return id;
+    });
+    vi.stubGlobal("cancelAnimationFrame", (id: number) => {
+      frames.delete(id);
+    });
+    function flush(): void {
+      const pending = [...frames.values()];
+      frames.clear();
+      pending.forEach((frame) => frame(now));
+    }
+    function drain(): void {
+      for (let i = 0; i < 8 && frames.size > 0; i += 1) {
+        now += 16;
+        flush();
+      }
+    }
+
+    const innerState = { scrollTop: 80, scrollHeight: 300, clientHeight: 80 };
+    const inner = document.createElement("div");
+    inner.style.overflow = "auto";
+    layout(inner, { x: 10, y: 10, width: 180, height: 80 });
+    Object.defineProperty(inner, "scrollTop", {
+      configurable: true,
+      get: () => innerState.scrollTop,
+      set: (value: number) => {
+        innerState.scrollTop = value;
+      },
+    });
+    Object.defineProperty(inner, "scrollHeight", { configurable: true, get: () => innerState.scrollHeight });
+    Object.defineProperty(inner, "clientHeight", { configurable: true, get: () => innerState.clientHeight });
+    inner.append(targetEl);
+    root.append(inner);
+    layout(targetEl, { x: 20, y: 20, width: 80, height: 20 });
+
+    const originalFromPoint = document.elementFromPoint.bind(document);
+    document.elementFromPoint = () => inner;
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg({ autoScroll: true }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 50 }));
+    flush();
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    now += 16;
+    flush();
+    expect(frames.size).toBe(0);
+
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 14 }));
+    now += 16;
+    flush();
+    now += 16;
+    flush();
+    expect(innerState.scrollTop).toBeLessThan(80);
+    expect(frames.size).toBeGreaterThan(0);
+
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 50 }));
+    drain();
+    expect(frames.size).toBe(0);
+    const afterLeave = innerState.scrollTop;
+    now += 16;
+    flush();
+    expect(frames.size).toBe(0);
+    expect(innerState.scrollTop).toBe(afterLeave);
+
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 14 }));
+    now += 16;
+    flush();
+    now += 16;
+    flush();
+    expect(innerState.scrollTop).toBeLessThan(afterLeave);
+    expect(frames.size).toBeGreaterThan(0);
+
+    innerState.scrollTop = 0;
+    drain();
+    expect(frames.size).toBe(0);
+    const exhausted = innerState.scrollTop;
+    now += 16;
+    flush();
+    expect(frames.size).toBe(0);
+    expect(innerState.scrollTop).toBe(exhausted);
+
+    document.elementFromPoint = originalFromPoint;
     controller.destroy();
   });
 });

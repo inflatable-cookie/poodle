@@ -11,7 +11,26 @@
         border: 1px solid #888;
         margin: 16px;
       }
+      #outer-scroll {
+        height: 180px;
+        overflow: auto;
+        border: 1px solid #888;
+        margin: 16px;
+      }
+      #inner-scroll {
+        height: 90px;
+        overflow: auto;
+        margin: 24px 8px;
+        border: 1px dashed #666;
+      }
+      #nested-source, #nested-target {
+        width: 140px;
+        padding: 8px;
+        margin: 8px;
+        border: 1px solid #444;
+      }
       #spacer { height: 160px; }
+      .nested-spacer { height: 120px; }
       #source, #target {
         width: 160px;
         padding: 12px;
@@ -30,6 +49,16 @@
         <button type="button" id="source">Alpha</button>
         <div id="target">List</div>
         <div id="spacer"></div>
+      </div>
+      <div id="outer-scroll">
+        <div class="nested-spacer"></div>
+        <div id="inner-scroll">
+          <div class="nested-spacer" style="height: 100px"></div>
+          <button type="button" id="nested-source">Nested Alpha</button>
+          <div id="nested-target">Nested List</div>
+          <div class="nested-spacer"></div>
+        </div>
+        <div class="nested-spacer"></div>
       </div>
       <button type="button" id="shift">Shift target</button>
       <div id="probe" data-phase="idle" data-captured="false" data-drop=""></div>

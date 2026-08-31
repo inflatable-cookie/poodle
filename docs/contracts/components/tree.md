@@ -1,7 +1,7 @@
 # Tree
 
 Status: detailed contract
-Updated: 2026-07-25
+Updated: 2026-08-30
 
 ## 1. Purpose
 
@@ -79,11 +79,16 @@ Updated: 2026-07-25
   renders the menu as a positioned overlay routed by token.
 - **Reorder** (`reorderable` + `onReorder`): rows are draggable; a drop fires
   `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`
-  (computed from pointer Y within the target; `inside` only for branches).
-  Alt+↑/↓ moves the focused node among siblings. The shared `reorder_nodes(nodes,
-  from, to, position)` helper performs the move (no-op for self / missing /
-  dropping into own subtree). Svelte uses HTML5 drag; GPUI uses
-  `on_drag`/`on_drop`/`drag_over`; Jetstream tracks mouse down→up over rows.
+  (computed from pointer Y within the target row; `inside` only for branches).
+  Alt+↑/↓ moves the focused node among siblings through
+  `requestKeyboardDrop` over the visible logical target catalogue; it does
+  not call `onReorder` directly. Space/Enter remain selection/activation.
+  The shared `reorder_nodes(nodes, from, to, position)` helper performs the
+  move (no-op for self / missing / dropping into own subtree). Svelte and
+  React use the shared web drag substrate (source/focus owner on the
+  `treeitem`, pointer/touch on the row handle, no HTML `DataTransfer`). GPUI
+  uses `on_drag`/`on_drop`/`drag_over`; Jetstream tracks mouse down→up over
+  rows.
 
 ## 3. Props And Inputs
 
@@ -216,7 +221,7 @@ helpers `visible_rows` / `next_visible` / `prev_visible` / `parent_of`.
 | Enter | Select focused item (replace) and fire `onActivate` |
 | Space | Toggle focused item in the selection set |
 | F2 | Start inline rename of the focused item |
-| Alt+Up / Alt+Down | Move the focused item among its siblings (when `reorderable`) |
+| Alt+Up / Alt+Down | One-keystroke sibling move through `requestKeyboardDrop` (when `reorderable`) |
 | Shift+Down / Shift+Up | Move focus and extend the selection range |
 | Ctrl/Cmd+Click, Ctrl/Cmd+Space | Toggle the item in the selection set |
 | Shift+Click | Select the contiguous visible range from the anchor |
@@ -495,8 +500,18 @@ None.
   snippet `renderNode(node, depth)` so nesting is internal — no public `TreeItem`
 - wrapper strategy: `role="tree"` root with `aria-multiselectable`; roving
   tabindex over visible treeitems (`tabindex=0` on the active item, `-1`
-  elsewhere); pointer + keyboard handlers live on the `treeitem`, which
-  `stopPropagation`s so nested items do not double-fire
+  elsewhere); selection/keyboard handlers live on the `treeitem`, which
+  `stopPropagation`s so nested items do not double-fire. Reorder registers the
+  `treeitem` as the drag source with the row as its pointer handle, and the
+  same `treeitem` as the nested drop target, so Space/Enter keep tree
+  selection/activate, terminal focus returns to the `treeitem`, and
+  ancestor/descendant rows can share a pointer. Geometry still comes from the
+  row. The twisty is marked `data-poodle-no-drag` so expansion is not a drag
+  source. Visible rows register as logical keyboard targets; Alt+↑/↓ calls
+  `requestKeyboardDrop`. Tree omits `keyboardOrder` so ordinary Space/Enter
+  pickup stays off.
+- virtualized windows pin the active source row until the session ends; they
+  do not page or unmount it mid-drag
 - implementation-only details: expansion is uncontrolled-capable via internal
   `$state` seeded from `defaultExpandedValues`; controlled when `expandedValues`
   is non-null. Selection anchor is tracked for Shift range selection

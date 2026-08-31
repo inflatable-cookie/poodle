@@ -2,10 +2,12 @@ import { describe, expect, test } from "bun:test";
 
 import {
   flattenVisibleTreeRows,
+  treeCanAcceptDrop,
   treeCheckState,
   treeKeydownIntent,
   treeRangeSelection,
   treeSiblingReorderTarget,
+  treeSubtreeContains,
   treeToggleCheck,
   treeVirtualWindow,
   type TreeNodeLike,
@@ -129,5 +131,22 @@ describe("treeSiblingReorderTarget / treeVirtualWindow", () => {
     expect(window.endIndex).toBe(27); // ceil(580/28)=21, plus overscan
     expect(window.offsetY).toBe(4 * 28);
     expect(window.totalHeight).toBe(28000);
+  });
+
+  test("virtual window pins an active source that would otherwise unmount", () => {
+    const pinned = treeVirtualWindow(1000, 28, 280, 300, 6, 0);
+    expect(pinned.startIndex).toBe(0);
+    expect(pinned.offsetY).toBe(0);
+    expect(treeVirtualWindow(1000, 28, 280, 300, 6, 40).endIndex).toBe(41);
+  });
+});
+
+describe("treeCanAcceptDrop", () => {
+  test("rejects self, missing, and own-subtree targets", () => {
+    expect(treeCanAcceptDrop(nodes, "src", "docs")).toBe(true);
+    expect(treeCanAcceptDrop(nodes, "src", "src")).toBe(false);
+    expect(treeCanAcceptDrop(nodes, "src", "src/a.ts")).toBe(false);
+    expect(treeSubtreeContains(nodes, "src", "src/lib/c.ts")).toBe(true);
+    expect(treeCanAcceptDrop(nodes, "missing", "docs")).toBe(false);
   });
 });

@@ -11,6 +11,10 @@ const probe = document.getElementById("probe") as HTMLElement;
 const overlay = document.getElementById("overlay") as HTMLElement;
 const live = document.getElementById("live") as HTMLElement;
 const shift = document.getElementById("shift") as HTMLButtonElement;
+const outerScroll = document.getElementById("outer-scroll") as HTMLElement;
+const innerScroll = document.getElementById("inner-scroll") as HTMLElement;
+const nestedSource = document.getElementById("nested-source") as HTMLButtonElement;
+const nestedTarget = document.getElementById("nested-target") as HTMLElement;
 
 source.addEventListener("gotpointercapture", (event) => {
   const pointer = event as PointerEvent;
@@ -29,6 +33,7 @@ controller.registerSource(source, {
   subject: { kind: "item", id: "alpha" },
   allowedOperations: ["move"],
   label: "Alpha",
+  keyboardOrder: 0,
 });
 
 controller.registerTarget(target, {
@@ -48,6 +53,8 @@ function paint(): void {
   probe.dataset.phase = snapshot.phase;
   probe.dataset.target = snapshot.targetId ?? "";
   probe.dataset.posture = snapshot.targetPosture ?? "";
+  probe.dataset.outerScroll = String(outerScroll.scrollTop);
+  probe.dataset.innerScroll = String(innerScroll.scrollTop);
   const captured = [0, 1, 2, 3, 4, 5, 6, 7].some((id) => source.hasPointerCapture(id));
   probe.dataset.captured = captured ? "true" : "false";
   probe.textContent = `${snapshot.phase} ${snapshot.targetId ?? ""} ${snapshot.announcement ?? ""}`;
@@ -67,6 +74,27 @@ function paint(): void {
 
 controller.subscribe(paint);
 paint();
+
+controller.registerSource(nestedSource, {
+  sourceId: "nested-alpha",
+  subject: { kind: "item", id: "nested-alpha" },
+  allowedOperations: ["move"],
+  label: "Nested Alpha",
+  keyboardOrder: 0,
+});
+
+controller.registerTarget(nestedTarget, {
+  targetId: "nested-list",
+  acceptedKinds: ["item"],
+  label: "Nested list",
+  autoScroll: true,
+  resolvePosition: () => "inside",
+  canDrop: (intent) => ({ accepted: true, intent }),
+  onDrop: (intent): DragDropCommitResult => {
+    probe.dataset.drop = `${intent.targetId}:${intent.position}:${intent.operation}`;
+    return { status: "committed" };
+  },
+});
 
 shift.addEventListener("click", () => {
   target.style.minHeight = "160px";

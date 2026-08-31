@@ -1,6 +1,7 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/tree.css";
   import {
+    createDragDropController,
     findTreeNode,
     flattenVisibleTreeRows,
     isTreeBranch,
@@ -10,11 +11,18 @@
     treeSiblingReorderTarget,
     treeToggleCheck,
     treeVirtualWindow,
+    type DragDropCommitResult,
+    type DragSession,
+    type DragTerminalOutcome,
+    type DropIntent,
   } from "@inflatable-cookie/poodle-core";
-  import { untrack } from "svelte";
+  import { onDestroy, untrack } from "svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Checkbox } from "./Checkbox.svelte";
   import { default as Spinner } from "./Spinner.svelte";
+  import DragDropProvider from "./DragDropProvider.svelte";
+  import TreeItem from "./tree-item/TreeItem.svelte";
+  import TreeKeyboardTargets from "./tree-item/TreeKeyboardTargets.svelte";
   import type {
     ControlDensity,
     ControlSize,
@@ -62,6 +70,9 @@
   }
 
   type DropPosition = "before" | "after" | "inside";
+
+  const dragController = createDragDropController();
+  onDestroy(() => dragController.destroy());
 
   let {
     nodes = [],
@@ -204,9 +215,8 @@
   }
 
   // ── Drag-and-drop reorder ──────────────────────────────────────
-  let dragValue = $state<string | null>(null);
-  let dropTarget = $state<string | null>(null);
-  let dropPosition = $state<DropPosition>("after");
+  let activeSourceId = $state<string | null>(null);
+  let liveSourceId: string | null = null;
 
   // The sibling array that contains `value` (its parent's children, or roots).
   function siblingListOf(value: string, list: TreeNode[] = nodes): TreeNode[] | null {
@@ -220,39 +230,26 @@
     return null;
   }
 
-  function clearDrag(): void {
-    dragValue = null;
-    dropTarget = null;
+  function handleDragStart(session: DragSession): void {
+    liveSourceId = session.subject.id;
+    activeSourceId = session.subject.id;
   }
-  function handleDragStart(node: TreeNode, event: DragEvent): void {
-    if (!reorderable || node.isDisabled) return;
-    dragValue = node.value;
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", node.value);
+  function handleDragEnd(_outcome: DragTerminalOutcome): void {
+    liveSourceId = null;
+    activeSourceId = null;
+  }
+  function isTreeDropPosition(position: DropIntent["position"]): position is DropPosition {
+    return position === "before" || position === "after" || position === "inside";
+  }
+
+  function handleDrop(intent: DropIntent): DragDropCommitResult {
+    const from = liveSourceId;
+    if (!from || !isTreeDropPosition(intent.position)) {
+      return { status: "rejected", reason: "unavailable" };
     }
-  }
-  function handleDragOver(node: TreeNode, event: DragEvent): void {
-    if (!reorderable || !dragValue || dragValue === node.value) return;
-    event.preventDefault(); // mark as a valid drop target
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    const ratio = rect.height > 0 ? (event.clientY - rect.top) / rect.height : 0.5;
-    let pos: DropPosition;
-    if (isBranch(node)) {
-      pos = ratio < 0.25 ? "before" : ratio > 0.75 ? "after" : "inside";
-    } else {
-      pos = ratio < 0.5 ? "before" : "after";
-    }
-    dropTarget = node.value;
-    dropPosition = pos;
-  }
-  function handleDrop(node: TreeNode, event: DragEvent): void {
-    if (!reorderable || !dragValue) return;
-    event.preventDefault();
-    const from = dragValue;
-    const pos = dropPosition;
-    clearDrag();
-    if (from !== node.value) onReorder?.(from, node.value, pos);
+    if (from === intent.targetId) return { status: "rejected", reason: "self" };
+    onReorder?.(from, intent.targetId, intent.position);
+    return { status: "committed" };
   }
   // Alt+Up/Down moves the focused node among its siblings.
   function moveSibling(node: TreeNode, dir: 1 | -1): void {
@@ -260,7 +257,11 @@
     if (!sibs) return;
     const move = treeSiblingReorderTarget(sibs, node.value, dir);
     if (!move) return;
-    onReorder?.(node.value, move.target, move.position);
+    dragController.requestKeyboardDrop({
+      sourceId: node.value,
+      targetId: move.target,
+      position: move.position,
+    });
   }
 
   // Flattened visible rows drive keyboard navigation and range selection.
@@ -281,7 +282,12 @@
 
   // ── Virtual scroll windowing (opt-in, flat render) ─────────────
   let scrollTop = $state(0);
-  const virtualWindow = $derived(treeVirtualWindow(visibleRows.length, rowHeightPx, scrollTop, virtualHeight));
+  const pinIndex = $derived(
+    activeSourceId ? visibleRows.findIndex((row) => row.node.value === activeSourceId) : null,
+  );
+  const virtualWindow = $derived(
+    treeVirtualWindow(visibleRows.length, rowHeightPx, scrollTop, virtualHeight, 6, pinIndex),
+  );
   const totalHeight = $derived(virtualWindow.totalHeight);
   const windowRows = $derived(visibleRows.slice(virtualWindow.startIndex, virtualWindow.endIndex));
   const offsetY = $derived(virtualWindow.offsetY);
@@ -424,167 +430,166 @@
   }
 </script>
 
-<div
-  bind:this={rootEl}
-  class="poodle-tree"
-  role="tree"
-  aria-multiselectable="true"
-  aria-label={ariaLabel ?? undefined}
-  data-size={size ?? undefined}
-  data-density={density ?? undefined}
-  data-size-role={sizeRole}
-  data-virtualized={virtualized ? "true" : undefined}
-  data-flat={isFlat ? "true" : undefined}
-  style={virtualized ? `height:${virtualHeight}px;overflow-y:auto;` : undefined}
-  onscroll={virtualized ? handleScroll : undefined}
->
-  {#if virtualized}
-    <div class="poodle-tree__viewport" style={`height:${totalHeight}px;`}>
-      <div class="poodle-tree__window" style={`transform:translateY(${offsetY}px);`}>
-        {#each windowRows as row (row.node.value)}
-          {@render flatItem(row.node, row.depth, row.parent)}
-        {/each}
+<DragDropProvider controller={dragController}>
+  <TreeKeyboardTargets rows={visibleRows} {nodes} {reorderable} {editingValue} onDrop={handleDrop} />
+  <div
+    bind:this={rootEl}
+    class="poodle-tree"
+    role="tree"
+    aria-multiselectable="true"
+    aria-label={ariaLabel ?? undefined}
+    data-size={size ?? undefined}
+    data-density={density ?? undefined}
+    data-size-role={sizeRole}
+    data-virtualized={virtualized ? "true" : undefined}
+    data-flat={isFlat ? "true" : undefined}
+    style={virtualized ? `height:${virtualHeight}px;overflow-y:auto;` : undefined}
+    onscroll={virtualized ? handleScroll : undefined}
+  >
+    {#if virtualized}
+      <div class="poodle-tree__viewport" style={`height:${totalHeight}px;`}>
+        <div class="poodle-tree__window" style={`transform:translateY(${offsetY}px);`}>
+          {#each windowRows as row (row.node.value)}
+            {@render flatItem(row.node, row.depth, row.parent)}
+          {/each}
+        </div>
       </div>
-    </div>
-  {:else}
-    {#each nodes as node (node.value)}
-      {@render renderNode(node, 0, null)}
-    {/each}
-  {/if}
-</div>
-
-{#snippet rowMarkup(node: TreeNode, depth: number, branch: boolean, open: boolean)}
-  <div class="poodle-tree__row">
-    {#each Array.from({ length: depth }) as _, i (i)}
-      <span
-        class="poodle-tree__indent"
-        data-guide={showGuides ? "true" : undefined}
-        aria-hidden="true"
-      ></span>
-    {/each}
-    <span
-      class="poodle-tree__twisty"
-      data-expanded={open ? "true" : undefined}
-      onclick={(event) => handleTwistyClick(node, event)}
-      aria-hidden="true"
-    >
-      {#if branch}
-        <Icon name="chevron-right" />
-      {/if}
-    </span>
-    {#if showCheckboxes}
-      {@const cs = checkState(node)}
-      <span class="poodle-tree__checkbox">
-        <Checkbox
-          checked={cs === "checked"}
-          mixed={cs === "mixed"}
-          disabled={node.isDisabled}
-          label={null}
-          size={size ?? "xs"}
-          onCheckedChange={() => toggleCheck(node)}
-        />
-      </span>
-    {/if}
-    {#if showIcons}
-      <span class="poodle-tree__icon" aria-hidden="true">
-        {#if node.icon}
-          <Icon name={node.icon} />
-        {/if}
-      </span>
-    {/if}
-    {#if isEditing(node.value)}
-      <!-- svelte-ignore a11y_autofocus -->
-      <input
-        bind:this={renameInputEl}
-        class="poodle-tree__rename"
-        bind:value={renameDraft}
-        onkeydown={(event) => renameKeydown(node, event)}
-        onblur={() => commitRename(node)}
-        onclick={(event) => event.stopPropagation()}
-        aria-label={`Rename ${node.label}`}
-      />
     {:else}
-      <span class="poodle-tree__label">{node.label}</span>
-      {#if node.endLabel}
-        <span class="poodle-tree__end-label">{node.endLabel}</span>
-      {/if}
+      {#each nodes as node (node.value)}
+        {@render renderNode(node, 0, null)}
+      {/each}
     {/if}
   </div>
+</DragDropProvider>
+
+{#snippet rowMarkup(node: TreeNode, depth: number, branch: boolean, open: boolean)}
+  {#each Array.from({ length: depth }) as _, i (i)}
+    <span
+      class="poodle-tree__indent"
+      data-guide={showGuides ? "true" : undefined}
+      aria-hidden="true"
+    ></span>
+  {/each}
+  <span
+    class="poodle-tree__twisty"
+    data-expanded={open ? "true" : undefined}
+    data-poodle-no-drag=""
+    onclick={(event) => handleTwistyClick(node, event)}
+    aria-hidden="true"
+  >
+    {#if branch}
+      <Icon name="chevron-right" />
+    {/if}
+  </span>
+  {#if showCheckboxes}
+    {@const cs = checkState(node)}
+    <span class="poodle-tree__checkbox">
+      <Checkbox
+        checked={cs === "checked"}
+        mixed={cs === "mixed"}
+        disabled={node.isDisabled}
+        label={null}
+        size={size ?? "xs"}
+        onCheckedChange={() => toggleCheck(node)}
+      />
+    </span>
+  {/if}
+  {#if showIcons}
+    <span class="poodle-tree__icon" aria-hidden="true">
+      {#if node.icon}
+        <Icon name={node.icon} />
+      {/if}
+    </span>
+  {/if}
+  {#if isEditing(node.value)}
+    <!-- svelte-ignore a11y_autofocus -->
+    <input
+      bind:this={renameInputEl}
+      class="poodle-tree__rename"
+      bind:value={renameDraft}
+      onkeydown={(event) => renameKeydown(node, event)}
+      onblur={() => commitRename(node)}
+      onclick={(event) => event.stopPropagation()}
+      aria-label={`Rename ${node.label}`}
+    />
+  {:else}
+    <span class="poodle-tree__label">{node.label}</span>
+    {#if node.endLabel}
+      <span class="poodle-tree__end-label">{node.endLabel}</span>
+    {/if}
+  {/if}
+{/snippet}
+
+{#snippet itemGroup(node: TreeNode, depth: number)}
+  {#if node.children?.length}
+    {#each node.children as child (child.value)}
+      {@render renderNode(child, depth + 1, node.value)}
+    {/each}
+  {:else if isLoading(node.value)}
+    {@render loadingRow(depth + 1)}
+  {/if}
 {/snippet}
 
 {#snippet renderNode(node: TreeNode, depth: number, parent: string | null)}
   {@const branch = isBranch(node)}
   {@const open = branch && isExpanded(node.value)}
-  {@const selected = isSelected(node.value)}
-  <div
-    class="poodle-tree__item"
-    role="treeitem"
-    data-value={node.value}
-    data-branch={branch ? "true" : undefined}
-    data-selected={selected ? "true" : undefined}
-    data-muted={node.isMuted ? "true" : undefined}
-    data-drop={dropTarget === node.value ? dropPosition : undefined}
-    draggable={reorderable && !node.isDisabled && !isEditing(node.value)}
-    tabindex={effectiveFocus === node.value ? 0 : -1}
-    aria-level={depth + 1}
-    aria-selected={selected}
-    aria-expanded={branch ? open : undefined}
-    aria-disabled={node.isDisabled ? "true" : undefined}
-    onclick={(event) => handleRowClick(node, event)}
-    ondblclick={(event) => handleRowDblClick(node, event)}
-    oncontextmenu={(event) => handleContextMenu(node, event)}
-    ondragstart={(event) => handleDragStart(node, event)}
-    ondragover={(event) => handleDragOver(node, event)}
-    ondrop={(event) => handleDrop(node, event)}
-    ondragend={clearDrag}
-    onkeydown={(event) => handleKeydown({ node, depth, parent }, event)}
+  <TreeItem
+    {node}
+    {nodes}
+    {depth}
+    {parent}
+    {branch}
+    {open}
+    selected={isSelected(node.value)}
+    muted={Boolean(node.isMuted)}
+    focused={effectiveFocus === node.value}
+    {reorderable}
+    editing={isEditing(node.value)}
+    onDrop={handleDrop}
+    onDragStart={handleDragStart}
+    onDragEnd={handleDragEnd}
+    showGroup={branch && open}
+    onClick={(event) => handleRowClick(node, event)}
+    onDblClick={(event) => handleRowDblClick(node, event)}
+    onContextMenu={(event) => handleContextMenu(node, event)}
+    onKeyDown={(event) => handleKeydown({ node, depth, parent }, event)}
   >
-    {@render rowMarkup(node, depth, branch, open)}
-    {#if branch && open}
-      {#if node.children?.length}
-        <div class="poodle-tree__group" role="group">
-          {#each node.children as child (child.value)}
-            {@render renderNode(child, depth + 1, node.value)}
-          {/each}
-        </div>
-      {:else if isLoading(node.value)}
-        <div class="poodle-tree__group" role="group">
-          {@render loadingRow(depth + 1)}
-        </div>
-      {/if}
-    {/if}
-  </div>
+    {#snippet row()}
+      {@render rowMarkup(node, depth, branch, open)}
+    {/snippet}
+    {#snippet group()}
+      {@render itemGroup(node, depth)}
+    {/snippet}
+  </TreeItem>
 {/snippet}
 
 {#snippet flatItem(node: TreeNode, depth: number, parent: string | null)}
   {@const branch = isBranch(node)}
   {@const open = branch && isExpanded(node.value)}
-  {@const selected = isSelected(node.value)}
-  <div
-    class="poodle-tree__item"
-    role="treeitem"
-    data-value={node.value}
-    data-branch={branch ? "true" : undefined}
-    data-selected={selected ? "true" : undefined}
-    data-muted={node.isMuted ? "true" : undefined}
-    data-drop={dropTarget === node.value ? dropPosition : undefined}
-    draggable={reorderable && !node.isDisabled && !isEditing(node.value)}
-    tabindex={effectiveFocus === node.value ? 0 : -1}
-    aria-level={depth + 1}
-    aria-selected={selected}
-    aria-expanded={branch ? open : undefined}
-    aria-disabled={node.isDisabled ? "true" : undefined}
-    onclick={(event) => handleRowClick(node, event)}
-    ondblclick={(event) => handleRowDblClick(node, event)}
-    oncontextmenu={(event) => handleContextMenu(node, event)}
-    ondragstart={(event) => handleDragStart(node, event)}
-    ondragover={(event) => handleDragOver(node, event)}
-    ondrop={(event) => handleDrop(node, event)}
-    ondragend={clearDrag}
-    onkeydown={(event) => handleKeydown({ node, depth, parent }, event)}
+  <TreeItem
+    {node}
+    {nodes}
+    {depth}
+    {parent}
+    {branch}
+    {open}
+    selected={isSelected(node.value)}
+    muted={Boolean(node.isMuted)}
+    focused={effectiveFocus === node.value}
+    {reorderable}
+    editing={isEditing(node.value)}
+    onDrop={handleDrop}
+    onDragStart={handleDragStart}
+    onDragEnd={handleDragEnd}
+    onClick={(event) => handleRowClick(node, event)}
+    onDblClick={(event) => handleRowDblClick(node, event)}
+    onContextMenu={(event) => handleContextMenu(node, event)}
+    onKeyDown={(event) => handleKeydown({ node, depth, parent }, event)}
   >
-    {@render rowMarkup(node, depth, branch, open)}
-  </div>
+    {#snippet row()}
+      {@render rowMarkup(node, depth, branch, open)}
+    {/snippet}
+  </TreeItem>
 {/snippet}
 
 {#snippet loadingRow(depth: number)}
@@ -599,7 +604,7 @@
       {#each Array.from({ length: depth }) as _, i (i)}
         <span class="poodle-tree__indent" aria-hidden="true"></span>
       {/each}
-      <span class="poodle-tree__twisty" aria-hidden="true"></span>
+      <span class="poodle-tree__twisty" data-poodle-no-drag="" aria-hidden="true"></span>
       <span class="poodle-tree__spinner"><Spinner size="xs" ariaLabel="Loading" /></span>
       <span class="poodle-tree__label poodle-tree__label--muted">Loading…</span>
     </div>

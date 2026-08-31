@@ -1,6 +1,6 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: active — compiled as g16.021–g16.028; g16.021 merged, g16.022 landed
+Status: active — compiled as g16.021–g16.028; g16.021–g16.023 merged; g16.024 in review
 Updated: 2026-08-30
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
@@ -171,7 +171,10 @@ The web pointer sensor uses Pointer Events. It must:
 - use current measured/cached geometry after scroll and resize invalidation;
 - coalesce move work to one animation frame without losing the final release;
 - clean up capture, listeners, preview, source/target attributes, and scroll
-  state exactly once; and
+  state exactly once;
+- skip interactive descendants (`button`, `input`, `textarea`, `select`,
+  `a[href]`, `[role='button']`, `contenteditable`) and `[data-poodle-no-drag]`
+  hosts so a whole-row source does not steal their pointerdown; and
 - handle `pointercancel`, lost capture, visibility loss, source unmount, and
   target unmount.
 
@@ -208,7 +211,8 @@ The paired public registration names are:
   initial `operation`, `disabled`, required accessible `label`, optional
   `instructions`, optional `handle` (`Element` or a selector inside the
   source), per-pointer `activation` (`DragActivationConstraints`),
-  optional `keyboardOrder`, `onDragStart`, and `onDragEnd`;
+  optional `keyboardOrder` (Space/Enter pickup opt-in and ordered logical
+  traversal origin), `onDragStart`, and `onDragEnd`;
 - `DropTargetRegistration`: `targetId`, `acceptedKinds`, `disabled`,
   `priority`, required accessible `label`, `resolvePosition`
   (`DragPositionResolverInput` → `DropPosition | null`), `canDrop` (boolean or
@@ -230,11 +234,13 @@ current subject, operation, and input kind. It returns a semantic
 subject; it cannot mutate. DOM geometry never enters `DragSession` or
 `DropIntent`.
 
-When a keyboard source declares `keyboardOrder` and matching logical keyboard
-targets exist, keyboard traversal uses that ordered registry. `previous` and
-`next` are distinct resolver inputs; a linear list normally maps them to
-`before` and `after`. `first` and `last` remain explicit rather than being
-inferred from a synthetic centre point. A logical target and a mounted DOM
+Ordinary Space/Enter pickup is opt-in through `keyboardOrder`. Sources that
+omit it leave those keys to the host component. When a keyboard source
+declares `keyboardOrder` and matching logical keyboard targets exist, keyboard
+traversal uses that ordered registry. `previous` and `next` are distinct
+resolver inputs; a linear list normally maps them to `before` and `after`.
+`first` and `last` remain explicit rather than being inferred from a synthetic
+centre point. A logical target and a mounted DOM
 target may share a `targetId`: the logical registration is keyboard authority,
 the DOM registration is pointer/touch authority, and each registry rejects
 duplicates within itself. Without logical targets, the existing spatial DOM
@@ -310,7 +316,10 @@ until intent is clear:
 - a scroll gesture before activation cancels drag preparation;
 - after activation, pointer capture owns the gesture until drop or cancel; and
 - auto-scroll accelerates near the active scroll container edge and stops on
-  leave, cancellation, drop, or unmount.
+  leave, direction exhaustion, cancellation, drop, or unmount. The frame loop
+  is demand-driven: it does not keep a queued frame while the pointer is off
+  an edge or the owner cannot move, and later pointer or layout movement may
+  restart it.
 
 Nested scroll containers choose the nearest eligible container that can still
 scroll in the requested direction. The sensor must not run one timer per
@@ -321,7 +330,9 @@ target.
 Every reorder or move surface that is pointer-draggable has a keyboard route.
 The baseline interaction is:
 
-- Space or an authored shortcut picks up the focused source;
+- Space or Enter pick up the focused source when it declares `keyboardOrder`;
+  otherwise an authored shortcut or `requestKeyboardDrop` is the keyboard
+  route;
 - arrow keys or target-navigation commands move the current intent;
 - Home/End may choose first/last valid position where the component contract
   already uses them;

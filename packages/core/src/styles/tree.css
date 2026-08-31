@@ -236,12 +236,21 @@
     cursor: not-allowed;
   }
 
+  /* Provider wraps the tree; contents keeps the tree the layout box. */
+  .poodle-drag-drop-provider:has(> .poodle-tree) {
+    display: contents;
+  }
+
   /* ── Drag-and-drop reorder indicator ── */
   .poodle-tree__item > .poodle-tree__row {
     position: relative;
   }
-  .poodle-tree__item[data-drop="before"] > .poodle-tree__row::before,
-  .poodle-tree__item[data-drop="after"] > .poodle-tree__row::after {
+  .poodle-tree .poodle-tree__item[data-poodle-drop-target="accepted"] > .poodle-tree__row,
+  .poodle-tree .poodle-tree__item[data-poodle-drop-target="rejected"] > .poodle-tree__row {
+    outline: none;
+  }
+  .poodle-tree__item[data-poodle-drop-position="before"] > .poodle-tree__row::before,
+  .poodle-tree__item[data-poodle-drop-position="after"] > .poodle-tree__row::after {
     content: "";
     position: absolute;
     left: 0;
@@ -250,13 +259,13 @@
     background: var(--poodle-recipe-tree-before-after-row-after-fill, var(--poodle-color-accent-base));
     pointer-events: none;
   }
-  .poodle-tree__item[data-drop="before"] > .poodle-tree__row::before {
+  .poodle-tree__item[data-poodle-drop-position="before"] > .poodle-tree__row::before {
     top: -0.0625rem;
   }
-  .poodle-tree__item[data-drop="after"] > .poodle-tree__row::after {
+  .poodle-tree__item[data-poodle-drop-position="after"] > .poodle-tree__row::after {
     bottom: -0.0625rem;
   }
-  .poodle-tree__item[data-drop="inside"] > .poodle-tree__row {
+  .poodle-tree__item[data-poodle-drop-position="inside"] > .poodle-tree__row {
     box-shadow: var(--poodle-recipe-tree-row-shadow, inset 0 0 0 0.0625rem var(--poodle-color-accent-base));
     background: var(--poodle-recipe-tree-inside-row-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
   }

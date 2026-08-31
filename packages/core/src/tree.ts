@@ -248,9 +248,15 @@ export function treeVirtualWindow(
   scrollTop: number,
   viewportHeightPx: number,
   overscan = 6,
+  pinIndex: number | null = null,
 ): TreeVirtualWindow {
-  const startIndex = Math.max(0, Math.floor(scrollTop / rowHeightPx) - overscan);
-  const endIndex = Math.min(rowCount, Math.ceil((scrollTop + viewportHeightPx) / rowHeightPx) + overscan);
+  let startIndex = Math.max(0, Math.floor(scrollTop / rowHeightPx) - overscan);
+  let endIndex = Math.min(rowCount, Math.ceil((scrollTop + viewportHeightPx) / rowHeightPx) + overscan);
+
+  if (pinIndex !== null && pinIndex >= 0 && pinIndex < rowCount) {
+    if (pinIndex < startIndex) startIndex = pinIndex;
+    if (pinIndex >= endIndex) endIndex = pinIndex + 1;
+  }
 
   return {
     startIndex,
@@ -258,4 +264,29 @@ export function treeVirtualWindow(
     offsetY: startIndex * rowHeightPx,
     totalHeight: rowCount * rowHeightPx,
   };
+}
+
+/** True when `descendant` is in the subtree of `ancestor` (not itself). */
+export function treeSubtreeContains<T extends TreeNodeLike>(
+  nodes: readonly T[],
+  ancestor: string,
+  descendant: string,
+): boolean {
+  const node = findTreeNode(nodes, ancestor);
+  if (!node || ancestor === descendant) return false;
+  return findTreeNode(node.children ?? [], descendant) !== null;
+}
+
+/**
+ * Whether a tree drop is eligible: not self, not missing, not into the source
+ * subtree. Hosts still apply `reorder_nodes`; this is hover/drop-time rejection.
+ */
+export function treeCanAcceptDrop<T extends TreeNodeLike>(
+  nodes: readonly T[],
+  from: string,
+  to: string,
+): boolean {
+  if (from === to) return false;
+  if (!findTreeNode(nodes, from) || !findTreeNode(nodes, to)) return false;
+  return !treeSubtreeContains(nodes, from, to);
 }

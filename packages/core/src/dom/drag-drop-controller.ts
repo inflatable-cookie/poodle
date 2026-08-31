@@ -9,6 +9,12 @@
  * terminals stay in `dragSessionTransition` / `resolveDropTarget`.
  */
 
+import { collectScrollParents } from "./anchor";
+import {
+  resolveAutoScroll,
+  type AutoScrollCandidate,
+  type AutoScrollMetrics,
+} from "./drag-drop-auto-scroll";
 import {
   dragSessionTransition,
   resolveDropTarget,
@@ -73,6 +79,7 @@ export interface DragSourceRegistration {
   readonly instructions?: string;
   readonly handle?: Element | string;
   readonly activation?: DragActivationConstraints;
+  /** When set, Space/Enter pick up this focused source. Also the origin for ordered logical keyboard traversal. */
   readonly keyboardOrder?: number;
   readonly onDragStart?: (session: DragSession) => void;
   readonly onDragEnd?: (outcome: DragTerminalOutcome) => void;
@@ -87,6 +94,8 @@ export interface DropTargetRegistration {
   readonly resolvePosition: (input: DragPositionResolverInput) => DropPosition | null;
   readonly canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
   readonly onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
+  /** When true, this element is an auto-scroll owner in addition to overflow ancestors. */
+  readonly autoScroll?: boolean;
 }
 
 export type KeyboardDropDirection = "previous" | "next" | "first" | "last";
@@ -107,6 +116,12 @@ export interface KeyboardDropTargetRegistration {
   readonly resolvePosition: (input: KeyboardPositionResolverInput) => DropPosition | null;
   readonly canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
   readonly onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
+}
+
+export interface KeyboardDropCommand {
+  readonly sourceId: string;
+  readonly targetId: string;
+  readonly position: DropPosition;
 }
 
 export interface DragSourceHandle {
@@ -174,6 +189,7 @@ export interface DragDropController {
   registerSource(element: Element, registration: DragSourceRegistration): DragSourceHandle;
   registerTarget(element: Element, registration: DropTargetRegistration): DropTargetHandle;
   registerKeyboardTarget(registration: KeyboardDropTargetRegistration): KeyboardDropTargetHandle;
+  requestKeyboardDrop(command: KeyboardDropCommand): boolean;
   getSnapshot(): DragDropSnapshot;
   subscribe(listener: () => void): () => void;
   invalidateLayout(): void;
@@ -374,8 +390,9 @@ function canPointerCapture(element: Element): boolean {
   return typeof (element as HTMLElement).setPointerCapture === "function";
 }
 
+const NO_DRAG_ATTR = "data-poodle-no-drag";
 const INTERACTIVE_SELECTOR =
-  "button, input, textarea, select, a[href], [role='button'], [contenteditable]:not([contenteditable='false'])";
+  `button, input, textarea, select, a[href], [role='button'], [contenteditable]:not([contenteditable='false']), [${NO_DRAG_ATTR}]`;
 
 function resolveHandle(element: Element, handle: Element | string | undefined): Element {
   if (handle === undefined) return element;
@@ -388,6 +405,43 @@ function resolveHandle(element: Element, handle: Element | string | undefined): 
 function interactiveHost(target: EventTarget | null): Element | null {
   if (!(target instanceof Element)) return null;
   return target.closest(INTERACTIVE_SELECTOR);
+}
+
+const SCROLL_OVERFLOW = /(auto|scroll|overlay)/;
+
+function hitElementFromPoint(doc: Document, x: number, y: number): Element | null {
+  const stack =
+    typeof doc.elementsFromPoint === "function" ? doc.elementsFromPoint(x, y) : [doc.elementFromPoint(x, y)];
+  for (const node of stack) {
+    if (!(node instanceof Element)) continue;
+    if (node.classList.contains("poodle-drag-overlay") || node.classList.contains("poodle-drag-preview")) {
+      continue;
+    }
+    const style = node.ownerDocument.defaultView?.getComputedStyle(node);
+    if (style?.pointerEvents === "none") continue;
+    return node;
+  }
+  return null;
+}
+
+function isScrollOwner(element: Element): element is HTMLElement {
+  if (!(element instanceof HTMLElement)) return false;
+  const style = element.ownerDocument.defaultView?.getComputedStyle(element);
+  if (!style) return false;
+  return SCROLL_OVERFLOW.test(`${style.overflowY} ${style.overflowX} ${style.overflow}`);
+}
+
+function measureScrollMetrics(element: HTMLElement): AutoScrollMetrics {
+  const rect = element.getBoundingClientRect();
+  return {
+    scrollTop: element.scrollTop,
+    scrollLeft: element.scrollLeft,
+    scrollHeight: element.scrollHeight,
+    scrollWidth: element.scrollWidth,
+    clientHeight: element.clientHeight,
+    clientWidth: element.clientWidth,
+    rect: { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left },
+  };
 }
 
 function activationFor(
@@ -444,9 +498,15 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   let gesture: PointerGesture | null = null;
   let moveFrame: number | null = null;
   let pendingMove: { x: number; y: number } | null = null;
+  let autoScrollFrame: number | null = null;
+  let autoScrollRunning = false;
+  let lastAutoScrollTs: number | null = null;
+  const scrollOwnerIds = new WeakMap<Element, string>();
+  let scrollOwnerSeq = 0;
   let dropGeneration = 0;
   let lastOutcome: DragTerminalOutcome | undefined;
   let keyboardSourceId: string | null = null;
+  let keyboardCommandSession = false;
   let keyboardLogicalSession = false;
   let keyboardTargetIndex = -1;
 
@@ -703,12 +763,14 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         return [];
 
       case "cleanupSession":
+        stopAutoScroll();
         releasePointerHardware();
         gesture = null;
         dropGeneration += 1;
         keyboardSourceId = null;
         keyboardTargetIndex = -1;
         keyboardLogicalSession = false;
+        keyboardCommandSession = false;
         lastKeyboardDirection = null;
         lastOutcome = undefined;
         return [];
@@ -778,6 +840,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   }
 
   function abandonUnarmedGesture(): void {
+    stopAutoScroll();
     releasePointerHardware();
     gesture = null;
     inputKind = null;
@@ -852,7 +915,129 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         gesture.restoredTouchAction = restored;
       }
     }
+    startAutoScroll();
     notify();
+  }
+
+  function scrollOwnerId(element: Element): string {
+    const existing = scrollOwnerIds.get(element);
+    if (existing) return existing;
+    scrollOwnerSeq += 1;
+    const id = `scroll-${scrollOwnerSeq}`;
+    scrollOwnerIds.set(element, id);
+    return id;
+  }
+
+  function scrollOwnerDepth(element: Element): number {
+    let depth = isScrollOwner(element) ? 1 : 0;
+    let current: HTMLElement | null = element.parentElement;
+    while (current) {
+      if (isScrollOwner(current)) depth += 1;
+      current = current.parentElement;
+    }
+    return depth;
+  }
+
+  function considerScrollOwner(
+    element: Element | null,
+    seen: Set<Element>,
+    list: Array<AutoScrollCandidate & { element: HTMLElement }>,
+    explicit = false,
+  ): void {
+    if (!(element instanceof HTMLElement) || seen.has(element)) return;
+    if (!explicit && !isScrollOwner(element)) return;
+    seen.add(element);
+    list.push({
+      id: scrollOwnerId(element),
+      depth: scrollOwnerDepth(element),
+      metrics: measureScrollMetrics(element),
+      element,
+    });
+  }
+
+  function collectAutoScrollCandidates(): Array<AutoScrollCandidate & { element: HTMLElement }> {
+    const seen = new Set<Element>();
+    const list: Array<AutoScrollCandidate & { element: HTMLElement }> = [];
+    const origins: Array<Element | null> = [];
+
+    if (connectedDocument && pointerPosition) {
+      origins.push(hitElementFromPoint(connectedDocument, pointerPosition.x, pointerPosition.y));
+    }
+    origins.push(connectedRoot);
+    for (const target of targets.values()) {
+      if (target.registration.autoScroll) origins.push(target.element);
+    }
+
+    for (const origin of origins) {
+      const explicit = origin instanceof Element && [...targets.values()].some((target) => target.registration.autoScroll && target.element === origin);
+      considerScrollOwner(origin, seen, list, explicit);
+      if (origin instanceof Element) {
+        for (const parent of collectScrollParents(origin)) {
+          considerScrollOwner(parent, seen, list);
+        }
+      }
+    }
+
+    const scrolling = connectedDocument?.scrollingElement ?? null;
+    considerScrollOwner(scrolling, seen, list);
+    return list;
+  }
+
+  function applyAutoScroll(id: string, dx: number, dy: number, owners: Array<AutoScrollCandidate & { element: HTMLElement }>): boolean {
+    const owner = owners.find((entry) => entry.id === id);
+    if (!owner) return false;
+    const beforeTop = owner.element.scrollTop;
+    const beforeLeft = owner.element.scrollLeft;
+    if (dy !== 0) owner.element.scrollTop = beforeTop + dy;
+    if (dx !== 0) owner.element.scrollLeft = beforeLeft + dx;
+    return owner.element.scrollTop !== beforeTop || owner.element.scrollLeft !== beforeLeft;
+  }
+
+  function stopAutoScroll(): void {
+    autoScrollRunning = false;
+    lastAutoScrollTs = null;
+    if (autoScrollFrame !== null && connectedWindow) {
+      connectedWindow.cancelAnimationFrame(autoScrollFrame);
+    }
+    autoScrollFrame = null;
+  }
+
+  function startAutoScroll(): void {
+    if (phase !== "dragging" || inputKind === "keyboard") return;
+    autoScrollRunning = true;
+    scheduleAutoScroll();
+  }
+
+  function scheduleAutoScroll(): void {
+    if (!autoScrollRunning || autoScrollFrame !== null || !connectedWindow) return;
+    autoScrollFrame = -1;
+    let sync = true;
+    const frame = connectedWindow.requestAnimationFrame((now) => {
+      if (autoScrollFrame === -1 || autoScrollFrame === frame) autoScrollFrame = null;
+      const keepGoing = onAutoScrollFrame(now);
+      if (!sync && keepGoing) scheduleAutoScroll();
+    });
+    sync = false;
+    if (autoScrollFrame === -1) autoScrollFrame = frame;
+  }
+
+  function onAutoScrollFrame(now: number): boolean {
+    if (!autoScrollRunning || phase !== "dragging" || !pointerPosition) {
+      stopAutoScroll();
+      return false;
+    }
+    const dt = lastAutoScrollTs === null ? 16 : Math.min(Math.max(now - lastAutoScrollTs, 0), 64);
+    if (dt === 0) return true;
+    lastAutoScrollTs = now;
+    const owners = collectAutoScrollCandidates();
+    const intent = resolveAutoScroll(owners, pointerPosition, dt);
+    if (!intent || !applyAutoScroll(intent.id, intent.dx, intent.dy, owners)) {
+      lastAutoScrollTs = null;
+      return false;
+    }
+    layoutDirty = true;
+    hitTest(pointerPosition.x, pointerPosition.y);
+    return true;
   }
 
   function evaluateTarget(
@@ -967,6 +1152,44 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     return source?.registration.keyboardOrder !== undefined && kind !== undefined && hasMatchingLogicalTarget(kind);
   }
 
+  function requestKeyboardDrop(command: KeyboardDropCommand): boolean {
+    if (destroyed || phase !== "idle") return false;
+    const source = sources.get(command.sourceId);
+    if (!source || source.registration.disabled || isDisabled(source.element)) return false;
+    if (source.registration.allowedOperations.length === 0) return false;
+
+    const logical = keyboardTargets.get(command.targetId);
+    const dom = targets.get(command.targetId);
+    const registration = logical?.registration ?? dom?.registration;
+    if (!registration || registration.disabled) return false;
+    if (!logical && dom && isDisabled(dom.element)) return false;
+    if (!registration.acceptedKinds.includes(source.registration.subject.kind)) return false;
+
+    const rect = measure(source.element);
+    const sessionId = beginSession(source, "keyboard", rect.left + rect.width / 2, rect.top + rect.height / 2);
+    keyboardLogicalSession = logical !== undefined;
+    keyboardCommandSession = true;
+    keyboardSourceId = source.registration.sourceId;
+    lastKeyboardDirection = null;
+    activate(sessionId, null, null);
+    const session = context.session;
+    if (!session || session.sessionId !== sessionId) return false;
+
+    const operation = session.operation;
+    const intent: DropIntent = {
+      targetId: command.targetId,
+      position: command.position,
+      operation,
+    };
+    dispatch({ type: "TARGET_INTENT", sessionId, intent });
+    if (context.session?.intent) {
+      dispatch({ type: "DROP_REQUESTED", sessionId });
+    } else {
+      dispatch({ type: "CANCEL", sessionId });
+    }
+    return true;
+  }
+
   function usesLogicalKeyboard(): boolean {
     return keyboardLogicalSession;
   }
@@ -983,14 +1206,26 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     canDrop: DropTargetRegistration["canDrop"];
     onDrop: DropTargetRegistration["onDrop"];
   } | null {
-    if (inputKind === "keyboard" && usesLogicalKeyboard()) {
+    if (keyboardCommandSession || (inputKind === "keyboard" && usesLogicalKeyboard())) {
       const logical = keyboardTargets.get(intent.targetId);
-      if (!logical) return null;
-      return logical.registration;
+      if (logical) return logical.registration;
+      if (keyboardCommandSession) {
+        const dom = targets.get(intent.targetId);
+        return dom?.registration ?? null;
+      }
+      return null;
     }
     const target = targets.get(intent.targetId);
     if (!target) return null;
     return target.registration;
+  }
+
+  function commandTargetUnavailable(intent: DropIntent): boolean {
+    const logical = keyboardTargets.get(intent.targetId);
+    if (logical) return Boolean(logical.registration.disabled);
+    const dom = targets.get(intent.targetId);
+    if (!dom) return true;
+    return Boolean(dom.registration.disabled) || isDisabled(dom.element);
   }
 
   function requestDrop(sessionId: string, intent: DropIntent): void {
@@ -1004,19 +1239,33 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
 
     let accepted: DropIntent = intent;
-    if (inputKind === "keyboard" && usesLogicalKeyboard()) {
-      const logical = keyboardTargets.get(intent.targetId);
-      const direction = lastKeyboardDirection ?? "next";
-      const position = logical
-        ? logical.registration.resolvePosition({
-            direction,
-            subject: session.subject,
-            operation: session.operation,
-          })
-        : intent.position;
-      if (position === null) {
+    if (keyboardCommandSession) {
+      if (commandTargetUnavailable(intent)) {
         dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
         return;
+      }
+      const eligibility = eligibilityFromCanDrop(registration.canDrop(intent, session.subject), intent);
+      if (eligibility.accepted === false) {
+        dispatch({ type: "DROP_REJECTED", sessionId, reason: eligibility.reason });
+        return;
+      }
+      accepted = eligibility.intent;
+    } else if (inputKind === "keyboard" && usesLogicalKeyboard()) {
+      const logical = keyboardTargets.get(intent.targetId);
+      let position = intent.position;
+      if (lastKeyboardDirection !== null) {
+        const resolved = logical
+          ? logical.registration.resolvePosition({
+              direction: lastKeyboardDirection,
+              subject: session.subject,
+              operation: session.operation,
+            })
+          : intent.position;
+        if (resolved === null) {
+          dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
+          return;
+        }
+        position = resolved;
       }
       const revalidated: DropIntent = {
         targetId: intent.targetId,
@@ -1089,7 +1338,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   function applyCommit(sessionId: string, intent: DropIntent, commit: DragDropCommitResult): void {
     const liveTarget = liveDropRegistration(intent);
-    if (!liveTarget || liveTarget.disabled) {
+    if (!liveTarget || liveTarget.disabled || (keyboardCommandSession && commandTargetUnavailable(intent))) {
       dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
       return;
     }
@@ -1206,6 +1455,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
 
     hitTest(x, y);
+    if (gesture?.activated) scheduleAutoScroll();
   }
 
   function suppressScroll(event: Event): void {
@@ -1299,6 +1549,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
     if (phase === "dragging" && pointerPosition) {
       hitTest(pointerPosition.x, pointerPosition.y);
+      scheduleAutoScroll();
     }
   }
 
@@ -1393,7 +1644,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     if (phase === "idle") {
       if (event.key !== " " && event.key !== "Enter") return;
       const source = focusedSource();
-      if (!source) return;
+      if (!source || source.registration.keyboardOrder === undefined) return;
       event.preventDefault();
       const rect = measure(source.element);
       const x = rect.left + rect.width / 2;
@@ -1747,6 +1998,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
       return () => {
         if (connectedRoot !== root) return;
+        stopAutoScroll();
         stopCandidate();
         if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
         unbindDocument();
@@ -1863,6 +2115,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       };
     },
 
+    requestKeyboardDrop,
+
     registerKeyboardTarget(registration: KeyboardDropTargetRegistration): KeyboardDropTargetHandle {
       assertLive();
       if (keyboardTargets.has(registration.targetId)) {
@@ -1928,6 +2182,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     },
 
     cancel() {
+      stopAutoScroll();
       stopCandidate();
       if (!context.session) return;
       dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
@@ -1935,6 +2190,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
     destroy() {
       if (destroyed) return;
+      stopAutoScroll();
       stopCandidate();
       if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
       for (const id of [...sources.keys()]) unregisterSource(id);
