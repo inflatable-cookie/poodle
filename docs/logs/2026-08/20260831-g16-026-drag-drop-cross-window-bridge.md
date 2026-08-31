@@ -2,6 +2,7 @@
 
 Status: implementation complete — awaiting orchestrator review
 Date: 2026-08-31
+PR: https://github.com/inflatable-cookie/poodle/pull/113
 Card: `docs/roadmaps/g16/026-drag-drop-cross-window-bridge-and-dock-region.md`
 Handoff: `docs/handoffs/20260831-145018-g16-026-cross-window-drag-bridge.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
