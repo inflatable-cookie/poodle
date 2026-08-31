@@ -117,10 +117,19 @@ either direction, and nothing in Poodle deletes anything.
   protection is not enough: a host that re-publishes `entered` for a batch
   that already committed or was refused looks exactly like a new drag, so it
   would open a second session and release the same id twice. Each installation
-  keeps a bounded tombstone of the ids it has answered. Scoped to the
-  installation, because an id is one host's own name for something — a
+  remembers every id it has answered, for the whole of its lifetime. Scoped to
+  the installation, because an id is one host's own name for something — a
   replacement bridge, or a reconnect, may legitimately reuse the same opaque
-  text. See review round 2.
+  text. See review rounds 2 and 3.
+
+- **An exactness rule cannot have a threshold.** The first attempt kept a
+  bounded tail of 4,096 answered ids, which is a false negative with a counter
+  on it: the entry evicted to make room is exactly the one a repeating host is
+  most likely to send again. The tombstone is unbounded now. One entry appears
+  per *answered batch* — one per external drag gesture, not one per event —
+  and the host growing it is the window's own adapter, so the cost is
+  proportional to work that host already did. The announcement log is bounded
+  because pointer motion writes to it; this is not that.
 
 - **Inbound batches carry a protocol version, checked first.** An adapter
   ships separately from Poodle and can be pinned to an older release. A batch
@@ -147,6 +156,7 @@ either direction, and nothing in Poodle deletes anything.
 | Transport exclusivity | both mismatched bridge shapes throw at connect |
 | A finished id cannot resurrect | a re-published `entered` for a committed *and* for a refused id opens nothing and releases nothing, in web and GPUI |
 | A replacement host may reuse an id | the tombstone is the installation's: a new bridge, or a reconnect, takes the same opaque text as a new batch |
+| Inertness has no threshold | the first answered id is replayed after 5,000 later ones, in web and GPUI, and still opens nothing |
 | Every observed batch is answered exactly once | busy window, second batch, repeated id, post-disconnect news, and stale news after a bridge swap — web and GPUI |
 | Replacement ends the outgoing session | asserted at the moment of replacement, before any frame, so no end-of-frame sweep can stand in for it |
 | A consumer projection that throws ends the drag | the exception does not escape the drop listener and the controller returns to idle |
@@ -231,6 +241,13 @@ released the same id a second time. The round 1 tests named "cannot
 resurrect" only replayed `dropped` and `cancelled`, which the live check
 already handled — they could not have caught it.
 
+Review round 3 added two:
+
+26. the web tombstone's completeness, by reinstating the 4,096-entry bounded
+    tail — the first id answered is evicted by later ones and opens a session
+    on replay; and
+27. the GPUI tombstone's completeness, the same way.
+
 ## Review round 1
 
 The orchestrator required changes on `de4358a7d`. Five blocking findings, all
@@ -286,12 +303,28 @@ released the same id twice. The round 1 tests labelled "cannot resurrect"
 replayed only `dropped` and `cancelled` — news the live check already
 handled — so they could not have caught it.
 
-Each installation now keeps a bounded tombstone of the ids it has answered,
-consulted before an `entered` is taken and written by the single path every
-terminal and refusal goes through. It is scoped to the installation — the
-subscription on web, the generation on GPUI — so a replacement host may
-legitimately use the same opaque text. Both errors are proved: a replay that
-must do nothing, and a replacement that must work.
+Each installation now remembers the ids it has answered, consulted before an
+`entered` is taken and written by the single path every terminal and refusal
+goes through. It is scoped to the installation — the subscription on web, the
+generation on GPUI — so a replacement host may legitimately use the same
+opaque text. Both errors are proved: a replay that must do nothing, and a
+replacement that must work.
+
+## Review round 3
+
+One exactness blocker: the first version of that tombstone kept a bounded tail
+of 4,096 ids, and said so in its own comment. A cap on an exactness rule is a
+false negative with a counter on it — answer 4,096 further ids and the first
+one resurrects — and it contradicted the unqualified claim in spec 069, in the
+log, and in the tests' own names. The reviewer was right that no board would
+have caught it; only a boundary case would.
+
+The tombstone is unbounded now, in both runtimes, and a regression in each
+crosses the old threshold: 5,000 later ids, then the first one replayed, which
+must still open nothing while a fresh id and a new installation both work
+normally. What is left is honest about its growth: one entry per *answered
+batch* — one per external drag gesture, not one per event — added by the
+window's own adapter, so the cost tracks work that host already did.
 
 ## Evidence
 
@@ -299,13 +332,13 @@ must do nothing, and a replacement that must work.
   `packages/contracts/headless/src/external_file_drag.rs` (9 Rust cases),
   `packages/core/test/external-file-drag.test.ts` (12 cases).
 - Web adapter: `packages/core/src/dom/inbound-file-data-transfer.ts`.
-- Web controller: `packages/core/src/dom/drag-drop-controller.ts`; 36
+- Web controller: `packages/core/src/dom/drag-drop-controller.ts`; 37
   adversarial cases in `test/headless-dom/inbound-files-and-drag-out.test.ts`.
 - Shared Rust: `packages/render/src/drag_drop.rs`
   (`inbound_file_target`, `file_export_source`),
   `packages/contracts/node/src/drag.rs`.
-- GPUI: `packages/gpui/node-backend/src/drag.rs`; twelve mounted regressions
-  in `packages/gpui/preview/tests/headless_regressions.rs`.
+- GPUI: `packages/gpui/node-backend/src/drag.rs`; thirteen mounted
+  regressions in `packages/gpui/preview/tests/headless_regressions.rs`.
 - Frameworks: `DragDropProvider` in both, `ExternalFileSurface` specimens and
   their four mounted tests each.
 - Headless engines: `test/drag-drop/files.{html,ts}` and the new leg in

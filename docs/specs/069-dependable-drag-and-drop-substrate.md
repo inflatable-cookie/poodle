@@ -796,7 +796,11 @@ this installation has already answered stays answered: news for a released
 batch can neither commit nor cancel, and a re-published `entered` for it opens
 nothing. That tombstone is scoped to the publishing installation, so a
 *replacement* host may legitimately use the same opaque text — an id is one
-host's own name for something, not a global identity.
+host's own name for something, not a global identity. It holds for the whole
+of that installation's lifetime, with no threshold: an id that stopped being
+inert after enough later ids would be a false negative in an exactness rule,
+and the id evicted first is the one a repeating host is most likely to send
+again.
 Replacing a window's bridge ends the outgoing batch's session rather than
 releasing under it, and the outgoing host's queued news is answered through the
 host that published it.

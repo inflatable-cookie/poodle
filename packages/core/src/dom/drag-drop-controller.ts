@@ -336,16 +336,6 @@ const SOURCE_ATTR = "data-poodle-drag-source";
 const TARGET_ATTR = "data-poodle-drop-target";
 const POSITION_ATTR = "data-poodle-drop-position";
 const EXPORT_ATTR = "data-poodle-drag-export";
-/**
- * How many answered batch ids one installation remembers.
- *
- * Bounded because the ids come from outside: a host that publishes without
- * limit must not be able to grow this window's memory without limit either.
- * A bounded tail is the same trade the announcement log makes — thousands of
- * distinct external drags into one surface, and the oldest id could be
- * replayed again.
- */
-const INBOUND_ANSWERED_LIMIT = 4096;
 const TOUCH_ACTION = "touch-action";
 
 interface CachedRect {
@@ -781,7 +771,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   let inbound: InboundFileTransaction | null = null;
   /**
-   * Batch ids this installation has already answered.
+   * Every batch id this installation has answered, for the whole of its
+   * lifetime.
    *
    * A release is the *end* of an id, not the end of an observation of it: a
    * host that re-publishes `entered` for a batch that already committed, was
@@ -789,6 +780,14 @@ export function createDragDropController(options: DragDropControllerOptions = {}
    * batch and release it twice. The tombstone belongs to the subscription —
    * a later installation, or a reconnect, is a different host relationship
    * and may legitimately reuse the same opaque text.
+   *
+   * Deliberately not a bounded tail. Once-per-id is an exactness rule, and a
+   * cap is a false negative with a counter on it: the id evicted to make room
+   * is exactly the one a repeating host is most likely to send again. One
+   * entry appears per *answered batch* — one per external drag gesture, not
+   * one per event — and the host growing it is the window's own adapter, so
+   * the cost is proportional to work that host already did. The announcement
+   * log is bounded because pointer motion writes to it; this is not that.
    */
   let inboundAnswered = new Set<string>();
   let inboundUnsubscribe: (() => void) | null = null;
@@ -1730,10 +1729,6 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     // needs to hold.
     if (inboundAnswered.has(batchId)) return;
     inboundAnswered.add(batchId);
-    if (inboundAnswered.size > INBOUND_ANSWERED_LIMIT) {
-      const oldest = inboundAnswered.values().next();
-      if (!oldest.done) inboundAnswered.delete(oldest.value);
-    }
 
     try {
       inboundFileBridge?.release(batchId, outcome);

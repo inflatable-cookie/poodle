@@ -92,10 +92,6 @@ pub const GPUI_DRAG_CAPABILITIES: NodeDragCapabilities = NodeDragCapabilities {
 /// a controller lives as long as its host, so the log still has to be bounded.
 pub const ANNOUNCEMENT_LOG_LIMIT: usize = 64;
 
-/// How many answered batch ids one installation remembers; see
-/// `inbound_answered`.
-const INBOUND_ANSWERED_LIMIT: usize = 4096;
-
 /// The value stock GPUI carries for the duration of a pointer drag.
 ///
 /// `controller` scopes it: `on_drag_move` is dispatched by payload *type*, so
@@ -295,21 +291,25 @@ struct ControllerState {
     inbound_unsubscribe: Option<CrossWindowCleanup>,
     /// The external batch this window is currently being offered.
     inbound: Option<InboundFileTransaction>,
-    /// Batch ids already answered, keyed by the installation that answered
-    /// them.
+    /// Every batch id already answered, keyed by the installation that
+    /// answered it, for the whole of that installation's lifetime.
     ///
     /// A release is the *end* of an id, not the end of one observation of it:
     /// a host that re-publishes `Entered` for a batch that already committed,
     /// was refused, or was cancelled would otherwise open a second session
     /// over one batch and release it twice. The generation is part of the key
     /// so a *replacement* host may legitimately use the same opaque text —
-    /// an id is one host's own name for something, not a global identity.
+    /// an id is one host's own name for something, not a global identity. It
+    /// also keeps a replaced installation's answers intact, because that host
+    /// may still deliver stale news long after it was swapped out.
     ///
-    /// Bounded, because the ids come from outside: a host that publishes
-    /// without limit must not grow this window's memory without limit either.
+    /// Deliberately unbounded. Once-per-id is an exactness rule, and a cap is
+    /// a false negative with a counter on it: the key evicted to make room is
+    /// exactly the one a repeating host is most likely to send again. One
+    /// entry appears per *answered batch* — one per external drag gesture,
+    /// not one per event — and the host growing it is this window's own
+    /// adapter, so the cost is proportional to work that host already did.
     inbound_answered: std::collections::HashSet<(u64, String)>,
-    /// Insertion order for the bound above.
-    inbound_answered_order: VecDeque<(u64, String)>,
     /// The host's own name for a subject this window has no source for.
     external_source_label: Option<String>,
     /// Host answers that arrived without an `App` in reach.
@@ -591,7 +591,6 @@ impl DragDropController {
                 inbound_unsubscribe: None,
                 inbound: None,
                 inbound_answered: std::collections::HashSet::new(),
-                inbound_answered_order: VecDeque::new(),
                 external_source_label: None,
                 host_inbox: DragHostInbox::default(),
                 wake: None,
@@ -1507,15 +1506,11 @@ impl DragDropController {
     ) {
         {
             let mut state = self.state.borrow_mut();
-            let key = (generation, batch_id.to_string());
-            if !state.inbound_answered.insert(key.clone()) {
+            if !state
+                .inbound_answered
+                .insert((generation, batch_id.to_string()))
+            {
                 return;
-            }
-            state.inbound_answered_order.push_back(key);
-            while state.inbound_answered_order.len() > INBOUND_ANSWERED_LIMIT {
-                if let Some(oldest) = state.inbound_answered_order.pop_front() {
-                    state.inbound_answered.remove(&oldest);
-                }
             }
         }
         bridge.release(batch_id, outcome);

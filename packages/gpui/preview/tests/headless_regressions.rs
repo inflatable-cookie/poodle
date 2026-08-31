@@ -17255,3 +17255,135 @@ fn a_finished_gpui_batch_id_stays_inert_until_its_bridge_is_replaced() {
         assert_eq!(count_starting_with(&trace_of(&trace), "drop:"), 2);
     });
 }
+
+/// g16.027. Exactness has no threshold. A bounded tombstone would answer the
+/// replay case correctly for a while and then silently stop — the key evicted
+/// to make room is exactly the one a repeating host is most likely to send
+/// again — so the first id answered stays inert after thousands of others,
+/// while a fresh id and a replacement installation are still ordinary
+/// business.
+#[test]
+fn the_first_answered_gpui_batch_id_stays_inert_after_thousands_of_later_ones() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let first = InboundStub::default();
+        let second = InboundStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_inbound_file_bridge(Arc::new(first.clone()), cx));
+
+        let node = Arc::new(Mutex::new(inbound_tree(
+            &trace,
+            poodle_node::InboundFileConstraints::default(),
+        )));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let zone = payload_frac("files-zone", 0.5, 0.5);
+        let (x, y) = (f32::from(zone.x), f32::from(zone.y));
+        let batch = |id: &str| poodle_node::InboundFileBatch {
+            batch_id: id.to_string(),
+            ..inbound_batch(vec![inbound_file(
+                "batch:0",
+                Some("take-01.wav"),
+                "audio/wav",
+                Some(16),
+            )])
+        };
+
+        // One batch owns the controller, so every id after it takes the
+        // busy-refusal path and is answered without a session of its own.
+        first.send(poodle_node::InboundFileEvent::Entered {
+            batch: batch("first"),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+
+        // Comfortably past the 4096 a bounded tail used to keep.
+        let later = 5_000;
+        for index in 0..later {
+            first.send(poodle_node::InboundFileEvent::Entered {
+                batch: batch(&format!("answered-{index}")),
+                x,
+                y,
+            });
+        }
+        driver.draw_frame();
+        assert_eq!(first.released().len(), later);
+
+        first.send(poodle_node::InboundFileEvent::Cancelled {
+            batch_id: "first".to_string(),
+        });
+        driver.draw_frame();
+        assert_eq!(first.released().len(), later + 1);
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+
+        // The one a bounded tail would have forgotten first, and the one whose
+        // terminal was the last thing remembered.
+        first.send(poodle_node::InboundFileEvent::Entered {
+            batch: batch("answered-0"),
+            x,
+            y,
+        });
+        first.send(poodle_node::InboundFileEvent::Entered {
+            batch: batch("first"),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert_eq!(first.released().len(), later + 1);
+
+        // Remembering does not make the window deaf.
+        first.send(poodle_node::InboundFileEvent::Entered {
+            batch: batch("fresh"),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        first.send(poodle_node::InboundFileEvent::Dropped {
+            batch: batch("fresh"),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(
+            first.released().last().cloned(),
+            Some((
+                "fresh".to_string(),
+                poodle_node::InboundFileOutcome::Committed
+            ))
+        );
+
+        // And a replacement installation still starts with no history.
+        driver.update_app(|cx| {
+            controller.set_inbound_file_bridge(Arc::new(second.clone()), cx)
+        });
+        driver.drain();
+        second.send(poodle_node::InboundFileEvent::Entered {
+            batch: batch("answered-0"),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+    });
+}

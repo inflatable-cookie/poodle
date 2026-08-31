@@ -1176,6 +1176,72 @@ describe("inbound files", () => {
   });
 
   /**
+   * Exactness has no threshold.
+   *
+   * A bounded tail would answer this case correctly for a while and then
+   * silently stop: the id evicted to make room is exactly the one a repeating
+   * host is most likely to send again. So the first id answered stays inert
+   * after thousands of others — and a *fresh* id, and a new installation, are
+   * still ordinary business.
+   */
+  it("keeps the first answered id inert after thousands of later ones", () => {
+    const host = createInboundHost();
+    const controller = createDragDropController({ inboundFileBridge: host.bridge });
+    const disconnect = controller.connect(root);
+    controller.registerTarget(targetEl, fileTargetReg());
+
+    // One batch owns the controller, so every id after it takes the
+    // busy-refusal path and is answered without a session of its own.
+    host.send({ type: "entered", batch: hostBatch({ batchId: "first" }), x: 40, y: 90 });
+    expect(controller.getSnapshot().inboundFiles?.batchId).toBe("first");
+    host.send({ type: "entered", batch: hostBatch({ batchId: "answered-0" }), x: 40, y: 90 });
+
+    // Comfortably past the 4096 a bounded tail used to keep.
+    const later = 5_000;
+    for (let index = 1; index < later; index += 1) {
+      host.send({
+        type: "entered",
+        batch: hostBatch({ batchId: `answered-${index}` }),
+        x: 40,
+        y: 90,
+      });
+    }
+    expect(host.released).toHaveLength(later);
+
+    host.send({ type: "cancelled", batchId: "first" });
+    expect(host.released).toHaveLength(later + 1);
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    // The one a bounded tail would have forgotten first.
+    host.send({ type: "entered", batch: hostBatch({ batchId: "answered-0" }), x: 40, y: 90 });
+    expect(controller.getSnapshot().phase).toBe("idle");
+    // And the batch that owned the session, whose terminal was the last thing
+    // remembered.
+    host.send({ type: "entered", batch: hostBatch({ batchId: "first" }), x: 40, y: 90 });
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(host.released).toHaveLength(later + 1);
+
+    // Nothing about remembering makes the window deaf: an id it has not
+    // answered is still taken.
+    host.send({ type: "entered", batch: hostBatch({ batchId: "fresh" }), x: 40, y: 90 });
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    host.send({ type: "dropped", batch: hostBatch({ batchId: "fresh" }), x: 40, y: 90 });
+    expect(host.released[host.released.length - 1]).toEqual({
+      batchId: "fresh",
+      outcome: "committed",
+    });
+
+    // And a new installation still forgets all of it.
+    disconnect();
+    const reconnected = controller.connect(root);
+    host.send({ type: "entered", batch: hostBatch({ batchId: "answered-0" }), x: 40, y: 90 });
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    reconnected();
+    controller.destroy();
+  });
+
+  /**
    * The tombstone is the *installation's*, not the id's. Reconnecting is a new
    * host relationship, and the same opaque text may name a different batch —
    * an id is a host's own name for something, not a global identity.
