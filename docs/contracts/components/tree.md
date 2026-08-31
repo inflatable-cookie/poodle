@@ -535,10 +535,15 @@ None.
   → `editing_text`); F2 starts, Enter commits, Escape cancels
 - context menu: right-click via `on_mouse_down(MouseButton::Right)` →
   `on_context_menu`; host renders `ContextMenu` at `anchor_point`
-- reorder: `on_drag` (typed payload + preview view) + `on_drag_move` (computes
-  before/after/inside from pointer Y within row bounds → `on_drag_over`) +
-  `on_drop` (applies via `reorder_nodes`); `drag_over` indicator is a top/bottom
-  accent line or inside fill. Alt+Up/Down moves among siblings.
+- reorder: the shared drag-and-drop substrate (architecture 011, spec 069).
+  Every enabled row registers a `NodeDragSource` and a nested `NodeDropTarget`;
+  the GPUI `DragDropController` owns capture, hit testing, deterministic
+  deepest-target arbitration, cancellation, and exactly-once cleanup, and the
+  band rule (`before` / `inside` / `after` by thirds) lives in
+  `poodle_render::drag_drop`. `on_drag_over` and `on_reorder` keep their
+  `(dragged, over, DropEdge)` shape: the component still never sees a
+  coordinate. The `drag_over` indicator is a top/bottom accent line or inside
+  fill. Alt+Up/Down moves among siblings.
 - chevron uses `▸` / `▾` glyphs; guides are left-bordered indent cells
 - known GPUI-native deltas: no accessibility (runtime limit, §6 + Known Deltas);
   no virtual scrolling; transition timing is platform-owned

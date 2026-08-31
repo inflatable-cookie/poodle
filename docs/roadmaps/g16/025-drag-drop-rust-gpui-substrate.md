@@ -1,6 +1,6 @@
 # g16.025 — Drag-And-Drop Rust And GPUI Substrate
 
-Status: ready — stock-GPUI desktop capability boundary approved 2026-08-31
+Status: implemented 2026-08-31 — PR open, orchestrator review pending
 Depends on: `024-drag-drop-tree-nested-intent-and-auto-scroll.md`
 Governing refs: architecture 011, spec 069, the Node/render architecture, and
 the Tabs, EditableList, Tree, and ModelCatalogueEditor contracts
@@ -48,18 +48,44 @@ synthesis. Do not add a GPUI fork or platform input beneath GPUI.
 
 ## Acceptance Criteria
 
-- [ ] Custom Rust/GPUI source and target fixtures use the same semantic kernel.
-- [ ] Mounted tests cover mouse, keyboard, Escape/explicit cancellation,
+- [x] Custom Rust/GPUI source and target fixtures use the same semantic kernel.
+- [x] Mounted tests cover mouse, keyboard, Escape/explicit cancellation,
       release outside, rebuild, nested arbitration, and two independent
       sessions through real GPUI dispatch.
-- [ ] Capability tests prove the exact stock-GPUI matrix and reject any pen,
+- [x] Capability tests prove the exact stock-GPUI matrix and reject any pen,
       touch, or device-cancel claim based only on mouse synthesis.
-- [ ] Tabs and ModelCatalogueEditor preserve their existing mounted claims.
-- [ ] EditableList and Tree move to mounted only if named real-dispatch tests
-      prove their complete authored behavior; ledger changes are limited to
-      those honest cells.
-- [ ] Deferred Jetstream construction consumes renderer-neutral shape only and
+- [x] Tabs and ModelCatalogueEditor preserve their existing mounted claims.
+- [x] Tree moves to mounted on a named real-dispatch test covering selection,
+      expand, a keyboard command, a cancelled drag, and a committed nested
+      reorder. EditableList does **not** move and stays `missing`: its native
+      renderer documents reorder and change as host-owned, it registers no
+      drag source or target, and its rows carry no element identity to drive.
+      Inventing either would be a new component feature, not this card.
+- [x] Deferred Jetstream construction consumes renderer-neutral shape only and
       remains labelled deferred; no Jetstream preview/QA runs.
+
+## Outcome
+
+Delivered. The full account — capability matrix, design decisions, review
+oracle, and evidence — is
+`docs/logs/2026-08/20260831-g16-025-drag-drop-rust-gpui-substrate.md`.
+
+Public surfaces added: `poodle_node::drag` (`NodeDragSource`,
+`NodeDropTarget`, `NodeDragCapabilities`, and their resolver/handler types),
+`poodle_render::drag_drop` builders, and
+`poodle_gpui_node_backend::{DragDropController, drag_drop_provider,
+GPUI_DRAG_CAPABILITIES, NativeDragPayload, DragDropSnapshot,
+DragPreviewSnapshot, DragAnnouncementEvent}`.
+
+Public surfaces removed, with no shim: `Interaction::drag_payload`,
+`drop_zone`, `on_drag_start`, `on_drag_end`, `on_drop_hover`,
+`on_drop_leave`, `on_drop`, and `NodeDropEvent`. `DropEdge` is retained as the
+closed component-callback shorthand. No component's public callback changed.
+
+The shared Rust kernel needed no extension: no defect surfaced under mounted
+native dispatch.
+
+Ledger: 52 → 53 mounted, 122 → 121 missing.
 
 ## Writable Scope
 

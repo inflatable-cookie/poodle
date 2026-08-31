@@ -108,6 +108,7 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   ModelCatalogueEditor: "model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window",
   Radio: "radio_selects_on_activate_and_does_not_uncheck_itself",
   Select: "select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds",
+  Tree: "tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec",
   UpdateStatus: "update_status_confirm_then_install_through_the_real_tree",
   UpdateCenter: "update_center_hidden_presence_mounts_nothing_and_open_shows_status",
   SettingsShell: "settings_shell_navigates_and_refused_close_stays_open",
@@ -565,7 +566,7 @@ export function generateLedgerMarkdown(root = ROOT): string {
   return `# g16.001 — Active-Cohort Parity Evidence Ledger
 
 Status: current evidence snapshot
-Updated: 2026-08-26
+Updated: 2026-08-31
 Source: live public Svelte exports, generated portable catalogue, runtime registries, focused tests, and retained g15 evidence
 
 ## Purpose
