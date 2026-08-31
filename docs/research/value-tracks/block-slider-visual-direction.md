@@ -45,7 +45,7 @@ Access/check date for all external sources below: **2026-08-31**. The local audi
 - architecture: `docs/architecture/001-poodle-system-shape.md`, `002-token-system-and-package-layout.md`, `006-headless-core-and-machine-model.md`, `007-appearance-recipe-contract.md`, `008-audio-control-family.md`, `010-native-presentation-construction-context.md`, and `product-guardrails.md`;
 - contracts/specs: `docs/contracts/001-working-rules.md`, `docs/contracts/components/slider.md`, `docs/contracts/components/range-slider.md`, `docs/contracts/components/size-and-density.md`, `docs/contracts/003-native-accessibility.md`, and the relevant accessibility, contrast, performance, migration, and GPUI baseline specs;
 - current TypeScript/Rust source, CSS, recipes, tokens, Svelte/React/GPUI specimens, focused tests, parity records, and consumer references;
-- the supplied image, which was available at `/var/folders/ng/5rcw8k5s24j50my4x2rqf8sm0000gn/T/paseo-attachments-a7zsvQ/e8de4aad9aeaf14dc032dc2bf9ca74f9c4040a29a5ffbd7ed4d5e7393611c9c3.png`. It was inspected as a visual reference only and was not copied into the repository.
+- the operator-supplied visual reference described in `docs/triage/20260831-155151-block-slider-visual-direction.md`, inspected on 2026-08-31. It was used as a visual reference only and was not copied into the repository.
 
 External research prioritized normative platform/accessibility sources, then mature component-library precedent. No third-party code or asset is copied by this dossier.
 
