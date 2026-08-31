@@ -231,6 +231,14 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.update(|_window, cx| cx.has_active_drag())
     }
 
+    /// Run one closure with a real `App`, without drawing.
+    ///
+    /// For the cases that install or replace window-level wiring mid-test,
+    /// where drawing would confound what the test is measuring.
+    pub fn update_app<R>(&mut self, body: impl FnOnce(&mut gpui::App) -> R) -> R {
+        self.cx.update(|_window, cx| body(cx))
+    }
+
     /// Swap in a new node and repaint.
     pub fn mount_node(&mut self, node: Arc<Mutex<Node>>) {
         self.root.update(self.cx, |root, cx| {

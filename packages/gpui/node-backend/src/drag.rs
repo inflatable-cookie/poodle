@@ -254,6 +254,14 @@ struct ControllerState {
     /// host callback captures. The controller is an `Rc` and cannot cross a
     /// thread; a channel can.
     cross_window_inbox: CrossWindowInbox,
+    /// Wakes the main thread when a host answer arrives.
+    ///
+    /// Without it a host that answers asynchronously — which the contract
+    /// explicitly permits — would leave an otherwise idle window sitting in
+    /// `Preparing` until some unrelated interaction happened to draw a frame.
+    /// The sender is `Send + Sync`; the task that receives on it lives on the
+    /// main thread and owns the `Rc` controller.
+    wake: Option<CrossWindowWaker>,
     preview: Option<PreviewRenderer>,
     describe_announcement: Option<AnnouncementRenderer>,
 }
@@ -282,6 +290,13 @@ struct CrossWindowSourceTransaction {
 struct CrossWindowTargetTransaction {
     session_id: String,
     receipt: CrossWindowDragReceipt,
+    /// The bridge that published this transaction.
+    ///
+    /// Held on the transaction rather than read from the controller, because
+    /// the controller's bridge can be replaced while this one is still live.
+    /// A receipt belongs to the host that issued it, and committing it through
+    /// a later host would hand one window's lease to another.
+    bridge: Arc<dyn CrossWindowDragTargetBridge>,
     projection: CrossWindowDragProjection,
     /// Covers the commit and the target pick alike: both are requests this
     /// window can abandon while the host is still working on them.
@@ -293,11 +308,36 @@ struct CrossWindowTargetTransaction {
 /// The queue a host callback posts into, and the controller drains.
 type CrossWindowInbox = Arc<std::sync::Mutex<VecDeque<CrossWindowMessage>>>;
 
+/// The `Send + Sync` half of the wake path: a host callback's only handle on
+/// the main thread.
+type CrossWindowWaker = futures::channel::mpsc::UnboundedSender<()>;
+
+/// Post a host answer and wake the main thread to process it.
+///
+/// One function, used by every callback, so a new host answer cannot be added
+/// that queues without waking — which is exactly the hang this exists to stop.
+fn post(inbox: &CrossWindowInbox, waker: &Option<CrossWindowWaker>, message: CrossWindowMessage) {
+    inbox
+        .lock()
+        .expect("cross-window inbox")
+        .push_back(message);
+    if let Some(waker) = waker {
+        // Unbounded: the send only fails once the pump is gone, and a dropped
+        // pump means the controller is gone too.
+        let _ = waker.unbounded_send(());
+    }
+}
+
 /// A host answer waiting for a frame.
 enum CrossWindowMessage {
     /// A source preparation resolved: a receipt, or a decline.
+    ///
+    /// Carries the bridge that allocated it. A late receipt has to be returned
+    /// to *that* host, and by the time it arrives the transaction may be gone
+    /// and a different source with a different bridge may be live.
     Prepared {
         session_id: String,
+        bridge: Arc<dyn CrossWindowDragSourceBridge>,
         receipt: Option<CrossWindowDragReceipt>,
     },
     /// The host's authoritative terminal for an outgoing transaction.
@@ -404,6 +444,7 @@ impl DragDropController {
                 cross_window_source: None,
                 cross_window_projection: None,
                 cross_window_inbox: CrossWindowInbox::default(),
+                wake: None,
                 preview: None,
                 describe_announcement: None,
             })),
@@ -530,38 +571,91 @@ impl DragDropController {
     /// callback fires from wherever the host happens to be, and running a
     /// kernel event needs `&mut App`; the frame boundary is where this
     /// controller reliably has one.
-    pub fn set_cross_window_target_bridge(&self, bridge: Arc<dyn CrossWindowDragTargetBridge>) {
-        if bridge.capabilities().keyboard_target_picker
-            && !bridge.pick_target(
-                CrossWindowDragReceipt {
-                    protocol_version: 0,
-                    token: String::new(),
-                },
-                CrossWindowAbort::new(),
-                Box::new(|_| {}),
-            )
-        {
-            panic!("cross-window target bridge advertises keyboard_target_picker but implements no pick_target");
+    pub fn set_cross_window_target_bridge(
+        &self,
+        bridge: Arc<dyn CrossWindowDragTargetBridge>,
+        cx: &mut App,
+    ) {
+        // Installation has no picker side effects. A capability probe here
+        // would be an observable host request outside any transaction, absent
+        // from the contract, and it would force every implementation to
+        // special-case an invalid token. The declared capability is trusted
+        // until a real keyboard pick needs it.
+        self.ensure_wake(cx);
+
+        // Replacing a bridge while an incoming transaction is live ends that
+        // transaction first. Its receipt belongs to the outgoing host, and the
+        // outgoing host is about to stop being subscribed — leaving it open
+        // would strand a session nothing can cancel.
+        if self.state.borrow().cross_window_projection.is_some() {
+            self.release_cross_window_projection(DragCancelReason::TransportLost);
+            if let Some(session_id) = self.active_session_id() {
+                self.dispatch(
+                    DragSessionEvent::HostTerminal {
+                        session_id,
+                        outcome: DragTerminalOutcome::Cancelled {
+                            reason: DragCancelReason::TransportLost,
+                        },
+                    },
+                    cx,
+                );
+            }
         }
 
         let inbox = self.inbox();
+        let waker = self.waker();
         let unsubscribe = bridge.subscribe(Box::new(move |event| {
-            inbox
-                .lock()
-                .expect("cross-window inbox")
-                .push_back(CrossWindowMessage::Target(event));
+            post(&inbox, &waker, CrossWindowMessage::Target(event));
         }));
 
-        let mut state = self.state.borrow_mut();
-        if let Some(previous) = state.cross_window_unsubscribe.take() {
+        let previous = {
+            let mut state = self.state.borrow_mut();
+            let previous = state.cross_window_unsubscribe.take();
+            state.cross_window_target = Some(bridge);
+            state.cross_window_unsubscribe = Some(unsubscribe);
+            previous
+        };
+        if let Some(previous) = previous {
             previous();
         }
-        state.cross_window_target = Some(bridge);
-        state.cross_window_unsubscribe = Some(unsubscribe);
     }
 
     fn inbox(&self) -> CrossWindowInbox {
         Arc::clone(&self.state.borrow().cross_window_inbox)
+    }
+
+    fn waker(&self) -> Option<CrossWindowWaker> {
+        self.state.borrow().wake.clone()
+    }
+
+    /// Install the foreground pump, once.
+    ///
+    /// A host answer arrives with no `App` in reach and possibly on another
+    /// thread. It posts to the inbox and sends on this channel; the task below
+    /// runs on the main thread, drains with a real `App`, and asks for a frame
+    /// so the result is painted. `App::spawn` gives the task an `AsyncApp`,
+    /// which is why the controller — an `Rc` — can be captured at all.
+    fn ensure_wake(&self, cx: &mut App) {
+        if self.state.borrow().wake.is_some() {
+            return;
+        }
+        let (sender, mut receiver) = futures::channel::mpsc::unbounded::<()>();
+        self.state.borrow_mut().wake = Some(sender);
+
+        let controller = self.clone();
+        cx.spawn(async move |cx: &mut gpui::AsyncApp| {
+            use futures::StreamExt as _;
+            while receiver.next().await.is_some() {
+                let applied = cx.update(|cx| {
+                    controller.drain_cross_window(cx);
+                    cx.refresh_windows();
+                });
+                if applied.is_err() {
+                    break;
+                }
+            }
+        })
+        .detach();
     }
 
     /// Whether this host can carry the input kind in hand.
@@ -618,18 +712,22 @@ impl DragDropController {
         };
 
         let inbox = self.inbox();
+        let waker = self.waker();
         let session = session_id.to_owned();
+        let allocating = Arc::clone(&bridge);
         bridge.prepare(
             request,
             abort,
             Box::new(move |receipt| {
-                inbox
-                    .lock()
-                    .expect("cross-window inbox")
-                    .push_back(CrossWindowMessage::Prepared {
+                post(
+                    &inbox,
+                    &waker,
+                    CrossWindowMessage::Prepared {
                         session_id: session,
+                        bridge: allocating,
                         receipt,
-                    });
+                    },
+                );
             }),
         );
     }
@@ -659,18 +757,20 @@ impl DragDropController {
         };
 
         let inbox = self.inbox();
+        let waker = self.waker();
         let session = session_id.to_owned();
         let stop = bridge.start(
             receipt,
             CrossWindowDragTransport::WindowCapture,
             Box::new(move |outcome| {
-                inbox
-                    .lock()
-                    .expect("cross-window inbox")
-                    .push_back(CrossWindowMessage::SourceTerminal {
+                post(
+                    &inbox,
+                    &waker,
+                    CrossWindowMessage::SourceTerminal {
                         session_id: session.clone(),
                         outcome,
-                    });
+                    },
+                );
             }),
         );
 
@@ -728,8 +828,9 @@ impl DragDropController {
             match message {
                 CrossWindowMessage::Prepared {
                     session_id,
+                    bridge,
                     receipt,
-                } => self.apply_prepared(&session_id, receipt, cx),
+                } => self.apply_prepared(&session_id, &bridge, receipt, cx),
                 CrossWindowMessage::SourceTerminal {
                     session_id,
                     outcome,
@@ -747,6 +848,7 @@ impl DragDropController {
     fn apply_prepared(
         &self,
         session_id: &str,
+        bridge: &Arc<dyn CrossWindowDragSourceBridge>,
         receipt: Option<CrossWindowDragReceipt>,
         cx: &mut App,
     ) {
@@ -762,19 +864,12 @@ impl DragDropController {
 
         if stale {
             // The host still allocated something for a session that no longer
-            // exists. Hand it back rather than leak it.
+            // exists. Hand it back — to the host that allocated it, which the
+            // message carries: by now a different source with a different
+            // bridge may be preparing, and returning A's lease through B would
+            // both leak A's and issue a command B never made.
             if let Some(receipt) = receipt.filter(|receipt| receipt.is_valid()) {
-                let bridge = self
-                    .state
-                    .borrow()
-                    .cross_window_target
-                    .as_ref()
-                    .map(|_| ())
-                    .and(None::<Arc<dyn CrossWindowDragSourceBridge>>);
-                let _ = bridge;
-                if let Some(source) = self.late_source_bridge(session_id) {
-                    source.cancel(receipt, DragCancelReason::Superseded);
-                }
+                bridge.cancel(receipt, DragCancelReason::Superseded);
             }
             return;
         }
@@ -822,18 +917,6 @@ impl DragDropController {
                 }
             }
         }
-    }
-
-    /// The bridge of a transaction that has already been released.
-    ///
-    /// Only used to hand a late receipt back. The registry is rebuilt every
-    /// frame, so the source registration is the durable place to find it.
-    fn late_source_bridge(&self, _session_id: &str) -> Option<Arc<dyn CrossWindowDragSourceBridge>> {
-        let state = self.state.borrow();
-        state
-            .active_source
-            .as_ref()
-            .and_then(|(source, _)| source.cross_window_source_bridge.clone())
     }
 
     fn apply_source_terminal(
@@ -948,6 +1031,10 @@ impl DragDropController {
             return;
         }
 
+        let Some(publishing) = self.state.borrow().cross_window_target.clone() else {
+            return;
+        };
+
         let session_id = {
             let mut state = self.state.borrow_mut();
             state.next_session += 1;
@@ -957,6 +1044,7 @@ impl DragDropController {
         self.state.borrow_mut().cross_window_projection = Some(CrossWindowTargetTransaction {
             session_id: session_id.clone(),
             receipt: projection.receipt.clone(),
+            bridge: publishing,
             projection: projection.clone(),
             abort: abort.clone(),
             committing: false,
@@ -1084,25 +1172,25 @@ impl DragDropController {
         }
         let (bridge, receipt, abort) = {
             let state = self.state.borrow();
-            let Some(bridge) = state.cross_window_target.clone() else {
-                return;
-            };
-            if !bridge.capabilities().keyboard_target_picker {
-                return;
-            }
             let Some(transaction) = state.cross_window_projection.as_ref() else {
                 return;
             };
+            if !transaction.bridge.capabilities().keyboard_target_picker {
+                return;
+            }
             (
-                bridge,
+                Arc::clone(&transaction.bridge),
                 transaction.receipt.clone(),
                 transaction.abort.clone(),
             )
         };
 
         let inbox = self.inbox();
+        let waker = self.waker();
         let expected = receipt.clone();
-        bridge.pick_target(
+        // Consistency is enforced here, on a real request bound to a live
+        // receipt, rather than by probing at installation.
+        let implemented = bridge.pick_target(
             receipt,
             abort.clone(),
             Box::new(move |picked| {
@@ -1113,12 +1201,18 @@ impl DragDropController {
                 if abort.is_aborted() || picked.receipt != expected {
                     return;
                 }
-                inbox.lock().expect("cross-window inbox").push_back(
+                post(
+                    &inbox,
+                    &waker,
                     CrossWindowMessage::Target(CrossWindowDragTargetEvent::Projection {
                         projection: picked,
                     }),
                 );
             }),
+        );
+        assert!(
+            implemented,
+            "cross-window target bridge advertises keyboard_target_picker but implements no pick_target"
         );
         let _ = session_id;
     }
@@ -1128,10 +1222,6 @@ impl DragDropController {
     fn request_cross_window_commit(&self, session_id: &str, intent: DropIntent, cx: &mut App) {
         let (bridge, receipt, abort, subject) = {
             let state = self.state.borrow();
-            let Some(bridge) = state.cross_window_target.clone() else {
-                self.state.borrow_mut();
-                return;
-            };
             let Some(transaction) = state.cross_window_projection.as_ref() else {
                 return;
             };
@@ -1141,8 +1231,11 @@ impl DragDropController {
             let Some(session) = state.context.session.as_ref() else {
                 return;
             };
+            // The transaction's own bridge, not the controller's current one:
+            // a replacement must not redirect a receipt the outgoing host
+            // issued.
             (
-                bridge,
+                Arc::clone(&transaction.bridge),
                 transaction.receipt.clone(),
                 transaction.abort.clone(),
                 session.subject.clone(),
@@ -1184,6 +1277,7 @@ impl DragDropController {
         }
 
         let inbox = self.inbox();
+        let waker = self.waker();
         let session = session_id.to_owned();
         let committed_intent = intent.clone();
         let guard = abort.clone();
@@ -1199,14 +1293,15 @@ impl DragDropController {
                 if guard.is_aborted() {
                     return;
                 }
-                inbox
-                    .lock()
-                    .expect("cross-window inbox")
-                    .push_back(CrossWindowMessage::Commit {
+                post(
+                    &inbox,
+                    &waker,
+                    CrossWindowMessage::Commit {
                         session_id: session,
                         intent: committed_intent,
                         result,
-                    });
+                    },
+                );
             }),
         );
     }
@@ -1268,6 +1363,9 @@ impl DragDropController {
     /// surviving session then re-resolves against the new registrations, so an
     /// eligibility change with no pointer motion still moves the intent.
     fn frame_end(&self, window: &mut Window, cx: &mut App) {
+        // A controller that has rendered has an `App`, which is the one thing
+        // the wake path cannot get for itself.
+        self.ensure_wake(cx);
         // Host answers first: a projection or a terminal that arrived since the
         // last frame is news about *this* frame's session, and the sweep below
         // decides what survived.
@@ -1437,6 +1535,9 @@ impl DragDropController {
         self.release_cross_window_source(DragCancelReason::TransportLost);
         self.release_cross_window_projection(DragCancelReason::TransportLost);
         self.inbox().lock().expect("cross-window inbox").clear();
+        let mut state = self.state.borrow_mut();
+        state.cross_window_target = None;
+        state.wake = None;
     }
 
     fn forget_registrations(&self) {
@@ -1510,6 +1611,7 @@ impl DragDropController {
     /// run, so a later cross-window bridge slots into the same lifecycle
     /// rather than growing a second one.
     fn begin_session(&self, source_id: &str, kind: NodeDragInputKind, cx: &mut App) -> bool {
+        self.ensure_wake(cx);
         let prepared = {
             let mut state = self.state.borrow_mut();
             let Some(record) = state.sources.get(source_id) else {

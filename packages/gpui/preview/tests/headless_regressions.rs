@@ -2138,11 +2138,9 @@ impl poodle_node::CrossWindowDragTargetBridge for HostStub {
         if !self.keyboard_picker {
             return false;
         }
-        // The capability probe passes an empty receipt; it only asks whether a
-        // picker exists.
-        if receipt.token.is_empty() {
-            return true;
-        }
+        // No special case for a receipt that names nothing: a host should never
+        // be asked to pick outside a transaction, and a stub that tolerated it
+        // would hide exactly that.
         let mut state = self.state.lock().expect("host state");
         state.log.picks.push(receipt.token.clone());
         state.pending_pick = Some((receipt, abort, complete));
@@ -2365,7 +2363,7 @@ fn an_incoming_gpui_projection_revalidates_locally_and_commits_through_the_host(
         let trace = Arc::new(Mutex::new(Vec::new()));
         let host = HostStub::default();
         let controller = poodle_gpui_node_backend::DragDropController::new();
-        controller.set_cross_window_target_bridge(Arc::new(host.clone()));
+        cx.update(|cx| controller.set_cross_window_target_bridge(Arc::new(host.clone()), cx));
 
         let node = Arc::new(Mutex::new(scoped_drag_tree("xw", &trace)));
         let build = {
@@ -2441,7 +2439,7 @@ fn a_cancelled_gpui_commit_and_a_mismatched_pick_are_both_inert() {
             ..HostStub::default()
         };
         let controller = poodle_gpui_node_backend::DragDropController::new();
-        controller.set_cross_window_target_bridge(Arc::new(host.clone()));
+        cx.update(|cx| controller.set_cross_window_target_bridge(Arc::new(host.clone()), cx));
 
         let node = Arc::new(Mutex::new(scoped_drag_tree("xw", &trace)));
         let build = {
@@ -2539,6 +2537,275 @@ fn a_cancelled_gpui_commit_and_a_mismatched_pick_are_both_inert() {
             !entries.iter().any(|entry| entry.starts_with("drop:")),
             "no local drop callback ran: {entries:?}"
         );
+    });
+}
+
+
+/// g16.026 round 2. A late preparation receipt goes back to the host that
+/// allocated it, and to no other.
+///
+/// Two sources with two *different* hosts. A prepares and is abandoned; B
+/// prepares and is still live when A's host finally answers. Returning A's
+/// lease through B would both leak A's and issue a command B never made — and
+/// a single shared stub cannot tell the two apart, which is why this one uses
+/// two.
+#[test]
+fn a_late_receipt_is_returned_to_the_host_that_allocated_it() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host_a = HostStub::default();
+        let host_b = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let mut row = Node::container();
+        row.id = Some("xw-pair".to_string());
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(240.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        let mut left = scoped_drag_tree("a", &trace);
+        attach_bridge(&mut left, "a-source", Arc::new(host_a.clone()));
+        let mut right = scoped_drag_tree("b", &trace);
+        attach_bridge(&mut right, "b-source", Arc::new(host_b.clone()));
+        let node = Arc::new(Mutex::new(row.child(left).child(right)));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        // A prepares, then is abandoned before it arms.
+        let a = payload_frac("a-source", 0.5, 0.5);
+        driver.pointer_press(a);
+        driver.pointer_drag(point(px(f32::from(a.x) + 4.0), a.y));
+        assert_eq!(host_a.log(|log| log.prepares.len()), 1);
+        driver.dispatch_key_raw("escape");
+        driver.draw_frame();
+
+        // B prepares and stays live.
+        let b = payload_frac("b-source", 0.5, 0.5);
+        driver.pointer_press(b);
+        driver.pointer_drag(point(px(f32::from(b.x) + 4.0), b.y));
+        assert_eq!(host_b.log(|log| log.prepares.len()), 1);
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Preparing);
+
+        // A's host answers late.
+        host_a.settle_prepare(0, Some("lease-a"));
+        driver.drain();
+
+        assert_eq!(
+            host_a.log(|log| log.cancels.clone()),
+            vec![(
+                "lease-a".to_string(),
+                poodle_node::DragCancelReason::Superseded
+            )],
+            "the allocating host gets its lease back, exactly once"
+        );
+        assert!(
+            host_b.log(|log| log.cancels.is_empty()),
+            "the live host is issued no command it never made: {:?}",
+            host_b.log(|log| log.cancels.clone())
+        );
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Preparing,
+            "B's preparation is untouched and still waiting for its own receipt"
+        );
+        assert!(host_b.log(|log| log.starts.is_empty()));
+    });
+}
+
+/// g16.026 round 2. An asynchronous host answer wakes the window by itself.
+///
+/// The contract explicitly permits a host to answer whenever its lease
+/// resolves. Queueing the answer and waiting for the next incidental frame
+/// leaves an otherwise idle window in `Preparing` forever, so the only thing
+/// this test does after the answer is let the async runtime run — no draw, no
+/// unrelated input.
+#[test]
+fn an_asynchronous_host_answer_advances_the_session_without_a_manufactured_frame() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let mut node = scoped_drag_tree("xw", &trace);
+        attach_bridge(&mut node, "xw-source", Arc::new(host.clone()));
+        let node = Arc::new(Mutex::new(node));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let source = payload_frac("xw-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Preparing);
+
+        host.settle_prepare(0, Some("lease-1"));
+
+        // The only thing that happens next is the async runtime running.
+        driver.drain();
+
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Dragging,
+            "the host's own answer woke the window"
+        );
+        assert_eq!(
+            host.log(|log| log.starts.clone()),
+            vec!["lease-1:WindowCapture".to_string()]
+        );
+
+        // And the terminal takes the same route.
+        host.report_terminal(poodle_node::DragTerminalOutcome::Rejected {
+            reason: Some("lease expired".to_string()),
+        });
+        driver.drain();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+    });
+}
+
+/// g16.026 round 2. Installing a target bridge asks the host for nothing.
+///
+/// A capability probe at installation is an observable request outside any
+/// transaction, and it forces implementations to special-case a receipt that
+/// names nothing. The declared capability is trusted until a real keyboard
+/// pick needs it.
+#[test]
+fn installing_a_target_bridge_makes_no_host_request() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub {
+            keyboard_picker: true,
+            ..HostStub::default()
+        };
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_cross_window_target_bridge(Arc::new(host.clone()), cx));
+
+        let node = Arc::new(Mutex::new(scoped_drag_tree("xw", &trace)));
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+        driver.drain();
+
+        assert!(
+            host.log(|log| log.picks.is_empty()),
+            "installation picked nothing: {:?}",
+            host.log(|log| log.picks.clone())
+        );
+
+        // The picker is reached on a real request, bound to a live receipt.
+        let mut keyboard = projection_for("lease-1", None);
+        keyboard.input_kind = poodle_node::CrossWindowDragInputKind::Keyboard;
+        host.project(keyboard);
+        driver.drain();
+        assert_eq!(host.log(|log| log.picks.clone()), vec!["lease-1".to_string()]);
+    });
+}
+
+/// g16.026 round 2. Replacing the window's bridge mid-projection ends the
+/// transaction the outgoing host owned.
+///
+/// The outgoing host is about to stop being subscribed, so a projection left
+/// open behind it is a session nothing can cancel — and its receipt must never
+/// reach the incoming host, which never issued it.
+#[test]
+fn replacing_the_target_bridge_ends_the_outgoing_transaction() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host_a = HostStub::default();
+        let host_b = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_cross_window_target_bridge(Arc::new(host_a.clone()), cx));
+
+        let node = Arc::new(Mutex::new(scoped_drag_tree("xw", &trace)));
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        host_a.project(projection_for("lease-a", Some("xw-zone-a")));
+        driver.drain();
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("xw-zone-a")
+        );
+
+        // Swap the window's bridge while A's transaction is live.
+        driver.update_app(|cx| {
+            controller.set_cross_window_target_bridge(Arc::new(host_b.clone()), cx)
+        });
+        driver.drain();
+
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Idle,
+            "the outgoing host's transaction is ended, not stranded"
+        );
+
+        // A release now cannot commit A's receipt anywhere, least of all to B.
+        driver.pointer_release(payload_frac("xw-zone-a", 0.5, 0.75));
+        driver.drain();
+        assert!(
+            host_b.log(|log| log.commits.is_empty()),
+            "B is never sent a receipt it did not issue: {:?}",
+            host_b.log(|log| log.commits.clone())
+        );
+        assert!(host_a.log(|log| log.commits.is_empty()));
     });
 }
 

@@ -1,6 +1,6 @@
 # g16.026 — Drag-And-Drop Cross-Window Bridge, Tabs, And DockRegion
 
-Status: implementation complete — repaired after Northstar review round 1
+Status: implementation complete — repaired after Northstar review rounds 1-2
 Date: 2026-08-31
 PR: https://github.com/inflatable-cookie/poodle/pull/113
 Card: `docs/roadmaps/g16/026-drag-drop-cross-window-bridge-and-dock-region.md`
@@ -123,7 +123,7 @@ and its older-build fallback is gone.
 
 ### Falsified
 
-Eleven claims were checked by planting the pre-fix behaviour back and confirming
+Fifteen claims were checked by planting the pre-fix behaviour back and confirming
 the case fails:
 
 1. the two-window isolation, by reintroducing a thread-global census — it
@@ -142,7 +142,13 @@ the case fails:
 9. the late-receipt return, by dropping it;
 10. the picker's receipt binding, by trusting any projection;
 11. the abandoned-commit signal, by releasing the transaction without telling
-    the host.
+    the host;
+12. the allocating-bridge binding, by returning the late lease through the
+    current source;
+13. the wake path, by queueing without waking;
+14. the absence of an installation probe, by planting it back;
+15. the replacement teardown, by swapping the bridge without ending the
+    outgoing transaction.
 
 One test was found to be vacuous on the way and fixed: the composition case
 originally dropped onto the receiving strip's *self-rejecting* tab, so it
@@ -233,12 +239,53 @@ plus an addendum that changed the shape of the first repair.
    same stale claim in the `poodle-render` module doc. Absence search now
    covers authoritative docs as well as active source.
 
+## Review round 2
+
+Three blocking lifecycle defects in the round 1 repair, plus one adjacent case
+the operator folded in. All four are the same class: **authority must be
+exact**.
+
+1. **A late preparation receipt could be cancelled through the wrong bridge.**
+   `CrossWindowMessage::Prepared` carried only a session id, and the helper
+   that returned a stale lease read the *currently active* source instead. If A
+   was superseded by B with a different host, A's lease went back through B —
+   leaking A's and issuing a command B never made. The message now carries the
+   allocating bridge. The round 1 test used one stub for both attempts and
+   could not see this; the new one uses two.
+
+2. **Asynchronous host answers did not wake GPUI.** Every callback appended to
+   the inbox and nothing asked for a frame, so an idle window could sit in
+   `Preparing` indefinitely — and the contract explicitly permits a host to
+   answer whenever its lease resolves. A foreground pump now drains on the main
+   thread: the `Send + Sync` half is an unbounded sender a host callback holds,
+   the receiving task owns the `Rc` controller and an `AsyncApp`. One `post`
+   helper does queue-and-wake, so a future host answer cannot be added that
+   queues without waking.
+
+3. **Installing a target bridge called `pick_target` with a fake receipt.**
+   That is an observable host request outside any transaction, absent from the
+   TypeScript contract, and it forced implementations to special-case a token
+   naming nothing. Installation now asks the host for nothing; the declared
+   capability is enforced on a real keyboard pick bound to a live receipt.
+
+4. **Replacing the window bridge stranded the outgoing transaction.**
+   (Operator addition.) A was unsubscribed and B stored, but A's transaction
+   stayed live — and the commit path read the controller's *current* bridge, so
+   A's receipt would have gone to B. The transaction now owns the bridge that
+   published it, replacement ends the outgoing transaction first, and release
+   clears the stored bridge.
+
+One of the four new proofs was vacuous until the stub was fixed: it still
+carried an empty-token special case written for the old probe, which hid
+exactly the behaviour under test. Removing that special case is also the point
+of finding 3 — a host should not need it.
+
 ## Open items for review
 
-- The GPUI host bridge queues host answers and drains them at the frame
-  boundary, because executing a kernel event needs `&mut App` and a host
-  callback has none. A host that answers without causing a frame will see its
-  answer applied on the next one.
+- The GPUI host bridge drains through a foreground pump installed the first
+  time the controller sees an `App` — on its first frame, or when a source
+  begins preparing. A controller that has never rendered has no session, so
+  there is nothing to wake.
 - Cross-region transfer between two DockRegions now requires one common
   `DragDropProvider`. That is the operator's decision recorded in spec 069 and
   the card, and the specimen was updated to wrap both docks; consumers with two
