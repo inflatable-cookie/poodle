@@ -1,16 +1,18 @@
 # g16.033 — HistoryCenter Rejection Surface
 
-Status: reserved — do not dispatch; public API decision required after
-`g16.026` closes
+Status: reserved — do not dispatch; follows `g16.028` and requires a public
+API decision
 Opened: 2026-08-31
 Depends on: accepted and merged `g16.026` only for shared-file serialization;
-there is no drag-and-drop semantic dependency
+there is no drag-and-drop semantic dependency. Dispatch stays behind the
+ordered `g16.027` → `g16.028` runway.
 Governing refs: `../../contracts/components/history-center.md`,
 `../../contracts/001-working-rules.md`,
 `../../architecture/006-headless-core-and-machine-model.md`
 Source evidence: Loophole `PAPERCUTS.md` entries “HistoryCentre delete
 rejections collapse to UnknownEntry” and “Poodle-svelte types.ts still exports
-v2 HistoryEntry”, reassessed after Loophole PR #14 merged
+v2 HistoryEntry”, reassessed after Loophole PR #14 merged. Portfolio ownership
+is recorded in `../../triage/20260831-194043-history-papercut-ownership.md`.
 
 ## Goal
 
@@ -143,8 +145,9 @@ workflow mutation, or sibling-repository commands.
 
 ## Continuation
 
-After `g16.026` merges, resolve the decision gate and only then prepare the
-worker handoff. This Poodle thread owns implementation review and merge. A
-later explicitly authorized release/adoption lane may publish the corrected
-package and close Loophole's pin-lag entry. `g16.027` remains the next ordered
-drag-and-drop card and is not displaced by this reservation.
+After `g16.028` closes, resolve the decision gate and only then prepare the
+worker handoff. The worker workspace must carry the capitalized `Papercuts`
+label before launch. This Poodle thread owns implementation review and merge.
+A later explicitly authorized release/adoption lane may publish the corrected
+package and close Loophole's pin-lag entry. The ordered `g16.027` → `g16.028`
+drag-and-drop runway is not displaced by this reservation.

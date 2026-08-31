@@ -12,3 +12,6 @@ Current open notes:
 
 - `20260821-165500-longhorn-conformance-lab.md` — lab ownership and native
   capture/process lifecycle remain undecided.
+- `20260831-194043-history-papercut-ownership.md` — portfolio ownership is
+  settled; the CS20 presentation choice and Longhorn rejection-code API choice
+  remain open behind the active drag runway.
