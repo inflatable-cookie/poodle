@@ -14,6 +14,7 @@ import {
 import "@inflatable-cookie/poodle-core/styles/drag-drop.css";
 import {
   createDragDropController,
+  type CrossWindowDragTargetBridge,
   type DragAnnouncementEvent,
   type DragDropController,
   type DragDropSnapshot,
@@ -28,6 +29,15 @@ import {
 } from "@inflatable-cookie/poodle-core";
 
 export type {
+  CrossWindowDragCapabilities,
+  CrossWindowDragCommitRequest,
+  CrossWindowDragPrepareRequest,
+  CrossWindowDragProjection,
+  CrossWindowDragReceipt,
+  CrossWindowDragSourceBridge,
+  CrossWindowDragTargetBridge,
+  CrossWindowDragTargetEvent,
+  CrossWindowDragTransport,
   DragActivationConstraints,
   DragAnnouncementEvent,
   DragDropCommitResult,
@@ -69,6 +79,12 @@ function composeHandler<E>(theirs?: (event: E) => void, ours?: (event: E) => voi
 export interface DragDropProviderProps {
   controller?: DragDropController;
   describeAnnouncement?: (event: DragAnnouncementEvent) => string | null;
+  /**
+   * Incoming cross-window host projection, commit, and accessible target
+   * picking for this document. Ignored when an explicit `controller` is
+   * supplied, because that controller already owns its own bridge.
+   */
+  crossWindowTargetBridge?: CrossWindowDragTargetBridge;
   preview?: (snapshot: DragPreviewSnapshot) => ReactNode;
   children?: ReactNode;
 }
@@ -76,12 +92,15 @@ export interface DragDropProviderProps {
 export function DragDropProvider({
   controller,
   describeAnnouncement,
+  crossWindowTargetBridge,
   preview,
   children,
 }: DragDropProviderProps) {
   const ownedRef = useRef(controller === undefined);
   const [ctrl] = useState(() =>
-    ownedRef.current ? createDragDropController({ describeAnnouncement }) : controller!,
+    ownedRef.current
+      ? createDragDropController({ describeAnnouncement, crossWindowTargetBridge })
+      : controller!,
   );
   const rootRef = useRef<HTMLDivElement>(null);
   const [snapshot, setSnapshot] = useState(() => ctrl.getSnapshot());

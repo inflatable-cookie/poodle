@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Poodle cross-window drag bridge fixture</title>
+    <style>
+      body { font-family: sans-serif; margin: 0; }
+      #source, #target, #other {
+        width: 200px;
+        padding: 16px;
+        margin: 24px;
+        border: 1px solid #444;
+      }
+      #source { background: #eee; }
+      #target { background: #f7f7f7; min-height: 56px; }
+      #other { background: #fafafa; min-height: 56px; }
+      /* Fixed box: a probe that grows would resize the observed root. */
+      #probe { margin: 16px; height: 24px; overflow: hidden; font-family: monospace; }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <button type="button" id="source">Alpha</button>
+      <div id="target">List</div>
+      <div id="other">Other list</div>
+      <div id="probe" data-phase="idle" data-posture="" data-target=""></div>
+      <div id="overlay" class="poodle-drag-overlay" aria-hidden="true"></div>
+    </div>
+    <script type="module" src="./cross-window.ts"></script>
+  </body>
+</html>

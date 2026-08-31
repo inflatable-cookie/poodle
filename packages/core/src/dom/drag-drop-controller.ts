@@ -999,7 +999,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     pending.sessionId = beginSession(source, kind, pending.x, pending.y, sessionId);
     if (!pending.thresholdReached) return;
     const handle = resolveHandle(source.element, source.registration.handle);
-    if (phase === "armed") {
+    if (currentPhase() === "armed") {
       activate(pending.sessionId, handle, pending.pointerId);
       if (gesture) hitTest(pending.x, pending.y);
     }
@@ -1079,6 +1079,9 @@ export function createDragDropController(options: DragDropControllerOptions = {}
           return;
         }
         transaction.receipt = receipt;
+        // Armed: only now may the element advertise the browser's own drag.
+        const advertised = sources.get(transaction.sourceId);
+        if (advertised) applySourceDom(advertised);
         dispatch({ type: "PREPARED", sessionId });
         // An armed receipt may arrive after the gesture already passed its
         // activation threshold; the pending activation is honoured here rather
@@ -1138,6 +1141,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     if (!transaction) return;
     crossWindowSource = null;
     nativeDragSessionId = null;
+    const advertised = sources.get(transaction.sourceId);
+    if (advertised) applySourceDom(advertised);
 
     if (!transaction.abort.signal.aborted) transaction.abort.abort(reason);
 
@@ -2816,15 +2821,17 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     } else {
       element.setAttribute("aria-description", entry.authoredAriaDescription);
     }
-    // The browser's own drag is the web's only cross-window transport, so a
-    // source whose host can carry a pointer transfer must advertise it. Every
-    // other source stays non-draggable: the sensor owns the gesture and a
-    // parallel native drag would fight it.
-    const bridge = entry.registration.crossWindowSourceBridge;
-    element.setAttribute(
-      "draggable",
-      bridge && bridge.capabilities.pointer ? "true" : "false",
-    );
+    // The browser's own drag is the web's only cross-window transport, and a
+    // source may not advertise one before its receipt is armed: `draggable`
+    // is the advertisement, and a browser that starts a drag on it while the
+    // host is still deciding would take the gesture away from a transfer
+    // nobody agreed to. Every other source stays non-draggable — the sensor
+    // owns the gesture and a parallel native drag would fight it.
+    const armed =
+      crossWindowSource !== null &&
+      crossWindowSource.sourceId === entry.registration.sourceId &&
+      crossWindowSource.receipt !== null;
+    element.setAttribute("draggable", armed ? "true" : "false");
   }
 
   function restoreSourceDom(entry: SourceEntry): void {

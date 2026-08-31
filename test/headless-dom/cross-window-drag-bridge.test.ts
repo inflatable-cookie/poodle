@@ -313,11 +313,15 @@ describe("cross-window drag bridge", () => {
     const disconnect = controller.connect(sendingRoot);
     controller.registerSource(sourceEl, sourceReg({ crossWindowSourceBridge: host.source }));
 
-    expect(sourceEl.getAttribute("draggable")).toBe("true");
+    // The advertisement is the receipt, not the registration: an element that
+    // said `draggable` before the host agreed would let the browser take the
+    // gesture for a transfer nobody armed.
+    expect(sourceEl.getAttribute("draggable")).toBe("false");
 
     sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
     await settle();
     expect(controller.getSnapshot().phase).toBe("armed");
+    expect(sourceEl.getAttribute("draggable")).toBe("true");
 
     const dataTransfer = new DataTransfer();
     const start = drag("dragstart", dataTransfer);
