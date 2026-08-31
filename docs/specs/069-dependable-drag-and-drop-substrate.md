@@ -526,6 +526,15 @@ window-owned bridge; local same-document panel drops continue to use
 `canAcceptPanel` and `onPanelDrop`. A host receipt uses the bridge's commit and
 does not also invoke `onPanelDrop`, matching the old external-target split.
 
+Same-document DockRegion transfer uses the ordinary shared drag controller,
+not the cross-window bridge or a document-global panel session. A DockRegion
+joins the nearest `DragDropProvider` when present and otherwise owns a private
+controller for its own reorder behavior. Two sibling regions cross-drop only
+when a common provider owns both registrations; consumers that need that
+behavior wrap them in one provider. Two independently self-provided regions do
+not discover each other, and no MIME, module singleton, or global registry
+restores that link implicitly.
+
 On GPUI, `DragDropWindowHost` is an ordinary value owned one-per-window.
 `drag_drop_window_host(&host, || root)` establishes that window's provider
 census, appends the window-reaching end-of-frame sweep, and owns native drag

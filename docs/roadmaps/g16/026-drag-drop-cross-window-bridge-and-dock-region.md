@@ -39,6 +39,11 @@ controller-wide bridge.
   `crossWindowDragSource` / `crossWindowDropTarget`. Local panel moves retain
   `canAcceptPanel` / `onPanelDrop`; a host receipt commits through the target
   bridge and does not also call `onPanelDrop`.
+- Same-document cross-region panel transfer uses one ambient
+  `DragDropProvider`. A DockRegion joins that provider when present and creates
+  a private controller otherwise. Two self-provided sibling regions keep local
+  reorder but do not cross-drop; no document-global session or second MIME
+  wire remains.
 - Rust exports the same public type and trait names with idiomatic field names.
   Host-supplied completion callbacks may replace TypeScript promises; the
   lifecycle and result shapes may not differ.
@@ -100,7 +105,9 @@ or wrappers. Preserve `onPanelDrop`'s semantic purpose, make
    zones, collapse, callbacks, and projection, but replace the external
    controller and `dockPanelDragSession` with the split bridge. Make
    `PanelDragData.sourceZone` required and delete the old fallback and public
-   exports only after mounted replacement proof passes.
+   exports only after mounted replacement proof passes. Register local panel
+   sources and targets with the nearest shared provider, falling back to one
+   private controller only for the region's own local reorder.
 6. Add renderer-neutral DockRegion registrations and the GPUI projection path
    without importing host geometry or authority. Keep Jetstream at compile-only
    renderer-neutral maintenance.
@@ -130,6 +137,9 @@ or wrappers. Preserve `onPanelDrop`'s semantic purpose, make
       stale lease, rejection, commit, cancel, window close, and late completion.
 - [ ] Svelte, React, and GPUI DockRegion projections preserve component
       behavior and use the same lifecycle semantics.
+- [ ] Two sibling web DockRegions under one provider cross-drop through the
+      normal target path and call `onPanelDrop` once; without a common provider
+      they retain same-region reorder but do not discover one another.
 - [ ] Headless web multi-context and GPUI host-stub tests take no operator focus.
 - [ ] Poodle imports no Longhorn/shell package and owns no window transaction.
 - [ ] Existing DockRegion ledger claim remains honest; no unrelated row moves.
@@ -188,6 +198,7 @@ registered under its own root. Its end-of-frame element reaches `Window` and
 | Keyboard is the same transaction | picker returns a target that becomes stale before commit | normal revalidation rejects; no arrow-key window simulation or second callback path appears |
 | Touch claims are capability-bound | host cannot observe touch outside the source window | internal touch remains true; cross-window touch advertises false and never starts |
 | Local reorder stays independent | ordinary Tabs has no source bridge or the host declines | pointer and Alt+Arrow reorder still use the shared local lifecycle with no native payload |
+| DockRegion has no hidden local bus | two sibling regions mount first under one provider, then without one | the shared-provider pair cross-drops once; the self-provided pair keeps local reorder and exposes no cross-region target |
 | Two GPUI windows are isolated | A renders while B has an active controller and provider | A's frame cannot cancel, prune, or stop B |
 | Provider unmount stops the real GPUI drag | B's provider disappears mid-drag | B reaches semantic idle, registrations and preview vanish, and GPUI reports no active native drag |
 | Clean migration is complete | active-source search over old names and optional `sourceZone` | zero definitions, imports, exports, aliases, wrappers, global session uses, or fallback reads |
