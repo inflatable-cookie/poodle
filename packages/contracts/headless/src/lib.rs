@@ -14,6 +14,7 @@ pub mod agent_transcript;
 pub mod audio;
 pub mod checkbox;
 pub mod color;
+pub mod cross_window_drag;
 pub mod date;
 pub mod disclosure;
 pub mod drag_drop;

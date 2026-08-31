@@ -86,6 +86,19 @@ export type DragTerminalOutcome =
   | { status: "failed"; reason?: string }
   | { status: "cancelled"; reason: DragCancelReason };
 
+/**
+ * The authoritative answer to one revalidated drop request.
+ *
+ * Semantic, not DOM: a local target returns it from `onDrop`, and a
+ * cross-window host bridge returns it from `commit`. Both map onto the same
+ * kernel terminal event, so a host refusal and a local refusal are the same
+ * observation to everything downstream.
+ */
+export type DragDropCommitResult =
+  | { status: "committed" }
+  | { status: "rejected"; reason?: string }
+  | { status: "failed"; reason?: string };
+
 export type DragAnnouncementKind =
   | "pickup"
   | "intentChanged"
@@ -145,6 +158,22 @@ export type DragSessionEvent =
   | { type: "TARGET_LOST"; sessionId: string; targetId: string }
   | { type: "TRANSPORT_LOST"; sessionId: string }
   | { type: "WINDOW_LOST"; sessionId: string }
+  /**
+   * The authoritative completion of a host-owned transaction — the one event
+   * a cross-window transport has that a local gesture does not.
+   *
+   * A local drop reaches its result through `DROP_REQUESTED`, because the
+   * adapter holds the live target and can revalidate it. A host transaction
+   * has no local target to revalidate: the drop happened in another window,
+   * and the only authority on what became of it is the host. Its refusal must
+   * therefore stay a refusal rather than degrade into a cancellation, which is
+   * the one thing the ordinary path cannot express from `dragging`.
+   *
+   * It is not a back door to a commit. Only a host bridge Poodle was handed
+   * can produce one, it is bound to the session id the preparation was created
+   * for, and a repeat arrives in a terminal phase that no longer accepts it.
+   */
+  | { type: "HOST_TERMINAL"; sessionId: string; outcome: DragTerminalOutcome }
   | { type: "RESET"; sessionId: string };
 
 export type DragSessionEffect =
@@ -445,6 +474,27 @@ export function dragSessionTransition(
 
     case "WINDOW_LOST":
       return isActivePhase(phase) ? cancel(phase, session, "window-lost") : inert;
+
+    case "HOST_TERMINAL": {
+      if (!isActivePhase(phase)) return inert;
+      const outcome = event.outcome;
+
+      if (outcome.status === "cancelled") {
+        return cancel(phase, session, outcome.reason);
+      }
+
+      if (outcome.status === "committed") {
+        return terminal(
+          phase,
+          { ...session, operation: outcome.intent.operation, intent: outcome.intent },
+          outcome,
+          "dropped",
+          "ended",
+        );
+      }
+
+      return terminal(phase, session, outcome, outcome.status === "rejected" ? "rejected" : "failed", "ended");
+    }
 
     case "RESET":
       return isTerminalPhase(phase) ? { state: "idle", context: { session: null }, effects: [] } : inert;

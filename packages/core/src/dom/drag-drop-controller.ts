@@ -19,6 +19,7 @@ import {
   dragSessionTransition,
   resolveDropTarget,
   type DragAnnouncementKind,
+  type DragDropCommitResult,
   type DragOperation,
   type DragSession,
   type DragSessionContext,
@@ -32,6 +33,8 @@ import {
   type DropPosition,
   type DropTargetCandidate,
 } from "../drag-drop";
+
+export type { DragDropCommitResult };
 
 export type DragInputKind = "mouse" | "pen" | "touch" | "keyboard";
 
@@ -63,11 +66,6 @@ export interface DragPositionResolverInput {
   readonly operation: DragOperation;
   readonly inputKind: DragInputKind;
 }
-
-export type DragDropCommitResult =
-  | { status: "committed" }
-  | { status: "rejected"; reason?: string }
-  | { status: "failed"; reason?: string };
 
 export interface DragSourceRegistration {
   readonly sourceId: string;

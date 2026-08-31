@@ -725,10 +725,34 @@ export {
 } from "./dock-external-drag";
 
 export {
+  CROSS_WINDOW_DRAG_MAX_TOKEN_LENGTH,
+  CROSS_WINDOW_DRAG_MIME_TYPE,
+  CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
+  isCrossWindowDragReceipt,
+  sameCrossWindowDragReceipt,
+  type CrossWindowDragCapabilities,
+  type CrossWindowDragCommitRequest,
+  type CrossWindowDragPrepareRequest,
+  type CrossWindowDragProjection,
+  type CrossWindowDragReceipt,
+  type CrossWindowDragSourceBridge,
+  type CrossWindowDragTargetBridge,
+  type CrossWindowDragTargetEvent,
+  type CrossWindowDragTransport,
+} from "./cross-window-drag";
+export {
+  createCrossWindowDataTransferAdapter,
+  CROSS_WINDOW_DRAG_MAX_ENVELOPE_LENGTH,
+  type CrossWindowDataTransferAdapter,
+  type CrossWindowDataTransferAdapterOptions,
+  type CrossWindowDataTransferLike,
+} from "./dom/cross-window-data-transfer";
+export {
   dragSessionTransition,
   resolveDropTarget,
   type DragAnnouncementKind,
   type DragCancelReason,
+  type DragDropCommitResult,
   type DragOperation,
   type DragSession,
   type DragSessionContext,
@@ -769,7 +793,6 @@ export {
   type DragActivationHold,
   type DragAnnouncementEvent,
   type DragDropCapabilities,
-  type DragDropCommitResult,
   type DragDropController,
   type DragDropControllerOptions,
   type DragDropSnapshot,
