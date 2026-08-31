@@ -11,6 +11,20 @@
 
 import { collectScrollParents } from "./anchor";
 import {
+  createCrossWindowDataTransferAdapter,
+  type CrossWindowDataTransferAdapter,
+} from "./cross-window-data-transfer";
+import {
+  isCrossWindowDragReceipt,
+  sameCrossWindowDragReceipt,
+  type CrossWindowDragProjection,
+  type CrossWindowDragReceipt,
+  type CrossWindowDragSourceBridge,
+  type CrossWindowDragTargetBridge,
+  type CrossWindowDragTargetEvent,
+  type CrossWindowDragTransport,
+} from "../cross-window-drag";
+import {
   resolveAutoScroll,
   type AutoScrollCandidate,
   type AutoScrollMetrics,
@@ -19,6 +33,7 @@ import {
   dragSessionTransition,
   resolveDropTarget,
   type DragAnnouncementKind,
+  type DragCancelReason,
   type DragDropCommitResult,
   type DragOperation,
   type DragSession,
@@ -79,6 +94,17 @@ export interface DragSourceRegistration {
   readonly activation?: DragActivationConstraints;
   /** When set, Space/Enter pick up this focused source. Also the origin for ordered logical keyboard traversal. */
   readonly keyboardOrder?: number;
+  /**
+   * Host preparation for a drag that may leave this window.
+   *
+   * Optional and per source, because a lease belongs to the subject being
+   * dragged. Preparation runs on the accepted pre-drag gesture, before
+   * activation, and the source cannot advertise or start a cross-window
+   * gesture until its own receipt is armed. A source without one keeps the
+   * internal transport's immediate preparation, and so does a source whose
+   * bridge does not advertise the capability for the input kind in hand.
+   */
+  readonly crossWindowSourceBridge?: CrossWindowDragSourceBridge;
   readonly onDragStart?: (session: DragSession) => void;
   readonly onDragEnd?: (outcome: DragTerminalOutcome) => void;
 }
@@ -179,6 +205,15 @@ export interface DragDropCapabilities {
 export interface DragDropControllerOptions {
   readonly describeAnnouncement?: (event: DragAnnouncementEvent) => string | null;
   readonly createSessionId?: () => string;
+  /**
+   * Incoming host projection, commit, and accessible target picking for this
+   * one document.
+   *
+   * Per window rather than per source: a projection arrives with no local
+   * source at all, and outlives any one subject. It is installed when the
+   * controller connects and torn down when it disconnects.
+   */
+  readonly crossWindowTargetBridge?: CrossWindowDragTargetBridge;
 }
 
 export interface DragDropController {
@@ -257,6 +292,16 @@ interface PointerGesture {
   sourceId: string;
   sessionId: string;
   activated: boolean;
+  /**
+   * The activation constraint is already satisfied.
+   *
+   * Distinct from `activated` only for a cross-window source, whose host
+   * preparation may still be in flight when the pointer passes its distance
+   * or hold: the gesture is committed, but the session cannot enter
+   * `dragging` until its receipt is armed. Every other source arms
+   * synchronously and the two flip together.
+   */
+  thresholdReached: boolean;
   holdTimer: ReturnType<typeof setTimeout> | null;
   captureElement: Element | null;
   restoredTouchAction: string | null;
@@ -459,9 +504,48 @@ function activationFor(
   return { distance: authored?.mouse?.distance ?? DEFAULT_MOUSE_DISTANCE };
 }
 
+/**
+ * One source's live host transaction.
+ *
+ * Held beside the kernel session rather than inside it: the kernel owns
+ * lifecycle and knows nothing about transports, and a receipt is the one thing
+ * that must survive independently of which phase the session happens to be in
+ * when the host answers.
+ */
+interface CrossWindowSourceTransaction {
+  readonly sessionId: string;
+  readonly sourceId: string;
+  readonly bridge: CrossWindowDragSourceBridge;
+  readonly abort: AbortController;
+  receipt: CrossWindowDragReceipt | null;
+  transport: CrossWindowDragTransport | null;
+  stopTerminal: (() => void) | null;
+  /** The host already delivered its authoritative terminal for this receipt. */
+  settled: boolean;
+}
+
+/** The incoming host transaction this window is currently projecting. */
+interface CrossWindowTargetTransaction {
+  readonly sessionId: string;
+  readonly receipt: CrossWindowDragReceipt;
+  projection: CrossWindowDragProjection;
+  readonly abort: AbortController;
+  /** A commit is in flight; a second drop cannot start another. */
+  committing: boolean;
+}
+
 export function createDragDropController(options: DragDropControllerOptions = {}): DragDropController {
   const createSessionId = options.createSessionId ?? defaultSessionId;
   let describeAnnouncement = options.describeAnnouncement;
+  const crossWindowTargetBridge = options.crossWindowTargetBridge;
+  /**
+   * One codec for both directions.
+   *
+   * The source writes the envelope at `dragstart` and the target reads it at
+   * `drop`; they are the same bounded format, and two instances would be two
+   * places for the MIME type and the bounds to drift apart.
+   */
+  const crossWindowCodec: CrossWindowDataTransferAdapter = createCrossWindowDataTransferAdapter();
 
   let destroyed = false;
   let connectedRoot: Element | null = null;
@@ -508,9 +592,39 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   let keyboardLogicalSession = false;
   let keyboardTargetIndex = -1;
 
+  let crossWindowSource: CrossWindowSourceTransaction | null = null;
+  /**
+   * A session that must not re-enter its source's host bridge.
+   *
+   * The local fallback reuses the same registration, so without this the
+   * declined bridge would be asked again and decline again forever.
+   */
+  let bridgeBypassSessionId: string | null = null;
+  /**
+   * The host's own name for a subject this window has no source for.
+   *
+   * Announcements need a name and an incoming projection is the only place one
+   * exists, so it is held for the session rather than looked up in a registry
+   * that will never contain it.
+   */
+  let crossWindowSourceLabel: string | null = null;
+  let crossWindowTarget: CrossWindowTargetTransaction | null = null;
+  let crossWindowUnsubscribe: (() => void) | null = null;
+  /** The native gesture handed to the browser for a `data-transfer` source. */
+  let nativeDragSessionId: string | null = null;
+
   const documentListeners: Array<[string, EventListener, AddEventListenerOptions | boolean | undefined]> = [];
   let resizeObserver: ResizeObserver | null = null;
   let restoredRootUserSelect: string | null | undefined;
+
+  /**
+   * Read the phase through a call so a guard earlier in the same function does
+   * not narrow it. `dispatch` reassigns `phase`, which control-flow analysis
+   * cannot see through.
+   */
+  function currentPhase(): DragSessionPhase {
+    return phase;
+  }
 
   function assertLive(): void {
     if (destroyed) {
@@ -608,7 +722,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
             operation: session.operation,
             x: pointerPosition.x + PREVIEW_OFFSET,
             y: pointerPosition.y + PREVIEW_OFFSET,
-            label: source?.registration.label ?? session.subject.id,
+            label: source?.registration.label ?? crossWindowSourceLabel ?? session.subject.id,
           })
         : null;
 
@@ -643,7 +757,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
     const event: DragAnnouncementEvent = {
       kind,
-      sourceLabel: source?.registration.label ?? session?.subject.id ?? "item",
+      sourceLabel:
+        source?.registration.label ?? crossWindowSourceLabel ?? session?.subject.id ?? "item",
       targetLabel: target?.registration.label,
       position: session?.intent?.position,
       operation: session?.operation,
@@ -728,8 +843,29 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   function runEffect(effect: DragSessionEffect): DragSessionEvent[] {
     switch (effect.type) {
-      case "prepareSession":
-        return [{ type: "PREPARED", sessionId: effect.sessionId }];
+      case "prepareSession": {
+        // An incoming host projection has no local source to prepare — the
+        // preparation already happened in the window the drag came from.
+        if (crossWindowTarget?.sessionId === effect.sessionId) {
+          return [{ type: "PREPARED", sessionId: effect.sessionId }];
+        }
+
+        if (bridgeBypassSessionId === effect.sessionId) {
+          bridgeBypassSessionId = null;
+          return [{ type: "PREPARED", sessionId: effect.sessionId }];
+        }
+
+        const source = sources.get(effect.sourceId);
+        const bridge = source?.registration.crossWindowSourceBridge;
+        if (!source || !bridge || inputKind === null || !crossWindowCarries(bridge, inputKind)) {
+          return [{ type: "PREPARED", sessionId: effect.sessionId }];
+        }
+
+        // Stays in `preparing` until the host answers: an armed receipt is the
+        // precondition for advertising or starting a cross-window gesture.
+        beginCrossWindowPreparation(effect.sessionId, source, bridge);
+        return [];
+      }
 
       case "emitDragStart": {
         const source = sources.get(effect.sourceId);
@@ -763,6 +899,13 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       case "cleanupSession":
         stopAutoScroll();
         releasePointerHardware();
+        if (crossWindowSource?.sessionId === effect.sessionId) {
+          releaseCrossWindowSource(releaseReasonFor(lastOutcome));
+        }
+        if (crossWindowTarget?.sessionId === effect.sessionId) {
+          releaseCrossWindowTarget();
+        }
+        crossWindowSourceLabel = null;
         gesture = null;
         dropGeneration += 1;
         keyboardSourceId = null;
@@ -773,6 +916,598 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         lastOutcome = undefined;
         return [];
     }
+  }
+
+
+  // ── Cross-window host bridge ───────────────────────────────────────────
+
+  /**
+   * Whether this host can carry the input kind in hand.
+   *
+   * Capability is resolved before the affordance claims support, and it is
+   * per input class rather than per bridge: a host that follows a mouse
+   * across windows may have no way to see a touch contact outside the source
+   * window, and saying otherwise would arm a gesture that can never leave.
+   * A `false` answer is not a failure — the source falls back to the internal
+   * transport's immediate preparation and stays a perfectly good local drag.
+   */
+  function crossWindowCarries(bridge: CrossWindowDragSourceBridge, kind: DragInputKind): boolean {
+    if (kind === "keyboard") return bridge.capabilities.keyboardTargetPicker;
+    if (kind === "touch") return bridge.capabilities.touch;
+    return bridge.capabilities.pointer;
+  }
+
+  /**
+   * The transport Poodle is actually using, never what the host would prefer.
+   *
+   * A web page cannot observe a pointer in another window, so mouse and pen
+   * transfer is the browser's own drag with the receipt in a bounded envelope.
+   * `window-capture` is left for touch, where a host that advertises the
+   * capability is claiming an out-of-window observation the page itself does
+   * not have; keyboard has no pointer at all.
+   */
+  function crossWindowTransport(kind: DragInputKind): CrossWindowDragTransport {
+    if (kind === "keyboard") return "keyboard-picker";
+    if (kind === "touch") return "window-capture";
+    return "data-transfer";
+  }
+
+  /** Mouse and pen hand the gesture to the browser rather than to the sensor. */
+  function crossWindowUsesNativeDrag(bridge: CrossWindowDragSourceBridge, kind: DragInputKind): boolean {
+    return (kind === "mouse" || kind === "pen") && bridge.capabilities.pointer;
+  }
+
+  /**
+   * The cross-window attempt failed; the local drag has not.
+   *
+   * A decline or failure cancels only the transfer, so the gesture the user is
+   * still making falls back to the ordinary local lifecycle with a fresh
+   * session and no host payload. Without this, a host that says "not this one"
+   * would also break same-window reorder.
+   */
+  function endCrossWindowAttempt(
+    sessionId: string,
+    event: "PREPARE_DECLINED" | "PREPARE_FAILED",
+    sourceId: string,
+  ): void {
+    // The kernel's cancellation clears the gesture along with the session,
+    // which is right for a real terminal and wrong here: the pointer is still
+    // down and the user is still dragging. The gesture is held across the
+    // dispatch, hold timer included, so a declined touch source does not also
+    // lose the hold it was in the middle of.
+    const pending = gesture;
+    const holdTimer = pending?.holdTimer ?? null;
+    if (pending) pending.holdTimer = null;
+    dispatch({ type: event, sessionId });
+    if (pending) pending.holdTimer = holdTimer;
+    fallBackToLocalSession(pending, sourceId);
+  }
+
+  function fallBackToLocalSession(pending: PointerGesture | null, sourceId: string): void {
+    if (!pending || pending.sourceId !== sourceId || pending.activated) return;
+    if (phase !== "idle") return;
+    const source = sources.get(sourceId);
+    if (!source || source.registration.disabled || !source.element.isConnected) return;
+    const kind = pending.pointerType;
+
+    gesture = pending;
+    inputKind = kind;
+    pointerPosition = { x: pending.x, y: pending.y };
+
+    const sessionId = createSessionId();
+    bridgeBypassSessionId = sessionId;
+    pending.sessionId = beginSession(source, kind, pending.x, pending.y, sessionId);
+    if (!pending.thresholdReached) return;
+    const handle = resolveHandle(source.element, source.registration.handle);
+    if (phase === "armed") {
+      activate(pending.sessionId, handle, pending.pointerId);
+      if (gesture) hitTest(pending.x, pending.y);
+    }
+  }
+
+  /**
+   * Ask the host for a lease, without letting the answer arm the wrong
+   * session.
+   *
+   * Every guard here is the same guard: the completion is bound to the session
+   * it was created for. A receipt that arrives after supersession is handed
+   * straight back to the host rather than dropped on the floor, because the
+   * host allocated something for it.
+   */
+  function beginCrossWindowPreparation(
+    sessionId: string,
+    source: SourceEntry,
+    bridge: CrossWindowDragSourceBridge,
+  ): void {
+    const abort = new AbortController();
+    const transaction: CrossWindowSourceTransaction = {
+      sessionId,
+      sourceId: source.registration.sourceId,
+      bridge,
+      abort,
+      receipt: null,
+      transport: null,
+      stopTerminal: null,
+      settled: false,
+    };
+    crossWindowSource = transaction;
+
+    const operation = source.registration.operation ?? source.registration.allowedOperations[0];
+    if (operation === undefined) {
+      dispatch({ type: "PREPARE_FAILED", sessionId });
+      return;
+    }
+
+    let pending: Promise<CrossWindowDragReceipt | null>;
+    try {
+      pending = bridge.prepare(
+        {
+          sessionId,
+          sourceId: source.registration.sourceId,
+          subject: source.registration.subject,
+          operation,
+          allowedOperations: source.registration.allowedOperations,
+        },
+        abort.signal,
+      );
+    } catch {
+      dispatch({ type: "PREPARE_FAILED", sessionId });
+      return;
+    }
+
+    void Promise.resolve(pending).then(
+      (receipt) => {
+        const stale = crossWindowSource !== transaction || abort.signal.aborted;
+        if (stale) {
+          // The host still allocated something for a session that no longer
+          // exists. Hand it back rather than leaking it.
+          if (receipt && isCrossWindowDragReceipt(receipt)) {
+            try {
+              void bridge.cancel(receipt, "superseded");
+            } catch {
+              // A host that throws on cleanup cannot break the local session.
+            }
+          }
+          return;
+        }
+        if (receipt === null) {
+          endCrossWindowAttempt(sessionId, "PREPARE_DECLINED", transaction.sourceId);
+          return;
+        }
+        if (!isCrossWindowDragReceipt(receipt)) {
+          endCrossWindowAttempt(sessionId, "PREPARE_FAILED", transaction.sourceId);
+          return;
+        }
+        transaction.receipt = receipt;
+        dispatch({ type: "PREPARED", sessionId });
+        // An armed receipt may arrive after the gesture already passed its
+        // activation threshold; the pending activation is honoured here rather
+        // than waiting for another pointer move that may never come.
+        if (gesture?.sessionId === sessionId && gesture.thresholdReached && phase === "armed") {
+          const live = sources.get(transaction.sourceId);
+          if (live) {
+            const handle = resolveHandle(live.element, live.registration.handle);
+            activate(sessionId, handle, gesture.pointerId);
+            hitTest(gesture.x, gesture.y);
+          }
+        }
+      },
+      () => {
+        if (crossWindowSource !== transaction || abort.signal.aborted) return;
+        endCrossWindowAttempt(sessionId, "PREPARE_FAILED", transaction.sourceId);
+      },
+    );
+  }
+
+  /**
+   * The gesture is live: install the one authoritative terminal subscription.
+   *
+   * `start` is called once per receipt. Its callback is the only thing in this
+   * controller that can end a cross-window session with a drop result — native
+   * `dragend`, pointer release, and `dropEffect` cannot, which is the whole
+   * reason the host owns this subscription rather than the DOM.
+   */
+  function startCrossWindowTransport(sessionId: string, transport: CrossWindowDragTransport): void {
+    const transaction = crossWindowSource;
+    if (!transaction || transaction.sessionId !== sessionId) return;
+    if (transaction.stopTerminal !== null || transaction.receipt === null) return;
+
+    transaction.transport = transport;
+    const receipt = transaction.receipt;
+    try {
+      transaction.stopTerminal = transaction.bridge.start(receipt, transport, (outcome) => {
+        if (crossWindowSource !== transaction || transaction.settled) return;
+        transaction.settled = true;
+        dispatch({ type: "HOST_TERMINAL", sessionId, outcome });
+      });
+    } catch {
+      transaction.stopTerminal = null;
+      dispatch({ type: "TRANSPORT_LOST", sessionId });
+    }
+  }
+
+  /**
+   * Release the host transaction exactly once, on the single terminal.
+   *
+   * `cancel` runs only while the receipt is still live — a host that already
+   * reported its own terminal has closed the transaction, and telling it to
+   * cancel afterwards would be a second command against one session id.
+   */
+  function releaseCrossWindowSource(reason: DragCancelReason): void {
+    const transaction = crossWindowSource;
+    if (!transaction) return;
+    crossWindowSource = null;
+    nativeDragSessionId = null;
+
+    if (!transaction.abort.signal.aborted) transaction.abort.abort(reason);
+
+    const stop = transaction.stopTerminal;
+    transaction.stopTerminal = null;
+    if (stop) {
+      try {
+        stop();
+      } catch {
+        // Host cleanup cannot break local cleanup.
+      }
+    }
+
+    if (transaction.receipt && !transaction.settled) {
+      try {
+        void transaction.bridge.cancel(transaction.receipt, reason);
+      } catch {
+        // Same: the local session is already ending either way.
+      }
+    }
+  }
+
+  /** The cancel reason to hand the host, taken from the terminal that ran. */
+  function releaseReasonFor(outcome: DragTerminalOutcome | undefined): DragCancelReason {
+    return outcome?.status === "cancelled" ? outcome.reason : "explicit";
+  }
+
+  function releaseCrossWindowTarget(): void {
+    const transaction = crossWindowTarget;
+    if (!transaction) return;
+    crossWindowTarget = null;
+    if (!transaction.abort.signal.aborted) transaction.abort.abort();
+  }
+
+
+  // ── Cross-window target projection ─────────────────────────────────────
+
+  /** The host reports a device class; this window never observed the device. */
+  function projectedInputKind(kind: CrossWindowDragProjection["inputKind"]): DragInputKind {
+    if (kind === "keyboard") return "keyboard";
+    if (kind === "touch") return "touch";
+    return "mouse";
+  }
+
+  /**
+   * The live registration a projected target id names, if it still exists.
+   *
+   * A projection can name a DOM target or, on the keyboard route, a logical
+   * one. It cannot name both and it cannot name two, which is what keeps one
+   * host gesture from producing two simultaneous drops.
+   */
+  function projectedRegistration(targetId: string): {
+    disabled?: boolean;
+    acceptedKinds: readonly string[];
+    canDrop: DropTargetRegistration["canDrop"];
+    label: string;
+  } | null {
+    const dom = targets.get(targetId);
+    if (dom) {
+      if (isDisabled(dom.element)) return null;
+      return dom.registration;
+    }
+    const logical = keyboardTargets.get(targetId);
+    return logical ? logical.registration : null;
+  }
+
+  /**
+   * Re-run this window's own gates over a host-supplied projection.
+   *
+   * The host decided *which* target the gesture is over; it does not decide
+   * whether that target will take it. Kind, disabled posture, and `canDrop`
+   * are consumer state the host cannot see, and they are checked here on every
+   * projection and again at commit — hover acceptance never authorizes a
+   * durable move.
+   */
+  function applyProjection(projection: CrossWindowDragProjection): void {
+    const session = context.session;
+    if (!session || phase !== "dragging") return;
+
+    if (projection.targetId === null || projection.position === null) {
+      rejectedTargetId = null;
+      rejectedReason = undefined;
+      if (session.intent) dispatch({ type: "TARGET_CLEARED", sessionId: session.sessionId });
+      else {
+        projectAttributes();
+        notify();
+      }
+      return;
+    }
+
+    const registration = projectedRegistration(projection.targetId);
+    const intent: DropIntent = {
+      targetId: projection.targetId,
+      position: projection.position,
+      operation: projection.operation,
+    };
+
+    let eligibility: DropEligibility = { accepted: false };
+    if (
+      registration &&
+      !registration.disabled &&
+      registration.acceptedKinds.includes(projection.subject.kind)
+    ) {
+      eligibility = eligibilityFromCanDrop(
+        registration.canDrop(intent, projection.subject),
+        intent,
+      );
+    }
+
+    if (eligibility.accepted) {
+      rejectedTargetId = null;
+      rejectedReason = undefined;
+      dispatch({ type: "TARGET_INTENT", sessionId: session.sessionId, intent: eligibility.intent });
+      return;
+    }
+
+    rejectedTargetId = registration ? projection.targetId : null;
+    rejectedReason = eligibility.accepted === false ? eligibility.reason : undefined;
+    if (session.intent) dispatch({ type: "TARGET_CLEARED", sessionId: session.sessionId });
+    else {
+      projectAttributes();
+      notify();
+    }
+  }
+
+  /**
+   * Begin, update, or refuse the one incoming host transaction.
+   *
+   * A local gesture always wins: the user's own pointer or keyboard owns this
+   * controller, and a projection arriving mid-drag would otherwise supersede a
+   * drag the user is still making. The host is free to project again once the
+   * local gesture ends.
+   */
+  function onCrossWindowTargetEvent(event: CrossWindowDragTargetEvent): void {
+    if (destroyed || !connectedRoot) return;
+
+    if (event.type === "projection") {
+      const projection = event.projection;
+      if (!isCrossWindowDragReceipt(projection.receipt)) return;
+
+      const live = crossWindowTarget;
+      if (live && sameCrossWindowDragReceipt(live.receipt, projection.receipt)) {
+        if (context.session?.sessionId !== live.sessionId) return;
+        live.projection = projection;
+        applyProjection(projection);
+        return;
+      }
+
+      if (live) releaseCrossWindowTargetSession("superseded");
+      if (gesture !== null || keyboardSourceId !== null || phase !== "idle") return;
+
+      const sessionId = createSessionId();
+      const transaction: CrossWindowTargetTransaction = {
+        sessionId,
+        receipt: projection.receipt,
+        projection,
+        abort: new AbortController(),
+        committing: false,
+      };
+      crossWindowTarget = transaction;
+      crossWindowSourceLabel = projection.sourceLabel;
+      inputKind = projectedInputKind(projection.inputKind);
+      // No local pointer was ever observed, so there is no local preview: a
+      // cross-window drag's preview belongs to whoever owns the cursor.
+      pointerPosition = null;
+
+      dispatch({
+        type: "PREPARE",
+        sessionId,
+        sourceId: projection.sourceId,
+        subject: projection.subject,
+        operation: projection.operation,
+        allowedOperations: [projection.operation],
+      });
+      if (context.session?.sessionId !== sessionId) {
+        releaseCrossWindowTarget();
+        return;
+      }
+      dispatch({ type: "ACTIVATE", sessionId });
+      if (currentPhase() !== "dragging") {
+        releaseCrossWindowTarget();
+        return;
+      }
+      applyProjection(projection);
+      maybePickTarget(transaction);
+      return;
+    }
+
+    const live = crossWindowTarget;
+    if (!live || !sameCrossWindowDragReceipt(live.receipt, event.receipt)) return;
+
+    if (event.type === "left") {
+      rejectedTargetId = null;
+      rejectedReason = undefined;
+      if (context.session?.sessionId === live.sessionId && context.session.intent) {
+        dispatch({ type: "TARGET_CLEARED", sessionId: live.sessionId });
+      } else {
+        projectAttributes();
+        notify();
+      }
+      return;
+    }
+
+    releaseCrossWindowTargetSession(event.reason);
+  }
+
+  /** End the incoming session with the host's reason, exactly once. */
+  function releaseCrossWindowTargetSession(reason: DragCancelReason): void {
+    const live = crossWindowTarget;
+    if (!live) return;
+    if (context.session?.sessionId === live.sessionId && phase !== "idle") {
+      dispatch({ type: "HOST_TERMINAL", sessionId: live.sessionId, outcome: { status: "cancelled", reason } });
+      return;
+    }
+    releaseCrossWindowTarget();
+  }
+
+  /**
+   * The accessible cross-window route.
+   *
+   * The picker is how a keyboard transfer resolves its destination: the host
+   * owns the chooser, returns a projection, and Poodle runs the same
+   * revalidation, commit, announcement, and terminal path the pointer takes.
+   * A `null` choice leaves the session with no intent rather than inventing
+   * one, and a target that goes stale between the choice and the commit is
+   * refused by ordinary revalidation.
+   */
+  function maybePickTarget(transaction: CrossWindowTargetTransaction): void {
+    const bridge = crossWindowTargetBridge;
+    if (!bridge || transaction.projection.inputKind !== "keyboard") return;
+    if (!bridge.capabilities.keyboardTargetPicker) return;
+    const pick = bridge.pickTarget;
+    if (!pick) return;
+
+    void Promise.resolve(pick.call(bridge, transaction.receipt, transaction.abort.signal)).then(
+      (projection) => {
+        if (crossWindowTarget !== transaction || transaction.abort.signal.aborted) return;
+        if (context.session?.sessionId !== transaction.sessionId || phase !== "dragging") return;
+        if (projection === null) return;
+        if (!sameCrossWindowDragReceipt(projection.receipt, transaction.receipt)) return;
+        transaction.projection = projection;
+        applyProjection(projection);
+        if (context.session?.intent) {
+          dispatch({ type: "DROP_REQUESTED", sessionId: transaction.sessionId });
+        }
+      },
+      () => {
+        if (crossWindowTarget !== transaction) return;
+        releaseCrossWindowTargetSession("transport-lost");
+      },
+    );
+  }
+
+  /**
+   * `dragover` is the only place the browser will let us claim the drop, and
+   * the only place it hides the body. The declared type says the drag carries
+   * our envelope; the live projection says whether this window wants it. Both
+   * are required, because either alone would accept a drop it cannot honour.
+   */
+  function onNativeDragOver(event: Event): void {
+    if (!(event instanceof DragEvent) || !event.dataTransfer) return;
+    const live = crossWindowTarget;
+    if (!live || context.session?.sessionId !== live.sessionId) return;
+    if (!crossWindowCodec.accepts(event.dataTransfer)) return;
+    if (!context.session.intent) return;
+
+    event.preventDefault();
+    event.dataTransfer.dropEffect = nativeEffectFor(context.session.operation);
+  }
+
+  /**
+   * The drop envelope has to name the transaction this window is projecting.
+   *
+   * A receipt that is absent, malformed, or simply different is a drag this
+   * window never agreed to take, and hover acceptance does not carry over to
+   * it: the intent is cleared and no commit runs. The host's own terminal
+   * still ends the session, because the host is the only thing that knows what
+   * became of its lease.
+   */
+  function onNativeDrop(event: Event): void {
+    if (!(event instanceof DragEvent) || !event.dataTransfer) return;
+    const live = crossWindowTarget;
+    if (!live || context.session?.sessionId !== live.sessionId) return;
+    if (!crossWindowCodec.accepts(event.dataTransfer)) return;
+
+    event.preventDefault();
+    const receipt = crossWindowCodec.read(event.dataTransfer);
+    if (!receipt || !sameCrossWindowDragReceipt(receipt, live.receipt)) {
+      rejectedTargetId = null;
+      rejectedReason = undefined;
+      if (context.session.intent) {
+        dispatch({ type: "TARGET_CLEARED", sessionId: live.sessionId });
+      }
+      return;
+    }
+
+    if (!context.session.intent || live.committing) return;
+    dispatch({ type: "DROP_REQUESTED", sessionId: live.sessionId });
+  }
+
+  /**
+   * Ask the host to make the projected drop durable, after this window has
+   * re-checked its own gates one last time.
+   */
+  function requestCrossWindowCommit(
+    transaction: CrossWindowTargetTransaction,
+    sessionId: string,
+    intent: DropIntent,
+  ): void {
+    const bridge = crossWindowTargetBridge;
+    const session = context.session;
+    if (!bridge || !session) {
+      dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
+      return;
+    }
+
+    const registration = projectedRegistration(intent.targetId);
+    if (
+      !registration ||
+      registration.disabled ||
+      !registration.acceptedKinds.includes(session.subject.kind)
+    ) {
+      dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
+      return;
+    }
+
+    const eligibility = eligibilityFromCanDrop(
+      registration.canDrop(intent, session.subject),
+      intent,
+    );
+    if (eligibility.accepted === false) {
+      dispatch({ type: "DROP_REJECTED", sessionId, reason: eligibility.reason });
+      return;
+    }
+
+    const generation = dropGeneration;
+    transaction.committing = true;
+    let pending: Promise<DragDropCommitResult>;
+    try {
+      pending = bridge.commit(
+        {
+          receipt: transaction.receipt,
+          subject: session.subject,
+          intent: eligibility.intent,
+        },
+        transaction.abort.signal,
+      );
+    } catch (error) {
+      dispatch({
+        type: "DROP_FAILED",
+        sessionId,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+      return;
+    }
+
+    void Promise.resolve(pending).then(
+      (commit) => {
+        if (generation !== dropGeneration) return;
+        applyCommit(sessionId, eligibility.intent, commit);
+      },
+      (error: unknown) => {
+        if (generation !== dropGeneration) return;
+        dispatch({
+          type: "DROP_FAILED",
+          sessionId,
+          reason: error instanceof Error ? error.message : String(error),
+        });
+      },
+    );
   }
 
   function returnFocus(subject: DragSubject): void {
@@ -837,7 +1572,26 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     restoredRootUserSelect = undefined;
   }
 
+  /**
+   * Give up a gesture that never became a drag.
+   *
+   * A local source has nothing to give up — no session exists before
+   * activation. A cross-window source does: its preparation started at
+   * pointer-down, so a tap, a scroll, an Escape, or a pointer cancel has to
+   * release the host lease rather than leave it allocated for a drag that will
+   * never happen.
+   */
   function abandonUnarmedGesture(): void {
+    const pending = gesture;
+    if (
+      pending &&
+      context.session?.sessionId === pending.sessionId &&
+      phase !== "idle" &&
+      phase !== "ended" &&
+      phase !== "cancelled"
+    ) {
+      dispatch({ type: "CANCEL", sessionId: pending.sessionId });
+    }
     stopAutoScroll();
     releasePointerHardware();
     gesture = null;
@@ -851,13 +1605,22 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
   }
 
-  function beginSession(source: SourceEntry, kind: DragInputKind, x: number, y: number): string {
+  function beginSession(
+    source: SourceEntry,
+    kind: DragInputKind,
+    x: number,
+    y: number,
+    reuseSessionId?: string,
+  ): string {
     const operation = source.registration.operation ?? source.registration.allowedOperations[0];
     if (operation === undefined) {
       throw new Error(`Source "${source.registration.sourceId}" has no allowed operations`);
     }
 
-    const sessionId = createSessionId();
+    // A cross-window gesture prepares at pointer-down, so the session it
+    // creates is the one the gesture already carries: minting a second id here
+    // would leave the host's completion naming a session nobody is waiting on.
+    const sessionId = reuseSessionId ?? createSessionId();
     inputKind = kind;
     keyboardLogicalSession = kind === "keyboard" && matchingLogicalKeyboard(source);
     pointerPosition = { x, y };
@@ -883,6 +1646,45 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     const sessionId = beginSession(source, kind, x, y);
     if (gesture) gesture.sessionId = sessionId;
     activate(sessionId, captureElement, pointerId);
+  }
+
+  /**
+   * The activation constraint is satisfied. Enter `dragging` if the session is
+   * ready, and otherwise wait for the host.
+   *
+   * A local source arms synchronously, so this is `armAndActivate` under
+   * another name. A cross-window source may still be `preparing`: the gesture
+   * is committed but the receipt is not armed, and starting the drag anyway
+   * would advertise a transfer the host has not agreed to. The preparation's
+   * own resolution activates it instead.
+   */
+  function reachThreshold(
+    source: SourceEntry,
+    kind: DragInputKind,
+    x: number,
+    y: number,
+    captureElement: Element | null,
+    pointerId: number | null,
+  ): void {
+    const pending = gesture;
+    if (pending && context.session?.sessionId === pending.sessionId) {
+      if (phase === "preparing") return;
+      const bridge = source.registration.crossWindowSourceBridge;
+      // The browser's own `dragstart` activates a native cross-window gesture,
+      // because that is the only moment its envelope can be written. Arming
+      // here as well would start the session with the wrong transport.
+      if (bridge && crossWindowUsesNativeDrag(bridge, kind) && crossWindowSource?.sessionId === pending.sessionId) {
+        return;
+      }
+      if (phase === "armed") {
+        activate(pending.sessionId, captureElement, pointerId);
+        if (gesture) hitTest(x, y);
+      }
+      return;
+    }
+
+    armAndActivate(source, kind, x, y, captureElement, pointerId);
+    if (gesture) hitTest(x, y);
   }
 
   function activate(sessionId: string, captureElement: Element | null, pointerId: number | null): void {
@@ -914,6 +1716,9 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       }
     }
     startAutoScroll();
+    if (crossWindowSource?.sessionId === sessionId) {
+      startCrossWindowTransport(sessionId, crossWindowTransport(inputKind ?? "mouse"));
+    }
     notify();
   }
 
@@ -1229,6 +2034,15 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function requestDrop(sessionId: string, intent: DropIntent): void {
     const generation = dropGeneration;
     const session = context.session;
+
+    // An incoming host transaction revalidates semantically, not spatially:
+    // the position came from the host's own geometry, and this window never
+    // measured a pointer for it.
+    if (crossWindowTarget?.sessionId === sessionId) {
+      requestCrossWindowCommit(crossWindowTarget, sessionId, intent);
+      return;
+    }
+
     const registration = liveDropRegistration(intent);
 
     if (!session || session.sessionId !== sessionId || !registration || registration.disabled) {
@@ -1335,6 +2149,22 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   }
 
   function applyCommit(sessionId: string, intent: DropIntent, commit: DragDropCommitResult): void {
+    if (crossWindowTarget?.sessionId === sessionId) {
+      const projected = projectedRegistration(intent.targetId);
+      if (!projected || projected.disabled) {
+        dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
+        return;
+      }
+      if (commit.status === "committed") {
+        dispatch({ type: "DROP_COMMITTED", sessionId, intent });
+      } else if (commit.status === "rejected") {
+        dispatch({ type: "DROP_REJECTED", sessionId, reason: commit.reason });
+      } else {
+        dispatch({ type: "DROP_FAILED", sessionId, reason: commit.reason });
+      }
+      return;
+    }
+
     const liveTarget = liveDropRegistration(intent);
     if (!liveTarget || liveTarget.disabled || (keyboardCommandSession && commandTargetUnavailable(intent))) {
       dispatch({ type: "DROP_REJECTED", sessionId, reason: "target-unavailable" });
@@ -1399,10 +2229,20 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       sourceId: source.registration.sourceId,
       sessionId,
       activated: false,
+      thresholdReached: false,
       holdTimer: null,
       captureElement: null,
       restoredTouchAction: null,
     };
+
+    // The accepted pre-drag gesture, which is where host preparation belongs:
+    // a lease allocated inside the activation threshold would have to be
+    // allocated synchronously, and a host that cannot answer synchronously
+    // would have to be refused.
+    const bridge = source.registration.crossWindowSourceBridge;
+    if (bridge && crossWindowCarries(bridge, kind)) {
+      beginSession(source, kind, event.clientX, event.clientY, sessionId);
+    }
 
     if (kind === "touch") {
       const touch = activationFor(source.registration, "touch") as DragActivationHold;
@@ -1412,8 +2252,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         const live = sources.get(source.registration.sourceId);
         if (!live || live.registration.disabled) return;
         const capture = resolveHandle(live.element, live.registration.handle);
-        armAndActivate(live, kind, gesture.x, gesture.y, capture, event.pointerId);
-        if (gesture) hitTest(gesture.x, gesture.y);
+        gesture.thresholdReached = true;
+        reachThreshold(live, kind, gesture.x, gesture.y, capture, event.pointerId);
       }, touch.holdMs);
       return;
     }
@@ -1446,8 +2286,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       const constraint = activationFor(source.registration, kind) as DragActivationDistance;
       if (travelled >= constraint.distance) {
         const handle = resolveHandle(source.element, source.registration.handle);
-        armAndActivate(source, kind, x, y, handle, gesture.pointerId);
-        hitTest(x, y);
+        gesture.thresholdReached = true;
+        reachThreshold(source, kind, x, y, handle, gesture.pointerId);
       }
       return;
     }
@@ -1822,10 +2662,85 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     applyLogicalKeyboardIntent(entry, session, direction);
   }
 
+  /** `effectAllowed` is presentation for the OS; the operation stays semantic. */
+  function nativeEffectFor(operation: DragOperation): "move" | "copy" | "link" {
+    return operation;
+  }
+
+  /**
+   * The one moment a cross-window envelope can be written.
+   *
+   * A native drag is refused unless this source's own receipt is already
+   * armed: an unarmed gesture would leave the window advertising a transfer
+   * the host never agreed to, and `DataTransfer` cannot be written later.
+   * Every other native drag stays refused exactly as before, so an ordinary
+   * source never starts a second, browser-owned gesture beside the sensor's.
+   */
   function onNativeDragStart(event: Event): void {
     if (!(event instanceof DragEvent)) return;
-    if (!sourceFromEvent(event)) return;
-    event.preventDefault();
+    const source = sourceFromEvent(event);
+    if (!source) return;
+
+    const transaction = crossWindowSource;
+    const session = context.session;
+    const armed =
+      transaction !== null &&
+      transaction.receipt !== null &&
+      transaction.sourceId === source.registration.sourceId &&
+      session?.sessionId === transaction.sessionId &&
+      (phase === "armed" || phase === "dragging") &&
+      (inputKind === "mouse" || inputKind === "pen") &&
+      crossWindowUsesNativeDrag(transaction.bridge, inputKind) &&
+      event.dataTransfer !== null;
+
+    if (!armed || !transaction || !session || !transaction.receipt || !event.dataTransfer) {
+      event.preventDefault();
+      return;
+    }
+
+    try {
+      crossWindowCodec.write(event.dataTransfer, transaction.receipt);
+    } catch {
+      event.preventDefault();
+      return;
+    }
+    event.dataTransfer.effectAllowed = nativeEffectFor(session.operation);
+
+    if (phase === "armed") activate(transaction.sessionId, null, null);
+    if (phase !== "dragging") {
+      event.preventDefault();
+      return;
+    }
+
+    startCrossWindowTransport(transaction.sessionId, "data-transfer");
+    nativeDragSessionId = transaction.sessionId;
+
+    // The browser owns the gesture from here: our capture, touch-action, and
+    // move coalescing would only fight it, and no pointer event will arrive to
+    // release them.
+    releasePointerHardware();
+    gesture = null;
+  }
+
+  /**
+   * The native transport closed. It is not a result.
+   *
+   * `dropEffect` at this point reports what the OS believes happened, which is
+   * exactly the thing that must not become a commit: the host still owns the
+   * lease and its terminal subscription is the only authority on the outcome.
+   * A session whose host has already answered is long gone by now, so there is
+   * nothing left to do but drop the local gesture state.
+   */
+  function onNativeDragEnd(event: Event): void {
+    if (!(event instanceof DragEvent)) return;
+    if (nativeDragSessionId === null) return;
+    if (context.session?.sessionId !== nativeDragSessionId) {
+      nativeDragSessionId = null;
+      return;
+    }
+    nativeDragSessionId = null;
+    releasePointerHardware();
+    gesture = null;
   }
 
   function bindDocument(doc: Document, win: Window): void {
@@ -1846,6 +2761,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     add("touchmove", suppressScroll, { capture: true, passive: false });
     add("keydown", onKeyDown, true);
     add("dragstart", onNativeDragStart, true);
+    add("dragend", onNativeDragEnd, true);
+    if (crossWindowTargetBridge) {
+      add("dragover", onNativeDragOver, true);
+      add("drop", onNativeDrop, true);
+    }
     add("scroll", onScrollOrResize, true);
     add("visibilitychange", onVisibility);
 
@@ -1896,7 +2816,15 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     } else {
       element.setAttribute("aria-description", entry.authoredAriaDescription);
     }
-    element.setAttribute("draggable", "false");
+    // The browser's own drag is the web's only cross-window transport, so a
+    // source whose host can carry a pointer transfer must advertise it. Every
+    // other source stays non-draggable: the sensor owns the gesture and a
+    // parallel native drag would fight it.
+    const bridge = entry.registration.crossWindowSourceBridge;
+    element.setAttribute(
+      "draggable",
+      bridge && bridge.capabilities.pointer ? "true" : "false",
+    );
   }
 
   function restoreSourceDom(entry: SourceEntry): void {
@@ -1987,6 +2915,16 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       connectedDocument = doc;
       connectedWindow = win;
       bindDocument(doc, win);
+      // Installed with the document, not with the controller: a projection
+      // arriving before there is a window to render it into has nowhere to go.
+      if (crossWindowTargetBridge) {
+        if (crossWindowTargetBridge.capabilities.keyboardTargetPicker && !crossWindowTargetBridge.pickTarget) {
+          throw new Error(
+            "crossWindowTargetBridge advertises keyboardTargetPicker but implements no pickTarget",
+          );
+        }
+        crossWindowUnsubscribe = crossWindowTargetBridge.subscribe(onCrossWindowTargetEvent);
+      }
       if (typeof ResizeObserver === "function") {
         resizeObserver = new ResizeObserver(() => onScrollOrResize());
         resizeObserver.observe(root);
@@ -1999,6 +2937,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         stopAutoScroll();
         stopCandidate();
         if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
+        const unsubscribe = crossWindowUnsubscribe;
+        crossWindowUnsubscribe = null;
+        unsubscribe?.();
+        releaseCrossWindowSource("transport-lost");
+        releaseCrossWindowTarget();
         unbindDocument();
         resizeObserver?.disconnect();
         resizeObserver = null;
@@ -2191,6 +3134,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       stopAutoScroll();
       stopCandidate();
       if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
+      const unsubscribe = crossWindowUnsubscribe;
+      crossWindowUnsubscribe = null;
+      unsubscribe?.();
+      releaseCrossWindowSource("transport-lost");
+      releaseCrossWindowTarget();
       for (const id of [...sources.keys()]) unregisterSource(id);
       for (const id of [...targets.keys()]) unregisterTarget(id);
       for (const id of [...keyboardTargets.keys()]) unregisterKeyboardTarget(id);
