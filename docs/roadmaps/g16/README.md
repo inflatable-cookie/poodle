@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.023 merged; g16.024 pending review in PR #107
+Status: active — g16.024 merged; g16.025 awaits its GPUI input-capability readiness gate
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -54,7 +54,7 @@ stay maintained; backend admission is not part of the first card.
 21. [021 — Drag-and-drop semantic kernel](021-drag-drop-semantic-kernel.md) — complete; merged in PR #96
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — complete; merged in PR #101
 23. [023 — EditableList simple reorder migration](023-drag-drop-simple-reorder-migrations.md) — complete; merged in PR #104
-24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — complete; pending merge
+24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — complete; merged in PR #107
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — planned; depends on 024
 26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
@@ -313,8 +313,10 @@ ledger cell moved.
 
 ## Next Task
 
-`g16.024` is in PR #107 pending review. Tree nested intent, auto-scroll, and
-paired adapter proofs stay on that branch until operator-authorized merge.
-`g16.025` is next after merge for the shared Rust and GPUI runtime. Tabs still
-moves with DockRegion in `g16.026`. EditableLabel stays decision-blocked. No
-ledger cell moved.
+`g16.024` merged in PR #107. Tree now proves nested intent, demand-driven
+auto-scroll, live drop revalidation, one-shot Alt+Arrow movement, and semantic
+focus ownership through the shared web substrate. No ledger cell moved.
+`g16.025` is next, but is not dispatch-ready until its readiness gate records
+the mouse, pen, touch, pointer-cancel, capture, and keyboard capabilities
+actually exposed by crates.io GPUI 0.2.2. Tabs still moves with DockRegion in
+`g16.026`. EditableLabel stays decision-blocked.

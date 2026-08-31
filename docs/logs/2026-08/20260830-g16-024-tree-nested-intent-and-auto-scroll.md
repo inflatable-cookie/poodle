@@ -1,8 +1,9 @@
 # g16.024 — Tree Nested Intent And Auto-Scroll
 
-Status: complete — pending review
+Status: complete — merged
 Date: 2026-08-30
 PR: https://github.com/inflatable-cookie/poodle/pull/107
+Merge: `219d1ef1aa4de83bdc8ed4360f528e4ca0b25a16`
 Card: `docs/roadmaps/g16/024-drag-drop-tree-nested-intent-and-auto-scroll.md`
 Handoff: `docs/handoffs/20260830-213507-g16-024-tree-nested-autoscroll.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
@@ -82,5 +83,5 @@ Ledger remains 52 mounted / 122 missing.
 
 ## Continuation
 
-`g16.025` waits for operator-authorized merge of PR #107. Tabs stays with
-DockRegion in `g16.026`.
+`g16.025` is next, but its GPUI input-capability readiness gate must be recorded
+before promotion. Tabs stays with DockRegion in `g16.026`.

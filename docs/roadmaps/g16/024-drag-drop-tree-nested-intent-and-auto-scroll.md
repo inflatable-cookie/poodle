@@ -1,6 +1,6 @@
 # g16.024 — Drag-And-Drop Tree Nested Intent And Auto-Scroll
 
-Status: complete — pending review in PR #107
+Status: complete — merged in PR #107
 Depends on: `023-drag-drop-simple-reorder-migrations.md`
 Governing refs: architecture 011, spec 069, and
 `../../contracts/components/tree.md`
@@ -88,4 +88,5 @@ check. Never use a windowed/native visual or Jetstream selector.
 
 ## Continuation
 
-After merge, promote `g16.025` for the shared Rust and GPUI runtime.
+PR #107 merged as `219d1ef1a`. Run the `g16.025` GPUI input-capability
+readiness gate before promoting the shared Rust and GPUI runtime card.
