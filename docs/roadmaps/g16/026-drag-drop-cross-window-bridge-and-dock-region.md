@@ -1,6 +1,6 @@
 # g16.026 — Drag-And-Drop Cross-Window Bridge, Tabs, And DockRegion
 
-Status: implementation complete — awaiting orchestrator review; public
+Status: implementation complete — repaired after Northstar review round 1; public
 migration, paired bridge API, Tabs subject-family composition, and GPUI window
 ownership all landed
 Log: `../../logs/2026-08/20260831-g16-026-drag-drop-cross-window-bridge.md`

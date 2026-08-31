@@ -1,6 +1,6 @@
 # g16.026 — Drag-And-Drop Cross-Window Bridge, Tabs, And DockRegion
 
-Status: implementation complete — awaiting orchestrator review
+Status: implementation complete — repaired after Northstar review round 1
 Date: 2026-08-31
 PR: https://github.com/inflatable-cookie/poodle/pull/113
 Card: `docs/roadmaps/g16/026-drag-drop-cross-window-bridge-and-dock-region.md`
@@ -123,7 +123,7 @@ and its older-build fallback is gone.
 
 ### Falsified
 
-Six claims were checked by planting the pre-fix behaviour back and confirming
+Eleven claims were checked by planting the pre-fix behaviour back and confirming
 the case fails:
 
 1. the two-window isolation, by reintroducing a thread-global census — it
@@ -136,7 +136,13 @@ the case fails:
 5. the registration-id scoping, by minting ids from the value alone
    (`Duplicate drag source id "alpha"`);
 6. the DockRegion sibling isolation, by flipping the pair onto a shared
-   provider.
+   provider;
+7. the armed-receipt gate on GPUI, by activating without waiting;
+8. the host-owned terminal, by letting a release commit locally;
+9. the late-receipt return, by dropping it;
+10. the picker's receipt binding, by trusting any projection;
+11. the abandoned-commit signal, by releasing the transaction without telling
+    the host.
 
 One test was found to be vacuous on the way and fixed: the composition case
 originally dropped onto the receiving strip's *self-rejecting* tab, so it
@@ -183,8 +189,56 @@ frameworks); the ledger's own generator now derives the replacements.
 case-insensitive filesystem the directory collided with `Tabs.tsx` in the
 ledger's extension-less path resolver and was reported as drift.
 
+## Review round 1
+
+The orchestrator requested changes on PR #113. Two blockers, both closed here,
+plus an addendum that changed the shape of the first repair.
+
+1. **The Rust cross-window bridge was declaration-only.** Nothing outside the
+   trait definitions consumed it: the GPUI controller had no bridge input,
+   `DockRegionHandlers` had no seam, and native could register and locally move
+   panels but could not prepare, project, revalidate, commit, or take a host
+   terminal. That failed ordered work 2 and 6 and the Svelte/React/GPUI
+   lifecycle acceptance row. Now wired end to end, with four host-stub
+   regressions.
+
+   The addendum then ruled that the traits could not be wired as written: my
+   first Rust draft had dropped `AbortSignal` from `prepare` and `commit`, and
+   dropped the receipt from `pick_target`. A completion callback may replace a
+   promise; abortability and receipt identity may not disappear.
+   `CrossWindowAbort` is the renderer-neutral signal — idempotent, first reason
+   wins, listeners run once — and `pick_target` is bound to the exact receipt
+   it is picking for.
+
+   Wiring found three real defects, none of which the declaration could have:
+
+   - a release over a local target **committed locally** while the host owned
+     the terminal, which is precisely the inference the boundary forbids;
+   - the frame sweep cancelled every incoming projection on its first frame,
+     because a projected session has no local source by construction;
+   - a projected drop re-hit-tested local bounds, overruling the host with
+     geometry it never used.
+
+   Two of the four new proofs were **vacuous on the first pass**: a second line
+   of defence in the controller hid the rule under test, so removing the rule
+   left them green. The mismatched-pick case now asserts the live transaction
+   survives untouched, and the abandoned-commit case asserts the host was
+   actually told to stop rather than merely ignored. Both bite now.
+
+2. **DockRegion authority contradicted the landed API.** The contract still
+   declared `sourceZone?`, still described deleted `onDragPrepare` /
+   `onDragStart` / `onDragEnd`, and its delta table still named deleted
+   `externalDragSource` / `externalDropTarget` and claimed the natives run no
+   panel gesture — false after repair 1. All four are corrected, along with the
+   same stale claim in the `poodle-render` module doc. Absence search now
+   covers authoritative docs as well as active source.
+
 ## Open items for review
 
+- The GPUI host bridge queues host answers and drains them at the frame
+  boundary, because executing a kernel event needs `&mut App` and a host
+  callback has none. A host that answers without causing a frame will see its
+  answer applied on the next one.
 - Cross-region transfer between two DockRegions now requires one common
   `DragDropProvider`. That is the operator's decision recorded in spec 069 and
   the card, and the specimen was updated to wrap both docks; consumers with two
