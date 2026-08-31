@@ -65,8 +65,8 @@ impl Render for HeadlessRoot {
         // end after this effect cycle so a removed continuous-value host
         // cancels in the removal frame without a next-frame delay.
         poodle_gpui_node_backend::overlay_frame_begin();
-        cx.defer(|_cx| {
-            poodle_gpui_node_backend::overlay_frame_end();
+        cx.defer(|cx| {
+            poodle_gpui_node_backend::overlay_frame_end_with(cx);
         });
         // The same per-frame reset the production root performs
         // (`main.rs`): without it, generated element ids mint fresh every

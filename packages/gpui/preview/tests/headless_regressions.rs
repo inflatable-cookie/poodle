@@ -14546,3 +14546,75 @@ fn an_unrelated_key_release_cannot_re_enable_the_suppressed_activation() {
         );
     });
 }
+
+/// g16.025. A provider that stops rendering takes its session with it.
+///
+/// The provider's own sweep is the only thing that could close a session it
+/// holds, and an unmounted provider never sweeps again. Before the host frame
+/// boundary learned to notice, the session stayed `Dragging` forever: no
+/// terminal callback, registrations still live, and a consumer's own drag
+/// state latched with nothing left to clear it. Spec 069 makes provider
+/// unmount a cancellation, and this is that path.
+#[test]
+fn unmounting_a_provider_cancels_its_session_and_drops_its_registrations() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        let node = Arc::new(Mutex::new(scoped_drag_tree("left", &trace)));
+        let mounted = Rc::new(std::cell::Cell::new(true));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            let mounted = Rc::clone(&mounted);
+            Rc::new(move || {
+                use gpui::{IntoElement as _, ParentElement as _};
+                if !mounted.get() {
+                    return gpui::div().into_any_element();
+                }
+                let tree = node.lock().expect("node lock").clone();
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let source = payload_frac("left-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("left-zone-a", 0.5, 0.75));
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(controller.source_ids(), ["left-source"]);
+
+        mounted.set(false);
+        driver.draw_frame();
+
+        let events = trace_of(&trace);
+        assert_eq!(
+            count_starting_with(&events, "end:cancelled:TransportLost"),
+            1,
+            "the provider that owned the gesture is gone: {events:?}"
+        );
+        assert_eq!(
+            count_starting_with(&events, "cleared:left-zone-a"),
+            1,
+            "the target holding the intent is still told it stopped: {events:?}"
+        );
+        assert_eq!(count_starting_with(&events, "drop:"), 0, "{events:?}");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert!(
+            controller.source_ids().is_empty() && controller.target_ids().is_empty(),
+            "an unmounted provider leaves no live registrations behind"
+        );
+
+        // Another frame must not produce a second terminal.
+        driver.draw_frame();
+        assert_eq!(count_starting_with(&trace_of(&trace), "end:"), 1);
+    });
+}

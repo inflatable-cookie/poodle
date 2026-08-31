@@ -122,6 +122,12 @@ that the reported input kind is `Mouse`.
   Any other key-up arriving first — a modifier, a neighbouring shortcut, an
   overlapping Enter while Space is held — would consume a single flag and let
   the real release synthesize the row's click after all.
+- **A provider that stops rendering takes its session with it.** Its own sweep
+  is the only thing that could close a session it holds, and an unmounted
+  provider never sweeps again. The host frame boundary
+  (`overlay_frame_begin` / `overlay_frame_end_with`) notices a controller that
+  did not sweep and closes an active session as `TransportLost`, then drops its
+  registrations. Spec 069 makes provider unmount a cancellation.
 - **The controller holds the current target's clear callback**, rather than
   looking it up when the intent moves. The registry is rebuilt every frame, so
   a target removed while it held the intent would otherwise never be told it
@@ -166,6 +172,7 @@ that the reported input kind is `Mouse`.
 | Traversal past an absent boundary | `keyboard_traversal_selects_nothing_past_an_absent_boundary`, both directions |
 | Pickup key with no target chosen | `the_pickup_key_cancels_a_session_that_never_chose_a_target` |
 | Unrelated key-up re-enabling activation | `an_unrelated_key_release_cannot_re_enable_the_suppressed_activation` |
+| Provider unmount | `unmounting_a_provider_cancels_its_session_and_drops_its_registrations` |
 
 Five of these were falsified by planting the pre-fix behavior back and
 confirming they fail: stale hover at release, pickup double-firing activation,
@@ -181,7 +188,7 @@ traversal boundary, pickup-key cancellation, and per-key suppression.
 - Controller units (capability matrix, identity, eligibility defaults,
   announcements): `packages/gpui/node-backend/src/drag.rs`.
 - Mounted GPUI, real dispatch: `packages/gpui/preview/tests/headless_regressions.rs`
-  — twenty-one custom-surface tests plus
+  — twenty-two custom-surface tests plus
   `tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec`, with
   `tabs_drag_keyboard_and_identity_rebuild_the_host_spec` and
   `model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window` retained.
@@ -255,9 +262,41 @@ Three more, all closed:
    indicator is now asserted as Tree's documented native gap, in its contract
    and here. The card was not expanded and no operator decision was assumed.
 
+## Self-audit after review round 2
+
+Both review rounds found real defects of the same class — the Rust path
+diverging from the web authority, or a doc claiming something the code did not
+do — so I ran the same pass over my own diff rather than waiting. It found one
+defect and one hazard, both fixed here:
+
+- **Provider unmount left the session open.** Confirmed by probe before fixing:
+  after the provider stopped rendering the session stayed `Dragging`, the
+  source stayed registered, and no terminal ran, so a consumer's own drag state
+  latched with nothing left to clear it. Now closed at the host frame boundary
+  and covered by a named regression.
+- **The announcement log was unbounded.** A controller lives as long as its
+  host, so every hover of every drag accumulated a string forever. Capped at
+  `ANNOUNCEMENT_LOG_LIMIT`. There is nothing to throttle on this runtime —
+  GPUI ships no accessibility API, so no assistive technology is being fed —
+  but the log still had to be bounded.
+
+Two gaps found and deliberately **not** closed, recorded here for the
+orchestrator rather than fixed unprompted:
+
+- `DragDropSnapshot` has no accepted/rejected target posture or rejection
+  reason. The web snapshot has both, and without them a native consumer cannot
+  paint spec 069's "rejected target with reason" specimen: a hover over a
+  rejected target is indistinguishable from a hover over nothing. Nothing in
+  this card claims otherwise, and the specimen does not exist yet, so this is a
+  gap rather than a false claim. Closing it widens this card's own public type.
+- Native EditableList registers no drag source or target at all, so the
+  substrate does not reach it. Recorded in the card.
+
 ## Continuation
 
 `g16.026` — the cross-window host bridge, the Tabs public migration, and
-DockRegion — is next. Jetstream construction consumes the renderer-neutral
+DockRegion — is next. It should also settle the two named carry-forwards:
+Tree's keyboard route plus its clear/terminal callback, and whether
+`DragDropSnapshot` gains target posture and rejection reason. Jetstream construction consumes the renderer-neutral
 registrations only and remains deferred; no Jetstream preview or QA selector
 was run or claimed.

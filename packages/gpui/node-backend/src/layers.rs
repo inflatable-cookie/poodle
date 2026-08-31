@@ -83,6 +83,7 @@ pub fn overlay_frame_begin() {
     // Safety net for a previous cycle that never called overlay_frame_end.
     // Same-frame lost-host cancel is overlay_frame_end after this paint.
     crate::interaction::sweep_lost_continuous_host();
+    crate::drag::host_frame_begin();
     LAYERS.with(|layers| layers.borrow_mut().clear());
     ELEMENT_BOUNDS.with(|bounds| bounds.borrow_mut().clear());
     ELEMENT_LAYERS.with(|layers| layers.borrow_mut().clear());
@@ -101,6 +102,14 @@ pub fn overlay_frame_begin() {
 pub fn overlay_frame_end() {
     FOCUS_REQUESTS.with(|requests| requests.borrow_mut().clear());
     crate::interaction::sweep_lost_continuous_host();
+}
+
+/// The same frame boundary, for the sweep that needs an `App`: a drag provider
+/// that stopped rendering has lost the transport its session was riding on.
+/// Hosts call this immediately after [`overlay_frame_end`].
+pub fn overlay_frame_end_with(cx: &mut gpui::App) {
+    overlay_frame_end();
+    crate::drag::host_frame_end(cx);
 }
 
 /// Queue a focus request for the element with this id. The target element's

@@ -41,7 +41,7 @@
 
 use std::cell::RefCell;
 use std::collections::{HashMap, VecDeque};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 use gpui::{
     canvas, div, px, AnyView, App, AppContext, Bounds, Div, InteractiveElement, IntoElement,
@@ -74,6 +74,14 @@ pub const GPUI_DRAG_CAPABILITIES: NodeDragCapabilities = NodeDragCapabilities {
     in_window_capture: true,
     device_cancel: false,
 };
+
+/// How many composed announcements a controller keeps.
+///
+/// Announcements are presentation text: the live one is on the snapshot, and
+/// the tail exists for diagnosis and tests. GPUI ships no accessibility API,
+/// so there is no assistive technology to flood and nothing to throttle — but
+/// a controller lives as long as its host, so the log still has to be bounded.
+pub const ANNOUNCEMENT_LOG_LIMIT: usize = 64;
 
 /// The value stock GPUI carries for the duration of a pointer drag.
 ///
@@ -169,7 +177,10 @@ struct ControllerState {
     /// registration contract promises it will be.
     notified_clear: Option<poodle_node::NodeDropIntentClearedHandler>,
     announcement: Option<String>,
-    announcements: Vec<String>,
+    /// A bounded tail of composed announcements, for diagnosis and tests.
+    /// Bounded because a controller lives as long as its host: an unbounded
+    /// log would grow for every hover of every drag for the life of the app.
+    announcements: VecDeque<String>,
     /// Duplicate live ids and other registration conflicts, for diagnosis.
     conflicts: Vec<String>,
     /// The source registration the live session started from, plus its element
@@ -196,6 +207,10 @@ struct ControllerState {
     /// A terminal ran without a window in reach; the next windowed handler
     /// clears GPUI's own drag state.
     pending_stop_active_drag: bool,
+    /// This controller's provider ran its sweep during the current host frame.
+    /// A frame that completes without it means the provider is no longer
+    /// mounted, and a session it still holds has lost its transport.
+    swept_this_frame: bool,
     preview: Option<PreviewRenderer>,
     describe_announcement: Option<AnnouncementRenderer>,
 }
@@ -215,6 +230,12 @@ impl Default for DragDropController {
 }
 
 thread_local! {
+    /// Every controller constructed on this thread, weakly. The host frame
+    /// boundary uses it to notice a provider that stopped rendering: its own
+    /// sweep can no longer run, so nothing else would ever close a session it
+    /// still holds.
+    static LIVE_CONTROLLERS: RefCell<Vec<Weak<RefCell<ControllerState>>>> =
+        const { RefCell::new(Vec::new()) };
     /// Controllers currently building their subtree. Innermost wins, so a
     /// provider nested inside another provider claims its own registrations.
     static PROVIDER_STACK: RefCell<Vec<DragDropController>> = const { RefCell::new(Vec::new()) };
@@ -251,7 +272,7 @@ impl DragDropController {
             next.set(id + 1);
             id
         });
-        Self {
+        let controller = Self {
             state: Rc::new(RefCell::new(ControllerState {
                 id,
                 phase: DragSessionPhase::Idle,
@@ -266,7 +287,7 @@ impl DragDropController {
                 notified: None,
                 notified_clear: None,
                 announcement: None,
-                announcements: Vec::new(),
+                announcements: VecDeque::new(),
                 conflicts: Vec::new(),
                 active_source: None,
                 last_outcome: None,
@@ -275,10 +296,17 @@ impl DragDropController {
                 keyboard_origin: None,
                 suppress_activation: std::collections::BTreeSet::new(),
                 pending_stop_active_drag: false,
+                swept_this_frame: false,
                 preview: None,
                 describe_announcement: None,
             })),
-        }
+        };
+        LIVE_CONTROLLERS.with(|live| {
+            let mut live = live.borrow_mut();
+            live.retain(|weak| weak.strong_count() > 0);
+            live.push(Rc::downgrade(&controller.state));
+        });
+        controller
     }
 
     /// What this runtime actually supports. Immutable by construction.
@@ -330,9 +358,11 @@ impl DragDropController {
         }
     }
 
-    /// Every announcement this controller has composed, oldest first.
+    /// The most recent announcements this controller composed, oldest first.
+    ///
+    /// A bounded tail, not a transcript: see [`ANNOUNCEMENT_LOG_LIMIT`].
     pub fn announcements(&self) -> Vec<String> {
-        self.state.borrow().announcements.clone()
+        self.state.borrow().announcements.iter().cloned().collect()
     }
 
     /// Registration conflicts — duplicate live source or target ids. The
@@ -394,6 +424,7 @@ impl DragDropController {
     /// surviving session then re-resolves against the new registrations, so an
     /// eligibility change with no pointer motion still moves the intent.
     fn frame_end(&self, window: &mut Window, cx: &mut App) {
+        self.state.borrow_mut().swept_this_frame = true;
         FRAME_CONTROLLER.with(|current| {
             let mut current = current.borrow_mut();
             if current
@@ -1225,7 +1256,10 @@ impl DragDropController {
             .and_then(|describe| describe(&event))
             .unwrap_or_else(|| default_announcement(&event));
         let mut state = self.state.borrow_mut();
-        state.announcements.push(text.clone());
+        state.announcements.push_back(text.clone());
+        while state.announcements.len() > ANNOUNCEMENT_LOG_LIMIT {
+            state.announcements.pop_front();
+        }
         state.announcement = Some(text);
     }
 
@@ -1510,6 +1544,67 @@ pub(crate) fn apply_drag_listeners(
         }
     }
     el
+}
+
+/// Start a host frame: no provider has swept yet.
+///
+/// Called from [`crate::overlay_frame_begin`], which every host already runs
+/// once per rendered frame.
+pub(crate) fn host_frame_begin() {
+    for_each_live_controller(|state| state.borrow_mut().swept_this_frame = false);
+}
+
+/// End a host frame: a provider that did not sweep is no longer mounted.
+///
+/// Its own sweep is the only thing that could have closed a session it still
+/// holds, so the session has lost its transport. Without this a host that
+/// unmounts a provider mid-drag keeps a `Dragging` session, its registrations,
+/// and a source whose terminal callback never runs — the consumer's own drag
+/// state latches with nothing left to clear it.
+pub(crate) fn host_frame_end(cx: &mut App) {
+    let orphaned: Vec<DragDropController> = {
+        let mut found = Vec::new();
+        for_each_live_controller(|state| {
+            let swept = state.borrow().swept_this_frame;
+            let active = matches!(
+                state.borrow().phase,
+                DragSessionPhase::Preparing
+                    | DragSessionPhase::Armed
+                    | DragSessionPhase::Dragging
+                    | DragSessionPhase::Dropping
+            );
+            if !swept && active {
+                found.push(DragDropController {
+                    state: Rc::clone(state),
+                });
+            }
+        });
+        found
+    };
+
+    for controller in orphaned {
+        if let Some(session_id) = controller.active_session_id() {
+            controller.dispatch(DragSessionEvent::TransportLost { session_id }, cx);
+        }
+        // The provider is gone, so its registrations are too. Leaving them
+        // would let a stale source id start another session from a tree that
+        // is no longer on screen.
+        let mut state = controller.state.borrow_mut();
+        state.sources.clear();
+        state.targets.clear();
+        state.depths.clear();
+    }
+}
+
+fn for_each_live_controller(mut visit: impl FnMut(&Rc<RefCell<ControllerState>>)) {
+    let live: Vec<Rc<RefCell<ControllerState>>> = LIVE_CONTROLLERS.with(|live| {
+        let mut live = live.borrow_mut();
+        live.retain(|weak| weak.strong_count() > 0);
+        live.iter().filter_map(Weak::upgrade).collect()
+    });
+    for state in &live {
+        visit(state);
+    }
 }
 
 /// Record drop-target nesting depth for the tree about to be built.

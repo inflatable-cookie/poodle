@@ -391,8 +391,8 @@ impl Render for PreviewRoot {
         // overlay_frame_end is deferred to the end of this effect cycle so a
         // removed continuous-value host cancels in the same frame.
         poodle_gpui_node_backend::overlay_frame_begin();
-        cx.defer(|_cx| {
-            poodle_gpui_node_backend::overlay_frame_end();
+        cx.defer(|cx| {
+            poodle_gpui_node_backend::overlay_frame_end_with(cx);
         });
         // Apply interactions node-backed specimens reported since the last frame.
         let specimen_changed = self.state.drain_node_events();
