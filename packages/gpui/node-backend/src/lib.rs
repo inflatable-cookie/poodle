@@ -53,8 +53,8 @@ pub use tracked_scroll::{tracked_vertical_scroll, TrackedScrollOptions, TrackedS
 
 use interaction::apply_listeners;
 pub use drag::{
-    drag_drop_provider, DragAnnouncementEvent, DragDropController, DragDropSnapshot,
-    DragDropTargetPosture,
+    drag_drop_provider, drag_drop_window_host, DragAnnouncementEvent, DragDropController,
+    DragDropSnapshot, DragDropTargetPosture, DragDropWindowHost,
     DragPreviewSnapshot, NativeDragPayload, ANNOUNCEMENT_LOG_LIMIT, GPUI_DRAG_CAPABILITIES,
 };
 pub use layers::{

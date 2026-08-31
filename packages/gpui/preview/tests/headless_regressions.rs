@@ -1915,6 +1915,228 @@ fn scoped_drag_tree(scope: &str, trace: &Arc<Mutex<Vec<String>>>) -> Node {
     row.child(source).child(zone)
 }
 
+/// g16.026, carried from g16.025. **Two windows, no false cancel.**
+///
+/// This is the counterexample that sank the first attempt. That version kept a
+/// thread-global "did this controller sweep this frame" mark, so rendering
+/// window A reset and swept controllers owned by window B — and cancelled a
+/// live drag in B merely because B did not render during A's frame.
+///
+/// Here B starts a real drag and then simply stops being drawn, which is what
+/// a background window does. A is then mounted and drawn repeatedly. B's
+/// session, registrations, and census must all survive it.
+#[test]
+fn one_window_frame_cannot_cancel_another_windows_live_drag() {
+    run_headless(|cx| {
+        let background_trace = Arc::new(Mutex::new(Vec::new()));
+        let background = poodle_gpui_node_backend::DragDropController::new();
+        let background_host;
+
+        {
+            let node = Arc::new(Mutex::new(scoped_drag_tree("bg", &background_trace)));
+            let build = {
+                let controller = background.clone();
+                let node = Arc::clone(&node);
+                Rc::new(move || {
+                    let tree = node.lock().expect("bg lock").clone();
+                    use gpui::{IntoElement as _, ParentElement as _};
+                    gpui::div()
+                        .child(poodle_gpui_node_backend::drag_drop_provider(
+                            &controller,
+                            || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                        ))
+                        .into_any_element()
+                }) as Rc<dyn Fn() -> gpui::AnyElement>
+            };
+
+            let mut driver = HeadlessDriver::new_element(cx, build);
+            driver.draw_frame();
+            background_host = driver.drag_host();
+
+            let source = payload_frac("bg-source", 0.5, 0.5);
+            driver.pointer_press(source);
+            driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+            driver.pointer_drag(payload_frac("bg-zone-a", 0.5, 0.75));
+
+            assert_eq!(
+                background.snapshot().phase,
+                DragSessionPhase::Dragging,
+                "the background window is mid-drag before the other window opens"
+            );
+            assert_eq!(
+                background.snapshot().target_id.as_deref(),
+                Some("bg-zone-a")
+            );
+            // The mount host's own provider plus the nested one under test.
+            assert_eq!(background_host.census_len(), 2);
+        }
+        // The driver is gone; the window and its live drag are not. From here
+        // the background window never draws another frame.
+
+        let foreground_trace = Arc::new(Mutex::new(Vec::new()));
+        let foreground = poodle_gpui_node_backend::DragDropController::new();
+        let node = Arc::new(Mutex::new(scoped_drag_tree("fg", &foreground_trace)));
+        let build = {
+            let controller = foreground.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("fg lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        for _ in 0..5 {
+            driver.draw_frame();
+        }
+
+        assert_eq!(
+            background.snapshot().phase,
+            DragSessionPhase::Dragging,
+            "another window's frames must not cancel a live drag; trace={:?} census={}",
+            background_trace.lock().expect("trace"),
+            background_host.census_len()
+        );
+        assert_eq!(
+            background.snapshot().target_id.as_deref(),
+            Some("bg-zone-a"),
+            "another window's frames must not prune the live registrations"
+        );
+        assert_eq!(
+            background_host.census_len(),
+            2,
+            "a window's census belongs to that window and nothing else may empty it"
+        );
+        assert!(
+            !background_trace
+                .lock()
+                .expect("trace")
+                .iter()
+                .any(|entry| entry.starts_with("end:")),
+            "no terminal ran in the background window: {:?}",
+            background_trace.lock().expect("trace")
+        );
+
+        // And the foreground window built and swept normally while it did so.
+        // Its own drag is not started here: GPUI's active drag is app-wide, so
+        // a second simultaneous native gesture would be testing the runtime
+        // rather than the census.
+        assert_eq!(driver.drag_host().census_len(), 2);
+        assert_eq!(foreground.source_ids(), vec!["fg-source".to_string()]);
+        assert_eq!(foreground.snapshot().phase, DragSessionPhase::Idle);
+    });
+}
+
+/// g16.026, carried from g16.025. **Native drag actually stops.**
+///
+/// A controller can only close a session during its own per-frame sweep, and
+/// an unmounted provider never sweeps again — so removing a provider mid-drag
+/// used to leave a `Dragging` session, live registrations, no terminal, and
+/// GPUI's own drag still in flight. Semantic idle is not enough here: the
+/// runtime's active drag and preview have to be gone too, which is the second
+/// claim the earlier attempt could not make.
+#[test]
+fn unmounting_a_provider_mid_drag_cancels_it_and_stops_the_native_drag() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let inner = poodle_gpui_node_backend::DragDropController::new();
+        let mounted = Arc::new(Mutex::new(true));
+        let node = Arc::new(Mutex::new(scoped_drag_tree("inner", &trace)));
+
+        let build = {
+            let controller = inner.clone();
+            let node = Arc::clone(&node);
+            let mounted = Arc::clone(&mounted);
+            Rc::new(move || {
+                use gpui::{IntoElement as _, ParentElement as _};
+                let root = gpui::div();
+                if !*mounted.lock().expect("mounted lock") {
+                    return root.into_any_element();
+                }
+                let tree = node.lock().expect("inner lock").clone();
+                root.child(poodle_gpui_node_backend::drag_drop_provider(
+                    &controller,
+                    || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                ))
+                .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+        let host = driver.drag_host();
+        // Two providers in this window: the mount host's own, and the nested
+        // one under test.
+        assert_eq!(host.census_len(), 2);
+
+        let source = payload_frac("inner-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("inner-zone-a", 0.5, 0.75));
+
+        assert_eq!(inner.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(inner.source_ids(), vec!["inner-source".to_string()]);
+        assert!(
+            driver.has_active_native_drag(),
+            "the runtime owns a drag before the provider disappears"
+        );
+
+        // The host removes the provider mid-drag.
+        *mounted.lock().expect("mounted lock") = true;
+        *mounted.lock().expect("mounted lock") = false;
+        driver.draw_frame();
+
+        assert_eq!(
+            inner.snapshot().phase,
+            DragSessionPhase::Idle,
+            "an absent provider's session is cancelled once"
+        );
+        assert!(
+            inner.source_ids().is_empty() && inner.target_ids().is_empty(),
+            "its registrations are dropped: {:?} {:?}",
+            inner.source_ids(),
+            inner.target_ids()
+        );
+        assert!(
+            !driver.has_active_native_drag(),
+            "semantic idle is not enough: GPUI's own drag and preview must be gone too"
+        );
+        assert_eq!(host.census_len(), 1, "the host forgets the departed provider");
+
+        let entries = trace.lock().expect("trace").clone();
+        let terminals: Vec<&String> = entries
+            .iter()
+            .filter(|entry| entry.starts_with("end:"))
+            .collect();
+        assert_eq!(
+            terminals.len(),
+            1,
+            "exactly one terminal, and it is a cancellation: {entries:?}"
+        );
+        assert!(terminals[0].contains("cancel"), "{:?}", terminals[0]);
+
+        // A second frame with the provider still absent changes nothing.
+        driver.draw_frame();
+        assert_eq!(
+            trace
+                .lock()
+                .expect("trace")
+                .iter()
+                .filter(|entry| entry.starts_with("end:"))
+                .count(),
+            1,
+            "the cancellation does not repeat once the provider is forgotten"
+        );
+    });
+}
+
+
 /// g16.025. The keyboard route creates the same semantic session as the
 /// pointer: pickup on a focused opted-in source, ordered traversal, one
 /// revalidated commit, and the same terminal cleanup. It never calls the

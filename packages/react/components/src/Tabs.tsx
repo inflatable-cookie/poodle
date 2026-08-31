@@ -27,8 +27,8 @@ import { DragDropProvider } from "./drag-drop";
 import { Icon } from "./Icon";
 import { Menu } from "./Menu";
 import { Pill } from "./Pill";
-import { TabsItem } from "./tabs/TabsItem";
-import { TabsKeyboardTargets } from "./tabs/TabsKeyboardTargets";
+import { TabsItem } from "./tabs-parts/TabsItem";
+import { TabsKeyboardTargets } from "./tabs-parts/TabsKeyboardTargets";
 import {
   resolveSemanticControlSize,
   resolveSupportingVisualSize,

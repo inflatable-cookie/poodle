@@ -254,6 +254,14 @@ thread_local! {
     static PROVIDER_STACK: RefCell<Vec<DragDropController>> = const { RefCell::new(Vec::new()) };
     /// The frame's top-level provider, current for the whole frame.
     static FRAME_CONTROLLER: RefCell<Option<DragDropController>> = const { RefCell::new(None) };
+    /// The window host whose root is currently being built.
+    ///
+    /// A stack, not a value, only so a malformed nest cannot strand the
+    /// entry. It is scoped strictly to one `drag_drop_window_host` call and
+    /// holds no census of its own: the census lives on the host, which is what
+    /// keeps one window's frame from ever reaching another window's
+    /// controllers.
+    static WINDOW_HOST_STACK: RefCell<Vec<DragDropWindowHost>> = const { RefCell::new(Vec::new()) };
     static NEXT_CONTROLLER_ID: std::cell::Cell<u64> = const { std::cell::Cell::new(1) };
 }
 
@@ -584,6 +592,19 @@ impl DragDropController {
             },
         );
         true
+    }
+
+    /// Drop every registration this controller holds.
+    ///
+    /// Used only when the provider that owned them is gone: the tree that
+    /// declared them will never build again, so keeping them would leave a
+    /// registry describing elements that are not on screen.
+    fn forget_registrations(&self) {
+        let mut state = self.state.borrow_mut();
+        state.sources.clear();
+        state.targets.clear();
+        state.depths.clear();
+        state.conflicts.clear();
     }
 
     fn record_target_bounds(&self, target_id: &str, bounds: Bounds<Pixels>) {
@@ -1512,6 +1533,158 @@ impl Render for NodeDragPreview {
     }
 }
 
+
+// ── Window host ────────────────────────────────────────────────────────────
+
+/// One window's census of the drag controllers mounted inside it.
+///
+/// A [`DragDropController`] can only close a session it holds during its own
+/// per-frame sweep, and a provider that has been unmounted never sweeps again.
+/// A host that removes a provider mid-drag would therefore leave a `Dragging`
+/// session with live registrations, no terminal callback, and GPUI's own drag
+/// still painting — the consumer's drag state latched with nothing left to
+/// clear it. Spec 069 makes provider unmount a cancellation, and this is where
+/// that cancellation can actually run.
+///
+/// **It is per window, and that is the whole design.** An earlier attempt used
+/// a thread-global "did this controller sweep this frame" mark, which is
+/// wrong: rendering window A resets and sweeps controllers owned by window B,
+/// so a live drag in B is cancelled merely because B did not happen to render
+/// during A's frame. A census that belongs to one host can only ever name that
+/// host's own controllers, so A's frame has nothing of B's to look at.
+///
+/// Cheap to clone: every clone is the same host, the way a handle is.
+#[derive(Clone)]
+pub struct DragDropWindowHost {
+    state: Rc<RefCell<WindowHostState>>,
+}
+
+#[derive(Default)]
+struct WindowHostState {
+    /// Controllers that registered during the frame currently being built.
+    building: Vec<DragDropController>,
+    /// Controllers present at the end of the last completed frame.
+    census: Vec<DragDropController>,
+}
+
+impl Default for DragDropWindowHost {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl DragDropWindowHost {
+    pub fn new() -> Self {
+        Self {
+            state: Rc::new(RefCell::new(WindowHostState::default())),
+        }
+    }
+
+    /// How many controllers this window currently owns. Diagnosis and tests.
+    pub fn census_len(&self) -> usize {
+        self.state.borrow().census.len()
+    }
+
+    fn frame_begin(&self) {
+        self.state.borrow_mut().building.clear();
+    }
+
+    /// Record a provider building inside this window's root.
+    ///
+    /// Idempotent per frame: a provider that renders twice in one frame is one
+    /// mounted provider, not two.
+    fn note(&self, controller: &DragDropController) {
+        let mut state = self.state.borrow_mut();
+        if state
+            .building
+            .iter()
+            .any(|known| Rc::ptr_eq(&known.state, &controller.state))
+        {
+            return;
+        }
+        state.building.push(controller.clone());
+    }
+
+    /// Close the frame: anything in the census that did not build is gone.
+    ///
+    /// Runs from a zero-size paint canvas appended last at this window's root,
+    /// so it reaches a `Window` as well as an `App`. That matters: a terminal
+    /// reached with no provider left has no controller host to drain
+    /// `pending_stop_active_drag`, so semantic idle and empty registries are
+    /// not enough — GPUI's own active drag and preview have to be cleared
+    /// here or nowhere.
+    fn frame_end(&self, window: &mut Window, cx: &mut App) {
+        let departed: Vec<DragDropController> = {
+            let state = self.state.borrow();
+            state
+                .census
+                .iter()
+                .filter(|known| {
+                    !state
+                        .building
+                        .iter()
+                        .any(|live| Rc::ptr_eq(&live.state, &known.state))
+                })
+                .cloned()
+                .collect()
+        };
+
+        for controller in departed {
+            // Order matters and is the point: cancel through the kernel so the
+            // consumer's terminal callback runs exactly once, drop the
+            // registrations the vanished tree left behind, and only then stop
+            // the runtime's own drag. Forgetting the controller first would
+            // leave nothing to drain.
+            controller.cancel(cx);
+            controller.forget_registrations();
+            controller.drain_pending_stop(window, cx);
+        }
+
+        let mut state = self.state.borrow_mut();
+        state.census = std::mem::take(&mut state.building);
+    }
+}
+
+/// The window host a provider building right now belongs to.
+fn current_window_host() -> Option<DragDropWindowHost> {
+    WINDOW_HOST_STACK.with(|stack| stack.borrow().last().cloned())
+}
+
+/// Establish this window's provider census and its end-of-frame sweep.
+///
+/// One per window, wrapped around the one root element — the same shape
+/// `attach_overlay_host` already has. `build` returns the window's own root;
+/// no wrapper is inserted, so the host never changes layout or hit testing.
+///
+/// The sweep rides a zero-size paint canvas appended last at the root, after
+/// every provider's own canvas, so providers close their frames first and the
+/// host then closes over whatever did not appear. It is not `App::defer`:
+/// deferring reaches an `App` alone, and stopping GPUI's active drag needs a
+/// `Window`.
+pub fn drag_drop_window_host<E>(host: &DragDropWindowHost, build: impl FnOnce() -> E) -> E
+where
+    E: InteractiveElement + ParentElement + 'static,
+{
+    host.frame_begin();
+    WINDOW_HOST_STACK.with(|stack| stack.borrow_mut().push(host.clone()));
+    let root = build();
+    WINDOW_HOST_STACK.with(|stack| {
+        stack.borrow_mut().pop();
+    });
+
+    let sweep = host.clone();
+    root.child(
+        canvas(
+            |_bounds, _window, _cx| {},
+            move |_bounds, _prepaint, window, cx| sweep.frame_end(window, cx),
+        )
+        .absolute()
+        .top(px(0.0))
+        .left(px(0.0))
+        .size(px(0.0)),
+    )
+}
+
 /// Build a host element with `controller` current, then give it that
 /// controller's window-level listeners and frame sweep.
 ///
@@ -1533,6 +1706,12 @@ pub fn drag_drop_provider<E>(controller: &DragDropController, build: impl FnOnce
 where
     E: InteractiveElement + ParentElement + 'static,
 {
+    // Join this window's census before building. A provider that never
+    // appears again is only detectable against a record of the providers that
+    // used to appear, and that record belongs to the window, not the thread.
+    if let Some(host) = current_window_host() {
+        host.note(controller);
+    }
     controller.frame_begin();
     // A top-level provider claims the frame before building, so a nested one
     // started inside its closure cannot claim it first.

@@ -72,7 +72,7 @@ multiple handlers or content slots.
 
 ## Wire the Window Root
 
-`to_gpui` converts one node tree. Two behaviours are window-level rather than
+`to_gpui` converts one node tree. Three behaviours are window-level rather than
 component-level, and an application has to opt into them **once**, at its root:
 
 - **Tab and Shift+Tab traversal.** GPUI owns sequential focus
@@ -81,12 +81,29 @@ component-level, and an application has to opt into them **once**, at its root:
 - **Overlay dismissal and drag cleanup.** Escape dismisses the innermost open
   layer, a pointer press outside a layer dismisses it, and an unfinished
   payload drag ends on mouse-up or Escape.
+- **The drag provider census.** One `DragDropWindowHost` per window notices a
+  drag provider that stopped rendering and closes it down.
 
-Both live on `attach_overlay_host`, whose name predates the traversal it now
-also carries. Its companion, `overlay_frame_begin`, marks the frame boundary
-the layer registry, painted bounds, and focus queue are rebuilt at. Defer
-`overlay_frame_end` to the end of the same effect cycle so a removed control
-cancels in the removal frame.
+The first two live on `attach_overlay_host`, whose name predates the traversal
+it now also carries. Its companion, `overlay_frame_begin`, marks the frame
+boundary the layer registry, painted bounds, and focus queue are rebuilt at.
+Defer `overlay_frame_end` to the end of the same effect cycle so a removed
+control cancels in the removal frame.
+
+The third is `drag_drop_window_host`, wrapped around the same root. A
+`DragDropController` can only close a session during its own per-frame sweep,
+and a provider the application removes mid-drag never sweeps again — so
+without the host that removal leaves a live session, live registrations, no
+terminal callback, and GPUI's own drag still painting. The host cancels the
+absent provider once, drops its registrations, and calls `stop_active_drag`
+before forgetting it.
+
+It is deliberately **per window**. The census is a field on the host, not a
+static, so one window's frame can only ever inspect controllers mounted in
+that window. A background window holding a live drag survives every frame the
+foreground window draws — which a thread-global sweep does not, because
+rendering one window would cancel the other's drag merely because it did not
+happen to render.
 
 ```rust
 use gpui::{div, Context, IntoElement, ParentElement, Render, Styled, Window};
@@ -100,12 +117,19 @@ impl Render for AppRoot {
         // the same ElementId across the frames a real click spans.
         poodle_gpui_node_backend::reset_element_ids();
 
-        // Once per window, around the one root element.
-        poodle_gpui_node_backend::attach_overlay_host(
-            div()
-                .size_full()
-                .child(poodle_gpui_node_backend::to_gpui(&self.node_tree())),
-        )
+        // Once per window, around the one root element. The host owns this
+        // window's provider census; the provider owns one drag scope. Both are
+        // ordinary values the application holds — `self.drag_host` is a
+        // `DragDropWindowHost` and `self.drag` a `DragDropController`.
+        poodle_gpui_node_backend::drag_drop_window_host(&self.drag_host, || {
+            poodle_gpui_node_backend::drag_drop_provider(&self.drag, || {
+                poodle_gpui_node_backend::attach_overlay_host(
+                    div()
+                        .size_full()
+                        .child(poodle_gpui_node_backend::to_gpui(&self.node_tree())),
+                )
+            })
+        })
     }
 }
 ```

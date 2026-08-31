@@ -22,8 +22,8 @@
   import { default as Menu } from "./Menu.svelte";
   import { default as Pill } from "./Pill.svelte";
   import { firstEnabledIndex } from "./internal";
-  import { default as TabsItem } from "./tabs/TabsItem.svelte";
-  import { default as TabsKeyboardTargets } from "./tabs/TabsKeyboardTargets.svelte";
+  import { default as TabsItem } from "./tabs-parts/TabsItem.svelte";
+  import { default as TabsKeyboardTargets } from "./tabs-parts/TabsKeyboardTargets.svelte";
   import {
     getUiPresentation,
     resolveSemanticControlSize,
