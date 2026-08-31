@@ -5,7 +5,7 @@ Created: 2026-08-31
 Checked: 2026-08-31
 Track: Poodle-owned icon morphing
 Origin: [`docs/triage/20260831-155152-icon-morphing-research.md`](../../triage/20260831-155152-icon-morphing-research.md)
-Primary lead: [Morphicons “How it works”](https://www.morphicons.com/#how)
+Primary lead (live/mutable): [Morphicons “How it works”](https://www.morphicons.com/#how)
 
 This is point-in-time research, not a component contract or an implementation
 plan. The current contract remains authoritative. Do not treat this dossier as
@@ -31,8 +31,8 @@ interpolates in polar coordinates. Its DOM driver then serializes a sampled
 polyline during flight, snaps to an exact canonical endpoint, shares one
 `requestAnimationFrame` scheduler, and re-plans from the current intermediate
 shape when interrupted. These facts are visible in the [official core source
-files](https://github.com/guillermolg00/morphicons/tree/main/src/core) and the
-[DOM driver](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/dom/index.ts).
+files](https://github.com/guillermolg00/morphicons/tree/38d2a7221633a453eeafebd872ee3649b9274b22/src/core) and the
+[DOM driver](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/dom/index.ts).
 
 The “any icon” claim has material boundaries. The implementation is for
 stroke-oriented icons on a common grid. It accepts an `IconNode` or raw `d`, but
@@ -40,9 +40,9 @@ the current normalizer handles seven primitive families and rejects groups,
 transforms, unsupported elements, and fill-only geometry. Unequal subpath counts
 are made drawable by duplicating a matched subpath; that is deterministic, but
 not a guarantee of semantic or visual quality. [VF] from the
-[normalizer](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/normalize.ts),
-[planner](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/plan.ts),
-and the project’s [compatibility notes](https://raw.githubusercontent.com/guillermolg00/morphicons/main/README.md#icon-library-compatibility).
+[normalizer](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/normalize.ts),
+[planner](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/plan.ts),
+and the project’s [compatibility notes](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/README.md#icon-library-compatibility).
 
 Poodle’s Lucide base is unusually favourable for a constrained morph: the
 current contract fixes a 24×24 viewBox, `fill="none"`, `currentColor`, uniform
@@ -94,6 +94,9 @@ and the [active-cohort rule](../../contracts/001-working-rules.md#L64-L70).
    animation-frame, Lucide, and GPUI primary/official sources. External URLs in
    this dossier were accessed and checked on 2026-08-31 unless a different date
    is stated.
+   The inspected Morphicons release is tag `v1.7.1` at commit
+   `38d2a7221633a453eeafebd872ee3649b9274b22`; all release/code citations below
+   are pinned to that revision. The live product page is intentionally mutable.
 5. Separated facts, source-author claims, and worker inferences. No code spike
    or generated artifact was required to establish the recommendation.
 
@@ -101,11 +104,11 @@ and the [active-cohort rule](../../contracts/001-working-rules.md#L64-L70).
 
 | ID | Direct source | Use | Checked |
 |---|---|---|---|
-| M1 | [Morphicons live technique page](https://www.morphicons.com/#how) | Maintainer’s public overview, examples, stated constraints, size and runtime claims, and attribution links. | 2026-08-31 |
-| M2 | [Morphicons README](https://raw.githubusercontent.com/guillermolg00/morphicons/main/README.md) | Public API, supported formats, lifecycle, reduced motion, SSR, compatibility, and architecture claims. | 2026-08-31 |
-| M3 | [Morphicons core source](https://github.com/guillermolg00/morphicons/tree/main/src/core) and direct files for [parse](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/parse.ts), [normalize](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/normalize.ts), [resample](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/resample.ts), [plan](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/plan.ts), [interpolate](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/interpolate.ts), [serialize](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/serialize.ts), and [spring](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/spring.ts) | Actual algorithm, topology handling, numeric choices, output format, and bounds. | 2026-08-31 |
-| M4 | Morphicons [DOM driver](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/dom/index.ts), [controller](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/dom/controller.ts), [React binding](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/react/index.tsx), and [Svelte binding](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/svelte/MorphIcon.svelte) | Per-frame mutation, cancellation, interruption, SSR, and binding lifecycle. | 2026-08-31 |
-| M5 | Morphicons [package metadata](https://raw.githubusercontent.com/guillermolg00/morphicons/main/package.json), [MIT licence](https://raw.githubusercontent.com/guillermolg00/morphicons/main/LICENSE), and [changelog](https://raw.githubusercontent.com/guillermolg00/morphicons/main/CHANGELOG.md) | Current published version, exports, optional peers, size gates, licence, and release history. | 2026-08-31; package/changelog report 1.7.1 on 2026-08-28 |
+| M1 | [Morphicons live/mutable technique page](https://www.morphicons.com/#how) | Maintainer’s public overview, examples, stated constraints, size and runtime claims, and attribution links. | 2026-08-31 |
+| M2 | [Morphicons README at v1.7.1](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/README.md) | Public API, supported formats, lifecycle, reduced motion, SSR, compatibility, and architecture claims. | 2026-08-31 |
+| M3 | [Morphicons core source at v1.7.1](https://github.com/guillermolg00/morphicons/tree/38d2a7221633a453eeafebd872ee3649b9274b22/src/core) and direct files for [parse](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/parse.ts), [normalize](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/normalize.ts), [resample](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/resample.ts), [plan](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/plan.ts), [interpolate](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/interpolate.ts), [serialize](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/serialize.ts), and [spring](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/spring.ts) | Actual algorithm, topology handling, numeric choices, output format, and bounds. | 2026-08-31 |
+| M4 | Morphicons [DOM driver](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/dom/index.ts), [controller](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/dom/controller.ts), [React binding](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/react/index.tsx), and [Svelte binding](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/svelte/MorphIcon.svelte) | Per-frame mutation, cancellation, interruption, SSR, and binding lifecycle. | 2026-08-31 |
+| M5 | Morphicons [package metadata](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/package.json), [MIT licence](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/LICENSE), and [changelog](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/CHANGELOG.md) | Current published version, exports, optional peers, size gates, licence, and release history. | 2026-08-31; package/changelog report 1.7.1 on 2026-08-28 |
 | S1 | Lucide [licence](https://github.com/lucide-icons/lucide/blob/main/LICENSE), [icon data guide](https://github.com/lucide-icons/lucide/blob/main/docs/guide/packages/icons.md), [package metadata](https://github.com/lucide-icons/lucide/blob/main/packages/lucide/package.json), and [contributing pipeline](https://github.com/lucide-icons/lucide/blob/main/CONTRIBUTING.md) | Authoritative icon data shape, tree-shaking model, source-to-generated flow, and ISC/Feather-derived notices. | 2026-08-31 |
 | S2 | W3C [SVG paths](https://www.w3.org/TR/SVG2/paths.html) and [painting](https://www.w3.org/TR/SVG2/painting.html) | Native path interpolation, subpaths, closepath, fill, and stroke semantics. | 2026-08-31 |
 | S3 | MDN [fill-rule](https://developer.mozilla.org/en-US/docs/Web/CSS/fill-rule), [fill](https://developer.mozilla.org/docs/Web/CSS/fill), [preserveAspectRatio](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Attribute/preserveAspectRatio), [SVG in HTML](https://developer.mozilla.org/en-US/docs/Web/SVG/Guides/SVG_in_HTML), [SVG title](https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/title), [ARIA img](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/img_role), [prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion), and [requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame) | Browser geometry, naming, user preference, and frame scheduling details. | 2026-08-31 |
@@ -114,7 +117,7 @@ and the [active-cohort rule](../../contracts/001-working-rules.md#L64-L70).
 | N1 | GPUI 0.2.2 [animation source](https://docs.rs/gpui/0.2.2/src/gpui/elements/animation.rs.html) and [Transformation API](https://docs.rs/gpui/0.2.2/gpui/struct.Transformation.html) | Official native animation and SVG transform capability reference. | 2026-08-31 |
 
 Morphicons’ repository and package are MIT-licensed according to the
-[upstream licence](https://raw.githubusercontent.com/guillermolg00/morphicons/main/LICENSE)
+[upstream licence](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/LICENSE)
 and `package.json`. That licence covers Morphicons code. It does not settle the
 licence or attribution obligations of icon data fed into it. Poodle’s current
 Lucide/Feather notices remain the relevant local record in
@@ -270,21 +273,21 @@ Morphicons source or asset is copied here.
 | Stage | Observed technique | Poodle implication |
 |---|---|---|
 | Input | Structural `IconNode` tuples or a raw path `d`; the input type is DOM-free. | A pure core could consume Poodle’s generated node data without coupling to Svelte or React. Public Poodle inputs should still be narrower than the internal structural type. |
-| Parse | Absolute subpaths are reconstructed from `M/L/H/V/C/S/Q/T/A/Z`; relative commands, shorthand reflection, repeated pairs, packed arc flags, and scientific notation are handled. | A parser is real domain logic. It needs malformed-input errors and bounded work, not a string interpolation helper. [VF, [parser](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/parse.ts)] |
-| Normalize | Lines and quadratics become cubics; arcs use SVG endpoint-to-centre conversion and ≤90° cubic slices; circles, ellipses, rectangles, polylines, and polygons become cubic paths. | Normalization must preserve closure and stroke topology, and must reject unsupported fill/transform/group semantics. [VF, [normalizer](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/normalize.ts)] |
-| Resample | Cubic paths are sampled at equal arc-length intervals, default `N=64`; segment boundaries, endpoints, and detected corners are anchored. Closed loops avoid duplicating the first sample and leave circular start-point freedom for matching. | Fixed sample counts make interpolation possible, but create approximation error and a quality/CPU tradeoff. [VF, [resampler](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/resample.ts)] |
-| Match | Subpaths are paired using centroid plus length cost. Equal counts use exhaustive permutations up to eight subpaths, then greedy matching; unequal counts use a bounded surjection and duplicate a nearest shape where necessary. | “Any pair” includes deterministic compromises. Registry metadata should record pair quality and reject visually bad matches rather than hide all compromises. [VF, [planner](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/plan.ts)] |
-| Align | Both traversal directions and closed-loop circular offsets are tried. A closed-form 2D Procrustes similarity chooses rotation/scale; a minimal-rotation tie-break resolves symmetric cases. A global-hybrid path keeps congruent multi-subpath icons coherent. | Rotation should be derived, not hand-authored for every pair. A quality review still matters for semantically unrelated shapes. [VF, [planner](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/plan.ts)] |
-| Interpolate | Scale is log-linear, angle is linear, centroids are translated, and residual points are blended in the aligned frame. Exact endpoints are supported; spring overshoot extrapolates progress. | A lower-level utility can separate geometry planning from visual component bindings. [VF, [interpolator](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/interpolate.ts)] |
-| Serialize | In flight, sampled points become an `M/L` polyline with closure flags. At rest, the target’s canonical cubic `d` is restored; canonical values are quantized to four decimals for cross-engine stability. | SSR and rest output need a canonical representation distinct from the cheap frame representation. [VF, [serializer](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/serialize.ts)] |
-| Animate | A semi-implicit Euler spring uses fixed 1/240-second substeps, capped per frame; named presets and custom stiffness/damping are supported. | A spring is a policy choice, not a geometry requirement. Poodle should decide whether tokens own duration/easing or a spring family. [VF, [spring](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/spring.ts)] |
+| Parse | Absolute subpaths are reconstructed from `M/L/H/V/C/S/Q/T/A/Z`; relative commands, shorthand reflection, repeated pairs, packed arc flags, and scientific notation are handled. | A parser is real domain logic. It needs malformed-input errors and bounded work, not a string interpolation helper. [VF, [parser](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/parse.ts)] |
+| Normalize | Lines and quadratics become cubics; arcs use SVG endpoint-to-centre conversion and ≤90° cubic slices; circles, ellipses, rectangles, polylines, and polygons become cubic paths. | Normalization must preserve closure and stroke topology, and must reject unsupported fill/transform/group semantics. [VF, [normalizer](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/normalize.ts)] |
+| Resample | Cubic paths are sampled at equal arc-length intervals, default `N=64`; segment boundaries, endpoints, and detected corners are anchored. Closed loops avoid duplicating the first sample and leave circular start-point freedom for matching. | Fixed sample counts make interpolation possible, but create approximation error and a quality/CPU tradeoff. [VF, [resampler](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/resample.ts)] |
+| Match | Subpaths are paired using centroid plus length cost. Equal counts use exhaustive permutations up to eight subpaths, then greedy matching; unequal counts use a bounded surjection and duplicate a nearest shape where necessary. | “Any pair” includes deterministic compromises. Registry metadata should record pair quality and reject visually bad matches rather than hide all compromises. [VF, [planner](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/plan.ts)] |
+| Align | Both traversal directions and closed-loop circular offsets are tried. A closed-form 2D Procrustes similarity chooses rotation/scale; a minimal-rotation tie-break resolves symmetric cases. A global-hybrid path keeps congruent multi-subpath icons coherent. | Rotation should be derived, not hand-authored for every pair. A quality review still matters for semantically unrelated shapes. [VF, [planner](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/plan.ts)] |
+| Interpolate | Scale is log-linear, angle is linear, centroids are translated, and residual points are blended in the aligned frame. Exact endpoints are supported; spring overshoot extrapolates progress. | A lower-level utility can separate geometry planning from visual component bindings. [VF, [interpolator](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/interpolate.ts)] |
+| Serialize | In flight, sampled points become an `M/L` polyline with closure flags. At rest, the target’s canonical cubic `d` is restored; canonical values are quantized to four decimals for cross-engine stability. | SSR and rest output need a canonical representation distinct from the cheap frame representation. [VF, [serializer](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/serialize.ts)] |
+| Animate | A semi-implicit Euler spring uses fixed 1/240-second substeps, capped per frame; named presets and custom stiffness/damping are supported. | A spring is a policy choice, not a geometry requirement. Poodle should decide whether tokens own duration/easing or a spring family. [VF, [spring](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/spring.ts)] |
 
 The public site and README call the system zero-dependency and universal, and
 the site states approximately 6.5 KB, under 1 ms planning, and one shared rAF.
 Those are [SAC] claims, not independent measurements. The published package
 does provide concrete anti-regression size gates: 7 KB gzip for core, 7.5 KB for
-core plus DOM, and 8.5 KB for the React entry. [SAC/VF, [site](https://www.morphicons.com/#how)
-and [package size limits](https://raw.githubusercontent.com/guillermolg00/morphicons/main/package.json)].
+core plus DOM, and 8.5 KB for the React entry. [SAC/VF, [live/mutable product page](https://www.morphicons.com/#how)
+and [v1.7.1 package size limits](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/package.json)].
 
 ### 2. SVG topology, winding, stroke, fill, and viewBox
 
@@ -300,8 +303,8 @@ one `d`; `Z` closes a subpath and can produce different joins and caps from an
 explicit final line. [VF, W3C [paths](https://www.w3.org/TR/SVG2/paths.html)].
 Morphicons preserves a closed flag and appends `Z` when both the plan and target
 allow it. A closed-to-open transition is intentionally allowed to open the
-loop. [VF, [Morphicons serializer](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/serialize.ts)
-and [planner](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/plan.ts)].
+loop. [VF, [Morphicons serializer](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/serialize.ts)
+and [planner](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/plan.ts)].
 
 Winding is a fill concern, not just point order. `nonzero` and `evenodd` use
 different winding rules, and fill paints an open subpath as if it were closed.
@@ -310,7 +313,7 @@ different winding rules, and fill paints an open subpath as if it were closed.
 Reversing or duplicating contours can therefore change a filled icon’s interior,
 holes, and visual weight even when its sampled centreline looks plausible.
 Morphicons’ own compatibility scan is explicit about stroke-based geometry and
-rejects fill-only cases. [VF, [README compatibility section](https://raw.githubusercontent.com/guillermolg00/morphicons/main/README.md#icon-library-compatibility)].
+rejects fill-only cases. [VF, [README compatibility section](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/README.md#icon-library-compatibility)].
 
 `viewBox` establishes the SVG’s logical coordinate system, and
 `preserveAspectRatio` controls how it maps into the viewport. [VF, MDN [SVG in
@@ -331,7 +334,7 @@ correspondence. [WI]
 Morphicons deliberately handles unequal subpath counts through surjective
 matching and duplicate “cell division.” It is a useful general-purpose
 fallback, but it means an arbitrary pair always gets an answer even when the
-answer should be rejected for product quality. [VF, [planner](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/plan.ts)].
+answer should be rejected for product quality. [VF, [planner](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/plan.ts)].
 
 Poodle has a finite, generated default icon set and semantic consumers such as
 `IconButton`, `Menu`, and loading controls. A curated registry can choose pairs
@@ -354,13 +357,13 @@ The practical boundary is therefore:
 
 The Morphicons DOM driver exposes `morphTo`, `set`, `seek`, `progress`, a live
 reduced-motion policy, and `destroy`. It keeps one global ticker set and cancels
-the rAF when no ticker remains. [VF, [DOM driver](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/dom/index.ts)].
+the rAF when no ticker remains. [VF, [DOM driver](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/dom/index.ts)].
 
 When a target changes during flight, it snapshots the current sampled buffers,
 builds a new plan from that intermediate shape, preserves the spring velocity,
 and starts the new progress at zero. `set` stops the ticker and snaps to a
 canonical target. Destroy makes later calls no-ops and unregisters the ticker.
-[VF, [DOM driver lifecycle](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/dom/index.ts#L214-L299)].
+[VF, [DOM driver lifecycle](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/dom/index.ts#L214-L299)].
 This is the right class of behavior for rapid toggles: no visible jump merely
 because the user clicked again. It is not a guarantee that a reverse spring is
 the exact time-reversal of the prior flight; it is a new plan from the current
@@ -369,7 +372,7 @@ shape with retained velocity. [WI]
 The controller separates uncontrolled target changes, controlled frozen
 `from`/`to`/`progress`, and imperative calls. Controlled mode wins while both
 endpoints exist; leaving it invalidates the old pair and re-bases on re-entry.
-[VF, [controller](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/dom/controller.ts#L65-L220)].
+[VF, [controller](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/dom/controller.ts#L65-L220)].
 Poodle should preserve this distinction if it exposes scrubbing, but should not
 add all three modes to a first contract without an actual use case.
 
@@ -395,8 +398,8 @@ way to disable or reduce such animation. [VF, MDN [prefers-reduced-motion](https
 and W3C WAI [SC 2.3.3 guidance](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html)].
 Morphicons currently defaults to `reducedMotion="never"`, which ignores the OS
 setting, and offers `"user"` and `"always"` as opt-in alternatives. [VF/SAC,
-[README reduced-motion section](https://raw.githubusercontent.com/guillermolg00/morphicons/main/README.md#reduced-motion-all-five-bindings)
-and [driver policy](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/dom/index.ts#L31-L40)].
+[README reduced-motion section](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/README.md#reduced-motion-all-five-bindings)
+and [driver policy](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/dom/index.ts#L31-L40)].
 That is an explicit product choice, not a browser requirement. Poodle should
 default to honoring the user preference or provide a contract-level policy that
 does so by default; a short icon transition is not a sufficient reason to
@@ -412,16 +415,16 @@ current path unless the contract says so. [WI]
 Morphicons computes a canonical initial `d` with its pure core, emits it from
 SSR, then creates the driver on mount/hydration. The React binding intentionally
 keeps that initial string stable and mutates the path outside the virtual DOM;
-the Svelte binding follows the same pattern. [VF/SAC, [React source](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/react/index.tsx#L1-L110)
-and [Svelte source](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/svelte/MorphIcon.svelte#L1-L87)].
+the Svelte binding follows the same pattern. [VF/SAC, [React source](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/react/index.tsx#L1-L110)
+and [Svelte source](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/svelte/MorphIcon.svelte#L1-L87)].
 
 React’s official hydration contract requires the initial client output to match
 the server output; browser-only values and deliberate differences must be
 deferred to an effect. [VF, React [hydrateRoot](https://react.dev/reference/react-dom/client/hydrateRoot)].
 Morphicons’ canonical serializer quantizes to four decimals because arc-to-cubic
 trigonometry can differ by a final floating-point ulp across JS engines. [VF,
-[serializer](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/serialize.ts#L29-L53)
-and [changelog entry](https://raw.githubusercontent.com/guillermolg00/morphicons/main/CHANGELOG.md#L47-L50)].
+[serializer](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/serialize.ts#L29-L53)
+and [changelog entry](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/CHANGELOG.md#L47-L50)].
 
 For Poodle, a future morph must render a deterministic endpoint or controlled
 frozen shape synchronously on server and client, avoid `matchMedia` during
@@ -442,11 +445,11 @@ owned, so the same pure plan should not assume browser globals. [WI]
 Morphicons’ source uses typed arrays for samples and preallocated output buffers;
 its object-identity caches retain samples and rest-to-target plans for reusable
 `IconNode` objects, while intermediate interruption plans are not cached. [VF,
-[DOM driver caches](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/dom/index.ts#L101-L149)
-and [interpolator](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/core/interpolate.ts#L14-L46)].
+[DOM driver caches](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/dom/index.ts#L101-L149)
+and [interpolator](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/core/interpolate.ts#L14-L46)].
 Each animated SVG frame still performs a `d` attribute write and string
 serialization. That keeps the virtual DOM out of the hot path but remains
-main-thread DOM work and can trigger SVG style/paint. [VF, [driver render loop](https://raw.githubusercontent.com/guillermolg00/morphicons/main/src/dom/index.ts#L178-L212); WI about browser cost].
+main-thread DOM work and can trigger SVG style/paint. [VF, [driver render loop](https://github.com/guillermolg00/morphicons/blob/38d2a7221633a453eeafebd872ee3649b9274b22/src/dom/index.ts#L178-L212); WI about browser cost].
 
 The package’s published size limits and one-rAF design are good engineering
 guardrails, but Poodle should measure its own generated registry, number of
