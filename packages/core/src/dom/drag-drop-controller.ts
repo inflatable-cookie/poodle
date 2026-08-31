@@ -25,6 +25,23 @@ import {
   type CrossWindowDragTransport,
 } from "../cross-window-drag";
 import {
+  canExportAnything,
+  validateFileExport,
+  validateInboundFiles,
+  INBOUND_FILE_SUBJECT_KIND,
+  type DragExportBridge,
+  type DragExportSnapshot,
+  type DragExportState,
+  type DragExportTerminal,
+  type InboundFileBatch,
+  type InboundFileConstraints,
+  type InboundFileEvent,
+  type InboundFileDomBridge,
+  type InboundFileHostBridge,
+  type InboundFileOutcome,
+  type PreparedFileExport,
+} from "../external-file-drag";
+import {
   resolveAutoScroll,
   type AutoScrollCandidate,
   type AutoScrollMetrics,
@@ -105,6 +122,21 @@ export interface DragSourceRegistration {
    * bridge does not advertise the capability for the input kind in hand.
    */
   readonly crossWindowSourceBridge?: CrossWindowDragSourceBridge;
+  /**
+   * Host preparation for a drag that may leave for the operating system.
+   *
+   * Optional and per source, because what gets exported belongs to the
+   * subject being dragged. Preparation runs on the accepted pre-drag gesture,
+   * before activation, so a host that has to render or write a file has
+   * somewhere to do it that is not inside a synchronous native drag start,
+   * and the source cannot advertise or start a native drag until its own
+   * receipt is armed.
+   *
+   * Mutually exclusive with {@link crossWindowSourceBridge}: one gesture can
+   * only leave one way, and a source that declared both would need a silent
+   * precedence rule nobody asked for.
+   */
+  readonly fileExportBridge?: DragExportBridge;
   readonly onDragStart?: (session: DragSession) => void;
   readonly onDragEnd?: (outcome: DragTerminalOutcome) => void;
 }
@@ -117,9 +149,35 @@ export interface DropTargetRegistration {
   readonly label: string;
   readonly resolvePosition: (input: DragPositionResolverInput) => DropPosition | null;
   readonly canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
-  readonly onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
+  readonly onDrop: (
+    intent: DropIntent,
+    context: DropCommitContext,
+  ) => DragDropCommitResult | Promise<DragDropCommitResult>;
+  /**
+   * What this target will take when the subject is an external file batch.
+   *
+   * Checked *before* eligibility, on every hover and again at drop, so a
+   * refusal is a refusal with a reason rather than something `canDrop` has to
+   * discover. A target that accepts {@link INBOUND_FILE_SUBJECT_KIND} without
+   * declaring constraints takes whatever the window's inbound transport
+   * itself allows.
+   */
+  readonly inboundFiles?: InboundFileConstraints;
   /** When true, this element is an auto-scroll owner in addition to overflow ancestors. */
   readonly autoScroll?: boolean;
+}
+
+/**
+ * What a commit handler is given beside its intent.
+ *
+ * The subject was always reachable through the snapshot; the inbound batch was
+ * not, and a file target that could not see the receipts it just accepted
+ * would have to go looking for them. Both are reads: nothing here is a handle,
+ * a path, or a `File`.
+ */
+export interface DropCommitContext {
+  readonly subject: DragSubject;
+  readonly inboundFiles: InboundFileBatch | null;
 }
 
 export type KeyboardDropDirection = "previous" | "next" | "first" | "last";
@@ -185,10 +243,31 @@ export interface DragDropSnapshot {
   readonly rejectedReason: string | undefined;
   readonly preview: DragPreviewSnapshot | null;
   readonly announcement: string | null;
+  /**
+   * The current native file export, or `null` when this session is not one.
+   *
+   * A source whose adapter can export nothing never prepares, so it has no
+   * session state to read here; its `data-poodle-drag-export="unavailable"`
+   * attribute is the at-rest presentation instead.
+   */
+  readonly fileExport: DragExportSnapshot | null;
+  /** The external files this window is currently being offered, if any. */
+  readonly inboundFiles: InboundFileBatch | null;
 }
 
 export interface DragAnnouncementEvent {
   readonly kind: DragAnnouncementKind;
+  /**
+   * The export's own state, when this session is a native file drag-out.
+   *
+   * The session kind and the artifact's state are different stories, and at a
+   * terminal they can disagree: a drag that left for the operating system
+   * ends with nothing committed *locally*, which is a cancellation to the
+   * kernel and an ordinary ending to the user. Announcing "cancelled" for a
+   * file the user successfully dragged onto their desktop would be a lie told
+   * only to assistive technology.
+   */
+  readonly exportState?: DragExportState;
   readonly sourceLabel: string;
   readonly targetLabel?: string;
   readonly position?: DropPosition;
@@ -214,6 +293,16 @@ export interface DragDropControllerOptions {
    * controller connects and torn down when it disconnects.
    */
   readonly crossWindowTargetBridge?: CrossWindowDragTargetBridge;
+  /**
+   * Inbound external files for this one document or window.
+   *
+   * Per window rather than per target, and *exclusive*: the bridge's
+   * `capabilities.transport` names the one transport that owns inbound files
+   * here. A webview's own file drag and a native host's file-drop capture can
+   * both be live on some platforms, and a surface that listened to both would
+   * take one user gesture as two drops.
+   */
+  readonly inboundFileBridge?: InboundFileHostBridge;
 }
 
 export interface DragDropController {
@@ -246,6 +335,7 @@ const CAPABILITIES: DragDropCapabilities = Object.freeze({
 const SOURCE_ATTR = "data-poodle-drag-source";
 const TARGET_ATTR = "data-poodle-drop-target";
 const POSITION_ATTR = "data-poodle-drop-position";
+const EXPORT_ATTR = "data-poodle-drag-export";
 const TOUCH_ACTION = "touch-action";
 
 interface CachedRect {
@@ -366,11 +456,15 @@ function freezeSnapshot(snapshot: DragDropSnapshot): DragDropSnapshot {
   if (snapshot.session) Object.freeze(snapshot.session);
   if (snapshot.pointer) Object.freeze(snapshot.pointer);
   if (snapshot.preview) Object.freeze(snapshot.preview);
+  if (snapshot.fileExport) Object.freeze(snapshot.fileExport);
+  if (snapshot.inboundFiles) Object.freeze(snapshot.inboundFiles);
   return Object.freeze(snapshot);
 }
 
 function emptySnapshot(phase: DragSessionPhase, session: DragSession | null): DragDropSnapshot {
   return freezeSnapshot({
+    fileExport: null,
+    inboundFiles: null,
     phase,
     session: session ? Object.freeze({ ...session, allowedOperations: [...session.allowedOperations] }) : null,
     inputKind: null,
@@ -385,6 +479,24 @@ function emptySnapshot(phase: DragSessionPhase, session: DragSession | null): Dr
 }
 
 function defaultAnnouncement(event: DragAnnouncementEvent): string {
+  // The export's own terminal wording comes first: to the kernel a drag that
+  // left this window committed nothing locally, which is true and is not what
+  // happened as far as the person doing it is concerned.
+  if (event.kind === "cancelled" && event.exportState === "ended") {
+    return `Finished exporting ${event.sourceLabel}`;
+  }
+  if (event.exportState === "failed" && (event.kind === "cancelled" || event.kind === "failed")) {
+    return event.reason
+      ? `Export failed for ${event.sourceLabel}: ${event.reason}`
+      : `Export failed for ${event.sourceLabel}`;
+  }
+  if (event.kind === "cancelled" && event.exportState === "unavailable") {
+    return `${event.sourceLabel} cannot be exported`;
+  }
+  if (event.kind === "cancelled" && event.exportState === "cancelled") {
+    return `Cancelled exporting ${event.sourceLabel}`;
+  }
+
   switch (event.kind) {
     case "pickup":
       return `Picked up ${event.sourceLabel}`;
@@ -524,6 +636,34 @@ interface CrossWindowSourceTransaction {
   settled: boolean;
 }
 
+/**
+ * One source's live export transaction.
+ *
+ * Held beside the kernel session for the same reason the cross-window
+ * transaction is: the kernel owns lifecycle and knows nothing about hosts, and
+ * a prepared receipt has to survive independently of which phase the session
+ * is in when the host answers.
+ */
+interface FileExportTransaction {
+  readonly sessionId: string;
+  readonly sourceId: string;
+  readonly bridge: DragExportBridge;
+  readonly abort: AbortController;
+  prepared: PreparedFileExport | null;
+  stopTerminal: (() => void) | null;
+  /** The host already delivered its authoritative terminal for this receipt. */
+  settled: boolean;
+}
+
+/** The external file batch this window is currently being offered. */
+interface InboundFileTransaction {
+  readonly sessionId: string;
+  readonly batchId: string;
+  /** Replaced by the fully disclosed batch at drop, then revalidated. */
+  batch: InboundFileBatch;
+  released: boolean;
+}
+
 /** The incoming host transaction this window is currently projecting. */
 interface CrossWindowTargetTransaction {
   readonly sessionId: string;
@@ -538,6 +678,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   const createSessionId = options.createSessionId ?? defaultSessionId;
   let describeAnnouncement = options.describeAnnouncement;
   const crossWindowTargetBridge = options.crossWindowTargetBridge;
+  const inboundFileBridge = options.inboundFileBridge;
   /**
    * One codec for both directions.
    *
@@ -603,15 +744,54 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   /**
    * The host's own name for a subject this window has no source for.
    *
-   * Announcements need a name and an incoming projection is the only place one
-   * exists, so it is held for the session rather than looked up in a registry
-   * that will never contain it.
+   * Announcements need a name, and an incoming projection or file batch is the
+   * only place one exists, so it is held for the session rather than looked up
+   * in a registry that will never contain it.
    */
-  let crossWindowSourceLabel: string | null = null;
+  let externalSourceLabel: string | null = null;
   let crossWindowTarget: CrossWindowTargetTransaction | null = null;
   let crossWindowUnsubscribe: (() => void) | null = null;
   /** The native gesture handed to the browser for a `data-transfer` source. */
   let nativeDragSessionId: string | null = null;
+
+  let fileExport: FileExportTransaction | null = null;
+  /**
+   * The export's visible state, and the source it belongs to.
+   *
+   * Deliberately outlives the transaction: `ended`, `cancelled`, and `failed`
+   * are states a surface has to be able to show *after* the session is gone,
+   * and a projection cleared on cleanup would flash the terminal state for one
+   * frame and then claim the source was idle.
+   */
+  let exportState: DragExportState = "idle";
+  let exportSourceId: string | null = null;
+  let exportReason: string | null = null;
+  let exportDetail: { form: PreparedFileExport["form"]; fileCount: number; displayName: string | null } | null =
+    null;
+
+  let inbound: InboundFileTransaction | null = null;
+  /**
+   * Every batch id this installation has answered, for the whole of its
+   * lifetime.
+   *
+   * A release is the *end* of an id, not the end of an observation of it: a
+   * host that re-publishes `entered` for a batch that already committed, was
+   * refused, or was cancelled would otherwise open a second session over one
+   * batch and release it twice. The tombstone belongs to the subscription —
+   * a later installation, or a reconnect, is a different host relationship
+   * and may legitimately reuse the same opaque text.
+   *
+   * Deliberately not a bounded tail. Once-per-id is an exactness rule, and a
+   * cap is a false negative with a counter on it: the id evicted to make room
+   * is exactly the one a repeating host is most likely to send again. One
+   * entry appears per *answered batch* — one per external drag gesture, not
+   * one per event — and the host growing it is the window's own adapter, so
+   * the cost is proportional to work that host already did. The announcement
+   * log is bounded because pointer motion writes to it; this is not that.
+   */
+  let inboundAnswered = new Set<string>();
+  let inboundUnsubscribe: (() => void) | null = null;
+  let inboundDisconnect: (() => void) | null = null;
 
   const documentListeners: Array<[string, EventListener, AddEventListenerOptions | boolean | undefined]> = [];
   let resizeObserver: ResizeObserver | null = null;
@@ -624,6 +804,22 @@ export function createDragDropController(options: DragDropControllerOptions = {}
    */
   function currentPhase(): DragSessionPhase {
     return phase;
+  }
+
+  /**
+   * A source leaves this window one way or no ways.
+   *
+   * Cross-window transfer and file export both own the pre-drag preparation
+   * and both own the native gesture; a source declaring both would need a
+   * precedence rule, and any rule would be a silent choice made for the
+   * consumer. Loud is better.
+   */
+  function assertOneExternalBridge(registration: DragSourceRegistration): void {
+    if (registration.crossWindowSourceBridge && registration.fileExportBridge) {
+      throw new Error(
+        `Drag source "${registration.sourceId}" declares both crossWindowSourceBridge and fileExportBridge`,
+      );
+    }
   }
 
   function assertLive(): void {
@@ -684,6 +880,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       } else {
         source.element.removeAttribute(SOURCE_ATTR);
       }
+      applyExportAttribute(source);
     }
 
     for (const [id, target] of targets) {
@@ -722,7 +919,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
             operation: session.operation,
             x: pointerPosition.x + PREVIEW_OFFSET,
             y: pointerPosition.y + PREVIEW_OFFSET,
-            label: source?.registration.label ?? crossWindowSourceLabel ?? session.subject.id,
+            label: source?.registration.label ?? externalSourceLabel ?? session.subject.id,
           })
         : null;
 
@@ -733,6 +930,17 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     return freezeSnapshot({
       phase,
       session,
+      fileExport:
+        exportSourceId === null
+          ? null
+          : {
+              state: exportState,
+              form: exportDetail?.form ?? null,
+              fileCount: exportDetail?.fileCount ?? 0,
+              displayName: exportDetail?.displayName ?? null,
+              reason: exportReason,
+            },
+      inboundFiles: inbound?.batch ?? null,
       inputKind,
       pointer: pointerPosition ? Object.freeze({ ...pointerPosition }) : null,
       sourceId: session?.sourceId ?? null,
@@ -757,8 +965,10 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
     const event: DragAnnouncementEvent = {
       kind,
+      exportState:
+        fileExport !== null && session?.sessionId === fileExport.sessionId ? exportState : undefined,
       sourceLabel:
-        source?.registration.label ?? crossWindowSourceLabel ?? session?.subject.id ?? "item",
+        source?.registration.label ?? externalSourceLabel ?? session?.subject.id ?? "item",
       targetLabel: target?.registration.label,
       position: session?.intent?.position,
       operation: session?.operation,
@@ -856,15 +1066,25 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         }
 
         const source = sources.get(effect.sourceId);
-        const bridge = source?.registration.crossWindowSourceBridge;
-        if (!source || !bridge || inputKind === null || !crossWindowCarries(bridge, inputKind)) {
+        if (!source || inputKind === null) {
           return [{ type: "PREPARED", sessionId: effect.sessionId }];
         }
 
         // Stays in `preparing` until the host answers: an armed receipt is the
-        // precondition for advertising or starting a cross-window gesture.
-        beginCrossWindowPreparation(effect.sessionId, source, bridge);
-        return [];
+        // precondition for advertising or starting either native gesture.
+        const bridge = source.registration.crossWindowSourceBridge;
+        if (bridge && crossWindowCarries(bridge, inputKind)) {
+          beginCrossWindowPreparation(effect.sessionId, source, bridge);
+          return [];
+        }
+
+        const exportBridge = source.registration.fileExportBridge;
+        if (exportBridge && exportCarries(exportBridge, inputKind)) {
+          beginFileExportPreparation(effect.sessionId, source, exportBridge);
+          return [];
+        }
+
+        return [{ type: "PREPARED", sessionId: effect.sessionId }];
       }
 
       case "emitDragStart": {
@@ -905,7 +1125,13 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         if (crossWindowTarget?.sessionId === effect.sessionId) {
           releaseCrossWindowTarget();
         }
-        crossWindowSourceLabel = null;
+        if (fileExport?.sessionId === effect.sessionId) {
+          releaseFileExport(releaseReasonFor(lastOutcome));
+        }
+        if (inbound?.sessionId === effect.sessionId) {
+          releaseInboundFiles(inboundOutcomeFor(lastOutcome));
+        }
+        externalSourceLabel = null;
         gesture = null;
         dropGeneration += 1;
         keyboardSourceId = null;
@@ -958,14 +1184,17 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   }
 
   /**
-   * The cross-window attempt failed; the local drag has not.
+   * The host preparation failed; the local drag has not.
    *
-   * A decline or failure cancels only the transfer, so the gesture the user is
-   * still making falls back to the ordinary local lifecycle with a fresh
-   * session and no host payload. Without this, a host that says "not this one"
-   * would also break same-window reorder.
+   * A decline or failure cancels only the transfer or export, so the gesture
+   * the user is still making falls back to the ordinary local lifecycle with a
+   * fresh session and no host payload. Without this, a host that says "not
+   * this one" would also break same-window reorder. Shared by both host
+   * bridges: the reason a cross-window lease was refused and the reason a file
+   * could not be rendered are different, and what happens to the gesture
+   * afterwards is not.
    */
-  function endCrossWindowAttempt(
+  function endExternalPreparation(
     sessionId: string,
     event: "PREPARE_DECLINED" | "PREPARE_FAILED",
     sourceId: string,
@@ -1071,11 +1300,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
           return;
         }
         if (receipt === null) {
-          endCrossWindowAttempt(sessionId, "PREPARE_DECLINED", transaction.sourceId);
+          endExternalPreparation(sessionId, "PREPARE_DECLINED", transaction.sourceId);
           return;
         }
         if (!isCrossWindowDragReceipt(receipt)) {
-          endCrossWindowAttempt(sessionId, "PREPARE_FAILED", transaction.sourceId);
+          endExternalPreparation(sessionId, "PREPARE_FAILED", transaction.sourceId);
           return;
         }
         transaction.receipt = receipt;
@@ -1097,7 +1326,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       },
       () => {
         if (crossWindowSource !== transaction || abort.signal.aborted) return;
-        endCrossWindowAttempt(sessionId, "PREPARE_FAILED", transaction.sourceId);
+        endExternalPreparation(sessionId, "PREPARE_FAILED", transaction.sourceId);
       },
     );
   }
@@ -1175,6 +1404,474 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     if (!transaction) return;
     crossWindowTarget = null;
     if (!transaction.abort.signal.aborted) transaction.abort.abort();
+  }
+
+  // ── Native file drag-out ───────────────────────────────────────────────
+
+  /**
+   * Whether an export can be armed for the input kind in hand.
+   *
+   * A file drag-out is the operating system's own pointer gesture. There is no
+   * keyboard or touch route out of the window — a page cannot hand a touch
+   * contact to the desktop, and "move to…" has no meaning when the destination
+   * is the Finder — so those kinds keep the ordinary local transport instead of
+   * arming an export that could never start. An adapter that can carry neither
+   * files nor an agreed custom type is inert the same way.
+   */
+  function exportCarries(bridge: DragExportBridge, kind: DragInputKind): boolean {
+    return (kind === "mouse" || kind === "pen") && canExportAnything(bridge.capabilities);
+  }
+
+  function setExportState(state: DragExportState, reason: string | null = null): void {
+    exportState = state;
+    exportReason = reason;
+    const entry = exportSourceId === null ? undefined : sources.get(exportSourceId);
+    if (entry) applySourceDom(entry);
+    notify();
+  }
+
+  /**
+   * Ask the host to prepare an artifact, without letting the answer arm the
+   * wrong session.
+   *
+   * Every guard is the same guard as the cross-window one: the completion is
+   * bound to the session it was created for, and anything the host allocated
+   * for a session that no longer exists is handed straight back rather than
+   * left for a cleanup nobody will run.
+   */
+  function beginFileExportPreparation(
+    sessionId: string,
+    source: SourceEntry,
+    bridge: DragExportBridge,
+  ): void {
+    const abort = new AbortController();
+    const transaction: FileExportTransaction = {
+      sessionId,
+      sourceId: source.registration.sourceId,
+      bridge,
+      abort,
+      prepared: null,
+      stopTerminal: null,
+      settled: false,
+    };
+    fileExport = transaction;
+    exportSourceId = transaction.sourceId;
+    exportDetail = null;
+    setExportState("preparing");
+
+    const operation = source.registration.operation ?? source.registration.allowedOperations[0];
+    if (operation === undefined) {
+      setExportState("failed", "no allowed operation");
+      dispatch({ type: "PREPARE_FAILED", sessionId });
+      return;
+    }
+
+    let pending: Promise<PreparedFileExport | null>;
+    try {
+      pending = bridge.prepare(
+        {
+          sessionId,
+          sourceId: source.registration.sourceId,
+          subject: source.registration.subject,
+          operation,
+          allowedOperations: source.registration.allowedOperations,
+        },
+        abort.signal,
+      );
+    } catch (error) {
+      setExportState("failed", error instanceof Error ? error.message : String(error));
+      dispatch({ type: "PREPARE_FAILED", sessionId });
+      return;
+    }
+
+    void Promise.resolve(pending).then(
+      (prepared) => {
+        if (fileExport !== transaction || abort.signal.aborted) {
+          // The host still made something for a session that is gone. Hand it
+          // back; it is not Poodle's to keep and not Poodle's to delete.
+          if (prepared) returnPreparedExport(bridge, prepared, "superseded");
+          return;
+        }
+        if (prepared === null) {
+          setExportState("unavailable", "host declined");
+          endExternalPreparation(sessionId, "PREPARE_DECLINED", transaction.sourceId);
+          return;
+        }
+
+        const validation = validateFileExport(prepared, bridge.capabilities);
+        if (validation.accepted === false) {
+          // Allocated but unusable: the host is told, so a temporary file it
+          // made for a drag that will never start does not simply leak.
+          returnPreparedExport(bridge, prepared, "preparation-failed");
+          setExportState("failed", validation.reason);
+          endExternalPreparation(sessionId, "PREPARE_FAILED", transaction.sourceId);
+          return;
+        }
+
+        transaction.prepared = prepared;
+        exportDetail = {
+          form: prepared.form,
+          fileCount: prepared.fileCount ?? 1,
+          displayName: prepared.displayName ?? null,
+        };
+        setExportState("armed");
+        // Armed: only now may the element advertise a native drag.
+        const advertised = sources.get(transaction.sourceId);
+        if (advertised) applySourceDom(advertised);
+        dispatch({ type: "PREPARED", sessionId });
+        // A receipt may arrive after the gesture already passed its activation
+        // threshold; the pending activation is honoured here rather than
+        // waiting for another pointer move that may never come.
+        if (gesture?.sessionId === sessionId && gesture.thresholdReached && phase === "armed") {
+          const live = sources.get(transaction.sourceId);
+          if (live) {
+            const handle = resolveHandle(live.element, live.registration.handle);
+            activate(sessionId, handle, gesture.pointerId);
+            hitTest(gesture.x, gesture.y);
+          }
+        }
+      },
+      (error: unknown) => {
+        if (fileExport !== transaction || abort.signal.aborted) return;
+        setExportState("failed", error instanceof Error ? error.message : String(error));
+        endExternalPreparation(sessionId, "PREPARE_FAILED", transaction.sourceId);
+      },
+    );
+  }
+
+  /** Give a receipt back to the host that issued it. Never a delete order. */
+  function returnPreparedExport(
+    bridge: DragExportBridge,
+    prepared: PreparedFileExport,
+    reason: DragCancelReason,
+  ): void {
+    try {
+      void bridge.cancel(prepared, reason);
+    } catch {
+      // A host that throws on cleanup cannot break the local session.
+    }
+  }
+
+  /**
+   * The native drag is starting: install the one authoritative terminal.
+   *
+   * `start` runs once per receipt. Its callback is the only thing that can end
+   * an export — there is no `dragend` to misread, because the browser's own
+   * drag was refused so the host could run the operating system's instead.
+   */
+  function startFileExport(sessionId: string): void {
+    const transaction = fileExport;
+    if (!transaction || transaction.sessionId !== sessionId) return;
+    if (transaction.stopTerminal !== null || transaction.prepared === null) return;
+
+    const prepared = transaction.prepared;
+    setExportState("dragging");
+
+    let stop: (() => void) | null = null;
+    try {
+      stop = transaction.bridge.start(prepared, (terminal) => {
+        if (fileExport !== transaction || transaction.settled) return;
+        transaction.settled = true;
+        applyExportTerminal(sessionId, terminal);
+      });
+    } catch (error) {
+      setExportState("failed", error instanceof Error ? error.message : String(error));
+      // The gesture is over and the visible result is *failed*, not cancelled:
+      // `releaseFileExport` leaves an already-recorded failure alone.
+      dispatch({ type: "TRANSPORT_LOST", sessionId });
+      return;
+    }
+
+    // A host may answer inside `start` — the contract lets it terminate
+    // whenever its work resolves, and "immediately" is a legal whenever. By
+    // now the session may already be over, and storing the subscription on a
+    // transaction nobody will release again would leave it installed forever.
+    if (fileExport !== transaction || transaction.settled) {
+      try {
+        stop?.();
+      } catch {
+        // Host cleanup cannot break local cleanup.
+      }
+      return;
+    }
+
+    transaction.stopTerminal = stop;
+  }
+
+  /**
+   * The host's terminal, mapped into the kernel without inventing a result.
+   *
+   * `ended` is the interesting one. The gesture finished, and no Poodle target
+   * took anything — which is exactly a kernel cancellation, and exactly not
+   * what the user did. The kernel records the truth it can check; the export
+   * state records the truth the host reported, and the announcement uses that
+   * one. Neither claims a destination consumed the file, because nothing on
+   * this side of the boundary can know that.
+   */
+  function applyExportTerminal(sessionId: string, terminal: DragExportTerminal): void {
+    if (terminal.status === "ended") {
+      setExportState("ended");
+      dispatch({
+        type: "HOST_TERMINAL",
+        sessionId,
+        outcome: { status: "cancelled", reason: "explicit" },
+      });
+      return;
+    }
+    if (terminal.status === "cancelled") {
+      setExportState("cancelled", terminal.reason);
+      dispatch({
+        type: "HOST_TERMINAL",
+        sessionId,
+        outcome: { status: "cancelled", reason: terminal.reason },
+      });
+      return;
+    }
+    setExportState("failed", terminal.reason ?? null);
+    dispatch({
+      type: "HOST_TERMINAL",
+      sessionId,
+      outcome: terminal.reason === undefined ? { status: "failed" } : { status: "failed", reason: terminal.reason },
+    });
+  }
+
+  /**
+   * Release the export transaction exactly once, on the single terminal.
+   *
+   * `cancel` runs only while the receipt is still live: a host that already
+   * reported its own terminal has closed the transaction, and telling it to
+   * cancel afterwards would be a second command against one receipt. Nothing
+   * here deletes an artifact — retention is the host's, always.
+   */
+  function releaseFileExport(reason: DragCancelReason): void {
+    const transaction = fileExport;
+    if (!transaction) return;
+    fileExport = null;
+    const advertised = sources.get(transaction.sourceId);
+    if (advertised) applySourceDom(advertised);
+
+    if (!transaction.abort.signal.aborted) transaction.abort.abort(reason);
+
+    const stop = transaction.stopTerminal;
+    transaction.stopTerminal = null;
+    if (stop) {
+      try {
+        stop();
+      } catch {
+        // Host cleanup cannot break local cleanup.
+      }
+    }
+
+    if (transaction.prepared && !transaction.settled) {
+      returnPreparedExport(transaction.bridge, transaction.prepared, reason);
+      // A failure already said what happened. Overwriting it here would turn
+      // "the host could not start this" into "the user cancelled", which is
+      // both wrong and the only thing the surface had to show.
+      if (exportState !== "failed") setExportState("cancelled", reason);
+    }
+  }
+
+
+  // ── Inbound external files ─────────────────────────────────────────────
+
+  /**
+   * Why this target cannot take the live batch, or `null` when it can.
+   *
+   * Runs before the consumer's own eligibility resolver, on every hover and
+   * again at drop: type, count, size, name shape, and host-issued identity are
+   * all untrusted external input, and a target should be answering "do I want
+   * this" rather than "is this even real". The refusal reason is presentation
+   * text, so a surface can say *why* it said no.
+   */
+  function inboundRefusal(
+    constraints: InboundFileConstraints | undefined,
+    subject: DragSubject,
+  ): string | null {
+    if (subject.kind !== INBOUND_FILE_SUBJECT_KIND) return null;
+    const live = inbound;
+    if (!inboundFileBridge || !live || live.batch.batchId !== subject.id) {
+      return "external-files-unavailable";
+    }
+    const validation = validateInboundFiles(
+      live.batch,
+      constraints ?? {},
+      inboundFileBridge.capabilities,
+    );
+    return validation.accepted === false ? validation.reason : null;
+  }
+
+  /** A name for a batch nothing in this window registered. */
+  function inboundLabel(batch: InboundFileBatch): string {
+    if (batch.files.length === 1) {
+      return batch.files[0]?.name ?? "1 file";
+    }
+    return `${batch.files.length} files`;
+  }
+
+  function inboundOutcomeFor(outcome: DragTerminalOutcome | undefined): InboundFileOutcome {
+    if (outcome?.status === "committed") return "committed";
+    if (outcome?.status === "rejected") return "rejected";
+    if (outcome?.status === "failed") return "failed";
+    return "cancelled";
+  }
+
+  /**
+   * Answer a batch this window never took ownership of.
+   *
+   * The contract is that *every observed batch reaches exactly one release* —
+   * a batch this window silently ignored would leave the host holding
+   * material for a gesture nobody will ever finish. Refusing is still an
+   * answer, and it is the only one this path can honestly give.
+   */
+  function refuseInboundBatch(batchId: string, outcome: InboundFileOutcome): void {
+    // Exactly once, for the lifetime of this installation. Every path that
+    // ends a batch comes through here, so this is the only place the rule
+    // needs to hold.
+    if (inboundAnswered.has(batchId)) return;
+    inboundAnswered.add(batchId);
+
+    try {
+      inboundFileBridge?.release(batchId, outcome);
+    } catch {
+      // A host that throws on release cannot break this window.
+    }
+  }
+
+  /**
+   * Tell the host the batch is finished with, exactly once.
+   *
+   * A notification, not a command: the host decides whether the copy it made
+   * survives a rejection, and when a committed one is cleaned up. Poodle holds
+   * no files and removes none.
+   */
+  function releaseInboundFiles(outcome: InboundFileOutcome): void {
+    const live = inbound;
+    if (!live) return;
+    inbound = null;
+    if (live.released) return;
+    live.released = true;
+    refuseInboundBatch(live.batchId, outcome);
+  }
+
+  /**
+   * Drive one external file gesture through the ordinary session.
+   *
+   * The host supplies the coordinates because a native file drag delivers no
+   * pointer events to the surface it is over; everything after that is the
+   * normal path — hit-testing, nested arbitration, eligibility, revalidation,
+   * commit, announcement, and one terminal. There is no separate file-drop
+   * callback, and a local gesture always wins: the user's own pointer owns
+   * this controller, and an inbound batch arriving mid-drag would otherwise
+   * supersede a drag they are still making.
+   */
+  function onInboundFileEvent(event: InboundFileEvent): void {
+    if (!inboundFileBridge) return;
+    if (destroyed || !connectedRoot) {
+      // News from a surface that is gone. Only an `entered` introduces a batch
+      // this window has not yet answered, so only that one is refused —
+      // answering a later event would be a second release for one batch.
+      if (event.type === "entered") refuseInboundBatch(event.batch.batchId, "rejected");
+      return;
+    }
+
+    if (event.type === "entered") {
+      // The same batch again is one observation, not two: it is already
+      // owned, and answering it here would be a second release.
+      if (inbound?.batchId === event.batch.batchId) return;
+
+      // An id this installation already answered stays answered. A host that
+      // re-publishes a committed, refused, or cancelled batch is repeating
+      // itself, not offering a new one, and taking it again would release the
+      // same id twice.
+      if (inboundAnswered.has(event.batch.batchId)) return;
+
+      // A local gesture, or a batch already in flight, owns this controller.
+      // The newcomer is still answered rather than dropped on the floor.
+      if (inbound !== null || gesture !== null || keyboardSourceId !== null || phase !== "idle") {
+        refuseInboundBatch(event.batch.batchId, "rejected");
+        return;
+      }
+
+      // The window's own limits are checked before a session exists at all; a
+      // batch this transport cannot carry never becomes one.
+      const validation = validateInboundFiles(event.batch, {}, inboundFileBridge.capabilities);
+      if (validation.accepted === false) {
+        refuseInboundBatch(event.batch.batchId, "rejected");
+        return;
+      }
+
+      const sessionId = createSessionId();
+      inbound = {
+        sessionId,
+        batchId: event.batch.batchId,
+        batch: event.batch,
+        released: false,
+      };
+      externalSourceLabel = inboundLabel(event.batch);
+      inputKind = "mouse";
+      pointerPosition = { x: event.x, y: event.y };
+
+      dispatch({
+        type: "PREPARE",
+        sessionId,
+        sourceId: `poodle-inbound:${event.batch.batchId}`,
+        subject: { kind: INBOUND_FILE_SUBJECT_KIND, id: event.batch.batchId },
+        // External files are always a copy: the operating system keeps its own.
+        operation: "copy",
+        allowedOperations: ["copy"],
+      });
+      if (context.session?.sessionId !== sessionId) {
+        releaseInboundFiles("cancelled");
+        return;
+      }
+      dispatch({ type: "ACTIVATE", sessionId });
+      if (currentPhase() !== "dragging") {
+        releaseInboundFiles("cancelled");
+        return;
+      }
+      hitTest(event.x, event.y);
+      return;
+    }
+
+    const live = inbound;
+    if (!live) return;
+
+    if (event.type === "cancelled") {
+      if (live.batchId !== event.batchId) return;
+      if (context.session?.sessionId === live.sessionId && phase !== "idle") {
+        dispatch({
+          type: "HOST_TERMINAL",
+          sessionId: live.sessionId,
+          outcome: { status: "cancelled", reason: "transport-lost" },
+        });
+        return;
+      }
+      releaseInboundFiles("cancelled");
+      return;
+    }
+
+    const batchId = event.type === "moved" ? event.batchId : event.batch.batchId;
+    if (live.batchId !== batchId) return;
+    if (context.session?.sessionId !== live.sessionId || currentPhase() !== "dragging") return;
+
+    pointerPosition = { x: event.x, y: event.y };
+
+    if (event.type === "moved") {
+      hitTest(event.x, event.y);
+      return;
+    }
+
+    // The drop discloses the names and sizes hover could not see. The batch is
+    // replaced *before* the hit test, so every rule that deferred at hover is
+    // answered here, and hover acceptance cannot carry a file the target would
+    // now refuse.
+    live.batch = event.batch;
+    hitTest(event.x, event.y);
+    if (!context.session?.intent) {
+      dispatch({ type: "CANCEL", sessionId: live.sessionId });
+      return;
+    }
+    dispatch({ type: "DROP_REQUESTED", sessionId: live.sessionId });
   }
 
 
@@ -1303,7 +2000,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         committing: false,
       };
       crossWindowTarget = transaction;
-      crossWindowSourceLabel = projection.sourceLabel;
+      externalSourceLabel = projection.sourceLabel;
       inputKind = projectedInputKind(projection.inputKind);
       // No local pointer was ever observed, so there is no local preview: a
       // cross-window drag's preview belongs to whoever owns the cursor.
@@ -1880,7 +2577,13 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         position,
         operation,
       };
-      eligibility = eligibilityFromCanDrop(entry.registration.canDrop(intent, subject), intent);
+      // External data is validated before the target is asked, so a consumer
+      // resolver never has to defend itself against a hostile batch.
+      const refusal = inboundRefusal(entry.registration.inboundFiles, subject);
+      eligibility =
+        refusal === null
+          ? eligibilityFromCanDrop(entry.registration.canDrop(intent, subject), intent)
+          : { accepted: false, reason: refusal };
     }
 
     return {
@@ -2124,7 +2827,10 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
 
     try {
-      const result = registration.onDrop(accepted);
+      const result = registration.onDrop(accepted, {
+        subject: session.subject,
+        inboundFiles: inbound?.sessionId === sessionId ? inbound.batch : null,
+      });
       if (result !== undefined && typeof (result as Promise<DragDropCommitResult>).then === "function") {
         void Promise.resolve(result).then(
           (commit) => {
@@ -2245,7 +2951,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     // allocated synchronously, and a host that cannot answer synchronously
     // would have to be refused.
     const bridge = source.registration.crossWindowSourceBridge;
-    if (bridge && crossWindowCarries(bridge, kind)) {
+    const exportBridge = source.registration.fileExportBridge;
+    if (
+      (bridge && crossWindowCarries(bridge, kind)) ||
+      (exportBridge && exportCarries(exportBridge, kind))
+    ) {
       beginSession(source, kind, event.clientX, event.clientY, sessionId);
     }
 
@@ -2686,8 +3396,31 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     const source = sourceFromEvent(event);
     if (!source) return;
 
-    const transaction = crossWindowSource;
     const session = context.session;
+    const exporting = fileExport;
+    if (
+      exporting !== null &&
+      exporting.prepared !== null &&
+      exporting.sourceId === source.registration.sourceId &&
+      session?.sessionId === exporting.sessionId &&
+      (phase === "armed" || phase === "dragging")
+    ) {
+      // The *host* runs the operating system's drag, so the browser's own must
+      // not also run: this is the documented shell pattern (prevent the web
+      // drag, then start the native one), and two live drags for one gesture
+      // would leave the page's `dragend` looking like an outcome.
+      event.preventDefault();
+      if (phase === "armed") activate(exporting.sessionId, null, null);
+      if (currentPhase() !== "dragging") return;
+      startFileExport(exporting.sessionId);
+      // Nothing local owns the gesture now, and no pointer event will arrive
+      // to release capture: the host's terminal is the only way out.
+      releasePointerHardware();
+      gesture = null;
+      return;
+    }
+
+    const transaction = crossWindowSource;
     const armed =
       transaction !== null &&
       transaction.receipt !== null &&
@@ -2827,11 +3560,38 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     // host is still deciding would take the gesture away from a transfer
     // nobody agreed to. Every other source stays non-draggable — the sensor
     // owns the gesture and a parallel native drag would fight it.
+    const id = entry.registration.sourceId;
     const armed =
-      crossWindowSource !== null &&
-      crossWindowSource.sourceId === entry.registration.sourceId &&
-      crossWindowSource.receipt !== null;
+      (crossWindowSource !== null &&
+        crossWindowSource.sourceId === id &&
+        crossWindowSource.receipt !== null) ||
+      (fileExport !== null && fileExport.sourceId === id && fileExport.prepared !== null);
     element.setAttribute("draggable", armed ? "true" : "false");
+    applyExportAttribute(entry);
+  }
+
+  /**
+   * The export's state as a styling and inspection hook.
+   *
+   * Per source rather than per session, because the two states a surface most
+   * needs to show are outside any session: `unavailable`, before a gesture
+   * exists at all, and the terminal one, after it is over. A source with no
+   * export bridge carries no attribute.
+   */
+  function applyExportAttribute(entry: SourceEntry): void {
+    const bridge = entry.registration.fileExportBridge;
+    if (!bridge) {
+      entry.element.removeAttribute(EXPORT_ATTR);
+      return;
+    }
+    if (!canExportAnything(bridge.capabilities)) {
+      entry.element.setAttribute(EXPORT_ATTR, "unavailable");
+      return;
+    }
+    entry.element.setAttribute(
+      EXPORT_ATTR,
+      exportSourceId === entry.registration.sourceId ? exportState : "idle",
+    );
   }
 
   function restoreSourceDom(entry: SourceEntry): void {
@@ -2932,6 +3692,30 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         }
         crossWindowUnsubscribe = crossWindowTargetBridge.subscribe(onCrossWindowTargetEvent);
       }
+      // The transport claim is checked here, once, rather than being inferred
+      // from which methods a bridge happens to have: a `data-transfer` bridge
+      // that cannot bind the document observes nothing, and a native host that
+      // could bind it would be the second listener this window refuses to have.
+      if (inboundFileBridge) {
+        const dom = inboundFileBridge as Partial<InboundFileDomBridge>;
+        const bindsDocument = typeof dom.connect === "function";
+        if (inboundFileBridge.capabilities.transport === "data-transfer" && !bindsDocument) {
+          throw new Error(
+            "inboundFileBridge claims the data-transfer transport but cannot connect to a document",
+          );
+        }
+        if (inboundFileBridge.capabilities.transport === "host" && bindsDocument) {
+          throw new Error(
+            "inboundFileBridge claims the host transport and must not also bind document drag events",
+          );
+        }
+        // A new installation is a new host relationship: whatever the last
+        // one answered is no longer this one's history, and the same opaque
+        // text may legitimately name a different batch.
+        inboundAnswered = new Set();
+        inboundUnsubscribe = inboundFileBridge.subscribe(onInboundFileEvent);
+        if (bindsDocument) inboundDisconnect = dom.connect?.(doc) ?? null;
+      }
       if (typeof ResizeObserver === "function") {
         resizeObserver = new ResizeObserver(() => onScrollOrResize());
         resizeObserver.observe(root);
@@ -2949,6 +3733,14 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         unsubscribe?.();
         releaseCrossWindowSource("transport-lost");
         releaseCrossWindowTarget();
+        releaseFileExport("transport-lost");
+        releaseInboundFiles("cancelled");
+        const disconnectInbound = inboundDisconnect;
+        const stopInbound = inboundUnsubscribe;
+        inboundDisconnect = null;
+        inboundUnsubscribe = null;
+        disconnectInbound?.();
+        stopInbound?.();
         unbindDocument();
         resizeObserver?.disconnect();
         resizeObserver = null;
@@ -2966,6 +3758,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       if (sourcesByElement.has(element)) {
         throw new Error("Element is already registered as a drag source");
       }
+      assertOneExternalBridge(registration);
 
       const entry: SourceEntry = {
         element,
@@ -2993,6 +3786,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
               `Drag source id "${entry.registration.sourceId}" is immutable on a live handle`,
             );
           }
+          assertOneExternalBridge(next);
           const id = entry.registration.sourceId;
           const wasDisabled = entry.registration.disabled;
           entry.registration = next;
@@ -3146,6 +3940,14 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       unsubscribe?.();
       releaseCrossWindowSource("transport-lost");
       releaseCrossWindowTarget();
+      releaseFileExport("transport-lost");
+      releaseInboundFiles("cancelled");
+      const disconnectInbound = inboundDisconnect;
+      const stopInbound = inboundUnsubscribe;
+      inboundDisconnect = null;
+      inboundUnsubscribe = null;
+      disconnectInbound?.();
+      stopInbound?.();
       for (const id of [...sources.keys()]) unregisterSource(id);
       for (const id of [...targets.keys()]) unregisterTarget(id);
       for (const id of [...keyboardTargets.keys()]) unregisterKeyboardTarget(id);

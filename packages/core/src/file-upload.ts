@@ -29,20 +29,32 @@ export function formatFileSize(bytes: number | null | undefined): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }
 
-function isAcceptedFileType(file: File, accept: string): boolean {
+/**
+ * Whether `accept` admits a file, by name and declared media type alone.
+ *
+ * Split out of the `File` form because the same vocabulary (`.ext`,
+ * `type/*`, an exact media type) has to answer for an *inbound* external
+ * drag, where the platform gives display metadata and no `File` at all. One
+ * matcher, so a rule that admits an upload admits the same drop.
+ */
+export function fileTypeAccepted(accept: string, name: string, mediaType: string): boolean {
+  if (accept === "*") return true;
   const acceptedTypes = accept.split(",").map((type) => type.trim());
-  const fileType = file.type;
-  const fileExtension = `.${file.name.split(".").pop()?.toLowerCase()}`;
+  const fileExtension = `.${name.split(".").pop()?.toLowerCase()}`;
 
   return acceptedTypes.some((acceptedType) => {
     if (acceptedType.startsWith(".")) {
       return fileExtension === acceptedType.toLowerCase();
     }
     if (acceptedType.endsWith("/*")) {
-      return fileType.startsWith(acceptedType.slice(0, -1));
+      return mediaType.startsWith(acceptedType.slice(0, -1));
     }
-    return fileType === acceptedType;
+    return mediaType === acceptedType;
   });
+}
+
+function isAcceptedFileType(file: File, accept: string): boolean {
+  return fileTypeAccepted(accept, file.name, file.type);
 }
 
 export function validateUploadFile({

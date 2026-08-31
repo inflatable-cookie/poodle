@@ -7,6 +7,7 @@
     type DragDropController,
     type DragDropSnapshot,
     type DragPreviewSnapshot,
+    type InboundFileHostBridge,
   } from "@inflatable-cookie/poodle-core";
   import { onMount, untrack, type Snippet } from "svelte";
 
@@ -21,15 +22,35 @@
      * supplied, because that controller already owns its own bridge.
      */
     crossWindowTargetBridge?: CrossWindowDragTargetBridge;
+    /**
+     * Inbound external files for this document. Ignored when an explicit
+     * `controller` is supplied, because that controller already owns its own
+     * bridge, and exclusive by construction: the bridge names the one
+     * transport that owns inbound files here.
+     */
+    inboundFileBridge?: InboundFileHostBridge;
     preview?: Snippet<[DragPreviewSnapshot]>;
     children?: Snippet;
   }
 
-  let { controller, describeAnnouncement, crossWindowTargetBridge, preview, children }: Props = $props();
+  let {
+    controller,
+    describeAnnouncement,
+    crossWindowTargetBridge,
+    inboundFileBridge,
+    preview,
+    children,
+  }: Props = $props();
 
   const owned = untrack(() => controller === undefined);
   const ctrl = untrack(
-    () => controller ?? createDragDropController({ describeAnnouncement, crossWindowTargetBridge }),
+    () =>
+      controller ??
+      createDragDropController({
+        describeAnnouncement,
+        crossWindowTargetBridge,
+        inboundFileBridge,
+      }),
   );
   let root: HTMLDivElement | undefined;
   let snapshot: DragDropSnapshot = $state(ctrl.getSnapshot());

@@ -182,6 +182,10 @@ pub struct CrossWindowDragCommitRequest {
 /// can replace a promise; it cannot replace the channel that runs the other
 /// way.
 ///
+/// Named for the transfer it shipped with, and reused as-is by the external
+/// file bridges: they abandon requests for the same reasons, and a second copy
+/// would be a second place for the idempotence rule to drift.
+///
 /// Cheap to clone, and every clone is the same signal. Aborting is idempotent:
 /// the first reason wins and listeners run exactly once, so a late second
 /// cancellation cannot double-release a host's resources.

@@ -16,9 +16,10 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    DragOperation, DragSubject, DropEdge, DropEligibility, DropIntent, DropPosition, Node,
-    NodeDragSource, NodeDropPositionInput, NodeDropTarget, NodeKeyboardDropDirection,
-    NodeKeyboardPositionInput, DROP_POSITION_AFTER, DROP_POSITION_BEFORE, DROP_POSITION_INSIDE,
+    DragExportBridge, DragOperation, DragSubject, DropEdge, DropEligibility, DropIntent,
+    DropPosition, InboundFileConstraints, Node, NodeDragSource, NodeDropPositionInput,
+    NodeDropTarget, NodeKeyboardDropDirection, NodeKeyboardPositionInput, DROP_POSITION_AFTER,
+    DROP_POSITION_BEFORE, DROP_POSITION_INSIDE, INBOUND_FILE_SUBJECT_KIND,
 };
 
 /// The subject-kind prefix every list-reorder component uses for its own rows.
@@ -337,6 +338,50 @@ pub fn decode_dock_panel_subject(id: &str) -> Option<DockPanelSubject> {
     })
 }
 
+/// A drop target for external files arriving from outside the application.
+///
+/// The kind is the one external-file family, so a target opts in the same way
+/// it opts into any other subject: there is no separate file-drop callback and
+/// no second eligibility path. `constraints` are checked *before* the target's
+/// own resolver, on hover and again at commit, because count, size, declared
+/// type, and name shape are untrusted external input rather than questions a
+/// consumer should have to defend against.
+///
+/// The position is fixed at `inside`: a file arrives *at* a surface, and a
+/// consumer that needs placement bands supplies its own resolver afterwards.
+pub fn inbound_file_target(
+    target_id: &str,
+    label: &str,
+    constraints: InboundFileConstraints,
+) -> NodeDropTarget {
+    let mut target = NodeDropTarget::new(target_id, INBOUND_FILE_SUBJECT_KIND, label);
+    target.resolve_position = Some(Arc::new(|_: &NodeDropPositionInput| {
+        Some(DROP_POSITION_INSIDE.to_string())
+    }));
+    target.inbound_files = Some(constraints);
+    target
+}
+
+/// A drag source whose subject can leave for the operating system.
+///
+/// The subject stays opaque: the consumer names *what* is being exported and
+/// its host resolves that into files. No path, descriptor, or temporary
+/// directory reaches this registration, and a host that can export nothing
+/// leaves the source an ordinary local drag rather than an affordance that
+/// cannot deliver.
+pub fn file_export_source(
+    source_id: &str,
+    subject: DragSubject,
+    label: &str,
+    bridge: Arc<dyn DragExportBridge>,
+) -> NodeDragSource {
+    let mut source = NodeDragSource::new(source_id, subject, label);
+    source.allowed_operations = vec![DragOperation::Copy];
+    source.operation = DragOperation::Copy;
+    source.file_export_bridge = Some(bridge);
+    source
+}
+
 /// Attach a source registration to a node, unless the row is inert.
 ///
 /// A disabled row is not registered at all rather than registered-and-ignored:
@@ -374,6 +419,106 @@ mod tests {
         assert_eq!(position_for_fraction(0.25, false), DROP_POSITION_BEFORE);
         assert_eq!(position_for_fraction(0.5, false), DROP_POSITION_AFTER);
         assert_eq!(position_for_fraction(0.99, false), DROP_POSITION_AFTER);
+    }
+
+    /// An external-file target opts into the one external family and nothing
+    /// else, so a reordered row cannot land in a file drop zone that happens
+    /// to be nearby — and its constraints are carried where the controller
+    /// checks them, before the consumer's own resolver.
+    #[test]
+    fn an_inbound_file_target_accepts_only_the_external_family() {
+        let target = inbound_file_target(
+            "library",
+            "Library",
+            InboundFileConstraints {
+                max_files: Some(2),
+                accept: Some("audio/*".to_string()),
+                ..Default::default()
+            },
+        );
+
+        assert!(target.accepts(&DragSubject {
+            kind: INBOUND_FILE_SUBJECT_KIND.to_string(),
+            id: "batch-1".to_string(),
+        }));
+        assert!(!target.accepts(&reorder_subject("tabs", "a")));
+        assert_eq!(
+            target
+                .inbound_files
+                .as_ref()
+                .and_then(|constraints| constraints.max_files),
+            Some(2)
+        );
+        // A file arrives *at* a surface; placement bands are a consumer's own
+        // resolver to add.
+        let resolve = target.resolve_position.as_ref().expect("resolver");
+        assert_eq!(
+            resolve(&NodeDropPositionInput {
+                fraction_x: 0.9,
+                fraction_y: 0.9,
+                subject: DragSubject {
+                    kind: INBOUND_FILE_SUBJECT_KIND.to_string(),
+                    id: "batch-1".to_string(),
+                },
+                operation: DragOperation::Copy,
+                input_kind: poodle_node::NodeDragInputKind::Mouse,
+            }),
+            Some(DROP_POSITION_INSIDE.to_string())
+        );
+    }
+
+    /// An export is a copy: the operating system takes its own file and the
+    /// consumer's subject stays where it is. A move would claim Poodle
+    /// removed something, which is exactly what it never does.
+    #[test]
+    fn a_file_export_source_is_a_copy_and_carries_only_its_bridge() {
+        struct NullExport;
+        impl poodle_node::DragExportBridge for NullExport {
+            fn capabilities(&self) -> poodle_node::DragExportCapabilities {
+                poodle_node::DragExportCapabilities {
+                    files: true,
+                    ..Default::default()
+                }
+            }
+            fn prepare(
+                &self,
+                _request: poodle_node::DragExportPrepareRequest,
+                _abort: poodle_node::CrossWindowAbort,
+                complete: poodle_node::DragExportPrepareComplete,
+            ) {
+                complete(None);
+            }
+            fn start(
+                &self,
+                _prepared: poodle_node::PreparedFileExport,
+                _on_terminal: poodle_node::DragExportTerminalCallback,
+            ) -> poodle_node::CrossWindowCleanup {
+                Box::new(|| {})
+            }
+            fn cancel(
+                &self,
+                _prepared: poodle_node::PreparedFileExport,
+                _reason: poodle_node::DragCancelReason,
+            ) {
+            }
+        }
+
+        let source = file_export_source(
+            "clip-1",
+            DragSubject {
+                kind: "clip".to_string(),
+                id: "clip-1".to_string(),
+            },
+            "Intro clip",
+            Arc::new(NullExport),
+        );
+
+        assert_eq!(source.operation, DragOperation::Copy);
+        assert_eq!(source.allowed_operations, vec![DragOperation::Copy]);
+        assert!(source.file_export_bridge.is_some());
+        // One way out per source: the controller refuses both bridges, and a
+        // builder that quietly set the other one would defeat that.
+        assert!(source.cross_window_source_bridge.is_none());
     }
 
     /// The closed component edge and the open semantic position must round

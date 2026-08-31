@@ -105,6 +105,34 @@ foreground window draws — which a thread-global sweep does not, because
 rendering one window would cancel the other's drag merely because it did not
 happen to render.
 
+### External files
+
+A drag that leaves for the operating system, and files arriving from it, use
+the same two host bridges as the web.
+
+```rust
+// Out: the host prepares an artifact and owns the native drag. The receipt is
+// opaque, its cleanup is the host's, and a drag ending is not permission to
+// delete anything.
+source.file_export_bridge = Some(Arc::new(my_shell_export_bridge));
+
+// In: one bridge per window, whose `capabilities.transport` names the only
+// inbound transport this window listens to.
+controller.set_inbound_file_bridge(Arc::new(my_shell_inbound_bridge), cx);
+```
+
+Inbound batches reach ordinary drop targets under
+`INBOUND_FILE_SUBJECT_KIND`; build one with
+`poodle_render::inbound_file_target`, whose `InboundFileConstraints` are
+checked before the target's own eligibility resolver runs and again at commit.
+The commit event carries the batch it is committing — receipts and display
+metadata, never a path or a file handle.
+
+Both bridges answer through completion callbacks and a `CrossWindowAbort` rather
+than futures, because this controller runs inside GPUI's frame loop with no
+executor to await on. Answers arriving from elsewhere queue and are applied at
+the next frame, which the controller wakes for itself.
+
 ```rust
 use gpui::{div, Context, IntoElement, ParentElement, Render, Styled, Window};
 

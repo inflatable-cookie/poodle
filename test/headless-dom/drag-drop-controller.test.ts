@@ -373,7 +373,10 @@ describe("createDragDropController", () => {
     root.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
     expect(controller.getSnapshot().targetId).toBe("c");
     root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-    expect(onDrop).toHaveBeenCalledWith({ targetId: "c", position: "after", operation: "move" });
+    expect(onDrop).toHaveBeenCalledWith(
+      { targetId: "c", position: "after", operation: "move" },
+      { subject: { kind: "item", id: "b" }, inboundFiles: null },
+    );
     controller.destroy();
   });
 
@@ -454,7 +457,10 @@ describe("createDragDropController", () => {
     expect(controller.getSnapshot().targetId).toBe("c");
     expect(controller.getSnapshot().session?.intent?.position).toBe("after");
     root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-    expect(onDrop).toHaveBeenCalledWith({ targetId: "c", position: "after", operation: "move" });
+    expect(onDrop).toHaveBeenCalledWith(
+      { targetId: "c", position: "after", operation: "move" },
+      { subject: { kind: "item", id: "b" }, inboundFiles: null },
+    );
 
     rowB.focus();
     rowB.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
@@ -462,7 +468,10 @@ describe("createDragDropController", () => {
     expect(controller.getSnapshot().targetId).toBe("a");
     expect(controller.getSnapshot().session?.intent?.position).toBe("before");
     root.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
-    expect(onDrop).toHaveBeenLastCalledWith({ targetId: "a", position: "before", operation: "move" });
+    expect(onDrop).toHaveBeenLastCalledWith(
+      { targetId: "a", position: "before", operation: "move" },
+      { subject: { kind: "item", id: "b" }, inboundFiles: null },
+    );
     controller.destroy();
   });
 
@@ -762,7 +771,10 @@ describe("createDragDropController", () => {
 
     expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(true);
     expect(onStart).toHaveBeenCalledTimes(1);
-    expect(onDrop).toHaveBeenCalledWith({ targetId: "dst", position: "after", operation: "move" });
+    expect(onDrop).toHaveBeenCalledWith(
+      { targetId: "dst", position: "after", operation: "move" },
+      { subject: { kind: "item", id: "a" }, inboundFiles: null },
+    );
     expect(onEnd).toHaveBeenCalledWith({
       status: "committed",
       intent: { targetId: "dst", position: "after", operation: "move" },
@@ -881,7 +893,10 @@ describe("createDragDropController", () => {
     controller.registerTarget(targetEl, targetReg({ onDrop }));
 
     expect(controller.requestKeyboardDrop({ sourceId: "src", targetId: "dst", position: "after" })).toBe(true);
-    expect(onDrop).toHaveBeenCalledWith({ targetId: "dst", position: "after", operation: "move" });
+    expect(onDrop).toHaveBeenCalledWith(
+      { targetId: "dst", position: "after", operation: "move" },
+      { subject: { kind: "item", id: "a" }, inboundFiles: null },
+    );
     expect(onEnd).toHaveBeenCalledWith({
       status: "committed",
       intent: { targetId: "dst", position: "after", operation: "move" },

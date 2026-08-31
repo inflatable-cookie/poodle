@@ -605,6 +605,233 @@ async function runCrossWindow(name: string, browser: Browser): Promise<void> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// External files (g16.027).
+//
+// The engine's own `DataTransfer`, `DataTransferItem`, and `File`: what a drag
+// discloses during `dragover` versus at `drop`, whether the page claimed the
+// drop, and whether an export refuses the browser's drag so the host can run
+// the operating system's instead.
+//
+// Not proved here, and deliberately not faked: an operating-system-originated
+// file drag into the page, and any destination's consumption of an exported
+// file. Playwright cannot originate the first, and no browser API reports the
+// second. Both stay manual platform evidence.
+// ---------------------------------------------------------------------------
+
+type FileHost = {
+  state(): {
+    prepares: string[];
+    starts: string[];
+    stops: string[];
+    cancels: string[];
+    outcomes: string[];
+    drops: string[];
+    artifacts: string[];
+    phase: string;
+  };
+  probe(): {
+    phase: string;
+    posture: string;
+    reason: string;
+    export: string;
+    exportName: string;
+    draggable: string;
+    offered: string;
+    names: string;
+  };
+  arm(receiptId: string | null, fileCount?: number): void;
+  startNativeDrag(): { prevented: boolean; types: string[] };
+  endNativeDrag(): void;
+  reportExport(terminal: { status: string; reason?: string }): void;
+  hoverFiles(files: Array<{ name: string; type: string; bytes: number }>): {
+    claimed: boolean;
+    types: string[];
+    kinds: string[];
+  };
+  dropFiles(files: Array<{ name: string; type: string; bytes: number }>): void;
+  leaveOnce(): void;
+  heldBatches(): string[];
+  hostPath(): string;
+};
+
+declare global {
+  interface Window {
+    __poodleFiles: FileHost;
+  }
+}
+
+const WAV = { name: "take-01.wav", type: "audio/wav", bytes: 512 };
+
+async function runExternalFiles(name: string, browser: Browser): Promise<void> {
+  const context = await browser.newContext({ viewport: { width: 640, height: 480 } });
+  const page = await context.newPage();
+
+  try {
+    await page.goto(`${url}files.html`, { waitUntil: "load" });
+    await page.locator("#zone").waitFor();
+
+    // ── inbound: hover discloses types, the drop discloses everything ────
+    const hover = await page.evaluate(
+      (file) => window.__poodleFiles.hoverFiles([file]),
+      WAV,
+    );
+    const hovering = await page.evaluate(() => window.__poodleFiles.probe());
+    check(
+      `${name}: a real file drag is claimed and hovers on declared types alone`,
+      hover.claimed &&
+        hover.types.includes("Files") &&
+        hover.kinds.every((kind) => kind === "file") &&
+        hovering.phase === "dragging" &&
+        hovering.posture === "accepted" &&
+        hovering.offered === "1" &&
+        hovering.names === "?",
+      `claimed=${hover.claimed} types=${hover.types.join(",")} kinds=${hover.kinds.join(",")} phase=${hovering.phase} posture=${hovering.posture} offered=${hovering.offered} names=${hovering.names}`,
+    );
+
+    await page.evaluate((file) => window.__poodleFiles.dropFiles([file]), WAV);
+    const dropped = await page.evaluate(() => window.__poodleFiles.state());
+    const afterDrop = await page.evaluate(() => window.__poodleFiles.probe());
+    const held = await page.evaluate(() => window.__poodleFiles.heldBatches());
+    check(
+      `${name}: the drop commits through the ordinary target and releases the batch`,
+      dropped.drops.length === 1 &&
+        dropped.drops[0] === "take-01.wav:512" &&
+        afterDrop.phase === "idle" &&
+        held.length === 0,
+      `drops=${dropped.drops.join(",")} phase=${afterDrop.phase} held=${held.join(",")}`,
+    );
+
+    // ── inbound: the target's own limits, on real engine metadata ────────
+    await page.reload({ waitUntil: "load" });
+    await page.locator("#zone").waitFor();
+    const refusedHover = await page.evaluate(() =>
+      window.__poodleFiles.hoverFiles([
+        { name: "notes.txt", type: "text/plain", bytes: 8 },
+      ]),
+    );
+    const refused = await page.evaluate(() => window.__poodleFiles.probe());
+    check(
+      `${name}: a declared type the target refuses is rejected at hover`,
+      refusedHover.claimed && refused.posture === "rejected" && refused.reason === "unsupported-type",
+      `claimed=${refusedHover.claimed} posture=${refused.posture} reason=${refused.reason}`,
+    );
+
+    // A size the platform only discloses at drop is caught there.
+    await page.reload({ waitUntil: "load" });
+    await page.locator("#zone").waitFor();
+    await page.evaluate(() =>
+      window.__poodleFiles.hoverFiles([{ name: "big.wav", type: "audio/wav", bytes: 8 }]),
+    );
+    const acceptedHover = await page.evaluate(() => window.__poodleFiles.probe());
+    await page.evaluate(() =>
+      window.__poodleFiles.dropFiles([{ name: "big.wav", type: "audio/wav", bytes: 9_000 }]),
+    );
+    const oversized = await page.evaluate(() => window.__poodleFiles.state());
+    check(
+      `${name}: an oversized file is refused at drop, not on hover acceptance`,
+      acceptedHover.posture === "accepted" && oversized.drops.length === 0 && oversized.phase === "idle",
+      `hover=${acceptedHover.posture} drops=${oversized.drops.join(",")} phase=${oversized.phase}`,
+    );
+
+    // ── inbound: per-element leaves are not the drag leaving ─────────────
+    await page.reload({ waitUntil: "load" });
+    await page.locator("#zone").waitFor();
+    await page.evaluate((file) => window.__poodleFiles.hoverFiles([file]), WAV);
+    await page.evaluate((file) => window.__poodleFiles.hoverFiles([file]), WAV);
+    await page.evaluate(() => window.__poodleFiles.leaveOnce());
+    const stillLive = await page.evaluate(() => window.__poodleFiles.probe());
+    await page.evaluate(() => window.__poodleFiles.leaveOnce());
+    await page.evaluate(() => window.__poodleFiles.leaveOnce());
+    const left = await page.evaluate(() => window.__poodleFiles.probe());
+    check(
+      `${name}: a per-element leave does not end the drag; leaving the window does`,
+      stillLive.phase === "dragging" && left.phase === "idle",
+      `after-one=${stillLive.phase} after-all=${left.phase}`,
+    );
+
+    // ── drag-out: the host owns the native gesture ───────────────────────
+    await page.reload({ waitUntil: "load" });
+    await page.locator("#clip").waitFor();
+    const clip = center(await box(page, "#clip"));
+    await page.mouse.move(clip.x, clip.y);
+    await page.mouse.down();
+    const preparing = await waitProbe(page, "export", "preparing");
+    const unarmed = await page.evaluate(() => window.__poodleFiles.startNativeDrag());
+    const beforeArm = await page.evaluate(() => window.__poodleFiles.state());
+    check(
+      `${name}: an unarmed export cannot start a native drag`,
+      preparing === "preparing" && beforeArm.starts.length === 0 && unarmed.prevented,
+      `export=${preparing} starts=${beforeArm.starts.join(",")} prevented=${unarmed.prevented}`,
+    );
+
+    await page.evaluate(() => window.__poodleFiles.arm("export-1"));
+    await waitProbe(page, "export", "armed");
+    const armed = await page.evaluate(() => window.__poodleFiles.probe());
+    const started = await page.evaluate(() => window.__poodleFiles.startNativeDrag());
+    const afterStart = await page.evaluate(() => window.__poodleFiles.state());
+    const dragging = await page.evaluate(() => window.__poodleFiles.probe());
+    check(
+      `${name}: the armed export advertises, refuses the browser's drag, and starts the host's`,
+      armed.draggable === "true" &&
+        armed.exportName === "take-01.wav" &&
+        started.prevented &&
+        started.types.length === 0 &&
+        afterStart.starts.length === 1 &&
+        afterStart.starts[0] === "export-1" &&
+        dragging.export === "dragging",
+      `draggable=${armed.draggable} name=${armed.exportName} prevented=${started.prevented} types=${started.types.join(",")} starts=${afterStart.starts.join(",")} export=${dragging.export}`,
+    );
+
+    await page.evaluate(() => window.__poodleFiles.endNativeDrag());
+    const afterNativeEnd = await page.evaluate(() => window.__poodleFiles.state());
+    await page.evaluate(() => window.__poodleFiles.reportExport({ status: "ended" }));
+    await page.evaluate(() => window.__poodleFiles.reportExport({ status: "ended" }));
+    const ended = await page.evaluate(() => window.__poodleFiles.state());
+    const endedProbe = await page.evaluate(() => window.__poodleFiles.probe());
+    const markup = await page.evaluate(() => document.body.innerHTML);
+    const hostPath = await page.evaluate(() => window.__poodleFiles.hostPath());
+    check(
+      `${name}: a native end is not a result, and an ending deletes nothing`,
+      afterNativeEnd.outcomes.length === 0 &&
+        ended.outcomes.length === 1 &&
+        ended.cancels.length === 0 &&
+        ended.stops.length === 1 &&
+        ended.artifacts.length === 1 &&
+        endedProbe.export === "ended" &&
+        endedProbe.phase === "idle" &&
+        !markup.includes(hostPath),
+      `native-end-outcomes=${afterNativeEnd.outcomes.length} outcomes=${ended.outcomes.join(",")} cancels=${ended.cancels.join(",")} stops=${ended.stops.join(",")} export=${endedProbe.export} leaked=${markup.includes(hostPath)}`,
+    );
+    await page.mouse.up();
+
+    // ── drag-out: a receipt beyond the adapter's capabilities ────────────
+    await page.reload({ waitUntil: "load" });
+    await page.locator("#clip").waitFor();
+    const again = center(await box(page, "#clip"));
+    await page.mouse.move(again.x, again.y);
+    await page.mouse.down();
+    await waitProbe(page, "export", "preparing");
+    await page.evaluate(() => window.__poodleFiles.arm("export-1", 3));
+    const refusedExport = await waitProbe(page, "export", "failed");
+    const afterRefusal = await page.evaluate(() => window.__poodleFiles.state());
+    const refusedProbe = await page.evaluate(() => window.__poodleFiles.probe());
+    check(
+      `${name}: a receipt beyond the adapter's capabilities is refused and returned`,
+      refusedExport === "failed" &&
+        afterRefusal.starts.length === 0 &&
+        afterRefusal.cancels.length === 1 &&
+        afterRefusal.cancels[0] === "export-1:preparation-failed" &&
+        afterRefusal.artifacts.length === 1 &&
+        refusedProbe.draggable === "false",
+      `export=${refusedExport} starts=${afterRefusal.starts.join(",")} cancels=${afterRefusal.cancels.join(",")} draggable=${refusedProbe.draggable}`,
+    );
+    await page.mouse.up();
+  } finally {
+    await context.close().catch(() => {});
+  }
+}
+
 for (const [name, type] of engines) {
   console.log(`\n=== ${name} ===`);
   const browser = await type.launch();
@@ -618,6 +845,7 @@ for (const [name, type] of engines) {
     if (name === "chromium") cdp = await context.newCDPSession(page);
     await run(page, name, cdp);
     await runCrossWindow(name, browser);
+    await runExternalFiles(name, browser);
   } catch (error) {
     failures += 1;
     console.log(`  FAIL  ${name}: ${error instanceof Error ? error.message : String(error)}`);

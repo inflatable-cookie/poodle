@@ -1,6 +1,7 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: active — compiled as g16.021–g16.028; g16.021–g16.026 merged; g16.027 is ready
+Status: active — compiled as g16.021–g16.028; g16.021–g16.026 merged;
+g16.027 is delivered and under review
 Updated: 2026-08-31
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
@@ -215,11 +216,14 @@ The paired public registration names are:
   `instructions`, optional `handle` (`Element` or a selector inside the
   source), per-pointer `activation` (`DragActivationConstraints`),
   optional `keyboardOrder` (Space/Enter pickup opt-in and ordered logical
-  traversal origin), `onDragStart`, and `onDragEnd`;
+  traversal origin), at most one of `crossWindowSourceBridge` or
+  `fileExportBridge`, `onDragStart`, and `onDragEnd`;
 - `DropTargetRegistration`: `targetId`, `acceptedKinds`, `disabled`,
   `priority`, required accessible `label`, `resolvePosition`
   (`DragPositionResolverInput` → `DropPosition | null`), `canDrop` (boolean or
-  `DropEligibility`), and `onDrop`;
+  `DropEligibility`), optional `inboundFiles` constraints, and `onDrop`, which
+  receives the revalidated intent plus a `DropCommitContext` carrying the live
+  subject and the external file batch when there is one;
 - `KeyboardDropTargetRegistration`: the same target id, accepted kinds,
   disabled posture, priority, label, `canDrop`, and `onDrop`, plus a stable
   numeric `order` and `resolvePosition` over `previous | next | first | last`,
@@ -274,8 +278,9 @@ cancels the candidate and leaves scrolling untouched. Pointer capture and
 
 `DragDropSnapshot` is an immutable presentation read containing the semantic
 phase/session plus adapter-owned input kind, pointer position where present,
-active source/target ids, accepted/rejected target posture, and current
-preview position. It exposes no controller maps, elements, listeners, timers,
+active source/target ids, accepted/rejected target posture, current preview
+position, the current file export, and the external files this window is being
+offered. It exposes no controller maps, elements, listeners, timers,
 observers, or mutable machine context. `DragPreviewSnapshot` is the subset
 passed to custom preview renderers.
 
@@ -609,14 +614,87 @@ type DragExportCapabilities = {
   customDataTypes: readonly string[];
 };
 
+type DragExportForm =
+  | "existing-file"
+  | "materialized-file"
+  | "promised-file"
+  | "custom-data";
+
 type PreparedFileExport = {
   receiptId: string;
   displayName?: string;
+  form: DragExportForm;
+  fileCount?: number;
+  dataTypes?: readonly string[];
+};
+
+type DragExportTerminal =
+  | { status: "ended" }
+  | { status: "cancelled"; reason: DragCancelReason }
+  | { status: "failed"; reason?: string };
+
+type DragExportBridge = {
+  readonly capabilities: DragExportCapabilities;
+  prepare(
+    request: DragExportPrepareRequest,
+    signal: AbortSignal,
+  ): Promise<PreparedFileExport | null>;
+  start(
+    prepared: PreparedFileExport,
+    onTerminal: (terminal: DragExportTerminal) => void,
+  ): () => void;
+  cancel(prepared: PreparedFileExport, reason: DragCancelReason): void | Promise<void>;
 };
 ```
 
 The receipt is opaque to Poodle. Filesystem paths, file descriptors, and
-temporary-directory handles remain in the host.
+temporary-directory handles remain in the host. `form` and `fileCount` are the
+distinctions the adapter has to keep, and they are validated against that
+adapter's own advertised capabilities before a receipt can arm anything: a
+receipt beyond them is refused *and returned*, so an artifact made for a drag
+that will never start is not abandoned. A `displayName` that is a path, a
+drive letter, or a URL is refused rather than trimmed.
+
+`DragExportBridge` is optional on one `DragSourceRegistration.fileExportBridge`
+and mutually exclusive with `crossWindowSourceBridge`: one gesture leaves one
+way, and a source declaring both would need a silent precedence rule. Export
+preparation runs only for mouse and pen — there is no keyboard or touch route
+to a desktop — and an adapter that can carry neither files nor an agreed
+custom type stays inert.
+
+There is no committed export terminal. A native drag ending does not prove a
+destination consumed anything, so the honest qualities are `ended`,
+`cancelled`, and `failed`. The kernel records the truth it can check — nothing
+local committed — while the export's own state carries what the host reported,
+and announcements use that one so a successful desktop drop is not announced
+as a cancellation.
+
+The export's visible state is separate from the session phase and outlives it:
+
+```ts
+type DragExportState =
+  | "unavailable"
+  | "idle"
+  | "preparing"
+  | "armed"
+  | "dragging"
+  | "ended"
+  | "cancelled"
+  | "failed";
+```
+
+It is published on the presentation snapshot and as a
+`data-poodle-drag-export` attribute on the source, so `unavailable` (before
+any gesture) and the terminal states (after one) are both showable. It also
+travels on the announcement description in both runtimes, which is what makes
+the states *accessible* rather than merely visible: ended, cancelled,
+declined, and failed exports reach the same kernel cancellation, and each is
+announced in its own words rather than as "cancelled".
+
+Installing the native drag is safe against a host that answers inside `start`:
+the subscription it returns is closed rather than stored on a session that is
+already over. A `start` that throws leaves the export visibly `failed`; the
+release that follows returns the receipt without overwriting that result.
 
 The export adapter must distinguish:
 
@@ -644,11 +722,106 @@ Inbound file drop uses the same target registration and eligibility result,
 but the host adapter resolves external file descriptors or paths. Browser
 `File` objects and Tauri path events remain adapter-specific inputs.
 
+```ts
+const INBOUND_FILE_SUBJECT_KIND = "poodle.external-file";
+
+type InboundFileTransport = "data-transfer" | "host";
+
+type InboundFileCapabilities = {
+  files: boolean;
+  multipleFiles: boolean;
+  transport: InboundFileTransport;
+  customDataTypes: readonly string[];
+};
+
+type InboundFileReceipt = {
+  receiptId: string;
+  name: string | null;
+  mediaType: string;
+  size: number | null;
+};
+
+type InboundFileBatch = {
+  protocolVersion: number;
+  batchId: string;
+  transport: InboundFileTransport;
+  files: readonly InboundFileReceipt[];
+};
+
+type InboundFileEvent =
+  | { type: "entered"; batch: InboundFileBatch; x: number; y: number }
+  | { type: "moved"; batchId: string; x: number; y: number }
+  | { type: "dropped"; batch: InboundFileBatch; x: number; y: number }
+  | { type: "cancelled"; batchId: string };
+
+type InboundFileHostBridge = {
+  readonly capabilities: InboundFileCapabilities;
+  subscribe(listener: (event: InboundFileEvent) => void): () => void;
+  release(batchId: string, outcome: InboundFileOutcome): void;
+};
+```
+
+One bridge per document or native window, on the controller. A batch becomes an
+ordinary session under `INBOUND_FILE_SUBJECT_KIND` with `copy` as its only
+operation, and reaches the same hit-testing, nested arbitration, eligibility,
+revalidation, commit, announcement, and terminal path as any other subject. A
+local gesture always wins: a batch arriving mid-drag does not supersede a drag
+the user is still making. `release` is the single terminal notification per
+batch — a notification, not a command, because retention is the host's.
+
 The target receives opaque accepted-file receipts or a consumer-authored
-projection, not an unchecked native path. Tauri's native file-drop capture can
-conflict with frontend HTML5 drag events on some platforms, so the host adapter
-must advertise which inbound transport owns the window rather than enabling
-both silently.
+projection, not an unchecked native path. A target declares
+`inboundFiles: { maxFiles?, maxSize?, accept? }`, using the same `accept`
+vocabulary as the file-upload surfaces, and it is validated *before* the
+target's own eligibility resolver on every hover and again at drop. Protocol
+version, transport identity, host-issued receipt identity, count, size,
+declared type, and name shape are all checked there, so a consumer resolver
+never has to defend itself against a hostile batch.
+
+`protocolVersion` is checked first and must equal
+`INBOUND_FILE_PROTOCOL_VERSION`, the one version a build accepts. A batch is
+assembled by an adapter that ships separately from Poodle — a shell plugin
+pinned to an older release, a bridge nobody updated — and a shape this build
+cannot fully understand is one it cannot honestly claim to have validated. It
+is refused before any other field is read, because none of them is trustworthy
+yet.
+
+Every observed batch reaches exactly one release. A batch refused for any
+reason, one arriving while a local gesture or another batch owns the
+controller, one published by a bridge that has since been replaced, and one
+that arrives after the surface is gone are all *answered* — a silently ignored
+batch would leave the host holding material for a gesture nobody will finish.
+Repeating an id already owned is one observation rather than two, and an id
+this installation has already answered stays answered: news for a released
+batch can neither commit nor cancel, and a re-published `entered` for it opens
+nothing. That tombstone is scoped to the publishing installation, so a
+*replacement* host may legitimately use the same opaque text — an id is one
+host's own name for something, not a global identity. It holds for the whole
+of that installation's lifetime, with no threshold: an id that stopped being
+inert after enough later ids would be a false negative in an exactness rule,
+and the id evicted first is the one a repeating host is most likely to send
+again.
+Replacing a window's bridge ends the outgoing batch's session rather than
+releasing under it, and the outgoing host's queued news is answered through the
+host that published it.
+
+`name` and `size` are `null` while the platform is still hiding them: a browser
+discloses only item kinds and declared types during `dragover`. The unknown is
+modelled rather than guessed, undecidable rules defer, and the drop-time batch
+— where every answer exists — is validated again before it can commit.
+
+Tauri's native file-drop capture can conflict with frontend HTML5 drag events
+on some platforms, so the host adapter must advertise which inbound transport
+owns the window rather than enabling both silently. The claim is exclusive and
+checked at connection: a `data-transfer` bridge that cannot observe the
+document, and a `host` bridge that also binds document drag events, are both
+errors rather than a silently ignored half.
+
+The web adapter is `createInboundFileDataTransferBridge`. It holds the `File`
+objects; a consumer that needs them supplies its own `project`, and one that
+does not never sees them. It claims the drop for the whole document while a
+batch is live, because an unclaimed file drop navigates the window to the file
+and destroys the surface the user was dragging onto.
 
 ## Failure And Cancellation Rules
 
@@ -813,9 +986,9 @@ land after the internal proof.
 
 The compiled runway is `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
 through `028-drag-drop-migration-and-certification-closeout.md`.
-`g16.021`–`g16.026` are merged. The inbound-file and file-drag-out boundary is
-fixed for `g16.027`; that card is ready. `g16.028` remains planned behind its
-landed dependency.
+`g16.021`–`g16.026` are merged. `g16.027` delivered the inbound-file and
+file-drag-out boundary and is under review. `g16.028` remains planned behind
+its landed dependency.
 
 ## Non-goals
 

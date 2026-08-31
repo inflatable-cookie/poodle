@@ -1448,6 +1448,7 @@ mod tests {
                 position: poodle_node::DROP_POSITION_AFTER.to_string(),
                 operation: poodle_node::DragOperation::Move,
             },
+            inbound_files: None,
         });
         assert_eq!(commit, poodle_node::NodeDropCommit::Committed);
         assert_eq!(

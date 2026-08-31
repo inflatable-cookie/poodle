@@ -685,6 +685,7 @@ mod tests {
         on_drop(&poodle_node::NodeDropCommitEvent {
             subject: foreign,
             intent,
+            inbound_files: None,
         });
         let seen = moved.lock().expect("lock").clone();
         assert_eq!(seen.len(), 1);
