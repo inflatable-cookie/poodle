@@ -9,7 +9,7 @@
  * is proved not to cross-drop.
  */
 
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DockRegion } from "../src/DockRegion";
@@ -235,5 +235,53 @@ describe("DockRegion panel movement", () => {
 
     send(document, pointer("pointerup", 450, 50));
     expect(onPanelDropB).not.toHaveBeenCalled();
+  });
+
+  it("never leaks the encoded subject id through a public callback", () => {
+    const onValueChange = vi.fn();
+    const onClose = vi.fn();
+    const onReorder = vi.fn();
+    const { container, getAllByRole } = render(
+      <DockRegion
+        edge="left"
+        items={[
+          { value: "explorer", label: "Explorer", closable: true },
+          { value: "inspector", label: "Inspector", closable: true },
+        ]}
+        value="explorer"
+        onValueChange={onValueChange}
+        onClose={onClose}
+        onReorder={onReorder}
+      />,
+    );
+
+    // The strip's tab values are the substrate's subject ids, and those carry
+    // the panel's edge and zone. Everything a consumer sees has to be the
+    // panel value it supplied.
+    const [firstTab, secondTab] = getAllByRole("tab");
+    act(() => {
+      fireEvent.click(secondTab);
+    });
+    expect(onValueChange).toHaveBeenCalledWith("inspector");
+
+    const [close] = [...container.querySelectorAll<HTMLElement>(".poodle-tabs__close")];
+    act(() => {
+      fireEvent.click(close);
+    });
+    expect(onClose).toHaveBeenCalledWith("explorer");
+
+    act(() => {
+      firstTab.focus();
+      fireEvent.keyDown(firstTab, { key: "ArrowRight", altKey: true });
+    });
+    expect(onReorder).toHaveBeenCalledWith(["inspector", "explorer"]);
+
+    for (const call of [
+      ...onValueChange.mock.calls,
+      ...onClose.mock.calls,
+      ...onReorder.mock.calls.flat(),
+    ].flat()) {
+      expect(JSON.stringify(call)).not.toContain("poodle-panel:");
+    }
   });
 });

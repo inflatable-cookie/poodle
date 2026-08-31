@@ -23,7 +23,7 @@ import {
 } from "@inflatable-cookie/poodle-core";
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Button } from "./Button";
-import { DragDropProvider } from "./drag-drop";
+import { DragDropProvider, useOptionalDragDrop } from "./drag-drop";
 import { Icon } from "./Icon";
 import { Menu } from "./Menu";
 import { Pill } from "./Pill";
@@ -109,6 +109,15 @@ export interface TabsProps {
    * receipt leaves the window. Tabs keeps its local reorder either way.
    */
   crossWindowSourceBridge?: CrossWindowDragSourceBridge;
+  /**
+   * The semantic drag family this strip belongs to.
+   *
+   * `null` mints a family scoped to this Tabs instance, so two ordinary tab
+   * sets sharing one provider are never eligible for each other. An owning
+   * composite passes an explicit kind to put the strip in a shared family —
+   * without taking over reorder, which stays Tabs' own.
+   */
+  dragSubjectKind?: string | null;
   onClose?: ((value: string) => void) | undefined;
   children?: (value: string) => ReactNode;
   actions?: ReactNode;
@@ -153,6 +162,7 @@ export function Tabs({
   onValueChange = undefined,
   onReorder = undefined,
   crossWindowSourceBridge = undefined,
+  dragSubjectKind = null,
   onClose = undefined,
   children,
   actions,
@@ -462,19 +472,49 @@ export function Tabs({
   // ── Reorder (shared drag substrate; local and cross-window are one session) ──
 
   /**
-   * One controller per Tabs instance.
+   * Join the nearest provider, or own a controller.
    *
-   * Tabs owns it rather than borrowing an ambient one so a Tabs anywhere in a
-   * page reorders without its consumer having to install a provider, and so
-   * two mounted tab sets can never resolve each other's targets.
+   * Joining is what lets an owning composite arbitrate a tab drop against its
+   * own targets. Isolation does not depend on the controller: it comes from
+   * the subject family and the registration ids, so a Tabs that joined a
+   * shared provider is still unreachable from an ordinary sibling strip.
    */
-  const [dragController] = useState(() => createDragDropController());
+  const ambient = useOptionalDragDrop();
+  const [ownDragController] = useState(() => (ambient ? null : createDragDropController()));
+  const dragController = ambient?.controller ?? ownDragController!;
 
-  /** Scoped the way the Rust reorder builders scope theirs. */
-  const subjectKind = `poodle.reorder-item:tabs:${tabsId}`;
+  /**
+   * The semantic family, and the registration namespace, are different things.
+   *
+   * `subjectKind` is what other surfaces can match on — shared when a
+   * composite says so. `sourceId` / `targetId` are always scoped to this
+   * instance, because two strips in one ambient controller may legitimately
+   * hold the same tab values and duplicate live ids are an error, not
+   * last-writer-wins.
+   */
+  const subjectKind = dragSubjectKind ?? `poodle.reorder-item:tabs:${tabsId}`;
+  const registrationScope = `tabs:${tabsId}`;
+
+  function sourceIdOf(value: string): string {
+    return `${registrationScope}:source:${value}`;
+  }
+
+  function targetIdOf(value: string): string {
+    return `${registrationScope}:target:${value}`;
+  }
+
+  function valueOfTargetId(targetId: string): string {
+    const prefix = `${registrationScope}:target:`;
+    return targetId.startsWith(prefix) ? targetId.slice(prefix.length) : "";
+  }
 
   function indexOfValue(value: string): number {
     return renderedItemsRef.current.findIndex((item) => item.value === value);
+  }
+
+  /** Whether a subject belongs to this strip at all. */
+  function ownsValue(value: string): boolean {
+    return indexOfValue(value) >= 0;
   }
 
   /**
@@ -486,7 +526,7 @@ export function Tabs({
    */
   function handleDrop(intent: DropIntent): DragDropCommitResult {
     const from = indexOfValue(dragController.getSnapshot().session?.subject.id ?? "");
-    const target = indexOfValue(intent.targetId);
+    const target = indexOfValue(valueOfTargetId(intent.targetId));
     if (from < 0 || target < 0 || from === target) {
       return { status: "rejected", reason: "same tab" };
     }
@@ -510,8 +550,8 @@ export function Tabs({
     const target = renderedItems[fromIndex + direction];
     if (!from || !target) return;
     dragController.requestKeyboardDrop({
-      sourceId: from.value,
-      targetId: target.value,
+      sourceId: sourceIdOf(from.value),
+      targetId: targetIdOf(target.value),
       position: direction === 1 ? "after" : "before",
     });
   }
@@ -561,12 +601,14 @@ export function Tabs({
     );
   }
 
-  return (
-    <DragDropProvider controller={dragController}>
+  const strip = (
+    <>
       <TabsKeyboardTargets
         items={renderedItems}
         reorderable={reorderable}
         subjectKind={subjectKind}
+        targetIdOf={targetIdOf}
+        ownsValue={ownsValue}
         onDrop={handleDrop}
       />
       <div
@@ -645,6 +687,9 @@ export function Tabs({
                 hasPanel={hasPanel}
                 crossWindowSourceBridge={crossWindowSourceBridge}
                 indexOfValue={indexOfValue}
+                ownsValue={ownsValue}
+                sourceId={sourceIdOf(item.value)}
+                targetId={targetIdOf(item.value)}
                 selected={currentValue === item.value}
                 focused={effectiveFocusIndex === index}
                 iconSize={resolvedIconSize}
@@ -705,6 +750,12 @@ export function Tabs({
         </div>
       ) : null}
       </div>
-    </DragDropProvider>
+    </>
+  );
+
+  // A Tabs that joined a provider contributes registrations to it. One with no
+  // provider owns a controller so it still reorders on its own.
+  return ambient ? strip : (
+    <DragDropProvider controller={ownDragController!}>{strip}</DragDropProvider>
   );
 }

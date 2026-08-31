@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { DockRegion } from "@inflatable-cookie/poodle-react";
+import { DockRegion, DragDropProvider } from "@inflatable-cookie/poodle-react";
 import type { PanelTabItem, DockEdge } from "@inflatable-cookie/poodle-react";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
@@ -448,6 +448,10 @@ export function DockRegionSpecimen() {
         </SpecimenGroup>
 
         <SpecimenGroup label="Move panels between docks" bare>
+          {/* One provider around both docks. Cross-region transfer is ordinary
+              controller scope now: two regions see each other's targets only
+              when a single controller holds both registrations. */}
+          <DragDropProvider>
           <div style={dndLayout}>
             <div style={frameDnd}>
               <DockRegion
@@ -490,6 +494,7 @@ export function DockRegionSpecimen() {
               </DockRegion>
             </div>
           </div>
+          </DragDropProvider>
         </SpecimenGroup>
 
         <SpecimenGroup label="Static panel stacks" bare>

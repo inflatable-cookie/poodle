@@ -18,6 +18,8 @@ export interface TabsKeyboardTargetsProps {
   items: TabItem[];
   reorderable: boolean;
   subjectKind: string;
+  targetIdOf: (value: string) => string;
+  ownsValue: (value: string) => boolean;
   onDrop: (intent: DropIntent) => DragDropCommitResult;
 }
 
@@ -26,26 +28,34 @@ function TabKeyboardTarget({
   index,
   reorderable,
   subjectKind,
+  targetIdOf,
+  ownsValue,
   onDrop,
 }: {
   item: TabItem;
   index: number;
   reorderable: boolean;
   subjectKind: string;
+  targetIdOf: (value: string) => string;
+  ownsValue: (value: string) => boolean;
   onDrop: (intent: DropIntent) => DragDropCommitResult;
 }) {
   useKeyboardDropTarget({
-    targetId: item.value,
+    targetId: targetIdOf(item.value),
     acceptedKinds: [subjectKind],
     disabled: !reorderable,
     label: item.label,
     order: index,
     resolvePosition: (input) =>
       input.direction === "previous" || input.direction === "first" ? "before" : "after",
-    canDrop: (intent, subject) =>
-      subject.id === intent.targetId
+    canDrop: (intent, subject) => {
+      if (!ownsValue(subject.id)) {
+        return { accepted: false, reason: "not this tab set" };
+      }
+      return subject.id === item.value
         ? { accepted: false, reason: "same tab" }
-        : { accepted: true, intent },
+        : { accepted: true, intent };
+    },
     onDrop,
   });
   return null;
@@ -55,6 +65,8 @@ export function TabsKeyboardTargets({
   items,
   reorderable,
   subjectKind,
+  targetIdOf,
+  ownsValue,
   onDrop,
 }: TabsKeyboardTargetsProps) {
   return (
@@ -66,6 +78,8 @@ export function TabsKeyboardTargets({
           index={index}
           reorderable={reorderable}
           subjectKind={subjectKind}
+          targetIdOf={targetIdOf}
+          ownsValue={ownsValue}
           onDrop={onDrop}
         />
       ))}

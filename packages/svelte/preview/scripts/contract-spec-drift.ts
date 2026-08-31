@@ -167,11 +167,7 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
  * adding one means a prop shipped to the web without reaching the shared spec
  * surface, which is the thing this gate exists to stop.
  */
-const OPEN_GAPS: Record<string, string[]> = {
-  // g16.026 contract-first planning base. Remove when TabsSpec carries the
-  // accepted renderer-neutral subject-family seam.
-  tabs: ["dragSubjectKind"],
-};
+const OPEN_GAPS: Record<string, string[]> = {};
 
 /**
  * Contract prop -> Spec field, where the two deliberately differ. The prop IS

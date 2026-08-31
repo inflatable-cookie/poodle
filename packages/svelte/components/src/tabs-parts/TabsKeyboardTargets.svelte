@@ -21,27 +21,33 @@
     items: TabItem[];
     reorderable: boolean;
     subjectKind: string;
+    targetIdOf: (value: string) => string;
+    ownsValue: (value: string) => boolean;
     onDrop: (intent: DropIntent) => DragDropCommitResult;
   }
 
-  let { items, reorderable, subjectKind, onDrop }: Props = $props();
+  let { items, reorderable, subjectKind, targetIdOf, ownsValue, onDrop }: Props = $props();
 
   const { keyboardDropTarget } = useDragDrop();
 
   $effect(() => {
     const handles: KeyboardDropTargetHandle[] = items.map((item, index) =>
       keyboardDropTarget({
-        targetId: item.value,
+        targetId: targetIdOf(item.value),
         acceptedKinds: [subjectKind],
         disabled: !reorderable,
         label: item.label,
         order: index,
         resolvePosition: (input) =>
           input.direction === "previous" || input.direction === "first" ? "before" : "after",
-        canDrop: (intent, subject) =>
-          subject.id === intent.targetId
+        canDrop: (intent, subject) => {
+          if (!ownsValue(subject.id)) {
+            return { accepted: false, reason: "not this tab set" };
+          }
+          return subject.id === item.value
             ? { accepted: false, reason: "same tab" }
-            : { accepted: true, intent },
+            : { accepted: true, intent };
+        },
         onDrop,
       }),
     );

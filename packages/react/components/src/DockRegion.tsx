@@ -127,8 +127,17 @@ export function DockRegion({
   const isVerticalEdge = edge === "left" || edge === "right";
   const activeItem = items.find((item) => item.value === value) ?? items[0] ?? null;
   const collapseDirection = ({ left: "left", right: "right", top: "up", bottom: "down" } as const)[edge];
+  /**
+   * The strip's tabs carry the encoded subject id as their value.
+   *
+   * That is the whole composition seam: the tab set shares the
+   * `poodle.dock-panel` family, and each tab's semantic subject id says which
+   * panel, from which edge, and from which zone — which is what a sibling
+   * region needs during hover. It is substrate identity only, so every public
+   * boundary decodes it back to the consumer's own panel value.
+   */
   const tabItems: TabItem[] = items.map((item) => ({
-    value: item.value,
+    value: panelSubjectId(item.value),
     label: item.label,
     icon: item.icon ?? undefined,
     closable: item.closable,
@@ -188,8 +197,10 @@ export function DockRegion({
     return () => resizeObserver.disconnect();
   }, [showIconStrip, showHidden, sizing, items.length]);
 
+  // Every one of these takes a strip value and hands out a panel value. The
+  // encoding is substrate identity; it must never reach a consumer callback.
   function handleValueChange(nextValue: string): void {
-    onValueChange?.(nextValue);
+    onValueChange?.(panelValueOf(nextValue));
     if (collapsed) {
       onCollapsedChange?.(false);
     }
@@ -223,6 +234,11 @@ export function DockRegion({
 
   function panelSubjectId(panelId: string): string {
     return encodeDockPanelSubject({ panelId, sourceEdge: edge, sourceZone: dropZoneId });
+  }
+
+  /** The public panel value behind a strip value. Never leaks the encoding. */
+  function panelValueOf(encoded: string): string {
+    return decodeDockPanelSubject(encoded)?.panelId ?? encoded;
   }
 
   function acceptsPanel(subjectId: string): boolean {
@@ -286,13 +302,14 @@ export function DockRegion({
       density={density}
       showTooltips={withTooltips}
       items={tabItems}
-      value={activeItem?.value ?? ""}
+      value={activeItem ? panelSubjectId(activeItem.value) : ""}
       reorderable={tabReorderable}
       ariaLabel={ariaLabel ?? `${edge} dock panels`}
       onValueChange={handleValueChange}
-      onReorder={(next) => onReorder?.(next)}
-      onClose={(next) => onClose?.(next)}
+      onReorder={(next) => onReorder?.(next.map(panelValueOf))}
+      onClose={(next) => onClose?.(panelValueOf(next))}
       crossWindowSourceBridge={crossWindowDragSource}
+      dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
     />
   );
 

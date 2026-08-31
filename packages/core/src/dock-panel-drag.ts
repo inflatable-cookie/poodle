@@ -41,40 +41,42 @@ export interface DockPanelDragSubject {
 export const DOCK_PANEL_SUBJECT_KIND = "poodle.dock-panel";
 
 /**
+ * The marker that says an id is one of ours.
+ *
+ * Checked before decoding so a consumer value that merely happens to contain
+ * separators is refused rather than parsed into a plausible-looking panel.
+ */
+const PREFIX = "poodle-panel:";
+
+/**
  * Encode a panel's identity into a subject id.
  *
- * JSON rather than a delimited string: a panel id, an edge, or a zone id is
- * consumer-supplied text, and any separator character chosen here would one
- * day appear inside one of them.
+ * Percent-encoded fields joined by `|`, not JSON: this value becomes part of
+ * generated DOM ids, so it has to survive an attribute without braces and
+ * quotes in it. Encoding each field keeps the separator unambiguous even when
+ * a consumer's panel id or zone contains one.
  */
 export function encodeDockPanelSubject(subject: DockPanelDragSubject): string {
-  return JSON.stringify({
-    panelId: subject.panelId,
-    sourceEdge: subject.sourceEdge,
-    sourceZone: subject.sourceZone,
-  });
+  return [
+    PREFIX + encodeURIComponent(subject.sourceZone),
+    encodeURIComponent(subject.sourceEdge),
+    encodeURIComponent(subject.panelId),
+  ].join("|");
 }
 
 /** Decode a subject id, or `null` when it is not one of ours. */
 export function decodeDockPanelSubject(id: string): DockPanelDragSubject | null {
-  let parsed: unknown;
+  if (!id.startsWith(PREFIX)) return null;
+  const parts = id.slice(PREFIX.length).split("|");
+  if (parts.length !== 3) return null;
+  const [zone, edge, panel] = parts as [string, string, string];
   try {
-    parsed = JSON.parse(id);
+    return {
+      panelId: decodeURIComponent(panel),
+      sourceEdge: decodeURIComponent(edge),
+      sourceZone: decodeURIComponent(zone),
+    };
   } catch {
     return null;
   }
-  if (typeof parsed !== "object" || parsed === null) return null;
-  const candidate = parsed as Partial<DockPanelDragSubject>;
-  if (
-    typeof candidate.panelId !== "string" ||
-    typeof candidate.sourceEdge !== "string" ||
-    typeof candidate.sourceZone !== "string"
-  ) {
-    return null;
-  }
-  return {
-    panelId: candidate.panelId,
-    sourceEdge: candidate.sourceEdge,
-    sourceZone: candidate.sourceZone,
-  };
 }

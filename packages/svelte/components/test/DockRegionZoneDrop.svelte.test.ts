@@ -12,6 +12,7 @@
 import { fireEvent, render } from "@testing-library/svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import DockRegion from "../src/DockRegion.svelte";
 import DockRegionZoneDropHarness from "./DockRegionZoneDropHarness.svelte";
 import type { PanelTabItem } from "../src/types.ts";
 
@@ -185,5 +186,47 @@ describe("DockRegion panel movement", () => {
 
     await fireEvent(document, pointer("pointerup", 450, 50));
     expect(onPanelDropB).not.toHaveBeenCalled();
+  });
+
+  it("never leaks the encoded subject id through a public callback", async () => {
+    const onValueChange = vi.fn();
+    const onClose = vi.fn();
+    const onReorder = vi.fn();
+    const { container, getAllByRole } = render(DockRegion, {
+      props: {
+        edge: "left",
+        items: [
+          { value: "explorer", label: "Explorer", closable: true },
+          { value: "inspector", label: "Inspector", closable: true },
+        ],
+        value: "explorer",
+        onValueChange,
+        onClose,
+        onReorder,
+      },
+    });
+
+    // The strip's tab values are the substrate's subject ids, and those carry
+    // the panel's edge and zone. Everything a consumer sees has to be the
+    // panel value it supplied.
+    const [firstTab, secondTab] = getAllByRole("tab");
+    await fireEvent.click(secondTab);
+    expect(onValueChange).toHaveBeenCalledWith("inspector");
+
+    const [close] = [...container.querySelectorAll<HTMLElement>(".poodle-tabs__close")];
+    await fireEvent.click(close);
+    expect(onClose).toHaveBeenCalledWith("explorer");
+
+    firstTab.focus();
+    await fireEvent.keyDown(firstTab, { key: "ArrowRight", altKey: true });
+    expect(onReorder).toHaveBeenCalledWith(["inspector", "explorer"]);
+
+    for (const call of [
+      ...onValueChange.mock.calls,
+      ...onClose.mock.calls,
+      ...onReorder.mock.calls.flat(),
+    ].flat()) {
+      expect(JSON.stringify(call)).not.toContain("poodle-panel:");
+    }
   });
 });

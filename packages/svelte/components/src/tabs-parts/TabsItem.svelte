@@ -37,6 +37,10 @@
     crossWindowSourceBridge?: CrossWindowDragSourceBridge;
     /** Index of the value being dragged, so the whole-tab band can resolve. */
     indexOfValue: (value: string) => number;
+    /** Whether a subject id belongs to this strip at all. */
+    ownsValue: (value: string) => boolean;
+    sourceId: string;
+    targetId: string;
     onDrop: (intent: DropIntent) => DragDropCommitResult;
     onElement: (element: HTMLButtonElement | null) => void;
     onSelect: () => void;
@@ -64,6 +68,9 @@
     iconSize,
     crossWindowSourceBridge,
     indexOfValue,
+    ownsValue,
+    sourceId,
+    targetId,
     onDrop,
     onElement,
     onSelect,
@@ -81,17 +88,17 @@
   /** A disabled tab cannot be picked up. It is still a place to put one. */
   const canDrag = $derived(reorderable && item.disabled !== true);
   const dragging = $derived(
-    $snapshot.sourceId === item.value &&
+    $snapshot.sourceId === sourceId &&
       ($snapshot.phase === "dragging" || $snapshot.phase === "dropping"),
   );
   const isDropTarget = $derived(
-    $snapshot.targetId === item.value &&
+    $snapshot.targetId === targetId &&
       $snapshot.targetPosture === "accepted" &&
-      $snapshot.sourceId !== item.value,
+      $snapshot.sourceId !== sourceId,
   );
 
   const sourceRegistration = $derived<DragSourceRegistration>({
-    sourceId: item.value,
+    sourceId,
     subject: { kind: subjectKind, id: item.value },
     allowedOperations: ["move"],
     label: item.label,
@@ -110,16 +117,24 @@
    * halves would change the resulting order for the same gesture.
    */
   const targetRegistration = $derived<DropTargetRegistration>({
-    targetId: item.value,
+    targetId,
     acceptedKinds: [subjectKind],
     disabled: !reorderable,
     label: item.label,
     resolvePosition: ({ subject }): DropPosition =>
       indexOfValue(subject.id) < index ? "after" : "before",
-    canDrop: (intent, subject) =>
-      subject.id === intent.targetId
+    canDrop: (intent, subject) => {
+      // A shared family means another surface's subject can reach this target.
+      // Refusing it *here*, during eligibility, is what lets arbitration
+      // discard this tab and hand the drop to an eligible ancestor composite.
+      // Claiming it and rejecting at commit would swallow the drop instead.
+      if (!ownsValue(subject.id)) {
+        return { accepted: false, reason: "not this tab set" };
+      }
+      return subject.id === item.value
         ? { accepted: false, reason: "same tab" }
-        : { accepted: true, intent },
+        : { accepted: true, intent };
+    },
     onDrop,
   });
 </script>

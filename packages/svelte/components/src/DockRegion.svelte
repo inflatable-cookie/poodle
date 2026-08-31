@@ -144,14 +144,28 @@
   const tabOrientation = $derived(
     collapsed && collapsedPosture === "icon-strip" && isVerticalEdge ? "vertical" : "horizontal",
   );
+  /**
+   * The strip's tabs carry the encoded subject id as their value.
+   *
+   * That is the whole composition seam: the tab set shares the
+   * `poodle.dock-panel` family, and each tab's semantic subject id says which
+   * panel, from which edge, and from which zone — which is what a sibling
+   * region needs during hover. It is substrate identity only, so every public
+   * boundary below decodes it back to the consumer's own panel value.
+   */
   const tabItems = $derived.by<TabItem[]>(() =>
     items.map((item) => ({
-      value: item.value,
+      value: panelSubjectId(item.value),
       label: item.label,
       icon: item.icon ?? undefined,
       closable: item.closable,
     })),
   );
+
+  /** The public panel value behind a strip value. Never leaks the encoding. */
+  function panelValueOf(encoded: string): string {
+    return decodeDockPanelSubject(encoded)?.panelId ?? encoded;
+  }
   const stackDirection = $derived(isVerticalEdge ? "column" : "row");
   const showIconStrip = $derived(collapsed && collapsedPosture === "icon-strip");
   const showHidden = $derived(collapsed && collapsedPosture === "hidden");
@@ -214,19 +228,21 @@
     resizeObserver?.disconnect();
   });
 
+  // Every one of these takes a strip value and hands out a panel value. The
+  // encoding is substrate identity; it must never reach a consumer callback.
   function handleValueChange(nextValue: string): void {
-    onValueChange?.(nextValue);
+    onValueChange?.(panelValueOf(nextValue));
     if (collapsed) {
       onCollapsedChange?.(false);
     }
   }
 
   function handleReorder(nextItems: string[]): void {
-    onReorder?.(nextItems);
+    onReorder?.(nextItems.map(panelValueOf));
   }
 
   function handleClose(nextValue: string): void {
-    onClose?.(nextValue);
+    onClose?.(panelValueOf(nextValue));
   }
 
   function handleCollapseToggle(): void {
@@ -456,13 +472,14 @@
           {sizeRole}
           {density}
           items={tabItems}
-          value={activeItem?.value ?? ""}
+          value={activeItem ? panelSubjectId(activeItem.value) : ""}
           reorderable={tabReorderable}
           ariaLabel={ariaLabel ?? `${edge} dock panels`}
           onValueChange={handleValueChange}
           onReorder={handleReorder}
           onClose={handleClose}
           crossWindowSourceBridge={crossWindowDragSource}
+          dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
         />
       {/if}
     </div>
@@ -486,13 +503,14 @@
             {density}
             showTooltips={isCompact}
             items={tabItems}
-            value={activeItem?.value ?? ""}
+            value={activeItem ? panelSubjectId(activeItem.value) : ""}
             reorderable={tabReorderable}
             ariaLabel={ariaLabel ?? `${edge} dock panels`}
             onValueChange={handleValueChange}
             onReorder={handleReorder}
             onClose={handleClose}
           crossWindowSourceBridge={crossWindowDragSource}
+          dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
           />
         </div>
       {/if}
@@ -525,13 +543,14 @@
             {density}
             showTooltips={isCompact}
             items={tabItems}
-            value={activeItem?.value ?? ""}
+            value={activeItem ? panelSubjectId(activeItem.value) : ""}
             reorderable={tabReorderable}
             ariaLabel={ariaLabel ?? `${edge} dock panels`}
             onValueChange={handleValueChange}
             onReorder={handleReorder}
             onClose={handleClose}
           crossWindowSourceBridge={crossWindowDragSource}
+          dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
           />
         </div>
         {#if collapsible && showCollapseToggle}

@@ -31,6 +31,10 @@ export interface TabsItemProps {
   crossWindowSourceBridge?: CrossWindowDragSourceBridge;
   /** Index of the value being dragged, so the whole-tab band can resolve. */
   indexOfValue: (value: string) => number;
+  /** Whether a subject id belongs to this strip at all. */
+  ownsValue: (value: string) => boolean;
+  sourceId: string;
+  targetId: string;
   onDrop: (intent: DropIntent) => DragDropCommitResult;
   onElement: (element: HTMLButtonElement | null) => void;
   onSelect: () => void;
@@ -56,6 +60,9 @@ export function TabsItem({
   iconSize,
   crossWindowSourceBridge,
   indexOfValue,
+  ownsValue,
+  sourceId,
+  targetId,
   onDrop,
   onElement,
   onSelect,
@@ -72,7 +79,7 @@ export function TabsItem({
   const canDrag = reorderable && item.disabled !== true;
 
   const { getSourceProps, dragging } = useDragSource({
-    sourceId: item.value,
+    sourceId,
     subject: { kind: subjectKind, id: item.value },
     allowedOperations: ["move"],
     label: item.label,
@@ -90,16 +97,24 @@ export function TabsItem({
    * target; coming from the right, it means before it.
    */
   const { getTargetProps, accepted } = useDropTarget({
-    targetId: item.value,
+    targetId,
     acceptedKinds: [subjectKind],
     disabled: !reorderable,
     label: item.label,
     resolvePosition: ({ subject }): DropPosition =>
       indexOfValue(subject.id) < index ? "after" : "before",
-    canDrop: (intent, subject) =>
-      subject.id === intent.targetId
+    canDrop: (intent, subject) => {
+      // A shared family means another surface's subject can reach this target.
+      // Refusing it *here*, during eligibility, is what lets arbitration
+      // discard this tab and hand the drop to an eligible ancestor composite.
+      // Claiming it and rejecting at commit would swallow the drop instead.
+      if (!ownsValue(subject.id)) {
+        return { accepted: false, reason: "not this tab set" };
+      }
+      return subject.id === item.value
         ? { accepted: false, reason: "same tab" }
-        : { accepted: true, intent },
+        : { accepted: true, intent };
+    },
     onDrop,
   });
 

@@ -94,9 +94,27 @@ pub fn reorder_subject(scope: &str, value: &str) -> DragSubject {
 /// `scope` is the component instance id, so two mounted lists in one
 /// controller never mint the same source id.
 pub fn reorder_source(scope: &str, value: &str, label: &str) -> NodeDragSource {
+    reorder_source_in_family(scope, &reorder_kind(scope), value, label)
+}
+
+/// A reorder source in an explicit semantic family.
+///
+/// The registration id stays scoped to the surface instance while the subject
+/// kind is chosen by an owning composite. Those are different things: the kind
+/// says who may consider this row, the id says which registration it is, and
+/// two strips in one controller may legitimately hold the same row values.
+pub fn reorder_source_in_family(
+    scope: &str,
+    kind: &str,
+    value: &str,
+    label: &str,
+) -> NodeDragSource {
     NodeDragSource::new(
         format!("{scope}:source:{value}"),
-        reorder_subject(scope, value),
+        DragSubject {
+            kind: kind.to_string(),
+            id: value.to_string(),
+        },
         label,
     )
 }
@@ -116,6 +134,50 @@ pub fn reorder_target(scope: &str, value: &str, label: &str) -> NodeDropTarget {
     target.resolve_keyboard_position = Some(linear_keyboard_resolver());
     target.can_drop = Some(rejects_self(value));
     target
+}
+
+/// A reorder target in an explicit semantic family.
+///
+/// `owned` is this surface's own row values. A shared family means another
+/// surface's subject can reach this target, so it refuses one it does not own
+/// *during eligibility* — arbitration then discards it and an eligible
+/// ancestor composite target wins. Claiming the drop and rejecting it at
+/// commit would swallow it instead.
+pub fn reorder_target_in_family(
+    scope: &str,
+    kind: &str,
+    value: &str,
+    label: &str,
+    owned: Vec<String>,
+) -> NodeDropTarget {
+    let mut target = NodeDropTarget::new(format!("{scope}:target:{value}"), kind, label);
+    target.resolve_position = Some(vertical_band_resolver(false));
+    target.resolve_keyboard_position = Some(linear_keyboard_resolver());
+    target.can_drop = Some(rejects_foreign_or_self(value, owned));
+    target
+}
+
+/// Refuse a row dropped onto itself, and any subject this surface does not own.
+pub fn rejects_foreign_or_self(
+    value: &str,
+    owned: Vec<String>,
+) -> Arc<dyn Fn(&DropIntent, &DragSubject) -> DropEligibility + Send + Sync> {
+    let value = value.to_string();
+    Arc::new(move |intent: &DropIntent, subject: &DragSubject| {
+        if !owned.iter().any(|known| *known == subject.id) {
+            return DropEligibility::Rejected {
+                reason: Some("That row belongs to another surface".to_string()),
+            };
+        }
+        if subject.id == value {
+            return DropEligibility::Rejected {
+                reason: Some("A row cannot be dropped onto itself".to_string()),
+            };
+        }
+        DropEligibility::Accepted {
+            intent: intent.clone(),
+        }
+    })
 }
 
 /// A nested placement target: before / inside / after by thirds when the row
