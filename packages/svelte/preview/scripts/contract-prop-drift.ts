@@ -25,10 +25,6 @@ const svelteDir = path.join(repoRoot, "packages/svelte/components/src");
 // Known, accepted drift: slug -> { contractOnly?: string[]; svelteOnly?: string[] }.
 // Closing a drift means deleting its entry.
 const BASELINE: Record<string, { contractOnly?: string[]; svelteOnly?: string[] }> = {
-  // g16.026 contract-first planning base. The dispatched worker removes this
-  // entry when the paired Svelte surface lands; keeping the names exact makes
-  // any extra contract/implementation drift continue to fail.
-  tabs: { contractOnly: ["crossWindowSourceBridge", "dragSubjectKind"] },
   // g13-027 Part 2 tranche (see the batch log): web-only or spec-surface-pending
   // props the contract deliberately does not table. Tabling them would fail
   // contract-spec-drift until the poodle-specs structs carry the fields, and

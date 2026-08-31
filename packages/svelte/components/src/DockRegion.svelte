@@ -1,10 +1,27 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/dock-region.css";
-  import { onDestroy, tick, type Snippet } from "svelte";
+  import { onDestroy, tick, untrack, type Snippet } from "svelte";
 
-  import { createDockExternalDragController, dockPanelDragSession } from "@inflatable-cookie/poodle-core";
+  import {
+    createDragDropController,
+    decodeDockPanelSubject,
+    encodeDockPanelSubject,
+    DOCK_PANEL_SUBJECT_KIND,
+    type CrossWindowDragSourceBridge,
+    type CrossWindowDragTargetBridge,
+    type DragDropCommitResult,
+    type DropIntent,
+    type DropTargetRegistration,
+  } from "@inflatable-cookie/poodle-core";
   import { default as CollapseToggle } from "./CollapseToggle.svelte";
+  import { default as DragDropProvider } from "./DragDropProvider.svelte";
   import { default as Tabs } from "./Tabs.svelte";
+  import {
+    dragDropSnapshotStore,
+    dragSourceAction,
+    dropTargetAction,
+    tryDragDrop,
+  } from "./drag-drop-context";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type {
     ActiveEdge,
@@ -14,8 +31,6 @@
     DockCollapsedPosture,
     DockEdge,
     DockEmphasis,
-    DockExternalDragSource,
-    DockExternalDropTarget,
     DockSizing,
     PanelDragData,
     PanelTabItem,
@@ -57,10 +72,23 @@
     value?: string | null;
     ariaLabel?: string | null;
     canAcceptPanel?: ((panelId: string, sourceEdge: DockEdge) => boolean) | null;
-    externalDragSource?: DockExternalDragSource | null;
+    /**
+     * Host preparation for a panel that may leave this window.
+     *
+     * Forwarded to the tab strip as its `crossWindowSourceBridge`: the host
+     * owns the transaction and only an opaque receipt leaves the window.
+     */
+    crossWindowDragSource?: CrossWindowDragSourceBridge;
     /** Distinguishes drop zones that share an edge; defaults to `edge`. */
     dragZoneId?: string | null;
-    externalDropTarget?: DockExternalDropTarget | null;
+    /**
+     * Incoming host projection and commit for this window.
+     *
+     * Only meaningful when this region owns its controller. A region that
+     * joined an ambient `DragDropProvider` is not the window: the provider is,
+     * and the bridge belongs there.
+     */
+    crossWindowDropTarget?: CrossWindowDragTargetBridge;
     onValueChange?: ((value: string) => void) | undefined;
     onCollapsedChange?: ((isCollapsed: boolean) => void) | undefined;
     onClose?: ((value: string) => void) | undefined;
@@ -92,9 +120,9 @@
     value = null,
     ariaLabel = null,
     canAcceptPanel = null,
-    externalDragSource = null,
+    crossWindowDragSource = undefined,
     dragZoneId = null,
-    externalDropTarget = null,
+    crossWindowDropTarget = undefined,
     onValueChange = undefined,
     onCollapsedChange = undefined,
     onClose = undefined,
@@ -104,7 +132,6 @@
     children,
   }: Props = $props();
 
-  const PANEL_DRAG_TYPE = "application/x-poodle-panel-drag";
   const dropZoneId = $derived(dragZoneId ?? edge);
 
   const uiPresentation = getUiPresentation();
@@ -117,14 +144,28 @@
   const tabOrientation = $derived(
     collapsed && collapsedPosture === "icon-strip" && isVerticalEdge ? "vertical" : "horizontal",
   );
+  /**
+   * The strip's tabs carry the encoded subject id as their value.
+   *
+   * That is the whole composition seam: the tab set shares the
+   * `poodle.dock-panel` family, and each tab's semantic subject id says which
+   * panel, from which edge, and from which zone — which is what a sibling
+   * region needs during hover. It is substrate identity only, so every public
+   * boundary below decodes it back to the consumer's own panel value.
+   */
   const tabItems = $derived.by<TabItem[]>(() =>
     items.map((item) => ({
-      value: item.value,
+      value: panelSubjectId(item.value),
       label: item.label,
       icon: item.icon ?? undefined,
       closable: item.closable,
     })),
   );
+
+  /** The public panel value behind a strip value. Never leaks the encoding. */
+  function panelValueOf(encoded: string): string {
+    return decodeDockPanelSubject(encoded)?.panelId ?? encoded;
+  }
   const stackDirection = $derived(isVerticalEdge ? "column" : "row");
   const showIconStrip = $derived(collapsed && collapsedPosture === "icon-strip");
   const showHidden = $derived(collapsed && collapsedPosture === "hidden");
@@ -185,32 +226,23 @@
 
   onDestroy(() => {
     resizeObserver?.disconnect();
-    externalDrag.cancel("unmounted");
   });
 
-  let isDragOver = $state(false);
-  let dropInsertIndex = $state(-1);
-  let dragSourceIndex = $state(-1);
-
-  const externalDrag = createDockExternalDragController({
-    source: () => externalDragSource,
-    panel: (panelId) => items.find((item) => item.value === panelId),
-    edge: () => edge,
-  });
-
+  // Every one of these takes a strip value and hands out a panel value. The
+  // encoding is substrate identity; it must never reach a consumer callback.
   function handleValueChange(nextValue: string): void {
-    onValueChange?.(nextValue);
+    onValueChange?.(panelValueOf(nextValue));
     if (collapsed) {
       onCollapsedChange?.(false);
     }
   }
 
   function handleReorder(nextItems: string[]): void {
-    onReorder?.(nextItems);
+    onReorder?.(nextItems.map(panelValueOf));
   }
 
   function handleClose(nextValue: string): void {
-    onClose?.(nextValue);
+    onClose?.(panelValueOf(nextValue));
   }
 
   function handleCollapseToggle(): void {
@@ -220,205 +252,160 @@
     }
   }
 
-  function handleTabDragStart(panelId: string, event: DragEvent): void {
-    if (!event.dataTransfer) return;
-    if (externalDragSource) {
-      externalDrag.start(panelId, event);
-      return;
-    }
+  // ── Panel movement (shared drag substrate) ─────────────────────────────
 
-    const data: PanelDragData = {
-      panelId,
-      sourceEdge: edge,
-      sourceZone: dropZoneId,
+  /**
+   * Join the nearest provider, or own a controller.
+   *
+   * Two sibling regions can only see each other's targets when one controller
+   * holds both registrations, so a consumer that wants cross-region transfer
+   * wraps its regions in one `DragDropProvider`. A region with no provider
+   * still reorders its own stack — it simply does not discover anyone else.
+   * There is no document-global session restoring that link implicitly.
+   */
+  const ambient = tryDragDrop();
+  // Both are fixed for the region's lifetime, like the controller they
+  // configure: a bridge swapped mid-session would be a second window host.
+  const windowBridge = untrack(() => crossWindowDropTarget);
+  if (ambient && windowBridge) {
+    throw new Error(
+      "DockRegion: crossWindowDropTarget belongs on the DragDropProvider that owns this window, not on a region that joined one",
+    );
+  }
+  const ownController = ambient
+    ? undefined
+    : createDragDropController({ crossWindowTargetBridge: windowBridge });
+  const controller = ambient?.controller ?? ownController!;
+  const dragSource = dragSourceAction(controller);
+  const dropTarget = dropTargetAction(controller);
+  const snapshot = dragDropSnapshotStore(controller);
+
+  const isDragOver = $derived(
+    $snapshot.targetId === dropZoneId && $snapshot.targetPosture === "accepted",
+  );
+
+  function panelSubjectId(panelId: string): string {
+    return encodeDockPanelSubject({ panelId, sourceEdge: edge, sourceZone: dropZoneId });
+  }
+
+  /**
+   * The one eligibility rule every dock target shares.
+   *
+   * `canAcceptPanel` is consumer policy and runs on hover *and* again at
+   * commit, which is what the substrate guarantees and the old side channel
+   * could only approximate.
+   */
+  function acceptsPanel(intent: DropIntent, subjectId: string): boolean {
+    const panel = decodeDockPanelSubject(subjectId);
+    if (!panel) return false;
+    return canAcceptPanel === null || canAcceptPanel(panel.panelId, panel.sourceEdge as DockEdge);
+  }
+
+  function panelFrom(subjectId: string): PanelDragData | null {
+    const decoded = decodeDockPanelSubject(subjectId);
+    if (!decoded) return null;
+    return {
+      panelId: decoded.panelId,
+      sourceEdge: decoded.sourceEdge as DockEdge,
+      sourceZone: decoded.sourceZone,
     };
-    event.dataTransfer.setData(PANEL_DRAG_TYPE, JSON.stringify(data));
-    event.dataTransfer.effectAllowed = "move";
-    // The payload is unreadable during dragover, so hovered regions learn
-    // which panel is in flight from this session instead of the event.
-    dockPanelDragSession.announce({ panelId, sourceEdge: edge });
   }
 
-  function handleTabDragEnd(panelId: string, event: DragEvent): void {
-    externalDrag.end(panelId, event);
-    dockPanelDragSession.clear();
-  }
-
-  function canAcceptExternalDrop(
-    phase: "over" | "drop",
-    event: DragEvent,
-  ): boolean {
-    if (!externalDropTarget || !event.dataTransfer) return false;
-    return externalDropTarget.canDrop({
-      phase,
-      targetEdge: edge,
-      event,
-      dataTransfer: event.dataTransfer,
-    });
-  }
-
-  function handleRegionDragOver(event: DragEvent): void {
-    const hasPoodlePanel =
-      event.dataTransfer?.types.includes(PANEL_DRAG_TYPE) === true;
-
-    if (hasPoodlePanel) {
-      const session = dockPanelDragSession.current();
-      if (
-        session &&
-        canAcceptPanel &&
-        canAcceptPanel(session.panelId, session.sourceEdge as DockEdge) ===
-          false
-      ) {
-        isDragOver = false;
-        return;
+  /** The region itself: anything from another zone may land here. */
+  const regionTarget = $derived<DropTargetRegistration>({
+    targetId: dropZoneId,
+    acceptedKinds: [DOCK_PANEL_SUBJECT_KIND],
+    label: ariaLabel ?? `${edge} dock`,
+    // Deepest wins, so a stack item always beats the region it sits in.
+    priority: -1,
+    resolvePosition: () => "inside",
+    canDrop: (intent, subject) => {
+      const panel = decodeDockPanelSubject(subject.id);
+      if (!panel) return { accepted: false, reason: "not a panel" };
+      // A panel dropped back on its own flexible zone is a same-strip reorder,
+      // which the strip already owns.
+      if (panel.sourceZone === dropZoneId && sizing === "flexible") {
+        return { accepted: false, reason: "same zone" };
       }
-    }
+      return acceptsPanel(intent, subject.id)
+        ? { accepted: true, intent }
+        : { accepted: false, reason: "refused by host" };
+    },
+    onDrop: (intent): DragDropCommitResult => {
+      const panel = panelFrom($snapshot.session?.subject.id ?? "");
+      if (!panel) return { status: "rejected", reason: "not a panel" };
+      onPanelDrop?.({ panel, targetEdge: edge });
+      return { status: "committed" };
+    },
+  });
 
-    const acceptsExternal =
-      !hasPoodlePanel && canAcceptExternalDrop("over", event);
-    if (!hasPoodlePanel && !acceptsExternal) return;
-
-    event.preventDefault();
-    isDragOver = true;
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = "move";
-    }
-  }
-
-  function handleRegionDragLeave(event: DragEvent): void {
-    const current = event.currentTarget as HTMLElement;
-    const related = event.relatedTarget as Node | null;
-    if (related && current.contains(related)) return;
-    isDragOver = false;
-  }
-
-  function handleRegionDrop(event: DragEvent): void {
-    isDragOver = false;
-
-    const raw = event.dataTransfer?.getData(PANEL_DRAG_TYPE);
-    if (!raw) {
-      if (!canAcceptExternalDrop("drop", event) || !event.dataTransfer) return;
-
-      event.preventDefault();
-      void externalDropTarget?.drop({
-        targetEdge: edge,
-        event,
-        dataTransfer: event.dataTransfer,
-      });
-      return;
-    }
-
-    event.preventDefault();
-
-    let data: PanelDragData;
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      return;
-    }
-
-    if ((data.sourceZone ?? data.sourceEdge) === dropZoneId && sizing === "flexible") return;
-    if (canAcceptPanel && !canAcceptPanel(data.panelId, data.sourceEdge)) return;
-
-    onPanelDrop?.({ panel: data, targetEdge: edge });
-  }
-
-  function handleStackItemDragStart(event: DragEvent, index: number): void {
-    if (!event.dataTransfer) return;
-    dragSourceIndex = index;
-    if (externalDragSource) {
-      externalDrag.start(items[index].value, event);
-      return;
-    }
-
-    // The stack path stamps the zone too. Its own reorder uses
-    // `dragSourceIndex` and never reads this, but the payload can land in
-    // another region — a stacked panel dragged onto a flexible region sharing
-    // its edge is exactly the drop `dragZoneId` exists to let through.
-    const data: PanelDragData = {
-      panelId: items[index].value,
-      sourceEdge: edge,
-      sourceZone: dropZoneId,
+  /**
+   * One stacked panel: a source, and a target for the insert position.
+   *
+   * Static mode is where DockRegion owns the panels themselves, so this is the
+   * local move the substrate can carry end to end. A drop from this region's
+   * own zone is a reorder; anything else is a transfer.
+   */
+  function stackSource(item: PanelTabItem, index: number) {
+    return {
+      sourceId: `${dropZoneId}:${item.value}`,
+      subject: { kind: DOCK_PANEL_SUBJECT_KIND, id: panelSubjectId(item.value) },
+      allowedOperations: ["move"] as const,
+      label: item.label ?? `Panel ${index + 1}`,
+      crossWindowSourceBridge: crossWindowDragSource,
     };
-    event.dataTransfer.setData(PANEL_DRAG_TYPE, JSON.stringify(data));
-    event.dataTransfer.effectAllowed = "move";
-    dockPanelDragSession.announce({ panelId: items[index].value, sourceEdge: edge });
   }
 
-  function handleStackItemDragOver(event: DragEvent, index: number): void {
-    const isLocalReorder = dragSourceIndex >= 0;
-    const hasPoodlePanel =
-      event.dataTransfer?.types.includes(PANEL_DRAG_TYPE) === true;
-    if (!isLocalReorder && !hasPoodlePanel) return;
+  function stackTarget(item: PanelTabItem, index: number): DropTargetRegistration {
+    return {
+      targetId: `${dropZoneId}:slot:${item.value}`,
+      acceptedKinds: [DOCK_PANEL_SUBJECT_KIND],
+      label: item.label ?? `Panel ${index + 1}`,
+      resolvePosition: () => "inside",
+      canDrop: (intent, subject) => {
+        const panel = decodeDockPanelSubject(subject.id);
+        if (!panel) return { accepted: false, reason: "not a panel" };
+        if (panel.sourceZone === dropZoneId && panel.panelId === item.value) {
+          return { accepted: false, reason: "same panel" };
+        }
+        return acceptsPanel(intent, subject.id)
+          ? { accepted: true, intent }
+          : { accepted: false, reason: "refused by host" };
+      },
+      onDrop: (): DragDropCommitResult => {
+        const panel = panelFrom($snapshot.session?.subject.id ?? "");
+        if (!panel) return { status: "rejected", reason: "not a panel" };
 
-    if (!isLocalReorder && hasPoodlePanel) {
-      const session = dockPanelDragSession.current();
-      if (
-        session &&
-        canAcceptPanel &&
-        canAcceptPanel(session.panelId, session.sourceEdge as DockEdge) ===
-          false
-      ) {
-        dropInsertIndex = -1;
-        return;
-      }
-    }
+        if (panel.sourceZone === dropZoneId) {
+          const order = items.map((entry) => entry.value);
+          const from = order.indexOf(panel.panelId);
+          if (from < 0) return { status: "rejected", reason: "unknown panel" };
+          const [moved] = order.splice(from, 1);
+          order.splice(index, 0, moved);
+          onReorder?.(order);
+          return { status: "committed" };
+        }
 
-    event.preventDefault();
-    dropInsertIndex = index;
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = "move";
-    }
+        onPanelDrop?.({ panel, targetEdge: edge });
+        return { status: "committed" };
+      },
+    };
   }
 
-  function handleStackItemDragLeave(): void {
-    dropInsertIndex = -1;
+  function stackItemState(item: PanelTabItem): { dragging: boolean; over: boolean } {
+    return {
+      dragging:
+        $snapshot.sourceId === `${dropZoneId}:${item.value}` &&
+        ($snapshot.phase === "dragging" || $snapshot.phase === "dropping"),
+      over:
+        $snapshot.targetId === `${dropZoneId}:slot:${item.value}` &&
+        $snapshot.targetPosture === "accepted",
+    };
   }
 
-  function handleStackItemDrop(event: DragEvent, index: number): void {
-    isDragOver = false;
-    dropInsertIndex = -1;
-
-    if (dragSourceIndex >= 0) {
-      event.preventDefault();
-      event.stopPropagation();
-      const order = items.map((item) => item.value);
-      const [moved] = order.splice(dragSourceIndex, 1);
-      order.splice(index, 0, moved);
-      dragSourceIndex = -1;
-      onReorder?.(order);
-      return;
-    }
-
-    const raw = event.dataTransfer?.getData(PANEL_DRAG_TYPE);
-    if (!raw) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    let data: PanelDragData;
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      return;
-    }
-
-    if (canAcceptPanel && !canAcceptPanel(data.panelId, data.sourceEdge)) return;
-    onPanelDrop?.({ panel: data, targetEdge: edge });
-  }
-
-  function handleStackDragEnd(event: DragEvent): void {
-    const panelId = externalDrag.activePanelId();
-    if (panelId) {
-      externalDrag.end(panelId, event);
-    }
-    dockPanelDragSession.clear();
-    isDragOver = false;
-    dragSourceIndex = -1;
-    dropInsertIndex = -1;
-  }
 </script>
 
+{#snippet region()}
 <section
   class="poodle-dock-region"
   data-edge={edge}
@@ -430,9 +417,7 @@
   data-collapsed-posture={collapsed ? collapsedPosture : undefined}
   data-show-tabs={showTabs ? undefined : "false"}
   aria-label={ariaLabel ?? `${edge} dock`}
-  ondragover={handleRegionDragOver}
-  ondragleave={handleRegionDragLeave}
-  ondrop={handleRegionDrop}
+  use:dropTarget={regionTarget}
 >
   {#if isDragOver}
     <div class="poodle-dock-region__drop-zone"></div>
@@ -443,18 +428,12 @@
       {#each items as item, index (item.value)}
         <div
           class="poodle-dock-region__stack-item"
-          data-drop-target={dropInsertIndex === index || undefined}
-          data-drag-source={dragSourceIndex === index || undefined}
-          draggable="true"
+          data-drop-target={stackItemState(item).over || undefined}
+          data-drag-source={stackItemState(item).dragging || undefined}
           role="group"
           aria-label={item.label ?? `Panel ${index + 1}`}
-          onpointerdown={(event) =>
-            externalDrag.prepare(item.value, event)}
-          ondragstart={(event) => handleStackItemDragStart(event, index)}
-          ondragover={(event) => handleStackItemDragOver(event, index)}
-          ondragleave={handleStackItemDragLeave}
-          ondrop={(event) => handleStackItemDrop(event, index)}
-          ondragend={handleStackDragEnd}
+          use:dragSource={stackSource(item, index)}
+          use:dropTarget={stackTarget(item, index)}
         >
           {@render panel?.(item)}
         </div>
@@ -493,15 +472,14 @@
           {sizeRole}
           {density}
           items={tabItems}
-          value={activeItem?.value ?? ""}
+          value={activeItem ? panelSubjectId(activeItem.value) : ""}
           reorderable={tabReorderable}
           ariaLabel={ariaLabel ?? `${edge} dock panels`}
           onValueChange={handleValueChange}
           onReorder={handleReorder}
           onClose={handleClose}
-          onDragPrepare={externalDrag.prepare}
-          onDragStart={handleTabDragStart}
-          onDragEnd={handleTabDragEnd}
+          crossWindowSourceBridge={crossWindowDragSource}
+          dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
         />
       {/if}
     </div>
@@ -525,15 +503,14 @@
             {density}
             showTooltips={isCompact}
             items={tabItems}
-            value={activeItem?.value ?? ""}
+            value={activeItem ? panelSubjectId(activeItem.value) : ""}
             reorderable={tabReorderable}
             ariaLabel={ariaLabel ?? `${edge} dock panels`}
             onValueChange={handleValueChange}
             onReorder={handleReorder}
             onClose={handleClose}
-            onDragPrepare={externalDrag.prepare}
-            onDragStart={handleTabDragStart}
-            onDragEnd={handleTabDragEnd}
+          crossWindowSourceBridge={crossWindowDragSource}
+          dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
           />
         </div>
       {/if}
@@ -566,15 +543,14 @@
             {density}
             showTooltips={isCompact}
             items={tabItems}
-            value={activeItem?.value ?? ""}
+            value={activeItem ? panelSubjectId(activeItem.value) : ""}
             reorderable={tabReorderable}
             ariaLabel={ariaLabel ?? `${edge} dock panels`}
             onValueChange={handleValueChange}
             onReorder={handleReorder}
             onClose={handleClose}
-            onDragPrepare={externalDrag.prepare}
-            onDragStart={handleTabDragStart}
-            onDragEnd={handleTabDragEnd}
+          crossWindowSourceBridge={crossWindowDragSource}
+          dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
           />
         </div>
         {#if collapsible && showCollapseToggle}
@@ -602,3 +578,12 @@
     </div>
   {/if}
 </section>
+{/snippet}
+
+{#if ambient}
+  {@render region()}
+{:else}
+  <DragDropProvider controller={ownController}>
+    {@render region()}
+  </DragDropProvider>
+{/if}

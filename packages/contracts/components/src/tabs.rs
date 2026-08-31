@@ -121,6 +121,15 @@ pub struct TabsSpec {
     pub shed: Vec<TabsShedPart>,
     /// Label for the overflow-collapse control.
     pub collapse_label: Option<String>,
+    /// The semantic drag family this strip belongs to.
+    ///
+    /// `None` means a family scoped to the mounted Tabs instance, so ordinary
+    /// tab sets never accept one another's rows even under one controller. An
+    /// owning composite sets an explicit kind to place the strip in a shared
+    /// family — DockRegion uses `poodle.dock-panel` — without taking over
+    /// reorder, which stays Tabs' own. Registration ids remain instance-scoped
+    /// either way; this is subject vocabulary, not identity.
+    pub drag_subject_kind: Option<String>,
 }
 
 impl Default for TabsSpec {
@@ -149,6 +158,7 @@ impl Default for TabsSpec {
             overflow_strategy: TabsOverflowStrategy::Collapse,
             shed: vec![TabsShedPart::Icon, TabsShedPart::Count],
             collapse_label: None,
+            drag_subject_kind: None,
         }
     }
 }

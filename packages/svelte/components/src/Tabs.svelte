@@ -7,22 +7,24 @@
   import { onDestroy, onMount, tick, type Snippet } from "svelte";
 
   import {
+    createDragDropController,
     tabsKeydownEvent,
     tabsTransition,
+    type CrossWindowDragSourceBridge,
+    type DragDropCommitResult,
+    type DropIntent,
     type TabsContext as HeadlessTabsContext,
     type TabsEvent as HeadlessTabsEvent,
   } from "@inflatable-cookie/poodle-core";
-  import { anchored } from "./anchored";
   import { default as Button } from "./Button.svelte";
+  import { default as DragDropProvider } from "./DragDropProvider.svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as Menu } from "./Menu.svelte";
   import { default as Pill } from "./Pill.svelte";
   import { firstEnabledIndex } from "./internal";
-  import {
-    handleDragStart as startDrag,
-    handleDragOver as overDrag,
-    handleDrop as dropDrag,
-  } from "./tabs-reorder";
+  import { default as TabsItem } from "./tabs-parts/TabsItem.svelte";
+  import { default as TabsKeyboardTargets } from "./tabs-parts/TabsKeyboardTargets.svelte";
+  import { tryDragDrop } from "./drag-drop-context";
   import {
     getUiPresentation,
     resolveSemanticControlSize,
@@ -95,9 +97,23 @@
     onValueChange?: ((value: string) => void) | undefined;
     onReorder?: ((items: string[]) => void) | undefined;
     onClose?: ((value: string) => void) | undefined;
-    onDragPrepare?: ((value: string, event: PointerEvent) => void) | undefined;
-    onDragStart?: ((value: string, event: DragEvent) => void) | undefined;
-    onDragEnd?: ((value: string, event: DragEvent) => void) | undefined;
+    /**
+     * Host preparation for a tab that may be moved to another window.
+     *
+     * The whole cross-window seam, in one semantic prop: preparation runs on
+     * the pre-drag gesture, the host owns the transaction, and only an opaque
+     * receipt leaves the window. Tabs keeps its local reorder either way.
+     */
+    crossWindowSourceBridge?: CrossWindowDragSourceBridge;
+    /**
+     * The semantic drag family this strip belongs to.
+     *
+     * `null` mints a family scoped to this Tabs instance, so two ordinary tab
+     * sets sharing one provider are never eligible for each other. An owning
+     * composite passes an explicit kind to put the strip in a shared family —
+     * without taking over reorder, which stays Tabs' own.
+     */
+    dragSubjectKind?: string | null;
     children?: Snippet<[string]>;
     actions?: Snippet<[]>;
   }
@@ -127,9 +143,8 @@
     onValueChange = undefined,
     onReorder = undefined,
     onClose = undefined,
-    onDragPrepare = undefined,
-    onDragStart = undefined,
-    onDragEnd = undefined,
+    crossWindowSourceBridge = undefined,
+    dragSubjectKind = null,
     children,
     actions,
   }: Props = $props();
@@ -160,9 +175,6 @@
   let lastSyncedValue = $state<string | null>(null);
   let tooltipIndex = $state<number | null>(null);
   let tooltipTimer = $state<ReturnType<typeof setTimeout> | null>(null);
-  let dragSourceIndex = $state<number | null>(null);
-  let dragSourceValue = $state<string | null>(null);
-  let dropTargetIndex = $state<number | null>(null);
   let collapsedByOverflow = $state(false);
   let historyReady = $state(false);
 
@@ -478,58 +490,91 @@
     void evaluateCollapsedOverflow();
   });
 
-  // ── Reorder (native drag session also powers cross-region/window moves) ──
+  // ── Reorder (shared drag substrate; local and cross-window are one session) ──
 
-  function resetDrag(): void {
-    dragSourceIndex = null;
-    dragSourceValue = null;
-    dropTargetIndex = null;
+  /**
+   * Join the nearest provider, or own a controller.
+   *
+   * Joining is what lets an owning composite arbitrate a tab drop against its
+   * own targets. Isolation does not depend on the controller: it comes from
+   * the subject family and the registration ids, so a Tabs that joined a
+   * shared provider is still unreachable from an ordinary sibling strip.
+   */
+  const ambient = tryDragDrop();
+  const ownDragController = ambient ? undefined : createDragDropController();
+  const dragController = ambient?.controller ?? ownDragController!;
+
+  /**
+   * The semantic family, and the registration namespace, are different things.
+   *
+   * `subjectKind` is what other surfaces can match on — shared when a
+   * composite says so. `sourceId` / `targetId` are always scoped to this
+   * instance, because two strips in one ambient controller may legitimately
+   * hold the same tab values and duplicate live ids are an error, not
+   * last-writer-wins.
+   */
+  const subjectKind = $derived(dragSubjectKind ?? `poodle.reorder-item:tabs:${tabsId}`);
+  const registrationScope = `tabs:${tabsId}`;
+
+  function sourceIdOf(value: string): string {
+    return `${registrationScope}:source:${value}`;
   }
 
-  function handleDragPointerDown(
-    event: PointerEvent,
-    item: TabItem,
-  ): void {
-    if (!reorderable || event.button !== 0 || item.disabled === true) return;
+  function targetIdOf(value: string): string {
+    return `${registrationScope}:target:${value}`;
+  }
 
-    if (currentValue !== item.value) {
-      send({ type: "SELECT", value: item.value });
+  function valueOfTargetId(targetId: string): string {
+    const prefix = `${registrationScope}:target:`;
+    return targetId.startsWith(prefix) ? targetId.slice(prefix.length) : "";
+  }
+
+  function indexOfValue(value: string): number {
+    return renderedItems.findIndex((item) => item.value === value);
+  }
+
+  /** Whether a subject belongs to this strip at all. */
+  function ownsValue(value: string): boolean {
+    return indexOfValue(value) >= 0;
+  }
+
+  /**
+   * Turn one revalidated intent into the machine's reorder.
+   *
+   * `before`/`after` are relative to the target's own position, and
+   * `applyReorder` splices into the *shortened* array, so the index shifts by
+   * one when the tab is moving forward.
+   */
+  function handleDrop(intent: DropIntent): DragDropCommitResult {
+    const from = indexOfValue(dragController.getSnapshot().session?.subject.id ?? "");
+    const target = indexOfValue(valueOfTargetId(intent.targetId));
+    if (from < 0 || target < 0 || from === target) {
+      return { status: "rejected", reason: "same tab" };
     }
-    onDragPrepare?.(item.value, event);
+
+    const to =
+      intent.position === "before"
+        ? from < target
+          ? target - 1
+          : target
+        : from < target
+          ? target
+          : target + 1;
+
+    send({ type: "REORDER", fromIndex: from, toIndex: to });
+    return { status: "committed" };
   }
 
-  function handleDragStart(event: DragEvent, index: number): void {
-    const result = startDrag(event, index, reorderable);
-    if (result.dragSourceIndex !== null) {
-      dragSourceIndex = result.dragSourceIndex;
-      dragSourceValue = renderedItems[index].value;
-      onDragStart?.(dragSourceValue, event);
-    }
-  }
-
-  function handleDragOver(event: DragEvent, index: number): void {
-    const result = overDrag(event, index, dragSourceIndex);
-    if (result.dropTargetIndex !== null) {
-      dropTargetIndex = result.dropTargetIndex;
-    }
-  }
-
-  function handleDragLeave(): void {
-    dropTargetIndex = null;
-  }
-
-  function handleDrop(event: DragEvent, index: number): void {
-    const result = dropDrag(event, index, dragSourceIndex);
-    if (result.fromIndex !== null && result.toIndex !== null) {
-      send({ type: "REORDER", fromIndex: result.fromIndex, toIndex: result.toIndex });
-    }
-  }
-
-  function handleDragEnd(event: DragEvent): void {
-    if (dragSourceValue) {
-      onDragEnd?.(dragSourceValue, event);
-    }
-    resetDrag();
+  /** Alt+Arrow: the established one-keystroke move, run as a real session. */
+  function moveTab(fromIndex: number, direction: -1 | 1): void {
+    const from = renderedItems[fromIndex];
+    const target = renderedItems[fromIndex + direction];
+    if (!from || !target) return;
+    dragController.requestKeyboardDrop({
+      sourceId: sourceIdOf(from.value),
+      targetId: targetIdOf(target.value),
+      position: direction === 1 ? "after" : "before",
+    });
   }
 
   function handleKeydown(event: KeyboardEvent, index: number): void {
@@ -549,13 +594,30 @@
       index,
     );
 
-    if (machineEvent) {
-      event.preventDefault();
-      send(machineEvent);
+    if (!machineEvent) return;
+    event.preventDefault();
+
+    // The reorder step is the one machine event the substrate owns: it must
+    // reach the same session, announcement, and revalidation a pointer drop
+    // does rather than mutating the order behind the controller's back.
+    if (machineEvent.type === "REORDER_STEP") {
+      moveTab(machineEvent.fromIndex ?? index, machineEvent.direction);
+      return;
     }
+
+    send(machineEvent);
   }
 </script>
 
+{#snippet strip()}
+<TabsKeyboardTargets
+  items={renderedItems}
+  {reorderable}
+  {subjectKind}
+  {targetIdOf}
+  {ownsValue}
+  onDrop={handleDrop}
+/>
 <div
   bind:this={rootElement}
   class="poodle-tabs"
@@ -647,89 +709,41 @@
       aria-orientation={orientation}
     >
       {#each renderedItems as item, index (item.value)}
-        <div
-          class="poodle-tabs__item"
-          role="presentation"
-          data-selected={currentValue === item.value}
-          data-drag-source={dragSourceIndex === index || undefined}
-          data-drop-target={dropTargetIndex === index && dropTargetIndex !== dragSourceIndex || undefined}
-          ondragover={(event) => handleDragOver(event, index)}
-          ondragleave={handleDragLeave}
-          ondrop={(event) => handleDrop(event, index)}
-          onmouseenter={() => hasTooltips && scheduleTooltip(index)}
-          onmouseleave={() => hasTooltips && dismissTooltip()}
-        >
-          <button
-            bind:this={tabElements[index]}
-            type="button"
-            class="poodle-tabs__tab"
-            disabled={item.disabled === true}
-            draggable={reorderable && !item.disabled}
-            ondragstart={(event) => handleDragStart(event, index)}
-            ondragend={handleDragEnd}
-            id={`poodle-tab-${tabsId}-${item.value}`}
-            data-value={item.value}
-            role="tab"
-            tabindex={focusIndex === index ? 0 : -1}
-            aria-selected={currentValue === item.value ? "true" : "false"}
-            aria-controls={hasPanel ? `poodle-tabpanel-${tabsId}-${item.value}` : undefined}
-            onfocus={() => { focusIndex = index; if (isVertical) scheduleTooltip(index); }}
-            onblur={() => hasTooltips && dismissTooltip()}
-            onpointerdown={(event) => handleDragPointerDown(event, item)}
-            onclick={() => send({ type: "SELECT", value: item.value })}
-            onkeydown={(event) => {
-              if (event.key === "Escape" && hasTooltips) dismissTooltip();
-              handleKeydown(event, index);
-            }}
-          >
-            {#if item.icon}
-              <Icon icon={item.icon} size={resolvedIconSize} />
-            {/if}
-            <span class="poodle-tabs__label">{item.label}</span>
-            {#if item.count !== undefined}
-              <Pill
-                tone="neutral"
-                appearance="badge"
-                size={resolvedIconSize}
-                muted
-                adaptiveWidth
-                ariaLabel={`${item.count}`}
-              >
-                {item.count}
-              </Pill>
-            {/if}
-          </button>
-
-          {#if item.closable}
-            <button
-              type="button"
-              class="poodle-tabs__close"
-              aria-label={`Close ${item.label}`}
-              onclick={(event) => {
-                event.stopPropagation();
-                send({ type: "CLOSE", value: item.value });
-              }}
-            >
-              <Icon name="x" size={resolvedIconSize} />
-            </button>
-          {/if}
-
-          {#if hasTooltips && tooltipIndex === index}
-            <span
-              use:anchored={{
-                anchor: tabElements[index],
-                placement: isVertical ? "right" : "bottom",
-                offset: 6,
-              }}
-              class="poodle-tabs__tooltip"
-              data-placement={isVertical ? "right" : "bottom"}
-              role="tooltip"
-            >
-              {item.label}
-            </span>
-          {/if}
-
-        </div>
+        <TabsItem
+          {item}
+          {index}
+          {tabsId}
+          {subjectKind}
+          {reorderable}
+          {hasPanel}
+          {hasTooltips}
+          {isVertical}
+          {crossWindowSourceBridge}
+          {indexOfValue}
+          {ownsValue}
+          sourceId={sourceIdOf(item.value)}
+          targetId={targetIdOf(item.value)}
+          selected={currentValue === item.value}
+          focused={focusIndex === index}
+          tooltipOpen={tooltipIndex === index}
+          iconSize={resolvedIconSize}
+          anchorElement={tabElements[index] ?? null}
+          onDrop={handleDrop}
+          onElement={(element) => (tabElements[index] = element)}
+          onSelect={() => send({ type: "SELECT", value: item.value })}
+          onClose={() => send({ type: "CLOSE", value: item.value })}
+          onFocus={() => {
+            focusIndex = index;
+            if (isVertical) scheduleTooltip(index);
+          }}
+          onBlur={() => hasTooltips && dismissTooltip()}
+          onEnter={() => hasTooltips && scheduleTooltip(index)}
+          onLeave={() => hasTooltips && dismissTooltip()}
+          onKeydown={(event) => {
+            if (event.key === "Escape" && hasTooltips) dismissTooltip();
+            handleKeydown(event, index);
+          }}
+        />
         {#if item.separator && index < renderedItems.length - 1}
           <span class="poodle-tabs__separator" aria-hidden="true"></span>
         {/if}
@@ -756,3 +770,12 @@
     </div>
   {/if}
 </div>
+{/snippet}
+
+{#if ambient}
+  {@render strip()}
+{:else}
+  <DragDropProvider controller={ownDragController}>
+    {@render strip()}
+  </DragDropProvider>
+{/if}

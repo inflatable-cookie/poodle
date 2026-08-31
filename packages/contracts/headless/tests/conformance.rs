@@ -766,6 +766,41 @@ fn drop_intent_json(intent: &DropIntent) -> Value {
     })
 }
 
+fn drag_cancel_reason(value: &Value) -> DragCancelReason {
+    match value.as_str().expect("cancel reason") {
+        "preparation-declined" => DragCancelReason::PreparationDeclined,
+        "preparation-failed" => DragCancelReason::PreparationFailed,
+        "superseded" => DragCancelReason::Superseded,
+        "escape" => DragCancelReason::Escape,
+        "explicit" => DragCancelReason::Explicit,
+        "source-lost" => DragCancelReason::SourceLost,
+        "target-lost" => DragCancelReason::TargetLost,
+        "transport-lost" => DragCancelReason::TransportLost,
+        "window-lost" => DragCancelReason::WindowLost,
+        other => panic!("unknown drag cancel reason {other}"),
+    }
+}
+
+/// The host-authoritative outcome a cross-window bridge reports, decoded from
+/// the same JSON shape `drag_outcome_json` emits.
+fn drag_terminal_outcome(value: &Value) -> DragTerminalOutcome {
+    match s(value, "status") {
+        "committed" => DragTerminalOutcome::Committed {
+            intent: drop_intent(&value["intent"]),
+        },
+        "rejected" => DragTerminalOutcome::Rejected {
+            reason: opt_string(value, "reason"),
+        },
+        "failed" => DragTerminalOutcome::Failed {
+            reason: opt_string(value, "reason"),
+        },
+        "cancelled" => DragTerminalOutcome::Cancelled {
+            reason: drag_cancel_reason(&value["reason"]),
+        },
+        other => panic!("unknown drag terminal status {other}"),
+    }
+}
+
 fn drag_event(value: &Value) -> DragSessionEvent {
     let session_id = s(value, "sessionId").to_string();
 
@@ -817,6 +852,10 @@ fn drag_event(value: &Value) -> DragSessionEvent {
         },
         "TRANSPORT_LOST" => DragSessionEvent::TransportLost { session_id },
         "WINDOW_LOST" => DragSessionEvent::WindowLost { session_id },
+        "HOST_TERMINAL" => DragSessionEvent::HostTerminal {
+            session_id,
+            outcome: drag_terminal_outcome(&value["outcome"]),
+        },
         "RESET" => DragSessionEvent::Reset { session_id },
         other => panic!("unknown dragDrop event {other}"),
     }

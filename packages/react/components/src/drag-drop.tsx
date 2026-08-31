@@ -14,6 +14,7 @@ import {
 import "@inflatable-cookie/poodle-core/styles/drag-drop.css";
 import {
   createDragDropController,
+  type CrossWindowDragTargetBridge,
   type DragAnnouncementEvent,
   type DragDropController,
   type DragDropSnapshot,
@@ -28,6 +29,15 @@ import {
 } from "@inflatable-cookie/poodle-core";
 
 export type {
+  CrossWindowDragCapabilities,
+  CrossWindowDragCommitRequest,
+  CrossWindowDragPrepareRequest,
+  CrossWindowDragProjection,
+  CrossWindowDragReceipt,
+  CrossWindowDragSourceBridge,
+  CrossWindowDragTargetBridge,
+  CrossWindowDragTargetEvent,
+  CrossWindowDragTransport,
   DragActivationConstraints,
   DragAnnouncementEvent,
   DragDropCommitResult,
@@ -69,6 +79,12 @@ function composeHandler<E>(theirs?: (event: E) => void, ours?: (event: E) => voi
 export interface DragDropProviderProps {
   controller?: DragDropController;
   describeAnnouncement?: (event: DragAnnouncementEvent) => string | null;
+  /**
+   * Incoming cross-window host projection, commit, and accessible target
+   * picking for this document. Ignored when an explicit `controller` is
+   * supplied, because that controller already owns its own bridge.
+   */
+  crossWindowTargetBridge?: CrossWindowDragTargetBridge;
   preview?: (snapshot: DragPreviewSnapshot) => ReactNode;
   children?: ReactNode;
 }
@@ -76,12 +92,15 @@ export interface DragDropProviderProps {
 export function DragDropProvider({
   controller,
   describeAnnouncement,
+  crossWindowTargetBridge,
   preview,
   children,
 }: DragDropProviderProps) {
   const ownedRef = useRef(controller === undefined);
   const [ctrl] = useState(() =>
-    ownedRef.current ? createDragDropController({ describeAnnouncement }) : controller!,
+    ownedRef.current
+      ? createDragDropController({ describeAnnouncement, crossWindowTargetBridge })
+      : controller!,
   );
   const rootRef = useRef<HTMLDivElement>(null);
   const [snapshot, setSnapshot] = useState(() => ctrl.getSnapshot());
@@ -129,6 +148,18 @@ export function DragDropProvider({
       </div>
     </DragDropContext.Provider>
   );
+}
+
+/**
+ * The nearest drag-drop context, or `null`.
+ *
+ * Internal to the component package and deliberately not re-exported: a
+ * component that *joins* an ambient provider when one exists needs to ask
+ * without throwing, but a consumer reaching for the controller should still
+ * get the loud `useDragDrop` error rather than a silent null.
+ */
+export function useOptionalDragDrop(): DragDropContextValue | null {
+  return useContext(DragDropContext);
 }
 
 function useDragDropContext(): DragDropContextValue {
@@ -240,6 +271,59 @@ export function useDropTarget(registration: DropTargetRegistration): {
     getTargetProps,
     accepted: ctx.snapshot.targetId === registration.targetId && ctx.snapshot.targetPosture === "accepted",
     rejected: ctx.snapshot.targetId === registration.targetId && ctx.snapshot.targetPosture === "rejected",
+  };
+}
+
+/**
+ * Register a drop target against an explicit controller.
+ *
+ * For the one case the context hooks cannot serve: a component that *renders*
+ * the provider is above it in the tree, so it cannot read its own context. A
+ * DockRegion with no ambient provider is exactly that — it owns the controller
+ * and registers its own region against it directly.
+ */
+export function useControllerDropTarget(
+  controller: DragDropController,
+  registration: DropTargetRegistration,
+): { getTargetProps: TargetPropGetter; accepted: boolean; rejected: boolean } {
+  const [node, setNode] = useState<HTMLElement | null>(null);
+  const [snapshot, setSnapshot] = useState(() => controller.getSnapshot());
+  const handleRef = useRef<DropTargetHandle | null>(null);
+  const registrationRef = useRef(registration);
+  registrationRef.current = registration;
+
+  useLayoutEffect(() => {
+    setSnapshot(controller.getSnapshot());
+    return controller.subscribe(() => setSnapshot(controller.getSnapshot()));
+  }, [controller]);
+
+  useLayoutEffect(() => {
+    if (!node) return;
+    const handle = controller.registerTarget(node, registrationRef.current);
+    handleRef.current = handle;
+    return () => {
+      handle.unregister();
+      handleRef.current = null;
+    };
+  }, [controller, registration.targetId, node]);
+
+  useLayoutEffect(() => {
+    handleRef.current?.update(registration);
+  });
+
+  const getTargetProps = useCallback<TargetPropGetter>((props = {}) => {
+    const { ref, onKeyDown, ...rest } = props;
+    return {
+      ...rest,
+      ref: composeRefs(ref, (el) => setNode(el)),
+      onKeyDown: composeHandler(onKeyDown),
+    };
+  }, []);
+
+  return {
+    getTargetProps,
+    accepted: snapshot.targetId === registration.targetId && snapshot.targetPosture === "accepted",
+    rejected: snapshot.targetId === registration.targetId && snapshot.targetPosture === "rejected",
   };
 }
 

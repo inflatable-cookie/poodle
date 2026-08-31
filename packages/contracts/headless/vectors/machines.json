@@ -2551,6 +2551,416 @@
             ]
           }
         ]
+      },
+      {
+        "name": "a host refusal after native end stays a refusal rather than a cancellation",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "panel", "id": "mixer" },
+              "operation": "move",
+              "allowedOperations": ["move"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "HOST_TERMINAL",
+              "sessionId": "s1",
+              "outcome": { "status": "rejected", "reason": "lease expired" }
+            },
+            "phase": "ended",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "rejected", "reason": "lease expired" }
+              },
+              { "type": "announce", "kind": "rejected" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "panel", "id": "mixer" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          },
+          {
+            "event": {
+              "type": "HOST_TERMINAL",
+              "sessionId": "s1",
+              "outcome": {
+                "status": "committed",
+                "intent": { "targetId": "dock-right", "position": "inside", "operation": "move" }
+              }
+            },
+            "phase": "ended",
+            "effects": []
+          },
+          {
+            "event": { "type": "RESET", "sessionId": "s1" },
+            "phase": "idle",
+            "session": null,
+            "effects": []
+          }
+        ]
+      },
+      {
+        "name": "a host commit carries its own intent onto the session",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "panel", "id": "mixer" },
+              "operation": "move",
+              "allowedOperations": ["move", "copy"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "HOST_TERMINAL",
+              "sessionId": "s1",
+              "outcome": {
+                "status": "committed",
+                "intent": { "targetId": "dock-right", "position": "inside", "operation": "copy" }
+              }
+            },
+            "phase": "ended",
+            "session": {
+              "operation": "copy",
+              "intent": { "targetId": "dock-right", "position": "inside", "operation": "copy" }
+            },
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": {
+                  "status": "committed",
+                  "intent": { "targetId": "dock-right", "position": "inside", "operation": "copy" }
+                }
+              },
+              { "type": "announce", "kind": "dropped" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "panel", "id": "mixer" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "a host failure and a host cancellation keep their own status",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "panel", "id": "mixer" },
+              "operation": "move",
+              "allowedOperations": ["move"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s1" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "HOST_TERMINAL",
+              "sessionId": "s1",
+              "outcome": { "status": "failed", "reason": "host unreachable" }
+            },
+            "phase": "ended",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "failed", "reason": "host unreachable" }
+              },
+              { "type": "announce", "kind": "failed" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s1",
+                "subject": { "kind": "panel", "id": "mixer" }
+              },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          },
+          {
+            "event": { "type": "RESET", "sessionId": "s1" },
+            "phase": "idle",
+            "session": null,
+            "effects": []
+          },
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s2",
+              "sourceId": "src-a",
+              "subject": { "kind": "panel", "id": "mixer" },
+              "operation": "move",
+              "allowedOperations": ["move"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s2",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s2" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s2" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s2",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          },
+          {
+            "event": {
+              "type": "HOST_TERMINAL",
+              "sessionId": "s2",
+              "outcome": { "status": "cancelled", "reason": "window-lost" }
+            },
+            "phase": "cancelled",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s2",
+                "outcome": { "status": "cancelled", "reason": "window-lost" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              {
+                "type": "returnFocus",
+                "sessionId": "s2",
+                "subject": { "kind": "panel", "id": "mixer" }
+              },
+              { "type": "cleanupSession", "sessionId": "s2" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "a host completion for a superseded session cannot end its successor",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "panel", "id": "mixer" },
+              "operation": "move",
+              "allowedOperations": ["move"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" }
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s2",
+              "sourceId": "src-a",
+              "subject": { "kind": "panel", "id": "mixer" },
+              "operation": "move",
+              "allowedOperations": ["move"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "cancelled", "reason": "superseded" }
+              },
+              { "type": "announce", "kind": "cancelled" },
+              { "type": "cleanupSession", "sessionId": "s1" },
+              {
+                "type": "prepareSession",
+                "sessionId": "s2",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" }
+              }
+            ]
+          },
+          {
+            "event": {
+              "type": "HOST_TERMINAL",
+              "sessionId": "s1",
+              "outcome": {
+                "status": "committed",
+                "intent": { "targetId": "dock-right", "position": "inside", "operation": "move" }
+              }
+            },
+            "phase": "preparing",
+            "effects": []
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s2" }, "phase": "armed", "effects": [] },
+          {
+            "event": { "type": "ACTIVATE", "sessionId": "s2" },
+            "phase": "dragging",
+            "effects": [
+              {
+                "type": "emitDragStart",
+                "sessionId": "s2",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" },
+                "operation": "move"
+              },
+              { "type": "announce", "kind": "pickup" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "a host completion before pickup emits no focus return",
+        "steps": [
+          {
+            "event": {
+              "type": "PREPARE",
+              "sessionId": "s1",
+              "sourceId": "src-a",
+              "subject": { "kind": "panel", "id": "mixer" },
+              "operation": "move",
+              "allowedOperations": ["move"]
+            },
+            "phase": "preparing",
+            "effects": [
+              {
+                "type": "prepareSession",
+                "sessionId": "s1",
+                "sourceId": "src-a",
+                "subject": { "kind": "panel", "id": "mixer" }
+              }
+            ]
+          },
+          { "event": { "type": "PREPARED", "sessionId": "s1" }, "phase": "armed", "effects": [] },
+          {
+            "event": {
+              "type": "HOST_TERMINAL",
+              "sessionId": "s1",
+              "outcome": { "status": "rejected", "reason": "declined" }
+            },
+            "phase": "ended",
+            "effects": [
+              {
+                "type": "emitDropResult",
+                "sessionId": "s1",
+                "outcome": { "status": "rejected", "reason": "declined" }
+              },
+              { "type": "announce", "kind": "rejected" },
+              { "type": "cleanupSession", "sessionId": "s1" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "a host completion is inert against an idle machine",
+        "steps": [
+          {
+            "event": {
+              "type": "HOST_TERMINAL",
+              "sessionId": "s1",
+              "outcome": {
+                "status": "committed",
+                "intent": { "targetId": "dock-right", "position": "inside", "operation": "move" }
+              }
+            },
+            "phase": "idle",
+            "session": null,
+            "effects": []
+          }
+        ]
       }
     ],
     "arbitration": [

@@ -64,23 +64,41 @@ composition belongs in `poodle-render`, not in this adapter or the backend.
 ## Window Root
 
 `to_gpui` converts a tree; it does not install window-level behaviour. Tab and
-Shift+Tab traversal, Escape and outside-press overlay dismissal, and payload
-drag cleanup are all document-level defaults, so an application opts into them
-once at its root:
+Shift+Tab traversal, Escape and outside-press overlay dismissal, payload drag
+cleanup, and the drag provider census are all document-level defaults, so an
+application opts into them once at its root:
 
 ```rust
 poodle_gpui_node_backend::overlay_frame_begin();   // once per rendered frame
 cx.defer(|_cx| poodle_gpui_node_backend::overlay_frame_end()); // same cycle: lost-host cancel
 poodle_gpui_node_backend::reset_element_ids();     // once per rendered frame
 
-poodle_gpui_node_backend::attach_overlay_host(     // once per window
-    div().size_full().child(poodle_gpui_node_backend::to_gpui(&node)),
-)
+// One host per window, one provider per drag scope. Both are ordinary values
+// the application owns; neither is a global.
+poodle_gpui_node_backend::drag_drop_window_host(&self.drag_host, || {
+    poodle_gpui_node_backend::drag_drop_provider(&self.drag, || {
+        poodle_gpui_node_backend::attach_overlay_host(
+            div().size_full().child(poodle_gpui_node_backend::to_gpui(&node)),
+        )
+    })
+})
 ```
 
 `attach_overlay_host` is named for the overlay dismissal it started with and
 now also carries Tab traversal — GPUI owns `focus_next`/`focus_prev` but binds
-no key to them. Wrap the one root element, not each component. Full example:
+no key to them. Wrap the one root element, not each component.
+
+`DragDropWindowHost` is the census of the drag providers mounted in **this**
+window. A provider can only close a session during its own per-frame sweep, so
+a provider the application removes mid-drag would otherwise leave a live
+session, live registrations, no terminal callback, and GPUI's own drag still
+painting. The host notices the provider that stopped rendering, cancels it
+once, drops its registrations, and calls `stop_active_drag` before forgetting
+it. It is per window and never shared: a census that belongs to one window
+cannot reach another window's controllers, so a background window's live drag
+survives every frame the foreground window draws.
+
+Full example:
 [GPUI developer guide](../../../docs/guides/gpui-developer-guide.md#wire-the-window-root).
 
 ## Style Mapping

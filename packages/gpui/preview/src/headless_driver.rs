@@ -51,6 +51,11 @@ pub struct HeadlessRoot {
     /// sessions mounts two provider elements instead (see
     /// `HeadlessContent::Element`).
     pub drag: poodle_gpui_node_backend::DragDropController,
+    /// This window's provider census, exactly as a production root wires it.
+    /// One per window and never shared: two mounted windows own two hosts,
+    /// which is what stops one window's frame from sweeping the other's
+    /// controllers.
+    pub drag_host: poodle_gpui_node_backend::DragDropWindowHost,
 }
 
 impl Focusable for HeadlessRoot {
@@ -95,6 +100,8 @@ impl Render for HeadlessRoot {
             }
             HeadlessContent::Element(build) => HeadlessContent::Element(Rc::clone(build)),
         };
+        let drag_host = self.drag_host.clone();
+        poodle_gpui_node_backend::drag_drop_window_host(&drag_host, || {
         poodle_gpui_node_backend::drag_drop_provider(&self.drag, || {
             let content = match &content {
                 HeadlessContent::Node(node) => {
@@ -116,6 +123,7 @@ impl Render for HeadlessRoot {
                         .child(content),
                 ),
             )
+        })
         })
     }
 }
@@ -157,6 +165,7 @@ impl<'a> HeadlessDriver<'a> {
                 box_width,
                 box_height,
                 drag: poodle_gpui_node_backend::DragDropController::new(),
+                drag_host: poodle_gpui_node_backend::DragDropWindowHost::new(),
             };
             window.refresh();
             root
@@ -183,6 +192,7 @@ impl<'a> HeadlessDriver<'a> {
                 box_width: MOUNT_BOX_WIDTH,
                 box_height: MOUNT_BOX_HEIGHT,
                 drag: poodle_gpui_node_backend::DragDropController::new(),
+                drag_host: poodle_gpui_node_backend::DragDropWindowHost::new(),
             };
             window.refresh();
             root
@@ -203,6 +213,30 @@ impl<'a> HeadlessDriver<'a> {
     /// a mounted node tree registers with.
     pub fn drag(&mut self) -> poodle_gpui_node_backend::DragDropController {
         self.cx.update(|_window, cx| self.root.read(cx).drag.clone())
+    }
+
+    /// This window's provider census — the seam that notices an unmounted
+    /// provider and stops the runtime's own drag on its behalf.
+    pub fn drag_host(&mut self) -> poodle_gpui_node_backend::DragDropWindowHost {
+        self.cx
+            .update(|_window, cx| self.root.read(cx).drag_host.clone())
+    }
+
+    /// Whether GPUI itself still believes a drag is in flight.
+    ///
+    /// Distinct from the semantic phase on purpose: a session can reach idle
+    /// with registries empty while the runtime keeps painting its own drag,
+    /// and that gap is exactly what the provider-unmount proof is about.
+    pub fn has_active_native_drag(&mut self) -> bool {
+        self.cx.update(|_window, cx| cx.has_active_drag())
+    }
+
+    /// Run one closure with a real `App`, without drawing.
+    ///
+    /// For the cases that install or replace window-level wiring mid-test,
+    /// where drawing would confound what the test is measuring.
+    pub fn update_app<R>(&mut self, body: impl FnOnce(&mut gpui::App) -> R) -> R {
+        self.cx.update(|_window, cx| body(cx))
     }
 
     /// Swap in a new node and repaint.

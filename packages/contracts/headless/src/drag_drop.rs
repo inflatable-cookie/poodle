@@ -193,6 +193,25 @@ pub enum DragSessionEvent {
     WindowLost {
         session_id: String,
     },
+    /// The authoritative completion of a host-owned transaction — the one
+    /// event a cross-window transport has that a local gesture does not.
+    ///
+    /// A local drop reaches its result through `DropRequested`, because the
+    /// adapter holds the live target and can revalidate it. A host transaction
+    /// has no local target to revalidate: the drop happened in another window,
+    /// and the only authority on what became of it is the host. Its refusal
+    /// must therefore stay a refusal rather than degrade into a cancellation,
+    /// which is the one thing the ordinary path cannot express from
+    /// `Dragging`.
+    ///
+    /// It is not a back door to a commit. Only a host bridge Poodle was handed
+    /// can produce one, it is bound to the session id the preparation was
+    /// created for, and a repeat arrives in a terminal phase that no longer
+    /// accepts it.
+    HostTerminal {
+        session_id: String,
+        outcome: DragTerminalOutcome,
+    },
     Reset {
         session_id: String,
     },
@@ -221,6 +240,7 @@ impl DragSessionEvent {
             | DragSessionEvent::TargetLost { session_id, .. }
             | DragSessionEvent::TransportLost { session_id }
             | DragSessionEvent::WindowLost { session_id }
+            | DragSessionEvent::HostTerminal { session_id, .. }
             | DragSessionEvent::Reset { session_id } => session_id,
         }
     }
@@ -608,6 +628,37 @@ pub fn drag_session_transition(
         DragSessionEvent::WindowLost { .. } if is_active_phase(phase) => {
             cancel(phase, session, DragCancelReason::WindowLost)
         }
+        DragSessionEvent::HostTerminal { outcome, .. } if is_active_phase(phase) => match outcome {
+            DragTerminalOutcome::Cancelled { reason } => cancel(phase, session, reason),
+            DragTerminalOutcome::Committed { intent } => {
+                let committed = DragSession {
+                    operation: intent.operation,
+                    intent: Some(intent.clone()),
+                    ..session
+                };
+                terminal(
+                    phase,
+                    committed,
+                    DragTerminalOutcome::Committed { intent },
+                    DragAnnouncementKind::Dropped,
+                    DragSessionPhase::Ended,
+                )
+            }
+            DragTerminalOutcome::Rejected { reason } => terminal(
+                phase,
+                session,
+                DragTerminalOutcome::Rejected { reason },
+                DragAnnouncementKind::Rejected,
+                DragSessionPhase::Ended,
+            ),
+            DragTerminalOutcome::Failed { reason } => terminal(
+                phase,
+                session,
+                DragTerminalOutcome::Failed { reason },
+                DragAnnouncementKind::Failed,
+                DragSessionPhase::Ended,
+            ),
+        },
         DragSessionEvent::Reset { .. } if is_terminal_phase(phase) => (
             DragSessionPhase::Idle,
             DragSessionContext { session: None },

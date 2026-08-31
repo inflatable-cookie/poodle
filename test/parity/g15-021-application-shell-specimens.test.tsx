@@ -385,11 +385,14 @@ describe("g15.021 application-shell specimens", () => {
 
     const left = transfer.querySelector('[aria-label="Left dock"]') as HTMLElement;
     const right = transfer.querySelector('[aria-label="Right dock"]') as HTMLElement;
-    const tab = left.querySelector("[draggable='true']") as HTMLElement;
+    const tab = left.querySelector('[role="tab"]') as HTMLElement;
     expect(tab, "transfer source tab").toBeTruthy();
-    const dataTransfer = new DataTransfer();
-    await fireEventSvelte.dragStart(tab, { dataTransfer });
-    await fireEventSvelte.drop(right, { dataTransfer });
+
+    // Both docks sit under one provider, so the tab's `poodle.dock-panel`
+    // subject is eligible for the other region's target. The tab's own
+    // reorder targets refuse a subject they do not own, which is what lets the
+    // receiving region win arbitration.
+    await dragBetween(tab, left, right);
     expect(transfer.textContent).toMatch(/Left dock — 2 panels/);
     expect(transfer.textContent).toMatch(/Right dock — 2 panels/);
 
@@ -409,13 +412,11 @@ describe("g15.021 application-shell specimens", () => {
     const before = tabLabels();
     expect(before.length).toBeGreaterThanOrEqual(2);
 
-    const [firstTab, secondTab] = [...dock.querySelectorAll('[role="tab"]')] as HTMLElement[];
-    const secondItem = secondTab.parentElement!;
-    const dataTransfer = new DataTransfer();
-    await fireEventSvelte.pointerDown(firstTab, { button: 0 });
-    await fireEventSvelte.dragStart(firstTab, { dataTransfer });
-    await fireEventSvelte.dragOver(secondItem, { dataTransfer });
-    await fireEventSvelte.drop(secondItem, { dataTransfer });
+    // Reorder runs on the shared substrate now, so the keyboard route is the
+    // one that needs no synthetic geometry.
+    const [firstTab] = [...dock.querySelectorAll('[role="tab"]')] as HTMLElement[];
+    firstTab.focus();
+    await fireEventSvelte.keyDown(firstTab, { key: "ArrowRight", altKey: true });
     expect(tabLabels()).not.toEqual(before);
 
     const close = expanded.querySelector(
@@ -438,3 +439,70 @@ describe("g15.021 application-shell specimens", () => {
     cleanupSvelte();
   });
 });
+
+/**
+ * Drag one element into another through the shared substrate.
+ *
+ * happy-dom measures everything as an empty box at the origin, so the two
+ * regions are given real places first; otherwise every target contains every
+ * point and "dropped on the right dock" would mean nothing.
+ */
+async function dragBetween(source: HTMLElement, from: HTMLElement, to: HTMLElement): Promise<void> {
+  place(from, 0);
+  place(to, 600);
+  // The controller coalesces movement onto a frame; run frames inline so a
+  // move and its hit test are one step.
+  const realRaf = window.requestAnimationFrame;
+  window.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    callback(0);
+    return 1;
+  }) as typeof window.requestAnimationFrame;
+
+  const pointerAt = (type: string, x: number) =>
+    new PointerEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      pointerId: 1,
+      pointerType: "mouse",
+      button: 0,
+      buttons: type === "pointerup" ? 0 : 1,
+      isPrimary: true,
+      clientX: x,
+      clientY: 40,
+    });
+  try {
+    await fireEventSvelte(source, pointerAt("pointerdown", 40));
+    await fireEventSvelte(document, pointerAt("pointermove", 80));
+    await fireEventSvelte(document, pointerAt("pointermove", 700));
+    await fireEventSvelte(document, pointerAt("pointerup", 700));
+  } finally {
+    window.requestAnimationFrame = realRaf;
+  }
+}
+
+function place(region: HTMLElement, originX: number): void {
+  rect(region, originX, 0, 500, 200);
+  region.querySelectorAll<HTMLElement>('[role="tab"], .poodle-tabs__item').forEach((node, index) => {
+    rect(node, originX + index * 60, 20, 60, 30);
+  });
+}
+
+function rect(element: HTMLElement, x: number, y: number, width: number, height: number): void {
+  const value = {
+    x,
+    y,
+    width,
+    height,
+    top: y,
+    left: x,
+    right: x + width,
+    bottom: y + height,
+    toJSON() {
+      return this;
+    },
+  } as DOMRect;
+  element.getBoundingClientRect = () => value;
+  element.setPointerCapture = () => {};
+  element.releasePointerCapture = () => {};
+  element.hasPointerCapture = () => false;
+}

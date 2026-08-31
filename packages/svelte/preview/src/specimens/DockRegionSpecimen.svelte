@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { DockRegion } from "@inflatable-cookie/poodle-svelte";
+  import { DockRegion, DragDropProvider } from "@inflatable-cookie/poodle-svelte";
   import type { PanelTabItem, DockEdge } from "@inflatable-cookie/poodle-svelte";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
@@ -330,6 +330,10 @@
       </SpecimenGroup>
 
       <SpecimenGroup label="Move panels between docks" bare>
+        <!-- One provider around both docks. Cross-region transfer is ordinary
+             controller scope now: two regions see each other's targets only
+             when a single controller holds both registrations. -->
+        <DragDropProvider>
         <div class="poodle-specimen__dnd-layout">
           <div class="poodle-specimen__frame poodle-specimen__dnd-region">
             <DockRegion
@@ -372,6 +376,7 @@
             </DockRegion>
           </div>
         </div>
+        </DragDropProvider>
       </SpecimenGroup>
 
       <SpecimenGroup label="Static panel stacks" bare>

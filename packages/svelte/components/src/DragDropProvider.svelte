@@ -3,6 +3,7 @@
   import {
     createDragDropController,
     type DragAnnouncementEvent,
+    type CrossWindowDragTargetBridge,
     type DragDropController,
     type DragDropSnapshot,
     type DragPreviewSnapshot,
@@ -14,14 +15,22 @@
   interface Props {
     controller?: DragDropController;
     describeAnnouncement?: (event: DragAnnouncementEvent) => string | null;
+    /**
+     * Incoming cross-window host projection, commit, and accessible target
+     * picking for this document. Ignored when an explicit `controller` is
+     * supplied, because that controller already owns its own bridge.
+     */
+    crossWindowTargetBridge?: CrossWindowDragTargetBridge;
     preview?: Snippet<[DragPreviewSnapshot]>;
     children?: Snippet;
   }
 
-  let { controller, describeAnnouncement, preview, children }: Props = $props();
+  let { controller, describeAnnouncement, crossWindowTargetBridge, preview, children }: Props = $props();
 
   const owned = untrack(() => controller === undefined);
-  const ctrl = untrack(() => controller ?? createDragDropController({ describeAnnouncement }));
+  const ctrl = untrack(
+    () => controller ?? createDragDropController({ describeAnnouncement, crossWindowTargetBridge }),
+  );
   let root: HTMLDivElement | undefined;
   let snapshot: DragDropSnapshot = $state(ctrl.getSnapshot());
 

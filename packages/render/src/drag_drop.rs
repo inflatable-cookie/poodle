@@ -94,9 +94,27 @@ pub fn reorder_subject(scope: &str, value: &str) -> DragSubject {
 /// `scope` is the component instance id, so two mounted lists in one
 /// controller never mint the same source id.
 pub fn reorder_source(scope: &str, value: &str, label: &str) -> NodeDragSource {
+    reorder_source_in_family(scope, &reorder_kind(scope), value, label)
+}
+
+/// A reorder source in an explicit semantic family.
+///
+/// The registration id stays scoped to the surface instance while the subject
+/// kind is chosen by an owning composite. Those are different things: the kind
+/// says who may consider this row, the id says which registration it is, and
+/// two strips in one controller may legitimately hold the same row values.
+pub fn reorder_source_in_family(
+    scope: &str,
+    kind: &str,
+    value: &str,
+    label: &str,
+) -> NodeDragSource {
     NodeDragSource::new(
         format!("{scope}:source:{value}"),
-        reorder_subject(scope, value),
+        DragSubject {
+            kind: kind.to_string(),
+            id: value.to_string(),
+        },
         label,
     )
 }
@@ -116,6 +134,50 @@ pub fn reorder_target(scope: &str, value: &str, label: &str) -> NodeDropTarget {
     target.resolve_keyboard_position = Some(linear_keyboard_resolver());
     target.can_drop = Some(rejects_self(value));
     target
+}
+
+/// A reorder target in an explicit semantic family.
+///
+/// `owned` is this surface's own row values. A shared family means another
+/// surface's subject can reach this target, so it refuses one it does not own
+/// *during eligibility* — arbitration then discards it and an eligible
+/// ancestor composite target wins. Claiming the drop and rejecting it at
+/// commit would swallow it instead.
+pub fn reorder_target_in_family(
+    scope: &str,
+    kind: &str,
+    value: &str,
+    label: &str,
+    owned: Vec<String>,
+) -> NodeDropTarget {
+    let mut target = NodeDropTarget::new(format!("{scope}:target:{value}"), kind, label);
+    target.resolve_position = Some(vertical_band_resolver(false));
+    target.resolve_keyboard_position = Some(linear_keyboard_resolver());
+    target.can_drop = Some(rejects_foreign_or_self(value, owned));
+    target
+}
+
+/// Refuse a row dropped onto itself, and any subject this surface does not own.
+pub fn rejects_foreign_or_self(
+    value: &str,
+    owned: Vec<String>,
+) -> Arc<dyn Fn(&DropIntent, &DragSubject) -> DropEligibility + Send + Sync> {
+    let value = value.to_string();
+    Arc::new(move |intent: &DropIntent, subject: &DragSubject| {
+        if !owned.iter().any(|known| *known == subject.id) {
+            return DropEligibility::Rejected {
+                reason: Some("That row belongs to another surface".to_string()),
+            };
+        }
+        if subject.id == value {
+            return DropEligibility::Rejected {
+                reason: Some("A row cannot be dropped onto itself".to_string()),
+            };
+        }
+        DropEligibility::Accepted {
+            intent: intent.clone(),
+        }
+    })
 }
 
 /// A nested placement target: before / inside / after by thirds when the row
@@ -191,6 +253,87 @@ pub fn rejects_self(
                 intent: intent.clone(),
             }
         }
+    })
+}
+
+// ── Dock panel subjects ────────────────────────────────────────────────────
+
+/// The one subject kind every dock region accepts.
+///
+/// Deliberately not scoped per instance, unlike a reorder surface's kind: a
+/// panel is *meant* to cross between regions, and two regions can only resolve
+/// each other's targets when they agree on the kind. Which regions can see one
+/// another is decided by which controller they registered with.
+///
+/// Mirrors core's `DOCK_PANEL_SUBJECT_KIND`.
+pub const DOCK_PANEL_SUBJECT_KIND: &str = "poodle.dock-panel";
+
+const DOCK_PANEL_PREFIX: &str = "poodle-panel:";
+
+/// A dock panel's identity, as it travels in `DragSubject.id`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DockPanelSubject {
+    pub panel_id: String,
+    pub source_edge: String,
+    pub source_zone: String,
+}
+
+fn percent_encode(value: &str) -> String {
+    let mut out = String::with_capacity(value.len());
+    for byte in value.as_bytes() {
+        match byte {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                out.push(*byte as char);
+            }
+            other => out.push_str(&format!("%{other:02X}")),
+        }
+    }
+    out
+}
+
+fn percent_decode(value: &str) -> Option<String> {
+    let bytes = value.as_bytes();
+    let mut out: Vec<u8> = Vec::with_capacity(bytes.len());
+    let mut index = 0;
+    while index < bytes.len() {
+        if bytes[index] == b'%' {
+            let hex = value.get(index + 1..index + 3)?;
+            out.push(u8::from_str_radix(hex, 16).ok()?);
+            index += 3;
+        } else {
+            out.push(bytes[index]);
+            index += 1;
+        }
+    }
+    String::from_utf8(out).ok()
+}
+
+/// Encode a panel's identity into a subject id.
+///
+/// Percent-encoded fields joined by `|`, matching core exactly: this value
+/// becomes part of generated element ids, so it has to survive one without
+/// braces and quotes, and encoding each field keeps the separator unambiguous
+/// when a consumer's panel id or zone contains one.
+pub fn encode_dock_panel_subject(subject: &DockPanelSubject) -> String {
+    format!(
+        "{DOCK_PANEL_PREFIX}{}|{}|{}",
+        percent_encode(&subject.source_zone),
+        percent_encode(&subject.source_edge),
+        percent_encode(&subject.panel_id),
+    )
+}
+
+/// Decode a subject id, or `None` when it is not one of ours.
+pub fn decode_dock_panel_subject(id: &str) -> Option<DockPanelSubject> {
+    let body = id.strip_prefix(DOCK_PANEL_PREFIX)?;
+    let parts: Vec<&str> = body.split('|').collect();
+    if parts.len() != 3 {
+        return None;
+    }
+    Some(DockPanelSubject {
+        source_zone: percent_decode(parts[0])?,
+        source_edge: percent_decode(parts[1])?,
+        panel_id: percent_decode(parts[2])?,
     })
 }
 

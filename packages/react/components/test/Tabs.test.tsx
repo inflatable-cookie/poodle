@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Tabs } from "../src/Tabs";
 
@@ -13,7 +13,79 @@ function tabs() {
   return screen.getAllByRole("tab");
 }
 
+function itemsOf(container: HTMLElement): HTMLElement[] {
+  return [...container.querySelectorAll<HTMLElement>(".poodle-tabs__item")];
+}
+
+/**
+ * Lay the strip out horizontally.
+ *
+ * The substrate hit-tests measured rectangles, and happy-dom measures
+ * everything as an empty box at the origin — every tab would contain every
+ * point. Giving each item its real place is what makes "dropped on the third
+ * tab" mean anything here.
+ */
+function layout(container: HTMLElement): void {
+  itemsOf(container).forEach((item, index) => {
+    const rect = {
+      x: index * 100,
+      y: 0,
+      width: 100,
+      height: 30,
+      top: 0,
+      left: index * 100,
+      right: index * 100 + 100,
+      bottom: 30,
+      toJSON() {
+        return this;
+      },
+    } as DOMRect;
+    item.getBoundingClientRect = () => rect;
+    const tab = item.querySelector<HTMLElement>(".poodle-tabs__tab");
+    if (tab) {
+      tab.getBoundingClientRect = () => rect;
+      tab.setPointerCapture = vi.fn();
+      tab.releasePointerCapture = vi.fn();
+      tab.hasPointerCapture = () => false;
+    }
+  });
+}
+
+function pointer(type: string, x: number, y: number): PointerEvent {
+  return new PointerEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    pointerId: 1,
+    pointerType: "mouse",
+    button: 0,
+    buttons: type === "pointerup" ? 0 : 1,
+    isPrimary: true,
+    clientX: x,
+    clientY: y,
+  });
+}
+
+function send(target: EventTarget, event: PointerEvent): void {
+  act(() => {
+    target.dispatchEvent(event);
+  });
+}
+
 describe("Tabs (react)", () => {
+  beforeEach(() => {
+    // The controller coalesces pointer movement onto a frame; the tests drive
+    // it synchronously so a move and its hit test are one step.
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    });
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("automatic arrows skip disabled tabs and commit selection", () => {
     const onValueChange = vi.fn();
     render(<Tabs items={items} defaultValue="mix" onValueChange={onValueChange} />);
@@ -68,61 +140,99 @@ describe("Tabs (react)", () => {
     expect(onReorder).toHaveBeenCalledWith(["master", "mix", "notes"]);
   });
 
-  it("pointer drag reports start, target, drop order, and end cleanup", () => {
-    const onDragStart = vi.fn();
-    const onDragEnd = vi.fn();
-    const onReorder = vi.fn();
-    const { container } = render(
-      <Tabs
-        items={items}
-        defaultValue="mix"
-        reorderable
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        onReorder={onReorder}
-      />,
-    );
-    const [source, , target] = tabs();
-    const dataTransfer = new DataTransfer();
-    fireEvent.dragStart(source, { dataTransfer });
-    expect(onDragStart).toHaveBeenCalledWith("mix", expect.any(Object));
-    expect(container.querySelector('[data-drag-source="true"]')).not.toBeNull();
-
-    const targetItem = target.closest(".poodle-tabs__item")!;
-    fireEvent.dragOver(targetItem, { dataTransfer });
-    expect(container.querySelector('[data-drop-target="true"]')).toBe(targetItem);
-
-    fireEvent.dragLeave(targetItem);
-    expect(container.querySelector('[data-drop-target="true"]')).toBeNull();
-
-    fireEvent.dragOver(targetItem, { dataTransfer });
-    fireEvent.drop(targetItem, { dataTransfer });
-    expect(onReorder).toHaveBeenCalledWith(["master", "notes", "mix"]);
-
-    fireEvent.dragEnd(source);
-    expect(onDragEnd).toHaveBeenCalledWith("mix", expect.any(Object));
-    expect(container.querySelector("[data-drag-source]")).toBeNull();
-    expect(container.querySelector("[data-drop-target]")).toBeNull();
-  });
-
-  it("cancelling a drag clears transient source and target state", () => {
+  it("a pointer drag posts the target and commits the same order the old drop did", async () => {
     const onReorder = vi.fn();
     const { container } = render(
       <Tabs items={items} defaultValue="mix" reorderable onReorder={onReorder} />,
     );
-    const [source, , target] = tabs();
-    const dataTransfer = new DataTransfer();
-    fireEvent.dragStart(source, { dataTransfer });
-    fireEvent.dragOver(target.closest(".poodle-tabs__item")!, { dataTransfer });
-    fireEvent.dragEnd(source);
+    layout(container);
+    const [source] = tabs();
+    const [sourceItem, , targetItem] = itemsOf(container);
+
+    send(source, pointer("pointerdown", 50, 15));
+    send(document, pointer("pointermove", 90, 15));
+    expect(sourceItem.getAttribute("data-drag-source")).toBe("true");
+
+    send(document, pointer("pointermove", 250, 15));
+    expect(targetItem.getAttribute("data-drop-target")).toBe("true");
+
+    send(document, pointer("pointerup", 250, 15));
+
+    // The tab lands *at* the tab it was dropped on, which is exactly where the
+    // DOM-event implementation put it.
+    expect(onReorder).toHaveBeenCalledWith(["master", "notes", "mix"]);
+    expect(container.querySelector("[data-drag-source]")).toBeNull();
+    expect(container.querySelector("[data-drop-target]")).toBeNull();
+  });
+
+  it("Escape cancels a drag and clears transient source and target state", () => {
+    const onReorder = vi.fn();
+    const { container } = render(
+      <Tabs items={items} defaultValue="mix" reorderable onReorder={onReorder} />,
+    );
+    layout(container);
+    const [source] = tabs();
+
+    send(source, pointer("pointerdown", 50, 15));
+    send(document, pointer("pointermove", 250, 15));
+    expect(container.querySelector("[data-drop-target]")).not.toBeNull();
+
+    act(() => {
+      fireEvent.keyDown(document, { key: "Escape" });
+    });
+
     expect(onReorder).not.toHaveBeenCalled();
     expect(container.querySelector("[data-drag-source]")).toBeNull();
     expect(container.querySelector("[data-drop-target]")).toBeNull();
   });
 
-  it("disabled tabs are not draggable", () => {
-    render(<Tabs items={items} defaultValue="mix" reorderable />);
-    expect(tabs()[1].getAttribute("draggable")).toBe("false");
-    expect(tabs()[0].getAttribute("draggable")).toBe("true");
+  it("a tab dropped on itself is refused rather than reordered", () => {
+    const onReorder = vi.fn();
+    const { container } = render(
+      <Tabs items={items} defaultValue="mix" reorderable onReorder={onReorder} />,
+    );
+    layout(container);
+    const [source] = tabs();
+    const [sourceItem] = itemsOf(container);
+
+    send(source, pointer("pointerdown", 50, 15));
+    send(document, pointer("pointermove", 90, 15));
+    expect(sourceItem.getAttribute("data-drop-target")).toBeNull();
+
+    send(document, pointer("pointerup", 90, 15));
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("a disabled tab cannot be picked up but is still a place to put one", () => {
+    const onReorder = vi.fn();
+    const { container } = render(
+      <Tabs items={items} defaultValue="mix" reorderable onReorder={onReorder} />,
+    );
+    layout(container);
+    const [, disabled] = tabs();
+    const [enabledItem, disabledItem] = itemsOf(container);
+
+    expect(enabledItem.getAttribute("data-reorderable")).toBe("true");
+    expect(disabledItem.getAttribute("data-reorderable")).toBeNull();
+
+    send(disabled, pointer("pointerdown", 150, 15));
+    send(document, pointer("pointermove", 250, 15));
+    expect(container.querySelector("[data-drag-source]")).toBeNull();
+    send(document, pointer("pointerup", 250, 15));
+
+    // Still a landing position: a disabled tab occupies an index, and a
+    // reorder that could not pass through it would be a different result.
+    send(tabs()[0], pointer("pointerdown", 50, 15));
+    send(document, pointer("pointermove", 150, 15));
+    expect(disabledItem.getAttribute("data-drop-target")).toBe("true");
+    send(document, pointer("pointerup", 150, 15));
+    expect(onReorder).toHaveBeenCalledWith(["master", "mix", "notes"]);
+  });
+
+  it("no tab advertises a native drag without a cross-window host", () => {
+    const { container } = render(<Tabs items={items} defaultValue="mix" reorderable />);
+    for (const tab of itemsOf(container).map((item) => item.querySelector(".poodle-tabs__tab"))) {
+      expect(tab?.getAttribute("draggable")).toBe("false");
+    }
   });
 });

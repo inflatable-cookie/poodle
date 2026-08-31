@@ -101,6 +101,10 @@ struct PreviewRoot {
     /// provider, so every reorderable specimen on the page shares one session
     /// and none of them can start a second while the first is open.
     drag: poodle_gpui_node_backend::DragDropController,
+    /// This window's provider census. It is what notices a provider that
+    /// stopped rendering, and it is the only place GPUI's own drag can be
+    /// stopped when the controller that owned it is gone.
+    drag_host: poodle_gpui_node_backend::DragDropWindowHost,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -361,6 +365,7 @@ impl PreviewRoot {
             component_page_list: ListState::new(3, ListAlignment::Top, px(256.0)),
             component_page_key: None,
             drag: poodle_gpui_node_backend::DragDropController::new(),
+            drag_host: poodle_gpui_node_backend::DragDropWindowHost::new(),
         }
     }
 }
@@ -438,6 +443,8 @@ impl Render for PreviewRoot {
         // controller — not a backend global — owns capture, hit testing,
         // release, and cancellation.
         let drag = self.drag.clone();
+        let drag_host = self.drag_host.clone();
+        poodle_gpui_node_backend::drag_drop_window_host(&drag_host, || {
         poodle_gpui_node_backend::drag_drop_provider(&drag, || {
         poodle_gpui_node_backend::attach_overlay_host(
             div()
@@ -491,6 +498,7 @@ impl Render for PreviewRoot {
             // containers get a definite content-mask for hit testing.
             .child(self.render_section_content(content_h, cx)),
         )
+        })
         })
     }
 }

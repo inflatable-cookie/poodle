@@ -27,8 +27,8 @@ describe("DockRegion tab pass-throughs (react)", () => {
     expect(tabs.getAttribute("data-active-fill")).toBe("tint");
     expect(tabs.getAttribute("data-bordered")).toBe("false");
     expect(tabs.hasAttribute("data-full-width")).toBe(false);
-    const item = tabs.querySelector(".poodle-tabs__tab")!;
-    expect(item.getAttribute("draggable")).toBe("true");
+    const item = tabs.querySelector(".poodle-tabs__item")!;
+    expect(item.getAttribute("data-reorderable")).toBe("true");
   });
 
   it("forwards all five props to Tabs", () => {
@@ -48,8 +48,8 @@ describe("DockRegion tab pass-throughs (react)", () => {
     expect(tabs.getAttribute("data-active-fill")).toBe("solid");
     expect(tabs.getAttribute("data-bordered")).toBe("true");
     expect(tabs.hasAttribute("data-full-width")).toBe(true);
-    const item = tabs.querySelector(".poodle-tabs__tab")!;
-    expect(item.getAttribute("draggable")).toBe("false");
+    const item = tabs.querySelector(".poodle-tabs__item")!;
+    expect(item.getAttribute("data-reorderable")).toBeNull();
   });
 
   it("tabActiveEdge=none renders no underline; the default keeps it", () => {
@@ -62,12 +62,12 @@ describe("DockRegion tab pass-throughs (react)", () => {
 
   it("tabReorderable=false produces non-reorderable tabs; the default stays reorderable", () => {
     const locked = render(<DockRegion items={items} value="explorer" tabReorderable={false} />);
-    const lockedItem = tabsOf(locked.container).querySelector(".poodle-tabs__tab")!;
-    expect(lockedItem.getAttribute("draggable")).toBe("false");
+    const lockedItem = tabsOf(locked.container).querySelector(".poodle-tabs__item")!;
+    expect(lockedItem.getAttribute("data-reorderable")).toBeNull();
 
     const defaulted = render(<DockRegion items={items} value="explorer" />);
-    const defaultItem = tabsOf(defaulted.container).querySelector(".poodle-tabs__tab")!;
-    expect(defaultItem.getAttribute("draggable")).toBe("true");
+    const defaultItem = tabsOf(defaulted.container).querySelector(".poodle-tabs__item")!;
+    expect(defaultItem.getAttribute("data-reorderable")).toBe("true");
   });
 
   it("applies at every call site: collapsed vertical and horizontal icon-strips", () => {

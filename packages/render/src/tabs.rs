@@ -407,12 +407,20 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
     }
     node.style.descriptor.cursor = CursorHint::Grab;
     let scope = drag_scope(handlers);
+    // The semantic family may be shared by an owning composite; the
+    // registration namespace never is.
+    let kind = spec
+        .drag_subject_kind
+        .clone()
+        .unwrap_or_else(|| crate::drag_drop::reorder_kind(&scope));
+    let owned: Vec<String> = spec.tabs.iter().map(|tab| tab.value.clone()).collect();
     let value = tab.value.clone();
 
     // Source. `on_drag_start` and `on_drag_end` keep their `Fn(&str)` shape:
     // the tab value IS the subject id, so the row's own value answers both
     // without the terminal outcome having to carry a subject back.
-    let mut source = crate::drag_drop::reorder_source(&scope, &value, &tab.label);
+    let mut source =
+        crate::drag_drop::reorder_source_in_family(&scope, &kind, &value, &tab.label);
     if let Some(handler) = &handlers.on_drag_start {
         let handler = Arc::clone(handler);
         source.on_drag_start = Some(Arc::new(move |session| handler(&session.subject.id)));
@@ -427,7 +435,13 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
     // Target. A tab bar reorders along its main axis, so the band rule reads
     // the horizontal fraction; the drop itself reorders onto this tab's index
     // and does not branch on the band.
-    let mut target = crate::drag_drop::reorder_target(&scope, &value, &tab.label);
+    let mut target = crate::drag_drop::reorder_target_in_family(
+        &scope,
+        &kind,
+        &value,
+        &tab.label,
+        owned,
+    );
     target.resolve_position = Some(crate::drag_drop::horizontal_band_resolver(false));
     if let Some(handler) = &handlers.on_drop_target_change {
         let hover = Arc::clone(handler);
@@ -1283,6 +1297,62 @@ mod tests {
         ])
         .with_reorderable(true)
         .with_value("a")
+    }
+
+    /// g16.026. The semantic family is choosable; the registration namespace
+    /// is not. A composite that shares a kind must not also make two strips
+    /// collide, and a strip must refuse a subject it does not own during
+    /// eligibility so an ancestor composite target can win.
+    #[test]
+    fn an_explicit_subject_kind_shares_the_family_without_sharing_ids() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let mut spec = reorder_spec();
+        spec.drag_subject_kind = Some("poodle.dock-panel".to_string());
+        let root = tabs(&spec, &ctx, None, None);
+        let a = tab_of(&root, "a");
+
+        let source = a.interaction.drag_source.as_ref().expect("source");
+        let target = a.interaction.drop_target.as_ref().expect("target");
+
+        assert_eq!(source.subject.kind, "poodle.dock-panel");
+        assert_eq!(source.subject.id, "a", "the tab value is the subject id");
+        assert_eq!(
+            target.accepted_kinds,
+            vec!["poodle.dock-panel".to_string()],
+            "the strip joins the composite's family"
+        );
+
+        // Ids stay instance-scoped, so a second strip with the same values
+        // cannot collide with this one.
+        assert_eq!(source.source_id, "tabs:source:a");
+        assert_eq!(target.target_id, "tabs:target:a");
+
+        let can_drop = target.can_drop.as_ref().expect("eligibility");
+        let intent = poodle_node::DropIntent {
+            target_id: target.target_id.clone(),
+            position: "after".to_string(),
+            operation: poodle_node::DragOperation::Move,
+        };
+        let subject = |id: &str| poodle_node::DragSubject {
+            kind: "poodle.dock-panel".to_string(),
+            id: id.to_string(),
+        };
+
+        assert!(
+            matches!(
+                can_drop(&intent, &subject("b")),
+                poodle_node::DropEligibility::Accepted { .. }
+            ),
+            "a row this strip owns is eligible"
+        );
+        assert!(
+            matches!(
+                can_drop(&intent, &subject("from-another-strip")),
+                poodle_node::DropEligibility::Rejected { .. }
+            ),
+            "a same-family row from elsewhere is refused during eligibility"
+        );
     }
 
     #[test]

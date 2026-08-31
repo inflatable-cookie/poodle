@@ -1915,6 +1915,1164 @@ fn scoped_drag_tree(scope: &str, trace: &Arc<Mutex<Vec<String>>>) -> Node {
     row.child(source).child(zone)
 }
 
+// ── Cross-window host bridge (g16.026) ─────────────────────────────────────
+//
+// A stub host, driven by the test. It records every command the controller
+// sends it and answers on demand, because most of these claims are about what
+// the controller did *not* do — start an unarmed gesture, commit a stale
+// projection, act on a completion for a session that is gone.
+
+#[derive(Default)]
+struct HostLog {
+    prepares: Vec<String>,
+    starts: Vec<String>,
+    stops: Vec<String>,
+    cancels: Vec<(String, poodle_node::DragCancelReason)>,
+    commits: Vec<String>,
+    picks: Vec<String>,
+    aborts: Vec<poodle_node::DragCancelReason>,
+}
+
+type PendingPrepare = (
+    poodle_node::CrossWindowAbort,
+    poodle_node::CrossWindowPrepareComplete,
+);
+
+#[derive(Default)]
+struct HostStubState {
+    log: HostLog,
+    pending_prepare: Vec<PendingPrepare>,
+    terminal: Option<poodle_node::CrossWindowTerminal>,
+    listener: Option<Box<dyn Fn(poodle_node::CrossWindowDragTargetEvent) + Send>>,
+    pending_commit: Option<(
+        poodle_node::CrossWindowAbort,
+        poodle_node::CrossWindowCommitComplete,
+    )>,
+    pending_pick: Option<(
+        poodle_node::CrossWindowDragReceipt,
+        poodle_node::CrossWindowAbort,
+        Box<dyn FnOnce(Option<poodle_node::CrossWindowDragProjection>) + Send>,
+    )>,
+}
+
+#[derive(Clone, Default)]
+struct HostStub {
+    state: Arc<Mutex<HostStubState>>,
+    keyboard_picker: bool,
+}
+
+impl HostStub {
+    fn log<T>(&self, read: impl FnOnce(&HostLog) -> T) -> T {
+        read(&self.state.lock().expect("host state").log)
+    }
+
+    /// Answer the n-th outstanding preparation.
+    fn settle_prepare(&self, index: usize, token: Option<&str>) {
+        let entry = {
+            let mut state = self.state.lock().expect("host state");
+            if index >= state.pending_prepare.len() {
+                return;
+            }
+            state.pending_prepare.remove(index)
+        };
+        let (abort, complete) = entry;
+        // A real host watches the signal; this one records that it fired and
+        // answers anyway, so the *controller's* handling of a late answer is
+        // what the test measures.
+        if let Some(reason) = abort.reason() {
+            self.state.lock().expect("host state").log.aborts.push(reason);
+        }
+        complete(token.map(|token| poodle_node::CrossWindowDragReceipt {
+            protocol_version: poodle_node::CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
+            token: token.to_string(),
+        }));
+    }
+
+    fn report_terminal(&self, outcome: poodle_node::DragTerminalOutcome) {
+        let terminal = {
+            let state = self.state.lock().expect("host state");
+            state.terminal.is_some()
+        };
+        if !terminal {
+            return;
+        }
+        let state = self.state.lock().expect("host state");
+        if let Some(callback) = state.terminal.as_ref() {
+            callback(outcome);
+        }
+    }
+
+    fn project(&self, projection: poodle_node::CrossWindowDragProjection) {
+        let state = self.state.lock().expect("host state");
+        if let Some(listener) = state.listener.as_ref() {
+            listener(poodle_node::CrossWindowDragTargetEvent::Projection { projection });
+        }
+    }
+
+    fn cancel_from_host(
+        &self,
+        receipt: poodle_node::CrossWindowDragReceipt,
+        reason: poodle_node::DragCancelReason,
+    ) {
+        let state = self.state.lock().expect("host state");
+        if let Some(listener) = state.listener.as_ref() {
+            listener(poodle_node::CrossWindowDragTargetEvent::Cancelled { receipt, reason });
+        }
+    }
+
+    fn settle_commit(&self, result: poodle_node::DragDropCommitResult) {
+        let entry = self.state.lock().expect("host state").pending_commit.take();
+        if let Some((abort, complete)) = entry {
+            if let Some(reason) = abort.reason() {
+                self.state.lock().expect("host state").log.aborts.push(reason);
+            }
+            complete(result);
+        }
+    }
+
+    fn settle_pick(&self, projection: Option<poodle_node::CrossWindowDragProjection>) {
+        let entry = self.state.lock().expect("host state").pending_pick.take();
+        if let Some((_receipt, abort, complete)) = entry {
+            if let Some(reason) = abort.reason() {
+                self.state.lock().expect("host state").log.aborts.push(reason);
+            }
+            complete(projection);
+        }
+    }
+}
+
+impl poodle_node::CrossWindowDragSourceBridge for HostStub {
+    fn capabilities(&self) -> poodle_node::CrossWindowDragCapabilities {
+        poodle_node::CrossWindowDragCapabilities {
+            pointer: true,
+            touch: false,
+            keyboard_target_picker: self.keyboard_picker,
+        }
+    }
+
+    fn prepare(
+        &self,
+        request: poodle_node::CrossWindowDragPrepareRequest,
+        abort: poodle_node::CrossWindowAbort,
+        complete: poodle_node::CrossWindowPrepareComplete,
+    ) {
+        let mut state = self.state.lock().expect("host state");
+        state.log.prepares.push(request.session_id);
+        state.pending_prepare.push((abort, complete));
+    }
+
+    fn start(
+        &self,
+        receipt: poodle_node::CrossWindowDragReceipt,
+        transport: poodle_node::CrossWindowDragTransport,
+        on_terminal: poodle_node::CrossWindowTerminal,
+    ) -> poodle_node::CrossWindowCleanup {
+        let token = receipt.token.clone();
+        {
+            let mut state = self.state.lock().expect("host state");
+            state.log.starts.push(format!("{token}:{transport:?}"));
+            state.terminal = Some(on_terminal);
+        }
+        let stub = self.clone();
+        Box::new(move || {
+            let mut state = stub.state.lock().expect("host state");
+            state.terminal = None;
+            state.log.stops.push(token);
+        })
+    }
+
+    fn cancel(
+        &self,
+        receipt: poodle_node::CrossWindowDragReceipt,
+        reason: poodle_node::DragCancelReason,
+    ) {
+        self.state
+            .lock()
+            .expect("host state")
+            .log
+            .cancels
+            .push((receipt.token, reason));
+    }
+}
+
+impl poodle_node::CrossWindowDragTargetBridge for HostStub {
+    fn capabilities(&self) -> poodle_node::CrossWindowDragCapabilities {
+        poodle_node::CrossWindowDragCapabilities {
+            pointer: true,
+            touch: false,
+            keyboard_target_picker: self.keyboard_picker,
+        }
+    }
+
+    fn subscribe(
+        &self,
+        listener: Box<dyn Fn(poodle_node::CrossWindowDragTargetEvent) + Send>,
+    ) -> poodle_node::CrossWindowCleanup {
+        self.state.lock().expect("host state").listener = Some(listener);
+        let stub = self.clone();
+        Box::new(move || {
+            stub.state.lock().expect("host state").listener = None;
+        })
+    }
+
+    fn commit(
+        &self,
+        request: poodle_node::CrossWindowDragCommitRequest,
+        abort: poodle_node::CrossWindowAbort,
+        complete: poodle_node::CrossWindowCommitComplete,
+    ) {
+        let mut state = self.state.lock().expect("host state");
+        state.log.commits.push(format!(
+            "{}:{}:{}",
+            request.receipt.token, request.intent.target_id, request.intent.position
+        ));
+        state.pending_commit = Some((abort, complete));
+    }
+
+    fn pick_target(
+        &self,
+        receipt: poodle_node::CrossWindowDragReceipt,
+        abort: poodle_node::CrossWindowAbort,
+        complete: Box<dyn FnOnce(Option<poodle_node::CrossWindowDragProjection>) + Send>,
+    ) -> bool {
+        if !self.keyboard_picker {
+            return false;
+        }
+        // No special case for a receipt that names nothing: a host should never
+        // be asked to pick outside a transaction, and a stub that tolerated it
+        // would hide exactly that.
+        let mut state = self.state.lock().expect("host state");
+        state.log.picks.push(receipt.token.clone());
+        state.pending_pick = Some((receipt, abort, complete));
+        true
+    }
+}
+
+fn receipt_for(token: &str) -> poodle_node::CrossWindowDragReceipt {
+    poodle_node::CrossWindowDragReceipt {
+        protocol_version: poodle_node::CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
+        token: token.to_string(),
+    }
+}
+
+fn projection_for(
+    token: &str,
+    target: Option<&str>,
+) -> poodle_node::CrossWindowDragProjection {
+    poodle_node::CrossWindowDragProjection {
+        receipt: poodle_node::CrossWindowDragReceipt {
+            protocol_version: poodle_node::CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
+            token: token.to_string(),
+        },
+        source_id: "remote-source".to_string(),
+        source_label: "Remote".to_string(),
+        subject: poodle_node::DragSubject {
+            kind: CUSTOM_SUBJECT_KIND.to_string(),
+            id: "remote-row".to_string(),
+        },
+        operation: poodle_node::DragOperation::Move,
+        input_kind: poodle_node::CrossWindowDragInputKind::Pointer,
+        target_id: target.map(|value| value.to_string()),
+        position: target.map(|_| "after".to_string()),
+    }
+}
+
+/// g16.026. The source half of the split, end to end: preparation runs before
+/// activation, the gesture cannot start until the receipt arms, `start`
+/// installs the one authoritative terminal, and the host's refusal — not the
+/// native end — is what ends the session.
+#[test]
+fn a_bridged_gpui_source_prepares_before_activation_and_ends_on_the_host_terminal() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let mut node = scoped_drag_tree("xw", &trace);
+        attach_bridge(&mut node, "xw-source", Arc::new(host.clone()));
+        let node = Arc::new(Mutex::new(node));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let source = payload_frac("xw-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+
+        // Preparation ran, and the gesture is *not* dragging: the receipt has
+        // not armed, so nothing may start.
+        assert_eq!(host.log(|log| log.prepares.len()), 1);
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Preparing);
+        assert!(host.log(|log| log.starts.is_empty()));
+
+        host.settle_prepare(0, Some("lease-1"));
+        driver.draw_frame();
+
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(
+            host.log(|log| log.starts.clone()),
+            vec!["lease-1:WindowCapture".to_string()],
+            "one authoritative terminal subscription"
+        );
+
+        // A release is not a result. The host still owns the transaction.
+        driver.pointer_release(payload_frac("xw-zone-a", 0.5, 0.75));
+        driver.draw_frame();
+
+        host.report_terminal(poodle_node::DragTerminalOutcome::Rejected {
+            reason: Some("lease expired".to_string()),
+        });
+        driver.draw_frame();
+
+        let entries = trace.lock().expect("trace").clone();
+        let terminals: Vec<&String> = entries
+            .iter()
+            .filter(|entry| entry.starts_with("end:"))
+            .collect();
+        assert_eq!(terminals.len(), 1, "exactly one terminal: {entries:?}");
+        assert!(
+            terminals[0].contains("rejected"),
+            "the host's refusal is the result, not a cancellation: {:?}",
+            terminals[0]
+        );
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert!(
+            host.log(|log| log.cancels.is_empty()),
+            "the host closed its own transaction; Poodle does not cancel it again"
+        );
+        assert_eq!(host.log(|log| log.stops.clone()), vec!["lease-1".to_string()]);
+
+        // A repeat is inert.
+        host.report_terminal(poodle_node::DragTerminalOutcome::Committed {
+            intent: poodle_node::DropIntent {
+                target_id: "xw-zone-a".to_string(),
+                position: "after".to_string(),
+                operation: poodle_node::DragOperation::Move,
+            },
+        });
+        driver.draw_frame();
+        assert_eq!(
+            trace
+                .lock()
+                .expect("trace")
+                .iter()
+                .filter(|entry| entry.starts_with("end:"))
+                .count(),
+            1
+        );
+    });
+}
+
+/// g16.026. A superseded preparation is aborted, its late receipt is handed
+/// straight back, and it cannot arm the session that replaced it.
+#[test]
+fn a_superseded_gpui_preparation_is_aborted_and_its_late_receipt_returned() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let mut node = scoped_drag_tree("xw", &trace);
+        attach_bridge(&mut node, "xw-source", Arc::new(host.clone()));
+        let node = Arc::new(Mutex::new(node));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let source = payload_frac("xw-source", 0.5, 0.5);
+
+        // A first gesture prepares, then is abandoned before it ever arms.
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        assert_eq!(host.log(|log| log.prepares.len()), 1);
+        driver.dispatch_key_raw("escape");
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+
+        // A second gesture prepares afresh.
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        assert_eq!(host.log(|log| log.prepares.len()), 2);
+        let first_session = host.log(|log| log.prepares[0].clone());
+        let second_session = host.log(|log| log.prepares[1].clone());
+        assert_ne!(first_session, second_session);
+
+        // The first host answer arrives late. It cannot arm the second session,
+        // and the lease it allocated is handed back rather than leaked.
+        host.settle_prepare(0, Some("stale-lease"));
+        driver.draw_frame();
+
+        assert!(
+            host.log(|log| log.aborts.contains(&poodle_node::DragCancelReason::Escape)),
+            "the abandoned preparation was told to stop: {:?}",
+            host.log(|log| log.aborts.clone())
+        );
+        assert_eq!(
+            host.log(|log| log.cancels.clone()),
+            vec![(
+                "stale-lease".to_string(),
+                poodle_node::DragCancelReason::Superseded
+            )],
+            "the late lease is returned exactly once"
+        );
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Preparing,
+            "the live session is still waiting for its own receipt"
+        );
+        assert!(host.log(|log| log.starts.is_empty()));
+    });
+}
+
+/// g16.026. The window half of the split: an incoming projection starts one
+/// session, this window re-runs its own eligibility, and the commit goes
+/// through the host bridge — never through a local drop callback.
+#[test]
+fn an_incoming_gpui_projection_revalidates_locally_and_commits_through_the_host() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_cross_window_target_bridge(Arc::new(host.clone()), cx));
+
+        let node = Arc::new(Mutex::new(scoped_drag_tree("xw", &trace)));
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        // A target this window does not have: refused, and no session survives
+        // holding an intent for it.
+        host.project(projection_for("lease-1", Some("not-in-this-window")));
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(
+            controller.snapshot().target_id, None,
+            "a target this window does not have resolves to no intent at all"
+        );
+
+        // A target it does have.
+        host.project(projection_for("lease-1", Some("xw-zone-a")));
+        driver.draw_frame();
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("xw-zone-a")
+        );
+        assert_eq!(
+            controller.snapshot().target_posture,
+            Some(poodle_gpui_node_backend::DragDropTargetPosture::Accepted),
+            "accepted, not merely named: the snapshot reports a refusal the same way"
+        );
+
+        driver.pointer_release(payload_frac("xw-zone-a", 0.5, 0.75));
+        driver.draw_frame();
+
+        assert_eq!(
+            host.log(|log| log.commits.clone()),
+            vec!["lease-1:xw-zone-a:after".to_string()],
+            "the host bridge commits, exactly once"
+        );
+
+        host.settle_commit(poodle_node::DragDropCommitResult::Committed);
+        driver.draw_frame();
+
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        let entries = trace.lock().expect("trace").clone();
+        assert!(
+            !entries.iter().any(|entry| entry.starts_with("drop:")),
+            "a cross-window drop never reaches a local drop callback: {entries:?}"
+        );
+    });
+}
+
+/// g16.026. A commit the window abandoned mid-flight, and a pick that comes
+/// back naming another transaction. Both are refused, and cleanup runs once.
+#[test]
+fn a_cancelled_gpui_commit_and_a_mismatched_pick_are_both_inert() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub {
+            keyboard_picker: true,
+            ..HostStub::default()
+        };
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_cross_window_target_bridge(Arc::new(host.clone()), cx));
+
+        let node = Arc::new(Mutex::new(scoped_drag_tree("xw", &trace)));
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        // A keyboard projection asks the host to pick, bound to this receipt.
+        let mut keyboard = projection_for("lease-1", None);
+        keyboard.input_kind = poodle_node::CrossWindowDragInputKind::Keyboard;
+        host.project(keyboard);
+        driver.draw_frame();
+        assert_eq!(
+            host.log(|log| log.picks.clone()),
+            vec!["lease-1".to_string()],
+            "the picker is bound to the exact receipt"
+        );
+
+        let live_session = controller.snapshot().session_id.clone();
+
+        // The host answers with a projection for a *different* transaction.
+        // Refusing it at the picker is what leaves the live transaction alone;
+        // letting it through would supersede a transaction this window is
+        // still holding, which is the damage the receipt binding prevents.
+        host.settle_pick(Some(projection_for("someone-elses-lease", Some("xw-zone-a"))));
+        driver.draw_frame();
+        assert_eq!(
+            controller.snapshot().target_id,
+            None,
+            "a pick naming another receipt is refused, not trusted"
+        );
+        assert_eq!(
+            controller.snapshot().session_id, live_session,
+            "and the live transaction is untouched"
+        );
+
+        // Proof that it really is untouched: the host can still project into it.
+        let mut still_live = projection_for("lease-1", Some("xw-zone-a"));
+        still_live.input_kind = poodle_node::CrossWindowDragInputKind::Keyboard;
+        host.project(still_live);
+        driver.draw_frame();
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("xw-zone-a"),
+            "the transaction the mismatched pick did not disturb still resolves"
+        );
+
+        // A keyboard transaction is not released by a mouse-up, so the commit
+        // case is its own pointer transaction — a different receipt, as it
+        // would be in a real host.
+        host.cancel_from_host(receipt_for("lease-1"), poodle_node::DragCancelReason::Explicit);
+        driver.draw_frame();
+
+        host.project(projection_for("lease-2", Some("xw-zone-a")));
+        driver.draw_frame();
+        driver.pointer_release(payload_frac("xw-zone-a", 0.5, 0.75));
+        driver.draw_frame();
+        assert_eq!(
+            host.log(|log| log.commits.clone()),
+            vec!["lease-2:xw-zone-a:after".to_string()]
+        );
+
+        host.cancel_from_host(receipt_for("lease-2"), poodle_node::DragCancelReason::WindowLost);
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+
+        // The host's late answer to the abandoned commit changes nothing — and,
+        // more to the point, the host was *told* to stop. A window that
+        // abandons a request without signalling it leaves the host working on
+        // a transaction nobody is waiting for.
+        host.settle_commit(poodle_node::DragDropCommitResult::Committed);
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert_eq!(
+            host.log(|log| log.aborts.clone()),
+            vec![poodle_node::DragCancelReason::WindowLost],
+            "the abandoned commit carried the reason it was abandoned for"
+        );
+
+        let entries = trace.lock().expect("trace").clone();
+        assert!(
+            !entries.iter().any(|entry| entry.starts_with("drop:")),
+            "no local drop callback ran: {entries:?}"
+        );
+    });
+}
+
+
+/// g16.026 round 2. A late preparation receipt goes back to the host that
+/// allocated it, and to no other.
+///
+/// Two sources with two *different* hosts. A prepares and is abandoned; B
+/// prepares and is still live when A's host finally answers. Returning A's
+/// lease through B would both leak A's and issue a command B never made — and
+/// a single shared stub cannot tell the two apart, which is why this one uses
+/// two.
+#[test]
+fn a_late_receipt_is_returned_to_the_host_that_allocated_it() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host_a = HostStub::default();
+        let host_b = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let mut row = Node::container();
+        row.id = Some("xw-pair".to_string());
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(240.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        let mut left = scoped_drag_tree("a", &trace);
+        attach_bridge(&mut left, "a-source", Arc::new(host_a.clone()));
+        let mut right = scoped_drag_tree("b", &trace);
+        attach_bridge(&mut right, "b-source", Arc::new(host_b.clone()));
+        let node = Arc::new(Mutex::new(row.child(left).child(right)));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        // A prepares, then is abandoned before it arms.
+        let a = payload_frac("a-source", 0.5, 0.5);
+        driver.pointer_press(a);
+        driver.pointer_drag(point(px(f32::from(a.x) + 4.0), a.y));
+        assert_eq!(host_a.log(|log| log.prepares.len()), 1);
+        driver.dispatch_key_raw("escape");
+        driver.draw_frame();
+
+        // B prepares and stays live.
+        let b = payload_frac("b-source", 0.5, 0.5);
+        driver.pointer_press(b);
+        driver.pointer_drag(point(px(f32::from(b.x) + 4.0), b.y));
+        assert_eq!(host_b.log(|log| log.prepares.len()), 1);
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Preparing);
+
+        // A's host answers late.
+        host_a.settle_prepare(0, Some("lease-a"));
+        driver.drain();
+
+        assert_eq!(
+            host_a.log(|log| log.cancels.clone()),
+            vec![(
+                "lease-a".to_string(),
+                poodle_node::DragCancelReason::Superseded
+            )],
+            "the allocating host gets its lease back, exactly once"
+        );
+        assert!(
+            host_b.log(|log| log.cancels.is_empty()),
+            "the live host is issued no command it never made: {:?}",
+            host_b.log(|log| log.cancels.clone())
+        );
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Preparing,
+            "B's preparation is untouched and still waiting for its own receipt"
+        );
+        assert!(host_b.log(|log| log.starts.is_empty()));
+    });
+}
+
+/// g16.026 round 2. An asynchronous host answer wakes the window by itself.
+///
+/// The contract explicitly permits a host to answer whenever its lease
+/// resolves. Queueing the answer and waiting for the next incidental frame
+/// leaves an otherwise idle window in `Preparing` forever, so the only thing
+/// this test does after the answer is let the async runtime run — no draw, no
+/// unrelated input.
+#[test]
+fn an_asynchronous_host_answer_advances_the_session_without_a_manufactured_frame() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let mut node = scoped_drag_tree("xw", &trace);
+        attach_bridge(&mut node, "xw-source", Arc::new(host.clone()));
+        let node = Arc::new(Mutex::new(node));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let source = payload_frac("xw-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Preparing);
+
+        host.settle_prepare(0, Some("lease-1"));
+
+        // The only thing that happens next is the async runtime running.
+        driver.drain();
+
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Dragging,
+            "the host's own answer woke the window"
+        );
+        assert_eq!(
+            host.log(|log| log.starts.clone()),
+            vec!["lease-1:WindowCapture".to_string()]
+        );
+
+        // And the terminal takes the same route.
+        host.report_terminal(poodle_node::DragTerminalOutcome::Rejected {
+            reason: Some("lease expired".to_string()),
+        });
+        driver.drain();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+    });
+}
+
+/// g16.026 round 2. Installing a target bridge asks the host for nothing.
+///
+/// A capability probe at installation is an observable request outside any
+/// transaction, and it forces implementations to special-case a receipt that
+/// names nothing. The declared capability is trusted until a real keyboard
+/// pick needs it.
+#[test]
+fn installing_a_target_bridge_makes_no_host_request() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub {
+            keyboard_picker: true,
+            ..HostStub::default()
+        };
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_cross_window_target_bridge(Arc::new(host.clone()), cx));
+
+        let node = Arc::new(Mutex::new(scoped_drag_tree("xw", &trace)));
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+        driver.drain();
+
+        assert!(
+            host.log(|log| log.picks.is_empty()),
+            "installation picked nothing: {:?}",
+            host.log(|log| log.picks.clone())
+        );
+
+        // The picker is reached on a real request, bound to a live receipt.
+        let mut keyboard = projection_for("lease-1", None);
+        keyboard.input_kind = poodle_node::CrossWindowDragInputKind::Keyboard;
+        host.project(keyboard);
+        driver.drain();
+        assert_eq!(host.log(|log| log.picks.clone()), vec!["lease-1".to_string()]);
+    });
+}
+
+/// g16.026 round 2. Replacing the window's bridge mid-projection ends the
+/// transaction the outgoing host owned.
+///
+/// The outgoing host is about to stop being subscribed, so a projection left
+/// open behind it is a session nothing can cancel — and its receipt must never
+/// reach the incoming host, which never issued it.
+#[test]
+fn replacing_the_target_bridge_ends_the_outgoing_transaction() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host_a = HostStub::default();
+        let host_b = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_cross_window_target_bridge(Arc::new(host_a.clone()), cx));
+
+        let node = Arc::new(Mutex::new(scoped_drag_tree("xw", &trace)));
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        host_a.project(projection_for("lease-a", Some("xw-zone-a")));
+        driver.drain();
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("xw-zone-a")
+        );
+
+        // A publishes again — this one is only *queued*, not yet drained.
+        host_a.project(projection_for("lease-a-late", Some("xw-zone-a")));
+
+        // Swap the window's bridge while A's transaction is live and A's
+        // second message is still in flight.
+        driver.update_app(|cx| {
+            controller.set_cross_window_target_bridge(Arc::new(host_b.clone()), cx)
+        });
+        driver.drain();
+
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Idle,
+            "the outgoing host's transaction is ended, not stranded"
+        );
+        assert_eq!(
+            controller.snapshot().target_id, None,
+            "and A's queued news did not start a transaction under B"
+        );
+
+        // A release now cannot commit A's receipt anywhere, least of all to B.
+        driver.pointer_release(payload_frac("xw-zone-a", 0.5, 0.75));
+        driver.drain();
+        assert!(
+            host_b.log(|log| log.commits.is_empty()),
+            "B is never sent a receipt it did not issue: {:?}",
+            host_b.log(|log| log.commits.clone())
+        );
+        assert!(host_a.log(|log| log.commits.is_empty()));
+
+        // B still works on its own terms, with its own receipt.
+        host_b.project(projection_for("lease-b", Some("xw-zone-a")));
+        driver.drain();
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("xw-zone-a"),
+            "the replacement is live, not merely inert"
+        );
+        driver.pointer_release(payload_frac("xw-zone-a", 0.5, 0.75));
+        driver.drain();
+        assert_eq!(
+            host_b.log(|log| log.commits.clone()),
+            vec!["lease-b:xw-zone-a:after".to_string()]
+        );
+        assert!(host_a.log(|log| log.commits.is_empty()));
+    });
+}
+
+/// Attach a host source bridge to one registered source in a built tree.
+fn attach_bridge(
+    node: &mut Node,
+    source_id: &str,
+    bridge: Arc<dyn poodle_node::CrossWindowDragSourceBridge>,
+) {
+    if let Some(source) = node.interaction.drag_source.as_mut() {
+        if source.source_id == source_id {
+            source.cross_window_source_bridge = Some(bridge);
+            return;
+        }
+    }
+    for child in node.children.iter_mut() {
+        attach_bridge(child, source_id, Arc::clone(&bridge));
+    }
+}
+
+
+/// g16.026, carried from g16.025. **Two windows, no false cancel.**
+///
+/// This is the counterexample that sank the first attempt. That version kept a
+/// thread-global "did this controller sweep this frame" mark, so rendering
+/// window A reset and swept controllers owned by window B — and cancelled a
+/// live drag in B merely because B did not render during A's frame.
+///
+/// Here B starts a real drag and then simply stops being drawn, which is what
+/// a background window does. A is then mounted and drawn repeatedly. B's
+/// session, registrations, and census must all survive it.
+#[test]
+fn one_window_frame_cannot_cancel_another_windows_live_drag() {
+    run_headless(|cx| {
+        let background_trace = Arc::new(Mutex::new(Vec::new()));
+        let background = poodle_gpui_node_backend::DragDropController::new();
+        let background_host;
+
+        {
+            let node = Arc::new(Mutex::new(scoped_drag_tree("bg", &background_trace)));
+            let build = {
+                let controller = background.clone();
+                let node = Arc::clone(&node);
+                Rc::new(move || {
+                    let tree = node.lock().expect("bg lock").clone();
+                    use gpui::{IntoElement as _, ParentElement as _};
+                    gpui::div()
+                        .child(poodle_gpui_node_backend::drag_drop_provider(
+                            &controller,
+                            || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                        ))
+                        .into_any_element()
+                }) as Rc<dyn Fn() -> gpui::AnyElement>
+            };
+
+            let mut driver = HeadlessDriver::new_element(cx, build);
+            driver.draw_frame();
+            background_host = driver.drag_host();
+
+            let source = payload_frac("bg-source", 0.5, 0.5);
+            driver.pointer_press(source);
+            driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+            driver.pointer_drag(payload_frac("bg-zone-a", 0.5, 0.75));
+
+            assert_eq!(
+                background.snapshot().phase,
+                DragSessionPhase::Dragging,
+                "the background window is mid-drag before the other window opens"
+            );
+            assert_eq!(
+                background.snapshot().target_id.as_deref(),
+                Some("bg-zone-a")
+            );
+            // The mount host's own provider plus the nested one under test.
+            assert_eq!(background_host.census_len(), 2);
+        }
+        // The driver is gone; the window and its live drag are not. From here
+        // the background window never draws another frame.
+
+        let foreground_trace = Arc::new(Mutex::new(Vec::new()));
+        let foreground = poodle_gpui_node_backend::DragDropController::new();
+        let node = Arc::new(Mutex::new(scoped_drag_tree("fg", &foreground_trace)));
+        let build = {
+            let controller = foreground.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("fg lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        for _ in 0..5 {
+            driver.draw_frame();
+        }
+
+        assert_eq!(
+            background.snapshot().phase,
+            DragSessionPhase::Dragging,
+            "another window's frames must not cancel a live drag; trace={:?} census={}",
+            background_trace.lock().expect("trace"),
+            background_host.census_len()
+        );
+        assert_eq!(
+            background.snapshot().target_id.as_deref(),
+            Some("bg-zone-a"),
+            "another window's frames must not prune the live registrations"
+        );
+        assert_eq!(
+            background_host.census_len(),
+            2,
+            "a window's census belongs to that window and nothing else may empty it"
+        );
+        assert!(
+            !background_trace
+                .lock()
+                .expect("trace")
+                .iter()
+                .any(|entry| entry.starts_with("end:")),
+            "no terminal ran in the background window: {:?}",
+            background_trace.lock().expect("trace")
+        );
+
+        // And the foreground window built and swept normally while it did so.
+        // Its own drag is not started here: GPUI's active drag is app-wide, so
+        // a second simultaneous native gesture would be testing the runtime
+        // rather than the census.
+        assert_eq!(driver.drag_host().census_len(), 2);
+        assert_eq!(foreground.source_ids(), vec!["fg-source".to_string()]);
+        assert_eq!(foreground.snapshot().phase, DragSessionPhase::Idle);
+    });
+}
+
+/// g16.026, carried from g16.025. **Native drag actually stops.**
+///
+/// A controller can only close a session during its own per-frame sweep, and
+/// an unmounted provider never sweeps again — so removing a provider mid-drag
+/// used to leave a `Dragging` session, live registrations, no terminal, and
+/// GPUI's own drag still in flight. Semantic idle is not enough here: the
+/// runtime's active drag and preview have to be gone too, which is the second
+/// claim the earlier attempt could not make.
+#[test]
+fn unmounting_a_provider_mid_drag_cancels_it_and_stops_the_native_drag() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let inner = poodle_gpui_node_backend::DragDropController::new();
+        let mounted = Arc::new(Mutex::new(true));
+        let node = Arc::new(Mutex::new(scoped_drag_tree("inner", &trace)));
+
+        let build = {
+            let controller = inner.clone();
+            let node = Arc::clone(&node);
+            let mounted = Arc::clone(&mounted);
+            Rc::new(move || {
+                use gpui::{IntoElement as _, ParentElement as _};
+                let root = gpui::div();
+                if !*mounted.lock().expect("mounted lock") {
+                    return root.into_any_element();
+                }
+                let tree = node.lock().expect("inner lock").clone();
+                root.child(poodle_gpui_node_backend::drag_drop_provider(
+                    &controller,
+                    || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                ))
+                .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+        let host = driver.drag_host();
+        // Two providers in this window: the mount host's own, and the nested
+        // one under test.
+        assert_eq!(host.census_len(), 2);
+
+        let source = payload_frac("inner-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        driver.pointer_drag(payload_frac("inner-zone-a", 0.5, 0.75));
+
+        assert_eq!(inner.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(inner.source_ids(), vec!["inner-source".to_string()]);
+        assert!(
+            driver.has_active_native_drag(),
+            "the runtime owns a drag before the provider disappears"
+        );
+
+        // The host removes the provider mid-drag.
+        *mounted.lock().expect("mounted lock") = true;
+        *mounted.lock().expect("mounted lock") = false;
+        driver.draw_frame();
+
+        assert_eq!(
+            inner.snapshot().phase,
+            DragSessionPhase::Idle,
+            "an absent provider's session is cancelled once"
+        );
+        assert!(
+            inner.source_ids().is_empty() && inner.target_ids().is_empty(),
+            "its registrations are dropped: {:?} {:?}",
+            inner.source_ids(),
+            inner.target_ids()
+        );
+        assert!(
+            !driver.has_active_native_drag(),
+            "semantic idle is not enough: GPUI's own drag and preview must be gone too"
+        );
+        assert_eq!(host.census_len(), 1, "the host forgets the departed provider");
+
+        let entries = trace.lock().expect("trace").clone();
+        let terminals: Vec<&String> = entries
+            .iter()
+            .filter(|entry| entry.starts_with("end:"))
+            .collect();
+        assert_eq!(
+            terminals.len(),
+            1,
+            "exactly one terminal, and it is a cancellation: {entries:?}"
+        );
+        assert!(terminals[0].contains("cancel"), "{:?}", terminals[0]);
+
+        // A second frame with the provider still absent changes nothing.
+        driver.draw_frame();
+        assert_eq!(
+            trace
+                .lock()
+                .expect("trace")
+                .iter()
+                .filter(|entry| entry.starts_with("end:"))
+                .count(),
+            1,
+            "the cancellation does not repeat once the provider is forgotten"
+        );
+    });
+}
+
+
 /// g16.025. The keyboard route creates the same semantic session as the
 /// pointer: pickup on a focused opted-in source, ordered traversal, one
 /// revalidated commit, and the same terminal cleanup. It never calls the
@@ -14493,7 +15651,10 @@ fn the_pickup_key_cancels_a_session_that_never_chose_a_target() {
 
         driver.dispatch_key_raw("space");
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
-        assert_eq!(controller.snapshot().target_id, None);
+        assert_eq!(
+            controller.snapshot().target_id, None,
+            "a target this window does not have resolves to no intent at all"
+        );
 
         // Straight back down, no traversal.
         driver.dispatch_key_raw("space");
