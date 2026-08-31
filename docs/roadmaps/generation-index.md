@@ -26,10 +26,11 @@ Updated: 2026-08-31
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: review and close the in-flight `g16.026` worker PR. Then resolve
-    `g16.033`'s structured-code-versus-host-message gate before dispatch while
-    keeping `g16.027` as the next ordered drag card. Component continuation
-    remains paused at the separate EditableLabel decision gate.
+  - Next move: review and close the in-flight `g16.026` worker PR, whose
+    implementation is complete and awaiting review. Then resolve `g16.033`'s
+    structured-code-versus-host-message gate before dispatch while keeping
+    `g16.027` as the next ordered drag card. Component continuation remains
+    paused at the separate EditableLabel decision gate.
 
 ## Latest Completed Track
 

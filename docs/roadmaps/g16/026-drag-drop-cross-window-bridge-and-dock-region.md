@@ -1,8 +1,9 @@
 # g16.026 — Drag-And-Drop Cross-Window Bridge, Tabs, And DockRegion
 
-Status: in progress — Paseo worker dispatched from pushed main; public migration,
-paired bridge API, Tabs subject-family composition, and GPUI window ownership
-fixed
+Status: implementation complete — awaiting orchestrator review; public
+migration, paired bridge API, Tabs subject-family composition, and GPUI window
+ownership all landed
+Log: `../../logs/2026-08/20260831-g16-026-drag-drop-cross-window-bridge.md`
 Depends on: `025-drag-drop-rust-gpui-substrate.md`
 Governing refs: architecture 011, spec 069, and the Tabs and DockRegion
 contracts
@@ -138,36 +139,36 @@ or wrappers. Preserve `onPanelDrop`'s semantic purpose, make
 
 ## Acceptance Criteria
 
-- [ ] Paired TypeScript/Rust bridge contracts carry only opaque authority.
-- [ ] The public names and split ownership match the locked API above and spec
+- [x] Paired TypeScript/Rust bridge contracts carry only opaque authority.
+- [x] The public names and split ownership match the locked API above and spec
       069 exactly; there is no unified or DockRegion-specific replacement
       controller.
-- [ ] Cross-window source preparation is bound to one kernel session, starts
+- [x] Cross-window source preparation is bound to one kernel session, starts
       before activation, and ignores late or repeated completions.
-- [ ] Host target projection uses the existing registry and revalidates the
+- [x] Host target projection uses the existing registry and revalidates the
       exact live target before one authoritative commit.
-- [ ] The bounded DataTransfer adapter writes and reads only protocol version
+- [x] The bounded DataTransfer adapter writes and reads only protocol version
       plus opaque token and rejects malformed, oversized, future, or mismatched
       envelopes.
-- [ ] Svelte and React Tabs preserve reorder results, keyboard behavior, focus,
+- [x] Svelte and React Tabs preserve reorder results, keyboard behavior, focus,
       disabled inertia, and curated specimens on the shared substrate.
-- [ ] Plain Tabs remain instance-isolated under a common provider, while an
+- [x] Plain Tabs remain instance-isolated under a common provider, while an
       explicit `dragSubjectKind` composes with an ancestor target without
       leaking or colliding registration ids; shared Rust carries the same
       semantic input.
-- [ ] A deterministic host simulator proves prepare, moving target geometry,
+- [x] A deterministic host simulator proves prepare, moving target geometry,
       stale lease, rejection, commit, cancel, window close, and late completion.
-- [ ] Svelte, React, and GPUI DockRegion projections preserve component
+- [x] Svelte, React, and GPUI DockRegion projections preserve component
       behavior and use the same lifecycle semantics.
-- [ ] Two sibling web DockRegions under one provider cross-drop through the
+- [x] Two sibling web DockRegions under one provider cross-drop through the
       normal target path and call `onPanelDrop` once; without a common provider
       they retain same-region reorder but do not discover one another.
-- [ ] Headless web multi-context and GPUI host-stub tests take no operator focus.
-- [ ] Poodle imports no Longhorn/shell package and owns no window transaction.
-- [ ] Existing DockRegion ledger claim remains honest; no unrelated row moves.
-- [ ] Active-source search proves the old controller, session side channel,
+- [x] Headless web multi-context and GPUI host-stub tests take no operator focus.
+- [x] Poodle imports no Longhorn/shell package and owns no window transaction.
+- [x] Existing DockRegion ledger claim remains honest; no unrelated row moves.
+- [x] Active-source search proves the old controller, session side channel,
       types, re-exports, and optional-source-zone fallback are absent.
-- [ ] GPUI provider unmount closes an active session, drops that provider's
+- [x] GPUI provider unmount closes an active session, drops that provider's
       registrations, and stops the native drag/preview. Carried from
       `g16.025` (see below).
 
