@@ -336,6 +336,16 @@ const SOURCE_ATTR = "data-poodle-drag-source";
 const TARGET_ATTR = "data-poodle-drop-target";
 const POSITION_ATTR = "data-poodle-drop-position";
 const EXPORT_ATTR = "data-poodle-drag-export";
+/**
+ * How many answered batch ids one installation remembers.
+ *
+ * Bounded because the ids come from outside: a host that publishes without
+ * limit must not be able to grow this window's memory without limit either.
+ * A bounded tail is the same trade the announcement log makes — thousands of
+ * distinct external drags into one surface, and the oldest id could be
+ * replayed again.
+ */
+const INBOUND_ANSWERED_LIMIT = 4096;
 const TOUCH_ACTION = "touch-action";
 
 interface CachedRect {
@@ -770,6 +780,17 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     null;
 
   let inbound: InboundFileTransaction | null = null;
+  /**
+   * Batch ids this installation has already answered.
+   *
+   * A release is the *end* of an id, not the end of an observation of it: a
+   * host that re-publishes `entered` for a batch that already committed, was
+   * refused, or was cancelled would otherwise open a second session over one
+   * batch and release it twice. The tombstone belongs to the subscription —
+   * a later installation, or a reconnect, is a different host relationship
+   * and may legitimately reuse the same opaque text.
+   */
+  let inboundAnswered = new Set<string>();
   let inboundUnsubscribe: (() => void) | null = null;
   let inboundDisconnect: (() => void) | null = null;
 
@@ -1704,6 +1725,16 @@ export function createDragDropController(options: DragDropControllerOptions = {}
    * answer, and it is the only one this path can honestly give.
    */
   function refuseInboundBatch(batchId: string, outcome: InboundFileOutcome): void {
+    // Exactly once, for the lifetime of this installation. Every path that
+    // ends a batch comes through here, so this is the only place the rule
+    // needs to hold.
+    if (inboundAnswered.has(batchId)) return;
+    inboundAnswered.add(batchId);
+    if (inboundAnswered.size > INBOUND_ANSWERED_LIMIT) {
+      const oldest = inboundAnswered.values().next();
+      if (!oldest.done) inboundAnswered.delete(oldest.value);
+    }
+
     try {
       inboundFileBridge?.release(batchId, outcome);
     } catch {
@@ -1749,9 +1780,15 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
 
     if (event.type === "entered") {
-      // The same batch again is one observation, not two: it is already owned,
-      // and answering it here would be a second release.
+      // The same batch again is one observation, not two: it is already
+      // owned, and answering it here would be a second release.
       if (inbound?.batchId === event.batch.batchId) return;
+
+      // An id this installation already answered stays answered. A host that
+      // re-publishes a committed, refused, or cancelled batch is repeating
+      // itself, not offering a new one, and taking it again would release the
+      // same id twice.
+      if (inboundAnswered.has(event.batch.batchId)) return;
 
       // A local gesture, or a batch already in flight, owns this controller.
       // The newcomer is still answered rather than dropped on the floor.
@@ -3677,6 +3714,10 @@ export function createDragDropController(options: DragDropControllerOptions = {}
             "inboundFileBridge claims the host transport and must not also bind document drag events",
           );
         }
+        // A new installation is a new host relationship: whatever the last
+        // one answered is no longer this one's history, and the same opaque
+        // text may legitimately name a different batch.
+        inboundAnswered = new Set();
         inboundUnsubscribe = inboundFileBridge.subscribe(onInboundFileEvent);
         if (bindsDocument) inboundDisconnect = dom.connect?.(doc) ?? null;
       }

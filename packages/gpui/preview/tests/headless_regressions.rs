@@ -16827,7 +16827,9 @@ fn a_gpui_window_owns_one_batch_and_answers_every_other_one_once() {
             ]
         );
 
-        // A late repeat of the finished id cannot resurrect it or release twice.
+        // A late repeat of the finished id cannot resurrect it or release
+        // twice — including a replayed `Entered`, which is the shape that
+        // would otherwise open a second session over one batch.
         host.send(poodle_node::InboundFileEvent::Dropped {
             batch: inbound_batch(vec![file()]),
             x,
@@ -16836,9 +16838,23 @@ fn a_gpui_window_owns_one_batch_and_answers_every_other_one_once() {
         host.send(poodle_node::InboundFileEvent::Cancelled {
             batch_id: "batch-1".to_string(),
         });
+        host.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![file()]),
+            x,
+            y,
+        });
+        host.send(poodle_node::InboundFileEvent::Entered {
+            batch: poodle_node::InboundFileBatch {
+                batch_id: "batch-2".to_string(),
+                ..inbound_batch(vec![file()])
+            },
+            x,
+            y,
+        });
         driver.draw_frame();
         assert_eq!(host.released().len(), 2);
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert!(controller.snapshot().inbound_files.is_none());
     });
 }
 
@@ -17075,5 +17091,167 @@ fn a_gpui_batch_from_another_protocol_version_is_refused_before_eligibility() {
                 poodle_node::InboundFileOutcome::Rejected
             )]
         );
+    });
+}
+
+/// g16.027. A release ends an id, not one observation of it. A host that
+/// publishes `Entered` again for a batch that already finished is repeating
+/// itself, and taking it again would open a second session over one batch and
+/// release it twice — while a *replacement* host may legitimately use the
+/// same opaque text, because an id is one host's own name for something.
+#[test]
+fn a_finished_gpui_batch_id_stays_inert_until_its_bridge_is_replaced() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let first = InboundStub::default();
+        let second = InboundStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_inbound_file_bridge(Arc::new(first.clone()), cx));
+
+        let node = Arc::new(Mutex::new(inbound_tree(
+            &trace,
+            poodle_node::InboundFileConstraints::default(),
+        )));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let zone = payload_frac("files-zone", 0.5, 0.5);
+        let (x, y) = (f32::from(zone.x), f32::from(zone.y));
+        let file = || inbound_file("batch-1:0", Some("take-01.wav"), "audio/wav", Some(16));
+
+        // One batch commits.
+        first.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![file()]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        first.send(poodle_node::InboundFileEvent::Dropped {
+            batch: inbound_batch(vec![file()]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(
+            first.released(),
+            vec![(
+                "batch-1".to_string(),
+                poodle_node::InboundFileOutcome::Committed
+            )]
+        );
+        assert_eq!(count_starting_with(&trace_of(&trace), "drop:"), 1);
+
+        // The host publishes the same id again, from idle, exactly as it
+        // would a new drag. It is not one.
+        first.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![file()]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert!(controller.snapshot().inbound_files.is_none());
+
+        first.send(poodle_node::InboundFileEvent::Dropped {
+            batch: inbound_batch(vec![file()]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(first.released().len(), 1, "one id, one release");
+        assert_eq!(count_starting_with(&trace_of(&trace), "drop:"), 1);
+
+        // A refused id is just as final: this one is refused for arriving
+        // while another batch owns the controller.
+        first.send(poodle_node::InboundFileEvent::Entered {
+            batch: poodle_node::InboundFileBatch {
+                batch_id: "batch-9".to_string(),
+                ..inbound_batch(vec![file()])
+            },
+            x,
+            y,
+        });
+        driver.draw_frame();
+        first.send(poodle_node::InboundFileEvent::Entered {
+            batch: poodle_node::InboundFileBatch {
+                batch_id: "batch-refused".to_string(),
+                ..inbound_batch(vec![file()])
+            },
+            x,
+            y,
+        });
+        first.send(poodle_node::InboundFileEvent::Cancelled {
+            batch_id: "batch-9".to_string(),
+        });
+        driver.draw_frame();
+        first.send(poodle_node::InboundFileEvent::Entered {
+            batch: poodle_node::InboundFileBatch {
+                batch_id: "batch-refused".to_string(),
+                ..inbound_batch(vec![file()])
+            },
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert_eq!(
+            first
+                .released()
+                .iter()
+                .filter(|(id, _)| id == "batch-refused")
+                .count(),
+            1,
+            "a refused id is answered once: {:?}",
+            first.released()
+        );
+
+        // A replacement host is a different relationship. The same text may
+        // name a batch this window has never seen.
+        driver.update_app(|cx| {
+            controller.set_inbound_file_bridge(Arc::new(second.clone()), cx)
+        });
+        driver.drain();
+
+        second.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![file()]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Dragging,
+            "a replacement host may reuse the same opaque text"
+        );
+        second.send(poodle_node::InboundFileEvent::Dropped {
+            batch: inbound_batch(vec![file()]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(
+            second.released(),
+            vec![(
+                "batch-1".to_string(),
+                poodle_node::InboundFileOutcome::Committed
+            )]
+        );
+        assert_eq!(count_starting_with(&trace_of(&trace), "drop:"), 2);
     });
 }

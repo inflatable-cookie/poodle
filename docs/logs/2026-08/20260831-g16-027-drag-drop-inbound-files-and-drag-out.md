@@ -113,6 +113,15 @@ either direction, and nothing in Poodle deletes anything.
   rather than two, and news for a released batch can neither commit nor
   cancel.
 
+- **A release ends an id, not one observation of it.** Live-only duplicate
+  protection is not enough: a host that re-publishes `entered` for a batch
+  that already committed or was refused looks exactly like a new drag, so it
+  would open a second session and release the same id twice. Each installation
+  keeps a bounded tombstone of the ids it has answered. Scoped to the
+  installation, because an id is one host's own name for something — a
+  replacement bridge, or a reconnect, may legitimately reuse the same opaque
+  text. See review round 2.
+
 - **Inbound batches carry a protocol version, checked first.** An adapter
   ships separately from Poodle and can be pinned to an older release. A batch
   whose shape this build cannot fully understand is refused before any other
@@ -136,6 +145,8 @@ either direction, and nothing in Poodle deletes anything.
 | Terminal accounting is exact | one `release` per batch, with the outcome the session actually reached; a repeat from the host cannot produce a second |
 | A local gesture always wins | a batch arriving mid-drag is ignored and not released |
 | Transport exclusivity | both mismatched bridge shapes throw at connect |
+| A finished id cannot resurrect | a re-published `entered` for a committed *and* for a refused id opens nothing and releases nothing, in web and GPUI |
+| A replacement host may reuse an id | the tombstone is the installation's: a new bridge, or a reconnect, takes the same opaque text as a new batch |
 | Every observed batch is answered exactly once | busy window, second batch, repeated id, post-disconnect news, and stale news after a bridge swap — web and GPUI |
 | Replacement ends the outgoing session | asserted at the moment of replacement, before any frame, so no end-of-frame sweep can stand in for it |
 | A consumer projection that throws ends the drag | the exception does not escape the drop listener and the controller returns to idle |
@@ -200,6 +211,26 @@ repair. It now asserts the phase at the moment of replacement, which no sweep
 can reach — and the web controller, which has no sweep at all, is the reason
 that distinction matters.
 
+Review round 2 added five more:
+
+21. the web replay guard, by taking a re-published `entered` for an id this
+    installation already answered — a second session opens over one batch;
+22. the web answer-once guard, by releasing whenever asked — the
+    post-disconnect repeat answers three times for one batch;
+23. the web tombstone's scope, by never clearing it at connect — a reconnected
+    surface can no longer take an id the previous installation used;
+24. the GPUI replay guard, the same way as 21; and
+25. the GPUI generation key, by making the tombstone generation-blind — a
+    replacement host can then never reuse an id the outgoing one finished,
+    which is the opposite error and just as wrong.
+
+Round 2's finding was a real hole, not a documentation gap: the round 1
+duplicate protection only covered an id while it was *live*, so a host that
+re-published `entered` after a commit or a refusal started a fresh session and
+released the same id a second time. The round 1 tests named "cannot
+resurrect" only replayed `dropped` and `cancelled`, which the live check
+already handled — they could not have caught it.
+
 ## Review round 1
 
 The orchestrator required changes on `de4358a7d`. Five blocking findings, all
@@ -245,18 +276,35 @@ accepted as landed.
    exactly as merged, the export bridge reuses that channel, and no alias
    exists.
 
+## Review round 2
+
+The orchestrator closed four of the five and found one bounded hole left in
+the first: **a released inbound id could still resurrect**. Duplicate
+protection covered an id only while it was live, so a host that re-published
+`entered` after that batch committed or was refused opened a fresh session and
+released the same id twice. The round 1 tests labelled "cannot resurrect"
+replayed only `dropped` and `cancelled` — news the live check already
+handled — so they could not have caught it.
+
+Each installation now keeps a bounded tombstone of the ids it has answered,
+consulted before an `entered` is taken and written by the single path every
+terminal and refusal goes through. It is scoped to the installation — the
+subscription on web, the generation on GPUI — so a replacement host may
+legitimately use the same opaque text. Both errors are proved: a replay that
+must do nothing, and a replacement that must work.
+
 ## Evidence
 
 - Contracts: `packages/core/src/external-file-drag.ts`,
   `packages/contracts/headless/src/external_file_drag.rs` (9 Rust cases),
   `packages/core/test/external-file-drag.test.ts` (12 cases).
 - Web adapter: `packages/core/src/dom/inbound-file-data-transfer.ts`.
-- Web controller: `packages/core/src/dom/drag-drop-controller.ts`; 34
+- Web controller: `packages/core/src/dom/drag-drop-controller.ts`; 36
   adversarial cases in `test/headless-dom/inbound-files-and-drag-out.test.ts`.
 - Shared Rust: `packages/render/src/drag_drop.rs`
   (`inbound_file_target`, `file_export_source`),
   `packages/contracts/node/src/drag.rs`.
-- GPUI: `packages/gpui/node-backend/src/drag.rs`; eleven mounted regressions
+- GPUI: `packages/gpui/node-backend/src/drag.rs`; twelve mounted regressions
   in `packages/gpui/preview/tests/headless_regressions.rs`.
 - Frameworks: `DragDropProvider` in both, `ExternalFileSurface` specimens and
   their four mounted tests each.

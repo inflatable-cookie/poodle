@@ -1107,13 +1107,100 @@ describe("inbound files", () => {
       { batchId: "batch-1", outcome: "committed" },
     ]);
 
-    // A late repeat of the finished id cannot resurrect it or release twice.
+    // A late repeat of the finished id cannot resurrect it or release twice —
+    // including a replayed `entered`, which is the shape that would otherwise
+    // open a second session over one batch.
     host.send({ type: "dropped", batch: hostBatch(), x: 40, y: 90 });
     host.send({ type: "cancelled", batchId: "batch-1" });
+    host.send({ type: "entered", batch: hostBatch(), x: 40, y: 90 });
+    host.send({ type: "entered", batch: hostBatch({ batchId: "batch-2" }), x: 40, y: 90 });
     expect(host.released).toHaveLength(2);
     expect(controller.getSnapshot().phase).toBe("idle");
+    expect(controller.getSnapshot().inboundFiles).toBe(null);
 
     disconnect();
+    controller.destroy();
+  });
+
+  /**
+   * A release ends an id, not one observation of it.
+   *
+   * The dangerous shape is a host that publishes `entered` again for a batch
+   * that already finished: it looks exactly like a new drag, so without a
+   * tombstone it opens a second session and releases the same id a second
+   * time. Both terminal shapes are covered — one that committed, one that was
+   * refused.
+   */
+  it("keeps a finished id inert for the life of the installation", () => {
+    const host = createInboundHost();
+    const onDrop = vi.fn(() => ({ status: "committed" }) as const);
+    const controller = createDragDropController({ inboundFileBridge: host.bridge });
+    const disconnect = controller.connect(root);
+    controller.registerTarget(targetEl, fileTargetReg({ onDrop }));
+
+    // One batch commits; another is refused for being over the target's limit
+    // while the first is live.
+    host.send({ type: "entered", batch: hostBatch(), x: 40, y: 90 });
+    host.send({ type: "entered", batch: hostBatch({ batchId: "batch-2" }), x: 40, y: 90 });
+    host.send({ type: "dropped", batch: hostBatch(), x: 40, y: 90 });
+    expect(host.released).toEqual([
+      { batchId: "batch-2", outcome: "rejected" },
+      { batchId: "batch-1", outcome: "committed" },
+    ]);
+    expect(onDrop).toHaveBeenCalledTimes(1);
+
+    // The host publishes both again, from idle, exactly as it would a new drag.
+    host.send({ type: "entered", batch: hostBatch(), x: 40, y: 90 });
+    expect(controller.getSnapshot().phase).toBe("idle");
+    host.send({ type: "dropped", batch: hostBatch(), x: 40, y: 90 });
+
+    host.send({ type: "entered", batch: hostBatch({ batchId: "batch-2" }), x: 40, y: 90 });
+    expect(controller.getSnapshot().phase).toBe("idle");
+    host.send({ type: "dropped", batch: hostBatch({ batchId: "batch-2" }), x: 40, y: 90 });
+
+    expect(host.released).toHaveLength(2);
+    expect(onDrop).toHaveBeenCalledTimes(1);
+
+    // A batch the host has *not* used before is still ordinary business.
+    host.send({ type: "entered", batch: hostBatch({ batchId: "batch-3" }), x: 40, y: 90 });
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    host.send({ type: "dropped", batch: hostBatch({ batchId: "batch-3" }), x: 40, y: 90 });
+    expect(host.released).toEqual([
+      { batchId: "batch-2", outcome: "rejected" },
+      { batchId: "batch-1", outcome: "committed" },
+      { batchId: "batch-3", outcome: "committed" },
+    ]);
+
+    disconnect();
+    controller.destroy();
+  });
+
+  /**
+   * The tombstone is the *installation's*, not the id's. Reconnecting is a new
+   * host relationship, and the same opaque text may name a different batch —
+   * an id is a host's own name for something, not a global identity.
+   */
+  it("lets a new installation reuse an id the last one finished", () => {
+    const host = createInboundHost();
+    const controller = createDragDropController({ inboundFileBridge: host.bridge });
+    const first = controller.connect(root);
+    controller.registerTarget(targetEl, fileTargetReg());
+
+    host.send({ type: "entered", batch: hostBatch(), x: 40, y: 90 });
+    host.send({ type: "dropped", batch: hostBatch(), x: 40, y: 90 });
+    expect(host.released).toEqual([{ batchId: "batch-1", outcome: "committed" }]);
+    first();
+
+    const second = controller.connect(root);
+    host.send({ type: "entered", batch: hostBatch(), x: 40, y: 90 });
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    host.send({ type: "dropped", batch: hostBatch(), x: 40, y: 90 });
+    expect(host.released).toEqual([
+      { batchId: "batch-1", outcome: "committed" },
+      { batchId: "batch-1", outcome: "committed" },
+    ]);
+
+    second();
     controller.destroy();
   });
 
@@ -1127,6 +1214,10 @@ describe("inbound files", () => {
 
     disconnect();
     host.send({ type: "entered", batch: hostBatch(), x: 40, y: 90 });
+    // Answered once, however many times the host repeats itself: the refusal
+    // path shares the same tombstone as every other terminal.
+    host.send({ type: "entered", batch: hostBatch(), x: 40, y: 90 });
+    host.send({ type: "entered", batch: hostBatch(), x: 41, y: 91 });
 
     expect(host.released).toEqual([{ batchId: "batch-1", outcome: "rejected" }]);
     expect(controller.getSnapshot().phase).toBe("idle");

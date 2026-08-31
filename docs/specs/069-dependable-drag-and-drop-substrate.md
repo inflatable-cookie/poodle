@@ -791,8 +791,12 @@ reason, one arriving while a local gesture or another batch owns the
 controller, one published by a bridge that has since been replaced, and one
 that arrives after the surface is gone are all *answered* — a silently ignored
 batch would leave the host holding material for a gesture nobody will finish.
-Repeating an id already owned is one observation rather than two, and news for
-a batch that has been released can neither commit nor cancel anything.
+Repeating an id already owned is one observation rather than two, and an id
+this installation has already answered stays answered: news for a released
+batch can neither commit nor cancel, and a re-published `entered` for it opens
+nothing. That tombstone is scoped to the publishing installation, so a
+*replacement* host may legitimately use the same opaque text — an id is one
+host's own name for something, not a global identity.
 Replacing a window's bridge ends the outgoing batch's session rather than
 releasing under it, and the outgoing host's queued news is answered through the
 host that published it.

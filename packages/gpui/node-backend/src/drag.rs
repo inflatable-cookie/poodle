@@ -92,6 +92,10 @@ pub const GPUI_DRAG_CAPABILITIES: NodeDragCapabilities = NodeDragCapabilities {
 /// a controller lives as long as its host, so the log still has to be bounded.
 pub const ANNOUNCEMENT_LOG_LIMIT: usize = 64;
 
+/// How many answered batch ids one installation remembers; see
+/// `inbound_answered`.
+const INBOUND_ANSWERED_LIMIT: usize = 4096;
+
 /// The value stock GPUI carries for the duration of a pointer drag.
 ///
 /// `controller` scopes it: `on_drag_move` is dispatched by payload *type*, so
@@ -291,6 +295,21 @@ struct ControllerState {
     inbound_unsubscribe: Option<CrossWindowCleanup>,
     /// The external batch this window is currently being offered.
     inbound: Option<InboundFileTransaction>,
+    /// Batch ids already answered, keyed by the installation that answered
+    /// them.
+    ///
+    /// A release is the *end* of an id, not the end of one observation of it:
+    /// a host that re-publishes `Entered` for a batch that already committed,
+    /// was refused, or was cancelled would otherwise open a second session
+    /// over one batch and release it twice. The generation is part of the key
+    /// so a *replacement* host may legitimately use the same opaque text —
+    /// an id is one host's own name for something, not a global identity.
+    ///
+    /// Bounded, because the ids come from outside: a host that publishes
+    /// without limit must not grow this window's memory without limit either.
+    inbound_answered: std::collections::HashSet<(u64, String)>,
+    /// Insertion order for the bound above.
+    inbound_answered_order: VecDeque<(u64, String)>,
     /// The host's own name for a subject this window has no source for.
     external_source_label: Option<String>,
     /// Host answers that arrived without an `App` in reach.
@@ -361,6 +380,8 @@ struct FileExportTransaction {
 struct InboundFileTransaction {
     session_id: String,
     batch_id: String,
+    /// The installation that observed this batch; see `inbound_answered`.
+    generation: u64,
     /// The bridge that published this batch, held for the same reason the
     /// projection holds its own: a receipt belongs to the host that issued it.
     bridge: Arc<dyn InboundFileHostBridge>,
@@ -569,6 +590,8 @@ impl DragDropController {
                 inbound_generation: 0,
                 inbound_unsubscribe: None,
                 inbound: None,
+                inbound_answered: std::collections::HashSet::new(),
+                inbound_answered_order: VecDeque::new(),
                 external_source_label: None,
                 host_inbox: DragHostInbox::default(),
                 wake: None,
@@ -1469,10 +1492,44 @@ impl DragDropController {
         }
     }
 
-    /// Tell the host the batch is finished with, exactly once.
+    /// Answer a batch, exactly once for the lifetime of its installation.
     ///
     /// A notification, not a command: the host decides whether the copy it
-    /// made survives, and when. Poodle holds no files and removes none.
+    /// made survives, and when. Poodle holds no files and removes none. Every
+    /// path that ends a batch comes through here, so this is the only place
+    /// the once-per-id rule needs to hold.
+    fn answer_inbound_batch(
+        &self,
+        bridge: &Arc<dyn InboundFileHostBridge>,
+        generation: u64,
+        batch_id: &str,
+        outcome: InboundFileOutcome,
+    ) {
+        {
+            let mut state = self.state.borrow_mut();
+            let key = (generation, batch_id.to_string());
+            if !state.inbound_answered.insert(key.clone()) {
+                return;
+            }
+            state.inbound_answered_order.push_back(key);
+            while state.inbound_answered_order.len() > INBOUND_ANSWERED_LIMIT {
+                if let Some(oldest) = state.inbound_answered_order.pop_front() {
+                    state.inbound_answered.remove(&oldest);
+                }
+            }
+        }
+        bridge.release(batch_id, outcome);
+    }
+
+    /// Whether this installation has already answered `batch_id`.
+    fn inbound_already_answered(&self, generation: u64, batch_id: &str) -> bool {
+        self.state
+            .borrow()
+            .inbound_answered
+            .contains(&(generation, batch_id.to_string()))
+    }
+
+    /// Tell the host the live batch is finished with, exactly once.
     fn release_inbound_files(&self, outcome: InboundFileOutcome) {
         let Some(mut transaction) = self.state.borrow_mut().inbound.take() else {
             return;
@@ -1481,7 +1538,8 @@ impl DragDropController {
             return;
         }
         transaction.released = true;
-        transaction.bridge.release(&transaction.batch_id, outcome);
+        let bridge = Arc::clone(&transaction.bridge);
+        self.answer_inbound_batch(&bridge, transaction.generation, &transaction.batch_id, outcome);
     }
 
     fn inbound_outcome(outcome: Option<&DragTerminalOutcome>) -> InboundFileOutcome {
@@ -1514,7 +1572,12 @@ impl DragDropController {
             // so only that one is refused — and through the bridge that
             // published it, which is the only host that knows what it holds.
             if let InboundFileEvent::Entered { batch, .. } = &event {
-                bridge.release(&batch.batch_id, InboundFileOutcome::Rejected);
+                self.answer_inbound_batch(
+                    &bridge,
+                    generation,
+                    &batch.batch_id,
+                    InboundFileOutcome::Rejected,
+                );
             }
             return;
         }
@@ -1535,6 +1598,14 @@ impl DragDropController {
                     return;
                 }
 
+                // An id this installation already answered stays answered. A
+                // host that re-publishes a committed, refused, or cancelled
+                // batch is repeating itself, not offering a new one, and
+                // taking it again would release the same id twice.
+                if self.inbound_already_answered(generation, &batch.batch_id) {
+                    return;
+                }
+
                 // A local gesture, or a batch already in flight, owns this
                 // controller. The newcomer is still answered: a batch this
                 // window silently ignored would leave the host holding
@@ -1544,7 +1615,12 @@ impl DragDropController {
                     state.inbound.is_some() || state.phase != DragSessionPhase::Idle
                 };
                 if busy {
-                    bridge.release(&batch.batch_id, InboundFileOutcome::Rejected);
+                    self.answer_inbound_batch(
+                        &bridge,
+                        generation,
+                        &batch.batch_id,
+                        InboundFileOutcome::Rejected,
+                    );
                     return;
                 }
 
@@ -1554,7 +1630,12 @@ impl DragDropController {
                     &bridge.capabilities(),
                 ) {
                     // A batch this window cannot carry never becomes a session.
-                    bridge.release(&batch.batch_id, InboundFileOutcome::Rejected);
+                    self.answer_inbound_batch(
+                        &bridge,
+                        generation,
+                        &batch.batch_id,
+                        InboundFileOutcome::Rejected,
+                    );
                     return;
                 }
                 self.begin_inbound_session(&bridge, batch, x, y, cx);
@@ -1667,6 +1748,7 @@ impl DragDropController {
             state.inbound = Some(InboundFileTransaction {
                 session_id: session_id.clone(),
                 batch_id: batch.batch_id.clone(),
+                generation: state.inbound_generation,
                 bridge: Arc::clone(bridge),
                 batch: batch.clone(),
                 released: false,
