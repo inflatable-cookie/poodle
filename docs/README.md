@@ -75,6 +75,8 @@ The remaining sections preserve decision and delivery context:
 - `logs/` — completed work and validation evidence
 - `research/` — external comparisons and early investigation
 - `handoffs/` — point-in-time continuation briefs
+- `triage/` — open observations and operator decisions awaiting promotion;
+  promoted, superseded, or executed notes are removed
 - `parity/` — historical pre-consolidation parity audits; current parity is
   generated from contracts, runtime reports, tests, and previews
 

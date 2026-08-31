@@ -2,8 +2,8 @@
 
 Status: complete — merged in PR #80 (`9e5934af`)
 Opened: 2026-08-26
-Depends on: complete `g16.005`; resolved decision in
-`../../triage/20260826-173329-tabs-native-drag-lifecycle.md`
+Depends on: complete `g16.005`; resolved payload lifecycle fixed in the Tabs
+contract
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/tabs.md`, `parity-evidence-ledger.md`

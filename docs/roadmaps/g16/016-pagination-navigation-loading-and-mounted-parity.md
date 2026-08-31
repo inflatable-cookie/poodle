@@ -4,8 +4,7 @@ Status: complete
 Opened: 2026-08-27
 Completed: 2026-08-27
 Merged: PR #91
-Depends on: merged `g16.015` / PR #90 and the resolved selection in
-`../../triage/20260827-210417-post-g16-015-native-lane-decision.md`
+Depends on: merged `g16.015` / PR #90 and the fixed Pagination contract
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/pagination.md`, `parity-evidence-ledger.md`

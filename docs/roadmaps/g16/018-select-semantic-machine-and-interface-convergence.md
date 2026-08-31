@@ -4,8 +4,8 @@ Status: complete
 Opened: 2026-08-28
 Completed: 2026-08-28
 Merged: PR #93
-Depends on: merged `g16.017` / PR #92 and the resolved decision in
-`../../triage/20260828-085200-post-g16-017-native-lane-decision.md`
+Depends on: merged `g16.017` / PR #92 and the operator-approved freeform
+selection boundary fixed in the Select contract
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../architecture/003-component-docs-ia-and-implementation-substrates.md`,

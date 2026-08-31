@@ -3,8 +3,8 @@
 Status: complete — merged in PR #87
 Opened: 2026-08-27
 Completed: 2026-08-27
-Depends on: merged `g16.012` / PR #86; operator-approved breaking migration in
-`../../triage/20260827-160028-post-g16-012-native-lane-decision.md`
+Depends on: merged `g16.012` / PR #86; operator-approved breaking migration
+fixed in the TriStateSwitch contract
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/tri-state-switch.md`,

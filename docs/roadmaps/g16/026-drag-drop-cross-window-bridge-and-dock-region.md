@@ -1,11 +1,10 @@
 # g16.026 — Drag-And-Drop Cross-Window Bridge, Tabs, And DockRegion
 
-Status: ready — dependency merged; public migration, paired bridge API, and GPUI window ownership fixed
+Status: in progress — Paseo worker dispatched from pushed main; public migration,
+paired bridge API, and GPUI window ownership fixed
 Depends on: `025-drag-drop-rust-gpui-substrate.md`
-Governing refs: architecture 011, spec 069, the resolved
-`../../triage/20260828-221415-drag-drop-public-migration-boundary.md`,
-`../../triage/20260830-180816-tabs-drag-host-bridge-sequencing.md`, and the Tabs
-and DockRegion contracts
+Governing refs: architecture 011, spec 069, and the Tabs and DockRegion
+contracts
 
 ## Goal
 

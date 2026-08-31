@@ -6,8 +6,7 @@ Depends on: approved `docs/contracts/components/time-input.md`; merged
 `g16.021` before dispatch because both lanes edit shared core/headless exports
 Governing refs: `../../contracts/components/time-input.md`,
 `../../architecture/006-headless-core-and-machine-model.md`,
-`../../contracts/001-working-rules.md`,
-`../../triage/20260828-224148-time-input-native-editing-decision.md`
+`../../contracts/001-working-rules.md`
 
 ## Goal
 

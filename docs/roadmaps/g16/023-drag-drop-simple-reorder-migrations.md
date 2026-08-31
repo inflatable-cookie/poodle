@@ -2,9 +2,8 @@
 
 Status: complete — merged in PR #104
 Depends on: `022-drag-drop-web-custom-surface-substrate.md`
-Governing refs: architecture 011, spec 069, the resolved
-`../../triage/20260830-180816-tabs-drag-host-bridge-sequencing.md`, and the
-EditableList component contract
+Governing refs: architecture 011, spec 069, the EditableList component
+contract, and the serial Tabs/DockRegion boundary in `026`
 
 ## Goal
 

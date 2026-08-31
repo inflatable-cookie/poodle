@@ -4,8 +4,8 @@ Status: complete
 Opened: 2026-08-27
 Completed: 2026-08-27
 Merged: PR #92
-Depends on: merged `g16.016` / PR #91 and the resolved selection in
-`../../triage/20260827-222346-post-g16-016-native-lane-decision.md`
+Depends on: merged `g16.016` / PR #91 and the operator-approved migration fixed
+in the Rating contract
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/rating.md`, `parity-evidence-ledger.md`

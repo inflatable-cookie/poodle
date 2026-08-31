@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.025 merged; g16.026 ready for dispatch
+Status: active — g16.026 implementation in progress
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -56,7 +56,7 @@ stay maintained; backend admission is not part of the first card.
 23. [023 — EditableList simple reorder migration](023-drag-drop-simple-reorder-migrations.md) — complete; merged in PR #104
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — complete; merged in PR #107
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — complete; merged in PR #108 after four orchestrator review rounds; ledger unchanged at 52 mounted / 122 missing
-26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — ready; split source/window bridge API, bounded opaque receipt, clean public migration, and window-owned GPUI provider seam fixed
+26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — in progress; Paseo worker dispatched for the fixed split source/window bridge API, bounded opaque receipt, clean public migration, and window-owned GPUI provider seam
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
@@ -181,9 +181,9 @@ validation timing, OS input methods, and native accessibility/visual closure
 explicitly unclaimed. Two further findings (Tab mapped to submit in the backend
 key path; blur-time `forget` keyed by the wrong id) are recorded in the
 execution log for the orchestrator rather than repaired inside the card.
-`NumberInput` stays out: its concrete-`f64`, stepper-only native surface needs a
-separate raw-draft/value-model decision recorded in
-`../../triage/20260826-213343-number-input-native-value-model.md`.
+`NumberInput` stayed out: its concrete-`f64`, stepper-only native surface needed
+a separate raw-draft/value-model decision later fixed in its contract and
+`g16.030`.
 
 The post-`g16.007` checkpoint found that both recorded backend defects share one
 bounded routing seam. `g16.008` corrected generic Tab-versus-submit dispatch and
@@ -324,9 +324,7 @@ and its in-window capture-equivalent drag route; pen, touch, and
 device-originated pointer cancellation remain explicit unsupported debt. No
 ledger cell moved.
 
-`g16.026` is ready. Dispatch one worker for the split TypeScript/Rust host
-bridge, bounded DataTransfer receipt, Tabs/DockRegion clean migration, and
-window-owned GPUI provider-unmount seam. The card's review oracle carries the
-late receipt, stale lease, moving projection, two-window false-cancel, and
-native drag-stop counterexamples. `g16.027` remains serial behind its merge;
-EditableLabel stays decision-blocked.
+`g16.026` is in progress in one Paseo-managed worker lane. Its review oracle
+carries the late receipt, stale lease, moving projection, two-window
+false-cancel, and native drag-stop counterexamples. Review its PR against the
+fixed card before promoting `g16.027`; EditableLabel stays decision-blocked.

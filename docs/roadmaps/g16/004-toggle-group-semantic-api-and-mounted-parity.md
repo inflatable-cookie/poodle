@@ -3,8 +3,8 @@
 Status: complete — merged in PR #78
 Opened: 2026-08-26
 Completed: 2026-08-26
-Depends on: complete `g16.003`; accepted decision promoted from
-`../../triage/20260826-123030-selection-control-stops.md`
+Depends on: complete `g16.003`; accepted decision fixed in the ToggleGroup
+contract
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/toggle-group.md`,

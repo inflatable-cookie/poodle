@@ -6,8 +6,7 @@ Depends on: merged `g16.021`, then completed `g16.029`; all three touch paired
 core/headless exports and the shared domain-vector corpus
 Governing refs: `../../contracts/components/number-input.md`,
 `../../architecture/006-headless-core-and-machine-model.md`,
-`../../contracts/001-working-rules.md`,
-`../../triage/20260826-213343-number-input-native-value-model.md`
+`../../contracts/001-working-rules.md`
 
 ## Goal
 

@@ -7,8 +7,7 @@ Depends on: merged `g16.011` / PR #85
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/collapsible.md`,
-`parity-evidence-ledger.md`,
-`../../triage/20260827-141543-post-g16-011-native-lane-decision.md`
+`parity-evidence-ledger.md`
 
 ## Goal
 

@@ -2,8 +2,8 @@
 
 Status: complete
 Opened: 2026-08-27
-Depends on: merged `g16.013` / PR #87; operator-approved clean migration in
-`../../triage/20260827-173242-post-g16-013-native-lane-decision.md`
+Depends on: merged `g16.013` / PR #87; operator-approved clean migration fixed
+in the Accordion contract
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/accordion.md`,

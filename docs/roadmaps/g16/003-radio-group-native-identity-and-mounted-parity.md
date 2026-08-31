@@ -3,8 +3,8 @@
 Status: complete
 Opened: 2026-08-26
 Completed: 2026-08-26
-Depends on: closed `g16.002`; operator decision recorded in
-`../../triage/20260826-123030-selection-control-stops.md`
+Depends on: closed `g16.002`; operator decision fixed in the RadioGroup
+contract
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/radio-group.md`,

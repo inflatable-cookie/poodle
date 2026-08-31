@@ -51,9 +51,9 @@ behavior repairs without inventing another conformance authority.
   pointer targeting, and one mounted GPUI cell; ledger 47 mounted /
   127 missing. Known-delta totals stay 115 / 60. No broader
   conformance programme is implied. PR #95 closed `g16.020`: its 175-row
-  continuation register separates 93 closed, 69 evidence-only, 3
-  decision-blocked, 7 programme-owned, and 3 unknown components, with no known
-  repair at audit closeout. Architecture 011/spec 069 are now compiled as
+  continuation register now separates 100 closed, 69 evidence-only, 1
+  decision-blocked, and 5 programme-owned components after promoted-lane
+  reconciliation. Architecture 011/spec 069 are compiled as
   `g16.021`–`g16.028`; the paired semantic kernel in `021` landed with its
   shared `dragDrop` vector corpus in PR #96.
   TimeInput's native editing decision closed and merged as `g16.029` (ledger
@@ -79,7 +79,7 @@ behavior repairs without inventing another conformance authority.
   in-window capture certified; pen, touch, and device-originated cancel remain
   unsupported debt no mouse fixture may flip. It merged in PR #108 after four
   review rounds; no ledger cell moved. Tabs now moves with its DockRegion
-  host-bridge consumer in `g16.026`.
+  host-bridge consumer in the in-flight `g16.026` worker lane.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other

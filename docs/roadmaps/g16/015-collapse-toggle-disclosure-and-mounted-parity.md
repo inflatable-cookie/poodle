@@ -3,8 +3,7 @@
 Status: complete
 Opened: 2026-08-27
 Completed: 2026-08-27
-Depends on: merged `g16.014` / PR #88 and the resolved selection in
-`../../triage/20260827-195632-post-g16-014-native-lane-decision.md`
+Depends on: merged `g16.014` / PR #88 and the fixed CollapseToggle contract
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/001-poodle-system-shape.md`,
 `../../contracts/components/collapse-toggle.md`,
@@ -209,4 +208,3 @@ host-rebuild proof, regenerated ledger totals, validation, and execution log to
 the orchestrator. Do not compile or implement `g16.016`. After operator merge,
 the orchestrator returns to the measured 44 mounted / 130 missing ledger and
 chooses the next bounded parity lane.
-

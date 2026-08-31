@@ -15,7 +15,8 @@ Updated: 2026-08-31
     `019` merged in PR #94; `020` merged in PR #95; `021` merged in PR #96;
     `022` merged in PR #101 (web custom-surface substrate, no ledger movement);
     `023` merged in PR #104; `024` merged in PR #107; `025` merged in PR #108;
-    `026`–`028` remain behind ordered drag-and-drop dependencies;
+    `026` is in progress; `027`–`028` remain behind ordered drag-and-drop
+    dependencies;
     `029` complete and merged (TimeInput native parity, ledger 48/126); `030`
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
@@ -23,10 +24,9 @@ Updated: 2026-08-31
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: dispatch ready `g16.026`. Its split source/window host bridge,
-    bounded DataTransfer receipt, and window-owned GPUI provider-unmount seam
-    are fixed. Component continuation remains paused at the separate
-    EditableLabel decision gate.
+  - Next move: review and close the in-flight `g16.026` worker PR, then promote
+    `g16.027` from the landed bridge. Component continuation remains paused at
+    the separate EditableLabel decision gate.
 
 ## Latest Completed Track
 
