@@ -1,6 +1,6 @@
 # g16.025 — Drag-And-Drop Rust And GPUI Substrate
 
-Status: implemented 2026-08-31 — PR #108 open, orchestrator review pending
+Status: implemented 2026-08-31 — PR #108 open, review rounds 1 and 2 addressed
 Depends on: `024-drag-drop-tree-nested-intent-and-auto-scroll.md`
 Governing refs: architecture 011, spec 069, the Node/render architecture, and
 the Tabs, EditableList, Tree, and ModelCatalogueEditor contracts
@@ -92,13 +92,21 @@ native dispatch.
 
 Ledger: unchanged at 52 mounted / 122 missing.
 
-## Review Round 1
+## Review Rounds
 
-The orchestrator requested changes on PR #108 and named six gaps. All six are
-closed on this branch; the log records each fix and its mounted counterexample.
-Two of them changed observable behavior on purpose: a self-drop is now
-*rejected* rather than silently accepted, and a reorder surface is ineligible
-for another surface's rows.
+Round 1 named six gaps, round 2 named three more. All nine are closed on this
+branch; the log records each fix and its mounted counterexample.
+
+Two changed observable behavior on purpose: a self-drop is now *rejected*
+rather than silently accepted, and a reorder surface is ineligible for another
+surface's rows.
+
+No component public callback changed. Round 1 added two optional
+`TreeHandlers` fields to unlatch Tree's drop indicator after cancellation;
+round 2 ruled that a new public field crosses this card's stop condition, so
+they are reverted. The latched indicator is recorded as Tree's native gap in
+its contract, asserted in the mounted regression, and carried to the card that
+migrates Tree's keyboard route.
 
 ## Writable Scope
 

@@ -544,15 +544,14 @@ None.
   row's subject kind is scoped to Tree, so a drag from another reorder surface
   sharing the controller is never eligible here. `on_drag_over` and
   `on_reorder` keep their `(dragged, over, DropEdge)` shape: the component
-  still never sees a coordinate. `on_drag_leave` and `on_drag_end` are the
-  optional clear hooks — the target stopped holding the intent, and the
-  gesture ended (committed, rejected, or cancelled, exactly once) — so a host
-  can unlatch `drag_value` / `drop_target_value` instead of inferring the
-  terminal from `on_reorder`. The `drag_over` indicator is a top/bottom accent
-  line or inside fill.
-- Alt+Up/Down sibling reorder is reported through `on_key` and executed by the
-  host; it does not yet run through the shared semantic session the way the
-  web route does. Known gap, carried to the card that migrates it.
+  still never sees a coordinate. The `drag_over` indicator is a top/bottom
+  accent line or inside fill.
+- Two native gaps are carried to the card that migrates Tree's keyboard route.
+  Alt+Up/Down sibling reorder is reported through `on_key` and executed by the
+  host rather than running through the shared semantic session the way the web
+  route does. And there is no clear or terminal channel in `TreeHandlers`, so a
+  host's `drag_value` / `drop_target_value` stay latched after a cancelled
+  drag; adding one is a public API decision that card owns.
 - chevron uses `▸` / `▾` glyphs; guides are left-bordered indent cells
 - known GPUI-native deltas: no accessibility (runtime limit, §6 + Known Deltas);
   no virtual scrolling; transition timing is platform-owned

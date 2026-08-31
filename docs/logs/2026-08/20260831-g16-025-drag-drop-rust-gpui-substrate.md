@@ -1,6 +1,6 @@
 # g16.025 — Drag-And-Drop Rust And GPUI Substrate
 
-Status: implemented — PR #108 open; review round 1 addressed
+Status: implemented — PR #108 open; review rounds 1 and 2 addressed
 Date: 2026-08-31
 PR: https://github.com/inflatable-cookie/poodle/pull/108
 Card: `docs/roadmaps/g16/025-drag-drop-rust-gpui-substrate.md`
@@ -40,11 +40,10 @@ no alias, wrapper, or fallback. `DropEdge` stays: it is the closed
 three-value shorthand component callbacks speak, mapped at the render edge so
 the substrate's `DropPosition` can stay open to consumer-defined placements.
 
-Tabs, Tree, and ModelCatalogueEditor migrated. No public callback changed;
-Tree gained two optional ones (`on_drag_leave`, `on_drag_end`) so cancellation
-can unlatch its indicator. EditableList did not migrate: its native renderer
-documents reorder and change as host-owned, it registers no source or target,
-and its rows carry no element identity.
+Tabs, Tree, and ModelCatalogueEditor migrated with every public callback
+unchanged. EditableList did not migrate: its native renderer documents reorder
+and change as host-owned, it registers no source or target, and its rows carry
+no element identity.
 
 Two behaviors changed on purpose, both after review. A row dropped onto itself
 is now *rejected* rather than silently accepted, so the target posture and the
@@ -110,10 +109,19 @@ that the reported input kind is `Mouse`.
   also activate the row it picked up. `prevent_default` resets per dispatched
   event, so the suppression has to be re-applied on the matching key-up rather
   than set on the key-down.
-- **Keyboard traversal starts from the source's declared `keyboard_order`.**
-  A source at order 5 between targets at 1 and 9 moves Next to 9 and Previous
-  to 1. Starting at index 0 was the reverse of the contract for any source not
-  sitting at the start of the registry.
+- **Keyboard traversal starts from the source's declared `keyboard_order`, and
+  stops at an absent boundary.** A source at order 5 between targets at 1 and 9
+  moves Next to 9 and Previous to 1. A source past every target selects
+  *nothing* on Next rather than wrapping backwards to the end, and the same in
+  reverse — the web controller's `firstTargetAfterSource` /
+  `firstTargetBeforeSource` rule, which returns and leaves the intent alone.
+- **The pickup key is also the drop key, so with no target chosen it puts the
+  row back down.** Reporting the key handled and leaving the drag open would
+  strand a keyboard user in a gesture their own pickup key could not close.
+- **Activation suppression is keyed by the key it suppresses**, not one flag.
+  Any other key-up arriving first — a modifier, a neighbouring shortcut, an
+  overlapping Enter while Space is held — would consume a single flag and let
+  the real release synthesize the row's click after all.
 - **The controller holds the current target's clear callback**, rather than
   looking it up when the intent moves. The registry is rebuilt every frame, so
   a target removed while it held the intent would otherwise never be told it
@@ -155,10 +163,13 @@ that the reported input kind is `Mouse`.
 | Self-drop | same test, plus `tabs_drag_keyboard_and_identity_rebuild_the_host_spec` |
 | Removed target's clear callback | `removing_the_current_target_during_a_rebuild_cancels_once` |
 | Subject change during rebuild | `a_source_that_changes_subject_during_a_rebuild_cancels_once` |
-| Tree cancellation unlatching | `tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec` |
+| Traversal past an absent boundary | `keyboard_traversal_selects_nothing_past_an_absent_boundary`, both directions |
+| Pickup key with no target chosen | `the_pickup_key_cancels_a_session_that_never_chose_a_target` |
+| Unrelated key-up re-enabling activation | `an_unrelated_key_release_cannot_re_enable_the_suppressed_activation` |
 
-The stale-hover and activation-suppression tests were falsified by planting the
-pre-fix behavior back and confirming both fail.
+Five of these were falsified by planting the pre-fix behavior back and
+confirming they fail: stale hover at release, pickup double-firing activation,
+traversal boundary, pickup-key cancellation, and per-key suppression.
 
 ## Evidence
 
@@ -170,7 +181,7 @@ pre-fix behavior back and confirming both fail.
 - Controller units (capability matrix, identity, eligibility defaults,
   announcements): `packages/gpui/node-backend/src/drag.rs`.
 - Mounted GPUI, real dispatch: `packages/gpui/preview/tests/headless_regressions.rs`
-  — eighteen custom-surface tests plus
+  — twenty-one custom-surface tests plus
   `tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec`, with
   `tabs_drag_keyboard_and_identity_rebuild_the_host_spec` and
   `model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window` retained.
@@ -188,14 +199,20 @@ pre-fix behavior back and confirming both fail.
 Unchanged: 52 mounted / 122 missing. No cell moved.
 
 Tree's mounted regression lands as substrate evidence — selection, twisty
-expand, a keyboard command, a cancelled drag that unlatches the indicator, and
-a committed nested reorder — but the cell stays `missing`. Tree's contract puts
-Alt+Up/Down sibling reorder on the component; the native renderer reports those
-keys through `on_key` and the host executes them, so that authored behavior
-does not run through the shared semantic session. Claiming `mounted` would
-overstate it, and intercepting the keys here would change what `on_key`
-reports, which is a stop condition for this card. The cell moves in the card
-that migrates the keyboard route.
+expand, a keyboard command, a cancelled drag, and a committed nested reorder —
+but the cell stays `missing`. Two native gaps keep it there, and both belong to
+the card that migrates Tree's keyboard route:
+
+- Tree's contract puts Alt+Up/Down sibling reorder on the component, but the
+  native renderer reports those keys through `on_key` and the host executes
+  them, so that authored behavior does not run through the shared semantic
+  session. Intercepting the keys here would change what `on_key` reports — a
+  public callback change, which is a stop condition for this card.
+- `TreeHandlers` has no clear or terminal channel, so a host's `drag_value` /
+  `drop_target_value` stay latched after a cancelled drag. Round 1 added two
+  optional handlers for this; round 2 correctly ruled that a new public field
+  crosses the same stop condition, so they are reverted and the latched state
+  is asserted as the documented gap rather than quietly fixed.
 
 EditableList stays `missing` for the reason above. Tabs and
 ModelCatalogueEditor keep their existing cells.
@@ -220,8 +237,23 @@ The orchestrator requested changes on PR #108. Six gaps, all closed here:
 5. **A source could change subject during a rebuild without cancelling.**
    Fixed and given its own mounted counterexample.
 6. **Tree's ledger move was not backed by complete authored proof.** The cell
-   is reverted to `missing`; the latched-indicator defect the review exposed is
-   fixed and proved.
+   is reverted to `missing`.
+
+## Review round 2
+
+Three more, all closed:
+
+1. **Traversal wrapped past an absent boundary, and the pickup key could not
+   close its own pickup.** Both now match the web controller exactly; three
+   mounted counterexamples, all falsified.
+2. **Activation suppression was one controller-global flag any key-up could
+   consume.** It is now a set keyed by the released key. The counterexample
+   holds Space, sends an unrelated key and an overlapping Enter, then releases
+   Space; falsified.
+3. **The Tree clear hooks were a public API change the card stops on.**
+   Reverted, along with the assertions that depended on them. The latched
+   indicator is now asserted as Tree's documented native gap, in its contract
+   and here. The card was not expanded and no operator decision was assumed.
 
 ## Continuation
 

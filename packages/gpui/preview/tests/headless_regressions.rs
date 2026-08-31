@@ -13736,7 +13736,6 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
         drop_position: TreeDropPosition,
         reorders: Vec<(String, String, poodle_node::DropEdge)>,
         keys: Vec<String>,
-        terminals: usize,
     }
 
     fn nodes() -> Vec<TreeNode> {
@@ -13770,7 +13769,6 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
             drop_position: TreeDropPosition::After,
             reorders: Vec::new(),
             keys: Vec::new(),
-            terminals: 0,
         }));
         let mounted = Arc::new(Mutex::new(Node::container()));
 
@@ -13836,26 +13834,6 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
                                     poodle_node::DropEdge::After => TreeDropPosition::After,
                                 };
                             }
-                            rebuild();
-                        })
-                    }),
-                    on_drag_leave: Some({
-                        let host = Arc::clone(host);
-                        let rebuild = rebuild.clone();
-                        Arc::new(move || {
-                            host.lock().expect("host lock").drop_target = None;
-                            rebuild();
-                        })
-                    }),
-                    on_drag_end: Some({
-                        let host = Arc::clone(host);
-                        let rebuild = rebuild.clone();
-                        Arc::new(move || {
-                            let mut host = host.lock().expect("host lock");
-                            host.drag = None;
-                            host.drop_target = None;
-                            host.terminals += 1;
-                            drop(host);
                             rebuild();
                         })
                     }),
@@ -13955,12 +13933,16 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
                 host.nodes.iter().map(|node| node.value.as_str()).collect::<Vec<_>>(),
                 ["alpha", "bravo", "charlie"]
             );
-            // Cancellation must unlatch the indicator. Without the terminal
-            // and clear hooks the host keeps painting a drop line for a drag
-            // that ended.
-            assert_eq!(host.drag, None, "Escape clears the dragged row");
-            assert_eq!(host.drop_target, None, "Escape clears the drop target");
-            assert_eq!(host.terminals, 1, "one terminal per gesture");
+            // `TreeHandlers` has no clear or terminal channel, so the host's
+            // indicator state stays latched after a cancelled drag. That is
+            // Tree's pre-existing native gap, carried to the card that adds
+            // the callback — not something this substrate can close without
+            // changing Tree's public API.
+            assert_eq!(
+                host.drop_target.as_deref(),
+                Some("charlie"),
+                "the latched indicator is the documented Tree gap"
+            );
         }
 
         // ── Committed drag: the bottom band is `after`, and the host reorders ──
@@ -13984,10 +13966,10 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
             host.nodes.iter().map(|node| node.value.as_str()).collect::<Vec<_>>(),
             ["bravo", "charlie", "alpha"]
         );
-        assert!(host.drag.is_none() && host.drop_target.is_none());
-        assert_eq!(
-            host.terminals, 2,
-            "the committed gesture reports its terminal exactly once too"
+        assert!(
+            host.drag.is_none() && host.drop_target.is_none(),
+            "a committed reorder clears the host's own drag state, because \
+             `on_reorder` is the channel that tells it the move happened"
         );
     });
 }
@@ -14393,5 +14375,174 @@ fn a_source_that_changes_subject_during_a_rebuild_cancels_once() {
             "the superseded subject must not commit: {events:?}"
         );
         assert_eq!(count_starting_with(&events, "end:"), 1, "{events:?}");
+    });
+}
+
+/// g16.025 review 2. Traversal stops at an absent boundary instead of wrapping.
+///
+/// A source past every target has nothing after it, so the first Next selects
+/// nothing rather than jumping backwards to the end of the registry; a source
+/// before every target has nothing before it. This is the web controller's
+/// `firstTargetAfterSource` / `firstTargetBeforeSource` rule, which returns and
+/// leaves the intent alone.
+#[test]
+fn keyboard_traversal_selects_nothing_past_an_absent_boundary() {
+    fn bounded_tree(trace: &Arc<Mutex<Vec<String>>>, source_order: i32) -> Node {
+        let mut target = drag_box("bounded-target", 60.0, 40.0);
+        target.interaction.drop_target = Some(traced_target(
+            "bounded-target",
+            "Only",
+            trace,
+            false,
+            5,
+            NodeDropCommit::Committed,
+        ));
+
+        let mut source = drag_box("bounded-source", 60.0, 40.0);
+        source.interaction.focusable = true;
+        source.a11y.tab_index = Some(0);
+        let mut registration = traced_source("bounded-source", "Alpha", trace);
+        registration.keyboard_order = Some(source_order);
+        source.interaction.drag_source = Some(registration);
+
+        let mut row = Node::container();
+        row.id = Some("bounded-row".to_owned());
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        row.child(target).child(source)
+    }
+
+    // Source after the only target: Next has nowhere to go.
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(bounded_tree(&trace, 9)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 200.0, 80.0);
+        driver.wait_for_focus_handle("bounded-source");
+        driver.focus_element("bounded-source");
+        let controller = driver.drag();
+
+        driver.dispatch_key_raw("space");
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            controller.snapshot().target_id,
+            None,
+            "a source past every target must not wrap backwards on Next"
+        );
+        // Previous still finds the target that IS before it.
+        driver.dispatch_key_raw("up");
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("bounded-target")
+        );
+        driver.dispatch_key_raw("escape");
+    });
+
+    // Source before the only target: Previous has nowhere to go.
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(bounded_tree(&trace, 1)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 200.0, 80.0);
+        driver.wait_for_focus_handle("bounded-source");
+        driver.focus_element("bounded-source");
+        let controller = driver.drag();
+
+        driver.dispatch_key_raw("space");
+        driver.dispatch_key_raw("up");
+        assert_eq!(
+            controller.snapshot().target_id,
+            None,
+            "a source before every target must not wrap forwards on Previous"
+        );
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("bounded-target")
+        );
+        driver.dispatch_key_raw("escape");
+    });
+}
+
+/// g16.025 review 2. The pickup key is also the drop key, so with no target
+/// chosen it puts the row back down.
+///
+/// Reporting the key handled and leaving the drag open would strand a keyboard
+/// user in a gesture their own pickup key could not close.
+#[test]
+fn the_pickup_key_cancels_a_session_that_never_chose_a_target() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(custom_drag_tree(&trace, false)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.wait_for_focus_handle("custom-source");
+        driver.focus_element("custom-source");
+        let controller = driver.drag();
+
+        driver.dispatch_key_raw("space");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(controller.snapshot().target_id, None);
+
+        // Straight back down, no traversal.
+        driver.dispatch_key_raw("space");
+
+        let events = trace_of(&trace);
+        assert_eq!(count_starting_with(&events, "drop:"), 0, "{events:?}");
+        assert_eq!(
+            count_starting_with(&events, "end:cancelled:Explicit"),
+            1,
+            "the pickup key puts the row back down, exactly once: {events:?}"
+        );
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+    });
+}
+
+/// g16.025 review 2. Activation suppression is tied to the key it suppresses.
+///
+/// One flag was consumable by *any* key-up: a modifier release, a neighbouring
+/// shortcut, or an overlapping Enter would clear it, and the real Space release
+/// would then synthesize the focused row's click after all.
+#[test]
+fn an_unrelated_key_release_cannot_re_enable_the_suppressed_activation() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let activations = Arc::new(Mutex::new(0usize));
+        let node = {
+            let mut tree = custom_drag_tree(&trace, false);
+            let activations = Arc::clone(&activations);
+            let source = tree
+                .children
+                .iter_mut()
+                .find(|child| child.id.as_deref() == Some("custom-source"))
+                .expect("the source row");
+            source.interaction.on_activate = Some(Arc::new(move || {
+                *activations.lock().expect("activation lock") += 1;
+            }));
+            Arc::new(Mutex::new(tree))
+        };
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 280.0, 100.0);
+        driver.wait_for_focus_handle("custom-source");
+        driver.focus_element("custom-source");
+        let controller = driver.drag();
+
+        // Press Space and hold it: the pickup is armed against `space`.
+        driver.dispatch_key_press("space");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+
+        // Another key arrives and leaves while Space is still held.
+        driver.dispatch_key_press("a");
+        driver.dispatch_key_release("a");
+        // And an overlapping Enter press/release, which arms and consumes its
+        // own entry without touching Space's.
+        driver.dispatch_key_press("enter");
+        driver.dispatch_key_release("enter");
+
+        // Now the real release.
+        driver.dispatch_key_release("space");
+
+        assert_eq!(
+            *activations.lock().expect("activation lock"),
+            0,
+            "an unrelated key-up must not re-enable the row's activation"
+        );
     });
 }

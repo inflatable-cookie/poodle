@@ -477,6 +477,30 @@ impl<'a> HeadlessDriver<'a> {
         self.dispatch_key_raw(key);
     }
 
+    /// One key **press**, with no matching release. Focus is untouched.
+    ///
+    /// The pair below exists because press and release are separate dispatched
+    /// events with separate state: GPUI synthesizes Enter/Space clicks on
+    /// key-up, so anything that suppresses that has to survive whatever
+    /// arrives between the two.
+    pub fn dispatch_key_press(&mut self, key: &str) {
+        let keystroke = Keystroke::parse(key).expect("keystroke parses");
+        self.cx.simulate_event(KeyDownEvent {
+            keystroke,
+            is_held: false,
+        });
+        self.cx.run_until_parked();
+        self.draw_frame();
+    }
+
+    /// One key **release**, with no preceding press.
+    pub fn dispatch_key_release(&mut self, key: &str) {
+        let keystroke = Keystroke::parse(key).expect("keystroke parses");
+        self.cx.simulate_event(KeyUpEvent { keystroke });
+        self.cx.run_until_parked();
+        self.draw_frame();
+    }
+
     /// The keystroke half of [`Self::dispatch_key`], with focus untouched —
     /// callers that already focused the target use this so the mount host
     /// never steals focus.

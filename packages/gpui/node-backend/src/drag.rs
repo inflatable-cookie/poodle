@@ -184,10 +184,15 @@ struct ControllerState {
     /// step lands on the nearest target past it in the chosen direction, not
     /// on the end of the registry.
     keyboard_origin: Option<i32>,
-    /// A drag key was handled on the way down, so the matching key-up must
+    /// Activation keys handled on the way down, whose matching key-up must
     /// suppress GPUI's Enter/Space click synthesis. Otherwise a keyboard
     /// pickup also activates the focused row it picked up.
-    suppress_activation: bool,
+    ///
+    /// A set keyed by the released key, not one flag: any *other* key-up
+    /// arriving first — a modifier, a neighbouring shortcut, an overlapping
+    /// Enter while Space is held — would consume a single flag and let the
+    /// real release through.
+    suppress_activation: std::collections::BTreeSet<String>,
     /// A terminal ran without a window in reach; the next windowed handler
     /// clears GPUI's own drag state.
     pending_stop_active_drag: bool,
@@ -268,7 +273,7 @@ impl DragDropController {
                 next_session: 0,
                 keyboard_index: None,
                 keyboard_origin: None,
-                suppress_activation: false,
+                suppress_activation: std::collections::BTreeSet::new(),
                 pending_stop_active_drag: false,
                 preview: None,
                 describe_announcement: None,
@@ -775,8 +780,14 @@ impl DragDropController {
                     .session
                     .as_ref()
                     .is_some_and(|session| session.intent.is_some());
+                // The pickup key is also the drop key, so with no target
+                // chosen it puts the row back down. Reporting the key handled
+                // and leaving the drag open would strand a keyboard user in a
+                // gesture their own pickup key could not close.
                 if has_intent {
                     self.dispatch(DragSessionEvent::DropRequested { session_id }, cx);
+                } else {
+                    self.dispatch(DragSessionEvent::Cancel { session_id }, cx);
                 }
                 true
             }
@@ -840,32 +851,41 @@ impl DragDropController {
             }
             let last = ordered.len() - 1;
             // The first step is measured from the source's own
-            // `keyboard_order` — the declared traversal origin. Jumping to
-            // index 0 on the first Next reversed the contract for any source
-            // that does not sit at the start: a row at order 5 with targets at
-            // 1 and 9 must move Next to 9 and Previous to 1.
+            // `keyboard_order` — the declared traversal origin — and it can
+            // fail. A source past every target has nothing after it, so Next
+            // selects nothing rather than wrapping backwards to the end; a
+            // source before every target has nothing before it. Traversal also
+            // stops at the ends instead of restating the current index. This
+            // mirrors `createDragDropController`'s `firstTargetAfterSource` /
+            // `firstTargetBeforeSource`, which return and leave the intent
+            // alone.
             let origin = state.keyboard_origin;
-            let first_after = || {
-                origin
-                    .and_then(|origin| ordered.iter().position(|(order, ..)| *order > origin))
-                    .unwrap_or(last)
+            let first_after = || match origin {
+                Some(origin) => ordered.iter().position(|(order, ..)| *order > origin),
+                None => Some(0),
             };
-            let last_before = || {
-                origin
-                    .and_then(|origin| ordered.iter().rposition(|(order, ..)| *order < origin))
-                    .unwrap_or(0)
+            let last_before = || match origin {
+                Some(origin) => ordered.iter().rposition(|(order, ..)| *order < origin),
+                None => Some(last),
             };
             let index = match direction {
-                NodeKeyboardDropDirection::First => 0,
-                NodeKeyboardDropDirection::Last => last,
+                NodeKeyboardDropDirection::First => Some(0),
+                NodeKeyboardDropDirection::Last => Some(last),
                 NodeKeyboardDropDirection::Next => match state.keyboard_index {
-                    Some(current) => (current + 1).min(last),
+                    Some(current) if current >= last => None,
+                    Some(current) => Some(current + 1),
                     None => first_after(),
                 },
                 NodeKeyboardDropDirection::Previous => match state.keyboard_index {
-                    Some(current) => current.saturating_sub(1),
+                    Some(0) => None,
+                    Some(current) => Some(current - 1),
                     None => last_before(),
                 },
+            };
+            // Handled — the key belongs to the open gesture — but there is
+            // nowhere to go, so the current intent stands.
+            let Some(index) = index else {
+                return true;
             };
             state.keyboard_index = Some(index);
             let target_id = ordered[index].2.clone();
@@ -1259,15 +1279,16 @@ impl DragDropController {
             let key = event.keystroke.key.as_str();
             let handled = keys.key(key, window, cx);
             if handled && matches!(key, "space" | "enter") {
-                keys.state.borrow_mut().suppress_activation = true;
+                keys.state
+                    .borrow_mut()
+                    .suppress_activation
+                    .insert(key.to_owned());
             }
         })
         .capture_key_up(move |event: &gpui::KeyUpEvent, window, _cx| {
-            let suppressed = {
-                let mut state = key_ups.state.borrow_mut();
-                std::mem::take(&mut state.suppress_activation)
-            };
-            if suppressed && matches!(event.keystroke.key.as_str(), "space" | "enter") {
+            let key = event.keystroke.key.as_str();
+            let suppressed = key_ups.state.borrow_mut().suppress_activation.remove(key);
+            if suppressed {
                 window.prevent_default();
             }
         })
