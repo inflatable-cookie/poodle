@@ -1,6 +1,6 @@
 # g16.026 — Drag-And-Drop Cross-Window Bridge, Tabs, And DockRegion
 
-Status: implementation complete — repaired after Northstar review rounds 1-2
+Status: complete — merged in PR #113 after Northstar review rounds 1-2
 Date: 2026-08-31
 PR: https://github.com/inflatable-cookie/poodle/pull/113
 Card: `docs/roadmaps/g16/026-drag-drop-cross-window-bridge-and-dock-region.md`
@@ -259,9 +259,9 @@ exact**.
    `Preparing` indefinitely — and the contract explicitly permits a host to
    answer whenever its lease resolves. A foreground pump now drains on the main
    thread: the `Send + Sync` half is an unbounded sender a host callback holds,
-   the receiving task owns the `Rc` controller and an `AsyncApp`. One `post`
-   helper does queue-and-wake, so a future host answer cannot be added that
-   queues without waking.
+   while the receiving task holds a weak controller handle and upgrades it per
+   wake through an `AsyncApp`. One `post` helper does queue-and-wake, so a
+   future host answer cannot be added that queues without waking.
 
 3. **Installing a target bridge called `pick_target` with a fake receipt.**
    That is an observable host request outside any transaction, absent from the
@@ -301,7 +301,7 @@ carried an empty-token special case written for the old probe, which hid
 exactly the behaviour under test. Removing that special case is also the point
 of finding 3 — a host should not need it.
 
-## Open items for review
+## Accepted boundaries
 
 - The GPUI host bridge drains through a foreground pump installed the first
   time the controller sees an `App` — on its first frame, or when a source

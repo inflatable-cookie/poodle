@@ -15,22 +15,21 @@ Updated: 2026-08-31
     `019` merged in PR #94; `020` merged in PR #95; `021` merged in PR #96;
     `022` merged in PR #101 (web custom-surface substrate, no ledger movement);
     `023` merged in PR #104; `024` merged in PR #107; `025` merged in PR #108;
-    `026` is in progress; `027`–`028` remain behind ordered drag-and-drop
-    dependencies;
+    `026` merged in PR #113 after two Northstar review rounds; `027` is the
+    next ordered drag card and `028` remains behind it;
     `029` complete and merged (TimeInput native parity, ledger 48/126); `030`
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
-    mounted parity, ledger 52/122); `033` is reserved behind `026` for the
+    mounted parity, ledger 52/122); `033` is reserved after `026` for the
     HistoryCenter rejection surface and packed v3 HistoryEntry proof, with a
     public API decision required before dispatch
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: review and close the in-flight `g16.026` worker PR, whose
-    implementation is complete and awaiting review. Then resolve `g16.033`'s
-    structured-code-versus-host-message gate before dispatch while keeping
-    `g16.027` as the next ordered drag card. Component continuation remains
-    paused at the separate EditableLabel decision gate.
+  - Next move: promote `g16.027` as the next ordered drag card. In parallel,
+    resolve `g16.033`'s structured-code-versus-host-message gate before its
+    dispatch. Component continuation remains paused at the separate
+    EditableLabel decision gate.
 
 ## Latest Completed Track
 

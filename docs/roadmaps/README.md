@@ -78,9 +78,10 @@ behavior repairs without inventing another conformance authority.
   crates.io GPUI 0.2.2 capability matrix is immutable — mouse, keyboard, and
   in-window capture certified; pen, touch, and device-originated cancel remain
   unsupported debt no mouse fixture may flip. It merged in PR #108 after four
-  review rounds; no ledger cell moved. Tabs now moves with its DockRegion
-  host-bridge consumer in the in-flight `g16.026` worker lane.
-  `g16.033` is reserved behind that shared-file tranche for HistoryCenter's
+  review rounds; no ledger cell moved. PR #113 then merged `g16.026`: Tabs now
+  moves with its DockRegion host-bridge consumer through split source/window
+  authority and the window-owned GPUI pump.
+  `g16.033` is reserved after that shared-file tranche for HistoryCenter's
   Poodle-owned rejection surface and packed v3 `HistoryEntry` proof. It is not
   dispatchable until the public rejection shape is chosen; Keyboard vertical
   geometry and Longhorn's `AlreadyAtTarget` wire code remain separate deferred
@@ -151,7 +152,7 @@ behavior repairs without inventing another conformance authority.
   cards. `033` is the reserved HistoryCenter portfolio-papercut follow-on.
   Dependable drag-and-drop remains a
   separate programme governed by architecture 011/spec 069 and compiled as
-  `021`–`028`; `021`–`025` are merged, and `026` is the next planning gate.
+  `021`–`028`; `021`–`026` are merged, and `027` is the next ordered drag card.
 
 ## Rules
 

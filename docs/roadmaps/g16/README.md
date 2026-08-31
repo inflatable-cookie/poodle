@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — g16.026 implementation complete, awaiting review; g16.033
-reserved
+Status: active — g16.026 complete and merged; g16.027 is the next ordered
+drag card; g16.033 reserved at its public API decision gate
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -57,8 +57,8 @@ stay maintained; backend admission is not part of the first card.
 23. [023 — EditableList simple reorder migration](023-drag-drop-simple-reorder-migrations.md) — complete; merged in PR #104
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — complete; merged in PR #107
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — complete; merged in PR #108 after four orchestrator review rounds; ledger unchanged at 52 mounted / 122 missing
-26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — repaired after review rounds 1-2, awaiting re-review; split source/window bridge, bounded opaque receipt, clean public migration, Tabs subject-family seam, and window-owned GPUI provider census
-27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
+26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — complete; merged in PR #113 after two Northstar review rounds; split source/window bridge, bounded opaque receipt, clean public migration, Tabs subject-family seam, and window-owned GPUI provider census
+27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; dependency 026 is merged
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
@@ -96,7 +96,7 @@ Two continuation programmes are now explicit:
   roles, the bounded opaque receipt codec, and one `DragDropWindowHost` per
   GPUI window. Tabs migrates with its real DockRegion consumer. Later cards
   remain gated by landed dependencies.
-- **Portfolio papercut follow-on:** `g16.033` is reserved behind the in-flight
+- **Portfolio papercut follow-on:** `g16.033` is reserved after the merged
   `g16.026` shared-file tranche. It gives HistoryCenter distinct Poodle-owned
   deletion-refusal semantics and adds packed-package proof for the already-fixed
   v3 `HistoryEntry` export. Keyboard vertical geometry remains design-deferred;
@@ -332,8 +332,7 @@ and its in-window capture-equivalent drag route; pen, touch, and
 device-originated pointer cancellation remain explicit unsupported debt. No
 ledger cell moved.
 
-`g16.026` is repaired after review rounds 1-2 on
-`codex/g16-026-cross-window-drag-bridge` and awaits re-review. Round 1 closed
+`g16.026` merged in PR #113 after Northstar review rounds 1-2. Round 1 closed
 two blockers: the Rust cross-window bridge was declaration-only and is now
 wired through the GPUI controller with four falsified host-stub proofs, and the
 DockRegion contract contradicted the landed API. Round 2 closed four
@@ -346,5 +345,6 @@ back. The log is
 `../../logs/2026-08/20260831-g16-026-drag-drop-cross-window-bridge.md`. One
 consequence needs review attention: cross-region DockRegion transfer now
 requires one common `DragDropProvider`, per the operator decision recorded in
-spec 069. Review the PR against the fixed card before promoting `g16.027`;
-EditableLabel stays decision-blocked.
+spec 069. `g16.027` is now the next ordered drag card. `g16.033` remains
+reserved until the operator chooses structured rejection codes or a host-owned
+message; EditableLabel stays decision-blocked.
