@@ -55,7 +55,7 @@ stay maintained; backend admission is not part of the first card.
 22. [022 — Drag-and-drop web custom-surface substrate](022-drag-drop-web-custom-surface-substrate.md) — complete; merged in PR #101
 23. [023 — EditableList simple reorder migration](023-drag-drop-simple-reorder-migrations.md) — complete; merged in PR #104
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — complete; merged in PR #107
-25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — implemented; PR #108 open, orchestrator review pending; ledger 53 mounted / 121 missing
+25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — implemented; PR #108 open, review round 1 addressed; ledger unchanged at 52 mounted / 122 missing
 26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; clean public migration approved, depends on 025
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027

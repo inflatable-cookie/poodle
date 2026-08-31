@@ -1,6 +1,6 @@
 # g16.025 — Drag-And-Drop Rust And GPUI Substrate
 
-Status: implemented — PR open, orchestrator review pending
+Status: implemented — PR #108 open; review round 1 addressed
 Date: 2026-08-31
 PR: https://github.com/inflatable-cookie/poodle/pull/108
 Card: `docs/roadmaps/g16/025-drag-drop-rust-gpui-substrate.md`
@@ -40,10 +40,17 @@ no alias, wrapper, or fallback. `DropEdge` stays: it is the closed
 three-value shorthand component callbacks speak, mapped at the render edge so
 the substrate's `DropPosition` can stay open to consumer-defined placements.
 
-Tabs, Tree, and ModelCatalogueEditor migrated with every public callback
-unchanged. EditableList did not: its native renderer documents reorder and
-change as host-owned, it registers no source or target, and its rows carry no
-element identity — there is no honest mounted claim to make inside this card.
+Tabs, Tree, and ModelCatalogueEditor migrated. No public callback changed;
+Tree gained two optional ones (`on_drag_leave`, `on_drag_end`) so cancellation
+can unlatch its indicator. EditableList did not migrate: its native renderer
+documents reorder and change as host-owned, it registers no source or target,
+and its rows carry no element identity.
+
+Two behaviors changed on purpose, both after review. A row dropped onto itself
+is now *rejected* rather than silently accepted, so the target posture and the
+announcement say so. And a reorder surface's subject kind is scoped to its
+instance, so one Tabs cannot resolve a target in another Tabs, in Tree, or in
+ModelCatalogueEditor when they share a controller.
 
 ## Capability matrix
 
@@ -89,6 +96,34 @@ that the reported input kind is `Mouse`.
   `App::defer`. It reaches a `Window`, so a rebuild-driven cancellation can
   also stop GPUI's own drag, and a host that wires the provider cannot forget a
   second call.
+- **The release point decides, not the last hover.** A gesture can reach
+  mouse-up with no intervening move, and committing whatever the previous move
+  left would drop on a target the pointer is no longer over. Release
+  hit-tests its own position first, exactly like a move.
+- **One sensor owns an open gesture, with Escape as the deliberate exception.**
+  Traversal and drop keys are inert against a mouse-owned drag; Escape is the
+  accessible cancel for any session, because a mouse drag a user cannot
+  abandon from the keyboard is a trap.
+- **Drag keys are taken in the capture phase, and their key-up prevents the
+  default.** GPUI synthesizes a click from Enter/Space on *key-up* for any
+  focused element with a click listener, so a keyboard pickup would otherwise
+  also activate the row it picked up. `prevent_default` resets per dispatched
+  event, so the suppression has to be re-applied on the matching key-up rather
+  than set on the key-down.
+- **Keyboard traversal starts from the source's declared `keyboard_order`.**
+  A source at order 5 between targets at 1 and 9 moves Next to 9 and Previous
+  to 1. Starting at index 0 was the reverse of the contract for any source not
+  sitting at the start of the registry.
+- **The controller holds the current target's clear callback**, rather than
+  looking it up when the intent moves. The registry is rebuilt every frame, so
+  a target removed while it held the intent would otherwise never be told it
+  stopped — the one case the registration contract promises it will be.
+- **A source that changes subject during a rebuild is a lost source.** Reusing
+  one `source_id` for a new row would otherwise leave the old subject dragging
+  and let it commit against the new tree.
+- **Eligibility carries the instance scope, not just the ids.** Scoped source
+  and target ids stop a duplicate-id collision; they do nothing about one
+  surface resolving another's target. The subject kind does.
 - **Registration scope.** The provider stack is exact while a provider's
   closure runs. GPUI renders a `RenderOnce` child or list row during *layout*,
   after every closure has returned, so the frame's top-level provider stays
@@ -112,6 +147,18 @@ that the reported input kind is `Mouse`.
 | Rejected commit | `a_rejected_commit_ends_the_session_with_its_reason` |
 | Duplicate live id | `a_duplicate_live_target_id_is_recorded_and_refused` |
 | False pen/touch claim | `a_mouse_fixture_cannot_make_an_unsupported_capability_true` |
+| Stale hover at release | `a_release_away_from_the_hovered_target_commits_nothing`, with `a_release_over_another_target_commits_the_one_under_the_pointer` as its mirror |
+| Key against a mouse-owned drag | `keys_other_than_escape_cannot_drive_a_mouse_owned_drag` |
+| Traversal origin | `keyboard_traversal_starts_from_the_sources_declared_origin` |
+| Pickup double-firing activation | `a_keyboard_pickup_does_not_also_activate_its_own_source` |
+| Cross-surface drop | `two_reorder_surfaces_under_one_controller_cannot_cross_drop` |
+| Self-drop | same test, plus `tabs_drag_keyboard_and_identity_rebuild_the_host_spec` |
+| Removed target's clear callback | `removing_the_current_target_during_a_rebuild_cancels_once` |
+| Subject change during rebuild | `a_source_that_changes_subject_during_a_rebuild_cancels_once` |
+| Tree cancellation unlatching | `tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec` |
+
+The stale-hover and activation-suppression tests were falsified by planting the
+pre-fix behavior back and confirming both fail.
 
 ## Evidence
 
@@ -123,11 +170,12 @@ that the reported input kind is `Mouse`.
 - Controller units (capability matrix, identity, eligibility defaults,
   announcements): `packages/gpui/node-backend/src/drag.rs`.
 - Mounted GPUI, real dispatch: `packages/gpui/preview/tests/headless_regressions.rs`
-  — eleven custom-surface tests plus
+  — eighteen custom-surface tests plus
   `tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec`, with
   `tabs_drag_keyboard_and_identity_rebuild_the_host_spec` and
-  `model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window` retained
-  unchanged.
+  `model_catalogue_editor_grabs_moves_and_cancels_in_a_mounted_window` retained.
+  The Tabs test's one changed assertion is the self-drop rule: hovering the
+  dragged tab now clears the indicator instead of pointing a tab at itself.
 - Boards: `effigy ci:rust`, `effigy ci:native` (includes `regressions:native`,
   `probe:gpui-specimens`, `check:gpui`, `gpui:test`, `test:jetstream-adapter`,
   the drift gates, and the crates.io GPUI identity proof), `effigy docs:check`,
@@ -137,11 +185,43 @@ that the reported input kind is `Mouse`.
 
 ## Ledger
 
-52 → 53 mounted, 122 → 121 missing. One cell moved: Tree, on a named
-real-dispatch mounted regression covering selection, twisty expand, a keyboard
-command, a cancelled drag, and a committed nested reorder. Tabs and
-ModelCatalogueEditor keep their existing cells. EditableList stays `missing`
-for the reason above.
+Unchanged: 52 mounted / 122 missing. No cell moved.
+
+Tree's mounted regression lands as substrate evidence — selection, twisty
+expand, a keyboard command, a cancelled drag that unlatches the indicator, and
+a committed nested reorder — but the cell stays `missing`. Tree's contract puts
+Alt+Up/Down sibling reorder on the component; the native renderer reports those
+keys through `on_key` and the host executes them, so that authored behavior
+does not run through the shared semantic session. Claiming `mounted` would
+overstate it, and intercepting the keys here would change what `on_key`
+reports, which is a stop condition for this card. The cell moves in the card
+that migrates the keyboard route.
+
+EditableList stays `missing` for the reason above. Tabs and
+ModelCatalogueEditor keep their existing cells.
+
+## Review round 1
+
+The orchestrator requested changes on PR #108. Six gaps, all closed here:
+
+1. **Release used the stale hover intent.** Fixed: release hit-tests its own
+   position; two mounted counterexamples, one of them falsified.
+2. **Keyboard traversal ignored its declared origin, keys crossed sensor
+   kinds, and pickup could also activate the row.** Fixed: origin-relative
+   first step, Escape-only crossing, capture-phase keys with key-up
+   `prevent_default`; three mounted counterexamples, one falsified.
+3. **Reorder scoping was ids only, and the advertised self-rejection was never
+   installed.** Fixed: the subject kind carries the instance scope and both
+   reorder builders install `rejects_self`; one mounted and two unit
+   counterexamples.
+4. **A removed target lost its clear callback.** Fixed: the controller holds
+   the callback rather than looking it up in the swept registry; asserted
+   exactly once in the target-removal case.
+5. **A source could change subject during a rebuild without cancelling.**
+   Fixed and given its own mounted counterexample.
+6. **Tree's ledger move was not backed by complete authored proof.** The cell
+   is reverted to `missing`; the latched-indicator defect the review exposed is
+   fixed and proved.
 
 ## Continuation
 

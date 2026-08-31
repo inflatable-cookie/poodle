@@ -77,7 +77,7 @@ behavior repairs without inventing another conformance authority.
   backend-global payload session so two providers own two sessions; its
   crates.io GPUI 0.2.2 capability matrix is immutable — mouse, keyboard, and
   in-window capture certified; pen, touch, and device-originated cancel remain
-  unsupported debt no mouse fixture may flip. Ledger 53 mounted / 121 missing.
+  unsupported debt no mouse fixture may flip. No ledger cell moved.
   Tabs now moves with its DockRegion host-bridge consumer in `g16.026`.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after

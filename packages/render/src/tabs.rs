@@ -1294,7 +1294,16 @@ mod tests {
         let source = a.interaction.drag_source.as_ref().expect("source");
         assert_eq!(source.source_id, "tabs:source:a");
         assert_eq!(source.subject.id, "a");
-        assert_eq!(source.subject.kind, crate::drag_drop::REORDER_SUBJECT_KIND);
+        assert_eq!(source.subject.kind, crate::drag_drop::reorder_kind("tabs"));
+        assert_eq!(
+            a.interaction
+                .drop_target
+                .as_ref()
+                .expect("target")
+                .accepted_kinds,
+            vec![crate::drag_drop::reorder_kind("tabs")],
+            "one tab set is ineligible for another surface's rows"
+        );
         assert_eq!(
             a.interaction
                 .drop_target
@@ -1323,7 +1332,7 @@ mod tests {
         let input = |x: f32, y: f32| poodle_node::NodeDropPositionInput {
             fraction_x: x,
             fraction_y: y,
-            subject: crate::drag_drop::reorder_subject("b"),
+            subject: crate::drag_drop::reorder_subject("tabs", "b"),
             operation: poodle_node::DragOperation::Move,
             input_kind: poodle_node::NodeDragInputKind::Mouse,
         };
@@ -1363,7 +1372,7 @@ mod tests {
         );
         let target = tab_of(&root, "d").interaction.drop_target.clone().expect("target");
         let commit = (target.on_drop.as_ref().expect("drop"))(&poodle_node::NodeDropCommitEvent {
-            subject: crate::drag_drop::reorder_subject("a"),
+            subject: crate::drag_drop::reorder_subject("tabs", "a"),
             intent: poodle_node::DropIntent {
                 target_id: target.target_id.clone(),
                 position: poodle_node::DROP_POSITION_AFTER.to_string(),

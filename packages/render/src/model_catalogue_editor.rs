@@ -1167,7 +1167,7 @@ mod tests {
             .expect("the third row");
         let target = row.interaction.drop_target.clone().expect("target");
         let commit = (target.on_drop.as_ref().expect("drop"))(&poodle_node::NodeDropCommitEvent {
-            subject: crate::drag_drop::reorder_subject("model-alpha"),
+            subject: crate::drag_drop::reorder_subject("model-catalogue-editor", "model-alpha"),
             intent: poodle_node::DropIntent {
                 target_id: target.target_id.clone(),
                 position: poodle_node::DROP_POSITION_AFTER.to_string(),

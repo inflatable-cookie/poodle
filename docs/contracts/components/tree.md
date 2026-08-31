@@ -540,10 +540,19 @@ None.
   the GPUI `DragDropController` owns capture, hit testing, deterministic
   deepest-target arbitration, cancellation, and exactly-once cleanup, and the
   band rule (`before` / `inside` / `after` by thirds) lives in
-  `poodle_render::drag_drop`. `on_drag_over` and `on_reorder` keep their
-  `(dragged, over, DropEdge)` shape: the component still never sees a
-  coordinate. The `drag_over` indicator is a top/bottom accent line or inside
-  fill. Alt+Up/Down moves among siblings.
+  `poodle_render::drag_drop`. A row dropped onto itself is rejected, and a
+  row's subject kind is scoped to Tree, so a drag from another reorder surface
+  sharing the controller is never eligible here. `on_drag_over` and
+  `on_reorder` keep their `(dragged, over, DropEdge)` shape: the component
+  still never sees a coordinate. `on_drag_leave` and `on_drag_end` are the
+  optional clear hooks — the target stopped holding the intent, and the
+  gesture ended (committed, rejected, or cancelled, exactly once) — so a host
+  can unlatch `drag_value` / `drop_target_value` instead of inferring the
+  terminal from `on_reorder`. The `drag_over` indicator is a top/bottom accent
+  line or inside fill.
+- Alt+Up/Down sibling reorder is reported through `on_key` and executed by the
+  host; it does not yet run through the shared semantic session the way the
+  web route does. Known gap, carried to the card that migrates it.
 - chevron uses `▸` / `▾` glyphs; guides are left-bordered indent cells
 - known GPUI-native deltas: no accessibility (runtime limit, §6 + Known Deltas);
   no virtual scrolling; transition timing is platform-owned

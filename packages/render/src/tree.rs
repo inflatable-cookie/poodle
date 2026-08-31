@@ -61,6 +61,17 @@ pub struct TreeHandlers {
     /// A drag is hovering `over`, landing at `edge`. Drives the drop
     /// indicator; `dragged` is the row the gesture started on.
     pub on_drag_over: Option<TreeDropHandler>,
+    /// The hovered row stopped being the drop target — the pointer moved to
+    /// another row, left every row, or the row became ineligible.
+    ///
+    /// Without it the host's `drop_target_value` latches on the last row the
+    /// pointer touched and the indicator outlives the hover.
+    pub on_drag_leave: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// The drag ended — committed, rejected, or cancelled. Fires exactly once
+    /// per gesture, on every path including Escape and a rebuild that removes
+    /// the dragged row, so the host can clear `drag_value` and
+    /// `drop_target_value` without inferring the terminal from `on_reorder`.
+    pub on_drag_end: Option<Arc<dyn Fn() + Send + Sync>>,
     /// A drag was released: move `dragged` to `edge` of `over`.
     pub on_reorder: Option<TreeDropHandler>,
 }
@@ -340,11 +351,12 @@ fn render_row(
     // component still never sees a coordinate.
     if !node.is_disabled && m.reorderable {
         let value = node.value.clone();
-        crate::drag_drop::attach_source(
-            &mut row,
-            true,
-            crate::drag_drop::reorder_source(TREE_DRAG_SCOPE, &value, &node.label),
-        );
+        let mut source = crate::drag_drop::reorder_source(TREE_DRAG_SCOPE, &value, &node.label);
+        if let Some(handler) = &handlers.on_drag_end {
+            let handler = Arc::clone(handler);
+            source.on_drag_end = Some(Arc::new(move |_outcome| handler()));
+        }
+        crate::drag_drop::attach_source(&mut row, true, source);
 
         // Every tree row can take an `inside` drop: nesting is what the
         // component is for, so the band splits in thirds rather than halves.
@@ -358,6 +370,10 @@ fn render_row(
                     handler(&event.subject.id, &over, edge);
                 }
             }));
+        }
+        if let Some(handler) = &handlers.on_drag_leave {
+            let handler = Arc::clone(handler);
+            target.on_intent_cleared = Some(Arc::new(move || handler()));
         }
         if let Some(handler) = &handlers.on_reorder {
             let handler = Arc::clone(handler);

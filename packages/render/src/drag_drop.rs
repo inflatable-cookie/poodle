@@ -21,12 +21,20 @@ use poodle_node::{
     NodeKeyboardPositionInput, DROP_POSITION_AFTER, DROP_POSITION_BEFORE, DROP_POSITION_INSIDE,
 };
 
-/// The subject kind every list-reorder component uses for its own rows.
+/// The subject-kind prefix every list-reorder component uses for its own rows.
 ///
-/// Reorder moves a row within the surface that owns it, so the kind only has
-/// to separate one component instance's rows from an unrelated drag. The
-/// target id carries which instance.
+/// Never a kind on its own. Reorder moves a row *within* the surface that owns
+/// it, so the kind carries the instance scope: one shared kind would let a
+/// row from one Tabs resolve a target in another Tabs, in Tree, or in
+/// ModelCatalogueEditor whenever they share a controller, and overlapping
+/// values would then mutate the wrong component. Scoped ids alone do not stop
+/// that — eligibility does.
 pub const REORDER_SUBJECT_KIND: &str = "poodle.reorder-item";
+
+/// The subject kind one reorder surface accepts, and nothing else does.
+pub fn reorder_kind(scope: &str) -> String {
+    format!("{REORDER_SUBJECT_KIND}:{scope}")
+}
 
 /// Turn a semantic position into the closed three-value edge a reorder
 /// component's public callback speaks. An unknown consumer-defined position
@@ -72,10 +80,11 @@ pub fn position_for_fraction(fraction: f32, accepts_inside: bool) -> DropPositio
     .to_string()
 }
 
-/// The subject a reorder row carries: the component's own row value.
-pub fn reorder_subject(value: &str) -> DragSubject {
+/// The subject a reorder row carries: this surface's kind and the component's
+/// own row value.
+pub fn reorder_subject(scope: &str, value: &str) -> DragSubject {
     DragSubject {
-        kind: REORDER_SUBJECT_KIND.to_string(),
+        kind: reorder_kind(scope),
         id: value.to_string(),
     }
 }
@@ -87,33 +96,40 @@ pub fn reorder_subject(value: &str) -> DragSubject {
 pub fn reorder_source(scope: &str, value: &str, label: &str) -> NodeDragSource {
     NodeDragSource::new(
         format!("{scope}:source:{value}"),
-        reorder_subject(value),
+        reorder_subject(scope, value),
         label,
     )
 }
 
 /// A flat reorder target: before / after by half, no nesting.
+///
+/// Accepts this surface's scoped kind only, and refuses a row dropped onto
+/// itself — the two rules every reorder surface needs and none of them should
+/// restate.
 pub fn reorder_target(scope: &str, value: &str, label: &str) -> NodeDropTarget {
     let mut target = NodeDropTarget::new(
         format!("{scope}:target:{value}"),
-        REORDER_SUBJECT_KIND,
+        reorder_kind(scope),
         label,
     );
     target.resolve_position = Some(vertical_band_resolver(false));
     target.resolve_keyboard_position = Some(linear_keyboard_resolver());
+    target.can_drop = Some(rejects_self(value));
     target
 }
 
 /// A nested placement target: before / inside / after by thirds when the row
-/// can hold children, halves when it cannot.
+/// can hold children, halves when it cannot. Same scope and self-drop rules as
+/// [`reorder_target`].
 pub fn nested_target(scope: &str, value: &str, label: &str, accepts_inside: bool) -> NodeDropTarget {
     let mut target = NodeDropTarget::new(
         format!("{scope}:target:{value}"),
-        REORDER_SUBJECT_KIND,
+        reorder_kind(scope),
         label,
     );
     target.resolve_position = Some(vertical_band_resolver(accepts_inside));
     target.resolve_keyboard_position = Some(linear_keyboard_resolver());
+    target.can_drop = Some(rejects_self(value));
     target
 }
 
@@ -230,24 +246,34 @@ mod tests {
 
     #[test]
     fn a_reorder_row_rejects_itself_with_a_reason_rather_than_going_quiet() {
-        let eligibility = rejects_self("kick");
+        let target = reorder_target("list", "kick", "Kick");
+        let eligibility = target.can_drop.clone().expect("self-rejection is installed");
         let intent = DropIntent {
-            target_id: "list:target:kick".to_string(),
+            target_id: target.target_id.clone(),
             position: DROP_POSITION_AFTER.to_string(),
             operation: DragOperation::Move,
         };
 
-        let refused = eligibility(&intent, &reorder_subject("kick"));
+        let refused = eligibility(&intent, &reorder_subject("list", "kick"));
         assert!(matches!(
             refused,
             DropEligibility::Rejected { reason: Some(_) }
         ));
         assert_eq!(
-            eligibility(&intent, &reorder_subject("snare")),
+            eligibility(&intent, &reorder_subject("list", "snare")),
             DropEligibility::Accepted {
                 intent: intent.clone()
             }
         );
+    }
+
+    /// A nested surface needs the same two rules; Tree must not be the one
+    /// component that silently accepts a row dropped on itself.
+    #[test]
+    fn a_nested_target_carries_the_same_scope_and_self_drop_rules() {
+        let target = nested_target("tree", "kick", "Kick", true);
+        assert_eq!(target.accepted_kinds, vec![reorder_kind("tree")]);
+        assert!(target.can_drop.is_some());
     }
 
     /// Two mounted instances must not mint one id, or the controller's
@@ -264,6 +290,17 @@ mod tests {
         );
     }
 
+    /// Scoped ids are not enough: two reorder surfaces sharing one controller
+    /// must be ineligible for each other, or a row from one list resolves a
+    /// target in the other and mutates the wrong component.
+    #[test]
+    fn one_reorder_surface_is_ineligible_for_another_surfaces_subject() {
+        let mine = reorder_target("list-a", "row", "Row");
+        assert!(mine.accepts(&reorder_subject("list-a", "other")));
+        assert!(!mine.accepts(&reorder_subject("list-b", "other")));
+        assert!(!mine.accepts(&reorder_subject("tree", "other")));
+    }
+
     /// `previous` and `next` are distinct resolver inputs; a linear list maps
     /// them onto before and after rather than a synthetic centre point.
     #[test]
@@ -271,7 +308,7 @@ mod tests {
         let resolve = linear_keyboard_resolver();
         let input = |direction| NodeKeyboardPositionInput {
             direction,
-            subject: reorder_subject("kick"),
+            subject: reorder_subject("list", "kick"),
             operation: DragOperation::Move,
         };
 

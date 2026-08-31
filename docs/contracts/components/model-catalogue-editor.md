@@ -181,8 +181,10 @@ and disclosure transition for the hidden section.
 - Pointer drag runs on the shared drag-and-drop substrate (architecture 011,
   spec 069): the reorder handle registers a `NodeDragSource` and every unlocked
   row a `NodeDropTarget`, and the GPUI `DragDropController` owns the session,
-  hit testing, cancellation, and exactly-once cleanup. The explicit and
-  keyboard grab/move route is unchanged and emits the same order payload.
+  hit testing, cancellation, and exactly-once cleanup. The subject kind is
+  scoped to the catalogue instance and a row dropped onto itself is rejected.
+  The explicit and keyboard grab/move route is unchanged and emits the same
+  order payload.
 
 ### Native Binding
 

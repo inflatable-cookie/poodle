@@ -55,12 +55,17 @@ synthesis. Do not add a GPUI fork or platform input beneath GPUI.
 - [x] Capability tests prove the exact stock-GPUI matrix and reject any pen,
       touch, or device-cancel claim based only on mouse synthesis.
 - [x] Tabs and ModelCatalogueEditor preserve their existing mounted claims.
-- [x] Tree moves to mounted on a named real-dispatch test covering selection,
-      expand, a keyboard command, a cancelled drag, and a committed nested
-      reorder. EditableList does **not** move and stays `missing`: its native
-      renderer documents reorder and change as host-owned, it registers no
-      drag source or target, and its rows carry no element identity to drive.
-      Inventing either would be a new component feature, not this card.
+- [x] Neither EditableList nor Tree moves; both stay `missing`, and the
+      ledger is unchanged. EditableList registers no drag source or target and
+      its rows carry no element identity to drive. Tree's contract puts
+      Alt+Up/Down sibling reorder on the component, but the native renderer
+      reports those keys through `on_key` and the host executes them, so that
+      authored behavior does not run through the shared semantic session. A
+      mounted claim would be incomplete, and intercepting the keys here would
+      change what `on_key` reports — a public callback change, which is a stop
+      condition for this card. Tree's mounted regression lands anyway as
+      substrate evidence; the cell moves in the card that migrates the
+      keyboard route.
 - [x] Deferred Jetstream construction consumes renderer-neutral shape only and
       remains labelled deferred; no Jetstream preview/QA runs.
 
@@ -85,7 +90,15 @@ closed component-callback shorthand. No component's public callback changed.
 The shared Rust kernel needed no extension: no defect surfaced under mounted
 native dispatch.
 
-Ledger: 52 → 53 mounted, 122 → 121 missing.
+Ledger: unchanged at 52 mounted / 122 missing.
+
+## Review Round 1
+
+The orchestrator requested changes on PR #108 and named six gaps. All six are
+closed on this branch; the log records each fix and its mounted counterexample.
+Two of them changed observable behavior on purpose: a self-drop is now
+*rejected* rather than silently accepted, and a reorder surface is ineligible
+for another surface's rows.
 
 ## Writable Scope
 

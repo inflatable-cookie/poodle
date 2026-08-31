@@ -162,6 +162,12 @@ struct ControllerState {
     input_kind: Option<NodeDragInputKind>,
     pointer: Option<(f32, f32)>,
     notified: Option<NotifiedIntent>,
+    /// The clear callback of the target currently holding the intent, held
+    /// here rather than looked up on demand. The registry is rebuilt every
+    /// frame, so a target that was removed while it held the intent would
+    /// otherwise never be told it stopped — the one case the public
+    /// registration contract promises it will be.
+    notified_clear: Option<poodle_node::NodeDropIntentClearedHandler>,
     announcement: Option<String>,
     announcements: Vec<String>,
     /// Duplicate live ids and other registration conflicts, for diagnosis.
@@ -174,6 +180,14 @@ struct ControllerState {
     last_outcome: Option<DragTerminalOutcome>,
     next_session: u64,
     keyboard_index: Option<usize>,
+    /// The active source's `keyboard_order` — the traversal origin. The first
+    /// step lands on the nearest target past it in the chosen direction, not
+    /// on the end of the registry.
+    keyboard_origin: Option<i32>,
+    /// A drag key was handled on the way down, so the matching key-up must
+    /// suppress GPUI's Enter/Space click synthesis. Otherwise a keyboard
+    /// pickup also activates the focused row it picked up.
+    suppress_activation: bool,
     /// A terminal ran without a window in reach; the next windowed handler
     /// clears GPUI's own drag state.
     pending_stop_active_drag: bool,
@@ -245,6 +259,7 @@ impl DragDropController {
                 input_kind: None,
                 pointer: None,
                 notified: None,
+                notified_clear: None,
                 announcement: None,
                 announcements: Vec::new(),
                 conflicts: Vec::new(),
@@ -252,6 +267,8 @@ impl DragDropController {
                 last_outcome: None,
                 next_session: 0,
                 keyboard_index: None,
+                keyboard_origin: None,
+                suppress_activation: false,
                 pending_stop_active_drag: false,
                 preview: None,
                 describe_announcement: None,
@@ -392,15 +409,18 @@ impl DragDropController {
                 .retain(|_, record| record.generation == generation);
 
             let session = state.context.session.clone();
-            // Removed OR newly disabled: the spec cancels for both, because a
-            // source that can no longer be dragged is not holding a gesture.
+            // Removed, newly disabled, or now carrying a different subject.
+            // The registration contract calls all three a changed source, and
+            // the third matters most: a rebuild that reuses one `source_id`
+            // for a new row would otherwise leave the old subject dragging and
+            // let it commit against the new tree.
             let stale_source = session
                 .as_ref()
                 .filter(|session| {
-                    state
-                        .sources
-                        .get(&session.source_id)
-                        .is_none_or(|record| record.registration.disabled)
+                    state.sources.get(&session.source_id).is_none_or(|record| {
+                        record.registration.disabled
+                            || record.registration.subject != session.subject
+                    })
                 })
                 .map(|session| session.session_id.clone());
             let stale_target = session
@@ -589,6 +609,7 @@ impl DragDropController {
             let session_id = format!("gpui-drag-{}-{}", state.id, state.next_session);
             state.input_kind = Some(kind);
             state.keyboard_index = None;
+            state.keyboard_origin = registration.keyboard_order;
             state.last_outcome = None;
             state.active_source = Some((registration.clone(), element_id));
             (session_id, registration)
@@ -673,9 +694,14 @@ impl DragDropController {
         }
     }
 
-    /// Release. A live intent commits; anything else is cancellation, which is
-    /// what an outside release is.
-    fn pointer_release(&self, window: &mut Window, cx: &mut App) {
+    /// Release at a point. The point decides, not the last hover.
+    ///
+    /// A gesture can reach mouse-up without an intervening move — release
+    /// outside the window, or a move coalesced away — and committing whatever
+    /// the previous move happened to leave would drop on a target the pointer
+    /// is no longer over. So the release position is hit-tested first, exactly
+    /// like a move, and only then does a live intent commit.
+    fn pointer_release(&self, position: Point<Pixels>, window: &mut Window, cx: &mut App) {
         self.drain_pending_stop(window, cx);
         let Some(session_id) = self.active_session_id() else {
             return;
@@ -683,6 +709,10 @@ impl DragDropController {
         if self.state.borrow().input_kind != Some(NodeDragInputKind::Mouse) {
             return;
         }
+        let (x, y): (f32, f32) = (position.x.into(), position.y.into());
+        self.state.borrow_mut().pointer = Some((x, y));
+        self.resolve_pointer_intent(x, y, cx);
+
         let has_intent = self
             .state
             .borrow()
@@ -717,6 +747,21 @@ impl DragDropController {
         let Some(session_id) = self.active_session_id() else {
             return false;
         };
+        // One sensor owns an open gesture. Escape is the exception on purpose:
+        // it is the accessible cancel for *any* session, and a mouse drag a
+        // user cannot abandon from the keyboard is a trap. Everything else —
+        // traversal, drop — would otherwise let a keystroke move or commit a
+        // drag the mouse is still holding.
+        if self.state.borrow().input_kind != Some(NodeDragInputKind::Keyboard) {
+            if key != "escape" {
+                return false;
+            }
+            self.dispatch(DragSessionEvent::Escape { session_id }, cx);
+            self.sync_intent_notifications();
+            self.drain_pending_stop(window, cx);
+            cx.refresh_windows();
+            return true;
+        }
         let handled = match key {
             "escape" => {
                 self.dispatch(DragSessionEvent::Escape { session_id }, cx);
@@ -794,16 +839,32 @@ impl DragDropController {
                 return false;
             }
             let last = ordered.len() - 1;
+            // The first step is measured from the source's own
+            // `keyboard_order` — the declared traversal origin. Jumping to
+            // index 0 on the first Next reversed the contract for any source
+            // that does not sit at the start: a row at order 5 with targets at
+            // 1 and 9 must move Next to 9 and Previous to 1.
+            let origin = state.keyboard_origin;
+            let first_after = || {
+                origin
+                    .and_then(|origin| ordered.iter().position(|(order, ..)| *order > origin))
+                    .unwrap_or(last)
+            };
+            let last_before = || {
+                origin
+                    .and_then(|origin| ordered.iter().rposition(|(order, ..)| *order < origin))
+                    .unwrap_or(0)
+            };
             let index = match direction {
                 NodeKeyboardDropDirection::First => 0,
                 NodeKeyboardDropDirection::Last => last,
                 NodeKeyboardDropDirection::Next => match state.keyboard_index {
                     Some(current) => (current + 1).min(last),
-                    None => 0,
+                    None => first_after(),
                 },
                 NodeKeyboardDropDirection::Previous => match state.keyboard_index {
                     Some(current) => current.saturating_sub(1),
-                    None => last,
+                    None => last_before(),
                 },
             };
             state.keyboard_index = Some(index);
@@ -950,6 +1011,7 @@ impl DragDropController {
                     state.input_kind = None;
                     state.pointer = None;
                     state.keyboard_index = None;
+                    state.keyboard_origin = None;
                     state.active_source = None;
                     state.pending_stop_active_drag = true;
                 }
@@ -1041,52 +1103,61 @@ impl DragDropController {
             if state.notified == next {
                 return;
             }
-            let clear = state
-                .notified
-                .take()
-                .filter(|(previous, _, _)| {
-                    next.as_ref().map(|(id, _, _)| id) != Some(previous)
-                })
-                .and_then(|(target_id, _, _)| {
-                    state
-                        .targets
-                        .get(&target_id)
-                        .and_then(|record| record.registration.on_intent_cleared.clone())
-                });
+            let previous = state.notified.take();
+            let clear = match (&previous, &next) {
+                (Some((previous_id, ..)), Some((next_id, ..))) if previous_id == next_id => {
+                    // Same target, new position: it is still holding the
+                    // intent, so it is not told it stopped.
+                    state.notified_clear.clone()
+                }
+                (Some(_), _) => state.notified_clear.take(),
+                _ => None,
+            };
+            let clear = match (&previous, &next) {
+                (Some((previous_id, ..)), Some((next_id, ..))) if previous_id == next_id => None,
+                _ => clear,
+            };
             let notify = current.and_then(|((target_id, position, operation), subject)| {
-                state.targets.get(&target_id).and_then(|record| {
-                    record.registration.on_intent.clone().map(|handler| {
-                        (
-                            handler,
-                            NodeDropIntentEvent {
-                                subject,
-                                position,
-                                operation,
-                            },
-                        )
-                    })
-                })
+                let record = state.targets.get(&target_id)?;
+                let cleared = record.registration.on_intent_cleared.clone();
+                let intent = record.registration.on_intent.clone();
+                Some((cleared, intent, position, operation, subject))
             });
+            let notify = notify.map(|(cleared, intent, position, operation, subject)| {
+                state.notified_clear = cleared;
+                (
+                    intent,
+                    NodeDropIntentEvent {
+                        subject,
+                        position,
+                        operation,
+                    },
+                )
+            });
+            if notify.is_none() {
+                state.notified_clear = None;
+            }
             state.notified = next;
             (clear, notify)
         };
         if let Some(clear) = clear {
             clear();
         }
-        if let Some((handler, event)) = notify {
+        if let Some((Some(handler), event)) = notify {
             handler(&event);
         }
     }
 
+    /// Terminal cleanup: whatever holds the intent is told it stopped.
+    ///
+    /// The held callback is used rather than a registry lookup, because the
+    /// frame sweep that noticed the removal has already pruned the target this
+    /// is about.
     fn clear_intent_notification(&self) {
         let clear = {
             let mut state = self.state.borrow_mut();
-            state.notified.take().and_then(|(target_id, _, _)| {
-                state
-                    .targets
-                    .get(&target_id)
-                    .and_then(|record| record.registration.on_intent_cleared.clone())
-            })
+            state.notified = None;
+            state.notified_clear.take()
         };
         if let Some(clear) = clear {
             clear();
@@ -1146,7 +1217,15 @@ impl DragDropController {
     /// receiving the gesture after the pointer leaves the source — the
     /// observable result pointer capture produces, without a per-pointer
     /// capture handle GPUI does not expose. Release is bound on both sides of
-    /// the host so an outside release still closes the session.
+    /// the host so an outside release still closes the session, and it carries
+    /// its own position: the release point decides, not the last hover.
+    ///
+    /// Keys are taken in the **capture** phase, outermost first, so a drag key
+    /// is claimed before the focused row it is aimed at sees it. GPUI
+    /// synthesizes a click from Enter/Space on *key-up* for any focused
+    /// element with a click listener, so the matching key-up prevents that
+    /// default — otherwise a keyboard pickup also activates the row it picked
+    /// up.
     fn attach_host<E>(&self, el: E) -> E
     where
         E: InteractiveElement + 'static,
@@ -1155,6 +1234,7 @@ impl DragDropController {
         let up = self.clone();
         let up_out = self.clone();
         let keys = self.clone();
+        let key_ups = self.clone();
         let id = self.id();
         el.on_drag_move::<NativeDragPayload>(move |event, window, cx| {
             // `on_drag_move` dispatches by payload TYPE: every provider in the
@@ -1169,14 +1249,27 @@ impl DragDropController {
             }
             moves.pointer_move(event.event.position, window, cx);
         })
-        .on_mouse_up(MouseButton::Left, move |_event: &MouseUpEvent, window, cx| {
-            up.pointer_release(window, cx);
+        .on_mouse_up(MouseButton::Left, move |event: &MouseUpEvent, window, cx| {
+            up.pointer_release(event.position, window, cx);
         })
-        .on_mouse_up_out(MouseButton::Left, move |_event: &MouseUpEvent, window, cx| {
-            up_out.pointer_release(window, cx);
+        .on_mouse_up_out(MouseButton::Left, move |event: &MouseUpEvent, window, cx| {
+            up_out.pointer_release(event.position, window, cx);
         })
-        .on_key_down(move |event: &KeyDownEvent, window, cx| {
-            keys.key(event.keystroke.key.as_str(), window, cx);
+        .capture_key_down(move |event: &KeyDownEvent, window, cx| {
+            let key = event.keystroke.key.as_str();
+            let handled = keys.key(key, window, cx);
+            if handled && matches!(key, "space" | "enter") {
+                keys.state.borrow_mut().suppress_activation = true;
+            }
+        })
+        .capture_key_up(move |event: &gpui::KeyUpEvent, window, _cx| {
+            let suppressed = {
+                let mut state = key_ups.state.borrow_mut();
+                std::mem::take(&mut state.suppress_activation)
+            };
+            if suppressed && matches!(event.keystroke.key.as_str(), "space" | "enter") {
+                window.prevent_default();
+            }
         })
     }
 }

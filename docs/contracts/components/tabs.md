@@ -91,8 +91,10 @@ component.
 Native reorder runs on the shared drag-and-drop substrate (architecture 011,
 spec 069). Each enabled tab registers a `NodeDragSource` and a flat
 `NodeDropTarget` whose band rule reads the horizontal fraction of the tab's own
-bounds, and the GPUI `DragDropController` owns the session. Start fires once
-after the runtime's drag threshold. Exactly one target holds the current
+bounds, and the GPUI `DragDropController` owns the session. A tab's subject
+kind is scoped to its instance, so one tab set is never an eligible target for
+another's rows, and a tab dropped onto itself is rejected rather than reported
+as its own drop target. Start fires once after the runtime's drag threshold. Exactly one target holds the current
 intent at a time; the previous one is always told it stopped, which is what
 `on_drop_target_change(None)` reports. Reorder fires before end; release
 outside every target, Escape, and a host rebuild that removes the dragged tab
