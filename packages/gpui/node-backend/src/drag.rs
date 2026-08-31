@@ -55,7 +55,7 @@ use poodle_headless::drag_drop::{
     DropTargetCandidate,
 };
 use poodle_node::{
-    DragHostAbort, DragHostCleanup, CrossWindowDragCommitRequest, CrossWindowDragProjection,
+    CrossWindowAbort, CrossWindowCleanup, CrossWindowDragCommitRequest, CrossWindowDragProjection,
     CrossWindowDragReceipt, CrossWindowDragSourceBridge, CrossWindowDragTargetBridge,
     CrossWindowDragTargetEvent, CrossWindowDragTransport, DragDropCommitResult, Node,
     NodeDragCapabilities, NodeDragInputKind, NodeDragSource, NodeDropCommit, NodeDropCommitEvent,
@@ -162,6 +162,15 @@ pub struct DragPreviewSnapshot {
 #[derive(Clone, Debug, PartialEq)]
 pub struct DragAnnouncementEvent {
     pub kind: DragAnnouncementKind,
+    /// The export's own state, when this session is a native file drag-out.
+    ///
+    /// The session kind and the artifact's state are different stories, and at
+    /// a terminal they can disagree: a drag that left for the operating system
+    /// ends with nothing committed *locally*, which is a cancellation to the
+    /// kernel and an ordinary ending to the user. Announcing "cancelled" for a
+    /// file successfully dragged onto a desktop would be a lie told only to
+    /// assistive technology.
+    pub export_state: Option<DragExportState>,
     pub source_label: String,
     pub target_label: Option<String>,
     pub position: Option<DropPosition>,
@@ -258,7 +267,7 @@ struct ControllerState {
     /// time rather than at post time.
     cross_window_target_generation: u64,
     /// The subscription's teardown, held for the controller's lifetime.
-    cross_window_unsubscribe: Option<DragHostCleanup>,
+    cross_window_unsubscribe: Option<CrossWindowCleanup>,
     /// The outgoing host transaction, when a bridged source is in play.
     cross_window_source: Option<CrossWindowSourceTransaction>,
     /// The incoming host transaction this window is currently projecting.
@@ -279,7 +288,7 @@ struct ControllerState {
     inbound_bridge: Option<Arc<dyn InboundFileHostBridge>>,
     /// Which installation that bridge is; see `cross_window_target_generation`.
     inbound_generation: u64,
-    inbound_unsubscribe: Option<DragHostCleanup>,
+    inbound_unsubscribe: Option<CrossWindowCleanup>,
     /// The external batch this window is currently being offered.
     inbound: Option<InboundFileTransaction>,
     /// The host's own name for a subject this window has no source for.
@@ -320,9 +329,9 @@ struct CrossWindowSourceTransaction {
     session_id: String,
     bridge: Arc<dyn CrossWindowDragSourceBridge>,
     /// The channel the host watches to stop work this session no longer wants.
-    abort: DragHostAbort,
+    abort: CrossWindowAbort,
     receipt: Option<CrossWindowDragReceipt>,
-    stop_terminal: Option<DragHostCleanup>,
+    stop_terminal: Option<CrossWindowCleanup>,
     /// The host already delivered its authoritative terminal for this receipt.
     settled: bool,
     /// The gesture reached its activation threshold before the receipt armed.
@@ -339,9 +348,9 @@ struct FileExportTransaction {
     session_id: String,
     bridge: Arc<dyn DragExportBridge>,
     /// The channel the host watches to stop work this session no longer wants.
-    abort: DragHostAbort,
+    abort: CrossWindowAbort,
     prepared: Option<PreparedFileExport>,
-    stop_terminal: Option<DragHostCleanup>,
+    stop_terminal: Option<CrossWindowCleanup>,
     /// The host already delivered its authoritative terminal for this receipt.
     settled: bool,
     /// The gesture reached its activation threshold before the receipt armed.
@@ -374,7 +383,7 @@ struct CrossWindowTargetTransaction {
     projection: CrossWindowDragProjection,
     /// Covers the commit and the target pick alike: both are requests this
     /// window can abandon while the host is still working on them.
-    abort: DragHostAbort,
+    abort: CrossWindowAbort,
     /// A commit is in flight; a second drop cannot start another.
     committing: bool,
 }
@@ -450,8 +459,14 @@ enum DragHostMessage {
         terminal: DragExportTerminal,
     },
     /// The inbound bridge published something, and which installation did.
+    ///
+    /// Carries the publishing bridge for the same reason the cross-window
+    /// preparation does: news can outlive its installation, and a batch it
+    /// introduced still has to be answered — through the host that observed
+    /// it, not through whichever bridge happens to be current.
     Inbound {
         generation: u64,
+        bridge: Arc<dyn InboundFileHostBridge>,
         event: InboundFileEvent,
     },
 }
@@ -835,7 +850,7 @@ impl DragDropController {
         source: &NodeDragSource,
         bridge: Arc<dyn CrossWindowDragSourceBridge>,
     ) {
-        let abort = DragHostAbort::new();
+        let abort = CrossWindowAbort::new();
         {
             let mut state = self.state.borrow_mut();
             state.cross_window_source = Some(CrossWindowSourceTransaction {
@@ -998,9 +1013,11 @@ impl DragDropController {
                     session_id,
                     terminal,
                 } => self.apply_export_terminal(&session_id, terminal, cx),
-                DragHostMessage::Inbound { generation, event } => {
-                    self.apply_inbound_event(generation, event, cx)
-                }
+                DragHostMessage::Inbound {
+                    generation,
+                    bridge,
+                    event,
+                } => self.apply_inbound_event(generation, bridge, event, cx),
             }
         }
     }
@@ -1132,7 +1149,7 @@ impl DragDropController {
         source: &NodeDragSource,
         bridge: Arc<dyn DragExportBridge>,
     ) {
-        let abort = DragHostAbort::new();
+        let abort = CrossWindowAbort::new();
         {
             let mut state = self.state.borrow_mut();
             state.file_export = Some(FileExportTransaction {
@@ -1400,8 +1417,24 @@ impl DragDropController {
         cx: &mut App,
     ) {
         self.ensure_wake(cx);
+
+        // Replacing a bridge while a batch is live ends that batch's session
+        // first. The material belongs to the outgoing host, and the outgoing
+        // host is about to stop being subscribed — releasing without ending
+        // the session would leave a drag nothing can finish.
         if self.state.borrow().inbound.is_some() {
             self.release_inbound_files(InboundFileOutcome::Cancelled);
+            if let Some(session_id) = self.active_session_id() {
+                self.dispatch(
+                    DragSessionEvent::HostTerminal {
+                        session_id,
+                        outcome: DragTerminalOutcome::Cancelled {
+                            reason: DragCancelReason::TransportLost,
+                        },
+                    },
+                    cx,
+                );
+            }
         }
 
         let generation = {
@@ -1411,8 +1444,17 @@ impl DragDropController {
         };
         let inbox = self.inbox();
         let waker = self.waker();
+        let publishing = Arc::clone(&bridge);
         let unsubscribe = bridge.subscribe(Box::new(move |event| {
-            post(&inbox, &waker, DragHostMessage::Inbound { generation, event });
+            post(
+                &inbox,
+                &waker,
+                DragHostMessage::Inbound {
+                    generation,
+                    bridge: Arc::clone(&publishing),
+                    event,
+                },
+            );
         }));
 
         let previous = {
@@ -1459,25 +1501,53 @@ impl DragDropController {
     /// revalidation, commit, announcement, and one terminal. A local gesture
     /// always wins: an inbound batch arriving mid-drag would otherwise
     /// supersede a drag the user is still making.
-    fn apply_inbound_event(&self, generation: u64, event: InboundFileEvent, cx: &mut App) {
-        let (current, bridge) = {
-            let state = self.state.borrow();
-            (state.inbound_generation, state.inbound_bridge.clone())
-        };
-        if current != generation {
+    fn apply_inbound_event(
+        &self,
+        generation: u64,
+        bridge: Arc<dyn InboundFileHostBridge>,
+        event: InboundFileEvent,
+        cx: &mut App,
+    ) {
+        if self.state.borrow().inbound_generation != generation {
+            // News from an unsubscribed or replaced installation. Only an
+            // `Entered` introduces a batch this window has not yet answered,
+            // so only that one is refused — and through the bridge that
+            // published it, which is the only host that knows what it holds.
+            if let InboundFileEvent::Entered { batch, .. } = &event {
+                bridge.release(&batch.batch_id, InboundFileOutcome::Rejected);
+            }
             return;
         }
-        let Some(bridge) = bridge else { return };
 
         match event {
             InboundFileEvent::Entered { batch, x, y } => {
+                // The same batch again is one observation, not two: it is
+                // already owned, and answering it here would be a second
+                // release for one batch.
+                let owned = {
+                    let state = self.state.borrow();
+                    state
+                        .inbound
+                        .as_ref()
+                        .is_some_and(|live| live.batch_id == batch.batch_id)
+                };
+                if owned {
+                    return;
+                }
+
+                // A local gesture, or a batch already in flight, owns this
+                // controller. The newcomer is still answered: a batch this
+                // window silently ignored would leave the host holding
+                // material for a gesture nobody will ever finish.
                 let busy = {
                     let state = self.state.borrow();
                     state.inbound.is_some() || state.phase != DragSessionPhase::Idle
                 };
                 if busy {
+                    bridge.release(&batch.batch_id, InboundFileOutcome::Rejected);
                     return;
                 }
+
                 if let InboundFileValidation::Refused { .. } = validate_inbound_files(
                     &batch,
                     &InboundFileConstraints::default(),
@@ -1751,7 +1821,7 @@ impl DragDropController {
             state.next_session += 1;
             format!("gpui-drag-{}-{}", state.id, state.next_session)
         };
-        let abort = DragHostAbort::new();
+        let abort = CrossWindowAbort::new();
         self.state.borrow_mut().cross_window_projection = Some(CrossWindowTargetTransaction {
             session_id: session_id.clone(),
             receipt: projection.receipt.clone(),
@@ -3125,6 +3195,11 @@ impl DragDropController {
             (
                 DragAnnouncementEvent {
                     kind,
+                    export_state: state
+                        .file_export
+                        .as_ref()
+                        .filter(|transaction| transaction.session_id == session.session_id)
+                        .map(|_| state.export_state),
                     source_label,
                     target_label: target,
                     position: session.intent.as_ref().map(|intent| intent.position.clone()),
@@ -3388,6 +3463,30 @@ fn eligibility_for(
 
 fn default_announcement(event: &DragAnnouncementEvent) -> String {
     let source = &event.source_label;
+    // The export's own terminal wording comes first, and matches the web
+    // controller's: to the kernel a drag that left this window committed
+    // nothing locally, which is true and is not what happened as far as the
+    // person doing it is concerned.
+    if let Some(export) = event.export_state {
+        match (event.kind, export) {
+            (DragAnnouncementKind::Cancelled, DragExportState::Ended) => {
+                return format!("Finished exporting {source}.")
+            }
+            (DragAnnouncementKind::Cancelled, DragExportState::Unavailable) => {
+                return format!("{source} cannot be exported.")
+            }
+            (DragAnnouncementKind::Cancelled, DragExportState::Cancelled) => {
+                return format!("Cancelled exporting {source}.")
+            }
+            (DragAnnouncementKind::Cancelled | DragAnnouncementKind::Failed, DragExportState::Failed) => {
+                return match &event.reason {
+                    Some(reason) => format!("Export failed for {source}. {reason}"),
+                    None => format!("Export failed for {source}."),
+                }
+            }
+            _ => {}
+        }
+    }
     let placement = || match (&event.position, &event.target_label) {
         (Some(position), Some(target)) => format!("{position} {target}"),
         (_, Some(target)) => format!("on {target}"),
@@ -3876,6 +3975,7 @@ mod tests {
     fn default_announcements_name_the_source_placement_and_reason() {
         let event = |kind, reason: Option<&str>| DragAnnouncementEvent {
             kind,
+            export_state: None,
             source_label: "Kick".to_string(),
             target_label: Some("Snare".to_string()),
             position: Some("after".to_string()),
@@ -3902,6 +4002,60 @@ mod tests {
         assert_eq!(
             default_announcement(&event(DragAnnouncementKind::Cancelled, None)),
             "Cancelled moving Kick."
+        );
+
+        // The same kernel terminal, four different things to say. A drag that
+        // left for the operating system did not "cancel"; one whose host could
+        // not render the file did not either.
+        let export = |kind, export_state, reason: Option<&str>| DragAnnouncementEvent {
+            kind,
+            export_state: Some(export_state),
+            source_label: "Kick".to_string(),
+            target_label: None,
+            position: None,
+            operation: Some(DragOperation::Copy),
+            reason: reason.map(str::to_string),
+        };
+        assert_eq!(
+            default_announcement(&export(
+                DragAnnouncementKind::Cancelled,
+                DragExportState::Ended,
+                None
+            )),
+            "Finished exporting Kick."
+        );
+        assert_eq!(
+            default_announcement(&export(
+                DragAnnouncementKind::Cancelled,
+                DragExportState::Cancelled,
+                None
+            )),
+            "Cancelled exporting Kick."
+        );
+        assert_eq!(
+            default_announcement(&export(
+                DragAnnouncementKind::Cancelled,
+                DragExportState::Unavailable,
+                None
+            )),
+            "Kick cannot be exported."
+        );
+        assert_eq!(
+            default_announcement(&export(
+                DragAnnouncementKind::Cancelled,
+                DragExportState::Failed,
+                Some("disk full")
+            )),
+            "Export failed for Kick. disk full"
+        );
+        // An export that is merely in flight says nothing special.
+        assert_eq!(
+            default_announcement(&export(
+                DragAnnouncementKind::Pickup,
+                DragExportState::Dragging,
+                None
+            )),
+            "Picked up Kick."
         );
     }
 }

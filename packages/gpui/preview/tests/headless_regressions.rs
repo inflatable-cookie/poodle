@@ -1934,7 +1934,7 @@ struct HostLog {
 }
 
 type PendingPrepare = (
-    poodle_node::DragHostAbort,
+    poodle_node::CrossWindowAbort,
     poodle_node::CrossWindowPrepareComplete,
 );
 
@@ -1945,12 +1945,12 @@ struct HostStubState {
     terminal: Option<poodle_node::CrossWindowTerminal>,
     listener: Option<Box<dyn Fn(poodle_node::CrossWindowDragTargetEvent) + Send>>,
     pending_commit: Option<(
-        poodle_node::DragHostAbort,
+        poodle_node::CrossWindowAbort,
         poodle_node::CrossWindowCommitComplete,
     )>,
     pending_pick: Option<(
         poodle_node::CrossWindowDragReceipt,
-        poodle_node::DragHostAbort,
+        poodle_node::CrossWindowAbort,
         Box<dyn FnOnce(Option<poodle_node::CrossWindowDragProjection>) + Send>,
     )>,
 }
@@ -2053,7 +2053,7 @@ impl poodle_node::CrossWindowDragSourceBridge for HostStub {
     fn prepare(
         &self,
         request: poodle_node::CrossWindowDragPrepareRequest,
-        abort: poodle_node::DragHostAbort,
+        abort: poodle_node::CrossWindowAbort,
         complete: poodle_node::CrossWindowPrepareComplete,
     ) {
         let mut state = self.state.lock().expect("host state");
@@ -2066,7 +2066,7 @@ impl poodle_node::CrossWindowDragSourceBridge for HostStub {
         receipt: poodle_node::CrossWindowDragReceipt,
         transport: poodle_node::CrossWindowDragTransport,
         on_terminal: poodle_node::CrossWindowTerminal,
-    ) -> poodle_node::DragHostCleanup {
+    ) -> poodle_node::CrossWindowCleanup {
         let token = receipt.token.clone();
         {
             let mut state = self.state.lock().expect("host state");
@@ -2107,7 +2107,7 @@ impl poodle_node::CrossWindowDragTargetBridge for HostStub {
     fn subscribe(
         &self,
         listener: Box<dyn Fn(poodle_node::CrossWindowDragTargetEvent) + Send>,
-    ) -> poodle_node::DragHostCleanup {
+    ) -> poodle_node::CrossWindowCleanup {
         self.state.lock().expect("host state").listener = Some(listener);
         let stub = self.clone();
         Box::new(move || {
@@ -2118,7 +2118,7 @@ impl poodle_node::CrossWindowDragTargetBridge for HostStub {
     fn commit(
         &self,
         request: poodle_node::CrossWindowDragCommitRequest,
-        abort: poodle_node::DragHostAbort,
+        abort: poodle_node::CrossWindowAbort,
         complete: poodle_node::CrossWindowCommitComplete,
     ) {
         let mut state = self.state.lock().expect("host state");
@@ -2132,7 +2132,7 @@ impl poodle_node::CrossWindowDragTargetBridge for HostStub {
     fn pick_target(
         &self,
         receipt: poodle_node::CrossWindowDragReceipt,
-        abort: poodle_node::DragHostAbort,
+        abort: poodle_node::CrossWindowAbort,
         complete: Box<dyn FnOnce(Option<poodle_node::CrossWindowDragProjection>) + Send>,
     ) -> bool {
         if !self.keyboard_picker {
@@ -15880,7 +15880,7 @@ struct ExportLog {
 }
 
 type PendingExport = (
-    poodle_node::DragHostAbort,
+    poodle_node::CrossWindowAbort,
     poodle_node::DragExportPrepareComplete,
 );
 
@@ -15897,6 +15897,16 @@ struct ExportStubState {
 struct ExportStub {
     state: Arc<Mutex<ExportStubState>>,
     multiple_files: bool,
+}
+
+/// Drive one export to a chosen terminal and read back what a screen reader
+/// would have been told. Each of these reaches the *same* kernel terminal — a
+/// cancellation — and none of them means the same thing to the person doing it.
+enum ExportEnding {
+    Declined,
+    Ended,
+    Cancelled,
+    Failed,
 }
 
 impl ExportStub {
@@ -15966,7 +15976,7 @@ impl poodle_node::DragExportBridge for ExportStub {
     fn prepare(
         &self,
         request: poodle_node::DragExportPrepareRequest,
-        abort: poodle_node::DragHostAbort,
+        abort: poodle_node::CrossWindowAbort,
         complete: poodle_node::DragExportPrepareComplete,
     ) {
         let mut state = self.state.lock().expect("export state");
@@ -15978,7 +15988,7 @@ impl poodle_node::DragExportBridge for ExportStub {
         &self,
         prepared: poodle_node::PreparedFileExport,
         on_terminal: poodle_node::DragExportTerminalCallback,
-    ) -> poodle_node::DragHostCleanup {
+    ) -> poodle_node::CrossWindowCleanup {
         let receipt = prepared.receipt_id.clone();
         {
             let mut state = self.state.lock().expect("export state");
@@ -16062,7 +16072,7 @@ impl poodle_node::InboundFileHostBridge for InboundStub {
     fn subscribe(
         &self,
         listener: Box<dyn Fn(poodle_node::InboundFileEvent) + Send>,
-    ) -> poodle_node::DragHostCleanup {
+    ) -> poodle_node::CrossWindowCleanup {
         self.state.lock().expect("inbound state").listener = Some(listener);
         let stub = self.clone();
         Box::new(move || {
@@ -16081,6 +16091,7 @@ impl poodle_node::InboundFileHostBridge for InboundStub {
 
 fn inbound_batch(files: Vec<poodle_node::InboundFileReceipt>) -> poodle_node::InboundFileBatch {
     poodle_node::InboundFileBatch {
+        protocol_version: poodle_node::INBOUND_FILE_PROTOCOL_VERSION,
         batch_id: "batch-1".to_string(),
         transport: poodle_node::InboundFileTransport::Host,
         files,
@@ -16599,6 +16610,470 @@ fn a_disclosed_gpui_drop_is_validated_again_before_it_can_commit() {
         assert_eq!(
             host.released(),
             vec![("batch-1".to_string(), poodle_node::InboundFileOutcome::Cancelled)]
+        );
+    });
+}
+
+/// g16.027. Every export terminal reaches the same kernel cancellation and
+/// none of them means the same thing. The native runtime must say which,
+/// exactly as the web controller does — otherwise a screen reader is told
+/// "cancelled" for a file the user successfully dragged onto their desktop.
+#[test]
+fn gpui_export_terminals_are_announced_in_their_own_words() {
+    // One app, one window, one terminal per call. Sharing a `TestAppContext`
+    // across four drivers means every window redraws on every other window's
+    // frame, and the controllers' end-of-frame refresh keeps them all dirty.
+    fn announcement_for(ending: ExportEnding) -> String {
+        let announcement = Arc::new(Mutex::new(String::new()));
+        let captured = Arc::clone(&announcement);
+        run_headless(move |cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = ExportStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let mut node = scoped_drag_tree("fx", &trace);
+        attach_export_bridge(&mut node, "fx-source", Arc::new(host.clone()));
+        let node = Arc::new(Mutex::new(node));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let source = payload_frac("fx-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+
+        match ending {
+            ExportEnding::Declined => {
+                host.settle(0, None);
+                driver.draw_frame();
+            }
+            ExportEnding::Ended => {
+                host.settle(0, Some(("export-1", 1)));
+                driver.draw_frame();
+                host.report(poodle_node::DragExportTerminal::Ended);
+                driver.draw_frame();
+            }
+            ExportEnding::Cancelled => {
+                host.settle(0, Some(("export-1", 1)));
+                driver.draw_frame();
+                host.report(poodle_node::DragExportTerminal::Cancelled {
+                    reason: poodle_node::DragCancelReason::WindowLost,
+                });
+                driver.draw_frame();
+            }
+            ExportEnding::Failed => {
+                host.settle(0, Some(("export-1", 1)));
+                driver.draw_frame();
+                host.report(poodle_node::DragExportTerminal::Failed {
+                    reason: Some("disk full".to_string()),
+                });
+                driver.draw_frame();
+            }
+        }
+
+        *captured.lock().expect("announcement") = controller
+            .snapshot()
+            .announcement
+            .expect("an announcement for every terminal");
+        });
+        let text = announcement.lock().expect("announcement").clone();
+        text
+    }
+
+    assert_eq!(announcement_for(ExportEnding::Ended), "Finished exporting Alpha.");
+    assert_eq!(
+        announcement_for(ExportEnding::Cancelled),
+        "Cancelled exporting Alpha."
+    );
+    assert_eq!(
+        announcement_for(ExportEnding::Failed),
+        "Export failed for Alpha. disk full"
+    );
+    assert_eq!(
+        announcement_for(ExportEnding::Declined),
+        "Alpha cannot be exported."
+    );
+}
+
+/// g16.027. Exactly one release per observed batch, on the native runtime
+/// too: a repeat of the live id is one observation, a second batch is
+/// answered rather than ignored, and news for a batch this window refused can
+/// neither start nor end anything.
+#[test]
+fn a_gpui_window_owns_one_batch_and_answers_every_other_one_once() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = InboundStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_inbound_file_bridge(Arc::new(host.clone()), cx));
+
+        let node = Arc::new(Mutex::new(inbound_tree(
+            &trace,
+            poodle_node::InboundFileConstraints::default(),
+        )));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let zone = payload_frac("files-zone", 0.5, 0.5);
+        let (x, y) = (f32::from(zone.x), f32::from(zone.y));
+        let file = || inbound_file("batch-1:0", Some("take-01.wav"), "audio/wav", Some(16));
+
+        host.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![file()]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+
+        // The same batch again is one observation, not two.
+        host.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![file()]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert!(host.released().is_empty(), "{:?}", host.released());
+
+        // A second, different batch is answered — and the live one continues.
+        let second = poodle_node::InboundFileBatch {
+            batch_id: "batch-2".to_string(),
+            ..inbound_batch(vec![file()])
+        };
+        host.send(poodle_node::InboundFileEvent::Entered {
+            batch: second.clone(),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(
+            host.released(),
+            vec![(
+                "batch-2".to_string(),
+                poodle_node::InboundFileOutcome::Rejected
+            )]
+        );
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(
+            controller
+                .snapshot()
+                .inbound_files
+                .map(|batch| batch.batch_id),
+            Some("batch-1".to_string())
+        );
+
+        // News for the refused batch can neither commit nor cancel.
+        host.send(poodle_node::InboundFileEvent::Dropped {
+            batch: second,
+            x,
+            y,
+        });
+        host.send(poodle_node::InboundFileEvent::Cancelled {
+            batch_id: "batch-2".to_string(),
+        });
+        driver.draw_frame();
+        assert_eq!(host.released().len(), 1);
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(count_starting_with(&trace_of(&trace), "drop:"), 0);
+
+        host.send(poodle_node::InboundFileEvent::Dropped {
+            batch: inbound_batch(vec![file()]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(
+            host.released(),
+            vec![
+                (
+                    "batch-2".to_string(),
+                    poodle_node::InboundFileOutcome::Rejected
+                ),
+                (
+                    "batch-1".to_string(),
+                    poodle_node::InboundFileOutcome::Committed
+                )
+            ]
+        );
+
+        // A late repeat of the finished id cannot resurrect it or release twice.
+        host.send(poodle_node::InboundFileEvent::Dropped {
+            batch: inbound_batch(vec![file()]),
+            x,
+            y,
+        });
+        host.send(poodle_node::InboundFileEvent::Cancelled {
+            batch_id: "batch-1".to_string(),
+        });
+        driver.draw_frame();
+        assert_eq!(host.released().len(), 2);
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+    });
+}
+
+/// g16.027. A local gesture owns this controller — and a refusal is still an
+/// answer, so the host is told rather than left holding material for a
+/// gesture nobody will finish.
+#[test]
+fn a_gpui_batch_arriving_mid_gesture_is_refused_and_the_host_is_told() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = InboundStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_inbound_file_bridge(Arc::new(host.clone()), cx));
+
+        // A surface with both a local source and a file zone.
+        let mut node = scoped_drag_tree("fx", &trace);
+        let zone_tree = inbound_tree(&trace, poodle_node::InboundFileConstraints::default());
+        for child in zone_tree.children.into_iter() {
+            node = node.child(child);
+        }
+        let node = Arc::new(Mutex::new(node));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let source = payload_frac("fx-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        let local_subject = controller.snapshot().subject;
+
+        host.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![inbound_file(
+                "batch-1:0",
+                Some("take-01.wav"),
+                "audio/wav",
+                Some(16),
+            )]),
+            x: f32::from(source.x),
+            y: f32::from(source.y),
+        });
+        driver.draw_frame();
+
+        assert_eq!(
+            controller.snapshot().subject,
+            local_subject,
+            "the user's own gesture keeps the session"
+        );
+        assert!(controller.snapshot().inbound_files.is_none());
+        assert_eq!(
+            host.released(),
+            vec![(
+                "batch-1".to_string(),
+                poodle_node::InboundFileOutcome::Rejected
+            )],
+            "the refused batch is still answered"
+        );
+    });
+}
+
+/// g16.027. Replacing the bridge ends the outgoing batch's session, and A's
+/// queued news is answered through A rather than through B — a receipt
+/// belongs to the host that observed it.
+#[test]
+fn replacing_the_gpui_inbound_bridge_ends_the_session_and_answers_the_old_host() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let first = InboundStub::default();
+        let second = InboundStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_inbound_file_bridge(Arc::new(first.clone()), cx));
+
+        let node = Arc::new(Mutex::new(inbound_tree(
+            &trace,
+            poodle_node::InboundFileConstraints::default(),
+        )));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let zone = payload_frac("files-zone", 0.5, 0.5);
+        let (x, y) = (f32::from(zone.x), f32::from(zone.y));
+        let file = |id: &str| inbound_file(id, Some("take-01.wav"), "audio/wav", Some(16));
+
+        first.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![file("batch-1:0")]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+
+        // A queues more news that will not be drained until after B is in.
+        first.send(poodle_node::InboundFileEvent::Entered {
+            batch: poodle_node::InboundFileBatch {
+                batch_id: "batch-stale".to_string(),
+                ..inbound_batch(vec![file("batch-stale:0")])
+            },
+            x,
+            y,
+        });
+
+        driver.update_app(|cx| {
+            controller.set_inbound_file_bridge(Arc::new(second.clone()), cx)
+        });
+
+        // Checked *before* the next frame: the replacement ends the session
+        // itself. Leaving a live session behind for the end-of-frame sweep to
+        // notice would close it as a lost source, one frame later, and only
+        // because this runtime happens to have a sweep at all.
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Idle,
+            "replacing the bridge ends the batch's session rather than stranding it"
+        );
+
+        driver.drain();
+        assert_eq!(
+            first.released(),
+            vec![
+                (
+                    "batch-1".to_string(),
+                    poodle_node::InboundFileOutcome::Cancelled
+                ),
+                (
+                    "batch-stale".to_string(),
+                    poodle_node::InboundFileOutcome::Rejected
+                )
+            ],
+            "A's own batches are answered through A"
+        );
+        assert!(
+            second.released().is_empty(),
+            "B never issued anything and is never told about A's material: {:?}",
+            second.released()
+        );
+
+        // B is live and owns the window from here.
+        second.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![file("batch-1:0")]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+    });
+}
+
+/// g16.027. A batch from a protocol this build does not speak is refused
+/// before the consumer's own resolver is asked anything.
+#[test]
+fn a_gpui_batch_from_another_protocol_version_is_refused_before_eligibility() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = InboundStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_inbound_file_bridge(Arc::new(host.clone()), cx));
+
+        let node = Arc::new(Mutex::new(inbound_tree(
+            &trace,
+            poodle_node::InboundFileConstraints::default(),
+        )));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let zone = payload_frac("files-zone", 0.5, 0.5);
+        host.send(poodle_node::InboundFileEvent::Entered {
+            batch: poodle_node::InboundFileBatch {
+                protocol_version: poodle_node::INBOUND_FILE_PROTOCOL_VERSION + 1,
+                ..inbound_batch(vec![inbound_file(
+                    "batch-1:0",
+                    Some("take-01.wav"),
+                    "audio/wav",
+                    Some(16),
+                )])
+            },
+            x: f32::from(zone.x),
+            y: f32::from(zone.y),
+        });
+        driver.draw_frame();
+
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert_eq!(count_starting_with(&trace_of(&trace), "can_drop:"), 0);
+        assert_eq!(
+            host.released(),
+            vec![(
+                "batch-1".to_string(),
+                poodle_node::InboundFileOutcome::Rejected
+            )]
         );
     });
 }

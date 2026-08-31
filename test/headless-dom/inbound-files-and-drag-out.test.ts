@@ -26,6 +26,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createDragDropController,
   createInboundFileDataTransferBridge,
+  INBOUND_FILE_PROTOCOL_VERSION,
   INBOUND_FILE_SUBJECT_KIND,
   type DragCancelReason,
   type DragExportBridge,
@@ -121,6 +122,10 @@ interface ExportHostOptions {
   readonly deferPrepare?: boolean;
   readonly decline?: boolean;
   readonly failPrepare?: boolean;
+  /** The host reports its terminal synchronously, inside `start`. */
+  readonly terminalInsideStart?: DragExportTerminal;
+  /** `start` itself throws — the native drag never began. */
+  readonly failStart?: boolean;
   readonly prepared?: Partial<PreparedFileExport>;
 }
 
@@ -171,11 +176,16 @@ function createExportHost(options: ExportHostOptions = {}) {
     },
     start(prepared, onTerminal) {
       starts.push(prepared.receiptId);
+      if (options.failStart) throw new Error("native drag refused");
       terminal = onTerminal;
-      return () => {
+      const stop = () => {
         stops.push(prepared.receiptId);
         terminal = null;
       };
+      // A host is allowed to answer whenever its work resolves, and
+      // "immediately" is a legal whenever.
+      if (options.terminalInsideStart) onTerminal(options.terminalInsideStart);
+      return stop;
     },
     cancel(prepared, reason) {
       cancels.push({ receiptId: prepared.receiptId, reason });
@@ -238,20 +248,29 @@ function createInboundHost(multipleFiles = true) {
     },
   };
 
+  // Deliberately captured once: a real host keeps its own callback reference
+  // and may fire it after the surface has gone, which is exactly the case the
+  // "answers a batch that arrives after disconnect" claim is about.
+  let published: ((event: InboundFileEvent) => void) | null = null;
+
   return {
     bridge,
     released,
     send(event: InboundFileEvent) {
-      listener?.(event);
+      (listener ?? published)?.(event);
     },
     get subscribed(): boolean {
       return listener !== null;
+    },
+    rememberListener() {
+      published = listener;
     },
   };
 }
 
 function hostBatch(overrides: Partial<InboundFileBatch> = {}): InboundFileBatch {
   return {
+    protocolVersion: INBOUND_FILE_PROTOCOL_VERSION,
     batchId: "batch-1",
     transport: "host",
     files: [{ receiptId: "batch-1:0", name: "take-01.wav", mediaType: "audio/wav", size: 1_024 }],
@@ -409,6 +428,110 @@ describe("native file drag-out", () => {
 
     disconnect();
     controller.destroy();
+  });
+
+  /**
+   * The host answers inside `start`. By the time `start` returns, the session
+   * is already over — so the subscription it just handed back has to be closed
+   * here rather than stored on a transaction nobody will release again.
+   */
+  it("closes a subscription whose host terminated inside start", async () => {
+    const host = createExportHost({ terminalInsideStart: { status: "ended" } });
+    const controller = createDragDropController();
+    const disconnect = controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ fileExportBridge: host.bridge }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    await settle();
+    sourceEl.dispatchEvent(drag("dragstart", new DataTransfer()));
+
+    expect(host.starts).toEqual(["export-1"]);
+    expect(host.stops).toEqual(["export-1"]);
+    expect(host.cancels).toEqual([]);
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(controller.getSnapshot().fileExport?.state).toBe("ended");
+    expect(host.artifacts.has("export-1")).toBe(true);
+
+    disconnect();
+    controller.destroy();
+  });
+
+  /**
+   * A host that cannot start the native drag has *failed*, and that is what
+   * the surface must keep showing — the release that follows must not
+   * overwrite it with the cancellation the session technically reached.
+   */
+  it("keeps a start exception visibly failed and still returns the receipt", async () => {
+    const host = createExportHost({ failStart: true });
+    const controller = createDragDropController();
+    const disconnect = controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ fileExportBridge: host.bridge }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    await settle();
+    sourceEl.dispatchEvent(drag("dragstart", new DataTransfer()));
+
+    expect(host.starts).toEqual(["export-1"]);
+    expect(host.stops).toEqual([]);
+    expect(controller.getSnapshot().fileExport?.state).toBe("failed");
+    expect(controller.getSnapshot().fileExport?.reason).toBe("native drag refused");
+    expect(host.cancels).toEqual([
+      { receiptId: "export-1", reason: "transport-lost" },
+    ]);
+    expect(host.artifacts.has("export-1")).toBe(true);
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    disconnect();
+    controller.destroy();
+  });
+
+  /**
+   * Every export state a surface can reach has its own Poodle-owned wording.
+   * The kernel's terminal is the same cancellation in three of these cases;
+   * what the person doing it experienced is not.
+   */
+  it("announces each export terminal in its own words", async () => {
+    async function announcementFor(host: ReturnType<typeof createExportHost>, drive: (controller: ReturnType<typeof createDragDropController>) => void | Promise<void>): Promise<string | null> {
+      const controller = createDragDropController();
+      const disconnect = controller.connect(root);
+      controller.registerSource(sourceEl, sourceReg({ fileExportBridge: host.bridge }));
+      sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+      await settle();
+      await drive(controller);
+      await settle();
+      const announcement = controller.getSnapshot().announcement;
+      disconnect();
+      controller.destroy();
+      return announcement;
+    }
+
+    const ended = createExportHost();
+    expect(
+      await announcementFor(ended, () => {
+        sourceEl.dispatchEvent(drag("dragstart", new DataTransfer()));
+        ended.report({ status: "ended" });
+      }),
+    ).toBe("Finished exporting Alpha");
+
+    const cancelled = createExportHost();
+    expect(
+      await announcementFor(cancelled, () => {
+        sourceEl.dispatchEvent(drag("dragstart", new DataTransfer()));
+        cancelled.report({ status: "cancelled", reason: "window-lost" });
+      }),
+    ).toBe("Cancelled exporting Alpha");
+
+    const failed = createExportHost();
+    expect(
+      await announcementFor(failed, () => {
+        sourceEl.dispatchEvent(drag("dragstart", new DataTransfer()));
+        failed.report({ status: "failed", reason: "disk full" });
+      }),
+    ).toBe("Export failed for Alpha: disk full");
+
+    expect(await announcementFor(createExportHost({ decline: true }), () => {})).toBe(
+      "Alpha cannot be exported",
+    );
   });
 
   /** A late native end is not a second lifecycle, and never a result. */
@@ -918,8 +1041,12 @@ describe("inbound files", () => {
     controller.destroy();
   });
 
-  /** The user's own pointer owns this controller. */
-  it("ignores an inbound batch while a local gesture is live", async () => {
+  /**
+   * The user's own pointer owns this controller — but a refusal is still an
+   * *answer*. A batch this window silently ignored would leave the host
+   * holding material for a gesture nobody will ever finish.
+   */
+  it("refuses an inbound batch while a local gesture is live, and tells the host", async () => {
     const host = createInboundHost();
     const sourceEl = layout(document.createElement("button"), SOURCE_BOX);
     sourceEl.textContent = "Alpha";
@@ -938,7 +1065,93 @@ describe("inbound files", () => {
 
     expect(controller.getSnapshot().session?.subject).toEqual({ kind: "item", id: "a" });
     expect(controller.getSnapshot().inboundFiles).toBe(null);
+    expect(host.released).toEqual([{ batchId: "batch-1", outcome: "rejected" }]);
+
+    disconnect();
+    controller.destroy();
+  });
+
+  /**
+   * Exactly one release per observed batch. A second batch is refused while
+   * the first is live, the first is unaffected, and a repeat of either id
+   * cannot produce a second answer.
+   */
+  it("owns one batch at a time and answers every other one exactly once", () => {
+    const host = createInboundHost();
+    const controller = createDragDropController({ inboundFileBridge: host.bridge });
+    const disconnect = controller.connect(root);
+    controller.registerTarget(targetEl, fileTargetReg());
+
+    host.send({ type: "entered", batch: hostBatch(), x: 40, y: 90 });
+    expect(controller.getSnapshot().inboundFiles?.batchId).toBe("batch-1");
+
+    // The same batch again is one observation, not two.
+    host.send({ type: "entered", batch: hostBatch(), x: 41, y: 90 });
     expect(host.released).toEqual([]);
+
+    // A second, different batch is refused — and the live one keeps going.
+    host.send({ type: "entered", batch: hostBatch({ batchId: "batch-2" }), x: 41, y: 90 });
+    expect(host.released).toEqual([{ batchId: "batch-2", outcome: "rejected" }]);
+    expect(controller.getSnapshot().inboundFiles?.batchId).toBe("batch-1");
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    // News for a batch this window refused cannot start or end anything.
+    host.send({ type: "dropped", batch: hostBatch({ batchId: "batch-2" }), x: 40, y: 90 });
+    host.send({ type: "cancelled", batchId: "batch-2" });
+    expect(host.released).toHaveLength(1);
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    host.send({ type: "dropped", batch: hostBatch(), x: 40, y: 90 });
+    expect(host.released).toEqual([
+      { batchId: "batch-2", outcome: "rejected" },
+      { batchId: "batch-1", outcome: "committed" },
+    ]);
+
+    // A late repeat of the finished id cannot resurrect it or release twice.
+    host.send({ type: "dropped", batch: hostBatch(), x: 40, y: 90 });
+    host.send({ type: "cancelled", batchId: "batch-1" });
+    expect(host.released).toHaveLength(2);
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    disconnect();
+    controller.destroy();
+  });
+
+  /** A batch observed after the surface is gone is still answered. */
+  it("answers a batch that arrives after the controller disconnected", () => {
+    const host = createInboundHost();
+    const controller = createDragDropController({ inboundFileBridge: host.bridge });
+    const disconnect = controller.connect(root);
+    controller.registerTarget(targetEl, fileTargetReg());
+    host.rememberListener();
+
+    disconnect();
+    host.send({ type: "entered", batch: hostBatch(), x: 40, y: 90 });
+
+    expect(host.released).toEqual([{ batchId: "batch-1", outcome: "rejected" }]);
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    controller.destroy();
+  });
+
+  /** A batch this build cannot read is refused before any other field is. */
+  it("refuses a batch from another protocol version before eligibility", () => {
+    const host = createInboundHost();
+    const canDrop = vi.fn(() => true);
+    const controller = createDragDropController({ inboundFileBridge: host.bridge });
+    const disconnect = controller.connect(root);
+    controller.registerTarget(targetEl, fileTargetReg({ canDrop }));
+
+    host.send({
+      type: "entered",
+      batch: hostBatch({ protocolVersion: INBOUND_FILE_PROTOCOL_VERSION + 1 }),
+      x: 40,
+      y: 90,
+    });
+
+    expect(canDrop).not.toHaveBeenCalled();
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(host.released).toEqual([{ batchId: "batch-1", outcome: "rejected" }]);
 
     disconnect();
     controller.destroy();
@@ -1052,6 +1265,7 @@ describe("the browser's own file drag", () => {
 
     expect(seen).toEqual([
       {
+        protocolVersion: INBOUND_FILE_PROTOCOL_VERSION,
         batchId: "inbound-1",
         transport: "data-transfer",
         files: [
@@ -1120,6 +1334,39 @@ describe("the browser's own file drag", () => {
 
     targetEl.dispatchEvent(drag("dragleave", transfer, { clientX: 0, clientY: 0 }));
     expect(controller.getSnapshot().phase).toBe("idle");
+
+    disconnect();
+    controller.destroy();
+  });
+
+  /**
+   * A consumer's projection is consumer code, and it can throw. Leaving the
+   * exception to escape the drop listener would leave the controller dragging
+   * a batch that can never be dropped — the surface would look stuck with no
+   * way out.
+   */
+  it("ends the drag cleanly when the consumer's projection throws", () => {
+    const bridge = createInboundFileDataTransferBridge({
+      project: () => {
+        throw new Error("upload queue is closed");
+      },
+    });
+    const onDrop = vi.fn(() => ({ status: "committed" }) as const);
+    const controller = createDragDropController({ inboundFileBridge: bridge });
+    const disconnect = controller.connect(root);
+    controller.registerTarget(targetEl, fileTargetReg({ onDrop }));
+
+    const transfer = fileDataTransfer([makeFile("take-01.wav", "audio/wav", 2_048)]);
+    targetEl.dispatchEvent(drag("dragenter", transfer, { clientX: 40, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    const dropEvent = drag("drop", transfer, { clientX: 40, clientY: 90 });
+    expect(() => targetEl.dispatchEvent(dropEvent)).not.toThrow();
+
+    expect(onDrop).not.toHaveBeenCalled();
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(controller.getSnapshot().inboundFiles).toBe(null);
+    expect(bridge.heldBatches()).toEqual([]);
 
     disconnect();
     controller.destroy();

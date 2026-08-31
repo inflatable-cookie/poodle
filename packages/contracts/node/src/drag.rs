@@ -22,7 +22,7 @@
 use std::sync::Arc;
 
 pub use poodle_headless::cross_window_drag::{
-    CrossWindowCommitComplete, CrossWindowDragCapabilities,
+    CrossWindowAbort, CrossWindowCleanup, CrossWindowCommitComplete, CrossWindowDragCapabilities,
     CrossWindowDragCommitRequest, CrossWindowDragInputKind, CrossWindowDragPrepareRequest,
     CrossWindowDragProjection, CrossWindowDragReceipt, CrossWindowDragSourceBridge,
     CrossWindowDragTargetBridge, CrossWindowDragTargetEvent, CrossWindowDragTransport,
@@ -30,7 +30,7 @@ pub use poodle_headless::cross_window_drag::{
     CROSS_WINDOW_DRAG_MIME_TYPE, CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
 };
 pub use poodle_headless::drag_drop::{
-    DragAnnouncementKind, DragCancelReason, DragHostAbort, DragHostCleanup, DragOperation, DragSession, DragSessionPhase,
+    DragAnnouncementKind, DragCancelReason, DragOperation, DragSession, DragSessionPhase,
     DragSubject, DragTerminalOutcome, DropEligibility, DropIntent, DropPosition,
     DROP_POSITION_AFTER, DROP_POSITION_BEFORE, DROP_POSITION_INSIDE,
 };
@@ -41,7 +41,8 @@ pub use poodle_headless::external_file_drag::{
     DragExportState, DragExportTerminal, DragExportTerminalCallback, DragExportValidation,
     InboundFileBatch, InboundFileCapabilities, InboundFileConstraints, InboundFileEvent,
     InboundFileHostBridge, InboundFileOutcome, InboundFileReceipt, InboundFileRefusal,
-    InboundFileTransport, InboundFileValidation, PreparedFileExport, INBOUND_FILE_SUBJECT_KIND,
+    InboundFileTransport, InboundFileValidation, PreparedFileExport, INBOUND_FILE_PROTOCOL_VERSION,
+    INBOUND_FILE_SUBJECT_KIND,
 };
 
 /// Which input device drove the gesture that produced an observation.

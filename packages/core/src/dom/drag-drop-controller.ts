@@ -493,6 +493,9 @@ function defaultAnnouncement(event: DragAnnouncementEvent): string {
   if (event.kind === "cancelled" && event.exportState === "unavailable") {
     return `${event.sourceLabel} cannot be exported`;
   }
+  if (event.kind === "cancelled" && event.exportState === "cancelled") {
+    return `Cancelled exporting ${event.sourceLabel}`;
+  }
 
   switch (event.kind) {
     case "pickup":
@@ -1543,17 +1546,36 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
     const prepared = transaction.prepared;
     setExportState("dragging");
+
+    let stop: (() => void) | null = null;
     try {
-      transaction.stopTerminal = transaction.bridge.start(prepared, (terminal) => {
+      stop = transaction.bridge.start(prepared, (terminal) => {
         if (fileExport !== transaction || transaction.settled) return;
         transaction.settled = true;
         applyExportTerminal(sessionId, terminal);
       });
     } catch (error) {
-      transaction.stopTerminal = null;
       setExportState("failed", error instanceof Error ? error.message : String(error));
+      // The gesture is over and the visible result is *failed*, not cancelled:
+      // `releaseFileExport` leaves an already-recorded failure alone.
       dispatch({ type: "TRANSPORT_LOST", sessionId });
+      return;
     }
+
+    // A host may answer inside `start` — the contract lets it terminate
+    // whenever its work resolves, and "immediately" is a legal whenever. By
+    // now the session may already be over, and storing the subscription on a
+    // transaction nobody will release again would leave it installed forever.
+    if (fileExport !== transaction || transaction.settled) {
+      try {
+        stop?.();
+      } catch {
+        // Host cleanup cannot break local cleanup.
+      }
+      return;
+    }
+
+    transaction.stopTerminal = stop;
   }
 
   /**
@@ -1622,7 +1644,10 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
     if (transaction.prepared && !transaction.settled) {
       returnPreparedExport(transaction.bridge, transaction.prepared, reason);
-      setExportState("cancelled", reason);
+      // A failure already said what happened. Overwriting it here would turn
+      // "the host could not start this" into "the user cancelled", which is
+      // both wrong and the only thing the surface had to show.
+      if (exportState !== "failed") setExportState("cancelled", reason);
     }
   }
 
@@ -1671,6 +1696,22 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   }
 
   /**
+   * Answer a batch this window never took ownership of.
+   *
+   * The contract is that *every observed batch reaches exactly one release* —
+   * a batch this window silently ignored would leave the host holding
+   * material for a gesture nobody will ever finish. Refusing is still an
+   * answer, and it is the only one this path can honestly give.
+   */
+  function refuseInboundBatch(batchId: string, outcome: InboundFileOutcome): void {
+    try {
+      inboundFileBridge?.release(batchId, outcome);
+    } catch {
+      // A host that throws on release cannot break this window.
+    }
+  }
+
+  /**
    * Tell the host the batch is finished with, exactly once.
    *
    * A notification, not a command: the host decides whether the copy it made
@@ -1683,11 +1724,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     inbound = null;
     if (live.released) return;
     live.released = true;
-    try {
-      inboundFileBridge?.release(live.batchId, outcome);
-    } catch {
-      // A host that throws on release cannot break local cleanup.
-    }
+    refuseInboundBatch(live.batchId, outcome);
   }
 
   /**
@@ -1702,21 +1739,32 @@ export function createDragDropController(options: DragDropControllerOptions = {}
    * supersede a drag they are still making.
    */
   function onInboundFileEvent(event: InboundFileEvent): void {
-    if (destroyed || !connectedRoot || !inboundFileBridge) return;
+    if (!inboundFileBridge) return;
+    if (destroyed || !connectedRoot) {
+      // News from a surface that is gone. Only an `entered` introduces a batch
+      // this window has not yet answered, so only that one is refused —
+      // answering a later event would be a second release for one batch.
+      if (event.type === "entered") refuseInboundBatch(event.batch.batchId, "rejected");
+      return;
+    }
 
     if (event.type === "entered") {
-      if (inbound !== null) return;
-      if (gesture !== null || keyboardSourceId !== null || phase !== "idle") return;
+      // The same batch again is one observation, not two: it is already owned,
+      // and answering it here would be a second release.
+      if (inbound?.batchId === event.batch.batchId) return;
+
+      // A local gesture, or a batch already in flight, owns this controller.
+      // The newcomer is still answered rather than dropped on the floor.
+      if (inbound !== null || gesture !== null || keyboardSourceId !== null || phase !== "idle") {
+        refuseInboundBatch(event.batch.batchId, "rejected");
+        return;
+      }
 
       // The window's own limits are checked before a session exists at all; a
       // batch this transport cannot carry never becomes one.
       const validation = validateInboundFiles(event.batch, {}, inboundFileBridge.capabilities);
-      if (!validation.accepted) {
-        try {
-          inboundFileBridge.release(event.batch.batchId, "rejected");
-        } catch {
-          // Same: a throwing host cannot break this window.
-        }
+      if (validation.accepted === false) {
+        refuseInboundBatch(event.batch.batchId, "rejected");
         return;
       }
 

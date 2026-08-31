@@ -295,6 +295,18 @@ export interface DragExportSnapshot {
 export const INBOUND_FILE_SUBJECT_KIND = "poodle.external-file";
 
 /**
+ * The inbound batch protocol version this build accepts, and the only one.
+ *
+ * A batch is untrusted input assembled by an adapter that ships separately
+ * from this package — a shell plugin pinned to an older Poodle, a webview
+ * bridge someone forgot to update. Deliberately strict, for the same reason
+ * the cross-window receipt is: a batch whose shape this build cannot fully
+ * understand is one it cannot honestly claim to have validated, and a
+ * best-effort read of it would be a guess made about a user's files.
+ */
+export const INBOUND_FILE_PROTOCOL_VERSION = 1;
+
+/**
  * Which transport owns inbound files in this window.
  *
  * Not a preference — an exclusive claim. A Tauri window's native file-drop
@@ -335,6 +347,8 @@ export interface InboundFileReceipt {
 
 /** One inbound gesture's files, named by one host-issued batch id. */
 export interface InboundFileBatch {
+  /** Must equal {@link INBOUND_FILE_PROTOCOL_VERSION}. */
+  readonly protocolVersion: number;
   readonly batchId: string;
   readonly transport: InboundFileTransport;
   readonly files: readonly InboundFileReceipt[];
@@ -356,6 +370,7 @@ export interface InboundFileConstraints {
 
 /** Why an inbound batch cannot be offered to a target. */
 export type InboundFileRefusal =
+  | "unsupported-protocol"
   | "files-unsupported"
   | "empty"
   | "malformed"
@@ -372,10 +387,10 @@ export type InboundFileValidation =
 /**
  * Validate an inbound batch before any target is asked whether it wants it.
  *
- * External data is untrusted input: the count, the sizes, the declared types,
- * the names, and the host's own identifiers all arrive from outside and are
- * all checked here, before eligibility, before hover posture, and again
- * before commit. A batch that fails is refused with a reason a surface can
+ * External data is untrusted input: the protocol version, the count, the
+ * sizes, the declared types, the names, and the host's own identifiers all
+ * arrive from outside and are all checked here, before eligibility, before
+ * hover posture, and again before commit. A batch that fails is refused with a reason a surface can
  * announce — not dropped silently, and not passed through for `canDrop` to
  * discover.
  *
@@ -389,6 +404,11 @@ export function validateInboundFiles(
   constraints: InboundFileConstraints,
   capabilities: InboundFileCapabilities,
 ): InboundFileValidation {
+  if (batch.protocolVersion !== INBOUND_FILE_PROTOCOL_VERSION) {
+    // First, and before anything reads the rest of the shape: a batch from a
+    // protocol this build does not speak has no fields it can trust.
+    return { accepted: false, reason: "unsupported-protocol" };
+  }
   if (!capabilities.files) {
     return { accepted: false, reason: "files-unsupported" };
   }

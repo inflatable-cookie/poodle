@@ -30,8 +30,9 @@ resolution, materialization, native drag start, retention, and cleanup policy.
 
 - [x] TypeScript and Rust capability/receipt/lifecycle contracts are paired —
       `packages/core/src/external-file-drag.ts` and
-      `packages/contracts/headless/src/external_file_drag.rs`, with the shared
-      abort channel moved to the kernel module as `DragHostAbort`.
+      `packages/contracts/headless/src/external_file_drag.rs`, reusing the
+      cross-window `CrossWindowAbort` / `CrossWindowCleanup` channel rather
+      than renaming it.
 - [x] Fake host adapters prove existing file, materialized file, unsupported,
       cancellation, failure, supersession, multiple-file, and retained-cleanup
       outcomes — 27 web cases in
@@ -82,8 +83,10 @@ run windowed/native visual, Jetstream, release, or sibling mutation commands.
 
 ## Delivered
 
-- Paired contracts, validation, and bounds in both languages, with the shared
-  `DragHostAbort` / `DragHostCleanup` moved onto the kernel module.
+- Paired contracts, validation, and bounds in both languages, including the
+  bounded `INBOUND_FILE_PROTOCOL_VERSION` checked before every other field.
+  The existing `CrossWindowAbort` / `CrossWindowCleanup` channel is reused
+  as-is; no public Rust name changed.
 - Web controller: export preparation on the pre-drag gesture, the host-owned
   native start, the export state projection and `data-poodle-drag-export`
   attribute, the inbound session, and validation before eligibility.
@@ -102,6 +105,12 @@ Wiring found one real defect: the GPUI end-of-frame sweep cancelled an inbound
 session on its first frame, because a batch from outside the application has
 no local source — the same shape the cross-window projection was already
 exempted for.
+
+Review round 1 closed five more: inbound batches now have exact host terminal
+ownership in both runtimes, the GPUI runtime announces each export terminal in
+its own words, web export installation survives a synchronous or throwing
+`start`, the required inbound protocol check exists and is paired, and the
+merged cross-window public names are restored untouched.
 
 ## Continuation
 

@@ -96,10 +96,28 @@ either direction, and nothing in Poodle deletes anything.
   exactly what it asked for. The projection is live for the commit and
   released with the terminal.
 
-- **The shared abort channel moved to the kernel module.** Both host bridges
-  abandon requests for the same reasons, and `CrossWindowAbort` was the wrong
-  name for the channel a file materialization watches. It is `DragHostAbort` /
-  `DragHostCleanup` in `drag_drop.rs` now, with the same idempotence rules.
+- **The existing abort channel is reused, not renamed.** Both host bridges
+  abandon requests for the same reasons, so the export bridge takes
+  `CrossWindowAbort` / `CrossWindowCleanup` exactly as `g16.026` landed them.
+  The name reads oddly for a file materialization; a rename would have been a
+  breaking change to a merged public API that this card does not authorize,
+  and a second channel would be a second place for the idempotence rule to
+  drift. See review round 1.
+
+- **Every observed batch reaches exactly one release.** Ownership is the whole
+  inbound contract: a batch this window ignored — because a local gesture had
+  the controller, because another batch was already in flight, because its
+  bridge had been replaced, because the surface was gone — would leave a host
+  holding material for a gesture nobody will ever finish. Refusing is still an
+  answer. Symmetrically, a repeat of an id already owned is one observation
+  rather than two, and news for a released batch can neither commit nor
+  cancel.
+
+- **Inbound batches carry a protocol version, checked first.** An adapter
+  ships separately from Poodle and can be pinned to an older release. A batch
+  whose shape this build cannot fully understand is refused before any other
+  field is read, because none of them is trustworthy yet — the same strictness
+  the cross-window receipt already has.
 
 ## Review oracle
 
@@ -118,6 +136,12 @@ either direction, and nothing in Poodle deletes anything.
 | Terminal accounting is exact | one `release` per batch, with the outcome the session actually reached; a repeat from the host cannot produce a second |
 | A local gesture always wins | a batch arriving mid-drag is ignored and not released |
 | Transport exclusivity | both mismatched bridge shapes throw at connect |
+| Every observed batch is answered exactly once | busy window, second batch, repeated id, post-disconnect news, and stale news after a bridge swap — web and GPUI |
+| Replacement ends the outgoing session | asserted at the moment of replacement, before any frame, so no end-of-frame sweep can stand in for it |
+| A consumer projection that throws ends the drag | the exception does not escape the drop listener and the controller returns to idle |
+| A foreign protocol version is refused first | pure TS and Rust cases, plus mounted web and GPUI: the consumer resolver is never called |
+| Installation survives a synchronous or throwing `start` | the subscription is closed rather than stored on a dead transaction; a start exception stays visibly failed |
+| Every export terminal has its own accessible wording | mounted GPUI: ended, cancelled, failed, and declined, each proved against the exact string |
 | Engine-level disclosure | Chromium and WebKit: `types` reports `Files`, `items[i].kind` reports `file`, hover names are undisclosed, drop names and sizes are real |
 | Per-element leaves are not the drag leaving | the depth counter survives an inner leave and ends on the last one, in both engines |
 
@@ -146,19 +170,94 @@ confirming the case fails:
    `host` and binds the document — the document then produces a second drop
    for one gesture.
 
+Review round 1 added eleven more, checked the same way:
+
+9. the busy-window refusal, by ignoring the batch again — the host is left
+   holding it;
+10. the same-id guard, by answering a repeat — one batch, two releases;
+11. the post-disconnect answer, by returning silently;
+12. the throwing projection, by letting the exception escape the drop
+    listener — the controller stays dragging forever;
+13. the synchronous-terminal install, by storing the returned cleanup
+    unconditionally — the subscription is never closed;
+14. the failure-preserving release, by letting it overwrite `failed` with
+    `cancelled`;
+15. the protocol check, removed from the TypeScript validator;
+16. the protocol check, removed from the Rust validator — the pure paired
+    cases and the mounted GPUI case both fail;
+17. the GPUI export announcement, by passing `None` for the export state —
+    "Cancelled moving Alpha." comes back instead of "Finished exporting
+    Alpha.";
+18. the GPUI busy refusal, by ignoring the batch again;
+19. the GPUI stale-news attribution, by dropping the message instead of
+    answering through its publishing bridge; and
+20. the GPUI replacement terminal, by releasing without ending the session.
+
+One proof was vacuous on the way and was fixed: the replacement case first
+asserted the phase *after* the next frame, where the end-of-frame sweep closes
+the stranded session anyway and the assertion passed with or without the
+repair. It now asserts the phase at the moment of replacement, which no sweep
+can reach — and the web controller, which has no sweep at all, is the reason
+that distinction matters.
+
+## Review round 1
+
+The orchestrator required changes on `de4358a7d`. Five blocking findings, all
+closed here. The `PreparedFileExport.form` / `fileCount` extension was
+accepted as landed.
+
+1. **Inbound batches did not have exact host terminal ownership.** Four holes,
+   all the same shape — a batch this window observed and never answered.
+   Busy-window `entered` was silently dropped; a GPUI bridge replacement
+   released the receipt without ending the semantic session it was under;
+   stale queued news carried only a generation, so it could not be answered
+   through the host that published it; and a consumer projection that threw
+   inside the DOM adapter's `drop` left the controller dragging a batch that
+   could never be dropped. Now: every observed batch reaches exactly one
+   release, a repeated id is one observation, replacement ends the outgoing
+   session, stale news carries its publishing bridge, and a throwing
+   projection ends the drag cleanly.
+
+2. **The native runtime did not project the export lifecycle.** GPUI's
+   announcement event had no export state, so an ordinary drag-out ending was
+   announced as "Cancelled moving" — the exact lie the web wording exists to
+   avoid, told only to assistive technology. The state now travels on the
+   native announcement seam, and ended, declined, cancelled, and failed each
+   have their own wording, proved by mounted evidence. The web gained the
+   matching `Cancelled exporting` case for parity.
+
+3. **Web export start was neither reentrancy- nor failure-safe.** A host that
+   answered inside `start` had its cleanup stored on a transaction nobody
+   would release again — the subscription stayed installed forever. A `start`
+   that threw set `failed` and was then overwritten with `cancelled` by the
+   release that followed, so the surface showed the wrong thing. Both fixed,
+   with exact stop/cancel accounting.
+
+4. **The required inbound protocol check was absent.** The card and spec both
+   require protocol validation before eligibility, and neither language had a
+   version to check. `INBOUND_FILE_PROTOCOL_VERSION` is now paired, stamped by
+   the DataTransfer adapter, and refused first in web, GPUI, and the pure
+   tests.
+
+5. **An unapproved breaking Rust migration.** This card renamed
+   `CrossWindowAbort` / `CrossWindowCleanup`, landed publicly by `g16.026`,
+   without an operator decision. Reverted: both names and their module are
+   exactly as merged, the export bridge reuses that channel, and no alias
+   exists.
+
 ## Evidence
 
 - Contracts: `packages/core/src/external-file-drag.ts`,
-  `packages/contracts/headless/src/external_file_drag.rs` (8 Rust cases),
-  `packages/core/test/external-file-drag.test.ts` (11 cases).
+  `packages/contracts/headless/src/external_file_drag.rs` (9 Rust cases),
+  `packages/core/test/external-file-drag.test.ts` (12 cases).
 - Web adapter: `packages/core/src/dom/inbound-file-data-transfer.ts`.
-- Web controller: `packages/core/src/dom/drag-drop-controller.ts`; 27
+- Web controller: `packages/core/src/dom/drag-drop-controller.ts`; 34
   adversarial cases in `test/headless-dom/inbound-files-and-drag-out.test.ts`.
 - Shared Rust: `packages/render/src/drag_drop.rs`
   (`inbound_file_target`, `file_export_source`),
   `packages/contracts/node/src/drag.rs`.
-- GPUI: `packages/gpui/node-backend/src/drag.rs`; six mounted regressions in
-  `packages/gpui/preview/tests/headless_regressions.rs`.
+- GPUI: `packages/gpui/node-backend/src/drag.rs`; eleven mounted regressions
+  in `packages/gpui/preview/tests/headless_regressions.rs`.
 - Frameworks: `DragDropProvider` in both, `ExternalFileSurface` specimens and
   their four mounted tests each.
 - Headless engines: `test/drag-drop/files.{html,ts}` and the new leg in

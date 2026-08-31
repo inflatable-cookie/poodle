@@ -26,6 +26,7 @@
  */
 
 import {
+  INBOUND_FILE_PROTOCOL_VERSION,
   type InboundFileBatch,
   type InboundFileCapabilities,
   type InboundFileDomBridge,
@@ -141,6 +142,7 @@ export function createInboundFileDataTransferBridge<T = InboundFileReceipt>(
     const batchId = `inbound-${issued}`;
     liveBatchId = batchId;
     const batch: InboundFileBatch = {
+      protocolVersion: INBOUND_FILE_PROTOCOL_VERSION,
       batchId,
       transport: "data-transfer",
       files: describeHover(event.dataTransfer, batchId),
@@ -181,16 +183,30 @@ export function createInboundFileDataTransferBridge<T = InboundFileReceipt>(
     const files = Array.from(dataTransfer.files ?? []);
     const receipts = describeDrop(files, batchId);
     const project = options.project;
-    held.set(
-      batchId,
-      project
+    let projected: readonly T[];
+    try {
+      projected = project
         ? files.map((file, index) => project(file, receipts[index] as InboundFileReceipt))
-        : (receipts as readonly unknown[] as readonly T[]),
-    );
+        : (receipts as readonly unknown[] as readonly T[]);
+    } catch {
+      // The consumer's own projection threw. There is nothing to hand on, and
+      // returning here would leave the controller dragging a batch that will
+      // never be dropped — so the gesture is ended rather than abandoned. The
+      // failure is the consumer's to observe; the session is Poodle's to close.
+      held.delete(batchId);
+      emit({ type: "cancelled", batchId });
+      return;
+    }
+    held.set(batchId, projected);
 
     emit({
       type: "dropped",
-      batch: { batchId, transport: "data-transfer", files: receipts },
+      batch: {
+        protocolVersion: INBOUND_FILE_PROTOCOL_VERSION,
+        batchId,
+        transport: "data-transfer",
+        files: receipts,
+      },
       x: event.clientX,
       y: event.clientY,
     });

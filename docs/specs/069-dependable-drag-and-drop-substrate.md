@@ -685,7 +685,16 @@ type DragExportState =
 
 It is published on the presentation snapshot and as a
 `data-poodle-drag-export` attribute on the source, so `unavailable` (before
-any gesture) and the terminal states (after one) are both showable.
+any gesture) and the terminal states (after one) are both showable. It also
+travels on the announcement description in both runtimes, which is what makes
+the states *accessible* rather than merely visible: ended, cancelled,
+declined, and failed exports reach the same kernel cancellation, and each is
+announced in its own words rather than as "cancelled".
+
+Installing the native drag is safe against a host that answers inside `start`:
+the subscription it returns is closed rather than stored on a session that is
+already over. A `start` that throws leaves the export visibly `failed`; the
+release that follows returns the receipt without overwriting that result.
 
 The export adapter must distinguish:
 
@@ -733,6 +742,7 @@ type InboundFileReceipt = {
 };
 
 type InboundFileBatch = {
+  protocolVersion: number;
   batchId: string;
   transport: InboundFileTransport;
   files: readonly InboundFileReceipt[];
@@ -763,10 +773,29 @@ The target receives opaque accepted-file receipts or a consumer-authored
 projection, not an unchecked native path. A target declares
 `inboundFiles: { maxFiles?, maxSize?, accept? }`, using the same `accept`
 vocabulary as the file-upload surfaces, and it is validated *before* the
-target's own eligibility resolver on every hover and again at drop. Transport
-identity, host-issued receipt identity, count, size, declared type, and name
-shape are all checked there, so a consumer resolver never has to defend itself
-against a hostile batch.
+target's own eligibility resolver on every hover and again at drop. Protocol
+version, transport identity, host-issued receipt identity, count, size,
+declared type, and name shape are all checked there, so a consumer resolver
+never has to defend itself against a hostile batch.
+
+`protocolVersion` is checked first and must equal
+`INBOUND_FILE_PROTOCOL_VERSION`, the one version a build accepts. A batch is
+assembled by an adapter that ships separately from Poodle — a shell plugin
+pinned to an older release, a bridge nobody updated — and a shape this build
+cannot fully understand is one it cannot honestly claim to have validated. It
+is refused before any other field is read, because none of them is trustworthy
+yet.
+
+Every observed batch reaches exactly one release. A batch refused for any
+reason, one arriving while a local gesture or another batch owns the
+controller, one published by a bridge that has since been replaced, and one
+that arrives after the surface is gone are all *answered* — a silently ignored
+batch would leave the host holding material for a gesture nobody will finish.
+Repeating an id already owned is one observation rather than two, and news for
+a batch that has been released can neither commit nor cancel anything.
+Replacing a window's bridge ends the outgoing batch's session rather than
+releasing under it, and the outgoing host's queued news is answered through the
+host that published it.
 
 `name` and `size` are `null` while the platform is still hiding them: a browser
 discloses only item kinds and declared types during `dragover`. The unknown is

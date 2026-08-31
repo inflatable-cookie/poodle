@@ -7,14 +7,15 @@
  * host knows never appears anywhere in the rendered surface.
  */
 
-import type {
-  DragExportBridge,
-  DragExportTerminal,
-  InboundFileBatch,
-  InboundFileEvent,
-  InboundFileHostBridge,
-  InboundFileOutcome,
-  InboundFileReceipt,
+import {
+  INBOUND_FILE_PROTOCOL_VERSION,
+  type DragExportBridge,
+  type DragExportTerminal,
+  type InboundFileBatch,
+  type InboundFileEvent,
+  type InboundFileHostBridge,
+  type InboundFileOutcome,
+  type InboundFileReceipt,
 } from "@inflatable-cookie/poodle-core";
 
 /** The location only the host is allowed to know. */
@@ -86,5 +87,10 @@ export function inboundFile(name: string, size = 1_024): InboundFileReceipt {
 }
 
 export function inboundBatch(files: InboundFileReceipt[]): InboundFileBatch {
-  return { batchId: "batch-1", transport: "host", files };
+  return {
+    protocolVersion: INBOUND_FILE_PROTOCOL_VERSION,
+    batchId: "batch-1",
+    transport: "host",
+    files,
+  };
 }

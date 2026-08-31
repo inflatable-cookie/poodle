@@ -13,6 +13,7 @@ import { describe, expect, test } from "bun:test";
 
 import {
   canExportAnything,
+  INBOUND_FILE_PROTOCOL_VERSION,
   EXTERNAL_FILE_MAX_NAME_LENGTH,
   EXTERNAL_FILE_MAX_RECEIPT_LENGTH,
   isPresentableFileName,
@@ -58,7 +59,12 @@ function hovering(id: string, mediaType: string): InboundFileReceipt {
 }
 
 function batch(files: InboundFileReceipt[]): InboundFileBatch {
-  return { batchId: "batch-1", transport: "data-transfer", files };
+  return {
+    protocolVersion: INBOUND_FILE_PROTOCOL_VERSION,
+    batchId: "batch-1",
+    transport: "data-transfer",
+    files,
+  };
 }
 
 function exportRefusal(
@@ -231,9 +237,36 @@ describe("validateInboundFiles", () => {
     );
   });
 
+  /**
+   * A batch is assembled by an adapter that ships separately from this
+   * package. One whose shape this build cannot fully understand is refused
+   * before any other field is read, because none of them is trustworthy yet.
+   */
+  test("a batch from another protocol version is refused first", () => {
+    const good = batch([file("f1", "a.wav", "audio/wav", 10)]);
+    expect(inboundRefusal(good)).toBeNull();
+
+    for (const protocolVersion of [0, INBOUND_FILE_PROTOCOL_VERSION + 1]) {
+      expect(inboundRefusal({ ...good, protocolVersion })).toBe("unsupported-protocol");
+    }
+
+    // Refused *first*: a batch that is also empty and on the wrong transport
+    // still reports the version, because nothing after it was trustworthy
+    // enough to check.
+    expect(
+      inboundRefusal({
+        ...good,
+        protocolVersion: INBOUND_FILE_PROTOCOL_VERSION + 1,
+        transport: "host",
+        files: [],
+      }),
+    ).toBe("unsupported-protocol");
+  });
+
   /** One window hands ownership to exactly one transport. */
   test("a batch from the transport this window did not enable is refused", () => {
     const foreign: InboundFileBatch = {
+      protocolVersion: INBOUND_FILE_PROTOCOL_VERSION,
       batchId: "batch-1",
       transport: "host",
       files: [file("f1", "a.wav", "audio/wav", 10)],

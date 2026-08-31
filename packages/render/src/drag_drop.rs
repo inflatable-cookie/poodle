@@ -483,7 +483,7 @@ mod tests {
             fn prepare(
                 &self,
                 _request: poodle_node::DragExportPrepareRequest,
-                _abort: poodle_node::DragHostAbort,
+                _abort: poodle_node::CrossWindowAbort,
                 complete: poodle_node::DragExportPrepareComplete,
             ) {
                 complete(None);
@@ -492,7 +492,7 @@ mod tests {
                 &self,
                 _prepared: poodle_node::PreparedFileExport,
                 _on_terminal: poodle_node::DragExportTerminalCallback,
-            ) -> poodle_node::DragHostCleanup {
+            ) -> poodle_node::CrossWindowCleanup {
                 Box::new(|| {})
             }
             fn cancel(

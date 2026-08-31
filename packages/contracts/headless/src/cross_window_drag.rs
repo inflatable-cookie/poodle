@@ -28,8 +28,7 @@
 //! spec grants Rust.
 
 use crate::drag_drop::{
-    DragCancelReason, DragHostAbort, DragHostCleanup, DragOperation, DragSubject,
-    DragTerminalOutcome, DropIntent, DropPosition,
+    DragCancelReason, DragOperation, DragSubject, DragTerminalOutcome, DropIntent, DropPosition,
 };
 
 /// The authoritative answer to one revalidated drop request.
@@ -174,6 +173,91 @@ pub struct CrossWindowDragCommitRequest {
     pub intent: DropIntent,
 }
 
+/// The renderer-neutral counterpart of `AbortSignal`.
+///
+/// TypeScript hands the host an `AbortSignal` with every asynchronous request,
+/// and that is not decoration: a preparation that is superseded, a commit whose
+/// window closed, and a target pick the user escaped all have to reach the host
+/// so it can stop work and release whatever it allocated. A completion callback
+/// can replace a promise; it cannot replace the channel that runs the other
+/// way.
+///
+/// Named for the transfer it shipped with, and reused as-is by the external
+/// file bridges: they abandon requests for the same reasons, and a second copy
+/// would be a second place for the idempotence rule to drift.
+///
+/// Cheap to clone, and every clone is the same signal. Aborting is idempotent:
+/// the first reason wins and listeners run exactly once, so a late second
+/// cancellation cannot double-release a host's resources.
+#[derive(Clone, Default)]
+pub struct CrossWindowAbort {
+    state: std::sync::Arc<std::sync::Mutex<AbortState>>,
+}
+
+#[derive(Default)]
+struct AbortState {
+    reason: Option<DragCancelReason>,
+    listeners: Vec<Box<dyn FnOnce(DragCancelReason) + Send>>,
+}
+
+impl std::fmt::Debug for CrossWindowAbort {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("CrossWindowAbort")
+            .field("reason", &self.reason())
+            .finish()
+    }
+}
+
+impl CrossWindowAbort {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Whether this request has been abandoned.
+    pub fn is_aborted(&self) -> bool {
+        self.reason().is_some()
+    }
+
+    /// Why it was abandoned, if it was.
+    pub fn reason(&self) -> Option<DragCancelReason> {
+        self.state.lock().expect("abort state").reason
+    }
+
+    /// Abandon the request. The first reason wins; later calls are inert.
+    pub fn abort(&self, reason: DragCancelReason) {
+        let listeners = {
+            let mut state = self.state.lock().expect("abort state");
+            if state.reason.is_some() {
+                return;
+            }
+            state.reason = Some(reason);
+            std::mem::take(&mut state.listeners)
+        };
+        for listener in listeners {
+            listener(reason);
+        }
+    }
+
+    /// Run `listener` when the request is abandoned, or immediately when it
+    /// already has been. Called at most once either way.
+    pub fn on_abort(&self, listener: impl FnOnce(DragCancelReason) + Send + 'static) {
+        let already = {
+            let mut state = self.state.lock().expect("abort state");
+            match state.reason {
+                Some(reason) => Some(reason),
+                None => {
+                    state.listeners.push(Box::new(listener));
+                    return;
+                }
+            }
+        };
+        if let Some(reason) = already {
+            listener(reason);
+        }
+    }
+}
+
 /// The completion a host calls once its lease is allocated, or declined.
 ///
 /// A callback rather than a future: this crate is renderer-neutral and runs
@@ -191,6 +275,9 @@ pub type CrossWindowTerminal = Box<dyn Fn(DragTerminalOutcome) + Send>;
 
 /// The host's answer to one revalidated commit request.
 pub type CrossWindowCommitComplete = Box<dyn FnOnce(DragDropCommitResult) + Send>;
+
+/// A subscription's own teardown, run exactly once.
+pub type CrossWindowCleanup = Box<dyn FnOnce() + Send>;
 
 /// Per draggable source.
 ///
@@ -212,7 +299,7 @@ pub trait CrossWindowDragSourceBridge: Send + Sync {
     fn prepare(
         &self,
         request: CrossWindowDragPrepareRequest,
-        abort: DragHostAbort,
+        abort: CrossWindowAbort,
         complete: CrossWindowPrepareComplete,
     );
 
@@ -223,7 +310,7 @@ pub trait CrossWindowDragSourceBridge: Send + Sync {
         receipt: CrossWindowDragReceipt,
         transport: CrossWindowDragTransport,
         on_terminal: CrossWindowTerminal,
-    ) -> DragHostCleanup;
+    ) -> CrossWindowCleanup;
 
     /// Idempotent at the boundary, and called only while the receipt is still
     /// live.
@@ -244,12 +331,12 @@ pub trait CrossWindowDragTargetBridge: Send + Sync {
     fn subscribe(
         &self,
         listener: Box<dyn Fn(CrossWindowDragTargetEvent) + Send>,
-    ) -> DragHostCleanup;
+    ) -> CrossWindowCleanup;
 
     fn commit(
         &self,
         request: CrossWindowDragCommitRequest,
-        abort: DragHostAbort,
+        abort: CrossWindowAbort,
         complete: CrossWindowCommitComplete,
     );
 
@@ -263,7 +350,7 @@ pub trait CrossWindowDragTargetBridge: Send + Sync {
     fn pick_target(
         &self,
         _receipt: CrossWindowDragReceipt,
-        _abort: DragHostAbort,
+        _abort: CrossWindowAbort,
         _complete: Box<dyn FnOnce(Option<CrossWindowDragProjection>) + Send>,
     ) -> bool {
         false
@@ -310,7 +397,7 @@ mod tests {
     /// cannot make a host release the same lease twice.
     #[test]
     fn aborting_is_idempotent_and_keeps_the_first_reason() {
-        let abort = DragHostAbort::new();
+        let abort = CrossWindowAbort::new();
         let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
 
         let recorder = std::sync::Arc::clone(&seen);
@@ -333,7 +420,7 @@ mod tests {
     /// that was recorded — a host that registers late must not simply miss it.
     #[test]
     fn a_late_listener_runs_immediately_with_the_recorded_reason() {
-        let abort = DragHostAbort::new();
+        let abort = CrossWindowAbort::new();
         abort.abort(DragCancelReason::TransportLost);
 
         let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));

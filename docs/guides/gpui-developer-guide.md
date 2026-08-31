@@ -128,7 +128,7 @@ checked before the target's own eligibility resolver runs and again at commit.
 The commit event carries the batch it is committing — receipts and display
 metadata, never a path or a file handle.
 
-Both bridges answer through completion callbacks and a `DragHostAbort` rather
+Both bridges answer through completion callbacks and a `CrossWindowAbort` rather
 than futures, because this controller runs inside GPUI's frame loop with no
 executor to await on. Answers arriving from elsewhere queue and are applied at
 the next frame, which the controller wakes for itself.

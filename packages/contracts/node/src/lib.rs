@@ -27,7 +27,7 @@ use std::sync::Arc;
 pub mod drag;
 
 pub use drag::{
-    DragHostAbort, DragHostCleanup, CrossWindowCommitComplete, CrossWindowDragCapabilities,
+    CrossWindowAbort, CrossWindowCleanup, CrossWindowCommitComplete, CrossWindowDragCapabilities,
     CrossWindowDragCommitRequest, CrossWindowDragInputKind, CrossWindowDragPrepareRequest,
     CrossWindowDragProjection, CrossWindowDragReceipt, CrossWindowDragSourceBridge,
     CrossWindowDragTargetBridge, CrossWindowDragTargetEvent, CrossWindowDragTransport,
@@ -47,7 +47,8 @@ pub use drag::{
     DragExportTerminal, DragExportTerminalCallback, DragExportValidation, InboundFileBatch,
     InboundFileCapabilities, InboundFileConstraints, InboundFileEvent, InboundFileHostBridge,
     InboundFileOutcome, InboundFileReceipt, InboundFileRefusal, InboundFileTransport,
-    InboundFileValidation, PreparedFileExport, INBOUND_FILE_SUBJECT_KIND,
+    InboundFileValidation, PreparedFileExport, INBOUND_FILE_PROTOCOL_VERSION,
+    INBOUND_FILE_SUBJECT_KIND,
 };
 pub use poodle_layout::{
     CrossAxisAlignment, LayoutDirection, LayoutEdges, LayoutIntent, LayoutOverflow, LayoutSizing,

@@ -21,8 +21,15 @@
 //! single-threaded frame loop with no executor to await on. The lifecycle,
 //! the abort channel, and the exactly-once rules are identical to the
 //! TypeScript shapes; only the delivery differs.
+//!
+//! [`CrossWindowAbort`] and [`CrossWindowCleanup`] are reused rather than
+//! copied. They are named for the transfer they shipped with, and an export
+//! that is superseded abandons its work for exactly the same reasons a lease
+//! does; a second channel would be a second place for the idempotence rule to
+//! drift.
 
-use crate::drag_drop::{DragCancelReason, DragHostAbort, DragHostCleanup, DragOperation, DragSubject};
+use crate::cross_window_drag::{CrossWindowAbort, CrossWindowCleanup};
+use crate::drag_drop::{DragCancelReason, DragOperation, DragSubject};
 use crate::file_upload::file_accepts;
 
 // ── Shared bounds ──────────────────────────────────────────────────────────
@@ -203,7 +210,7 @@ pub trait DragExportBridge: Send + Sync {
     fn prepare(
         &self,
         request: DragExportPrepareRequest,
-        abort: DragHostAbort,
+        abort: CrossWindowAbort,
         complete: DragExportPrepareComplete,
     );
 
@@ -213,7 +220,7 @@ pub trait DragExportBridge: Send + Sync {
         &self,
         prepared: PreparedFileExport,
         on_terminal: DragExportTerminalCallback,
-    ) -> DragHostCleanup;
+    ) -> CrossWindowCleanup;
 
     /// Idempotent at the boundary, and called only while the receipt is still
     /// live. Never an instruction to delete.
@@ -342,6 +349,16 @@ pub struct DragExportSnapshot {
 /// handler through the same arbitration as a reordered row.
 pub const INBOUND_FILE_SUBJECT_KIND: &str = "poodle.external-file";
 
+/// The inbound batch protocol version this build accepts, and the only one.
+///
+/// A batch is untrusted input assembled by an adapter that ships separately
+/// from this crate — a shell plugin pinned to an older Poodle, a bridge
+/// someone forgot to update. Deliberately strict, for the same reason the
+/// cross-window receipt is: a batch whose shape this build cannot fully
+/// understand is one it cannot honestly claim to have validated, and a
+/// best-effort read of it would be a guess made about a user's files.
+pub const INBOUND_FILE_PROTOCOL_VERSION: u32 = 1;
+
 /// Which transport owns inbound files in this window.
 ///
 /// Not a preference — an exclusive claim. A native file-drop capture and a
@@ -385,6 +402,8 @@ pub struct InboundFileReceipt {
 /// One inbound gesture's files, named by one host-issued batch id.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct InboundFileBatch {
+    /// Must equal [`INBOUND_FILE_PROTOCOL_VERSION`].
+    pub protocol_version: u32,
     pub batch_id: String,
     pub transport: InboundFileTransport,
     pub files: Vec<InboundFileReceipt>,
@@ -406,6 +425,7 @@ pub struct InboundFileConstraints {
 /// Why an inbound batch cannot be offered to a target.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum InboundFileRefusal {
+    UnsupportedProtocol,
     FilesUnsupported,
     Empty,
     Malformed,
@@ -424,10 +444,10 @@ pub enum InboundFileValidation {
 
 /// Validate an inbound batch before any target is asked whether it wants it.
 ///
-/// External data is untrusted input: the count, the sizes, the declared types,
-/// the names, and the host's own identifiers all arrive from outside and are
-/// all checked here, before eligibility, before hover posture, and again
-/// before commit. A batch that fails is refused with a reason a surface can
+/// External data is untrusted input: the protocol version, the count, the
+/// sizes, the declared types, the names, and the host's own identifiers all
+/// arrive from outside and are all checked here, before eligibility, before
+/// hover posture, and again before commit. A batch that fails is refused with a reason a surface can
 /// announce — not dropped silently, and not passed through for the
 /// consumer's eligibility resolver to discover.
 ///
@@ -442,6 +462,11 @@ pub fn validate_inbound_files(
 ) -> InboundFileValidation {
     let refuse = |reason: InboundFileRefusal| InboundFileValidation::Refused { reason };
 
+    if batch.protocol_version != INBOUND_FILE_PROTOCOL_VERSION {
+        // First, and before anything reads the rest of the shape: a batch from
+        // a protocol this build does not speak has no fields it can trust.
+        return refuse(InboundFileRefusal::UnsupportedProtocol);
+    }
     if !capabilities.files {
         return refuse(InboundFileRefusal::FilesUnsupported);
     }
@@ -580,7 +605,7 @@ pub enum InboundFileOutcome {
 pub trait InboundFileHostBridge: Send + Sync {
     fn capabilities(&self) -> InboundFileCapabilities;
 
-    fn subscribe(&self, listener: Box<dyn Fn(InboundFileEvent) + Send>) -> DragHostCleanup;
+    fn subscribe(&self, listener: Box<dyn Fn(InboundFileEvent) + Send>) -> CrossWindowCleanup;
 
     fn release(&self, batch_id: &str, outcome: InboundFileOutcome);
 }
@@ -628,6 +653,7 @@ mod tests {
 
     fn batch(files: Vec<InboundFileReceipt>) -> InboundFileBatch {
         InboundFileBatch {
+            protocol_version: INBOUND_FILE_PROTOCOL_VERSION,
             batch_id: "batch-1".to_string(),
             transport: InboundFileTransport::DataTransfer,
             files,
@@ -889,6 +915,53 @@ mod tests {
         assert_eq!(
             refused(validate_inbound_files(&dropped, &by_extension, &capabilities)),
             Some(InboundFileRefusal::UnsupportedType)
+        );
+    }
+
+    /// A batch from a protocol this build does not speak is refused before any
+    /// other field is read: an adapter pinned to a different Poodle may mean
+    /// anything by the rest of the shape, and guessing would be a guess about
+    /// somebody's files.
+    #[test]
+    fn a_batch_from_another_protocol_version_is_refused_first() {
+        let capabilities = inbound_capabilities();
+        let good = batch(vec![receipt("f1", "a.wav", "audio/wav", Some(10))]);
+        assert_eq!(
+            validate_inbound_files(&good, &InboundFileConstraints::default(), &capabilities),
+            InboundFileValidation::Accepted
+        );
+
+        for version in [0, INBOUND_FILE_PROTOCOL_VERSION + 1] {
+            let foreign = InboundFileBatch {
+                protocol_version: version,
+                ..good.clone()
+            };
+            assert_eq!(
+                refused(validate_inbound_files(
+                    &foreign,
+                    &InboundFileConstraints::default(),
+                    &capabilities
+                )),
+                Some(InboundFileRefusal::UnsupportedProtocol)
+            );
+        }
+
+        // Refused *first*: a batch that is also empty and on the wrong
+        // transport still reports the version, because nothing after it was
+        // trustworthy enough to check.
+        let unreadable = InboundFileBatch {
+            protocol_version: INBOUND_FILE_PROTOCOL_VERSION + 1,
+            transport: InboundFileTransport::Host,
+            files: Vec::new(),
+            ..good.clone()
+        };
+        assert_eq!(
+            refused(validate_inbound_files(
+                &unreadable,
+                &InboundFileConstraints::default(),
+                &capabilities
+            )),
+            Some(InboundFileRefusal::UnsupportedProtocol)
         );
     }
 
