@@ -32,6 +32,21 @@ pub struct DockRegionHandlers {
     /// Stable native instance scope. Two docks with the same tab values
     /// would otherwise share one backend focus handle.
     pub instance_id: Option<String>,
+    /// A panel from another zone landed on this region.
+    ///
+    /// Semantic only: the panel's own id, the edge and zone it came from, and
+    /// the edge it landed on. No geometry, no host session, no authority —
+    /// the consumer applies the move and rebuilds the spec.
+    pub on_panel_drop: Option<Arc<dyn Fn(&DockPanelDrop) + Send + Sync>>,
+}
+
+/// One accepted cross-region panel move.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DockPanelDrop {
+    pub panel_id: String,
+    pub source_edge: String,
+    pub source_zone: String,
+    pub target_edge: DockEdge,
 }
 
 /// The backend-state id of one dock tab.
@@ -67,6 +82,10 @@ pub fn dock_region(
     let space_x = rem_to_px(control_space_x_rem(density));
     let space_y = rem_to_px(panel_space_y_rem(density));
     let tab_gap = space_x * 0.5;
+    // Zone identity: a host may map several regions onto one edge, and without
+    // this a cross-region drop would read as same-zone and be refused.
+    let edge_name = format!("{:?}", spec.edge).to_lowercase();
+    let drop_zone_id = spec.drag_zone_id.clone().unwrap_or_else(|| edge_name.clone());
     let border_w = ctx.theme().resolve_border_width("border.width.default");
 
     let fill = ctx.theme().resolve_color(spec.strip_fill_token());
@@ -196,6 +215,27 @@ pub fn dock_region(
                 let value = value.to_string();
                 tab_btn.interaction.on_activate = Some(Arc::new(move || handler(&value)));
             }
+
+            // The panel itself is the drag subject. Its id carries the panel,
+            // the edge, and the zone, because a receiving region needs all
+            // three while it is *hovering* — not only at drop.
+            let subject_id = crate::drag_drop::encode_dock_panel_subject(
+                &crate::drag_drop::DockPanelSubject {
+                    panel_id: value.to_string(),
+                    source_edge: edge_name.clone(),
+                    source_zone: drop_zone_id.clone(),
+                },
+            );
+            let mut source = poodle_node::NodeDragSource::new(
+                format!("dock-region:{drop_zone_id}:source:{value}"),
+                poodle_node::DragSubject {
+                    kind: crate::drag_drop::DOCK_PANEL_SUBJECT_KIND.to_string(),
+                    id: subject_id,
+                },
+                label,
+            );
+            source.allowed_operations = crate::drag_drop::move_only();
+            tab_btn.interaction.drag_source = Some(source);
 
             tab_btn
         };
@@ -489,6 +529,62 @@ pub fn dock_region(
         el = el.child(drop_zone());
     }
 
+    // The region itself is the panel target.
+    //
+    // Deliberately low priority and shallow: a panel dropped on a tab should
+    // still land in the region, and nested arbitration prefers the deepest
+    // *eligible* target — a tab refuses a panel outright, so the region wins.
+    if spec.can_accept_panel {
+        let mut target = poodle_node::NodeDropTarget::new(
+            format!("dock-region:{drop_zone_id}"),
+            crate::drag_drop::DOCK_PANEL_SUBJECT_KIND,
+            spec.aria_label.clone().unwrap_or_else(|| format!("{edge_name} dock")),
+        );
+        target.priority = -1;
+        target.resolve_position = Some(Arc::new(|_input| {
+            Some(poodle_node::DROP_POSITION_INSIDE.to_string())
+        }));
+        let same_zone = drop_zone_id.clone();
+        let is_flexible = spec.sizing == DockSizing::Flexible;
+        target.can_drop = Some(Arc::new(move |intent, subject| {
+            let Some(panel) = crate::drag_drop::decode_dock_panel_subject(&subject.id) else {
+                return poodle_node::DropEligibility::Rejected {
+                    reason: Some("That subject is not a dock panel".to_string()),
+                };
+            };
+            // A panel dropped back on its own flexible zone is a same-strip
+            // reorder, which the strip already owns.
+            if panel.source_zone == same_zone && is_flexible {
+                return poodle_node::DropEligibility::Rejected {
+                    reason: Some("The panel is already in this zone".to_string()),
+                };
+            }
+            poodle_node::DropEligibility::Accepted {
+                intent: intent.clone(),
+            }
+        }));
+        if let Some(handler) = &handlers.on_panel_drop {
+            let handler = Arc::clone(handler);
+            let target_edge = spec.edge;
+            target.on_drop = Some(Arc::new(move |event| {
+                let Some(panel) = crate::drag_drop::decode_dock_panel_subject(&event.subject.id)
+                else {
+                    return poodle_node::NodeDropCommit::Rejected {
+                        reason: Some("That subject is not a dock panel".to_string()),
+                    };
+                };
+                handler(&DockPanelDrop {
+                    panel_id: panel.panel_id,
+                    source_edge: panel.source_edge,
+                    source_zone: panel.source_zone,
+                    target_edge,
+                });
+                poodle_node::NodeDropCommit::Committed
+            }));
+        }
+        el.interaction.drop_target = Some(target);
+    }
+
     if let Some(label) = spec.aria_label.as_deref() {
         if !label.is_empty() {
             el.a11y.label = Some(label.to_string());
@@ -499,6 +595,91 @@ pub fn dock_region(
 
 #[cfg(test)]
 mod tests {
+
+    /// g16.026. A dock panel is an ordinary drag subject: its id carries the
+    /// panel, the edge, and the zone, so a receiving region can answer its own
+    /// policy while hovering. A panel dropped back on its own flexible zone is
+    /// same-strip reorder and is refused.
+    #[test]
+    fn a_dock_panel_is_a_subject_its_own_zone_refuses() {
+        use poodle_node::{DragSubject, DropEligibility, DropIntent};
+
+        let moved = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let handlers = DockRegionHandlers {
+            on_panel_drop: {
+                let moved = Arc::clone(&moved);
+                Some(Arc::new(move |drop: &DockPanelDrop| {
+                    moved.lock().expect("lock").push(drop.clone());
+                }))
+            },
+            ..DockRegionHandlers::default()
+        };
+        let spec = DockRegionSpec::new(
+            DockEdge::Left,
+            vec![PanelTabItem::new("explorer", "Explorer")],
+        )
+        .with_can_accept_panel(true);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let root = dock_region(&spec, &ctx, None, handlers);
+
+        let source = root
+            .find(&|node| node.interaction.drag_source.is_some())
+            .and_then(|node| node.interaction.drag_source.as_ref())
+            .expect("a tab registers a panel source");
+        assert_eq!(
+            source.subject.kind,
+            crate::drag_drop::DOCK_PANEL_SUBJECT_KIND
+        );
+        let decoded = crate::drag_drop::decode_dock_panel_subject(&source.subject.id)
+            .expect("the subject id decodes");
+        assert_eq!(decoded.panel_id, "explorer");
+        assert_eq!(decoded.source_edge, "left");
+        assert_eq!(decoded.source_zone, "left");
+
+        let target = root
+            .interaction
+            .drop_target
+            .as_ref()
+            .expect("the region registers a panel target");
+        let intent = DropIntent {
+            target_id: target.target_id.clone(),
+            position: poodle_node::DROP_POSITION_INSIDE.to_string(),
+            operation: poodle_node::DragOperation::Move,
+        };
+        let can_drop = target.can_drop.as_ref().expect("eligibility");
+
+        // Its own zone: same-strip reorder owns it.
+        assert!(matches!(
+            can_drop(&intent, &source.subject),
+            DropEligibility::Rejected { .. }
+        ));
+
+        // Another zone: accepted, and reported semantically.
+        let foreign = DragSubject {
+            kind: crate::drag_drop::DOCK_PANEL_SUBJECT_KIND.to_string(),
+            id: crate::drag_drop::encode_dock_panel_subject(&crate::drag_drop::DockPanelSubject {
+                panel_id: "inspector".to_string(),
+                source_edge: "right".to_string(),
+                source_zone: "right".to_string(),
+            }),
+        };
+        assert!(matches!(
+            can_drop(&intent, &foreign),
+            DropEligibility::Accepted { .. }
+        ));
+
+        let on_drop = target.on_drop.as_ref().expect("commit");
+        on_drop(&poodle_node::NodeDropCommitEvent {
+            subject: foreign,
+            intent,
+        });
+        let seen = moved.lock().expect("lock").clone();
+        assert_eq!(seen.len(), 1);
+        assert_eq!(seen[0].panel_id, "inspector");
+        assert_eq!(seen[0].source_zone, "right");
+        assert_eq!(seen[0].target_edge, DockEdge::Left);
+    }
     use super::*;
     use poodle_specs::PanelTabItem;
 

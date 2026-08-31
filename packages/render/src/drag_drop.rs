@@ -256,6 +256,87 @@ pub fn rejects_self(
     })
 }
 
+// ── Dock panel subjects ────────────────────────────────────────────────────
+
+/// The one subject kind every dock region accepts.
+///
+/// Deliberately not scoped per instance, unlike a reorder surface's kind: a
+/// panel is *meant* to cross between regions, and two regions can only resolve
+/// each other's targets when they agree on the kind. Which regions can see one
+/// another is decided by which controller they registered with.
+///
+/// Mirrors core's `DOCK_PANEL_SUBJECT_KIND`.
+pub const DOCK_PANEL_SUBJECT_KIND: &str = "poodle.dock-panel";
+
+const DOCK_PANEL_PREFIX: &str = "poodle-panel:";
+
+/// A dock panel's identity, as it travels in `DragSubject.id`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DockPanelSubject {
+    pub panel_id: String,
+    pub source_edge: String,
+    pub source_zone: String,
+}
+
+fn percent_encode(value: &str) -> String {
+    let mut out = String::with_capacity(value.len());
+    for byte in value.as_bytes() {
+        match byte {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                out.push(*byte as char);
+            }
+            other => out.push_str(&format!("%{other:02X}")),
+        }
+    }
+    out
+}
+
+fn percent_decode(value: &str) -> Option<String> {
+    let bytes = value.as_bytes();
+    let mut out: Vec<u8> = Vec::with_capacity(bytes.len());
+    let mut index = 0;
+    while index < bytes.len() {
+        if bytes[index] == b'%' {
+            let hex = value.get(index + 1..index + 3)?;
+            out.push(u8::from_str_radix(hex, 16).ok()?);
+            index += 3;
+        } else {
+            out.push(bytes[index]);
+            index += 1;
+        }
+    }
+    String::from_utf8(out).ok()
+}
+
+/// Encode a panel's identity into a subject id.
+///
+/// Percent-encoded fields joined by `|`, matching core exactly: this value
+/// becomes part of generated element ids, so it has to survive one without
+/// braces and quotes, and encoding each field keeps the separator unambiguous
+/// when a consumer's panel id or zone contains one.
+pub fn encode_dock_panel_subject(subject: &DockPanelSubject) -> String {
+    format!(
+        "{DOCK_PANEL_PREFIX}{}|{}|{}",
+        percent_encode(&subject.source_zone),
+        percent_encode(&subject.source_edge),
+        percent_encode(&subject.panel_id),
+    )
+}
+
+/// Decode a subject id, or `None` when it is not one of ours.
+pub fn decode_dock_panel_subject(id: &str) -> Option<DockPanelSubject> {
+    let body = id.strip_prefix(DOCK_PANEL_PREFIX)?;
+    let parts: Vec<&str> = body.split('|').collect();
+    if parts.len() != 3 {
+        return None;
+    }
+    Some(DockPanelSubject {
+        source_zone: percent_decode(parts[0])?,
+        source_edge: percent_decode(parts[1])?,
+        panel_id: percent_decode(parts[2])?,
+    })
+}
+
 /// Attach a source registration to a node, unless the row is inert.
 ///
 /// A disabled row is not registered at all rather than registered-and-ignored:

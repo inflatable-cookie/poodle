@@ -7770,6 +7770,7 @@ pub(crate) struct DockRegion {
     on_tab_change: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     on_collapse_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
     instance_id: Option<String>,
+    on_panel_drop: Option<Arc<dyn Fn(&poodle_render::DockPanelDrop) + Send + Sync>>,
 }
 
 impl DockRegion {
@@ -7778,6 +7779,7 @@ impl DockRegion {
             spec,
             theme: theme.clone(),
             content: None,
+            on_panel_drop: None,
             on_tab_change: None,
             on_collapse_toggle: None,
             instance_id: None,
@@ -7804,11 +7806,20 @@ impl DockRegion {
         self
     }
 
+    pub(crate) fn on_panel_drop(
+        mut self,
+        handler: Arc<dyn Fn(&poodle_render::DockPanelDrop) + Send + Sync>,
+    ) -> Self {
+        self.on_panel_drop = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
         let handlers = poodle_render::DockRegionHandlers {
             on_tab_change: self.on_tab_change,
             on_collapse_toggle: self.on_collapse_toggle,
             instance_id: self.instance_id,
+            on_panel_drop: self.on_panel_drop,
         };
         poodle_render::dock_region(&self.spec, &RenderContext::new(&self.theme), self.content, handlers)
     }
