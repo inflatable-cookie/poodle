@@ -13,6 +13,7 @@
   import {
     INBOUND_FILE_SUBJECT_KIND,
     type DragExportBridge,
+    type DropCommitContext,
     type DropIntent,
     type InboundFileConstraints,
   } from "@inflatable-cookie/poodle-core";
@@ -48,7 +49,7 @@
       inboundFiles: constraints,
       resolvePosition: () => "inside" as const,
       canDrop: (intent: DropIntent) => ({ accepted: true as const, intent }),
-      onDrop: (intent: DropIntent, context: { inboundFiles: { files: { name: string | null }[] } | null }) => {
+      onDrop: (_intent: DropIntent, context: DropCommitContext) => {
         accepted = (context.inboundFiles?.files ?? [])
           .map((file) => file.name)
           .filter((name): name is string => name !== null);

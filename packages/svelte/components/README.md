@@ -68,6 +68,12 @@ import { DragDropProvider, useDragDrop } from "@inflatable-cookie/poodle-svelte"
 actions and a `keyboardDropTarget` helper for element-free ordered keyboard
 targets. The provider owns one overlay and one polite live region.
 
+`DragDropProvider` also accepts `crossWindowTargetBridge` and
+`inboundFileBridge` for this document. External files reach ordinary drop
+targets as receipts; a drag-out source declares `fileExportBridge` and shows
+its own state through the snapshot. Poodle never receives a path or a `File` —
+see the core package README.
+
 ## Stability Notes
 
 - public entry points are the package root and `./types`

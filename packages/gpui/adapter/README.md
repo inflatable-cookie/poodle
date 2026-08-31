@@ -98,6 +98,15 @@ it. It is per window and never shared: a census that belongs to one window
 cannot reach another window's controllers, so a background window's live drag
 survives every frame the foreground window draws.
 
+External files use the same two host bridges the web does.
+`NodeDragSource::file_export_bridge` prepares an opaque receipt on the pre-drag
+gesture and the host owns the operating system's drag;
+`DragDropController::set_inbound_file_bridge` installs the one inbound
+transport for this window, whose events reach ordinary drop targets under
+`INBOUND_FILE_SUBJECT_KIND` after their metadata is validated. No path, file
+handle, or shell type crosses either boundary, and a drag ending never
+authorizes Poodle to delete what a host materialized.
+
 Full example:
 [GPUI developer guide](../../../docs/guides/gpui-developer-guide.md#wire-the-window-root).
 

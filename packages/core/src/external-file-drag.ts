@@ -187,8 +187,8 @@ export type DragExportRefusal =
   | "name-is-a-path";
 
 export type DragExportValidation =
-  | { readonly accepted: true; readonly prepared: PreparedFileExport }
-  | { readonly accepted: false; readonly reason: DragExportRefusal };
+  | { accepted: true; prepared: PreparedFileExport }
+  | { accepted: false; reason: DragExportRefusal };
 
 /**
  * Check an armed receipt against what its own adapter said it could do.
@@ -366,8 +366,8 @@ export type InboundFileRefusal =
   | "unsupported-type";
 
 export type InboundFileValidation =
-  | { readonly accepted: true; readonly batch: InboundFileBatch }
-  | { readonly accepted: false; readonly reason: InboundFileRefusal };
+  | { accepted: true; batch: InboundFileBatch }
+  | { accepted: false; reason: InboundFileRefusal };
 
 /**
  * Validate an inbound batch before any target is asked whether it wants it.

@@ -1476,7 +1476,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         }
 
         const validation = validateFileExport(prepared, bridge.capabilities);
-        if (!validation.accepted) {
+        if (validation.accepted === false) {
           // Allocated but unusable: the host is told, so a temporary file it
           // made for a drag that will never start does not simply leak.
           returnPreparedExport(bridge, prepared, "preparation-failed");
@@ -1652,7 +1652,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       constraints ?? {},
       inboundFileBridge.capabilities,
     );
-    return validation.accepted ? null : validation.reason;
+    return validation.accepted === false ? validation.reason : null;
   }
 
   /** A name for a batch nothing in this window registered. */

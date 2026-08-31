@@ -819,6 +819,7 @@ export {
   type DragPreviewSnapshot,
   type DragSourceHandle,
   type DragSourceRegistration,
+  type DropCommitContext,
   type DropTargetHandle,
   type DropTargetRegistration,
   type KeyboardDropCommand,

@@ -34,6 +34,12 @@ consumer refs and handlers. `useKeyboardDropTarget` registers an element-free
 ordered keyboard target. The provider owns one overlay and one polite live
 region.
 
+`DragDropProvider` also accepts `crossWindowTargetBridge` and
+`inboundFileBridge` for this document. External files reach ordinary drop
+targets as receipts; a drag-out source declares `fileExportBridge` and shows
+its own state through the snapshot. Poodle never receives a path or a `File` —
+see the core package README.
+
 ## Setup
 
 Three things wire a consuming app up.

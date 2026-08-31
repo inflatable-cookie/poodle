@@ -80,7 +80,11 @@ behavior repairs without inventing another conformance authority.
   unsupported debt no mouse fixture may flip. It merged in PR #108 after four
   review rounds; no ledger cell moved. PR #113 then merged `g16.026`: Tabs now
   moves with its DockRegion host-bridge consumer through split source/window
-  authority and the window-owned GPUI pump.
+  authority and the window-owned GPUI pump. `g16.027` is delivered and under
+  review: inbound files and native file drag-out, paired in both languages and
+  wired through the web and GPUI controllers, with opaque receipts, validation
+  before eligibility, host-owned retention, and no committed export terminal
+  because a native drag ending never proves a destination took the file.
   `g16.033` is reserved after that shared-file tranche for HistoryCenter's
   Poodle-owned rejection surface and packed v3 `HistoryEntry` proof. It is not
   dispatchable until the public rejection shape is chosen; Keyboard vertical
