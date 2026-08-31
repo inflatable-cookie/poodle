@@ -13,5 +13,6 @@ Current open notes:
 - `20260821-165500-longhorn-conformance-lab.md` — lab ownership and native
   capture/process lifecycle remain undecided.
 - `20260831-194043-history-papercut-ownership.md` — portfolio ownership is
-  settled; the Poodle rejection shape and CS20 presentation choice remain open
-  behind the active drag runway, while Longhorn wave 27 owns the wire code.
+  settled; the Poodle rejection shape, package publication, CS20 presentation,
+  and keyboard geometry remain behind the active drag runway; the external
+  wire-code branch is complete.

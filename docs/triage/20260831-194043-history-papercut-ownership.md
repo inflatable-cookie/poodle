@@ -1,7 +1,7 @@
 # History Papercut Ownership
 
-Status: open — ownership is settled; Poodle and CS20 choices remain; the
-Longhorn wire decision is promoted externally
+Status: open — external wire/adoption work is complete; Poodle rejection,
+package publication, CS20, and keyboard-geometry follow-ons remain
 Captured: 2026-08-31
 Source: Loophole `PAPERCUTS.md` after PR #14 merged
 
@@ -38,8 +38,9 @@ host protocol vocabulary.
 
 Poodle source already re-exports the v3 `HistoryEntry` / `HistoryEntryPosition`
 shape. `g16.033` owns packed-candidate proof for both the package root and
-`@inflatable-cookie/poodle-svelte/types`; it does not own npm publication or a
-Loophole dependency update.
+`@inflatable-cookie/poodle-svelte/types`; it does not mutate npm. This thread
+owns the later publication/adoption follow-on, but only after the packed proof
+lands and the operator explicitly authorizes release mutation.
 
 ### Loophole/Pulse — CS20 `groupId`
 
@@ -59,46 +60,48 @@ Longhorn wire shape.
 
 ### Longhorn — `AlreadyAtTarget` wire code
 
-Longhorn's domain error has `ForkNavigationError::AlreadyAtTarget`, but
-`ForkNavigationRejectionCode` has no matching stable variant. Loophole maps the
-case to `invalidRequest`, copies the diagnostic detail, then its renderer
-sniffs “already at” to recover Poodle's `AlreadyAtTarget` meaning.
+Longhorn papercuts wave 27 added the exact `alreadyAtTarget` wire rejection and
+merged in PR #20 as `c216fd79012d77b8da00b67c88de80a5f26d9794`. Its canonical
+dispatch artifact remains Longhorn
+`docs/handoffs/20260831-203639-papercuts-wave27-already-at-target.md`.
 
-Northstar has now approved and queued the exact wire code as Longhorn papercuts
-wave 27. Its canonical dispatch artifact is Longhorn
-`docs/handoffs/20260831-203639-papercuts-wave27-already-at-target.md`. The lane
-is source-only and remains separate from `g16.033`; Poodle can preserve its
-existing semantic code without waiting for the protocol change. Poodle must
-not open a duplicate card, worker, or implementation diff for it. A bounded
-Loophole adapter cleanup may follow after the Longhorn source change lands.
+This source-only lane is complete and remains separate from `g16.033`.
+Poodle must not open a duplicate card, worker, or implementation diff for it.
 
 ### Loophole adoption
 
-After the relevant upstream surfaces land, Loophole owns mapping its deletion
-failures onto the selected Poodle semantics, consuming a published corrected
-Poodle package, and removing detail sniffing if Longhorn gains an exact wire
-code. These are adoption changes, not reasons to combine repositories in one
-worker.
+Loophole PR #16 adopted Longhorn's `alreadyAtTarget` wire code and merged as
+`8699c76fa06190bf2cef01d822a6834dd4a8067d`; the diagnostic-detail sniff is no
+longer Poodle work. Loophole still owns mapping deletion failures onto the
+future selected Poodle semantics and consuming a published corrected Poodle
+package. Those remain adoption changes, not reasons to combine repositories in
+one worker.
 
-Keyboard vertical geometry remains design-deferred and outside this packet.
+Keyboard vertical geometry remains design-deferred. Ownership stays with this
+thread, but it is outside `g16.033` and receives no worker until its design is
+settled.
 
 ## Open Decisions
 
 - Poodle `g16.033`: structured Poodle rejection codes or host-owned message?
 - CS20: label-only presentation or a stable group identity on the one
   coalesced node?
+- Keyboard: what vertical geometry should the component expose?
 
 ## Promotion Route
 
 1. Finish `g16.027` and `g16.028` without inserting a papercut worker.
 2. Resolve the Poodle rejection-shape gate, then dispatch `g16.033` from this
    thread with the required `Papercuts` label.
-3. Promote the CS20 decision into Loophole planning only if group identity is
+3. After `g16.033` proves the packed v3 type surface, seek explicit release
+   authority for publication and the remaining Loophole package adoption.
+4. Promote the CS20 decision into Loophole planning only if group identity is
    wanted.
-4. Treat Longhorn wave 27 as the sole source lane for the exact wire code; do
-   not duplicate it in Poodle.
-5. Run publication and Loophole adoption only under separate release/adoption
-   authority.
+5. Keep keyboard vertical geometry design-deferred until the operator settles
+   its geometry; do not fold it into HistoryCenter or the drag closeout.
+
+Longhorn PR #20 and Loophole PR #16 close the wire-code branch of this packet.
+No Poodle promotion or worker follows from those receipts.
 
 Remove this note once each open choice has either been rejected or promoted
 into its owning repository's canonical plan.
