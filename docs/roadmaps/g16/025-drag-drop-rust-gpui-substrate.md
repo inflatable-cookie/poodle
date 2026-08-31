@@ -1,6 +1,6 @@
 # g16.025 — Drag-And-Drop Rust And GPUI Substrate
 
-Status: implemented 2026-08-31 — PR #108 open, review rounds 1 and 2 addressed
+Status: implemented 2026-08-31 — PR #108 open, review rounds 1-3 addressed
 Depends on: `024-drag-drop-tree-nested-intent-and-auto-scroll.md`
 Governing refs: architecture 011, spec 069, the Node/render architecture, and
 the Tabs, EditableList, Tree, and ModelCatalogueEditor contracts
@@ -94,8 +94,13 @@ Ledger: unchanged at 52 mounted / 122 missing.
 
 ## Review Rounds
 
-Round 1 named six gaps, round 2 named three more. All nine are closed on this
-branch; the log records each fix and its mounted counterexample.
+Round 1 named six gaps, round 2 named three more, round 3 named two. All eleven
+are closed on this branch; the log records each fix and its mounted
+counterexample.
+
+Round 3 also reverted the provider-unmount mechanism a self-audit had added:
+the gap is real, but closing it needs window ownership, which `g16.026` owns.
+That card now carries the requirement and both counterexamples.
 
 Two changed observable behavior on purpose: a self-drop is now *rejected*
 rather than silently accepted, and a reorder surface is ineligible for another

@@ -41,7 +41,7 @@
 
 use std::cell::RefCell;
 use std::collections::{HashMap, VecDeque};
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 
 use gpui::{
     canvas, div, px, AnyView, App, AppContext, Bounds, Div, InteractiveElement, IntoElement,
@@ -94,6 +94,17 @@ pub struct NativeDragPayload {
     pub source_id: String,
 }
 
+/// How the target under the gesture is answering.
+///
+/// `Rejected` is not the same as no target, and a custom surface has to be
+/// able to tell them apart: one draws a refusal with its reason, the other
+/// draws nothing.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DragDropTargetPosture {
+    Accepted,
+    Rejected,
+}
+
 /// An immutable presentation read of the controller's current session.
 ///
 /// Snapshots expose semantics plus adapter-owned pointer state. They never
@@ -105,8 +116,16 @@ pub struct DragDropSnapshot {
     pub source_id: Option<String>,
     pub subject: Option<DragSubject>,
     pub operation: Option<DragOperation>,
+    /// The accepted intent's target while one exists, otherwise the target
+    /// currently refusing the gesture. Read it with [`Self::target_posture`].
     pub target_id: Option<String>,
+    /// `Some` only when [`Self::target_posture`] is
+    /// [`DragDropTargetPosture::Accepted`]: a refusal has no placement.
     pub position: Option<DropPosition>,
+    pub target_posture: Option<DragDropTargetPosture>,
+    /// The refusing target's reason, suitable for presentation. Cleared the
+    /// moment an intent is accepted.
+    pub rejected_reason: Option<String>,
     pub input_kind: Option<NodeDragInputKind>,
     pub pointer: Option<(f32, f32)>,
     pub announcement: Option<String>,
@@ -181,6 +200,10 @@ struct ControllerState {
     /// Bounded because a controller lives as long as its host: an unbounded
     /// log would grow for every hover of every drag for the life of the app.
     announcements: VecDeque<String>,
+    /// The target refusing the gesture right now, and why. Set only while no
+    /// intent is accepted — an accepted intent is the answer, and a stale
+    /// refusal beside it would let a surface paint both at once.
+    rejected: Option<(String, Option<String>)>,
     /// Duplicate live ids and other registration conflicts, for diagnosis.
     conflicts: Vec<String>,
     /// The source registration the live session started from, plus its element
@@ -207,10 +230,6 @@ struct ControllerState {
     /// A terminal ran without a window in reach; the next windowed handler
     /// clears GPUI's own drag state.
     pending_stop_active_drag: bool,
-    /// This controller's provider ran its sweep during the current host frame.
-    /// A frame that completes without it means the provider is no longer
-    /// mounted, and a session it still holds has lost its transport.
-    swept_this_frame: bool,
     preview: Option<PreviewRenderer>,
     describe_announcement: Option<AnnouncementRenderer>,
 }
@@ -230,12 +249,6 @@ impl Default for DragDropController {
 }
 
 thread_local! {
-    /// Every controller constructed on this thread, weakly. The host frame
-    /// boundary uses it to notice a provider that stopped rendering: its own
-    /// sweep can no longer run, so nothing else would ever close a session it
-    /// still holds.
-    static LIVE_CONTROLLERS: RefCell<Vec<Weak<RefCell<ControllerState>>>> =
-        const { RefCell::new(Vec::new()) };
     /// Controllers currently building their subtree. Innermost wins, so a
     /// provider nested inside another provider claims its own registrations.
     static PROVIDER_STACK: RefCell<Vec<DragDropController>> = const { RefCell::new(Vec::new()) };
@@ -272,7 +285,7 @@ impl DragDropController {
             next.set(id + 1);
             id
         });
-        let controller = Self {
+        Self {
             state: Rc::new(RefCell::new(ControllerState {
                 id,
                 phase: DragSessionPhase::Idle,
@@ -288,6 +301,7 @@ impl DragDropController {
                 notified_clear: None,
                 announcement: None,
                 announcements: VecDeque::new(),
+                rejected: None,
                 conflicts: Vec::new(),
                 active_source: None,
                 last_outcome: None,
@@ -296,17 +310,10 @@ impl DragDropController {
                 keyboard_origin: None,
                 suppress_activation: std::collections::BTreeSet::new(),
                 pending_stop_active_drag: false,
-                swept_this_frame: false,
                 preview: None,
                 describe_announcement: None,
             })),
-        };
-        LIVE_CONTROLLERS.with(|live| {
-            let mut live = live.borrow_mut();
-            live.retain(|weak| weak.strong_count() > 0);
-            live.push(Rc::downgrade(&controller.state));
-        });
-        controller
+        }
     }
 
     /// What this runtime actually supports. Immutable by construction.
@@ -340,18 +347,30 @@ impl DragDropController {
     pub fn snapshot(&self) -> DragDropSnapshot {
         let state = self.state.borrow();
         let session = state.context.session.as_ref();
+        let intent = session.and_then(|s| s.intent.as_ref());
+        let dragging = state.phase == DragSessionPhase::Dragging;
+        // A refusal is only current while the gesture is live and nothing has
+        // been accepted, matching `createDragDropController`'s
+        // `targetPosture` rule exactly.
+        let rejected = state.rejected.as_ref().filter(|_| dragging && intent.is_none());
+        let target_posture = match (dragging, intent.is_some(), rejected.is_some()) {
+            (true, true, _) => Some(DragDropTargetPosture::Accepted),
+            (true, false, true) => Some(DragDropTargetPosture::Rejected),
+            _ => None,
+        };
+
         DragDropSnapshot {
             phase: state.phase,
             session_id: session.map(|s| s.session_id.clone()),
             source_id: session.map(|s| s.source_id.clone()),
             subject: session.map(|s| s.subject.clone()),
             operation: session.map(|s| s.operation),
-            target_id: session
-                .and_then(|s| s.intent.as_ref())
-                .map(|intent| intent.target_id.clone()),
-            position: session
-                .and_then(|s| s.intent.as_ref())
-                .map(|intent| intent.position.clone()),
+            target_id: intent
+                .map(|intent| intent.target_id.clone())
+                .or_else(|| rejected.map(|(target_id, _)| target_id.clone())),
+            position: intent.map(|intent| intent.position.clone()),
+            target_posture,
+            rejected_reason: rejected.and_then(|(_, reason)| reason.clone()),
             input_kind: state.input_kind,
             pointer: state.pointer,
             announcement: state.announcement.clone(),
@@ -424,7 +443,6 @@ impl DragDropController {
     /// surviving session then re-resolves against the new registrations, so an
     /// eligibility change with no pointer motion still moves the intent.
     fn frame_end(&self, window: &mut Window, cx: &mut App) {
-        self.state.borrow_mut().swept_this_frame = true;
         FRAME_CONTROLLER.with(|current| {
             let mut current = current.borrow_mut();
             if current
@@ -708,6 +726,13 @@ impl DragDropController {
         };
 
         let resolved = resolve_drop_target(&candidates);
+        // A refusal is presentation, not lifecycle: it never becomes an
+        // intent, and it only stands while nothing was accepted.
+        let refused = resolved
+            .is_none()
+            .then(|| resolve_rejected_target(&candidates))
+            .flatten();
+        self.state.borrow_mut().rejected = refused;
         self.apply_intent(&session, resolved, cx);
     }
 
@@ -935,6 +960,7 @@ impl DragDropController {
         };
 
         let Some(position) = position else {
+            self.state.borrow_mut().rejected = None;
             self.apply_intent(&session, None, cx);
             return true;
         };
@@ -952,9 +978,17 @@ impl DragDropController {
         };
         match eligible {
             Some(DropEligibility::Accepted { intent }) => {
-                self.apply_intent(&session, Some(intent), cx)
+                self.state.borrow_mut().rejected = None;
+                self.apply_intent(&session, Some(intent), cx);
             }
-            _ => self.apply_intent(&session, None, cx),
+            Some(DropEligibility::Rejected { reason }) => {
+                self.state.borrow_mut().rejected = Some((target_id, reason));
+                self.apply_intent(&session, None, cx);
+            }
+            None => {
+                self.state.borrow_mut().rejected = None;
+                self.apply_intent(&session, None, cx);
+            }
         }
         true
     }
@@ -1064,6 +1098,7 @@ impl DragDropController {
                     state.keyboard_index = None;
                     state.keyboard_origin = None;
                     state.active_source = None;
+                    state.rejected = None;
                     state.pending_stop_active_drag = true;
                 }
                 queue.push_back(DragSessionEvent::Reset { session_id });
@@ -1373,6 +1408,51 @@ fn pointer_candidate(
     })
 }
 
+/// The refused target the pointer is over, by the same arbitration the
+/// accepted set uses.
+///
+/// `resolve_drop_target` discards rejected candidates — correctly, because a
+/// refusal must never become an intent. But a custom surface still has to be
+/// able to style the target refusing it, so the refused set is handed to that
+/// same resolver as if it were acceptable, and only the winner's identity and
+/// reason are kept. Keeping a second copy of the deepest / priority / order
+/// rule here is exactly the drift this substrate exists to remove, and the two
+/// copies would disagree the first time one of them changed.
+///
+/// This is stricter than the web controller, which takes the first refusal in
+/// registry iteration order. Deterministic beats incidental: with nested
+/// targets, "whichever we happened to visit first" is not a rule a consumer
+/// can rely on.
+fn resolve_rejected_target(
+    candidates: &[DropTargetCandidate],
+) -> Option<(String, Option<String>)> {
+    let refused: Vec<DropTargetCandidate> = candidates
+        .iter()
+        .filter(|candidate| matches!(candidate.eligibility, DropEligibility::Rejected { .. }))
+        .map(|candidate| DropTargetCandidate {
+            eligibility: DropEligibility::Accepted {
+                intent: DropIntent {
+                    target_id: candidate.target_id.clone(),
+                    position: String::new(),
+                    operation: DragOperation::Move,
+                },
+            },
+            target_id: candidate.target_id.clone(),
+            ..*candidate
+        })
+        .collect();
+
+    let winner = resolve_drop_target(&refused)?.target_id;
+    let reason = candidates
+        .iter()
+        .find(|candidate| candidate.target_id == winner)
+        .and_then(|candidate| match &candidate.eligibility {
+            DropEligibility::Rejected { reason } => reason.clone(),
+            _ => None,
+        });
+    Some((winner, reason))
+}
+
 /// Kind filter, disabled posture, then the target's own resolver. Absent
 /// `can_drop` accepts, matching the registration's documented default.
 fn eligibility_for(
@@ -1546,67 +1626,6 @@ pub(crate) fn apply_drag_listeners(
     el
 }
 
-/// Start a host frame: no provider has swept yet.
-///
-/// Called from [`crate::overlay_frame_begin`], which every host already runs
-/// once per rendered frame.
-pub(crate) fn host_frame_begin() {
-    for_each_live_controller(|state| state.borrow_mut().swept_this_frame = false);
-}
-
-/// End a host frame: a provider that did not sweep is no longer mounted.
-///
-/// Its own sweep is the only thing that could have closed a session it still
-/// holds, so the session has lost its transport. Without this a host that
-/// unmounts a provider mid-drag keeps a `Dragging` session, its registrations,
-/// and a source whose terminal callback never runs — the consumer's own drag
-/// state latches with nothing left to clear it.
-pub(crate) fn host_frame_end(cx: &mut App) {
-    let orphaned: Vec<DragDropController> = {
-        let mut found = Vec::new();
-        for_each_live_controller(|state| {
-            let swept = state.borrow().swept_this_frame;
-            let active = matches!(
-                state.borrow().phase,
-                DragSessionPhase::Preparing
-                    | DragSessionPhase::Armed
-                    | DragSessionPhase::Dragging
-                    | DragSessionPhase::Dropping
-            );
-            if !swept && active {
-                found.push(DragDropController {
-                    state: Rc::clone(state),
-                });
-            }
-        });
-        found
-    };
-
-    for controller in orphaned {
-        if let Some(session_id) = controller.active_session_id() {
-            controller.dispatch(DragSessionEvent::TransportLost { session_id }, cx);
-        }
-        // The provider is gone, so its registrations are too. Leaving them
-        // would let a stale source id start another session from a tree that
-        // is no longer on screen.
-        let mut state = controller.state.borrow_mut();
-        state.sources.clear();
-        state.targets.clear();
-        state.depths.clear();
-    }
-}
-
-fn for_each_live_controller(mut visit: impl FnMut(&Rc<RefCell<ControllerState>>)) {
-    let live: Vec<Rc<RefCell<ControllerState>>> = LIVE_CONTROLLERS.with(|live| {
-        let mut live = live.borrow_mut();
-        live.retain(|weak| weak.strong_count() > 0);
-        live.iter().filter_map(Weak::upgrade).collect()
-    });
-    for state in &live {
-        visit(state);
-    }
-}
-
 /// Record drop-target nesting depth for the tree about to be built.
 ///
 /// Depth is a property of the node tree, not of paint order or bounds
@@ -1699,6 +1718,82 @@ mod tests {
             DropEligibility::Accepted {
                 intent: intent.clone()
             }
+        );
+    }
+
+    /// A refusal is arbitrated by the same rule as an acceptance: deepest
+    /// first, then priority, then registration order. Taking whichever refusal
+    /// happened to be visited first would make a nested surface report a
+    /// different refusing target depending on registry iteration.
+    #[test]
+    fn the_refused_target_is_arbitrated_deepest_first() {
+        let refused = |target_id: &str, depth: i32, order: i32, reason: &str| DropTargetCandidate {
+            target_id: target_id.to_string(),
+            depth,
+            order,
+            priority: 0,
+            contains_point: true,
+            eligibility: DropEligibility::Rejected {
+                reason: Some(reason.to_string()),
+            },
+        };
+        let candidates = vec![
+            refused("outer", 0, 0, "outer says no"),
+            refused("inner", 1, 1, "inner says no"),
+        ];
+
+        assert_eq!(
+            resolve_rejected_target(&candidates),
+            Some(("inner".to_string(), Some("inner says no".to_string())))
+        );
+
+        let mut reversed = candidates.clone();
+        reversed.reverse();
+        assert_eq!(
+            resolve_rejected_target(&reversed),
+            resolve_rejected_target(&candidates),
+            "the answer cannot depend on collection order"
+        );
+    }
+
+    /// A candidate the pointer is not over is not refusing anything.
+    #[test]
+    fn a_target_the_pointer_has_left_is_not_the_refusing_one() {
+        let candidates = vec![DropTargetCandidate {
+            target_id: "away".to_string(),
+            depth: 0,
+            order: 0,
+            priority: 0,
+            contains_point: false,
+            eligibility: DropEligibility::Rejected {
+                reason: Some("no".to_string()),
+            },
+        }];
+
+        assert_eq!(resolve_rejected_target(&candidates), None);
+    }
+
+    /// The announcement tail is bounded: a controller lives as long as its
+    /// host, and an unbounded log would grow for every hover of every drag.
+    #[test]
+    fn the_announcement_log_keeps_a_bounded_tail() {
+        let controller = DragDropController::new();
+        {
+            let mut state = controller.state.borrow_mut();
+            for index in 0..(ANNOUNCEMENT_LOG_LIMIT * 3) {
+                state.announcements.push_back(format!("line {index}"));
+                while state.announcements.len() > ANNOUNCEMENT_LOG_LIMIT {
+                    state.announcements.pop_front();
+                }
+            }
+        }
+
+        let announcements = controller.announcements();
+        assert_eq!(announcements.len(), ANNOUNCEMENT_LOG_LIMIT);
+        assert_eq!(
+            announcements.last().map(String::as_str),
+            Some(format!("line {}", ANNOUNCEMENT_LOG_LIMIT * 3 - 1).as_str()),
+            "the tail keeps the newest, not the oldest"
         );
     }
 

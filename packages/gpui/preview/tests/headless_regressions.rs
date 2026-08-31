@@ -30,7 +30,7 @@ use poodle_headless::time_input::{
 };
 use poodle_node::{
     ColorValue, ContinuousValuePhase, DismissReason, DragSession, DragSessionPhase, DragSubject,
-    DragTerminalOutcome, FocusRing, LayoutDirection, LayoutOverflow, LayoutSizing, Node,
+    DragTerminalOutcome, DropEligibility, FocusRing, LayoutDirection, LayoutOverflow, LayoutSizing, Node,
     NodeContinuousValueEvent, NodeDragInputKind, NodeDragSource, NodeDropCommit,
     NodeDropCommitEvent, NodeDropIntentEvent, NodeDropTarget, NodeKind, NodePosition, NodeRole,
     NodeWheelEvent,
@@ -14283,11 +14283,18 @@ fn two_reorder_surfaces_under_one_controller_cannot_cross_drop() {
         assert_eq!(trace_of(&trace), ["start:list-a:row"]);
 
         // Over the OTHER list's row. Same value, same shape, different scope.
+        // It is *refused*, not invisible: the surface can say so. What it must
+        // never be is an accepted intent.
         driver.pointer_drag(payload_frac("list-b-row", 0.5, 0.75));
+        let snapshot = controller.snapshot();
         assert_eq!(
-            controller.snapshot().target_id,
-            None,
-            "another reorder surface is not an eligible target"
+            snapshot.target_posture,
+            Some(poodle_gpui_node_backend::DragDropTargetPosture::Rejected),
+            "another reorder surface refuses this subject kind"
+        );
+        assert_eq!(
+            snapshot.position, None,
+            "a refusal resolves no placement"
         );
         driver.pointer_release(payload_frac("list-b-row", 0.5, 0.75));
 
@@ -14303,10 +14310,16 @@ fn two_reorder_surfaces_under_one_controller_cannot_cross_drop() {
         driver.pointer_press(source);
         driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
         driver.pointer_drag(payload_frac("list-a-row", 0.5, 0.75));
+        let snapshot = controller.snapshot();
         assert_eq!(
-            controller.snapshot().target_id,
-            None,
+            snapshot.target_posture,
+            Some(poodle_gpui_node_backend::DragDropTargetPosture::Rejected),
             "a self-drop is rejected, not silently accepted"
+        );
+        assert_eq!(
+            snapshot.rejected_reason.as_deref(),
+            Some("A row cannot be dropped onto itself"),
+            "and the surface is told why"
         );
         driver.pointer_release(payload_frac("list-a-row", 0.5, 0.75));
         assert_eq!(count_starting_with(&trace_of(&trace), "drop:"), 0);
@@ -14547,74 +14560,143 @@ fn an_unrelated_key_release_cannot_re_enable_the_suppressed_activation() {
     });
 }
 
-/// g16.025. A provider that stops rendering takes its session with it.
+/// g16.025 review 3. The public snapshot distinguishes a refused target from
+/// no target, and carries the refusal's reason.
 ///
-/// The provider's own sweep is the only thing that could close a session it
-/// holds, and an unmounted provider never sweeps again. Before the host frame
-/// boundary learned to notice, the session stayed `Dragging` forever: no
-/// terminal callback, registrations still live, and a consumer's own drag
-/// state latched with nothing left to clear it. Spec 069 makes provider
-/// unmount a cancellation, and this is that path.
+/// Spec 069 requires accepted/rejected target posture on `DragDropSnapshot`.
+/// Without it a custom surface cannot paint a rejected target at all: the
+/// kernel discards refused candidates, so hovering a target that says no looks
+/// exactly like hovering empty space. This drives the full cycle —
+/// accepted → rejected → empty → terminal — through real mounted input.
 #[test]
-fn unmounting_a_provider_cancels_its_session_and_drops_its_registrations() {
+fn the_snapshot_reports_accepted_rejected_and_empty_target_posture() {
+    use poodle_gpui_node_backend::DragDropTargetPosture;
+
+    fn posture_tree(trace: &Arc<Mutex<Vec<String>>>) -> Node {
+        let mut source = drag_box("posture-source", 60.0, 60.0);
+        source.interaction.drag_source = Some(traced_source("posture-source", "Alpha", trace));
+
+        let mut open = drag_box("posture-open", 60.0, 60.0);
+        open.interaction.drop_target = Some(traced_target(
+            "posture-open",
+            "Open",
+            trace,
+            false,
+            1,
+            NodeDropCommit::Committed,
+        ));
+
+        let mut locked = drag_box("posture-locked", 60.0, 60.0);
+        let mut locked_target = traced_target(
+            "posture-locked",
+            "Locked",
+            trace,
+            false,
+            2,
+            NodeDropCommit::Committed,
+        );
+        locked_target.can_drop = Some(Arc::new(|_intent, _subject| DropEligibility::Rejected {
+            reason: Some("Locked by another editor".to_string()),
+        }));
+        locked.interaction.drop_target = Some(locked_target);
+
+        let mut row = Node::container();
+        row.id = Some("posture-row".to_owned());
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(180.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(60.0);
+        row.child(source).child(open).child(locked)
+    }
+
     run_headless(|cx| {
         let trace = Arc::new(Mutex::new(Vec::new()));
-        let controller = poodle_gpui_node_backend::DragDropController::new();
-        let node = Arc::new(Mutex::new(scoped_drag_tree("left", &trace)));
-        let mounted = Rc::new(std::cell::Cell::new(true));
-
-        let build = {
-            let controller = controller.clone();
-            let node = Arc::clone(&node);
-            let mounted = Rc::clone(&mounted);
-            Rc::new(move || {
-                use gpui::{IntoElement as _, ParentElement as _};
-                if !mounted.get() {
-                    return gpui::div().into_any_element();
-                }
-                let tree = node.lock().expect("node lock").clone();
-                gpui::div()
-                    .child(poodle_gpui_node_backend::drag_drop_provider(
-                        &controller,
-                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
-                    ))
-                    .into_any_element()
-            }) as Rc<dyn Fn() -> gpui::AnyElement>
-        };
-
-        let mut driver = HeadlessDriver::new_element(cx, build);
+        let node = Arc::new(Mutex::new(posture_tree(&trace)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 240.0, 100.0);
         driver.draw_frame();
+        let controller = driver.drag();
 
-        let source = payload_frac("left-source", 0.5, 0.5);
+        let source = payload_frac("posture-source", 0.5, 0.5);
         driver.pointer_press(source);
         driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
-        driver.pointer_drag(payload_frac("left-zone-a", 0.5, 0.75));
-        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
-        assert_eq!(controller.source_ids(), ["left-source"]);
 
-        mounted.set(false);
-        driver.draw_frame();
+        // ── Accepted ──
+        driver.pointer_drag(payload_frac("posture-open", 0.5, 0.75));
+        let snapshot = controller.snapshot();
+        assert_eq!(
+            snapshot.target_posture,
+            Some(DragDropTargetPosture::Accepted)
+        );
+        assert_eq!(snapshot.target_id.as_deref(), Some("posture-open"));
+        assert_eq!(snapshot.position.as_deref(), Some("after"));
+        assert_eq!(
+            snapshot.rejected_reason, None,
+            "an accepted intent leaves no refusal beside it"
+        );
+
+        // ── Rejected: named, with its reason, and no placement ──
+        driver.pointer_drag(payload_frac("posture-locked", 0.5, 0.75));
+        let snapshot = controller.snapshot();
+        assert_eq!(
+            snapshot.target_posture,
+            Some(DragDropTargetPosture::Rejected)
+        );
+        assert_eq!(
+            snapshot.target_id.as_deref(),
+            Some("posture-locked"),
+            "a refused target is still the target the surface is over"
+        );
+        assert_eq!(
+            snapshot.rejected_reason.as_deref(),
+            Some("Locked by another editor")
+        );
+        assert_eq!(
+            snapshot.position, None,
+            "a refusal has no placement to draw"
+        );
+        assert!(
+            trace_of(&trace)
+                .iter()
+                .all(|event| !event.starts_with("intent:posture-locked")),
+            "a refusal never becomes an intent"
+        );
+
+        // ── Empty: over nothing at all ──
+        driver.pointer_drag(point(px(4.0), px(4.0)));
+        let snapshot = controller.snapshot();
+        assert_eq!(
+            snapshot.target_posture, None,
+            "no target is not the same as a refusing target"
+        );
+        assert_eq!(snapshot.target_id, None);
+        assert_eq!(snapshot.rejected_reason, None);
+
+        // ── Refuse again, then end on it: the terminal clears the posture ──
+        driver.pointer_drag(payload_frac("posture-locked", 0.5, 0.75));
+        assert_eq!(
+            controller.snapshot().target_posture,
+            Some(DragDropTargetPosture::Rejected)
+        );
+        driver.pointer_release(payload_frac("posture-locked", 0.5, 0.75));
+
+        let snapshot = controller.snapshot();
+        assert_eq!(snapshot.phase, DragSessionPhase::Idle);
+        assert_eq!(
+            snapshot.target_posture, None,
+            "a finished session refuses nothing"
+        );
+        assert_eq!(snapshot.rejected_reason, None);
+        assert_eq!(snapshot.target_id, None);
 
         let events = trace_of(&trace);
         assert_eq!(
-            count_starting_with(&events, "end:cancelled:TransportLost"),
-            1,
-            "the provider that owned the gesture is gone: {events:?}"
+            count_starting_with(&events, "drop:"),
+            0,
+            "releasing over a refusing target commits nothing: {events:?}"
         );
         assert_eq!(
-            count_starting_with(&events, "cleared:left-zone-a"),
+            count_starting_with(&events, "end:cancelled:"),
             1,
-            "the target holding the intent is still told it stopped: {events:?}"
+            "{events:?}"
         );
-        assert_eq!(count_starting_with(&events, "drop:"), 0, "{events:?}");
-        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
-        assert!(
-            controller.source_ids().is_empty() && controller.target_ids().is_empty(),
-            "an unmounted provider leaves no live registrations behind"
-        );
-
-        // Another frame must not produce a second terminal.
-        driver.draw_frame();
-        assert_eq!(count_starting_with(&trace_of(&trace), "end:"), 1);
     });
 }

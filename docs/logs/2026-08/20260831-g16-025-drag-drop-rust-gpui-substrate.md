@@ -1,6 +1,6 @@
 # g16.025 — Drag-And-Drop Rust And GPUI Substrate
 
-Status: implemented — PR #108 open; review rounds 1 and 2 addressed
+Status: implemented — PR #108 open; review rounds 1, 2, and 3 addressed
 Date: 2026-08-31
 PR: https://github.com/inflatable-cookie/poodle/pull/108
 Card: `docs/roadmaps/g16/025-drag-drop-rust-gpui-substrate.md`
@@ -122,12 +122,13 @@ that the reported input kind is `Mouse`.
   Any other key-up arriving first — a modifier, a neighbouring shortcut, an
   overlapping Enter while Space is held — would consume a single flag and let
   the real release synthesize the row's click after all.
-- **A provider that stops rendering takes its session with it.** Its own sweep
-  is the only thing that could close a session it holds, and an unmounted
-  provider never sweeps again. The host frame boundary
-  (`overlay_frame_begin` / `overlay_frame_end_with`) notices a controller that
-  did not sweep and closes an active session as `TransportLost`, then drops its
-  registrations. Spec 069 makes provider unmount a cancellation.
+- **A refusal is presentation, and it is arbitrated like an acceptance.**
+  `resolve_drop_target` discards rejected candidates — correctly, a refusal
+  must never become an intent — but a surface still has to be able to style the
+  target refusing it. The refused set is handed to that *same* resolver as if
+  it were acceptable and only the winner's identity and reason are kept, so
+  there is no second copy of the deepest / priority / order rule to drift.
+  Stricter than the web, which takes the first refusal in iteration order.
 - **The controller holds the current target's clear callback**, rather than
   looking it up when the intent moves. The registry is rebuilt every frame, so
   a target removed while it held the intent would otherwise never be told it
@@ -172,11 +173,12 @@ that the reported input kind is `Mouse`.
 | Traversal past an absent boundary | `keyboard_traversal_selects_nothing_past_an_absent_boundary`, both directions |
 | Pickup key with no target chosen | `the_pickup_key_cancels_a_session_that_never_chose_a_target` |
 | Unrelated key-up re-enabling activation | `an_unrelated_key_release_cannot_re_enable_the_suppressed_activation` |
-| Provider unmount | `unmounting_a_provider_cancels_its_session_and_drops_its_registrations` |
+| Rejected vs empty target | `the_snapshot_reports_accepted_rejected_and_empty_target_posture` — accepted → rejected → empty → terminal |
 
-Five of these were falsified by planting the pre-fix behavior back and
+Six of these were falsified by planting the pre-fix behavior back and
 confirming they fail: stale hover at release, pickup double-firing activation,
-traversal boundary, pickup-key cancellation, and per-key suppression.
+traversal boundary, pickup-key cancellation, per-key suppression, and rejected
+target posture.
 
 ## Evidence
 
@@ -267,36 +269,57 @@ Three more, all closed:
 Both review rounds found real defects of the same class — the Rust path
 diverging from the web authority, or a doc claiming something the code did not
 do — so I ran the same pass over my own diff rather than waiting. It found one
-defect and one hazard, both fixed here:
+defect and one hazard, and flagged two gaps I chose not to close unprompted.
+Round 3 then ruled on all four; the outcome is recorded there.
 
-- **Provider unmount left the session open.** Confirmed by probe before fixing:
-  after the provider stopped rendering the session stayed `Dragging`, the
-  source stayed registered, and no terminal ran, so a consumer's own drag state
-  latched with nothing left to clear it. Now closed at the host frame boundary
-  and covered by a named regression.
+- **Provider unmount left the session open.** Real, and reverted: see round 3.
 - **The announcement log was unbounded.** A controller lives as long as its
   host, so every hover of every drag accumulated a string forever. Capped at
-  `ANNOUNCEMENT_LOG_LIMIT`. There is nothing to throttle on this runtime —
-  GPUI ships no accessibility API, so no assistive technology is being fed —
-  but the log still had to be bounded.
+  `ANNOUNCEMENT_LOG_LIMIT` and unit-tested. There is nothing to throttle on
+  this runtime — GPUI ships no accessibility API, so no assistive technology is
+  being fed — but the log still had to be bounded.
+- **`DragDropSnapshot` had no rejected posture.** Flagged as a gap; round 3
+  ruled it a governing contract of this card, so it is now implemented.
+- **Native EditableList registers nothing.** Recorded in the card; unchanged.
 
-Two gaps found and deliberately **not** closed, recorded here for the
-orchestrator rather than fixed unprompted:
+## Review round 3
 
-- `DragDropSnapshot` has no accepted/rejected target posture or rejection
-  reason. The web snapshot has both, and without them a native consumer cannot
-  paint spec 069's "rejected target with reason" specimen: a hover over a
-  rejected target is indistinguishable from a hover over nothing. Nothing in
-  this card claims otherwise, and the specimen does not exist yet, so this is a
-  gap rather than a false claim. Closing it widens this card's own public type.
-- Native EditableList registers no drag source or target at all, so the
-  substrate does not reach it. Recorded in the card.
+1. **The snapshot omitted required rejected-target posture and reason.** Spec
+   069 puts accepted/rejected posture on `DragDropSnapshot`, and I had filed it
+   as an optional enhancement. It is not: without it a custom surface cannot
+   paint a refused target at all. `DragDropSnapshot` now carries
+   `target_posture` and `rejected_reason`, `target_id` names the refusing
+   target when one is refusing, and `position` is `None` for a refusal because
+   a refusal has no placement. Cleared on accepted intent, on leave, and on the
+   terminal. Proved accepted → rejected → empty → terminal through mounted
+   input, and falsified.
+
+   One existing assertion changed with it: the cross-surface test used
+   `target_id == None` as a proxy for "not eligible". A kind mismatch is a
+   *refusal* — the web reports it the same way — so the test now asserts the
+   posture and the absence of a placement, which is the stronger claim.
+
+2. **The provider-unmount mechanism is reverted.** The gap is real but the fix
+   crossed this card's stop condition against expanding into host windows, and
+   it was wrong as written: `LIVE_CONTROLLERS` and the sweep mark were
+   thread-global, so rendering window A would have swept controllers owned by
+   window B and cancelled a live drag there merely because B did not render.
+   The terminal also set `pending_stop_active_drag` with no host left to drain
+   it, so GPUI's own drag was never proved stopped — and only the preview was
+   moved to the new boundary, leaving the developer guide and adapter README
+   documenting a root wiring that would silently miss the behavior.
+
+   `LIVE_CONTROLLERS`, the host-frame sweep, `overlay_frame_end_with`, the
+   preview/driver changes, and the unmount regression are gone. The requirement
+   is carried to `g16.026` with both counterexamples named: the two-window
+   false-cancel, and the native-active-drag cleanup proof. That card owns
+   window ownership, which is where this belongs.
 
 ## Continuation
 
 `g16.026` — the cross-window host bridge, the Tabs public migration, and
-DockRegion — is next. It should also settle the two named carry-forwards:
-Tree's keyboard route plus its clear/terminal callback, and whether
-`DragDropSnapshot` gains target posture and rejection reason. Jetstream construction consumes the renderer-neutral
+DockRegion — is next. It also carries two named requirements from here: GPUI
+provider unmount (with the two-window false-cancel and native-active-drag
+proofs), and Tree's keyboard route plus its clear/terminal callback. Jetstream construction consumes the renderer-neutral
 registrations only and remains deferred; no Jetstream preview or QA selector
 was run or claimed.

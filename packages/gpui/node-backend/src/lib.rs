@@ -54,12 +54,12 @@ pub use tracked_scroll::{tracked_vertical_scroll, TrackedScrollOptions, TrackedS
 use interaction::apply_listeners;
 pub use drag::{
     drag_drop_provider, DragAnnouncementEvent, DragDropController, DragDropSnapshot,
+    DragDropTargetPosture,
     DragPreviewSnapshot, NativeDragPayload, ANNOUNCEMENT_LOG_LIMIT, GPUI_DRAG_CAPABILITIES,
 };
 pub use layers::{
     attach_overlay_host, bounds_for, dismiss_innermost, dismiss_layers_at, layer_for_element,
-    open_layer_count, overlay_frame_begin, overlay_frame_end, overlay_frame_end_with,
-    request_focus, spared_layer_ids_at,
+    open_layer_count, overlay_frame_begin, overlay_frame_end, request_focus, spared_layer_ids_at,
 };
 use style::{
     apply_cursor, apply_layout, apply_paint, apply_patch, apply_position, apply_state_patches,
