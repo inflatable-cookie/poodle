@@ -2,7 +2,7 @@
 
 Status: implemented — PR open, orchestrator review pending
 Date: 2026-08-31
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/108
 Card: `docs/roadmaps/g16/025-drag-drop-rust-gpui-substrate.md`
 Handoff: `docs/handoffs/20260831-095256-g16-025-rust-gpui-drag-substrate.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
