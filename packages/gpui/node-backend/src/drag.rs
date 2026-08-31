@@ -236,6 +236,14 @@ struct ControllerState {
     pending_stop_active_drag: bool,
     /// This window's incoming host bridge, when the consumer installed one.
     cross_window_target: Option<Arc<dyn CrossWindowDragTargetBridge>>,
+    /// Which installation that bridge is.
+    ///
+    /// A host's news can already be queued when its bridge is replaced, and a
+    /// projection is authority: applying A's queued receipt after B is
+    /// installed would start a B-owned transaction over a lease B never
+    /// issued. The generation is what makes "still current" decidable at drain
+    /// time rather than at post time.
+    cross_window_target_generation: u64,
     /// The subscription's teardown, held for the controller's lifetime.
     cross_window_unsubscribe: Option<CrossWindowCleanup>,
     /// The outgoing host transaction, when a bridged source is in play.
@@ -345,8 +353,11 @@ enum CrossWindowMessage {
         session_id: String,
         outcome: DragTerminalOutcome,
     },
-    /// The window bridge published something.
-    Target(CrossWindowDragTargetEvent),
+    /// The window bridge published something, and which installation did.
+    Target {
+        generation: u64,
+        event: CrossWindowDragTargetEvent,
+    },
     /// A commit came back from the host.
     Commit {
         session_id: String,
@@ -440,6 +451,7 @@ impl DragDropController {
                 suppress_activation: std::collections::BTreeSet::new(),
                 pending_stop_active_drag: false,
                 cross_window_target: None,
+                cross_window_target_generation: 0,
                 cross_window_unsubscribe: None,
                 cross_window_source: None,
                 cross_window_projection: None,
@@ -602,10 +614,20 @@ impl DragDropController {
             }
         }
 
+        let generation = {
+            let mut state = self.state.borrow_mut();
+            state.cross_window_target_generation += 1;
+            state.cross_window_target_generation
+        };
+
         let inbox = self.inbox();
         let waker = self.waker();
         let unsubscribe = bridge.subscribe(Box::new(move |event| {
-            post(&inbox, &waker, CrossWindowMessage::Target(event));
+            post(
+                &inbox,
+                &waker,
+                CrossWindowMessage::Target { generation, event },
+            );
         }));
 
         let previous = {
@@ -642,16 +664,25 @@ impl DragDropController {
         let (sender, mut receiver) = futures::channel::mpsc::unbounded::<()>();
         self.state.borrow_mut().wake = Some(sender);
 
-        let controller = self.clone();
+        // Weak, and upgraded per wake. A strong clone here would be a cycle:
+        // the controller owns the sender, the detached task would own the
+        // controller, and the receiver only ends when every sender drops — so
+        // neither could ever be released. With a weak handle an ordinary drop
+        // takes the sender with it, the stream ends, and the task exits.
+        let weak = Rc::downgrade(&self.state);
         cx.spawn(async move |cx: &mut gpui::AsyncApp| {
             use futures::StreamExt as _;
             while receiver.next().await.is_some() {
+                let Some(state) = weak.upgrade() else {
+                    return;
+                };
+                let controller = DragDropController { state };
                 let applied = cx.update(|cx| {
                     controller.drain_cross_window(cx);
                     cx.refresh_windows();
                 });
                 if applied.is_err() {
-                    break;
+                    return;
                 }
             }
         })
@@ -835,7 +866,9 @@ impl DragDropController {
                     session_id,
                     outcome,
                 } => self.apply_source_terminal(&session_id, outcome, cx),
-                CrossWindowMessage::Target(event) => self.apply_target_event(event, cx),
+                CrossWindowMessage::Target { generation, event } => {
+                    self.apply_target_event(generation, event, cx)
+                }
                 CrossWindowMessage::Commit {
                     session_id,
                     intent,
@@ -944,7 +977,18 @@ impl DragDropController {
         );
     }
 
-    fn apply_target_event(&self, event: CrossWindowDragTargetEvent, cx: &mut App) {
+    fn apply_target_event(
+        &self,
+        generation: u64,
+        event: CrossWindowDragTargetEvent,
+        cx: &mut App,
+    ) {
+        // News from an unsubscribed or replaced installation is discarded
+        // whole. It cannot start a transaction, clear one, or cancel one: the
+        // host that published it is no longer this window's authority.
+        if self.state.borrow().cross_window_target_generation != generation {
+            return;
+        }
         match event {
             CrossWindowDragTargetEvent::Projection { projection } => {
                 self.apply_projection(projection, cx)
@@ -1187,6 +1231,7 @@ impl DragDropController {
 
         let inbox = self.inbox();
         let waker = self.waker();
+        let generation = self.state.borrow().cross_window_target_generation;
         let expected = receipt.clone();
         // Consistency is enforced here, on a real request bound to a live
         // receipt, rather than by probing at installation.
@@ -1204,9 +1249,12 @@ impl DragDropController {
                 post(
                     &inbox,
                     &waker,
-                    CrossWindowMessage::Target(CrossWindowDragTargetEvent::Projection {
-                        projection: picked,
-                    }),
+                    CrossWindowMessage::Target {
+                        generation,
+                        event: CrossWindowDragTargetEvent::Projection {
+                            projection: picked,
+                        },
+                    },
                 );
             }),
         );
@@ -1537,6 +1585,7 @@ impl DragDropController {
         self.inbox().lock().expect("cross-window inbox").clear();
         let mut state = self.state.borrow_mut();
         state.cross_window_target = None;
+        state.cross_window_target_generation += 1;
         state.wake = None;
     }
 

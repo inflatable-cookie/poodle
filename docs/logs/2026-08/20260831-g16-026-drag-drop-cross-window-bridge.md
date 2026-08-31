@@ -123,7 +123,7 @@ and its older-build fallback is gone.
 
 ### Falsified
 
-Fifteen claims were checked by planting the pre-fix behaviour back and confirming
+Sixteen claims were checked by planting the pre-fix behaviour back and confirming
 the case fails:
 
 1. the two-window isolation, by reintroducing a thread-global census — it
@@ -148,7 +148,8 @@ the case fails:
 13. the wake path, by queueing without waking;
 14. the absence of an installation probe, by planting it back;
 15. the replacement teardown, by swapping the bridge without ending the
-    outgoing transaction.
+    outgoing transaction;
+16. the installation-generation gate, by letting stale target news through.
 
 One test was found to be vacuous on the way and fixed: the composition case
 originally dropped onto the receiving strip's *self-rejecting* tab, so it
@@ -274,6 +275,26 @@ exact**.
    A's receipt would have gone to B. The transaction now owns the bridge that
    published it, replacement ends the outgoing transaction first, and release
    clears the stored bridge.
+
+Two further defects were caught by operator inspection of the in-progress
+round 2 diff, both in code I had just written:
+
+5. **The wake pump was a reference cycle.** The controller owned the sender and
+   the detached task owned a strong controller clone; the stream only ends when
+   every sender drops, so neither could ever be released. The pump now holds
+   `Rc::downgrade` and upgrades per wake, so an ordinary drop takes the sender
+   with it and the task exits. This one is structural and **not** covered by a
+   regression: observing task lifetime needs the window and the provider
+   closure to release their own controller clones first, which the headless
+   harness cannot arrange cheaply. Recorded rather than papered over with a
+   test that would not actually measure it.
+
+6. **Target news lost its publishing installation.** A projection queued by
+   host A could drain after B was installed, and `apply_projection` would bind
+   A's receipt to B — a B-owned transaction over a lease B never issued. Each
+   installation now has a generation, the message carries it, and news from a
+   replaced or unsubscribed installation is discarded whole. Release bumps the
+   generation too, so nothing outstanding can be applied afterwards.
 
 One of the four new proofs was vacuous until the stub was fixed: it still
 carried an empty-token special case written for the old probe, which hid

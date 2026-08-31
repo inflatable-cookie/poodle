@@ -2785,7 +2785,11 @@ fn replacing_the_target_bridge_ends_the_outgoing_transaction() {
             Some("xw-zone-a")
         );
 
-        // Swap the window's bridge while A's transaction is live.
+        // A publishes again — this one is only *queued*, not yet drained.
+        host_a.project(projection_for("lease-a-late", Some("xw-zone-a")));
+
+        // Swap the window's bridge while A's transaction is live and A's
+        // second message is still in flight.
         driver.update_app(|cx| {
             controller.set_cross_window_target_bridge(Arc::new(host_b.clone()), cx)
         });
@@ -2796,6 +2800,10 @@ fn replacing_the_target_bridge_ends_the_outgoing_transaction() {
             DragSessionPhase::Idle,
             "the outgoing host's transaction is ended, not stranded"
         );
+        assert_eq!(
+            controller.snapshot().target_id, None,
+            "and A's queued news did not start a transaction under B"
+        );
 
         // A release now cannot commit A's receipt anywhere, least of all to B.
         driver.pointer_release(payload_frac("xw-zone-a", 0.5, 0.75));
@@ -2804,6 +2812,22 @@ fn replacing_the_target_bridge_ends_the_outgoing_transaction() {
             host_b.log(|log| log.commits.is_empty()),
             "B is never sent a receipt it did not issue: {:?}",
             host_b.log(|log| log.commits.clone())
+        );
+        assert!(host_a.log(|log| log.commits.is_empty()));
+
+        // B still works on its own terms, with its own receipt.
+        host_b.project(projection_for("lease-b", Some("xw-zone-a")));
+        driver.drain();
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("xw-zone-a"),
+            "the replacement is live, not merely inert"
+        );
+        driver.pointer_release(payload_frac("xw-zone-a", 0.5, 0.75));
+        driver.drain();
+        assert_eq!(
+            host_b.log(|log| log.commits.clone()),
+            vec!["lease-b:xw-zone-a:after".to_string()]
         );
         assert!(host_a.log(|log| log.commits.is_empty()));
     });
