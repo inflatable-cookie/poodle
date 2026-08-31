@@ -3,8 +3,12 @@
 //! Contract: `docs/contracts/components/dock-region.md`
 //! Ported from: `packages/jetstream/components/src/dock_region.rs`.
 //!
-//! The drag events (`onDragStart`, reorder, panel drop) are drag-with-payload
-//! gestures the vocabulary does not carry; recorded as a delta.
+//! Panel movement runs on the shared drag substrate: each tab registers a
+//! `poodle.dock-panel` source whose subject id carries the panel, the edge, and
+//! the zone, and the region registers the matching target. The host bridge for
+//! a panel that leaves the window is `DockRegionHandlers::cross_window_drag_source`;
+//! the window half is installed on the runtime's own controller, because it
+//! outlives any one region.
 
 use std::sync::Arc;
 

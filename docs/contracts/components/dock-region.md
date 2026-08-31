@@ -241,7 +241,7 @@ type PanelDragData = {
   panelId: string;
   sourceEdge: DockEdge;
   /** The source region's `dragZoneId`, falling back to its edge. */
-  sourceZone?: string;
+  sourceZone: string;
 };
 ```
 
@@ -649,17 +649,22 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 - Compact mode uses `ResizeObserver` with `scrollWidth > clientWidth` detection
 - Passes `showTooltips={isCompact}` to Tabs for horizontal icon-only tooltip support
 - `use:observeStrip` Svelte action binds ResizeObserver to the tabs container
-- Tabs exposes Poodle-owned `onDragPrepare`, `onDragStart`, and `onDragEnd`
-  callbacks so DockRegion can begin asynchronous work before the native
-  payload-write window without inspecting generated ids or CSS classes
-- the public extension receives native events directly; no selector, internal
-  Poodle MIME type, generated id, or Longhorn type is part of the contract
+- DockRegion passes `poodle.dock-panel` to Tabs as its `dragSubjectKind` and
+  maps each panel value onto an encoded subject id carrying panel id, source
+  edge, and source zone. That encoding is substrate identity only: `value`,
+  `onValueChange`, `onClose`, `onReorder`, and `onPanelDrop` all speak the
+  consumer's own panel values
+- `crossWindowDragSource` reaches the strip as its `crossWindowSourceBridge`;
+  no selector, generated id, DOM event, MIME type, or host type is part of the
+  contract
 
 ## 10a. Jetstream Notes
 
 - `DockRegion::from_spec(spec, theme).content(...).on_tab_change(...).on_collapse_toggle(...)`.
-- The drag set — `onDragStart`, reorder, panel drop — are drag-with-payload
-  gestures the runtime does not carry; recorded below as a delta.
+- Panel drag is renderer-neutral: each tab registers a `poodle.dock-panel`
+  drag source and the region registers the matching drop target, so a
+  Jetstream-shaped runtime inherits the same construction. Whether a given
+  runtime *delivers* the gesture is that runtime's own capability report.
 
 ## 11. Parity Checklist
 
@@ -682,7 +687,7 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 
 ### Tier 3: Implementation Freedom
 
-- [x] cross-region drag-and-drop via native HTML Drag and Drop API
+- [x] cross-region panel movement through the shared drag substrate
 - [x] asynchronous external preparation precedes the native payload-write window
 - [x] unready external preparation cannot advertise an external payload
 - [x] external eligibility drives the existing drop affordance
@@ -695,8 +700,8 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
 | Collapsed strip sizing differs by edge | side docks use vertical tabs, top/bottom keep horizontal | allowed | consistent behavior per edge type |
-| `externalDragSource` and `externalDropTarget` are web-only — Svelte and React both have them, GPUI and Jetstream do not | they expose native HTML `PointerEvent`, `DragEvent`, and `DataTransfer`; native hosts already own equivalent renderer event-loop integration | accepted | do not copy browser callbacks into `DockRegionSpec` |
-| Panel drag (reorder and cross-region drop) is web-only; the natives draw the drop zone but run no gesture | drag-with-payload is not in the native event vocabulary — see the module docs on `packages/render/src/dock_region.rs` | accepted | `drag_zone_id` is on `DockRegionSpec` for surface parity and is read by nothing until that gesture exists |
+| `crossWindowDragSource` and `crossWindowDropTarget` are props on web and handler/controller seams on native | a host bridge is capability, not renderer-neutral data: leases, window geometry, and commit authority live outside Poodle. Native carries the same split — `DockRegionHandlers.cross_window_drag_source` per region, `DragDropController::set_cross_window_target_bridge` per window | accepted | do not copy either bridge into `DockRegionSpec` |
+| A web DockRegion joins the nearest `DragDropProvider`; a GPUI one joins the window's `DragDropController` | the web has no ambient controller unless a consumer installs one, so a lone region self-provides. GPUI hosts already own one controller per provider | accepted | two sibling regions cross-drop only under one shared controller on either runtime |
 | No context menu event | not implemented in current iteration | deferred | add in future workspace milestone |
 
 ## 13. Specimen Definitions
