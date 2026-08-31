@@ -5,7 +5,7 @@ API decision
 Opened: 2026-08-31
 Depends on: accepted and merged `g16.026` only for shared-file serialization;
 there is no drag-and-drop semantic dependency. Dispatch stays behind the
-ordered `g16.027` → `g16.028` runway.
+ordered `g16.028` closeout.
 Governing refs: `../../contracts/components/history-center.md`,
 `../../contracts/001-working-rules.md`,
 `../../architecture/006-headless-core-and-machine-model.md`
@@ -149,5 +149,5 @@ After `g16.028` closes, resolve the decision gate and only then prepare the
 worker handoff. The worker workspace must carry the capitalized `Papercuts`
 label before launch. This Poodle thread owns implementation review and merge.
 A later explicitly authorized release/adoption lane may publish the corrected
-package and close Loophole's pin-lag entry. The ordered `g16.027` → `g16.028`
-drag-and-drop runway is not displaced by this reservation.
+package and close Loophole's pin-lag entry. The ordered `g16.028`
+drag-and-drop closeout is not displaced by this reservation.

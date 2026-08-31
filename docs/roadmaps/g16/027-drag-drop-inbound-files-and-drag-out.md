@@ -1,6 +1,6 @@
 # g16.027 — Drag-And-Drop Inbound Files And Drag-Out
 
-Status: complete — delivered in PR #115, under review
+Status: complete — merged in PR #115
 Depends on: `026-drag-drop-cross-window-bridge-and-dock-region.md`
 Governing refs: architecture 011 and spec 069
 
@@ -35,9 +35,9 @@ resolution, materialization, native drag start, retention, and cleanup policy.
       than renaming it.
 - [x] Fake host adapters prove existing file, materialized file, unsupported,
       cancellation, failure, supersession, multiple-file, and retained-cleanup
-      outcomes — 27 web cases in
-      `test/headless-dom/inbound-files-and-drag-out.test.ts` plus six mounted
-      GPUI host-stub regressions.
+      outcomes — 37 web cases in
+      `test/headless-dom/inbound-files-and-drag-out.test.ts` plus thirteen
+      mounted GPUI host-stub regressions.
 - [x] Browser inbound-file targets use the common target/eligibility path —
       one subject kind, the ordinary hit test, arbitration, `canDrop`,
       revalidation, and `onDrop`; no second file-drop callback exists.
@@ -93,8 +93,8 @@ run windowed/native visual, Jetstream, release, or sibling mutation commands.
 - `createInboundFileDataTransferBridge`: the browser's own file drag as a
   bridge, holding the `File` objects behind a consumer-authored projection.
 - Renderer-neutral construction (`inbound_file_target`, `file_export_source`)
-  and the same two seams wired through the GPUI controller, with six mounted
-  host-stub regressions.
+  and the same two seams wired through the GPUI controller, with thirteen
+  mounted host-stub regressions.
 - Both providers pass an inbound bridge; both frameworks carry the curated
   specimen.
 - A new external-file leg in the headless Chromium/WebKit probe: nine checks
@@ -112,7 +112,13 @@ its own words, web export installation survives a synchronous or throwing
 `start`, the required inbound protocol check exists and is paired, and the
 merged cross-window public names are restored untouched.
 
+Review rounds 2 and 3 closed replay resurrection and removed a bounded
+tombstone that made the exact-lifetime rule false after 4,096 answered ids.
+Northstar accepted exact head `7bcd36a17c8a449e1ae67dc4d4a78837a38b86cb`;
+PR #115 merged as `3bdba228ca0a7fdc25a1f321b7b5fe19ee875fa6`.
+
 ## Continuation
 
-After merge, promote `g16.028` for remaining component migrations and programme
-certification. Downstream shell adapters remain separately owned.
+`g16.028` is the sole next ordered drag checkpoint. Reassess and promote it
+against the landed inventory before dispatch. Downstream shell adapters remain
+separately owned.

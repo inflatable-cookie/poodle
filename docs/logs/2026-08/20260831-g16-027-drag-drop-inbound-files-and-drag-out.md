@@ -1,8 +1,10 @@
 # g16.027 — Drag-And-Drop Inbound Files And Drag-Out
 
-Status: delivered — under review
+Status: complete — merged in PR #115
 Date: 2026-08-31
 PR: https://github.com/inflatable-cookie/poodle/pull/115
+Accepted head: `7bcd36a17c8a449e1ae67dc4d4a78837a38b86cb`
+Merge: `3bdba228ca0a7fdc25a1f321b7b5fe19ee875fa6`
 Card: `docs/roadmaps/g16/027-drag-drop-inbound-files-and-drag-out.md`
 Handoff: `docs/handoffs/20260831-180228-g16-027-inbound-files-drag-out.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
@@ -325,6 +327,16 @@ must still open nothing while a fresh id and a new installation both work
 normally. What is left is honest about its growth: one entry per *answered
 batch* — one per external drag gesture, not one per event — added by the
 window's own adapter, so the cost tracks work that host already did.
+
+## Accepted review and merge
+
+Northstar accepted exact head `7bcd36a17c8a449e1ae67dc4d4a78837a38b86cb`
+after the three repair rounds and merged PR #115 as
+`3bdba228ca0a7fdc25a1f321b7b5fe19ee875fa6`. Independent validation passed
+`effigy docs:check`, `effigy test:drag-drop-browser`, and a full `effigy qa`
+retry. The first `qa` attempt hit the already-recorded transient GPUI window
+capture manifest rejection; its isolated selector and the full retry passed.
+`git diff --check` was clean. No windowed or native-visual selector ran.
 
 ## Evidence
 

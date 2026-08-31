@@ -1,6 +1,6 @@
 # Roadmap Generation Index
 
-Updated: 2026-08-31
+Updated: 2026-09-01
 
 ## Active Track
 
@@ -15,8 +15,9 @@ Updated: 2026-08-31
     `019` merged in PR #94; `020` merged in PR #95; `021` merged in PR #96;
     `022` merged in PR #101 (web custom-surface substrate, no ledger movement);
     `023` merged in PR #104; `024` merged in PR #107; `025` merged in PR #108;
-    `026` merged in PR #113 after two Northstar review rounds; `027` is the
-    next ordered drag card and `028` remains behind it;
+    `026` merged in PR #113 after two Northstar review rounds; `027` merged in
+    PR #115 after three Northstar repair rounds; `028` is the next ordered
+    planned checkpoint;
     `029` complete and merged (TimeInput native parity, ledger 48/126); `030`
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
@@ -26,10 +27,10 @@ Updated: 2026-08-31
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: promote `g16.027` as the next ordered drag card. In parallel,
-    resolve `g16.033`'s structured-code-versus-host-message gate before its
-    dispatch. Component continuation remains paused at the separate
-    EditableLabel decision gate.
+  - Next move: review the landed migration inventory and promote `g16.028`
+    when its scope and oracle are ready. In parallel, resolve `g16.033`'s
+    structured-code-versus-host-message gate before its dispatch. Component
+    continuation remains paused at the separate EditableLabel decision gate.
 
 ## Latest Completed Track
 

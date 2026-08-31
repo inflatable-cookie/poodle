@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-08-31
+Updated: 2026-09-01
 
 Roadmaps record Poodle's executable milestone work. `g15` completed the full
 v0.2.x release programme: the roster and parity baseline, failed v0.2.0
@@ -80,11 +80,13 @@ behavior repairs without inventing another conformance authority.
   unsupported debt no mouse fixture may flip. It merged in PR #108 after four
   review rounds; no ledger cell moved. PR #113 then merged `g16.026`: Tabs now
   moves with its DockRegion host-bridge consumer through split source/window
-  authority and the window-owned GPUI pump. `g16.027` is delivered and under
-  review: inbound files and native file drag-out, paired in both languages and
-  wired through the web and GPUI controllers, with opaque receipts, validation
-  before eligibility, host-owned retention, and no committed export terminal
-  because a native drag ending never proves a destination took the file.
+  authority and the window-owned GPUI pump. PR #115 then merged `g16.027` after
+  three Northstar repair rounds: inbound files and native file drag-out, paired
+  in both languages and wired through the web and GPUI controllers, with opaque
+  receipts, exact per-installation inbound ownership, validation before
+  eligibility, host-owned retention, and no committed export terminal because
+  a native drag ending never proves a destination took the file. `g16.028` is
+  the next ordered drag checkpoint, still planned pending readiness review.
   `g16.033` is reserved after that shared-file tranche for HistoryCenter's
   Poodle-owned rejection surface and packed v3 `HistoryEntry` proof. It is not
   dispatchable until the public rejection shape is chosen; Keyboard vertical
@@ -156,7 +158,8 @@ behavior repairs without inventing another conformance authority.
   cards. `033` is the reserved HistoryCenter portfolio-papercut follow-on.
   Dependable drag-and-drop remains a
   separate programme governed by architecture 011/spec 069 and compiled as
-  `021`–`028`; `021`–`026` are merged, and `027` is the next ordered drag card.
+  `021`–`028`; `021`–`027` are merged, and `028` is the next ordered planned
+  checkpoint.
 
 ## Rules
 

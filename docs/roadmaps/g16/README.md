@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — g16.026 complete and merged; g16.027 delivered and under
-review; g16.033 reserved at its public API decision gate
+Status: active — g16.027 complete and merged; g16.028 is the next ordered drag
+checkpoint; g16.033 reserved at its public API decision gate
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -58,8 +58,8 @@ stay maintained; backend admission is not part of the first card.
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — complete; merged in PR #107
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — complete; merged in PR #108 after four orchestrator review rounds; ledger unchanged at 52 mounted / 122 missing
 26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — complete; merged in PR #113 after two Northstar review rounds; split source/window bridge, bounded opaque receipt, clean public migration, Tabs subject-family seam, and window-owned GPUI provider census
-27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — delivered in PR #115, under review; paired export/inbound contracts, the web and GPUI boundaries, curated specimens, and a new engine probe leg
-28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
+27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — complete; merged in PR #115 after three Northstar repair rounds; paired export/inbound contracts, exact per-installation inbound ownership, web and GPUI boundaries, curated specimens, and a new engine probe leg
+28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; next ordered checkpoint, pending landed-inventory readiness review
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
@@ -100,8 +100,9 @@ Two continuation programmes are now explicit:
   `g16.026` shared-file tranche. It gives HistoryCenter distinct Poodle-owned
   deletion-refusal semantics and adds packed-package proof for the already-fixed
   v3 `HistoryEntry` export. Keyboard vertical geometry remains design-deferred;
-  Longhorn's `AlreadyAtTarget` wire code remains an undispatched API decision.
-  The card does not displace ordered drag card `g16.027`.
+  Longhorn's `AlreadyAtTarget` wire code and Loophole adoption are complete in
+  their owning repositories. The card does not displace ordered drag card
+  `g16.028`.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
@@ -348,7 +349,7 @@ requires one common `DragDropProvider`, per the operator decision recorded in
 spec 069. `g16.033` remains reserved until the operator chooses structured rejection
 codes or a host-owned message; EditableLabel stays decision-blocked.
 
-`g16.027` is delivered in PR #115 and awaiting review. Both external-file boundaries are paired and wired end to end: an
+`g16.027` merged in PR #115 after three Northstar repair rounds. Both external-file boundaries are paired and wired end to end: an
 export prepares an opaque receipt on the pre-drag gesture and the host runs
 the operating system's drag, while inbound batches become ordinary sessions
 under one subject kind, validated before eligibility and again at the drop.
@@ -356,7 +357,9 @@ There is deliberately no committed export terminal — a native drag ending does
 not prove a destination consumed anything — so the export carries its own
 visible state beside the session phase. Wiring found the GPUI first-frame
 sweep cancelling inbound sessions, the same shape the cross-window projection
-was already exempted for. Eight claims were falsified by planting the pre-fix
-behaviour back. No ledger cell moved. The log is
+was already exempted for. Review then closed exact terminal ownership, replay
+resurrection, and the bounded-tombstone false negative. Twenty-seven claims
+were falsified by planting the pre-fix behaviour back. No ledger cell moved. The log is
 `../../logs/2026-08/20260831-g16-027-drag-drop-inbound-files-and-drag-out.md`.
-`g16.028` becomes the next ordered drag card once this merges.
+`g16.028` is now the sole next ordered drag checkpoint, still planned pending
+a landed-inventory readiness review.

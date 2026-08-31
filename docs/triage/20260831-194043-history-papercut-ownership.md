@@ -15,10 +15,9 @@ Poodle lane. Longhorn source work keeps its own repository authority.
 
 Keep the existing sequence intact:
 
-1. `g16.026` is merged.
-2. `g16.027` remains the active drag card.
-3. `g16.028` remains its ordered closeout.
-4. `g16.033` remains the reserved Poodle follow-on and cannot dispatch until
+1. `g16.026` and `g16.027` are merged.
+2. `g16.028` remains the ordered drag closeout.
+3. `g16.033` remains the reserved Poodle follow-on and cannot dispatch until
    its public rejection-shape decision is recorded.
 
 Every papercut worker workspace created from this packet must carry the
@@ -90,7 +89,7 @@ settled.
 
 ## Promotion Route
 
-1. Finish `g16.027` and `g16.028` without inserting a papercut worker.
+1. Finish `g16.028` without inserting a papercut worker.
 2. Resolve the Poodle rejection-shape gate, then dispatch `g16.033` from this
    thread with the required `Papercuts` label.
 3. After `g16.033` proves the packed v3 type surface, seek explicit release
