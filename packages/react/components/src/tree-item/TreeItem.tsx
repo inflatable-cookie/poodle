@@ -23,7 +23,6 @@ export interface TreeItemProps {
   muted: boolean;
   focused: boolean;
   reorderable: boolean;
-  keyboardOrder: number;
   editing: boolean;
   showGroup: boolean;
   row: ReactNode;
@@ -47,7 +46,6 @@ export function TreeItem({
   muted,
   focused,
   reorderable,
-  keyboardOrder,
   editing,
   showGroup,
   row,
@@ -68,7 +66,7 @@ export function TreeItem({
     allowedOperations: ["move"],
     label: node.label,
     disabled: !canDrag,
-    keyboardOrder,
+    handle: ".poodle-tree__row",
     onDragStart,
     onDragEnd,
   });
@@ -92,14 +90,15 @@ export function TreeItem({
     onDrop,
   });
 
-  const itemProps = getTargetProps({
-    className: "poodle-tree__item",
-    onClick,
-    onDoubleClick,
-    onContextMenu,
-    onKeyDown,
-  });
-  const rowProps = getSourceProps({ className: "poodle-tree__row", ref: rowRef, tabIndex: -1 });
+  const itemProps = getSourceProps(
+    getTargetProps({
+      className: "poodle-tree__item",
+      onClick,
+      onDoubleClick,
+      onContextMenu,
+      onKeyDown,
+    }),
+  );
 
   return (
     <div
@@ -115,7 +114,9 @@ export function TreeItem({
       aria-expanded={branch ? open : undefined}
       aria-disabled={node.isDisabled ? true : undefined}
     >
-      <div {...rowProps}>{row}</div>
+      <div className="poodle-tree__row" ref={rowRef}>
+        {row}
+      </div>
       {showGroup ? (
         <div className="poodle-tree__group" role="group">
           {group}

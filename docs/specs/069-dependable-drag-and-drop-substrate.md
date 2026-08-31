@@ -211,7 +211,8 @@ The paired public registration names are:
   initial `operation`, `disabled`, required accessible `label`, optional
   `instructions`, optional `handle` (`Element` or a selector inside the
   source), per-pointer `activation` (`DragActivationConstraints`),
-  optional `keyboardOrder`, `onDragStart`, and `onDragEnd`;
+  optional `keyboardOrder` (Space/Enter pickup opt-in and ordered logical
+  traversal origin), `onDragStart`, and `onDragEnd`;
 - `DropTargetRegistration`: `targetId`, `acceptedKinds`, `disabled`,
   `priority`, required accessible `label`, `resolvePosition`
   (`DragPositionResolverInput` → `DropPosition | null`), `canDrop` (boolean or
@@ -233,11 +234,13 @@ current subject, operation, and input kind. It returns a semantic
 subject; it cannot mutate. DOM geometry never enters `DragSession` or
 `DropIntent`.
 
-When a keyboard source declares `keyboardOrder` and matching logical keyboard
-targets exist, keyboard traversal uses that ordered registry. `previous` and
-`next` are distinct resolver inputs; a linear list normally maps them to
-`before` and `after`. `first` and `last` remain explicit rather than being
-inferred from a synthetic centre point. A logical target and a mounted DOM
+Ordinary Space/Enter pickup is opt-in through `keyboardOrder`. Sources that
+omit it leave those keys to the host component. When a keyboard source
+declares `keyboardOrder` and matching logical keyboard targets exist, keyboard
+traversal uses that ordered registry. `previous` and `next` are distinct
+resolver inputs; a linear list normally maps them to `before` and `after`.
+`first` and `last` remain explicit rather than being inferred from a synthetic
+centre point. A logical target and a mounted DOM
 target may share a `targetId`: the logical registration is keyboard authority,
 the DOM registration is pointer/touch authority, and each registry rejects
 duplicates within itself. Without logical targets, the existing spatial DOM
@@ -327,7 +330,9 @@ target.
 Every reorder or move surface that is pointer-draggable has a keyboard route.
 The baseline interaction is:
 
-- Space or an authored shortcut picks up the focused source;
+- Space or Enter pick up the focused source when it declares `keyboardOrder`;
+  otherwise an authored shortcut or `requestKeyboardDrop` is the keyboard
+  route;
 - arrow keys or target-navigation commands move the current intent;
 - Home/End may choose first/last valid position where the component contract
   already uses them;

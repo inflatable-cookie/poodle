@@ -262,7 +262,6 @@
       targetId: move.target,
       position: move.position,
     });
-    focusRow(node.value);
   }
 
   // Flattened visible rows drive keyboard navigation and range selection.
@@ -545,7 +544,6 @@
     muted={Boolean(node.isMuted)}
     focused={effectiveFocus === node.value}
     {reorderable}
-    keyboardOrder={visibleRows.findIndex((row) => row.node.value === node.value)}
     editing={isEditing(node.value)}
     onDrop={handleDrop}
     onDragStart={handleDragStart}
@@ -579,7 +577,6 @@
     muted={Boolean(node.isMuted)}
     focused={effectiveFocus === node.value}
     {reorderable}
-    keyboardOrder={visibleRows.findIndex((row) => row.node.value === node.value)}
     editing={isEditing(node.value)}
     onDrop={handleDrop}
     onDragStart={handleDragStart}

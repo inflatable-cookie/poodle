@@ -20,6 +20,7 @@ function SourceRow({ item, kind }: { item: Item; kind: string }) {
     subject: { kind, id: item.id },
     allowedOperations: ["move"],
     label: item.label,
+    keyboardOrder: 0,
   });
 
   return <li className="poodle-drag-drop-item" data-testid={`source-${item.id}`} {...getSourceProps()}>{item.label}</li>;

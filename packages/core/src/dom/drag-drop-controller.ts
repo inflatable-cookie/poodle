@@ -79,6 +79,7 @@ export interface DragSourceRegistration {
   readonly instructions?: string;
   readonly handle?: Element | string;
   readonly activation?: DragActivationConstraints;
+  /** When set, Space/Enter pick up this focused source. Also the origin for ordered logical keyboard traversal. */
   readonly keyboardOrder?: number;
   readonly onDragStart?: (session: DragSession) => void;
   readonly onDragEnd?: (outcome: DragTerminalOutcome) => void;
@@ -1643,7 +1644,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     if (phase === "idle") {
       if (event.key !== " " && event.key !== "Enter") return;
       const source = focusedSource();
-      if (!source) return;
+      if (!source || source.registration.keyboardOrder === undefined) return;
       event.preventDefault();
       const rect = measure(source.element);
       const x = rect.left + rect.width / 2;

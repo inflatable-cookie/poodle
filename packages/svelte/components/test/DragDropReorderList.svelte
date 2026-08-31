@@ -25,6 +25,7 @@
       subject: { kind, id: item.id },
       allowedOperations: ["move"] as const,
       label: item.label,
+      keyboardOrder: 0,
     };
   }
 

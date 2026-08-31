@@ -33,6 +33,7 @@ controller.registerSource(source, {
   subject: { kind: "item", id: "alpha" },
   allowedOperations: ["move"],
   label: "Alpha",
+  keyboardOrder: 0,
 });
 
 controller.registerTarget(target, {
@@ -79,6 +80,7 @@ controller.registerSource(nestedSource, {
   subject: { kind: "item", id: "nested-alpha" },
   allowedOperations: ["move"],
   label: "Nested Alpha",
+  keyboardOrder: 0,
 });
 
 controller.registerTarget(nestedTarget, {

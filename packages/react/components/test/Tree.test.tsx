@@ -187,6 +187,48 @@ describe("Tree row metadata (react)", () => {
     expect(document.activeElement).toBe(item);
   });
 
+  it("returns pointer-commit focus to the treeitem, not the row handle", () => {
+    const onReorder = vi.fn();
+    const { container } = render(
+      <Tree nodes={nested} expandedValues={["src"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const item = container.querySelector<HTMLElement>('[data-value="a.ts"]')!;
+    item.focus();
+    drag(rows.get("a.ts")!, rows.get("lib")!.getBoundingClientRect().top + 36);
+    expect(onReorder).toHaveBeenCalledWith("a.ts", "lib", "after");
+    expect(document.activeElement).toBe(item);
+    expect([...container.querySelectorAll<HTMLElement>(".poodle-tree__row")].every((row) => row.tabIndex < 0)).toBe(
+      true,
+    );
+    expect(
+      [...container.querySelectorAll<HTMLElement>('[role="treeitem"][data-value]')].filter((node) => node.tabIndex >= 0),
+    ).toHaveLength(1);
+  });
+
+  it("returns pointer-cancel focus to the treeitem, not the row handle", () => {
+    const onReorder = vi.fn();
+    const { container } = render(
+      <Tree nodes={nested} expandedValues={["src"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const item = container.querySelector<HTMLElement>('[data-value="a.ts"]')!;
+    item.focus();
+    act(() => {
+      rows.get("a.ts")!.dispatchEvent(pointer("pointerdown", { clientY: 54 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: 90 }));
+      document.dispatchEvent(pointer("pointercancel", { clientY: 90 }));
+    });
+    expect(onReorder).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(item);
+    expect([...container.querySelectorAll<HTMLElement>(".poodle-tree__row")].every((row) => row.tabIndex < 0)).toBe(
+      true,
+    );
+    expect(
+      [...container.querySelectorAll<HTMLElement>('[role="treeitem"][data-value]')].filter((node) => node.tabIndex >= 0),
+    ).toHaveLength(1);
+  });
+
   it("does not Alt+Arrow reorder onto a disabled sibling", () => {
     const onReorder = vi.fn();
     const { container } = render(

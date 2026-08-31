@@ -259,7 +259,6 @@ function TreeView({
       targetId: move.target,
       position: move.position,
     });
-    focusRow(node.value);
   }
 
   function handleDragStart(session: DragSession): void {
@@ -446,7 +445,6 @@ function TreeView({
         muted={Boolean(node.isMuted)}
         focused={effectiveFocus === node.value}
         reorderable={reorderable}
-        keyboardOrder={visibleRows.findIndex((row) => row.node.value === node.value)}
         editing={isEditing(node.value)}
         showGroup={Boolean(group)}
         row={rowMarkup(node, depth, branch, open)}

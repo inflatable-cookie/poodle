@@ -298,11 +298,30 @@ describe("createDragDropController", () => {
     controller.destroy();
   });
 
+  it("does not pick up from Space or Enter unless the source declares keyboardOrder", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+    sourceEl.focus();
+
+    const space = new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true });
+    sourceEl.dispatchEvent(space);
+    expect(space.defaultPrevented).toBe(false);
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    const enter = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+    sourceEl.dispatchEvent(enter);
+    expect(enter.defaultPrevented).toBe(false);
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
   it("picks up from the keyboard, moves intent, and drops", () => {
     const onDrop = vi.fn(() => ({ status: "committed" as const }));
     const controller = createDragDropController();
     controller.connect(root);
-    controller.registerSource(sourceEl, sourceReg());
+    controller.registerSource(sourceEl, sourceReg({ keyboardOrder: 0 }));
     controller.registerTarget(targetEl, targetReg({ onDrop }));
     sourceEl.focus();
 
@@ -339,7 +358,10 @@ describe("createDragDropController", () => {
 
     const controller = createDragDropController();
     controller.connect(root);
-    controller.registerSource(rowB, sourceReg({ sourceId: "b", subject: { kind: "item", id: "b" }, label: "Beta" }));
+    controller.registerSource(
+      rowB,
+      sourceReg({ sourceId: "b", subject: { kind: "item", id: "b" }, label: "Beta", keyboardOrder: 0 }),
+    );
     controller.registerTarget(rowA, rowTarget("a"));
     controller.registerTarget(rowB, rowTarget("b"));
     controller.registerTarget(rowC, rowTarget("c"));
@@ -1331,7 +1353,10 @@ describe("createDragDropController", () => {
     expect(onEnd).toHaveBeenCalledWith({ status: "cancelled", reason: "source-lost" });
     expect(controller.getSnapshot().phase).toBe("idle");
 
-    const keyboard = controller.registerSource(sourceEl, sourceReg({ onDragEnd: onEnd, label: "Keys" }));
+    const keyboard = controller.registerSource(
+      sourceEl,
+      sourceReg({ onDragEnd: onEnd, label: "Keys", keyboardOrder: 0 }),
+    );
     sourceEl.focus();
     sourceEl.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
     expect(controller.getSnapshot().phase).toBe("dragging");

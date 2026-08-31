@@ -26,7 +26,6 @@
     muted: boolean;
     focused: boolean;
     reorderable: boolean;
-    keyboardOrder: number;
     editing: boolean;
     row: Snippet;
     group?: Snippet;
@@ -51,7 +50,6 @@
     muted,
     focused,
     reorderable,
-    keyboardOrder,
     editing,
     row,
     group,
@@ -75,7 +73,7 @@
     allowedOperations: ["move"],
     label: node.label,
     disabled: !canDrag,
-    keyboardOrder,
+    handle: ".poodle-tree__row",
     onDragStart,
     onDragEnd,
   });
@@ -117,9 +115,10 @@
   ondblclick={onDblClick}
   oncontextmenu={onContextMenu}
   onkeydown={onKeyDown}
+  use:dragSource={sourceRegistration}
   use:dropTarget={targetRegistration}
 >
-  <div class="poodle-tree__row" bind:this={rowEl} tabindex="-1" use:dragSource={sourceRegistration}>
+  <div class="poodle-tree__row" bind:this={rowEl}>
     {@render row()}
   </div>
   {#if showGroup && group}
