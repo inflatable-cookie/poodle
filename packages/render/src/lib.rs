@@ -266,7 +266,8 @@ pub use dock_region::{
     dock_collapse_focus_id, dock_region, dock_tab_focus_id, DockPanelDrop, DockRegionHandlers,
 };
 pub use drag_drop::{
-    attach_source, attach_target, edge_from_position, horizontal_band_resolver, linear_keyboard_resolver, move_only,
+    attach_source, attach_target, edge_from_position, file_export_source, horizontal_band_resolver,
+    inbound_file_target, linear_keyboard_resolver, move_only,
     nested_target, position_for_fraction, position_from_edge, rejects_self, reorder_kind,
     reorder_source,
     reorder_subject, reorder_target, vertical_band_resolver, REORDER_SUBJECT_KIND,

@@ -22,7 +22,7 @@
 use std::sync::Arc;
 
 pub use poodle_headless::cross_window_drag::{
-    DragHostAbort, DragHostCleanup, CrossWindowCommitComplete, CrossWindowDragCapabilities,
+    CrossWindowCommitComplete, CrossWindowDragCapabilities,
     CrossWindowDragCommitRequest, CrossWindowDragInputKind, CrossWindowDragPrepareRequest,
     CrossWindowDragProjection, CrossWindowDragReceipt, CrossWindowDragSourceBridge,
     CrossWindowDragTargetBridge, CrossWindowDragTargetEvent, CrossWindowDragTransport,
@@ -30,9 +30,18 @@ pub use poodle_headless::cross_window_drag::{
     CROSS_WINDOW_DRAG_MIME_TYPE, CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
 };
 pub use poodle_headless::drag_drop::{
-    DragAnnouncementKind, DragCancelReason, DragOperation, DragSession, DragSessionPhase,
+    DragAnnouncementKind, DragCancelReason, DragHostAbort, DragHostCleanup, DragOperation, DragSession, DragSessionPhase,
     DragSubject, DragTerminalOutcome, DropEligibility, DropIntent, DropPosition,
     DROP_POSITION_AFTER, DROP_POSITION_BEFORE, DROP_POSITION_INSIDE,
+};
+pub use poodle_headless::external_file_drag::{
+    can_export_anything, is_presentable_file_name, validate_file_export,
+    validate_inbound_files, DragExportBridge, DragExportCapabilities, DragExportForm,
+    DragExportPrepareComplete, DragExportPrepareRequest, DragExportRefusal, DragExportSnapshot,
+    DragExportState, DragExportTerminal, DragExportTerminalCallback, DragExportValidation,
+    InboundFileBatch, InboundFileCapabilities, InboundFileConstraints, InboundFileEvent,
+    InboundFileHostBridge, InboundFileOutcome, InboundFileReceipt, InboundFileRefusal,
+    InboundFileTransport, InboundFileValidation, PreparedFileExport, INBOUND_FILE_SUBJECT_KIND,
 };
 
 /// Which input device drove the gesture that produced an observation.
@@ -132,6 +141,9 @@ pub enum NodeDropCommit {
 pub struct NodeDropCommitEvent {
     pub subject: DragSubject,
     pub intent: DropIntent,
+    /// The external files being committed, when the subject is an inbound
+    /// batch. Receipts and display metadata only — never a path or a handle.
+    pub inbound_files: Option<InboundFileBatch>,
 }
 
 /// The current session intent, projected onto the target that owns it.
@@ -192,6 +204,13 @@ pub struct NodeDragSource {
     /// runtime's controller instead, because it outlives any one subject and
     /// arrives with no local source at all.
     pub cross_window_source_bridge: Option<Arc<dyn CrossWindowDragSourceBridge>>,
+    /// Host preparation for a drag that may leave for the operating system.
+    ///
+    /// Optional and per source, because what gets exported belongs to the
+    /// subject being dragged. Mutually exclusive with
+    /// [`Self::cross_window_source_bridge`]: one gesture can only leave one
+    /// way, and a source declaring both would need a silent precedence rule.
+    pub file_export_bridge: Option<Arc<dyn DragExportBridge>>,
     pub on_drag_start: Option<NodeDragStartHandler>,
     pub on_drag_end: Option<NodeDragEndHandler>,
 }
@@ -209,6 +228,7 @@ impl NodeDragSource {
             instructions: None,
             keyboard_order: None,
             cross_window_source_bridge: None,
+            file_export_bridge: None,
             on_drag_start: None,
             on_drag_end: None,
         }
@@ -240,6 +260,12 @@ pub struct NodeDropTarget {
     pub keyboard_order: Option<i32>,
     /// Traversal direction to semantic position, for the keyboard route.
     pub resolve_keyboard_position: Option<NodeKeyboardPositionResolver>,
+    /// What this target takes when the subject is an external file batch.
+    ///
+    /// Checked before [`Self::can_drop`], on every hover and again at drop:
+    /// external metadata is untrusted input, and a target should answer "do I
+    /// want this" rather than "is this even real".
+    pub inbound_files: Option<InboundFileConstraints>,
     /// Eligibility for a resolved intent. Absent means accepted.
     pub can_drop: Option<NodeDropEligibilityResolver>,
     /// The revalidated commit. Absent means the target cannot commit and the
@@ -269,6 +295,7 @@ impl NodeDropTarget {
             resolve_position: None,
             keyboard_order: None,
             resolve_keyboard_position: None,
+            inbound_files: None,
             can_drop: None,
             on_drop: None,
             on_intent: None,

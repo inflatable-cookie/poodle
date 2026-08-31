@@ -15861,3 +15861,744 @@ fn the_snapshot_reports_accepted_rejected_and_empty_target_posture() {
         );
     });
 }
+
+// ── External files (g16.027) ──────────────────────────────────────────────
+//
+// Both directions of the external-file boundary, mounted. The stubs record
+// every command the controller sends, because the load-bearing claims are
+// again about what it did *not* do: arm an unvalidated receipt, delete an
+// artifact, ask a settled receipt to cancel, or let an unchecked batch reach
+// a consumer's own resolver.
+
+#[derive(Default)]
+struct ExportLog {
+    prepares: Vec<String>,
+    starts: Vec<String>,
+    stops: Vec<String>,
+    cancels: Vec<(String, poodle_node::DragCancelReason)>,
+    aborts: Vec<poodle_node::DragCancelReason>,
+}
+
+type PendingExport = (
+    poodle_node::DragHostAbort,
+    poodle_node::DragExportPrepareComplete,
+);
+
+#[derive(Default)]
+struct ExportStubState {
+    log: ExportLog,
+    pending: Vec<PendingExport>,
+    terminal: Option<poodle_node::DragExportTerminalCallback>,
+    /// The temporary files this host wrote. Nothing in Poodle may remove one.
+    artifacts: Vec<String>,
+}
+
+#[derive(Clone, Default)]
+struct ExportStub {
+    state: Arc<Mutex<ExportStubState>>,
+    multiple_files: bool,
+}
+
+impl ExportStub {
+    fn log<T>(&self, read: impl FnOnce(&ExportLog) -> T) -> T {
+        read(&self.state.lock().expect("export state").log)
+    }
+
+    fn artifacts(&self) -> Vec<String> {
+        self.state.lock().expect("export state").artifacts.clone()
+    }
+
+    /// Answer the n-th outstanding preparation with a receipt of `count` files.
+    fn settle(&self, index: usize, receipt: Option<(&str, u32)>) {
+        let entry = {
+            let mut state = self.state.lock().expect("export state");
+            if index >= state.pending.len() {
+                return;
+            }
+            state.pending.remove(index)
+        };
+        let (abort, complete) = entry;
+        if let Some(reason) = abort.reason() {
+            self.state
+                .lock()
+                .expect("export state")
+                .log
+                .aborts
+                .push(reason);
+        }
+        let prepared = receipt.map(|(id, count)| {
+            // The host writes its temporary file here, exactly as a shell
+            // would, and keeps it until it decides otherwise.
+            self.state
+                .lock()
+                .expect("export state")
+                .artifacts
+                .push(id.to_string());
+            poodle_node::PreparedFileExport {
+                receipt_id: id.to_string(),
+                display_name: Some("take-01.wav".to_string()),
+                form: poodle_node::DragExportForm::MaterializedFile,
+                file_count: Some(count),
+                data_types: Vec::new(),
+            }
+        });
+        complete(prepared);
+    }
+
+    fn report(&self, terminal: poodle_node::DragExportTerminal) {
+        let state = self.state.lock().expect("export state");
+        if let Some(callback) = state.terminal.as_ref() {
+            callback(terminal);
+        }
+    }
+}
+
+impl poodle_node::DragExportBridge for ExportStub {
+    fn capabilities(&self) -> poodle_node::DragExportCapabilities {
+        poodle_node::DragExportCapabilities {
+            files: true,
+            multiple_files: self.multiple_files,
+            promised_files: false,
+            custom_data_types: Vec::new(),
+        }
+    }
+
+    fn prepare(
+        &self,
+        request: poodle_node::DragExportPrepareRequest,
+        abort: poodle_node::DragHostAbort,
+        complete: poodle_node::DragExportPrepareComplete,
+    ) {
+        let mut state = self.state.lock().expect("export state");
+        state.log.prepares.push(request.session_id);
+        state.pending.push((abort, complete));
+    }
+
+    fn start(
+        &self,
+        prepared: poodle_node::PreparedFileExport,
+        on_terminal: poodle_node::DragExportTerminalCallback,
+    ) -> poodle_node::DragHostCleanup {
+        let receipt = prepared.receipt_id.clone();
+        {
+            let mut state = self.state.lock().expect("export state");
+            state.log.starts.push(receipt.clone());
+            state.terminal = Some(on_terminal);
+        }
+        let stub = self.clone();
+        Box::new(move || {
+            let mut state = stub.state.lock().expect("export state");
+            state.terminal = None;
+            state.log.stops.push(receipt);
+        })
+    }
+
+    fn cancel(
+        &self,
+        prepared: poodle_node::PreparedFileExport,
+        reason: poodle_node::DragCancelReason,
+    ) {
+        // Not a delete order: the artifact stays, so a test can prove Poodle
+        // never asked for its removal.
+        self.state
+            .lock()
+            .expect("export state")
+            .log
+            .cancels
+            .push((prepared.receipt_id, reason));
+    }
+}
+
+fn attach_export_bridge(
+    node: &mut Node,
+    source_id: &str,
+    bridge: Arc<dyn poodle_node::DragExportBridge>,
+) {
+    if let Some(source) = node.interaction.drag_source.as_mut() {
+        if source.source_id == source_id {
+            source.file_export_bridge = Some(bridge);
+            return;
+        }
+    }
+    for child in node.children.iter_mut() {
+        attach_export_bridge(child, source_id, Arc::clone(&bridge));
+    }
+}
+
+#[derive(Default)]
+struct InboundStubState {
+    released: Vec<(String, poodle_node::InboundFileOutcome)>,
+    listener: Option<Box<dyn Fn(poodle_node::InboundFileEvent) + Send>>,
+}
+
+#[derive(Clone, Default)]
+struct InboundStub {
+    state: Arc<Mutex<InboundStubState>>,
+}
+
+impl InboundStub {
+    fn released(&self) -> Vec<(String, poodle_node::InboundFileOutcome)> {
+        self.state.lock().expect("inbound state").released.clone()
+    }
+
+    fn send(&self, event: poodle_node::InboundFileEvent) {
+        let state = self.state.lock().expect("inbound state");
+        if let Some(listener) = state.listener.as_ref() {
+            listener(event);
+        }
+    }
+}
+
+impl poodle_node::InboundFileHostBridge for InboundStub {
+    fn capabilities(&self) -> poodle_node::InboundFileCapabilities {
+        poodle_node::InboundFileCapabilities {
+            files: true,
+            multiple_files: true,
+            transport: poodle_node::InboundFileTransport::Host,
+            custom_data_types: Vec::new(),
+        }
+    }
+
+    fn subscribe(
+        &self,
+        listener: Box<dyn Fn(poodle_node::InboundFileEvent) + Send>,
+    ) -> poodle_node::DragHostCleanup {
+        self.state.lock().expect("inbound state").listener = Some(listener);
+        let stub = self.clone();
+        Box::new(move || {
+            stub.state.lock().expect("inbound state").listener = None;
+        })
+    }
+
+    fn release(&self, batch_id: &str, outcome: poodle_node::InboundFileOutcome) {
+        self.state
+            .lock()
+            .expect("inbound state")
+            .released
+            .push((batch_id.to_string(), outcome));
+    }
+}
+
+fn inbound_batch(files: Vec<poodle_node::InboundFileReceipt>) -> poodle_node::InboundFileBatch {
+    poodle_node::InboundFileBatch {
+        batch_id: "batch-1".to_string(),
+        transport: poodle_node::InboundFileTransport::Host,
+        files,
+    }
+}
+
+fn inbound_file(
+    id: &str,
+    name: Option<&str>,
+    media_type: &str,
+    size: Option<u64>,
+) -> poodle_node::InboundFileReceipt {
+    poodle_node::InboundFileReceipt {
+        receipt_id: id.to_string(),
+        name: name.map(|value| value.to_string()),
+        media_type: media_type.to_string(),
+        size,
+    }
+}
+
+/// A surface with one file drop zone, built from the shared renderer-neutral
+/// construction rather than a hand-written registration.
+fn inbound_tree(
+    trace: &Arc<Mutex<Vec<String>>>,
+    constraints: poodle_node::InboundFileConstraints,
+) -> Node {
+    let mut zone = drag_box("files-zone", 60.0, 40.0);
+    let mut target = poodle_render::inbound_file_target("files-zone", "Library", constraints);
+    let drop_trace = Arc::clone(trace);
+    target.on_drop = Some(Arc::new(move |event: &NodeDropCommitEvent| {
+        let names = event
+            .inbound_files
+            .as_ref()
+            .map(|batch| {
+                batch
+                    .files
+                    .iter()
+                    .map(|file| file.name.clone().unwrap_or_default())
+                    .collect::<Vec<String>>()
+                    .join(",")
+            })
+            .unwrap_or_default();
+        push_trace(&drop_trace, format!("drop:files-zone:{names}"));
+        NodeDropCommit::Committed
+    }));
+    let eligibility_trace = Arc::clone(trace);
+    target.can_drop = Some(Arc::new(
+        move |intent: &poodle_node::DropIntent, _subject: &DragSubject| {
+            // Recorded so a test can prove validation ran *before* this.
+            push_trace(&eligibility_trace, "can_drop:files-zone".to_string());
+            DropEligibility::Accepted {
+                intent: intent.clone(),
+            }
+        },
+    ));
+    zone.interaction.drop_target = Some(target);
+
+    let mut row = Node::container();
+    row.id = Some("files-row".to_string());
+    row.style.descriptor.layout.direction = LayoutDirection::Row;
+    row.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+    row.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+    row.child(zone)
+}
+
+/// g16.027. The export half, end to end: preparation runs before activation,
+/// nothing starts until the receipt arms, the host's terminal is the only way
+/// out, and an ending does not authorize deleting what the host made.
+#[test]
+fn a_gpui_export_prepares_before_activation_and_ends_without_authorizing_deletion() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = ExportStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let mut node = scoped_drag_tree("fx", &trace);
+        attach_export_bridge(&mut node, "fx-source", Arc::new(host.clone()));
+        let node = Arc::new(Mutex::new(node));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let source = payload_frac("fx-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+
+        assert_eq!(host.log(|log| log.prepares.len()), 1);
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Preparing);
+        assert!(
+            host.log(|log| log.starts.is_empty()),
+            "an unarmed receipt cannot start a native drag"
+        );
+        assert_eq!(
+            controller.snapshot().file_export.map(|export| export.state),
+            Some(poodle_node::DragExportState::Preparing)
+        );
+
+        host.settle(0, Some(("export-1", 1)));
+        driver.draw_frame();
+
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(host.log(|log| log.starts.clone()), vec!["export-1".to_string()]);
+        let armed = controller.snapshot().file_export.expect("export");
+        assert_eq!(armed.state, poodle_node::DragExportState::Dragging);
+        assert_eq!(armed.display_name.as_deref(), Some("take-01.wav"));
+
+        host.report(poodle_node::DragExportTerminal::Ended);
+        driver.draw_frame();
+
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert_eq!(
+            controller.snapshot().file_export.map(|export| export.state),
+            Some(poodle_node::DragExportState::Ended),
+            "the ending is visible after the session is gone"
+        );
+        assert!(
+            host.log(|log| log.cancels.is_empty()),
+            "a settled receipt is never cancelled again"
+        );
+        assert_eq!(host.log(|log| log.stops.clone()), vec!["export-1".to_string()]);
+        assert_eq!(
+            host.artifacts(),
+            vec!["export-1".to_string()],
+            "the host still owns what it made"
+        );
+
+        // A repeat is inert.
+        host.report(poodle_node::DragExportTerminal::Ended);
+        driver.draw_frame();
+        assert_eq!(
+            count_starting_with(&trace_of(&trace), "end:"),
+            1,
+            "one terminal per session"
+        );
+    });
+}
+
+/// g16.027. A receipt beyond the adapter's own advertised capabilities is
+/// refused *and handed back*, so the artifact it made for a drag that will
+/// never start is not silently abandoned.
+#[test]
+fn a_gpui_export_receipt_beyond_its_capabilities_is_refused_and_returned() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = ExportStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let mut node = scoped_drag_tree("fx", &trace);
+        attach_export_bridge(&mut node, "fx-source", Arc::new(host.clone()));
+        let node = Arc::new(Mutex::new(node));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let source = payload_frac("fx-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+
+        // Three files from an adapter that advertised one.
+        host.settle(0, Some(("export-1", 3)));
+        driver.draw_frame();
+
+        assert!(
+            host.log(|log| log.starts.is_empty()),
+            "an unvalidated receipt never arms a native drag"
+        );
+        assert_eq!(
+            host.log(|log| log.cancels.clone()),
+            vec![(
+                "export-1".to_string(),
+                poodle_node::DragCancelReason::PreparationFailed
+            )],
+            "the receipt goes back to the host that made it"
+        );
+        assert_eq!(
+            controller.snapshot().file_export.map(|export| export.state),
+            Some(poodle_node::DragExportState::Failed)
+        );
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert_eq!(
+            host.artifacts(),
+            vec!["export-1".to_string()],
+            "refusing is not deleting"
+        );
+    });
+}
+
+/// g16.027. A superseded export is aborted, and its late receipt is returned
+/// rather than arming the session that replaced it.
+#[test]
+fn a_superseded_gpui_export_receipt_cannot_arm_its_successor() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = ExportStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+
+        let mut node = scoped_drag_tree("fx", &trace);
+        attach_export_bridge(&mut node, "fx-source", Arc::new(host.clone()));
+        let node = Arc::new(Mutex::new(node));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let source = payload_frac("fx-source", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        assert_eq!(host.log(|log| log.prepares.len()), 1);
+
+        driver.dispatch_key_raw("escape");
+        driver.draw_frame();
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+        assert_eq!(host.log(|log| log.prepares.len()), 2);
+
+        // The first host answers late, for a session that is gone.
+        host.settle(0, Some(("stale-export", 1)));
+        driver.draw_frame();
+
+        assert!(
+            host.log(|log| log.aborts.contains(&poodle_node::DragCancelReason::Escape)),
+            "the abandoned preparation was told to stop: {:?}",
+            host.log(|log| log.aborts.clone())
+        );
+        assert_eq!(
+            host.log(|log| log.cancels.clone()),
+            vec![(
+                "stale-export".to_string(),
+                poodle_node::DragCancelReason::Superseded
+            )]
+        );
+        assert!(
+            host.log(|log| log.starts.is_empty()),
+            "a stale receipt cannot arm the live session"
+        );
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Preparing);
+    });
+}
+
+/// g16.027. Inbound files reach the ordinary target path, commit through the
+/// ordinary handler with their receipts, and release exactly once.
+#[test]
+fn an_inbound_gpui_batch_commits_through_the_common_target_path_and_releases_once() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = InboundStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_inbound_file_bridge(Arc::new(host.clone()), cx));
+
+        let node = Arc::new(Mutex::new(inbound_tree(
+            &trace,
+            poodle_node::InboundFileConstraints {
+                accept: Some("audio/*".to_string()),
+                ..Default::default()
+            },
+        )));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let zone = payload_frac("files-zone", 0.5, 0.5);
+        let (x, y) = (f32::from(zone.x), f32::from(zone.y));
+
+        // Hover: the platform has disclosed a declared type and nothing else.
+        host.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![inbound_file("batch-1:0", None, "audio/wav", None)]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        assert_eq!(
+            controller.snapshot().target_posture,
+            Some(poodle_gpui_node_backend::DragDropTargetPosture::Accepted)
+        );
+        assert_eq!(
+            controller
+                .snapshot()
+                .inbound_files
+                .map(|batch| batch.files.len()),
+            Some(1)
+        );
+
+        // Drop: names and sizes finally exist, and the same target commits.
+        host.send(poodle_node::InboundFileEvent::Dropped {
+            batch: inbound_batch(vec![inbound_file(
+                "batch-1:0",
+                Some("take-01.wav"),
+                "audio/wav",
+                Some(2_048),
+            )]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+
+        let events = trace_of(&trace);
+        assert!(
+            events.contains(&"drop:files-zone:take-01.wav".to_string()),
+            "the commit handler received the disclosed receipts: {events:?}"
+        );
+        assert_eq!(
+            host.released(),
+            vec![("batch-1".to_string(), poodle_node::InboundFileOutcome::Committed)],
+            "one release, with the outcome the session actually reached"
+        );
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert!(controller.snapshot().inbound_files.is_none());
+    });
+}
+
+/// g16.027. Untrusted external metadata is refused by the boundary, before
+/// the consumer's own eligibility resolver is asked anything.
+#[test]
+fn an_inbound_gpui_batch_is_validated_before_the_targets_own_resolver() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = InboundStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_inbound_file_bridge(Arc::new(host.clone()), cx));
+
+        let node = Arc::new(Mutex::new(inbound_tree(
+            &trace,
+            poodle_node::InboundFileConstraints {
+                max_files: Some(1),
+                ..Default::default()
+            },
+        )));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let zone = payload_frac("files-zone", 0.5, 0.5);
+        host.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![
+                inbound_file("batch-1:0", Some("a.wav"), "audio/wav", Some(1)),
+                inbound_file("batch-1:1", Some("b.wav"), "audio/wav", Some(1)),
+            ]),
+            x: f32::from(zone.x),
+            y: f32::from(zone.y),
+        });
+        driver.draw_frame();
+
+        let events = trace_of(&trace);
+        assert_eq!(
+            count_starting_with(&events, "can_drop:"),
+            0,
+            "the target's resolver never saw an over-limit batch: {events:?}"
+        );
+        assert_eq!(
+            controller.snapshot().target_posture,
+            Some(poodle_gpui_node_backend::DragDropTargetPosture::Rejected)
+        );
+
+        host.send(poodle_node::InboundFileEvent::Cancelled {
+            batch_id: "batch-1".to_string(),
+        });
+        driver.draw_frame();
+
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert_eq!(
+            host.released(),
+            vec![("batch-1".to_string(), poodle_node::InboundFileOutcome::Cancelled)]
+        );
+    });
+}
+
+/// g16.027. Hover acceptance is provisional: the platform hides sizes until
+/// the drop, and a file that is only too large once disclosed is refused
+/// there rather than committed on the strength of the hover.
+#[test]
+fn a_disclosed_gpui_drop_is_validated_again_before_it_can_commit() {
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = InboundStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_inbound_file_bridge(Arc::new(host.clone()), cx));
+
+        let node = Arc::new(Mutex::new(inbound_tree(
+            &trace,
+            poodle_node::InboundFileConstraints {
+                max_size: Some(1_000),
+                ..Default::default()
+            },
+        )));
+
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+
+        let zone = payload_frac("files-zone", 0.5, 0.5);
+        let (x, y) = (f32::from(zone.x), f32::from(zone.y));
+
+        host.send(poodle_node::InboundFileEvent::Entered {
+            batch: inbound_batch(vec![inbound_file("batch-1:0", None, "audio/wav", None)]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+        assert_eq!(
+            controller.snapshot().target_posture,
+            Some(poodle_gpui_node_backend::DragDropTargetPosture::Accepted),
+            "an undisclosed size cannot refuse yet"
+        );
+
+        host.send(poodle_node::InboundFileEvent::Dropped {
+            batch: inbound_batch(vec![inbound_file(
+                "batch-1:0",
+                Some("take-01.wav"),
+                "audio/wav",
+                Some(9_999),
+            )]),
+            x,
+            y,
+        });
+        driver.draw_frame();
+
+        let events = trace_of(&trace);
+        assert_eq!(
+            count_starting_with(&events, "drop:"),
+            0,
+            "hover acceptance did not carry a file the target now refuses: {events:?}"
+        );
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert_eq!(
+            host.released(),
+            vec![("batch-1".to_string(), poodle_node::InboundFileOutcome::Cancelled)]
+        );
+    });
+}
