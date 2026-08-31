@@ -1,6 +1,6 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: active — compiled as g16.021–g16.028; g16.021–g16.025 merged; g16.026 is the next planning gate
+Status: active — compiled as g16.021–g16.028; g16.021–g16.025 merged; g16.026 is ready
 Updated: 2026-08-31
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
@@ -390,24 +390,152 @@ adapter rather than every component.
 
 ## Cross-Window Host Bridge
 
-The bridge is capability-based:
+The bridge is capability-based and split by ownership. A source preparation is
+owned by one draggable subject. Incoming projection, commit, and accessible
+target picking are owned by one host window. They share only an opaque receipt
+and semantic drag types; there is no controller-wide object that combines both
+lifetimes.
+
+The paired TypeScript names are normative. Rust uses the same public type and
+trait names with idiomatic snake-case fields and host-supplied completion
+callbacks where TypeScript returns a `Promise`:
 
 ```ts
-type CrossWindowDragBridge = {
-  capabilities: {
-    pointer: boolean;
-    touch: boolean;
-    keyboardTargetPicker: boolean;
-  };
-  prepare(subject: DragSubject, signal: AbortSignal): Promise<ArmedReceipt | null>;
-  start(receipt: ArmedReceipt, transport: HostDragTransport): void;
-  cancel(receipt: ArmedReceipt, reason: DragCancelReason): void;
-  end(receipt: ArmedReceipt, result: HostDragResult): void;
+type CrossWindowDragCapabilities = {
+  pointer: boolean;
+  touch: boolean;
+  keyboardTargetPicker: boolean;
+};
+
+type CrossWindowDragReceipt = {
+  protocolVersion: number;
+  token: string;
+};
+
+type CrossWindowDragTransport =
+  | "data-transfer"
+  | "window-capture"
+  | "keyboard-picker";
+
+type CrossWindowDragPrepareRequest = {
+  sessionId: string;
+  sourceId: string;
+  subject: DragSubject;
+  operation: DragOperation;
+  allowedOperations: readonly DragOperation[];
+};
+
+type CrossWindowDragProjection = {
+  receipt: CrossWindowDragReceipt;
+  sourceId: string;
+  sourceLabel: string;
+  subject: DragSubject;
+  operation: DragOperation;
+  inputKind: "pointer" | "touch" | "keyboard";
+  targetId: string | null;
+  position: DropPosition | null;
+};
+
+type CrossWindowDragTargetEvent =
+  | { type: "projection"; projection: CrossWindowDragProjection }
+  | { type: "left"; receipt: CrossWindowDragReceipt }
+  | {
+      type: "cancelled";
+      receipt: CrossWindowDragReceipt;
+      reason: DragCancelReason;
+    };
+
+type CrossWindowDragCommitRequest = {
+  receipt: CrossWindowDragReceipt;
+  subject: DragSubject;
+  intent: DropIntent;
+};
+
+type CrossWindowDragSourceBridge = {
+  readonly capabilities: CrossWindowDragCapabilities;
+  prepare(
+    request: CrossWindowDragPrepareRequest,
+    signal: AbortSignal,
+  ): Promise<CrossWindowDragReceipt | null>;
+  start(
+    receipt: CrossWindowDragReceipt,
+    transport: CrossWindowDragTransport,
+    onTerminal: (outcome: DragTerminalOutcome) => void,
+  ): () => void;
+  cancel(
+    receipt: CrossWindowDragReceipt,
+    reason: DragCancelReason,
+  ): void | Promise<void>;
+};
+
+type CrossWindowDragTargetBridge = {
+  readonly capabilities: CrossWindowDragCapabilities;
+  subscribe(listener: (event: CrossWindowDragTargetEvent) => void): () => void;
+  commit(
+    request: CrossWindowDragCommitRequest,
+    signal: AbortSignal,
+  ): Promise<DragDropCommitResult>;
+  pickTarget?(
+    receipt: CrossWindowDragReceipt,
+    signal: AbortSignal,
+  ): Promise<CrossWindowDragProjection | null>;
 };
 ```
 
-The exact exported API may split these operations, but it preserves their
-ordering and exactly-once terminal rule.
+`CrossWindowDragSourceBridge` is optional on one source registration. Its
+preparation starts on the accepted pre-drag gesture, before activation. A
+decline or failure cancels only that attempted cross-window session. A source
+without the bridge keeps the internal transport's immediate preparation. A
+source with the bridge cannot advertise or start a native cross-window gesture
+until its matching receipt is armed. `start` installs one authoritative host
+terminal subscription and returns its cleanup. Native `dragend`, pointer
+release, or `dropEffect` never manufactures a committed result. Poodle calls
+`cancel` only while the receipt is still live; late preparation and repeated
+host terminal events are rejected by the kernel session id.
+
+`CrossWindowDragTargetBridge` is optional on one document or native window
+controller. The host resolves a receipt to the local semantic projection shown
+above. `subject`, `sourceId`, and `sourceLabel` are a host-local projection;
+they are not serialized beside the receipt. A projection names at most one
+registered Poodle target and position. Poodle re-runs that target's kind,
+disabled, and `canDrop` gates before `commit`, then maps the returned
+`DragDropCommitResult` through the ordinary kernel terminal path. Target
+removal, a changed projection, a stale receipt, or a mismatched drop envelope
+cannot reuse hover acceptance. `pickTarget` is required exactly when
+`keyboardTargetPicker` is true and uses the same projection, revalidation,
+commit, announcement, and terminal path.
+
+The web-only `CrossWindowDataTransferAdapter` is exported from the DOM adapter
+surface. `createCrossWindowDataTransferAdapter()` uses
+`application/x-poodle-cross-window-drag+json` and exposes `write`, `accepts`,
+and `read`. The encoded body is exactly `{ protocolVersion, token }` with
+bounded string and integer validation. `write` is valid only during native
+`dragstart`; `accepts` consults the MIME type during `dragover`; `read` decodes
+at `drop`. The live target bridge remains hover authority because the
+`DataTransfer` body is unavailable then. A custom MIME option is allowed for a
+host protocol, but it cannot change the normalized receipt shape or make
+`DataTransfer` the session store.
+
+Svelte and React `DragDropProvider` pass an optional
+`crossWindowTargetBridge` to their controller. `DragSourceRegistration` gains
+optional `crossWindowSourceBridge`; Tabs exposes the same semantic prop and
+drops `onDragPrepare`, `onDragStart`, and `onDragEnd`. DockRegion replaces
+`externalDragSource` / `externalDropTarget` with
+`crossWindowDragSource` / `crossWindowDropTarget`. The latter names the
+window-owned bridge; local same-document panel drops continue to use
+`canAcceptPanel` and `onPanelDrop`. A host receipt uses the bridge's commit and
+does not also invoke `onPanelDrop`, matching the old external-target split.
+
+On GPUI, `DragDropWindowHost` is an ordinary value owned one-per-window.
+`drag_drop_window_host(&host, || root)` establishes that window's provider
+census, appends the window-reaching end-of-frame sweep, and owns native drag
+stop. Existing `drag_drop_provider(&controller, || subtree)` remains the
+per-controller registration boundary and registers itself with the current
+window host. A provider absent from that host's next completed frame is
+cancelled once, its registrations are dropped, and
+`App::stop_active_drag(window)` runs before the host forgets it. No thread-wide
+controller registry or preview-only hook is allowed. The adapter README and
+GPUI developer guide show both calls at every consumer root.
 
 For Longhorn-backed transfer:
 
@@ -650,10 +778,10 @@ land after the internal proof.
 
 The compiled runway is `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
 through `028-drag-drop-migration-and-certification-closeout.md`.
-`g16.021`–`g16.025` are merged. The public migration gate for `g16.026` is
-resolved, but its exact paired host-bridge API and window-owned GPUI
-provider-unmount integration still need orchestrator promotion before worker
-dispatch. Later cards remain planned behind their landed dependencies.
+`g16.021`–`g16.025` are merged. The public migration, split source/window
+bridge API, bounded DataTransfer envelope, and window-owned GPUI provider seam
+are fixed for `g16.026`; that card is ready. Later cards remain planned behind
+their landed dependencies.
 
 ## Non-goals
 

@@ -23,9 +23,10 @@ Updated: 2026-08-31
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: promote `g16.026` by fixing the exact paired host-bridge API and
-    window-owned GPUI provider-unmount seam, then dispatch it. Component
-    continuation remains paused at the separate EditableLabel decision gate.
+  - Next move: dispatch ready `g16.026`. Its split source/window host bridge,
+    bounded DataTransfer receipt, and window-owned GPUI provider-unmount seam
+    are fixed. Component continuation remains paused at the separate
+    EditableLabel decision gate.
 
 ## Latest Completed Track
 

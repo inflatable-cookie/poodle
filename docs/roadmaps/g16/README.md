@@ -1,6 +1,6 @@
 # g16 — Next Work
 
-Status: active — g16.025 merged; g16.026 is the next planning gate
+Status: active — g16.025 merged; g16.026 ready for dispatch
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -56,7 +56,7 @@ stay maintained; backend admission is not part of the first card.
 23. [023 — EditableList simple reorder migration](023-drag-drop-simple-reorder-migrations.md) — complete; merged in PR #104
 24. [024 — Drag-and-drop Tree nested intent and auto-scroll](024-drag-drop-tree-nested-intent-and-auto-scroll.md) — complete; merged in PR #107
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — complete; merged in PR #108 after four orchestrator review rounds; ledger unchanged at 52 mounted / 122 missing
-26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — planned; dependency landed and clean public migration approved, but the exact paired host-bridge API must be fixed before dispatch
+26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — ready; split source/window bridge API, bounded opaque receipt, clean public migration, and window-owned GPUI provider seam fixed
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — planned; depends on 026
 28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — planned; depends on 027
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
@@ -90,10 +90,10 @@ Two continuation programmes are now explicit:
   publishes an immutable stock-GPUI capability matrix — mouse, keyboard, and
   in-window capture certified; pen, touch, and device-originated cancel
   unsupported, and merged in PR #108 after the unsafe provider-unmount sweep
-  was removed. Tabs migrates with
-  its real DockRegion consumer in `g16.026`. Later cards
-  remain gated by landed dependencies and the host bridge's exact post-kernel
-  API shape.
+  was removed. `g16.026` now fixes separate per-source and per-window bridge
+  roles, the bounded opaque receipt codec, and one `DragDropWindowHost` per
+  GPUI window. Tabs migrates with its real DockRegion consumer. Later cards
+  remain gated by landed dependencies.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
@@ -324,9 +324,9 @@ and its in-window capture-equivalent drag route; pen, touch, and
 device-originated pointer cancellation remain explicit unsupported debt. No
 ledger cell moved.
 
-The next orchestrator checkpoint is `g16.026`. Before dispatch, reconcile the
-exact paired TypeScript/Rust host-bridge API against the landed web and GPUI
-controllers, and choose a window-owned provider-unmount integration that
-cannot cancel a controller belonging to another window. Tabs and DockRegion
-still migrate together under the approved clean public break. EditableLabel
-stays decision-blocked.
+`g16.026` is ready. Dispatch one worker for the split TypeScript/Rust host
+bridge, bounded DataTransfer receipt, Tabs/DockRegion clean migration, and
+window-owned GPUI provider-unmount seam. The card's review oracle carries the
+late receipt, stale lease, moving projection, two-window false-cancel, and
+native drag-stop counterexamples. `g16.027` remains serial behind its merge;
+EditableLabel stays decision-blocked.
