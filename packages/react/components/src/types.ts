@@ -10,15 +10,6 @@ import type { IconNodes } from "@inflatable-cookie/poodle-core/icons";
 // Generic in the panel and edge types; this target binds them to its own
 // `PanelTabItem` / `DockEdge` further down.
 import type {
-  DockExternalDragCancelContext as HeadlessDockExternalDragCancelContext,
-  DockExternalDragEndContext as HeadlessDockExternalDragEndContext,
-  DockExternalDragPreparation as HeadlessDockExternalDragPreparation,
-  DockExternalDragPrepareContext as HeadlessDockExternalDragPrepareContext,
-  DockExternalDragSource as HeadlessDockExternalDragSource,
-  DockExternalDragStartContext as HeadlessDockExternalDragStartContext,
-  DockExternalDropContext as HeadlessDockExternalDropContext,
-  DockExternalDropEligibilityContext as HeadlessDockExternalDropEligibilityContext,
-  DockExternalDropTarget as HeadlessDockExternalDropTarget,
 } from "@inflatable-cookie/poodle-core";
 
 export type {
@@ -693,8 +684,14 @@ export type PanelDragData = {
    * Identifies the exact drag-source zone. Edges are too coarse when a host
    * maps several regions onto one edge (two "top" docks): without this, a
    * cross-region drop looks same-edge and is ignored.
+   *
+   * Required. It used to be optional so a payload written by an older build
+   * still parsed, and a receiver fell back to `sourceEdge`. There is no wire
+   * to be compatible with any more — the subject is minted and read by one
+   * controller — so the fallback is gone rather than left as a silent
+   * mis-resolution of two regions on one edge.
    */
-  sourceZone?: string;
+  sourceZone: string;
 };
 
 export type PanelTabItem = {
@@ -704,35 +701,6 @@ export type PanelTabItem = {
   closable?: boolean;
 };
 
-/**
- * DockRegion external-drag types.
- *
- * Re-exported from `@inflatable-cookie/poodle-core` rather than redeclared: the session
- * ordering these describe is run by `createDockExternalDragController` there,
- * and a second declaration here would be a second thing to keep in step.
- * `PanelTabItem` and `DockEdge` are the concrete arguments in this target.
- */
-export type {
-  DockExternalDragCancelReason,
-  DockExternalDragController,
-} from "@inflatable-cookie/poodle-core";
-
-export type DockExternalDragPrepareContext =
-  HeadlessDockExternalDragPrepareContext<PanelTabItem, DockEdge>;
-export type DockExternalDragStartContext =
-  HeadlessDockExternalDragStartContext<PanelTabItem, DockEdge>;
-export type DockExternalDragEndContext =
-  HeadlessDockExternalDragEndContext<PanelTabItem, DockEdge>;
-export type DockExternalDragCancelContext =
-  HeadlessDockExternalDragCancelContext<PanelTabItem, DockEdge>;
-export type DockExternalDragPreparation =
-  HeadlessDockExternalDragPreparation<PanelTabItem, DockEdge>;
-export type DockExternalDragSource =
-  HeadlessDockExternalDragSource<PanelTabItem, DockEdge>;
-export type DockExternalDropEligibilityContext =
-  HeadlessDockExternalDropEligibilityContext<DockEdge>;
-export type DockExternalDropContext = HeadlessDockExternalDropContext<DockEdge>;
-export type DockExternalDropTarget = HeadlessDockExternalDropTarget<DockEdge>;
 
 // ---------------------------------------------------------------------------
 // ModelPicker

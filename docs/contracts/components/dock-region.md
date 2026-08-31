@@ -95,8 +95,8 @@ Updated: 2026-08-13
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for Tabs |
 | `ariaLabel` | `string \| null` | `null` | no | region accessible label |
 | `canAcceptPanel` | `(panelId: string, sourceEdge: DockEdge) => boolean \| null` | `null` | no | cross-region drop validation |
-| `externalDragSource` | `DockExternalDragSource \| null` | `null` | no | prepares and writes a host-owned external payload without exposing host protocol types |
-| `externalDropTarget` | `DockExternalDropTarget \| null` | `null` | no | synchronously decides external eligibility and receives an accepted external drop |
+| `crossWindowDragSource` | `CrossWindowDragSourceBridge \| undefined` | `undefined` | no | host preparation for a panel that may leave this window; forwarded to the tab strip as its `crossWindowSourceBridge`. Only an opaque receipt leaves the window |
+| `crossWindowDropTarget` | `CrossWindowDragTargetBridge \| undefined` | `undefined` | no | incoming host projection and commit for this window. Valid only when the region owns its controller — a region that joined an ambient `DragDropProvider` throws, because the provider is the window and the bridge belongs there |
 | `dragZoneId` | `string \| null` | `null` | no | exact drop-zone identity for the same-zone drop guard; defaults to `edge`. Hosts mapping several regions onto one edge must pass a per-region id, or cross-region drops read as same-zone and are ignored |
 
 ### Tab Pass-throughs
@@ -222,24 +222,17 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `onReorder` | tabs or stack items reordered | `string[]` | within-region reorder |
 | `onPanelDrop` | panel dropped from another region | `{ panel: PanelDragData; targetEdge: DockEdge }` | cross-region transfer |
 
-The `DockExternalDragSource` and `DockExternalDropTarget` methods are public
-extension hooks, not Poodle callbacks masquerading as app policy. Poodle owns
-their ordering:
+`crossWindowDragSource` and `crossWindowDropTarget` are the host bridge, not
+Poodle callbacks masquerading as app policy. Their field and method contract is
+spec 069's Cross-Window Host Bridge section, which both web targets and shared
+Rust implement identically. Poodle owns only the ordering: preparation runs on
+the accepted pre-drag gesture and before activation, a source cannot advertise
+or start a cross-window gesture until its own receipt is armed, the host's
+terminal subscription is the sole authority on the outcome, and a projected
+target is revalidated against this region's own `canAcceptPanel` before commit.
 
-| Hook | When It Runs | Required Result |
-|------|--------------|-----------------|
-| `prepare` | primary pointer down on an enabled draggable panel | return a preparation now or later; `null` declines the external session |
-| preparation `start` | native `dragstart`, only when the matching preparation is ready | synchronously write the host's public payload |
-| preparation `cancel` | a ready preparation is superseded, released, cancelled, unready at dragstart, or unmounted before start | release host resources; reason is explicit |
-| preparation `end` | native `dragend`, only after `start` ran | finish or cancel the host session using its own policy |
-| `canDrop` | external `dragover` and again at `drop` | synchronous eligibility; only `DataTransfer.types` is portable during dragover |
-| `drop` | `drop`, only when the drop-time eligibility check passes | read and accept the public host payload |
-
-That ordering lives in `createDockExternalDragController` in `@inflatable-cookie/poodle-core`,
-not in either web target. It is subtle enough — a preparation that resolves
-after the drag already started must cancel rather than write, and a pointer
-released without a drag must still cancel — that two implementations would be
-two things to keep in step, and the second would drift.
+A host receipt commits through the target bridge and does **not** also call
+`onPanelDrop`, matching the split the old external-target seam had.
 
 ### PanelDragData
 
@@ -252,91 +245,21 @@ type PanelDragData = {
 };
 ```
 
-`sourceZone` is optional so a payload written by an older build still parses;
-a receiver missing it falls back to `sourceEdge`, which is the pre-`dragZoneId`
-behaviour. Every region writes it on every drag it starts — the strip and the
-stacked list both — because the payload can be read by a region that is not the
-one it came from.
+`sourceZone` is required. It was optional so a payload written by an older
+build still parsed, and a receiver missing it fell back to `sourceEdge` — which
+silently read two regions on one edge as the same zone. There is no wire to be
+compatible with any more: the subject is minted and read by one controller, so
+the fallback is gone rather than left as a quiet mis-resolution.
 
-### External Drag Types
+### Cross-Window Types
 
-```ts
-type DockExternalDragCancelReason =
-  | "superseded"
-  | "pointer-released"
-  | "pointer-cancelled"
-  | "not-ready"
-  | "unmounted";
-
-type DockExternalDragPrepareContext = {
-  panel: PanelTabItem;
-  sourceEdge: DockEdge;
-  event: PointerEvent;
-  signal: AbortSignal;
-};
-
-type DockExternalDragStartContext = {
-  panel: PanelTabItem;
-  sourceEdge: DockEdge;
-  event: DragEvent;
-  dataTransfer: DataTransfer;
-};
-
-type DockExternalDragEndContext = {
-  panel: PanelTabItem;
-  sourceEdge: DockEdge;
-  event: DragEvent;
-  dropEffect: DataTransfer["dropEffect"];
-};
-
-type DockExternalDragCancelContext = {
-  panel: PanelTabItem;
-  sourceEdge: DockEdge;
-  reason: DockExternalDragCancelReason;
-};
-
-type DockExternalDragPreparation = {
-  start(context: DockExternalDragStartContext): void;
-  end?(context: DockExternalDragEndContext): void | Promise<void>;
-  cancel?(context: DockExternalDragCancelContext): void | Promise<void>;
-};
-
-type DockExternalDragSource = {
-  prepare(
-    context: DockExternalDragPrepareContext,
-  ):
-    | DockExternalDragPreparation
-    | null
-    | Promise<DockExternalDragPreparation | null>;
-  onPrepareError?(
-    error: unknown,
-    context: DockExternalDragPrepareContext,
-  ): void;
-};
-
-type DockExternalDropEligibilityContext = {
-  phase: "over" | "drop";
-  targetEdge: DockEdge;
-  event: DragEvent;
-  dataTransfer: DataTransfer;
-};
-
-type DockExternalDropContext = {
-  targetEdge: DockEdge;
-  event: DragEvent;
-  dataTransfer: DataTransfer;
-};
-
-type DockExternalDropTarget = {
-  canDrop(context: DockExternalDropEligibilityContext): boolean;
-  drop(context: DockExternalDropContext): void | Promise<void>;
-};
-```
-
-The preparation object closes over any host-owned state. Poodle does not store,
-inspect, serialize, or type that state. `start` is the only place an extension
-writes `DataTransfer`; it runs synchronously inside the browser's native
-`dragstart` event.
+The bridge types are shared, not DockRegion's own: `CrossWindowDragSourceBridge`,
+`CrossWindowDragTargetBridge`, `CrossWindowDragReceipt`,
+`CrossWindowDragProjection`, and `CrossWindowDragCapabilities` are exported from
+`@inflatable-cookie/poodle-core` and mirrored in
+`poodle_headless::cross_window_drag`. Spec 069 is their single definition; this
+contract does not restate them, because a second copy would be a second thing
+to keep in step.
 
 ## 6. Accessibility
 
@@ -387,80 +310,69 @@ writes `DataTransfer`; it runs synchronously inside the browser's native
 
 ## 8. Drag-and-Drop
 
+Panel movement runs on the shared drag substrate (architecture 011, spec 069).
+There is no dock-specific DOM plumbing left: no `application/x-poodle-panel-drag`
+MIME wire, and no `dockPanelDragSession` module global.
+
+### Controller Scope
+
+A DockRegion joins the nearest `DragDropProvider` when one is present, and
+otherwise creates a private controller for its own reorder.
+
+That scope is the whole cross-region rule. Two sibling regions resolve each
+other's targets **only** when one controller holds both registrations, so a
+consumer that wants cross-region transfer wraps its regions in one provider.
+Two independently self-provided regions keep their own reorder and do not
+discover each other. Nothing restores that link implicitly — the old global
+session is deleted, and no MIME type, module singleton, or document registry
+replaces it.
+
+`crossWindowDropTarget` is therefore valid only on a region that owns its
+controller. A region that joined a provider throws if given one: the provider
+is the window, and a window bridge belongs there.
+
 ### Within-Region Reorder
 
-- **Flexible mode**: delegated to Tabs primitive's built-in drag reorder
-- **Static mode**: native HTML drag-and-drop on stack items with drop position indicators
+- **Flexible mode**: delegated to the Tabs primitive's reorder, which runs on
+  the same substrate. Pointer and Alt+Arrow reach one session.
+- **Static mode**: each stack item is a drag source and a drop target on this
+  region's controller. A drop whose subject came from this region's own zone is
+  a reorder and reports `onReorder`.
 
 ### Cross-Region Transfer
 
-- Without `externalDragSource`, uses Poodle's custom MIME type
-  `application/x-poodle-panel-drag` on `dataTransfer`
-- With `externalDragSource`, preparation begins on primary pointer down.
-  Poodle's cross-region payload is suppressed; the ready preparation's `start`
-  method owns the external payload write during native `dragstart`
-- If preparation is absent or pending at `dragstart`, no external payload is
-  written. Tabs' own same-region reorder payload and visual state remain active
-- Poodle-local drop validation uses `canAcceptPanel`, consulted on `dragover`
-  (through the drag session, when one is announced) and again on `drop`
-- A drop back onto the source zone is ignored in flexible sizing (same-strip
-  reorder owns it). Zone identity is `dragZoneId` when set, else the edge;
-  the payload carries `sourceZone` so two regions on one edge stay distinct
-- External drop validation uses `externalDropTarget.canDrop` during `dragover`
-  and again during `drop`; its result drives the same drop-zone affordance
-- Visual feedback: dashed accent-colored border overlay during drag-over
-- Drop zone overlay: absolute-positioned, `pointer-events: none`
+- A stack item dragged into another region on the same controller reports
+  `onPanelDrop` with the complete `PanelDragData`.
+- Eligibility is `canAcceptPanel`, run during hover **and** again at commit.
+  The substrate carries the subject in the session, so the panel's identity is
+  known at hover without a side channel — which is the entire reason the old
+  global existed.
+- A drop back onto the source zone is ineligible in flexible sizing, because
+  same-strip reorder owns it. Zone identity is `dragZoneId` when set, else the
+  edge.
+- A stack item beats the region it sits in: nested arbitration prefers the
+  deepest target, and the region registers at a lower priority.
+- Visual feedback: dashed accent-coloured border overlay while the region holds
+  the accepted intent. Drop-zone overlay is absolute-positioned and
+  `pointer-events: none`.
 
-### Drag Session
+### Cross-Window Transfer
 
-HTML5 makes the `dataTransfer` payload unreadable during `dragover` — only the
-types list is visible — so a hovered region cannot learn which panel is in
-flight from the event, and `canAcceptPanel(panelId, sourceEdge)` would be
-uncallable at hover time. Poodle therefore tracks the in-flight panel in a
-shared per-window drag session (`dockPanelDragSession` from
-`@inflatable-cookie/poodle-core`):
+A panel that leaves the window goes through the host bridge, never through a
+local wire:
 
-- Whoever stamps the `application/x-poodle-panel-drag` payload at `dragstart`
-  announces it: DockRegion's native dragstart, the external-drag controller's
-  `start`, or a host dragging from outside DockRegion (e.g. a strip region
-  stamping the same wire format). Each calls `announce({ panelId, sourceEdge })`.
-- `dragend` clears it: DockRegion's own dragend handlers and the controller's
-  `end` call `clear`.
-- During `dragover`, a region with a session entry consults
-  `canAcceptPanel(session.panelId, session.sourceEdge)`. A `false` result
-  suppresses the drop-zone affordance and the static stack's insert indicator,
-  and the region stays inert (no `preventDefault`). A drag with no session
-  entry — a foreign writer nobody announced — keeps the permissive behaviour
-  and is still validated at `drop` from the payload itself.
+| Order | Poodle action | Host observation |
+|------:|---------------|------------------|
+| 1 | accepted pre-drag gesture on an enabled panel | `prepare(request, signal)` starts, before activation |
+| 2 | a later gesture supersedes an unfinished preparation | the signal aborts; a late receipt is handed straight back through `cancel` |
+| 3 | the receipt arms | only now may the source advertise or start a native cross-window gesture |
+| 4 | the gesture becomes live | `start(receipt, transport, onTerminal)` installs the one authoritative terminal subscription |
+| 5 | the receiving window projects | `subscribe` publishes a projection; this region re-runs `canAcceptPanel` against it |
+| 6 | the drop lands | the projected target is revalidated, then `commit(request, signal)` runs — `onPanelDrop` does not |
+| 7 | the host answers | that result ends the session. A native drag end, a pointer release, and `dropEffect` never manufacture a committed result |
 
-### Event Order
-
-| Order | Poodle Action | Extension Observation |
-|------:|---------------|-----------------------|
-| 1 | enabled tab or stack item receives primary `pointerdown` | `prepare(context)` starts with a fresh `AbortSignal` |
-| 2 | a later pointerdown supersedes an unfinished source | old signal aborts with `"superseded"`; a ready old result receives `cancel` |
-| 3 | native `dragstart` begins local Poodle reorder | a matching ready result receives `start`; a pending result aborts with `"not-ready"` |
-| 4 | `dragstart` announces the in-flight panel | `dockPanelDragSession.announce({ panelId, sourceEdge })` runs from the native path, controller `start`, or the host |
-| 5 | target receives `dragover` | `canDrop({ phase: "over" })` drives preventDefault, drop effect, and affordance; a Poodle panel drag also consults `canAcceptPanel` via the session |
-| 6 | target receives `drop` | `canDrop({ phase: "drop" })` is rechecked, then `drop` runs |
-| 7 | source receives native `dragend` | a started result receives `end` exactly once; the drag session is cleared |
-
-### Preparation Race And Cancellation Matrix
-
-| Condition | External Payload | Lifecycle |
-|-----------|------------------|-----------|
-| preparation resolves before matching `dragstart` | written by `start` | `end` on native `dragend` |
-| preparation still pending at matching `dragstart` | none | signal aborts with `"not-ready"`; a late result is cancelled |
-| pointer released before `dragstart` | none | signal aborts with `"pointer-released"`; ready result receives `cancel` |
-| pointer cancelled before `dragstart` | none | signal aborts with `"pointer-cancelled"`; ready result receives `cancel` |
-| another panel begins preparation | none from old preparation | old signal aborts with `"superseded"`; ready old result receives `cancel` |
-| component unmounts before `dragstart` | none | signal aborts with `"unmounted"`; ready result receives `cancel` |
-| `prepare` rejects | none | `onPrepareError` receives the rejection; no drag lifecycle starts |
-
-`cancel` and `end` are mutually exclusive for one preparation. Late resolutions
-after cancellation receive `cancel` exactly once. The extension must treat
-`AbortSignal.reason` as the same `DockExternalDragCancelReason` supplied to
-`cancel`.
+A decline or failure at step 1 cancels only the transfer. The gesture continues
+as an ordinary local drag.
 
 ## 9. Token Usage
 

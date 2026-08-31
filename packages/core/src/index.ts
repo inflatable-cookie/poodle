@@ -696,26 +696,13 @@ export {
   type TabsPartProps,
 } from "./tabs";
 
-export {
-  createDockExternalDragController,
-  dockPanelDragSession,
-  type DockEdgeLike,
-  type DockPanelLike,
-  type DockPanelDragSessionEntry,
-  type DockExternalDragAccessors,
-  type DockExternalDragCancelContext,
-  type DockExternalDragCancelReason,
-  type DockExternalDragController,
-  type DockExternalDragEndContext,
-  type DockExternalDragPreparation,
-  type DockExternalDragPrepareContext,
-  type DockExternalDragSource,
-  type DockExternalDragStartContext,
-  type DockExternalDropContext,
-  type DockExternalDropEligibilityContext,
-  type DockExternalDropTarget,
-} from "./dock-external-drag";
 
+export {
+  decodeDockPanelSubject,
+  encodeDockPanelSubject,
+  DOCK_PANEL_SUBJECT_KIND,
+  type DockPanelDragSubject,
+} from "./dock-panel-drag";
 export {
   CROSS_WINDOW_DRAG_MAX_TOKEN_LENGTH,
   CROSS_WINDOW_DRAG_MIME_TYPE,

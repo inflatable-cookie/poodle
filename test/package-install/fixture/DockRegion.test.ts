@@ -15,7 +15,7 @@ import {
 } from "@inflatable-cookie/poodle-svelte";
 import type { LicenceKeyFormat, LicenceSeat } from "@inflatable-cookie/poodle-core";
 import type {
-  DockExternalDragSource,
+  CrossWindowDragSourceBridge,
   PanelTabItem,
 } from "@inflatable-cookie/poodle-svelte";
 
@@ -123,43 +123,45 @@ describe("packed @inflatable-cookie/poodle-svelte", () => {
     catalogue.unmount();
   });
 
-  it("mounts the public drag seam and keeps local reorder", async () => {
+  it("mounts the public cross-window seam and keeps local reorder", async () => {
     const onReorder = vi.fn();
-    const end = vi.fn();
-    const externalDragSource: DockExternalDragSource = {
-      prepare: () => ({
-        start: ({ dataTransfer }) => {
-          dataTransfer.setData(
-            "application/x-consumer-panel",
-            "prepared-panel",
-          );
-        },
-        end,
-      }),
+    const prepare = vi.fn();
+
+    // The public seam is one semantic bridge now, not three DOM-event
+    // callbacks. Packing has to keep both the prop and its type.
+    const crossWindowDragSource: CrossWindowDragSourceBridge = {
+      capabilities: { pointer: true, touch: false, keyboardTargetPicker: false },
+      prepare: (request) => {
+        prepare(request.sourceId);
+        return Promise.resolve(null);
+      },
+      start: () => () => {},
+      cancel: () => {},
     };
+
     const { getAllByRole, getByRole } = render(DockRegion, {
       props: {
         items,
         value: "explorer",
         ariaLabel: "Consumer panels",
         onReorder,
-        externalDragSource,
+        crossWindowDragSource,
       },
     });
-    const [firstTab, secondTab] = getAllByRole("tab");
-    const dataTransfer = new DataTransfer();
+    const [firstTab] = getAllByRole("tab");
 
     expect(getByRole("region", { name: "Consumer panels" })).toBeTruthy();
-    await fireEvent.pointerDown(firstTab, { button: 0 });
-    await fireEvent.dragStart(firstTab, { dataTransfer });
-    await fireEvent.dragOver(secondTab, { dataTransfer });
-    await fireEvent.drop(secondTab, { dataTransfer });
-    await fireEvent.dragEnd(firstTab, { dataTransfer });
 
-    expect(dataTransfer.getData("application/x-consumer-panel")).toBe(
-      "prepared-panel",
-    );
+    // No host has armed a receipt, so nothing advertises a native drag and
+    // nothing reaches `DataTransfer`.
+    const dataTransfer = new DataTransfer();
+    await fireEvent.dragStart(firstTab, { dataTransfer });
+    expect([...dataTransfer.types]).toEqual([]);
+    expect(firstTab.getAttribute("draggable")).toBe("false");
+
+    // Local reorder still runs, through the shared substrate's keyboard route.
+    firstTab.focus();
+    await fireEvent.keyDown(firstTab, { key: "ArrowRight", altKey: true });
     expect(onReorder).toHaveBeenCalledWith(["inspector", "explorer"]);
-    expect(end).toHaveBeenCalledOnce();
   });
 });

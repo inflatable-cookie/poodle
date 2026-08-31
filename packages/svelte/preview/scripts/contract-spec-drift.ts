@@ -123,10 +123,6 @@ const WEB_ONLY_PROPS = new Set([
   "crossWindowDragSource",
   "crossWindowDropTarget",
   "crossWindowSourceBridge",
-  // Retained only until g16.026 replaces the old DockRegion contract on the
-  // worker branch; remove these two names in that same migration.
-  "externalDragSource",
-  "externalDropTarget",
   // AppHeader's bindable `element` escape hatch (g13-b014). Exposes the raw
   // `<header>` DOM node for host-attached behaviour (e.g. window dragging);
   // GPUI/Jetstream own window dragging as an adapter capability and have no

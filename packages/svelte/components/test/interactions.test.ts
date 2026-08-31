@@ -194,7 +194,7 @@ describe("svelte interaction", () => {
     }
   });
 
-  it("DockRegion tab drags expose the panel transfer payload", async () => {
+  it("DockRegion writes no native panel payload of its own", async () => {
     const { getByRole } = render(DockRegion, {
       props: {
         edge: "left",
@@ -203,21 +203,17 @@ describe("svelte interaction", () => {
         value: "inspector",
       },
     });
+
+    // The `application/x-poodle-panel-drag` wire and the module-global panel
+    // session are both gone. A panel now moves as an ordinary drag subject
+    // inside one controller, and the only thing that ever reaches
+    // `DataTransfer` is the bounded cross-window receipt — which needs a host
+    // bridge this region was not given.
     const dataTransfer = new DataTransfer();
+    await fireEvent.dragStart(getByRole("tab"), { dataTransfer });
 
-    await fireEvent.dragStart(getByRole("tab"), {
-      dataTransfer,
-    });
-
-    expect(
-      JSON.parse(
-        dataTransfer.getData("application/x-poodle-panel-drag"),
-      ),
-    ).toEqual({
-      panelId: "inspector",
-      sourceEdge: "left",
-      sourceZone: "left",
-    });
+    expect([...dataTransfer.types]).toEqual([]);
+    expect(getByRole("tab").getAttribute("draggable")).toBe("false");
   });
 
   it("DockRegion showTabs=false omits the tab strip", () => {

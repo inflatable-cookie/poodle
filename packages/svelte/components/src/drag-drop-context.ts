@@ -22,6 +22,78 @@ export function setDragDrop(value: DragDropContextValue): void {
   setContext(POODLE_DRAG_DROP, value);
 }
 
+/**
+ * The registration actions for one controller.
+ *
+ * Split out of `useDragDrop` so a component that owns its controller — a
+ * DockRegion with no ambient provider — registers through exactly the same
+ * code path as one that joined somebody else's.
+ */
+export function dragSourceAction(
+  controller: DragDropController,
+): Action<HTMLElement, DragSourceRegistration> {
+  return (node, registration) => {
+    let current = registration;
+    let handle = controller.registerSource(node, current);
+    return {
+      update(next) {
+        if (next.sourceId !== current.sourceId) {
+          handle.unregister();
+          handle = controller.registerSource(node, next);
+        } else {
+          handle.update(next);
+        }
+        current = next;
+      },
+      destroy() {
+        handle.unregister();
+      },
+    };
+  };
+}
+
+export function dropTargetAction(
+  controller: DragDropController,
+): Action<HTMLElement, DropTargetRegistration> {
+  return (node, registration) => {
+    let current = registration;
+    let handle = controller.registerTarget(node, current);
+    return {
+      update(next) {
+        if (next.targetId !== current.targetId) {
+          handle.unregister();
+          handle = controller.registerTarget(node, next);
+        } else {
+          handle.update(next);
+        }
+        current = next;
+      },
+      destroy() {
+        handle.unregister();
+      },
+    };
+  };
+}
+
+/** An immutable presentation read of one controller, as a store. */
+export function dragDropSnapshotStore(controller: DragDropController): Readable<DragDropSnapshot> {
+  return readable(controller.getSnapshot(), (set) =>
+    controller.subscribe(() => set(controller.getSnapshot())),
+  );
+}
+
+/**
+ * The nearest drag-drop context, or `undefined`.
+ *
+ * Internal to the component package and deliberately not re-exported: a
+ * component that *joins* an ambient provider when one exists needs to ask
+ * without throwing, but a consumer reaching for the controller should still
+ * get the loud `useDragDrop` error rather than a silent null.
+ */
+export function tryDragDrop(): DragDropContextValue | undefined {
+  return getContext<DragDropContextValue | undefined>(POODLE_DRAG_DROP);
+}
+
 export function useDragDrop(): {
   snapshot: Readable<DragDropSnapshot>;
   cancel: () => void;
@@ -35,47 +107,10 @@ export function useDragDrop(): {
     throw new Error("useDragDrop must be used inside DragDropProvider");
   }
 
-  const snapshot = readable(ctx.controller.getSnapshot(), (set) =>
-    ctx.controller.subscribe(() => set(ctx.controller.getSnapshot())),
-  );
+  const snapshot = dragDropSnapshotStore(ctx.controller);
 
-  const dragSource: Action<HTMLElement, DragSourceRegistration> = (node, registration) => {
-    let current = registration;
-    let handle = ctx.controller.registerSource(node, current);
-    return {
-      update(next) {
-        if (next.sourceId !== current.sourceId) {
-          handle.unregister();
-          handle = ctx.controller.registerSource(node, next);
-        } else {
-          handle.update(next);
-        }
-        current = next;
-      },
-      destroy() {
-        handle.unregister();
-      },
-    };
-  };
-
-  const dropTarget: Action<HTMLElement, DropTargetRegistration> = (node, registration) => {
-    let current = registration;
-    let handle = ctx.controller.registerTarget(node, current);
-    return {
-      update(next) {
-        if (next.targetId !== current.targetId) {
-          handle.unregister();
-          handle = ctx.controller.registerTarget(node, next);
-        } else {
-          handle.update(next);
-        }
-        current = next;
-      },
-      destroy() {
-        handle.unregister();
-      },
-    };
-  };
+  const dragSource = dragSourceAction(ctx.controller);
+  const dropTarget = dropTargetAction(ctx.controller);
 
   const keyboardDropTarget = (registration: KeyboardDropTargetRegistration): KeyboardDropTargetHandle =>
     ctx.controller.registerKeyboardTarget(registration);

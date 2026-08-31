@@ -150,6 +150,18 @@ export function DragDropProvider({
   );
 }
 
+/**
+ * The nearest drag-drop context, or `null`.
+ *
+ * Internal to the component package and deliberately not re-exported: a
+ * component that *joins* an ambient provider when one exists needs to ask
+ * without throwing, but a consumer reaching for the controller should still
+ * get the loud `useDragDrop` error rather than a silent null.
+ */
+export function useOptionalDragDrop(): DragDropContextValue | null {
+  return useContext(DragDropContext);
+}
+
 function useDragDropContext(): DragDropContextValue {
   const ctx = useContext(DragDropContext);
   if (!ctx) {
@@ -259,6 +271,59 @@ export function useDropTarget(registration: DropTargetRegistration): {
     getTargetProps,
     accepted: ctx.snapshot.targetId === registration.targetId && ctx.snapshot.targetPosture === "accepted",
     rejected: ctx.snapshot.targetId === registration.targetId && ctx.snapshot.targetPosture === "rejected",
+  };
+}
+
+/**
+ * Register a drop target against an explicit controller.
+ *
+ * For the one case the context hooks cannot serve: a component that *renders*
+ * the provider is above it in the tree, so it cannot read its own context. A
+ * DockRegion with no ambient provider is exactly that — it owns the controller
+ * and registers its own region against it directly.
+ */
+export function useControllerDropTarget(
+  controller: DragDropController,
+  registration: DropTargetRegistration,
+): { getTargetProps: TargetPropGetter; accepted: boolean; rejected: boolean } {
+  const [node, setNode] = useState<HTMLElement | null>(null);
+  const [snapshot, setSnapshot] = useState(() => controller.getSnapshot());
+  const handleRef = useRef<DropTargetHandle | null>(null);
+  const registrationRef = useRef(registration);
+  registrationRef.current = registration;
+
+  useLayoutEffect(() => {
+    setSnapshot(controller.getSnapshot());
+    return controller.subscribe(() => setSnapshot(controller.getSnapshot()));
+  }, [controller]);
+
+  useLayoutEffect(() => {
+    if (!node) return;
+    const handle = controller.registerTarget(node, registrationRef.current);
+    handleRef.current = handle;
+    return () => {
+      handle.unregister();
+      handleRef.current = null;
+    };
+  }, [controller, registration.targetId, node]);
+
+  useLayoutEffect(() => {
+    handleRef.current?.update(registration);
+  });
+
+  const getTargetProps = useCallback<TargetPropGetter>((props = {}) => {
+    const { ref, onKeyDown, ...rest } = props;
+    return {
+      ...rest,
+      ref: composeRefs(ref, (el) => setNode(el)),
+      onKeyDown: composeHandler(onKeyDown),
+    };
+  }, []);
+
+  return {
+    getTargetProps,
+    accepted: snapshot.targetId === registration.targetId && snapshot.targetPosture === "accepted",
+    rejected: snapshot.targetId === registration.targetId && snapshot.targetPosture === "rejected",
   };
 }
 

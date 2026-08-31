@@ -409,13 +409,11 @@ describe("g15.021 application-shell specimens", () => {
     const before = tabLabels();
     expect(before.length).toBeGreaterThanOrEqual(2);
 
-    const [firstTab, secondTab] = [...dock.querySelectorAll('[role="tab"]')] as HTMLElement[];
-    const secondItem = secondTab.parentElement!;
-    const dataTransfer = new DataTransfer();
-    await fireEventSvelte.pointerDown(firstTab, { button: 0 });
-    await fireEventSvelte.dragStart(firstTab, { dataTransfer });
-    await fireEventSvelte.dragOver(secondItem, { dataTransfer });
-    await fireEventSvelte.drop(secondItem, { dataTransfer });
+    // Reorder runs on the shared substrate now, so the keyboard route is the
+    // one that needs no synthetic geometry.
+    const [firstTab] = [...dock.querySelectorAll('[role="tab"]')] as HTMLElement[];
+    firstTab.focus();
+    await fireEventSvelte.keyDown(firstTab, { key: "ArrowRight", altKey: true });
     expect(tabLabels()).not.toEqual(before);
 
     const close = expanded.querySelector(

@@ -1,7 +1,18 @@
-import { fireEvent, render } from "@testing-library/svelte";
-import { describe, expect, it, vi } from "vitest";
+/**
+ * DockRegion panel movement on the shared drag substrate (g16.026).
+ *
+ * The old `dockPanelDragSession` module global let any two regions in a
+ * document find each other. It is gone, and what replaces it is ordinary
+ * controller scope: a panel moves between regions when one controller holds
+ * both registrations, and not otherwise. These cases pin both halves of that,
+ * because "no hidden local bus" is only a real claim if the self-provided pair
+ * is proved not to cross-drop.
+ */
 
-import DockRegion from "../src/DockRegion.svelte";
+import { fireEvent, render } from "@testing-library/svelte";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import DockRegionZoneDropHarness from "./DockRegionZoneDropHarness.svelte";
 import type { PanelTabItem } from "../src/types.ts";
 
 const items: PanelTabItem[] = [
@@ -9,65 +20,170 @@ const items: PanelTabItem[] = [
   { value: "inspector", label: "Inspector" },
 ];
 
-function dragTab(region: HTMLElement): DataTransfer {
-  const tab = region.querySelector("[draggable='true']")!;
-  const dataTransfer = new DataTransfer();
-  fireEvent.dragStart(tab, { dataTransfer });
-  return dataTransfer;
+/**
+ * Lay the two stacks out side by side.
+ *
+ * happy-dom measures everything as an empty box at the origin, so without this
+ * every target contains every point and "dropped on region B" would mean
+ * nothing.
+ */
+function layout(container: HTMLElement): void {
+  const regions = [...container.querySelectorAll<HTMLElement>("section")];
+  regions.forEach((region, regionIndex) => {
+    const originX = regionIndex * 400;
+    box(region, originX, 0, 400, 100);
+    [...region.querySelectorAll<HTMLElement>(".poodle-dock-region__stack-item")].forEach(
+      (item, index) => {
+        box(item, originX + index * 100, 20, 100, 60);
+      },
+    );
+  });
 }
 
-describe("DockRegion drop zones", () => {
-  it("accepts a drop between two zones that share an edge", async () => {
-    const onDropA = vi.fn();
-    const onDropB = vi.fn();
-    const a = render(DockRegion, {
-      props: { items, value: "explorer", edge: "top", dragZoneId: "region:a", onPanelDrop: onDropA },
-    });
-    const b = render(DockRegion, {
-      props: { items, value: "explorer", edge: "top", dragZoneId: "region:b", onPanelDrop: onDropB },
-    });
-    const regionA = a.container.querySelector("section")!;
-    const regionB = b.container.querySelector("section")!;
+function box(element: HTMLElement, x: number, y: number, width: number, height: number): void {
+  const rect = {
+    x,
+    y,
+    width,
+    height,
+    top: y,
+    left: x,
+    right: x + width,
+    bottom: y + height,
+    toJSON() {
+      return this;
+    },
+  } as DOMRect;
+  element.getBoundingClientRect = () => rect;
+  element.setPointerCapture = vi.fn();
+  element.releasePointerCapture = vi.fn();
+  element.hasPointerCapture = () => false;
+}
 
-    const dataTransfer = dragTab(regionA);
-    await fireEvent.drop(regionB, { dataTransfer });
+function pointer(type: string, x: number, y: number): PointerEvent {
+  return new PointerEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    pointerId: 1,
+    pointerType: "mouse",
+    button: 0,
+    buttons: type === "pointerup" ? 0 : 1,
+    isPrimary: true,
+    clientX: x,
+    clientY: y,
+  });
+}
 
-    expect(onDropB).toHaveBeenCalledOnce();
-    expect(onDropB.mock.calls[0][0].panel).toMatchObject({
+function stackItems(container: HTMLElement): HTMLElement[] {
+  return [...container.querySelectorAll<HTMLElement>(".poodle-dock-region__stack-item")];
+}
+
+describe("DockRegion panel movement", () => {
+  beforeEach(() => {
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      callback(0);
+      return 1;
+    });
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("cross-drops between two sibling regions under one provider", async () => {
+    const onPanelDropA = vi.fn();
+    const onPanelDropB = vi.fn();
+    const { container } = render(DockRegionZoneDropHarness, {
+      props: { shared: true, items, onPanelDropA, onPanelDropB },
+    });
+    layout(container);
+
+    // Region A's first panel, dropped into region B.
+    const [sourceItem] = stackItems(container);
+    await fireEvent(sourceItem, pointer("pointerdown", 50, 50));
+    await fireEvent(document, pointer("pointermove", 90, 50));
+    await fireEvent(document, pointer("pointermove", 450, 50));
+    await fireEvent(document, pointer("pointerup", 450, 50));
+
+    expect(onPanelDropB).toHaveBeenCalledOnce();
+    expect(onPanelDropB.mock.calls[0][0].panel).toEqual({
       panelId: "explorer",
       sourceEdge: "top",
       sourceZone: "region:a",
     });
-    expect(onDropA).not.toHaveBeenCalled();
+    expect(onPanelDropB.mock.calls[0][0].targetEdge).toBe("top");
+    expect(onPanelDropA).not.toHaveBeenCalled();
   });
 
-  it("ignores a drop back onto the source zone in flexible sizing", async () => {
-    const onDrop = vi.fn();
-    const a = render(DockRegion, {
-      props: { items, value: "explorer", edge: "top", dragZoneId: "region:a", onPanelDrop: onDrop },
+  it("keeps local reorder but discovers no sibling when each region provides itself", async () => {
+    const onPanelDropA = vi.fn();
+    const onPanelDropB = vi.fn();
+    const onReorderA = vi.fn();
+    const { container } = render(DockRegionZoneDropHarness, {
+      props: { shared: false, items, onPanelDropA, onPanelDropB, onReorderA },
     });
-    const regionA = a.container.querySelector("section")!;
+    layout(container);
 
-    const dataTransfer = dragTab(regionA);
-    await fireEvent.drop(regionA, { dataTransfer });
+    const [first] = stackItems(container);
+    await fireEvent(first, pointer("pointerdown", 50, 50));
+    await fireEvent(document, pointer("pointermove", 90, 50));
+    await fireEvent(document, pointer("pointermove", 450, 50));
 
-    expect(onDrop).not.toHaveBeenCalled();
+    // Region B is not in this controller's registry, so it is not a candidate
+    // and nothing in it lights up.
+    expect(container.querySelectorAll("[data-drop-target]")).toHaveLength(0);
+
+    await fireEvent(document, pointer("pointerup", 450, 50));
+    expect(onPanelDropA).not.toHaveBeenCalled();
+    expect(onPanelDropB).not.toHaveBeenCalled();
+
+    // Its own stack still reorders.
+    await fireEvent(first, pointer("pointerdown", 50, 50));
+    await fireEvent(document, pointer("pointermove", 90, 50));
+    await fireEvent(document, pointer("pointermove", 150, 50));
+    await fireEvent(document, pointer("pointerup", 150, 50));
+    expect(onReorderA).toHaveBeenCalledWith(["inspector", "explorer"]);
   });
 
-  it("treats a legacy edge-only payload from the same edge as same-zone", async () => {
-    const onDrop = vi.fn();
-    const a = render(DockRegion, {
-      props: { items, value: "explorer", edge: "top", onPanelDrop: onDrop },
+  it("reorders within one region rather than reporting a transfer", async () => {
+    const onPanelDropA = vi.fn();
+    const onReorderA = vi.fn();
+    const { container } = render(DockRegionZoneDropHarness, {
+      props: { shared: true, items, onPanelDropA, onReorderA },
     });
-    const region = a.container.querySelector("section")!;
+    layout(container);
 
-    const dataTransfer = new DataTransfer();
-    dataTransfer.setData(
-      "application/x-poodle-panel-drag",
-      JSON.stringify({ panelId: "explorer", sourceEdge: "top" }),
-    );
-    await fireEvent.drop(region, { dataTransfer });
+    const [first] = stackItems(container);
+    await fireEvent(first, pointer("pointerdown", 50, 50));
+    await fireEvent(document, pointer("pointermove", 90, 50));
+    await fireEvent(document, pointer("pointermove", 150, 50));
+    await fireEvent(document, pointer("pointerup", 150, 50));
 
-    expect(onDrop).not.toHaveBeenCalled();
+    expect(onReorderA).toHaveBeenCalledWith(["inspector", "explorer"]);
+    expect(onPanelDropA).not.toHaveBeenCalled();
+  });
+
+  it("refuses a panel the receiving region's rules reject, on hover and at drop", async () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(DockRegionZoneDropHarness, {
+      props: {
+        shared: true,
+        items,
+        canAcceptPanel: (panelId: string) => panelId !== "explorer",
+        onPanelDropB,
+      },
+    });
+    layout(container);
+
+    const [sourceItem] = stackItems(container);
+    await fireEvent(sourceItem, pointer("pointerdown", 50, 50));
+    await fireEvent(document, pointer("pointermove", 90, 50));
+    await fireEvent(document, pointer("pointermove", 450, 50));
+
+    expect(container.querySelectorAll("[data-drop-target]")).toHaveLength(0);
+
+    await fireEvent(document, pointer("pointerup", 450, 50));
+    expect(onPanelDropB).not.toHaveBeenCalled();
   });
 });
