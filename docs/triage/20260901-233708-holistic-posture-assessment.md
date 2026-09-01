@@ -73,23 +73,27 @@ measure is not possible; making the bar measurable is the first parity card.
 
 ## Findings By Lane
 
-### A. Release truth (blocker)
+### A. Release truth (settled disposition; honesty repair still open)
 
-The repository claims a release that does not exist. Every consumer is on
-`0.2.2`; the guide tells them to install `0.2.2`; the changelog says `0.2.3`
-shipped. The in-flight PR #144 correctly moves the HistoryEntry break to
-`0.3.0`, but it inherits the ghost `0.2.3` baseline. Decide `0.2.3`'s fate
-(publish it, or fold its ContextMenu change into `0.3.0` and rewrite the
-changelog entry as unreleased) before any release lane runs. Bind future
-changelog headers to a publication receipt so this cannot recur.
+Merged PR #144 settled the version question in
+`20260901-230400-history-release-adoption-decision.md`: `0.2.3` is prepared
+but unpublished, `0.2.4` is skipped, and all post-`v0.2.2` work folds into
+`0.3.0`. This note does not reopen that. The remaining defect is that
+`CHANGELOG.md:12` and `docs/release-notes/README.md:23` still describe
+`0.2.3` as released on 2026-08-30 while npm `latest` is `0.2.2` and no
+`v0.2.3` tag exists. Candidate card `g16.054` (PR #148) owns that repair; it
+must land before the `0.3.0` candidate is cut. Longer term, bind changelog
+release headers to a publication receipt so a "released" line cannot be
+written before the registry agrees.
 
 ### B. Green main (blocker, cheap)
 
 `effigy qa` cannot pass on `main`. The fix is a `\b` on one regex and has been
-in PAPERCUTS since g16.028 closed. A red release board silently trains every
-worker to treat qa failure as noise. Fix it in the next mechanical batch and
-add a scheduled or post-merge `effigy qa` on `main` so a red main is a paged
-event, not a papercut.
+in PAPERCUTS since g16.028 closed; candidate `g16.053` (PR #148) is the ready
+repair. A red release board trains every worker to treat qa failure as
+noise. The operator approved a Linux-only web + Rust PR/main board on
+2026-09-02; that is a separate workflow card under `.github/workflows/`
+authority, not part of the scanner repair.
 
 ### C. Consumer packaging (high, small cost, large payoff)
 
@@ -133,9 +137,14 @@ text, input, and lifecycle. The pair is not sound as an *admitted* pair:
   `:313-320`). Its README says it does not implement components. The
   node-consuming path lives only in `packages/jetstream/preview` via the
   sibling `jetstream-poodle` crate. Architecture 001 says "a native component
-  should not be reimplemented separately in both backends"; today it is. This
-  belongs in front of the Jetstream readiness delegate
-  (`docs/handoffs/20260901-230409-*.md`) before it audits "adapter gaps".
+  should not be reimplemented separately in both backends"; today it is. Merged
+  PR #147 (`20260901-230409-jetstream-readiness-review.md`, "hold") already
+  records the 60 + 48 direct implementations as a separate legacy path from
+  the Node-to-Jetstream preview route and holds admission on lost
+  interaction/accessibility/event fields. Receipt acknowledged. What remains
+  from this audit is a source-of-truth defect: the adapter README claims it
+  implements no components. Whether the legacy path is quarantined or
+  deleted stays a gated architecture decision, not a card from this note.
 - **Paired-machine divergences the corpora miss.** TypeScript HistoryCenter
   deletion writes a nested invalidation into the root map
   (`packages/core/src/history-center.ts:1010-1019`) while Rust replaces the
@@ -254,16 +263,24 @@ The spine records process faithfully and serves readers poorly:
 
 ## Recommendations, Ranked
 
-1. **Release truth and green main** — one mechanical batch: regex boundary
-   plus a prose fixture, `0.2.3` disposition, changelog rewrite, pack-install
-   output to a temp dir, worktree-keyed gate state, delete merged branches.
-   No design decisions, no contract changes. Do this before PR #144 lands.
-   Then a Linux-only push/PR board running `ci` so main has a shared signal
-   (operator approved a Linux-only web + Rust PR/main board on 2026-09-02).
-2. **Consumer packaging trio** — `sideEffects`, `marked` isolation, README
-   statement of the toolchain boundary (or a `dist/` build if the operator
-   wants a broader boundary). Ships in `0.3.0` alongside the HistoryEntry break
-   so consumers absorb one migration.
+1. **Scanner repair** — `g16.053` as compiled in PR #148. Nothing else rides
+   on it.
+2. **Release-history honesty** — `g16.054` as compiled in PR #148: changelog
+   and release-note lines for `0.2.3` say prepared-but-unpublished; `0.3.0`
+   candidate follows. Compiled `dist/` output is now an explicit operator
+   prerequisite for `0.3.0` (decision 2026-09-02) and needs its own
+   evidence/decision packet (build tool, declaration emit, export map, CSS
+   delivery, `sideEffects`, `marked` isolation) before it enters the release
+   dependency chain. It is not optional and it is not "mechanical".
+2a. **Validation hygiene candidates, each assessed separately** — pack-install
+   output to a temp dir; worktree-keyed `gate-tree-guard` state; doctor scan
+   excludes for committed generated roots. Source-level, small, no authority
+   beyond the task catalogue.
+2b. **Repository settings** — delete-on-merge for the 98 merged remote
+   branches is a GitHub setting, operator-owned, not worker work.
+2c. **Workflow automation** — Linux-only `ci:web` + `ci:rust` on PR and
+   main, approved 2026-09-02; a bounded workflow card under explicit
+   `.github/workflows/` authority.
 3. **React gate or React decision** — extend prop drift to React now; ask the
    operator whether React continues without a consumer.
 4. **Consumer papercut sweep lane** — recurring, cheap, and it feeds the runway
@@ -282,30 +299,31 @@ The spine records process faithfully and serves readers poorly:
    and they are real defects regardless of the pacing decision.
 8. **Define "real parity" as a switch trigger, then select cards by it** —
    the operator will move apps once parity is real. Make that operational:
-   pick the first app to switch (Nucleus imports 29 components, Soundcheck
-   11, Finch 8, Loophole 1) and define parity as *that app's component set*
+   the operator chose **Nucleus** (29 distinct Poodle components) on
+   2026-09-02 as the first app to switch. Define parity as *Nucleus's
+   component set*
    at mounted + accessibility + visual in GPUI, proven by execution not by
    name map. Select ledger cells in that app's order instead of alphabetical
-   or "next bounded seam". A 29-component target is roughly a quarter of the
+   or "next bounded seam". Twenty-nine components is roughly a quarter of the
    remaining mounted gap and yields a shippable GPUI app as the proof, which
    is the evidence the operator says would unlock commitment. Jetstream
    admission stays behind the adapter quarantine.
 
-Items 1, 2, 5, 6, and 7 are mechanical and suit cheap models. Items 3, 4, and 8
-need the operator or the orchestrator's judgment.
+Items 1, 2a, 5, 6, and 7 are bounded source work that suits cheap models once
+compiled as cards. Items 2, 2c, and 8 carry release, workflow, or product
+authority. Items 3 and 4 are decided (2026-09-02) and await compilation. This
+note compiles none of them.
 
 ## Questions Only The Operator Can Answer
 
-- Is `0.2.3` published under a different mechanism, or is it a ghost? If a
-  ghost, fold it into `0.3.0`?
 - Answered 2026-09-02: retain React source-only and add a Svelte↔React
   prop-drift gate; publication waits for a named consumer.
 - Answered 2026-09-02: no. The operator requires a `dist/` build (compiled
   JS + declarations) for `0.3.0`; the web packages will not ship raw source
   again.
 - Answered 2026-09-02: parity is the goal; real parity triggers switching
-  several apps. Open follow-up: which app is the first switch candidate, so
-  its component set can define the parity bar?
+  several apps. Follow-up answered the same day: Nucleus is the first switch
+  candidate; its 29-component set defines the parity bar.
 - Answered 2026-09-02: direct import (architecture 001). Repair AGENTS.md,
   product-guardrails, and the vision to match.
 - Answered 2026-09-02: a recurring read-only sweep of sibling consumer
@@ -313,11 +331,18 @@ need the operator or the orchestrator's judgment.
 
 ## Promotion Route
 
-1. Orchestrator reads this note; hand section E to the Jetstream readiness delegate.
-2. Recommendations 1, 2, 6, and 7 become mechanical cards; no operator
-   question is needed except the workflow-edit approval.
-3. Recommendations 3 and 8 go to the operator as decisions; record answers in
-   vision/architecture, then compile cards.
-4. Recommendations 4 and 5 become recurring cheap-model lanes.
-5. Remove this note when each item is promoted or rejected; carry any
-   unresolved operator question into its own note.
+1. Orchestrator reads this note as advisory evidence. It compiles nothing.
+2. Already compiled elsewhere: `g16.053` scanner repair and `g16.054`
+   release-history honesty (PR #148); Jetstream hold (PR #147); `0.3.0`
+   disposition (PR #144). This note only cross-references them.
+3. Operator decisions recorded here (parity goal, Nucleus, React retain +
+   gate, Linux CI, compiled dist, direct Underlay imports, recurring consumer
+   papercut sweep) are promoted by the orchestrator into vision,
+   architecture, or contracts first, then compiled as cards with their own
+   evidence.
+4. Every other finding (packaging evidence packet, validation hygiene,
+   React drift gate, native source-of-truth repairs, ledger execution
+   backing, docs compaction, consumer sweep lane) is a separately assessed
+   candidate. None becomes a card because it appears in this list.
+5. Remove this note when each item is promoted, rejected, or superseded by a
+   canonical surface; carry any still-open item into its own note.
