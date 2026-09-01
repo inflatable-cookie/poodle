@@ -101,11 +101,8 @@ silently applying defaults. Adding another component, state, theme, size, or
 density is tranche expansion and stops the work.
 
 Every row uses a controlled value, an explicit accessible label where the
-contract requires one, `sizeRole="control"`, and an explicit density. The
-ordinary components receive the explicit `size` shown below. `TriStateSwitch`
-has no public `size` prop in its contract, so its host sets the same resolved
-size through the presentation context; that is an explicit context input, not
-an ambient default. No row uses a custom color override.
+contract requires one, an explicit public `size`, `sizeRole="control"`, and an
+explicit density. No row uses a custom color override.
 
 All labels and option values are fixed as written. The adapters must not
 generate copy, ids, options, or state from fixture names.
@@ -174,12 +171,12 @@ not set because its interaction law is not a static visual input.
 
 ### TriStateSwitch
 
-| Fixture id | Direct component inputs | Theme | Resolved size | Density |
+| Fixture id | Direct component inputs | Theme | Size | Density |
 | --- | --- | --- | --- | --- |
-| `tri-state-switch/default-md` | `value="default"`, `options={excluded:"Exclude", default:"Default", included:"Include"}`, `ariaLabel="Filter mode"` | `eclipse` | `md` through presentation context | `default` |
-| `tri-state-switch/excluded-xs-compact` | `value="excluded"`, `options={excluded:"Exclude", default:"Default", included:"Include"}`, `ariaLabel="Filter mode"` | `eclipse` | `xs` through presentation context | `compact` |
-| `tri-state-switch/included-xl-comfortable` | `value="included"`, `options={excluded:"Exclude", default:"Default", included:"Include"}`, `ariaLabel="Filter mode"` | `eclipse` | `xl` through presentation context | `comfortable` |
-| `tri-state-switch/disabled-custom-iceberg` | `value="included"`, `disabled=true`, `options={excluded:"Hide", default:"All", included:"Show"}`, `ariaLabel="Visibility filter"` | `iceberg` | `md` through presentation context | `default` |
+| `tri-state-switch/default-md` | `value="default"`, `options={excluded:"Exclude", default:"Default", included:"Include"}`, `ariaLabel="Filter mode"` | `eclipse` | `md` | `default` |
+| `tri-state-switch/excluded-xs-compact` | `value="excluded"`, `options={excluded:"Exclude", default:"Default", included:"Include"}`, `ariaLabel="Filter mode"` | `eclipse` | `xs` | `compact` |
+| `tri-state-switch/included-xl-comfortable` | `value="included"`, `options={excluded:"Exclude", default:"Default", included:"Include"}`, `ariaLabel="Filter mode"` | `eclipse` | `xl` | `comfortable` |
+| `tri-state-switch/disabled-custom-iceberg` | `value="included"`, `disabled=true`, `options={excluded:"Hide", default:"All", included:"Show"}`, `ariaLabel="Visibility filter"` | `iceberg` | `md` | `default` |
 
 The three first rows cover each state color and capsule position. The fourth
 row adds disabled opacity and the contract's custom-label input without
@@ -197,7 +194,7 @@ components, two themes, five sizes, and three densities.
 | Theme | `eclipse`, `iceberg` | 18 Eclipse rows and six Iceberg rows; the Iceberg rows are the fourth row for each component |
 | Size | `xs`, `md`, `xl` | Each component has one boundary-small, one baseline, and one boundary-large row; the Iceberg row returns to `md` |
 | Density | `compact`, `default`, `comfortable` | Each component has one row at each density; the Iceberg row uses `default` |
-| Size role | `control` | Fixed for all components; TriStateSwitch resolves its explicit size through presentation context |
+| Size role | `control` | Fixed for all components |
 | Static state | Selected/unselected, mixed, on/off, disabled item/group, orientation, width mode, and ternary state | Only the direct states listed in the fixture tables are authoritative |
 | Repeat | Two observations per runtime/fixture | Repeats must be byte-identical at the decoded image and typed-receipt level |
 
@@ -223,7 +220,7 @@ no visual claim for them.
 | Meaning, states, parts, and token roles | The six component contracts under `docs/contracts/components/` | A screenshot cannot redefine a contract or token |
 | Web visual reference | Svelte implementation in the same pinned headless Chromium environment | Svelte is the web reference for GPUI comparison; it does not donate behavior or native evidence |
 | Web peer | React implementation in the same pinned headless Chromium environment | React must match Svelte exactly for this static visual set |
-| Native visual source | Dedicated conformance lab's short-lived, operator-approved, non-activating GPUI capture process | The lab owns native process, permission, focus, provenance, and transport details |
+| Native visual source | Dedicated conformance lab's short-lived, operator-approved, non-activating GPUI capture process | The lab owns native process, permission, window-activation, provenance, and transport details |
 | Evidence status | `docs/roadmaps/g16/parity-evidence-ledger.md` after the run | Only the six named visual rows may be updated by the future execution owner |
 
 The dedicated-lab architecture handoff at
@@ -305,8 +302,9 @@ exception.
 | Root/group/track/segment/option edges | At most `0.5` logical pixel per corresponding edge |
 | Indicator, mark, dot, thumb, and selection-capsule centers and extents | At most `1.0` logical pixel per corresponding center or extent |
 | Label and option-content extents | At most `2.0` logical pixels |
-| Expected fill, border, text, and focus-role colors | At most one 8-bit sRGB channel |
-| Border and focus-ring width | At most `0.5` logical pixel |
+| Expected fill, border, and text-role colors | At most one 8-bit sRGB channel |
+| Focus-visible paint | N/A for this static tranche; no focus frames are captured or compared, so absent focus paint cannot fail a comparison or create a focus claim |
+| Border width | At most `0.5` logical pixel |
 | Shadow layers and inset | Layer count and inset exact; geometry at most `0.5` logical pixel |
 | Full viewport pixels for Svelte-to-GPUI | Pixelmatch threshold `0.1`, `includeAA=false`, differing pixels no more than `3%` of the full viewport |
 
@@ -314,8 +312,9 @@ The web pair has zero differing decoded pixels. The native policy is not a
 license for structural drift: geometry and paint-role checks remain blocking,
 and the 3% full-viewport rule is only one channel. Existing or newly observed
 renderer differences are annotations, not passes. For example, missing native
-shadow, altered focus treatment, or a color-mix approximation still produces a
-finding when it exceeds the fixed policy.
+shadow, altered selected or disabled treatment, or a color-mix approximation
+still produces a finding when it exceeds the fixed policy. Focus-visible paint
+is the explicit N/A exception defined in the policy table, not a hidden pass.
 
 ### Manual review
 
@@ -405,8 +404,9 @@ conformance denominator.
   threshold widening, frame selection, pixel averaging, or a known-delta
   suppression list.
 - Require the native lab receipt to prove the approved non-activating capture
-  boundary and to include sanitized provenance. Focus change, permission
-  drift, missing provenance, or a long-running sidecar invalidates the run.
+  boundary and to include sanitized provenance. Window activation/frontmost
+  change, permission drift, missing provenance, or a long-running sidecar
+  invalidates the run.
 - Keep semantic, mounted, accessibility, and visual evidence separate. A
   visual match cannot close a GPUI AT gap; an axe or mounted result cannot serve
   as a pixel comparison.
@@ -459,9 +459,9 @@ unknown, missing, extra, duplicate, stale, hash-mismatched, and implicitly
 defaulted inputs. It must also run the relevant existing Svelte, React, Rust,
 and GPUI mounted checks without turning their results into visual evidence.
 
-The dedicated lab owns native capture-process and focus/permission checks. The
-Poodle-side execution uses the headless visual fixture/comparator selectors
-and `effigy docs:lint`; it does not invoke a local windowed or native visual
+The dedicated lab owns native capture-process and window-activation/permission
+checks. Poodle-side execution uses headless visual fixture/comparator selectors
+plus `effigy docs:lint`; it does not invoke a local windowed or native visual
 selector. The complete 24-row batch is run twice through the lab boundary,
 then receives the manual contact-sheet review before any ledger update.
 
@@ -476,9 +476,9 @@ Stop and return to the orchestrator when any of the following occurs:
   unapproved custom token, or non-contract input;
 - any named component cannot render its real implementation in Svelte, React,
   or GPUI, or a runtime would borrow a capture or receipt from another runtime;
-- the dedicated lab is not ready, cannot provide sanitized provenance, changes
-  focus/frontmost state, requires unapproved permission, uses a local windowed
-  selector, or crosses its own process/lifecycle boundary;
+- the dedicated lab is not ready, cannot provide sanitized provenance, activates
+  or changes frontmost window state, requires unapproved permission, uses a
+  local windowed selector, or crosses its own process/lifecycle boundary;
 - either repeat differs, an image or receipt hash is wrong, a part is missing or
   duplicated, dimensions differ, or the input manifest is stale;
 - fixed tolerances reject antialiasing that needs a policy decision, or appear
