@@ -43,7 +43,7 @@ These are the exact defaults proposed for promotion. They are component-private 
 | Case | Recommendation |
 | --- | --- |
 | Mouse pointer enters a submenu parent | Open the child immediately: `openGrace = 0 ms`. Preserve the existing immediate hover-to-open behavior. |
-| Eligible mouse pointer leaves an active submenu parent toward its visible child | Keep the active branch only while the directional corridor remains valid and until one hard deadline: `closeGraceCap = 300 ms` from the parent-exit sample. |
+| Eligible mouse pointer leaves an active submenu parent toward its visible child | Temporarily defer the branch-close transition itself while the directional corridor remains valid and until one hard deadline: `closeGraceCap = 300 ms` from the parent-exit sample. The semantic open state and visual open state remain synchronized until that transition commits. |
 | Pointer samples inside the corridor | Do not reset or extend the 300 ms deadline. A sample can preserve the branch, never make it sticky indefinitely. |
 | Child entry | Switch to or focus the child immediately according to the existing component semantics. |
 | Sibling, sibling submenu, opposite direction, unrelated item, outside ancestry, or outside the menu | Close or switch immediately. These paths bypass the grace deadline. |
@@ -70,11 +70,13 @@ These values are clean-room behavioral defaults informed by the pinned Floating 
 
 ### State boundaries
 
-The grace may defer only the visual branch-close decision for an eligible active mouse submenu. It must not defer or suppress:
+The corridor may temporarily defer the branch-close transition itself for an eligible active mouse submenu. This is not a visual-only hold: while the transition is deferred, the semantic open state (including `aria-expanded`) and visual open state remain synchronized; when the transition commits, both states close together. Grace must not defer or suppress any other authoritative transition. Explicit outside dismissal, keyboard dismissal, focus exit, activation, branch switch, and equivalent authoritative transitions bypass or cancel grace immediately and update semantic and visual state normally. In particular, a retained submenu must never remain visibly open after its semantic open state has closed.
+
+Grace must not defer or suppress:
 
 - outside dismissal or `layerContains` ancestry checks;
 - Escape, ArrowLeft, focus exit, or other keyboard dismissal;
-- activation, selection, disabled-item behavior, or checked/radio state;
+- activation, branch switch, selection, disabled-item behavior, or checked/radio state;
 - focus movement or focus restoration;
 - ARIA state updates required by the current semantic transition; or
 - touch/pen activation and any non-hover input.
@@ -189,7 +191,7 @@ The orchestrator should promote only when all of the following are demonstrated:
 - sibling, outside, opposite, reverse, and invalid-geometry paths close or switch without sticky state;
 - fresh resolved placement and current rects govern every retained corridor, with no stale hold after collision, scroll, resize, clipping, hidden state, or unmount;
 - keyboard, focus, dismissal, touch, pen, disabled, separator, check/radio, and leaf semantics remain unchanged and equivalent;
-- full, reduced, and frozen motion policies produce the same semantic result and the pointer deadline is not tied to visual motion;
+- full, reduced, and frozen motion policies produce the same semantic result, each deferred branch-close transition keeps semantic and visual open state synchronized, and the pointer deadline is not tied to visual motion;
 - named browser and GPUI mounted regressions exercise the real host paths;
 - the Menu/ContextMenu focus-restoration contradiction is resolved in contract ownership;
 - GPUI host evidence is sufficient for the semantic contract, with no unsupported AT claim; and
@@ -199,15 +201,15 @@ The orchestrator should promote only when all of the following are demonstrated:
 
 | Input or state | Pointer-intent eligibility | Required result and proof |
 | --- | --- | --- |
-| Mouse diagonal parent → child | Yes, only for the active visible submenu | Immediate child open; corridor may defer branch close for at most 300 ms; child entry is immediate; named mounted proof. |
-| Mouse to sibling or sibling submenu | No retained hold once the sibling is the target | Immediate close/switch; no sticky old branch; active-item and ARIA updates remain correct. |
-| Mouse reverse, opposite direction, outside menu/window | No | Existing close/dismiss path runs immediately; outside ancestry remains authoritative. |
+| Mouse diagonal parent → child | Yes, only for the active visible submenu | Immediate child open; corridor may defer the branch-close transition for at most 300 ms while semantic and visual open state remain synchronized; child entry is immediate; named mounted proof. |
+| Mouse to sibling or sibling submenu | No retained hold once the sibling is the target | Branch-switch transition bypasses or cancels grace immediately; no sticky old branch; active-item and ARIA updates remain correct. |
+| Mouse reverse, opposite direction, outside menu/window | No | Reverse/opposite close or explicit outside dismissal bypasses or cancels grace immediately; semantic and visual state update together, and outside ancestry remains authoritative. |
 | Touch | No hover grace | Existing activation semantics remain immediate and usable; no invisible pointer corridor or hover-only state. |
 | Pen | No hover grace | Same as touch unless the host's existing pen activation contract explicitly says otherwise; no hover delay. |
-| Keyboard trigger/context invocation, ArrowRight, Enter, Space | No | Immediate open/activation, correct active item and focus, `aria-haspopup`/`aria-expanded`, and recursive child semantics. |
-| ArrowLeft and Escape | No | Immediate close according to the resolved Menu/ContextMenu contract, with required focus restoration and no pointer timer interference. |
+| Keyboard trigger/context invocation, ArrowRight, Enter, Space | No | Immediate open/activation; activation bypasses or cancels grace immediately; correct active item and focus, `aria-haspopup`/`aria-expanded`, and recursive child semantics. |
+| ArrowLeft and Escape | No | Immediate close according to the resolved Menu/ContextMenu contract; keyboard dismissal bypasses or cancels grace immediately, with required focus restoration and no pointer timer interference. |
 | Assistive technology / semantic state | No | Native/web equivalent menu and menuitem meaning, disabled/separator/check/radio/leaf semantics, no focus trap, and no delayed semantic update. Web axe/keyboard/AT evidence is required for each recursive runtime; current GPUI AT capability is a gate, not a waiver. |
-| Outside pointer dismissal | No | Existing `layerContains`/dismiss-stack behavior remains unchanged; grace cannot keep an outside branch alive. |
+| Outside pointer dismissal | No | Explicit dismissal bypasses or cancels grace immediately; existing `layerContains`/dismiss-stack behavior remains unchanged, and grace cannot keep an outside branch alive. |
 | Full, reduced, frozen motion | No semantic difference | Same open/close/focus/ARIA result in all policies; frozen has no visual clock; no semantic timer is owned by motion. |
 | Menubar top-level hover | Excluded | Immediate top-level switching remains `0/0`; deeper behavior is a separate contract lane. |
 
