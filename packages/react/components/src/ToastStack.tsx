@@ -28,8 +28,10 @@ export interface ToastStackProps {
   onAction?: (id: string) => void;
 }
 
+const EMPTY_TOAST_ITEMS: ToastItem[] = [];
+
 export function ToastStack({
-  items = [],
+  items = EMPTY_TOAST_ITEMS,
   ariaLabel = "Notifications",
   size = null,
   sizeRole = "chrome",
@@ -61,14 +63,27 @@ export function ToastStack({
   useEffect(() => {
     const liveIds = items.map((item) => item.id);
     setRetained((previous) => {
+      let changed = false;
       const next = new Map(previous);
       for (const item of items) {
-        next.set(item.id, item);
+        if (next.get(item.id) !== item) {
+          changed = true;
+          next.set(item.id, item);
+        }
+      }
+      return changed ? next : previous;
+    });
+    setVisuals((previous) => {
+      const next = nextToastVisuals(previous, liveIds, initialPass.current);
+      initialPass.current = false;
+      if (
+        next.length === previous.length &&
+        next.every((visual, index) => visual.id === previous[index].id && visual.phase === previous[index].phase)
+      ) {
+        return previous;
       }
       return next;
     });
-    setVisuals((previous) => nextToastVisuals(previous, liveIds, initialPass.current));
-    initialPass.current = false;
   }, [items]);
 
   function handleDismiss(id: string, toastEl: HTMLElement | null, activator: EventTarget | null) {

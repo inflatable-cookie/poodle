@@ -8,7 +8,7 @@ import { configDefaults, defineConfig } from "vitest/config";
 // tests cover the framework binding those machines to real DOM.
 export default defineConfig({
   test: {
-    // Two forks OOM the specimen census even at 16 GB; serialize the pool.
+    // Specimen census OOMs a 16 GB worker; serialize and raise the heap in ci:web.
     maxWorkers: 1,
     projects: [
       {

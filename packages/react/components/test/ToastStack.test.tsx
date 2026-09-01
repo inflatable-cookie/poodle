@@ -57,4 +57,10 @@ describe("ToastStack (react)", () => {
     const { container } = render(<ToastStack items={[]} />);
     expect(container.querySelectorAll(".poodle-toast").length).toBe(0);
   });
+
+  it("omitted items settle without a default-array render loop", () => {
+    const { container } = render(<ToastStack />);
+    expect(container.querySelector(".poodle-toast-stack")).not.toBeNull();
+    expect(container.querySelectorAll(".poodle-toast").length).toBe(0);
+  }, 2000);
 });

@@ -1,9 +1,9 @@
 # g16.034 — Shared Motion Policy And Five-Family Pilot
 
-Status: implemented — awaiting review
+Status: implemented — boards still open (repair round 2)
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/124
-Implementation commit: `bb656700f`
+Implementation commits: `bb656700f` (initial), `d99b9af83` + `f03f723bc` (review repair)
 Card: `docs/roadmaps/g16/034-shared-motion-policy-and-five-family-pilot.md`
 Handoff: `docs/handoffs/20260901-130224-g16-034-shared-motion-policy.md`
 Governing refs: `docs/architecture/012-semantic-motion-policy.md`,
@@ -17,7 +17,7 @@ Base: rebased onto `origin/main` at `b682ebfed` after merged PR #123
 
 ## Outcome
 
-One explicit `full | reduced | frozen` host policy now exists in TypeScript and
+One explicit `full | reduced | frozen` host policy exists in TypeScript and
 Rust. Missing preference is full. Nesting is restriction-only. Presentation
 scopes preserve motion. Frozen declares no visual clocks.
 
@@ -25,11 +25,13 @@ The five pilot families consume that policy:
 
 - Accordion / Collapsible: clipped block-axis height plus indicator rotation
   after the first committed frame; reduced/frozen snap; closed panels stay
-  inert and hidden immediately.
-- ToastStack: keyed enter/exit, inert exit remnants, focus fallback
-  next → previous → entered-from. Expiry still belongs to ToastHost.
+  inert and keep content in layout until the clip finishes.
+- ToastStack: WAAPI completion drives settle/drop; keyed enter/exit, inert exit
+  remnants, focus fallback next → previous → entered-from. Expiry still belongs
+  to ToastHost.
 - Tabs `activeEdge="underline"`: one measured paint-only indicator. First
-  layout and resize snap; semantic selection can retarget.
+  layout and resize snap; semantic selection can retarget; rAF cancelled on
+  teardown.
 - Checkbox / IconButton: semantic state is immediate; reduced keeps opacity
   only; frozen paints the endpoint.
 - Skeleton / Spinner: 1.6s opacity pulse and ring/dot/grid loops only in full
@@ -42,6 +44,27 @@ new MotionPolicyProvider row was added because the public default-as export
 changed the live denominator (176 public / 175 portable). GPUI construction
 cells now say 175/175 routes.
 
+## Review repair (PR #124 changes requested)
+
+Addressed on `d99b9af83` + `f03f723bc`:
+
+- Toast lifecycle uses WAAPI `finished` completion, not CSS `animationend`;
+  exit rows are `inert` with `tabIndex=-1`; owner-scoped registry keys;
+  identity-safe handle deletion; unmount guards block late mutation.
+- `setMotionTracePolicy` assigns the requested policy directly (relaxation
+  works); reversal duration uses `originalDurationMs`; live runtime retains
+  trace state across `playClippedHeight` / `playToastPresence`.
+- IconButton reduced CSS is opacity-only; Skeleton skips `useMotionReady` when
+  `animated=false`; disclosure keeps content unhidden during close clip;
+  Tabs observes selected item and cancels rAF on teardown.
+- Native toast/skeleton/spinner skip enter/loop until first frame committed;
+  native Tabs owns one paint-only underline indicator.
+- Mounted Svelte/React family receipts, GPUI headless regression
+  `mounted_motion_policy_construction_does_not_invent_clocks`, and bounded
+  Chromium + WebKit probe at `test/motion-policy-probe/`.
+- Empty ToastStack default `items` is a stable array; presence sync skips
+  no-op Map/visual writes so omitted-items mounts (parity) cannot loop.
+
 ## Overlap
 
 The operator-driven drag-fix lane already edits Tabs files:
@@ -49,43 +72,71 @@ The operator-driven drag-fix lane already edits Tabs files:
 - `packages/svelte/components/src/Tabs.svelte`
 - `packages/react/components/src/Tabs.tsx`
 - related Tabs tests and `packages/render/src/tabs.rs` (this lane did not
-  edit the native Tabs renderer)
+  edit the native Tabs renderer beyond the underline indicator contract)
 
-This lane still had to add the underline indicator on the web Tabs shells.
 The orchestrator owns merge order.
 
 ## Falsification
 
-Proofs were committed at `c4ede32be` before planting.
+Real proofs committed at `d99b9af83` before planting. Restores used
+`git checkout --` against committed sources, not a dirty index.
 
-| Row | Plant | Result |
-| --- | --- | --- |
-| restriction-only (TS) | `restrictMotionPolicy` returns the child request | `nesting is restriction-only` failed: expected reduced, received full |
-| restriction-only (Rust) | same nearest-wins plant | `nesting_is_restriction_only` panicked Full vs Reduced |
-| frozen clocks (native) | `animation_for_policy(Frozen, spin, false)` already fails if it returns Some; the spinner test `frozen_and_reduced_schedule_no_ring_clock` is the live proof | green after restore |
+| Oracle row | Plant | Intended failure | Restore + rerun |
+| --- | --- | --- | --- |
+| 1 Policy restriction-only | TS `restrictMotionPolicy` returns child; Rust `restrict_motion_policy` returns requested only | TS expected reduced, received full; Rust Full vs Reduced | green |
+| 2 Initial state is not invented | skip `intent.initial` so `shouldSchedule` is true | TS `authored initial state` schedule true; Rust `!decision.schedule` | green |
+| 3 Latest semantic state owns motion | reversal uses `durationMs` not `originalDurationMs` | second reversal expected 144, received 58 (TS + Rust) | green |
+| 4 Reduced and frozen differ | `setMotionTracePolicy` does not drop frozen clocks | liveClockCount expected 0, received 1 | green |
+| 5 Cleanup is exact | reject handler `handles.delete(key)` unconditionally | replace-key test expected live 1, received 0 | green |
+| 6 Disclosure exception bounded | `gpuiMotionPlan` applies `height` | expected static-endpoint, received none | green |
+| 7 Toast semantics | `nextToastVisuals` drops instead of exit remnant | family test `.poodle-toast` null, cannot read `dataset` | green |
+| 8 Tabs indicator vs environment | ResizeObserver no-op | probe before=188 after=188 | green |
+| 9 Discrete semantics precede paint | Checkbox `emitCheckedChange` reverts native checked | expected true, received false | green |
+| 10 Loading loops obey policy | loop schedules without `firstFrameCommitted` | expected schedule false, received true | green |
+| 11 Native gaps stay visible | `gpuiMotionPlan` applies `translateY` | expected opacity-stand-in, received none | green |
 
-Restores used `git checkout --` against the committed proofs, not a dirty
-index.
+## Evidence
+
+- Paired TS/Rust trace tests: `packages/core/test/motion-policy.test.ts`,
+  `packages/contracts/headless/src/motion_policy.rs` (inline tests).
+- Web runtime: `packages/core/test/motion-runtime.test.ts`.
+- Mounted family receipts: `packages/svelte/components/test/motion-families.test.ts`,
+  `packages/react/components/test/motion-families.test.tsx`.
+- GPUI mounted regression: `mounted_motion_policy_construction_does_not_invent_clocks`
+  in `packages/gpui/preview/tests/headless_regressions.rs`.
+- Browser probe: `effigy test:motion-policy-browser` (Chromium + WebKit).
 
 ## Validation
 
-Focused: `bun test packages/core/test/motion-policy.test.ts`; Svelte/React
-provider, Accordion, Collapsible, Tabs, ToastStack, Skeleton, Spinner,
-IconButton; `cargo test` motion_policy, context, motion, frozen spinner.
+Focused (repair head):
+
+- core motion policy/runtime, Svelte/React provider + family suites — pass
+- `cargo test --lib motion` (headless) — pass
+- `mounted_motion_policy_construction_does_not_invent_clocks` — pass
+- `effigy test:motion-policy-browser` — pass (Chromium + WebKit, Svelte + React)
 
 Boards:
 
-- `effigy docs:check` pass
-- `effigy ci:native` pass
-- `effigy ci:rust` pass
-- `effigy test:web-pack-install` pass
-- `effigy check:svelte` pass
-- `git diff --check origin/main...HEAD` pass
-- `effigy ci:web` local `bunx vitest run`: 367/369 files and 3287+ tests green;
-  `packages/react/components/test/smoke.test.tsx` and
-  `test/parity/component-parity.test.tsx` OOM this worktree at 8 GB heap
-  (no assertion failures). Recorded as a papercut.
-- Headless `effigy qa` not re-run after that OOM; native/docs/pack-install
-  and focused motion suites are the local proof.
-- Refresh onto `b682ebfed` (PR #123): docs front-door integration only.
-  `g16.035` stays complete; `g16.034` stays implemented awaiting review.
+- `effigy docs:check` — pass (re-run after this log edit)
+- `effigy ci:rust` — pass
+- `git diff --check origin/main...HEAD` — pass
+- `effigy ci:web` — 32 GB serial run on `f03f723bc` (before the empty-default
+  fix): 369/371 files, 3407/3409 tests. Failures were only ToastStack parity
+  (914773ms hang) and React ToastStack smoke (max update depth / invalid array
+  length). Specimen census completed on that same worker. Focused rerun after
+  the stable-empty + no-op presence sync: family/host/ToastStack unit tests
+  plus `ToastStack` smoke/parity — pass (45 tests, ~10s). Full board rerun
+  follows.
+- `effigy ci:native` — last full run failed `smoke:gpui-window-capture`
+  `tests::batch_mode_accepts_no_other_flag` (likely pid+len temp-dir flake).
+  Earlier proofs-commit run passed. Retry after `ci:web`.
+- `effigy qa` — not run; includes `ci:web` + `ci:native` + `audit:security`.
+  `audit:security` remains the known main-red English-word false positive
+  (`mask-plus-translated-highlight`).
+
+## Unresolved
+
+- GPUI translation/scale: opacity-stand-in only
+- Disclosure height: static-endpoint on native
+- No Jetstream admission
+- Specimen census needs 32 GB heap even serially (papercut recorded)

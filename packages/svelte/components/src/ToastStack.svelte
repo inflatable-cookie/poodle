@@ -19,12 +19,12 @@
   import { onDestroy, untrack } from "svelte";
   import { getMotionPolicy } from "./motion-policy";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
-  import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+  import type { ControlDensity, ControlSize, SemanticControlSizeRole, ToastItem } from "./types";
 
-  import type { ToastItem } from "./types";
+  const EMPTY_TOAST_ITEMS: ToastItem[] = [];
 
   let {
-    items = [],
+    items = EMPTY_TOAST_ITEMS,
     ariaLabel = "Notifications",
     size = null,
     sizeRole = "chrome",
@@ -61,16 +61,39 @@
   );
 
   $effect(() => {
-    const liveIds = items.map((item) => item.id);
-    const currentVisuals = untrack(() => visuals);
-    const currentRetained = untrack(() => retainedItems);
-    const nextRetained = new Map(currentRetained);
-    for (const item of items) {
-      nextRetained.set(item.id, item);
-    }
-    retainedItems = nextRetained;
-    visuals = nextToastVisuals(currentVisuals, liveIds, initialPass);
-    initialPass = false;
+    const liveItems = items;
+    const liveIds = liveItems.map((item) => item.id);
+    untrack(() => {
+      const currentVisuals = visuals;
+      const currentRetained = retainedItems;
+      const nextRetained = new Map(currentRetained);
+      for (const item of liveItems) {
+        nextRetained.set(item.id, item);
+      }
+      const nextVisuals = nextToastVisuals(currentVisuals, liveIds, initialPass);
+      initialPass = false;
+      let retainedChanged = nextRetained.size !== currentRetained.size;
+      if (!retainedChanged) {
+        for (const [id, item] of nextRetained) {
+          if (currentRetained.get(id) !== item) {
+            retainedChanged = true;
+            break;
+          }
+        }
+      }
+      const visualsUnchanged =
+        nextVisuals.length === currentVisuals.length &&
+        nextVisuals.every(
+          (visual, index) =>
+            visual.id === currentVisuals[index]?.id && visual.phase === currentVisuals[index]?.phase,
+        );
+      if (retainedChanged) {
+        retainedItems = nextRetained;
+      }
+      if (!visualsUnchanged) {
+        visuals = nextVisuals;
+      }
+    });
   });
 
   onDestroy(() => {
