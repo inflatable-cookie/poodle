@@ -1,8 +1,9 @@
 # History Papercut Ownership
 
-Status: open — external wire work and the Poodle rejection surface are
-complete; package publication/adoption, CS20, and keyboard-geometry follow-ons
-remain
+Status: partially promoted — rejection surface complete; candidate chain
+compiled as `g16.053`–`g16.054`
+Disposition: publication/adoption, CS20, and keyboard geometry retain their
+separate authority gates
 Captured: 2026-08-31
 Source: Loophole `PAPERCUTS.md` after PR #14 merged
 

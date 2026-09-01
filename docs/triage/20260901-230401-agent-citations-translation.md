@@ -1,6 +1,8 @@
 # Agent Citations Translation Memo
 
-Status: ready for orchestrator intake; promotion held
+Status: accepted direction — composition-gated in the canonical runway
+Disposition: no component card; authored rich semantic carrier and paragraph
+consumer proof remain serial prerequisites
 Captured: 2026-09-01
 Owner: Poodle Northstar orchestrator
 Source: [agent citations and sources dossier](../research/value-tracks/agent-citations-and-sources.md)

@@ -1,6 +1,7 @@
 # Block Slider And RangeSlider Promotion Decision Proposal
 
-Status: delegate proposal awaiting operator acceptance or revision
+Status: accepted decision — promoted as `g16.046`
+Disposition: additive horizontal block appearance; vertical RangeSlider held
 Captured: 2026-09-01
 Owner: Poodle Northstar orchestrator
 Scope: additive block appearance for `Slider` and `RangeSlider`

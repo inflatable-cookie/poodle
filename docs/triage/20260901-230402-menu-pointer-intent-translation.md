@@ -1,6 +1,8 @@
 # Nested Menu Pointer Intent Translation Memo
 
-Status: delegate recommendation — ready for orchestrator intake
+Status: accepted direction — gated in the canonical runway
+Disposition: preserve conditional pointer intent and synchronized close grace;
+no card until recursive runtime substrate and focus contract agree
 Created: 2026-09-01
 Promotion authority: Poodle Northstar orchestrator
 Implementation status: held pending the gates in this memo

@@ -1,6 +1,7 @@
 # Contributor Design-Guidance Pilot Decision
 
-Status: ready for orchestrator review; implementation held
+Status: accepted decision — promoted as `g16.052`
+Disposition: finite Svelte-only matched pilot; public guidance remains held
 Captured: 2026-09-01
 Owner: Poodle Northstar orchestrator
 Source: `docs/handoffs/20260901-121256-design-guidance-pilot-planning.md`

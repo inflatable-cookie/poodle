@@ -1,6 +1,7 @@
 # Cross-Runtime Visual Comparison Tranche
 
-Status: delegate proposal — ready for orchestrator review
+Status: accepted tranche — blocked on the operational dedicated lab
+Disposition: preserve six components / 24 fixtures; do not dispatch locally
 Captured: 2026-09-01
 Owner: Poodle planning delegate
 Source: `docs/handoffs/20260901-230408-visual-comparison-tranche-planning.md`

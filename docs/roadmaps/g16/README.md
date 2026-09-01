@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — g16.034 is complete, g16.036 is in review, and the eight-card
-DesEngs research wave is complete
+Status: active — complete through `g16.044`; canonical continuation compiled
+through `g16.054`
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -68,7 +68,7 @@ stay maintained; backend admission is not part of the first card.
 34. [034 — Shared motion policy and five-family pilot](034-shared-motion-policy-and-five-family-pilot.md) — complete; merged in PR #124 after four exact-head review rounds. Architecture 012, MotionPolicyProvider, and the eight pilot contracts are the authority. No ledger cell moved.
 35. [035 — MarkdownEditor bounded preview scroll](035-markdown-editor-bounded-preview-scroll.md) — complete; merged in PR #123 after two native-oracle repair rounds; long preview content now scrolls inside a constrained host across Svelte, React, and mounted GPUI without a new sizing API
 36. [036 — Tree external drop authority](036-tree-external-drop-authority.md)
-    — in review; paired Svelte/React `reorderAuthority` adapter over the existing
+    — complete in PR #127; paired Svelte/React `reorderAuthority` adapter over the existing
     Tree substrate for a latched moving set, pre-paint accept/rewrite/refuse,
     and real sync/async commit results; ordinary `onReorder` remains unchanged
 37. [037 — Transcript-inline agent approval research](037-transcript-inline-agent-approval-research.md) — research-complete in PR #130; compose AgentQuestion/AgentPlan, no generic approval surface
@@ -79,10 +79,28 @@ stay maintained; backend admission is not part of the first card.
 42. [042 — Semantic interaction cues research](042-semantic-interaction-cues-research.md) — research-complete in PR #134; consumer-owned, no cue API
 43. [043 — In-place toast lifecycle research](043-in-place-toast-lifecycle-research.md) — research-complete in PR #133; consumer-owned same-id updates
 44. [044 — Nested menu pointer intent research](044-nested-menu-pointer-intent-research.md) — research-complete in PR #131; conditional compose-and-extend direction
+45. [045 — EditableLabel editing model and mounted parity](045-editable-label-editing-model-and-mounted-parity.md) — ready
+46. [046 — Block Slider and RangeSlider appearance](046-block-slider-and-range-slider-appearance.md) — ready
+47. [047 — Toast same-id update convention](047-toast-same-id-update-convention.md) — ready
+48. [048 — AgentSubagent ownership and shimmer benchmark](048-agent-subagent-ownership-and-shimmer-benchmark.md) — ready; contract reconciliation precedes the disposable benchmark
+49. [049 — Icon geometry format and registry foundation](049-icon-geometry-format-and-registry-foundation.md) — ready; IG-01/02 only
+50. [050 — Icon geometry internal runtime substrate](050-icon-geometry-internal-runtime-substrate.md) — blocked on accepted `g16.049`
+51. [051 — Icon geometry native visual admission](051-icon-geometry-native-visual-admission.md) — blocked on accepted `g16.050` and the external lab
+52. [052 — Contributor design-guidance pilot](052-contributor-design-guidance-pilot.md) — ready
+53. [053 — Repository security-audit boundary repair](053-repository-security-audit-boundary-repair.md) — ready
+54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — blocked on accepted `g16.053`; no release mutation
 
 ## Parallel Continuation
 
-Two continuation programmes are now explicit:
+The [canonical continuation map](component-continuation-runway.md) now owns the
+ready, serial, gated, and held frontier. Ready cards are `g16.045`–`g16.049`,
+`g16.052`, and `g16.053`. `g16.050`, `g16.051`, and `g16.054` retain their
+explicit serial or external gates. Citations, nested-menu pointer intent, the
+dedicated lab, its six-component / 24-fixture visual tranche, GPUI
+accessibility, public IconMorph admission, release/adoption mutations, and
+Jetstream remain gated or held rather than becoming implicit worker work.
+
+The earlier continuation programmes remain provenance:
 
 - **Component continuation:** merged `g16.020` accounts for all 175 components
   and returns seven bounded candidate lanes without mutating components or the
@@ -129,14 +147,15 @@ Two continuation programmes are now explicit:
   and proves the same bounded scroll ownership through mounted GPUI wheel input.
   No public sizing API changed and no parity-ledger cell moved.
 - **Tree consumer-authority follow-on:** PR #125 is merged and remains the
-  interaction/geometry baseline. `g16.036` is ready as a separate paired-web
+  interaction/geometry baseline. `g16.036` is complete in PR #127 as a paired-web
   public seam: one latched moving set, synchronous external eligibility and
   destination rewrite before accepted presentation, and the substrate's real
   commit result. It adds no consumer vocabulary or second machine. Rust/GPUI
   stays on the current synchronous single-row route because honest native
   parity requires broader Node substrate work.
 - **DesEngs research wave:** PR #126's eight-family intake is fully researched
-  in merged PRs #128–#135, and the consumed triage note is removed. The
+  in merged PRs #128–#135. The preserved triage packets now carry explicit
+  promoted or gated dispositions. The
   dossiers reject generic approval, task-list, live-series, numeric-motion,
   cue-policy, and toast-lifecycle APIs; citations remain composition-gated;
   nested-menu pointer intent is conditional compose-and-extend work. No public
@@ -155,7 +174,8 @@ shared core/headless exports and the domain-vector corpus.
 Promoting NumberInput's explicit runtime deltas moved only that ledger axis from
 115 / 60 to 116 present / 59 not-applicable; mounted totals are now 49 / 125
 after `g16.030`.
-EditableLabel still needs an operator-owned editing decision. Fader, Knob, and
+EditableLabel's operator-owned editing decision is accepted and compiled as
+ready `g16.045`. Fader, Knob, and
 XYPad now have a completed bounded audit and two serial cards: `g16.031`
 aligns paired machines plus Svelte/React gesture and entry lifecycles;
 `g16.032` added the missing continuous-value Node/GPUI seam and three mounted
@@ -172,8 +192,8 @@ component-order checklist:
 
 - close bounded foundation behavior gaps where the web authority, Rust
   contract, and mounted proof can be made coherent in one card;
-- execute the approved NumberInput value-model migration only after its serial
-  prerequisites, and resolve EditableLabel's separate gate before implementation;
+- execute the accepted post-triage ready frontier without crossing the serial,
+  external-lab, release, sibling-repository, or Jetstream gates;
 - repair composite selection/disclosure APIs such as Accordion only after
   their callback and state ownership are explicit;
 - choose a separate visual-comparison or native-accessibility programme only

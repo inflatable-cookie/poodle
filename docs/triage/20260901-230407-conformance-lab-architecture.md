@@ -1,6 +1,8 @@
 # Dedicated Conformance Lab Architecture
 
-Status: planning packet — recommendation ready; promotion remains orchestrator-owned
+Status: accepted architecture — external bootstrap remains held
+Disposition: dedicated lab stays outside Poodle and needs separate repository
+authority; no local windowed substitution
 Created: 2026-09-01
 Source handoff: `docs/handoffs/20260901-230407-conformance-lab-architecture-planning.md`
 Target repository: dedicated internal Poodle conformance-lab repository

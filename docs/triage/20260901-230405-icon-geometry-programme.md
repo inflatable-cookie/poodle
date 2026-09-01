@@ -1,7 +1,8 @@
 # Icon Geometry Programme
 
-Status: delegate recommendation ready for orchestrator review; implementation
-and public admission held
+Status: accepted programme — compiled as `g16.049`–`g16.051`
+Disposition: `g16.049` ready; `g16.050`/`g16.051` serially blocked; IG-07
+public admission remains held
 Captured: 2026-09-01
 Owner: Poodle Northstar planning delegate
 Promotion owner: Poodle Northstar orchestrator

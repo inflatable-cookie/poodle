@@ -1,6 +1,8 @@
 # EditableLabel Editing-Model Decision Proposal
 
-Status: delegate proposal awaiting operator acceptance or revision
+Status: accepted decision — promoted as `g16.045`
+Disposition: exact committed/draft, focus, keyboard, trim, scalar-limit, and
+teardown model
 Captured: 2026-09-01
 Owner: Poodle Northstar orchestrator
 Scope: EditableLabel activation, draft, commit, cancel, blur, and focus

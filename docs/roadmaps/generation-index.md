@@ -25,20 +25,23 @@ Updated: 2026-09-01
     `034` merged in PR #124 after four exact-head review rounds and delivered
     the shared motion policy and five-family pilot; `035` merged in PR #123 after
     two native-oracle repair rounds and closed the independent MarkdownEditor
-    bounded-preview issue; `036` is in exact-head review for the paired-web
-    Tree external drop-authority adapter after PR #125 supplied the interaction
-    and outline geometry baseline; `037`–`044` completed the DesEngs research
-    wave in merged PRs #128–#135
+    bounded-preview issue; `036` merged in PR #127 with the paired-web Tree
+    external drop-authority adapter; `037`–`044` completed the DesEngs research
+    wave in merged PRs #128–#135; `045`–`054` are the canonical post-triage
+    continuation cards
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: finish `g16.036` with serial same-repository review and merge.
-    The remaining post-motion queue is
-    recorded in
-    `../triage/20260901-125758-post-motion-research-queue.md`; block sliders
-    follow the motion pilot, while icon feasibility and AgentSubagent shimmer
-    remain downstream evidence gates. Component continuation remains paused at
-    the separate EditableLabel decision gate.
+  - Ready frontier: `g16.045` EditableLabel, `g16.046` block sliders,
+    `g16.047` toast updates, `g16.048` AgentSubagent reconciliation/benchmark,
+    `g16.049` icon geometry foundation, `g16.052` contributor-guidance pilot,
+    and `g16.053` security-audit boundary repair.
+  - Blocked frontier: `g16.050` on `049`; `g16.051` on `050` plus the external
+    lab; `g16.054` on `053`. Citations, nested menus, the visual tranche,
+    public IconMorph, publication/adoption, GPUI accessibility, and Jetstream
+    retain the gates recorded in `g16/component-continuation-runway.md`.
+  - Next move: orchestrator reviews and merges the exact planning head, then
+    dispatches only the ready frontier with overlap-aware serialization.
 
 ## Latest Completed Track
 

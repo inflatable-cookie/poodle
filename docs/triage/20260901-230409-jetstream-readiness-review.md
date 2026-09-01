@@ -1,6 +1,7 @@
 # Jetstream Admission Readiness Review
 
 Status: hold — readiness review complete; admission planning is not authorized
+Disposition: canonical runway records the hold; no implementation card
 Captured: 2026-09-01
 Source handoff: `docs/handoffs/20260901-230409-jetstream-readiness-review.md`
 Promotion route: orchestrator review; no merge in this delegate lane

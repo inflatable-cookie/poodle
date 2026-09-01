@@ -1,6 +1,7 @@
 # Toast Same-Id Update Convention Proposal
 
-Status: delegate proposal awaiting operator acceptance or revision
+Status: accepted decision — promoted as `g16.047`
+Disposition: consumer-owned same-id convention; no lifecycle or promise API
 Captured: 2026-09-01
 Owner: Poodle Northstar orchestrator
 Scope: narrow host update convention for in-place toast settlement

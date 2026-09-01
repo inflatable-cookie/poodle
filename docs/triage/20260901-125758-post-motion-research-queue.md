@@ -1,7 +1,8 @@
 # Post-Motion Research Queue
 
-Status: open — motion policy is promoted as g16.034; three downstream tracks
-retain evidence or operator gates
+Status: superseded by the canonical g16 continuation runway
+Disposition: block sliders are `g16.046`; AgentSubagent is `g16.048`; icon
+geometry is `g16.049`–`g16.051`
 Captured: 2026-09-01
 Owner: Poodle Northstar orchestrator
 Supersedes: `20260901-080641-post-g16-research-queue.md`

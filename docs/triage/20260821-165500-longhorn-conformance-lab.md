@@ -1,8 +1,8 @@
 # Longhorn-Backed Poodle Conformance Lab
 
-Status: open — the `g15.044`–`g15.047` Button comparator lane is complete;
-webview control is bounded and the native capture boundary is now explicit;
-full app ownership and process lifecycle remain a post-release decision
+Status: superseded in meaning by the accepted dedicated-lab architecture
+Disposition: preserve as source evidence; external bootstrap remains held in
+`20260901-230407-conformance-lab-architecture.md`
 Captured: 2026-08-21
 Operator idea: build a small Longhorn-backed Tauri app that agents can control
 over MCP to compare Poodle runtimes without stealing focus or pointer control.

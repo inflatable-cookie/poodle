@@ -1,7 +1,8 @@
 # HistoryCenter Release And Loophole Adoption Decision
 
-Status: planning packet for orchestrator review; no publication or sibling
-mutation from this branch
+Status: accepted decision — candidate chain compiled as `g16.053`–`g16.054`
+Disposition: `g16.053` ready; `g16.054` serially blocked; publication and
+sibling adoption retain separate authority
 Captured: 2026-09-01
 Owner: Poodle Northstar orchestrator
 Scope: publish the corrected Poodle preview packages, then Loophole pin and

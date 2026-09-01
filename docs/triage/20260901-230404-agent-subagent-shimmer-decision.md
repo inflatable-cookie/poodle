@@ -1,6 +1,8 @@
 # AgentSubagent Running Activity Shimmer — Decision Packet
 
-Status: proposal for orchestrator review; implementation held
+Status: accepted decision — promoted as `g16.048`
+Disposition: contract/runtime reconciliation, then disposable web benchmark;
+production shimmer remains held
 Captured: 2026-09-01
 Owner: Poodle Northstar orchestrator
 Source handoff: `docs/handoffs/20260901-230404-agent-subagent-shimmer-planning.md`
