@@ -27,13 +27,15 @@ Updated: 2026-09-01
     two native-oracle repair rounds and closed the independent MarkdownEditor
     bounded-preview issue; `036` is ready for the paired-web Tree external
     drop-authority adapter after PR #125 supplied the interaction and outline
-    geometry baseline
+    geometry baseline; `037`–`039` and `044` are research-ready from merged
+    DesEngs intake PR #126; `040`–`043` are planned behind accepted `034`
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: continue `g16.034` and dispatch the independently writable
-    `g16.036` Tree authority lane. Same-repository merges remain serial. The
-    remaining post-motion research queue is
+  - Next move: continue `g16.034` and `g16.036` with serial same-repository
+    merges. The independent research frontier is `g16.037`–`g16.039` plus
+    `g16.044`; `g16.040`–`g16.043` wait for accepted and merged `g16.034`.
+    The remaining post-motion research queue is
     recorded in
     `../triage/20260901-125758-post-motion-research-queue.md`; block sliders
     follow the motion pilot, while icon feasibility and AgentSubagent shimmer

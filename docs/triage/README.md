@@ -20,5 +20,3 @@ Current open notes:
   router pilot is settled as planning evidence; implementation held.
 - `20260901-125758-post-motion-research-queue.md` — motion policy is promoted;
   block slider, icon morph, and AgentSubagent shimmer remain gated.
-- `20260901-192850-desengs-reuse-candidates.md` — desengs.com full-index
-  scout (8 families). Research lead only; orchestrator splits cards.
