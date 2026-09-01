@@ -1394,7 +1394,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onCollapsedChange", type: "((isCollapsed: boolean) => void) | undefined", default: "undefined", description: "Called when the collapsed state changes." },
       { name: "onClose", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a panel tab is closed." },
       { name: "onReorder", type: "((items: string[]) => void) | undefined", default: "undefined", description: "Called when panel tabs are reordered." },
-      { name: "onPanelDrop", type: "((payload: { panel: PanelDragData; targetEdge: DockEdge }) => void) | undefined", default: "undefined", description: "Called when a panel is dropped onto this dock." },
+      { name: "onPanelDrop", type: "((payload: { panel: PanelDragData; targetEdge: DockEdge; index: number }) => void) | undefined", default: "undefined", description: "Called when a panel is dropped onto this dock. `index` is the insert slot in the destination items; a drop on the region body appends." },
     ],
     slots: [
       { name: "panel", description: "Static-panel snippet. Receives the current panel item." },

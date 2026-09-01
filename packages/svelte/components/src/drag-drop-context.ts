@@ -89,11 +89,35 @@ export function dropTargetAction(
   };
 }
 
-/** An immutable presentation read of one controller, as a store. */
+function presentationKey(snapshot: DragDropSnapshot): string {
+  return [
+    snapshot.phase,
+    snapshot.sourceId ?? "",
+    snapshot.targetId ?? "",
+    snapshot.targetPosture ?? "",
+    snapshot.announcement ?? "",
+    snapshot.preview?.label ?? "",
+    snapshot.preview ? "1" : "0",
+  ].join("|");
+}
+
+/** Presentation-only read: skips pointer-only moves so drop-target trees stay quiet. */
 export function dragDropSnapshotStore(controller: DragDropController): Readable<DragDropSnapshot> {
-  return readable(controller.getSnapshot(), (set) =>
-    controller.subscribe(() => set(controller.getSnapshot())),
-  );
+  return readable(controller.getSnapshot(), (set) => {
+    let last = presentationKey(controller.getSnapshot());
+    return controller.subscribe(() => {
+      const next = controller.getSnapshot();
+      const key = presentationKey(next);
+      if (key === last) return;
+      last = key;
+      set(next);
+    });
+  });
+}
+
+/** Public snapshot, including consecutive pointer/preview coordinates. */
+export function dragDropLiveSnapshotStore(controller: DragDropController): Readable<DragDropSnapshot> {
+  return readable(controller.getSnapshot(), (set) => controller.subscribe(() => set(controller.getSnapshot())));
 }
 
 /**
@@ -121,7 +145,7 @@ export function useDragDrop(): {
     throw new Error("useDragDrop must be used inside DragDropProvider");
   }
 
-  const snapshot = dragDropSnapshotStore(ctx.controller);
+  const snapshot = dragDropLiveSnapshotStore(ctx.controller);
 
   const dragSource = dragSourceAction(ctx.controller);
   const dropTarget = dropTargetAction(ctx.controller);

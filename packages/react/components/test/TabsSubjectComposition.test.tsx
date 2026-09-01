@@ -235,7 +235,7 @@ describe("Tabs drag subject composition", () => {
 
     // And each strip still reorders itself, so the ids resolve to the right
     // registrations rather than merely being unique.
-    dragTo(leftTabs(container)[0], 100);
+    dragTo(leftTabs(container)[0], 140);
     expect(onLeftReorder).toHaveBeenCalledWith(["beta", "alpha"]);
   });
 
@@ -278,7 +278,7 @@ describe("Tabs drag subject composition", () => {
     );
     layout(container);
 
-    dragTo(leftTabs(container)[0], 100);
+    dragTo(leftTabs(container)[0], 140);
 
     expect(onLeftReorder).toHaveBeenCalledWith(["beta", "alpha"]);
     expect(onCompositeDrop).not.toHaveBeenCalled();

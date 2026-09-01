@@ -419,8 +419,7 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
     // Source. `on_drag_start` and `on_drag_end` keep their `Fn(&str)` shape:
     // the tab value IS the subject id, so the row's own value answers both
     // without the terminal outcome having to carry a subject back.
-    let mut source =
-        crate::drag_drop::reorder_source_in_family(&scope, &kind, &value, &tab.label);
+    let mut source = crate::drag_drop::reorder_source_in_family(&scope, &kind, &value, &tab.label);
     if let Some(handler) = &handlers.on_drag_start {
         let handler = Arc::clone(handler);
         source.on_drag_start = Some(Arc::new(move |session| handler(&session.subject.id)));
@@ -434,15 +433,15 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
 
     // Target. A tab bar reorders along its main axis, so the band rule reads
     // the horizontal fraction; the drop itself reorders onto this tab's index
-    // and does not branch on the band.
-    let mut target = crate::drag_drop::reorder_target_in_family(
-        &scope,
-        &kind,
-        &value,
-        &tab.label,
-        owned,
-    );
-    target.resolve_position = Some(crate::drag_drop::horizontal_band_resolver(false));
+    // and does not branch on the band. The indicator paints the whole tab, so
+    // a drop on a sibling lands at that sibling.
+    let mut target =
+        crate::drag_drop::reorder_target_in_family(&scope, &kind, &value, &tab.label, owned);
+    target.resolve_position = Some(if spec.orientation == Orientation::Vertical {
+        crate::drag_drop::vertical_band_resolver(false)
+    } else {
+        crate::drag_drop::horizontal_band_resolver(false)
+    });
     if let Some(handler) = &handlers.on_drop_target_change {
         let hover = Arc::clone(handler);
         let value = value.clone();
@@ -457,10 +456,7 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
     let instance_id = handlers.instance_id.clone();
     let to_index = index;
     target.on_drop = Some(Arc::new(move |event| {
-        let Some(from_index) = items
-            .iter()
-            .position(|item| item.value == event.subject.id)
-        else {
+        let Some(from_index) = items.iter().position(|item| item.value == event.subject.id) else {
             return NodeDropCommit::Rejected {
                 reason: Some("The dragged tab is no longer in this tab set".to_string()),
             };
@@ -1333,6 +1329,7 @@ mod tests {
             target_id: target.target_id.clone(),
             position: "after".to_string(),
             operation: poodle_node::DragOperation::Move,
+            destination: None,
         };
         let subject = |id: &str| poodle_node::DragSubject {
             kind: "poodle.dock-panel".to_string(),
@@ -1397,7 +1394,11 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let root = tabs(&reorder_spec(), &ctx, None, None);
-        let target = tab_of(&root, "a").interaction.drop_target.clone().expect("target");
+        let target = tab_of(&root, "a")
+            .interaction
+            .drop_target
+            .clone()
+            .expect("target");
         let resolve = target.resolve_position.expect("resolver");
         let input = |x: f32, y: f32| poodle_node::NodeDropPositionInput {
             fraction_x: x,
@@ -1440,13 +1441,18 @@ mod tests {
                 ..TabsHandlers::default()
             },
         );
-        let target = tab_of(&root, "d").interaction.drop_target.clone().expect("target");
+        let target = tab_of(&root, "d")
+            .interaction
+            .drop_target
+            .clone()
+            .expect("target");
         let commit = (target.on_drop.as_ref().expect("drop"))(&poodle_node::NodeDropCommitEvent {
             subject: crate::drag_drop::reorder_subject("tabs", "a"),
             intent: poodle_node::DropIntent {
                 target_id: target.target_id.clone(),
                 position: poodle_node::DROP_POSITION_AFTER.to_string(),
                 operation: poodle_node::DragOperation::Move,
+                destination: None,
             },
             inbound_files: None,
         });
@@ -1461,6 +1467,36 @@ mod tests {
             ]]
         );
         assert_eq!(*focused.lock().unwrap(), vec!["a"]);
+    }
+
+    #[test]
+    fn a_vertical_tab_band_rule_reads_the_vertical_fraction() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = reorder_spec().with_orientation(poodle_specs::Orientation::Vertical);
+        let root = tabs(&spec, &ctx, None, None);
+        let target = tab_of(&root, "a")
+            .interaction
+            .drop_target
+            .clone()
+            .expect("target");
+        let resolve = target.resolve_position.expect("resolver");
+        let input = |x: f32, y: f32| poodle_node::NodeDropPositionInput {
+            fraction_x: x,
+            fraction_y: y,
+            subject: crate::drag_drop::reorder_subject("tabs", "b"),
+            operation: poodle_node::DragOperation::Move,
+            input_kind: poodle_node::NodeDragInputKind::Mouse,
+        };
+
+        assert_eq!(
+            resolve(&input(0.9, 0.1)).as_deref(),
+            Some(poodle_node::DROP_POSITION_BEFORE)
+        );
+        assert_eq!(
+            resolve(&input(0.1, 0.9)).as_deref(),
+            Some(poodle_node::DROP_POSITION_AFTER)
+        );
     }
 
     #[test]

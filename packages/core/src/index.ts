@@ -413,6 +413,9 @@ export {
   treeVirtualWindow,
   treeSubtreeContains,
   treeCanAcceptDrop,
+  treeDropEligibility,
+  treeLocate,
+  type TreeLocation,
   type TreeNodeLike,
   type TreeRow,
   type TreeCheckState,
@@ -766,6 +769,8 @@ export {
 } from "./dom/cross-window-data-transfer";
 export {
   dragSessionTransition,
+  dropCommitDestination,
+  asDropResolveResult,
   resolveDropTarget,
   type DragAnnouncementKind,
   type DragCancelReason,
@@ -780,17 +785,26 @@ export {
   type DragSubject,
   type DragTerminalOutcome,
   type DropEligibility,
+  type DropDestination,
   type DropIntent,
   type DropPosition,
+  type DropResolveResult,
+  type ResolvedDropPosition,
   type DropTargetCandidate,
   type StandardDropPosition,
 } from "./drag-drop";
 export {
   resolveNestedDropPosition,
+  treeResolveDropPosition,
+  treeResolveOutlineDrop,
+  treeOutlineRows,
+  type TreeOutlineDrop,
+  type TreeOutlineRow,
   type NestedDropKind,
   type NestedDropPositionInput,
   type NestedDropRect,
 } from "./dom/drag-drop-geometry";
+export { readTreeDropMetrics } from "./dom/tree-drop-metrics";
 export {
   canScrollHorizontal,
   canScrollVertical,

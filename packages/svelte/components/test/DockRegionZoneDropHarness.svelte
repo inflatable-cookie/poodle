@@ -1,10 +1,10 @@
 <script lang="ts">
   import DockRegion from "../src/DockRegion.svelte";
   import DragDropProvider from "../src/DragDropProvider.svelte";
-  import type { DockEdge, PanelDragData, PanelTabItem } from "../src/types";
+  import type { DockEdge, DockPanelDropPayload, DockSizing, PanelTabItem } from "../src/types";
 
   /**
-   * Two static dock regions, with or without one common provider.
+   * Two dock regions, with or without one common provider.
    *
    * The whole point of the pair is the difference between those two mountings:
    * under one provider the regions share a controller and can resolve each
@@ -14,26 +14,32 @@
   interface Props {
     shared: boolean;
     items: PanelTabItem[];
+    itemsB?: PanelTabItem[];
+    sizing?: DockSizing;
     canAcceptPanel?: ((panelId: string, sourceEdge: DockEdge) => boolean) | null;
-    onPanelDropA?: (payload: { panel: PanelDragData; targetEdge: DockEdge }) => void;
-    onPanelDropB?: (payload: { panel: PanelDragData; targetEdge: DockEdge }) => void;
+    onPanelDropA?: (payload: DockPanelDropPayload) => void;
+    onPanelDropB?: (payload: DockPanelDropPayload) => void;
     onReorderA?: (order: string[]) => void;
+    edge?: DockEdge;
   }
 
   let {
     shared,
     items,
+    itemsB = items,
+    sizing = "static",
     canAcceptPanel = null,
     onPanelDropA,
     onPanelDropB,
     onReorderA,
+    edge = "top",
   }: Props = $props();
 </script>
 
 {#snippet pair()}
   <DockRegion
-    sizing="static"
-    edge="top"
+    {sizing}
+    {edge}
     dragZoneId="region:a"
     {items}
     {canAcceptPanel}
@@ -45,10 +51,10 @@
     {/snippet}
   </DockRegion>
   <DockRegion
-    sizing="static"
-    edge="top"
+    {sizing}
+    {edge}
     dragZoneId="region:b"
-    {items}
+    items={itemsB}
     {canAcceptPanel}
     onPanelDrop={onPanelDropB}
   >

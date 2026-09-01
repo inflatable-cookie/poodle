@@ -5,6 +5,9 @@
     findTreeNode,
     flattenVisibleTreeRows,
     isTreeBranch,
+    treeOutlineRows,
+    treeDropEligibility,
+    dropCommitDestination,
     treeCheckState,
     treeKeydownIntent,
     treeRangeSelection,
@@ -244,11 +247,15 @@
 
   function handleDrop(intent: DropIntent): DragDropCommitResult {
     const from = liveSourceId;
-    if (!from || !isTreeDropPosition(intent.position)) {
+    const dest = dropCommitDestination(intent);
+    if (!from || !isTreeDropPosition(dest.position)) {
       return { status: "rejected", reason: "unavailable" };
     }
-    if (from === intent.targetId) return { status: "rejected", reason: "self" };
-    onReorder?.(from, intent.targetId, intent.position);
+    const eligibility = treeDropEligibility(nodes, from, intent);
+    if (eligibility.accepted === false) {
+      return { status: "rejected", reason: eligibility.reason };
+    }
+    onReorder?.(from, dest.targetId, dest.position);
     return { status: "committed" };
   }
   // Alt+Up/Down moves the focused node among its siblings.
@@ -536,6 +543,7 @@
   <TreeItem
     {node}
     {nodes}
+    outlineRows={treeOutlineRows(visibleRows)}
     {depth}
     {parent}
     {branch}
@@ -569,6 +577,7 @@
   <TreeItem
     {node}
     {nodes}
+    outlineRows={treeOutlineRows(visibleRows)}
     {depth}
     {parent}
     {branch}

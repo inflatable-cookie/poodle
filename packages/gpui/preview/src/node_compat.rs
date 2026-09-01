@@ -7775,6 +7775,8 @@ pub(crate) struct DockRegion {
     on_collapse_toggle: Option<Arc<dyn Fn(bool) + Send + Sync>>,
     instance_id: Option<String>,
     on_panel_drop: Option<Arc<dyn Fn(&poodle_render::DockPanelDrop) + Send + Sync>>,
+    on_reorder: Option<Arc<dyn Fn(&[String]) + Send + Sync>>,
+    accept_panel: Option<Arc<dyn Fn(&str, &str) -> bool + Send + Sync>>,
     cross_window_drag_source: Option<Arc<dyn poodle_node::CrossWindowDragSourceBridge>>,
 }
 
@@ -7785,6 +7787,8 @@ impl DockRegion {
             theme: theme.clone(),
             content: None,
             on_panel_drop: None,
+            on_reorder: None,
+            accept_panel: None,
             cross_window_drag_source: None,
             on_tab_change: None,
             on_collapse_toggle: None,
@@ -7828,12 +7832,27 @@ impl DockRegion {
         self
     }
 
+    pub(crate) fn on_reorder(mut self, handler: Arc<dyn Fn(&[String]) + Send + Sync>) -> Self {
+        self.on_reorder = Some(handler);
+        self
+    }
+
+    pub(crate) fn accept_panel(
+        mut self,
+        handler: Arc<dyn Fn(&str, &str) -> bool + Send + Sync>,
+    ) -> Self {
+        self.accept_panel = Some(handler);
+        self
+    }
+
     fn into_node(self) -> poodle_node::Node {
         let handlers = poodle_render::DockRegionHandlers {
             on_tab_change: self.on_tab_change,
             on_collapse_toggle: self.on_collapse_toggle,
             instance_id: self.instance_id,
             on_panel_drop: self.on_panel_drop,
+            on_reorder: self.on_reorder,
+            accept_panel: self.accept_panel,
             cross_window_drag_source: self.cross_window_drag_source,
         };
         poodle_render::dock_region(&self.spec, &RenderContext::new(&self.theme), self.content, handlers)

@@ -20,6 +20,8 @@
        above it. Same defaults; a consumer can now zero them. */
     --poodle-tree-pad-block: var(--poodle-space-panel-y);
     --poodle-tree-pad-inline: 0.25rem;
+    /* Drop line starts at the icon column, past the twisty gutter. */
+    --poodle-tree-drop-icon-inset: var(--poodle-tree-twisty-size);
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -110,6 +112,9 @@
      nothing and just leaves an empty column down the left. Reclaimed only when
      the consumer opts in, and only while the tree really is flat — the moment a
      node becomes a branch the spacer returns and alignment is right again. */
+  .poodle-tree[data-flat="true"] {
+    --poodle-tree-drop-icon-inset: 0px;
+  }
   .poodle-tree[data-flat="true"] .poodle-tree__twisty {
     display: none;
   }
@@ -245,6 +250,12 @@
   .poodle-tree__item > .poodle-tree__row {
     position: relative;
   }
+  /* The drop target is the treeitem (it wraps children). The generic
+     provider outline would ring the whole subtree and disagree with the
+     row's before/after line. */
+  .poodle-tree .poodle-tree__item[data-poodle-drop-target] {
+    outline: none;
+  }
   .poodle-tree .poodle-tree__item[data-poodle-drop-target="accepted"] > .poodle-tree__row,
   .poodle-tree .poodle-tree__item[data-poodle-drop-target="rejected"] > .poodle-tree__row {
     outline: none;
@@ -253,8 +264,11 @@
   .poodle-tree__item[data-poodle-drop-position="after"] > .poodle-tree__row::after {
     content: "";
     position: absolute;
-    left: 0;
-    right: 0;
+    left: calc(
+      var(--poodle-tree-row-pad-inline) + var(--poodle-tree-drop-depth, 0) * var(--poodle-tree-indent) +
+        var(--poodle-tree-drop-icon-inset)
+    );
+    right: var(--poodle-tree-row-pad-inline);
     height: 0.125rem;
     background: var(--poodle-recipe-tree-before-after-row-after-fill, var(--poodle-color-accent-base));
     pointer-events: none;
@@ -266,6 +280,8 @@
     bottom: -0.0625rem;
   }
   .poodle-tree__item[data-poodle-drop-position="inside"] > .poodle-tree__row {
-    box-shadow: var(--poodle-recipe-tree-row-shadow, inset 0 0 0 0.0625rem var(--poodle-color-accent-base));
-    background: var(--poodle-recipe-tree-inside-row-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
+    background: var(
+      --poodle-recipe-tree-inside-row-fill,
+      color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)
+    );
   }

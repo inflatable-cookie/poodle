@@ -114,8 +114,31 @@
   }));
   let bigExpanded = $state<string[]>(bigTree.map((n) => n.value));
 
-  // Inline rename + right-click context menu.
+  // Inline rename + right-click context menu + reorder.
   let renameNodes = $state<TreeNode[]>([
+    {
+      value: "src",
+      label: "src",
+      icon: "folder",
+      children: [
+        {
+          value: "src/components",
+          label: "components",
+          icon: "folder",
+          children: [
+            { value: "src/components/Button.svelte", label: "Button.svelte", icon: "file" },
+            { value: "src/components/Tree.svelte", label: "Tree.svelte", icon: "file" },
+          ],
+        },
+        {
+          value: "src/lib",
+          label: "lib",
+          icon: "folder",
+          children: [{ value: "src/lib/utils.ts", label: "utils.ts", icon: "file" }],
+        },
+        { value: "src/index.ts", label: "index.ts", icon: "file" },
+      ],
+    },
     {
       value: "docs",
       label: "docs",
@@ -123,11 +146,35 @@
       children: [
         { value: "docs/intro.md", label: "intro.md", icon: "file" },
         { value: "docs/guide.md", label: "guide.md", icon: "file" },
+        {
+          value: "docs/api",
+          label: "api",
+          icon: "folder",
+          children: [{ value: "docs/api/tree.md", label: "tree.md", icon: "file" }],
+        },
       ],
     },
+    {
+      value: "assets",
+      label: "assets",
+      icon: "folder",
+      children: [
+        { value: "assets/logo.svg", label: "logo.svg", icon: "file" },
+        { value: "assets/icon.svg", label: "icon.svg", icon: "file" },
+      ],
+    },
+    { value: "vendor", label: "vendor", icon: "folder", isBranch: true },
     { value: "notes.txt", label: "notes.txt", icon: "file" },
+    { value: "README.md", label: "README.md", icon: "file" },
   ]);
-  let renameExpanded = $state<string[]>(["docs"]);
+  let renameExpanded = $state<string[]>([
+    "src",
+    "src/components",
+    "src/lib",
+    "docs",
+    "docs/api",
+    "assets",
+  ]);
   let editing = $state<string | null>(null);
   let menuOpen = $state(false);
   let menuAnchor = $state<{ x: number; y: number } | null>(null);
@@ -274,7 +321,7 @@
     </SpecimenGroup>
 
     <SpecimenGroup label="Editing and reordering">
-      <div class="poodle-specimen__frame">
+      <div class="poodle-specimen__frame poodle-specimen__frame--reorder">
         <Tree
           ariaLabel="Rename tree"
           nodes={renameNodes}
@@ -350,5 +397,10 @@
   .poodle-specimen__frame--virtual {
     min-height: 0;
     overflow: hidden;
+  }
+
+  .poodle-specimen__frame--reorder {
+    width: 22rem;
+    min-height: 28rem;
   }
 </style>

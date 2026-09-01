@@ -24,6 +24,7 @@ import {
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Button } from "./Button";
 import { DragDropProvider, useOptionalDragDrop } from "./drag-drop";
+import { useTabsForeignInsert } from "./tabs-foreign-insert";
 import { Icon } from "./Icon";
 import { Menu } from "./Menu";
 import { Pill } from "./Pill";
@@ -168,13 +169,14 @@ export function Tabs({
   actions,
 }: TabsProps) {
   const tabsId = useId();
+  const foreignInsert = useTabsForeignInsert();
   const uiPresentation = useUiPresentation();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const measureListRef = useRef<HTMLDivElement | null>(null);
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingTabFocus = useRef<number | null>(null);
+  const pendingTabFocus = useRef<string | null>(null);
   const lastItemsSignature = useRef("");
   const lastSyncedValue = useRef<string | null>(null);
   const historyReady = useRef(false);
@@ -188,8 +190,9 @@ export function Tabs({
   const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    setTooltipAnchor(tooltipIndex === null ? null : (tabRefs.current[tooltipIndex] ?? null));
-  }, [tooltipIndex]);
+    const value = tooltipIndex === null ? undefined : renderedItems[tooltipIndex]?.value;
+    setTooltipAnchor(value ? (tabRefs.current[value] ?? null) : null);
+  }, [tooltipIndex, renderedItems]);
   const [collapsedByOverflow, setCollapsedByOverflow] = useState(false);
   /** How many entries of `shed` are currently given up. */
   const [shedCount, setShedCount] = useState(0);
@@ -280,7 +283,8 @@ export function Tabs({
           break;
         }
         case "focusTab": {
-          pendingTabFocus.current = effect.index;
+          // The button follows the tab's value across keyed reorder; index slots do not.
+          pendingTabFocus.current = result.context.items[effect.index]?.value ?? null;
           break;
         }
         case "emitReorder": {
@@ -525,9 +529,16 @@ export function Tabs({
    * one when the tab is moving forward.
    */
   function handleDrop(intent: DropIntent): DragDropCommitResult {
-    const from = indexOfValue(dragController.getSnapshot().session?.subject.id ?? "");
+    const subjectId = dragController.getSnapshot().session?.subject.id ?? "";
+    const from = indexOfValue(subjectId);
     const target = indexOfValue(valueOfTargetId(intent.targetId));
-    if (from < 0 || target < 0 || from === target) {
+    if (from < 0) {
+      if (!foreignInsert || target < 0) {
+        return { status: "rejected", reason: "same tab" };
+      }
+      return foreignInsert.commit(subjectId, intent.position === "after" ? target + 1 : target);
+    }
+    if (target < 0 || from === target) {
       return { status: "rejected", reason: "same tab" };
     }
 
@@ -539,6 +550,10 @@ export function Tabs({
         : from < target
           ? target
           : target + 1;
+
+    if (from === to) {
+      return { status: "rejected", reason: "same tab" };
+    }
 
     send({ type: "REORDER", fromIndex: from, toIndex: to });
     return { status: "committed" };
@@ -688,6 +703,8 @@ export function Tabs({
                 crossWindowSourceBridge={crossWindowSourceBridge}
                 indexOfValue={indexOfValue}
                 ownsValue={ownsValue}
+                acceptsForeign={foreignInsert !== null}
+                isVertical={isVertical}
                 sourceId={sourceIdOf(item.value)}
                 targetId={targetIdOf(item.value)}
                 selected={currentValue === item.value}
@@ -695,7 +712,7 @@ export function Tabs({
                 iconSize={resolvedIconSize}
                 onDrop={handleDrop}
                 onElement={(element) => {
-                  tabRefs.current[index] = element;
+                  tabRefs.current[item.value] = element;
                 }}
                 onSelect={() => send({ type: "SELECT", value: item.value })}
                 onClose={() => send({ type: "CLOSE", value: item.value })}

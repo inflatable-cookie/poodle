@@ -65,15 +65,58 @@ fn apply_file_pick_outcome(
 pub fn docs_tree() -> Vec<TreeNode> {
     vec![
         TreeNode::branch(
+            "src",
+            "src",
+            vec![
+                TreeNode::branch(
+                    "src/components",
+                    "components",
+                    vec![
+                        TreeNode::new("src/components/Button.svelte", "Button.svelte")
+                            .with_icon("file"),
+                        TreeNode::new("src/components/Tree.svelte", "Tree.svelte").with_icon("file"),
+                    ],
+                )
+                .with_icon("folder"),
+                TreeNode::branch(
+                    "src/lib",
+                    "lib",
+                    vec![TreeNode::new("src/lib/utils.ts", "utils.ts").with_icon("file")],
+                )
+                .with_icon("folder"),
+                TreeNode::new("src/index.ts", "index.ts").with_icon("file"),
+            ],
+        )
+        .with_icon("folder"),
+        TreeNode::branch(
             "docs",
             "docs",
             vec![
                 TreeNode::new("docs/intro.md", "intro.md").with_icon("file"),
                 TreeNode::new("docs/guide.md", "guide.md").with_icon("file"),
+                TreeNode::branch(
+                    "docs/api",
+                    "api",
+                    vec![TreeNode::new("docs/api/tree.md", "tree.md").with_icon("file")],
+                )
+                .with_icon("folder"),
             ],
         )
         .with_icon("folder"),
+        TreeNode::branch(
+            "assets",
+            "assets",
+            vec![
+                TreeNode::new("assets/logo.svg", "logo.svg").with_icon("file"),
+                TreeNode::new("assets/icon.svg", "icon.svg").with_icon("file"),
+            ],
+        )
+        .with_icon("folder"),
+        TreeNode::new("vendor", "vendor")
+            .with_icon("folder")
+            .with_branch(true),
         TreeNode::new("notes.txt", "notes.txt").with_icon("file"),
+        TreeNode::new("README.md", "README.md").with_icon("file"),
     ]
 }
 

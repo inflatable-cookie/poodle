@@ -14,7 +14,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DockRegion } from "../src/DockRegion";
 import { DragDropProvider } from "../src/drag-drop";
-import type { DockEdge, PanelDragData, PanelTabItem } from "../src/types";
+import type { DockEdge, DockPanelDropPayload, PanelTabItem } from "../src/types";
 
 const items: PanelTabItem[] = [
   { value: "explorer", label: "Explorer" },
@@ -23,14 +23,22 @@ const items: PanelTabItem[] = [
 
 interface PairProps {
   shared: boolean;
+  itemsA?: PanelTabItem[];
+  itemsB?: PanelTabItem[];
+  sizing?: "static" | "flexible";
+  edge?: DockEdge;
   canAcceptPanel?: ((panelId: string, sourceEdge: DockEdge) => boolean) | null;
-  onPanelDropA?: (payload: { panel: PanelDragData; targetEdge: DockEdge }) => void;
-  onPanelDropB?: (payload: { panel: PanelDragData; targetEdge: DockEdge }) => void;
+  onPanelDropA?: (payload: DockPanelDropPayload) => void;
+  onPanelDropB?: (payload: DockPanelDropPayload) => void;
   onReorderA?: (order: string[]) => void;
 }
 
 function Pair({
   shared,
+  itemsA = items,
+  itemsB = items,
+  sizing = "static",
+  edge = "top",
   canAcceptPanel = null,
   onPanelDropA,
   onPanelDropB,
@@ -39,20 +47,20 @@ function Pair({
   const pair = (
     <>
       <DockRegion
-        sizing="static"
-        edge="top"
+        sizing={sizing}
+        edge={edge}
         dragZoneId="region:a"
-        items={items}
+        items={itemsA}
         canAcceptPanel={canAcceptPanel}
         onPanelDrop={onPanelDropA}
         onReorder={onReorderA}
         panel={(item) => <span data-panel={item.value}>{item.label}</span>}
       />
       <DockRegion
-        sizing="static"
-        edge="top"
+        sizing={sizing}
+        edge={edge}
         dragZoneId="region:b"
-        items={items}
+        items={itemsB}
         canAcceptPanel={canAcceptPanel}
         onPanelDrop={onPanelDropB}
         panel={(item) => <span data-panel={item.value}>{item.label}</span>}
@@ -76,6 +84,18 @@ function layout(container: HTMLElement): void {
     [...region.querySelectorAll<HTMLElement>(".poodle-dock-region__stack-item")].forEach(
       (item, index) => {
         box(item, originX + index * 100, 20, 100, 60);
+      },
+    );
+  });
+}
+
+function layoutColumn(container: HTMLElement): void {
+  [...container.querySelectorAll<HTMLElement>("section")].forEach((region, regionIndex) => {
+    const originX = regionIndex * 400;
+    box(region, originX, 0, 120, 200);
+    [...region.querySelectorAll<HTMLElement>(".poodle-dock-region__stack-item")].forEach(
+      (item, index) => {
+        box(item, originX + 20, index * 80, 80, 80);
       },
     );
   });
@@ -125,6 +145,18 @@ function stackItems(container: HTMLElement): HTMLElement[] {
   return [...container.querySelectorAll<HTMLElement>(".poodle-dock-region__stack-item")];
 }
 
+function layoutTabs(container: HTMLElement): void {
+  [...container.querySelectorAll<HTMLElement>("section")].forEach((region, regionIndex) => {
+    const originX = regionIndex * 400;
+    box(region, originX, 0, 400, 100);
+    [...region.querySelectorAll<HTMLElement>(".poodle-tabs__item")].forEach((item, index) => {
+      box(item, originX + index * 100, 0, 100, 30);
+      const tab = item.querySelector<HTMLElement>(".poodle-tabs__tab");
+      if (tab) box(tab, originX + index * 100, 0, 100, 30);
+    });
+  });
+}
+
 describe("DockRegion panel movement", () => {
   beforeEach(() => {
     vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
@@ -149,8 +181,8 @@ describe("DockRegion panel movement", () => {
     const [sourceItem] = stackItems(container);
     send(sourceItem, pointer("pointerdown", 50, 50));
     send(document, pointer("pointermove", 90, 50));
-    send(document, pointer("pointermove", 450, 50));
-    send(document, pointer("pointerup", 450, 50));
+    send(document, pointer("pointermove", 420, 50));
+    send(document, pointer("pointerup", 420, 50));
 
     expect(onPanelDropB).toHaveBeenCalledOnce();
     expect(onPanelDropB.mock.calls[0][0].panel).toEqual({
@@ -159,7 +191,102 @@ describe("DockRegion panel movement", () => {
       sourceZone: "region:a",
     });
     expect(onPanelDropB.mock.calls[0][0].targetEdge).toBe("top");
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
     expect(onPanelDropA).not.toHaveBeenCalled();
+  });
+
+  it("a flexible strip drop lands at the hovered tab, not the end", () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(
+      <Pair
+        shared
+        sizing="flexible"
+        itemsA={items}
+        itemsB={[{ value: "outline", label: "Outline" }]}
+        onPanelDropB={onPanelDropB}
+      />,
+    );
+    layoutTabs(container);
+
+    const source = container.querySelectorAll<HTMLElement>('[role="tab"]')[0]!;
+    send(source, pointer("pointerdown", 50, 15));
+    send(document, pointer("pointermove", 90, 15));
+    send(document, pointer("pointermove", 420, 15));
+    send(document, pointer("pointerup", 420, 15));
+
+    expect(onPanelDropB).toHaveBeenCalledOnce();
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
+  });
+
+  it("refuses a panel on a hovered flexible tab when canAcceptPanel says no", () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(
+      <Pair
+        shared
+        sizing="flexible"
+        itemsA={items}
+        itemsB={[{ value: "outline", label: "Outline" }]}
+        canAcceptPanel={(panelId) => panelId !== "explorer"}
+        onPanelDropB={onPanelDropB}
+      />,
+    );
+    layoutTabs(container);
+
+    const source = container.querySelectorAll<HTMLElement>('[role="tab"]')[0]!;
+    send(source, pointer("pointerdown", 50, 15));
+    send(document, pointer("pointermove", 90, 15));
+    send(document, pointer("pointermove", 420, 15));
+    expect(container.querySelectorAll("[data-drop-target]")).toHaveLength(0);
+    send(document, pointer("pointerup", 420, 15));
+    expect(onPanelDropB).not.toHaveBeenCalled();
+  });
+
+  it("inserts before or after a static stack item from the hovered half", () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(<Pair shared onPanelDropB={onPanelDropB} />);
+    layout(container);
+    expect(container.querySelector(".poodle-dock-region__stack")?.getAttribute("data-direction")).toBe(
+      "row",
+    );
+
+    const [sourceItem] = stackItems(container);
+    send(sourceItem, pointer("pointerdown", 50, 50));
+    send(document, pointer("pointermove", 90, 50));
+    send(document, pointer("pointermove", 490, 50));
+    send(document, pointer("pointerup", 490, 50));
+    expect(onPanelDropB).toHaveBeenCalledOnce();
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(1);
+
+    onPanelDropB.mockClear();
+    send(sourceItem, pointer("pointerdown", 50, 50));
+    send(document, pointer("pointermove", 90, 50));
+    send(document, pointer("pointermove", 410, 50));
+    send(document, pointer("pointerup", 410, 50));
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
+  });
+
+  it("inserts before or after a side-edge static stack item from the hovered Y half", () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(<Pair shared edge="left" onPanelDropB={onPanelDropB} />);
+    layoutColumn(container);
+    expect(container.querySelector(".poodle-dock-region__stack")?.getAttribute("data-direction")).toBe(
+      "column",
+    );
+
+    const [sourceItem] = stackItems(container);
+    send(sourceItem, pointer("pointerdown", 50, 40));
+    send(document, pointer("pointermove", 90, 40));
+    send(document, pointer("pointermove", 460, 100));
+    send(document, pointer("pointerup", 460, 100));
+    expect(onPanelDropB).toHaveBeenCalledOnce();
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(1);
+
+    onPanelDropB.mockClear();
+    send(sourceItem, pointer("pointerdown", 50, 40));
+    send(document, pointer("pointermove", 90, 40));
+    send(document, pointer("pointermove", 460, 20));
+    send(document, pointer("pointerup", 460, 20));
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
   });
 
   it("keeps local reorder but discovers no sibling when each region provides itself", () => {

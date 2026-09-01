@@ -2263,6 +2263,7 @@ fn a_bridged_gpui_source_prepares_before_activation_and_ends_on_the_host_termina
                 target_id: "xw-zone-a".to_string(),
                 position: "after".to_string(),
                 operation: poodle_node::DragOperation::Move,
+                destination: None,
             },
         });
         driver.draw_frame();
@@ -6805,6 +6806,254 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
         assert!(
             after_collapse.iter().any(|t| t == "Tab: search"),
             "the stored tab survives collapse"
+        );
+    });
+}
+
+/// Hovered-tab `accept_panel` and static-stack before/after insert run through
+/// mounted pointer dispatch, not a direct handler poke. Top docks resolve X;
+/// side docks resolve Y, matching their stack axis.
+#[test]
+fn dock_region_hovered_tab_policy_and_static_insert_run_through_mounted_input() {
+    use poodle_render::DockPanelDrop;
+    use poodle_specs::{DockEdge, DockRegionSpec, DockSizing, PanelTabItem};
+
+    fn sized(id: &str, width: f32, height: f32, child: Node) -> Node {
+        let mut wrap = Node::container();
+        wrap.id = Some(id.to_owned());
+        wrap.style.descriptor.layout.width = LayoutSizing::Fixed(width);
+        wrap.style.descriptor.layout.height = LayoutSizing::Fixed(height);
+        wrap.child(child)
+    }
+
+    run_headless(|cx| {
+        let refused = Arc::new(Mutex::new(Vec::new()));
+        let left = DockRegionSpec::new(
+            DockEdge::Left,
+            vec![PanelTabItem::new("explorer", "Explorer")],
+        )
+        .with_can_accept_panel(true)
+        .with_drag_zone_id("zone-a")
+        .with_value("explorer");
+        let right = DockRegionSpec::new(
+            DockEdge::Left,
+            vec![PanelTabItem::new("outline", "Outline")],
+        )
+        .with_can_accept_panel(true)
+        .with_drag_zone_id("zone-b")
+        .with_value("outline");
+
+        let left_dock = poodle_render::dock_region(
+            &left,
+            &RenderContext::new(&theme()),
+            None,
+            poodle_render::DockRegionHandlers {
+                on_panel_drop: {
+                    let refused = Arc::clone(&refused);
+                    Some(Arc::new(move |drop: &DockPanelDrop| {
+                        refused.lock().unwrap().push(drop.clone());
+                    }))
+                },
+                accept_panel: Some(Arc::new(|panel_id: &str, _edge: &str| {
+                    panel_id != "explorer"
+                })),
+                ..poodle_render::DockRegionHandlers::default()
+            },
+        );
+        let right_dock = poodle_render::dock_region(
+            &right,
+            &RenderContext::new(&theme()),
+            None,
+            poodle_render::DockRegionHandlers {
+                on_panel_drop: {
+                    let refused = Arc::clone(&refused);
+                    Some(Arc::new(move |drop: &DockPanelDrop| {
+                        refused.lock().unwrap().push(drop.clone());
+                    }))
+                },
+                accept_panel: Some(Arc::new(|panel_id: &str, _edge: &str| {
+                    panel_id != "explorer"
+                })),
+                ..poodle_render::DockRegionHandlers::default()
+            },
+        );
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(400.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(160.0);
+        let node = Arc::new(Mutex::new(
+            row.child(sized("dock-a", 200.0, 160.0, left_dock))
+                .child(sized("dock-b", 200.0, 160.0, right_dock)),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 400.0, 160.0);
+        driver.draw_frame();
+
+        let source = payload_frac("dock-tab-explorer", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 8.0), source.y));
+        driver.pointer_drag(payload_frac("dock-tab-outline", 0.5, 0.5));
+        driver.pointer_release(payload_frac("dock-tab-outline", 0.5, 0.5));
+        assert!(
+            refused.lock().unwrap().is_empty(),
+            "accept_panel must refuse explorer on the hovered tab"
+        );
+    });
+
+    run_headless(|cx| {
+        let moved = Arc::new(Mutex::new(Vec::new()));
+        let source_spec = DockRegionSpec::new(
+            DockEdge::Top,
+            vec![PanelTabItem::new("explorer", "Explorer")],
+        )
+        .with_sizing(DockSizing::Static)
+        .with_can_accept_panel(true)
+        .with_drag_zone_id("stack-a");
+        let target_spec = DockRegionSpec::new(
+            DockEdge::Top,
+            vec![
+                PanelTabItem::new("outline", "Outline"),
+                PanelTabItem::new("inspector", "Inspector"),
+            ],
+        )
+        .with_sizing(DockSizing::Static)
+        .with_can_accept_panel(true)
+        .with_drag_zone_id("stack-b");
+
+        let source_dock = poodle_render::dock_region(
+            &source_spec,
+            &RenderContext::new(&theme()),
+            None,
+            poodle_render::DockRegionHandlers::default(),
+        );
+        assert_eq!(
+            source_dock.style.descriptor.layout.direction,
+            LayoutDirection::Row,
+            "a top static stack is a row"
+        );
+        let target_dock = poodle_render::dock_region(
+            &target_spec,
+            &RenderContext::new(&theme()),
+            None,
+            poodle_render::DockRegionHandlers {
+                on_panel_drop: {
+                    let moved = Arc::clone(&moved);
+                    Some(Arc::new(move |drop: &DockPanelDrop| {
+                        moved.lock().unwrap().push(drop.clone());
+                    }))
+                },
+                ..poodle_render::DockRegionHandlers::default()
+            },
+        );
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(400.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(160.0);
+        let node = Arc::new(Mutex::new(
+            row.child(sized("stack-a-host", 200.0, 160.0, source_dock))
+                .child(sized("stack-b-host", 200.0, 160.0, target_dock)),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 400.0, 160.0);
+        driver.draw_frame();
+
+        let source = payload_frac("dock-stack-explorer", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 8.0), source.y));
+        driver.pointer_drag(payload_frac("dock-stack-outline", 0.25, 0.5));
+        driver.pointer_release(payload_frac("dock-stack-outline", 0.25, 0.5));
+        assert_eq!(
+            moved.lock().unwrap().last().map(|drop| drop.index),
+            Some(0),
+            "left half of a top static stack item inserts before"
+        );
+
+        moved.lock().unwrap().clear();
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 8.0), source.y));
+        driver.pointer_drag(payload_frac("dock-stack-outline", 0.75, 0.5));
+        driver.pointer_release(payload_frac("dock-stack-outline", 0.75, 0.5));
+        assert_eq!(
+            moved.lock().unwrap().last().map(|drop| drop.index),
+            Some(1),
+            "right half of a top static stack item inserts after"
+        );
+    });
+
+    run_headless(|cx| {
+        let moved = Arc::new(Mutex::new(Vec::new()));
+        let source_spec = DockRegionSpec::new(
+            DockEdge::Left,
+            vec![PanelTabItem::new("explorer", "Explorer")],
+        )
+        .with_sizing(DockSizing::Static)
+        .with_can_accept_panel(true)
+        .with_drag_zone_id("side-a");
+        let target_spec = DockRegionSpec::new(
+            DockEdge::Left,
+            vec![
+                PanelTabItem::new("outline", "Outline"),
+                PanelTabItem::new("inspector", "Inspector"),
+            ],
+        )
+        .with_sizing(DockSizing::Static)
+        .with_can_accept_panel(true)
+        .with_drag_zone_id("side-b");
+
+        let source_dock = poodle_render::dock_region(
+            &source_spec,
+            &RenderContext::new(&theme()),
+            None,
+            poodle_render::DockRegionHandlers::default(),
+        );
+        assert_eq!(
+            source_dock.style.descriptor.layout.direction,
+            LayoutDirection::Column,
+            "a side static stack is a column"
+        );
+        let target_dock = poodle_render::dock_region(
+            &target_spec,
+            &RenderContext::new(&theme()),
+            None,
+            poodle_render::DockRegionHandlers {
+                on_panel_drop: {
+                    let moved = Arc::clone(&moved);
+                    Some(Arc::new(move |drop: &DockPanelDrop| {
+                        moved.lock().unwrap().push(drop.clone());
+                    }))
+                },
+                ..poodle_render::DockRegionHandlers::default()
+            },
+        );
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(400.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(200.0);
+        let node = Arc::new(Mutex::new(
+            row.child(sized("side-a-host", 200.0, 200.0, source_dock))
+                .child(sized("side-b-host", 200.0, 200.0, target_dock)),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 400.0, 200.0);
+        driver.draw_frame();
+
+        let source = payload_frac("dock-stack-explorer", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 8.0), source.y));
+        driver.pointer_drag(payload_frac("dock-stack-outline", 0.5, 0.75));
+        driver.pointer_release(payload_frac("dock-stack-outline", 0.5, 0.75));
+        assert_eq!(
+            moved.lock().unwrap().last().map(|drop| drop.index),
+            Some(1),
+            "lower half of a side static stack item inserts after"
+        );
+
+        moved.lock().unwrap().clear();
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 8.0), source.y));
+        driver.pointer_drag(payload_frac("dock-stack-outline", 0.5, 0.25));
+        driver.pointer_release(payload_frac("dock-stack-outline", 0.5, 0.25));
+        assert_eq!(
+            moved.lock().unwrap().last().map(|drop| drop.index),
+            Some(0),
+            "upper half of a side static stack item inserts before"
         );
     });
 }
@@ -15069,18 +15318,21 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
         }
 
         // ── Cancelled drag: hovered intent appears, then nothing commits ──
+        //
+        // Bravo is a branch. Its middle band nests. Charlie is a sibling leaf,
+        // so the same fraction would land after it rather than inside.
         let alpha = payload_frac("tree:alpha", 0.5, 0.5);
         driver.pointer_press(alpha);
         driver.pointer_drag(point(px(f32::from(alpha.x) + 4.0), alpha.y));
-        driver.pointer_drag(payload_frac("tree:charlie", 0.5, 0.5));
+        driver.pointer_drag(payload_frac("tree:bravo", 0.5, 0.5));
         {
             let host = host.lock().expect("host lock");
             assert_eq!(host.drag.as_deref(), Some("alpha"));
-            assert_eq!(host.drop_target.as_deref(), Some("charlie"));
+            assert_eq!(host.drop_target.as_deref(), Some("bravo"));
             assert_eq!(
                 host.drop_position,
                 TreeDropPosition::Inside,
-                "a tree row's middle band is a nested placement, not a sibling one"
+                "a branch row's middle band is a nested placement, not a sibling one"
             );
         }
         driver.dispatch_key("escape");
@@ -15098,7 +15350,7 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
             // changing Tree's public API.
             assert_eq!(
                 host.drop_target.as_deref(),
-                Some("charlie"),
+                Some("bravo"),
                 "the latched indicator is the documented Tree gap"
             );
         }

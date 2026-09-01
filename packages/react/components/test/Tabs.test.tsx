@@ -158,8 +158,7 @@ describe("Tabs (react)", () => {
 
     send(document, pointer("pointerup", 250, 15));
 
-    // The tab lands *at* the tab it was dropped on, which is exactly where the
-    // DOM-event implementation put it.
+    // Trailing half of the target: the tab lands at that tab.
     expect(onReorder).toHaveBeenCalledWith(["master", "notes", "mix"]);
     expect(container.querySelector("[data-drag-source]")).toBeNull();
     expect(container.querySelector("[data-drop-target]")).toBeNull();
@@ -184,6 +183,137 @@ describe("Tabs (react)", () => {
     expect(onReorder).not.toHaveBeenCalled();
     expect(container.querySelector("[data-drag-source]")).toBeNull();
     expect(container.querySelector("[data-drop-target]")).toBeNull();
+  });
+
+  it("dragging over a sibling then back to origin does not swap", () => {
+    const onReorder = vi.fn();
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+      { value: "utils.ts", label: "utils.ts", closable: true },
+      { value: "types.ts", label: "types.ts", closable: true },
+    ];
+    const { container } = render(
+      <Tabs items={files} defaultValue="App.svelte" reorderable onReorder={onReorder} />,
+    );
+    layout(container);
+    const source = tabs()[1];
+    const [, sourceItem, siblingItem] = itemsOf(container);
+
+    send(source, pointer("pointerdown", 150, 15));
+    send(document, pointer("pointermove", 190, 15));
+    send(document, pointer("pointermove", 270, 15));
+    expect(siblingItem.getAttribute("data-drop-target")).toBe("true");
+
+    send(document, pointer("pointermove", 150, 15));
+    expect(sourceItem.getAttribute("data-drop-target")).toBeNull();
+    expect(siblingItem.getAttribute("data-drop-target")).toBeNull();
+
+    send(document, pointer("pointerup", 150, 15));
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("dropping on a sibling lands at that sibling even on the origin-facing half", () => {
+    const onReorder = vi.fn();
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+      { value: "utils.ts", label: "utils.ts", closable: true },
+      { value: "types.ts", label: "types.ts", closable: true },
+    ];
+    const { container } = render(
+      <Tabs items={files} defaultValue="App.svelte" reorderable onReorder={onReorder} />,
+    );
+    layout(container);
+    const source = tabs()[1];
+    const [, , siblingItem] = itemsOf(container);
+
+    send(source, pointer("pointerdown", 150, 15));
+    send(document, pointer("pointermove", 190, 15));
+    send(document, pointer("pointermove", 220, 15));
+    expect(siblingItem.getAttribute("data-drop-target")).toBe("true");
+
+    send(document, pointer("pointerup", 220, 15));
+    expect(onReorder).toHaveBeenCalledWith(["index.ts", "utils.ts", "App.svelte", "types.ts"]);
+  });
+
+  it("a second drag uses the post-reorder layout, not the original slots", () => {
+    const onReorder = vi.fn();
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+      { value: "utils.ts", label: "utils.ts", closable: true },
+      { value: "types.ts", label: "types.ts", closable: true },
+    ];
+    const { container } = render(
+      <Tabs items={files} defaultValue="App.svelte" reorderable onReorder={onReorder} />,
+    );
+    layout(container);
+    const source = tabs()[1];
+
+    send(source, pointer("pointerdown", 150, 15));
+    send(document, pointer("pointermove", 190, 15));
+    send(document, pointer("pointermove", 250, 15));
+    send(document, pointer("pointerup", 250, 15));
+    expect(onReorder).toHaveBeenCalledWith(["index.ts", "utils.ts", "App.svelte", "types.ts"]);
+
+    layout(container);
+    const moved = [...tabs()].find((tab) => tab.getAttribute("data-value") === "App.svelte")!;
+    const occupant = itemsOf(container)[1];
+
+    send(moved, pointer("pointerdown", 250, 15));
+    send(document, pointer("pointermove", 260, 15));
+    expect(occupant.getAttribute("data-drop-target")).toBeNull();
+    expect(moved.closest(".poodle-tabs__item")?.getAttribute("data-drop-target")).toBeNull();
+  });
+
+  it("arrows follow visual order after a pointer reorder", () => {
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+      { value: "utils.ts", label: "utils.ts", closable: true },
+      { value: "types.ts", label: "types.ts", closable: true },
+    ];
+    const { container } = render(<Tabs items={files} defaultValue="App.svelte" reorderable />);
+    layout(container);
+
+    send(tabs()[1], pointer("pointerdown", 150, 15));
+    send(document, pointer("pointermove", 190, 15));
+    send(document, pointer("pointermove", 250, 15));
+    send(document, pointer("pointerup", 250, 15));
+
+    expect(tabs().map((tab) => tab.getAttribute("data-value"))).toEqual([
+      "index.ts",
+      "utils.ts",
+      "App.svelte",
+      "types.ts",
+    ]);
+    const moved = tabs()[2];
+    expect(document.activeElement).toBe(moved);
+    expect(tabs().map((tab) => tab.getAttribute("tabindex"))).toEqual(["-1", "-1", "0", "-1"]);
+
+    fireEvent.keyDown(moved, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(tabs()[3]);
+    expect(tabs()[3].getAttribute("data-value")).toBe("types.ts");
+    expect(tabs().map((tab) => tab.getAttribute("tabindex"))).toEqual(["-1", "-1", "-1", "0"]);
+  });
+
+  it("the drag preview follows the pointer while the hover target stays put", () => {
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+    ];
+    const { container } = render(<Tabs items={files} defaultValue="App.svelte" reorderable />);
+    layout(container);
+
+    send(tabs()[1], pointer("pointerdown", 150, 15));
+    send(document, pointer("pointermove", 190, 15));
+    const preview = container.querySelector<HTMLElement>(".poodle-drag-preview");
+    expect(preview).not.toBeNull();
+    expect(preview?.style.transform).toBe(`translate3d(${190 + 12}px, ${15 + 12}px, 0)`);
+
+    send(document, pointer("pointermove", 170, 18));
+    expect(preview?.style.transform).toBe(`translate3d(${170 + 12}px, ${18 + 12}px, 0)`);
   });
 
   it("a tab dropped on itself is refused rather than reordered", () => {

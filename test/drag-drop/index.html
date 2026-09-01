@@ -37,12 +37,15 @@
         margin: 16px;
         border: 1px solid #444;
       }
-      #source { background: #eee; }
+      #transformed-host {
+        transform: translate(80px, 40px);
+      }
       #target { background: #f7f7f7; min-height: 48px; }
       #probe { margin: 16px; font-family: monospace; }
     </style>
   </head>
   <body>
+    <div id="transformed-host">
     <div id="root">
       <div id="scroller">
         <div id="spacer"></div>
@@ -62,9 +65,10 @@
       </div>
       <button type="button" id="shift">Shift target</button>
       <div id="probe" data-phase="idle" data-captured="false" data-drop=""></div>
-      <div id="overlay" class="poodle-drag-overlay" aria-hidden="true"></div>
       <div id="live" class="poodle-drag-live-region" aria-live="polite"></div>
     </div>
+    </div>
+    <div id="overlay" class="poodle-drag-overlay" aria-hidden="true"></div>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

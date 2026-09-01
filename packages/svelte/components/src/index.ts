@@ -424,6 +424,7 @@ export type {
   HistoryBranch,
   HistoryStatus,
   PanelDragData,
+  DockPanelDropPayload,
   PanelTabItem,
   PanelVariant,
   ParsedEmbed,

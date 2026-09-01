@@ -49,6 +49,14 @@ pub struct DockRegionHandlers {
     /// the edge it landed on. No geometry, no host session, no authority —
     /// the consumer applies the move and rebuilds the spec.
     pub on_panel_drop: Option<Arc<dyn Fn(&DockPanelDrop) + Send + Sync>>,
+    /// Within-region stack reorder. The complete next item order, matching web
+    /// `onReorder`.
+    pub on_reorder: Option<Arc<dyn Fn(&[String]) + Send + Sync>>,
+    /// Panel-specific eligibility, matching web `canAcceptPanel`.
+    ///
+    /// The spec bool only gates whether drop targets are registered. When this
+    /// is `Some`, region, tab, and stack paths run it on hover and at commit.
+    pub accept_panel: Option<Arc<dyn Fn(&str, &str) -> bool + Send + Sync>>,
 }
 
 /// One accepted cross-region panel move.
@@ -58,6 +66,8 @@ pub struct DockPanelDrop {
     pub source_edge: String,
     pub source_zone: String,
     pub target_edge: DockEdge,
+    /// Insert index in the destination items. A drop on the region body appends.
+    pub index: usize,
 }
 
 /// The backend-state id of one dock tab.
@@ -144,9 +154,11 @@ pub fn dock_region(
     };
 
     // Build a single tab. `compact` → icon-only (label suppressed); `vertical`
-    // → full-width stacked entry.
+    // → full-width stacked entry. `index` is the insert slot a foreign panel
+    // lands at when this tab is the drop target.
+    let item_count = spec.items.len();
     let build_tab =
-        |value: &str, label: &str, icon: Option<&str>, compact: bool, vertical: bool| -> Node {
+        |value: &str, label: &str, icon: Option<&str>, compact: bool, vertical: bool, index: usize| -> Node {
             let is_active = active.as_deref() == Some(value);
 
             let mut tab_btn = Node::button("");
@@ -249,6 +261,85 @@ pub fn dock_region(
             source.cross_window_source_bridge = handlers.cross_window_drag_source.clone();
             tab_btn.interaction.drag_source = Some(source);
 
+            if spec.can_accept_panel {
+                let mut target = poodle_node::NodeDropTarget::new(
+                    format!("dock-region:{drop_zone_id}:target:{value}"),
+                    crate::drag_drop::DOCK_PANEL_SUBJECT_KIND,
+                    label,
+                );
+                target.resolve_position = Some(if vertical {
+                    crate::drag_drop::vertical_band_resolver(false)
+                } else {
+                    crate::drag_drop::horizontal_band_resolver(false)
+                });
+                let same_zone = drop_zone_id.clone();
+                let panel_id = value.to_string();
+                let accept = handlers.accept_panel.clone();
+                target.can_drop = Some(Arc::new(move |intent, subject| {
+                    let Some(panel) = crate::drag_drop::decode_dock_panel_subject(&subject.id) else {
+                        return poodle_node::DropEligibility::Rejected {
+                            reason: Some("That subject is not a dock panel".to_string()),
+                        };
+                    };
+                    if panel.source_zone == same_zone {
+                        return poodle_node::DropEligibility::Rejected {
+                            reason: Some("The panel is already in this zone".to_string()),
+                        };
+                    }
+                    if panel.panel_id == panel_id {
+                        return poodle_node::DropEligibility::Rejected {
+                            reason: Some("same panel".to_string()),
+                        };
+                    }
+                    if let Some(accept) = &accept {
+                        if !accept(&panel.panel_id, &panel.source_edge) {
+                            return poodle_node::DropEligibility::Rejected {
+                                reason: Some("refused by host".to_string()),
+                            };
+                        }
+                    }
+                    poodle_node::DropEligibility::Accepted {
+                        intent: intent.clone(),
+                    }
+                }));
+                if let Some(handler) = &handlers.on_panel_drop {
+                    let handler = Arc::clone(handler);
+                    let target_edge = spec.edge;
+                    let tab_index = index;
+                    let accept_commit = handlers.accept_panel.clone();
+                    target.on_drop = Some(Arc::new(move |event| {
+                        let Some(panel) =
+                            crate::drag_drop::decode_dock_panel_subject(&event.subject.id)
+                        else {
+                            return poodle_node::NodeDropCommit::Rejected {
+                                reason: Some("That subject is not a dock panel".to_string()),
+                            };
+                        };
+                        if let Some(accept) = &accept_commit {
+                            if !accept(&panel.panel_id, &panel.source_edge) {
+                                return poodle_node::NodeDropCommit::Rejected {
+                                    reason: Some("refused by host".to_string()),
+                                };
+                            }
+                        }
+                        let insert = if event.intent.position == poodle_node::DROP_POSITION_AFTER {
+                            tab_index + 1
+                        } else {
+                            tab_index
+                        };
+                        handler(&DockPanelDrop {
+                            panel_id: panel.panel_id,
+                            source_edge: panel.source_edge,
+                            source_zone: panel.source_zone,
+                            target_edge,
+                            index: insert,
+                        });
+                        poodle_node::NodeDropCommit::Committed
+                    }));
+                }
+                tab_btn.interaction.drop_target = Some(target);
+            }
+
             tab_btn
         };
 
@@ -313,10 +404,12 @@ pub fn dock_region(
         let mut stack = Node::container();
         {
             let s = &mut stack.style;
+            // Side docks are tall (column / Y halves); top/bottom docks are
+            // wide (row / X halves). Matches web `data-direction`.
             s.descriptor.layout.direction = if is_side_edge {
-                LayoutDirection::Row
-            } else {
                 LayoutDirection::Column
+            } else {
+                LayoutDirection::Row
             };
             s.descriptor.background = Some(root_bg);
             apply_edge_border(s);
@@ -324,7 +417,7 @@ pub fn dock_region(
         }
         let mut stack = stack;
 
-        for item in &spec.items {
+        for (index, item) in spec.items.iter().enumerate() {
             let mut cell = Node::container();
             cell.id = Some(format!("dock-stack-{}", item.value));
             {
@@ -340,6 +433,139 @@ pub fn dock_region(
                     s.descriptor.border.color = accent;
                 }
             }
+
+            let subject_id =
+                crate::drag_drop::encode_dock_panel_subject(&crate::drag_drop::DockPanelSubject {
+                    panel_id: item.value.clone(),
+                    source_edge: edge_name.clone(),
+                    source_zone: drop_zone_id.clone(),
+                });
+            let mut source = poodle_node::NodeDragSource::new(
+                format!("dock-region:{drop_zone_id}:source:{}", item.value),
+                poodle_node::DragSubject {
+                    kind: crate::drag_drop::DOCK_PANEL_SUBJECT_KIND.to_string(),
+                    id: subject_id,
+                },
+                item.label.as_str(),
+            );
+            source.allowed_operations = crate::drag_drop::move_only();
+            source.cross_window_source_bridge = handlers.cross_window_drag_source.clone();
+            cell.interaction.drag_source = Some(source);
+
+            let mut target = poodle_node::NodeDropTarget::new(
+                format!("dock-region:{drop_zone_id}:slot:{}", item.value),
+                crate::drag_drop::DOCK_PANEL_SUBJECT_KIND,
+                item.label.as_str(),
+            );
+            target.resolve_position = Some(if is_side_edge {
+                crate::drag_drop::vertical_band_resolver(false)
+            } else {
+                crate::drag_drop::horizontal_band_resolver(false)
+            });
+            let same_zone = drop_zone_id.clone();
+            let panel_id = item.value.clone();
+            let accept = handlers.accept_panel.clone();
+            target.can_drop = Some(Arc::new(move |intent, subject| {
+                let Some(panel) = crate::drag_drop::decode_dock_panel_subject(&subject.id) else {
+                    return poodle_node::DropEligibility::Rejected {
+                        reason: Some("That subject is not a dock panel".to_string()),
+                    };
+                };
+                if panel.source_zone == same_zone && panel.panel_id == panel_id {
+                    return poodle_node::DropEligibility::Rejected {
+                        reason: Some("same panel".to_string()),
+                    };
+                }
+                if panel.source_zone != same_zone {
+                    if let Some(accept) = &accept {
+                        if !accept(&panel.panel_id, &panel.source_edge) {
+                            return poodle_node::DropEligibility::Rejected {
+                                reason: Some("refused by host".to_string()),
+                            };
+                        }
+                    }
+                }
+                poodle_node::DropEligibility::Accepted {
+                    intent: intent.clone(),
+                }
+            }));
+            let order = spec
+                .items
+                .iter()
+                .map(|entry| entry.value.clone())
+                .collect::<Vec<_>>();
+            let on_reorder = handlers.on_reorder.clone();
+            let on_panel_drop = handlers.on_panel_drop.clone();
+            let accept_commit = handlers.accept_panel.clone();
+            let target_edge = spec.edge;
+            let drop_zone = drop_zone_id.clone();
+            target.on_drop = Some(Arc::new(move |event| {
+                let Some(panel) = crate::drag_drop::decode_dock_panel_subject(&event.subject.id)
+                else {
+                    return poodle_node::NodeDropCommit::Rejected {
+                        reason: Some("That subject is not a dock panel".to_string()),
+                    };
+                };
+                let after = event.intent.position == poodle_node::DROP_POSITION_AFTER;
+                if panel.source_zone == drop_zone {
+                    let Some(handler) = &on_reorder else {
+                        return poodle_node::NodeDropCommit::Rejected {
+                            reason: Some("same panel".to_string()),
+                        };
+                    };
+                    let from = match order.iter().position(|value| *value == panel.panel_id) {
+                        Some(from) => from,
+                        None => {
+                            return poodle_node::NodeDropCommit::Rejected {
+                                reason: Some("unknown panel".to_string()),
+                            };
+                        }
+                    };
+                    let to = if after {
+                        if from < index {
+                            index
+                        } else {
+                            index + 1
+                        }
+                    } else if from < index {
+                        index.saturating_sub(1)
+                    } else {
+                        index
+                    };
+                    if from == to {
+                        return poodle_node::NodeDropCommit::Rejected {
+                            reason: Some("same panel".to_string()),
+                        };
+                    }
+                    let mut next = order.clone();
+                    let moved = next.remove(from);
+                    let insert_at = to.min(next.len());
+                    next.insert(insert_at, moved);
+                    handler(&next);
+                    return poodle_node::NodeDropCommit::Committed;
+                }
+                if let Some(accept) = &accept_commit {
+                    if !accept(&panel.panel_id, &panel.source_edge) {
+                        return poodle_node::NodeDropCommit::Rejected {
+                            reason: Some("refused by host".to_string()),
+                        };
+                    }
+                }
+                let Some(handler) = &on_panel_drop else {
+                    return poodle_node::NodeDropCommit::Rejected {
+                        reason: Some("refused by host".to_string()),
+                    };
+                };
+                handler(&DockPanelDrop {
+                    panel_id: panel.panel_id,
+                    source_edge: panel.source_edge,
+                    source_zone: panel.source_zone,
+                    target_edge,
+                    index: if after { index + 1 } else { index },
+                });
+                poodle_node::NodeDropCommit::Committed
+            }));
+            cell.interaction.drop_target = Some(target);
             stack = stack.child(cell.child(Node::text(&item.label)));
         }
         if let Some(c) = content {
@@ -388,13 +614,14 @@ pub fn dock_region(
             if spec.is_collapsible {
                 strip = strip.child(build_toggle(true));
             }
-            for item in &spec.items {
+            for (index, item) in spec.items.iter().enumerate() {
                 strip = strip.child(build_tab(
                     &item.value,
                     &item.label,
                     item.icon.as_deref(),
                     true,
                     true,
+                    index,
                 ));
             }
             return strip;
@@ -415,13 +642,14 @@ pub fn dock_region(
                 apply_edge_border(s);
             }
             let mut strip = strip;
-            for item in &spec.items {
+            for (index, item) in spec.items.iter().enumerate() {
                 strip = strip.child(build_tab(
                     &item.value,
                     &item.label,
                     item.icon.as_deref(),
                     true,
                     false,
+                    index,
                 ));
             }
             if spec.is_collapsible {
@@ -493,13 +721,14 @@ pub fn dock_region(
         s.min_width = Some(0.0);
     }
     let mut tab_list = tab_list;
-    for item in &spec.items {
+    for (index, item) in spec.items.iter().enumerate() {
         tab_list = tab_list.child(build_tab(
             &item.value,
             &item.label,
             item.icon.as_deref(),
             false,
             is_tabs_on_edge,
+            index,
         ));
     }
     let mut tab_bar = tab_bar.child(tab_list);
@@ -541,11 +770,11 @@ pub fn dock_region(
         el = el.child(drop_zone());
     }
 
-    // The region itself is the panel target.
+    // The region itself is the panel target for body / empty-strip drops.
     //
-    // Deliberately low priority and shallow: a panel dropped on a tab should
-    // still land in the region, and nested arbitration prefers the deepest
-    // *eligible* target — a tab refuses a panel outright, so the region wins.
+    // A tab now accepts a foreign panel and reports the insert index. Nested
+    // arbitration prefers the deepest eligible target, so a hovered tab wins
+    // and the region only takes the drop when no tab is under the pointer.
     if spec.can_accept_panel {
         let mut target = poodle_node::NodeDropTarget::new(
             format!("dock-region:{drop_zone_id}"),
@@ -558,6 +787,7 @@ pub fn dock_region(
         }));
         let same_zone = drop_zone_id.clone();
         let is_flexible = spec.sizing == DockSizing::Flexible;
+        let accept = handlers.accept_panel.clone();
         target.can_drop = Some(Arc::new(move |intent, subject| {
             let Some(panel) = crate::drag_drop::decode_dock_panel_subject(&subject.id) else {
                 return poodle_node::DropEligibility::Rejected {
@@ -571,6 +801,13 @@ pub fn dock_region(
                     reason: Some("The panel is already in this zone".to_string()),
                 };
             }
+            if let Some(accept) = &accept {
+                if !accept(&panel.panel_id, &panel.source_edge) {
+                    return poodle_node::DropEligibility::Rejected {
+                        reason: Some("refused by host".to_string()),
+                    };
+                }
+            }
             poodle_node::DropEligibility::Accepted {
                 intent: intent.clone(),
             }
@@ -578,6 +815,7 @@ pub fn dock_region(
         if let Some(handler) = &handlers.on_panel_drop {
             let handler = Arc::clone(handler);
             let target_edge = spec.edge;
+            let accept_commit = handlers.accept_panel.clone();
             target.on_drop = Some(Arc::new(move |event| {
                 let Some(panel) = crate::drag_drop::decode_dock_panel_subject(&event.subject.id)
                 else {
@@ -585,11 +823,19 @@ pub fn dock_region(
                         reason: Some("That subject is not a dock panel".to_string()),
                     };
                 };
+                if let Some(accept) = &accept_commit {
+                    if !accept(&panel.panel_id, &panel.source_edge) {
+                        return poodle_node::NodeDropCommit::Rejected {
+                            reason: Some("refused by host".to_string()),
+                        };
+                    }
+                }
                 handler(&DockPanelDrop {
                     panel_id: panel.panel_id,
                     source_edge: panel.source_edge,
                     source_zone: panel.source_zone,
                     target_edge,
+                    index: item_count,
                 });
                 poodle_node::NodeDropCommit::Committed
             }));
@@ -658,6 +904,7 @@ mod tests {
             target_id: target.target_id.clone(),
             position: poodle_node::DROP_POSITION_INSIDE.to_string(),
             operation: poodle_node::DragOperation::Move,
+            destination: None,
         };
         let can_drop = target.can_drop.as_ref().expect("eligibility");
 
@@ -692,7 +939,267 @@ mod tests {
         assert_eq!(seen[0].panel_id, "inspector");
         assert_eq!(seen[0].source_zone, "right");
         assert_eq!(seen[0].target_edge, DockEdge::Left);
+        assert_eq!(seen[0].index, 1);
+
+        let tab = root
+            .find(&|node| node.interaction.drag_source.is_some())
+            .expect("tab");
+        let tab_target = tab
+            .interaction
+            .drop_target
+            .as_ref()
+            .expect("a tab accepts a foreign panel");
+        let tab_intent = DropIntent {
+            target_id: tab_target.target_id.clone(),
+            position: poodle_node::DROP_POSITION_BEFORE.to_string(),
+            operation: poodle_node::DragOperation::Move,
+            destination: None,
+        };
+        let incoming = DragSubject {
+            kind: crate::drag_drop::DOCK_PANEL_SUBJECT_KIND.to_string(),
+            id: crate::drag_drop::encode_dock_panel_subject(&crate::drag_drop::DockPanelSubject {
+                panel_id: "search".to_string(),
+                source_edge: "right".to_string(),
+                source_zone: "right".to_string(),
+            }),
+        };
+        assert!(matches!(
+            (tab_target.can_drop.as_ref().expect("eligibility"))(&tab_intent, &incoming),
+            DropEligibility::Accepted { .. }
+        ));
+        (tab_target.on_drop.as_ref().expect("commit"))(&poodle_node::NodeDropCommitEvent {
+            subject: incoming,
+            intent: tab_intent,
+            inbound_files: None,
+        });
+        let seen = moved.lock().expect("lock").clone();
+        assert_eq!(seen[1].panel_id, "search");
+        assert_eq!(seen[1].index, 0);
     }
+
+    #[test]
+    fn a_hovered_tab_runs_accept_panel_on_hover_and_commit() {
+        use poodle_node::{DragSubject, DropEligibility, DropIntent};
+
+        let moved = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let handlers = DockRegionHandlers {
+            on_panel_drop: {
+                let moved = Arc::clone(&moved);
+                Some(Arc::new(move |drop: &DockPanelDrop| {
+                    moved.lock().expect("lock").push(drop.clone());
+                }))
+            },
+            accept_panel: Some(Arc::new(|panel_id: &str, _edge: &str| panel_id != "search")),
+            ..DockRegionHandlers::default()
+        };
+        let spec = DockRegionSpec::new(
+            DockEdge::Left,
+            vec![PanelTabItem::new("explorer", "Explorer")],
+        )
+        .with_can_accept_panel(true);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let root = dock_region(&spec, &ctx, None, handlers);
+        let tab = root
+            .find(&|node| node.interaction.drag_source.is_some())
+            .expect("tab");
+        let tab_target = tab
+            .interaction
+            .drop_target
+            .as_ref()
+            .expect("a tab accepts a foreign panel");
+        let tab_intent = DropIntent {
+            target_id: tab_target.target_id.clone(),
+            position: poodle_node::DROP_POSITION_BEFORE.to_string(),
+            operation: poodle_node::DragOperation::Move,
+            destination: None,
+        };
+        let incoming = DragSubject {
+            kind: crate::drag_drop::DOCK_PANEL_SUBJECT_KIND.to_string(),
+            id: crate::drag_drop::encode_dock_panel_subject(&crate::drag_drop::DockPanelSubject {
+                panel_id: "search".to_string(),
+                source_edge: "right".to_string(),
+                source_zone: "right".to_string(),
+            }),
+        };
+        assert!(matches!(
+            (tab_target.can_drop.as_ref().expect("eligibility"))(&tab_intent, &incoming),
+            DropEligibility::Rejected { .. }
+        ));
+        (tab_target.on_drop.as_ref().expect("commit"))(&poodle_node::NodeDropCommitEvent {
+            subject: incoming,
+            intent: tab_intent,
+            inbound_files: None,
+        });
+        assert!(moved.lock().expect("lock").is_empty());
+    }
+
+    #[test]
+    fn a_static_stack_follows_the_dock_edge_axis() {
+        use poodle_node::{DragOperation, DragSubject, NodeDragInputKind, NodeDropPositionInput};
+        use poodle_specs::DockSizing;
+
+        let incoming = DragSubject {
+            kind: crate::drag_drop::DOCK_PANEL_SUBJECT_KIND.to_string(),
+            id: crate::drag_drop::encode_dock_panel_subject(&crate::drag_drop::DockPanelSubject {
+                panel_id: "search".to_string(),
+                source_edge: "right".to_string(),
+                source_zone: "right".to_string(),
+            }),
+        };
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let items = vec![
+            PanelTabItem::new("explorer", "Explorer"),
+            PanelTabItem::new("inspector", "Inspector"),
+        ];
+
+        let side = dock_region(
+            &DockRegionSpec::new(DockEdge::Left, items.clone())
+                .with_sizing(DockSizing::Static)
+                .with_can_accept_panel(true),
+            &ctx,
+            None,
+            DockRegionHandlers::default(),
+        );
+        assert_eq!(
+            side.style.descriptor.layout.direction,
+            LayoutDirection::Column,
+            "a left static stack is a column"
+        );
+        let side_target = side
+            .find(&|node| node.id.as_deref() == Some("dock-stack-explorer"))
+            .and_then(|node| node.interaction.drop_target.as_ref())
+            .expect("side stack item");
+        let resolve = side_target.resolve_position.as_ref().expect("resolver");
+        let y_before = NodeDropPositionInput {
+            fraction_x: 0.9,
+            fraction_y: 0.25,
+            subject: incoming.clone(),
+            operation: DragOperation::Move,
+            input_kind: NodeDragInputKind::Mouse,
+        };
+        let y_after = NodeDropPositionInput {
+            fraction_x: 0.1,
+            fraction_y: 0.75,
+            subject: incoming.clone(),
+            operation: DragOperation::Move,
+            input_kind: NodeDragInputKind::Mouse,
+        };
+        assert_eq!(resolve(&y_before).as_deref(), Some(poodle_node::DROP_POSITION_BEFORE));
+        assert_eq!(resolve(&y_after).as_deref(), Some(poodle_node::DROP_POSITION_AFTER));
+
+        let top = dock_region(
+            &DockRegionSpec::new(DockEdge::Top, items)
+                .with_sizing(DockSizing::Static)
+                .with_can_accept_panel(true),
+            &ctx,
+            None,
+            DockRegionHandlers::default(),
+        );
+        assert_eq!(
+            top.style.descriptor.layout.direction,
+            LayoutDirection::Row,
+            "a top static stack is a row"
+        );
+        let top_target = top
+            .find(&|node| node.id.as_deref() == Some("dock-stack-explorer"))
+            .and_then(|node| node.interaction.drop_target.as_ref())
+            .expect("top stack item");
+        let resolve = top_target.resolve_position.as_ref().expect("resolver");
+        let x_before = NodeDropPositionInput {
+            fraction_x: 0.25,
+            fraction_y: 0.9,
+            subject: incoming.clone(),
+            operation: DragOperation::Move,
+            input_kind: NodeDragInputKind::Mouse,
+        };
+        let x_after = NodeDropPositionInput {
+            fraction_x: 0.75,
+            fraction_y: 0.1,
+            subject: incoming,
+            operation: DragOperation::Move,
+            input_kind: NodeDragInputKind::Mouse,
+        };
+        assert_eq!(resolve(&x_before).as_deref(), Some(poodle_node::DROP_POSITION_BEFORE));
+        assert_eq!(resolve(&x_after).as_deref(), Some(poodle_node::DROP_POSITION_AFTER));
+    }
+
+    #[test]
+    fn a_static_stack_item_lands_before_or_after_the_hovered_half() {
+        use poodle_node::{DragSubject, DropEligibility, DropIntent};
+        use poodle_specs::DockSizing;
+
+        let moved = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let handlers = DockRegionHandlers {
+            on_panel_drop: {
+                let moved = Arc::clone(&moved);
+                Some(Arc::new(move |drop: &DockPanelDrop| {
+                    moved.lock().expect("lock").push(drop.clone());
+                }))
+            },
+            ..DockRegionHandlers::default()
+        };
+        let spec = DockRegionSpec::new(
+            DockEdge::Top,
+            vec![
+                PanelTabItem::new("explorer", "Explorer"),
+                PanelTabItem::new("inspector", "Inspector"),
+            ],
+        )
+        .with_sizing(DockSizing::Static)
+        .with_can_accept_panel(true);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let root = dock_region(&spec, &ctx, None, handlers);
+        let explorer = root
+            .find(&|node| node.id.as_deref() == Some("dock-stack-explorer"))
+            .expect("stack item");
+        assert!(explorer.interaction.drag_source.is_some());
+        let target = explorer
+            .interaction
+            .drop_target
+            .as_ref()
+            .expect("stack item is a drop target");
+        let incoming = DragSubject {
+            kind: crate::drag_drop::DOCK_PANEL_SUBJECT_KIND.to_string(),
+            id: crate::drag_drop::encode_dock_panel_subject(&crate::drag_drop::DockPanelSubject {
+                panel_id: "search".to_string(),
+                source_edge: "right".to_string(),
+                source_zone: "right".to_string(),
+            }),
+        };
+        let before = DropIntent {
+            target_id: target.target_id.clone(),
+            position: poodle_node::DROP_POSITION_BEFORE.to_string(),
+            operation: poodle_node::DragOperation::Move,
+            destination: None,
+        };
+        assert!(matches!(
+            (target.can_drop.as_ref().expect("eligibility"))(&before, &incoming),
+            DropEligibility::Accepted { .. }
+        ));
+        (target.on_drop.as_ref().expect("commit"))(&poodle_node::NodeDropCommitEvent {
+            subject: incoming.clone(),
+            intent: before,
+            inbound_files: None,
+        });
+        let after = DropIntent {
+            target_id: target.target_id.clone(),
+            position: poodle_node::DROP_POSITION_AFTER.to_string(),
+            operation: poodle_node::DragOperation::Move,
+            destination: None,
+        };
+        (target.on_drop.as_ref().expect("commit"))(&poodle_node::NodeDropCommitEvent {
+            subject: incoming,
+            intent: after,
+            inbound_files: None,
+        });
+        let seen = moved.lock().expect("lock").clone();
+        assert_eq!(seen[0].index, 0);
+        assert_eq!(seen[1].index, 1);
+    }
+
     use super::*;
     use poodle_specs::PanelTabItem;
 

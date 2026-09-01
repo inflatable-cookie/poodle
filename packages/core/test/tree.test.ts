@@ -3,6 +3,8 @@ import { describe, expect, test } from "bun:test";
 import {
   flattenVisibleTreeRows,
   treeCanAcceptDrop,
+  treeDropEligibility,
+  treeLocate,
   treeCheckState,
   treeKeydownIntent,
   treeRangeSelection,
@@ -148,5 +150,68 @@ describe("treeCanAcceptDrop", () => {
     expect(treeCanAcceptDrop(nodes, "src", "src/a.ts")).toBe(false);
     expect(treeSubtreeContains(nodes, "src", "src/lib/c.ts")).toBe(true);
     expect(treeCanAcceptDrop(nodes, "missing", "docs")).toBe(false);
+  });
+
+  test("eligibility uses the commit destination, not the hovered row", () => {
+    const hoveredSelf = treeDropEligibility(nodes, "src", {
+      targetId: "src",
+      position: "inside",
+      operation: "move",
+      destination: { targetId: "src/a.ts", position: "before" },
+    });
+    expect(hoveredSelf).toEqual({ accepted: false, reason: "subtree" });
+
+    const hoveredChildCommitsSibling = treeDropEligibility(nodes, "src", {
+      targetId: "src/a.ts",
+      position: "before",
+      operation: "move",
+      destination: { targetId: "docs", position: "after" },
+    });
+    expect(hoveredChildCommitsSibling).toEqual({
+      accepted: true,
+      intent: {
+        targetId: "src/a.ts",
+        position: "before",
+        operation: "move",
+        destination: { targetId: "docs", position: "after" },
+      },
+    });
+  });
+
+  test("eligibility refuses a remapped disabled destination", () => {
+    const outline: TreeNodeLike[] = [
+      {
+        value: "docs",
+        children: [
+          { value: "intro" },
+          { value: "guide", isDisabled: true },
+        ],
+      },
+      { value: "notes" },
+    ];
+    const remappedDisabled = treeDropEligibility(outline, "notes", {
+      targetId: "notes",
+      position: "before",
+      operation: "move",
+      destination: { targetId: "guide", position: "after" },
+    });
+    expect(remappedDisabled).toEqual({ accepted: false, reason: "disabled" });
+
+    const remappedLive = treeDropEligibility(outline, "notes", {
+      targetId: "notes",
+      position: "before",
+      operation: "move",
+      destination: { targetId: "intro", position: "after" },
+    });
+    expect(remappedLive.accepted).toBe(true);
+  });
+});
+
+describe("treeLocate", () => {
+  test("finds parent, siblings, and index", () => {
+    expect(treeLocate(nodes, "src")).toMatchObject({ parent: null, index: 0 });
+    expect(treeLocate(nodes, "src/a.ts")).toMatchObject({ parent: "src", index: 0 });
+    expect(treeLocate(nodes, "src/lib/c.ts")).toMatchObject({ parent: "src/lib", index: 0 });
+    expect(treeLocate(nodes, "missing")).toBeNull();
   });
 });

@@ -20,6 +20,7 @@ import {
 } from "@inflatable-cookie/poodle-core";
 import { DragDropProvider, useControllerDropTarget, useOptionalDragDrop } from "./drag-drop";
 import { DockStackItem } from "./dock-region-parts/DockStackItem";
+import { TabsForeignInsertProvider } from "./tabs-foreign-insert";
 
 import { CollapseToggle } from "./CollapseToggle";
 import { Tabs } from "./Tabs";
@@ -32,6 +33,7 @@ import type {
   DockEdge,
   DockEmphasis,
   DockSizing,
+  DockPanelDropPayload,
   PanelDragData,
   PanelTabItem,
   SemanticControlSizeRole,
@@ -86,7 +88,7 @@ export interface DockRegionProps {
   onCollapsedChange?: ((isCollapsed: boolean) => void) | undefined;
   onClose?: ((value: string) => void) | undefined;
   onReorder?: ((items: string[]) => void) | undefined;
-  onPanelDrop?: ((payload: { panel: PanelDragData; targetEdge: DockEdge }) => void) | undefined;
+  onPanelDrop?: ((payload: DockPanelDropPayload) => void) | undefined;
   panel?: (item: PanelTabItem) => ReactNode;
   children?: (item: PanelTabItem | null) => ReactNode;
 }
@@ -283,13 +285,22 @@ export function DockRegion({
     onDrop: (): DragDropCommitResult => {
       const panel = panelFrom(liveSubjectId());
       if (!panel) return { status: "rejected", reason: "not a panel" };
-      onPanelDrop?.({ panel, targetEdge: edge });
+      if (canAcceptPanel !== null && !canAcceptPanel(panel.panelId, panel.sourceEdge as DockEdge)) {
+        return { status: "rejected", reason: "refused by host" };
+      }
+      onPanelDrop?.({ panel, targetEdge: edge, index: items.length });
       return { status: "committed" };
     },
   });
   const isDragOver = region.accepted;
 
   const stripTabs = (orientation: "horizontal" | "vertical", withTooltips: boolean) => (
+    <TabsForeignInsertProvider
+      value={{
+        canAccept: (subjectId) => acceptsPanel(subjectId),
+        commit: handleForeignDrop,
+      }}
+    >
     <Tabs
       variant={tabVariant}
       activeEdge={tabActiveEdge}
@@ -311,7 +322,18 @@ export function DockRegion({
       crossWindowSourceBridge={crossWindowDragSource}
       dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
     />
+    </TabsForeignInsertProvider>
   );
+
+  function handleForeignDrop(subjectId: string, index: number): DragDropCommitResult {
+    const panel = panelFrom(subjectId);
+    if (!panel) return { status: "rejected", reason: "not a panel" };
+    if (canAcceptPanel !== null && !canAcceptPanel(panel.panelId, panel.sourceEdge as DockEdge)) {
+      return { status: "rejected", reason: "refused by host" };
+    }
+    onPanelDrop?.({ panel, targetEdge: edge, index });
+    return { status: "committed" };
+  }
 
   const region_ = (
 

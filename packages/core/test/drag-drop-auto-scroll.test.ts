@@ -87,4 +87,17 @@ describe("resolveAutoScroll", () => {
     expect(canScrollVertical(exhausted.metrics, 1)).toBe(false);
     expect(resolveAutoScroll([exhausted], { x: 100, y: 4 }, 50)).toBeNull();
   });
+
+  test("a horizontal-only scroller does not auto-scroll on Y", () => {
+    const strip = candidate("strip", 0, {
+      overflowY: false,
+      overflowX: true,
+      scrollTop: 2,
+      scrollHeight: 48,
+      clientHeight: 44,
+      rect: { top: 0, right: 400, bottom: 44, left: 0 },
+    });
+    expect(canScrollVertical(strip.metrics, -1)).toBe(false);
+    expect(resolveAutoScroll([strip], { x: 40, y: 4 }, 50)).toBeNull();
+  });
 });

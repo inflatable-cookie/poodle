@@ -21,6 +21,10 @@ export interface AutoScrollMetrics {
   readonly clientHeight: number;
   readonly clientWidth: number;
   readonly rect: AutoScrollRect;
+  /** When false, this box must not be auto-scrolled on X. Default true. */
+  readonly overflowX?: boolean;
+  /** When false, this box must not be auto-scrolled on Y. Default true. */
+  readonly overflowY?: boolean;
 }
 
 export interface AutoScrollCandidate {
@@ -56,12 +60,14 @@ export const DEFAULT_AUTO_SCROLL_EDGE: AutoScrollEdgeConfig = Object.freeze({
 const SCROLL_EPSILON = 0.5;
 
 export function canScrollVertical(metrics: AutoScrollMetrics, direction: -1 | 1): boolean {
+  if (metrics.overflowY === false) return false;
   if (metrics.scrollHeight - metrics.clientHeight <= SCROLL_EPSILON) return false;
   if (direction < 0) return metrics.scrollTop > SCROLL_EPSILON;
   return metrics.scrollTop + metrics.clientHeight < metrics.scrollHeight - SCROLL_EPSILON;
 }
 
 export function canScrollHorizontal(metrics: AutoScrollMetrics, direction: -1 | 1): boolean {
+  if (metrics.overflowX === false) return false;
   if (metrics.scrollWidth - metrics.clientWidth <= SCROLL_EPSILON) return false;
   if (direction < 0) return metrics.scrollLeft > SCROLL_EPSILON;
   return metrics.scrollLeft + metrics.clientWidth < metrics.scrollWidth - SCROLL_EPSILON;

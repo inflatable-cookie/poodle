@@ -100,7 +100,9 @@ explicit kind lets a composite share a semantic family; `TabItem.value` is the
 subject id, while source and target registration ids remain instance-scoped to
 avoid ambient-controller collisions. A Tabs reorder target rejects a subject
 whose id is absent from its own item set during eligibility, allowing an
-eligible ancestor composite target to win. A tab dropped onto itself is
+eligible ancestor composite target to win. DockRegion that owns the strip
+opts the hovered tab into a foreign insert through an internal composition
+hook, not a public Tabs callback; eligibility is still `canAcceptPanel`. A tab dropped onto itself is
 rejected rather than reported as its own drop target. Start fires once after
 the runtime's drag threshold. Exactly one target holds the current
 intent at a time; the previous one is always told it stopped, which is what

@@ -23,6 +23,7 @@
   import { default as Pill } from "./Pill.svelte";
   import { firstEnabledIndex } from "./internal";
   import { default as TabsItem } from "./tabs-parts/TabsItem.svelte";
+  import { getTabsForeignInsert } from "./tabs-foreign-insert";
   import { default as TabsKeyboardTargets } from "./tabs-parts/TabsKeyboardTargets.svelte";
   import { tryDragDrop } from "./drag-drop-context";
   import {
@@ -150,9 +151,10 @@
   }: Props = $props();
 
   const tabsId = ++nextTabsId;
+  const foreignInsert = getTabsForeignInsert();
   const isBrowser = typeof window !== "undefined";
   const uiPresentation = getUiPresentation();
-  let tabElements = $state<Array<HTMLButtonElement | null>>([]);
+  let tabElements = $state<Record<string, HTMLButtonElement | null>>({});
   let rootElement = $state<HTMLDivElement | null>(null);
   let measureListElement = $state<HTMLDivElement | null>(null);
   /** How many entries of `shed` are currently given up. */
@@ -382,8 +384,11 @@
           break;
         }
         case "focusTab": {
-          const index = effect.index;
-          tick().then(() => tabElements[index]?.focus());
+          // The button follows the tab's value across keyed reorder; index slots do not.
+          const value = result.context.items[effect.index]?.value;
+          tick().then(() => {
+            if (value) tabElements[value]?.focus();
+          });
           break;
         }
         case "emitReorder": {
@@ -546,9 +551,17 @@
    * one when the tab is moving forward.
    */
   function handleDrop(intent: DropIntent): DragDropCommitResult {
-    const from = indexOfValue(dragController.getSnapshot().session?.subject.id ?? "");
+    const subjectId = dragController.getSnapshot().session?.subject.id ?? "";
+    const from = indexOfValue(subjectId);
     const target = indexOfValue(valueOfTargetId(intent.targetId));
-    if (from < 0 || target < 0 || from === target) {
+    const foreign = foreignInsert;
+    if (from < 0) {
+      if (!foreign || target < 0) {
+        return { status: "rejected", reason: "same tab" };
+      }
+      return foreign.commit(subjectId, intent.position === "after" ? target + 1 : target);
+    }
+    if (target < 0 || from === target) {
       return { status: "rejected", reason: "same tab" };
     }
 
@@ -560,6 +573,10 @@
         : from < target
           ? target
           : target + 1;
+
+    if (from === to) {
+      return { status: "rejected", reason: "same tab" };
+    }
 
     send({ type: "REORDER", fromIndex: from, toIndex: to });
     return { status: "committed" };
@@ -721,15 +738,16 @@
           {crossWindowSourceBridge}
           {indexOfValue}
           {ownsValue}
+          acceptsForeign={foreignInsert !== null}
           sourceId={sourceIdOf(item.value)}
           targetId={targetIdOf(item.value)}
           selected={currentValue === item.value}
           focused={focusIndex === index}
           tooltipOpen={tooltipIndex === index}
           iconSize={resolvedIconSize}
-          anchorElement={tabElements[index] ?? null}
+          anchorElement={tabElements[item.value] ?? null}
           onDrop={handleDrop}
-          onElement={(element) => (tabElements[index] = element)}
+          onElement={(element) => (tabElements[item.value] = element)}
           onSelect={() => send({ type: "SELECT", value: item.value })}
           onClose={() => send({ type: "CLOSE", value: item.value })}
           onFocus={() => {

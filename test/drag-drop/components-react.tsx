@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { ModelCatalogueItem } from "@inflatable-cookie/poodle-core";
 
 import { BlockEditor } from "../../packages/react/components/src/BlockEditor";
+import { DockRegion } from "../../packages/react/components/src/DockRegion";
 import { EditableList } from "../../packages/react/components/src/EditableList";
 import { DragDropProvider } from "../../packages/react/components/src/drag-drop";
 import { ModelCatalogueEditor } from "../../packages/react/components/src/ModelCatalogueEditor";
@@ -98,6 +99,27 @@ export function ComponentsHarness() {
         data-order-c={orderC.join(",")}
         data-order-c-count={orderCCount}
       />
+
+      <div
+        id="react-dock"
+        style={{
+          width: 280,
+          height: 160,
+          ["--poodle-radius-surface" as string]: "12px",
+          ["--poodle-radius-control" as string]: "4px",
+          ["--poodle-border-width-focus" as string]: "2px",
+          ["--poodle-color-accent-focusRing" as string]: "rgb(0, 0, 255)",
+        }}
+      >
+        <DockRegion
+          edge="left"
+          items={[
+            { value: "explorer", label: "Explorer" },
+            { value: "search", label: "Search" },
+          ]}
+          value="explorer"
+        />
+      </div>
 
       {/* One provider, two catalogues, the same three model ids. */}
       <DragDropProvider>

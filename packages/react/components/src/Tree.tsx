@@ -11,6 +11,9 @@ import {
   findTreeNode,
   flattenVisibleTreeRows,
   isTreeBranch,
+  treeOutlineRows,
+  treeDropEligibility,
+  dropCommitDestination,
   treeCheckState,
   treeKeydownIntent,
   treeRangeSelection,
@@ -26,7 +29,7 @@ import {
 import "@inflatable-cookie/poodle-core/styles/tree.css";
 
 import { Checkbox } from "./Checkbox";
-import { DragDropProvider, useDragDrop } from "./drag-drop";
+import { DragDropProvider, useDragDrop, useOptionalDragDrop } from "./drag-drop";
 import { Icon } from "./Icon";
 import { Spinner } from "./Spinner";
 import { TreeItem } from "./tree-item/TreeItem";
@@ -121,6 +124,7 @@ function TreeView({
 }: TreeProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const { requestKeyboardDrop } = useDragDrop();
+  const dragDrop = useOptionalDragDrop();
 
   // Bindable pairs: controlled when prop provided, internal otherwise.
   const [internalSelected, setInternalSelected] = useState<string[]>([]);
@@ -277,11 +281,15 @@ function TreeView({
 
   function handleDrop(intent: DropIntent): DragDropCommitResult {
     const from = activeSourceIdRef.current;
-    if (!from || !isTreeDropPosition(intent.position)) {
+    const dest = dropCommitDestination(intent);
+    if (!from || !isTreeDropPosition(dest.position)) {
       return { status: "rejected", reason: "unavailable" };
     }
-    if (from === intent.targetId) return { status: "rejected", reason: "self" };
-    onReorder?.(from, intent.targetId, intent.position);
+    const eligibility = treeDropEligibility(nodes, from, intent);
+    if (!eligibility.accepted) {
+      return { status: "rejected", reason: eligibility.reason };
+    }
+    onReorder?.(from, dest.targetId, dest.position);
     return { status: "committed" };
   }
 
@@ -437,6 +445,7 @@ function TreeView({
         key={node.value}
         node={node}
         nodes={nodes}
+        outlineRows={treeOutlineRows(visibleRows)}
         depth={depth}
         parent={parent}
         branch={branch}

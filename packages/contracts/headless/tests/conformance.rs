@@ -755,6 +755,7 @@ fn drop_intent(value: &Value) -> DropIntent {
         target_id: s(value, "targetId").to_string(),
         position: s(value, "position").to_string(),
         operation: drag_operation(&value["operation"]),
+        destination: None,
     }
 }
 
@@ -1002,10 +1003,7 @@ fn drop_target_candidate(value: &Value) -> DropTargetCandidate {
         target_id: s(value, "targetId").to_string(),
         depth: f(value, "depth") as i32,
         order: f(value, "order") as i32,
-        priority: value
-            .get("priority")
-            .and_then(Value::as_f64)
-            .unwrap_or(0.0) as i32,
+        priority: value.get("priority").and_then(Value::as_f64).unwrap_or(0.0) as i32,
         contains_point: b(value, "containsPoint"),
         eligibility: if b(eligibility, "accepted") {
             DropEligibility::Accepted {
@@ -1083,10 +1081,7 @@ fn drag_drop_conformance() {
             .as_ref()
             .map_or(Value::Null, drop_intent_json);
 
-        assert_eq!(
-            actual, case["expect"]["intent"],
-            "dragDrop/{name}: intent"
-        );
+        assert_eq!(actual, case["expect"]["intent"], "dragDrop/{name}: intent");
     }
 }
 

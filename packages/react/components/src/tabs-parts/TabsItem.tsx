@@ -8,6 +8,7 @@ import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 
 import { Icon } from "../Icon";
 import { useDragSource, useDropTarget } from "../drag-drop";
+import { useTabsForeignInsert } from "../tabs-foreign-insert";
 import type { ControlSize, TabItem } from "../types";
 
 /**
@@ -33,6 +34,9 @@ export interface TabsItemProps {
   indexOfValue: (value: string) => number;
   /** Whether a subject id belongs to this strip at all. */
   ownsValue: (value: string) => boolean;
+  /** Accept a family member that is not in this strip, so an owning composite can insert. */
+  acceptsForeign?: boolean;
+  isVertical?: boolean;
   sourceId: string;
   targetId: string;
   onDrop: (intent: DropIntent) => DragDropCommitResult;
@@ -61,6 +65,8 @@ export function TabsItem({
   crossWindowSourceBridge,
   indexOfValue,
   ownsValue,
+  acceptsForeign = false,
+  isVertical = false,
   sourceId,
   targetId,
   onDrop,
@@ -77,6 +83,7 @@ export function TabsItem({
 }: TabsItemProps) {
   /** A disabled tab cannot be picked up. It is still a place to put one. */
   const canDrag = reorderable && item.disabled !== true;
+  const foreignInsert = useTabsForeignInsert();
 
   const { getSourceProps, dragging } = useDragSource({
     sourceId,
@@ -88,28 +95,39 @@ export function TabsItem({
   });
 
   /**
-   * The whole tab is one band, and which side it resolves to depends on where
-   * the dragged tab started.
-   *
-   * Tabs has always landed a dropped tab *at* the tab it was dropped on,
-   * whichever half the pointer was over, and that public result is preserved
-   * here rather than re-litigated: coming from the left, "at" means after the
-   * target; coming from the right, it means before it.
+   * The drop indicator paints the whole tab, so the band must too: a drop on
+   * this sibling lands *at* this sibling. Which half the pointer is over does
+   * not change that public result. Coming from the left, "at" is after; coming
+   * from the right, it is before.
    */
   const { getTargetProps, accepted } = useDropTarget({
     targetId,
     acceptedKinds: [subjectKind],
-    disabled: !reorderable,
+    disabled: !reorderable && !acceptsForeign,
     label: item.label,
-    resolvePosition: ({ subject }): DropPosition =>
-      indexOfValue(subject.id) < index ? "after" : "before",
+    resolvePosition: ({ subject, x, y, rect }): DropPosition => {
+      if (!ownsValue(subject.id)) {
+        return isVertical
+          ? y < rect.top + rect.height / 2
+            ? "before"
+            : "after"
+          : x < rect.left + rect.width / 2
+            ? "before"
+            : "after";
+      }
+      return indexOfValue(subject.id) < index ? "after" : "before";
+    },
     canDrop: (intent, subject) => {
       // A shared family means another surface's subject can reach this target.
       // Refusing it *here*, during eligibility, is what lets arbitration
       // discard this tab and hand the drop to an eligible ancestor composite.
       // Claiming it and rejecting at commit would swallow the drop instead.
+      // An owning composite that wants the insert (DockRegion) opts in via
+      // `acceptsForeign` instead of falling through to the region.
       if (!ownsValue(subject.id)) {
-        return { accepted: false, reason: "not this tab set" };
+        if (!acceptsForeign || !foreignInsert?.canAccept(subject.id)) {
+          return { accepted: false, reason: "not this tab set" };
+        }
       }
       return subject.id === item.value
         ? { accepted: false, reason: "same tab" }
@@ -138,6 +156,10 @@ export function TabsItem({
           onBlur,
           onClick: onSelect,
           onKeyDown,
+          onPointerDown: (event) => {
+            if (item.disabled === true) return;
+            event.currentTarget.focus({ preventScroll: true });
+          },
           ref: onElement as never,
         })}
         type="button"

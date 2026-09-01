@@ -5,6 +5,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
   type HTMLAttributes,
   type ReactNode,
@@ -93,6 +94,27 @@ function composeHandler<E>(theirs?: (event: E) => void, ours?: (event: E) => voi
   };
 }
 
+function presentationKey(snapshot: DragDropSnapshot): string {
+  return [
+    snapshot.phase,
+    snapshot.sourceId ?? "",
+    snapshot.targetId ?? "",
+    snapshot.targetPosture ?? "",
+    snapshot.announcement ?? "",
+    snapshot.preview?.label ?? "",
+    snapshot.preview ? "1" : "0",
+  ].join("|");
+}
+
+function previewTransform(preview: DragPreviewSnapshot): string {
+  return `translate3d(${preview.x}px, ${preview.y}px, 0)`;
+}
+
+function previewPoseKey(preview: DragPreviewSnapshot | null): string {
+  if (!preview) return "";
+  return `${preview.x}|${preview.y}|${preview.label}|${preview.sourceId}`;
+}
+
 export interface DragDropProviderProps {
   controller?: DragDropController;
   describeAnnouncement?: (event: DragAnnouncementEvent) => string | null;
@@ -132,12 +154,33 @@ export function DragDropProvider({
       : controller!,
   );
   const rootRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [snapshot, setSnapshot] = useState(() => ctrl.getSnapshot());
+  const [previewPose, setPreviewPose] = useState<DragPreviewSnapshot | null>(
+    () => ctrl.getSnapshot().preview,
+  );
+  const presentationKeyRef = useRef(presentationKey(snapshot));
+  const previewPoseKeyRef = useRef(previewPoseKey(snapshot.preview));
   const connectGenerationRef = useRef(0);
 
   useLayoutEffect(() => {
     const generation = ++connectGenerationRef.current;
-    const unsub = ctrl.subscribe(() => setSnapshot(ctrl.getSnapshot()));
+    const unsub = ctrl.subscribe(() => {
+      const next = ctrl.getSnapshot();
+      const node = previewRef.current;
+      if (node && next.preview) {
+        node.style.transform = previewTransform(next.preview);
+      }
+      const pose = previewPoseKey(next.preview);
+      if (pose !== previewPoseKeyRef.current) {
+        previewPoseKeyRef.current = pose;
+        setPreviewPose(next.preview ? { ...next.preview } : null);
+      }
+      const key = presentationKey(next);
+      if (key === presentationKeyRef.current) return;
+      presentationKeyRef.current = key;
+      setSnapshot(next);
+    });
     const root = rootRef.current;
     if (!root) {
       unsub();
@@ -156,8 +199,8 @@ export function DragDropProvider({
     };
   }, [ctrl]);
 
-  const previewStyle: CSSProperties | undefined = snapshot.preview
-    ? { left: snapshot.preview.x, top: snapshot.preview.y }
+  const previewStyle: CSSProperties | undefined = previewPose
+    ? { transform: previewTransform(previewPose) }
     : undefined;
 
   return (
@@ -165,9 +208,9 @@ export function DragDropProvider({
       <div ref={rootRef} className="poodle-drag-drop-provider">
         {children}
         <div className="poodle-drag-overlay" aria-hidden="true">
-          {snapshot.preview ? (
-            <div className="poodle-drag-preview" style={previewStyle}>
-              {preview ? preview(snapshot.preview) : snapshot.preview.label}
+          {previewPose ? (
+            <div ref={previewRef} className="poodle-drag-preview" style={previewStyle}>
+              {preview ? preview(previewPose) : previewPose.label}
             </div>
           ) : null}
         </div>
@@ -205,8 +248,13 @@ export function useDragDrop(): {
   requestKeyboardDrop: (command: KeyboardDropCommand) => boolean;
 } {
   const ctx = useDragDropContext();
+  const snapshot = useSyncExternalStore(
+    (listener) => ctx.controller.subscribe(listener),
+    () => ctx.controller.getSnapshot(),
+    () => ctx.controller.getSnapshot(),
+  );
   return {
-    snapshot: ctx.snapshot,
+    snapshot,
     cancel: () => ctx.controller.cancel(),
     requestKeyboardDrop: (command) => ctx.controller.requestKeyboardDrop(command),
   };

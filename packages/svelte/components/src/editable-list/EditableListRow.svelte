@@ -11,11 +11,13 @@
 
   import { default as IconButton } from "../IconButton.svelte";
   import { useDragDrop } from "../drag-drop";
+  import { dragDropSnapshotStore, tryDragDrop } from "../drag-drop-context";
   import type { ControlDensity, ControlSize } from "../types";
 
   interface Props {
     item: T;
     index: number;
+    indexOfId: (id: string) => number;
     total: number;
     reorderable: boolean;
     embeddedHandle: boolean;
@@ -35,6 +37,7 @@
   let {
     item,
     index,
+    indexOfId,
     total,
     reorderable,
     embeddedHandle,
@@ -51,7 +54,8 @@
     onIdleKeydown,
   }: Props = $props();
 
-  const { dragSource, dropTarget, snapshot } = useDragDrop();
+  const { dragSource, dropTarget } = useDragDrop();
+  const snapshot = dragDropSnapshotStore(tryDragDrop()!.controller);
   const canDrag = $derived(reorderable && !isUnavailable);
   const dragging = $derived(
     $snapshot.sourceId === item.id &&
@@ -81,7 +85,7 @@
     acceptedKinds: ["poodle.editable-list"],
     disabled: !canDrag,
     label: item.label ?? item.id,
-    resolvePosition: (input) => (input.y < input.rect.top + input.rect.height / 2 ? "before" : "after"),
+    resolvePosition: ({ subject }) => (indexOfId(subject.id) < index ? "after" : "before"),
     canDrop: (intent, subject) =>
       subject.id === intent.targetId ? { accepted: false, reason: "self" } : { accepted: true, intent },
     onDrop,

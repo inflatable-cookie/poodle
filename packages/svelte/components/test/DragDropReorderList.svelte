@@ -59,3 +59,4 @@
 </ul>
 
 <div data-testid="announcement">{$snapshot.announcement ?? ""}</div>
+<div data-testid="preview-x">{$snapshot.preview?.x ?? ""}</div>

@@ -184,7 +184,12 @@ pub fn rejects_foreign_or_self(
 /// A nested placement target: before / inside / after by thirds when the row
 /// can hold children, halves when it cannot. Same scope and self-drop rules as
 /// [`reorder_target`].
-pub fn nested_target(scope: &str, value: &str, label: &str, accepts_inside: bool) -> NodeDropTarget {
+pub fn nested_target(
+    scope: &str,
+    value: &str,
+    label: &str,
+    accepts_inside: bool,
+) -> NodeDropTarget {
     let mut target = NodeDropTarget::new(
         format!("{scope}:target:{value}"),
         reorder_kind(scope),
@@ -218,12 +223,14 @@ pub fn vertical_band_resolver(
 /// The band rule for a surface whose documented result lands a dropped row
 /// *at* the row it was dropped on.
 ///
-/// Tabs, OrderBy, BlockEditor, and ModelCatalogueEditor all publish that
-/// result, and geometry cannot express it: which half the pointer is over says
-/// nothing about which side "at" is. The travelling direction does — a row
-/// coming from above arrives after its target, one coming from below arrives
-/// before it — and both web frameworks resolve it the same way, so the same
-/// gesture produces one order on every runtime.
+/// OrderBy, BlockEditor, and ModelCatalogueEditor publish that result, and
+/// geometry cannot express it: which half the pointer is over says nothing
+/// about which side "at" is. The travelling direction does — a row coming
+/// from above arrives after its target, one coming from below arrives before
+/// it — and both web frameworks resolve it the same way, so the same gesture
+/// produces one order on every runtime. Tabs is not in this set: its contract
+/// reads the fraction of the tab's own bounds, so origin-facing half is
+/// `before`.
 ///
 /// `owned` is this surface's row values in their current order.
 pub fn arrival_band_resolver(
@@ -605,11 +612,15 @@ mod tests {
     #[test]
     fn a_reorder_row_rejects_itself_with_a_reason_rather_than_going_quiet() {
         let target = reorder_target("list", "kick", "Kick");
-        let eligibility = target.can_drop.clone().expect("self-rejection is installed");
+        let eligibility = target
+            .can_drop
+            .clone()
+            .expect("self-rejection is installed");
         let intent = DropIntent {
             target_id: target.target_id.clone(),
             position: DROP_POSITION_AFTER.to_string(),
             operation: DragOperation::Move,
+            destination: None,
         };
 
         let refused = eligibility(&intent, &reorder_subject("list", "kick"));

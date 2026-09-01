@@ -3694,9 +3694,9 @@
       },
       {
         "name": "onPanelDrop",
-        "type": "((payload: { panel: PanelDragData; targetEdge: DockEdge }) => void) | undefined",
+        "type": "((payload: { panel: PanelDragData; targetEdge: DockEdge; index: number }) => void) | undefined",
         "default": "undefined",
-        "description": "Called when a panel is dropped onto this dock."
+        "description": "Called when a panel is dropped onto this dock. `index` is the insert slot in the destination items; a drop on the region body appends."
       }
     ],
     "slots": [

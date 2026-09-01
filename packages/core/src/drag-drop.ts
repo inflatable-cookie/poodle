@@ -46,10 +46,42 @@ export interface DragSubject {
   id: string;
 }
 
+/**
+ * Authoritative commit placement when it differs from the hovered target.
+ *
+ * The hovered registration stays the indicator anchor (`DropIntent.targetId`
+ * and `position`). Eligibility, revalidation, commit, and announcements use
+ * this destination when present.
+ */
+export interface DropDestination {
+  readonly targetId: string;
+  readonly position: DropPosition;
+}
+
 export interface DropIntent {
   targetId: string;
   position: DropPosition;
   operation: DragOperation;
+  destination?: DropDestination;
+}
+
+/** What a pointer resolver may return besides a bare drop position. */
+export interface DropResolveResult {
+  readonly position: DropPosition;
+  readonly destination?: DropDestination;
+}
+
+export type ResolvedDropPosition = DropPosition | DropResolveResult;
+
+/** The commit placement a session should announce and revalidate. */
+export function dropCommitDestination(intent: DropIntent): DropDestination {
+  return intent.destination ?? { targetId: intent.targetId, position: intent.position };
+}
+
+export function asDropResolveResult(value: ResolvedDropPosition | null): DropResolveResult | null {
+  if (value === null) return null;
+  if (typeof value === "string") return { position: value };
+  return value;
 }
 
 export type DropEligibility =
@@ -227,12 +259,17 @@ function currentSession(context: DragSessionContext, sessionId: string): DragSes
 }
 
 function sameIntent(left: DropIntent | null, right: DropIntent): boolean {
-  return (
-    left !== null &&
-    left.targetId === right.targetId &&
-    left.position === right.position &&
-    left.operation === right.operation
-  );
+  if (left === null) return false;
+  if (
+    left.targetId !== right.targetId ||
+    left.position !== right.position ||
+    left.operation !== right.operation
+  ) {
+    return false;
+  }
+  const from = dropCommitDestination(left);
+  const to = dropCommitDestination(right);
+  return from.targetId === to.targetId && from.position === to.position;
 }
 
 /**

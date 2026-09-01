@@ -10,6 +10,8 @@
  * and focus calls stay adapter-side.
  */
 
+import { dropCommitDestination, type DropEligibility, type DropIntent } from "./drag-drop";
+
 export interface TreeNodeLike {
   value: string;
   children?: TreeNodeLike[];
@@ -289,4 +291,48 @@ export function treeCanAcceptDrop<T extends TreeNodeLike>(
   if (from === to) return false;
   if (!findTreeNode(nodes, from) || !findTreeNode(nodes, to)) return false;
   return !treeSubtreeContains(nodes, from, to);
+}
+
+/** Hover and commit eligibility against the authoritative destination. */
+export function treeDropEligibility<T extends TreeNodeLike>(
+  nodes: readonly T[],
+  from: string,
+  intent: DropIntent,
+): DropEligibility {
+  const dest = dropCommitDestination(intent);
+  const destNode = findTreeNode(nodes, dest.targetId);
+  if (!destNode) {
+    return { accepted: false, reason: "missing" };
+  }
+  if (destNode.isDisabled) {
+    return { accepted: false, reason: "disabled" };
+  }
+  if (!treeCanAcceptDrop(nodes, from, dest.targetId)) {
+    return { accepted: false, reason: dest.targetId === from ? "self" : "subtree" };
+  }
+  return { accepted: true, intent };
+}
+
+/** Where `value` sits in the tree: its parent, sibling list, and index. */
+export interface TreeLocation<T extends TreeNodeLike = TreeNodeLike> {
+  parent: string | null;
+  siblings: readonly T[];
+  index: number;
+}
+
+export function treeLocate<T extends TreeNodeLike>(
+  nodes: readonly T[],
+  value: string,
+): TreeLocation<T> | null {
+  const search = (siblings: readonly T[], parent: string | null): TreeLocation<T> | null => {
+    const index = siblings.findIndex((node) => node.value === value);
+    if (index >= 0) return { parent, siblings, index };
+    for (const node of siblings) {
+      if (!node.children?.length) continue;
+      const found = search(node.children as T[], node.value);
+      if (found) return found;
+    }
+    return null;
+  };
+  return search(nodes, null);
 }

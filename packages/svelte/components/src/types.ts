@@ -805,6 +805,14 @@ export type PanelDragData = {
   sourceZone: string;
 };
 
+/** One accepted cross-region panel move. */
+export type DockPanelDropPayload = {
+  panel: PanelDragData;
+  targetEdge: DockEdge;
+  /** Insert index in the destination `items`. A drop on the region body appends. */
+  index: number;
+};
+
 export type PanelTabItem = {
   value: string;
   label: string;

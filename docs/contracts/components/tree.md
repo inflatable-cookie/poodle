@@ -1,7 +1,7 @@
 # Tree
 
 Status: detailed contract
-Updated: 2026-08-30
+Updated: 2026-09-01
 
 ## 1. Purpose
 
@@ -78,8 +78,28 @@ Updated: 2026-08-30
   pointer (items are app-specific). Jetstream polls the platform right-button and
   renders the menu as a positioned overlay routed by token.
 - **Reorder** (`reorderable` + `onReorder`): rows are substrate drag sources; a drop fires
-  `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`
-  (computed from pointer Y within the target row; `inside` only for branches).
+  `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`.
+  The hovered row is the indicator anchor; the session's commit destination is
+  the `{to, position}` the geometry resolved, and eligibility, announcements,
+  and `onReorder` all use that destination — never a privately recomputed one.
+  Hovering an expanded source does not land before its first child (own
+  subtree). Y picks the band on the hovered row; `inside` on a folder appends as last
+  child, including when that folder is the dragged node's parent or an
+  immediate sibling. An `after` on the last visible
+  descendant of an open parent then offers every ancestor that ends at that
+  gap — including the dragged next sibling's whole row (the gap above it),
+  that last descendant's whole row, and the last descendant itself when
+  nothing follows it at the bottom of the tree. Vertical movement between
+  those two rows does not change depth. The gap above an open folder is only before the
+  folder — it does not indent, even if the pointer moves right. Nest from the
+  folder row or from the gap below. `inside` appends as last child; the gap
+  between an open folder header and its first child is before that child.
+  Depth
+  steps are two indent columns, so a root filename stays at root until the
+  pointer moves clearly into the nested icon column. The drop line indents to
+  the icon column at the chosen depth as the pointer moves, including when
+  only X changes on the same row.
+  Same-parent leaves land *at* the hovered row.
   Alt+↑/↓ moves the focused node among siblings through
   `requestKeyboardDrop` over the visible logical target catalogue; it does
   not call `onReorder` directly. Space/Enter remain selection/activation.
@@ -483,9 +503,9 @@ Focus lives on the `treeitem`; the ring is painted on its presentational row chi
 
 | Value | Rendering |
 |-------|-----------|
-| `before` | accent line (`0.125rem`, `var(--poodle-color-accent-base)`) at the row top |
-| `after` | accent line at the row bottom |
-| `inside` | inset accent ring + `color-mix(... accent-base 12%, transparent)` fill |
+| `before` | accent line (`0.125rem`, `var(--poodle-color-accent-base)`) at the row top, aligned to the icon column at the drop depth |
+| `after` | accent line at the row bottom, aligned to the icon column at the drop depth |
+| `inside` | row fill `color-mix(... accent-base 12%, transparent)` |
 
 GPUI draws the equivalent (top/bottom accent line or inside fill) via an absolute
 child; the position comes from pointer Y within the row during `on_drag_move`.
@@ -539,8 +559,9 @@ None.
   Every enabled row registers a `NodeDragSource` and a nested `NodeDropTarget`;
   the GPUI `DragDropController` owns capture, hit testing, deterministic
   deepest-target arbitration, cancellation, and exactly-once cleanup, and the
-  band rule (`before` / `inside` / `after` by thirds) lives in
-  `poodle_render::drag_drop`. A row dropped onto itself is rejected, and a
+  band rule (`before` / `inside` / `after`) lives in
+  `poodle_render::drag_drop`. Web also walks last-descendant ancestors from
+  pointer X so a leftward move un-nests after an open parent. A row dropped onto itself is rejected. A disabled row is not a live destination even when an enabled hover remaps onto it. A
   row's subject kind is scoped to Tree, so a drag from another reorder surface
   sharing the controller is never eligible here. `on_drag_over` and
   `on_reorder` keep their `(dragged, over, DropEdge)` shape: the component

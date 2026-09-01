@@ -195,6 +195,20 @@ describe("EditableList (react)", () => {
     expect((onReorder.mock.calls[0][0] as typeof items).map((item) => item.id)).toEqual(["b", "c", "a"]);
   });
 
+  it("lands at the hovered row even on the origin-facing half", () => {
+    const onReorder = vi.fn();
+    const { container } = render(<EditableList items={items} onReorder={onReorder} />);
+    const rows = stackRows(container);
+    const handle = rows[0].querySelector(".poodle-editable-list__handle") as HTMLElement;
+
+    fireEvent.pointerDown(handle, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(handle, { pointerId: 1, clientX: 20, clientY: 60 });
+    fireEvent.pointerUp(handle, { pointerId: 1, clientX: 20, clientY: 60 });
+
+    expect(onReorder).toHaveBeenCalledTimes(1);
+    expect((onReorder.mock.calls[0][0] as typeof items).map((item) => item.id)).toEqual(["b", "a", "c"]);
+  });
+
   it("reorders with a touch hold", () => {
     vi.useFakeTimers();
     const onReorder = vi.fn();

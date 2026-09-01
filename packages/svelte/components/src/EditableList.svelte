@@ -347,6 +347,7 @@
           <EditableListRow
             item={reorderItem}
             {index}
+            indexOfId={(id) => items.findIndex((entry) => entry.id === id)}
             total={items.length}
             {reorderable}
             {embeddedHandle}

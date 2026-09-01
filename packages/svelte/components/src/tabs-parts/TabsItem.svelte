@@ -12,6 +12,8 @@
   import { default as Pill } from "../Pill.svelte";
   import { anchored } from "../anchored";
   import { useDragDrop } from "../drag-drop";
+  import { dragDropSnapshotStore, tryDragDrop } from "../drag-drop-context";
+  import { getTabsForeignInsert } from "../tabs-foreign-insert";
   import type { ControlSize, TabItem } from "../types";
 
   /**
@@ -39,6 +41,8 @@
     indexOfValue: (value: string) => number;
     /** Whether a subject id belongs to this strip at all. */
     ownsValue: (value: string) => boolean;
+    /** Accept a family member that is not in this strip, so an owning composite can insert. */
+    acceptsForeign?: boolean;
     sourceId: string;
     targetId: string;
     onDrop: (intent: DropIntent) => DragDropCommitResult;
@@ -69,6 +73,7 @@
     crossWindowSourceBridge,
     indexOfValue,
     ownsValue,
+    acceptsForeign = false,
     sourceId,
     targetId,
     onDrop,
@@ -83,7 +88,9 @@
     anchorElement,
   }: Props = $props();
 
-  const { dragSource, dropTarget, snapshot } = useDragDrop();
+  const { dragSource, dropTarget } = useDragDrop();
+  const snapshot = dragDropSnapshotStore(tryDragDrop()!.controller);
+  const foreignInsert = getTabsForeignInsert();
 
   /** A disabled tab cannot be picked up. It is still a place to put one. */
   const canDrag = $derived(reorderable && item.disabled !== true);
@@ -107,29 +114,41 @@
   });
 
   /**
-   * The whole tab is one band, and which side it resolves to depends on where
-   * the dragged tab started.
-   *
-   * Tabs has always landed a dropped tab *at* the tab it was dropped on,
-   * whichever half the pointer was over, and that public result is preserved
-   * here rather than re-litigated: coming from the left, "at" means after the
-   * target; coming from the right, it means before it. Splitting the tab into
-   * halves would change the resulting order for the same gesture.
+   * The drop indicator paints the whole tab, so the band must too: a drop on
+   * this sibling lands *at* this sibling. Which half the pointer is over does
+   * not change that public result. Coming from the left, "at" is after; coming
+   * from the right, it is before.
    */
   const targetRegistration = $derived<DropTargetRegistration>({
     targetId,
     acceptedKinds: [subjectKind],
-    disabled: !reorderable,
+    disabled: !reorderable && !acceptsForeign,
     label: item.label,
-    resolvePosition: ({ subject }): DropPosition =>
-      indexOfValue(subject.id) < index ? "after" : "before",
+    resolvePosition: ({ subject, x, y, rect }): DropPosition => {
+      if (!ownsValue(subject.id)) {
+        // Incoming: the hovered half is the insert side, so a drop on the
+        // leading half of the first tab can still land at index 0.
+        return isVertical
+          ? y < rect.top + rect.height / 2
+            ? "before"
+            : "after"
+          : x < rect.left + rect.width / 2
+            ? "before"
+            : "after";
+      }
+      return indexOfValue(subject.id) < index ? "after" : "before";
+    },
     canDrop: (intent, subject) => {
       // A shared family means another surface's subject can reach this target.
       // Refusing it *here*, during eligibility, is what lets arbitration
       // discard this tab and hand the drop to an eligible ancestor composite.
       // Claiming it and rejecting at commit would swallow the drop instead.
+      // An owning composite that wants the insert (DockRegion) opts in via
+      // `acceptsForeign` instead of falling through to the region.
       if (!ownsValue(subject.id)) {
-        return { accepted: false, reason: "not this tab set" };
+        if (!acceptsForeign || !foreignInsert?.canAccept(subject.id)) {
+          return { accepted: false, reason: "not this tab set" };
+        }
       }
       return subject.id === item.value
         ? { accepted: false, reason: "same tab" }
@@ -168,6 +187,10 @@
     onblur={onBlur}
     onclick={onSelect}
     onkeydown={onKeydown}
+    onpointerdown={(event) => {
+      if (item.disabled === true) return;
+      event.currentTarget.focus({ preventScroll: true });
+    }}
     use:dragSource={sourceRegistration}
   >
     {#if item.icon}

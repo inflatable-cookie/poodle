@@ -1,9 +1,10 @@
 <script lang="ts">
   import {
-    isTreeBranch,
-    resolveNestedDropPosition,
-    treeCanAcceptDrop,
+    treeDropEligibility,
+    treeResolveOutlineDrop,
+    readTreeDropMetrics,
     type DragDropCommitResult,
+    type TreeOutlineRow,
     type DragSession,
     type DragSourceRegistration,
     type DragTerminalOutcome,
@@ -13,11 +14,13 @@
   import type { Snippet } from "svelte";
 
   import { useDragDrop } from "../drag-drop";
+  import { tryDragDrop } from "../drag-drop-context";
   import type { TreeNode } from "../types";
 
   interface Props {
     node: TreeNode;
     nodes: TreeNode[];
+    outlineRows: TreeOutlineRow[];
     depth: number;
     parent: string | null;
     branch: boolean;
@@ -42,6 +45,7 @@
   let {
     node,
     nodes,
+    outlineRows,
     depth,
     parent: _parent,
     branch,
@@ -64,8 +68,46 @@
   }: Props = $props();
 
   const { dragSource, dropTarget } = useDragDrop();
+  const controller = tryDragDrop()?.controller;
   const canDrag = $derived(reorderable && !node.isDisabled && !editing);
   let rowEl: HTMLElement | undefined;
+  let itemEl: HTMLElement | undefined;
+
+  function applyDropDepth(): void {
+    if (!itemEl) return;
+    const snap = controller?.getSnapshot();
+    const rect = rowEl?.getBoundingClientRect();
+    if (
+      !snap ||
+      snap.targetId !== node.value ||
+      snap.targetPosture !== "accepted" ||
+      !snap.pointer ||
+      !rect
+    ) {
+      itemEl.style.removeProperty("--poodle-tree-drop-depth");
+      return;
+    }
+    const metrics = rowEl ? readTreeDropMetrics(rowEl) : { indentPx: 16, gutterPx: 24 };
+    const depth = treeResolveOutlineDrop({
+      rows: outlineRows,
+      from: snap.session?.subject.id ?? "",
+      to: node.value,
+      x: snap.pointer.x,
+      y: snap.pointer.y,
+      rect,
+      ...metrics,
+    })?.depth;
+    if (depth == null) itemEl.style.removeProperty("--poodle-tree-drop-depth");
+    else itemEl.style.setProperty("--poodle-tree-drop-depth", String(depth));
+  }
+
+  $effect(() => {
+    void itemEl;
+    void rowEl;
+    if (!controller) return;
+    applyDropDepth();
+    return controller.subscribe(applyDropDepth);
+  });
 
   const sourceRegistration = $derived<DragSourceRegistration>({
     sourceId: node.value,
@@ -85,21 +127,29 @@
     label: node.label,
     resolvePosition: (input) => {
       const rect = rowEl?.getBoundingClientRect() ?? input.rect;
-      return resolveNestedDropPosition({
+      const metrics = rowEl ? readTreeDropMetrics(rowEl) : { indentPx: 16, gutterPx: 24 };
+      const placement = treeResolveOutlineDrop({
+        rows: outlineRows,
+        from: input.subject.id,
+        to: node.value,
+        x: input.x,
         y: input.y,
         rect,
-        kind: isTreeBranch(node) ? "container" : "item",
+        ...metrics,
       });
+      if (!placement) return null;
+      return {
+        position: placement.indicator,
+        destination: { targetId: placement.to, position: placement.position },
+      };
     },
-    canDrop: (intent, subject) =>
-      treeCanAcceptDrop(nodes, subject.id, intent.targetId)
-        ? { accepted: true, intent }
-        : { accepted: false, reason: subject.id === intent.targetId ? "self" : "subtree" },
+    canDrop: (intent, subject) => treeDropEligibility(nodes, subject.id, intent),
     onDrop,
   });
 </script>
 
 <div
+  bind:this={itemEl}
   class="poodle-tree__item"
   role="treeitem"
   data-value={node.value}

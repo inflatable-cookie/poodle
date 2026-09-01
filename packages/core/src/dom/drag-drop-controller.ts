@@ -45,9 +45,12 @@ import {
   resolveAutoScroll,
   type AutoScrollCandidate,
   type AutoScrollMetrics,
+  type AutoScrollRect,
 } from "./drag-drop-auto-scroll";
 import {
+  asDropResolveResult,
   dragSessionTransition,
+  dropCommitDestination,
   resolveDropTarget,
   type DragAnnouncementKind,
   type DragCancelReason,
@@ -64,9 +67,10 @@ import {
   type DropIntent,
   type DropPosition,
   type DropTargetCandidate,
+  type ResolvedDropPosition,
 } from "../drag-drop";
 
-export type { DragDropCommitResult };
+export type { DragDropCommitResult, ResolvedDropPosition };
 
 export type DragInputKind = "mouse" | "pen" | "touch" | "keyboard";
 
@@ -161,7 +165,7 @@ export interface DropTargetRegistration {
   readonly disabled?: boolean;
   readonly priority?: number;
   readonly label: string;
-  readonly resolvePosition: (input: DragPositionResolverInput) => DropPosition | null;
+  readonly resolvePosition: (input: DragPositionResolverInput) => ResolvedDropPosition | null;
   readonly canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
   readonly onDrop: (
     intent: DropIntent,
@@ -600,8 +604,16 @@ function isScrollOwner(element: Element): element is HTMLElement {
   return SCROLL_OVERFLOW.test(`${style.overflowY} ${style.overflowX} ${style.overflow}`);
 }
 
+function axisAllowsScroll(axisValue: string, shorthand: string): boolean {
+  const value = axisValue === "" || axisValue === "visible" ? shorthand : axisValue;
+  return SCROLL_OVERFLOW.test(value);
+}
+
 function measureScrollMetrics(element: HTMLElement): AutoScrollMetrics {
   const rect = element.getBoundingClientRect();
+  const style = element.ownerDocument.defaultView?.getComputedStyle(element);
+  const overflowX = style ? axisAllowsScroll(style.overflowX, style.overflow) : true;
+  const overflowY = style ? axisAllowsScroll(style.overflowY, style.overflow) : true;
   return {
     scrollTop: element.scrollTop,
     scrollLeft: element.scrollLeft,
@@ -610,6 +622,8 @@ function measureScrollMetrics(element: HTMLElement): AutoScrollMetrics {
     clientHeight: element.clientHeight,
     clientWidth: element.clientWidth,
     rect: { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left },
+    overflowX,
+    overflowY,
   };
 }
 
@@ -921,7 +935,14 @@ export function createDragDropController(options: DragDropControllerOptions = {}
           ...context.session,
           allowedOperations: Object.freeze([...context.session.allowedOperations]),
           subject: Object.freeze({ ...context.session.subject }),
-          intent: context.session.intent ? Object.freeze({ ...context.session.intent }) : null,
+          intent: context.session.intent
+            ? Object.freeze({
+                ...context.session.intent,
+                destination: context.session.intent.destination
+                  ? Object.freeze({ ...context.session.intent.destination })
+                  : undefined,
+              })
+            : null,
         })
       : null;
 
@@ -970,8 +991,9 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   function announce(kind: DragAnnouncementKind, outcome?: DragTerminalOutcome): void {
     const session = context.session;
+    const commit = session?.intent ? dropCommitDestination(session.intent) : null;
     const source = session ? sources.get(session.sourceId) : undefined;
-    const target = session?.intent ? targetForAnnouncement(session.intent.targetId) : undefined;
+    const target = commit ? targetForAnnouncement(commit.targetId) : undefined;
     const reason =
       outcome && (outcome.status === "rejected" || outcome.status === "failed" || outcome.status === "cancelled")
         ? "reason" in outcome
@@ -986,7 +1008,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       sourceLabel:
         source?.registration.label ?? externalSourceLabel ?? session?.subject.id ?? "item",
       targetLabel: target?.registration.label,
-      position: session?.intent?.position,
+      position: commit?.position,
       operation: session?.operation,
       reason,
     };
@@ -2515,6 +2537,49 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     return list;
   }
 
+  function isExplicitAutoScrollTree(element: HTMLElement): boolean {
+    for (const target of targets.values()) {
+      if (!target.registration.autoScroll) continue;
+      if (target.element === element || element.contains(target.element) || target.element.contains(element)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function rectOverflowsClip(rect: CachedRect, clip: AutoScrollRect): boolean {
+    // Ignore a focus-ring's worth of ink (~width-focus + offset) so a tab
+    // strip does not start auto-scrolling from outline overflow.
+    const slop = 4;
+    return (
+      rect.top < clip.top - slop ||
+      rect.bottom > clip.bottom + slop ||
+      rect.left < clip.left - slop ||
+      rect.right > clip.right + slop
+    );
+  }
+
+  /**
+   * Page-level (and other ancestor) auto-scroll is for revealing clipped
+   * sources or drop targets. A tab strip fully visible in a catalogue scroller
+   * must not shove the strip away from the pointer.
+   */
+  function candidateRevealsClippedWork(
+    owner: AutoScrollCandidate & { element: HTMLElement },
+    source: SourceEntry | undefined,
+  ): boolean {
+    if (isExplicitAutoScrollTree(owner.element)) return true;
+    const clip = owner.metrics.rect;
+    const kind = context.session?.subject.kind;
+    if (source && rectOverflowsClip(measure(source.element), clip)) return true;
+    if (!kind) return false;
+    for (const target of targets.values()) {
+      if (!target.registration.acceptedKinds.includes(kind)) continue;
+      if (rectOverflowsClip(measure(target.element), clip)) return true;
+    }
+    return false;
+  }
+
   function applyAutoScroll(id: string, dx: number, dy: number, owners: Array<AutoScrollCandidate & { element: HTMLElement }>): boolean {
     const owner = owners.find((entry) => entry.id === id);
     if (!owner) return false;
@@ -2561,7 +2626,10 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     const dt = lastAutoScrollTs === null ? 16 : Math.min(Math.max(now - lastAutoScrollTs, 0), 64);
     if (dt === 0) return true;
     lastAutoScrollTs = now;
-    const owners = collectAutoScrollCandidates();
+    refreshLayout();
+    const owners = collectAutoScrollCandidates().filter((owner) =>
+      candidateRevealsClippedWork(owner, currentSource()),
+    );
     const intent = resolveAutoScroll(owners, pointerPosition, dt);
     if (!intent || !applyAutoScroll(intent.id, intent.dx, intent.dy, owners)) {
       lastAutoScrollTs = null;
@@ -2582,16 +2650,19 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   ): { candidate: DropTargetCandidate; rejected?: { reason?: string } } {
     const rect = measure(entry.element);
     const inside = containsPoint(rect, x, y);
-    const position = inside
-      ? entry.registration.resolvePosition({
-          x,
-          y,
-          rect: rect as DOMRectReadOnly,
-          subject,
-          operation,
-          inputKind: kind,
-        })
+    const resolved = inside
+      ? asDropResolveResult(
+          entry.registration.resolvePosition({
+            x,
+            y,
+            rect: rect as DOMRectReadOnly,
+            subject,
+            operation,
+            inputKind: kind,
+          }),
+        )
       : null;
+    const position = resolved?.position ?? null;
 
     let eligibility: DropEligibility = { accepted: false };
     if (
@@ -2603,6 +2674,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         targetId: entry.registration.targetId,
         position,
         operation,
+        destination: resolved?.destination,
       };
       // External data is validated before the target is asked, so a consumer
       // resolver never has to defend itself against a hostile batch.
@@ -2953,6 +3025,10 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       return;
     }
 
+    // A committed drop (or any other DOM move) can relocate the same
+    // registered elements without a resize. Remeasure from this press.
+    layoutDirty = true;
+
     const kind = asInputKind(event.pointerType);
     const sessionId = createSessionId();
     inputKind = kind;
@@ -3035,7 +3111,12 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
 
     hitTest(x, y);
-    if (gesture?.activated) scheduleAutoScroll();
+    if (gesture?.activated) {
+      scheduleAutoScroll();
+      // Target-intent is inert when the hover has not changed, but the
+      // preview still has to follow the pointer on that frame.
+      notify();
+    }
   }
 
   function suppressScroll(event: Event): void {

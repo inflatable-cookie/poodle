@@ -41,6 +41,18 @@ function layout(container: HTMLElement): void {
   });
 }
 
+function layoutColumn(container: HTMLElement): void {
+  [...container.querySelectorAll<HTMLElement>("section")].forEach((region, regionIndex) => {
+    const originX = regionIndex * 400;
+    box(region, originX, 0, 120, 200);
+    [...region.querySelectorAll<HTMLElement>(".poodle-dock-region__stack-item")].forEach(
+      (item, index) => {
+        box(item, originX + 20, index * 80, 80, 80);
+      },
+    );
+  });
+}
+
 function box(element: HTMLElement, x: number, y: number, width: number, height: number): void {
   const rect = {
     x,
@@ -79,6 +91,18 @@ function stackItems(container: HTMLElement): HTMLElement[] {
   return [...container.querySelectorAll<HTMLElement>(".poodle-dock-region__stack-item")];
 }
 
+function layoutTabs(container: HTMLElement): void {
+  [...container.querySelectorAll<HTMLElement>("section")].forEach((region, regionIndex) => {
+    const originX = regionIndex * 400;
+    box(region, originX, 0, 400, 100);
+    [...region.querySelectorAll<HTMLElement>(".poodle-tabs__item")].forEach((item, index) => {
+      box(item, originX + index * 100, 0, 100, 30);
+      const tab = item.querySelector<HTMLElement>(".poodle-tabs__tab");
+      if (tab) box(tab, originX + index * 100, 0, 100, 30);
+    });
+  });
+}
+
 describe("DockRegion panel movement", () => {
   beforeEach(() => {
     vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
@@ -104,8 +128,8 @@ describe("DockRegion panel movement", () => {
     const [sourceItem] = stackItems(container);
     await fireEvent(sourceItem, pointer("pointerdown", 50, 50));
     await fireEvent(document, pointer("pointermove", 90, 50));
-    await fireEvent(document, pointer("pointermove", 450, 50));
-    await fireEvent(document, pointer("pointerup", 450, 50));
+    await fireEvent(document, pointer("pointermove", 420, 50));
+    await fireEvent(document, pointer("pointerup", 420, 50));
 
     expect(onPanelDropB).toHaveBeenCalledOnce();
     expect(onPanelDropB.mock.calls[0][0].panel).toEqual({
@@ -114,7 +138,107 @@ describe("DockRegion panel movement", () => {
       sourceZone: "region:a",
     });
     expect(onPanelDropB.mock.calls[0][0].targetEdge).toBe("top");
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
     expect(onPanelDropA).not.toHaveBeenCalled();
+  });
+
+  it("a flexible strip drop lands at the hovered tab, not the end", async () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(DockRegionZoneDropHarness, {
+      props: {
+        shared: true,
+        sizing: "flexible",
+        items,
+        itemsB: [{ value: "outline", label: "Outline" }],
+        onPanelDropB,
+      },
+    });
+    layoutTabs(container);
+
+    const source = container.querySelectorAll<HTMLElement>('[role="tab"]')[0]!;
+    await fireEvent(source, pointer("pointerdown", 50, 15));
+    await fireEvent(document, pointer("pointermove", 90, 15));
+    await fireEvent(document, pointer("pointermove", 420, 15));
+    await fireEvent(document, pointer("pointerup", 420, 15));
+
+    expect(onPanelDropB).toHaveBeenCalledOnce();
+    expect(onPanelDropB.mock.calls[0][0].panel.panelId).toBe("explorer");
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
+  });
+
+  it("refuses a panel on a hovered flexible tab when canAcceptPanel says no", async () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(DockRegionZoneDropHarness, {
+      props: {
+        shared: true,
+        sizing: "flexible",
+        items,
+        itemsB: [{ value: "outline", label: "Outline" }],
+        canAcceptPanel: (panelId: string) => panelId !== "explorer",
+        onPanelDropB,
+      },
+    });
+    layoutTabs(container);
+
+    const source = container.querySelectorAll<HTMLElement>('[role="tab"]')[0]!;
+    await fireEvent(source, pointer("pointerdown", 50, 15));
+    await fireEvent(document, pointer("pointermove", 90, 15));
+    await fireEvent(document, pointer("pointermove", 420, 15));
+    expect(container.querySelectorAll("[data-drop-target]")).toHaveLength(0);
+    await fireEvent(document, pointer("pointerup", 420, 15));
+    expect(onPanelDropB).not.toHaveBeenCalled();
+  });
+
+  it("inserts before or after a static stack item from the hovered half", async () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(DockRegionZoneDropHarness, {
+      props: { shared: true, items, onPanelDropB },
+    });
+    layout(container);
+    expect(container.querySelector(".poodle-dock-region__stack")?.getAttribute("data-direction")).toBe(
+      "row",
+    );
+
+    const [sourceItem] = stackItems(container);
+    await fireEvent(sourceItem, pointer("pointerdown", 50, 50));
+    await fireEvent(document, pointer("pointermove", 90, 50));
+    await fireEvent(document, pointer("pointermove", 490, 50));
+    await fireEvent(document, pointer("pointerup", 490, 50));
+    expect(onPanelDropB).toHaveBeenCalledOnce();
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(1);
+
+    onPanelDropB.mockClear();
+    await fireEvent(sourceItem, pointer("pointerdown", 50, 50));
+    await fireEvent(document, pointer("pointermove", 90, 50));
+    await fireEvent(document, pointer("pointermove", 410, 50));
+    await fireEvent(document, pointer("pointerup", 410, 50));
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
+  });
+
+  it("inserts before or after a side-edge static stack item from the hovered Y half", async () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(DockRegionZoneDropHarness, {
+      props: { shared: true, items, edge: "left", onPanelDropB },
+    });
+    layoutColumn(container);
+    expect(container.querySelector(".poodle-dock-region__stack")?.getAttribute("data-direction")).toBe(
+      "column",
+    );
+
+    const [sourceItem] = stackItems(container);
+    await fireEvent(sourceItem, pointer("pointerdown", 50, 40));
+    await fireEvent(document, pointer("pointermove", 90, 40));
+    await fireEvent(document, pointer("pointermove", 460, 100));
+    await fireEvent(document, pointer("pointerup", 460, 100));
+    expect(onPanelDropB).toHaveBeenCalledOnce();
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(1);
+
+    onPanelDropB.mockClear();
+    await fireEvent(sourceItem, pointer("pointerdown", 50, 40));
+    await fireEvent(document, pointer("pointermove", 90, 40));
+    await fireEvent(document, pointer("pointermove", 460, 20));
+    await fireEvent(document, pointer("pointerup", 460, 20));
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
   });
 
   it("keeps local reorder but discovers no sibling when each region provides itself", async () => {
