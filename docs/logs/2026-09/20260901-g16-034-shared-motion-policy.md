@@ -1,10 +1,11 @@
 # g16.034 — Shared Motion Policy And Five-Family Pilot
 
-Status: implemented — ready for exact-head review
+Status: implemented — production repair complete; exact-head evidence recorded
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/124
 Implementation commits: `bb656700f` (initial), `d99b9af83` + `f03f723bc` +
-`a9fa37d1e` + `9b4006a2d` (review repair)
+`a9fa37d1e` + `9b4006a2d` (review repair), `e93cd3f29` (production execution
+repair)
 Card: `docs/roadmaps/g16/034-shared-motion-policy-and-five-family-pilot.md`
 Handoff: `docs/handoffs/20260901-130224-g16-034-shared-motion-policy.md`
 Governing refs: `docs/architecture/012-semantic-motion-policy.md`,
@@ -13,8 +14,14 @@ Governing refs: `docs/architecture/012-semantic-motion-policy.md`,
 `docs/contracts/001-working-rules.md`
 Branch: `feature/g16-034-shared-motion-policy`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-034-shared-motion-policy`
-Base: rebased onto `origin/main` at `b682ebfed` after merged PR #123
-(g16.035 closeout); planning base `b89c11275` is an ancestor
+Starting exact review head: `493735e8f15abdff646a9067ae9ca666a787eee5`
+Production repair commit: `e93cd3f29a61b9c7568fd066dd3b969f79083ec2`
+Base: PR #125 merged into `main` at
+`a980cb7748fdf9751dd4ca64b02903111a44d59f`; this branch's merge-base is that
+commit. `origin/main` later advanced to
+`8f60700ffdde723c2e0ea009296cc20aacfe3e4f` after this exact-head repair was
+based and is intentionally not integrated here.
+Planning base `b89c11275` is an ancestor.
 
 ## Outcome
 
@@ -37,14 +44,18 @@ The five pilot families consume that policy:
 - Checkbox / IconButton: semantic state is immediate; reduced keeps opacity
   only; frozen paints the endpoint.
 - Skeleton / Spinner: 1.6s opacity pulse and ring/dot/grid loops only in full
-  after the first frame. `Skeleton.animated=false` wins.
+  after the first frame. The GPUI preview commits that frame through the real
+  `Window::on_next_frame` path before the mounted loading routes schedule.
+  `Skeleton.animated=false` wins.
 
 GPUI still only drives generic opacity and SVG rotation. Translation/scale
 declarations record `opacity-stand-in`. Disclosure height has no native
-channel and stays a static-endpoint gap. No existing ledger cell moved. One
-new MotionPolicyProvider row was added because the public default-as export
-changed the live denominator (176 public / 175 portable). GPUI construction
-cells now say 175/175 routes.
+channel and stays a static-endpoint gap. No established ledger cell moved.
+The additive MotionPolicyProvider public export/row is reflected in the live
+denominator (176 public / 175 portable; `MeterSurface` remains web-only / n/a).
+Any generated/static Jetstream catalogue route is registry metadata only;
+Jetstream remains deferred and has no mounted-parity admission. GPUI
+construction cells now say 175/175 routes.
 
 ## Review repair (PR #124 changes requested)
 
@@ -71,16 +82,34 @@ Addressed on `d99b9af83` + `f03f723bc` + `a9fa37d1e` + `9b4006a2d`:
   preserves a synchronous replacement; Tabs measurement rAF teardown is
   identity-safe in both web shells.
 
+Production execution repair (`e93cd3f29`):
+
+- GPUI `PreviewRoot` now carries first-frame commitment through the real
+  `Window::on_next_frame` callback into the production Skeleton/Spinner route;
+  a mounted probe proves full-mode loops do not start before that commit.
+- Svelte and React Accordion/Collapsible now use the shared clipped-height
+  runtime on the actual component path. Mounted rapid controlled reversal
+  receipts prove the live clip is the reversal start and duration is
+  proportional to remaining distance.
+- Natural clipped-height completion settles the style and removes only the
+  exact live handle; the core runtime has a finishing regression.
+- Svelte ToastStack seeds authored preloaded visuals synchronously, with an SSR
+  first-paint receipt proving settled output and no enter animation.
+- React controlled prop-driven close retains the visible inert remnant until
+  the close clip exists and completes; the mounted reversal receipt proves it.
+
 ## Overlap
 
-The operator-driven drag-fix lane already edits Tabs files:
-
-- `packages/svelte/components/src/Tabs.svelte`
-- `packages/react/components/src/Tabs.tsx`
-- related Tabs tests and `packages/render/src/tabs.rs` (this lane did not
-  edit the native Tabs renderer beyond the underline indicator contract)
-
-The orchestrator owns merge order.
+PR #125 merged into `main` at
+`a980cb7748fdf9751dd4ca64b02903111a44d59f` before this production repair. The
+branch was already reconciled against that merge. The combined
+`Tabs.svelte`, `Tabs.tsx`, `packages/core/src/styles/tabs.css`, and
+`packages/render/src/tabs.rs` state preserves accepted drag/drop handlers and
+the g16.034 underline/motion observer behavior; this repair does not alter the
+accepted drag/drop semantics. Planning/index overlap remains documentation
+metadata only: the additive provider denominator is current, while Jetstream's
+static catalogue route is deferred registry metadata, not admission or mounted
+parity.
 
 ## Falsification
 
@@ -103,47 +132,59 @@ or discard workspace changes.
 | 9 Discrete semantics precede paint | Checkbox `emitCheckedChange` reverts native checked | expected true, received false | green |
 | 10 Loading loops obey policy | loop schedules without `firstFrameCommitted` | expected schedule false, received true | green |
 | 11 Native gaps stay visible | `gpuiMotionPlan` applies `translateY` | expected opacity-stand-in, received none | green |
+| 12 Native production first-frame gate | `PreviewRoot::render_component_specimen` passes `false` instead of its committed-frame state | mounted production Skeleton probe fails after the commit callback because the full-mode loop is still absent (`skeleton: ... must enable the full-mode loop`) | restored; 9-specimen probe green |
+| 13 Mounted proportional reversal | shared activation uses `existing.axisTo` instead of the semantic target axis | mounted React and Svelte controlled reversal receipts receive `135ms`, not the expected `45ms`, from the live `60px / 80px` clip | restored; both mounted receipts green |
+| 14 Exact clipped-height finish cleanup | animation finish deletes the handle without checking exact live-handle identity | replacement runtime receipt expects one live handle and receives zero | restored; runtime receipt green |
+| 15 Svelte SSR preloaded ToastStack | initial `visuals` is empty instead of synchronously seeded from authored items | SSR receipt emits an empty list and omits `Saved` | restored; SSR receipt green |
+| 16 React controlled close remnant | `Collapsible` keeps content only when `isOpen` | mounted close/reversal receipts see `hidden=true` before the remnant exists | restored; mounted receipt green |
 
 ## Evidence
 
 - Paired TS/Rust trace tests: `packages/core/test/motion-policy.test.ts`,
   `packages/contracts/headless/src/motion_policy.rs` (inline tests).
 - Web runtime: `packages/core/test/motion-runtime.test.ts`, including
-  unsupported-WAAPI cleanup and synchronous replacement identity.
+  unsupported-WAAPI cleanup, synchronous replacement identity, and exact
+  natural clipped-height handle removal.
 - Mounted family receipts: `packages/svelte/components/test/motion-families.test.ts`,
-  `packages/svelte/components/test/MotionFamilyHarness.svelte`, and
-  `packages/react/components/test/motion-families.test.tsx`.
-- GPUI mounted regression: `mounted_motion_policy_construction_does_not_invent_clocks`
-  in `packages/gpui/preview/tests/headless_regressions.rs`.
+  `packages/svelte/components/test/MotionFamilyHarness.svelte`,
+  `packages/svelte/components/src/disclosure-motion.ts`,
+  `packages/react/components/test/motion-families.test.tsx`, and
+  `packages/react/components/src/disclosure-motion.ts`; the mounted reversal
+  cases use a live clipped height and proportional remaining duration.
+- Svelte SSR receipt: `packages/svelte/components/test/ssr/ToastStackSsr.test.ts`
+  proves authored preloaded items are present and settled on the first paint.
+- GPUI mounted regressions: `mounted_motion_policy_construction_does_not_invent_clocks`
+  and `production_loading_routes_commit_before_starting_full_mode_loops` in
+  `packages/gpui/preview/src/specimen_probe.rs`; the latter mounts the real
+  PreviewRoot loading routes and uses the production first-frame commit path.
 - Browser probe: `effigy test:motion-policy-browser` (Chromium + WebKit).
 
 ## Validation
 
-Focused (repair head):
+Focused (post-production-repair):
 
-- `bun test packages/core/test/motion-runtime.test.ts packages/core/test/motion-policy.test.ts` — 16 pass, 0 fail, 68 expect.
-- Svelte motion-family suite — 9 pass; mounted Svelte/React provider, family,
-  and ToastStack suites — 6 files, 39 pass.
-- `effigy test:core` — 1125 pass, 0 fail, 3673 expect across 58 files.
-- `effigy check:svelte-components` — 0 errors, 4 existing warnings in 2 files.
-- Native focused tests — GPUI mounted regression 1 pass, headless motion
-  policy 12 pass, render underline 5 pass, GPUI specimens 8 pass.
+- `bun test packages/core/test/motion-runtime.test.ts packages/core/test/motion-policy.test.ts packages/core/test/tabs.test.ts` — 37 pass, 0 fail, 132 expect.
+- React Tabs/disclosure/family focus — 6 files, 39 pass.
+- Svelte Tabs/disclosure/family/ToastStack focus — 6 files, 44 pass; SSR
+  ToastStack receipt — 1 file, 1 pass.
+- `effigy probe:gpui-specimens` — 9 pass, 0 fail, including the mounted
+  production Skeleton/Spinner first-frame gate.
 - `effigy test:motion-policy-browser-chromium` — Svelte + React checks pass:
   disclosure, underline resize, preloaded toasts, exit cleanup/focus, and
   reduced IconButton transition.
 - `effigy test:motion-policy-browser-webkit` — the same checks pass.
-- Callback/prop/capability/contract drift and packed-consumer proof — pass;
-  111 callbacks, 137 props, 36 capability rows, 10 files/20 packed tests.
+- `effigy docs:check` — pass; 176 evidence rows and zero drift.
 
 Boards:
 
-- `effigy ci:web` — pass: 371 files, 3411 tests; packed consumer 10 files,
-  20 tests.
-- `effigy ci:rust` — pass, including 196 headless and 289 component-spec
+- `effigy ci:web` — pass: 372 files, 3468 tests; packed consumer 10 files,
+  20 tests; 0 Svelte-check errors and 4 existing component warnings.
+- `effigy ci:rust` — pass, including 197 headless and 289 component-spec
   tests.
-- `effigy ci:native` — pass: 560 render tests, 134 GPUI tests, 162 Jetstream
-  tests, 166 headless regressions, and the 8 GPUI motion specimens.
-- `effigy docs:check` — pass; 176 evidence rows and zero drift.
+- `effigy ci:native` — pass; all drift checks, render/node-backend, GPUI,
+  Jetstream, headless-regression, specimen, dual-dependency, and capture-smoke
+  selectors passed. The native board included 167 headless regressions and 9
+  GPUI specimen tests.
 - Final `effigy qa` — substantive selectors pass; aggregate exit 1 only at
   `audit:security`. It flags the known main-baseline English-word false
   positive (`mask-plus-translated-highlight`) in `PAPERCUTS.md`, the g16.033
@@ -162,6 +203,8 @@ intentional, documented boundaries:
   used.
 - GPUI translation/scale remains a named opacity stand-in; native disclosure
   height remains a static endpoint because those channels are not admitted.
-- Jetstream has no admission in this card.
+- Jetstream has no admission in this card. Any generated/static catalogue
+  route is registry metadata only and does not claim Jetstream admission or
+  mounted parity; that route remains deferred to a later planning decision.
 - The full specimen census needs a 32 GB heap even serially; the papercut is
   recorded and does not block these focused proofs.
