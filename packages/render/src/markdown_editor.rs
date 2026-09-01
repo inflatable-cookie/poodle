@@ -96,6 +96,10 @@ pub fn markdown_editor_with_handlers(
     };
 
     // ── Root ──────────────────────────────────────────────────
+    // Column + min_height 0 + overflow hidden matches shared CSS: a definite
+    // host can shrink the editor without a public height prop; short content
+    // stays natural when the host does not constrain (no fill_height / height
+    // 100%). Textarea minHeight stays on the editing pane, not the root.
     let mut el = Node::container();
     {
         let s = &mut el.style;
@@ -103,7 +107,8 @@ pub fn markdown_editor_with_handlers(
         s.descriptor.border.width = 1.0;
         s.descriptor.border.color = border;
         s.descriptor.layout.direction = LayoutDirection::Column;
-        s.min_height = Some(min_h);
+        s.fill_width = true;
+        s.min_height = Some(0.0);
         s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
         s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
         if spec.is_disabled {
@@ -121,6 +126,7 @@ pub fn markdown_editor_with_handlers(
         s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
         s.descriptor.layout.alignment.main = MainAxisAlignment::SpaceBetween;
         s.descriptor.layout.spacing.gap = toolbar_gap;
+        s.flex_shrink_zero = true;
         let pad = &mut s.descriptor.layout.spacing.padding;
         pad.left = toolbar_x;
         pad.right = toolbar_x;
@@ -259,7 +265,8 @@ pub fn markdown_editor_with_handlers(
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.width = LayoutSizing::Grow;
             s.fill_height = true;
-            s.min_height = Some(0.0);
+            // Contract §3 / §7: minHeight is the editing-pane minimum.
+            s.min_height = Some(min_h);
             s.min_width = Some(0.0);
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = pane_pad;
@@ -279,8 +286,9 @@ pub fn markdown_editor_with_handlers(
         let mut preview = Node::container();
         {
             let s = &mut preview.style;
-            // Explicit Row (see switch.rs).
-            s.descriptor.layout.direction = LayoutDirection::Row;
+            // Column so preview content stacks and can overflow vertically;
+            // Row would stretch siblings to the viewport and hide scroll extent.
+            s.descriptor.layout.direction = LayoutDirection::Column;
             s.descriptor.layout.width = LayoutSizing::Grow;
             s.fill_height = true;
             s.min_height = Some(0.0);
@@ -319,7 +327,7 @@ pub fn markdown_editor_with_handlers(
 
 #[cfg(test)]
 mod tests {
-    use poodle_node::LayoutOverflow;
+    use poodle_node::{LayoutDirection, LayoutOverflow};
     use poodle_specs::MarkdownEditorSpec;
 
     use super::*;
@@ -349,6 +357,10 @@ mod tests {
         assert_eq!(
             preview.style.descriptor.layout.overflow_y,
             LayoutOverflow::Scroll
+        );
+        assert_eq!(
+            preview.style.descriptor.layout.direction,
+            LayoutDirection::Column
         );
         assert_eq!(preview.style.min_height, Some(0.0));
         assert!(preview.style.fill_height);

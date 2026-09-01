@@ -1,6 +1,6 @@
 # g16.035 — MarkdownEditor Bounded Preview Scroll
 
-Status: implemented, PR open (review follow-up)
+Status: implemented, PR open (second oracle-gap follow-up)
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/123
 Card: `docs/roadmaps/g16/035-markdown-editor-bounded-preview-scroll.md`
@@ -21,8 +21,10 @@ preview pane owns vertical scroll. Short unconstrained content stays naturally
 sized — no `height: 100%` default and no new public height prop.
 
 Native render mirrors the same ownership with existing node vocabulary:
-preview `LayoutOverflow::Scroll`, body/preview `min_height: 0` / `fill_height`.
-Source-text versus rendered-HTML remains Tier-3 and untouched.
+preview `LayoutDirection::Column` + `LayoutOverflow::Scroll`, body/preview
+`min_height: 0` / `fill_height`, root `min_height: 0` (editing `minHeight` on
+the textarea pane). Source-text versus rendered-HTML remains Tier-3 and
+untouched.
 
 ## Diagnosis
 
@@ -39,32 +41,36 @@ supplies the shrink/scroll chain.
   siblings stay put, short unconstrained preview stays natural.
 - `poodle-render` unit tests for preview Scroll + body shrink.
 - Mounted GPUI regression
-  `markdown_editor_bounded_preview_scrolls_under_host_height`: production
-  renderer + node backend, 16rem host, long preview content, real wheel input;
-  editor stays inside the host; clipped fixture tail activates only after
-  scroll. Fixture stamps runtime ids after render (no public id prop).
+  `markdown_editor_bounded_preview_scrolls_under_host_height`: unmodified
+  production renderer inside a fixed 16rem host; fixture stamps runtime ids +
+  synthetic overflow only (no sizing/overflow mutations, no declaration
+  assert); real wheel input; clipped fixture tail activates only after scroll.
 - Oracle falsification: planted pre-fix (removed CSS shrink chain; cleared
   native Scroll/body shrink). Probe failed on internal overflow / stuck
   `scrollTop`; vitest and render tests failed for the intended reasons.
-  Mounted GPUI regression failed when native Scroll/shrink was cleared
-  (`Visible` instead of `Scroll`). Restored and reran green.
+  Second mounted falsification planted pre-fix native shrink/overflow
+  (root `minHeight`, no body/preview shrink, preview Row + Visible); mounted
+  GPUI regression failed on geometry —
+  `preview sits under the toolbar inside the host: preview=2765 host=256` —
+  before wheel/hit-test. Restored and reran green.
 
 ## Validation run
 
-- `bunx vitest run` MarkdownEditor Svelte + React tests — pass
 - `cargo test --manifest-path packages/render/Cargo.toml markdown_editor` — pass
 - `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions markdown_editor_bounded_preview_scrolls_under_host_height` — pass
-- `effigy test:markdown-editor-preview-scroll` (chromium + webkit) — pass
-- `effigy docs:check` — pass (prior head); re-run on follow-up head
-- `effigy ci:rust` / `effigy ci:native` — re-run on follow-up head
-- `effigy ci:web` — pass (web unchanged on follow-up)
-- `git diff --check origin/main...HEAD` — clean
+- `effigy docs:check` — pass
+- `effigy ci:rust` — pass
+- `effigy ci:native` — pass
+- `git diff --check` — clean
+- Prior web suite (`effigy test:markdown-editor-preview-scroll`, `effigy ci:web`) unchanged and previously green
 
 ## Review follow-up
 
-Northstar `oracle-gap` on PR #123: declaration-only native tests were not
-enough. Added the mounted GPUI regression above and falsified it against the
-pre-fix native overflow shape.
+Northstar `oracle-gap` on PR #123 (twice): declaration-only native tests were
+not enough; the first mounted draft still force-sized the editor in the fixture
+and stopped falsification on a `Visible` vs `Scroll` assert. Second follow-up
+keeps the production editor unmodified under the host, moves preview to Column
+so vertical overflow is real, and falsifies on mounted geometry as above.
 
 ## Scope kept honest
 

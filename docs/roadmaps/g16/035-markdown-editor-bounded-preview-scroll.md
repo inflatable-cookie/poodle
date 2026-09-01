@@ -105,10 +105,16 @@ proof and reran green.
 
 Review follow-up (`oracle-gap`): added
 `markdown_editor_bounded_preview_scrolls_under_host_height` in
-`packages/gpui/preview/tests/headless_regressions.rs`. Planted the same native
-pre-fix shape again; the mounted GPUI regression failed because production
-preview overflow stayed `Visible` (and render unit tests failed likewise).
-Restored and reran the mounted regression green.
+`packages/gpui/preview/tests/headless_regressions.rs`. First mounted draft still
+mutated fixture sizing and masked falsification on a declaration assert.
+
+Second review follow-up: fixture stamps runtime ids + synthetic overflow only;
+production preview is Column + Scroll with the shrink chain; mounted case has
+no declaration assert. Planted pre-fix native shrink/overflow (root
+`minHeight`, no body/preview shrink, preview Row + Visible). Mounted GPUI
+regression failed on geometry —
+`preview sits under the toolbar inside the host: preview=2765 host=256` —
+before wheel/hit-test. Restored and reran the mounted regression green.
 
 ## Writable Scope
 

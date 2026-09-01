@@ -18325,9 +18325,9 @@ fn every_history_center_rejection_mounts_its_own_native_copy() {
 }
 
 /// g16.035. Production MarkdownEditor preview scroll under a definite host
-/// height, through the real GPUI node backend. Declaration-only tests cannot
-/// prove that `fill_height` + toolbar + preview `LayoutOverflow::Scroll`
-/// actually stays inside the host and moves under wheel input.
+/// height, through the real GPUI node backend. The fixture stamps runtime ids
+/// and synthetic overflow content only — it does not mutate production sizing
+/// or overflow. The host wrapper is the sole definite height constraint.
 #[test]
 fn markdown_editor_bounded_preview_scrolls_under_host_height() {
     use poodle_render::markdown_editor;
@@ -18348,15 +18348,10 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
             .collect()
     }
 
-    /// Fixture-only identities and stacked rows that overflow the preview.
-    /// No public id prop — stamps land after the production render.
+    /// Fixture-only runtime ids + synthetic overflow rows. No sizing/overflow
+    /// mutations on the production editor/body/preview nodes.
     fn stamp_bounded_preview(editor: &mut Node, activated: &Arc<Mutex<bool>>) {
         editor.runtime_id = Some("md-editor".to_owned());
-        // Host assigns available height (web: max-height 100% under a definite
-        // ancestor). Production body/preview already declare fill_height + Scroll.
-        editor.style.fill_height = true;
-        editor.style.fill_width = true;
-        editor.style.max_height = Some(HOST_H);
 
         let body = editor.children.get_mut(1).expect("toolbar then body");
         let preview = body
@@ -18365,7 +18360,15 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
             .find(|child| child.a11y.label.as_deref() == Some("Preview"))
             .expect("preview pane");
         preview.runtime_id = Some("md-preview".to_owned());
-        preview.style.descriptor.layout.direction = LayoutDirection::Column;
+        // Replace production source-text children with fixture overflow only —
+        // content stamp, not sizing/overflow mutation.
+        preview.children.clear();
+
+        // Column runway as a child — does not rewrite preview direction/sizing.
+        let mut runway = Node::container();
+        runway.runtime_id = Some("md-preview-runway".to_owned());
+        runway.style.descriptor.layout.direction = LayoutDirection::Column;
+        runway.style.fill_width = true;
 
         for index in 0..(ROW_COUNT - 1) {
             let mut row = Node::container();
@@ -18378,7 +18381,7 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
                 s.fill_width = true;
             }
             row = row.child(Node::text(format!("row {index}")));
-            preview.children.push(row);
+            runway = runway.child(row);
         }
 
         let seen = Arc::clone(activated);
@@ -18395,7 +18398,8 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
             s.min_height = Some(ROW_H);
             s.fill_width = true;
         }
-        preview.children.push(tail);
+        runway = runway.child(tail);
+        preview.children.push(runway);
     }
 
     fn wrap_host(editor: Node) -> Node {
@@ -18421,23 +18425,6 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
         let activated = Arc::new(Mutex::new(false));
         let mut editor = markdown_editor(&spec, &ctx);
         stamp_bounded_preview(&mut editor, &activated);
-        {
-            let preview = editor
-                .children
-                .get(1)
-                .expect("body")
-                .children
-                .iter()
-                .find(|child| child.a11y.label.as_deref() == Some("Preview"))
-                .expect("preview");
-            assert_eq!(
-                preview.style.descriptor.layout.overflow_y,
-                LayoutOverflow::Scroll,
-                "production render declares preview scroll"
-            );
-            assert_eq!(preview.style.min_height, Some(0.0));
-            assert!(preview.style.fill_height);
-        }
 
         let mounted = Arc::new(Mutex::new(wrap_host(editor)));
         let mut driver =
@@ -18486,8 +18473,6 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
         );
 
         // GPUI scroll offset is `[-max, 0]`. Negative pixel delta moves down.
-        // The long source text plus stacked rows need a large delta before the
-        // clipped tail enters hit-test (same pattern as the select listbox).
         driver.scroll_vertical_id("md-preview", -5000.0);
         let first_after =
             poodle_gpui_node_backend::bounds_for("md-preview-row-0").expect("first row after scroll");
