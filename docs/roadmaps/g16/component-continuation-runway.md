@@ -38,9 +38,8 @@ These cards have complete boundaries and no unmet serial dependency:
 | [`g16.047`](047-toast-same-id-update-convention.md) | ToastHost / ToastStack | existing host update path, timer, announcement, focus, native role | consumer-owned same-id settlement convention |
 | [`g16.048`](048-agent-subagent-ownership-and-shimmer-benchmark.md) | AgentSubagent | contract reconciliation, then disposable web benchmark | threshold verdict; no shipped shimmer |
 | [`g16.049`](049-icon-geometry-format-and-registry-foundation.md) | icon geometry IG-01/02 | internal architecture, format, vectors, generated registry | validated internal geometry foundation |
-| [`g16.053`](053-repository-security-audit-boundary-repair.md) | repository audit | existing OpenAI-key matcher and focused tests | green, non-waived security audit input |
 
-These six lanes are independently dispatchable after this planning PR is accepted.
+These five lanes are independently dispatchable after this planning PR is accepted.
 If implementation discovers shared barrel, registry, contract, or generated
 file ownership between cards, serialize the overlapping pair before edits.
 Global g16 front-door and closeout edits remain orchestrator-owned.
@@ -58,7 +57,7 @@ it cannot ship production shimmer or promise it in the contract itself.
 | [`g16.050`](050-icon-geometry-internal-runtime-substrate.md) | blocked | accepted `g16.049` | IG-03–IG-05; internal plan, node/GPUI headless proof, private web shells |
 | [`g16.051`](051-icon-geometry-native-visual-admission.md) | blocked | accepted `g16.050`, operational Button lab, and separately accepted icon adapter/manifest extension | IG-06 native visual admission only |
 | [`g16.052`](052-contributor-design-guidance-pilot.md) | gated | named human reviewers, two freeze approvals, and orchestrator execution custody | finite matched pilot; no ordinary worker judgment |
-| [`g16.054`](054-historycenter-v030-release-candidate.md) | blocked | accepted `g16.053` plus an accepted, separately promoted compiled-JS/declarations prerequisite whose mechanics remain unplanned | immutable `0.3.0` candidate and validation evidence; no release mutation |
+| [`g16.054`](054-historycenter-v030-release-candidate.md) | blocked | `g16.053` is complete; an accepted, separately promoted compiled-JS/declarations prerequisite whose mechanics remain unplanned is still missing | immutable `0.3.0` candidate and validation evidence; no release mutation |
 | AgentSubagent implementation | gated | `g16.048` meets every threshold and a new bounded card is accepted | web-only finite sweep; no generic effect API |
 | IconMorph public admission | gated | `g16.051` returns an admit verdict | IG-07 requires a later explicit public card |
 | HistoryCenter publication and Loophole adoption | gated | accepted `g16.054`, exact receipts, and separate orchestrator authority | tag/publish and sibling adoption stay distinct mutations |

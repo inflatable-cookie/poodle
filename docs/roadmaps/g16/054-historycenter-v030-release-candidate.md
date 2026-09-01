@@ -1,11 +1,11 @@
 # g16.054 — HistoryCenter v0.3.0 Release Candidate
 
-Status: blocked — serial on accepted `g16.053` and an accepted, separately
-promoted compiled-JS/declarations prerequisite; later certification and
-Loophole adoption remain separate authority gates
+Status: blocked — `g16.053` is complete; an accepted, separately promoted
+compiled-JS/declarations prerequisite is still missing; later certification
+and Loophole adoption remain separate authority gates
 Type: release candidate — no release mutation
 Opened: 2026-09-01
-Depends on: accepted `g16.053`; an accepted, separately promoted prerequisite
+Depends on: completed `g16.053`; an accepted, separately promoted prerequisite
 that lands compiled JavaScript and declarations before candidate freeze;
 merged `g16.033`; merged `g16.036`; and the accepted sequence recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`

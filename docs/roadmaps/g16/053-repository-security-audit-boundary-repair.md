@@ -1,9 +1,11 @@
 # g16.053 — Repository Security-Audit Boundary Repair
 
-Status: complete — PR #150; orchestrator review and merge pending
+Status: complete
 Type: implementation — Papercuts
 Opened: 2026-09-01
 Completed: 2026-09-02
+PR: https://github.com/inflatable-cookie/poodle/pull/150
+Merge: `a60648179f18a0e10a00dd64737c8fa696ea0a87`
 Depends on: the recorded `PAPERCUTS.md` false-positive entry and the accepted
 HistoryCenter sequence recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`
