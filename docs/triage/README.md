@@ -16,3 +16,10 @@ Current open notes:
   settled; the Poodle rejection shape, package publication, CS20 presentation,
   and keyboard geometry remain behind the active drag runway; the external
   wire-code branch is complete.
+- `20260901-121256-design-guidance-pilot-decision.md` — finite contributor
+  router pilot is settled as planning evidence; implementation held.
+- `20260901-125758-post-motion-research-queue.md` — motion policy is promoted;
+  block slider, icon morph, and AgentSubagent shimmer remain gated.
+- `20260901-192850-desengs-reuse-candidates.md` — desengs.com scout: HITL
+  approval, citations, agent task list, numeric-change motion, semantic sound.
+  Research lead only.
