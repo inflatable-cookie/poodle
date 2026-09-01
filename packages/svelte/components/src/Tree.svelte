@@ -252,7 +252,7 @@
       return { status: "rejected", reason: "unavailable" };
     }
     const eligibility = treeDropEligibility(nodes, from, intent);
-    if (!eligibility.accepted) {
+    if (eligibility.accepted === false) {
       return { status: "rejected", reason: eligibility.reason };
     }
     onReorder?.(from, dest.targetId, dest.position);
