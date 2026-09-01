@@ -1853,4 +1853,55 @@ describe("createDragDropController", () => {
     document.elementFromPoint = originalFromPoint;
     controller.destroy();
   });
+
+  it("does not vertically auto-scroll a horizontal-only tablist", () => {
+    const frames: FrameRequestCallback[] = [];
+    let now = 1000;
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    vi.stubGlobal("cancelAnimationFrame", () => {
+      frames.length = 0;
+    });
+
+    const listState = { scrollTop: 2, scrollHeight: 48, clientHeight: 44 };
+    const list = document.createElement("div");
+    list.style.overflowX = "auto";
+    list.style.overflowY = "hidden";
+    layout(list, { x: 0, y: 0, width: 400, height: 44 });
+    Object.defineProperty(list, "scrollTop", {
+      configurable: true,
+      get: () => listState.scrollTop,
+      set: (value: number) => {
+        listState.scrollTop = value;
+      },
+    });
+    Object.defineProperty(list, "scrollHeight", { configurable: true, get: () => listState.scrollHeight });
+    Object.defineProperty(list, "clientHeight", { configurable: true, get: () => listState.clientHeight });
+    layout(sourceEl, { x: 8, y: 4, width: 80, height: 36 });
+    layout(targetEl, { x: 96, y: 4, width: 80, height: 36 });
+    list.append(sourceEl, targetEl);
+    root.append(list);
+
+    const originalFromPoint = document.elementFromPoint.bind(document);
+    document.elementFromPoint = () => sourceEl;
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg({ autoScroll: true }));
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 16 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 8 }));
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    now += 16;
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(listState.scrollTop).toBe(2);
+
+    document.elementFromPoint = originalFromPoint;
+    controller.destroy();
+  });
 });

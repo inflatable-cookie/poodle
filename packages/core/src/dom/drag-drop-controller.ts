@@ -601,8 +601,16 @@ function isScrollOwner(element: Element): element is HTMLElement {
   return SCROLL_OVERFLOW.test(`${style.overflowY} ${style.overflowX} ${style.overflow}`);
 }
 
+function axisAllowsScroll(axisValue: string, shorthand: string): boolean {
+  const value = axisValue === "" || axisValue === "visible" ? shorthand : axisValue;
+  return SCROLL_OVERFLOW.test(value);
+}
+
 function measureScrollMetrics(element: HTMLElement): AutoScrollMetrics {
   const rect = element.getBoundingClientRect();
+  const style = element.ownerDocument.defaultView?.getComputedStyle(element);
+  const overflowX = style ? axisAllowsScroll(style.overflowX, style.overflow) : true;
+  const overflowY = style ? axisAllowsScroll(style.overflowY, style.overflow) : true;
   return {
     scrollTop: element.scrollTop,
     scrollLeft: element.scrollLeft,
@@ -611,6 +619,8 @@ function measureScrollMetrics(element: HTMLElement): AutoScrollMetrics {
     clientHeight: element.clientHeight,
     clientWidth: element.clientWidth,
     rect: { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left },
+    overflowX,
+    overflowY,
   };
 }
 
