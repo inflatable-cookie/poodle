@@ -79,12 +79,22 @@ Updated: 2026-09-01
   renders the menu as a positioned overlay routed by token.
 - **Reorder** (`reorderable` + `onReorder`): rows are substrate drag sources; a drop fires
   `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`.
-  Y picks the band on the hovered row; `inside` only for branches (never when
-  the source is already a direct child). An `after` on the last visible
+  Y picks the band on the hovered row; `inside` on a folder appends as last
+  child, including when that folder is the dragged node's parent or an
+  immediate sibling. An `after` on the last visible
   descendant of an open parent then offers every ancestor that ends at that
-  gap. Those levels are equal bands across the row: move left to un-nest,
-  right to stay inside or nest into a collapsed folder. The drop line indents
-  to the icon column at the chosen depth.
+  gap — including the dragged next sibling's whole row (the gap above it),
+  that last descendant's whole row, and the last descendant itself when
+  nothing follows it at the bottom of the tree. Vertical movement between
+  those two rows does not change depth. The gap above an open folder is only before the
+  folder — it does not indent, even if the pointer moves right. Nest from the
+  folder row or from the gap below. `inside` appends as last child; the gap
+  between an open folder header and its first child is before that child.
+  Depth
+  steps are two indent columns, so a root filename stays at root until the
+  pointer moves clearly into the nested icon column. The drop line indents to
+  the icon column at the chosen depth as the pointer moves, including when
+  only X changes on the same row.
   Same-parent leaves land *at* the hovered row.
   Alt+↑/↓ moves the focused node among siblings through
   `requestKeyboardDrop` over the visible logical target catalogue; it does

@@ -1,7 +1,8 @@
-import { useRef, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import {
   treeCanAcceptDrop,
   treeResolveOutlineDrop,
+  readTreeDropMetrics,
   type DragDropCommitResult,
   type TreeOutlineRow,
   type DragSession,
@@ -9,7 +10,7 @@ import {
   type DropIntent,
 } from "@inflatable-cookie/poodle-core";
 
-import { useDragDrop, useDragSource, useDropTarget } from "../drag-drop";
+import { useDragSource, useDropTarget, useOptionalDragDrop } from "../drag-drop";
 import type { TreeNode } from "../types";
 
 export interface TreeItemProps {
@@ -62,7 +63,10 @@ export function TreeItem({
 }: TreeItemProps) {
   const canDrag = reorderable && !node.isDisabled && !editing;
   const rowRef = useRef<HTMLDivElement | null>(null);
-  const { snapshot } = useDragDrop();
+  const itemRef = useRef<HTMLDivElement | null>(null);
+  const outlineRowsRef = useRef(outlineRows);
+  outlineRowsRef.current = outlineRows;
+  const dragDrop = useOptionalDragDrop();
   const { getSourceProps } = useDragSource({
     sourceId: node.value,
     subject: { kind: "poodle.tree", id: node.value },
@@ -80,6 +84,9 @@ export function TreeItem({
     label: node.label,
     resolvePosition: (input) => {
       const rect = rowRef.current?.getBoundingClientRect() ?? input.rect;
+      const metrics = rowRef.current
+        ? readTreeDropMetrics(rowRef.current)
+        : { indentPx: 16, gutterPx: 24 };
       return (
         treeResolveOutlineDrop({
           rows: outlineRows,
@@ -88,34 +95,51 @@ export function TreeItem({
           x: input.x,
           y: input.y,
           rect,
-        })?.position ?? null
+          ...metrics,
+        })?.indicator ?? null
       );
     },
-    canDrop: (intent, subject) =>
-      treeCanAcceptDrop(nodes, subject.id, intent.targetId)
+    canDrop: (intent, subject) => {
+      if (subject.id === intent.targetId) return { accepted: true, intent };
+      return treeCanAcceptDrop(nodes, subject.id, intent.targetId)
         ? { accepted: true, intent }
-        : { accepted: false, reason: subject.id === intent.targetId ? "self" : "subtree" },
+        : { accepted: false, reason: "subtree" };
+    },
     onDrop,
   });
 
-  const dropDepth =
-    snapshot.targetId === node.value &&
-    snapshot.targetPosture === "accepted" &&
-    snapshot.pointer &&
-    rowRef.current
-      ? treeResolveOutlineDrop({
-          rows: outlineRows,
-          from: snapshot.session?.subject.id ?? "",
-          to: node.value,
-          x: snapshot.pointer.x,
-          y: snapshot.pointer.y,
-          rect: rowRef.current.getBoundingClientRect(),
-        })?.depth ?? null
-      : null;
+  useLayoutEffect(() => {
+    const controller = dragDrop?.controller;
+    if (!controller) return;
+    const apply = (): void => {
+      const item = itemRef.current;
+      const row = rowRef.current;
+      if (!item) return;
+      const snap = controller.getSnapshot();
+      if (snap.targetId !== node.value || snap.targetPosture !== "accepted" || !snap.pointer || !row) {
+        item.style.removeProperty("--poodle-tree-drop-depth");
+        return;
+      }
+      const depth = treeResolveOutlineDrop({
+        rows: outlineRowsRef.current,
+        from: snap.session?.subject.id ?? "",
+        to: node.value,
+        x: snap.pointer.x,
+        y: snap.pointer.y,
+        rect: row.getBoundingClientRect(),
+        ...readTreeDropMetrics(row),
+      })?.depth;
+      if (depth == null) item.style.removeProperty("--poodle-tree-drop-depth");
+      else item.style.setProperty("--poodle-tree-drop-depth", String(depth));
+    };
+    apply();
+    return controller.subscribe(apply);
+  }, [dragDrop?.controller, node.value]);
 
   const itemProps = getSourceProps(
     getTargetProps({
       className: "poodle-tree__item",
+      ref: itemRef,
       onClick,
       onDoubleClick,
       onContextMenu,
@@ -131,11 +155,6 @@ export function TreeItem({
       data-branch={branch ? "true" : undefined}
       data-selected={selected ? "true" : undefined}
       data-muted={muted ? "true" : undefined}
-      style={
-        dropDepth === null
-          ? undefined
-          : ({ ["--poodle-tree-drop-depth"]: dropDepth } as CSSProperties)
-      }
       tabIndex={focused ? 0 : -1}
       aria-level={depth + 1}
       aria-selected={selected}

@@ -99,7 +99,7 @@ describe("Tree row metadata (react)", () => {
     expect(onSelectionChange).toHaveBeenCalledWith(["empty"]);
   });
 
-  it("maps a child-on-parent drop to before or after, not inside", () => {
+  it("maps a child-on-parent drop to before, inside, or after", () => {
     const onReorder = vi.fn();
     const view = render(
       <Tree nodes={nested} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />,
@@ -116,14 +116,24 @@ describe("Tree row metadata (react)", () => {
     view.rerender(<Tree nodes={nested} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />);
     const rowsInside = layoutTree(view.container);
     drag(rowsInside.get("a.ts")!, top + 20);
-    // Child-on-parent: inside would no-op, so the lower half un-nests after.
-    expect(onReorder).toHaveBeenCalledWith("a.ts", "src", "after");
+    expect(onReorder).toHaveBeenCalledWith("a.ts", "src", "inside");
 
     onReorder.mockClear();
     view.rerender(<Tree nodes={nested} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />);
     const rowsAfter = layoutTree(view.container);
     drag(rowsAfter.get("a.ts")!, top + 36);
     expect(onReorder).toHaveBeenCalledWith("a.ts", "src", "after");
+  });
+
+  it("appends into the next sibling folder when dropped on the folder row", () => {
+    const onReorder = vi.fn();
+    const { container } = render(
+      <Tree nodes={nested} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const target = rows.get("lib")!;
+    drag(rows.get("a.ts")!, target.getBoundingClientRect().top + 20);
+    expect(onReorder).toHaveBeenCalledWith("a.ts", "lib", "inside");
   });
 
   it("lands a sibling leaf at the hovered row even on the origin-facing half", () => {
@@ -171,6 +181,256 @@ describe("Tree row metadata (react)", () => {
       document.dispatchEvent(pointer("pointerup", { clientX: 12, clientY: y }));
     });
     expect(onReorder).toHaveBeenCalledWith("a.ts", "src", "after");
+  });
+
+  it("un-nests the last nested row from itself without leaving it", () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "src",
+        label: "src",
+        children: [
+          { value: "a.ts", label: "a.ts" },
+          { value: "b.ts", label: "b.ts" },
+        ],
+      },
+    ];
+    const { container } = render(
+      <Tree nodes={nodes} expandedValues={["src"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const source = rows.get("b.ts")!;
+    const y = source.getBoundingClientRect().top + 20;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: y, clientX: 150 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 12 }));
+      document.dispatchEvent(pointer("pointerup", { clientY: y, clientX: 12 }));
+    });
+    expect(onReorder).toHaveBeenCalledWith("b.ts", "src", "after");
+  });
+
+  it("indents into the folder above from the dragged row without leaving it", () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "docs",
+        label: "docs",
+        children: [
+          { value: "intro.md", label: "intro.md" },
+          { value: "guide.md", label: "guide.md" },
+        ],
+      },
+      { value: "notes.txt", label: "notes.txt" },
+    ];
+    const { container } = render(
+      <Tree nodes={nodes} expandedValues={["docs"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const source = rows.get("notes.txt")!;
+    const y = source.getBoundingClientRect().top + 20;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: y, clientX: 40 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 150 }));
+      document.dispatchEvent(pointer("pointerup", { clientY: y, clientX: 150 }));
+    });
+    expect(onReorder).toHaveBeenCalledWith("notes.txt", "guide.md", "after");
+  });
+
+  it("keeps the origin gap at root when the pointer stays left on the dragged row", () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "docs",
+        label: "docs",
+        children: [
+          { value: "intro.md", label: "intro.md" },
+          { value: "guide.md", label: "guide.md" },
+        ],
+      },
+      { value: "notes.txt", label: "notes.txt" },
+    ];
+    const { container } = render(
+      <Tree nodes={nodes} expandedValues={["docs"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const source = rows.get("notes.txt")!;
+    const y = source.getBoundingClientRect().top + 20;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: y, clientX: 150 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 40 }));
+      document.dispatchEvent(pointer("pointerup", { clientY: y, clientX: 40 }));
+    });
+    expect(onReorder).toHaveBeenCalledWith("notes.txt", "docs", "after");
+  });
+
+  it("updates drop indent while the pointer stays on the dragged row", () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "docs",
+        label: "docs",
+        children: [
+          { value: "intro.md", label: "intro.md" },
+          { value: "guide.md", label: "guide.md" },
+        ],
+      },
+      { value: "notes.txt", label: "notes.txt" },
+    ];
+    const { container } = render(
+      <Tree nodes={nodes} expandedValues={["docs"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const source = rows.get("notes.txt")!;
+    const item = container.querySelector<HTMLElement>('[role="treeitem"][data-value="notes.txt"]')!;
+    const y = source.getBoundingClientRect().top + 20;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: y, clientX: 40 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 150 }));
+    });
+    expect(item.style.getPropertyValue("--poodle-tree-drop-depth")).toBe("1");
+    act(() => {
+      document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 40 }));
+    });
+    expect(item.style.getPropertyValue("--poodle-tree-drop-depth")).toBe("0");
+    act(() => {
+      document.dispatchEvent(pointer("pointerup", { clientY: y, clientX: 40 }));
+    });
+    expect(onReorder).toHaveBeenCalledWith("notes.txt", "docs", "after");
+  });
+
+  it("nests from the last child's origin-facing half at the same X", () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "docs",
+        label: "docs",
+        children: [
+          { value: "intro.md", label: "intro.md" },
+          { value: "guide.md", label: "guide.md" },
+        ],
+      },
+      { value: "notes.txt", label: "notes.txt" },
+    ];
+    const { container } = render(
+      <Tree nodes={nodes} expandedValues={["docs"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const source = rows.get("notes.txt")!;
+    const lastChild = rows.get("guide.md")!;
+    const startY = source.getBoundingClientRect().top + 20;
+    const y = lastChild.getBoundingClientRect().top + 4;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: startY, clientX: 40 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 150 }));
+      document.dispatchEvent(pointer("pointerup", { clientY: y, clientX: 150 }));
+    });
+    expect(onReorder).toHaveBeenCalledWith("notes.txt", "guide.md", "after");
+  });
+
+  it("does not indent from the row above an open folder", () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      { value: "notes.txt", label: "notes.txt" },
+      {
+        value: "docs",
+        label: "docs",
+        children: [
+          { value: "intro.md", label: "intro.md" },
+          { value: "guide.md", label: "guide.md" },
+        ],
+      },
+    ];
+    const { container } = render(
+      <Tree nodes={nodes} expandedValues={["docs"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const source = rows.get("notes.txt")!;
+    const y = source.getBoundingClientRect().top + 20;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: y, clientX: 40 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 150 }));
+      document.dispatchEvent(pointer("pointerup", { clientY: y, clientX: 150 }));
+    });
+    expect(onReorder).toHaveBeenCalledWith("notes.txt", "docs", "before");
+  });
+
+  it("does not indent when dragged above an open folder from below", () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "docs",
+        label: "docs",
+        children: [
+          { value: "intro.md", label: "intro.md" },
+          { value: "guide.md", label: "guide.md" },
+        ],
+      },
+      { value: "notes.txt", label: "notes.txt" },
+    ];
+    const { container } = render(
+      <Tree nodes={nodes} expandedValues={["docs"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const source = rows.get("notes.txt")!;
+    const target = rows.get("docs")!;
+    const startY = source.getBoundingClientRect().top + 20;
+    const y = target.getBoundingClientRect().top + 4;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: startY, clientX: 40 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 150 }));
+    });
+    const item = container.querySelector<HTMLElement>('[role="treeitem"][data-value="docs"]')!;
+    expect(item.style.getPropertyValue("--poodle-tree-drop-depth")).toBe("0");
+    act(() => {
+      document.dispatchEvent(pointer("pointerup", { clientY: y, clientX: 150 }));
+    });
+    expect(onReorder).toHaveBeenCalledWith("notes.txt", "docs", "before");
+  });
+
+  it("inserts at the top of a folder when dropped on the first nested row", () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "docs",
+        label: "docs",
+        children: [
+          { value: "intro.md", label: "intro.md" },
+          { value: "guide.md", label: "guide.md" },
+        ],
+      },
+      { value: "notes.txt", label: "notes.txt" },
+    ];
+    const { container } = render(
+      <Tree nodes={nodes} expandedValues={["docs"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const source = rows.get("notes.txt")!;
+    const firstChild = rows.get("intro.md")!;
+    const folder = rows.get("docs")!;
+    const startY = source.getBoundingClientRect().top + 20;
+
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: startY, clientX: 40 }));
+      document.dispatchEvent(
+        pointer("pointermove", { clientY: firstChild.getBoundingClientRect().top + 4, clientX: 150 }),
+      );
+      document.dispatchEvent(
+        pointer("pointerup", { clientY: firstChild.getBoundingClientRect().top + 4, clientX: 150 }),
+      );
+    });
+    expect(onReorder).toHaveBeenCalledWith("notes.txt", "intro.md", "before");
+
+    onReorder.mockClear();
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: startY, clientX: 40 }));
+      document.dispatchEvent(
+        pointer("pointermove", { clientY: folder.getBoundingClientRect().top + 36, clientX: 150 }),
+      );
+      document.dispatchEvent(
+        pointer("pointerup", { clientY: folder.getBoundingClientRect().top + 36, clientX: 150 }),
+      );
+    });
+    expect(onReorder).toHaveBeenCalledWith("notes.txt", "intro.md", "before");
   });
 
   it("rejects a drop into the source subtree and after the source is removed", () => {

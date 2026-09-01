@@ -7,6 +7,7 @@
     isTreeBranch,
     treeOutlineRows,
     treeResolveOutlineDrop,
+    readTreeDropMetrics,
     treeCheckState,
     treeKeydownIntent,
     treeRangeSelection,
@@ -259,6 +260,7 @@
       `[data-value="${CSS.escape(intent.targetId)}"] .poodle-tree__row`,
     );
     const rect = row?.getBoundingClientRect();
+    const metrics = row ? readTreeDropMetrics(row) : { indentPx: 16, gutterPx: 24 };
     const placement = treeResolveOutlineDrop({
       rows: treeOutlineRows(visibleRows),
       from,
@@ -266,6 +268,7 @@
       x: snap.pointer?.x,
       y: snap.pointer?.y ?? 0,
       rect: rect ?? { top: 0, height: 1, left: 0, width: 1 },
+      ...metrics,
     });
     if (!placement || placement.to === from) return { status: "rejected", reason: "self" };
     onReorder?.(from, placement.to, placement.position);

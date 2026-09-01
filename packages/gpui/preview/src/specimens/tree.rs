@@ -452,7 +452,14 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             "Editing and reordering",
             {
                 let mut rt_spec = TreeSpec::new(state.tree.rename_nodes.clone())
-                    .with_expanded_values(vec!["docs".into()])
+                    .with_expanded_values(vec![
+                        "src".into(),
+                        "src/components".into(),
+                        "src/lib".into(),
+                        "docs".into(),
+                        "docs/api".into(),
+                        "assets".into(),
+                    ])
                     .with_reorderable(true)
                     .with_drag(
                         None,
