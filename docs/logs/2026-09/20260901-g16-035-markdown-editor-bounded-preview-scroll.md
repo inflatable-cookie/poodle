@@ -1,7 +1,8 @@
 # g16.035 — MarkdownEditor Bounded Preview Scroll
 
-Status: implemented, PR pending
+Status: implemented, PR open
 Date: 2026-09-01
+PR: https://github.com/inflatable-cookie/poodle/pull/123
 Card: `docs/roadmaps/g16/035-markdown-editor-bounded-preview-scroll.md`
 Handoff: `docs/handoffs/20260901-142220-g16-035-markdown-editor-preview-scroll.md`
 Governing refs: `docs/contracts/components/markdown-editor.md`,
