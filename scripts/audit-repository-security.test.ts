@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import {
   approvedGitRevisions,
   registryOnlyCrates,
+  secretPatternHits,
   validateCargoLockSources,
   validateCargoManifestSources,
 } from "./repository-security-policy.ts";
@@ -160,4 +161,82 @@ test("missing notice markers remain a failure", () => {
   expect(missingNoticeMarkers("present", ["present", "missing"])).toEqual([
     "missing",
   ]);
+});
+
+const tokenBody = "A".repeat(20);
+
+function glued(...parts: string[]): string {
+  return parts.join("");
+}
+
+function openAiUserToken(): string {
+  return glued("sk-", tokenBody);
+}
+
+function openAiProjectToken(): string {
+  return glued("sk-", "proj-", tokenBody);
+}
+
+test("OpenAI user tokens remain detected at whitespace, quote, =, and : boundaries", () => {
+  const token = openAiUserToken();
+  for (const prefix of [" ", "\n", "\t", '"', "'", "=", ":"]) {
+    expect(secretPatternHits(`${prefix}${token}`)).toContain("OpenAI token");
+  }
+  expect(secretPatternHits(token)).toContain("OpenAI token");
+});
+
+test("quoted OpenAI project tokens remain detected", () => {
+  const token = openAiProjectToken();
+  expect(secretPatternHits(`"${token}"`)).toContain("OpenAI token");
+  expect(secretPatternHits(`'${token}'`)).toContain("OpenAI token");
+  expect(secretPatternHits(`=${token}`)).toContain("OpenAI token");
+  expect(secretPatternHits(`:${token}`)).toContain("OpenAI token");
+  expect(secretPatternHits(` ${token}`)).toContain("OpenAI token");
+});
+
+test("embedded English compounds are not OpenAI tokens", () => {
+  expect(secretPatternHits("mask-plus-translated-highlight")).not.toContain(
+    "OpenAI token",
+  );
+  expect(
+    secretPatternHits("023-task-backed-agent-workflow-contract.md"),
+  ).not.toContain("OpenAI token");
+});
+
+test("OpenAI near misses and letter-prefixed embeddings are not tokens", () => {
+  expect(secretPatternHits(glued("sk-", "A".repeat(19)))).not.toContain(
+    "OpenAI token",
+  );
+  expect(secretPatternHits(`a${openAiUserToken()}`)).not.toContain(
+    "OpenAI token",
+  );
+  expect(secretPatternHits(`a${openAiProjectToken()}`)).not.toContain(
+    "OpenAI token",
+  );
+});
+
+test("every other secret class still matches its production shape", () => {
+  expect(
+    secretPatternHits(glued("-----BEGIN ", "PRIVATE KEY-----")),
+  ).toContain("private key");
+  expect(secretPatternHits(glued("AKIA", "B".repeat(16)))).toContain(
+    "AWS access key",
+  );
+  expect(secretPatternHits(glued("ghp_", "c".repeat(30)))).toContain(
+    "GitHub token",
+  );
+  expect(secretPatternHits(glued("xoxb-", "d".repeat(10)))).toContain(
+    "Slack token",
+  );
+  expect(secretPatternHits(glued("rk_live_", "e".repeat(16)))).toContain(
+    "Stripe live key",
+  );
+  expect(
+    secretPatternHits(
+      glued("eyJ", "f".repeat(10), ".", "g".repeat(10), ".", "h".repeat(10)),
+    ),
+  ).toContain("JWT");
+  expect(
+    secretPatternHits(glued("https://", "alice", ":", "secret", "@", "host")),
+  ).toContain("credential URL");
 });

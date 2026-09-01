@@ -41,16 +41,19 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   snippet needs a v3 rewrite rather than a field edit. Found while running the
   v2 `branchCount` absence search for g16.033.
 
-- 2026-09-01 — `audit:security` fails on `main` on an English word.
+- 2026-09-01 — RESOLVED 2026-09-02 by g16.053. `audit:security` failed on
+  `main` on an English word.
   `docs/triage/20260901-080641-post-g16-research-queue.md:153` contains
   "mask-plus-translated-highlight", and the OpenAI matcher
   `/sk-(?:proj-)?[A-Za-z0-9_-]{20,}/` in
-  `scripts/audit-repository-security.ts:23` has no left boundary, so it matches
-  the `sk-plus-translated-hi…` inside `mask-`. `effigy qa` is therefore red on
-  `main` itself. Anchoring the pattern with `\b` keeps every real key (they
-  always follow whitespace, a quote, `=`, or `:`) and drops matches inside a
-  word. Not fixed here: a repo-wide security gate is outside this card's
-  writable scope. Found while closing g16.028.
+  `scripts/audit-repository-security.ts:23` had no left boundary, so it matched
+  the `sk-plus-translated-hi…` inside `mask-`. `effigy qa` was therefore red on
+  `main` itself. The production matcher now requires a left word boundary
+  (`\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}/`) and focused tests exercise that
+  production path: real `sk-` / `sk-proj-` shapes at whitespace, quote, `=`,
+  and `:` still match; `mask-plus-translated-highlight` and
+  `task-backed-...` do not. Denominator stays `git ls-files` with no path
+  exclusion. Found while closing g16.028.
 
 - 2026-09-01 — `probe:gpui-specimens` fails on a wall-clock budget
   (`probe shard N exceeded the two-minute test-body budget`) rather than on
