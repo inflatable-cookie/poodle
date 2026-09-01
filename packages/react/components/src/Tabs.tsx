@@ -172,9 +172,9 @@ export function Tabs({
 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const measureListRef = useRef<HTMLDivElement | null>(null);
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingTabFocus = useRef<number | null>(null);
+  const pendingTabFocus = useRef<string | null>(null);
   const lastItemsSignature = useRef("");
   const lastSyncedValue = useRef<string | null>(null);
   const historyReady = useRef(false);
@@ -188,8 +188,9 @@ export function Tabs({
   const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    setTooltipAnchor(tooltipIndex === null ? null : (tabRefs.current[tooltipIndex] ?? null));
-  }, [tooltipIndex]);
+    const value = tooltipIndex === null ? undefined : renderedItems[tooltipIndex]?.value;
+    setTooltipAnchor(value ? (tabRefs.current[value] ?? null) : null);
+  }, [tooltipIndex, renderedItems]);
   const [collapsedByOverflow, setCollapsedByOverflow] = useState(false);
   /** How many entries of `shed` are currently given up. */
   const [shedCount, setShedCount] = useState(0);
@@ -280,7 +281,8 @@ export function Tabs({
           break;
         }
         case "focusTab": {
-          pendingTabFocus.current = effect.index;
+          // The button follows the tab's value across keyed reorder; index slots do not.
+          pendingTabFocus.current = result.context.items[effect.index]?.value ?? null;
           break;
         }
         case "emitReorder": {
@@ -699,7 +701,7 @@ export function Tabs({
                 iconSize={resolvedIconSize}
                 onDrop={handleDrop}
                 onElement={(element) => {
-                  tabRefs.current[index] = element;
+                  tabRefs.current[item.value] = element;
                 }}
                 onSelect={() => send({ type: "SELECT", value: item.value })}
                 onClose={() => send({ type: "CLOSE", value: item.value })}

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/svelte";
+import { tick } from "svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import Tabs from "../src/Tabs.svelte";
@@ -263,6 +264,41 @@ describe("Tabs (svelte)", () => {
     await fireEvent(document, pointer("pointermove", 260, 15));
     expect(occupant.getAttribute("data-drop-target")).toBeNull();
     expect(moved.closest(".poodle-tabs__item")?.getAttribute("data-drop-target")).toBeNull();
+  });
+
+  it("arrows follow visual order after a pointer reorder", async () => {
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+      { value: "utils.ts", label: "utils.ts", closable: true },
+      { value: "types.ts", label: "types.ts", closable: true },
+    ];
+    const { container } = render(Tabs, {
+      props: { items: files, defaultValue: "App.svelte", reorderable: true },
+    });
+    layout(container);
+
+    await fireEvent(tabs()[1], pointer("pointerdown", 150, 15));
+    await fireEvent(document, pointer("pointermove", 190, 15));
+    await fireEvent(document, pointer("pointermove", 250, 15));
+    await fireEvent(document, pointer("pointerup", 250, 15));
+    await tick();
+
+    expect(tabs().map((tab) => tab.getAttribute("data-value"))).toEqual([
+      "index.ts",
+      "utils.ts",
+      "App.svelte",
+      "types.ts",
+    ]);
+    const moved = tabs()[2];
+    expect(document.activeElement).toBe(moved);
+    expect(tabs().map((tab) => tab.getAttribute("tabindex"))).toEqual(["-1", "-1", "0", "-1"]);
+
+    await fireEvent.keyDown(moved, { key: "ArrowRight" });
+    await tick();
+    expect(document.activeElement).toBe(tabs()[3]);
+    expect(tabs()[3].getAttribute("data-value")).toBe("types.ts");
+    expect(tabs().map((tab) => tab.getAttribute("tabindex"))).toEqual(["-1", "-1", "-1", "0"]);
   });
 
   it("the drag preview follows the pointer while the hover target stays put", async () => {

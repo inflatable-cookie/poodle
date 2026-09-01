@@ -267,6 +267,37 @@ describe("Tabs (react)", () => {
     expect(moved.closest(".poodle-tabs__item")?.getAttribute("data-drop-target")).toBeNull();
   });
 
+  it("arrows follow visual order after a pointer reorder", () => {
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+      { value: "utils.ts", label: "utils.ts", closable: true },
+      { value: "types.ts", label: "types.ts", closable: true },
+    ];
+    const { container } = render(<Tabs items={files} defaultValue="App.svelte" reorderable />);
+    layout(container);
+
+    send(tabs()[1], pointer("pointerdown", 150, 15));
+    send(document, pointer("pointermove", 190, 15));
+    send(document, pointer("pointermove", 250, 15));
+    send(document, pointer("pointerup", 250, 15));
+
+    expect(tabs().map((tab) => tab.getAttribute("data-value"))).toEqual([
+      "index.ts",
+      "utils.ts",
+      "App.svelte",
+      "types.ts",
+    ]);
+    const moved = tabs()[2];
+    expect(document.activeElement).toBe(moved);
+    expect(tabs().map((tab) => tab.getAttribute("tabindex"))).toEqual(["-1", "-1", "0", "-1"]);
+
+    fireEvent.keyDown(moved, { key: "ArrowRight" });
+    expect(document.activeElement).toBe(tabs()[3]);
+    expect(tabs()[3].getAttribute("data-value")).toBe("types.ts");
+    expect(tabs().map((tab) => tab.getAttribute("tabindex"))).toEqual(["-1", "-1", "-1", "0"]);
+  });
+
   it("the drag preview follows the pointer while the hover target stays put", () => {
     const files = [
       { value: "index.ts", label: "index.ts" },

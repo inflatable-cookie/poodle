@@ -152,7 +152,7 @@
   const tabsId = ++nextTabsId;
   const isBrowser = typeof window !== "undefined";
   const uiPresentation = getUiPresentation();
-  let tabElements = $state<Array<HTMLButtonElement | null>>([]);
+  let tabElements = $state<Record<string, HTMLButtonElement | null>>({});
   let rootElement = $state<HTMLDivElement | null>(null);
   let measureListElement = $state<HTMLDivElement | null>(null);
   /** How many entries of `shed` are currently given up. */
@@ -382,8 +382,11 @@
           break;
         }
         case "focusTab": {
-          const index = effect.index;
-          tick().then(() => tabElements[index]?.focus());
+          // The button follows the tab's value across keyed reorder; index slots do not.
+          const value = result.context.items[effect.index]?.value;
+          tick().then(() => {
+            if (value) tabElements[value]?.focus();
+          });
           break;
         }
         case "emitReorder": {
@@ -731,9 +734,9 @@
           focused={focusIndex === index}
           tooltipOpen={tooltipIndex === index}
           iconSize={resolvedIconSize}
-          anchorElement={tabElements[index] ?? null}
+          anchorElement={tabElements[item.value] ?? null}
           onDrop={handleDrop}
-          onElement={(element) => (tabElements[index] = element)}
+          onElement={(element) => (tabElements[item.value] = element)}
           onSelect={() => send({ type: "SELECT", value: item.value })}
           onClose={() => send({ type: "CLOSE", value: item.value })}
           onFocus={() => {
