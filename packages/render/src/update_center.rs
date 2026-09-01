@@ -282,10 +282,11 @@ mod tests {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
         let determinate = update_center(
-            &UpdateCenterSpec::new(UpdatePresence::Quiet)
-                .with_progress(UpdateProgressProjection::Downloading {
+            &UpdateCenterSpec::new(UpdatePresence::Quiet).with_progress(
+                UpdateProgressProjection::Downloading {
                     fraction: Some(0.42),
-                }),
+                },
+            ),
             &ctx,
             UpdateCenterHandlers::default(),
         );
@@ -295,10 +296,7 @@ mod tests {
             }
             node.children.iter().find_map(find_label)
         }
-        assert_eq!(
-            find_label(&determinate),
-            Some("Downloading update, 42%")
-        );
+        assert_eq!(find_label(&determinate), Some("Downloading update, 42%"));
         assert!(determinate
             .find(&|node| {
                 matches!(node.kind, poodle_node::NodeKind::ProgressRing { fraction } if fraction == 0.42)
@@ -317,6 +315,18 @@ mod tests {
             UpdateCenterHandlers::default(),
         );
         assert!(indeterminate
+            .find(&|node| {
+                matches!(&node.kind, poodle_node::NodeKind::Icon { name, .. } if name == "spinner")
+                    && node.style.animation.is_none()
+            })
+            .is_some());
+        let after = update_center(
+            &UpdateCenterSpec::new(UpdatePresence::Quiet)
+                .with_progress(UpdateProgressProjection::Downloading { fraction: None }),
+            &ctx.with_first_frame_committed(true),
+            UpdateCenterHandlers::default(),
+        );
+        assert!(after
             .find(&|node| {
                 matches!(&node.kind, poodle_node::NodeKind::Icon { name, .. } if name == "spinner")
                     && node.style.animation.is_some()
@@ -344,7 +354,13 @@ mod tests {
         let trigger = node
             .find(&|child| child.id.as_deref() == Some("update-center-trigger"))
             .expect("trigger");
-        assert_eq!(node.style.descriptor.layout.width, trigger.style.descriptor.layout.width);
-        assert_eq!(node.style.descriptor.layout.height, trigger.style.descriptor.layout.height);
+        assert_eq!(
+            node.style.descriptor.layout.width,
+            trigger.style.descriptor.layout.width
+        );
+        assert_eq!(
+            node.style.descriptor.layout.height,
+            trigger.style.descriptor.layout.height
+        );
     }
 }

@@ -166,8 +166,11 @@ pub fn skeleton(spec: &SkeletonSpec, ctx: &RenderContext<'_>) -> Node {
     let Some(ref preset) = spec.preset else {
         let mut el = single_shape(fill, radius, spec);
         if spec.is_animated {
-            el.style.animation =
-                crate::motion::animation_for_policy(ctx.motion_policy(), skeleton_pulse(), false);
+            el.style.animation = crate::motion::loop_animation_for_policy(
+                ctx.motion_policy(),
+                skeleton_pulse(),
+                ctx.first_frame_committed(),
+            );
         }
         return el;
     };
@@ -260,8 +263,11 @@ pub fn skeleton(spec: &SkeletonSpec, ctx: &RenderContext<'_>) -> Node {
     };
     // The whole skeleton breathes; opacity cascades to every shape.
     if spec.is_animated {
-        built.style.animation =
-            crate::motion::animation_for_policy(ctx.motion_policy(), skeleton_pulse(), false);
+        built.style.animation = crate::motion::loop_animation_for_policy(
+            ctx.motion_policy(),
+            skeleton_pulse(),
+            ctx.first_frame_committed(),
+        );
     }
     built
 }
@@ -305,5 +311,15 @@ mod tests {
             rem_to_px(0.625)
         );
         assert!(table.style.fill_width);
+    }
+
+    #[test]
+    fn initial_construction_schedules_no_pulse() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = skeleton(&SkeletonSpec::new(), &ctx);
+        assert!(node.style.animation.is_none());
+        let after = skeleton(&SkeletonSpec::new(), &ctx.with_first_frame_committed(true));
+        assert!(after.style.animation.is_some());
     }
 }

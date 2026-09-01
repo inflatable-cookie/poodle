@@ -1,4 +1,4 @@
-import { useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { toggleGroupTransition } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/accordion.css";
@@ -47,6 +47,29 @@ export function Accordion({
   const isControlled = value !== null;
   const currentValue = isControlled ? value : uncontrolledValue;
   const openValues = Array.isArray(currentValue) ? currentValue : currentValue ? [currentValue] : [];
+  const [closing, setClosing] = useState(() => new Set<string>());
+  const previousOpen = useRef(new Set(openValues));
+
+  useEffect(() => {
+    const next = new Set(openValues);
+    setClosing((current) => {
+      const nextClosing = new Set(current);
+      for (const value of next) {
+        nextClosing.delete(value);
+      }
+      if (motionReady) {
+        for (const value of previousOpen.current) {
+          if (!next.has(value)) {
+            nextClosing.add(value);
+          }
+        }
+      } else {
+        nextClosing.clear();
+      }
+      return nextClosing;
+    });
+    previousOpen.current = next;
+  }, [motionReady, openValues.join("\u001f")]);
 
   function toggle(itemValue: string): void {
     const result = toggleGroupTransition(
@@ -61,6 +84,25 @@ export function Accordion({
     );
     for (const effect of result.effects) {
       if (effect.type === "emitValueChange") {
+        if (motionReady) {
+          const next = Array.isArray(effect.value)
+            ? effect.value
+            : effect.value
+              ? [effect.value]
+              : [];
+          setClosing((current) => {
+            const nextClosing = new Set(current);
+            for (const value of next) {
+              nextClosing.delete(value);
+            }
+            for (const value of openValues) {
+              if (!next.includes(value)) {
+                nextClosing.add(value);
+              }
+            }
+            return nextClosing;
+          });
+        }
         if (!isControlled) setUncontrolledValue(effect.value);
         onValueChange?.(effect.value);
       }
@@ -102,13 +144,24 @@ export function Accordion({
               </button>
             </h3>
 
-            <div className="poodle-accordion__panel-clip">
+            <div
+              className="poodle-accordion__panel-clip"
+              onTransitionEnd={() => {
+                if (!open) {
+                  setClosing((current) => {
+                    const nextClosing = new Set(current);
+                    nextClosing.delete(item.value);
+                    return nextClosing;
+                  });
+                }
+              }}
+            >
               <div
                 className="poodle-accordion__panel"
                 id={panelId}
                 role="region"
                 aria-labelledby={triggerId}
-                hidden={!open}
+                hidden={!open && !closing.has(item.value)}
                 inert={!open}
                 aria-hidden={!open}
               >

@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState, type FocusEvent } from "react";
+import { useEffect, useId, useRef, useState, type FocusEvent } from "react";
 import {
+  applyToastExitInert,
+  cancelToastPresence,
   dropToastVisual,
   moveToastFocus,
   nextToastVisuals,
@@ -37,12 +39,15 @@ export function ToastStack({
 }: ToastStackProps) {
   const uiPresentation = useUiPresentation();
   const policy = useMotionPolicy();
+  const stackId = useId();
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
   const stackRef = useRef<HTMLUListElement | null>(null);
   const enteredFrom = useRef<Element | null>(null);
-  const initialPass = useRef(true);
-  const [visuals, setVisuals] = useState<ToastVisual[]>([]);
+  const initialPass = useRef(false);
+  const [visuals, setVisuals] = useState<ToastVisual[]>(() =>
+    nextToastVisuals([], items.map((item) => item.id), true),
+  );
   const [retained, setRetained] = useState(() => new Map(items.map((item) => [item.id, item])));
 
   useEffect(() => {
@@ -58,11 +63,21 @@ export function ToastStack({
     initialPass.current = false;
   }, [items]);
 
-  function handleDismiss(id: string, toastEl: HTMLElement | null) {
+  function handleDismiss(id: string, toastEl: HTMLElement | null, activator: EventTarget | null) {
     if (stackRef.current && toastEl) {
-      moveToastFocus(stackRef.current, toastEl, enteredFrom.current);
+      moveToastFocus(stackRef.current, toastEl, enteredFrom.current, activator);
+      applyToastExitInert(toastEl, true);
     }
     onDismiss?.(id);
+  }
+
+  function prune(id: string) {
+    setVisuals((current) => dropToastVisual(current, id));
+    setRetained((current) => {
+      const next = new Map(current);
+      next.delete(id);
+      return next;
+    });
   }
 
   return (
@@ -88,6 +103,7 @@ export function ToastStack({
         return (
           <ToastRow
             key={visual.id}
+            stackId={stackId}
             item={item}
             visual={visual}
             policy={policy}
@@ -96,7 +112,7 @@ export function ToastStack({
             onDismiss={handleDismiss}
             onAction={onAction}
             onEnterDone={() => setVisuals((current) => settleToastVisual(current, visual.id))}
-            onExitDone={() => setVisuals((current) => dropToastVisual(current, visual.id))}
+            onExitDone={() => prune(visual.id)}
           />
         );
       })}
@@ -105,6 +121,7 @@ export function ToastStack({
 }
 
 function ToastRow({
+  stackId,
   item,
   visual,
   policy,
@@ -115,29 +132,48 @@ function ToastRow({
   onEnterDone,
   onExitDone,
 }: {
+  stackId: string;
   item: ToastItem;
   visual: ToastVisual;
   policy: ReturnType<typeof useMotionPolicy>;
   resolvedSize: ControlSize;
   resolvedDensity: ControlDensity;
-  onDismiss: (id: string, toastEl: HTMLElement | null) => void;
+  onDismiss: (id: string, toastEl: HTMLElement | null, activator: EventTarget | null) => void;
   onAction?: (id: string) => void;
   onEnterDone: () => void;
   onExitDone: () => void;
 }) {
   const ref = useRef<HTMLLIElement | null>(null);
+  const owner = `${stackId}:${visual.id}`;
+  const exiting = visual.phase === "exit";
 
   useEffect(() => {
-    if (!ref.current) {
+    const node = ref.current;
+    if (!node) {
       return;
     }
-    playToastPresence(ref.current, {
-      owner: visual.id,
-      phase: visual.phase === "exit" ? "exit" : "enter",
+    applyToastExitInert(node, exiting);
+    if (visual.phase === "settled") {
+      return () => cancelToastPresence(owner);
+    }
+    playToastPresence(node, {
+      owner,
+      phase: exiting ? "exit" : "enter",
       policy,
-      initial: visual.phase === "settled",
+      initial: false,
+      onComplete: (status) => {
+        if (status !== "finish") {
+          return;
+        }
+        if (exiting) {
+          onExitDone();
+        } else {
+          onEnterDone();
+        }
+      },
     });
-  }, [policy, visual.id, visual.phase]);
+    return () => cancelToastPresence(owner);
+  }, [exiting, owner, policy, visual.phase]);
 
   return (
     <li
@@ -145,23 +181,20 @@ function ToastRow({
       className="poodle-toast"
       data-tone={item.tone ?? "info"}
       data-motion={visual.phase}
-      data-motion-inert={visual.phase === "exit" ? "true" : undefined}
-      aria-live={visual.phase === "exit" ? undefined : item.tone === "danger" ? "assertive" : "polite"}
+      data-motion-inert={exiting ? "true" : undefined}
+      inert={exiting ? true : undefined}
+      aria-live={exiting ? undefined : item.tone === "danger" ? "assertive" : "polite"}
       aria-atomic="true"
-      aria-hidden={visual.phase === "exit" ? true : undefined}
-      onAnimationEnd={() => {
-        if (visual.phase === "exit") {
-          onExitDone();
-        } else if (visual.phase === "enter") {
-          onEnterDone();
-        }
-      }}
+      aria-hidden={exiting ? true : undefined}
     >
       <button
         type="button"
         className="poodle-toast__dismiss"
         aria-label={`Dismiss ${item.title}`}
-        onClick={(event) => onDismiss(item.id, event.currentTarget.closest(".poodle-toast"))}
+        tabIndex={exiting ? -1 : undefined}
+        onClick={(event) =>
+          onDismiss(item.id, event.currentTarget.closest(".poodle-toast"), event.currentTarget)
+        }
       >
         <Icon name="x" />
       </button>
@@ -173,7 +206,12 @@ function ToastRow({
 
       {item.actionLabel ? (
         <div className="poodle-toast__actions">
-          <Button variant="secondary" size={resolvedSize} density={resolvedDensity} onClick={() => onAction?.(item.id)}>
+          <Button
+            variant="secondary"
+            size={resolvedSize}
+            density={resolvedDensity}
+            onClick={() => onAction?.(item.id)}
+          >
             {item.actionLabel}
           </Button>
         </div>

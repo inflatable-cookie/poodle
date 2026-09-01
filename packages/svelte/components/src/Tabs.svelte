@@ -226,6 +226,8 @@
   const selectedIndex = $derived(renderedItems.findIndex((item) => item.value === currentValue));
   const isVertical = $derived(orientation === "vertical");
 
+  let indicatorSnapFrame = 0;
+
   function measureIndicator(snap: boolean): void {
     if (activeEdge !== "underline" || !listElement) {
       indicatorBox = null;
@@ -240,7 +242,8 @@
       isVertical ? "vertical" : "horizontal",
     );
     if (snap) {
-      requestAnimationFrame(() => {
+      cancelAnimationFrame(indicatorSnapFrame);
+      indicatorSnapFrame = requestAnimationFrame(() => {
         indicatorSnap = false;
       });
     }
@@ -259,7 +262,14 @@
     }
     const observer = new ResizeObserver(() => measureIndicator(true));
     observer.observe(listElement);
-    return () => observer.disconnect();
+    const selected = tabElements[selectedIndex];
+    if (selected) {
+      observer.observe(selected);
+    }
+    return () => {
+      cancelAnimationFrame(indicatorSnapFrame);
+      observer.disconnect();
+    };
   });
   const hasPanel = $derived(children !== undefined);
   const hasTooltips = $derived(isVertical || showTooltips);

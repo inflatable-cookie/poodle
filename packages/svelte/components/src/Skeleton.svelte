@@ -20,7 +20,7 @@
     animated?: boolean;
   } = $props();
 
-  const motionReady = useMotionReady();
+  const motionReady = useMotionReady(() => animated);
 
   const resolvedWidth = $derived(
     width ?? (shape === "circle" ? pxToRem(40) : shape === "block" ? "100%" : "100%")

@@ -2,7 +2,7 @@ import { bindMotionReady, type MotionPolicy } from "@inflatable-cookie/poodle-co
 
 import { getMotionPolicy } from "./motion-policy";
 
-export function useMotionReady(enabled = true): {
+export function useMotionReady(enabled: boolean | (() => boolean) = true): {
   get ready(): boolean;
   get policy(): MotionPolicy;
 } {
@@ -11,11 +11,12 @@ export function useMotionReady(enabled = true): {
   let currentPolicy = $state<MotionPolicy>("full");
 
   $effect(() => {
+    const allow = typeof enabled === "function" ? enabled() : enabled;
     let stopReady = () => {};
     const unsubscribe = policyStore.subscribe((value) => {
       currentPolicy = value;
       stopReady();
-      stopReady = bindMotionReady(value, enabled, (next) => {
+      stopReady = bindMotionReady(value, allow, (next) => {
         ready = next;
       });
     });

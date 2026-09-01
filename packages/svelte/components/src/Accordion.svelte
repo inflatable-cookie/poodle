@@ -5,7 +5,7 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/accordion.css";
   import { toggleGroupTransition } from "@inflatable-cookie/poodle-core";
-  import type { Snippet } from "svelte";
+  import { untrack, type Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
   import { useMotionReady } from "./motion-ready.svelte";
@@ -62,6 +62,36 @@
     : currentValue
       ? [currentValue]
       : []);
+  let closing = $state(new Set<string>());
+  let previousOpen = new Set<string>();
+
+  $effect.pre(() => {
+    const next = new Set(openValues);
+    const ready = motionReady.ready;
+    const prev = previousOpen;
+    previousOpen = next;
+    const nextClosing = new Set<string>();
+    if (ready) {
+      const current = untrack(() => closing);
+      for (const value of current) {
+        if (!next.has(value)) {
+          nextClosing.add(value);
+        }
+      }
+      for (const value of prev) {
+        if (!next.has(value)) {
+          nextClosing.add(value);
+        }
+      }
+    }
+    const current = untrack(() => closing);
+    if (
+      current.size !== nextClosing.size ||
+      [...nextClosing].some((value) => !current.has(value))
+    ) {
+      closing = nextClosing;
+    }
+  });
 
   function toggle(itemValue: string): void {
     const result = toggleGroupTransition(
@@ -119,13 +149,22 @@
         </button>
       </h3>
 
-      <div class="poodle-accordion__panel-clip">
+      <div
+        class="poodle-accordion__panel-clip"
+        ontransitionend={() => {
+          if (!openValues.includes(item.value)) {
+            const nextClosing = new Set(closing);
+            nextClosing.delete(item.value);
+            closing = nextClosing;
+          }
+        }}
+      >
         <div
           class="poodle-accordion__panel"
           id={`poodle-accordion-panel-${accordionId}-${item.value}`}
           role="region"
           aria-labelledby={`poodle-accordion-trigger-${accordionId}-${item.value}`}
-          hidden={!openValues.includes(item.value)}
+          hidden={!openValues.includes(item.value) && !closing.has(item.value)}
           inert={!openValues.includes(item.value)}
           aria-hidden={!openValues.includes(item.value) ? "true" : undefined}
         >

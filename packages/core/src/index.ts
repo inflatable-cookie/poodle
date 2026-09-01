@@ -850,7 +850,9 @@ export {
 } from "./dom/drag-drop-auto-scroll";
 export {
   afterFirstFrame,
+  applyToastExitInert,
   bindMotionReady,
+  cancelToastPresence,
   cancelWebMotion,
   liveWebMotionCount,
   playClippedHeight,

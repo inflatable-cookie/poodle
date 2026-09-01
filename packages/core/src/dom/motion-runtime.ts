@@ -8,7 +8,11 @@
 import {
   MOTION_DURATION_MS,
   activateMotion,
+  completeMotion,
   createMotionTrace,
+  motionKey,
+  setMotionTracePolicy,
+  type MotionDecision,
   type MotionIntent,
   type MotionPolicy,
   type MotionTrace,
@@ -19,6 +23,7 @@ export interface WebMotionHandle {
 }
 
 const handles = new Map<string, WebMotionHandle>();
+const traces = new Map<string, MotionTrace>();
 
 export function liveWebMotionCount(): number {
   return handles.size;
@@ -28,17 +33,32 @@ export function cancelWebMotion(key?: string): void {
   if (key) {
     handles.get(key)?.cancel();
     handles.delete(key);
+    traces.delete(key);
     return;
   }
   for (const handle of handles.values()) {
     handle.cancel();
   }
   handles.clear();
+  traces.clear();
 }
 
 function track(key: string, handle: WebMotionHandle): void {
   handles.get(key)?.cancel();
   handles.set(key, handle);
+}
+
+function retainedTrace(key: string, policy: MotionPolicy): MotionTrace {
+  const existing = traces.get(key);
+  if (!existing) {
+    const created = createMotionTrace(policy);
+    traces.set(key, created);
+    return created;
+  }
+  if (existing.policy !== policy) {
+    setMotionTracePolicy(existing, policy);
+  }
+  return existing;
 }
 
 export function afterFirstFrame(onReady: () => void): () => void {
@@ -74,18 +94,30 @@ export function bindMotionReady(
   return afterFirstFrame(() => onReady(true));
 }
 
-function registerAnimation(key: string, animation: Animation): void {
-  const cancel = () => {
-    animation.cancel();
-    handles.delete(key);
-  };
-  animation.finished.then(() => {
+function registerAnimation(
+  key: string,
+  animation: Animation,
+  onComplete?: (status: "finish" | "cancel") => void,
+): void {
+  let settled = false;
+  const finish = (status: "finish" | "cancel") => {
+    if (settled) {
+      return;
+    }
+    settled = true;
     if (handles.get(key)?.cancel === cancel) {
       handles.delete(key);
     }
-  }).catch(() => {
-    handles.delete(key);
-  });
+    onComplete?.(status);
+  };
+  const cancel = () => {
+    animation.cancel();
+    finish("cancel");
+  };
+  animation.finished.then(
+    () => finish("finish"),
+    () => finish("cancel"),
+  );
   track(key, { cancel });
 }
 
@@ -95,14 +127,21 @@ export function playWebAnimation(
   element: Element,
   keyframes: Keyframe[],
   easing = "ease-out",
-): boolean {
+  onComplete?: (status: "finish" | "cancel") => void,
+): MotionDecision {
   const decision = activateMotion(trace, intent);
   if (!decision.schedule) {
-    cancelWebMotion(decision.key);
-    return false;
+    if (decision.interruption !== "inert") {
+      const existing = handles.get(decision.key);
+      if (existing) {
+        existing.cancel();
+        handles.delete(decision.key);
+      }
+    }
+    return decision;
   }
   if (typeof element.animate !== "function") {
-    return false;
+    return { ...decision, schedule: false, liveClock: false, paintEndpoint: true };
   }
   const animation = element.animate(keyframes, {
     duration: decision.durationMs,
@@ -110,8 +149,13 @@ export function playWebAnimation(
     fill: "forwards",
     iterations: intent.loop ? Infinity : 1,
   });
-  registerAnimation(decision.key, animation);
-  return true;
+  registerAnimation(decision.key, animation, (status) => {
+    if (status === "finish") {
+      completeMotion(trace, decision.key);
+    }
+    onComplete?.(status);
+  });
+  return decision;
 }
 
 export function playClippedHeight(
@@ -122,9 +166,9 @@ export function playClippedHeight(
     policy: MotionPolicy;
     initial: boolean;
     durationMs?: number;
+    onComplete?: (status: "finish" | "cancel") => void;
   },
-): boolean {
-  const trace = createMotionTrace(options.policy);
+): MotionDecision {
   const durationMs = options.durationMs ?? MOTION_DURATION_MS.standard;
   const target = options.open ? "open" : "closed";
   const intent: MotionIntent = {
@@ -137,22 +181,24 @@ export function playClippedHeight(
     initial: options.initial,
     reversible: true,
   };
+  const key = motionKey(intent.owner, intent.role, intent.channel);
+  const trace = retainedTrace(key, options.policy);
   const from = options.open ? 0 : element.scrollHeight;
   const to = options.open ? element.scrollHeight : 0;
   element.style.overflow = "hidden";
-  const scheduled = playWebAnimation(
+  const decision = playWebAnimation(
     trace,
     intent,
     element,
     [{ height: `${from}px` }, { height: `${to}px` }],
     "ease-out",
+    options.onComplete,
   );
-  if (!scheduled) {
+  if (!decision.schedule) {
     element.style.height = options.open ? "" : "0px";
     element.style.overflow = options.open ? "" : "hidden";
-    return false;
+    return decision;
   }
-  const key = `${options.owner}\u001fdisclosure-height\u001fpanel`;
   const handle = handles.get(key);
   const originalCancel = handle?.cancel;
   if (handle && originalCancel) {
@@ -167,7 +213,7 @@ export function playClippedHeight(
       }
     };
   }
-  return true;
+  return decision;
 }
 
 export function tabIndicatorBox(
@@ -238,12 +284,50 @@ export function settleToastVisual(visuals: ToastVisual[], id: string): ToastVisu
   );
 }
 
+export function applyToastExitInert(element: HTMLElement, inert: boolean): void {
+  element.inert = inert;
+  if (inert) {
+    element.setAttribute("inert", "");
+  } else {
+    element.removeAttribute("inert");
+  }
+  for (const control of element.querySelectorAll<HTMLElement>(
+    "button, a[href], input, select, textarea, [tabindex]",
+  )) {
+    if (inert) {
+      control.setAttribute("tabindex", "-1");
+    } else if (control.getAttribute("tabindex") === "-1") {
+      control.removeAttribute("tabindex");
+    }
+  }
+}
+
+function toastOwnsFocus(dismissed: HTMLElement, activator: EventTarget | Node | null): boolean {
+  const active = document.activeElement;
+  return (
+    (activator instanceof Node && dismissed.contains(activator)) ||
+    (active instanceof Node && dismissed.contains(active))
+  );
+}
+
+function holdToastFocus(node: HTMLElement): void {
+  node.focus();
+  const restore = () => {
+    if (node.isConnected && document.activeElement !== node) {
+      node.focus();
+    }
+  };
+  queueMicrotask(restore);
+  globalThis.requestAnimationFrame?.(restore);
+}
+
 export function moveToastFocus(
   stack: HTMLElement,
   dismissed: HTMLElement,
   enteredFrom: Element | null,
+  activator: EventTarget | Node | null = document.activeElement,
 ): void {
-  if (!dismissed.contains(document.activeElement)) {
+  if (!toastOwnsFocus(dismissed, activator)) {
     return;
   }
   const toasts = [...stack.querySelectorAll<HTMLElement>(".poodle-toast")];
@@ -258,12 +342,17 @@ export function moveToastFocus(
     "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
   );
   if (focusable) {
-    focusable.focus();
+    holdToastFocus(focusable);
     return;
   }
   if (enteredFrom instanceof HTMLElement && document.contains(enteredFrom)) {
-    enteredFrom.focus();
+    holdToastFocus(enteredFrom);
   }
+}
+
+export function cancelToastPresence(owner: string): void {
+  cancelWebMotion(motionKey(owner, "toast-enter", "item"));
+  cancelWebMotion(motionKey(owner, "toast-exit", "item"));
 }
 
 export function playToastPresence(
@@ -274,9 +363,9 @@ export function playToastPresence(
     policy: MotionPolicy;
     initial: boolean;
     durationMs?: number;
+    onComplete?: (status: "finish" | "cancel") => void;
   },
-): boolean {
-  const trace = createMotionTrace(options.policy);
+): MotionDecision {
   const durationMs = options.durationMs ?? MOTION_DURATION_MS.standard;
   const opacity = options.phase === "enter" ? [0, 1] : [1, 0];
   const translate = options.phase === "enter" ? ["0.5rem", "0"] : ["0", "0.5rem"];
@@ -290,6 +379,10 @@ export function playToastPresence(
     initial: options.initial,
     reducedOpacity: true,
   };
+  const siblingRole = options.phase === "enter" ? "toast-exit" : "toast-enter";
+  cancelWebMotion(motionKey(options.owner, siblingRole, "item"));
+  const key = motionKey(intent.owner, intent.role, intent.channel);
+  const trace = retainedTrace(key, options.policy);
   const keyframes: Keyframe[] =
     options.policy === "full"
       ? [
@@ -297,5 +390,16 @@ export function playToastPresence(
           { opacity: opacity[1], transform: `translateY(${translate[1]})` },
         ]
       : [{ opacity: opacity[0] }, { opacity: opacity[1] }];
-  return playWebAnimation(trace, intent, element, keyframes, "ease-out");
+  const decision = playWebAnimation(
+    trace,
+    intent,
+    element,
+    keyframes,
+    "ease-out",
+    options.onComplete,
+  );
+  if (!decision.schedule && decision.interruption !== "inert") {
+    options.onComplete?.("finish");
+  }
+  return decision;
 }

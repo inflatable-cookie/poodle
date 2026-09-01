@@ -319,10 +319,10 @@ pub fn button(
         if spec.is_loading {
             let mut spinner = Node::icon("spinner", spinner_size);
             spinner.style.descriptor.text_color = Some(text_color);
-            spinner.style.animation = crate::motion::animation_for_policy(
+            spinner.style.animation = crate::motion::loop_animation_for_policy(
                 ctx.motion_policy(),
                 NodeAnimation::spin("poodle-spinner-ring", 0.8),
-                false,
+                ctx.first_frame_committed(),
             );
             el = el.child(wrap_glyph(spinner));
         }
@@ -786,7 +786,19 @@ mod tests {
         assert_eq!(node.a11y.tab_index, None);
         let spinner = SpinnerSpec::new().with_size(SpinnerSize::Sm).size_px();
         assert_eq!(icon_size_of(&node, "spinner"), spinner);
-        assert!(node
+        let spinner_node = node
+            .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "spinner"))
+            .expect("spinner icon");
+        assert!(
+            spinner_node.style.animation.is_none(),
+            "loading loops wait for the first committed frame"
+        );
+        let after = button(
+            &spec,
+            &ctx.with_first_frame_committed(true),
+            Some(Arc::new(|| panic!("loading must not fire"))),
+        );
+        assert!(after
             .find(&|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "spinner"))
             .expect("spinner icon")
             .style

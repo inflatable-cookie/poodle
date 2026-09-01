@@ -29,25 +29,26 @@ use poodle_headless::time_input::{
     time_input_invalid, time_input_transition, TimeInputContext, TimeInputEvent,
 };
 use poodle_node::{
-    ColorValue, ContinuousValuePhase, DismissReason, DragSession, DragSessionPhase, DragSubject,
-    DragTerminalOutcome, DropEligibility, FocusRing, LayoutDirection, LayoutOverflow, LayoutSizing, Node,
-    NodeContinuousValueEvent, NodeDragInputKind, NodeDragSource, NodeDropCommit,
-    NodeDropCommitEvent, NodeDropIntentEvent, NodeDropTarget, NodeKind, NodePosition, NodeRole,
-    NodeWheelEvent,
+    AnimEasing, AnimKeyframe, AnimLoop, AnimProperty, ColorValue, ContinuousValuePhase, DismissReason,
+    DragSession, DragSessionPhase, DragSubject, DragTerminalOutcome, DropEligibility, FocusRing,
+    LayoutDirection, LayoutOverflow, LayoutSizing, Node, NodeAnimation, NodeContinuousValueEvent,
+    NodeDragInputKind, NodeDragSource, NodeDropCommit, NodeDropCommitEvent, NodeDropIntentEvent,
+    NodeDropTarget, NodeKind, NodePosition, NodeRole, NodeWheelEvent,
 };
 use poodle_render::{
     audio_entry_id, fader_spec_from_context, fader_with_handlers, history_center,
-    knob_spec_from_context, knob_with_handlers, time_input_with_persistent_context,
-    ui_presentation_provider, xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id,
+    knob_spec_from_context, knob_with_handlers, skeleton, spinner, tabs, time_input_with_persistent_context,
+    toast_stack, ui_presentation_provider, xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id,
     xy_pad_y_id, FaderHandlers, FaderLive, HistoryCenterHandlers, HistoryCenterView,
     KnobHandlers, KnobLive, RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers,
-    TabsHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers, XYPadLive,
+    TabsHandlers, ToastStackHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers, XYPadLive,
 };
 use poodle_specs::{
-    AccordionSelectionValue, AgentTranscriptSpec, ControlDensity, ControlSize, FaderSpec,
+    AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ControlDensity, ControlSize, FaderSpec,
     HistoryCenterRejection, HistoryCenterSpec, KnobSpec, Orientation, PopoverSpec, RangeSliderSpec,
-    RatingSpec, SliderSpec, TabActivationMode, TabDefinition, TabsSpec, TimeInputSpec,
-    TriStateSwitchSpec, TriStateValue, UiPresentationProviderSpec, XYPadSpec,
+    RatingSpec, SkeletonSpec, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition, TabVariant,
+    TabsSpec, TimeInputSpec, Toast, ToastStackSpec, TriStateSwitchSpec, TriStateValue,
+    UiPresentationProviderSpec, XYPadSpec,
 };
 
 #[path = "../src/headless_driver.rs"]
@@ -18755,6 +18756,131 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
         assert!(
             *activated.lock().expect("activated lock"),
             "wheel scrolling must bring the clipped preview tail into hit-test"
+        );
+    });
+}
+
+/// g16.034. Construction-time motion: loops wait for a committed first frame,
+/// preloaded toasts paint the endpoint, underline is one paint-only indicator,
+/// and unsupported translation is a named GPUI approximation.
+#[test]
+fn mounted_motion_policy_construction_does_not_invent_clocks() {
+    run_headless(|cx| {
+        let capture = Arc::new(Mutex::new(Vec::<&'static str>::new()));
+        let tree = Arc::new(Mutex::new(skeleton(&SkeletonSpec::new(), &RenderContext::new(&theme()))));
+        let build = {
+            let capture = Arc::clone(&capture);
+            let tree = Arc::clone(&tree);
+            Rc::new(move || {
+                let node = tree.lock().expect("tree lock").clone();
+                poodle_gpui_node_backend::begin_probe_capture();
+                use gpui::{IntoElement as _, ParentElement as _};
+                let element = gpui::div()
+                    .child(poodle_gpui_node_backend::to_gpui(&node))
+                    .into_any_element();
+                *capture.lock().expect("capture lock") = poodle_gpui_node_backend::take_probe_capture();
+                element
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+        assert!(
+            !capture
+                .lock()
+                .expect("capture lock")
+                .contains(&"surface.animation.scheduled"),
+            "default skeleton construction must not schedule a loop"
+        );
+
+        *tree.lock().expect("tree lock") = skeleton(
+            &SkeletonSpec::new(),
+            &RenderContext::new(&theme()).with_first_frame_committed(true),
+        );
+        driver.draw_frame();
+        assert!(
+            capture
+                .lock()
+                .expect("capture lock")
+                .contains(&"surface.animation.scheduled"),
+            "a committed first frame may attach the skeleton pulse"
+        );
+
+        *tree.lock().expect("tree lock") = spinner(
+            &SpinnerSpec::default(),
+            &RenderContext::new(&theme()),
+        );
+        driver.draw_frame();
+        assert!(
+            !capture
+                .lock()
+                .expect("capture lock")
+                .contains(&"surface.animation.scheduled"),
+            "default spinner construction must not schedule a loop"
+        );
+
+        *tree.lock().expect("tree lock") = toast_stack(
+            &ToastStackSpec::new().with_toasts(vec![Toast::new("save", "Saved")]),
+            &RenderContext::new(&theme()),
+            ToastStackHandlers::default(),
+        );
+        driver.draw_frame();
+        assert!(
+            !capture
+                .lock()
+                .expect("capture lock")
+                .contains(&"surface.animation.scheduled"),
+            "preloaded toasts must not enter"
+        );
+
+        *tree.lock().expect("tree lock") = tabs(
+            &TabsSpec::new(vec![
+                TabDefinition::new("a", "A"),
+                TabDefinition::new("b", "B"),
+            ])
+            .with_variant(TabVariant::Block)
+            .with_active_edge(ActiveEdge::Underline)
+            .with_value("a"),
+            &RenderContext::new(&theme()),
+            None,
+            None,
+        );
+        driver.draw_frame();
+        let tabs_tree = tree.lock().expect("tree lock").clone();
+        assert!(
+            tabs_tree
+                .find(&|n| n.id.as_deref() == Some("poodle-tabs-indicator"))
+                .is_some(),
+            "underline uses one paint-only indicator"
+        );
+        let selected = tabs_tree
+            .find(&|n| n.a11y.selected == Some(true))
+            .expect("selected tab");
+        assert_eq!(selected.style.border_bottom_width, None);
+        assert_eq!(selected.style.border_color_bottom, None);
+
+        let mut translated = Node::container();
+        translated.style.animation = Some(NodeAnimation {
+            key: "g16-034-translate".into(),
+            keyframes: vec![
+                AnimKeyframe {
+                    at: 0.0,
+                    values: vec![(AnimProperty::TranslateY, 8.0)],
+                },
+                AnimKeyframe {
+                    at: 1.0,
+                    values: vec![(AnimProperty::TranslateY, 0.0)],
+                },
+            ],
+            duration_secs: 0.18,
+            easing: AnimEasing::EaseOut,
+            loop_mode: AnimLoop::Once,
+        });
+        *tree.lock().expect("tree lock") = translated;
+        driver.draw_frame();
+        let channels = capture.lock().expect("capture lock").clone();
+        assert!(
+            channels.contains(&"surface.animation.approximation.opacity-stand-in"),
+            "unsupported translation must stay a named approximation: {channels:?}"
         );
     });
 }

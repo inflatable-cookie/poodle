@@ -42,6 +42,7 @@ pub struct RenderContext<'a> {
     size_scale: ControlSize,
     density: ControlDensity,
     motion_policy: MotionPolicy,
+    first_frame_committed: bool,
 }
 
 impl<'a> RenderContext<'a> {
@@ -52,6 +53,7 @@ impl<'a> RenderContext<'a> {
             size_scale: ControlSize::Md,
             density: ControlDensity::Default,
             motion_policy: MotionPolicy::Full,
+            first_frame_committed: false,
         }
     }
 
@@ -64,6 +66,7 @@ impl<'a> RenderContext<'a> {
             size_scale,
             density,
             motion_policy: self.motion_policy,
+            first_frame_committed: self.first_frame_committed,
         }
     }
 
@@ -75,6 +78,7 @@ impl<'a> RenderContext<'a> {
             size_scale: self.size_scale,
             density: self.density,
             motion_policy: restrict_motion_policy(Some(self.motion_policy), Some(policy)),
+            first_frame_committed: self.first_frame_committed,
         }
     }
 
@@ -121,6 +125,26 @@ impl<'a> RenderContext<'a> {
     /// The effective motion policy for this scope.
     pub fn motion_policy(&self) -> MotionPolicy {
         self.motion_policy
+    }
+
+    /// Whether the host has committed the baseline frame.
+    ///
+    /// Construction defaults to `false`. Full-mode loading loops may start
+    /// only after the host rebuilds with this bit set.
+    pub fn first_frame_committed(&self) -> bool {
+        self.first_frame_committed
+    }
+
+    /// Host-owned first-frame commitment. Restriction-only motion nesting
+    /// copies this bit unchanged.
+    pub fn with_first_frame_committed(&self, committed: bool) -> RenderContext<'_> {
+        RenderContext {
+            theme: self.theme,
+            size_scale: self.size_scale,
+            density: self.density,
+            motion_policy: self.motion_policy,
+            first_frame_committed: committed,
+        }
     }
 }
 

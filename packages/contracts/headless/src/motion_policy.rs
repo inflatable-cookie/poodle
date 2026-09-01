@@ -223,6 +223,9 @@ pub struct MotionClock {
     pub progress: f32,
     pub properties: Vec<MotionProperty>,
     pub duration_ms: u32,
+    pub original_duration_ms: u32,
+    pub axis_from: f32,
+    pub axis_to: f32,
     pub looped: bool,
     pub reversible: bool,
     pub reduced_opacity: bool,
@@ -305,9 +308,12 @@ pub fn activate_motion(trace: &mut MotionTrace, intent: MotionIntent) -> MotionD
         }
 
         if trace.clocks[index].reversible && intent.reversible {
-            let duration_ms = (trace.clocks[index].duration_ms as f32
-                * trace.clocks[index].progress)
-                .round() as u32;
+            let existing = &trace.clocks[index];
+            let current =
+                existing.axis_from + (existing.axis_to - existing.axis_from) * existing.progress;
+            let axis_to = if existing.axis_to == 1.0 { 0.0 } else { 1.0 };
+            let duration_ms =
+                ((axis_to - current).abs() * existing.original_duration_ms as f32).round() as u32;
             let mut continue_intent = intent.clone();
             continue_intent.initial = false;
             let schedule =
@@ -317,6 +323,8 @@ pub fn activate_motion(trace: &mut MotionTrace, intent: MotionIntent) -> MotionD
                 existing.target = intent.target;
                 existing.progress = 0.0;
                 existing.duration_ms = duration_ms;
+                existing.axis_from = current;
+                existing.axis_to = axis_to;
                 existing.properties = properties.clone();
             } else {
                 remove_clock(trace, &key);
@@ -367,6 +375,9 @@ pub fn activate_motion(trace: &mut MotionTrace, intent: MotionIntent) -> MotionD
             progress: 0.0,
             properties: properties.clone(),
             duration_ms: intent.duration_ms,
+            original_duration_ms: intent.duration_ms,
+            axis_from: 0.0,
+            axis_to: 1.0,
             looped: intent.looped,
             reversible: intent.reversible,
             reduced_opacity,
@@ -427,7 +438,7 @@ pub fn set_motion_trace_policy(
     trace: &mut MotionTrace,
     policy: MotionPolicy,
 ) -> Vec<MotionDecision> {
-    trace.policy = restrict_motion_policy(Some(trace.policy), Some(policy));
+    trace.policy = policy;
     let keys: Vec<String> = trace.clocks.iter().map(|clock| clock.key.clone()).collect();
     let mut decisions = Vec::new();
     for key in keys {
@@ -622,6 +633,12 @@ mod tests {
         assert_eq!(trace.live_clock_count(), 1);
         assert_eq!(trace.clocks[0].target, "closed");
         assert_eq!(trace.clocks[0].progress, 0.0);
+
+        sample_motion(&mut trace, &close.key, 0.5);
+        let reopen = activate_motion(&mut trace, one_shot("open", vec![MotionProperty::Height]));
+        assert_eq!(reopen.interruption, MotionInterruption::Reverse);
+        assert_eq!(reopen.duration_ms, 144);
+        assert_eq!(trace.clocks[0].target, "open");
     }
 
     #[test]
@@ -712,6 +729,9 @@ mod tests {
         assert!(frozen
             .iter()
             .all(|decision| !decision.live_clock && decision.paint_endpoint));
+
+        set_motion_trace_policy(&mut trace, MotionPolicy::Full);
+        assert_eq!(trace.policy, MotionPolicy::Full);
     }
 
     #[test]

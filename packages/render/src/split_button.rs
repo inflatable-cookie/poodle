@@ -198,10 +198,10 @@ pub fn split_button(
     if spec.is_loading {
         let mut spin = Node::icon("spinner", rem_to_px(0.75));
         spin.style.descriptor.text_color = Some(colors.text);
-        spin.style.animation = crate::motion::animation_for_policy(
+        spin.style.animation = crate::motion::loop_animation_for_policy(
             ctx.motion_policy(),
             NodeAnimation::spin("poodle-spinner-ring", 0.8),
-            false,
+            ctx.first_frame_committed(),
         );
         primary = primary.child(spin);
     }
@@ -739,7 +739,23 @@ mod tests {
             _ => unreachable!(),
         }
         assert_eq!(spinner.style.descriptor.text_color, Some(text_primary));
-        assert!(spinner.style.animation.is_some());
+        assert!(
+            spinner.style.animation.is_none(),
+            "loading loops wait for the first committed frame"
+        );
+        let after = split_button(
+            &spec,
+            &ctx.with_first_frame_committed(true),
+            SplitButtonHandlers::default(),
+        );
+        assert!(after
+            .find(
+                &|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "spinner"),
+            )
+            .expect("loading spinner glyph")
+            .style
+            .animation
+            .is_some());
         // Loading is unavailable: dimmed, no activation.
         assert!(primary_half(&node).interaction.on_activate.is_none());
     }

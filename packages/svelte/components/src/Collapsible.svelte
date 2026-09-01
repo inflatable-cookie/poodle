@@ -54,6 +54,8 @@
   const collapsibleId = ++nextCollapsibleId;
   let uncontrolledOpen = $state(false);
   let seededDefaultOpen = $state(false);
+  let closing = $state(false);
+  let previousOpen = false;
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
@@ -67,6 +69,19 @@
 
     uncontrolledOpen = defaultOpen;
     seededDefaultOpen = true;
+    previousOpen = defaultOpen;
+  });
+
+  $effect.pre(() => {
+    const open = isOpen;
+    if (open) {
+      closing = false;
+    } else if (previousOpen && motionReady.ready) {
+      closing = true;
+    } else {
+      closing = false;
+    }
+    previousOpen = open;
   });
 
   function toggle(): void {
@@ -119,13 +134,18 @@
     <span class="poodle-collapsible__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
   </button>
 
-  <div class="poodle-collapsible__content-clip">
+  <div
+    class="poodle-collapsible__content-clip"
+    ontransitionend={() => {
+      if (!isOpen) closing = false;
+    }}
+  >
     <div
       class="poodle-collapsible__content"
       id={`poodle-collapsible-content-${collapsibleId}`}
       role="region"
       aria-labelledby={`poodle-collapsible-trigger-${collapsibleId}`}
-      hidden={!isOpen}
+      hidden={!isOpen && !closing}
       inert={!isOpen}
       aria-hidden={!isOpen ? "true" : undefined}
     >

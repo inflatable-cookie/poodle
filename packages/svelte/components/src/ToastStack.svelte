@@ -1,6 +1,12 @@
+<script module lang="ts">
+  let nextToastStackId = 0;
+</script>
+
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/toast-stack.css";
   import {
+    applyToastExitInert,
+    cancelToastPresence,
     dropToastVisual,
     moveToastFocus,
     nextToastVisuals,
@@ -37,6 +43,7 @@
 
   const uiPresentation = getUiPresentation();
   const motionPolicy = getMotionPolicy();
+  const stackId = `toast-stack-${++nextToastStackId}`;
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
@@ -59,13 +66,36 @@
     initialPass = false;
   });
 
+  function prune(id: string) {
+    visuals = dropToastVisual(visuals, id);
+    const nextRetained = new Map(retainedItems);
+    nextRetained.delete(id);
+    retainedItems = nextRetained;
+  }
+
   function toastElement(node: HTMLElement, visual: ToastVisual) {
+    const ownerFor = (id: string) => `${stackId}:${id}`;
     function play(next: ToastVisual) {
+      const exiting = next.phase === "exit";
+      applyToastExitInert(node, exiting);
+      if (next.phase === "settled") {
+        return;
+      }
       playToastPresence(node, {
-        owner: next.id,
-        phase: next.phase === "exit" ? "exit" : "enter",
+        owner: ownerFor(next.id),
+        phase: exiting ? "exit" : "enter",
         policy: $motionPolicy,
-        initial: next.phase === "settled",
+        initial: false,
+        onComplete: (status) => {
+          if (status !== "finish") {
+            return;
+          }
+          if (exiting) {
+            prune(next.id);
+          } else {
+            visuals = settleToastVisual(visuals, next.id);
+          }
+        },
       });
     }
     play(visual);
@@ -73,13 +103,16 @@
       update(next: ToastVisual) {
         play(next);
       },
-      destroy() {},
+      destroy() {
+        cancelToastPresence(ownerFor(visual.id));
+      },
     };
   }
 
-  function handleDismiss(id: string, toastEl: HTMLElement | null) {
+  function handleDismiss(id: string, toastEl: HTMLElement | null, activator: EventTarget | null) {
     if (stackElement && toastEl) {
-      moveToastFocus(stackElement, toastEl, enteredFrom);
+      moveToastFocus(stackElement, toastEl, enteredFrom, activator);
+      applyToastExitInert(toastEl, true);
     }
     onDismiss?.(id);
   }
@@ -107,19 +140,19 @@
       data-tone={item.tone ?? "info"}
       data-motion={visual.phase}
       data-motion-inert={visual.phase === "exit" ? "true" : undefined}
+      inert={visual.phase === "exit" ? true : undefined}
       aria-live={visual.phase === "exit" ? undefined : item.tone === "danger" ? "assertive" : "polite"}
       aria-atomic="true"
       aria-hidden={visual.phase === "exit" ? "true" : undefined}
       use:toastElement={visual}
-      onanimationend={() => {
-        if (visual.phase === "exit") {
-          visuals = dropToastVisual(visuals, visual.id);
-        } else if (visual.phase === "enter") {
-          visuals = settleToastVisual(visuals, visual.id);
-        }
-      }}
     >
-      <button type="button" class="poodle-toast__dismiss" aria-label={`Dismiss ${item.title}`} onclick={(event) => handleDismiss(item.id, event.currentTarget.closest(".poodle-toast"))}>
+      <button
+        type="button"
+        class="poodle-toast__dismiss"
+        aria-label={`Dismiss ${item.title}`}
+        tabindex={visual.phase === "exit" ? -1 : undefined}
+        onclick={(event) => handleDismiss(item.id, event.currentTarget.closest(".poodle-toast"), event.currentTarget)}
+      >
         <Icon name="x" />
       </button>
 
@@ -141,4 +174,3 @@
     {/if}
   {/each}
 </ul>
-

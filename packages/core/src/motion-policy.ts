@@ -164,6 +164,9 @@ export interface MotionClock {
   progress: number;
   properties: MotionProperty[];
   durationMs: number;
+  originalDurationMs: number;
+  axisFrom: number;
+  axisTo: number;
   loop: boolean;
   reversible: boolean;
   reducedOpacity: boolean;
@@ -226,10 +229,14 @@ export function activateMotion(trace: MotionTrace, intent: MotionIntent): Motion
   }
 
   if (existing && existing.reversible && intent.reversible) {
-    const durationMs = Math.round(existing.durationMs * existing.progress);
+    const current = existing.axisFrom + (existing.axisTo - existing.axisFrom) * existing.progress;
+    const axisTo = existing.axisTo === 1 ? 0 : 1;
+    const durationMs = Math.round(Math.abs(axisTo - current) * existing.originalDurationMs);
     existing.target = intent.target;
     existing.progress = 0;
     existing.durationMs = durationMs;
+    existing.axisFrom = current;
+    existing.axisTo = axisTo;
     existing.properties = properties;
     const schedule = durationMs > 0 && shouldSchedule(trace.policy, { ...intent, initial: false }, properties);
     if (!schedule) {
@@ -275,6 +282,9 @@ export function activateMotion(trace: MotionTrace, intent: MotionIntent): Motion
       progress: 0,
       properties,
       durationMs: intent.durationMs,
+      originalDurationMs: intent.durationMs,
+      axisFrom: 0,
+      axisTo: 1,
       loop: intent.loop === true,
       reversible: intent.reversible === true,
       reducedOpacity,
@@ -332,8 +342,7 @@ export function completeMotion(trace: MotionTrace, key: string): MotionDecision 
 }
 
 export function setMotionTracePolicy(trace: MotionTrace, policy: MotionPolicy): MotionDecision[] {
-  const previous = trace.policy;
-  trace.policy = restrictMotionPolicy(previous, policy);
+  trace.policy = policy;
   const decisions: MotionDecision[] = [];
   for (const clock of [...trace.clocks]) {
     const properties = filterMotionProperties(trace.policy, clock.properties, {

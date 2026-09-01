@@ -23,8 +23,18 @@ pub fn spinner(spec: &SpinnerSpec, ctx: &RenderContext<'_>) -> Node {
     };
 
     let mut root = match spec.variant {
-        SpinnerVariant::Ring => build_ring(spec, tone_color, ctx.motion_policy()),
-        SpinnerVariant::Grid => build_grid(spec, tone_color, ctx.motion_policy()),
+        SpinnerVariant::Ring => build_ring(
+            spec,
+            tone_color,
+            ctx.motion_policy(),
+            ctx.first_frame_committed(),
+        ),
+        SpinnerVariant::Grid => build_grid(
+            spec,
+            tone_color,
+            ctx.motion_policy(),
+            ctx.first_frame_committed(),
+        ),
         SpinnerVariant::Dots => build_dots(tone_color),
     };
     if let Some(label) = spec.aria_label.as_deref() {
@@ -39,15 +49,16 @@ fn build_ring(
     spec: &SpinnerSpec,
     tone: ColorValue,
     policy: poodle_headless::motion_policy::MotionPolicy,
+    first_frame_committed: bool,
 ) -> Node {
     let mut el = Node::icon("spinner", spec.size_px());
     el.style.descriptor.text_color = Some(tone);
     // Contract: spinner-ring 0.8s linear infinite. One shared key: all ring
     // spinners share a clock and rotate in phase, like CSS keyframes.
-    el.style.animation = crate::motion::animation_for_policy(
+    el.style.animation = crate::motion::loop_animation_for_policy(
         policy,
         NodeAnimation::spin("poodle-spinner-ring", 0.8),
-        false,
+        first_frame_committed,
     );
     el
 }
@@ -57,6 +68,7 @@ fn build_grid(
     spec: &SpinnerSpec,
     tone: ColorValue,
     policy: poodle_headless::motion_policy::MotionPolicy,
+    first_frame_committed: bool,
 ) -> Node {
     let width = rem_to_px(spec.grid_width_rem());
     let height = rem_to_px(spec.grid_height_rem());
@@ -92,8 +104,11 @@ fn build_grid(
             s.descriptor.corner_radii.bottom_right = cell_radius;
             s.descriptor.corner_radii.bottom_left = cell_radius;
             s.descriptor.background = Some(tone);
-            s.animation =
-                crate::motion::animation_for_policy(policy, cell_pulse(i, floor, span, ph), false);
+            s.animation = crate::motion::loop_animation_for_policy(
+                policy,
+                cell_pulse(i, floor, span, ph),
+                first_frame_committed,
+            );
         }
         root = root.child(cell);
     }
@@ -162,7 +177,8 @@ mod tests {
     fn ring_uses_the_reference_svg_asset_and_rotation() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
-        let ctx = RenderContext::new(&theme);
+        let base = RenderContext::new(&theme);
+        let ctx = base.with_first_frame_committed(true);
         let node = spinner(&SpinnerSpec::new(), &ctx);
         assert!(matches!(
             &node.kind,
@@ -180,7 +196,8 @@ mod tests {
     fn frozen_and_reduced_schedule_no_ring_clock() {
         let theme =
             poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
-        let ctx = RenderContext::new(&theme);
+        let base = RenderContext::new(&theme);
+        let ctx = base.with_first_frame_committed(true);
         let frozen = ctx.with_motion_policy(poodle_headless::motion_policy::MotionPolicy::Frozen);
         assert!(spinner(&SpinnerSpec::new(), &frozen)
             .style
@@ -191,5 +208,13 @@ mod tests {
             .style
             .animation
             .is_none());
+    }
+
+    #[test]
+    fn initial_construction_schedules_no_ring_clock() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
+        assert!(spinner(&SpinnerSpec::new(), &ctx).style.animation.is_none());
     }
 }

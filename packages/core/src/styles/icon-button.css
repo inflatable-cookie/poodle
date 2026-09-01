@@ -45,10 +45,7 @@
   }
 
   [data-poodle-motion-policy="reduced"] .poodle-icon-button {
-    transition:
-      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
-      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
-      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+    transition: opacity var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
   [data-poodle-motion-policy="frozen"] .poodle-icon-button {

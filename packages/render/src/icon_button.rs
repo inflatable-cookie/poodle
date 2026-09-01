@@ -178,10 +178,10 @@ pub fn icon_button_with_handlers(
     if spec.is_loading {
         let mut spinner = Node::icon("spinner", LOADING_SPINNER_PX);
         spinner.style.descriptor.text_color = Some(text_color);
-        spinner.style.animation = crate::motion::animation_for_policy(
+        spinner.style.animation = crate::motion::loop_animation_for_policy(
             ctx.motion_policy(),
             NodeAnimation::spin("poodle-spinner-ring", 0.8),
-            false,
+            ctx.first_frame_committed(),
         );
         el = el.child(spinner);
     } else if !icon_name.is_empty() {
@@ -610,7 +610,16 @@ mod tests {
             }
             _ => panic!("expected spinner icon"),
         }
-        assert!(glyph.style.animation.is_some());
+        assert!(
+            glyph.style.animation.is_none(),
+            "loading loops wait for the first committed frame"
+        );
+        let after = icon_button(&spec, &ctx.with_first_frame_committed(true), None);
+        assert!(icon_child(&after)
+            .expect("the spinner stands in for the glyph")
+            .style
+            .animation
+            .is_some());
     }
 
     #[test]

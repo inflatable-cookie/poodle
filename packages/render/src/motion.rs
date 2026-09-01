@@ -4,7 +4,8 @@
 //! whether a declaration may schedule a clock for the effective policy.
 
 use poodle_headless::motion_policy::{
-    filter_motion_properties, gpui_motion_plan, GpuiApproximation, MotionPolicy, MotionProperty,
+    filter_motion_properties, gpui_motion_plan, should_run_motion_loop, GpuiApproximation,
+    MotionPolicy, MotionProperty,
 };
 use poodle_node::{AnimLoop, AnimProperty, NodeAnimation};
 
@@ -61,6 +62,19 @@ pub fn animation_for_policy(
         return None;
     }
     Some(animation)
+}
+
+/// Loops may attach only in full after the host commits the baseline frame.
+pub fn loop_animation_for_policy(
+    policy: MotionPolicy,
+    animation: NodeAnimation,
+    first_frame_committed: bool,
+) -> Option<NodeAnimation> {
+    if !should_run_motion_loop(policy, true, first_frame_committed) {
+        None
+    } else {
+        animation_for_policy(policy, animation, false)
+    }
 }
 
 pub fn named_gpui_approximation(animation: &NodeAnimation) -> GpuiApproximation {
@@ -135,5 +149,12 @@ mod tests {
             gpui_motion_plan(&[MotionProperty::Height]).approximation,
             GpuiApproximation::StaticEndpoint
         );
+    }
+
+    #[test]
+    fn loop_animation_for_policy_waits_for_first_frame() {
+        let spin = NodeAnimation::spin("ring", 0.8);
+        assert!(loop_animation_for_policy(MotionPolicy::Full, spin.clone(), false).is_none());
+        assert!(loop_animation_for_policy(MotionPolicy::Full, spin, true).is_some());
     }
 }

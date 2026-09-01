@@ -100,6 +100,12 @@ describe("motion policy laws", () => {
     expect(liveClockCount(trace)).toBe(1);
     expect(trace.clocks[0]?.target).toBe("closed");
     expect(trace.clocks[0]?.progress).toBe(0);
+
+    sampleMotion(trace, close.key, 0.5);
+    const reopen = activateMotion(trace, oneShot("open", ["height"]));
+    expect(reopen.interruption).toBe("reverse");
+    expect(reopen.durationMs).toBe(144);
+    expect(trace.clocks[0]?.target).toBe("open");
   });
 
   test("multi-target retarget does not queue", () => {
@@ -163,6 +169,9 @@ describe("motion policy laws", () => {
     expect(trace.policy).toBe("frozen");
     expect(liveClockCount(trace)).toBe(0);
     expect(frozen.every((decision) => !decision.liveClock && decision.paintEndpoint)).toBe(true);
+
+    setMotionTracePolicy(trace, "full");
+    expect(trace.policy).toBe("full");
   });
 
   test("abort keeps the endpoint and unmount drops the remnant", () => {

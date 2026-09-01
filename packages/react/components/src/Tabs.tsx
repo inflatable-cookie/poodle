@@ -261,7 +261,9 @@ export function Tabs({
       return;
     }
     const list = listRef.current;
+    let frame = 0;
     const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
       setIndicatorSnap(true);
       setIndicatorBox(
         tabIndicatorBox(
@@ -270,10 +272,17 @@ export function Tabs({
           orientation === "vertical" ? "vertical" : "horizontal",
         ),
       );
-      requestAnimationFrame(() => setIndicatorSnap(false));
+      frame = requestAnimationFrame(() => setIndicatorSnap(false));
     });
     observer.observe(list);
-    return () => observer.disconnect();
+    const selected = tabRefs.current[selectedIndex];
+    if (selected) {
+      observer.observe(selected);
+    }
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [orientation, selectedIndex]);
   const collapseTriggerLabel = collapseLabel ?? selectedItem?.label ?? "Sections";
   const collapsedMenuItems = renderedItems.map((item) => ({
