@@ -1,8 +1,8 @@
 # g16.042 — Semantic Interaction Cues Research
 
-Status: planned — research starts after accepted and merged `g16.034`
+Status: research-ready — `g16.034` merged in PR #124
 Opened: 2026-09-01
-Depends on: accepted and merged `g16.034` as policy/lifecycle evidence; current
+Depends on: merged `g16.034` at `369a24f8c` as policy/lifecycle evidence; current
 visual feedback and toast ownership
 Governing refs: `../../architecture/012-semantic-motion-policy.md`,
 `../../contracts/001-working-rules.md`

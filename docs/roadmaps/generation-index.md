@@ -22,19 +22,18 @@ Updated: 2026-09-01
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
     mounted parity, ledger 56/118 after `028`); `033` merged in PR #120;
-    `034` implemented the shared motion policy and five-family pilot from
-    architecture 012 and is awaiting review; `035` merged in PR #123 after
+    `034` merged in PR #124 after four exact-head review rounds and delivered
+    the shared motion policy and five-family pilot; `035` merged in PR #123 after
     two native-oracle repair rounds and closed the independent MarkdownEditor
     bounded-preview issue; `036` is ready for the paired-web Tree external
     drop-authority adapter after PR #125 supplied the interaction and outline
-    geometry baseline; `037`–`039` and `044` are research-ready from merged
-    DesEngs intake PR #126; `040`–`043` are planned behind accepted `034`
+    geometry baseline; `037`–`044` are research-ready from merged DesEngs
+    intake PR #126, with `040`–`043` now unblocked by merged `034`
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: continue `g16.034` and `g16.036` with serial same-repository
-    merges. The independent research frontier is `g16.037`–`g16.039` plus
-    `g16.044`; `g16.040`–`g16.043` wait for accepted and merged `g16.034`.
+  - Next move: finish `g16.036` with serial same-repository review and merge.
+    The independent DesEngs research frontier is `g16.037`–`g16.044`.
     The remaining post-motion research queue is
     recorded in
     `../triage/20260901-125758-post-motion-research-queue.md`; block sliders

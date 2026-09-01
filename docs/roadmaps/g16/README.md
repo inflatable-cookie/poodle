@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — g16.034 and g16.036 are in flight; DesEngs research intake is
-split into four ready and four motion-gated cards
+Status: active — g16.034 is complete, g16.036 is in repair, and all eight
+DesEngs research cards are active or ready
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -65,7 +65,7 @@ stay maintained; backend admission is not part of the first card.
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete; merged in PR #100; ledger 52 mounted / 122 missing
 33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — complete; merged in PR #120 after one Northstar review round; five distinct refusal meanings across TypeScript, Rust, both web shells and mounted GPUI, plus an installed-tarball v3 `HistoryEntry` proof; publication/pin movement stays separate
-34. [034 — Shared motion policy and five-family pilot](034-shared-motion-policy-and-five-family-pilot.md) — implemented; awaiting review. Architecture 012, MotionPolicyProvider, and the eight pilot contracts are the authority. No ledger cell moves.
+34. [034 — Shared motion policy and five-family pilot](034-shared-motion-policy-and-five-family-pilot.md) — complete; merged in PR #124 after four exact-head review rounds. Architecture 012, MotionPolicyProvider, and the eight pilot contracts are the authority. No ledger cell moved.
 35. [035 — MarkdownEditor bounded preview scroll](035-markdown-editor-bounded-preview-scroll.md) — complete; merged in PR #123 after two native-oracle repair rounds; long preview content now scrolls inside a constrained host across Svelte, React, and mounted GPUI without a new sizing API
 36. [036 — Tree external drop authority](036-tree-external-drop-authority.md)
     — ready; paired Svelte/React `reorderAuthority` adapter over the existing
@@ -74,10 +74,10 @@ stay maintained; backend admission is not part of the first card.
 37. [037 — Transcript-inline agent approval research](037-transcript-inline-agent-approval-research.md) — research-ready; placement, blocking, focus, and settled-record ownership
 38. [038 — Agent citations and sources research](038-agent-citations-and-sources-research.md) — research-ready; stable mark/source identity and active-cohort composition
 39. [039 — Agent task list research](039-agent-task-list-research.md) — research-ready; distinguish tasks from plans, tool runs, and progress
-40. [040 — Numeric change motion research](040-numeric-change-motion-research.md) — planned after accepted `g16.034`; consolidates NumberFlow with the existing Transitions.dev counter evidence
-41. [041 — Live series display research](041-live-series-display-research.md) — planned after accepted `g16.034`; consumer, data, rendering, and benchmark boundary
-42. [042 — Semantic interaction cues research](042-semantic-interaction-cues-research.md) — planned after accepted `g16.034`; policy, accessibility, and runtime ownership remain open
-43. [043 — In-place toast lifecycle research](043-in-place-toast-lifecycle-research.md) — planned after accepted `g16.034`; same-id pending-to-settled semantics and timer ownership
+40. [040 — Numeric change motion research](040-numeric-change-motion-research.md) — research-ready; consolidates NumberFlow with the existing Transitions.dev counter evidence
+41. [041 — Live series display research](041-live-series-display-research.md) — research-ready; consumer, data, rendering, and benchmark boundary
+42. [042 — Semantic interaction cues research](042-semantic-interaction-cues-research.md) — research-ready; policy, accessibility, and runtime ownership remain open
+43. [043 — In-place toast lifecycle research](043-in-place-toast-lifecycle-research.md) — research-ready; same-id pending-to-settled semantics and timer ownership
 44. [044 — Nested menu pointer intent research](044-nested-menu-pointer-intent-research.md) — research-ready; shared geometry, timing, and active-cohort boundary
 
 ## Parallel Continuation
@@ -121,7 +121,7 @@ Two continuation programmes are now explicit:
 - **Shared motion continuation:** planning PR #121 is accepted and merged.
   Architecture 012 now fixes explicit full/reduced/frozen host policy,
   restriction-only inheritance, lifecycle, native approximation, and layered
-  evidence. `g16.034` is implemented and awaiting review. The additive
+  evidence. `g16.034` is complete in merged PR #124. The additive
   block-slider lane remains next after its merge; icon feasibility and
   AgentSubagent shimmer stay downstream evidence gates.
 - **Independent MarkdownEditor issue fix:** `g16.035` is complete in PR #123.
@@ -139,8 +139,8 @@ Two continuation programmes are now explicit:
   into `g16.037`–`g16.044`, and the consumed triage note is removed. Approval,
   citations, agent task lists, and nested-menu pointer intent are independent
   research-ready lanes. Numeric change, live series, semantic interaction
-  cues, and in-place toast lifecycle wait for accepted and merged `g16.034` so
-  they research the landed motion authority rather than a moving branch.
+  cues, and in-place toast lifecycle are now research-ready against merged
+  `g16.034` and the landed motion authority.
   Every card produces one dossier only; names and public API shapes remain
   hypotheses until separate operator promotion.
 

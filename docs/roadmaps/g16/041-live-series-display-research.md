@@ -1,8 +1,8 @@
 # g16.041 — Live Series Display Research
 
-Status: planned — research starts after accepted and merged `g16.034`
+Status: research-ready — `g16.034` merged in PR #124
 Opened: 2026-09-01
-Depends on: accepted and merged `g16.034`; architecture 012; current
+Depends on: merged `g16.034` at `369a24f8c`; architecture 012; current
 MetricTile and WaveformDisplay ownership
 Governing refs: `../../architecture/012-semantic-motion-policy.md`,
 `../../contracts/components/metric-tile.md`,

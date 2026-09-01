@@ -1,8 +1,9 @@
 # g16.034 — Shared Motion Policy And Five-Family Pilot
 
-Status: implemented — exact-head blocker repair complete; ordinary web board green
+Status: complete — merged in PR #124
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/124
+Merge: `369a24f8ca6e825562970668e16cca7458625dfd`
 Rebased implementation commits: `473d874a7` (initial), `b92fdecd6` +
 `7230ad241` + `8daf60de5` + `757270766` + `92c26a9c9` + `c88941191`
 (review repair), `00174a219` (production execution repair), and

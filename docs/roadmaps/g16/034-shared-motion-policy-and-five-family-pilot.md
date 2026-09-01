@@ -1,6 +1,6 @@
 # g16.034 — Shared Motion Policy And Five-Family Pilot
 
-Status: implemented — production repair complete; final evidence in execution log
+Status: complete — merged in PR #124 after four exact-head review rounds
 Opened: 2026-09-01
 Depends on: merged planning intake PR #121 and promoted architecture 012;
 `g16.033` is complete
