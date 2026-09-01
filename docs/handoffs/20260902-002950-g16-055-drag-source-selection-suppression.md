@@ -1,5 +1,5 @@
 ---
-title: g16.055 drag-source selection suppression worker handoff
+title: g16.055 drag-source browser suppression worker handoff
 kind: northstar-handoff
 handoff_mode: worker-pr-loop
 worker_mode: implementation
@@ -20,9 +20,9 @@ tags: [Papercuts, drag-drop, tree, web, selection]
 
 Implement
 `docs/roadmaps/g16/055-drag-source-preactivation-selection-suppression.md`.
-Fix the browser text-selection leak at the shared DOM drag-controller boundary,
-prove it through paired Tree exposure and real Chromium/WebKit Selection
-behavior, and return one reviewable PR. Do not merge.
+Fix the browser text-selection leak and trailing compatibility click at the
+shared DOM drag-controller boundary. Prove both through paired Tree exposure
+and real Chromium/WebKit behavior, and return one reviewable PR. Do not merge.
 
 ## Current State
 
@@ -47,8 +47,13 @@ behavior, and return one reviewable PR. Do not merge.
 - Existing `sourceFromEvent` interactive/no-drag exclusions stay authoritative.
 - Suppress during the pre-threshold candidate and active drag; restore the exact
   prior inline root declaration on every exit.
+- Consume an activated pointer gesture's compatibility click at the shared
+  capture boundary before Tree row selection sees it, regardless of eventual
+  commit/reject/fail/cancel outcome. Expire the one-shot guard without eating a
+  later unrelated click.
 - Click row selection, rename/input selection, and non-reorderable text
-  selection must remain.
+  selection must remain. A tap or pre-threshold abandonment still clicks and
+  selects normally; keyboard reorder is unchanged.
 - Svelte and React consume the shared controller behavior. Rust/GPUI does not
   emulate a browser Selection lifecycle.
 
@@ -78,14 +83,19 @@ notes, package build/distribution, workflows, Figmatic, or any sibling repo.
 
 - Focused controller proofs for accepted pointerdown suppression, exact authored
   style restoration, pre-threshold release/cancel, source loss,
-  disconnect/destroy, interactive exclusions, and repeated sessions.
+  disconnect/destroy, interactive exclusions, activated compatibility-click
+  consumption, stale-guard expiry, and repeated sessions.
 - Paired Svelte and React Tree proof that click selection and rename/input
-  behavior remain.
+  behavior remain, while an activated drag causes one reorder request and no
+  trailing selection request for committed, rejected, failed, and cancelled
+  outcomes.
 - Mounted Chromium and WebKit Tree proof that a pointer drag through multiple
-  labels creates no Selection range, plus a non-reorderable counterexample that
-  demonstrates the probe can observe text selection.
-- Falsification by moving suppression back to activation or otherwise planting
-  the pre-fix lifecycle. Commit proof first; restore from a clean commit.
+  labels creates no Selection range and its compatibility click never reaches
+  the row, plus non-reorderable/tap counterexamples proving the probe observes
+  normal selection and clicks.
+- Falsification by moving selection suppression back to activation and removing
+  the compatibility-click guard. Commit proof first; restore from a clean
+  commit.
 - Relevant drag inventory/contract drift checks, `effigy ci:web`,
   `effigy docs:check`, and `git diff --check origin/main...HEAD`.
 
