@@ -62,9 +62,20 @@ contract-spec-drift. No Rust, GPUI, or Jetstream source in the diff.
 
 ## Oracle falsification
 
-Commit the green proofs, then plant each pre-fix row, confirm the named proof
-fails for the intended reason, restore from that commit (not `git checkout --`
-on a dirty index), rerun green. Recorded in the PR.
+Green proofs committed as `8d074c279`. Each plant restored with
+`git restore --source=HEAD --worktree`, not `git checkout --` on a dirty
+index. After the last restore, 74 paired Tree tests passed.
+
+| Invariant | Plant | Failure |
+| --- | --- | --- |
+| Invalid projection is not normalized | `treeLatchReorderSubject` falls back to `[sourceValue]` | `host.drops` length 1 instead of 0 |
+| Authority precedes accepted presentation | skip host `canDrop`, accept after generic safety | `data-poodle-drop-target="accepted"` |
+| Rewrite has one semantic owner | `treeAcceptedDropDepth` uses hovered `targetId` | `--poodle-tree-drop-depth` `"0"` instead of `"1"` |
+| Release uses live authority | capture `canDrop` at pickup | `host.drops` length 1 after live refuse |
+| Terminal result is not invented | ignore host Promise, return `committed` | source posture `null`, not `dropping` |
+| Convenience remains intact | omit `onReorder` | callback called 0 times |
+| Subject is a session snapshot | re-project on every hover | `projectMovingValues` called 4 times, not 1 |
+| Runtime boundary is honest | inspect diff | no `*.rs`, GPUI, Jetstream, headless, render, or contracts crate files |
 
 ## Validation
 
