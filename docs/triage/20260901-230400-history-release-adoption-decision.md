@@ -41,32 +41,36 @@ are not yet a candidate SHA, a tag, or a published package.
 
 ## Candidate Versions
 
-**Publish `0.2.4`.** Do not tag or publish `0.2.3`.
+**Publish `0.3.0`.** Do not tag or publish `0.2.3` or `0.2.4`.
 
 | Identity | Value | Role |
 | --- | --- | --- |
 | Last published npm `latest` | `0.2.2` | `@inflatable-cookie/poodle-core` and `@inflatable-cookie/poodle-svelte` |
 | Last published Git tag | `v0.2.2` at `d5607def24c6833913df1b5dcfa06372fcd5dd81` | immutable; never move, delete, or reuse |
 | In-tree lockstep today | `0.2.3` | unpublished ContextMenu bump at `ea1763786`; no `v0.2.3` tag on `origin` |
-| Candidate | **`0.2.4`** | next lockstep for all release-bearing manifests |
-| Tag to create later | `v0.2.4` | lightweight tag on the accepted candidate SHA only |
-| Loophole desktop pin today | exact `0.2.2` | `apps/desktop/package.json`; move only after npm `latest` is `0.2.4` |
+| Skipped | `0.2.4` | never a candidate, tag, or npm identity |
+| Candidate | **`0.3.0`** | next lockstep for all release-bearing manifests |
+| Failed-tag replacement | `0.3.1` | next candidate only if immutable `v0.3.0` fails |
+| Tag to create later | `v0.3.0` | lightweight tag on the accepted candidate SHA only |
+| Loophole desktop pin today | exact `0.2.2` | `apps/desktop/package.json`; move only after npm `latest` is `0.3.0` |
 
-Why `0.2.4` rather than tagging current `0.2.3`:
+Why `0.3.0`, not `0.2.3` or `0.2.4`:
 
 - npm `latest` is still `0.2.2`. Source already carries `0.2.3` for triggerless
   `ContextMenu` (`docs/release-notes/0.2.3.md`, `CHANGELOG.md` dated
-  2026-08-30). That version was never tagged or published.
+  2026-08-30). That version was never tagged or published. Keep it as that
+  prepared-but-unpublished identity.
 - `g16.033` and the rest of post-`v0.2.2` main landed after that bump. Current
   HEAD is not the ContextMenu-only tree the `0.2.3` notes describe.
 - Publishing HEAD as `0.2.3` would make the existing notes and package READMEs
-  false. Reusing `0.2.3` on npm after skipping a tag is also a consumer trap.
-- The adoption driver versus published `0.2.2` is breaking: packed Svelte
+  false.
+- The adoption driver versus published `0.2.2` is **breaking**: packed Svelte
   `HistoryEntry` is v3 (`continuationCount`; `branchCount` must not exist).
-  That change deserves its own published identity.
+  Spec 022 and `packages/release-manifest.json` allow pre-1.0 breaking changes
+  in **minor** releases, not patches. Skip `0.2.4` entirely.
 
 The candidate worker lockstep-bumps every release-bearing TypeScript manifest
-and every `packages/**/Cargo.toml` from `0.2.3` to `0.2.4`, including
+and every `packages/**/Cargo.toml` from `0.2.3` to `0.3.0`, including
 intra-repository version requirements and generated `poodle-codegen`
 stamps. Private tooling stays put: repository-root `package.json` `0.1.0`;
 `packages/tokens`, both web previews, and `packages/svelte/install-smoke`
@@ -75,13 +79,15 @@ remain `0.0.0`.
 Change class for the HistoryCenter delta versus last published `0.2.2`:
 **breaking** (removed v2 `HistoryEntry` / `branchCount`) plus **additive**
 (five-code rejection surface; unpublished `ContextMenu` `trigger={false}`;
-other public-intent work already on `main`). Pre-1.0 may ship that mix in a
-patch. Release notes must still name the break and the downstream re-check.
+other public-intent work already on `main`). That mix ships as minor `0.3.0`.
+Release notes must inventory the public delta from tag `v0.2.2` and name the
+breaking HistoryEntry migration and the downstream re-check.
 
-`0.2.3` notes stay in git as an unpublished lockstep. The `0.2.4` notes must
-say `0.2.3` was prepared and never tagged, and must inventory the public
-delta from tag `v0.2.2`, not from the in-tree `0.2.3` bump. Amend package
-READMEs that currently tell consumers to install unpublished `0.2.3`.
+`0.2.3` notes stay in git as an unpublished lockstep. Skip `0.2.4` entirely:
+no tag, no notes file, no npm identity. The `0.3.0` notes must say `0.2.3`
+was prepared and never tagged, and must inventory the public delta from tag
+`v0.2.2`, not from the in-tree `0.2.3` bump. Amend package READMEs that
+currently tell consumers to install unpublished `0.2.3`.
 
 Do not invent a HistoryCenter-only cherry-pick off `v0.2.2`. Lockstep tags
 the whole tree. The candidate freezes a SHA of `main` after required stops
@@ -96,12 +102,12 @@ and `.github/workflows/release.yml`. Do not edit the workflow.
 
 ### Publish to npm (preview channel)
 
-| Package | Path | `0.2.4` disposition |
+| Package | Path | `0.3.0` disposition |
 | --- | --- | --- |
 | `@inflatable-cookie/poodle-core` | `packages/core` | trusted-publish |
 | `@inflatable-cookie/poodle-svelte` | `packages/svelte/components` | trusted-publish |
 
-Consumers must install both at exactly `0.2.4`.
+Consumers must install both at exactly `0.3.0`.
 
 ### Pack and certify, do not publish
 
@@ -113,7 +119,7 @@ Consumers must install both at exactly `0.2.4`.
 
 ### Lockstep Rust (source/tag distribution, not crates.io)
 
-All 17 `packages/**/Cargo.toml` files carry `0.2.4` so tag `v0.2.4` names the
+All 17 `packages/**/Cargo.toml` files carry `0.3.0` so tag `v0.3.0` names the
 Rust graph too:
 
 - contracts: `poodle-adapter`, `poodle-events`, `poodle-headless`, `poodle-ir`,
@@ -160,7 +166,7 @@ Until that board is green, no candidate SHA is freezeable.
 Two commits, same pattern as `g15.060`:
 
 1. candidate tree: versions, requirements, locks, generated stamps, changelog,
-   `docs/release-notes/0.2.4.md`, honesty edits to READMEs/`0.2.3` notes;
+   `docs/release-notes/0.3.0.md`, honesty edits to READMEs/`0.2.3` notes;
 2. evidence-only receipt naming that candidate SHA. The receipt must not
    repin it.
 
@@ -169,7 +175,7 @@ outside the tracked tree (ignored `.artifacts/` or equivalent).
 
 Required evidence from that exact SHA:
 
-- lockstep agreement vs `tag=0.2.4` (replica of the `Versions agree with the
+- lockstep agreement vs `tag=0.3.0` (replica of the `Versions agree with the
   tag` step in `release.yml`): three public TypeScript manifests plus all 17
   Cargo manifests;
 - `bun.lock` workspace versions actually moved (known papercut: ordinary
@@ -198,7 +204,8 @@ Required evidence from that exact SHA:
   executed; fail-fast must not skip it)
 - `git diff --check` before the candidate commit, then
   `git diff --check origin/main...HEAD` before PR handoff
-- local and remote proof that `v0.2.4` is absent before the orchestrator tags
+- local and remote proof that `v0.3.0` and `v0.2.4` are absent before the
+  orchestrator tags
 
 Forbidden in the candidate and Papercuts workers: `effigy release prepare`,
 `execute`, `simulate`; tag create/push; `gh workflow run`; `npm publish`;
@@ -215,10 +222,10 @@ approves it separately.
 Human-owned, never a worker:
 
 1. confirm the reviewed HEAD is still the candidate SHA;
-2. create and push lightweight `v0.2.4` at that SHA only;
-3. `gh workflow run release.yml --ref v0.2.4 -f dry-run=false`;
+2. create and push lightweight `v0.3.0` at that SHA only;
+3. `gh workflow run release.yml --ref v0.3.0 -f dry-run=false`;
 4. record the Actions run, npm `latest`, tarball artifact digest, and a
-   clean-registry install of exact core/Svelte `0.2.4`.
+   clean-registry install of exact core/Svelte `0.3.0`.
 
 `release.yml` already packs only core and Svelte, publishes only those two
 under trusted publishing / OIDC, and uploads `packed-tarballs`. Dry-run
@@ -260,7 +267,7 @@ This proves the tarball the candidate will publish, not that npm has moved.
 | Origin tag `v0.2.3` | absent |
 | npm `0.2.3` | absent |
 
-### Required `0.2.4` receipts (fill during candidate/certification)
+### Required `0.3.0` receipts (fill during candidate/certification)
 
 | Receipt | When |
 | --- | --- |
@@ -269,22 +276,22 @@ This proves the tarball the candidate will publish, not that npm has moved.
 | Core/Svelte/React tarball names, bytes, SHA-256 | candidate |
 | `packedHistoryEntryProof` JSON | candidate `test:web-pack-install` |
 | `effigy release gates` one-gate pass from that SHA | candidate |
-| Remote tag `v0.2.4` SHA | certification; must equal candidate SHA |
+| Remote tag `v0.3.0` SHA | certification; must equal candidate SHA |
 | Workflow run URL and conclusion | certification |
-| npm `latest` = `0.2.4` for core and Svelte | certification |
-| Clean-registry install of exact `0.2.4` | certification |
+| npm `latest` = `0.3.0` for core and Svelte | certification |
+| Clean-registry install of exact `0.3.0` | certification |
 | Loophole pin + rejection-map PR | after the registry proof, in Loophole |
 
 ### Rollback
 
 - Never move, delete, or reuse `v0.2.0`, `v0.2.1` if present, `v0.2.2`, or a
-  failed `v0.2.4`.
-- Never tag `v0.2.3`.
-- If the workflow is red, or npm `latest` is not `0.2.4`, do not re-tag.
-  Fix in the next PATCH (`0.2.5`). npm `latest` stays `0.2.2` until a green
-  publish.
-- Do not unpublish `0.2.2` or `0.2.4`.
-- Loophole stays on `0.2.2` until certification proves `latest` is `0.2.4`.
+  failed `v0.3.0`.
+- Never tag `v0.2.3` or `v0.2.4`.
+- If the workflow is red, or npm `latest` is not `0.3.0`, do not re-tag.
+  The replacement candidate is `0.3.1`. npm `latest` stays `0.2.2` until a
+  green publish.
+- Do not unpublish `0.2.2` or `0.3.0`.
+- Loophole stays on `0.2.2` until certification proves `latest` is `0.3.0`.
 - A red flake (`smoke:gpui-window-capture`, `gate-tree-guard`) is retry
   evidence, not a waived gate.
 
@@ -299,10 +306,10 @@ Stop and return to the orchestrator. Do not tag, dispatch, or publish.
   IR/catalogue headers.
 - Packed proof missing, suppressed, or still accepting `branchCount`.
 - Candidate notes that describe only ContextMenu, omit the HistoryCenter
-  break, or claim `0.2.3` was published.
+  break, use a `0.2.x` identity, or claim `0.2.3` was published.
 - Any compatibility shim for v2 `HistoryEntry`.
 - Workflow, trusted-publisher, or tag-ref mismatch; dispatch against `main`
-  instead of `refs/tags/v0.2.4`; dry-run left true for the real publish.
+  instead of `refs/tags/v0.3.0`; dry-run left true for the real publish.
 - Attempt to publish React, crates.io, or Jetstream admission.
 - Longhorn `AlreadyAtTarget` reopened, or a Poodle worker editing Loophole /
   Longhorn.
@@ -323,19 +330,19 @@ publish, unless `docs:check` starts failing on it.
 ### Poodle owns
 
 - Papercuts matcher repair (label `Papercuts`).
-- `0.2.4` candidate PR: versions, notes, locks, stamps, receipt, headless
+- `0.3.0` candidate PR: versions, notes, locks, stamps, receipt, headless
   gates.
 - Review and merge of those Poodle PRs.
-- Tag `v0.2.4`, `release.yml` dispatch, npm trusted publish, provenance
+- Tag `v0.3.0`, `release.yml` dispatch, npm trusted publish, provenance
   verification.
 - Poodle closeout log after certification.
 
 Poodle workers never merge, never tag, and never touch Loophole or Longhorn.
 
-### Loophole owns, and only after npm `latest` is `0.2.4`
+### Loophole owns, and only after npm `latest` is `0.3.0`
 
 - Exact desktop pins `@inflatable-cookie/poodle-core` and
-  `@inflatable-cookie/poodle-svelte` from `0.2.2` to `0.2.4`.
+  `@inflatable-cookie/poodle-svelte` from `0.2.2` to `0.3.0`.
 - Hub mapping of deletion refusals onto `StaleHistory`, `ProtectedEntry`,
   and `DeletionUnavailable`. Keep `AlreadyAtTarget` / `UnknownEntry` as they
   already are. No host copy override and no Longhorn types in Poodle.
@@ -371,13 +378,13 @@ fix into it; if folded, that workspace still gets the `Papercuts` label.
 
 ## Recommendations
 
-- Serialise Papercuts matcher repair, then the `0.2.4` candidate, then
+- Serialise Papercuts matcher repair, then the `0.3.0` candidate, then
   orchestrator certification, then Loophole adoption. Do not pin Loophole
   from a packed-but-unpublished tarball.
 - Keep the candidate on current `main` after the matcher fix. Do not wait
   for unrelated in-flight cards. `g16.036` is already merged and rides the
   same tag.
-- Inventory the `v0.2.2...candidate` public-intent delta in `0.2.4` notes so
+- Inventory the `v0.2.2...candidate` public-intent delta in `0.3.0` notes so
   Loophole is not surprised by drag-drop, motion policy, or other already-
   merged g16 work riding the same tag.
 - Leave CS20 and keyboard geometry in
@@ -389,7 +396,8 @@ fix into it; if folded, that workspace still gets the `Papercuts` label.
 | Alternative | Reason |
 | --- | --- |
 | Tag current HEAD as `v0.2.3` | Notes/READMEs describe a ContextMenu-only unpublished bump; HEAD is a larger breaking payload |
-| Publish `0.2.3` from `ea1763786`, then `0.2.4` | Two publications; the authorized lane is the corrected HistoryCenter package |
+| Publish as patch `0.2.4` | Spec 022 and `release-manifest.json` put pre-1.0 breaking changes in minor releases |
+| Publish `0.2.3` from `ea1763786`, then `0.3.0` | Two publications; the authorized lane is the corrected HistoryCenter package |
 | Cherry-pick only `g16.033` onto `v0.2.2` | Breaks lockstep-on-main; omits already-shipped-in-source public work |
 | Keep publishing `0.2.3` after rewriting its notes | Reuses a version consumers may already have seen in git as a different meaning |
 | Include Loophole pin in the Poodle worker | Violates the settled ownership split |
@@ -412,10 +420,10 @@ fix into it; if folded, that workspace still gets the `Papercuts` label.
 
 | Meaning | Destination after packet acceptance |
 | --- | --- |
-| `0.2.4` lockstep, notes, changelog, README honesty | Candidate worker; `CHANGELOG.md`, `docs/release-notes/0.2.4.md`, package READMEs, unpublished-`0.2.3` clarification |
+| `0.3.0` lockstep, notes, changelog, README honesty | Candidate worker; `CHANGELOG.md`, `docs/release-notes/0.3.0.md`, package READMEs, unpublished-`0.2.3` clarification; no `0.2.4` notes file |
 | Headless candidate gates and receipt | New g16 release-candidate card cloned from the `g15.060` shape, version digits replaced |
 | Tag, workflow, registry proof | Orchestrator-owned certification card/log cloned from `g15.061`; never dispatched to a worker |
-| Loophole pin + rejection map | Loophole-owned adoption after npm `latest` is `0.2.4`; Poodle does not write it |
+| Loophole pin + rejection map | Loophole-owned adoption after npm `latest` is `0.3.0`; Poodle does not write it |
 | Security matcher | Papercuts worker (`Papercuts` label), then drop or mark the `PAPERCUTS.md` entry |
 | Preview v2 HistoryCenter snippet | Later `Papercuts` follow-on; not a publish gate |
 | CS20 / keyboard geometry | Remain on `docs/triage/20260831-194043-history-papercut-ownership.md` |
