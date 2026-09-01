@@ -3,8 +3,8 @@
 Status: ready
 Type: implementation
 Opened: 2026-09-01
-Depends on: merged `g16.034` and the accepted block-slider packet in
-`../../triage/20260901-221756-block-slider-promotion-decision.md`
+Depends on: merged `g16.034` and operator acceptance recorded in
+`../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/slider.md`,
 `../../contracts/components/range-slider.md`,
@@ -44,6 +44,18 @@ changing paging or admitting vertical RangeSlider early.
 - Invalid, read-only, indeterminate, tooltip-only, and public fit metrics stay
   outside the component surface. Jetstream remains deferred.
 
+Horizontal-only is a public validity law for both components:
+
+- `appearance="track"` keeps today's horizontal and vertical support.
+- `appearance="block"` accepts omitted `orientation` or
+  `orientation="horizontal"` only.
+- `appearance="block"` with `orientation="vertical"` is invalid in Svelte,
+  React, shared Rust composition, and GPUI. Adapters must reject it before
+  component paint/construction. They must not coerce orientation, silently
+  render track appearance, or split behavior by runtime.
+- Vertical block admission requires a later all-runtime contract migration
+  after real native RangeSlider axis geometry and mounted evidence exist.
+
 ## Ordered Work
 
 1. Amend Slider/RangeSlider and appearance-recipe authority. Add shared types,
@@ -70,6 +82,8 @@ changing paging or admitting vertical RangeSlider early.
   external readout remains stable across focus, overlap, and thumb movement.
 - Horizontal LTR/RTL geometry and numeric keyboard behavior agree in every
   active runtime.
+- Both components reject vertical block input before paint/construction while
+  vertical track input remains unchanged.
 - Equal-value RangeSlider keeps two focusable semantic thumbs. Pointer tie
   selects lower; upper remains directly keyboard operable.
 - Every terminal sequence emits at most one commit and preserves live-change
@@ -90,7 +104,7 @@ changing paging or admitting vertical RangeSlider early.
 | Terminal is idempotent | cancel then lost-capture then teardown | one commit, no rollback, later terminals inert |
 | Targets are real | `xs` equal-value range | both 44×44 bounds exist; lower pointer tie and upper keyboard work |
 | Forced colors preserve roles | selected and remainder both resolve to canvas | role/contrast gate fails |
-| Vertical stays gated | native vertical specimen still uses horizontal scrub geometry | no advertised vertical block support |
+| Vertical stays gated | either component receives `appearance="block"` with `orientation="vertical"` | every runtime rejects before paint/construction; no coercion or track fallback |
 
 Plant and restore the pre-fix behavior for every row after the real proof is
 committed.
@@ -117,7 +131,8 @@ final headless `effigy qa`, and `git diff --check origin/main...HEAD`. Never run
 Stop if the implementation needs public fit thresholds, thumb swapping,
 rollback state, new paging semantics, a generic tooltip/readout system,
 vertical admission without native axis proof, a new motion role, or a native
-AT claim beyond contract 003.
+AT claim beyond contract 003. A runtime-specific fallback or coercion for
+vertical block input is also a stop.
 
 ## Continuation
 

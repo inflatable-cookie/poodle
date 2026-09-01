@@ -1,19 +1,20 @@
 # g16.054 — HistoryCenter v0.3.0 Release Candidate
 
-Status: blocked — serial on accepted `g16.053`; certification and Loophole
-adoption remain separate authority gates
+Status: blocked — serial on accepted `g16.053`; later certification and
+Loophole adoption remain separate authority gates
 Type: release candidate — no release mutation
 Opened: 2026-09-01
 Depends on: accepted `g16.053`, merged `g16.033`, merged `g16.036`, and the
-accepted release packet in
-`../../triage/20260901-230400-history-release-adoption-decision.md`
+accepted sequence recorded in
+`../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: `../../specs/022-packaging-versioning-and-release-channel-rules.md`,
 `../../specs/044-deprecation-change-control-and-release-channel-operations.md`,
 `../g15/060-v022-release-candidate.md`, `../../contracts/001-working-rules.md`
 
 ## Goal
 
-Prepare and certify one immutable Poodle `0.3.0` candidate from current main.
+Prepare, validate, and evidence one immutable Poodle `0.3.0` candidate from
+current main.
 Record exact package, lock, generated, tarball, and headless-gate evidence. Do
 not tag, publish, dispatch release workflows, edit Loophole, or imply that a
 green candidate is a released package.
@@ -26,7 +27,7 @@ green candidate is a released package.
 - Lockstep-bump the three public TypeScript manifests and all 17
   `packages/**/Cargo.toml` files plus intra-repository requirements, locks, and
   generated stamps. Private/internal zero-version packages stay put.
-- Publish set remains core and Svelte only. React is packed/certified only;
+- Publish set remains core and Svelte only. React is packed and validated only;
   Rust stays source/tag distribution. Jetstream lockstep identity is not
   admission.
 - Release notes inventory public intent from immutable `v0.2.2`, name the
@@ -75,7 +76,7 @@ green candidate is a released package.
 | Version truth is lockstep | one Cargo manifest or bun workspace stays 0.2.3 | version gate fails |
 | Notes describe shipped delta | notes omit HistoryEntry break | release-doc review fails |
 | Packed surface is v3 | `branchCount` compiles on either Svelte path | unsuppressed TS2339 proof fails |
-| React is certify-only | workflow/manifest gains React publish | automation audit fails |
+| React is validate-only | workflow/manifest gains React publish | automation audit fails |
 | Green candidate is not a release | tag/workflow/npm changes appear | scope gate fails |
 
 ## Writable Scope

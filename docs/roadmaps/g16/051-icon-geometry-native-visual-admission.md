@@ -1,12 +1,13 @@
 # g16.051 — Icon Geometry Native Visual Admission
 
-Status: blocked — requires accepted `g16.050` and an operational dedicated
-conformance-lab bootstrap with separate repository authority
+Status: blocked — requires accepted `g16.050`, an operational Button-only lab,
+and an accepted icon-geometry lab adapter/manifest extension
 Type: external evidence / admission
 Opened: 2026-09-01
-Depends on: `g16.050`, the accepted lab architecture in
-`../../triage/20260901-230407-conformance-lab-architecture.md`, and a separately
-authorized lab run
+Depends on: accepted `g16.050` and every serial gate in
+`../../triage/20260902-000958-conformance-lab-and-visual-gates.md`, including a
+separately planned, reviewed, authorized, and landed icon-geometry lab adapter
+and manifest extension
 Governing refs: the icon-geometry architecture and evidence from `g16.049`–
 `g16.050`, `../../architecture/012-semantic-motion-policy.md`
 
@@ -24,6 +25,11 @@ or add public IconMorph in this card.
 - The separate lab owns one short-lived, operator-approved, non-activating GPUI
   process per fixture, exact-window capture, clean exit, and typed focus /
   permission / provenance receipts.
+- The accepted lab MVP is Button-only and rejects unknown adapters and fixture
+  IDs. Before this card can start, a separate lab-repository planning and
+  implementation lane must add a closed icon-geometry adapter and manifest
+  extension under the same allowlist, provenance, and receipt laws. Bootstrap
+  alone is insufficient.
 - Capture endpoint, midpoint, reverse, frozen, interruption, and teardown
   states twice. Repeats must agree. Headless/browser evidence from `g16.050`
   remains necessary but cannot substitute for native pixels.
@@ -35,7 +41,8 @@ or add public IconMorph in this card.
 ## Ordered Work
 
 1. Verify exact reviewed `g16.050` head, green headless evidence, accepted pair
-   inventory, fixture hashes, comparison rules, and complete lab request.
+   inventory, fixture hashes, comparison rules, operational Button MVP, and
+   the separately accepted icon adapter/manifest-extension receipts.
 2. Perform Poodle-owned intermediate-frame review in both directions.
 3. Through separately authorized lab operations, collect two exact-window
    receipts per named native state. Do not invoke a Poodle local selector.
@@ -62,6 +69,7 @@ or add public IconMorph in this card.
 | Invariant | Smallest counterexample | Required proof |
 | --- | --- | --- |
 | Headless is not pixels | GPUI path assertion passes, lab absent | status stays blocked; no native visual claim |
+| Button bootstrap is not icon support | operational Button MVP rejects an icon fixture ID | status stays blocked until the separately accepted icon adapter/manifest extension lands |
 | Capture is exact and non-activating | foreground changes or desktop fallback | typed failure; bundle is rejected |
 | Repeats are deterministic | midpoint captures disagree | pair/state fails; no frame picking or averaging |
 | Pair quality is human-reviewed | numeric residual passes visible twist | explicit rejection despite numeric result |
@@ -84,10 +92,10 @@ run local `*-windowed` or native-visual selectors.
 
 ## Stop Conditions
 
-Stop on absent lab authority/capability, activation, broad capture, unproved
-foreground, permission drift, incomplete provenance, mismatched repeats,
-endpoint/intermediate failure, or any request to admit a public/web-only
-surface from partial evidence.
+Stop on absent Button-lab or icon-extension authority/capability, activation,
+broad capture, unproved foreground, permission drift, incomplete provenance,
+mismatched repeats, endpoint/intermediate failure, or any request to admit a
+public/web-only surface from partial evidence.
 
 ## Continuation
 

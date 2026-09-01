@@ -85,16 +85,16 @@ stay maintained; backend admission is not part of the first card.
 48. [048 — AgentSubagent ownership and shimmer benchmark](048-agent-subagent-ownership-and-shimmer-benchmark.md) — ready; contract reconciliation precedes the disposable benchmark
 49. [049 — Icon geometry format and registry foundation](049-icon-geometry-format-and-registry-foundation.md) — ready; IG-01/02 only
 50. [050 — Icon geometry internal runtime substrate](050-icon-geometry-internal-runtime-substrate.md) — blocked on accepted `g16.049`
-51. [051 — Icon geometry native visual admission](051-icon-geometry-native-visual-admission.md) — blocked on accepted `g16.050` and the external lab
-52. [052 — Contributor design-guidance pilot](052-contributor-design-guidance-pilot.md) — ready
+51. [051 — Icon geometry native visual admission](051-icon-geometry-native-visual-admission.md) — blocked on accepted `g16.050`, the operational Button lab, and a separately accepted icon adapter/manifest extension
+52. [052 — Contributor design-guidance pilot](052-contributor-design-guidance-pilot.md) — gated on named human reviewers, freeze approvals, and orchestrator execution custody
 53. [053 — Repository security-audit boundary repair](053-repository-security-audit-boundary-repair.md) — ready
 54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — blocked on accepted `g16.053`; no release mutation
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
-ready, serial, gated, and held frontier. Ready cards are `g16.045`–`g16.049`,
-`g16.052`, and `g16.053`. `g16.050`, `g16.051`, and `g16.054` retain their
+ready, serial, gated, and held frontier. Ready cards are `g16.045`–`g16.049`
+and `g16.053`. `g16.050`, `g16.051`, `g16.052`, and `g16.054` retain their
 explicit serial or external gates. Citations, nested-menu pointer intent, the
 dedicated lab, its six-component / 24-fixture visual tranche, GPUI
 accessibility, public IconMorph admission, release/adoption mutations, and
@@ -133,9 +133,10 @@ The earlier continuation programmes remain provenance:
   meanings — a stale, protected, or unavailable deletion no longer reads as a
   missing entry — and `effigy test:svelte-pack-install` proves the packed v3
   `HistoryEntry` export on both public Svelte import paths. Keyboard vertical
-  geometry remains design-deferred; Longhorn's `AlreadyAtTarget` wire code and
-  Loophole adoption are complete in their owning repositories. Publication and
-  Loophole pin movement stay with a separately authorized release lane.
+  geometry remains design-deferred. Longhorn's `AlreadyAtTarget` wire code and
+  Loophole's wire adoption are complete; package pin/rejection adoption remains
+  gated behind later publication. CS20 `groupId` stays Loophole/Pulse
+  policy-owned. None of these holds belongs to the closed drag programme.
 - **Shared motion continuation:** planning PR #121 is accepted and merged.
   Architecture 012 now fixes explicit full/reduced/frozen host policy,
   restriction-only inheritance, lifecycle, native approximation, and layered
@@ -154,8 +155,9 @@ The earlier continuation programmes remain provenance:
   stays on the current synchronous single-row route because honest native
   parity requires broader Node substrate work.
 - **DesEngs research wave:** PR #126's eight-family intake is fully researched
-  in merged PRs #128–#135. The preserved triage packets now carry explicit
-  promoted or gated dispositions. The
+  in merged PRs #128–#135. Consumed decision packets are removed; fresh triage
+  notes retain only unresolved composition, menu, lab, visual, portfolio, and
+  Jetstream gates. The
   dossiers reject generic approval, task-list, live-series, numeric-motion,
   cue-policy, and toast-lifecycle APIs; citations remain composition-gated;
   nested-menu pointer intent is conditional compose-and-extend work. No public

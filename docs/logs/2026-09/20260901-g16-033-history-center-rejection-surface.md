@@ -9,7 +9,7 @@ Handoff: `docs/handoffs/20260901-105037-g16-033-history-center-rejection-surface
 Governing refs: `docs/contracts/components/history-center.md`,
 `docs/architecture/006-headless-core-and-machine-model.md`,
 `docs/contracts/001-working-rules.md`,
-`docs/triage/20260831-194043-history-papercut-ownership.md`
+`docs/triage/20260902-000956-history-portfolio-holds.md`
 Branch: `papercuts/g16-033-history-center-rejection-surface`
 Base: `main` at `9bdcf03e7` (rebased from `8cccdc65c` after PR #119 merged;
 the two incoming research/handoff docs overlap nothing here)

@@ -4,8 +4,8 @@ Status: ready
 Type: implementation — Papercuts
 Opened: 2026-09-01
 Depends on: the recorded `PAPERCUTS.md` false-positive entry and the accepted
-HistoryCenter release packet in
-`../../triage/20260901-230400-history-release-adoption-decision.md`
+HistoryCenter sequence recorded in
+`../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: `../../contracts/001-working-rules.md`, `../../../PAPERCUTS.md`
 
 ## Goal

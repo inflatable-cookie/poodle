@@ -3,8 +3,8 @@
 Status: ready
 Type: implementation
 Opened: 2026-09-01
-Depends on: merged `g16.008`, `g16.030`, and the accepted EditableLabel
-decision packet in `../../triage/20260901-230406-editable-label-decision.md`
+Depends on: merged `g16.008`, `g16.030`, and operator acceptance recorded in
+`../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/editable-label.md`,
 `../../contracts/components/text-input.md`,
@@ -39,6 +39,34 @@ mounted GPUI behavior in one clean pre-1.0 migration.
 - No public live draft, validation, pending, multiline, rich-text, persistence,
   or compatibility surface is added. Jetstream remains deferred.
 
+### Exact Imperative Web Surface
+
+Svelte exports exactly these component-instance methods:
+
+```ts
+export function focus(): void;
+export function startEditing(): void;
+export function cancelEditing(): void;
+```
+
+React exports `EditableLabelHandle` from the component module and package root,
+and exports `EditableLabel` through
+`forwardRef<EditableLabelHandle, EditableLabelProps>`. The handle is exactly:
+
+```ts
+export interface EditableLabelHandle {
+  focus(): void;
+  startEditing(): void;
+  cancelEditing(): void;
+}
+```
+
+`focus()` focuses the display control in view mode and the live input in edit
+mode. `startEditing()` ignores `activationMode` but is inert when disabled or
+already editing. `cancelEditing()` is inert outside edit mode and otherwise
+uses the Escape law, including display-focus restoration. No public `commit()`,
+element getter, controlled draft, or second handle type is added.
+
 ## Ordered Work
 
 1. Amend the component contract first. Add paired TypeScript/Rust transition
@@ -65,6 +93,8 @@ mounted GPUI behavior in one clean pre-1.0 migration.
   disablement, and teardown follow the fixed callback and focus law exactly.
 - `doubleClick`, `enterOrSpace`, and `programmatic` have the same observable
   activation boundary across Svelte, React, shared Rust, and GPUI.
+- Svelte instance methods and the exported React handle expose only `focus()`,
+  `startEditing()`, and `cancelEditing()` with the fixed behavior above.
 - The accessible name no longer defaults over visible content. No live region
   or new focus manager appears.
 - No sibling repository, release, visual-comparison, broad native AT, or
@@ -81,6 +111,7 @@ mounted GPUI behavior in one clean pre-1.0 migration.
 | Tab remains traversal | type, then Tab | commit once and focus advances; display is not refocused |
 | Activation modes stay distinct | single-click default and gesture in programmatic mode | default stays view on one click; programmatic stays view for every gesture |
 | Focus/name behavior is observable | omit `ariaLabel` on value `Kick`, then Enter/Escape | both nodes are named `Kick`; display focus returns after direct terminal |
+| Imperative shape is stable | call each method through Svelte `bind:this` and a React `EditableLabelHandle` ref | package types expose the same three methods; `focus()` selects the mode-owned focus target |
 
 Plant the pre-fix behavior for each row after committing the real proof. Restore
 from that commit and rerun green.
@@ -88,7 +119,8 @@ from that commit and rerun green.
 ## Writable Scope
 
 EditableLabel contract; shared edit/text helpers and vectors; component-local
-Svelte/React files and tests; EditableLabel Rust spec/headless/render paths;
+Svelte/React files, package exports/types, and tests; EditableLabel Rust
+spec/headless/render paths;
 the GPUI wrapper/specimen/regressions; LicenceActivation/LicenceSeats adapters;
 the EditableLabel ledger row; this card, one log, and new `PAPERCUTS.md`
 entries. Do not edit global roadmap front doors, releases, workflows, sibling
@@ -107,7 +139,8 @@ final headless `effigy qa`, and `git diff --check origin/main...HEAD`. Never run
 Stop if the envelope requires a public controlled draft, async validation,
 multiline/IME expansion beyond the current TextInput boundary, a new focus
 architecture, a compatibility shim, or a ledger claim wider than the single
-mounted EditableLabel cell.
+mounted EditableLabel cell. Also stop if implementation needs any imperative
+method beyond the exact three-method web surface.
 
 ## Continuation
 

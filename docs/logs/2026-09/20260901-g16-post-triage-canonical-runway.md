@@ -15,9 +15,10 @@ relevant September packets were reconciled into one canonical map.
 `g16.036` is closed at merge `f5663085aed62abd3d347931a7e7560465bd95ae`.
 Cards `g16.045`–`g16.054` now carry the settled continuation:
 
-- ready: `g16.045`–`g16.049`, `g16.052`, `g16.053`;
-- serially blocked: `g16.050` on `049`, `g16.051` on `050` plus the external
-  lab, and `g16.054` on `053`;
+- ready: `g16.045`–`g16.049`, `g16.053`;
+- blocked or gated: `g16.050` on `049`; `g16.051` on `050`, the Button lab,
+  and an accepted icon adapter/manifest extension; `g16.052` on human/
+  orchestrator ownership; `g16.054` on `053`;
 - gated or held without ready cards: citations, nested menus, lab bootstrap,
   the six-component / 24-fixture visual tranche, AgentSubagent production
   shimmer, public IconMorph, HistoryCenter publication/adoption, GPUI
@@ -31,8 +32,9 @@ changed.
 
 The batch changes planning and documentation only. It creates no worker
 handoff, production code, test, package, workflow, release, sibling-repository,
-or native-window mutation. Accepted triage packets remain in place with an
-explicit promoted or gated disposition.
+or native-window mutation. Consumed triage packets are removed; four fresh
+notes retain only unresolved portfolio, composition/menu, lab/visual, and
+Jetstream authority.
 
 ## Validation
 

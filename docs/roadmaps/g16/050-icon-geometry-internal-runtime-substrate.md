@@ -3,7 +3,8 @@
 Status: blocked — serial on accepted `g16.049`
 Type: implementation — internal capability
 Opened: 2026-09-01
-Depends on: `g16.049`; accepted icon-geometry programme
+Depends on: accepted `g16.049`; funded icon-geometry programme recorded in
+`../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: the architecture produced by `g16.049`,
 `../../architecture/012-semantic-motion-policy.md`,
 `../../contracts/components/icon.md`,

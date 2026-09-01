@@ -15,8 +15,8 @@ behavior repairs without inventing another conformance authority.
 - [Generation index](generation-index.md) is the canonical status summary.
 - `g16.036` is complete in PR #127. The 2026-09-01 triage decisions are
   consolidated in the [canonical continuation map](g16/component-continuation-runway.md):
-  `g16.045`–`g16.049`, `g16.052`, and `g16.053` are ready; `g16.050`,
-  `g16.051`, and `g16.054` keep explicit serial or external gates. Citations,
+  `g16.045`–`g16.049` and `g16.053` are ready; `g16.050`, `g16.051`,
+  `g16.052`, and `g16.054` keep explicit serial, ownership, or external gates. Citations,
   nested menus, the lab-backed visual tranche, public IconMorph, release and
   adoption mutations, GPUI accessibility, and Jetstream remain gated or held.
 - `g16.001` is complete and operator-reviewed in PR #75. It repairs stale
@@ -159,8 +159,8 @@ behavior repairs without inventing another conformance authority.
   adopted and React retained as source-only
 - `g16` — active evidence-led continuation generation. `001`–`044` are closed
   or research-complete, including Tree authority in PR #127. The canonical
-  post-triage runway is compiled as `045`–`054`; seven cards are ready and
-  three preserve serial or external gates. Dependable drag-and-drop remains a
+  post-triage runway is compiled as `045`–`054`; six cards are ready and four
+  preserve serial, ownership, or external gates. Dependable drag-and-drop remains a
   closed programme governed by architecture 011/spec 069.
 
 ## Rules

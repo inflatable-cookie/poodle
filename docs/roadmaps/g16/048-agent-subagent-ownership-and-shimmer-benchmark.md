@@ -4,8 +4,8 @@ Status: ready — benchmark is serial behind the contract/runtime reconciliation
 inside this card
 Type: benchmark
 Opened: 2026-09-01
-Depends on: merged `g16.034` and the accepted decision packet in
-`../../triage/20260901-230404-agent-subagent-shimmer-decision.md`
+Depends on: merged `g16.034` and operator acceptance recorded in
+`../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/agent-subagent.md`,
 `../../contracts/components/agent-transcript.md`,
@@ -20,11 +20,17 @@ verdict only; do not ship shimmer or add a generic effect API.
 
 ## Phase Gate
 
-The benchmark cannot start until the contract records the current active
-runtime ownership, transcript live-region owner, host-supplied activity line,
-native-static posture, and this private web-only visual delta.
+The benchmark cannot start until the contract records only current shipped
+truth: active runtime ownership, transcript live-region ownership, the
+host-supplied activity line, current static rendering in every active runtime,
+and Jetstream's deferred posture. The reconciliation must not add a shimmer
+motion role, lifecycle, web-only effect promise, mask/fallback law, or future
+implementation surface.
 
-The candidate lifecycle is fixed:
+## Benchmark Candidate Lifecycle
+
+The following lifecycle belongs only to the disposable benchmark card and its
+execution log:
 
 - one non-looping 2.0-second sweep after the first committed frame of an
   eligible `running` epoch with non-empty `activityLine` under `full` policy;
@@ -55,8 +61,9 @@ one execution log.
 
 ## Acceptance
 
-- The contract no longer says draft or defers live React/GPUI paths, and it
-  keeps Jetstream program-deferred.
+- The contract no longer says draft or defers live React/GPUI paths. It records
+  current static output and keeps Jetstream program-deferred without promising
+  the benchmark candidate.
 - Every candidate preserves zero effect-caused geometry change, one semantic
   text value, exact selection/copy, focus order, status ownership, and static
   fallbacks.
@@ -81,13 +88,15 @@ one execution log.
 | Re-entry is fresh | running → waiting → running | old epoch stays dead; new epoch gets one sweep |
 | Source text remains singular | mask candidate duplicates paint | copy and accessibility expose source once; duplicate is inert/hidden |
 | Claims match traces | property support but recurring paint | candidate stays static/paint-bound; no GPU-accelerated claim |
+| Contract remains shipped truth | benchmark candidate fails every threshold | component contract still promises only current static behavior |
 
 ## Writable Scope
 
 AgentSubagent contract; a disposable ignored benchmark harness and artifacts;
 one compact execution log; this card; new papercuts. Contract reconciliation
 may cite live component/spec/render/specimen evidence but must not edit
-production runtime code. Do not edit generic Text, AgentMessage, Skeleton,
+production runtime code or add candidate shimmer semantics to the contract. Do
+not edit generic Text, AgentMessage, Skeleton,
 Spinner, motion policy, packages, releases, workflows, native visual routes,
 or Jetstream behavior.
 
@@ -104,10 +113,12 @@ selectors.
 Stop if the contract/runtime facts disagree materially, the benchmark needs a
 public or permanent effect surface, text becomes transparent/unselectable,
 any hard budget fails, a complete engine path cannot be identified, or native
-mask support becomes necessary.
+mask support becomes necessary. Stop if candidate lifecycle or visual-effect
+language enters the component contract during this card.
 
 ## Continuation
 
 A passing verdict permits a separate bounded AgentSubagent web implementation
-card. A failed or inconclusive verdict closes on static text. This card never
-ships the effect itself.
+card. That later card amends the contract before shipping the passing effect.
+A failed or inconclusive verdict closes on static text with no contract
+rollback because this card never put the candidate in the contract.

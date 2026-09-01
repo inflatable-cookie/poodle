@@ -3,8 +3,8 @@
 Status: ready
 Type: implementation — internal architecture foundation
 Opened: 2026-09-01
-Depends on: merged `g16.034`, accepted icon-geometry programme in
-`../../triage/20260901-230405-icon-geometry-programme.md`
+Depends on: merged `g16.034` and the funded icon-geometry programme recorded in
+`../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/icon.md`,
 `../../contracts/components/icon-provider.md`,
