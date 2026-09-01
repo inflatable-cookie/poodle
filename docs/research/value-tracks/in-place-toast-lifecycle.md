@@ -95,7 +95,7 @@ Consumer evidence is from primary checkouts, not sibling worktree links:
 | [`src/state.ts`](https://raw.githubusercontent.com/emilkowalski/sonner/ecce1841c55e4a72dfe139a8992b56498660125e/src/state.ts) at `ecce1841` | id allocation, same-id merge, dismissed-id recreation, `promise()` loading/success/error/finally, HTTP `Response.ok` branch | Primary implementation. |
 | [`src/index.tsx`](https://raw.githubusercontent.com/emilkowalski/sonner/ecce1841c55e4a72dfe139a8992b56498660125e/src/index.tsx) at `ecce1841` | 4000ms default lifetime, loading skips timer, loading disables swipe, close button hidden while loading, container `aria-live="polite"` | Primary implementation. |
 | [`src/types.ts`](https://raw.githubusercontent.com/emilkowalski/sonner/ecce1841c55e4a72dfe139a8992b56498660125e/src/types.ts) | `ToastTypes` includes `loading`; `PromiseData` shape | Primary types. |
-| [`LICENSE.md`](https://raw.githubusercontent.com/emilkowalski/sonner/main/LICENSE.md) | MIT, Copyright (c) 2023 Emil Kowalski | Primary licence. Legal review still appropriate before any derivative helper. |
+| [`LICENSE.md`](https://raw.githubusercontent.com/emilkowalski/sonner/ecce1841c55e4a72dfe139a8992b56498660125e/LICENSE.md) | MIT, Copyright (c) 2023 Emil Kowalski | Primary licence. Legal review still appropriate before any derivative helper. |
 | [npm sonner](https://www.npmjs.com/package/sonner) | MIT, homepage, 2.0.8 published 2026-08-09 | Registry metadata. Pinned git package.json at `ecce1841` is `2.0.7`. |
 | [WAI-ARIA 1.2 `aria-live` / `aria-relevant` / `aria-atomic`](https://www.w3.org/TR/wai-aria/#aria-live) | Live-region update semantics | Normative a11y model. AT behavior still varies. |
 
