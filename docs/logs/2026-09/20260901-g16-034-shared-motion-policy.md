@@ -12,7 +12,8 @@ Governing refs: `docs/architecture/012-semantic-motion-policy.md`,
 `docs/contracts/001-working-rules.md`
 Branch: `feature/g16-034-shared-motion-policy`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-034-shared-motion-policy`
-Base: `origin/main` at `60eea0e25` (planning base `b89c11275` is an ancestor)
+Base: rebased onto `origin/main` at `701ab1c11` after design-guidance PR #122
+and the g16.035 dispatch; planning base `b89c11275` is an ancestor
 
 ## Outcome
 
@@ -36,7 +37,10 @@ The five pilot families consume that policy:
 
 GPUI still only drives generic opacity and SVG rotation. Translation/scale
 declarations record `opacity-stand-in`. Disclosure height has no native
-channel and stays a static-endpoint gap. No ledger cell moved.
+channel and stays a static-endpoint gap. No existing ledger cell moved. One
+new MotionPolicyProvider row was added because the public default-as export
+changed the live denominator (176 public / 175 portable). GPUI construction
+cells now say 175/175 routes.
 
 ## Overlap
 
@@ -69,6 +73,17 @@ Focused: `bun test packages/core/test/motion-policy.test.ts`; Svelte/React
 provider, Accordion, Collapsible, Tabs, ToastStack, Skeleton, Spinner,
 IconButton; `cargo test` motion_policy, context, motion, frozen spinner.
 
-Required boards still to record on the PR: `effigy ci:web`, `effigy ci:rust`,
-`effigy ci:native`, `effigy docs:check`, `effigy qa`,
-`git diff --check origin/main...HEAD`.
+Boards:
+
+- `effigy docs:check` pass
+- `effigy ci:native` pass
+- `effigy ci:rust` pass
+- `effigy test:web-pack-install` pass
+- `effigy check:svelte` pass
+- `git diff --check origin/main...HEAD` pass
+- `effigy ci:web` local `bunx vitest run`: 367/369 files and 3287+ tests green;
+  `packages/react/components/test/smoke.test.tsx` and
+  `test/parity/component-parity.test.tsx` OOM this worktree at 8 GB heap
+  (no assertion failures). Recorded as a papercut.
+- Headless `effigy qa` not re-run after that OOM; native/docs/pack-install
+  and focused motion suites are the local proof.

@@ -8,26 +8,26 @@ Governing refs: `docs/roadmaps/g15/001-release-baseline-roster-inventory.md`, `d
 
 ## Denominator
 
-The v0.2.0 release denominator is **175 public Svelte component exports**, enumerated mechanically from `export { default as <Name> } from "./<Name>.svelte"` in `packages/svelte/components/src/index.ts` (175 matches) and verified one-to-one against the component files (175/175 `.svelte` files present). Packed reachability: the package `exports` map exposes `.` (index), `./*.svelte` (per-file), and `./types`; the `files` array ships `src`, so every component is reachable from the packed tarball both through the index and its per-file subpath.
+The live public Svelte denominator is **176 component exports**, enumerated mechanically from `export { default as <Name> } from "./<Name>.svelte"` in `packages/svelte/components/src/index.ts` (176 matches) and verified one-to-one against the component files (176/176 `.svelte` files present). Packed reachability: the package `exports` map exposes `.` (index), `./*.svelte` (per-file), and `./types`; the `files` array ships `src`, so every component is reachable from the packed tarball both through the index and its per-file subpath. `MotionPolicyProvider` joined the roster in g16.034.
 
-Public types and helpers are recorded separately and are **not** part of the denominator: the `types` block and the `file-upload`, `theme-controller`, `date`, `presentation`, `anchored`, `portal`, `embed-input`, `media-workflow`, `persistence`, and `icon-registry` exports. The canonical preview catalogue (174 portable slugs plus the web-only `meter-surface`) maps one-to-one onto this roster.
+Public types and helpers are recorded separately and are **not** part of the denominator: the `types` block and the `file-upload`, `theme-controller`, `date`, `presentation`, `anchored`, `portal`, `embed-input`, `media-workflow`, `persistence`, and `icon-registry` exports. The canonical preview catalogue (175 portable slugs plus the web-only `meter-surface`) maps one-to-one onto this roster.
 
 | Surface | present | missing | not-applicable |
 | --- | ---: | ---: | ---: |
-| Implementation file present (`src/<Name>.svelte`) | 175 | 0 | 0 |
-| Export from index + packed `exports` map | 175 | 0 | 0 |
-| Contract (`docs/contracts/components/<name>.md`) | 175 | 0 | 0 |
-| Svelte preview specimen (dedicated file or scene-shared) | 175 | 0 | 0 |
-| Focused Svelte test (named file/case, beyond anatomy smoke) | 175 | 0 | 0 |
-| React implementation + export | 175 | 0 | 0 |
-| React gallery specimen | 175 | 0 | 0 |
-| Focused React test | 175 | 0 | 0 |
-| Rust declaration (`<Name>Spec`, including documented aliases) | 174 | 0 | 1 |
-| Rust render module (`poodle-render`) | 174 | 0 | 1 |
-| GPUI specimen | 174 | 0 | 1 |
-| `test:web-pack-install` Svelte packed root-import proof | 175 | 0 | 0 |
-| `test:web-pack-install` React packed root-import proof | 175 | 0 | 0 |
-| Downstream consumer use (16 canonical consumers scanned) | 110 | 65 (no use found) | 0 |
+| Implementation file present (`src/<Name>.svelte`) | 176 | 0 | 0 |
+| Export from index + packed `exports` map | 176 | 0 | 0 |
+| Contract (`docs/contracts/components/<name>.md`) | 176 | 0 | 0 |
+| Svelte preview specimen (dedicated file or scene-shared) | 176 | 0 | 0 |
+| Focused Svelte test (named file/case, beyond anatomy smoke) | 176 | 0 | 0 |
+| React implementation + export | 176 | 0 | 0 |
+| React gallery specimen | 176 | 0 | 0 |
+| Focused React test | 176 | 0 | 0 |
+| Rust declaration (`<Name>Spec`, including documented aliases) | 175 | 0 | 1 |
+| Rust render module (`poodle-render`) | 175 | 0 | 1 |
+| GPUI specimen | 175 | 0 | 1 |
+| `test:web-pack-install` Svelte packed root-import proof | 176 | 0 | 0 |
+| `test:web-pack-install` React packed root-import proof | 176 | 0 | 0 |
+| Downstream consumer use (16 canonical consumers scanned) | 110 | 66 (no use found) | 0 |
 | Jetstream | 0 (program-deferred) | — | — |
 
 `not-applicable` is exactly one component on exactly one axis each: `MeterSurface` is web-only by fixed decision (spec 068) and has no Rust declaration, Rust render, or GPUI counterpart. It still counts as a member of the denominator (exported, contracted, implemented, specified in Svelte) and its `not-applicable` rows are recorded as such, not as missing or present.
@@ -176,6 +176,7 @@ Rust declarations use the documented naming discrepancies where they exist: `Cal
 | `TriStateSwitch` | `docs/contracts/components/tri-state-switch.md` | `TriStateSwitchSpecimen.svelte` | `TriStateSwitch.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
 | `Menubar` | `docs/contracts/components/menubar.md` | `MenubarSpecimen.svelte` | `Menubar.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
 | `UiPresentationProvider` | `docs/contracts/components/ui-presentation-provider.md` | `UiPresentationProviderSpecimen.svelte` | `UiPresentationProvider.test.ts` | `test:web-pack-install` | `loophole`, `loophole-legacy` |
+| `MotionPolicyProvider` | `docs/contracts/components/motion-policy-provider.md` | `MotionPolicyProviderSpecimen.svelte` | `MotionPolicyProvider.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
 | `VideoPlayer` | `docs/contracts/components/video-player.md` | `VideoPlayerSpecimen.svelte` | `VideoPlayer.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
 | `DateTimeZonePicker` | `docs/contracts/components/date-time-zone-picker.md` | `DateTimeZonePickerSpecimen.svelte` | `DateTimeZonePicker.test.ts` | `test:web-pack-install` | no consumer use found (absence is not a release failure) |
 
@@ -380,6 +381,7 @@ One runtime never borrows another runtime's pass. React mirror posture names imp
 | `TriStateSwitch` | complete | complete | `TriStateSwitch.test.tsx` | `test:web-pack-install` | `TriStateSwitchSpec` (`packages/contracts/components/src/tri_state_switch.rs`) | `packages/render/src/tri_state_switch.rs` | `packages/gpui/preview/src/specimens/tri_state_switch.rs` |
 | `Menubar` | complete | complete | `Menubar.test.tsx` | `test:web-pack-install` | `MenubarSpec` (`packages/contracts/components/src/menubar.rs`) | `packages/render/src/menubar.rs` | `packages/gpui/preview/src/specimens/menubar.rs` |
 | `UiPresentationProvider` | complete | complete | `UiPresentationProvider.test.tsx` | `test:web-pack-install` | `UiPresentationProviderSpec` (`packages/contracts/components/src/ui_presentation_provider.rs`) | `packages/render/src/context.rs` (`RenderContext`, crate-root `ui_presentation_provider`, scoped `SlotBuilder` host slots) | `packages/gpui/preview/src/specimens/ui_presentation_provider.rs` (real cascade: root, inherited scopes, nested override, explicit reset, with mounted headless geometry evidence) |
+| `MotionPolicyProvider` | complete | complete | `MotionPolicyProvider.test.tsx` | `test:web-pack-install` | `MotionPolicyProviderSpec` (`packages/contracts/components/src/motion_policy_provider.rs`) | `packages/render/src/context.rs` (`RenderContext`, crate-root `motion_policy_provider`) | `packages/gpui/preview/src/specimens/motion_policy_provider.rs` |
 | `VideoPlayer` | complete | complete | `VideoPlayer.test.tsx` | `test:web-pack-install` | `VideoPlayerSpec` (`packages/contracts/components/src/video_player.rs`) | `packages/render/src/video_player.rs` | `packages/gpui/preview/src/specimens/video_player_specimen.rs` |
 | `DateTimeZonePicker` | complete | complete | `DateTimeZonePicker.test.tsx` | `test:web-pack-install` | `DateTimeZonePickerSpec` (`packages/contracts/components/src/date_time_zone_picker.rs`) | `packages/render/src/date_time_zone_picker.rs` | `packages/gpui/preview/src/specimens/date_time_zone_picker.rs` |
 

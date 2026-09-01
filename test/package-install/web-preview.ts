@@ -10,6 +10,7 @@ import {
 import { basename, join, resolve } from "node:path";
 
 import {
+  FROZEN_COMPONENT_COUNT,
   buildWebPackageRoster,
   readWebPackageRoster,
   type WebPackageRoster,
@@ -219,7 +220,7 @@ function importProofTest(
     const missingRootExports = expectedRootExports.filter((name) => !actualRootExports.includes(name));
     const extraRootExports = actualRootExports.filter((name) => !expectedRootExports.includes(name));
 
-    expect(expectedComponents).toHaveLength(175);
+    expect(expectedComponents).toHaveLength(${FROZEN_COMPONENT_COUNT});
     expect({ missingComponents, extraComponents }).toEqual({
       missingComponents: [],
       extraComponents: [],

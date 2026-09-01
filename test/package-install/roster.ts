@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const FROZEN_COMPONENT_COUNT = 175;
+export const FROZEN_COMPONENT_COUNT = 176;
 
 // These are public React-root runtime exports outside the frozen component
 // denominator. Keep this authority explicit and bounded: a new root export
@@ -30,6 +30,8 @@ const REACT_NON_COMPONENT_ROOT_EXPORTS = [
   "useKeyboardDropTarget",
   "usePillContext",
   "useThemeController",
+  "useMotionPolicy",
+  "useMotionReady",
   "useUiPresentation",
   "validateUploadFile",
 ] as const;
