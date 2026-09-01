@@ -2,6 +2,7 @@
 title: Icon morph native feasibility spike
 kind: northstar-handoff
 handoff_mode: worker-pr-loop
+worker_mode: implementation
 dispatch_authority: orchestrator
 review_authority: orchestrator
 merge_authority: orchestrator
@@ -90,4 +91,3 @@ Run only narrow compile/tests needed for the disposable spike plus
 diff is the single dossier and the worktree has no disposable residue. Commit,
 push, open a PR, and report exact head, evidence limits, recommendation, and
 next decision. The orchestrator owns exact-head review and merge.
-
