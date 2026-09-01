@@ -53,6 +53,10 @@ const WEB_ONLY_PROPS = new Set([
   // — `TreeSpec` lives in `tree/mod.rs` and had never been checked.
   "virtualized",
   "virtualHeight",
+  // g16.036 paired-web Tree authority adapter. Native would require pending
+  // local Node commits and durable multi-row session payloads; this card does
+  // not fake those through TreeSpec.
+  "reorderAuthority",
   // Dialog/FormDialog initial-focus intent. Web-only *for now*, by decision:
   // the "auto"/"none" policy is portable but the third form is a CSS selector,
   // which cannot cross to native. Rather than design portable focus-intent

@@ -400,6 +400,75 @@ sibling target and before/after position with its pure Tree helper, and calls
 `requestKeyboardDrop`; it does not call `onReorder` directly. Space and Enter
 remain Tree selection/activation keys and do not enter pickup mode.
 
+### Tree external authority adapter
+
+Tree's ordinary `onReorder(from, to, position)` path remains the default for a
+self-contained tree. A paired Svelte/React `reorderAuthority` adapter is the one
+opt-in route for a host whose own current state is the authority for legal
+placements. It uses shared-core semantic types and the existing controller:
+
+```ts
+interface TreeReorderSubject {
+  readonly sourceValue: string;
+  readonly movingValues: readonly string[];
+}
+
+interface TreeReorderCandidate {
+  readonly subject: TreeReorderSubject;
+  readonly intent: DropIntent;
+}
+
+interface TreeReorderAuthority {
+  projectMovingValues(
+    sourceValue: string,
+    selectedValues: readonly string[],
+  ): readonly string[];
+  canDrop(candidate: TreeReorderCandidate): DropEligibility;
+  onDrop(
+    candidate: TreeReorderCandidate,
+  ): DragDropCommitResult | Promise<DragDropCommitResult>;
+}
+
+type TreeReorderProps =
+  | {
+      reorderAuthority?: null;
+      onReorder?: (
+        from: string,
+        to: string,
+        position: "before" | "after" | "inside",
+      ) => void;
+    }
+  | { reorderAuthority: TreeReorderAuthority; onReorder?: never };
+```
+
+`projectMovingValues` is pure and is called once when the semantic session
+starts. Its result must be non-empty, unique, and contain `sourceValue`; an
+invalid result refuses the session rather than silently reducing it to one
+row. Every projected value must resolve in the current Tree. Poodle latches the
+resulting ordered moving set for the whole session and clears it on every
+terminal or teardown. Selection changes after pickup do not change that
+subject.
+
+`canDrop` is synchronous because its result decides whether the current
+indicator is accepted. It receives no coordinates. Its accepted `intent` must
+preserve the hovered `targetId`, indicator `position`, and `operation`; it may
+preserve or rewrite only `intent.destination`. Poodle validates that final
+destination against current nodes and the whole moving set, then uses it for
+indicator depth, announcement, drop-time revalidation, and commit. The
+authority is re-read at revalidation; removal of the installed authority
+refuses the pending drop. `onDrop` runs once with that revalidated candidate
+and its sync or async result passes through unchanged to the existing terminal
+lifecycle. `reorderAuthority` and `onReorder` are mutually exclusive public
+props; authority mode never invokes the convenience callback.
+
+This first adapter is paired across Svelte and React. Rust/GPUI keeps the
+existing synchronous single-row `TreeHandlers.on_reorder` surface. The current
+Node contract cannot honestly mirror this adapter: local `NodeDropCommit` has
+no pending completion, `NodeDropIntentEvent` does not carry a rewritten full
+intent, and `DragSubject` has no durable multi-row session payload. Adding
+those general capabilities is separate substrate work, not permission to
+encode a moving set into an id or add component-local session state.
+
 ### Headless browser evidence boundary
 
 Chromium's CDP leg proves native touch scrolling wins before hold and native

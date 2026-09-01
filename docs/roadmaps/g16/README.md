@@ -67,6 +67,10 @@ stay maintained; backend admission is not part of the first card.
 33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — complete; merged in PR #120 after one Northstar review round; five distinct refusal meanings across TypeScript, Rust, both web shells and mounted GPUI, plus an installed-tarball v3 `HistoryEntry` proof; publication/pin movement stays separate
 34. [034 — Shared motion policy and five-family pilot](034-shared-motion-policy-and-five-family-pilot.md) — ready; architecture 012 and the MotionPolicyProvider plus eight pilot contracts are promoted from merged planning PR #121
 35. [035 — MarkdownEditor bounded preview scroll](035-markdown-editor-bounded-preview-scroll.md) — complete; merged in PR #123 after two native-oracle repair rounds; long preview content now scrolls inside a constrained host across Svelte, React, and mounted GPUI without a new sizing API
+36. [036 — Tree external drop authority](036-tree-external-drop-authority.md)
+    — ready; paired Svelte/React `reorderAuthority` adapter over the existing
+    Tree substrate for a latched moving set, pre-paint accept/rewrite/refuse,
+    and real sync/async commit results; ordinary `onReorder` remains unchanged
 
 ## Parallel Continuation
 
@@ -116,6 +120,13 @@ Two continuation programmes are now explicit:
   Shared web CSS now supplies the shrink chain, and the native preview declares
   and proves the same bounded scroll ownership through mounted GPUI wheel input.
   No public sizing API changed and no parity-ledger cell moved.
+- **Tree consumer-authority follow-on:** PR #125 is merged and remains the
+  interaction/geometry baseline. `g16.036` is ready as a separate paired-web
+  public seam: one latched moving set, synchronous external eligibility and
+  destination rewrite before accepted presentation, and the substrate's real
+  commit result. It adds no consumer vocabulary or second machine. Rust/GPUI
+  stays on the current synchronous single-row route because honest native
+  parity requires broader Node substrate work.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening

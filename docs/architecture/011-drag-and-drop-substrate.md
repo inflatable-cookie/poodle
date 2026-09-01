@@ -207,6 +207,17 @@ Tabs reorder reports the resulting order; a Tree move reports a target and
 placement; DockRegion projects the host bridge. These component contracts do
 not become generic application policy.
 
+An externally authoritative consumer may need to narrow a composite's
+resolved candidate before Poodle paints it as accepted. That remains a
+component adapter over this substrate, not another drag machine: the adapter
+projects one immutable semantic subject, runs synchronous eligibility during
+hover and revalidation, may rewrite only the component's own destination
+vocabulary, and returns the substrate's real commit result. The ordinary
+self-contained callback stays available when no external authority is
+installed. Tree is the first bounded use of this pattern; its authority seam
+does not expose pointer coordinates, DOM ancestry, application records, or a
+second lifecycle.
+
 Continuous gestures such as sliders, faders, scrubbing, resize handles, and
 knob movement remain separate. They may reuse low-level pointer-capture helpers
 but do not create payload sessions or drop targets.

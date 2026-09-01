@@ -57,6 +57,9 @@ const BASELINE: Record<string, { contractOnly?: string[]; svelteOnly?: string[] 
   //   prose §TriggerIsInteractive); native composes its trigger directly and
   //   has no equivalent.
   popover: { svelteOnly: ["triggerIsInteractive"] },
+  // g16.036 promoted the paired-web Tree authority contract before its
+  // implementation worker. Delete this entry when `reorderAuthority` lands.
+  tree: { contractOnly: ["reorderAuthority"] },
   // split-view `minRatio` / `maxRatio` — cross-target ratio clamps; SplitViewSpec
   //   models `ratio` only — spec-surface tranche.
   "split-view": { svelteOnly: ["minRatio", "maxRatio"] },

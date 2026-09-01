@@ -25,11 +25,15 @@ Updated: 2026-09-01
     `034` is in flight for the shared motion policy and five-family pilot after
     planning PR #121 promoted architecture 012; `035` merged in PR #123 after
     two native-oracle repair rounds and closed the independent MarkdownEditor
-    bounded-preview issue
+    bounded-preview issue; `036` is ready for the paired-web Tree external
+    drop-authority adapter after PR #125 supplied the interaction and outline
+    geometry baseline
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: continue `g16.034`. The remaining post-motion research queue is
+  - Next move: continue `g16.034` and dispatch the independently writable
+    `g16.036` Tree authority lane. Same-repository merges remain serial. The
+    remaining post-motion research queue is
     recorded in
     `../triage/20260901-125758-post-motion-research-queue.md`; block sliders
     follow the motion pilot, while icon feasibility and AgentSubagent shimmer

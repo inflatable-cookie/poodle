@@ -109,6 +109,15 @@ Updated: 2026-09-01
   `treeitem`, pointer/touch on the row handle, no HTML `DataTransfer`). GPUI
   uses `on_drag`/`on_drop`/`drag_over`; Jetstream tracks mouse down→up over
   rows.
+- **Externally authoritative reorder** (`reorderable` + `reorderAuthority`, paired
+  Svelte/React): the host projects an ordered moving set once at session start,
+  inspects the resolved Tree destination, and synchronously accepts, rewrites,
+  or refuses it before an accepted indicator is painted. The accepted
+  destination drives indicator depth, announcement, drop-time revalidation,
+  and the one sync/async commit callback. This is an adapter over the same
+  Tree source, targets, outline geometry, keyboard route, auto-scroll, focus,
+  and terminal lifecycle. It is not a second drag machine. `onReorder` remains
+  the convenience path and is not fired for an authority-owned session.
 
 ## 3. Props And Inputs
 
@@ -129,6 +138,7 @@ Updated: 2026-09-01
 | `showIcons` | `boolean` | `true` | no | Reserve and render the leading icon slot |
 | `showCheckboxes` | `boolean` | `false` | no | Render a leading cascade checkbox per row |
 | `reorderable` | `boolean` | `false` | no | Allow drag-and-drop + Alt+↑/↓ row reordering |
+| `reorderAuthority` | `TreeReorderAuthority \| null` | `null` | no | **Svelte/React.** External subject, eligibility, destination rewrite, and authoritative commit adapter. Mutually exclusive with `onReorder` |
 | `virtualized` | `boolean` | `false` | no | **Svelte only.** Window the flattened visible rows in a scroll viewport |
 | `virtualHeight` | `number` | `320` | no | **Svelte only.** Viewport height (px) when `virtualized` |
 | `size` | `ControlSize \| null` | `null` | no | Absolute size override |
@@ -146,6 +156,60 @@ Updated: 2026-09-01
 | `onContextMenu` | Right-click on a row | `(value, x, y)` | Host opens a `ContextMenu` at the pointer |
 | `onReorder` | Drag-drop or Alt+↑/↓ | `(from, to, position)` | `position` is `before` / `after` / `inside`; host applies the move (`reorder_nodes`) |
 | `onActivate` | Row double-click, or the keyboard activate intent | `string` | The node's value. Keyboard activation selects the row first, then fires; a disabled node fires nothing |
+
+### Types: external drop authority
+
+These types are owned by `@inflatable-cookie/poodle-core` and re-exported by
+the paired component packages.
+
+```ts
+interface TreeReorderSubject {
+  readonly sourceValue: string;
+  readonly movingValues: readonly string[];
+}
+
+interface TreeReorderCandidate {
+  readonly subject: TreeReorderSubject;
+  readonly intent: DropIntent;
+}
+
+interface TreeReorderAuthority {
+  projectMovingValues(
+    sourceValue: string,
+    selectedValues: readonly string[],
+  ): readonly string[];
+  canDrop(candidate: TreeReorderCandidate): DropEligibility;
+  onDrop(
+    candidate: TreeReorderCandidate,
+  ): DragDropCommitResult | Promise<DragDropCommitResult>;
+}
+
+type TreeReorderProps =
+  | {
+      reorderAuthority?: null;
+      onReorder?: (
+        from: string,
+        to: string,
+        position: TreeDropPosition,
+      ) => void;
+    }
+  | { reorderAuthority: TreeReorderAuthority; onReorder?: never };
+```
+
+`projectMovingValues` is pure and runs once per semantic session. Its ordered
+result is non-empty, unique, and contains `sourceValue`; invalid output is
+refused, never normalized. Every moving value must resolve in the current Tree.
+The subject remains latched even if selection changes and is cleared on every
+terminal or teardown. `canDrop` is synchronous. It may refuse or return an accepted
+`DropEligibility` whose intent preserves the hovered target, indicator edge,
+and operation while preserving or rewriting only `destination`. Poodle
+validates the final destination against current nodes and every moving value.
+That destination owns line depth, announcement, revalidation, and commit.
+`onDrop` receives the revalidated candidate once and returns the real substrate
+result; a pending Promise keeps the session in `dropping` and a late answer
+cannot affect a newer session. The public props make `reorderAuthority` and
+`onReorder` mutually exclusive. `reorderable` remains the explicit switch in
+both branches; installing an authority does not implicitly enable dragging.
 
 ### Type: TreeNode
 
@@ -537,6 +601,9 @@ None.
   is non-null. Selection anchor is tracked for Shift range selection
 - chevron is `Icon name="chevron-right"` rotated 90° on expand
 - known browser-specific deltas: none
+- `reorderAuthority` is read live for hover and drop-time revalidation while its
+  projected moving set is session-latched. Removing the authority mid-session
+  refuses the drop; it never falls through to `onReorder`.
 
 ## 10. GPUI Notes
 
@@ -575,7 +642,11 @@ None.
   drag; adding one is a public API decision that card owns.
 - chevron uses `▸` / `▾` glyphs; guides are left-bordered indent cells
 - known GPUI-native deltas: no accessibility (runtime limit, §6 + Known Deltas);
-  no virtual scrolling; transition timing is platform-owned
+  no virtual scrolling; transition timing is platform-owned. The paired web
+  `reorderAuthority` is not projected onto native: local Node commits are
+  synchronous, intent presentation does not carry a rewritten destination,
+  and the Node subject has no durable multi-row session value. Native keeps
+  `on_reorder`; closing those generic substrate gaps is separate work.
 
 ## 10a. Jetstream Notes
 
