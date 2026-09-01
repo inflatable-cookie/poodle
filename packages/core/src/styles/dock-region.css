@@ -125,12 +125,11 @@
     border-top-right-radius: var(--poodle-radius-surface);
   }
 
-  .poodle-dock-region[data-edge="bottom"] .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:first-child {
-    border-top-left-radius: 0;
+  .poodle-dock-region[data-edge="bottom"][data-collapsed] .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:first-child {
     border-bottom-left-radius: var(--poodle-radius-surface);
   }
 
-  .poodle-dock-region[data-edge="bottom"] .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:last-child {
+  .poodle-dock-region[data-edge="bottom"][data-collapsed] .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:last-child {
     border-bottom-right-radius: var(--poodle-radius-surface);
   }
 
