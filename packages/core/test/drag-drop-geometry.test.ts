@@ -3,10 +3,10 @@ import { describe, expect, test } from "bun:test";
 import {
   resolveNestedDropPosition,
   treeAcceptedDropDepth,
-  treeOutlineRows,
   treeResolveDropPosition,
   treeResolveOutlineDrop,
 } from "../src/dom/drag-drop-geometry";
+import { flattenVisibleTreeRows } from "../src/tree.ts";
 
 const rect = { top: 100, height: 40 };
 
@@ -379,15 +379,14 @@ describe("treeResolveOutlineDrop", () => {
 });
 
 describe("treeAcceptedDropDepth", () => {
-  const rows = treeOutlineRows([
-    { node: { value: "docs", children: [{ value: "guide.md" }] }, depth: 0, parent: null },
-    { node: { value: "guide.md" }, depth: 1, parent: "docs" },
-    { node: { value: "notes.txt" }, depth: 0, parent: null },
-  ]);
+  const nodes = [
+    { value: "docs", children: [{ value: "guide.md" }] },
+    { value: "notes.txt" },
+  ];
 
   test("uses the commit destination, not the hovered row", () => {
     expect(
-      treeAcceptedDropDepth(rows, {
+      treeAcceptedDropDepth(nodes, {
         targetId: "notes.txt",
         position: "before",
         operation: "move",
@@ -395,7 +394,7 @@ describe("treeAcceptedDropDepth", () => {
       }),
     ).toBe(1);
     expect(
-      treeAcceptedDropDepth(rows, {
+      treeAcceptedDropDepth(nodes, {
         targetId: "notes.txt",
         position: "before",
         operation: "move",
@@ -403,10 +402,25 @@ describe("treeAcceptedDropDepth", () => {
       }),
     ).toBe(0);
     expect(
-      treeAcceptedDropDepth(rows, {
+      treeAcceptedDropDepth(nodes, {
         targetId: "docs",
         position: "inside",
         operation: "move",
+      }),
+    ).toBe(1);
+  });
+
+  test("uses full-tree depth when the dest row is collapsed", () => {
+    expect(flattenVisibleTreeRows(nodes, []).map((row) => row.node.value)).toEqual([
+      "docs",
+      "notes.txt",
+    ]);
+    expect(
+      treeAcceptedDropDepth(nodes, {
+        targetId: "notes.txt",
+        position: "before",
+        operation: "move",
+        destination: { targetId: "guide.md", position: "after" },
       }),
     ).toBe(1);
   });

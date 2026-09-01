@@ -411,8 +411,9 @@ export function treeLatchReorderSubject<T extends TreeNodeLike>(
 
 /**
  * Generic Tree safety, then live host policy, then structural validation of
- * any rewritten destination. Hover fields stay on the accepted intent; only
- * `destination` may change.
+ * any rewritten destination. Hover target, indicator position, and operation
+ * must match the hovered intent exactly; only `destination` may change.
+ * Illegal hover-field edits are refused, not rewritten onto `destination`.
  */
 export function treeAuthorityDropEligibility<T extends TreeNodeLike>(
   nodes: readonly T[],
@@ -429,6 +430,13 @@ export function treeAuthorityDropEligibility<T extends TreeNodeLike>(
   }
   const policy = authority.canDrop({ subject, intent });
   if (!policy.accepted) return policy;
+  if (
+    policy.intent.targetId !== intent.targetId ||
+    policy.intent.position !== intent.position ||
+    policy.intent.operation !== intent.operation
+  ) {
+    return { accepted: false, reason: "unavailable" };
+  }
   const dest = dropCommitDestination(policy.intent);
   if (!isTreeDropPosition(dest.position) || !isTreeDropPosition(intent.position)) {
     return { accepted: false, reason: "unavailable" };
@@ -439,8 +447,13 @@ export function treeAuthorityDropEligibility<T extends TreeNodeLike>(
     operation: intent.operation,
     destination: dest,
   };
+  const destIntent: DropIntent = {
+    targetId: dest.targetId,
+    position: dest.position,
+    operation: intent.operation,
+  };
   for (const moving of subject.movingValues) {
-    const safety = treeDropEligibility(nodes, moving, acceptedIntent);
+    const safety = treeDropEligibility(nodes, moving, destIntent);
     if (!safety.accepted) return safety;
   }
   return { accepted: true, intent: acceptedIntent };

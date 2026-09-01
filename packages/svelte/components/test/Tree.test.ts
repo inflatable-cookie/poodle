@@ -810,9 +810,9 @@ describe("Tree reorderAuthority", () => {
     const rows = layoutTree(container);
     const source = rows.get("a.ts")!;
     const target = rows.get("c.ts")!;
-    drag(source, target, target.getBoundingClientRect().top + 4);
-    expect(host.drops).toHaveLength(1);
-    expect(host.drops[0]?.subject.movingValues).toEqual(["a.ts", "b.ts"]);
+    const y = target.getBoundingClientRect().top + 4;
+    source.dispatchEvent(pointer("pointerdown", { clientY: source.getBoundingClientRect().top + 4 }));
+    document.dispatchEvent(pointer("pointermove", { clientY: y }));
     expect(projectMovingValues).toHaveBeenCalledTimes(1);
 
     await rerender({
@@ -821,9 +821,15 @@ describe("Tree reorderAuthority", () => {
       reorderable: true,
       reorderAuthority: host,
     });
+    layoutTree(container);
+    document.dispatchEvent(pointer("pointermove", { clientY: y }));
+    document.dispatchEvent(pointer("pointerup", { clientY: y }));
+    expect(host.drops).toHaveLength(1);
+    expect(host.drops[0]?.subject.movingValues).toEqual(["a.ts", "b.ts"]);
+    expect(projectMovingValues).toHaveBeenCalledTimes(1);
+
     const next = layoutTree(container);
     drag(next.get("a.ts")!, next.get("c.ts")!, next.get("c.ts")!.getBoundingClientRect().top + 4);
-    expect(host.drops[0]?.subject.movingValues).toEqual(["a.ts", "b.ts"]);
     expect(host.drops[1]?.subject.movingValues).toEqual(["a.ts"]);
 
     const later = layoutTree(container);
@@ -881,6 +887,34 @@ describe("Tree reorderAuthority", () => {
     expect(live).not.toMatch(/on notes\.txt$/);
   });
 
+  it("paints rewritten dest depth when that dest is collapsed", async () => {
+    const host = authority({
+      canDrop: (candidate) => ({
+        accepted: true,
+        intent: {
+          ...candidate.intent,
+          destination: { targetId: "guide.md", position: "after" },
+        },
+      }),
+    });
+    const { container } = render(Tree, {
+      props: { nodes: outline, expandedValues: [], reorderable: true, reorderAuthority: host },
+    });
+    const rows = layoutTree(container);
+    expect(container.querySelector('[data-value="guide.md"]')).toBeNull();
+    const source = rows.get("notes.txt")!;
+    const item = container.querySelector<HTMLElement>('[role="treeitem"][data-value="notes.txt"]')!;
+    const y = source.getBoundingClientRect().top + 20;
+    source.dispatchEvent(pointer("pointerdown", { clientY: y, clientX: 150 }));
+    document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 40 }));
+    expect(item.getAttribute("data-poodle-drop-target")).toBe("accepted");
+    expect(item.style.getPropertyValue("--poodle-tree-drop-depth")).toBe("1");
+    document.dispatchEvent(pointer("pointerup", { clientY: y, clientX: 40 }));
+    await tick();
+    expect(host.drops).toHaveLength(1);
+    expect(host.drops[0]?.intent.destination).toEqual({ targetId: "guide.md", position: "after" });
+  });
+
   it("revalidates live authority at release", () => {
     const host = authority();
     const { container } = render(Tree, {
@@ -923,42 +957,71 @@ describe("Tree reorderAuthority", () => {
     expect(onReorder).not.toHaveBeenCalled();
   });
 
-  it("keeps a pending authority commit dropping and ignores a stale answer", async () => {
+  it("a pending authority Promise settles its own session once", async () => {
     let finish: ((value: { status: "rejected"; reason: string }) => void) | undefined;
     const pending = new Promise<{ status: "rejected"; reason: string }>((resolve) => {
       finish = resolve;
     });
     const host = authority({ onDrop: () => pending });
-    const first = render(Tree, {
-      props: { nodes: nested, expandedValues: ["src", "lib"], reorderable: true, reorderAuthority: host },
+    const { container } = render(Tree, {
+      props: { nodes: files, reorderable: true, reorderAuthority: host },
     });
-    const rows = layoutTree(first.container);
-    drag(rows.get("a.ts")!, rows.get("docs")!, rows.get("docs")!.getBoundingClientRect().top + 4);
-    expect(first.container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).toBe(
+    const rows = layoutTree(container);
+    drag(rows.get("a.ts")!, rows.get("c.ts")!, rows.get("c.ts")!.getBoundingClientRect().top + 4);
+    expect(container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).toBe(
       "dropping",
     );
-    first.unmount();
+    finish?.({ status: "rejected", reason: "late" });
+    await pending;
+    await tick();
+    expect(container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).not.toBe(
+      "dropping",
+    );
+    expect(container.querySelector('[data-poodle-drag-source="dropping"]')).toBeNull();
+  });
 
-    const later = render(Tree, {
-      props: { nodes: nested, expandedValues: ["src", "lib"], reorderable: true, reorderAuthority: host },
+  it("a stale authority Promise cannot settle a later session on the same controller", async () => {
+    let finish: ((value: { status: "rejected"; reason: string }) => void) | undefined;
+    const pending = new Promise<{ status: "rejected"; reason: string }>((resolve) => {
+      finish = resolve;
     });
-    const next = layoutTree(later.container);
+    const host = authority({ onDrop: () => pending });
+    const { container, rerender } = render(Tree, {
+      props: { nodes: files, reorderable: true, reorderAuthority: host },
+    });
+    const rows = layoutTree(container);
+    drag(rows.get("a.ts")!, rows.get("c.ts")!, rows.get("c.ts")!.getBoundingClientRect().top + 4);
+    expect(container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).toBe(
+      "dropping",
+    );
+
+    await rerender({
+      nodes: files.filter((node) => node.value !== "a.ts"),
+      reorderable: true,
+      reorderAuthority: host,
+    });
+    await tick();
+    expect(container.querySelector('[data-poodle-drag-source="dropping"]')).toBeNull();
+
+    await rerender({
+      nodes: files,
+      reorderable: true,
+      reorderAuthority: host,
+    });
+    const next = layoutTree(container);
     const source = next.get("a.ts")!;
-    const target = next.get("docs")!;
-    const y = target.getBoundingClientRect().top + 4;
+    const y = next.get("c.ts")!.getBoundingClientRect().top + 4;
     source.dispatchEvent(pointer("pointerdown", { clientY: source.getBoundingClientRect().top + 4 }));
     document.dispatchEvent(pointer("pointermove", { clientY: y }));
-    expect(later.container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).toBe(
+    expect(container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).toBe(
       "dragging",
     );
     finish?.({ status: "rejected", reason: "late" });
     await pending;
     await tick();
-    expect(later.container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).toBe(
+    expect(container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).toBe(
       "dragging",
     );
-    document.dispatchEvent(pointer("pointerup", { clientY: y }));
-    later.unmount();
   });
 
   it("routes Alt+↑/↓ through the same authority path", async () => {

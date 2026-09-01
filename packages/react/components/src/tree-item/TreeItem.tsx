@@ -17,6 +17,7 @@ import type { TreeNode } from "../types";
 
 export interface TreeItemProps {
   node: TreeNode;
+  nodes: TreeNode[];
   outlineRows: TreeOutlineRow[];
   depth: number;
   parent: string | null;
@@ -42,6 +43,7 @@ export interface TreeItemProps {
 
 export function TreeItem({
   node,
+  nodes,
   outlineRows,
   depth,
   branch,
@@ -66,8 +68,8 @@ export function TreeItem({
   const canDrag = reorderable && !node.isDisabled && !editing;
   const rowRef = useRef<HTMLDivElement | null>(null);
   const itemRef = useRef<HTMLDivElement | null>(null);
-  const outlineRowsRef = useRef(outlineRows);
-  outlineRowsRef.current = outlineRows;
+  const nodesRef = useRef(nodes);
+  nodesRef.current = nodes;
   const dragDrop = useOptionalDragDrop();
   const { getSourceProps } = useDragSource({
     sourceId: node.value,
@@ -119,7 +121,7 @@ export function TreeItem({
         item.style.removeProperty("--poodle-tree-drop-depth");
         return;
       }
-      const depth = treeAcceptedDropDepth(outlineRowsRef.current, snap.session.intent);
+      const depth = treeAcceptedDropDepth(nodesRef.current, snap.session.intent);
       if (depth == null) item.style.removeProperty("--poodle-tree-drop-depth");
       else item.style.setProperty("--poodle-tree-drop-depth", String(depth));
     };

@@ -596,6 +596,7 @@
   {@const open = branch && isExpanded(node.value)}
   <TreeItem
     {node}
+    {nodes}
     outlineRows={treeOutlineRows(visibleRows)}
     {depth}
     {parent}
@@ -630,6 +631,7 @@
   {@const open = branch && isExpanded(node.value)}
   <TreeItem
     {node}
+    {nodes}
     outlineRows={treeOutlineRows(visibleRows)}
     {depth}
     {parent}

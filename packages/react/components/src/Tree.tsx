@@ -506,6 +506,7 @@ function TreeView({
       <TreeItem
         key={node.value}
         node={node}
+        nodes={nodes}
         outlineRows={treeOutlineRows(visibleRows)}
         depth={depth}
         parent={parent}

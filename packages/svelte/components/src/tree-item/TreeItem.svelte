@@ -21,6 +21,7 @@
 
   interface Props {
     node: TreeNode;
+    nodes: TreeNode[];
     outlineRows: TreeOutlineRow[];
     depth: number;
     parent: string | null;
@@ -46,6 +47,7 @@
 
   let {
     node,
+    nodes,
     outlineRows,
     depth,
     parent: _parent,
@@ -87,7 +89,7 @@
       itemEl.style.removeProperty("--poodle-tree-drop-depth");
       return;
     }
-    const depth = treeAcceptedDropDepth(outlineRows, snap.session.intent);
+    const depth = treeAcceptedDropDepth(nodes, snap.session.intent);
     if (depth == null) itemEl.style.removeProperty("--poodle-tree-drop-depth");
     else itemEl.style.setProperty("--poodle-tree-drop-depth", String(depth));
   }
@@ -95,7 +97,7 @@
   $effect(() => {
     void itemEl;
     void rowEl;
-    void outlineRows;
+    void nodes;
     if (!controller) return;
     applyDropDepth();
     return controller.subscribe(applyDropDepth);

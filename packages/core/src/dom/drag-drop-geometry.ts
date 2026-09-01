@@ -76,16 +76,35 @@ export function treeOutlineRows<T extends TreeNodeLike>(
   }));
 }
 
-/** Indicator depth for an accepted intent's commit destination, not a second pointer pass. */
+/** Depth of `value` in the full tree, including collapsed branches. */
+function treeNodeDepth(nodes: readonly TreeNodeLike[], value: string): number | null {
+  const walk = (list: readonly TreeNodeLike[], depth: number): number | null => {
+    for (const node of list) {
+      if (node.value === value) return depth;
+      if (node.children?.length) {
+        const found = walk(node.children, depth + 1);
+        if (found != null) return found;
+      }
+    }
+    return null;
+  };
+  return walk(nodes, 0);
+}
+
+/**
+ * Indicator depth for an accepted intent's commit destination.
+ * Walks the full tree so a rewritten dest under a collapsed branch still
+ * paints dest depth on the hovered anchor.
+ */
 export function treeAcceptedDropDepth(
-  rows: readonly TreeOutlineRow[],
+  nodes: readonly TreeNodeLike[],
   intent: DropIntent,
 ): number | null {
   const dest = dropCommitDestination(intent);
-  const destRow = rows.find((row) => row.value === dest.targetId);
-  if (!destRow) return null;
-  if (dest.position === "inside") return destRow.depth + 1;
-  if (dest.position === "before" || dest.position === "after") return destRow.depth;
+  const depth = treeNodeDepth(nodes, dest.targetId);
+  if (depth == null) return null;
+  if (dest.position === "inside") return depth + 1;
+  if (dest.position === "before" || dest.position === "after") return depth;
   return null;
 }
 

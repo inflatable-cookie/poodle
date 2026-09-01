@@ -306,6 +306,29 @@ describe("tree reorder authority helpers", () => {
     ).toEqual({ accepted: false, reason: "subtree" });
   });
 
+  test("refuses an accepted policy that mutates hover target, position, or operation", () => {
+    const subject = treeLatchReorderSubject(nodes, "README.md", ["README.md"])!;
+    const hovered = {
+      targetId: "docs",
+      position: "before" as const,
+      operation: "move" as const,
+    };
+    const host = (intent: typeof hovered & { destination?: { targetId: string; position: "before" | "after" | "inside" } }): TreeReorderAuthority => ({
+      projectMovingValues: () => subject.movingValues,
+      canDrop: () => ({ accepted: true, intent }),
+      onDrop: () => ({ status: "committed" }),
+    });
+    expect(
+      treeAuthorityDropEligibility(nodes, subject, host({ ...hovered, targetId: "src/a.ts" }), hovered),
+    ).toEqual({ accepted: false, reason: "unavailable" });
+    expect(
+      treeAuthorityDropEligibility(nodes, subject, host({ ...hovered, position: "after" }), hovered),
+    ).toEqual({ accepted: false, reason: "unavailable" });
+    expect(
+      treeAuthorityDropEligibility(nodes, subject, host({ ...hovered, operation: "copy" }), hovered),
+    ).toEqual({ accepted: false, reason: "unavailable" });
+  });
+
   test("a missing authority or subject is unavailable, not a convenience fallback", () => {
     const subject = treeLatchReorderSubject(nodes, "README.md", ["README.md"])!;
     const intent = { targetId: "docs", position: "before" as const, operation: "move" as const };
