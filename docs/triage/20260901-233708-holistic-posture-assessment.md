@@ -103,10 +103,11 @@ Three one-batch changes improve every one of the 16 consumers:
    imports stop bundling all 172 component stylesheets.
 2. Move `marked` behind the two components that use it (peer/optional or a
    subpath export) so a Button consumer does not ship a markdown parser.
-3. Decide whether to emit `dist/` (svelte-package + `.d.ts`). Today the
-   package is only consumable by Svelte 5 + Vite/SvelteKit toolchains. That
-   may be an acceptable pre-1.0 boundary if stated in README; it is not
-   stated.
+3. Emit `dist/` (compiled JS + declarations). Settled by the operator on
+   2026-09-02 as a mandatory prerequisite for `0.3.0`; the raw-source
+   boundary is not acceptable. The evidence packet still has to settle build
+   tool, declaration emit, export map, CSS delivery, `sideEffects`, and the
+   `marked` isolation.
 
 ### D. Web pair architecture (high)
 
@@ -119,10 +120,10 @@ React quietly drifts because nothing gates it. Options:
   interfaces and fail on Svelte↔React divergence. Cheap, immediate.
 - Then extract the pure parts (CSV export, selection math, tab overflow,
   async option loader, rename state) into core one composite per card.
-- Or decide React's fate. With no consumer and no publication, React costs a
-  full second implementation of 176 components. If it stays, it needs a
-  consumer and a gate; if it goes, that is an explicit operator decision the
-  vision must record.
+- React's posture is settled (operator, 2026-09-02): retain source-only,
+  add the Svelte↔React public-prop drift gate, and publish only after a
+  named consumer exists. Extraction of shared composite logic into core is a
+  separate, per-composite candidate.
 
 ### E. Native pair (high)
 
@@ -281,11 +282,14 @@ The spine records process faithfully and serves readers poorly:
 2c. **Workflow automation** — Linux-only `ci:web` + `ci:rust` on PR and
    main, approved 2026-09-02; a bounded workflow card under explicit
    `.github/workflows/` authority.
-3. **React gate or React decision** — extend prop drift to React now; ask the
-   operator whether React continues without a consumer.
-4. **Consumer papercut sweep lane** — recurring, cheap, and it feeds the runway
-   with defects real users hit. Promote the two Figmatic defects and the
-   Loophole Keyboard geometry as the first cards.
+3. **React drift gate** — settled: React stays source-only; extend
+   `contract-prop-drift.ts` to parse React `Props` and fail on Svelte↔React
+   divergence; no publication before a named consumer.
+4. **Consumer papercut sweep lane** — approved as a recurring read-only
+   intake of sibling `PAPERCUTS.md` files for Poodle defects. Each finding
+   (for example the Figmatic Tree treeitem name, the Select ghost variant in
+   native mode, the Loophole Keyboard geometry) still enters ordinary Poodle
+   triage and promotion; the sweep promotes nothing by itself.
 5. **Docs compaction** — roadmap status tables, archive handoffs/parity, spec
    purge, guide snippet check, Underlay rule reconciliation. Docs-only, can run
    on a cheap model in parallel with everything else.
