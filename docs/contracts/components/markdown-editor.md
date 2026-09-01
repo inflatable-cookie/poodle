@@ -1,7 +1,7 @@
 # MarkdownEditor
 
 Status: detailed contract
-Updated: 2026-08-10
+Updated: 2026-09-01
 
 ## 1. Purpose
 
@@ -144,13 +144,20 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 
 ### Sizing
 
-- Root: full width of container, border `0.0625rem solid border-default`, `radius-surface`, `overflow: hidden`
-- Toolbar: flex row, space-between, wraps on narrow widths, density-aware padding
+- Root: full width of container, column flex, `min-height: 0`, `max-height: 100%`,
+  border `0.0625rem solid border-default`, `radius-surface`, `overflow: hidden`.
+  A definite host height caps the root; without one, short content stays
+  naturally sized (no viewport-height default and no public height prop).
+- Toolbar: flex row, space-between, wraps on narrow widths, density-aware padding,
+  `flex-shrink: 0`
 - Tool button: semantic control box tied to size scale
 - Mode button: `IconButton` chrome sized by inherited presentation
-- Body: flex row; in split mode, textarea and preview each `flex: 1`
+- Body: flex row that grows into remaining root height (`flex: 1 1 auto`,
+  `min-height: 0`); in split mode, textarea and preview each `flex: 1` with
+  `min-height: 0` / `min-width: 0` so they share one bounded body
 - Textarea: density-aware pane padding, min-height from prop, resize vertical
-- Preview: density-aware pane padding, overflow-y auto
+- Preview: density-aware pane padding, `min-height: 0`, overflow-y auto — the
+  vertical scroll owner when content exceeds the visible pane
 
 ### Composition
 
@@ -170,6 +177,10 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 
 | Property | Value |
 |----------|-------|
+| display | `flex` |
+| flex-direction | `column` |
+| min-height | `0` |
+| max-height | `100%` |
 | border | `0.0625rem solid var(--poodle-color-border-default)` |
 | border-radius | `var(--poodle-radius-surface)` |
 | background | `var(--poodle-color-background-surface)` |
@@ -194,6 +205,7 @@ In split mode the textarea gets a right border (`border-subtle`) to visually sep
 | border-bottom | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | background | `color-mix(in srgb, var(--poodle-color-background-elevated) 72%, transparent)` |
 | flex-wrap | `wrap` |
+| flex-shrink | `0` |
 
 ### Tools Container `.md-editor__tools`
 
@@ -255,20 +267,24 @@ Mode button chrome delegates to the `IconButton` contract:
 | Property | Value |
 |----------|-------|
 | display | `flex` |
+| flex | `1 1 auto` |
+| min-height | `0` |
+| min-width | `0` |
 
 #### Body Split Mode `[data-mode="split"]`
 
 | Property | Value |
 |----------|-------|
 | gap | `0` |
-| textarea | `flex: 1`, `border-right: 0.0625rem solid var(--poodle-color-border-subtle)` |
-| preview | `flex: 1` |
+| textarea | `flex: 1`, `min-height: 0`, `min-width: 0`, `border-right: 0.0625rem solid var(--poodle-color-border-subtle)` |
+| preview | `flex: 1`, `min-height: 0`, `min-width: 0` |
 
 ### Textarea `.md-editor__textarea`
 
 | Property | Value |
 |----------|-------|
 | flex | `1` |
+| min-width | `0` |
 | width | `100%` |
 | padding | `0.75rem` (default) |
 | border | `0` |
@@ -286,6 +302,8 @@ Mode button chrome delegates to the `IconButton` contract:
 | Property | Value |
 |----------|-------|
 | flex | `1` |
+| min-height | `0` |
+| min-width | `0` |
 | padding | `0.75rem` (default) |
 | font-family | `var(--poodle-typography-body-family)` |
 | font-size | `0.875rem` |
@@ -382,6 +400,9 @@ The Mode X token (`--poodle-md-editor-mode-x`) scales the mode-switcher horizont
 - Both native backends interpret the same rendered component.
 - The native edit pane uses the backend text-input path. Markdown toolbar
   insertion and rendered-HTML override policy remain host-owned.
+- Preview vertical scroll ownership uses existing node overflow vocabulary
+  (`LayoutOverflow::Scroll` on the preview pane, body `min_height: 0` /
+  overflow hidden). Source-text versus rendered-HTML remains Tier-3 freedom.
 
 ## 11. Parity Checklist
 

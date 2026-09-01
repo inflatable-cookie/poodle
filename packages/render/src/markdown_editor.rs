@@ -207,9 +207,19 @@ pub fn markdown_editor_with_handlers(
     let el = el.child(toolbar);
 
     // ── Body ──────────────────────────────────────────────────
+    // Same shrink chain as shared CSS: body fills remaining column height and
+    // may shrink; the preview pane owns vertical scroll (contract §7).
     let mut body = Node::container();
-    body.style.descriptor.layout.direction = LayoutDirection::Row;
-    body.style.descriptor.layout.width = LayoutSizing::Grow;
+    {
+        let s = &mut body.style;
+        s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.width = LayoutSizing::Grow;
+        s.fill_width = true;
+        s.fill_height = true;
+        s.min_height = Some(0.0);
+        s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+        s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+    }
 
     if is_edit {
         let placeholder = spec.placeholder.as_deref().unwrap_or("Write markdown...");
@@ -248,6 +258,9 @@ pub fn markdown_editor_with_handlers(
             // Explicit Row (see switch.rs).
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.width = LayoutSizing::Grow;
+            s.fill_height = true;
+            s.min_height = Some(0.0);
+            s.min_width = Some(0.0);
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = pane_pad;
             pad.right = pane_pad;
@@ -269,12 +282,18 @@ pub fn markdown_editor_with_handlers(
             // Explicit Row (see switch.rs).
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.width = LayoutSizing::Grow;
+            s.fill_height = true;
+            s.min_height = Some(0.0);
+            s.min_width = Some(0.0);
+            // Preview is the vertical scroll owner (contract §7 / §8).
+            s.descriptor.layout.overflow_y = LayoutOverflow::Scroll;
             let pad = &mut s.descriptor.layout.spacing.padding;
             pad.left = pane_pad;
             pad.right = pane_pad;
             pad.top = pane_pad;
             pad.bottom = pane_pad;
         }
+        preview.a11y.label = Some("Preview".to_string());
 
         let mut copy = if spec.value.is_empty() {
             let mut t = Node::text("Nothing to preview");
@@ -296,4 +315,65 @@ pub fn markdown_editor_with_handlers(
         el.a11y.label = Some(spec.aria_label.clone());
     }
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use poodle_node::LayoutOverflow;
+    use poodle_specs::MarkdownEditorSpec;
+
+    use super::*;
+    use crate::context::RenderContext;
+
+    fn theme() -> poodle_jetstream::JetstreamThemeProvider {
+        poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
+    }
+
+    fn preview_pane(node: &Node) -> &Node {
+        let body = node.children.get(1).expect("toolbar then body");
+        body.children
+            .iter()
+            .find(|child| child.a11y.label.as_deref() == Some("Preview"))
+            .expect("preview pane carries aria-label Preview")
+    }
+
+    #[test]
+    fn preview_pane_declares_vertical_scroll_overflow() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = MarkdownEditorSpec::new()
+            .with_mode("preview")
+            .with_value("# Long\n\n".repeat(40));
+        let node = markdown_editor(&spec, &ctx);
+        let preview = preview_pane(&node);
+        assert_eq!(
+            preview.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Scroll
+        );
+        assert_eq!(preview.style.min_height, Some(0.0));
+        assert!(preview.style.fill_height);
+    }
+
+    #[test]
+    fn split_body_shrinks_and_preview_owns_scroll() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = MarkdownEditorSpec::new().with_mode("split").with_value(format!(
+            "short source\n\n{}",
+            "# Heading\n\nparagraph\n\n".repeat(30)
+        ));
+        let node = markdown_editor(&spec, &ctx);
+        let body = node.children.get(1).expect("toolbar then body");
+        assert_eq!(body.style.min_height, Some(0.0));
+        assert!(body.style.fill_height);
+        assert_eq!(
+            body.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Hidden
+        );
+        let preview = preview_pane(&node);
+        assert_eq!(
+            preview.style.descriptor.layout.overflow_y,
+            LayoutOverflow::Scroll
+        );
+    }
 }
