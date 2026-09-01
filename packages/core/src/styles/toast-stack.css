@@ -29,6 +29,14 @@
     overflow: hidden;
   }
 
+  .poodle-toast[data-motion="exit"] {
+    pointer-events: none;
+  }
+
+  .poodle-toast[data-motion-inert="true"] {
+    pointer-events: none;
+  }
+
   .poodle-toast::before {
     content: "";
     position: absolute;

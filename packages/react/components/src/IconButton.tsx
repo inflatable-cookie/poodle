@@ -16,6 +16,7 @@ import "@inflatable-cookie/poodle-core/styles/icon-button.css";
 
 import { Icon } from "./Icon";
 import { AnchoredSurface } from "./AnchoredSurface";
+import { useMotionReady } from "./motion-policy";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import { Spinner } from "./Spinner";
 import type {
@@ -78,6 +79,7 @@ export function IconButton({
   children,
 }: IconButtonProps) {
   const uiPresentation = useUiPresentation();
+  const motionReady = useMotionReady();
   const tooltipId = useId();
 
   const [tooltipOpen, setTooltipOpen] = useState(false);
@@ -151,6 +153,7 @@ export function IconButton({
         data-tone={tone !== "default" ? tone : undefined}
         data-size={resolvedSize}
         data-density={resolvedDensity}
+        data-motion-ready={motionReady}
         data-loading={loading}
         data-pressed={isToggle ? currentPressed : undefined}
         disabled={isUnavailable}

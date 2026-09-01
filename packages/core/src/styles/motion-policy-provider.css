@@ -1,0 +1,5 @@
+/* Styles for MotionPolicyProvider. Unique poodle-* selectors; safe as global CSS. */
+
+.poodle-motion-policy-provider {
+  display: contents;
+}

@@ -319,7 +319,11 @@ pub fn button(
         if spec.is_loading {
             let mut spinner = Node::icon("spinner", spinner_size);
             spinner.style.descriptor.text_color = Some(text_color);
-            spinner.style.animation = Some(NodeAnimation::spin("poodle-spinner-ring", 0.8));
+            spinner.style.animation = crate::motion::animation_for_policy(
+                ctx.motion_policy(),
+                NodeAnimation::spin("poodle-spinner-ring", 0.8),
+                false,
+            );
             el = el.child(wrap_glyph(spinner));
         }
         if let Some(ref icon_name) = spec.leading_icon {
@@ -458,8 +462,14 @@ mod tests {
         let base = theme.resolve_space("space.control.x");
         let cases = [
             ((ControlSize::Md, ControlDensity::Default), base),
-            ((ControlSize::Sm, ControlDensity::Compact), base - rem_to_px(0.125)),
-            ((ControlSize::Lg, ControlDensity::Comfortable), base + rem_to_px(0.125)),
+            (
+                (ControlSize::Sm, ControlDensity::Compact),
+                base - rem_to_px(0.125),
+            ),
+            (
+                (ControlSize::Lg, ControlDensity::Comfortable),
+                base + rem_to_px(0.125),
+            ),
         ];
         for ((size, density), expected) in cases {
             // A label keeps the button out of the icon-only (square) recipe.
@@ -703,7 +713,10 @@ mod tests {
             LayoutSizing::Fixed(wrapper_edge)
         );
         // The glyph itself keeps the sm icon token inside the wrapper.
-        assert_eq!(icon_size_of(&node, "play"), theme.resolve_space("size.icon.sm"));
+        assert_eq!(
+            icon_size_of(&node, "play"),
+            theme.resolve_space("size.icon.sm")
+        );
 
         let loading = button(&ButtonSpec::new().with_loading(true), &ctx, None);
         let spinner_wrapper = loading
@@ -799,7 +812,10 @@ mod tests {
         // state, so a focusable control without one is unobservable. Contract
         // §8: `border-width-focus` of `accent-focusRing` at a 2px offset.
         assert!(plain.interaction.focusable);
-        let ring = plain.style.focus_ring.expect("an enabled button declares a ring");
+        let ring = plain
+            .style
+            .focus_ring
+            .expect("an enabled button declares a ring");
         assert_eq!(
             ring.color,
             theme.resolve_color(ButtonSpec::new().focus_ring_color_token()),
@@ -821,10 +837,15 @@ mod tests {
             &ctx,
             None,
         );
-        assert_eq!(unpressed.a11y.toggled, Some(poodle_node::NodeToggled::False));
+        assert_eq!(
+            unpressed.a11y.toggled,
+            Some(poodle_node::NodeToggled::False)
+        );
 
         let disclosure = button(
-            &ButtonSpec::new().with_label("Details").with_aria_expanded(true),
+            &ButtonSpec::new()
+                .with_label("Details")
+                .with_aria_expanded(true),
             &ctx,
             None,
         );
@@ -842,7 +863,9 @@ mod tests {
         assert_eq!(plain.a11y.controls, None);
 
         let node = button(
-            &ButtonSpec::new().with_label("Details").with_controls("details"),
+            &ButtonSpec::new()
+                .with_label("Details")
+                .with_controls("details"),
             &ctx,
             None,
         );
@@ -863,11 +886,17 @@ mod tests {
         let ctx = RenderContext::new(&theme);
         let node = button(&spec, &ctx, None);
 
-        assert_eq!(node.roles.get("variant").map(String::as_str), Some("primary"));
+        assert_eq!(
+            node.roles.get("variant").map(String::as_str),
+            Some("primary")
+        );
         assert_eq!(node.roles.get("tone").map(String::as_str), Some("default"));
         // Resolved, not the declared base: the web pair reports the same.
         assert_eq!(node.roles.get("size").map(String::as_str), Some("lg"));
-        assert_eq!(node.roles.get("density").map(String::as_str), Some("compact"));
+        assert_eq!(
+            node.roles.get("density").map(String::as_str),
+            Some("compact")
+        );
         assert_eq!(node.roles.get("fit").map(String::as_str), Some("default"));
     }
 

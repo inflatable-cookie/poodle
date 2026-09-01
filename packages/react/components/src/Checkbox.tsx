@@ -4,6 +4,7 @@ import { checkboxParts, checkboxTransition, type CheckboxContext } from "@inflat
 import "@inflatable-cookie/poodle-core/styles/checkbox.css";
 
 import { Icon } from "./Icon";
+import { useMotionReady } from "./motion-policy";
 import { reactifyPart } from "./parts";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -46,6 +47,7 @@ export function Checkbox({
   onCheckedChange,
 }: CheckboxProps) {
   const uiPresentation = useUiPresentation();
+  const motionReady = useMotionReady();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [uncontrolledChecked, setUncontrolledChecked] = useState(defaultChecked);
   const isControlled = checked !== undefined;
@@ -89,6 +91,7 @@ export function Checkbox({
       className="poodle-checkbox"
       data-size={resolvedSize}
       data-density={resolvedDensity}
+      data-motion-ready={motionReady}
       style={checkboxStyles}
     >
       <input

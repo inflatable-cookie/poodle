@@ -178,7 +178,11 @@ pub fn icon_button_with_handlers(
     if spec.is_loading {
         let mut spinner = Node::icon("spinner", LOADING_SPINNER_PX);
         spinner.style.descriptor.text_color = Some(text_color);
-        spinner.style.animation = Some(NodeAnimation::spin("poodle-spinner-ring", 0.8));
+        spinner.style.animation = crate::motion::animation_for_policy(
+            ctx.motion_policy(),
+            NodeAnimation::spin("poodle-spinner-ring", 0.8),
+            false,
+        );
         el = el.child(spinner);
     } else if !icon_name.is_empty() {
         let mut glyph = Node::icon(icon_name, icon_size);

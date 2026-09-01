@@ -40,6 +40,26 @@
       transform var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
   }
 
+  .poodle-icon-button:not([data-motion-ready="true"]) {
+    transition: none;
+  }
+
+  [data-poodle-motion-policy="reduced"] .poodle-icon-button {
+    transition:
+      background var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      border-color var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      box-shadow var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  [data-poodle-motion-policy="frozen"] .poodle-icon-button {
+    transition: none;
+  }
+
+  [data-poodle-motion-policy="reduced"] .poodle-icon-button:active,
+  [data-poodle-motion-policy="frozen"] .poodle-icon-button:active {
+    transform: none;
+  }
+
 
   .poodle-icon-button[data-variant="primary"] {
     --poodle-icon-button-fill: var(--poodle-recipe-icon-button-primary-fill, var(--poodle-color-accent-base));

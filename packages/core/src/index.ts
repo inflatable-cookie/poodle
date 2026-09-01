@@ -1,5 +1,36 @@
 export type { TransitionResult, PartAttrs, AttrValue } from "./machine";
 
+export {
+  abortMotion,
+  activateMotion,
+  completeMotion,
+  createMotionTrace,
+  filterMotionProperties,
+  gpuiMotionPlan,
+  isLayoutMotionProperty,
+  liveClockCount,
+  MOTION_DURATION_MS,
+  MOTION_POLICY_DATA_ATTR,
+  MOTION_ROLE,
+  motionKey,
+  resolveMotionPreference,
+  restrictMotionPolicy,
+  roleAllowsReducedOpacity,
+  sampleMotion,
+  setMotionTracePolicy,
+  shouldRunMotionLoop,
+  unmountMotion,
+  type GpuiApproximation,
+  type MotionClock,
+  type MotionDecision,
+  type MotionIntent,
+  type MotionInterruption,
+  type MotionPolicy,
+  type MotionProperty,
+  type MotionRemnant,
+  type MotionTrace,
+} from "./motion-policy";
+
 export { findNextEnabledIndex, firstEnabledIndex } from "./nav";
 
 export {
@@ -817,6 +848,22 @@ export {
   type AutoScrollPointer,
   type AutoScrollRect,
 } from "./dom/drag-drop-auto-scroll";
+export {
+  afterFirstFrame,
+  bindMotionReady,
+  cancelWebMotion,
+  liveWebMotionCount,
+  playClippedHeight,
+  dropToastVisual,
+  moveToastFocus,
+  settleToastVisual,
+  nextToastVisuals,
+  playToastPresence,
+  playWebAnimation,
+  tabIndicatorBox,
+  type ToastVisual,
+  type ToastVisualPhase,
+} from "./dom/motion-runtime";
 export {
   createDragDropController,
   type DragActivationConstraints,

@@ -6,9 +6,9 @@
   import "@inflatable-cookie/poodle-core/styles/accordion.css";
   import { toggleGroupTransition } from "@inflatable-cookie/poodle-core";
   import type { Snippet } from "svelte";
-  import { slide } from "svelte/transition";
 
   import { default as Icon } from "./Icon.svelte";
+  import { useMotionReady } from "./motion-ready.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { AccordionItem, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -41,6 +41,7 @@
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+  const motionReady = useMotionReady();
   const accordionId = ++nextAccordionId;
   let uncontrolledValue = $state<string | string[] | null>(null);
   let seededDefaultValue = $state(false);
@@ -94,6 +95,7 @@
   aria-label={ariaLabel ?? undefined}
   data-size={resolvedSize}
   data-density={resolvedDensity}
+  data-motion-ready={motionReady.ready}
 >
   {#each items as item (item.value)}
     <section class="poodle-accordion__item" data-open={openValues.includes(item.value)}>
@@ -117,17 +119,19 @@
         </button>
       </h3>
 
-      {#if openValues.includes(item.value)}
+      <div class="poodle-accordion__panel-clip">
         <div
           class="poodle-accordion__panel"
           id={`poodle-accordion-panel-${accordionId}-${item.value}`}
           role="region"
           aria-labelledby={`poodle-accordion-trigger-${accordionId}-${item.value}`}
-          transition:slide={{ duration: 180 }}
+          hidden={!openValues.includes(item.value)}
+          inert={!openValues.includes(item.value)}
+          aria-hidden={!openValues.includes(item.value) ? "true" : undefined}
         >
-          {@render children?.(item, true)}
+          {@render children?.(item, openValues.includes(item.value))}
         </div>
-      {/if}
+      </div>
     </section>
   {/each}
 </div>

@@ -23,8 +23,8 @@ pub fn spinner(spec: &SpinnerSpec, ctx: &RenderContext<'_>) -> Node {
     };
 
     let mut root = match spec.variant {
-        SpinnerVariant::Ring => build_ring(spec, tone_color),
-        SpinnerVariant::Grid => build_grid(spec, tone_color),
+        SpinnerVariant::Ring => build_ring(spec, tone_color, ctx.motion_policy()),
+        SpinnerVariant::Grid => build_grid(spec, tone_color, ctx.motion_policy()),
         SpinnerVariant::Dots => build_dots(tone_color),
     };
     if let Some(label) = spec.aria_label.as_deref() {
@@ -35,17 +35,29 @@ pub fn spinner(spec: &SpinnerSpec, ctx: &RenderContext<'_>) -> Node {
 }
 
 /// Ring: the same spinner SVG asset and rotation used by the old GPUI tier.
-fn build_ring(spec: &SpinnerSpec, tone: ColorValue) -> Node {
+fn build_ring(
+    spec: &SpinnerSpec,
+    tone: ColorValue,
+    policy: poodle_headless::motion_policy::MotionPolicy,
+) -> Node {
     let mut el = Node::icon("spinner", spec.size_px());
     el.style.descriptor.text_color = Some(tone);
     // Contract: spinner-ring 0.8s linear infinite. One shared key: all ring
     // spinners share a clock and rotate in phase, like CSS keyframes.
-    el.style.animation = Some(NodeAnimation::spin("poodle-spinner-ring", 0.8));
+    el.style.animation = crate::motion::animation_for_policy(
+        policy,
+        NodeAnimation::spin("poodle-spinner-ring", 0.8),
+        false,
+    );
     el
 }
 
 /// Grid: 6 cells, 2×3, each pulsing opacity phase-shifted into a snake.
-fn build_grid(spec: &SpinnerSpec, tone: ColorValue) -> Node {
+fn build_grid(
+    spec: &SpinnerSpec,
+    tone: ColorValue,
+    policy: poodle_headless::motion_policy::MotionPolicy,
+) -> Node {
     let width = rem_to_px(spec.grid_width_rem());
     let height = rem_to_px(spec.grid_height_rem());
     let cell_radius = rem_to_px(spec.cell_radius_rem());
@@ -80,7 +92,8 @@ fn build_grid(spec: &SpinnerSpec, tone: ColorValue) -> Node {
             s.descriptor.corner_radii.bottom_right = cell_radius;
             s.descriptor.corner_radii.bottom_left = cell_radius;
             s.descriptor.background = Some(tone);
-            s.animation = Some(cell_pulse(i, floor, span, ph));
+            s.animation =
+                crate::motion::animation_for_policy(policy, cell_pulse(i, floor, span, ph), false);
         }
         root = root.child(cell);
     }
@@ -161,5 +174,22 @@ mod tests {
             .values
             .iter()
             .any(|(property, _)| *property == AnimProperty::Rotate)));
+    }
+
+    #[test]
+    fn frozen_and_reduced_schedule_no_ring_clock() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
+        let frozen = ctx.with_motion_policy(poodle_headless::motion_policy::MotionPolicy::Frozen);
+        assert!(spinner(&SpinnerSpec::new(), &frozen)
+            .style
+            .animation
+            .is_none());
+        let reduced = ctx.with_motion_policy(poodle_headless::motion_policy::MotionPolicy::Reduced);
+        assert!(spinner(&SpinnerSpec::new(), &reduced)
+            .style
+            .animation
+            .is_none());
     }
 }

@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-09-01 — `rustfmt path/to/lib.rs` formats the whole crate because
+  rustfmt follows `mod` declarations. Passing `packages/render/src/lib.rs`
+  rewrote dozens of unrelated renderer files. Format only the edited leaf
+  modules, never a crate root, unless the whole crate is in scope. Hit while
+  implementing g16.034.
+
 - 2026-09-01 — The HistoryCenter usage snippet in
   `packages/svelte/preview/src/component-docs.ts:5145` still teaches the retired
   v2/v1 API: `entries`/`branches` props, `branchCount` on `HistoryEntry`, and

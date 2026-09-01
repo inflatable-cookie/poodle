@@ -1,7 +1,9 @@
 //! Construction-time render context — the native presentation cascade.
 //!
-//! Architecture: `docs/architecture/010-native-presentation-construction-context.md`.
-//! Contract: `docs/contracts/components/ui-presentation-provider.md`.
+//! Architecture: `docs/architecture/010-native-presentation-construction-context.md`,
+//! `docs/architecture/012-semantic-motion-policy.md`.
+//! Contract: `docs/contracts/components/ui-presentation-provider.md`,
+//! `docs/contracts/components/motion-policy-provider.md`.
 //!
 //! Every public component renderer receives one explicit borrowed
 //! `RenderContext` instead of a bare `&dyn ThemeProvider`. The context carries
@@ -20,39 +22,59 @@
 //! closure, so exiting the closure restores the parent context by construction.
 
 use poodle_adapter::ThemeProvider;
+use poodle_headless::motion_policy::{restrict_motion_policy, MotionPolicy};
 use poodle_node::Node;
-use poodle_specs::{ControlDensity, ControlSize, SemanticControlSizeRole, UiPresentationProviderSpec};
+use poodle_specs::{
+    ControlDensity, ControlSize, MotionPolicyProviderSpec, SemanticControlSizeRole,
+    UiPresentationProviderSpec,
+};
 
 use crate::presentation::resolve_semantic_size;
 
 /// One explicit construction context: a borrowed token-only theme plus the
-/// effective size-scale and density defaults for the current scope.
+/// effective size-scale, density, and motion-policy defaults for the current
+/// scope.
 ///
-/// Cheap to reborrow and derive: `scoped` copies the two `Copy` defaults and
+/// Cheap to reborrow and derive: `scoped` copies the `Copy` defaults and
 /// reborrows the same theme, so a provider never mutates its parent.
 pub struct RenderContext<'a> {
     theme: &'a dyn ThemeProvider,
     size_scale: ControlSize,
     density: ControlDensity,
+    motion_policy: MotionPolicy,
 }
 
 impl<'a> RenderContext<'a> {
-    /// The root context: size scale `md`, density `default`.
+    /// The root context: size scale `md`, density `default`, motion `full`.
     pub fn new(theme: &'a dyn ThemeProvider) -> Self {
         Self {
             theme,
             size_scale: ControlSize::Md,
             density: ControlDensity::Default,
+            motion_policy: MotionPolicy::Full,
         }
     }
 
-    /// A nested scope replacing both presentation defaults. The parent is
-    /// untouched; dropping the derived context restores it by borrowing.
+    /// A nested scope replacing both presentation defaults. Motion is copied
+    /// unchanged. The parent is untouched; dropping the derived context
+    /// restores it by borrowing.
     pub fn scoped(&self, size_scale: ControlSize, density: ControlDensity) -> RenderContext<'_> {
         RenderContext {
             theme: self.theme,
             size_scale,
             density,
+            motion_policy: self.motion_policy,
+        }
+    }
+
+    /// A nested motion restriction. The result is `max(self, requested)` and
+    /// never re-enables motion the ancestor already suppressed.
+    pub fn with_motion_policy(&self, policy: MotionPolicy) -> RenderContext<'_> {
+        RenderContext {
+            theme: self.theme,
+            size_scale: self.size_scale,
+            density: self.density,
+            motion_policy: restrict_motion_policy(Some(self.motion_policy), Some(policy)),
         }
     }
 
@@ -95,6 +117,11 @@ impl<'a> RenderContext<'a> {
     pub fn resolve_density(&self, explicit: Option<ControlDensity>) -> ControlDensity {
         explicit.unwrap_or(self.density)
     }
+
+    /// The effective motion policy for this scope.
+    pub fn motion_policy(&self) -> MotionPolicy {
+        self.motion_policy
+    }
 }
 
 /// The `UiPresentationProvider` construction boundary.
@@ -109,6 +136,19 @@ pub fn ui_presentation_provider<R>(
     build_child: impl FnOnce(&RenderContext<'_>) -> R,
 ) -> R {
     build_child(&ctx.scoped(spec.size_scale, spec.density))
+}
+
+/// The `MotionPolicyProvider` construction boundary.
+///
+/// Derives a restricted child context, invokes the child builder immediately,
+/// and returns the resulting node unchanged. No provider metadata is added to
+/// the tree.
+pub fn motion_policy_provider<R>(
+    spec: &MotionPolicyProviderSpec,
+    ctx: &RenderContext<'_>,
+    build_child: impl FnOnce(&RenderContext<'_>) -> R,
+) -> R {
+    build_child(&ctx.with_motion_policy(spec.policy))
 }
 
 /// A host-content child builder for a composite that establishes an internal
@@ -144,6 +184,7 @@ mod tests {
         with_root(|ctx| {
             assert_eq!(ctx.size_scale(), ControlSize::Md);
             assert_eq!(ctx.density(), ControlDensity::Default);
+            assert_eq!(ctx.motion_policy(), MotionPolicy::Full);
             assert_eq!(ctx.base_size(None), ControlSize::Md);
             assert_eq!(ctx.resolve_density(None), ControlDensity::Default);
         });
@@ -304,11 +345,7 @@ mod tests {
             let (inherited_button, inherited_input) =
                 ui_presentation_provider(&scope, ctx, |scoped| {
                     (
-                        crate::button::button(
-                            &ButtonSpec::new().with_label("Save"),
-                            scoped,
-                            None,
-                        ),
+                        crate::button::button(&ButtonSpec::new().with_label("Save"), scoped, None),
                         crate::text_input::text_input(
                             &TextInputSpec::new().with_default_value("Save"),
                             scoped,
@@ -339,7 +376,10 @@ mod tests {
             // xl control height = 3.25rem = 52px (contract §8 ladder).
             assert_eq!(fixed_height(&inherited_button), 52.0);
             // Inherited output matches the explicit reference exactly...
-            assert_eq!(fixed_height(&inherited_button), fixed_height(&explicit_button));
+            assert_eq!(
+                fixed_height(&inherited_button),
+                fixed_height(&explicit_button)
+            );
             assert_eq!(
                 inherited_button.style.descriptor.layout.spacing,
                 explicit_button.style.descriptor.layout.spacing
@@ -400,11 +440,8 @@ mod tests {
                 let inner_child = ui_presentation_provider(&inner, outer_ctx, |inner_ctx| {
                     crate::button::button(&ButtonSpec::new().with_label("In"), inner_ctx, None)
                 });
-                let outer_sibling = crate::button::button(
-                    &ButtonSpec::new().with_label("Out"),
-                    outer_ctx,
-                    None,
-                );
+                let outer_sibling =
+                    crate::button::button(&ButtonSpec::new().with_label("Out"), outer_ctx, None);
                 (inner_child, outer_sibling)
             });
             // sm = 1.75rem = 28px inside the nested scope; xl = 52px outside it.
@@ -462,7 +499,10 @@ mod tests {
             let provided = ui_presentation_provider(&scope, ctx, |scoped| {
                 crate::button::button(&ButtonSpec::new().with_label("Save"), scoped, None)
             });
-            assert!(matches!(provided.kind, poodle_node::NodeKind::Button { .. }));
+            assert!(matches!(
+                provided.kind,
+                poodle_node::NodeKind::Button { .. }
+            ));
             assert_eq!(provided.a11y.role, Some(poodle_node::NodeRole::Button));
             assert_eq!(provided.a11y.tab_index, Some(0));
             assert!(provided.interaction.focusable);
@@ -474,6 +514,48 @@ mod tests {
             // ...and no provider shell sits between: the child's own subtree
             // is all there is (buttons without icons have no children).
             assert!(provided.children.is_empty());
+        });
+    }
+
+    #[test]
+    fn motion_defaults_to_full_and_nests_by_restriction() {
+        with_root(|ctx| {
+            assert_eq!(ctx.motion_policy(), MotionPolicy::Full);
+            let reduced = ctx.with_motion_policy(MotionPolicy::Reduced);
+            assert_eq!(reduced.motion_policy(), MotionPolicy::Reduced);
+            let child_full = reduced.with_motion_policy(MotionPolicy::Full);
+            assert_eq!(child_full.motion_policy(), MotionPolicy::Reduced);
+            let frozen = reduced.with_motion_policy(MotionPolicy::Frozen);
+            assert_eq!(frozen.motion_policy(), MotionPolicy::Frozen);
+        });
+    }
+
+    #[test]
+    fn presentation_scope_preserves_motion() {
+        with_root(|ctx| {
+            let reduced = ctx.with_motion_policy(MotionPolicy::Reduced);
+            let scope = UiPresentationProviderSpec::new()
+                .with_size_scale(ControlSize::Xl)
+                .with_density(ControlDensity::Comfortable);
+            ui_presentation_provider(&scope, &reduced, |scoped| {
+                assert_eq!(scoped.base_size(None), ControlSize::Xl);
+                assert_eq!(scoped.motion_policy(), MotionPolicy::Reduced);
+            });
+        });
+    }
+
+    #[test]
+    fn motion_provider_builds_the_child_unchanged_without_node_metadata() {
+        with_root(|ctx| {
+            let spec = MotionPolicyProviderSpec::new().with_policy(MotionPolicy::Frozen);
+            let child = motion_policy_provider(&spec, ctx, |scoped| {
+                assert_eq!(scoped.motion_policy(), MotionPolicy::Frozen);
+                crate::button::button(&ButtonSpec::new().with_label("Save"), scoped, None)
+            });
+            assert!(matches!(child.kind, poodle_node::NodeKind::Button { .. }));
+            assert_eq!(child.a11y.role, Some(poodle_node::NodeRole::Button));
+            assert!(child.children.is_empty());
+            assert_eq!(ctx.motion_policy(), MotionPolicy::Full);
         });
     }
 }

@@ -8,6 +8,7 @@
 
   import {
     createDragDropController,
+    tabIndicatorBox,
     tabsKeydownEvent,
     tabsTransition,
     type CrossWindowDragSourceBridge,
@@ -22,6 +23,7 @@
   import { default as Menu } from "./Menu.svelte";
   import { default as Pill } from "./Pill.svelte";
   import { firstEnabledIndex } from "./internal";
+  import { useMotionReady } from "./motion-ready.svelte";
   import { default as TabsItem } from "./tabs-parts/TabsItem.svelte";
   import { getTabsForeignInsert } from "./tabs-foreign-insert";
   import { default as TabsKeyboardTargets } from "./tabs-parts/TabsKeyboardTargets.svelte";
@@ -155,6 +157,10 @@
   const isBrowser = typeof window !== "undefined";
   const uiPresentation = getUiPresentation();
   let tabElements = $state<Record<string, HTMLButtonElement | null>>({});
+  let listElement = $state<HTMLDivElement | null>(null);
+  let indicatorBox = $state<{ left: number; top: number; width: number; height: number } | null>(null);
+  let indicatorSnap = $state(false);
+  const motionReady = useMotionReady();
   let rootElement = $state<HTMLDivElement | null>(null);
   let measureListElement = $state<HTMLDivElement | null>(null);
   /** How many entries of `shed` are currently given up. */
@@ -218,8 +224,44 @@
       null,
   );
   const selectedIndex = $derived(renderedItems.findIndex((item) => item.value === currentValue));
-  const hasPanel = $derived(children !== undefined);
   const isVertical = $derived(orientation === "vertical");
+
+  function measureIndicator(snap: boolean): void {
+    if (activeEdge !== "underline" || !listElement) {
+      indicatorBox = null;
+      return;
+    }
+    if (snap) {
+      indicatorSnap = true;
+    }
+    indicatorBox = tabIndicatorBox(
+      listElement,
+      tabElements[renderedItems[selectedIndex]?.value ?? ""] ?? null,
+      isVertical ? "vertical" : "horizontal",
+    );
+    if (snap) {
+      requestAnimationFrame(() => {
+        indicatorSnap = false;
+      });
+    }
+  }
+
+  $effect(() => {
+    currentValue;
+    orientation;
+    activeEdge;
+    measureIndicator(false);
+  });
+
+  $effect(() => {
+    if (!listElement) {
+      return;
+    }
+    const observer = new ResizeObserver(() => measureIndicator(true));
+    observer.observe(listElement);
+    return () => observer.disconnect();
+  });
+  const hasPanel = $derived(children !== undefined);
   const hasTooltips = $derived(isVertical || showTooltips);
   const canCollapse = $derived(collapseWhenOverflow && !isVertical);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
@@ -648,6 +690,8 @@
   data-collapsed={collapsedByOverflow || undefined}
   data-shed={shedCount > 0 ? shed.slice(0, shedCount).join(" ") : undefined}
   data-full-width={fullWidth || undefined}
+  data-motion-ready={motionReady.ready}
+  data-indicator-snap={indicatorSnap}
 >
   {#if canCollapse}
     <div class="poodle-tabs__measure-shell" aria-hidden="true">
@@ -720,6 +764,7 @@
     </div>
   {:else}
     <div
+      bind:this={listElement}
       class="poodle-tabs__list"
       role="tablist"
       aria-label={ariaLabel ?? undefined}
@@ -766,6 +811,14 @@
           <span class="poodle-tabs__separator" aria-hidden="true"></span>
         {/if}
       {/each}
+
+      {#if activeEdge === "underline" && indicatorBox}
+        <span
+          class="poodle-tabs__indicator"
+          aria-hidden="true"
+          style="left: {indicatorBox.left}px; top: {indicatorBox.top}px; width: {indicatorBox.width}px; height: {indicatorBox.height}px"
+        ></span>
+      {/if}
 
       {#if actions}
         <div class="poodle-tabs__actions">

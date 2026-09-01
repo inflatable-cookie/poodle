@@ -1,5 +1,6 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/spinner.css";
+  import { useMotionReady } from "./motion-ready.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, SemanticControlSizeRole } from "./types";
   import type { SpinnerSize, SpinnerTone, SpinnerVariant } from "./types";
@@ -26,6 +27,7 @@
   } & Record<string, unknown> = $props();
 
   const uiPresentation = getUiPresentation();
+  const motionReady = useMotionReady();
   const resolvedSize = $derived(
     (size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole)) as SpinnerSize,
   );
@@ -48,6 +50,7 @@
   data-size={resolvedSize}
   data-density={resolvedDensity}
   data-tone={tone}
+  data-motion-ready={motionReady.ready}
   style={style ?? undefined}
   role={ariaLabel ? "status" : undefined}
   aria-label={ariaLabel ?? undefined}

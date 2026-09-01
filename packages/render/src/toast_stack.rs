@@ -285,7 +285,11 @@ pub fn toast_stack(
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
             s.descriptor.layout.spacing.gap = item_gap;
             // Enter animation: fade + rise, one-shot, keyed by the stable id.
-            s.animation = Some(toast_enter(format!("poodle-toast-{}", toast.id)));
+            s.animation = crate::motion::animation_for_policy(
+                ctx.motion_policy(),
+                toast_enter(format!("poodle-toast-{}", toast.id)),
+                true,
+            );
         }
         all_corners(&mut toast_el, radius);
 

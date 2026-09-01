@@ -13,6 +13,7 @@ import {
 import {
   createDragDropController,
   firstEnabledIndex,
+  tabIndicatorBox,
   tabsKeydownEvent,
   tabsTransition,
   type CrossWindowDragSourceBridge,
@@ -28,6 +29,7 @@ import { useTabsForeignInsert } from "./tabs-foreign-insert";
 import { Icon } from "./Icon";
 import { Menu } from "./Menu";
 import { Pill } from "./Pill";
+import { useMotionReady } from "./motion-policy";
 import { TabsItem } from "./tabs-parts/TabsItem";
 import { TabsKeyboardTargets } from "./tabs-parts/TabsKeyboardTargets";
 import {
@@ -171,9 +173,11 @@ export function Tabs({
   const tabsId = useId();
   const foreignInsert = useTabsForeignInsert();
   const uiPresentation = useUiPresentation();
+  const motionReady = useMotionReady();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const measureListRef = useRef<HTMLDivElement | null>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingTabFocus = useRef<string | null>(null);
@@ -188,6 +192,13 @@ export function Tabs({
   // The hovered tab is promoted to state so the portalled tooltip can be
   // positioned against it.
   const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null);
+  const [indicatorBox, setIndicatorBox] = useState<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const [indicatorSnap, setIndicatorSnap] = useState(false);
 
   useEffect(() => {
     const value = tooltipIndex === null ? undefined : renderedItems[tooltipIndex]?.value;
@@ -230,6 +241,40 @@ export function Tabs({
   const resolvedDensity = density ?? uiPresentation.density;
   const resolvedIconSize = resolveSupportingVisualSize(resolvedSize);
   const selectedItem = renderedItems.find((item) => item.value === currentValue) ?? null;
+
+  useEffect(() => {
+    if (activeEdge !== "underline" || !listRef.current) {
+      setIndicatorBox(null);
+      return;
+    }
+    setIndicatorBox(
+      tabIndicatorBox(
+        listRef.current,
+        tabRefs.current[renderedItems[selectedIndex]?.value ?? ""] ?? null,
+        orientation === "vertical" ? "vertical" : "horizontal",
+      ),
+    );
+  }, [activeEdge, currentValue, orientation, selectedIndex, renderedItems]);
+
+  useEffect(() => {
+    if (!listRef.current) {
+      return;
+    }
+    const list = listRef.current;
+    const observer = new ResizeObserver(() => {
+      setIndicatorSnap(true);
+      setIndicatorBox(
+        tabIndicatorBox(
+          list,
+          tabRefs.current[renderedItems[selectedIndex]?.value ?? ""] ?? null,
+          orientation === "vertical" ? "vertical" : "horizontal",
+        ),
+      );
+      requestAnimationFrame(() => setIndicatorSnap(false));
+    });
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [orientation, selectedIndex]);
   const collapseTriggerLabel = collapseLabel ?? selectedItem?.label ?? "Sections";
   const collapsedMenuItems = renderedItems.map((item) => ({
     value: item.value,
@@ -639,6 +684,8 @@ export function Tabs({
       data-collapsed={collapsedByOverflow || undefined}
       data-shed={shedCount > 0 ? shed.slice(0, shedCount).join(" ") : undefined}
       data-full-width={fullWidth || undefined}
+      data-motion-ready={motionReady}
+      data-indicator-snap={indicatorSnap}
     >
       {canCollapse ? (
         <div className="poodle-tabs__measure-shell" aria-hidden="true">
@@ -690,7 +737,7 @@ export function Tabs({
           {actions ? <div className="poodle-tabs__actions">{actions}</div> : null}
         </div>
       ) : (
-        <div className="poodle-tabs__list" role="tablist" aria-label={ariaLabel ?? undefined} aria-orientation={orientation}>
+        <div ref={listRef} className="poodle-tabs__list" role="tablist" aria-label={ariaLabel ?? undefined} aria-orientation={orientation}>
           {renderedItems.map((item, index) => (
             <Fragment key={item.value}>
               <TabsItem
@@ -749,6 +796,19 @@ export function Tabs({
               ) : null}
             </Fragment>
           ))}
+
+          {activeEdge === "underline" && indicatorBox ? (
+            <span
+              className="poodle-tabs__indicator"
+              aria-hidden="true"
+              style={{
+                left: indicatorBox.left,
+                top: indicatorBox.top,
+                width: indicatorBox.width,
+                height: indicatorBox.height,
+              }}
+            />
+          ) : null}
 
           {actions ? <div className="poodle-tabs__actions">{actions}</div> : null}
         </div>

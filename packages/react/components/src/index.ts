@@ -197,6 +197,8 @@ export { Tabs, type TabsProps, type TabsItem } from "./Tabs";
 export { Text, type TextProps } from "./Text";
 export { TextLink, type TextLinkProps } from "./TextLink";
 export { UiPresentationProvider, useUiPresentation, resolveSemanticControlSize, resolveSupportingVisualSize, type UiPresentationContextValue } from "./presentation";
+export { MotionPolicyProvider, useMotionPolicy, useMotionReady } from "./motion-policy";
+export type { MotionPolicy } from "@inflatable-cookie/poodle-core";
 export {
   DragDropProvider,
   useDragDrop,

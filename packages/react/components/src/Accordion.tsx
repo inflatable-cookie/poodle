@@ -4,6 +4,7 @@ import { toggleGroupTransition } from "@inflatable-cookie/poodle-core";
 import "@inflatable-cookie/poodle-core/styles/accordion.css";
 
 import { Icon } from "./Icon";
+import { useMotionReady } from "./motion-policy";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { AccordionItem, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -35,6 +36,7 @@ export function Accordion({
   children,
 }: AccordionProps) {
   const uiPresentation = useUiPresentation();
+  const motionReady = useMotionReady();
   const accordionId = useId();
   const [uncontrolledValue, setUncontrolledValue] = useState<string | string[] | null>(
     () => defaultValue ?? (selectionMode === "multiple" ? [] : null),
@@ -72,6 +74,7 @@ export function Accordion({
       aria-label={ariaLabel ?? undefined}
       data-size={resolvedSize}
       data-density={resolvedDensity}
+      data-motion-ready={motionReady}
     >
       {items.map((item) => {
         const open = openValues.includes(item.value);
@@ -99,11 +102,19 @@ export function Accordion({
               </button>
             </h3>
 
-            {open ? (
-              <div className="poodle-accordion__panel" id={panelId} role="region" aria-labelledby={triggerId}>
-                {children?.(item, true)}
+            <div className="poodle-accordion__panel-clip">
+              <div
+                className="poodle-accordion__panel"
+                id={panelId}
+                role="region"
+                aria-labelledby={triggerId}
+                hidden={!open}
+                inert={!open}
+                aria-hidden={!open}
+              >
+                {children?.(item, open)}
               </div>
-            ) : null}
+            </div>
           </section>
         );
       })}

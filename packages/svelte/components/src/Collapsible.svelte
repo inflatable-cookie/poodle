@@ -6,9 +6,9 @@
   import "@inflatable-cookie/poodle-core/styles/collapsible.css";
   import { disclosureTransition } from "@inflatable-cookie/poodle-core";
   import type { Snippet } from "svelte";
-  import { slide } from "svelte/transition";
 
   import { default as Icon } from "./Icon.svelte";
+  import { useMotionReady } from "./motion-ready.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -50,6 +50,7 @@
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+  const motionReady = useMotionReady();
   const collapsibleId = ++nextCollapsibleId;
   let uncontrolledOpen = $state(false);
   let seededDefaultOpen = $state(false);
@@ -90,6 +91,7 @@
   data-highlighted={highlighted}
   data-size={resolvedSize}
   data-density={resolvedDensity}
+  data-motion-ready={motionReady.ready}
 >
   <button
     type="button"
@@ -117,16 +119,18 @@
     <span class="poodle-collapsible__indicator" aria-hidden="true"><Icon name="chevron-down" /></span>
   </button>
 
-  {#if isOpen}
+  <div class="poodle-collapsible__content-clip">
     <div
       class="poodle-collapsible__content"
       id={`poodle-collapsible-content-${collapsibleId}`}
       role="region"
       aria-labelledby={`poodle-collapsible-trigger-${collapsibleId}`}
-      transition:slide={{ duration: 180 }}
+      hidden={!isOpen}
+      inert={!isOpen}
+      aria-hidden={!isOpen ? "true" : undefined}
     >
       {@render children?.()}
     </div>
-  {/if}
+  </div>
 </section>
 

@@ -4,6 +4,7 @@ import { disclosureTransition } from "@inflatable-cookie/poodle-core";
 import "@inflatable-cookie/poodle-core/styles/collapsible.css";
 
 import { Icon } from "./Icon";
+import { useMotionReady } from "./motion-policy";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -39,6 +40,7 @@ export function Collapsible({
   children,
 }: CollapsibleProps) {
   const uiPresentation = useUiPresentation();
+  const motionReady = useMotionReady();
   const collapsibleId = useId();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
 
@@ -65,6 +67,7 @@ export function Collapsible({
       data-highlighted={highlighted}
       data-size={resolvedSize}
       data-density={resolvedDensity}
+      data-motion-ready={motionReady}
     >
       <button
         type="button"
@@ -91,16 +94,19 @@ export function Collapsible({
         </span>
       </button>
 
-      {isOpen ? (
+      <div className="poodle-collapsible__content-clip">
         <div
           className="poodle-collapsible__content"
           id={`${collapsibleId}-content`}
           role="region"
           aria-labelledby={`${collapsibleId}-trigger`}
+          hidden={!isOpen}
+          inert={!isOpen}
+          aria-hidden={!isOpen}
         >
           {children}
         </div>
-      ) : null}
+      </div>
     </section>
   );
 }

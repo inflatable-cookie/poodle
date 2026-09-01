@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 
 import "@inflatable-cookie/poodle-core/styles/skeleton.css";
 
+import { useMotionReady } from "./motion-policy";
 import type { SkeletonPreset, SkeletonShape } from "./types";
 
 export interface SkeletonProps {
@@ -27,9 +28,10 @@ export function Skeleton({
   lines = 3,
   animated = true,
 }: SkeletonProps) {
+  const motionReady = useMotionReady(animated);
   if (preset === "table-row") {
     return (
-      <div className="poodle-skeleton-preset poodle-skeleton-preset--table-row" data-animated={animated} aria-hidden="true">
+      <div className="poodle-skeleton-preset poodle-skeleton-preset--table-row" data-animated={animated} data-motion-ready={motionReady} aria-hidden="true">
         {[0, 1, 2, 3].map((i) => (
           <span
             key={i}
@@ -42,7 +44,7 @@ export function Skeleton({
   }
   if (preset === "card") {
     return (
-      <div className="poodle-skeleton-preset poodle-skeleton-preset--card" data-animated={animated} aria-hidden="true">
+      <div className="poodle-skeleton-preset poodle-skeleton-preset--card" data-animated={animated} data-motion-ready={motionReady} aria-hidden="true">
         <span className="poodle-skeleton poodle-skeleton--block-header" />
         <div className="poodle-skeleton-preset__card-body">
           <span className="poodle-skeleton poodle-skeleton--line" style={cellStyle("80%")} />
@@ -58,7 +60,7 @@ export function Skeleton({
   }
   if (preset === "list-item") {
     return (
-      <div className="poodle-skeleton-preset poodle-skeleton-preset--list-item" data-animated={animated} aria-hidden="true">
+      <div className="poodle-skeleton-preset poodle-skeleton-preset--list-item" data-animated={animated} data-motion-ready={motionReady} aria-hidden="true">
         <span className="poodle-skeleton poodle-skeleton--avatar" />
         <div className="poodle-skeleton-preset__list-text">
           <span className="poodle-skeleton poodle-skeleton--line" style={cellStyle("60%")} />
@@ -69,7 +71,7 @@ export function Skeleton({
   }
   if (preset === "detail-section") {
     return (
-      <div className="poodle-skeleton-preset poodle-skeleton-preset--detail" data-animated={animated} aria-hidden="true">
+      <div className="poodle-skeleton-preset poodle-skeleton-preset--detail" data-animated={animated} data-motion-ready={motionReady} aria-hidden="true">
         <span className="poodle-skeleton poodle-skeleton--heading" />
         {Array.from({ length: lines }, (_, i) => (
           <div key={i} className="poodle-skeleton-preset__detail-item">
@@ -82,7 +84,7 @@ export function Skeleton({
   }
   if (preset === "avatar-line") {
     return (
-      <div className="poodle-skeleton-preset poodle-skeleton-preset--avatar-line" data-animated={animated} aria-hidden="true">
+      <div className="poodle-skeleton-preset poodle-skeleton-preset--avatar-line" data-animated={animated} data-motion-ready={motionReady} aria-hidden="true">
         <span className="poodle-skeleton poodle-skeleton--avatar" />
         <span className="poodle-skeleton poodle-skeleton--line" style={cellStyle("10rem")} />
       </div>
@@ -95,7 +97,7 @@ export function Skeleton({
     <span
       className="poodle-skeleton"
       data-shape={shape}
-      data-animated={animated}
+      data-animated={animated} data-motion-ready={motionReady}
       style={{ "--poodle-skeleton-width": resolvedWidth, "--poodle-skeleton-height": resolvedHeight } as CSSProperties}
       aria-hidden="true"
     />
