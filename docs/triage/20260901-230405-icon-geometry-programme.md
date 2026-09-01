@@ -31,8 +31,13 @@ The handoff settles these decisions. They are recorded here, not reopened:
 - Architecture 012 owns full/reduced/frozen policy, semantic ownership,
   latest-state-wins interruption, and terminal cleanup. Icon geometry does not
   create a second motion policy.
-- A real GPUI window visual proof is required before native admission. A
-  headless path-building result is necessary evidence, not visual admission.
+- Native visual admission requires the accepted [dedicated conformance lab
+  boundary](20260901-230407-conformance-lab-architecture.md). The lab is the
+  sole native visual transport: its separate internal repository runs one
+  operator-approved, non-activating GPUI process per fixture and returns the
+  exact-window and provenance evidence. The historical g15.059–g15.061 path
+  informs safety invariants only; it is not a second Poodle execution route.
+  A headless path-building result is necessary evidence, not visual admission.
 - The active cohort remains Svelte, React, shared Rust composition, and GPUI.
   Jetstream remains deferred under the program-wide rule.
 
@@ -78,6 +83,16 @@ distinct intermediate geometries and exercised stroke and fill path
 construction. Its test platform did not present images, its frame requests
 were manually driven, and its timings are directional. The result is a
 geometry-channel feasibility signal, not a 60 Hz or pixel-equivalence claim.
+
+The accepted [dedicated conformance lab architecture](20260901-230407-conformance-lab-architecture.md)
+sets the native visual boundary for this programme. Poodle owns the icon
+fixture meaning, geometry policy, comparison criteria, and admission result.
+The lab owns the short-lived one-process-per-fixture capture, exact-window
+transport, and focus/permission/provenance receipt. The lab is a separate
+internal repository with no reverse dependency from Poodle; Poodle's default
+QA and CI remain headless. Poodle workers do not run a local
+windowed/native-visual selector. If the lab is unavailable, IG-06 stops and
+no public IconMorph admission occurs.
 
 ## Recommended Boundary
 
@@ -337,25 +352,33 @@ structural suite cannot stand in for a presented native image.
 | Svelte and React structure | Real shells prove stable outer SVG, fixed box, currentColor/stroke treatment, accessible/decorative mode, no layout shift, SSR/client equality, hydration, focus retention, reduced/frozen behavior, and IconButton semantics. | It cannot prove native rendering or assistive technology in GPUI. |
 | Shared Rust and node | Specs/render assertions prove pair lookup, resolved size/colour, stable identity, policy filtering, exact endpoint output, and the distinct geometry node. Tests prove existing NodeKind::Icon and IconProvider behavior stay unchanged. | A node assertion is not a presented native visual. |
 | GPUI headless | The production backend builds and updates dynamic paths, records the supported geometry channel, preserves stroke/colour, handles invalidation, and leaves zero live clocks or post-teardown paints. Instrument planning, frame work, allocation, and concurrency. | The current test window does not provide display pixels or real frame pacing. |
-| Web visual | A bounded browser scene captures canonical start, controlled midpoint, end, reverse, and frozen states. Svelte↔React exactness is checked where shared DOM/CSS makes it meaningful; endpoint geometry and layout are checked separately from pixels. | It cannot substitute for real GPUI window proof. |
-| Native visual admission | After headless and structural checks pass, an operator-approved non-activating GPUI window captures the same endpoint/midpoint/reversal fixtures, proves the path is visible and stable, and compares it with the static endpoint treatment. Repeat captures must agree and the foreground application must not change. | It is not true offscreen capture, not default QA/CI, and not automatic active-cohort admission. |
+| Web visual | A bounded browser scene captures canonical start, controlled midpoint, end, reverse, and frozen states. Svelte↔React exactness is checked where shared DOM/CSS makes it meaningful; endpoint geometry and layout are checked separately from pixels. | It cannot substitute for dedicated-lab native proof. |
+| Native visual admission | After headless and structural checks pass, Poodle submits the named fixture meaning and geometry expectations to the accepted dedicated conformance lab. The lab runs one short-lived operator-approved GPUI process per fixture, captures only its exact non-activating window, and returns focus/permission/provenance receipts. Poodle applies the comparison criteria and owns the admission result. | It is not a Poodle worker selector, not default QA/CI, and not automatic active-cohort admission. |
 
-The native window step follows the established capture boundary in
-g15.059–g15.061:
+The native visual step uses the dedicated lab's manual path:
 
-- run only after exact-head review and green headless evidence;
-- use a real GPUI window with focus false and capture its exact window ID;
-- never call application activation, key-window fallback, desktop capture, or
-  a silent alternate transport;
-- record the window-server and Screen Recording limitation honestly;
-- keep it outside effigy qa, CI, release, and ordinary worker validation; and
-- require explicit operator visual sign-off before native admission.
+- Poodle runs the fixture meaning, geometry-policy, and comparison work
+  headlessly first, with exact-head review and green evidence required before
+  a lab request;
+- the lab owns one short-lived GPUI process per fixture, exact-window
+  non-activating capture, clean close/exit, and the typed
+  focus/permission/provenance receipt;
+- the lab must reject application activation, key-window fallback, desktop or
+  region capture, and any silent alternate transport;
+- the lab's operator approval, WindowServer/Screen Recording limitation, and
+  foreground result remain explicit in the retained run envelope;
+- the path remains outside Poodle effigy qa, CI, release, and ordinary worker
+  validation. Poodle workers do not run a local windowed/native-visual
+  selector; and
+- Poodle owns the comparison criteria and admission result after reviewing the
+  lab evidence.
 
-The worker may prepare the fixture and receipt schema but must not run a
-windowed selector without renewed operator approval. If the display session,
-permission, capture stability, endpoint fidelity, or foreground invariant is
-missing, native admission stops. Headless evidence remains valid but is not
-upgraded to a visual pass.
+The g15.059–g15.061 documents remain historical evidence for the safety
+invariants: non-activation, exact-window ownership, foreground preservation,
+and fail-closed capture. They are not an execution route for this programme.
+If the lab is unavailable, or its transport, focus, permission, provenance,
+capture stability, endpoint fidelity, or foreground receipt is missing, IG-06
+stops. Headless evidence remains valid but is not upgraded to a visual pass.
 
 ## Initial Budgets
 
@@ -439,14 +462,23 @@ reduced/frozen behavior, focus and layout invariants, and capture controlled
 browser endpoint/midpoint/reversal fixtures. Keep the initial route private or
 otherwise non-public until IG-06 and the promoted contract gate pass.
 
-### IG-06 — Curated visual review and real-window native proof
+### IG-06 — Curated visual review and dedicated conformance-lab native proof
 
-Review every accepted candidate's intermediate frames and both directions.
-Run the operator-approved real GPUI window evidence after code review and
-headless green. Capture endpoint, midpoint, reverse, frozen, and teardown
-fixtures through the exact non-activating window boundary. Record environment,
-foreground invariance, repeat stability, endpoint fidelity, and any visual
-rejections.
+Poodle reviews every accepted candidate's intermediate frames and both
+directions, owning the fixture meaning, geometry policy, comparison criteria,
+and admission result. After code review and green headless evidence, submit
+the named fixture inputs to the accepted dedicated conformance lab. The lab
+owns the short-lived one-process-per-fixture capture, exact-window
+non-activating transport, clean teardown, and typed focus/permission/provenance
+receipt. Capture endpoint, midpoint, reverse, frozen, and teardown fixtures;
+record environment, foreground invariance, repeat stability, endpoint fidelity,
+and visual rejections in the lab evidence consumed by Poodle.
+
+The dedicated lab is the sole native visual transport. Poodle workers do not
+run a local windowed/native-visual selector. If the lab is unavailable, or the
+lab cannot return complete transport and provenance evidence, IG-06 stops and
+no public IconMorph admission occurs. The g15.059–g15.061 window-capture work
+is historical safety evidence only, not a second execution route.
 
 Failure keeps the geometry capability unadmitted. It does not authorize a
 web-only public contract or a silent static substitution.
@@ -478,8 +510,8 @@ silently alter an already-approved pair's geometry or semantic identity.
 | Motion policy is authoritative | Full transition is tightened to reduced and then frozen. | Geometry clock stops, semantic state stays immediate, reduced/frozen paint their contracted endpoints, and no handle remains. |
 | Teardown is exact | Unmount during a scheduled web or GPUI frame. | No late DOM write, native paint, callback, or retained scheduler entry. |
 | Semantics stay on the owner | A pressed/loading IconButton changes glyph during focus. | Button label, busy/pressed/disabled/focus behavior is unchanged; the path is decorative paint. |
-| Native evidence is not overstated | Headless GPUI path construction passes but no real window capture is available. | Native admission remains blocked; no headless-pixel or active-cohort visual claim is recorded. |
-| Real-window capture is safe | Capture attempts to activate the app, capture the desktop, or produces disagreeing repeats. | Stop the visual gate; do not substitute a silent transport or waive the failure. |
+| Native evidence is not overstated | Headless GPUI path construction passes but the dedicated lab capture is unavailable. | Native admission remains blocked; no headless-pixel or active-cohort visual claim is recorded. |
+| Dedicated-lab capture is safe | The lab attempts activation, broad capture, or produces disagreeing repeats or incomplete receipts. | Stop the visual gate; do not substitute a silent transport or waive the failure. |
 | Public scope remains curated | A request adds raw d or the full provider set to the first public input. | Return to planning; do not widen the pre-v1 contract. |
 
 ## Alternatives Not Selected
@@ -493,7 +525,7 @@ silently alter an already-approved pair's geometry or semantic identity.
 | Make GPUI load pair data from a global registry | Rejected. It hides shared composition authority and makes native behavior diverge from web/Rust evidence. |
 | Adopt Morphicons as a runtime dependency | Rejected for the first implementation. It is useful pinned research, but adds web ownership and no GPUI/node solution. |
 | Generate precomputed frame assets | Held as a bounded native fallback experiment only. It risks asset explosion and awkward interruption/reversal and is not the default geometry route. |
-| Ship a web-only public primitive with a native gap | Rejected by the settled real-window admission boundary and active-cohort rule. A private research shell may collect web evidence; public admission waits. |
+| Ship a web-only public primitive with a native gap | Rejected by the settled dedicated-lab native admission boundary and active-cohort rule. A private research shell may collect web evidence; public admission waits. |
 | Add fill, arbitrary viewBox fitting, transforms, masks, or multicolour morphs | Deferred to separate capability decisions with their own topology, paint, provenance, and visual gates. |
 
 ## Explicit Non-Goals
@@ -512,8 +544,9 @@ silently alter an already-approved pair's geometry or semantic identity.
   non-uniform-stroke, off-grid, or arbitrary consumer geometry in the first
   programme.
 - Claiming native assistive-technology support from GPUI node metadata.
-- Running windowed selectors in the worker or moving window capture into
-  default QA, CI, release, or publication.
+- Running a local windowed/native-visual selector in a Poodle worker, or
+  moving the dedicated lab's window capture into default QA, CI, release, or
+  publication.
 - Admitting Jetstream or creating a per-component Jetstream exception.
 - Treating a static endpoint swap or cross-fade as equivalent to a geometry
   morph. They remain the current safe fallback where an existing contract
@@ -544,10 +577,14 @@ Stop the relevant card and return to the orchestrator when:
 - endpoint, stroke, colour, contour, or intermediate visual review fails;
 - provenance, source digest, attribution, or derivative-geometry legal review
   is incomplete;
-- the real-window proof needs activation, desktop capture, a silent fallback,
-  unavailable permission, disagreeing repeats, or cannot show the intended
-  endpoint in its own window;
-- a public web result is proposed before real-window native approval;
+- the dedicated conformance lab is unavailable, cannot consume the named
+  fixture, or cannot return a complete exact-window,
+  focus/permission/provenance receipt;
+- the lab's native proof needs activation, desktop or region capture, a silent
+  fallback, disagreeing repeats, or cannot show the intended endpoint in its
+  own window;
+- a Poodle worker is asked to run a local windowed/native-visual selector;
+- a public web result is proposed before dedicated-lab native approval;
 - a new card asks for Jetstream, release/publication, workflow edits, or
   downstream consumer changes.
 
@@ -563,7 +600,8 @@ canonical split after re-reading current main:
 | Pure web geometry and lifecycle utility | packages/core icon-geometry modules with paired Rust vectors/logic where the active-cohort contract requires it. |
 | Pair authoring, generated registry, provenance, and drift gate | A manifest beside the current icon source plus the existing icon-generation/audit pipeline or a dedicated named extension. |
 | Renderer-neutral resolved geometry payload | packages/contracts/node; shared composition and token resolution in packages/render. |
-| GPUI dynamic path interpretation and headless proof | packages/gpui/node-backend and focused preview/probe surfaces. |
+| GPUI dynamic path interpretation and headless proof | packages/gpui/node-backend and focused preview/probe surfaces; no Poodle windowed capture route. |
+| Native visual transport and exact-window provenance receipt | The dedicated internal `poodle-conformance-lab` repository defined by the accepted conformance-lab architecture; Poodle consumes its evidence without a reverse dependency. |
 | Web shells and browser proof | Svelte/React component and preview surfaces only after the public contract gate. |
 | Parity, specimens, and visual receipts | A new icon-morph parity record and bounded fixtures after admission; no established Icon parity cell moves for research. |
 | Sequencing and implementation evidence | A promoted geometry programme card with child cards IG-01 through IG-07, plus one execution log per implementation batch. |
@@ -579,6 +617,7 @@ readiness, native admission, or implementation authorization.
   docs/handoffs/20260901-230405-icon-geometry-programme-planning.md
 - docs/research/value-tracks/icon-morphing.md
 - docs/research/value-tracks/icon-morphing-native-feasibility.md
+- docs/triage/20260901-230407-conformance-lab-architecture.md
 - docs/architecture/001-poodle-system-shape.md
 - docs/architecture/006-headless-core-and-machine-model.md
 - docs/architecture/010-native-presentation-construction-context.md
@@ -599,5 +638,10 @@ readiness, native admission, or implementation authorization.
 - packages/gpui/node-backend/src/lib.rs
 - docs/triage/20260901-125758-post-motion-research-queue.md
 - docs/roadmaps/g15/059-gpui-cratesio-recovery.md
+- docs/roadmaps/g15/060-v022-release-candidate.md
 - docs/roadmaps/g15/061-v022-release-certification.md
 - docs/roadmaps/g15/047-primitive-visual-comparison.md
+
+The g15.059–g15.061 records are retained as historical safety evidence for
+non-activation, exact-window ownership, foreground preservation, and
+fail-closed capture. They are not a second execution route for IG-06.
