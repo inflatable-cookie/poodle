@@ -7,6 +7,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-09-01 — `bunx vitest run` on the full `ci:web` board OOMs two
+  worker forks at the default ~4 GB heap once
+  `test/parity/specimen-axis-census.test.tsx` (~70s, all routes) runs
+  alongside other projects. Assertions were green (3287 passed); the board
+  still exits 1 on `Worker exited unexpectedly`. Raising
+  `NODE_OPTIONS=--max-old-space-size=8192` for that step recovers it. Hit
+  while closing g16.034.
+
 - 2026-09-01 — Adding one public portable catalogue component requires a
   coordinated denominator bump across `specimen_probe.rs` `EXPECTED_ROUTES`,
   `test/parity/specimen-axis-census.test.tsx`, `lint-docs.ts` GPUI/native
