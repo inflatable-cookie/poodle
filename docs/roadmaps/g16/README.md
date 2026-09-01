@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — g16.034 is ready after PR #121 promoted the shared motion
-policy and five-family pilot
+Status: active — g16.034 is in flight; reported MarkdownEditor sizing defect
+g16.035 is ready as an independent issue-fix lane
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -66,6 +66,7 @@ stay maintained; backend admission is not part of the first card.
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete; merged in PR #100; ledger 52 mounted / 122 missing
 33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — complete; merged in PR #120 after one Northstar review round; five distinct refusal meanings across TypeScript, Rust, both web shells and mounted GPUI, plus an installed-tarball v3 `HistoryEntry` proof; publication/pin movement stays separate
 34. [034 — Shared motion policy and five-family pilot](034-shared-motion-policy-and-five-family-pilot.md) — ready; architecture 012 and the MotionPolicyProvider plus eight pilot contracts are promoted from merged planning PR #121
+35. [035 — MarkdownEditor bounded preview scroll](035-markdown-editor-bounded-preview-scroll.md) — ready; a constrained host must bound long preview content and the preview must scroll internally without changing the public sizing API
 
 ## Parallel Continuation
 
@@ -111,6 +112,10 @@ Two continuation programmes are now explicit:
   evidence. `g16.034` is the next ready card. The additive block-slider lane
   remains next after its merge; icon feasibility and AgentSubagent shimmer stay
   downstream evidence gates.
+- **Independent MarkdownEditor issue fix:** `g16.035` owns the reported long
+  preview intrinsic-height defect. It may run beside `g16.034` because it owns
+  MarkdownEditor-only source, evidence, and closeout; the orchestrator retains
+  the shared g16 front-door integration step and same-repository merge order.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
