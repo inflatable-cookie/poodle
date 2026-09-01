@@ -1,6 +1,7 @@
 # g16.038 — Agent Citations And Sources Research
 
-Status: research-ready
+Status: research-complete — PR #129; compose existing primitives, promotion
+remains gated on a named consumer and stable source identity
 Opened: 2026-09-01
 Depends on: current AgentMessage and AgentTranscript contracts; independent of
 `g16.034` and `g16.036`

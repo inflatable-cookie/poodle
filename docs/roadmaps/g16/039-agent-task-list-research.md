@@ -1,6 +1,6 @@
 # g16.039 — Agent Task List Research
 
-Status: research-ready
+Status: research-complete — PR #128; keep task-list composition consumer-owned
 Opened: 2026-09-01
 Depends on: current ToolCallGroup, AgentPlan, Progress, and ChangedFiles
 contracts; independent of `g16.034` and `g16.036`

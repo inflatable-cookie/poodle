@@ -25,16 +25,15 @@ Updated: 2026-09-01
     `034` merged in PR #124 after four exact-head review rounds and delivered
     the shared motion policy and five-family pilot; `035` merged in PR #123 after
     two native-oracle repair rounds and closed the independent MarkdownEditor
-    bounded-preview issue; `036` is ready for the paired-web Tree external
-    drop-authority adapter after PR #125 supplied the interaction and outline
-    geometry baseline; `037`–`044` are research-ready from merged DesEngs
-    intake PR #126, with `040`–`043` now unblocked by merged `034`
+    bounded-preview issue; `036` is in exact-head review for the paired-web
+    Tree external drop-authority adapter after PR #125 supplied the interaction
+    and outline geometry baseline; `037`–`044` completed the DesEngs research
+    wave in merged PRs #128–#135
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
   - Next move: finish `g16.036` with serial same-repository review and merge.
-    The independent DesEngs research frontier is `g16.037`–`g16.044`.
-    The remaining post-motion research queue is
+    The remaining post-motion queue is
     recorded in
     `../triage/20260901-125758-post-motion-research-queue.md`; block sliders
     follow the motion pilot, while icon feasibility and AgentSubagent shimmer

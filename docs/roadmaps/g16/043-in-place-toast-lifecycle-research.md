@@ -1,6 +1,7 @@
 # g16.043 — In-Place Toast Lifecycle Research
 
-Status: research-ready — `g16.034` merged in PR #124
+Status: research-complete — PR #133; same-id pending-to-settled updates remain
+consumer-owned, no promise helper or lifecycle field
 Opened: 2026-09-01
 Depends on: merged `g16.034` at `369a24f8c`; current ToastHost and ToastStack
 contracts and motion lifecycle

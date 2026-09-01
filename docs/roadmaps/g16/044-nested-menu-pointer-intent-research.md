@@ -1,6 +1,7 @@
 # g16.044 — Nested Menu Pointer Intent Research
 
-Status: research-ready
+Status: research-complete — PR #131; conditional compose-and-extend direction,
+promotion still gated
 Opened: 2026-09-01
 Depends on: current Menu, ContextMenu, and Menubar cascading-submenu contracts;
 independent of `g16.034` and `g16.036`

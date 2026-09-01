@@ -1,6 +1,7 @@
 # g16.042 — Semantic Interaction Cues Research
 
-Status: research-ready — `g16.034` merged in PR #124
+Status: research-complete — PR #134; keep cues consumer-owned, no active-cohort
+cue policy or role API
 Opened: 2026-09-01
 Depends on: merged `g16.034` at `369a24f8c` as policy/lifecycle evidence; current
 visual feedback and toast ownership

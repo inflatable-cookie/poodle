@@ -1,6 +1,7 @@
 # g16.041 — Live Series Display Research
 
-Status: research-ready — `g16.034` merged in PR #124
+Status: research-complete — PR #132; reject a Poodle live-series primitive,
+keep future product charts consumer-owned
 Opened: 2026-09-01
 Depends on: merged `g16.034` at `369a24f8c`; architecture 012; current
 MetricTile and WaveformDisplay ownership

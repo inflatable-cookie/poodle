@@ -1,6 +1,7 @@
 # g16.040 — Numeric Change Motion Research
 
-Status: research-ready — `g16.034` merged in PR #124
+Status: research-complete — PR #135; recipe-only guidance, static Poodle
+behavior, no numeric motion role
 Opened: 2026-09-01
 Depends on: merged `g16.034` at `369a24f8c`; architecture 012; existing
 Transitions.dev `Number pop-in` and `Spinning counter` findings

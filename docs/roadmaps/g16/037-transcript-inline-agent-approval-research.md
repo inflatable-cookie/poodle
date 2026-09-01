@@ -1,6 +1,7 @@
 # g16.037 — Transcript-Inline Agent Approval Research
 
-Status: research-ready
+Status: research-complete — PR #130; reject a new generic approval surface,
+compose existing AgentQuestion and AgentPlan
 Opened: 2026-09-01
 Depends on: current AgentQuestion, AgentPlan, AgentTranscript, and
 ConfirmAction contracts; independent of `g16.034` and `g16.036`

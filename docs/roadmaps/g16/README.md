@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — g16.034 is complete, g16.036 is in repair, and all eight
-DesEngs research cards are active or ready
+Status: active — g16.034 is complete, g16.036 is in review, and the eight-card
+DesEngs research wave is complete
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -68,17 +68,17 @@ stay maintained; backend admission is not part of the first card.
 34. [034 — Shared motion policy and five-family pilot](034-shared-motion-policy-and-five-family-pilot.md) — complete; merged in PR #124 after four exact-head review rounds. Architecture 012, MotionPolicyProvider, and the eight pilot contracts are the authority. No ledger cell moved.
 35. [035 — MarkdownEditor bounded preview scroll](035-markdown-editor-bounded-preview-scroll.md) — complete; merged in PR #123 after two native-oracle repair rounds; long preview content now scrolls inside a constrained host across Svelte, React, and mounted GPUI without a new sizing API
 36. [036 — Tree external drop authority](036-tree-external-drop-authority.md)
-    — ready; paired Svelte/React `reorderAuthority` adapter over the existing
+    — in review; paired Svelte/React `reorderAuthority` adapter over the existing
     Tree substrate for a latched moving set, pre-paint accept/rewrite/refuse,
     and real sync/async commit results; ordinary `onReorder` remains unchanged
-37. [037 — Transcript-inline agent approval research](037-transcript-inline-agent-approval-research.md) — research-ready; placement, blocking, focus, and settled-record ownership
-38. [038 — Agent citations and sources research](038-agent-citations-and-sources-research.md) — research-ready; stable mark/source identity and active-cohort composition
-39. [039 — Agent task list research](039-agent-task-list-research.md) — research-ready; distinguish tasks from plans, tool runs, and progress
-40. [040 — Numeric change motion research](040-numeric-change-motion-research.md) — research-ready; consolidates NumberFlow with the existing Transitions.dev counter evidence
-41. [041 — Live series display research](041-live-series-display-research.md) — research-ready; consumer, data, rendering, and benchmark boundary
-42. [042 — Semantic interaction cues research](042-semantic-interaction-cues-research.md) — research-ready; policy, accessibility, and runtime ownership remain open
-43. [043 — In-place toast lifecycle research](043-in-place-toast-lifecycle-research.md) — research-ready; same-id pending-to-settled semantics and timer ownership
-44. [044 — Nested menu pointer intent research](044-nested-menu-pointer-intent-research.md) — research-ready; shared geometry, timing, and active-cohort boundary
+37. [037 — Transcript-inline agent approval research](037-transcript-inline-agent-approval-research.md) — research-complete in PR #130; compose AgentQuestion/AgentPlan, no generic approval surface
+38. [038 — Agent citations and sources research](038-agent-citations-and-sources-research.md) — research-complete in PR #129; compose and keep promotion gated
+39. [039 — Agent task list research](039-agent-task-list-research.md) — research-complete in PR #128; consumer-owned composition
+40. [040 — Numeric change motion research](040-numeric-change-motion-research.md) — research-complete in PR #135; static default and recipe-only guidance
+41. [041 — Live series display research](041-live-series-display-research.md) — research-complete in PR #132; Poodle primitive rejected
+42. [042 — Semantic interaction cues research](042-semantic-interaction-cues-research.md) — research-complete in PR #134; consumer-owned, no cue API
+43. [043 — In-place toast lifecycle research](043-in-place-toast-lifecycle-research.md) — research-complete in PR #133; consumer-owned same-id updates
+44. [044 — Nested menu pointer intent research](044-nested-menu-pointer-intent-research.md) — research-complete in PR #131; conditional compose-and-extend direction
 
 ## Parallel Continuation
 
@@ -135,14 +135,12 @@ Two continuation programmes are now explicit:
   commit result. It adds no consumer vocabulary or second machine. Rust/GPUI
   stays on the current synchronous single-row route because honest native
   parity requires broader Node substrate work.
-- **DesEngs research frontier:** PR #126's eight-family intake is fully split
-  into `g16.037`–`g16.044`, and the consumed triage note is removed. Approval,
-  citations, agent task lists, and nested-menu pointer intent are independent
-  research-ready lanes. Numeric change, live series, semantic interaction
-  cues, and in-place toast lifecycle are now research-ready against merged
-  `g16.034` and the landed motion authority.
-  Every card produces one dossier only; names and public API shapes remain
-  hypotheses until separate operator promotion.
+- **DesEngs research wave:** PR #126's eight-family intake is fully researched
+  in merged PRs #128–#135, and the consumed triage note is removed. The
+  dossiers reject generic approval, task-list, live-series, numeric-motion,
+  cue-policy, and toast-lifecycle APIs; citations remain composition-gated;
+  nested-menu pointer intent is conditional compose-and-extend work. No public
+  API shape is promoted by research intake alone.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening
