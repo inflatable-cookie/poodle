@@ -193,6 +193,23 @@ Five blockers, all repaired on this branch:
 Each repair is closed by a proof that fails against the planted pre-fix
 behaviour; the results are in the closeout log.
 
+## Review Round 2
+
+Three closeout blockers, all repaired:
+
+1. the seven authoritative contracts still described removed mechanisms —
+   BlockEditor's `draggable` grip, OrderBy's `draggable` handle and "joined or
+   owned controller", Tabs' component-owned drag indices and a drag sub-machine
+   its machine never had. All were removed, and `drift:drag-inventory` now
+   reads the contracts too: a contract may say a mechanism is absent, never
+   that it is present;
+2. the terminal oracle was proven on the wrong subset. OrderBy and BlockEditor
+   gained post-terminal focus and announcement assertions in both web
+   frameworks and in their native regressions, and where the honest answer was
+   weaker than the claim the claim moved into the log's accepted limits;
+3. the `ownsAnnouncements` seam gained a focused controller regression for its
+   latch and reset boundary, plus a native regression for the same shape.
+
 ## Continuation
 
 After operator-authorized merge, close the drag-and-drop programme in g16. The

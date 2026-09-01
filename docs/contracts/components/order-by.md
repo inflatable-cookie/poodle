@@ -36,7 +36,7 @@ Updated: 2026-07-19
       │   └── IconButton (icon="x", variant="ghost", ariaLabel="Clear sort") (conditional)
       ├── [List .order-by__list] <div role="list"> (conditional: visible when value non-empty)
       │   └── [Item .order-by__item] <div role="listitem"> (repeated, single flex row)
-      │       ├── [Drag Handle .order-by__drag-handle] <button draggable aria-label="Reorder …">
+      │       ├── [Drag Handle .order-by__drag-handle] <button aria-label="Reorder …">
       │       ├── [Item Label .order-by__item-label] <span>
       │       ├── [Direction Toggle] IconButton (arrow-up / arrow-down, size="xs")
       │       └── [Remove] IconButton (x, size="xs")
@@ -59,7 +59,7 @@ Updated: 2026-07-19
 | Surface | yes | anchored `role="dialog"` dropdown surface (`tabindex="-1"`) containing the sort builder UI |
 | List | no | vertical list of active sort items (shown when value is non-empty) |
 | Item | no | one active sort field row, a single flex row: drag handle, field label, direction toggle, remove; supports drag reorder |
-| Drag Handle | no | focusable `<button>` carrying the braille glyph (`⠿`); `draggable`, owns drag-start and Alt+Arrow keyboard reorder |
+| Drag Handle | no | focusable `<button>` carrying the braille glyph (`⠿`); the substrate drag source, and the Alt+Arrow keyboard reorder |
 | Item Label | no | field name, single line with ellipsis overflow |
 | Empty | no | placeholder text ("No sort fields") when value is empty |
 | Add | no | wrapper for the Select dropdown that adds a new sort field |
@@ -210,7 +210,6 @@ toggling; option logic is plain state.
 | List | `role` | `"list"` |
 | Item | `role` | `"listitem"` |
 | Drag handle | element | focusable `<button>` |
-| Drag handle | `draggable` | `true` (unless disabled) |
 | Drag handle | `aria-label` | `"Reorder {fieldLabel}. Drag or use Alt plus arrow keys."` |
 | Chevron | `aria-hidden` | `"true"` |
 | Direction toggle IconButton | `ariaLabel` | `"{fieldLabel}: ascending\|descending. Click to toggle."` |
@@ -594,8 +593,7 @@ arbitrated by.
 A builder that cannot reorder — `disabled`, or holding a single clause —
 registers no source and no target at all rather than registering disabled ones.
 A registered source is still keyboard-reachable and still nameable in an
-announcement. Joining changes who arbitrates, never
-which rows are eligible.
+announcement.
 
 ## 11. Internal Sub-Components
 
@@ -619,7 +617,7 @@ The panel uses the following internal component instances:
 - The `activeSort` prop provides backward compatibility: when `value` is empty, `activeSort` is converted to a one-element value; on every mutation, `activeSort` is updated to reflect the first value element
 - CSS classes `order-by__item--dragging` and `order-by__item--drop-target` are toggled via Svelte's `class:` directive,
   driven by the drag substrate's session snapshot
-- The panel registers rows through `dragSourceAction` / `dropTargetAction` against the joined or owned controller; React uses a row
+- The panel registers rows through `dragSourceAction` / `dropTargetAction` against the controller it owns; React uses a row
   sub-component because its registration hooks cannot run in a list loop
 - The add-field Select uses its value-change callback to call `addField(key)`, then resets its own value to `""` to allow re-selection
 - Clearing all sort fields is done via the reset `×` IconButton only — in the summary trigger for `summary`, in the panel header for `icon`; there is no footer or "Clear all" Button
@@ -642,6 +640,12 @@ The panel uses the following internal component instances:
   keyboard and pointer routes produce one identical result payload.
 - The handle is a focusable button. It is never drawn without its handler:
   a spec that cannot reorder draws no grip.
+- Runtime asymmetry, deliberate: on the web `Alt+Arrow` issues a keyboard drop
+  command and therefore runs as a real substrate session, announcement and all.
+  Natively it reaches the same emitter directly, because the native controller
+  exposes no keyboard-drop command to a renderer. The result payload is
+  identical on both; the native chord produces no substrate announcement, and
+  leaves focus on the handle it was pressed on.
 
 ## 13. Parity Checklist
 

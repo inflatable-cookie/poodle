@@ -1011,6 +1011,21 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         `blocks=${await attr(fw, "blocks")} count=${await attr(fw, "blocks-count")}`,
       );
 
+      // ── BlockEditor's terminal is announced once, in its own region ──
+      const blockRegion = (
+        await page.locator(`#${fw}-blocks .poodle-drag-live-region`).textContent()
+      )?.trim();
+      const blockDragging = await page.locator(`#${fw}-blocks .poodle-dragging`).count();
+      const blockDragOver = await page.locator(`#${fw}-blocks .poodle-drag-over`).count();
+      check(
+        `${name}: ${fw} BlockEditor terminal announces once and strands no posture`,
+        blockRegion === "Dropped paragraph block on paragraph block" &&
+          blockDragging === 0 &&
+          blockDragOver === 0,
+        `region="${blockRegion}" dragging=${blockDragging} dragOver=${blockDragOver}`,
+      );
+
+
       // ── BlockEditor: only the grip is a handle ──
       //
       // The press point is the toolbar's own gap — plain, non-interactive
@@ -1037,6 +1052,31 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         `${name}: ${fw} BlockEditor content press never starts a drag`,
         draggingFromContent === 0 && (await attr(fw, "blocks-count")) === "1",
         `dragging=${draggingFromContent} count=${await attr(fw, "blocks-count")}`,
+      );
+
+      // ── A move control commits once, and focus is not stranded ──
+      //
+      // Focus does not follow the block: the control is re-rendered at its new
+      // position and focus falls to the block group that contains it. It stays
+      // inside the block that moved, which is the part the terminal rule is
+      // about — nothing is left on `body`. Returning focus to the control
+      // itself is a BlockEditor focus decision this card did not take.
+      await page.locator(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(2) button[aria-label="Move up"]`).click();
+      await frames(page);
+      const blockFocusInside = await page.evaluate((framework) => {
+        const active = document.activeElement;
+        if (!active || active === document.body) return "body";
+        const moved = document.querySelector(
+          `#${framework}-blocks .poodle-block-editor__block:nth-of-type(1)`,
+        );
+        return moved && moved.contains(active) ? "inside-moved-block" : "elsewhere";
+      }, fw);
+      check(
+        `${name}: ${fw} BlockEditor move control commits once and strands no focus`,
+        (await attr(fw, "blocks")) === "b3,b2,b1" &&
+          (await attr(fw, "blocks-count")) === "2" &&
+          blockFocusInside === "inside-moved-block",
+        `blocks=${await attr(fw, "blocks")} count=${await attr(fw, "blocks-count")} focus=${blockFocusInside}`,
       );
 
       // ── The move is announced once, in the editor's own region ──
@@ -1191,13 +1231,35 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         `sort=${await attr(fw, "sort")} count=${await attr(fw, "sort-count")}`,
       );
 
+      // ── OrderBy's terminal is announced once, in the panel's own region ──
+      const orderRegion = (
+        await page.locator(".poodle-order-by__surface .poodle-drag-live-region").textContent()
+      )?.trim();
+      const orderDragging = await page.locator(".poodle-order-by__item--dragging").count();
+      const orderDropTarget = await page.locator(".poodle-order-by__item--drop-target").count();
+      check(
+        `${name}: ${fw} OrderBy terminal announces once and strands no posture`,
+        orderRegion === "Dropped Title on Size" &&
+          orderDragging === 0 &&
+          orderDropTarget === 0,
+        `region="${orderRegion}" dragging=${orderDragging} dropTarget=${orderDropTarget}`,
+      );
+
       await page.locator(".poodle-order-by__item:nth-of-type(2) .poodle-order-by__drag-handle").focus();
       await page.keyboard.press("Alt+ArrowUp");
       await frames(page);
+      const orderFocus = await page.evaluate(
+        () => (document.activeElement as HTMLElement | null)?.getAttribute("aria-label") ?? "",
+      );
       check(
         `${name}: ${fw} OrderBy Alt+Arrow commits through the same session`,
         (await attr(fw, "sort")) === "size,updated,title" && (await attr(fw, "sort-count")) === "2",
         `sort=${await attr(fw, "sort")} count=${await attr(fw, "sort-count")}`,
+      );
+      check(
+        `${name}: ${fw} OrderBy keeps focus on the handle it reordered from`,
+        orderFocus === "Reorder Size. Drag or use Alt plus arrow keys.",
+        `focused="${orderFocus}"`,
       );
     }
   } finally {

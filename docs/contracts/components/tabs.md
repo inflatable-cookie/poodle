@@ -204,19 +204,19 @@ props for parity and ignore them, as they already do for `collapseWhenOverflow`.
 | drag-source | dragging this tab | `opacity: 0.4` |
 | drop-target | dragging over this tab | `box-shadow: inset 0 0 0 0.125rem accent-base`, `border-radius: radius-control` |
 
-The drag-source / drop-target visuals are driven by transient host-set drag
-state. In Svelte these come from the component's own internal `dragSourceIndex`
-/ `dropTargetIndex` during a drag gesture (`[data-drag-source]` /
-`[data-drop-target]`). In the spec-driven targets (GPUI, Jetstream) the host
-sets `dragValue` / `dropTargetValue` (the tab values being dragged / hovered)
-on the spec; both default unset. GPUI consumes the same inset drop-target ring
-through the shared node shadow layer.
+The drag-source / drop-target visuals are driven by the drag substrate's
+session snapshot, keyed by the strip's own registration ids
+(`[data-drag-source]` / `[data-drop-target]`). No web adapter owns drag state
+of its own. In the spec-driven targets (GPUI, Jetstream) the host sets
+`dragValue` / `dropTargetValue` (the tab values being dragged / hovered) on the
+spec; both default unset. GPUI consumes the same inset drop-target ring through
+the shared node shadow layer.
 
 ### Component States
 
 - Selected-tab state: controlled or uncontrolled value tracking
 - Roving focus: `focusIndex` tracks which tab has `tabindex="0"`, all others get `tabindex="-1"`
-- Drag state: `dragSourceIndex` and `dropTargetIndex` for reorder
+- Drag posture: read from the substrate session snapshot, not component state
 
 ### Behavior Machine
 
@@ -247,9 +247,11 @@ Main chart:
 |-------|-------------|
 | `idle` | tablist interactive |
 
-Reorder sub-machine: `idle` → `dragging { sourceIndex, dropTargetIndex }` →
-`idle` (drop applies reorder; leave/end cancels). Keyboard reorder
-(Alt+Arrow) is a single-event action, not a `dragging` entry.
+There is no reorder sub-machine. The drag session — pickup, hover intent,
+cancellation, and commit — belongs to the drag substrate (architecture 011,
+spec 069). The machine only ever sees the accepted result, as `REORDER`.
+Keyboard reorder (Alt+Arrow) issues a keyboard drop command against the same
+registrations, so it reaches the machine the same way.
 
 Tooltip sub-machine (active when vertical or `showTooltips`): `hidden` →
 `pending { index }` (pointer enter, 300ms timer) → `visible { index }`;
@@ -269,7 +271,7 @@ Keyboard events carry the index of the tab that received the key
 (`fromIndex`/`index`); the machine prefers it over tracked `focusIndex` when
 the two diverge, matching the pre-machine behavior where handlers used their
 own tab index.
-| `DRAG_START` / `DRAG_OVER` / `DRAG_LEAVE` / `DROP` / `DRAG_END` | indices | pointer drag when `reorderable` |
+| `REORDER` | `fromIndex`, `toIndex` | the drag substrate committed a drop |
 | `URL_POP` | `value \| null` | environment: `popstate` when `historyKey` set |
 | `OVERFLOW_CHANGE` | `collapsed: boolean` | environment: measurement effect |
 
@@ -282,15 +284,13 @@ own tab index.
 | `idle` | `ACTIVATE` | `activationMode="manual"` | `idle` | commit selection as `SELECT` |
 | `idle` | `CLOSE` | item `closable` | `idle` | `onClose(value)` only — parent owns item removal |
 | `idle` | `REORDER_STEP` | `reorderable`, target in bounds | `idle` | reorder items, keep focus on moved tab (effect `focusTab`), `onReorder(order)` |
-| `idle` | `DRAG_START` | `reorderable`, item enabled | `dragging` | record `sourceIndex` |
-| `dragging` | `DRAG_OVER` / `DRAG_LEAVE` | — | `dragging` | update/clear `dropTargetIndex` |
-| `dragging` | `DROP` | valid target | `idle` | apply reorder as in `REORDER_STEP` |
-| `dragging` | `DRAG_END` | — | `idle` | clear drag context, no reorder |
+| `idle` | `REORDER` | substrate committed a drop | `idle` | apply the move, `onReorder(order)` |
 | `idle` | `URL_POP` | `historyKey` set | `idle` | set `value` from URL, falling back to first enabled item |
 | `idle` | `OVERFLOW_CHANGE` | `collapseWhenOverflow`, horizontal | `idle` | set `collapsedByOverflow`; collapsed rendering delegates selection to a Menu, which re-enters via `SELECT` |
 
 Disabled items: never selectable, never focus targets (`FOCUS_MOVE` skips
-them, wrapping modulo item count), not draggable.
+them, wrapping modulo item count), and never drag sources. A disabled tab is
+still a place to put one.
 
 #### Effects
 
@@ -851,7 +851,7 @@ Applies when `fullWidth` is set and orientation is horizontal.
 
 | State | Property | Value |
 |-------|----------|-------|
-| draggable item | `cursor` | `grab` |
+| reorderable item | `cursor` | `grab` |
 | drag source | `opacity` | `0.4` |
 | drop target | `box-shadow` | `inset 0 0 0 0.125rem var(--poodle-color-accent-base)` |
 | drop target | `border-radius` | `var(--poodle-radius-control)` |

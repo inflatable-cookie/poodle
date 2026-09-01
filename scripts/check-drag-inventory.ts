@@ -74,6 +74,57 @@ const BANNED_TOKENS: Array<{ pattern: RegExp; why: string }> = [
 ];
 
 /**
+ * The same mechanism vocabulary, read against the *contracts*.
+ *
+ * The contracts are the authority, so a contract that still describes a
+ * `draggable` grip or a component-owned drag index outranks the code that no
+ * longer has one — and a reader following the contract writes the old thing
+ * back. Prose is not code, though, so the rule is narrower than the source
+ * rule: a contract may say the mechanism is **absent**, and may not say it is
+ * **present**.
+ *
+ * A line is accepted when it carries one of these negations. Everything else
+ * naming a mechanism token is drift.
+ */
+const CONTRACT_NEGATIONS =
+  /\b(no|not|never|cannot|rather than|instead of|without|are gone|is gone)\b/i;
+
+/**
+ * How much text around a token is read for its negation.
+ *
+ * Both sides, because English puts the negation on either: "there is no
+ * `draggable` attribute" and "`DataTransfer` is not session authority" are
+ * both denials. Paragraph-wide would be too generous — "React uses a row
+ * sub-component because its registration hooks cannot run in a list loop"
+ * would excuse a "joined or owned controller" claim in the same sentence — so
+ * the window stays short enough that the negation is attached to the thing it
+ * negates.
+ */
+const NEGATION_BEFORE = 70;
+const NEGATION_AFTER = 40;
+
+/**
+ * Mechanism tokens that may not be *claimed* by a programme contract.
+ *
+ * Narrower than the source list on purpose: ordinary semantic uses of "drag"
+ * are how these contracts describe what the component does, and erasing them
+ * would make the documents worse. Only the tokens that name a specific
+ * removed mechanism are listed.
+ */
+const CONTRACT_BANNED_TOKENS: Array<{ pattern: RegExp; why: string }> = [
+  { pattern: /\bdraggable\b/, why: "the HTML `draggable` attribute; rows are substrate drag sources" },
+  { pattern: /\bdataTransfer\b/i, why: "a `DataTransfer` payload; subjects are opaque" },
+  { pattern: /\beffectAllowed\b/, why: "HTML drag operation negotiation" },
+  { pattern: /\bdropEffect\b/, why: "HTML drag operation negotiation" },
+  {
+    pattern: /\b(dragIndex|dragOverIndex|dragSourceIndex|dropTargetIndex|draggingId|dropTargetId)\b/,
+    why: "component-owned drag state; posture is read from the session snapshot",
+  },
+  { pattern: /\bDRAG_(START|OVER|LEAVE|END)\b/, why: "a component-owned drag machine event; the substrate owns the session" },
+  { pattern: /joined or owned controller/, why: "OrderBy always owns its controller; it cannot join" },
+];
+
+/**
  * Drag-shaped paths that are deliberately retained, each with a non-payload
  * reason grounded in its contract. An entry that stops matching is reported
  * too: a stale exemption is the same drift as a missing one.
@@ -112,6 +163,13 @@ const SUBSTRATE_MARKERS = {
   rust: ["use crate::drag_drop::", "crate::drag_drop::"],
 };
 
+function toKebab(name: string): string {
+  return name
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/([A-Z])([A-Z][a-z])/g, "$1-$2")
+    .toLowerCase();
+}
+
 function read(relativePath: string): string {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
@@ -146,6 +204,58 @@ function scan(relativePath: string, failures: string[]): void {
   }
 }
 
+/**
+ * A contract's logical lines: table rows stand alone, wrapped prose is joined
+ * back into its paragraph.
+ *
+ * A negation and the token it negates are routinely on different physical
+ * lines — "There is no `dragSourceIndex`, `dragOverIndex`, / `draggable`
+ * attribute" wraps mid-sentence — so a per-line read would report the second
+ * half of a sentence that says the opposite of what it is accused of.
+ */
+function logicalLines(source: string): Array<{ line: number; text: string }> {
+  const physical = source.split("\n");
+  const out: Array<{ line: number; text: string }> = [];
+  let buffer: string[] = [];
+  let start = 0;
+
+  const flush = () => {
+    if (buffer.length > 0) out.push({ line: start + 1, text: buffer.join(" ") });
+    buffer = [];
+  };
+
+  physical.forEach((raw, index) => {
+    const line = raw.replace(/<!--[\s\S]*?-->/g, "");
+    const trimmed = line.trim();
+    const standalone = trimmed.length === 0 || trimmed.startsWith("|") || trimmed.startsWith("#");
+    if (standalone) {
+      flush();
+      if (trimmed.length > 0) out.push({ line: index + 1, text: trimmed });
+      return;
+    }
+    if (buffer.length === 0) start = index;
+    buffer.push(trimmed);
+  });
+  flush();
+  return out;
+}
+
+function scanContract(relativePath: string, failures: string[]): void {
+  for (const { line, text } of logicalLines(read(relativePath))) {
+    for (const { pattern, why } of CONTRACT_BANNED_TOKENS) {
+      const match = new RegExp(pattern.source, `${pattern.flags}g`);
+      for (const hit of text.matchAll(match)) {
+        const at = hit.index ?? 0;
+        const window =
+          text.slice(Math.max(0, at - NEGATION_BEFORE), at) +
+          text.slice(at + hit[0].length, at + hit[0].length + NEGATION_AFTER);
+        if (CONTRACT_NEGATIONS.test(window)) continue;
+        failures.push(`${relativePath}:${line}: contract still claims ${why}\n    ${text.trim()}`);
+      }
+    }
+  }
+}
+
 export function runInventory(): string[] {
   const failures: string[] = [];
 
@@ -158,6 +268,13 @@ export function runInventory(): string[] {
         failures.push(`${component.name}: expected surface is missing: ${file}`);
         continue;
       }
+    }
+
+    const contract = `docs/contracts/components/${toKebab(component.name)}.md`;
+    if (!exists(contract)) {
+      failures.push(`${component.name}: contract is missing: ${contract}`);
+    } else {
+      scanContract(contract, failures);
     }
 
     const parts = component.parts.flatMap((part) => [
@@ -219,6 +336,8 @@ if (import.meta.main) {
     process.exit(1);
   }
   console.log(
-    `drag inventory: ${PROGRAMME_COMPONENTS.length} programme components on the common substrate; ${RETAINED.length} retained substrate-owned transports, each with a contract reason.`,
+    `drag inventory: ${PROGRAMME_COMPONENTS.length} programme components on the common substrate, ` +
+      `their contracts free of removed-mechanism claims; ${RETAINED.length} retained substrate-owned ` +
+      `transports, each with a contract reason.`,
   );
 }

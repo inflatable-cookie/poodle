@@ -237,6 +237,11 @@ struct ControllerState {
     /// every frame: a host that removes the dragged row still has to receive
     /// its own terminal callback and get focus back.
     active_source: Option<(NodeDragSource, String)>,
+    /// Whether the live session's source narrates itself, latched when the
+    /// session begins. Read `NodeDragSource::owns_announcements` for why this
+    /// is a latch and not a lookup: `active_source` is cleared during terminal
+    /// cleanup, which is exactly when a late announcement lands.
+    session_owns_announcements: bool,
     last_outcome: Option<DragTerminalOutcome>,
     next_session: u64,
     keyboard_index: Option<usize>,
@@ -570,6 +575,7 @@ impl DragDropController {
                 rejected: None,
                 conflicts: Vec::new(),
                 active_source: None,
+                session_owns_announcements: false,
                 last_outcome: None,
                 next_session: 0,
                 keyboard_index: None,
@@ -1737,6 +1743,9 @@ impl DragDropController {
             state.keyboard_index = None;
             state.keyboard_origin = None;
             state.last_outcome = None;
+            // An external batch has no local source, so nobody narrates it but
+            // this controller.
+            state.session_owns_announcements = false;
             state.active_source = None;
             state.pointer = Some((x, y));
             state.external_source_label = Some(inbound_label(&batch));
@@ -2509,6 +2518,7 @@ impl DragDropController {
             state.keyboard_index = None;
             state.keyboard_origin = registration.keyboard_order;
             state.last_outcome = None;
+            state.session_owns_announcements = registration.owns_announcements;
             state.active_source = Some((registration.clone(), element_id));
             (session_id, registration)
         };
@@ -3253,12 +3263,10 @@ impl DragDropController {
                 return;
             };
             // A source that narrates its own sessions has already said what
-            // happened, in its own words, in its own region.
-            if state
-                .active_source
-                .as_ref()
-                .is_some_and(|(source, _)| source.owns_announcements)
-            {
+            // happened, in its own words, in its own region. Latched at
+            // session start: `active_source` is gone by the time a terminal
+            // announcement lands.
+            if state.session_owns_announcements {
                 return;
             }
             let source_label = state

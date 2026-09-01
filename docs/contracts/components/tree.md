@@ -77,7 +77,7 @@ Updated: 2026-08-30
   `onContextMenu(value, x, y)`; the host opens its own `ContextMenu` at the
   pointer (items are app-specific). Jetstream polls the platform right-button and
   renders the menu as a positioned overlay routed by token.
-- **Reorder** (`reorderable` + `onReorder`): rows are draggable; a drop fires
+- **Reorder** (`reorderable` + `onReorder`): rows are substrate drag sources; a drop fires
   `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`
   (computed from pointer Y within the target row; `inside` only for branches).
   Alt+↑/↓ moves the focused node among siblings through

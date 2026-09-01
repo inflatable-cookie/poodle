@@ -59,7 +59,7 @@ Updated: 2026-08-13
 ```text
 [Root Region]
   └── [Stack]
-        ├── [Stack Item] (draggable, reorderable)
+        ├── [Stack Item] (drag source, reorderable)
         ├── [Stack Item]
         └── ...
 ```
@@ -72,7 +72,7 @@ Updated: 2026-08-13
 | CollapseToggle | conditional | collapse/expand affordance; only rendered when `collapsible=true` |
 | Body | flexible expanded only | active panel content snippet |
 | Stack | static only | flex container for stacked panels |
-| Stack Item | static only | draggable panel wrapper |
+| Stack Item | static only | panel wrapper, and the panel's drag source |
 | Drop Zone | conditional | overlay shown during cross-region drag |
 
 ## 3. Props And Inputs
@@ -746,7 +746,7 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Cross-region drag-and-drop | Two side-by-side DockRegions (left with 3 items: Explorer/Search/Source Control; right with 1 item: Outline), both `edge` appropriate, `canAcceptPanel` enabled, reorder and panelDrop events bound | Two docks in grid layout; tabs draggable between regions; drop zone overlay appears on drag-over; panel counts update after transfer |
+| Cross-region drag-and-drop | Two side-by-side DockRegions (left with 3 items: Explorer/Search/Source Control; right with 1 item: Outline), both `edge` appropriate, `canAcceptPanel` enabled, reorder and panelDrop events bound | Two docks in grid layout; tabs move between regions; drop zone overlay appears while a panel is over a region; panel counts update after transfer |
 
 ## 14. Approval And Adoption Notes
 

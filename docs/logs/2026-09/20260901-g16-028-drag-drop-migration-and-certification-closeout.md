@@ -3,7 +3,7 @@
 Status: delivered — awaiting orchestrator review
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/118
-Review rounds: 1 (five blockers, all repaired on this branch)
+Review rounds: 2 (five blockers, then three; all repaired on this branch)
 Card: `docs/roadmaps/g16/028-drag-drop-migration-and-certification-closeout.md`
 Handoff: `docs/handoffs/20260901-075640-g16-028-drag-closeout.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
@@ -168,13 +168,69 @@ fails against the pre-fix behaviour.
 | Focus follows the moved model | the focus request is removed from `emitOrder` | `svelte ModelCatalogueEditor returns focus to the moved model's handle` → `FAIL focused=""` |
 | Keyboard pickup commits | `keyboardOrder` removed from the EditableList row | `svelte EditableList keyboard pickup commits and leaves no posture` → `FAIL rows=r1,r2,r3 count=0` |
 
+## Review round 2
+
+Three closeout blockers.
+
+- **The authoritative contracts still described mechanisms the code had
+  dropped.** BlockEditor's grip was still `draggable="true"` in its anatomy and
+  parts table; OrderBy still gave the handle a `draggable` attribute in three
+  places, still said "joined or owned controller", and still claimed joining
+  changes arbitration; Tabs still described Svelte-owned `dragSourceIndex` /
+  `dropTargetIndex`, a reorder sub-machine, and `DRAG_START` / `DRAG_OVER` /
+  `DRAG_LEAVE` / `DROP` / `DRAG_END` machine events the Tabs machine has never
+  had — it only ever sees `REORDER`. All seven contracts were scanned and only
+  stale mechanism claims were removed; ordinary semantic uses of "drag" stayed,
+  and a few loose ones ("rows are draggable") were sharpened to "drag sources".
+
+  `drift:drag-inventory` now reads the seven contracts too, with a rule prose
+  can carry: a contract may say a mechanism is **absent**, and may not say it
+  is **present**. It joins wrapped prose back into paragraphs — a negation and
+  the token it negates routinely land on different physical lines — and looks
+  for the negation in a short window either side of the token rather than
+  anywhere in the paragraph.
+
+- **The terminal oracle was proven on the wrong subset.** The round-1
+  focus/one-voice assertions were ModelCatalogueEditor-only and the
+  keyboard-pickup case was EditableList-only. OrderBy and BlockEditor now have
+  their own post-terminal assertions in both web frameworks and in their native
+  regressions, and EditableList's native regression asserts its keyboard
+  terminal and focus. Where the honest answer was weaker than the claim, the
+  claim moved: see *Accepted limits*.
+
+- **The `ownsAnnouncements` seam claimed a lifecycle it had not proven.** Added
+  a focused controller regression for the latch and the reset boundary, and a
+  native regression for the same shape. Both bite.
+
+### Round-2 falsification
+
+| Repair | Planted counterexample | Named proof, and what it said |
+| --- | --- | --- |
+| Contracts carry no removed-mechanism claim | `draggable="true"` restored to BlockEditor's parts table | `drift:drag-inventory` → `block-editor.md:45: contract still claims the HTML draggable attribute` |
+| — | Svelte-owned `dragSourceIndex` / `dropTargetIndex` restored to Tabs | `drift:drag-inventory` → `tabs.md:217: contract still claims component-owned drag state` |
+| — | "joined or owned controller" restored to OrderBy | `drift:drag-inventory` → `order-by.md:614: contract still claims OrderBy always owns its controller; it cannot join` |
+| OrderBy's terminal has exactly one voice | OrderBy's source claims `ownsAnnouncements` | `svelte OrderBy terminal announces once and strands no posture` → `FAIL region=""` |
+| BlockEditor's terminal strands no posture | the drop-target class latches on a component-owned id | `svelte BlockEditor terminal announces once and strands no posture` → `FAIL dragOver=1` |
+| The announcement flag is latched, not looked up | the guard becomes a live registration lookup (TypeScript) | `silences every announcement of a self-narrating session, and only that session` → FAILED |
+| The flag resets per session | the native flag becomes sticky and never clears | `a_self_narrating_source_silences_its_whole_session_and_only_that_session` → `FAILED: the next ordinary session is narrated: []` |
+
+One plant did **not** bite, and the reason is worth keeping: making the *native*
+guard a live lookup changes nothing observable, because the native controller
+holds `active_source` as a clone taken at session start, so a lookup on it
+already behaves like a latch in every flow the driver can produce. The native
+latch is therefore the same shape as the TypeScript one rather than a repair;
+what is genuinely provable natively is the reset boundary, and that is the plant
+above.
+
 ## Evidence
 
 | Claim | Proof |
 | --- | --- |
-| Web migrations behave | `test/drag-drop/components.html` mounted in Chromium and WebKit via `effigy test:drag-drop-browser`: 16 checks per framework, 64 across both engines |
+| Web migrations behave | `test/drag-drop/components.html` mounted in Chromium and WebKit via `effigy test:drag-drop-browser` |
 | Native completions behave | `packages/gpui/preview/tests/headless_regressions.rs#editable_list_substrate_reorder_rebuilds_the_host_spec`, `#order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec`, `#block_editor_grip_drag_and_move_controls_rebuild_the_host_spec` |
 | One voice per session, natively | `packages/gpui/preview/tests/headless_regressions.rs#model_catalogue_editor_pointer_drop_is_announced_once_by_the_editor` |
+| The announcement latch and its reset | `test/headless-dom/drag-drop-controller.test.ts#silences every announcement of a self-narrating session, and only that session`; `packages/gpui/preview/tests/headless_regressions.rs#a_self_narrating_source_silences_its_whole_session_and_only_that_session` |
+| Contracts carry no removed-mechanism claim | `effigy drift:drag-inventory`, which reads the seven contracts as well as their sources |
 | Shared band/destination arithmetic | `packages/render/src/drag_drop.rs` unit tests for `arrival_band_resolver`, `reorder_destination`, and `apply_reorder` |
 | Programme absence | `effigy drift:drag-inventory` (`scripts/check-drag-inventory.ts`), wired into `ci:web` |
 | Ledger movement | `effigy check:parity-evidence-ledger`; four cells move, each naming its exact regression |
@@ -187,6 +243,22 @@ regressions; Tree moves on `tree_selection_expand_and_substrate_reorder_rebuild_
 which g16.025 landed and which no ledger row had ever named.
 
 ## Accepted limits
+
+- **Focus return is proven where it exists, and named where it does not.**
+  ModelCatalogueEditor returns focus to the moved model's handle (web), and
+  EditableList's native keyboard drop leaves focus on the row it carried.
+  OrderBy keeps focus on the handle the chord was pressed on, web and native —
+  nothing moves focus, so no return is claimed. BlockEditor's web move control
+  commits once and leaves focus *inside the block it moved*, not on the control,
+  because the control is re-rendered at its new position; nothing is stranded.
+  Returning focus to the control itself is a BlockEditor focus decision no card
+  has taken.
+- **A native component shortcut is not a substrate session.** The native
+  controller exposes no keyboard-drop command to a renderer, so OrderBy's
+  `Alt+Arrow` and BlockEditor's move buttons reach their own emitter directly.
+  The public result payload is identical to the web route's; the native
+  shortcut produces no substrate announcement. Recorded in both contracts and
+  in spec 069 rather than papered over.
 
 - GPUI 0.2.2 still exposes no pen, touch, or device-originated pointer cancel.
   The capability matrix is unchanged and nothing here infers those from mouse

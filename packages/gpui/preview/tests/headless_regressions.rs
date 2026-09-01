@@ -17523,6 +17523,11 @@ fn editable_list_substrate_reorder_rebuilds_the_host_spec() {
         }
 
         // ── Keyboard pickup commits through the same path ──
+        let drops_before = controller
+            .announcements()
+            .iter()
+            .filter(|line| line.starts_with("Dropped "))
+            .count();
         driver.wait_for_focus_handle("editable-list:list-a:row-2:handle");
         driver.focus_element("editable-list:list-a:row-2:handle");
         driver.dispatch_key_raw("space");
@@ -17542,6 +17547,27 @@ fn editable_list_substrate_reorder_rebuilds_the_host_spec() {
                 ["row-3".to_string(), "row-2".to_string(), "row-1".to_string()]
             );
         }
+        // The keyboard terminal is announced once, and focus stays on the
+        // handle that was carrying the row.
+        {
+            let spoken = controller.announcements();
+            let drops: Vec<&String> = spoken
+                .iter()
+                .filter(|line| line.starts_with("Dropped "))
+                .collect();
+            assert_eq!(
+                drops.len() - drops_before,
+                1,
+                "one keyboard drop, one terminal: {spoken:?}"
+            );
+            assert_eq!(drops[drops.len() - 1], "Dropped Two after Three.");
+        }
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("editable-list:list-a:row-2:handle"),
+            Some(true),
+            "focus follows the row that was carried, not the row it passed"
+        );
 
         // ── A cancelled keyboard session commits nothing and clears posture ──
         driver.wait_for_focus_handle("editable-list:list-a:row-3:handle");
@@ -17691,6 +17717,37 @@ fn order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec() {
             2,
             "the reorder chord is Alt+Arrow, not Arrow"
         );
+
+        // ── The terminal is announced once, by the controller ──
+        //
+        // OrderBy has no live region of its own, so the substrate's is the
+        // only voice and its source does not claim otherwise.
+        let spoken = controller.announcements();
+        let drops: Vec<&String> = spoken
+            .iter()
+            .filter(|line| line.starts_with("Dropped "))
+            .collect();
+        assert_eq!(drops.len(), 1, "one drop, one terminal announcement: {spoken:?}");
+
+        // ── Focus is where the keyboard left it ──
+        //
+        // Alt+Arrow reaches the same emitter as a drop but is not a substrate
+        // session: the native controller exposes no keyboard-drop command to a
+        // renderer, so there is no session to announce or to return focus
+        // from. The handle the person is on keeps focus, which is the part
+        // that matters.
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("order-by:sort:size:handle"),
+            Some(true),
+            "the reorder chord leaves focus on the handle it was pressed on"
+        );
+        assert_eq!(
+            controller.announcements().len(),
+            spoken.len(),
+            "and being no session, it adds no announcement: {:?}",
+            controller.announcements()
+        );
     });
 }
 
@@ -17786,7 +17843,18 @@ fn block_editor_grip_drag_and_move_controls_rebuild_the_host_spec() {
             "one drop, one complete block order"
         );
 
-        // ── Move up reaches the same emitter ──
+        // ── The terminal is announced once, by the controller ──
+        //
+        // BlockEditor has no live region of its own, so the substrate's is the
+        // only voice.
+        let spoken = controller.announcements();
+        let drops: Vec<&String> = spoken
+            .iter()
+            .filter(|line| line.starts_with("Dropped "))
+            .collect();
+        assert_eq!(drops.len(), 1, "one drop, one terminal announcement: {spoken:?}");
+
+        // ── Move up reaches the same emitter, and keeps its own focus ──
         driver.wait_for_focus_handle("block-editor:editor:b1:up");
         driver.keyboard_activate("block-editor:editor:b1:up");
         {
@@ -17797,6 +17865,18 @@ fn block_editor_grip_drag_and_move_controls_rebuild_the_host_spec() {
                 ["b2".to_string(), "b1".to_string(), "b3".to_string()]
             );
         }
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("block-editor:editor:b1:up"),
+            Some(true),
+            "the move control keeps focus on the block it moved"
+        );
+        assert_eq!(
+            controller.announcements().len(),
+            spoken.len(),
+            "a move control is not a substrate session, so it adds no announcement: {:?}",
+            controller.announcements()
+        );
     });
 }
 
@@ -17907,6 +17987,118 @@ fn model_catalogue_editor_pointer_drop_is_announced_once_by_the_editor() {
             controller.announcements().is_empty(),
             "and the controller says nothing about a session its source narrates: {:?}",
             controller.announcements()
+        );
+    });
+}
+
+/// g16.028 review round 2. The renderer-neutral half of `ownsAnnouncements`:
+/// a self-narrating source silences the controller for its whole session, and
+/// for no other session.
+///
+/// The guarantee is a latch taken at session start, not a lookup. `active_source`
+/// is cleared during terminal cleanup, and the node tree can drop the
+/// registration mid-drag, so a lookup would find nothing exactly when the
+/// terminal announcement lands and would narrate it after all.
+#[test]
+fn a_self_narrating_source_silences_its_whole_session_and_only_that_session() {
+    fn tree(trace: &Arc<Mutex<Vec<String>>>, quiet_present: bool) -> Node {
+        let mut quiet = drag_box("quiet-source", 60.0, 40.0);
+        quiet.interaction.focusable = true;
+        quiet.a11y.tab_index = Some(0);
+        if quiet_present {
+            let mut registration = traced_source("quiet-source", "Quiet", trace);
+            registration.owns_announcements = true;
+            quiet.interaction.drag_source = Some(registration);
+        }
+
+        let mut loud = drag_box("loud-source", 60.0, 40.0);
+        loud.interaction.focusable = true;
+        loud.interaction.drag_source = Some(traced_source("loud-source", "Loud", trace));
+
+        let mut zone = drag_box("quiet-zone", 60.0, 40.0);
+        zone.interaction.drop_target = Some(traced_target(
+            "quiet-zone",
+            "Zone",
+            trace,
+            false,
+            1,
+            NodeDropCommit::Committed,
+        ));
+
+        let mut row = Node::container();
+        row.id = Some("quiet-row".to_owned());
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(180.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        row.child(quiet).child(loud).child(zone)
+    }
+
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(tree(&trace, true)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 260.0, 80.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        // ── Pickup and hover intent are silent ──
+        let origin = payload_frac("quiet-source", 0.5, 0.5);
+        driver.pointer_press(origin);
+        driver.pointer_drag(point(px(f32::from(origin.x) + 4.0), origin.y));
+        driver.pointer_drag(payload_frac("quiet-zone", 0.5, 0.5));
+        assert_eq!(
+            controller.snapshot().target_posture,
+            Some(poodle_gpui_node_backend::DragDropTargetPosture::Accepted)
+        );
+        assert!(
+            controller.announcements().is_empty(),
+            "pickup and intent are the source's to narrate: {:?}",
+            controller.announcements()
+        );
+
+        // ── The registration leaves mid-drag; the terminal is still silent ──
+        //
+        // This is the case a live lookup gets wrong: there is no source to ask
+        // by the time the drop is announced.
+        driver.mount_node(Arc::new(Mutex::new(tree(&trace, false))));
+        driver.draw_frame();
+        driver.pointer_release(payload_frac("quiet-zone", 0.5, 0.5));
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert!(
+            controller.announcements().is_empty(),
+            "a terminal after the source left is still the source's: {:?}",
+            controller.announcements()
+        );
+
+        // ── A cancelled self-narrated session is silent too ──
+        driver.mount_node(Arc::new(Mutex::new(tree(&trace, true))));
+        driver.draw_frame();
+        let origin = payload_frac("quiet-source", 0.5, 0.5);
+        driver.pointer_press(origin);
+        driver.pointer_drag(point(px(f32::from(origin.x) + 4.0), origin.y));
+        driver.pointer_drag(payload_frac("quiet-zone", 0.5, 0.5));
+        driver.dispatch_key("escape");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert!(
+            controller.announcements().is_empty(),
+            "cancel is a terminal, and this session's terminals are silent: {:?}",
+            controller.announcements()
+        );
+
+        // ── The latch resets: an ordinary source in the same controller is
+        //    narrated again ──
+        let origin = payload_frac("loud-source", 0.5, 0.5);
+        driver.pointer_press(origin);
+        driver.pointer_drag(point(px(f32::from(origin.x) + 4.0), origin.y));
+        driver.pointer_drag(payload_frac("quiet-zone", 0.5, 0.5));
+        driver.pointer_release(payload_frac("quiet-zone", 0.5, 0.5));
+        let spoken = controller.announcements();
+        assert!(
+            spoken.iter().any(|line| line.contains("Loud")),
+            "the next ordinary session is narrated: {spoken:?}"
+        );
+        assert!(
+            !spoken.iter().any(|line| line.contains("Quiet")),
+            "and the silenced session never appears late: {spoken:?}"
         );
     });
 }

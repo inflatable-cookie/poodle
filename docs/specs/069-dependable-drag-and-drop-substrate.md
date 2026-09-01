@@ -145,10 +145,22 @@ are then narrated only by the component, never by the controller's live region.
 A composite with a contract-mandated live region of its own cannot otherwise
 silence a provider it *joined* — `describeAnnouncement` belongs to whoever
 created the controller — so one drop is read out twice, in two different
-sentences, from two regions. The flag is decided when the session begins and
-held for its whole life, so a throttled intent and a late terminal answer the
-same way as the pickup. An external session has no local source and is
-unaffected.
+sentences, from two regions.
+
+The flag is **latched when the session begins** and held for that session's
+whole life: pickup, throttled intent, cancellation, and terminal all answer the
+way the pickup did, including after the source is re-registered without the
+flag or unregistered entirely mid-drag. It is per session, not a mode — the
+next session is read from its own source. An external session (inbound files,
+an incoming cross-window projection) has no local source and is always narrated
+by the controller.
+
+The keyboard-drop *command* is a web-only entry point. A native renderer builds
+nodes and cannot ask the controller to run a session, so a native component
+shortcut — OrderBy's `Alt+Arrow`, BlockEditor's move buttons — reaches the
+component's own emitter directly. The public result payload is identical on
+both runtimes; the native shortcut simply is not a session, so it produces no
+substrate announcement.
 
 The registration may be used by a component wrapper, a Svelte action, a React
 hook/prop getter, or a native node builder. Those framework surfaces translate

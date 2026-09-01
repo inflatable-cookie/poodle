@@ -24,7 +24,7 @@ Updated: 2026-07-10
   └── [Block .block-editor__block]  (repeated, keyed by block.id) role="group"
         ├── [Toolbar .block-editor__toolbar]
         │     ├── [ToolbarLeft .block-editor__toolbar-left]
-        │     │     ├── [DragGrip .block-editor__drag-grip]  <span> draggable, Icon grip-vertical
+        │     │     ├── [DragGrip .block-editor__drag-grip]  <span> drag handle, Icon grip-vertical
         │     │     └── [TypeSelect .block-editor__type-select]  Select (variant="ghost", menuMinWidth="10rem")
         │     └── [ToolbarRight .block-editor__toolbar-right]
         │           ├── [MoveUpBtn .block-editor__tool-btn]  <button> Icon arrow-up
@@ -42,7 +42,7 @@ Updated: 2026-07-10
 | Root | `<div>` | yes | Flex column container with `aria-label`, wraps in `UiPresentationProvider` |
 | Block | `<div>` | yes (repeated) | `role="group"`, `aria-label="{type} block"`, drag-and-drop target |
 | Toolbar | `<div>` | yes (per block) | Flex row, space-between, transparent background |
-| DragGrip | `<span>` | yes (per block) | `draggable="true"`, `aria-hidden="true"`, `grab` cursor |
+| DragGrip | `<span>` | yes (per block) | the block source's pointer handle, `aria-hidden="true"`, `grab` cursor |
 | TypeSelect | Select | yes (per block) | Poodle Select component, `variant="ghost"`, `menuMinWidth="10rem"`, `ariaLabel="Block type"`; gains `--inset` margin-left when reordering is disabled (drag grip hidden) to keep alignment with block content |
 | MoveUpBtn | `<button>` | yes (per block) | Disabled when first block or editor disabled |
 | MoveDownBtn | `<button>` | yes (per block) | Disabled when last block or editor disabled |
@@ -489,7 +489,14 @@ are currently unused by the root itself.
   `crate::drag_drop::vertical_band_resolver`, a block dropped onto itself is
   rejected, and the drop is revalidated against the spec's live block list.
 - Move up / move down reach the same emitter as a drop, so the native keyboard
-  and pointer routes produce one identical order payload.
+  and pointer routes produce one identical order payload. They are ordinary
+  controls, not substrate sessions — natively because the controller exposes no
+  keyboard-drop command to a renderer — so they produce no substrate
+  announcement and keep focus on the control that was activated.
+- On the web a move control commits once and leaves focus inside the block it
+  moved, not on the control: the control is re-rendered at its new position.
+  Nothing is stranded. Returning focus to the control itself would be a
+  BlockEditor focus decision, and no card has taken it.
 - A grip is drawn only when the editor can actually reorder; a spec with no
   reorder handler draws no grip and no move buttons rather than a dead
   affordance.
