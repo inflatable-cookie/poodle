@@ -175,6 +175,8 @@
    * collapsed menu before settling on shed icons.
    */
   let measuring = false;
+  let measuringFrame: number | null = null;
+  let destroyed = false;
   let uncontrolledValue = $state<string | null>(null);
   let seededDefaultValue = $state(false);
   let focusIndex = $state(0);
@@ -320,15 +322,17 @@
 
     await tick();
 
-    if (!rootElement || !measureListElement) {
+    const root = rootElement;
+    const measureList = measureListElement;
+    if (destroyed || !root || !measureList) {
       return;
     }
 
     measuring = true;
-    const availableWidth = rootElement.getBoundingClientRect().width;
+    const availableWidth = root.getBoundingClientRect().width;
     const fits = (level: number): boolean => {
-      measureListElement!.dataset.shed = shed.slice(0, level).join(" ");
-      const width = measureListElement!.getBoundingClientRect().width;
+      measureList.dataset.shed = shed.slice(0, level).join(" ");
+      const width = measureList.getBoundingClientRect().width;
       return width <= availableWidth + 1;
     };
 
@@ -356,11 +360,16 @@
       // hides the icon on the menu's own trigger. Parts return with the menu.
       shedCount = canCollapse ? 0 : shed.length;
     } finally {
-      delete measureListElement.dataset.shed;
+      delete measureList.dataset.shed;
       // Released after a frame: the observer fires asynchronously, so clearing
       // it synchronously would let the restore-width notification through and
       // re-enter anyway.
-      requestAnimationFrame(() => {
+      if (destroyed) {
+        measuring = false;
+        return;
+      }
+      measuringFrame = requestAnimationFrame(() => {
+        measuringFrame = null;
         measuring = false;
       });
     }
@@ -389,7 +398,15 @@
     }
   }
 
-  onDestroy(() => clearTooltip());
+  onDestroy(() => {
+    destroyed = true;
+    clearTooltip();
+    if (measuringFrame !== null) {
+      cancelAnimationFrame(measuringFrame);
+      measuringFrame = null;
+    }
+    measuring = false;
+  });
 
   // Environment paths (URL history restore) apply values directly and keep
   // the old unknown-value semantics; user interactions go through the machine

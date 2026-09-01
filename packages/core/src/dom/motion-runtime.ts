@@ -8,6 +8,7 @@
 import {
   MOTION_DURATION_MS,
   activateMotion,
+  abortMotion,
   completeMotion,
   createMotionTrace,
   motionKey,
@@ -31,16 +32,30 @@ export function liveWebMotionCount(): number {
 
 export function cancelWebMotion(key?: string): void {
   if (key) {
-    handles.get(key)?.cancel();
-    handles.delete(key);
-    traces.delete(key);
+    const handle = handles.get(key);
+    const trace = traces.get(key);
+    handle?.cancel();
+    if (handles.get(key) === handle) {
+      handles.delete(key);
+    }
+    if (traces.get(key) === trace) {
+      traces.delete(key);
+    }
     return;
   }
-  for (const handle of handles.values()) {
+  const currentHandles = [...handles.entries()];
+  const currentTraces = [...traces.entries()];
+  for (const [motionKey, handle] of currentHandles) {
     handle.cancel();
+    if (handles.get(motionKey) === handle) {
+      handles.delete(motionKey);
+    }
   }
-  handles.clear();
-  traces.clear();
+  for (const [motionKey, trace] of currentTraces) {
+    if (traces.get(motionKey) === trace) {
+      traces.delete(motionKey);
+    }
+  }
 }
 
 function track(key: string, handle: WebMotionHandle): void {
@@ -135,12 +150,15 @@ export function playWebAnimation(
       const existing = handles.get(decision.key);
       if (existing) {
         existing.cancel();
-        handles.delete(decision.key);
+        if (handles.get(decision.key) === existing) {
+          handles.delete(decision.key);
+        }
       }
     }
     return decision;
   }
   if (typeof element.animate !== "function") {
+    abortMotion(trace, decision.key);
     return { ...decision, schedule: false, liveClock: false, paintEndpoint: true };
   }
   const animation = element.animate(keyframes, {

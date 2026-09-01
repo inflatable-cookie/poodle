@@ -19,6 +19,7 @@
   import { onDestroy, untrack } from "svelte";
   import { getMotionPolicy } from "./motion-policy";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import type { MotionPolicy } from "@inflatable-cookie/poodle-core";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole, ToastItem } from "./types";
 
   const EMPTY_TOAST_ITEMS: ToastItem[] = [];
@@ -113,38 +114,50 @@
     retainedItems = nextRetained;
   }
 
-  function toastElement(node: HTMLElement, visual: ToastVisual) {
+  type ToastActionState = { visual: ToastVisual; policy: MotionPolicy };
+
+  function toastElement(node: HTMLElement, initial: ToastActionState) {
     const ownerFor = (id: string) => `${stackId}:${id}`;
-    function play(next: ToastVisual) {
-      const exiting = next.phase === "exit";
+    let current = initial;
+
+    function play(next: ToastActionState) {
+      const ownerChanged = current.visual.id !== next.visual.id;
+      const policyChanged = current.policy !== next.policy;
+      if (ownerChanged || policyChanged) {
+        cancelToastPresence(ownerFor(current.visual.id));
+      }
+      current = next;
+
+      const { visual } = next;
+      const exiting = visual.phase === "exit";
       applyToastExitInert(node, exiting);
-      if (next.phase === "settled") {
+      if (visual.phase === "settled") {
         return;
       }
       playToastPresence(node, {
-        owner: ownerFor(next.id),
+        owner: ownerFor(visual.id),
         phase: exiting ? "exit" : "enter",
-        policy: $motionPolicy,
+        policy: next.policy,
         initial: false,
         onComplete: (status) => {
           if (!mounted || status !== "finish") {
             return;
           }
           if (exiting) {
-            prune(next.id);
+            prune(visual.id);
           } else {
-            visuals = settleToastVisual(visuals, next.id);
+            visuals = settleToastVisual(visuals, visual.id);
           }
         },
       });
     }
-    play(visual);
+    play(initial);
     return {
-      update(next: ToastVisual) {
+      update(next: ToastActionState) {
         play(next);
       },
       destroy() {
-        cancelToastPresence(ownerFor(visual.id));
+        cancelToastPresence(ownerFor(current.visual.id));
       },
     };
   }
@@ -182,7 +195,7 @@
       aria-live={visual.phase === "exit" ? undefined : item.tone === "danger" ? "assertive" : "polite"}
       aria-atomic="true"
       aria-hidden={visual.phase === "exit" ? "true" : undefined}
-      use:toastElement={visual}
+      use:toastElement={{ visual, policy: $motionPolicy }}
     >
       <button
         type="button"

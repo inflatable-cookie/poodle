@@ -3,9 +3,11 @@ import { afterEach, describe, expect, test } from "bun:test";
 import {
   cancelWebMotion,
   createMotionTrace,
+  liveClockCount,
   liveWebMotionCount,
   MOTION_DURATION_MS,
   MOTION_ROLE,
+  motionKey,
   playClippedHeight,
   playWebAnimation,
 } from "../src/index.ts";
@@ -104,5 +106,66 @@ describe("web motion runtime", () => {
     });
     expect(again.interruption).toBe("inert");
     expect(liveWebMotionCount()).toBe(1);
+  });
+
+  test("unsupported WAAPI paints the endpoint without retaining a clock", () => {
+    const element = { style: {} as CSSStyleDeclaration } as unknown as HTMLElement;
+    const trace = createMotionTrace("full");
+    const decision = playWebAnimation(
+      trace,
+      {
+        owner: "owner",
+        role: MOTION_ROLE.toastEnter,
+        channel: "item",
+        target: "enter",
+        properties: ["opacity"],
+        durationMs: MOTION_DURATION_MS.standard,
+        reducedOpacity: true,
+      },
+      element,
+      [{ opacity: 0 }, { opacity: 1 }],
+    );
+    expect(decision.schedule).toBe(false);
+    expect(decision.paintEndpoint).toBe(true);
+    expect(liveClockCount(trace)).toBe(0);
+    expect(liveWebMotionCount()).toBe(0);
+  });
+
+  test("cancelling a handle cannot erase a synchronous replacement", () => {
+    const holds: Hold[] = [];
+    const element = fakeElement((hold) => holds.push(hold));
+    const intent = {
+      owner: "owner",
+      role: MOTION_ROLE.toastEnter,
+      channel: "item",
+      target: "enter",
+      properties: ["opacity"] as const,
+      durationMs: MOTION_DURATION_MS.standard,
+      reducedOpacity: true,
+    };
+    const replacementTrace = createMotionTrace("full");
+    let replaced = false;
+    playWebAnimation(
+      createMotionTrace("full"),
+      intent,
+      element,
+      [{ opacity: 0 }, { opacity: 1 }],
+      "ease-out",
+      (status) => {
+        if (status === "cancel" && !replaced) {
+          replaced = true;
+          playWebAnimation(
+            replacementTrace,
+            { ...intent, target: "replacement" },
+            element,
+            [{ opacity: 1 }, { opacity: 0 }],
+          );
+        }
+      },
+    );
+
+    cancelWebMotion(motionKey(intent.owner, intent.role, intent.channel));
+    expect(liveWebMotionCount()).toBe(1);
+    holds.at(-1)?.finish();
   });
 });

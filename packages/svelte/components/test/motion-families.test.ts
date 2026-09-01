@@ -87,14 +87,30 @@ describe("g16.034 mounted family receipts (svelte)", () => {
     const second = render(ToastStack, { props: { items: [] } });
     await first.rerender({ items: [{ id: "save", title: "One" }] });
     await second.rerender({ items: [{ id: "save", title: "Two" }] });
-    expect(first.container.querySelector(".poodle-toast")?.dataset.motion).toBe("enter");
-    expect(second.container.querySelector(".poodle-toast")?.dataset.motion).toBe("enter");
+    expect(first.container.querySelector(".poodle-toast")?.getAttribute("data-motion")).toBe("enter");
+    expect(second.container.querySelector(".poodle-toast")?.getAttribute("data-motion")).toBe("enter");
     const liveBefore = liveWebMotionCount();
     expect(liveBefore).toBeGreaterThanOrEqual(2);
     first.unmount();
     expect(second.container.querySelector(".poodle-toast")).not.toBeNull();
     expect(liveWebMotionCount()).toBeGreaterThanOrEqual(1);
     second.unmount();
+  });
+
+  it("re-drives a mounted toast when the policy tightens", async () => {
+    const view = render(MotionFamilyHarness, {
+      props: { kind: "toast", items: [], policy: "full" },
+    });
+    const item = { id: "save", title: "Saved" };
+    await view.rerender({ items: [item] });
+    expect(liveWebMotionCount()).toBe(1);
+
+    await view.rerender({ items: [item], policy: "reduced" });
+    expect(liveWebMotionCount()).toBe(1);
+
+    await view.rerender({ items: [item], policy: "frozen" });
+    expect(liveWebMotionCount()).toBe(0);
+    expect(view.container.querySelector(".poodle-toast")?.getAttribute("data-motion")).toBe("settled");
   });
 
   it("animated=false never becomes motion-ready", async () => {

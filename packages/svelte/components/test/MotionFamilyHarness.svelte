@@ -5,15 +5,19 @@
   import MotionPolicyProvider from "../src/MotionPolicyProvider.svelte";
   import Skeleton from "../src/Skeleton.svelte";
   import Spinner from "../src/Spinner.svelte";
+  import ToastStack from "../src/ToastStack.svelte";
+  import type { ToastItem } from "../src/types";
 
   let {
     policy = "full",
     kind = "icon-button",
     animated = true,
+    items = [],
   }: {
     policy?: MotionPolicy;
-    kind?: "icon-button" | "spinner" | "skeleton";
+    kind?: "icon-button" | "spinner" | "skeleton" | "toast";
     animated?: boolean;
+    items?: ToastItem[];
   } = $props();
 </script>
 
@@ -22,6 +26,8 @@
     <IconButton icon="star" ariaLabel="Star" />
   {:else if kind === "spinner"}
     <Spinner />
+  {:else if kind === "toast"}
+    <ToastStack {items} />
   {:else}
     <Skeleton {animated} />
   {/if}

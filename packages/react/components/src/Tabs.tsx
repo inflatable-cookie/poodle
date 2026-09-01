@@ -217,6 +217,7 @@ export function Tabs({
    * before settling.
    */
   const measuringRef = useRef(false);
+  const measuringFrame = useRef<number | null>(null);
 
   // Prop items replace rendered (possibly machine-reordered) items only when
   // their content actually changes — mirrors the Svelte signature sync. The
@@ -438,7 +439,8 @@ export function Tabs({
         delete measureList.dataset.shed;
         // Released after a frame: the observer fires asynchronously, so
         // clearing synchronously would let the restore notification re-enter.
-        requestAnimationFrame(() => {
+        measuringFrame.current = requestAnimationFrame(() => {
+          measuringFrame.current = null;
           measuringRef.current = false;
         });
       }
@@ -456,6 +458,11 @@ export function Tabs({
     return () => {
       resizeObserver?.disconnect();
       window.removeEventListener("resize", evaluate);
+      if (measuringFrame.current !== null) {
+        cancelAnimationFrame(measuringFrame.current);
+        measuringFrame.current = null;
+      }
+      measuringRef.current = false;
     };
     // `isShedding` and `shed` belong here: a strategy or order change has to
     // re-run the ladder, not wait for the next resize.
