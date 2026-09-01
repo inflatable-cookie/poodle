@@ -190,3 +190,11 @@ Native delta is unchanged and explicit: no TreeSpec field, no pending Node
 commit, no rewritten full intent on native events, no multi-row `DragSubject`.
 `reorderAuthority` remains in `WEB_ONLY_PROPS`. Diff contains no Rust/GPUI
 source.
+
+PR #127 changes-requested repair: `treeAuthorityDropEligibility` refuses an
+accepted policy that mutates hover target, indicator position, or operation
+before dest rewrite. `treeAcceptedDropDepth` walks the full tree so a
+collapsed rewritten dest still paints dest depth. Paired tests change
+selection after pickup and before release, and a pending Promise is proven
+on one mounted controller (matching terminal plus source-loss then a later
+dropping session).

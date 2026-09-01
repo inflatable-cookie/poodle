@@ -1070,7 +1070,14 @@ describe("Tree reorderAuthority (react)", () => {
     const pending = new Promise<{ status: "rejected"; reason: string }>((resolve) => {
       finish = resolve;
     });
-    const host = authority({ onDrop: () => pending });
+    const laterPending = new Promise<{ status: "committed" }>(() => {});
+    let drops = 0;
+    const host = authority({
+      onDrop: () => {
+        drops += 1;
+        return drops === 1 ? pending : laterPending;
+      },
+    });
     const { container, rerender } = render(
       <Tree nodes={files} reorderable reorderAuthority={host} />,
     );
@@ -1095,21 +1102,16 @@ describe("Tree reorderAuthority (react)", () => {
       rerender(<Tree nodes={files} reorderable reorderAuthority={host} />);
     });
     const next = layoutTree(container);
-    const source = next.get("a.ts")!;
-    const y = next.get("c.ts")!.getBoundingClientRect().top + 4;
-    act(() => {
-      source.dispatchEvent(pointer("pointerdown", { clientY: source.getBoundingClientRect().top + 4 }));
-      document.dispatchEvent(pointer("pointermove", { clientY: y }));
-    });
+    drag(next.get("a.ts")!, next.get("c.ts")!.getBoundingClientRect().top + 4);
     expect(container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).toBe(
-      "dragging",
+      "dropping",
     );
     await act(async () => {
       finish?.({ status: "rejected", reason: "late" });
       await pending;
     });
     expect(container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).toBe(
-      "dragging",
+      "dropping",
     );
   });
 

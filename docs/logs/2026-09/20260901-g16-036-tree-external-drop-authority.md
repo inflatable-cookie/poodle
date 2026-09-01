@@ -45,13 +45,16 @@ contract-spec-drift. No Rust, GPUI, or Jetstream source in the diff.
 ## Evidence
 
 - Core helpers: validity, latch, generic-then-host eligibility, rewrite keeps
-  hover fields, rewritten dest into a moving subtree refuses,
-  `treeAcceptedDropDepth` uses commit dest not hovered row.
-- Paired Svelte/React Tree tests: latch across two sessions, host withhold
-  before accepted paint, rewritten depth/announcement/commit, live `canDrop`
-  at release, mid-session authority removal does not fall through to
-  `onReorder`, pending Promise stays dropping and a stale answer is inert,
-  Alt+↑/↓, invalid projection not normalized to `[source]`, convenience
+  hover fields, illegal hover-field mutation refuses with `unavailable`,
+  rewritten dest into a moving subtree refuses, `treeAcceptedDropDepth` uses
+  commit dest from the full tree (including collapsed dest rows).
+- Paired Svelte/React Tree tests: selection changes after pickup and before
+  release keep the latched pair; host withhold before accepted paint;
+  rewritten depth/announcement/commit; collapsed rewritten dest still paints
+  dest depth; live `canDrop` at release; mid-session authority removal does
+  not fall through to `onReorder`; a pending Promise settles its own session
+  once; source-loss then a later dropping session ignores the old Promise;
+  Alt+↑/↓; invalid projection not normalized to `[source]`; convenience
   `onReorder` pointer + Alt+↑/↓.
 - Mounted Chromium + WebKit: latched moving set on pointer drop, host refuse
   never paints accepted, Alt+Arrow through the same authority.
@@ -63,25 +66,24 @@ contract-spec-drift. No Rust, GPUI, or Jetstream source in the diff.
 
 ## Oracle falsification
 
-Green proofs committed as `8d074c279`. Each plant restored with
-`git restore --source=HEAD --worktree`, not `git checkout --` on a dirty
-index. After the last restore, 74 paired Tree tests passed.
+Green proofs for the PR #127 repair committed as `5829bf7af`, then the
+same-controller stale Promise tests were tightened to a later dropping
+session. Each plant restored with `git restore --source=HEAD --worktree`,
+not `git checkout --` on a dirty index.
 
 | Invariant | Plant | Failure |
 | --- | --- | --- |
-| Invalid projection is not normalized | `treeLatchReorderSubject` falls back to `[sourceValue]` | `host.drops` length 1 instead of 0 |
-| Authority precedes accepted presentation | skip host `canDrop`, accept after generic safety | `data-poodle-drop-target="accepted"` |
-| Rewrite has one semantic owner | `treeAcceptedDropDepth` uses hovered `targetId` | `--poodle-tree-drop-depth` `"0"` instead of `"1"` |
-| Release uses live authority | capture `canDrop` at pickup | `host.drops` length 1 after live refuse |
-| Terminal result is not invented | ignore host Promise, return `committed` | source posture `null`, not `dropping` |
-| Convenience remains intact | omit `onReorder` | callback called 0 times |
-| Subject is a session snapshot | re-project on every hover | `projectMovingValues` called 4 times, not 1 |
-| Runtime boundary is honest | inspect diff | no `*.rs`, GPUI, Jetstream, headless, render, or contracts crate files |
+| Illegal hover edits are refused | skip hover-field compare; dest taken from mutated `targetId` | accepted with `destination.targetId` `"src/a.ts"` |
+| Collapsed dest keeps dest depth | `treeAcceptedDropDepth` walks only `flattenVisibleTreeRows(nodes, [])` | core `null`; shells `--poodle-tree-drop-depth` `""` not `"1"` |
+| Subject is a session snapshot | re-project on every `canDrop`/`onDrop` from live selection | `projectMovingValues` called 2 times at first hover, not 1 |
+| Terminal result is not invented | skip promise generation guard and `currentSession` sessionId match | later source posture `null`, not `dropping` |
+
+Earlier card-oracle plants remain in the history at `8d074c279`.
 
 ## Validation
 
-- `bun test packages/core/test/tree.test.ts packages/core/test/drag-drop-geometry.test.ts` — 37 pass
-- `bunx vitest run packages/svelte/components/test/Tree.test.ts packages/react/components/test/Tree.test.tsx` — 74 pass
+- `bun test packages/core/test/tree.test.ts packages/core/test/drag-drop-geometry.test.ts` — 39 pass
+- `bunx vitest run packages/svelte/components/test/Tree.test.ts packages/react/components/test/Tree.test.tsx` — 78 pass
 - `effigy test:drag-drop-browser-chromium` — pass, including Tree authority rows
 - `effigy test:drag-drop-browser-webkit` — pass, including Tree authority rows
 - `effigy test:web-pack-install` — pass, `packedTreeReorderProof` present
