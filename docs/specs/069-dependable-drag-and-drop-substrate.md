@@ -151,9 +151,15 @@ The flag is **latched when the session begins** and held for that session's
 whole life: pickup, throttled intent, cancellation, and terminal all answer the
 way the pickup did, including after the source is re-registered without the
 flag or unregistered entirely mid-drag. It is per session, not a mode — the
-next session is read from its own source. An external session (inbound files,
-an incoming cross-window projection) has no local source and is always narrated
-by the controller.
+next session is read from its own source.
+
+An external session — an inbound file batch, an incoming cross-window
+projection — has no local source, so nothing on its side could have asked for
+silence and the controller always narrates it. That has to hold for the session
+*after* a self-narrating one, which is where deciding it per entry point fails:
+the entry that forgets is the one nobody is watching. The renderer-neutral
+controller therefore decides ownership once, at the single session-prepare
+event every entry point sends, rather than at each entry point.
 
 The keyboard-drop *command* is a web-only entry point. A native renderer builds
 nodes and cannot ask the controller to run a session, so a native component

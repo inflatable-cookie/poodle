@@ -18102,3 +18102,105 @@ fn a_self_narrating_source_silences_its_whole_session_and_only_that_session() {
         );
     });
 }
+
+/// g16.028 review round 3. An incoming cross-window projection is never
+/// silenced by the local session that ran before it.
+///
+/// `owns_announcements` belongs to a *source*, and a projection has none: it
+/// arrives from another window with no local registration at all, so this
+/// controller's live region is the only voice it will ever have. Leaving the
+/// previous session's latch in place would hand a remote drag the silence a
+/// local composite asked for, and there is nothing on the other side to notice.
+#[test]
+fn an_incoming_projection_is_narrated_after_a_self_narrating_local_session() {
+    fn tree(trace: &Arc<Mutex<Vec<String>>>) -> Node {
+        let mut source = drag_box("xw-source", 60.0, 40.0);
+        source.interaction.focusable = true;
+        source.a11y.tab_index = Some(0);
+        let mut registration = traced_source("xw-source", "Local", trace);
+        registration.owns_announcements = true;
+        source.interaction.drag_source = Some(registration);
+
+        let mut zone = drag_box("xw-zone-a", 60.0, 40.0);
+        zone.interaction.drop_target = Some(traced_target(
+            "xw-zone-a",
+            "Zone A",
+            trace,
+            false,
+            1,
+            NodeDropCommit::Committed,
+        ));
+
+        let mut row = Node::container();
+        row.id = Some("xw-row".to_owned());
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        row.child(source).child(zone)
+    }
+
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_cross_window_target_bridge(Arc::new(host.clone()), cx));
+
+        let node = Arc::new(Mutex::new(tree(&trace)));
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+        driver.drain();
+
+        // ── A complete local session from the self-narrating source ──
+        let origin = payload_frac("xw-source", 0.5, 0.5);
+        driver.pointer_press(origin);
+        driver.pointer_drag(point(px(f32::from(origin.x) + 4.0), origin.y));
+        driver.pointer_drag(payload_frac("xw-zone-a", 0.5, 0.5));
+        driver.pointer_release(payload_frac("xw-zone-a", 0.5, 0.5));
+        driver.drain();
+        assert!(
+            controller.announcements().is_empty(),
+            "the local session narrates itself: {:?}",
+            controller.announcements()
+        );
+
+        // ── An incoming projection right afterwards is the controller's to
+        //    narrate: it has no local source to have asked for silence ──
+        host.project(projection_for("lease-1", Some("xw-zone-a")));
+        driver.drain();
+        let spoken = controller.announcements();
+        assert!(
+            spoken.iter().any(|line| line.contains("remote-row")),
+            "an incoming projection is announced: {spoken:?}"
+        );
+
+        // ── And so is its terminal ──
+        host.cancel_from_host(
+            poodle_node::CrossWindowDragReceipt {
+                protocol_version: poodle_node::CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
+                token: "lease-1".to_string(),
+            },
+            poodle_node::DragCancelReason::TransportLost,
+        );
+        driver.drain();
+        let after = controller.announcements();
+        assert!(
+            after.len() > spoken.len(),
+            "the projection's terminal is announced too: {after:?}"
+        );
+    });
+}

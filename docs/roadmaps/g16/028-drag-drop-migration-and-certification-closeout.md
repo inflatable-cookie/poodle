@@ -210,6 +210,15 @@ Three closeout blockers, all repaired:
 3. the `ownsAnnouncements` seam gained a focused controller regression for its
    latch and reset boundary, plus a native regression for the same shape.
 
+## Review Round 3
+
+One blocker: the native announcement latch was set per entry point, and
+`apply_projection` — the third way a session starts — set neither the latch nor
+its reset. A self-narrating local terminal followed by an incoming cross-window
+projection left the projection silent, contradicting spec 069. Ownership is now
+decided once, at the single session-prepare event every entry point sends, and
+a named native regression bites the pre-fix shape.
+
 ## Continuation
 
 After operator-authorized merge, close the drag-and-drop programme in g16. The

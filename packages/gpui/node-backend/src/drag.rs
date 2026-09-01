@@ -237,10 +237,15 @@ struct ControllerState {
     /// every frame: a host that removes the dragged row still has to receive
     /// its own terminal callback and get focus back.
     active_source: Option<(NodeDragSource, String)>,
-    /// Whether the live session's source narrates itself, latched when the
-    /// session begins. Read `NodeDragSource::owns_announcements` for why this
-    /// is a latch and not a lookup: `active_source` is cleared during terminal
-    /// cleanup, which is exactly when a late announcement lands.
+    /// Whether the live session's source narrates itself, latched in
+    /// `dispatch` when the session is prepared.
+    ///
+    /// A latch and not a lookup: `active_source` is cleared during terminal
+    /// cleanup, which is exactly when a late announcement lands. Latched at
+    /// the one event every entry point sends, and not per entry point, because
+    /// the entry that forgets is the one nobody notices — an incoming
+    /// projection has no local source, so its silence would come from a
+    /// session that ended.
     session_owns_announcements: bool,
     last_outcome: Option<DragTerminalOutcome>,
     next_session: u64,
@@ -1744,8 +1749,8 @@ impl DragDropController {
             state.keyboard_origin = None;
             state.last_outcome = None;
             // An external batch has no local source, so nobody narrates it but
-            // this controller.
-            state.session_owns_announcements = false;
+            // this controller. `dispatch` reads that from `active_source` when
+            // the session is prepared.
             state.active_source = None;
             state.pointer = Some((x, y));
             state.external_source_label = Some(inbound_label(&batch));
@@ -2518,7 +2523,6 @@ impl DragDropController {
             state.keyboard_index = None;
             state.keyboard_origin = registration.keyboard_order;
             state.last_outcome = None;
-            state.session_owns_announcements = registration.owns_announcements;
             state.active_source = Some((registration.clone(), element_id));
             (session_id, registration)
         };
@@ -2961,6 +2965,22 @@ impl DragDropController {
     /// calls consumer code that may rebuild the host, and a nested
     /// `borrow_mut` there would panic.
     fn dispatch(&self, event: DragSessionEvent, cx: &mut App) {
+        // Announcement ownership is decided once, where a session begins.
+        //
+        // `Prepare` is the one event every entry point sends — a local pickup,
+        // an inbound file batch, and an incoming cross-window projection — so
+        // it is the only place that cannot be forgotten. Setting it per entry
+        // point is what let a projection inherit the previous local session's
+        // silence: a projection has no local source, so nothing on its side
+        // could have asked for it.
+        if matches!(event, DragSessionEvent::Prepare { .. }) {
+            let mut state = self.state.borrow_mut();
+            state.session_owns_announcements = state
+                .active_source
+                .as_ref()
+                .is_some_and(|(source, _)| source.owns_announcements);
+        }
+
         let mut queue = VecDeque::from([event]);
         while let Some(event) = queue.pop_front() {
             let effects = {

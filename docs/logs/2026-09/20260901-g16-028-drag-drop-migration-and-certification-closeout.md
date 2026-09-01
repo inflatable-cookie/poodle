@@ -3,7 +3,7 @@
 Status: delivered — awaiting orchestrator review
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/118
-Review rounds: 2 (five blockers, then three; all repaired on this branch)
+Review rounds: 3 (five blockers, then three, then one; all repaired on this branch)
 Card: `docs/roadmaps/g16/028-drag-drop-migration-and-certification-closeout.md`
 Handoff: `docs/handoffs/20260901-075640-g16-028-drag-closeout.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
@@ -222,6 +222,38 @@ latch is therefore the same shape as the TypeScript one rather than a repair;
 what is genuinely provable natively is the reset boundary, and that is the plant
 above.
 
+## Review round 3
+
+One blocker, and a good one: the announcement latch leaked across a session
+boundary the tests had not crossed.
+
+`session_owns_announcements` was set from the local source in
+`begin_session` and cleared in `begin_inbound_session`, but `apply_projection`
+— the third way a native session starts — set neither. Terminal cleanup clears
+`active_source` and not the latch, so the sequence *self-narrating local
+terminal → incoming cross-window projection* left the projection silent. A
+remote drag inherited the silence a local composite had asked for, and there is
+nothing on the far side of a projection to notice: it has no local source, so
+this controller's live region is the only voice it will ever have. That
+contradicted spec 069's own statement that external sessions are always
+narrated. TypeScript resets at both external starts and was never wrong.
+
+The fix is at the boundary rather than the instance. Ownership is now decided
+once in `dispatch`, on the `Prepare` event that every entry point sends —
+local pickup, inbound batch, incoming projection — derived from whether a local
+source is active at that moment. The two per-entry-point assignments are gone.
+Deciding this per entry point is what failed; the entry that forgets is the one
+nobody is watching.
+
+### Round-3 falsification
+
+| Repair | Planted counterexample | Named proof, and what it said |
+| --- | --- | --- |
+| An incoming projection is always the controller's to narrate | ownership decided per entry point again, with `apply_projection` forgetting it — the exact pre-fix shape | `a_incoming_projection_is_narrated_after_a_self_narrating_local_session` → `FAILED: an incoming projection is announced: []` |
+
+Under that plant the inbound-batch regressions stayed green, which is the other
+half of the reading: inbound was covered, the projection path was not.
+
 ## Evidence
 
 | Claim | Proof |
@@ -230,6 +262,7 @@ above.
 | Native completions behave | `packages/gpui/preview/tests/headless_regressions.rs#editable_list_substrate_reorder_rebuilds_the_host_spec`, `#order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec`, `#block_editor_grip_drag_and_move_controls_rebuild_the_host_spec` |
 | One voice per session, natively | `packages/gpui/preview/tests/headless_regressions.rs#model_catalogue_editor_pointer_drop_is_announced_once_by_the_editor` |
 | The announcement latch and its reset | `test/headless-dom/drag-drop-controller.test.ts#silences every announcement of a self-narrating session, and only that session`; `packages/gpui/preview/tests/headless_regressions.rs#a_self_narrating_source_silences_its_whole_session_and_only_that_session` |
+| An external session is never silenced by the one before it | `packages/gpui/preview/tests/headless_regressions.rs#an_incoming_projection_is_narrated_after_a_self_narrating_local_session` |
 | Contracts carry no removed-mechanism claim | `effigy drift:drag-inventory`, which reads the seven contracts as well as their sources |
 | Shared band/destination arithmetic | `packages/render/src/drag_drop.rs` unit tests for `arrival_band_resolver`, `reorder_destination`, and `apply_reorder` |
 | Programme absence | `effigy drift:drag-inventory` (`scripts/check-drag-inventory.ts`), wired into `ci:web` |
