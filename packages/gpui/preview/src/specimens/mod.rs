@@ -22,6 +22,7 @@ mod avatar;
 mod icon;
 mod icon_provider;
 mod ui_presentation_provider;
+mod motion_policy_provider;
 
 // ── Action ────────────────────────────────────────────────
 mod button;
@@ -314,6 +315,11 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
             "UiPresentationProvider",
             theme,
             ui_presentation_provider::render(state, cx),
+        ),
+        "motion-policy-provider" => specimen_card(
+            "MotionPolicyProvider",
+            theme,
+            motion_policy_provider::render(state, cx),
         ),
 
         // ── Action ──────────────────────────────────────────────

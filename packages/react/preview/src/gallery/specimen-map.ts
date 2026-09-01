@@ -169,6 +169,7 @@ import { TreeSpecimen } from "./specimens/TreeSpecimen";
 import { ValueReadoutSpecimen } from "./specimens/ValueReadoutSpecimen";
 import { TriStateSwitchSpecimen } from "./specimens/TriStateSwitchSpecimen";
 import { UiPresentationProviderSpecimen } from "./specimens/UiPresentationProviderSpecimen";
+import { MotionPolicyProviderSpecimen } from "./specimens/MotionPolicyProviderSpecimen";
 import { VideoPlayerSpecimen } from "./specimens/VideoPlayerSpecimen";
 import { UpdateCenterSpecimen } from "./specimens/UpdateCenterSpecimen";
 import { UpdateStatusSpecimen } from "./specimens/UpdateStatusSpecimen";
@@ -352,6 +353,7 @@ export const specimenMap: Record<string, ComponentType<{ slug?: string }>> = {
   "tree": TreeSpecimen,
   "tri-state-switch": TriStateSwitchSpecimen,
   "ui-presentation-provider": UiPresentationProviderSpecimen,
+  "motion-policy-provider": MotionPolicyProviderSpecimen,
   "value-readout": ValueReadoutSpecimen,
   "video-player": VideoPlayerSpecimen,
   "waveform-display": WaveformDisplaySpecimen,

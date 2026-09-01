@@ -51,6 +51,7 @@ const RENDER_MODULE_OVERRIDES: Record<string, string> = {
   StatusBar: "shell_status_bar",
   TimeInput: "time_input",
   UiPresentationProvider: "context",
+  MotionPolicyProvider: "context",
 };
 
 const AUDIO_RENDER_COMPONENTS = new Set([
@@ -289,11 +290,11 @@ export function deriveLiveRoster(root = ROOT): LiveComponent[] {
   const names = new Set(entries.map((entry) => entry.name));
   const nativeExclusions = entries.filter((entry) => !entry.portable);
 
-  if (entries.length !== 175) {
-    throw new Error(`Expected 175 public Svelte components, found ${entries.length}.`);
+  if (entries.length !== 176) {
+    throw new Error(`Expected 176 public Svelte components, found ${entries.length}.`);
   }
-  if (canonicalComponents.length !== 174) {
-    throw new Error(`Expected 174 portable catalogue components, found ${canonicalComponents.length}.`);
+  if (canonicalComponents.length !== 175) {
+    throw new Error(`Expected 175 portable catalogue components, found ${canonicalComponents.length}.`);
   }
   if (nativeExclusions.length !== 1 || nativeExclusions[0].name !== "MeterSurface") {
     throw new Error(
@@ -582,11 +583,11 @@ claim; one runtime's evidence never transfers to another runtime.
 
 ## Denominator
 
-- Public Svelte components: **175**, derived from
+- Public Svelte components: **176**, derived from
   \`packages/svelte/components/src/index.ts\`.
 - Portable native components: **174**, derived from the generated catalogue.
 - Native \`not-applicable\`: **MeterSurface** only, by the fixed web-only
-  boundary. It remains in the 175-component public denominator.
+  boundary. It remains in the 176-component public denominator.
 - Jetstream: one program-level \`deferred\` target. Shared Rust composition and
   the in-repo adapter do not make the sibling backend pass.
 

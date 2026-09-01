@@ -123,10 +123,10 @@
     "summary": [
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
-        "exportCount": 214,
-        "componentCount": 175,
-        "helperCount": 39,
-        "previewedCount": 212,
+        "exportCount": 216,
+        "componentCount": 176,
+        "helperCount": 40,
+        "previewedCount": 214,
         "contractOnlyCount": 2
       }
     ],
@@ -1221,6 +1221,19 @@
       },
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "getMotionPolicy",
+        "kind": "helper",
+        "status": "previewed",
+        "note": "Primitive helper exports remain reviewable through catalogue specimens and shared presentation-driven examples. The overlay primitives (anchored, portal) are exercised by every anchored specimen and by test/visual/overlay-portal-probe.ts.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "getProviderAccent",
         "kind": "helper",
         "status": "previewed",
@@ -1768,6 +1781,19 @@
       {
         "packageName": "@inflatable-cookie/poodle-svelte",
         "exportName": "ModMatrixGrid",
+        "kind": "component",
+        "status": "previewed",
+        "note": "Every public primitive export is directly reviewable from the catalogue.",
+        "sectionIds": [
+          "catalog-hub"
+        ],
+        "sectionTitles": [
+          "Catalog hub"
+        ]
+      },
+      {
+        "packageName": "@inflatable-cookie/poodle-svelte",
+        "exportName": "MotionPolicyProvider",
         "kind": "component",
         "status": "previewed",
         "note": "Every public primitive export is directly reviewable from the catalogue.",

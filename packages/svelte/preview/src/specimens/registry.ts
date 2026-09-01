@@ -163,6 +163,7 @@ import DetailSectionGroupSpecimen from "./DetailSectionGroupSpecimen.svelte";
 import ErrorBoundarySpecimen from "./ErrorBoundarySpecimen.svelte";
 import InlineListSectionSpecimen from "./InlineListSectionSpecimen.svelte";
 import UiPresentationProviderSpecimen from "./UiPresentationProviderSpecimen.svelte";
+import MotionPolicyProviderSpecimen from "./MotionPolicyProviderSpecimen.svelte";
 
 // Composite specimens
 import ActionDiscoveryPanelSpecimen from "./ActionDiscoveryPanelSpecimen.svelte";
@@ -347,6 +348,7 @@ export const specimenMap: Record<string, Component<Record<string, never>>> = {
   "error-boundary": ErrorBoundarySpecimen,
   "inline-list-section": InlineListSectionSpecimen,
   "ui-presentation-provider": UiPresentationProviderSpecimen,
+  "motion-policy-provider": MotionPolicyProviderSpecimen,
 
   // Workstation
   "action-discovery-panel": ActionDiscoveryPanelSpecimen,

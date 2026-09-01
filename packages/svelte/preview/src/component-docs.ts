@@ -4773,6 +4773,24 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
 <TriStateSwitch value={filter} ariaLabel="Include archived items" excludedColor="#ef4444" includedColor="#22c55e" onValueChange={(value) => (filter = value)} />`,
   },
 
+  "motion-policy-provider": {
+    props: [
+      { name: "policy", type: "MotionPolicy", default: '"full"', description: "Requested local restriction: full, reduced, or frozen. Nesting can only tighten." },
+    ],
+    slots: [
+      { name: "children", description: "Snippet for descendants built under the effective policy." },
+    ],
+    events: [],
+    usage: `<script lang="ts">
+  import { MotionPolicyProvider, Skeleton, Spinner } from "@inflatable-cookie/poodle-svelte";
+</script>
+
+<MotionPolicyProvider policy="reduced">
+  <Skeleton />
+  <Spinner />
+</MotionPolicyProvider>`,
+  },
+
   "ui-presentation-provider": {
     props: [
       { name: "density", type: "ControlDensity", default: '"default"', description: "Density applied to all descendant components. Supports compact, default, and comfortable." },

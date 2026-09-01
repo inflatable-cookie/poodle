@@ -703,6 +703,15 @@
       "collections": []
     },
     {
+      "slug": "motion-policy-provider",
+      "displayName": "MotionPolicyProvider",
+      "description": "Scoped provider for the effective full, reduced, or frozen host motion policy.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
       "slug": "callout",
       "displayName": "Callout",
       "description": "Informational block with tone and optional actions.",
