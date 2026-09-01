@@ -1,6 +1,6 @@
 # g16.033 — HistoryCenter Rejection Surface
 
-Status: implemented and pushed — awaiting orchestrator review and merge
+Status: accepted and merged in PR #120 as `df0c7acd9`
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/120
 Implementation commit: `ffe357d50753a6eb94c38bc77a585a3fdac57266`

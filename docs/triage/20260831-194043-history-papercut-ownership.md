@@ -1,8 +1,8 @@
 # History Papercut Ownership
 
-Status: open — external wire/adoption work is complete; the Poodle rejection
-surface is implemented and open as PR #120, awaiting review/merge; package publication/adoption, CS20, and
-keyboard-geometry follow-ons remain
+Status: open — external wire work and the Poodle rejection surface are
+complete; package publication/adoption, CS20, and keyboard-geometry follow-ons
+remain
 Captured: 2026-08-31
 Source: Loophole `PAPERCUTS.md` after PR #14 merged
 
@@ -18,14 +18,12 @@ Keep the existing sequence intact:
 
 1. `g16.026` and `g16.027` are merged.
 2. `g16.028` is accepted and merged in PR #118.
-3. `g16.033` is implemented on its worker branch with the promoted five-code
-   rejection surface and the installed-tarball v3 type proof; review and merge
-   remain with this thread.
+3. `g16.033` is accepted and merged in PR #120 as `df0c7acd9`, with the
+   promoted five-code rejection surface and installed-tarball v3 type proof.
 
 Every papercut worker workspace created from this packet must carry the
 capitalized `Papercuts` label before launch. The drag runway is closed;
-`g16.033` was the next bounded papercut worker and has been dispatched and
-implemented.
+`g16.033` was the next bounded papercut worker and is complete.
 
 ## Ownership Split
 
@@ -101,7 +99,7 @@ settled.
 
 1. `g16.028` closed without an inserted papercut worker.
 2. `g16.033` was dispatched from this thread with the required `Papercuts`
-   label and is implemented on its worker branch.
+   label and merged in PR #120 as `df0c7acd9`.
 3. `g16.033` proves the packed v3 type surface; the next step is explicit
    release authority for publication and the remaining Loophole package
    adoption.

@@ -94,9 +94,9 @@ behavior repairs without inventing another conformance authority.
   and the packed v3 `HistoryEntry` proof: five distinct refusal meanings across
   TypeScript, Rust, both web shells and mounted GPUI, and an installed-tarball
   typecheck on both public Svelte import paths. It moves no ledger cell and
-  claims no publication. Keyboard vertical
-  geometry and Longhorn's `AlreadyAtTarget` wire code remain separate deferred
-  decisions.
+  claims no publication. Keyboard vertical geometry remains design-deferred;
+  package publication and Loophole adoption remain separate authorized work.
+  Longhorn's `AlreadyAtTarget` wire code is complete in its owning repository.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other

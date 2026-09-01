@@ -1,8 +1,8 @@
 # g16.033 — HistoryCenter Rejection Surface
 
-Status: implemented — PR #120 on
-`papercuts/g16-033-history-center-rejection-surface`, awaiting orchestrator
-review and merge; `g16.028` accepted and merged in PR #118 as `17a25d633`
+Status: complete — accepted and merged in PR #120 as `df0c7acd9` after one
+Northstar review round; `g16.028` accepted and merged in PR #118 as
+`17a25d633`
 Opened: 2026-08-31
 Depends on: accepted and merged `g16.028` for runway sequencing — satisfied by
 PR #118 / `17a25d633`. There is no drag-and-drop semantic dependency.
