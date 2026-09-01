@@ -12,8 +12,10 @@ work is unrelated to drag.
 ## Open Continuations
 
 - **Poodle release:** `g16.054` prepares and validates one immutable `0.3.0`
-  candidate after accepted `g16.053`. Tag, workflow dispatch, publication, and
-  registry proof remain a later orchestrator-owned certification step.
+  candidate only after accepted `g16.053` and an accepted, separately promoted
+  compiled-JS/declarations prerequisite. Its build, export, CSS, and dependency
+  mechanics remain unplanned. Tag, workflow dispatch, publication, and registry
+  proof remain a later orchestrator-owned certification step.
 - **Loophole adoption:** package pin and rejection mapping begin only after
   npm `latest=0.3.0` is independently proved. Poodle does not write Loophole.
 - **CS20 `groupId`:** Poodle and Longhorn already carry the optional field.

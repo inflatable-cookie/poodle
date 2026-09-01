@@ -2,14 +2,20 @@
 
 Status: canonical post-triage planning map
 Compiled: 2026-09-01
-Source head: `35afa1e215eefd49a09b890e2b5642d79923f981`
+Source head: `ec2c226db781e05db2642f77ff4c6fbfb0fcc94d`
 Sources: `component-continuation-register.md`, the accepted consolidation
-handoff, promoted cards, and the remaining open triage gates
+handoff, promoted cards, the remaining open triage gates, and the open
+holistic posture assessment
 
 This map replaces the stale post-motion queue with one bounded continuation
 frontier. It records promotion, serial edges, external gates, and holds. It
 does not change parity evidence, authorize release or sibling-repository
 mutation, or create a worker handoff.
+
+Current main also carries independent ready card
+[`g16.055`](055-drag-source-preactivation-selection-suppression.md) and its
+worker handoff. They remain outside this post-triage map and are neither
+absorbed nor renumbered here.
 
 ## Closed Baseline
 
@@ -52,7 +58,7 @@ it cannot ship production shimmer or promise it in the contract itself.
 | [`g16.050`](050-icon-geometry-internal-runtime-substrate.md) | blocked | accepted `g16.049` | IG-03–IG-05; internal plan, node/GPUI headless proof, private web shells |
 | [`g16.051`](051-icon-geometry-native-visual-admission.md) | blocked | accepted `g16.050`, operational Button lab, and separately accepted icon adapter/manifest extension | IG-06 native visual admission only |
 | [`g16.052`](052-contributor-design-guidance-pilot.md) | gated | named human reviewers, two freeze approvals, and orchestrator execution custody | finite matched pilot; no ordinary worker judgment |
-| [`g16.054`](054-historycenter-v030-release-candidate.md) | blocked | accepted `g16.053` | immutable `0.3.0` candidate and validation evidence; no release mutation |
+| [`g16.054`](054-historycenter-v030-release-candidate.md) | blocked | accepted `g16.053` plus an accepted, separately promoted compiled-JS/declarations prerequisite whose mechanics remain unplanned | immutable `0.3.0` candidate and validation evidence; no release mutation |
 | AgentSubagent implementation | gated | `g16.048` meets every threshold and a new bounded card is accepted | web-only finite sweep; no generic effect API |
 | IconMorph public admission | gated | `g16.051` returns an admit verdict | IG-07 requires a later explicit public card |
 | HistoryCenter publication and Loophole adoption | gated | accepted `g16.054`, exact receipts, and separate orchestrator authority | tag/publish and sibling adoption stay distinct mutations |
@@ -75,6 +81,14 @@ The nested-menu direction remains conditional pointer intent: immediate sibling
 transfer only inside a valid corridor and accepted synchronized close grace.
 The citation direction remains composition-gated: paragraph proof first, with
 the full semantic content carrier as a separate serial prerequisite.
+
+### Separate Holistic Promotion Batch
+
+The [holistic posture assessment](../../triage/20260901-233708-holistic-posture-assessment.md)
+remains open input. Its Nucleus 29-component execution-backed GPUI parity
+programme, React drift gate, approved Linux web/Rust workflow card,
+direct-Underlay authority correction, and recurring consumer-papercut intake
+await a separate promotion batch. This runway compiles none of those cards.
 
 ## Promotion Rule
 

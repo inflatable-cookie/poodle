@@ -16,9 +16,14 @@ behavior repairs without inventing another conformance authority.
 - `g16.036` is complete in PR #127. The 2026-09-01 triage decisions are
   consolidated in the [canonical continuation map](g16/component-continuation-runway.md):
   `g16.045`–`g16.049` and `g16.053` are ready; `g16.050`, `g16.051`,
-  `g16.052`, and `g16.054` keep explicit serial, ownership, or external gates. Citations,
-  nested menus, the lab-backed visual tranche, public IconMorph, release and
-  adoption mutations, GPUI accessibility, and Jetstream remain gated or held.
+  and `g16.052` keep explicit serial, ownership, or external gates. `g16.054`
+  stays blocked on both accepted `g16.053` and an accepted, separately promoted
+  compiled-JS/declarations prerequisite whose mechanics remain unplanned.
+  Citations, nested menus, the lab-backed visual tranche, public IconMorph,
+  release and adoption mutations, GPUI accessibility, Jetstream, and the
+  separate holistic promotion batch remain gated or held.
+  Independent `g16.055` is ready on current main with its own worker handoff;
+  it remains outside the post-triage continuation map.
 - `g16.001` is complete and operator-reviewed in PR #75. It repairs stale
   parity reporting and produces one component-level evidence ledger. `g16.002`
   closed — partial outcome: mounted GPUI behaviour for Checkbox, Switch, and

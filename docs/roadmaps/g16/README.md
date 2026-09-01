@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — complete through `g16.044`; canonical continuation compiled
-through `g16.054`
+Status: active — complete through `g16.044`; canonical post-triage continuation
+compiled through `g16.054`; independent `g16.055` ready
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -88,17 +88,25 @@ stay maintained; backend admission is not part of the first card.
 51. [051 — Icon geometry native visual admission](051-icon-geometry-native-visual-admission.md) — blocked on accepted `g16.050`, the operational Button lab, and a separately accepted icon adapter/manifest extension
 52. [052 — Contributor design-guidance pilot](052-contributor-design-guidance-pilot.md) — gated on named human reviewers, freeze approvals, and orchestrator execution custody
 53. [053 — Repository security-audit boundary repair](053-repository-security-audit-boundary-repair.md) — ready
-54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — blocked on accepted `g16.053`; no release mutation
+54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — blocked on accepted `g16.053` plus an accepted, separately promoted compiled-JS/declarations prerequisite; its mechanics remain unplanned; no release mutation
+55. [055 — Drag source pre-activation selection suppression](055-drag-source-preactivation-selection-suppression.md) — ready; independent current-main Papercuts repair with its own worker handoff
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. Ready cards are `g16.045`–`g16.049`
-and `g16.053`. `g16.050`, `g16.051`, `g16.052`, and `g16.054` retain their
-explicit serial or external gates. Citations, nested-menu pointer intent, the
-dedicated lab, its six-component / 24-fixture visual tranche, GPUI
-accessibility, public IconMorph admission, release/adoption mutations, and
-Jetstream remain gated or held rather than becoming implicit worker work.
+and `g16.053`. `g16.050`, `g16.051`, and `g16.052` retain their explicit serial
+or external gates. `g16.054` requires both accepted `g16.053` and the separately
+promoted compiled-JS/declarations prerequisite; accepted `g16.053` alone cannot
+open candidate work. Citations, nested-menu pointer intent, the dedicated lab,
+its six-component / 24-fixture visual tranche, GPUI accessibility, public
+IconMorph admission, release/adoption mutations, and Jetstream remain gated or
+held rather than becoming implicit worker work. The canonical map also holds
+the five approved holistic-assessment directions for a separate promotion
+batch; no cards for them are compiled here.
+
+`g16.055` is a separate ready Papercuts repair already reserved on current
+main. It is not part of the post-triage continuation map.
 
 The earlier continuation programmes remain provenance:
 

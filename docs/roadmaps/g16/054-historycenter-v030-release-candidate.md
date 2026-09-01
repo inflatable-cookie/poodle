@@ -1,11 +1,13 @@
 # g16.054 — HistoryCenter v0.3.0 Release Candidate
 
-Status: blocked — serial on accepted `g16.053`; later certification and
+Status: blocked — serial on accepted `g16.053` and an accepted, separately
+promoted compiled-JS/declarations prerequisite; later certification and
 Loophole adoption remain separate authority gates
 Type: release candidate — no release mutation
 Opened: 2026-09-01
-Depends on: accepted `g16.053`, merged `g16.033`, merged `g16.036`, and the
-accepted sequence recorded in
+Depends on: accepted `g16.053`; an accepted, separately promoted prerequisite
+that lands compiled JavaScript and declarations before candidate freeze;
+merged `g16.033`; merged `g16.036`; and the accepted sequence recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: `../../specs/022-packaging-versioning-and-release-channel-rules.md`,
 `../../specs/044-deprecation-change-control-and-release-channel-operations.md`,
@@ -14,7 +16,7 @@ Governing refs: `../../specs/022-packaging-versioning-and-release-channel-rules.
 ## Goal
 
 Prepare, validate, and evidence one immutable Poodle `0.3.0` candidate from
-current main.
+current main after both serial prerequisites are accepted.
 Record exact package, lock, generated, tarball, and headless-gate evidence. Do
 not tag, publish, dispatch release workflows, edit Loophole, or imply that a
 green candidate is a released package.
@@ -30,6 +32,10 @@ green candidate is a released package.
 - Publish set remains core and Svelte only. React is packed and validated only;
   Rust stays source/tag distribution. Jetstream lockstep identity is not
   admission.
+- Core, Svelte, and React package inputs must already emit compiled JavaScript
+  and declarations under the separately promoted prerequisite. Its build tool,
+  declaration emit, export map, CSS delivery, `sideEffects`, and dependency
+  isolation mechanics remain unplanned and are not selected by this card.
 - Release notes inventory public intent from immutable `v0.2.2`, name the
   HistoryEntry breaking migration and five-code rejection surface, explain
   unpublished `0.2.3`, and correct READMEs that advertise it.
@@ -41,8 +47,10 @@ green candidate is a released package.
 
 ## Ordered Work
 
-1. Reconcile current main after `g16.053`; freeze the candidate inputs and
-   verify `v0.3.0` / `v0.2.4` are absent locally and remotely.
+1. Reconcile current main after `g16.053` and the separately promoted compiled
+   JavaScript/declarations prerequisite are accepted. Prove that prerequisite's
+   outputs are landed before freezing candidate inputs, then verify `v0.3.0` /
+   `v0.2.4` are absent locally and remotely.
 2. Apply lockstep versions, requirements, locks, generated stamps, changelog,
    `0.3.0` notes, and README/unpublished-`0.2.3` honesty edits.
 3. Commit the candidate tree. From a clean checkout of that exact commit, run
@@ -62,6 +70,9 @@ green candidate is a released package.
 - Core/Svelte/React tarball identities and SHA-256 receipts come from the exact
   candidate commit. Core/Svelte pack-content verification matches workflow
   rules without editing the workflow.
+- Packed core/Svelte/React surfaces contain compiled JavaScript and declarations
+  supplied by the accepted prerequisite. Candidate work does not design or
+  alter its build, export, CSS, or dependency mechanics.
 - `effigy release gates` executes the one configured headless gate from the
   exact candidate and all required boards pass.
 - Local/remote tag checks remain absent. npm, registries, workflows, releases,
@@ -76,6 +87,7 @@ green candidate is a released package.
 | Version truth is lockstep | one Cargo manifest or bun workspace stays 0.2.3 | version gate fails |
 | Notes describe shipped delta | notes omit HistoryEntry break | release-doc review fails |
 | Packed surface is v3 | `branchCount` compiles on either Svelte path | unsuppressed TS2339 proof fails |
+| Compiled package prerequisite is real | a tarball exposes raw source or lacks declarations | prerequisite receipt and pack proof fail |
 | React is validate-only | workflow/manifest gains React publish | automation audit fails |
 | Green candidate is not a release | tag/workflow/npm changes appear | scope gate fails |
 
@@ -86,7 +98,8 @@ generated version stamps; changelog, `0.3.0` notes, unpublished-`0.2.3`
 clarification, package README honesty; ignored tarballs; one candidate receipt;
 this card, one log, and new papercuts. Do not edit `.github/workflows/`, tags,
 registries, sibling repositories, component behavior, Jetstream admission, or
-windowed/native-visual routes.
+windowed/native-visual routes. Do not choose or change the prerequisite's
+build, export, CSS, `sideEffects`, or dependency-isolation mechanics.
 
 ## Validation
 
@@ -100,9 +113,10 @@ windowed/native-visual or mutating release commands.
 ## Stop Conditions
 
 Stop on any red non-flake gate, unproved flake, lock/stamp drift, missing packed
-negative proof, incomplete public-intent notes, a candidate-bearing mainline
-change after freeze, workflow/tag/registry mismatch, requested compatibility
-shim, sibling mutation, or release/windowed action.
+negative proof, absent compiled JavaScript/declarations prerequisite, incomplete
+public-intent notes, a candidate-bearing mainline change after freeze,
+workflow/tag/registry mismatch, requested compatibility shim, sibling mutation,
+or release/windowed action.
 
 ## Continuation
 
