@@ -300,13 +300,16 @@ need the operator or the orchestrator's judgment.
   ghost, fold it into `0.3.0`?
 - Answered 2026-09-02: retain React source-only and add a Svelte↔React
   prop-drift gate; publication waits for a named consumer.
-- Is "Svelte 5 + Vite/SvelteKit only" the intended consumer boundary for the
-  web packages pre-1.0?
+- Answered 2026-09-02: no. The operator requires a `dist/` build (compiled
+  JS + declarations) for `0.3.0`; the web packages will not ship raw source
+  again.
 - Answered 2026-09-02: parity is the goal; real parity triggers switching
   several apps. Open follow-up: which app is the first switch candidate, so
   its component set can define the parity bar?
-- Which Underlay rule is current: adapter-wrapped (AGENTS.md) or direct import
-  (architecture 001)?
+- Answered 2026-09-02: direct import (architecture 001). Repair AGENTS.md,
+  product-guardrails, and the vision to match.
+- Answered 2026-09-02: a recurring read-only sweep of sibling consumer
+  PAPERCUTS files for Poodle defects is approved as a cheap intake lane.
 
 ## Promotion Route
 
