@@ -1,4 +1,4 @@
-<!-- parity consv=fixed gpui=2 jetstream=1 specimen=ok pass=41 -->
+<!-- parity consv=fixed gpui=2 jetstream=1 specimen=ok pass=42 -->
 # Parity: MarkdownEditor
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -34,6 +34,7 @@
 - [x] FIXED min-height — `spec.min_height_rem()` parses rem/px and defaults to `12rem` (contract), no `200.0` px fallback.
 - [x] FIXED placeholder + font-size tokens — placeholder color = `text.tertiary`, preview-empty = `text.tertiary`, textarea `0.8125rem` / preview `0.875rem`. (Monospace font-family: GPUI text on a `div` has no font-family API here — Known Delta.)
 - [x] FIXED tool buttons disabled in preview — `tools_disabled()` dims to `0.4` + `Arrow` cursor; hover = accent@12% (was the bogus `color.bg.hover` token which resolves to **black** — real bug fixed).
+- [x] FIXED preview scroll ownership — preview pane is `LayoutDirection::Column` + `LayoutOverflow::Scroll` with `min_height: 0` / `fill_height`; body/root shrink under a definite host (`min_height: 0`, overflow hidden); mounted GPUI regression `markdown_editor_bounded_preview_scrolls_under_host_height` proves host-bounded geometry, content movement, and clipped-tail hit-test without fixture sizing mutations (g16.035).
 - [ ] Toolbar formatting buttons remain inert (no `on_click` markdown insertion) — Tier-1 "toolbar actions produce correct markdown" lives in the preview event loop. Note.
 - [ ] Preview pane shows source text, not parsed HTML (contract §8 "Preview Rendered Elements") — Tier-3 rendering freedom; a markdown→HTML renderer plugs in at the preview loop. Note.
 - accepted: no ARIA (gpui has no accessibility API).
@@ -60,4 +61,5 @@
 - GPUI/Jetstream both render the preview pane as plain source text rather than parsed HTML — this is the single biggest visual divergence. The contract §8 "Preview Rendered Elements" table (h1–hr styling) is entirely unrealized in both Rust targets. Markdown→HTML rendering is Tier-3 freedom, but showing unparsed source is arguably "worse than no preview". Flag for product decision.
 - GPUI is the only target with a working interactive specimen (stateful mode + value via AppState). Jetstream has no editor wiring in `main.rs`.
 - Spec `MarkdownEditorSpec` has `render_html_label: Option<String>` as a stand-in for the `renderHtml` callback — acceptable since callbacks can't cross the spec boundary, but neither Rust target reads it.
+- Pass 42: g16.035 bounded preview scroll — shared CSS column flex + `max-height: 100%` + `min-height: 0` shrink chain; GPUI/render preview is Column + `LayoutOverflow::Scroll` with the same shrink ownership; mounted headless GPUI regression proves host-bounded geometry / wheel / clipped-tail hit-test with fixture ids+overflow only. Source-text-versus-rendered-HTML remains Tier-3.
 - Pass 41: added additive pure helpers to `MarkdownEditorSpec` so both targets resolve the contract §8 tables from one place: `tool_size_rem`, `mode_x_rem`, `toolbar_x/y_rem`, `tool_gap_rem`, `mode_y_rem`, `pane_pad_rem`, `min_height_rem` (parses rem/px, defaults `12rem`), `effective_size`, `shows_editor/shows_preview/tools_disabled`, `char_count`, plus token methods (`tool_color/tool_hover_color/tool_hover_fill/textarea_color/placeholder_color/preview_empty_color/split_divider/toolbar_border/focus_ring`). Unit-tested in poodle-specs. No token gaps — all values map to existing semantic tokens; the only Known Delta is GPUI lacking a `div` font-family API (monospace textarea) and GPUI/Jetstream lacking inset rendering for the preview HTML tree.

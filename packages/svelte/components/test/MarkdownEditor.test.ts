@@ -1,7 +1,25 @@
 import { fireEvent, render } from "@testing-library/svelte";
+import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 
 import MarkdownEditor from "../src/MarkdownEditor.svelte";
+
+// Vitest stubs CSS imports; inject the shared sheet before computed-style proof
+// (same pattern as SettingsShell / AppHeader).
+const markdownEditorCss = readFileSync(
+  new URL("../../../core/src/styles/markdown-editor.css", `file://${import.meta.dirname}/`),
+  "utf8",
+);
+
+function injectStyles(): void {
+  const style = document.createElement("style");
+  style.textContent = markdownEditorCss;
+  document.head.appendChild(style);
+}
+
+function isZeroLength(value: string): boolean {
+  return value === "0" || value === "0px";
+}
 
 describe("MarkdownEditor (svelte)", () => {
   it("renders only the textarea in edit mode", () => {
@@ -73,5 +91,24 @@ describe("MarkdownEditor (svelte)", () => {
     const bold = container.querySelector('button[aria-label="Bold"]') as HTMLButtonElement;
     await fireEvent.click(bold);
     expect(textarea.value).toBe("**hello**");
+  });
+
+  it("keeps the preview pane as the vertical scroll owner in the shared stylesheet", () => {
+    injectStyles();
+    const { container } = render(MarkdownEditor, {
+      props: { mode: "preview", value: "# Hello" },
+    });
+    const root = container.querySelector(".poodle-md-editor") as HTMLElement;
+    const body = container.querySelector(".poodle-md-editor__body") as HTMLElement;
+    const preview = container.querySelector(".poodle-md-editor__preview") as HTMLElement;
+    const rootStyle = getComputedStyle(root);
+    const bodyStyle = getComputedStyle(body);
+    const previewStyle = getComputedStyle(preview);
+    expect(rootStyle.display).toBe("flex");
+    expect(rootStyle.flexDirection).toBe("column");
+    expect(rootStyle.maxHeight).toBe("100%");
+    expect(isZeroLength(bodyStyle.minHeight)).toBe(true);
+    expect(previewStyle.overflowY).toBe("auto");
+    expect(isZeroLength(previewStyle.minHeight)).toBe(true);
   });
 });

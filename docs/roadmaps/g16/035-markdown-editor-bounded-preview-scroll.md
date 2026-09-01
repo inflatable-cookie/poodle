@@ -1,7 +1,8 @@
 # g16.035 — MarkdownEditor Bounded Preview Scroll
 
-Status: ready
+Status: implemented
 Opened: 2026-09-01
+Closed: 2026-09-01
 Depends on: current MarkdownEditor contract and active-cohort implementations;
 independent of `g16.034`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -10,6 +11,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 Reported failure: a long rendered preview contributes its full intrinsic height,
 so the MarkdownEditor expands its surrounding editor layout instead of keeping
 the preview inside a scroll viewport
+PR: https://github.com/inflatable-cookie/poodle/pull/123
 
 ## Goal
 
@@ -90,6 +92,30 @@ Commit the real proof before planting the pre-fix behavior. Confirm each planted
 counterexample fails for the intended geometry or scroll reason, restore, and
 rerun green.
 
+### Falsification record
+
+Planted pre-fix by removing the CSS shrink chain (`display:flex` column,
+`max-height:100%`, `min-height:0`) while leaving `overflow-y:auto`, and by
+clearing native preview `LayoutOverflow::Scroll` / body shrink declarations.
+Chromium probe failed on internal overflow and mutable `scrollTop` for both
+shells (preview `scrollHeight == clientHeight`, `scrollTop` stuck at 0). Vitest
+stylesheet proof failed (`display` stayed `block`). Render tests failed on
+`LayoutOverflow::Scroll` and body `min_height: 0`. Restored from the committed
+proof and reran green.
+
+Review follow-up (`oracle-gap`): added
+`markdown_editor_bounded_preview_scrolls_under_host_height` in
+`packages/gpui/preview/tests/headless_regressions.rs`. First mounted draft still
+mutated fixture sizing and masked falsification on a declaration assert.
+
+Second review follow-up: fixture stamps runtime ids + synthetic overflow only;
+production preview is Column + Scroll with the shrink chain; mounted case has
+no declaration assert. Planted pre-fix native shrink/overflow (root
+`minHeight`, no body/preview shrink, preview Row + Visible). Mounted GPUI
+regression failed on geometry —
+`preview sits under the toolbar inside the host: preview=2765 host=256` —
+before wheel/hit-test. Restored and reran the mounted regression green.
+
 ## Writable Scope
 
 - `packages/core/src/styles/markdown-editor.css`;
@@ -143,3 +169,16 @@ mutation, or sibling-repository commands.
 On accepted merge, close this card and let the orchestrator reconcile the g16
 front doors against whichever of `g16.034` and `g16.035` merges first. The
 post-motion block-slider lane remains serial on `g16.034`, not on this fix.
+
+## Implementation notes
+
+Cause: preview already had `overflow-y: auto`, but the root was not a column
+flex with a definite max height and the body/preview lacked `min-height: 0`, so
+intrinsic preview height won the layout.
+
+Repair: shared CSS column flex + `max-height: 100%` + shrink chain; native
+preview declares `LayoutOverflow::Scroll` with body/preview `min_height: 0`.
+No new public sizing prop. Evidence:
+`effigy test:markdown-editor-preview-scroll`, focused shell/render tests, and
+the mounted GPUI regression
+`markdown_editor_bounded_preview_scrolls_under_host_height`.
