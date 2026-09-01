@@ -165,7 +165,6 @@
   function handleDismiss(id: string, toastEl: HTMLElement | null, activator: EventTarget | null) {
     if (stackElement && toastEl) {
       moveToastFocus(stackElement, toastEl, enteredFrom, activator);
-      applyToastExitInert(toastEl, true);
     }
     onDismiss?.(id);
   }

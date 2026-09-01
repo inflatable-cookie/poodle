@@ -7,12 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
-- 2026-09-01 — `bunx vitest run` on the full `ci:web` board OOMs the
-  specimen census even serially: one worker hits
-  `Ineffective mark-compacts near heap limit` at 16 GB
-  (`test/parity/specimen-axis-census.test.tsx`). Serial `maxWorkers: 1` plus
-  `NODE_OPTIONS=--max-old-space-size=32768` is the recovery. Hit while
-  closing g16.034.
+- 2026-09-01 — RESOLVED 2026-09-01. An earlier `ci:web` run OOMed the
+  specimen census at the ordinary V8 heap while closing g16.034. The shared
+  rAF/cancel cleanup and React smoke cleanup removed the leak: ordinary
+  `effigy test:components` and `effigy ci:web` now pass at default Vitest
+  parallelism and normal heap (372 files / 3468 tests). No heap override or
+  worker serialization is required.
 
 - 2026-09-01 — Adding one public portable catalogue component requires a
   coordinated denominator bump across `specimen_probe.rs` `EXPECTED_ROUTES`,

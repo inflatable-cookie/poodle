@@ -89,7 +89,6 @@ export function ToastStack({
   function handleDismiss(id: string, toastEl: HTMLElement | null, activator: EventTarget | null) {
     if (stackRef.current && toastEl) {
       moveToastFocus(stackRef.current, toastEl, enteredFrom.current, activator);
-      applyToastExitInert(toastEl, true);
     }
     onDismiss?.(id);
   }

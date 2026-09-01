@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, vi } from "vitest";
 
 // happy-dom implements requestAnimationFrame but not cancelAnimationFrame.
-// Motion-ready first-frame callbacks then accumulate across roster sweeps and
-// OOM the worker. Own both sides of the pair in tests.
+// Own both sides of the pair so motion-ready callbacks are teardown-safe and
+// test state cannot accumulate across roster sweeps.
 const pendingFrames = new Map<number, ReturnType<typeof setTimeout>>();
 let nextFrameId = 1;
 globalThis.requestAnimationFrame = ((cb: FrameRequestCallback) => {

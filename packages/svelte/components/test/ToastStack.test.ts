@@ -43,6 +43,46 @@ describe("ToastStack (svelte)", () => {
     expect(onDismiss).toHaveBeenCalledWith("t1");
   });
 
+  it("keeps a controlled toast live when dismiss has no removal callback", async () => {
+    const { container } = render(ToastStack, { props: { items } });
+    const dismiss = container.querySelector(
+      'button[aria-label="Dismiss Changes saved"]',
+    ) as HTMLButtonElement;
+    const nextDismiss = container.querySelector(
+      'button[aria-label="Dismiss New version"]',
+    ) as HTMLButtonElement;
+    dismiss.focus();
+
+    await fireEvent.click(dismiss);
+
+    const toast = container.querySelector(".poodle-toast") as HTMLElement;
+    expect(document.activeElement).toBe(nextDismiss);
+    expect(toast.dataset.motion).toBe("settled");
+    expect(toast.getAttribute("aria-live")).toBe("polite");
+    expect(toast.hasAttribute("aria-hidden")).toBe(false);
+    expect(toast.hasAttribute("inert")).toBe(false);
+    expect(dismiss.getAttribute("tabindex")).not.toBe("-1");
+  });
+
+  it("keeps a controlled toast live when onDismiss does not remove it", async () => {
+    const onDismiss = vi.fn();
+    const { container } = render(ToastStack, { props: { items, onDismiss } });
+    const dismiss = container.querySelector(
+      'button[aria-label="Dismiss Changes saved"]',
+    ) as HTMLButtonElement;
+    dismiss.focus();
+
+    await fireEvent.click(dismiss);
+
+    const toast = container.querySelector(".poodle-toast") as HTMLElement;
+    expect(onDismiss).toHaveBeenCalledWith("t1");
+    expect(toast.dataset.motion).toBe("settled");
+    expect(toast.getAttribute("aria-live")).toBe("polite");
+    expect(toast.hasAttribute("aria-hidden")).toBe(false);
+    expect(toast.hasAttribute("inert")).toBe(false);
+    expect(dismiss.getAttribute("tabindex")).not.toBe("-1");
+  });
+
   it("reports the action with the toast id", async () => {
     const onAction = vi.fn();
     const { container } = render(ToastStack, { props: { items, onAction } });

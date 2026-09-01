@@ -228,5 +228,7 @@ intentional, documented boundaries:
 - Jetstream has no admission in this card. Any generated/static catalogue
   route is registry metadata only and does not claim Jetstream admission or
   mounted parity; that route remains deferred to a later planning decision.
-- The full specimen census needs a 32 GB heap even serially; the papercut is
-  recorded and does not block these focused proofs.
+- The earlier full-specimen heap papercut is resolved on this head. Ordinary
+  `effigy test:components` and `effigy ci:web` use default Vitest parallelism
+  and the normal V8 heap; both pass with 372 files / 3468 tests. No
+  `NODE_OPTIONS` override or global worker serialization remains.

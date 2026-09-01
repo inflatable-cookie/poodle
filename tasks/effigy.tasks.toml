@@ -179,8 +179,8 @@
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
 # Verifies the machine -> DOM wiring the framework packages add on top of the
 # @inflatable-cookie/poodle-core machines (which test:core covers).
-# Specimen census OOMs at 16 GB even with maxWorkers: 1; raise heap for ci:web.
-"test:components" = "env NODE_OPTIONS=--max-old-space-size=32768 bunx vitest run"
+# Component tests use the ordinary Vitest heap and worker scheduling.
+"test:components" = "bunx vitest run"
 "test:web-pack-install" = "bun test/package-install/web-preview.ts"
 # Compatibility selector for existing downstream handoffs and historical docs.
 "test:svelte-pack-install" = [{ task = "test:web-pack-install" }]
