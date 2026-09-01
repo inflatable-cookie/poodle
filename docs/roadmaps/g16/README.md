@@ -1,7 +1,7 @@
 # g16 — Next Work
 
 Status: active — the drag-and-drop programme is closed by merged g16.028;
-g16.033 is ready with its public API decision promoted
+g16.033 is implemented on its worker branch and awaiting review and merge
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -64,7 +64,7 @@ stay maintained; backend admission is not part of the first card.
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete; merged in PR #100; ledger 52 mounted / 122 missing
-33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — ready; the public API decision is promoted and PR #118 satisfied the sequencing gate; package-type source is already fixed, publication/pin movement stays separate
+33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — implemented on `papercuts/g16-033-history-center-rejection-surface`, awaiting review and merge; five distinct refusal meanings across TypeScript, Rust, both web shells and mounted GPUI, plus an installed-tarball v3 `HistoryEntry` proof; publication/pin movement stays separate
 
 ## Parallel Continuation
 
@@ -96,13 +96,14 @@ Two continuation programmes are now explicit:
   roles, the bounded opaque receipt codec, and one `DragDropWindowHost` per
   GPUI window. Tabs migrates with its real DockRegion consumer. Later cards
   remain gated by landed dependencies.
-- **Portfolio papercut follow-on:** `g16.033` is ready after merged `g16.028`,
-  with its public API decision promoted. It gives HistoryCenter distinct Poodle-owned
-  deletion-refusal semantics and adds packed-package proof for the already-fixed
-  v3 `HistoryEntry` export. Keyboard vertical geometry remains design-deferred;
-  Longhorn's `AlreadyAtTarget` wire code and Loophole adoption are complete in
-  their owning repositories. PR #118 closed the ordered drag runway before
-  this lane opened.
+- **Portfolio papercut follow-on:** `g16.033` is implemented after merged
+  `g16.028`. HistoryCenter now carries five distinct Poodle-owned refusal
+  meanings — a stale, protected, or unavailable deletion no longer reads as a
+  missing entry — and `effigy test:svelte-pack-install` proves the packed v3
+  `HistoryEntry` export on both public Svelte import paths. Keyboard vertical
+  geometry remains design-deferred; Longhorn's `AlreadyAtTarget` wire code and
+  Loophole adoption are complete in their owning repositories. Publication and
+  Loophole pin movement stay with a separately authorized release lane.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening

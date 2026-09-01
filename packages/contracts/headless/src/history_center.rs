@@ -583,18 +583,32 @@ pub enum HistoryCenterState {
 }
 
 /// The rejections the machine can display, declared structurally. The host's
-/// bridge maps its protocol onto these two; the machine owns the copy, so the
-/// protocol's vocabulary never reaches an operator.
+/// bridge maps its protocol onto these five renderer-neutral meanings; the
+/// machine owns the copy, so the protocol's vocabulary never reaches an
+/// operator.
+///
+/// The three deletion refusals stay separate because they are separate facts:
+/// history moved under the request, the authority protects the entry, or
+/// deletion is not on offer at all. Collapsing them onto `UnknownEntry` told
+/// an operator their entry had vanished when it had not. Current-line and
+/// pinned/checkpoint policy share `ProtectedEntry` — both are entry-level
+/// protection, and splitting the host's reason is not Poodle's job.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum HistoryCenterRejectionCode {
     AlreadyAtTarget,
     UnknownEntry,
+    StaleHistory,
+    ProtectedEntry,
+    DeletionUnavailable,
 }
 
 pub fn history_center_rejection_message(code: HistoryCenterRejectionCode) -> &'static str {
     match code {
         HistoryCenterRejectionCode::AlreadyAtTarget => "Already at the requested target",
         HistoryCenterRejectionCode::UnknownEntry => "Entry does not exist",
+        HistoryCenterRejectionCode::StaleHistory => "History changed; this entry was not deleted",
+        HistoryCenterRejectionCode::ProtectedEntry => "This history entry is protected",
+        HistoryCenterRejectionCode::DeletionUnavailable => "History deletion is unavailable",
     }
 }
 

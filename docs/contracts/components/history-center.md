@@ -1,7 +1,7 @@
 # HistoryCenter
 
 Status: active contract
-Updated: 2026-08-15
+Updated: 2026-09-01
 
 ## 1. Purpose
 
@@ -753,7 +753,7 @@ inset step, font sizes) are internal and not part of the recipe contract.
 
 - contract status: `implemented` (Svelte + React + shared Rust/GPUI;
   Jetstream program-deferred)
-- approvers: Poodle core (cards `019`, `028`–`034`, g14.007)
+- approvers: Poodle core (cards `019`, `028`–`034`, g14.007, g16.033)
 - downstream adopters: Longhorn bridge (session → props mapping), consumer
   hosts that own undo/redo semantics
 - future follow-up: Jetstream execution when the deferred runtime lane resumes

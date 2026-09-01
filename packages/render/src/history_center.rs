@@ -1259,6 +1259,7 @@ mod tests {
     use poodle_headless::history_center::{
         history_center_visible_rows, HistoryCenterOpenFork, HistoryEntry, HistoryPathPage,
     };
+    use poodle_specs::HistoryCenterRejection;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -1785,5 +1786,77 @@ mod tests {
             seen.lock().expect("seen").as_slice(),
             ["confirm:f1", "cancel"],
         );
+    }
+
+    /// The exact contract table (`docs/contracts/components/history-center.md`
+    /// §"Rejection handling"). This is the shared node tree every native
+    /// backend paints, so a category that collapses here collapses in GPUI.
+    const REJECTION_COPY: [(HistoryCenterRejection, &str); 5] = [
+        (
+            HistoryCenterRejection::AlreadyAtTarget,
+            "Already at the requested target",
+        ),
+        (HistoryCenterRejection::UnknownEntry, "Entry does not exist"),
+        (
+            HistoryCenterRejection::StaleHistory,
+            "History changed; this entry was not deleted",
+        ),
+        (
+            HistoryCenterRejection::ProtectedEntry,
+            "This history entry is protected",
+        ),
+        (
+            HistoryCenterRejection::DeletionUnavailable,
+            "History deletion is unavailable",
+        ),
+    ];
+
+    /// Every accepted refusal reaches the operator as its own line, inside the
+    /// polite live region — a stale, protected, or unavailable deletion is
+    /// never rendered as a missing entry.
+    #[test]
+    fn every_rejection_code_renders_its_own_copy_in_the_live_region() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let mut rendered: Vec<String> = Vec::new();
+
+        for (code, expected) in REJECTION_COPY {
+            let spec = HistoryCenterSpec::new().with_open(true).with_rejection(code);
+            let message = spec
+                .rejection_message()
+                .unwrap_or_else(|| panic!("{code:?} resolves component-owned copy"));
+            assert_eq!(message, expected);
+
+            let view = HistoryCenterView {
+                is_open: true,
+                rejection: Some(message.to_owned()),
+                ..HistoryCenterView::default()
+            };
+            let node = history_center(&spec, &ctx, &view, &HistoryCenterHandlers::default());
+            let notice = find(&node, HISTORY_CENTER_REJECTION_ID)
+                .unwrap_or_else(|| panic!("{code:?} renders a rejection notice"));
+            assert_eq!(notice.a11y.role, Some(NodeRole::Status));
+            assert_eq!(notice.texts(), vec![expected]);
+            rendered.push(notice.texts().join(""));
+        }
+
+        let distinct = rendered.len();
+        rendered.sort();
+        rendered.dedup();
+        assert_eq!(rendered.len(), distinct, "no two codes may paint one line");
+    }
+
+    /// No rejection, no notice: the live region is not a permanent fixture.
+    #[test]
+    fn a_surface_without_a_rejection_paints_no_notice() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = history_center(
+            &open_spec(),
+            &ctx,
+            &open_view(),
+            &HistoryCenterHandlers::default(),
+        );
+        assert!(find(&node, HISTORY_CENTER_REJECTION_ID).is_none());
     }
 }

@@ -1,6 +1,7 @@
 # g16.033 — HistoryCenter Rejection Surface
 
-Status: ready — public API decision promoted; `g16.028` accepted and merged in
+Status: implemented on `papercuts/g16-033-history-center-rejection-surface` —
+awaiting orchestrator review and merge; `g16.028` accepted and merged in
 PR #118 as `17a25d633`
 Opened: 2026-08-31
 Depends on: accepted and merged `g16.028` for runway sequencing — satisfied by
@@ -139,13 +140,30 @@ workflow mutation, or sibling-repository commands.
   semantics, release certification, or Loophole adoption.
 - More than HistoryCenter semantic evidence would move.
 
+## Evidence
+
+Changed surfaces and their proofs:
+
+| Surface | Change | Proof |
+| --- | --- | --- |
+| `packages/core/src/history-center.ts` | five-code `HistoryCenterRejectionCode`, exhaustive `historyCenterRejectionMessage` | `packages/core/test/history-center.test.ts` — copy table, distinctness, display/replacement/idempotence |
+| `packages/contracts/headless/src/history_center.rs` | five-code `HistoryCenterRejectionCode`, exhaustive `history_center_rejection_message` | crate tests `every_rejection_code_owns_its_own_exact_copy`, `show_rejection_displays_replaces_and_repeats_inertly` |
+| `packages/contracts/components/src/history_center.rs` | five-variant `HistoryCenterRejection`, exhaustive `rejection_message` | crate tests `rejection_copy_is_component_owned`, `every_refusal_meaning_stays_distinct` |
+| `packages/render/src/history_center.rs` | unchanged renderer; new shared-tree proof | `every_rejection_code_renders_its_own_copy_in_the_live_region`, `a_surface_without_a_rejection_paints_no_notice` |
+| `packages/gpui/preview/tests/headless_regressions.rs` | mounted native proof | `every_history_center_rejection_mounts_its_own_native_copy` (`effigy regressions:native`) |
+| Svelte / React `HistoryCenter` | no source change — the code type flows from core | `mounts every accepted refusal as its own line…`, `replaces one refusal with the next and clears on null` in both shells |
+| `test/package-install/fixture/packed-types/`, `test/package-install/web-preview.ts` | installed-tarball v3 `HistoryEntry` type proof | `effigy test:svelte-pack-install` — positive compile on both import paths, one unsuppressed `branchCount` failure per path |
+
+The packed proof covers the **source candidate only**. npm `latest` remains
+`0.2.2`; no version, tag, release note, publication, or Loophole pin moved.
+
 ## Continuation
 
 The post-merge readiness review classified the lane `strict-ready` and planning
 `coherent`: scope, authority, exact API, oracle, validation, and stop conditions
-are settled. Dispatch through the committed worker handoff. The worker
-workspace must carry the capitalized `Papercuts` label before launch. This
-Poodle thread owns implementation review and merge.
+are settled. The worker implemented it on
+`papercuts/g16-033-history-center-rejection-surface`; this Poodle thread owns
+implementation review and merge.
 A later explicitly authorized release/adoption lane may publish the corrected
 package and close Loophole's pin-lag entry. The ordered `g16.028`
 drag-and-drop closeout merged before this lane opened.

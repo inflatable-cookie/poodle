@@ -29,6 +29,9 @@ pub enum HistoryCenterStatus {
 pub enum HistoryCenterRejection {
     #[default] AlreadyAtTarget,
     UnknownEntry,
+    StaleHistory,
+    ProtectedEntry,
+    DeletionUnavailable,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -201,12 +204,19 @@ impl HistoryCenterSpec {
     }
 
     /// The display copy for a mapped rejection. The host's bridge maps its
-    /// protocol onto the two codes; the component owns the wording, so the
-    /// protocol's vocabulary never reaches an operator.
+    /// protocol onto the five codes; the component owns the wording, so the
+    /// protocol's vocabulary never reaches an operator. The three deletion
+    /// refusals stay distinct from `UnknownEntry`: a stale, protected, or
+    /// unavailable deletion is not a missing entry.
     pub fn rejection_message(&self) -> Option<&'static str> {
         match self.rejection? {
             HistoryCenterRejection::AlreadyAtTarget => Some("Already at the requested target"),
             HistoryCenterRejection::UnknownEntry => Some("Entry does not exist"),
+            HistoryCenterRejection::StaleHistory => {
+                Some("History changed; this entry was not deleted")
+            }
+            HistoryCenterRejection::ProtectedEntry => Some("This history entry is protected"),
+            HistoryCenterRejection::DeletionUnavailable => Some("History deletion is unavailable"),
         }
     }
 
