@@ -185,12 +185,13 @@ Boards:
   Jetstream, headless-regression, specimen, dual-dependency, and capture-smoke
   selectors passed. The native board included 167 headless regressions and 9
   GPUI specimen tests.
-- Final `effigy qa` — substantive selectors pass; aggregate exit 1 only at
-  `audit:security`. It flags the known main-baseline English-word false
-  positive (`mask-plus-translated-highlight`) in `PAPERCUTS.md`, the g16.033
-  handoff/log, and this log. No credential is present; the scanner pattern has
-  no left boundary. This is recorded in `PAPERCUTS.md` and is outside this
-  card's scope.
+- Final `effigy qa` — all substantive selectors pass; aggregate exit 1 only at
+  `audit:security`. `audit-repository-security.ts` reports an OpenAI-token
+  pattern in `PAPERCUTS.md`, the g16.033 handoff/log, and this log because the
+  English phrase `mask-plus-translated-highlight` contains a matching
+  `sk-` substring with no left boundary. No credential is present. This is the
+  known main-baseline false positive recorded in `PAPERCUTS.md` and is outside
+  this card's scope.
 - Final `git diff --check` and diff-scope/absence checks — pass.
 
 ## Remaining explicit boundaries
