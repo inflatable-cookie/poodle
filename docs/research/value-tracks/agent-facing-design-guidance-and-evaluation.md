@@ -9,7 +9,7 @@ Priority: decision support for a bounded promotion pilot
 
 Vercel's method is useful to Poodle as a separation of concerns, not as a template to copy. The transferable pattern is:
 
-1. a short judgment layer that tells an agent how to frame a user's job and choose a composition;
+1. a task-facing judgment layer that tells an agent how to frame a user's job and choose a composition;
 2. bounded mechanics that make the approved visual system easy to use;
 3. deterministic checks for known mechanical failures; and
 4. a matched first-attempt review loop that decides which corrections belong in which layer.
@@ -46,11 +46,11 @@ The source pass did not copy proprietary prompts, brand rules, or source text. V
 | Source | Evidence type and capture | What it contributes | Boundary |
 | --- | --- | --- | --- |
 | [How our agents build on-brand pages with design.md](https://vercel.com/blog/how-our-agents-build-on-brand-pages-with-design-md) | [SF] Official Vercel article, published 2026-08-31; checked 2026-09-01 | Describes the guidance/mechanics/check/evaluation loop, fixed scenarios, blind comparisons, correction routing, and reported outcome | [SAC] The reported run counts and failure reduction are Vercel's evidence, not Poodle validation |
-| [Vercel `design.md`](https://vercel.com/design.md) | [SF] Public live artifact; checked 2026-09-01 | Shows how compact guidance can state reader job, evidence, composition, visual primitives, responsive behavior, and revision rules | Mutable public content; not a Poodle authority or a source to reproduce |
+| [Vercel `design.md`](https://vercel.com/design.md) | [SF] Public live artifact; checked 2026-09-01 | Shows how one public file can state reader job, evidence, composition, visual primitives, responsive behavior, and revision rules. At capture it was 39,519 bytes and 369 lines. | Mutable public content; not a Poodle authority or a source to reproduce |
 | [Teaching agents product design at Vercel](https://vercel.com/blog/teaching-agents-product-design-at-vercel) | [SF] Official Vercel article, published 2026-06-25; checked 2026-09-01 | Describes the repo-local `product-design` skill, source routing, modes, exemplars, linters, and review feedback loop | [SAC] Vercel's operating model is not evidence that the same surface is needed in Poodle |
 | [Vercel public brand stylesheet](https://vercel.com/geist/vercel-brand.css) | [SF] Public live stylesheet; HTTP 200 and CSS metadata checked 2026-09-01 | Shows the bounded-mechanics layer: namespaced classes, tokens, and composable report primitives | Mutable artifact; Poodle already has a canonical token/core-style system |
 | [Vercel Labs Eve design template](https://github.com/vercel-labs/eve-design-template/tree/7f8e5a62b02cb3407e063fc98c56c83dabbd95f4) | [SF] Public repository, pinned to `7f8e5a62b02cb3407e063fc98c56c83dabbd95f4`; checked 2026-09-01 | Gives a concrete source snapshot, manifest, owner approval, precedence, refresh, and runtime isolation model | Governance precedent only; no Slack corpus agent, private corpus, or Eve runtime is proposed |
-| [Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) | [SF] Official Anthropic engineering article, published 2026-01-09; checked 2026-09-01 | Defines tasks, trials, graders, transcripts, harnesses, suites, calibration, holdouts, and capability-versus-regression evaluation | General eval guidance; thresholds below are Poodle pilot proposals, not Anthropic requirements |
+| [Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) | [SF] Official Anthropic engineering article, published 2026-01-09; checked 2026-09-01 | Defines tasks, trials, graders, transcripts, harnesses, suites, calibration, holdouts, and capability-versus-regression evaluation | General eval guidance; any Poodle numeric decision rule is deferred to the operator-approved pilot brief |
 
 ### Poodle sources inspected
 
@@ -119,9 +119,9 @@ The current system has deliberate evidence boundaries:
 
 The article describes a three-part system: judgment in `design.md`, bounded mechanics in a stylesheet, and an evaluation loop. For comparison with Poodle's existing evidence model, this dossier splits the mechanics and checks into four layers.
 
-### 1. Judgment: compact, task-facing prose
+### 1. Judgment: task-facing prose
 
-[SF] Vercel distinguishes a repo-local `product-design` skill from a public `design.md` used when an agent is outside the repository. The repo-local skill routes to product judgment, interface-quality guidance, resilience, surfaces, copy, patterns, exemplars, and tooling. The public file is a concise artifact for a defined output audience.
+[SF] Vercel distinguishes a repo-local `product-design` skill from a public `design.md` used when an agent is outside the repository. The repo-local skill routes to product judgment, interface-quality guidance, resilience, surfaces, copy, patterns, exemplars, and tooling. The article presents `design.md` as one public file for a defined output audience; it does not establish that the file itself is compact, concise, or short. The captured file was 39,519 bytes and 369 lines.
 
 [SF] The public file focuses on reader job, evidence, caveats, composition, visual hierarchy, responsive behavior, and revision. It also tells the agent to use the public stylesheet's exact primitives rather than inventing names.
 
@@ -155,7 +155,7 @@ The article describes a three-part system: judgment in `design.md`, bounded mech
 
 | Construct | Poodle equivalent | Fit | Gap or constraint |
 | --- | --- | --- | --- |
-| Repo-local design skill | Repo-local Effigy routing plus contracts, architecture, specimens, and package docs | **Adapt** | No compact composition router exists. Any new skill must link to canonical sources, not clone them. |
+| Repo-local design skill | Repo-local Effigy routing plus contracts, architecture, specimens, and package docs | **Adapt** | No composition router exists. Any new skill must link to canonical sources, not clone them. |
 | Public `design.md` | Package READMEs, catalogue docs, contracts, and consumer-facing usage guidance | **Hold/adapt** | Audience, public ownership, release coupling, and source-of-truth status are unresolved. |
 | Bounded public stylesheet | DTCG schema, generated tokens, core styles, shared behavior, adapters | **Existing** | Do not create a parallel class/token system. |
 | Fixed recurring scenarios | g15 specimen families and bounded review cards | **Adapt** | Existing scenarios are authored specimen review, not matched agent first attempts. |
@@ -180,12 +180,12 @@ The four verbs are evaluated independently for each candidate. “Adopt” means
 
 **Verdict: adapt after a finite pilot or operator-approved promotion brief.** The immediate output should be a routing map, not a large guidance corpus.
 
-### Candidate B: compact consumer-facing `design.md`
+### Candidate B: consumer-facing `design.md`
 
 | Option | Assessment |
 | --- | --- |
 | Adopt | **No.** A public file cannot silently become authority over component semantics, tokens, accessibility, or runtime parity. |
-| Adapt | **Potentially.** If consumers have a real composition problem, a short public guide could state reader/job, composition, state, density, token, and accessibility expectations while linking to versioned package contracts and examples. |
+| Adapt | **Potentially.** If consumers have a real composition problem, a public guide could state reader/job, composition, state, density, token, and accessibility expectations while linking to versioned package contracts and examples. |
 | Hold | **Yes now.** Poodle has not made the public-audience, distribution, versioning, owner, or release-cadence decision. |
 | Reject | **Reject Vercel-specific brand guidance, public class names, and an unversioned parallel token vocabulary.** |
 
@@ -204,7 +204,7 @@ The four verbs are evaluated independently for each candidate. “Adopt” means
 
 ## Bounded pilot and evaluation rubric
 
-This is a proposed pilot shape, not an implementation card. `[WI]` thresholds and scenario briefs require operator approval before use.
+This is a proposed pilot shape, not an implementation card. `[WI]` scenario briefs and the numeric decision rule require operator approval before use.
 
 ### Preconditions
 
@@ -215,7 +215,7 @@ The pilot should not start until:
 3. the guidance is reduced to a versioned draft with links to canonical Poodle sources and no duplicated contract/token tables;
 4. the target runtime is fixed. The recommended first target is the Svelte web reference-proof surface. Results must not be generalized to React or GPUI without a separate evidence track;
 5. the Poodle commit, package versions, model/version, tool settings, prompt, fixtures, viewport, theme, density, and output retention rule are frozen; and
-6. the operator accepts the proposed rubric and thresholds before seeing the results.
+6. the operator accepts the proposed rubric and the pilot brief's numeric aggregation and decision rule before seeing the results.
 
 ### Scenario briefs
 
@@ -266,27 +266,19 @@ Score each dimension from 1 to 5. Use “not applicable” only when the scenari
 
 The last dimension is about use of the approved Poodle system, not resemblance to Vercel branding. Token and API compliance still belongs to deterministic or contract checks where possible.
 
-### Proposed falsifiable thresholds
+### Numeric decision rule deferred
 
-These are `[WI]` proposals for operator approval, not facts from Vercel or Anthropic.
+No numerical pass/fail threshold or aggregate score is adopted in this dossier. The trial counts above define data collection only; they do not define a promotion result. The operator-approved pilot brief must set the decision rule before any run is graded, including:
 
-The guidance pilot is a **signal** only if all of the following hold across the three in-set scenarios:
+- the per-output score calculation across the six rubric dimensions;
+- whether a dimension marked `not applicable` is excluded from that output's denominator, and the minimum number of applicable dimensions required for an output score;
+- how the two reviewer scores combine for an output, including disagreement handling and rounding;
+- how independent trials combine within a scenario, how scenarios combine across the in-set sample, and how the holdout is evaluated;
+- the exact defect-count denominator and treatment of duplicate findings;
+- the allowed semantic/behavioral, accessibility, renderer, and responsive regressions; and
+- the numeric promotion, hold, and kill thresholds.
 
-1. the guidance condition improves the median composition score by at least one point on at least two of the three scenarios;
-2. the predefined known-composition-defect count falls by at least 30% in aggregate, with no single scenario worsening by more than 0.5 points on the overall rubric;
-3. semantic/behavioral and accessibility failure rates do not increase relative to the no-guidance condition; and
-4. the hidden holdout is neutral or better on composition and does not reveal a new contract, accessibility, or responsive failure mode.
-
-The pilot **fails or remains held** if any of these occur:
-
-- no improvement after the predeclared trials;
-- improvement is confined to one prompt, one model quirk, or one reviewer;
-- the guidance duplicates or conflicts with a contract, token source, or product boundary;
-- reviewers cannot calibrate to the rubric or disagree on the correction category;
-- the guidance improves screenshots while worsening behavior, accessibility, or narrow use; or
-- running the pilot requires a new general-purpose platform, an unbounded corpus, an app-specific widget, or an unapproved repository path.
-
-[WI] With this sample size, these thresholds are promotion gates, not statistically stable estimates of model performance. A failed pilot should produce a hold/reject decision, not a larger test by default.
+Until that brief is approved, the results may be described only as collected observations and reviewer corrections. They must not be called a lift, regression, pass, fail, or falsifiable threshold result. Non-numeric stop conditions remain: a guidance conflict with canonical authority, inability to complete the blind rubric, or a pilot that requires an unapproved path, app-specific widget, unbounded corpus, or general-purpose platform keeps the work held.
 
 ### Correction ledger and routing rule
 
@@ -358,7 +350,7 @@ The existing Poodle checks should continue to own contract, token, catalogue, re
 ### Risks
 
 - **Source-author overclaim:** Vercel's 39-versus-91 result is a small, known-failure comparison. It does not prove Poodle lift, reliability, or shippability.
-- **Guidance drift:** a compact file can become a shadow contract or fossilize one team's taste unless every rule has a source, owner, and expiry/update path.
+- **Guidance drift:** a guidance file can become a shadow contract or fossilize one team's taste unless every rule has a source, owner, and expiry/update path.
 - **Prompt overfitting:** three scenarios can reward wording or a model quirk. The holdout and independent trials are required to expose this.
 - **Metric collapse:** a pixel pass, accessibility pass, or contract pass cannot stand in for composition quality. Combining them hides the failure mode that needs repair.
 - **Reviewer variance:** blind human review is necessary for nuanced composition, but it needs calibration, anchored scores, and correction notes.
@@ -383,9 +375,9 @@ The existing Poodle checks should continue to own contract, token, catalogue, re
 
 The staged disposition is:
 
-1. **Contributor-local skill — adapt, then promote only if owned and source-routed.** Keep it compact and task-specific. Its first job is to tell an agent where to look and which existing check to run, not to define new design truth.
+1. **Contributor-local skill — adapt, then promote only if owned and source-routed.** [WI] Keep a future skill compact and task-specific. Its first job is to tell an agent where to look and which existing check to run, not to define new design truth.
 2. **Consumer-facing `design.md` — hold.** Require an explicit public-audience, ownership, versioning, and release decision before writing one.
-3. **Composition-quality evaluation — adapt the protocol, hold the harness.** Run one finite matched pilot with the proposed thresholds and separate evidence tracks. Do not add permanent tooling unless the pilot passes and an owner accepts the cost.
+3. **Composition-quality evaluation — adapt the protocol, hold the harness.** Run one finite matched pilot with a predeclared operator-approved decision rule and separate evidence tracks. Do not add permanent tooling unless that rule records a passing result and an owner accepts the cost.
 
 This recommendation is intentionally narrower than “adopt Vercel's system.” It preserves Poodle's contract-first architecture and treats generated-interface quality as an evidence question.
 
@@ -410,10 +402,10 @@ Until these decisions are made, the correct disposition is **hold implementation
 - the exact guidance draft and canonical source map;
 - fixed model/runtime/render settings;
 - the separate evidence tracks and blind rubric;
-- the proposed thresholds and kill conditions; and
+- the predeclared numeric thresholds and non-numeric kill conditions; and
 - the owner, reviewer, retention rule, and decision date.
 
-That brief should be created only after the operator decisions above. It should not become an implementation card until the pilot produces a passing signal and the relevant authority owner accepts promotion.
+That brief should be created only after the operator decisions above. It should not become an implementation card until the approved decision rule records a passing result and the relevant authority owner accepts promotion.
 
 ## Follow-up disposition
 
