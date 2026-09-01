@@ -1,8 +1,9 @@
 # 069 Dependable Drag And Drop Substrate
 
 Status: complete — compiled as g16.021–g16.028; g16.021–g16.027 merged and
-g16.028 closes the migration and certification
-Updated: 2026-09-01
+g16.028 closes the migration and certification; g16.055 moves web selection
+suppression to accepted pointerdown
+Updated: 2026-09-02
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
 `../contracts/components/tabs.md`,
@@ -218,7 +219,16 @@ The web pointer sensor uses Pointer Events. It must:
   state exactly once;
 - skip interactive descendants (`button`, `input`, `textarea`, `select`,
   `a[href]`, `[role='button']`, `contenteditable`) and `[data-poodle-no-drag]`
-  hosts so a whole-row source does not steal their pointerdown; and
+  hosts so a whole-row source does not steal their pointerdown;
+- suppress native text selection on the connected root as soon as a primary
+  pointerdown resolves to an accepted, enabled registered source, keep that
+  suppression through the pre-threshold candidate and the active pointer drag,
+  and restore the root's exact prior inline `user-select` / `-webkit-user-select`
+  declarations on every exit;
+- consume an activated pointer gesture's browser compatibility click at the
+  document capture boundary on that source path, independent of drop outcome,
+  and expire the one-shot guard so a later unrelated click is not swallowed;
+  taps and pre-threshold abandonment still click; and
 - handle `pointercancel`, lost capture, visibility loss, source unmount, and
   target unmount.
 

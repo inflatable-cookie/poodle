@@ -64,11 +64,18 @@
     { value: "b.ts", label: "b.ts" },
     { value: "c.ts", label: "c.ts" },
   ];
+  const selectNodes = [
+    { value: "alpha", label: "Alpha selectable row label" },
+    { value: "beta", label: "Beta selectable row label" },
+    { value: "gamma", label: "Gamma selectable row label" },
+  ];
   let treeSelected = $state<string[]>(["a.ts"]);
   let treeRefuse = $state(false);
   let treeDrops = $state(0);
   let treeMoving = $state("");
   let treeDest = $state("");
+  let selectSelected = $state<string[]>([]);
+  let staticSelected = $state<string[]>([]);
   const treeAuthority: TreeReorderAuthority = {
     projectMovingValues(source, selected) {
       return selected.includes(source) && selected.length > 0 ? [...selected] : [source];
@@ -138,6 +145,8 @@
     data-tree-drops={treeDrops}
     data-tree-moving={treeMoving}
     data-tree-dest={treeDest}
+    data-tree-select={selectSelected.join(",")}
+    data-tree-static-select={staticSelected.join(",")}
   ></div>
 
   <div
@@ -231,6 +240,24 @@
       reorderable
       reorderAuthority={treeAuthority}
       ariaLabel="Authority tree"
+    />
+  </div>
+  <div id="svelte-tree-select">
+    <Tree
+      nodes={selectNodes}
+      selectedValues={selectSelected}
+      reorderable
+      onReorder={() => {}}
+      onSelectionChange={(values) => (selectSelected = values)}
+      ariaLabel="Reorderable selection tree"
+    />
+  </div>
+  <div id="svelte-tree-static">
+    <Tree
+      nodes={selectNodes}
+      selectedValues={staticSelected}
+      onSelectionChange={(values) => (staticSelected = values)}
+      ariaLabel="Static selection tree"
     />
   </div>
 </div>

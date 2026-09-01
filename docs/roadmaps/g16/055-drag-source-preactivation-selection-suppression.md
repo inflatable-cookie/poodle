@@ -1,6 +1,6 @@
 # g16.055 — Drag Source Pointer-gesture Browser Suppression
 
-Status: ready
+Status: in-review
 Opened: 2026-09-02
 Depends on: g16.021–g16.028 drag substrate and the merged Tree interaction
 repair from PR #125; independent of the post-triage product runway
@@ -165,3 +165,21 @@ After accepted merge, this repair rides the next unreleased `0.3.0` candidate.
 Do not create a `0.2.x` patch publication lane. Figmatic may verify against the
 merged source head immediately, but package adoption waits for the separately
 authorized compiled-distribution `0.3.0` release lane.
+
+## Implementation
+
+Shared DOM controller suppresses `user-select` and `-webkit-user-select` on the
+connected root at accepted primary pointerdown, restores the exact prior inline
+declarations on every exit, and consumes one source-path compatibility click
+after an activated pointerup/cancel. The guard expires on timeout/rAF, the next
+press, consume, disconnect, or destroy. Keyboard pickup is unchanged. No Tree
+CSS, public API, or native parity change.
+
+Focused controller tests cover pre-threshold suppression, authored-style
+restore, exclusions, source-loss/disconnect/destroy, activated click
+consumption for commit/reject/fail/cancel, async dropping, and stale-guard
+expiry. Paired Svelte/React Tree tests cover tap selection, rename/input
+exclusion, and no trailing selection after those drop outcomes. Chromium and
+WebKit probes prove empty Selection through a reorderable label drag, no
+trailing selected value, a tap that still selects, and a non-reorderable
+counterexample that produces a real range.

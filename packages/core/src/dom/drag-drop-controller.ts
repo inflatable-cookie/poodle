@@ -826,6 +826,9 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   const documentListeners: Array<[string, EventListener, AddEventListenerOptions | boolean | undefined]> = [];
   let resizeObserver: ResizeObserver | null = null;
   let restoredRootUserSelect: string | null | undefined;
+  let restoredRootWebkitUserSelect: string | null | undefined;
+  let compatibilityClickSource: Element | null = null;
+  let compatibilityClickExpiry: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Read the phase through a call so a guard earlier in the same function does
@@ -2309,17 +2312,65 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     restoreRootUserSelect();
   }
 
+  function restoreInlineUserSelect(
+    style: CSSStyleDeclaration,
+    property: string,
+    value: string | null | undefined,
+  ): void {
+    if (value === null || value === undefined || value === "") style.removeProperty(property);
+    else style.setProperty(property, value);
+  }
+
+  function suppressRootUserSelect(): void {
+    const rootStyle = connectedRoot ? styledElement(connectedRoot) : null;
+    if (!rootStyle || restoredRootUserSelect !== undefined) return;
+    restoredRootUserSelect = rootStyle.style.getPropertyValue("user-select");
+    restoredRootWebkitUserSelect = rootStyle.style.getPropertyValue("-webkit-user-select");
+    rootStyle.style.setProperty("user-select", "none");
+    rootStyle.style.setProperty("-webkit-user-select", "none");
+  }
+
   function restoreRootUserSelect(): void {
     if (!connectedRoot || restoredRootUserSelect === undefined) return;
     const style = styledElement(connectedRoot);
     if (style) {
-      if (restoredRootUserSelect === null || restoredRootUserSelect === "") {
-        style.style.removeProperty("user-select");
-      } else {
-        style.style.setProperty("user-select", restoredRootUserSelect);
-      }
+      restoreInlineUserSelect(style.style, "user-select", restoredRootUserSelect);
+      restoreInlineUserSelect(style.style, "-webkit-user-select", restoredRootWebkitUserSelect);
     }
     restoredRootUserSelect = undefined;
+    restoredRootWebkitUserSelect = undefined;
+  }
+
+  function clearCompatibilityClickGuard(): void {
+    if (compatibilityClickExpiry !== null) {
+      clearTimeout(compatibilityClickExpiry);
+      compatibilityClickExpiry = null;
+    }
+    compatibilityClickSource = null;
+  }
+
+  function armCompatibilityClickGuard(source: Element): void {
+    clearCompatibilityClickGuard();
+    compatibilityClickSource = source;
+    const win = connectedWindow;
+    compatibilityClickExpiry = setTimeout(() => {
+      compatibilityClickExpiry = null;
+      if (win && typeof win.requestAnimationFrame === "function") {
+        win.requestAnimationFrame(() => {
+          compatibilityClickSource = null;
+        });
+      } else {
+        compatibilityClickSource = null;
+      }
+    }, 0);
+  }
+
+  function onCompatibilityClick(event: Event): void {
+    const source = compatibilityClickSource;
+    if (!source) return;
+    if (!eventPath(event).includes(source)) return;
+    clearCompatibilityClickGuard();
+    event.stopImmediatePropagation();
   }
 
   /**
@@ -2444,11 +2495,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
     if (gesture) gesture.activated = true;
 
-    const rootStyle = connectedRoot ? styledElement(connectedRoot) : null;
-    if (rootStyle && restoredRootUserSelect === undefined) {
-      restoredRootUserSelect = rootStyle.style.getPropertyValue("user-select");
-      rootStyle.style.setProperty("user-select", "none");
-    }
+    suppressRootUserSelect();
 
     if (captureElement && pointerId !== null) {
       const style = styledElement(captureElement);
@@ -3017,6 +3064,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function onPointerDown(event: Event): void {
     if (!(event instanceof PointerEvent)) return;
     if (!isPrimaryPointer(event)) return;
+    if (!gesture) clearCompatibilityClickGuard();
     if (gesture || phase !== "idle") return;
 
     const source = sourceFromEvent(event);
@@ -3062,6 +3110,11 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       beginSession(source, kind, event.clientX, event.clientY, sessionId);
     }
 
+    // Accepted press: suppress native text selection before the pointer can
+    // paint a range. Capture still waits for activation so scrolling wins on
+    // a tap, and click/row-selection handlers still fire on release.
+    suppressRootUserSelect();
+
     if (kind === "touch") {
       const touch = activationFor(source.registration, "touch") as DragActivationHold;
       gesture.holdTimer = setTimeout(() => {
@@ -3075,9 +3128,6 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       }, touch.holdMs);
       return;
     }
-
-    // Mouse/pen wait for distance. Do not capture yet so scrolling/selection
-    // still win on a tap.
   }
 
   function flushMove(x: number, y: number): void {
@@ -3167,6 +3217,9 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       return;
     }
 
+    const source = sources.get(gesture.sourceId);
+    if (source) armCompatibilityClickGuard(source.element);
+
     releasePointerHardware();
     gesture = null;
 
@@ -3184,6 +3237,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       abandonUnarmedGesture();
       return;
     }
+    const source = sources.get(gesture.sourceId);
+    if (source) armCompatibilityClickGuard(source.element);
     const sessionId = gesture.sessionId;
     dispatch({ type: "TRANSPORT_LOST", sessionId });
   }
@@ -3604,6 +3659,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     add("pointerup", onPointerUp, true);
     add("pointercancel", onPointerCancel, true);
     add("lostpointercapture", onLostCapture, true);
+    add("click", onCompatibilityClick, true);
     add("touchmove", suppressScroll, { capture: true, passive: false });
     add("keydown", onKeyDown, true);
     add("dragstart", onNativeDragStart, true);
@@ -3835,6 +3891,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         if (connectedRoot !== root) return;
         stopAutoScroll();
         stopCandidate();
+        clearCompatibilityClickGuard();
         if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
         const unsubscribe = crossWindowUnsubscribe;
         crossWindowUnsubscribe = null;
@@ -4042,6 +4099,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       if (destroyed) return;
       stopAutoScroll();
       stopCandidate();
+      clearCompatibilityClickGuard();
       if (context.session) dispatch({ type: "CANCEL", sessionId: context.session.sessionId });
       const unsubscribe = crossWindowUnsubscribe;
       crossWindowUnsubscribe = null;

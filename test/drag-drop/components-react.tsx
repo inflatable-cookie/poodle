@@ -68,10 +68,17 @@ export function ComponentsHarness() {
     { value: "b.ts", label: "b.ts" },
     { value: "c.ts", label: "c.ts" },
   ];
+  const selectNodes = [
+    { value: "alpha", label: "Alpha selectable row label" },
+    { value: "beta", label: "Beta selectable row label" },
+    { value: "gamma", label: "Gamma selectable row label" },
+  ];
   const [treeSelected, setTreeSelected] = useState<string[]>(["a.ts"]);
   const [treeDrops, setTreeDrops] = useState(0);
   const [treeMoving, setTreeMoving] = useState("");
   const [treeDest, setTreeDest] = useState("");
+  const [selectSelected, setSelectSelected] = useState<string[]>([]);
+  const [staticSelected, setStaticSelected] = useState<string[]>([]);
   const treeRefuseRef = useRef(false);
   const treeAuthority: TreeReorderAuthority = {
     projectMovingValues: (source, selected) =>
@@ -137,6 +144,8 @@ export function ComponentsHarness() {
         data-tree-drops={treeDrops}
         data-tree-moving={treeMoving}
         data-tree-dest={treeDest}
+        data-tree-select={selectSelected.join(",")}
+        data-tree-static-select={staticSelected.join(",")}
       />
 
       <div
@@ -240,6 +249,24 @@ export function ComponentsHarness() {
           reorderable
           reorderAuthority={treeAuthority}
           ariaLabel="Authority tree"
+        />
+      </div>
+      <div id="react-tree-select">
+        <Tree
+          nodes={selectNodes}
+          selectedValues={selectSelected}
+          reorderable
+          onReorder={() => {}}
+          onSelectionChange={setSelectSelected}
+          ariaLabel="Reorderable selection tree"
+        />
+      </div>
+      <div id="react-tree-static">
+        <Tree
+          nodes={selectNodes}
+          selectedValues={staticSelected}
+          onSelectionChange={setStaticSelected}
+          ariaLabel="Static selection tree"
         />
       </div>
     </div>
