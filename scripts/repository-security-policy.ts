@@ -166,3 +166,24 @@ export function validateCargoLockSources(
 
   return errors;
 }
+
+const secretPatterns = [
+  ["private key", /-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----/],
+  ["AWS access key", /(?:AKIA|ASIA)[A-Z0-9]{16}/],
+  ["GitHub token", /gh[pousr]_[A-Za-z0-9]{30,}/],
+  // Left word boundary: `mask-plus-...` and `task-backed-...` contain `sk-`
+  // as an interior substring, not a token.
+  ["OpenAI token", /\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}/],
+  ["Slack token", /xox[baprs]-[A-Za-z0-9-]{10,}/],
+  ["Stripe live key", /[rs]k_live_[A-Za-z0-9]{16,}/],
+  ["JWT", /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/],
+  ["credential URL", /[A-Za-z][A-Za-z0-9+.-]*:\/\/[^/@\s]+:[^/@\s]+@/],
+] as const;
+
+export function secretPatternHits(source: string): string[] {
+  const hits: string[] = [];
+  for (const [label, pattern] of secretPatterns) {
+    if (pattern.test(source)) hits.push(label);
+  }
+  return hits;
+}

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { basename } from "node:path";
 import {
+  secretPatternHits,
   validateCargoLockSources,
   validateCargoManifestSources,
 } from "./repository-security-policy.ts";
@@ -16,16 +17,6 @@ const lifecycleHooks = new Set([
   "prepublish",
   "prepublishOnly",
 ]);
-const secretPatterns = [
-  ["private key", /-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----/],
-  ["AWS access key", /(?:AKIA|ASIA)[A-Z0-9]{16}/],
-  ["GitHub token", /gh[pousr]_[A-Za-z0-9]{30,}/],
-  ["OpenAI token", /sk-(?:proj-)?[A-Za-z0-9_-]{20,}/],
-  ["Slack token", /xox[baprs]-[A-Za-z0-9-]{10,}/],
-  ["Stripe live key", /[rs]k_live_[A-Za-z0-9]{16,}/],
-  ["JWT", /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/],
-  ["credential URL", /[A-Za-z][A-Za-z0-9+.-]*:\/\/[^/@\s]+:[^/@\s]+@/],
-] as const;
 const sensitiveName =
   /(?:^|\/)(?:\.env(?:\..+)?|credentials?|secrets?)(?:$|\.)|\.(?:jks|kdbx|key|keystore|p12|pem|pfx)$/i;
 const environmentExample = /(?:^|\/)\.env(?:\.[^/]+)?\.example$/;
@@ -72,8 +63,8 @@ for (const path of paths) {
   const bytes = readFileSync(path);
   if (bytes.includes(0)) continue;
   const source = bytes.toString("utf8");
-  for (const [label, pattern] of secretPatterns) {
-    if (pattern.test(source)) errors.push(`${path}: contains a ${label} pattern`);
+  for (const label of secretPatternHits(source)) {
+    errors.push(`${path}: contains a ${label} pattern`);
   }
 
   // `Cargo.toml.template` is the dual-dependency proof's manifest with one
