@@ -158,8 +158,16 @@ pub fn js_banner(spec: &BannerSpec, theme: &JetstreamThemeProvider) -> El {
     El(pr::banner(spec, &pr::RenderContext::new(theme)))
 }
 
-pub fn js_block_editor(spec: &BlockEditorSpec, theme: &JetstreamThemeProvider) -> El {
-    El(pr::block_editor(spec, &pr::RenderContext::new(theme)))
+pub fn js_block_editor(
+    spec: &BlockEditorSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: &str,
+) -> El {
+    El(pr::block_editor(
+        spec,
+        &pr::RenderContext::new(theme),
+        pr::BlockEditorHandlers::new(instance_id),
+    ))
 }
 
 pub fn js_breadcrumbs(spec: &BreadcrumbsSpec, theme: &JetstreamThemeProvider) -> El {
@@ -428,11 +436,15 @@ pub fn js_editable_label(spec: &EditableLabelSpec, theme: &JetstreamThemeProvide
     El(pr::editable_label(spec, &pr::RenderContext::new(theme), None))
 }
 
-pub fn js_editable_list(spec: &EditableListSpec, theme: &JetstreamThemeProvider) -> El {
+pub fn js_editable_list(
+    spec: &EditableListSpec,
+    theme: &JetstreamThemeProvider,
+    instance_id: &str,
+) -> El {
     El(pr::editable_list(
         spec,
         &pr::RenderContext::new(theme),
-        pr::EditableListHandlers::default(),
+        pr::EditableListHandlers::new(instance_id),
     ))
 }
 

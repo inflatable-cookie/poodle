@@ -1679,15 +1679,19 @@ impl IntoElement for MarkdownEditor {
 }
 
 impl EditableList {
-    pub(crate) fn new(theme: &GpuiThemeProvider) -> Self {
-        Self::from_spec(EditableListSpec::new(), theme)
+    pub(crate) fn new(theme: &GpuiThemeProvider, instance_id: impl Into<String>) -> Self {
+        Self::from_spec(EditableListSpec::new(), theme, instance_id)
     }
 
-    pub(crate) fn from_spec(spec: EditableListSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: EditableListSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
-            handlers: poodle_render::EditableListHandlers::default(),
+            handlers: poodle_render::EditableListHandlers::new(instance_id),
         }
     }
 
@@ -7856,14 +7860,20 @@ pub(crate) struct BlockEditor {
     spec: BlockEditorSpec,
     theme: GpuiThemeProvider,
     children: Vec<SlotBuilder<'static>>,
+    handlers: poodle_render::BlockEditorHandlers,
 }
 
 impl BlockEditor {
-    pub(crate) fn from_spec(spec: BlockEditorSpec, theme: &GpuiThemeProvider) -> Self {
+    pub(crate) fn from_spec(
+        spec: BlockEditorSpec,
+        theme: &GpuiThemeProvider,
+        instance_id: impl Into<String>,
+    ) -> Self {
         Self {
             spec,
             theme: theme.clone(),
             children: Vec::new(),
+            handlers: poodle_render::BlockEditorHandlers::new(instance_id),
         }
     }
 
@@ -7878,7 +7888,12 @@ impl BlockEditor {
     }
 
     fn into_node(self) -> poodle_node::Node {
-        poodle_render::block_editor_with_children(&self.spec, &RenderContext::new(&self.theme), self.children)
+        poodle_render::block_editor_with_children(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.children,
+            self.handlers,
+        )
     }
 }
 

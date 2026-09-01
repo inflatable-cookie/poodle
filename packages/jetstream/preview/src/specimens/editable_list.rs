@@ -31,6 +31,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_editable(true)
                     .with_reorderable(true),
                 theme,
+                "editable-list-1",
             ),
         ))
         // Empty: only the add row
@@ -44,6 +45,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_placeholder("Add a tag…")
                     .with_editable(true),
                 theme,
+                "editable-list-2",
             ),
         ))
         // Max items (5): counter "3/5", add row visible
@@ -59,6 +61,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_editable(true)
                     .with_max_items(5),
                 theme,
+                "editable-list-3",
             ),
         ))
         // At max (3/3): add row hidden, counter shows
@@ -72,6 +75,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_editable(true)
                     .with_max_items(3),
                 theme,
+                "editable-list-4",
             ),
         ))
         // Removable only: remove buttons, no reorder handle, no add row
@@ -85,6 +89,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_removable(true)
                     .with_reorderable(false),
                 theme,
+                "editable-list-5",
             ),
         ))
         // Reorderable: drag handles, no add/remove
@@ -97,6 +102,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_aria_label("Reorderable items")
                     .with_reorderable(true),
                 theme,
+                "editable-list-6",
             ),
         ))
         // Workflow chrome — dirty: Save Order enabled + Cancel
@@ -110,6 +116,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_reorderable(true)
                     .with_dirty(true),
                 theme,
+                "editable-list-7",
             ),
         ))
         // Workflow chrome — submitting: "Saving…"
@@ -124,6 +131,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_dirty(true)
                     .with_submitting(true),
                 theme,
+                "editable-list-8",
             ),
         ))
         // Error banner
@@ -137,6 +145,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_editable(true)
                     .with_error_message("Failed to save: 'rust' conflicts with an existing tag."),
                 theme,
+                "editable-list-9",
             ),
         ))
         // Info banner
@@ -150,6 +159,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_editable(true)
                     .with_info_message("Tags are shared across the workspace."),
                 theme,
+                "editable-list-10",
             ),
         ))
         // Disabled: reduced opacity, no interaction
@@ -163,6 +173,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_editable(true)
                     .with_disabled(true),
                 theme,
+                "editable-list-11",
             ),
         ))
         // Sizes sweep (xs → xl)
@@ -195,6 +206,7 @@ fn sized_list(theme: &JetstreamThemeProvider, spec: EditableListSpec) -> El {
             .with_editable(true)
             .with_reorderable(true),
         theme,
+        "editable-list-12",
     )
 }
 

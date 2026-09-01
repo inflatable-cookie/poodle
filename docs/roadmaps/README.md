@@ -85,8 +85,11 @@ behavior repairs without inventing another conformance authority.
   in both languages and wired through the web and GPUI controllers, with opaque
   receipts, exact per-installation inbound ownership, validation before
   eligibility, host-owned retention, and no committed export terminal because
-  a native drag ending never proves a destination took the file. `g16.028` is
-  ready as the final drag migration and certification checkpoint.
+  a native drag ending never proves a destination took the file. `g16.028`
+  then closed the programme: the last three web HTML-drag owners migrated,
+  EditableList/OrderBy/BlockEditor gained their native reorder result paths,
+  four GPUI mounted cells moved (52 → 56 mounted, 122 → 118 missing), and the
+  absence claim became executable as `effigy drift:drag-inventory`.
   `g16.033` is reserved after that shared-file tranche for HistoryCenter's
   Poodle-owned rejection surface and packed v3 `HistoryEntry` proof. It is not
   dispatchable until the public rejection shape is chosen; Keyboard vertical

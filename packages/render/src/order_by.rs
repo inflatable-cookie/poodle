@@ -4,24 +4,34 @@
 //! Ported from: `packages/jetstream/components/src/order_by.rs`.
 //!
 //! The contract has a single `onChange` carrying the whole ordering. A pointer
-//! cannot produce an ordering; it produces one of two intents on one row, so
-//! that is what the events say: `on_direction_toggle` and `on_remove`, each
-//! carrying the field. The host applies the intent to the ordering it already
-//! holds and passes the result back through the spec. Reordering is a drag,
-//! and the rows carry a drag handle with no handler yet.
+//! click produces one of two intents on one row, so that is what those events
+//! say: `on_direction_toggle` and `on_remove`, each carrying the field, and
+//! the host applies them to the ordering it already holds.
+//!
+//! Reordering is different: it *can* produce the whole ordering, so it does.
+//! `on_reorder` carries the complete next `Vec<OrderByField>` — the same
+//! result the web `onChange` carries for a reorder — and it runs on the shared
+//! renderer-neutral substrate (`crate::drag_drop`). The handle is the drag
+//! source, every enabled row a drop target, and both ids are scoped to
+//! `instance_id`.
 
 use std::sync::Arc;
 
 use poodle_node::{
-    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeRole,
+    CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodeDropCommit,
+    NodeKey, NodeRole, StylePatch,
 };
 use poodle_specs::{
-    ButtonVariant, ChoiceOption, ControlDensity, ControlSize, IconButtonSpec, OrderBySpec,
-    OrderByTriggerVariant, SelectSpec, SortDirection,
+    ButtonVariant, ChoiceOption, ControlDensity, ControlSize, IconButtonSpec, OrderByField,
+    OrderBySpec, OrderByTriggerVariant, SelectSpec, SortDirection,
 };
 
 use crate::color::mix_srgb;
 use crate::context::RenderContext;
+use crate::drag_drop::{
+    apply_reorder, arrival_band_resolver, attach_source, attach_target, edge_from_position,
+    reorder_destination, reorder_source, reorder_target,
+};
 use crate::icon_button::icon_button;
 use crate::presentation::{rem_to_px, size_padding_x_offset_rem};
 use crate::select::{select, SelectHandlers};
@@ -36,6 +46,8 @@ pub struct OrderByHandlers {
     pub on_direction_toggle: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// Fires with the field that was removed.
     pub on_remove: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Fires with the complete next ordering after an accepted reorder.
+    pub on_reorder: Option<Arc<dyn Fn(&[OrderByField]) + Send + Sync>>,
 }
 
 impl OrderByHandlers {
@@ -49,11 +61,40 @@ impl OrderByHandlers {
             instance_id,
             on_direction_toggle: None,
             on_remove: None,
+            on_reorder: None,
         }
     }
 }
 
+/// One accepted reorder, one complete ordering.
+///
+/// The clauses the closure holds are the ones this build drew; a rebuild
+/// replaces the registration along with the rest of the tree, so a clause the
+/// host has since removed cannot be moved.
+fn reorder_emitter(
+    value: Vec<OrderByField>,
+    handlers: Arc<OrderByHandlers>,
+) -> Arc<dyn Fn(usize, usize) + Send + Sync> {
+    Arc::new(move |from: usize, to: usize| {
+        if from == to {
+            return;
+        }
+        let Some(next) = apply_reorder(&value, from, to) else {
+            return;
+        };
+        if let Some(handler) = &handlers.on_reorder {
+            handler(&next);
+        }
+    })
+}
+
 pub fn order_by(spec: &OrderBySpec, ctx: &RenderContext<'_>, handlers: OrderByHandlers) -> Node {
+    let handlers = Arc::new(handlers);
+    let drag_scope = format!("order-by:{}", handlers.instance_id);
+    let ordering = spec.current_value();
+    let keys: Vec<String> = ordering.iter().map(|item| item.key.clone()).collect();
+    let reorder = reorder_emitter(ordering.clone(), Arc::clone(&handlers));
+    let can_reorder = !spec.is_disabled && ordering.len() > 1;
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
     // ── Size table (matches corrected contract §8) ────────────────────────────
@@ -267,7 +308,7 @@ pub fn order_by(spec: &OrderBySpec, ctx: &RenderContext<'_>, handlers: OrderByHa
             list.a11y.role = Some(NodeRole::List);
             list.style.descriptor.layout.direction = LayoutDirection::Column;
             list.style.descriptor.layout.spacing.gap = list_gap;
-            for item in current_value.iter() {
+            for (index, item) in current_value.iter().enumerate() {
                 let field_label = spec.active_label(&item.key);
                 let (dir_icon, dir_tooltip, dir_word) = match item.direction {
                     SortDirection::Asc => ("arrow-up", "Asc", "ascending"),
@@ -292,7 +333,8 @@ pub fn order_by(spec: &OrderBySpec, ctx: &RenderContext<'_>, handlers: OrderByHa
                 }
                 all_radius(&mut row, radius);
 
-                // Drag handle (focusable button carrying the braille glyph).
+                // Drag handle: the substrate's drag source and the Alt+Arrow
+                // keyboard route, both landing on one emitter.
                 let mut handle = Node::button("⠿");
                 {
                     let s = &mut handle.style;
@@ -305,6 +347,42 @@ pub fn order_by(spec: &OrderBySpec, ctx: &RenderContext<'_>, handlers: OrderByHa
                     s.text_size = Some(rem_to_px(0.75));
                 }
                 handle.interaction.focusable = true;
+                // A focusable node without a declared focus ring is not a
+                // tracked focus destination, and Alt+Arrow needs one.
+                handle.style.focus = Some(StylePatch {
+                    border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
+                    ..StylePatch::default()
+                });
+                handle.a11y.label = Some(format!(
+                    "Reorder {field_label}. Drag or use Alt plus arrow keys."
+                ));
+                handle.runtime_id = Some(format!(
+                    "order-by:{}:{}:handle",
+                    handlers.instance_id, item.key
+                ));
+                if can_reorder {
+                    let reorder = reorder.clone();
+                    let count = current_value.len();
+                    handle.interaction.on_key = Some(Arc::new(
+                        move |key: NodeKey, modifiers: poodle_node::NodeModifiers| {
+                            if !modifiers.alt {
+                                return None;
+                            }
+                            let to = match key {
+                                NodeKey::ArrowUp if index > 0 => index - 1,
+                                NodeKey::ArrowDown if index + 1 < count => index + 1,
+                                _ => return None,
+                            };
+                            reorder(index, to);
+                            None
+                        },
+                    ));
+                    attach_source(
+                        &mut handle,
+                        true,
+                        reorder_source(&drag_scope, &item.key, &field_label),
+                    );
+                }
 
                 // Field label (single-line ellipsis).
                 let mut label = Node::text(&field_label);
@@ -351,6 +429,37 @@ pub fn order_by(spec: &OrderBySpec, ctx: &RenderContext<'_>, handlers: OrderByHa
                         Arc::new(move || handler(&field)) as Arc<dyn Fn() + Send + Sync>
                     }),
                 );
+
+                row.runtime_id = Some(format!(
+                    "order-by:{}:{}:row",
+                    handlers.instance_id, item.key
+                ));
+                if can_reorder {
+                    let mut target = reorder_target(&drag_scope, &item.key, &field_label);
+                    // The documented result lands the clause *at* the row it
+                    // was dropped on, which is a direction question, not a
+                    // geometry one.
+                    target.resolve_position = Some(arrival_band_resolver(keys.clone(), index));
+                    let reorder = reorder.clone();
+                    let keys = keys.clone();
+                    let count = current_value.len();
+                    target.on_drop = Some(Arc::new(move |event| {
+                        let Some(from) = keys.iter().position(|key| *key == event.subject.id)
+                        else {
+                            return NodeDropCommit::Rejected {
+                                reason: Some("That field is no longer sorted".to_string()),
+                            };
+                        };
+                        let Some(edge) = edge_from_position(&event.intent.position) else {
+                            return NodeDropCommit::Rejected {
+                                reason: Some("Unknown drop position".to_string()),
+                            };
+                        };
+                        reorder(from, reorder_destination(from, index, edge, count));
+                        NodeDropCommit::Committed
+                    }));
+                    attach_target(&mut row, true, target);
+                }
 
                 list = list.child(
                     row.child(handle)

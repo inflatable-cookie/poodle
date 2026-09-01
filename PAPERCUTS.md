@@ -7,6 +7,23 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-09-01 — `probe:gpui-specimens` fails on a wall-clock budget
+  (`probe shard N exceeded the two-minute test-body budget`) rather than on
+  anything it constructed. All four shards reported `42/42 routes constructed`
+  and still failed at 162s because a `bunx vitest run` happened to be running
+  beside them; alone the same shards finish in ~21s. A budget that measures the
+  machine rather than the work sends the reader looking for a construction
+  regression that is not there. Either scale it from a warm-up measurement or
+  say in the failure that contention is the likely cause. Hit while validating
+  g16.028.
+
+- 2026-09-01 — `packages/render` is not `rustfmt`-clean on `main`
+  (`action_discovery_panel.rs`, `agent_chat_input.rs`, `drag_drop.rs`, and
+  others differ), so `cargo fmt --check` cannot be used to check a change and
+  `cargo fmt` would bury it in unrelated churn. AGENTS.md already warns against
+  crate-root formatting; a one-off format commit, or a documented exclusion,
+  would let workers verify their own diff. Hit while closing g16.028.
+
 - 2026-08-31 — `poodle-gpui-node-backend` converts every child through the
   PUBLIC `to_gpui` entry, so any pre-walk that entry performs restarts at the
   subtree root once per node. `collect_layers` survives that by deduping;

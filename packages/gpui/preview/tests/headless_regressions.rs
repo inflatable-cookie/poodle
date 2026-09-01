@@ -17387,3 +17387,415 @@ fn the_first_answered_gpui_batch_id_stays_inert_after_thousands_of_later_ones() 
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
     });
 }
+
+// ── g16.028 migrated composites on the native substrate ───────────────────
+//
+// EditableList, OrderBy, and BlockEditor drew reorder affordances that could
+// not produce their contract result. These drive the completed paths through
+// real mounted GPUI dispatch and assert the host spec each component rebuilt
+// from — never a directly invoked handler.
+
+/// EditableList's native reorder: two mounted lists holding the same item ids
+/// cannot cross-drop, an accepted drop emits one complete next order, a
+/// keyboard pickup commits through the same path, and a cancelled session
+/// commits nothing.
+#[test]
+fn editable_list_substrate_reorder_rebuilds_the_host_spec() {
+    use poodle_render::{editable_list, EditableListHandlers};
+    use poodle_specs::{EditableListItem, EditableListSpec};
+
+    struct ListHost {
+        a: Vec<EditableListItem>,
+        b: Vec<EditableListItem>,
+        orders: Vec<(String, Vec<String>)>,
+    }
+
+    fn rows() -> Vec<EditableListItem> {
+        vec![
+            EditableListItem::new("row-1").with_label("One"),
+            EditableListItem::new("row-2").with_label("Two"),
+            EditableListItem::new("row-3").with_label("Three"),
+        ]
+    }
+
+    fn ids(items: &[EditableListItem]) -> Vec<String> {
+        items.iter().map(|item| item.id.clone()).collect()
+    }
+
+    fn build(host: &Arc<Mutex<ListHost>>, mounted: &Arc<Mutex<Node>>) -> Node {
+        let rebuild = {
+            let host = Arc::clone(host);
+            let mounted = Arc::clone(mounted);
+            move || {
+                let next = build(&host, &mounted);
+                *mounted.lock().expect("mount lock") = next;
+            }
+        };
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let (a, b) = {
+            let host = host.lock().expect("host lock");
+            (host.a.clone(), host.b.clone())
+        };
+
+        let list = |scope: &'static str, items: Vec<EditableListItem>| {
+            let mut handlers = EditableListHandlers::new(scope);
+            let host = Arc::clone(host);
+            let rebuild = rebuild.clone();
+            handlers.on_reorder = Some(Arc::new(move |next: &[EditableListItem]| {
+                {
+                    let mut host = host.lock().expect("host lock");
+                    host.orders.push((scope.to_string(), ids(next)));
+                    if scope == "list-a" {
+                        host.a = next.to_vec();
+                    } else {
+                        host.b = next.to_vec();
+                    }
+                }
+                rebuild();
+            }));
+            editable_list(
+                &EditableListSpec::new()
+                    .with_items(items)
+                    .with_aria_label("Rows"),
+                &ctx,
+                handlers,
+            )
+        };
+
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.descriptor.layout.spacing.gap = 8.0;
+        root.child(list("list-a", a)).child(list("list-b", b))
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(ListHost {
+            a: rows(),
+            b: rows(),
+            orders: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 560.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        // ── The same item ids in two lists never cross ──
+        let handle = payload_frac("editable-list:list-a:row-1:handle", 0.5, 0.5);
+        driver.pointer_press(handle);
+        driver.pointer_drag(point(px(f32::from(handle.x) + 4.0), handle.y));
+        driver.pointer_drag(payload_frac("editable-list:list-b:row-3:row", 0.5, 0.9));
+        let snapshot = controller.snapshot();
+        assert_eq!(
+            snapshot.target_posture,
+            Some(poodle_gpui_node_backend::DragDropTargetPosture::Rejected),
+            "the other list refuses this subject rather than accepting it"
+        );
+        assert_eq!(snapshot.position, None, "a refusal resolves no placement");
+        driver.pointer_release(payload_frac("editable-list:list-b:row-3:row", 0.5, 0.9));
+        assert!(
+            host.lock().expect("host lock").orders.is_empty(),
+            "a cross-list drop commits nothing"
+        );
+
+        // ── One accepted drop, one complete order ──
+        let handle = payload_frac("editable-list:list-a:row-1:handle", 0.5, 0.5);
+        driver.pointer_press(handle);
+        driver.pointer_drag(point(px(f32::from(handle.x) + 4.0), handle.y));
+        driver.pointer_drag(payload_frac("editable-list:list-a:row-3:row", 0.5, 0.9));
+        driver.pointer_release(payload_frac("editable-list:list-a:row-3:row", 0.5, 0.9));
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.orders,
+                [(
+                    "list-a".to_string(),
+                    vec![
+                        "row-2".to_string(),
+                        "row-3".to_string(),
+                        "row-1".to_string()
+                    ]
+                )],
+                "exactly one reorder, carrying the whole next order"
+            );
+            assert_eq!(ids(&host.b), ["row-1", "row-2", "row-3"], "list B is untouched");
+        }
+
+        // ── Keyboard pickup commits through the same path ──
+        driver.wait_for_focus_handle("editable-list:list-a:row-2:handle");
+        driver.focus_element("editable-list:list-a:row-2:handle");
+        driver.dispatch_key_raw("space");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("editable-list:list-a:target:row-3"),
+            "traversal follows list order"
+        );
+        driver.dispatch_key_raw("space");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.orders.len(), 2, "one keystroke pair, one commit");
+            assert_eq!(
+                host.orders[1].1,
+                ["row-3".to_string(), "row-2".to_string(), "row-1".to_string()]
+            );
+        }
+
+        // ── A cancelled keyboard session commits nothing and clears posture ──
+        driver.wait_for_focus_handle("editable-list:list-a:row-3:handle");
+        driver.focus_element("editable-list:list-a:row-3:handle");
+        driver.dispatch_key_raw("space");
+        driver.dispatch_key_raw("down");
+        driver.dispatch_key_raw("escape");
+        let snapshot = controller.snapshot();
+        assert_eq!(snapshot.phase, DragSessionPhase::Idle);
+        assert_eq!(snapshot.target_id, None);
+        assert_eq!(snapshot.target_posture, None);
+        assert_eq!(
+            host.lock().expect("host lock").orders.len(),
+            2,
+            "Escape commits nothing"
+        );
+    });
+}
+
+/// OrderBy's native reorder: a pointer drop and the contract's Alt+Arrow both
+/// emit one complete next ordering, and a clause's own controls still work.
+#[test]
+fn order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec() {
+    use poodle_render::{order_by, OrderByHandlers};
+    use poodle_specs::{OrderByField, OrderBySpec, SortDirection, SortField};
+
+    struct SortHost {
+        value: Vec<OrderByField>,
+        orderings: Vec<Vec<String>>,
+        removed: Vec<String>,
+    }
+
+    fn keys(value: &[OrderByField]) -> Vec<String> {
+        value.iter().map(|item| item.key.clone()).collect()
+    }
+
+    fn build(host: &Arc<Mutex<SortHost>>, mounted: &Arc<Mutex<Node>>) -> Node {
+        let rebuild = {
+            let host = Arc::clone(host);
+            let mounted = Arc::clone(mounted);
+            move || {
+                let next = build(&host, &mounted);
+                *mounted.lock().expect("mount lock") = next;
+            }
+        };
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let value = host.lock().expect("host lock").value.clone();
+
+        let spec = OrderBySpec::new()
+            .with_fields(vec![
+                SortField::new("name", "Name"),
+                SortField::new("date", "Date"),
+                SortField::new("size", "Size"),
+            ])
+            .with_value(value)
+            .with_open(true);
+
+        let on_reorder = {
+            let host = Arc::clone(host);
+            let rebuild = rebuild.clone();
+            Arc::new(move |next: &[OrderByField]| {
+                {
+                    let mut host = host.lock().expect("host lock");
+                    host.orderings.push(keys(next));
+                    host.value = next.to_vec();
+                }
+                rebuild();
+            }) as Arc<dyn Fn(&[OrderByField]) + Send + Sync>
+        };
+        let on_remove = {
+            let host = Arc::clone(host);
+            Arc::new(move |key: &str| {
+                host.lock().expect("host lock").removed.push(key.to_string());
+            }) as Arc<dyn Fn(&str) + Send + Sync>
+        };
+
+        order_by(
+            &spec,
+            &ctx,
+            OrderByHandlers {
+                on_reorder: Some(on_reorder),
+                on_remove: Some(on_remove),
+                ..OrderByHandlers::new("sort")
+            },
+        )
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(SortHost {
+            value: vec![
+                OrderByField::new("name", SortDirection::Asc),
+                OrderByField::new("date", SortDirection::Desc),
+                OrderByField::new("size", SortDirection::Asc),
+            ],
+            orderings: Vec::new(),
+            removed: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 400.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        // ── A drop lands the clause *at* the row it was dropped on ──
+        let handle = payload_frac("order-by:sort:name:handle", 0.5, 0.5);
+        driver.pointer_press(handle);
+        driver.pointer_drag(point(px(f32::from(handle.x) + 4.0), handle.y));
+        driver.pointer_drag(payload_frac("order-by:sort:size:row", 0.5, 0.5));
+        let snapshot = controller.snapshot();
+        assert_eq!(
+            snapshot.target_id.as_deref(),
+            Some("order-by:sort:target:size"),
+            "the hovered row is the target the pointer is over"
+        );
+        assert_eq!(
+            snapshot.position.as_deref(),
+            Some("after"),
+            "a clause travelling down arrives after its target"
+        );
+        driver.pointer_release(payload_frac("order-by:sort:size:row", 0.5, 0.5));
+        assert_eq!(
+            host.lock().expect("host lock").orderings,
+            [vec![
+                "date".to_string(),
+                "size".to_string(),
+                "name".to_string()
+            ]],
+            "one drop, one complete ordering"
+        );
+
+        // ── Alt+Arrow reaches the same emitter ──
+        driver.keyboard_key("order-by:sort:size:handle", "alt-up");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.orderings.len(), 2, "one keystroke, one commit");
+            assert_eq!(
+                host.orderings[1],
+                ["size".to_string(), "date".to_string(), "name".to_string()]
+            );
+        }
+
+        // ── A plain Arrow on the handle is not a reorder ──
+        driver.keyboard_key("order-by:sort:size:handle", "down");
+        assert_eq!(
+            host.lock().expect("host lock").orderings.len(),
+            2,
+            "the reorder chord is Alt+Arrow, not Arrow"
+        );
+    });
+}
+
+/// BlockEditor's native reorder: the grip is the drag source, the move buttons
+/// are the keyboard route, and both emit one complete next block order. The
+/// content area is not a drag handle.
+#[test]
+fn block_editor_grip_drag_and_move_controls_rebuild_the_host_spec() {
+    use poodle_render::{block_editor, BlockEditorHandlers};
+    use poodle_specs::{BlockEditorSpec, BlockTypeDefinition, EditorBlock};
+
+    struct BlockHost {
+        blocks: Vec<EditorBlock>,
+        orders: Vec<Vec<String>>,
+    }
+
+    fn blocks() -> Vec<EditorBlock> {
+        vec![
+            EditorBlock::new("b1", "paragraph").with_content("one"),
+            EditorBlock::new("b2", "paragraph").with_content("two"),
+            EditorBlock::new("b3", "paragraph").with_content("three"),
+        ]
+    }
+
+    fn ids(blocks: &[EditorBlock]) -> Vec<String> {
+        blocks.iter().map(|block| block.id.clone()).collect()
+    }
+
+    fn build(host: &Arc<Mutex<BlockHost>>, mounted: &Arc<Mutex<Node>>) -> Node {
+        let rebuild = {
+            let host = Arc::clone(host);
+            let mounted = Arc::clone(mounted);
+            move || {
+                let next = build(&host, &mounted);
+                *mounted.lock().expect("mount lock") = next;
+            }
+        };
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let current = host.lock().expect("host lock").blocks.clone();
+
+        let mut handlers = BlockEditorHandlers::new("editor");
+        let sink = Arc::clone(host);
+        handlers.on_reorder = Some(Arc::new(move |next: &[EditorBlock]| {
+            {
+                let mut host = sink.lock().expect("host lock");
+                host.orders.push(ids(next));
+                host.blocks = next.to_vec();
+            }
+            rebuild();
+        }));
+
+        block_editor(
+            &BlockEditorSpec::new()
+                .with_blocks(current)
+                .with_block_types(vec![BlockTypeDefinition::new("paragraph", "Paragraph", "text")]),
+            &ctx,
+            handlers,
+        )
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(BlockHost {
+            blocks: blocks(),
+            orders: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 560.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        // ── The block body is an editing surface, not a grip ──
+        let body = payload_frac("block-editor:editor:b1:block", 0.5, 0.85);
+        driver.pointer_press(body);
+        driver.pointer_drag(point(px(f32::from(body.x) + 24.0), body.y));
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Idle,
+            "a press in the block body never arms a drag"
+        );
+        driver.pointer_release(point(px(f32::from(body.x) + 24.0), body.y));
+
+        // ── The grip drags, and the drop lands the block at its target ──
+        let grip = payload_frac("block-editor:editor:b1:grip", 0.5, 0.5);
+        driver.pointer_press(grip);
+        driver.pointer_drag(point(px(f32::from(grip.x) + 4.0), grip.y));
+        driver.pointer_drag(payload_frac("block-editor:editor:b3:block", 0.5, 0.5));
+        driver.pointer_release(payload_frac("block-editor:editor:b3:block", 0.5, 0.5));
+        assert_eq!(
+            host.lock().expect("host lock").orders,
+            [vec!["b2".to_string(), "b3".to_string(), "b1".to_string()]],
+            "one drop, one complete block order"
+        );
+
+        // ── Move up reaches the same emitter ──
+        driver.wait_for_focus_handle("block-editor:editor:b1:up");
+        driver.keyboard_activate("block-editor:editor:b1:up");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.orders.len(), 2, "one activation, one commit");
+            assert_eq!(
+                host.orders[1],
+                ["b2".to_string(), "b1".to_string(), "b3".to_string()]
+            );
+        }
+    });
+}

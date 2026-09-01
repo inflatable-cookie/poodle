@@ -390,6 +390,12 @@
 # architecture tombstone are preserved; active code, contracts, guides,
 # previews, and current evidence must use component Recipes directly.
 "drift:recipes" = "bun scripts/check-recipe-only-surface.ts"
+# g16.028 drag-and-drop closeout. The programme's certification claim is a
+# negative one — no programme component owns an HTML drag lifecycle or a local
+# drag index any more — so it needs an executable proof. Planting one
+# `draggable`, `DataTransfer`, or local drag index back into any of the seven
+# fails it, and so does a component that reaches no substrate module at all.
+"drift:drag-inventory" = "bun scripts/check-drag-inventory.ts"
 # The Jetstream sibling, and stronger: GPUI can only check that a handler field
 # is read, because a real click there needs a live window. Jetstream dispatches
 # clicks with no window, so this demands a test that actually drives one. Also
@@ -432,6 +438,7 @@
   { task = "audit:icons" },
   { task = "audit:tokens" },
   { task = "drift:recipes" },
+  { task = "drift:drag-inventory" },
   { task = "test:core" },
   { task = "test:components" },
   # The packaged counterpart of test:components. Cheap (~4s against ci:web's

@@ -137,7 +137,10 @@ and disclosure transition for the hidden section.
 - `Space`/`Enter` grabs or drops; arrows move; Escape cancels.
 - Explicit up/down buttons provide the same operation without grab mode.
 - Each hide/restore action includes the model label.
-- A polite atomic live region announces moves and visibility requests.
+- A polite atomic live region announces moves and visibility requests. It is
+  the component's own region and carries results, not drag lifecycle: when the
+  editor owns its drag controller the substrate's own announcements are
+  suppressed, so a terminal is never announced twice.
 - Focus follows a moved model. Hiding moves focus to the next shown model, the
   previous model, or the hidden-section disclosure when none remain.
 - GPUI later exposes list position, button names, and announcements natively.
@@ -171,6 +174,26 @@ and disclosure transition for the hidden section.
 - Rich action rows are purpose-built because EditableList's option semantics
   and add/remove workflow do not fit nested model actions.
 - Key rows by opaque id.
+- Pointer drag runs on the common drag-and-drop substrate (architecture 011,
+  spec 069) in both web frameworks, matching the native binding below: the
+  reorder handle is the drag source, every unlocked shown row is a drop target,
+  and there is no `draggable` attribute, `DataTransfer` payload, or
+  component-owned drag index. Registration ids and the subject kind
+  (`poodle.reorder-item:model-catalogue-editor:{instance}`) are scoped to the
+  editor instance, so two catalogues holding the same model ids under one
+  ambient provider can never cross-drop.
+- The editor joins an ambient `DragDropProvider` when one exists and owns an
+  isolated controller otherwise. `isDragEnabled=false` registers nothing at
+  all; the keyboard and move-button routes stay.
+- A drop is revalidated against the live shown list: the dragged model and the
+  target row are located again at commit, and a model that is no longer shown
+  rejects instead of moving the wrong row. One accepted drop emits
+  `onOrderChange` exactly once with the complete shown-id order.
+- The grab/move keyboard route is unchanged and stays component-owned, because
+  each arrow press is a committed move that emits the complete order — not an
+  intent that waits for a second key. `data-grabbed` and `data-drop-target`
+  keep their meaning; `data-drop-target` now follows the substrate's accepted
+  intent rather than a local index.
 
 ## 10. GPUI Notes
 

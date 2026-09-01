@@ -1,7 +1,7 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: active — compiled as g16.021–g16.028; g16.021–g16.027 merged;
-g16.028 is ready as the final migration and certification checkpoint
+Status: complete — compiled as g16.021–g16.028; g16.021–g16.027 merged and
+g16.028 closes the migration and certification
 Updated: 2026-09-01
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
@@ -876,6 +876,21 @@ those channels rather than discard working semantics.
 Migration happens in bounded waves. Old component-local session state and
 global side channels are deleted only after their mounted replacement passes.
 
+**Closed by `g16.028`.** All seven are migrated on every active runtime. No
+programme component owns an HTML drag lifecycle, a `DataTransfer` payload, or
+a component-local drag index any more, and EditableList, OrderBy, and
+BlockEditor expose a working native reorder result instead of a presentational
+handle. The claim is executable rather than narrative: `effigy
+drift:drag-inventory` reads the seven Svelte, React, and shared-Rust surfaces
+and fails when one banned token or one missing substrate reference reappears.
+
+Two `DataTransfer` uses are retained deliberately, both substrate-owned and
+neither a component lifecycle: the cross-window host bridge and the inbound
+file transport, which are the browser's own way in and out of the window. The
+controller also arms `draggable` on a bridged source, and disarms it on every
+terminal. The inventory carries each retained path with its contract reason and
+fails when an exemption goes stale.
+
 ### Approved public migration boundary
 
 The operator approved a clean pre-1.0 replacement on 2026-08-28:
@@ -913,7 +928,11 @@ period.
 
 ### Mounted web
 
-- Svelte and React custom consumer fixtures;
+- Svelte and React custom consumer fixtures, plus mounted *component* fixtures
+  for the migrated composites — two ModelCatalogueEditors holding the same
+  model ids under one provider, a BlockEditor whose grip is the only handle,
+  and an OrderBy panel driven by pointer and by Alt+Arrow
+  (`test/drag-drop/components.html`);
 - mouse, pen-shaped Pointer Events, touch-shaped Pointer Events, and keyboard;
 - tap/scroll versus drag arbitration;
 - pointer capture loss and source/target unmount;
@@ -928,6 +947,9 @@ period.
 - the adapter advertises pen, touch, and device-originated pointer cancel as
   unsupported on crates.io GPUI 0.2.2; tests must not infer them from mouse
   synthesis;
+- mounted component regressions for the completed native paths: EditableList
+  (isolation, drop, keyboard pickup, cancel), OrderBy (drop and Alt+Arrow), and
+  BlockEditor (grip-only drag and the move controls);
 - two independent sessions cannot collide;
 - source/target disappearance is safe; and
 - renderer-neutral Rust outputs remain consumable by deferred Jetstream.
@@ -985,11 +1007,11 @@ it. Cross-window and drag-out contracts shape the base even when their adapters
 land after the internal proof.
 
 The compiled runway is `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
-through `028-drag-drop-migration-and-certification-closeout.md`.
-`g16.021`–`g16.027` are merged. `g16.028` is ready: the remaining web HTML-drag
-owners are ModelCatalogueEditor, OrderBy, and BlockEditor; native
-EditableList, OrderBy, and BlockEditor still need their contract reorder result
-paths before final certification.
+through `028-drag-drop-migration-and-certification-closeout.md`, and it is
+complete. `g16.021`–`g16.028` are merged: the semantic kernels, the web
+custom-surface API, the simple and nested migrations, the Rust/GPUI
+controller, the cross-window bridge, inbound files and drag-out, and the final
+migration and certification closeout.
 
 ## Non-goals
 

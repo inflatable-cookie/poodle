@@ -161,8 +161,8 @@ When `value` is empty but `activeSort` is provided, the component treats it as a
 | icon trigger | `triggerVariant="icon"` | closed state is one secondary sort IconButton; opening shows the sort rows, add control, and reset in the panel header |
 | disabled | `disabled=true` | root reduced to disabled opacity; all buttons and controls disabled |
 | dropdown open | user clicks trigger | anchored dialog surface appears below the trigger |
-| item dragging | user drags a sort item | dragging item reduced to 0.65 opacity |
-| item drop target | dragging over a different item | target item gets accent 8% fill and a left accent bar (inset box-shadow) |
+| item dragging | a sort item is the substrate's active drag source | dragging item reduced to 0.65 opacity |
+| item drop target | the substrate accepts an intent on a different item | target item gets accent 8% fill and a left accent bar (inset box-shadow) |
 | all fields used | every field in `fields` is active | add-field Select hidden |
 | maxFields reached | active count equals `maxFields` | add-field Select hidden |
 
@@ -546,18 +546,46 @@ default `0 var(--poodle-space-control-x)`.
 
 ## 10. Drag-And-Drop Behavior
 
-Items in the sort list support native HTML drag-and-drop reordering:
+Sort rows reorder on the common drag-and-drop substrate (architecture 011,
+spec 069). There is no `draggable` attribute, no `DataTransfer`, and no
+component-owned drag index.
 
-1. **Drag start**: sets `dragIndex` to the source item index
-2. **Drag enter**: as the dragged item enters another item, `dragOverIndex` updates to highlight the drop target
-3. **Drop**: the dragged item is spliced out of its original position and inserted at the drop target index; the value array is synced
-4. **Drag end**: clears all drag state regardless of whether a drop occurred
+1. **Registration**: the drag-handle button of each enabled row is a drag
+   source and the row itself is a drop target. Both ids are scoped to the
+   OrderBy instance, and the subject kind is
+   `poodle.reorder-item:order-by:{instance}` so one sort builder is never
+   eligible for another one's row — even when two mounted builders sort the
+   same field keys under one ambient provider.
+2. **Eligibility**: a row refuses a subject this instance does not own and
+   refuses a row dropped onto itself, during eligibility rather than at commit.
+3. **Intent**: the whole row is one band. A row travelling down resolves
+   `after` its target and a row travelling up resolves `before` it, so a
+   dropped field lands *at* the row it was dropped on — the result the
+   pre-substrate implementation produced.
+4. **Commit**: the drop is revalidated against the live value. The source and
+   target keys are located again in the current ordering; a key that has since
+   been removed rejects instead of moving the wrong field. One accepted drop
+   emits `onChange` exactly once with the complete next `OrderByValue`.
+5. **Terminal**: cancellation, source removal, and target removal clear
+   dragging and drop-target posture. No state survives a terminal.
 
 Visual feedback during drag:
 - The source item gets the `order-by__item--dragging` class (0.65 opacity)
 - The current drop target gets the `order-by__item--drop-target` class (accent 8% fill + left accent bar via inset box-shadow)
 
-For keyboard-only users, the focusable drag-handle button provides equivalent reordering via **Alt+ArrowUp** (move earlier) and **Alt+ArrowDown** (move later).
+Both classes follow the substrate's session snapshot rather than local index
+state, and the component sheet overrides the generic provider posture styles so
+the exact values above still apply.
+
+Keyboard reordering uses the same session. **Alt+ArrowUp** (move earlier) and
+**Alt+ArrowDown** (move later) on the focusable drag handle issue a keyboard
+drop command against the same source and target registrations, so the
+eligibility, revalidation, commit, and `onChange` payload are the pointer
+route's — not a second code path that mutates the array directly.
+
+When OrderBy finds an ambient `DragDropProvider` it joins it; otherwise it owns
+an isolated controller for its own panel. Joining changes who arbitrates, never
+which rows are eligible.
 
 ## 11. Internal Sub-Components
 
@@ -568,7 +596,7 @@ The panel uses the following internal component instances:
 | local dialog surface | wraps the sort-builder UI when open | `role="dialog"`, `aria-label` from prop, `tabindex="-1"` |
 | `IconButton` (icon trigger) | opens the popover in icon mode | `icon="arrow-up-down"`, `variant="secondary"`, `ariaLabel` from prop, `expanded` from open state, `controls` from panel id |
 | `IconButton` (reset) | clears all sort fields | `icon="x"`, `variant="ghost"`, `ariaLabel="Clear sort"`; resolved size in summary trigger, `xs` in icon panel header |
-| drag-handle `<button>` | initiates drag + Alt+Arrow reorder | `draggable`, `aria-label="Reorder {field}. Drag or use Alt plus arrow keys."` |
+| drag-handle `<button>` | substrate drag source + Alt+Arrow reorder | `aria-label="Reorder {field}. Drag or use Alt plus arrow keys."` (no `draggable`) |
 | `IconButton` (direction toggle) | toggles asc/desc per field | `icon="arrow-up"` or `"arrow-down"`, `size="xs"`, `variant="ghost"`, `tooltip="Asc"`/`"Desc"` |
 | `IconButton` (remove) | removes field from sort | `icon="x"`, `size="xs"`, `variant="ghost"`, `tooltip="Remove"` (no danger tone) |
 | `Select` | add-field dropdown | `placeholder="+ Add field"`, `ariaLabel="Add sort field"`, items from available (unused) fields |
@@ -579,7 +607,10 @@ The panel uses the following internal component instances:
 - Size resolves from `size` prop or from inherited presentation context via `resolveSemanticControlSize`
 - Density resolves from `density` prop or from inherited presentation context
 - The `activeSort` prop provides backward compatibility: when `value` is empty, `activeSort` is converted to a one-element value; on every mutation, `activeSort` is updated to reflect the first value element
-- CSS classes `order-by__item--dragging` and `order-by__item--drop-target` are toggled via Svelte's `class:` directive
+- CSS classes `order-by__item--dragging` and `order-by__item--drop-target` are toggled via Svelte's `class:` directive,
+  driven by the drag substrate's session snapshot
+- The panel registers rows through `dragSourceAction` / `dropTargetAction` against the joined or owned controller; React uses a row
+  sub-component because its registration hooks cannot run in a list loop
 - The add-field Select uses its value-change callback to call `addField(key)`, then resets its own value to `""` to allow re-selection
 - Clearing all sort fields is done via the reset `×` IconButton only — in the summary trigger for `summary`, in the panel header for `icon`; there is no footer or "Clear all" Button
 - The reset `×` IconButton handler uses `stopPropagation` and `preventDefault` to avoid toggling the dropdown
@@ -587,13 +618,20 @@ The panel uses the following internal component instances:
 
 ## 10a. Jetstream Notes
 
-- `OrderBy::from_spec(spec, theme).on_direction_toggle(...).on_remove(...)`,
-  each carrying the field's key.
-- The contract's `onChange` carries a whole ordering, and a pointer cannot
-  produce one — it produces an intent on one row. So the events name the intent,
-  and the host applies it to the ordering it already holds. That is the same
-  split the web target makes internally before it emits `onChange`.
-- Reordering is a drag; the rows draw a handle and it carries no handler yet.
+- `OrderByHandlers::new(instance_id)` with `on_direction_toggle` and
+  `on_remove`, each carrying the field's key.
+- `on_reorder` carries the **complete next ordering** as `Vec<OrderByField>`,
+  the renderer-neutral mirror of the web `onChange` payload. The renderer, not
+  the host, applies the accepted move to the ordering the spec carries.
+- Reordering runs on the renderer-neutral substrate: the row handle registers a
+  `NodeDragSource` and every enabled row a `NodeDropTarget`, both scoped to
+  `instance_id`. The band rule is `crate::drag_drop::vertical_band_resolver`,
+  self-drops are rejected, and the drop is revalidated against the spec's live
+  field list before it commits.
+- `Alt+ArrowUp` / `Alt+ArrowDown` on the handle reach the same emitter, so the
+  keyboard and pointer routes produce one identical result payload.
+- The handle is a focusable button. It is never drawn without its handler:
+  a spec that cannot reorder draws no grip.
 
 ## 13. Parity Checklist
 

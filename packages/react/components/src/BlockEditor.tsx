@@ -1,7 +1,14 @@
 import "@inflatable-cookie/poodle-core/styles/block-editor.css";
 
-import { useState, type ChangeEvent, type DragEvent as ReactDragEvent, type ReactNode } from "react";
+import { useId, useState, type ChangeEvent, type ReactNode } from "react";
+import {
+  createDragDropController,
+  type DragDropCommitResult,
+  type DropIntent,
+} from "@inflatable-cookie/poodle-core";
 
+import { BlockEditorBlock } from "./block-editor/BlockEditorBlock";
+import { DragDropProvider, useOptionalDragDrop } from "./drag-drop";
 import { Icon } from "./Icon";
 import { Select } from "./Select";
 import { UiPresentationProvider, resolveSemanticControlSize, useUiPresentation } from "./presentation";
@@ -122,8 +129,19 @@ export function BlockEditor({
   const uiPresentation = useUiPresentation();
 
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
-  const [dragSourceIndex, setDragSourceIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const editorId = useId();
+
+  /**
+   * Join the nearest provider, or own a controller.
+   *
+   * Isolation does not come from the controller: it comes from the subject
+   * family and the registration ids, so an editor that joined a shared
+   * provider is still unreachable from a sibling editor holding the same block
+   * ids.
+   */
+  const ambient = useOptionalDragDrop();
+  const [ownDragController] = useState(() => (ambient ? null : createDragDropController()));
+  const dragController = ambient?.controller ?? ownDragController!;
 
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
@@ -159,15 +177,74 @@ export function BlockEditor({
     emitChange(blocks.filter((_, blockIndex) => blockIndex !== index));
   }
 
-  function moveBlock(index: number, direction: -1 | 1): void {
-    const target = index + direction;
-    if (target < 0 || target >= blocks.length) {
-      return;
+  const subjectKind = `poodle.reorder-item:block-editor:${editorId}`;
+  const registrationScope = `block-editor:${editorId}`;
+
+  function sourceIdOf(id: string): string {
+    return `${registrationScope}:source:${id}`;
+  }
+
+  function targetIdOf(id: string): string {
+    return `${registrationScope}:target:${id}`;
+  }
+
+  function idOfTargetId(targetId: string): string {
+    const prefix = `${registrationScope}:target:`;
+    return targetId.startsWith(prefix) ? targetId.slice(prefix.length) : "";
+  }
+
+  function indexOfBlock(id: string): number {
+    return blocks.findIndex((entry) => entry.id === id);
+  }
+
+  /**
+   * One accepted drop, one complete block order.
+   *
+   * Both indices are resolved again at commit: the host may have replaced
+   * `blocks` while the pointer was down, and a stale index would move the
+   * wrong block.
+   */
+  function handleDrop(intent: DropIntent): DragDropCommitResult {
+    if (disabled || !canReorder) return { status: "rejected", reason: "not reorderable" };
+
+    const from = indexOfBlock(dragController.getSnapshot().session?.subject.id ?? "");
+    const target = indexOfBlock(idOfTargetId(intent.targetId));
+    if (from < 0 || target < 0 || from === target) {
+      return { status: "rejected", reason: "missing block" };
     }
 
+    const to =
+      intent.position === "before"
+        ? from < target
+          ? target - 1
+          : target
+        : from < target
+          ? target
+          : target + 1;
+
     const nextBlocks = [...blocks];
-    [nextBlocks[index], nextBlocks[target]] = [nextBlocks[target], nextBlocks[index]];
+    const [moved] = nextBlocks.splice(from, 1);
+    nextBlocks.splice(to, 0, moved);
     emitChange(nextBlocks);
+    return { status: "committed" };
+  }
+
+  /**
+   * Move up / move down: the keyboard reorder route, run as a real session so
+   * it shares eligibility, revalidation, and the single commit with a drop.
+   */
+  function moveBlock(index: number, direction: -1 | 1): void {
+    if (disabled || !canReorder) return;
+
+    const from = blocks[index];
+    const target = blocks[index + direction];
+    if (!from || !target) return;
+
+    dragController.requestKeyboardDrop({
+      sourceId: sourceIdOf(from.id),
+      targetId: targetIdOf(target.id),
+      position: direction === 1 ? "after" : "before",
+    });
   }
 
   function updateBlock(index: number, updates: Partial<EditorBlock>): void {
@@ -182,106 +259,32 @@ export function BlockEditor({
     updateBlock(index, { content: event.currentTarget.value });
   }
 
-  function handleDragStart(event: ReactDragEvent, index: number): void {
-    if (disabled || !canReorder || !event.dataTransfer) {
-      return;
-    }
-
-    setDragSourceIndex(index);
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", String(index));
-  }
-
-  function handleDragOver(event: ReactDragEvent, index: number): void {
-    if (!canReorder) {
-      setDragOverIndex(null);
-      return;
-    }
-
-    if (dragSourceIndex === null || dragSourceIndex === index) {
-      setDragOverIndex(null);
-      return;
-    }
-
-    event.preventDefault();
-    if (event.dataTransfer) {
-      event.dataTransfer.dropEffect = "move";
-    }
-    setDragOverIndex(index);
-  }
-
-  function handleDragLeave(): void {
-    if (!canReorder) {
-      return;
-    }
-
-    setDragOverIndex(null);
-  }
-
-  function handleDrop(event: ReactDragEvent, targetIndex: number): void {
-    if (!canReorder) {
-      return;
-    }
-
-    event.preventDefault();
-    if (dragSourceIndex === null || dragSourceIndex === targetIndex) {
-      setDragSourceIndex(null);
-      setDragOverIndex(null);
-      return;
-    }
-
-    const nextBlocks = [...blocks];
-    const [moved] = nextBlocks.splice(dragSourceIndex, 1);
-    nextBlocks.splice(targetIndex, 0, moved);
-    setDragSourceIndex(null);
-    setDragOverIndex(null);
-    emitChange(nextBlocks);
-  }
-
-  function handleDragEnd(): void {
-    if (!canReorder) {
-      return;
-    }
-
-    setDragSourceIndex(null);
-    setDragOverIndex(null);
-  }
-
-  return (
-    <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
-      <div
-        className={disabled ? "poodle-block-editor poodle-block-editor--disabled" : "poodle-block-editor"}
-        data-size={resolvedSize}
-        data-density={resolvedDensity}
-        aria-label={ariaLabel}
-      >
+  const editor = (
+    <div
+      className={disabled ? "poodle-block-editor poodle-block-editor--disabled" : "poodle-block-editor"}
+      data-size={resolvedSize}
+      data-density={resolvedDensity}
+      aria-label={ariaLabel}
+    >
         {blocks.map((blockItem, index) => (
-          <div
+          <BlockEditorBlock
             key={blockItem.id}
-            className={[
-              "poodle-block-editor__block",
-              activeBlockId === blockItem.id ? "poodle-active" : "",
-              dragOverIndex === index ? "poodle-drag-over" : "",
-              dragSourceIndex === index ? "poodle-dragging" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            data-type={blockItem.type}
-            onFocus={() => setActiveBlockId(blockItem.id)}
-            onDragOver={(event) => handleDragOver(event, index)}
-            onDragLeave={handleDragLeave}
-            onDrop={(event) => handleDrop(event, index)}
-            role="group"
-            aria-label={`${blockItem.type} block`}
+            block={blockItem}
+            index={index}
+            active={activeBlockId === blockItem.id}
+            disabled={disabled || !canReorder}
+            subjectKind={subjectKind}
+            sourceId={sourceIdOf(blockItem.id)}
+            targetId={targetIdOf(blockItem.id)}
+            indexOfBlock={indexOfBlock}
+            onDrop={handleDrop}
+            onActivate={() => setActiveBlockId(blockItem.id)}
           >
             <div className="poodle-block-editor__toolbar">
               <div className="poodle-block-editor__toolbar-left">
                 <span
                   className="poodle-block-editor__drag-grip"
-                  draggable="true"
                   hidden={!canReorder}
-                  onDragStart={(event) => handleDragStart(event, index)}
-                  onDragEnd={handleDragEnd}
                   title="Drag to reorder"
                   aria-hidden="true"
                 >
@@ -410,9 +413,16 @@ export function BlockEditor({
                 />
               )}
             </div>
-          </div>
+          </BlockEditorBlock>
         ))}
-      </div>
+    </div>
+  );
+
+  // An editor that joined a provider contributes registrations to it. One with
+  // no provider owns a controller so it still reorders on its own.
+  return (
+    <UiPresentationProvider sizeScale={resolvedSize} density={resolvedDensity}>
+      {ambient ? editor : <DragDropProvider controller={ownDragController!}>{editor}</DragDropProvider>}
     </UiPresentationProvider>
   );
 }

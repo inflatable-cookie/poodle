@@ -171,6 +171,18 @@
     border-color: var(--poodle-recipe-order-by-hover-item-border, color-mix(in srgb, var(--poodle-color-border-default) 60%, transparent));
   }
 
+  /* The generic provider posture is unlayered and would otherwise outrank the
+     component's own drag treatment; the contract values win here. */
+  .poodle-drag-drop-provider .poodle-order-by__item[data-poodle-drop-target="accepted"],
+  .poodle-drag-drop-provider .poodle-order-by__item[data-poodle-drop-target="rejected"] {
+    outline: none;
+  }
+
+  .poodle-drag-drop-provider .poodle-order-by__drag-handle[data-poodle-drag-source="dragging"],
+  .poodle-drag-drop-provider .poodle-order-by__drag-handle[data-poodle-drag-source="dropping"] {
+    opacity: 1;
+  }
+
   .poodle-order-by__item--dragging {
     opacity: 0.65;
   }

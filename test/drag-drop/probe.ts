@@ -832,6 +832,240 @@ async function runExternalFiles(name: string, browser: Browser): Promise<void> {
   }
 }
 
+/**
+ * Mounted Svelte and React component evidence (g16.028).
+ *
+ * The fixture next door proves the substrate through a hand-built surface.
+ * This one mounts the three migrated composites in both web frameworks —
+ * including two ModelCatalogueEditors that deliberately hold the same model
+ * ids under one provider — and asserts the authored callback result.
+ */
+async function runComponents(name: string, browser: Browser): Promise<void> {
+  const context = await browser.newContext({ viewport: { width: 1000, height: 900 } });
+  const page = await context.newPage();
+  const componentsUrl = `${url}components.html`;
+
+  const attr = async (fw: string, key: string): Promise<string> =>
+    (await page.locator(`#${fw}-probe`).getAttribute(`data-${key}`)) ?? "";
+
+  const at = async (selector: string): Promise<{ x: number; y: number }> => {
+    const locator = page.locator(selector).first();
+    await locator.scrollIntoViewIfNeeded();
+    const rect = await locator.boundingBox();
+    if (!rect) throw new Error(`no box for ${selector}`);
+    return center(rect);
+  };
+
+  const press = async (selector: string): Promise<void> => {
+    const origin = await at(selector);
+    await page.mouse.move(origin.x, origin.y);
+    await page.mouse.down();
+    // One short move arms the gesture; the substrate needs movement, not a
+    // click, before it is a drag at all.
+    await page.mouse.move(origin.x + 12, origin.y + 2, { steps: 4 });
+  };
+
+  const hover = async (selector: string, yFraction = 0.5): Promise<void> => {
+    const locator = page.locator(selector).first();
+    await locator.scrollIntoViewIfNeeded();
+    const rect = await locator.boundingBox();
+    if (!rect) throw new Error(`no box for ${selector}`);
+    await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height * yFraction, { steps: 8 });
+    await frames(page);
+  };
+
+  try {
+    for (const fw of ["svelte", "react"]) {
+      await page.goto(componentsUrl, { waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+
+      // ── Two instances, the same ids, one provider ──
+      await press(`#${fw}-mce-a [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
+      await hover(`#${fw}-mce-b [data-model-catalogue-id="gamma"]`);
+      const foreignPosture = await page
+        .locator(`#${fw}-mce-b [data-drop-target="true"]`)
+        .count();
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} ModelCatalogueEditor instances cannot cross-drop colliding ids`,
+        foreignPosture === 0 &&
+          (await attr(fw, "order-b")) === "" &&
+          (await attr(fw, "order-a-count")) === "0",
+        `posture=${foreignPosture} orderB=${await attr(fw, "order-b")} countA=${await attr(fw, "order-a-count")}`,
+      );
+
+      // ── One accepted drop, one complete authored order ──
+      await press(`#${fw}-mce-a [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
+      await hover(`#${fw}-mce-a [data-model-catalogue-id="gamma"]`);
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} ModelCatalogueEditor drop emits one complete shown order`,
+        (await attr(fw, "order-a")) === "beta,gamma,alpha" &&
+          (await attr(fw, "order-a-count")) === "1",
+        `order=${await attr(fw, "order-a")} count=${await attr(fw, "order-a-count")}`,
+      );
+
+      // ── A row's own controls still work, and never start a drag ──
+      await page.locator(`#${fw}-mce-a [data-model-catalogue-id="beta"] [aria-label="Hide Beta"]`).click();
+      await frames(page);
+      check(
+        `${name}: ${fw} ModelCatalogueEditor row controls survive the reorder sensor`,
+        (await attr(fw, "hides")) === "beta:false" && (await attr(fw, "order-a-count")) === "1",
+        `hides=${await attr(fw, "hides")} count=${await attr(fw, "order-a-count")}`,
+      );
+
+      // ── A target that leaves mid-drag cannot commit ──
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await press(`#${fw}-mce-a [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
+      await hover(`#${fw}-mce-a [data-model-catalogue-id="gamma"]`);
+      await page.evaluate((framework) => {
+        const fixture = (window as unknown as Record<string, { removeCatalogueItem(id: string): void }>)[
+          `__${framework}Fixture`
+        ];
+        fixture.removeCatalogueItem("gamma");
+      }, fw);
+      await frames(page);
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} ModelCatalogueEditor rejects a drop whose target left`,
+        (await attr(fw, "order-a-count")) === "0" && (await attr(fw, "order-a")) === "",
+        `count=${await attr(fw, "order-a-count")} order=${await attr(fw, "order-a")}`,
+      );
+
+      // ── An order replaced mid-drag ends the session, it does not commit ──
+      //
+      // Reordering the catalogue moves the dragged row's element, which the
+      // substrate reads as the source leaving. Ending is the honest outcome:
+      // the alternative is committing a placement measured against an order
+      // that no longer exists.
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await press(`#${fw}-mce-a [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
+      await hover(`#${fw}-mce-a [data-model-catalogue-id="gamma"]`);
+      await page.evaluate((framework) => {
+        const fixture = (window as unknown as Record<string, { replaceCatalogue(ids: string[]): void }>)[
+          `__${framework}Fixture`
+        ];
+        fixture.replaceCatalogue(["gamma", "beta", "alpha"]);
+      }, fw);
+      await frames(page);
+      await hover(`#${fw}-mce-a [data-model-catalogue-id="beta"]`);
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} ModelCatalogueEditor never commits against a replaced order`,
+        (await attr(fw, "order-a-count")) === "0" && (await attr(fw, "order-a")) === "",
+        `order=${await attr(fw, "order-a")} count=${await attr(fw, "order-a-count")}`,
+      );
+
+      // ── A catalogue locked mid-drag refuses the drop ──
+      //
+      // Eligibility is read from live props at commit, not from the posture
+      // the row was registered with.
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await press(`#${fw}-mce-a [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
+      await hover(`#${fw}-mce-a [data-model-catalogue-id="gamma"]`);
+      await page.evaluate((framework) => {
+        const fixture = (window as unknown as Record<string, { lockCatalogue(): void }>)[
+          `__${framework}Fixture`
+        ];
+        fixture.lockCatalogue();
+      }, fw);
+      await frames(page);
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} ModelCatalogueEditor refuses a drop into a locked catalogue`,
+        (await attr(fw, "order-a-count")) === "0" && (await attr(fw, "order-a")) === "",
+        `order=${await attr(fw, "order-a")} count=${await attr(fw, "order-a-count")}`,
+      );
+
+      // ── Escape is a terminal: nothing commits, no posture survives ──
+      await press(`#${fw}-mce-a [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
+      await hover(`#${fw}-mce-a [data-model-catalogue-id="beta"]`);
+      await page.keyboard.press("Escape");
+      await frames(page);
+      const latched = await page.locator(`#${fw}-mce-a [data-drop-target="true"]`).count();
+      await page.mouse.up();
+      check(
+        `${name}: ${fw} ModelCatalogueEditor cancel commits nothing and clears posture`,
+        latched === 0 && (await attr(fw, "order-a-count")) === "0",
+        `latched=${latched} count=${await attr(fw, "order-a-count")}`,
+      );
+
+      // ── BlockEditor: the grip is the handle ──
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await press(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(1) .poodle-block-editor__drag-grip`);
+      await hover(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(3)`, 0.9);
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} BlockEditor grip drag emits one complete block order`,
+        (await attr(fw, "blocks")) === "b2,b3,b1" && (await attr(fw, "blocks-count")) === "1",
+        `blocks=${await attr(fw, "blocks")} count=${await attr(fw, "blocks-count")}`,
+      );
+
+      // ── BlockEditor: only the grip is a handle ──
+      //
+      // The press point is the toolbar's own gap — plain, non-interactive
+      // chrome the pointer sensor does not skip on its own. Only the
+      // registration's handle constraint keeps it from starting a drag.
+      await press(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(1) .poodle-block-editor__toolbar`);
+      await hover(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(3)`, 0.9);
+      const draggingFromChrome = await page.locator(`#${fw}-blocks .poodle-dragging`).count();
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} BlockEditor toolbar chrome is not a drag handle`,
+        draggingFromChrome === 0 && (await attr(fw, "blocks-count")) === "1",
+        `dragging=${draggingFromChrome} count=${await attr(fw, "blocks-count")}`,
+      );
+
+      // ── BlockEditor: the content area stays an editing surface ──
+      await press(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(1) textarea`);
+      await hover(`#${fw}-blocks .poodle-block-editor__block:nth-of-type(3)`, 0.9);
+      const draggingFromContent = await page.locator(`#${fw}-blocks .poodle-dragging`).count();
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} BlockEditor content press never starts a drag`,
+        draggingFromContent === 0 && (await attr(fw, "blocks-count")) === "1",
+        `dragging=${draggingFromContent} count=${await attr(fw, "blocks-count")}`,
+      );
+
+      // ── OrderBy: pointer and Alt+Arrow reach one commit path ──
+      await page.locator(`#${fw}-order .poodle-order-by__trigger`).click();
+      await page.locator(".poodle-order-by__item").first().waitFor();
+      await press(".poodle-order-by__item:nth-of-type(1) .poodle-order-by__drag-handle");
+      await hover(".poodle-order-by__item:nth-of-type(3)", 0.9);
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} OrderBy drop emits one complete ordering`,
+        (await attr(fw, "sort")) === "updated,size,title" && (await attr(fw, "sort-count")) === "1",
+        `sort=${await attr(fw, "sort")} count=${await attr(fw, "sort-count")}`,
+      );
+
+      await page.locator(".poodle-order-by__item:nth-of-type(2) .poodle-order-by__drag-handle").focus();
+      await page.keyboard.press("Alt+ArrowUp");
+      await frames(page);
+      check(
+        `${name}: ${fw} OrderBy Alt+Arrow commits through the same session`,
+        (await attr(fw, "sort")) === "size,updated,title" && (await attr(fw, "sort-count")) === "2",
+        `sort=${await attr(fw, "sort")} count=${await attr(fw, "sort-count")}`,
+      );
+    }
+  } finally {
+    await context.close().catch(() => {});
+  }
+}
+
 for (const [name, type] of engines) {
   console.log(`\n=== ${name} ===`);
   const browser = await type.launch();
@@ -846,6 +1080,7 @@ for (const [name, type] of engines) {
     await run(page, name, cdp);
     await runCrossWindow(name, browser);
     await runExternalFiles(name, browser);
+    await runComponents(name, browser);
   } catch (error) {
     failures += 1;
     console.log(`  FAIL  ${name}: ${error instanceof Error ? error.message : String(error)}`);

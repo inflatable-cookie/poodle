@@ -12,23 +12,33 @@
 //! `on_remove` carries the row's index (the contract's own `onRemove` is
 //! index-based). No `on_add`: the add button renders disabled, because the
 //! draft field is typed by the host and this component cannot know it has
-//! content. No `on_reorder` / `on_change`: drag payloads and keystrokes are
-//! host-owned.
+//! content.
+//!
+//! `on_reorder` carries the **complete next item order**, which is what the
+//! web `onReorder` / `onChange` carry too. Reordering runs on the shared
+//! renderer-neutral substrate (`crate::drag_drop`): the handle is the drag
+//! source, every enabled row a drop target, and both ids are scoped to
+//! [`EditableListHandlers::instance_id`] so two mounted lists in one
+//! controller never mint one id or resolve each other's rows.
 
 use std::sync::Arc;
 
 use poodle_node::{
     ColorValue, CrossAxisAlignment, LayoutDirection, LayoutSizing, MainAxisAlignment, Node,
-    NodeRole,
+    NodeDropCommit, NodeRole, StylePatch,
 };
 use poodle_specs::{
-    ButtonSpec, ButtonVariant, EditableListSpec, IconButtonSpec, SemanticControlSizeRole,
-    TextInputSpec,
+    ButtonSpec, ButtonVariant, EditableListItem, EditableListSpec, IconButtonSpec,
+    SemanticControlSizeRole, TextInputSpec,
 };
 
 use crate::button::button;
 use crate::color::{mix_srgb, TRANSPARENT};
 use crate::context::RenderContext;
+use crate::drag_drop::{
+    apply_reorder, attach_source, attach_target, edge_from_position, reorder_destination,
+    reorder_source, reorder_target,
+};
 use crate::icon_button::icon_button;
 use crate::presentation::{
     editable_list_font_rem, editable_list_handle_size_rem, editable_list_item_gap_rem,
@@ -36,13 +46,67 @@ use crate::presentation::{
 };
 use crate::text_input::text_input;
 
+/// The contract's reorder accessible name: label, position, and the grab
+/// instruction the web row carries too.
+fn reorder_label(item: &EditableListItem, index: usize, total: usize) -> String {
+    format!(
+        "Reorder {}. Position {} of {}.",
+        item.label.as_deref().unwrap_or(&item.id),
+        index + 1,
+        total
+    )
+}
+
 /// Host callbacks. All optional; a missing handler leaves that control inert.
-#[derive(Default)]
 pub struct EditableListHandlers {
+    /// Lifetime-stable scope for this list's drag registrations. It is not a
+    /// web public prop, and the renderer never invents one from render order.
+    pub instance_id: String,
     /// Fires with the removed row's index.
     pub on_remove: Option<Arc<dyn Fn(usize) + Send + Sync>>,
     pub on_submit: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// Fires with the complete next item order after an accepted reorder.
+    pub on_reorder: Option<Arc<dyn Fn(&[EditableListItem]) + Send + Sync>>,
+}
+
+impl EditableListHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "EditableListHandlers requires a non-empty lifetime-stable instance_id"
+        );
+        Self {
+            instance_id,
+            on_remove: None,
+            on_submit: None,
+            on_cancel: None,
+            on_reorder: None,
+        }
+    }
+}
+
+/// One accepted reorder, one complete next order.
+///
+/// The rows the closure holds are the ones this build drew, so a row the host
+/// has since removed cannot be moved: the rebuild replaced this registration
+/// along with the rest of the tree.
+fn reorder_emitter(
+    items: Vec<EditableListItem>,
+    handlers: Arc<EditableListHandlers>,
+) -> Arc<dyn Fn(usize, usize) + Send + Sync> {
+    Arc::new(move |from: usize, to: usize| {
+        if from == to {
+            return;
+        }
+        let Some(next) = apply_reorder(&items, from, to) else {
+            return;
+        };
+        if let Some(handler) = &handlers.on_reorder {
+            handler(&next);
+        }
+    })
 }
 
 pub fn editable_list(
@@ -50,6 +114,10 @@ pub fn editable_list(
     ctx: &RenderContext<'_>,
     handlers: EditableListHandlers,
 ) -> Node {
+    let handlers = Arc::new(handlers);
+    let drag_scope = format!("editable-list:{}", handlers.instance_id);
+    let row_values: Vec<String> = spec.items.iter().map(|item| item.id.clone()).collect();
+    let reorder = reorder_emitter(spec.items.clone(), Arc::clone(&handlers));
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
     let is_unavailable = spec.is_disabled || spec.is_submitting;
@@ -226,9 +294,15 @@ pub fn editable_list(
             }
 
             // Drag handle: 6-dot grip (`grip-vertical`), sized to the contract
-            // handle-size square. Decorative; shown only when reorderable.
+            // handle-size square. Shown only when reorderable.
             // `embedded_handle` means the host draws its own grip inside the
-            // row, so the component must not add a second one.
+            // row, so the component must not add a second one — and the row
+            // itself becomes the drag source, exactly as the web pair does.
+            let item = spec.items.get(i);
+            // A count-only spec draws rows with no identity, and a subject
+            // with no id cannot name what moved. Such a list stays readable
+            // and inert rather than advertising a reorder it cannot report.
+            let can_reorder = spec.is_reorderable && !is_unavailable && item.is_some();
             if spec.is_reorderable && !spec.has_embedded_handle {
                 let mut handle = Node::container();
                 {
@@ -242,7 +316,37 @@ pub fn editable_list(
                 }
                 let mut grip = Node::icon("grip-vertical", handle_size);
                 grip.style.descriptor.text_color = Some(handle_color);
-                row = row.child(handle.child(grip));
+                let mut handle = handle.child(grip);
+                if let Some(item) = item {
+                    // The handle is the pointer source *and* the keyboard
+                    // pickup, so it has to be a real focus destination: an
+                    // unfocusable grip is the dead affordance this card
+                    // removes.
+                    handle.interaction.focusable = can_reorder;
+                    // The backend only tracks a focusable node that declares a
+                    // focus ring, and a keyboard pickup needs a real focus
+                    // destination, so the two arrive together.
+                    handle.style.focus = Some(StylePatch {
+                        border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
+                        ..StylePatch::default()
+                    });
+                    handle.a11y.role = Some(NodeRole::Button);
+                    handle.a11y.label = Some(reorder_label(item, i, row_count));
+                    handle.runtime_id = Some(format!(
+                        "editable-list:{}:{}:handle",
+                        handlers.instance_id, item.id
+                    ));
+                    let mut source = reorder_source(
+                        &drag_scope,
+                        &item.id,
+                        item.label.as_deref().unwrap_or(&item.id),
+                    );
+                    source.keyboard_order = Some(i as i32);
+                    source.instructions =
+                        Some("Press space to grab, then arrow keys to move.".to_string());
+                    attach_source(&mut handle, can_reorder, source);
+                }
+                row = row.child(handle);
             }
 
             // Content area: flex-grow, ellipsis overflow.
@@ -291,6 +395,55 @@ pub fn editable_list(
                     s.flex_shrink_zero = true;
                 }
                 row = row.child(slot.child(remove_btn));
+            }
+
+            if let Some(item) = item {
+                // The row is a drop target, so it needs a backend identity of
+                // its own; `runtime_id` is what the backend keys elements by.
+                row.runtime_id = Some(format!(
+                    "editable-list:{}:{}:row",
+                    handlers.instance_id, item.id
+                ));
+                if spec.is_reorderable && spec.has_embedded_handle {
+                    let mut source = reorder_source(
+                        &drag_scope,
+                        &item.id,
+                        item.label.as_deref().unwrap_or(&item.id),
+                    );
+                    source.keyboard_order = Some(i as i32);
+                    row.interaction.focusable = can_reorder;
+                    row.a11y.label = Some(reorder_label(item, i, row_count));
+                    attach_source(&mut row, can_reorder, source);
+                }
+
+                let mut target = reorder_target(
+                    &drag_scope,
+                    &item.id,
+                    item.label.as_deref().unwrap_or(&item.id),
+                );
+                // Keyboard traversal follows list order, not paint order, so
+                // Down from a grabbed row reaches the row below it.
+                target.keyboard_order = Some(i as i32);
+                let reorder = reorder.clone();
+                let values = row_values.clone();
+                let index = i;
+                let count = row_count;
+                target.on_drop = Some(Arc::new(move |event| {
+                    let Some(from) = values.iter().position(|value| *value == event.subject.id)
+                    else {
+                        return NodeDropCommit::Rejected {
+                            reason: Some("That row is no longer in this list".to_string()),
+                        };
+                    };
+                    let Some(edge) = edge_from_position(&event.intent.position) else {
+                        return NodeDropCommit::Rejected {
+                            reason: Some("Unknown drop position".to_string()),
+                        };
+                    };
+                    reorder(from, reorder_destination(from, index, edge, count));
+                    NodeDropCommit::Committed
+                }));
+                attach_target(&mut row, can_reorder, target);
             }
 
             item_list = item_list.child(row);

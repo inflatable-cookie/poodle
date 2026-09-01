@@ -21,13 +21,14 @@ Updated: 2026-09-01
     `029` complete and merged (TimeInput native parity, ledger 48/126); `030`
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
-    mounted parity, ledger 52/122); `033` is reserved after `026` for the
+    mounted parity, ledger 56/118 after `028`); `033` is reserved after `026` for the
     HistoryCenter rejection surface and packed v3 HistoryEntry proof, with a
     public API decision required before dispatch
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: dispatch `g16.028` as the final ordered drag card. In parallel,
+  - Next move: the drag-and-drop programme is closed by `g16.028`; choose the
+    next checkpoint from the component continuation register. In parallel,
     resolve `g16.033`'s
     structured-code-versus-host-message gate before its dispatch. Component
     continuation remains paused at the separate EditableLabel decision gate.
