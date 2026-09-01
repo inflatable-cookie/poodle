@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": ["ambient.d.ts", "tree-reorder-root-negative.ts"]
+}

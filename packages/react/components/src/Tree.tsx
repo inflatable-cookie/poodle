@@ -20,10 +20,16 @@ import {
   treeSiblingReorderTarget,
   treeToggleCheck,
   treeVirtualWindow,
+  treeLatchReorderSubject,
+  treeAuthorityDropEligibility,
+  isTreeDropPosition,
   type DragDropCommitResult,
   type DragSession,
+  type DragSubject,
   type DragTerminalOutcome,
+  type DropEligibility,
   type DropIntent,
+  type TreeReorderSubject,
 } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/tree.css";
@@ -35,50 +41,11 @@ import { Spinner } from "./Spinner";
 import { TreeItem } from "./tree-item/TreeItem";
 import { TreeKeyboardTargets } from "./tree-item/TreeKeyboardTargets";
 import type {
-  ControlDensity,
-  ControlSize,
-  SemanticControlSizeRole,
-  TreeDropPosition,
   TreeNode,
+  TreeProps,
 } from "./types";
 
-export interface TreeProps {
-  nodes?: TreeNode[];
-  selectedValues?: string[];
-  expandedValues?: string[] | null;
-  defaultExpandedValues?: string[];
-  checkedValues?: string[];
-  loadingValues?: string[];
-  editingValue?: string | null;
-  ariaLabel?: string | null;
-  showGuides?: boolean;
-  /**
-   * Reclaim the twisty gutter when nothing in the tree can expand.
-   *
-   * Leaves render a twisty-sized spacer so their labels align with branch
-   * labels; in a genuinely flat tree that aligns them with nothing. Opt in and
-   * it collapses, returning the moment any node becomes a branch. tree.md §7.
-   */
-  collapseTwistyWhenFlat?: boolean;
-  showIcons?: boolean;
-  showCheckboxes?: boolean;
-  reorderable?: boolean;
-  virtualized?: boolean;
-  virtualHeight?: number;
-  size?: ControlSize | null;
-  sizeRole?: SemanticControlSizeRole;
-  density?: ControlDensity | null;
-  onSelectionChange?: (values: string[]) => void;
-  onExpandedChange?: (values: string[]) => void;
-  onCheckedChange?: (values: string[]) => void;
-  onLoadChildren?: (value: string) => void;
-  onRenameCommit?: (value: string, text: string) => void;
-  onRenameCancel?: () => void;
-  onEditingChange?: (value: string | null) => void;
-  onContextMenu?: (value: string, x: number, y: number) => void;
-  onReorder?: (from: string, to: string, position: TreeDropPosition) => void;
-  onActivate?: (value: string) => void;
-}
+export type { TreeProps };
 
 type Row = { node: TreeNode; depth: number; parent: string | null };
 
@@ -119,6 +86,7 @@ function TreeView({
   onRenameCancel,
   onEditingChange,
   onContextMenu,
+  reorderAuthority = null,
   onReorder,
   onActivate,
 }: TreeProps) {
@@ -141,6 +109,19 @@ function TreeView({
   const [renameDraft, setRenameDraft] = useState("");
   const [activeSourceId, setActiveSourceId] = useState<string | null>(null);
   const activeSourceIdRef = useRef<string | null>(null);
+  type ReorderSession =
+    | { mode: "authority"; subject: TreeReorderSubject }
+    | { mode: "authority-invalid"; sourceValue: string }
+    | { mode: "convenience"; sourceValue: string };
+  const reorderSessionRef = useRef<ReorderSession | null>(null);
+  const nodesRef = useRef(nodes);
+  nodesRef.current = nodes;
+  const selectedValuesRef = useRef(selectedValues);
+  selectedValuesRef.current = selectedValues;
+  const authorityRef = useRef(reorderAuthority);
+  authorityRef.current = reorderAuthority;
+  const onReorderRef = useRef(onReorder);
+  onReorderRef.current = onReorder;
   const [scrollTop, setScrollTop] = useState(0);
   const renameInputRef = useRef<HTMLInputElement | null>(null);
   const anchorValue = useRef<string | null>(null);
@@ -188,6 +169,12 @@ function TreeView({
       renameInputRef.current.select();
     }
   }, [editingValue, nodes]);
+
+  useEffect(() => {
+    return () => {
+      reorderSessionRef.current = null;
+    };
+  }, []);
 
   function setEditing(next: string | null): void {
     if (editingValueProp === undefined) setInternalEditing(next);
@@ -265,31 +252,72 @@ function TreeView({
     });
   }
 
+  function latchReorderSession(sourceValue: string): void {
+    const authority = authorityRef.current;
+    if (authority) {
+      const projected = authority.projectMovingValues(sourceValue, selectedValuesRef.current);
+      const subject = treeLatchReorderSubject(nodesRef.current, sourceValue, projected);
+      reorderSessionRef.current = subject
+        ? { mode: "authority", subject }
+        : { mode: "authority-invalid", sourceValue };
+      return;
+    }
+    reorderSessionRef.current = { mode: "convenience", sourceValue };
+  }
+
   function handleDragStart(session: DragSession): void {
     activeSourceIdRef.current = session.subject.id;
     setActiveSourceId(session.subject.id);
+    latchReorderSession(session.subject.id);
   }
 
   function handleDragEnd(_outcome: DragTerminalOutcome): void {
     activeSourceIdRef.current = null;
     setActiveSourceId(null);
+    reorderSessionRef.current = null;
   }
 
-  function isTreeDropPosition(position: DropIntent["position"]): position is TreeDropPosition {
-    return position === "before" || position === "after" || position === "inside";
+  function resolveTreeCanDrop(intent: DropIntent, subject: DragSubject): DropEligibility {
+    const live = reorderSessionRef.current;
+    const authority = authorityRef.current;
+    if (live?.mode === "authority" || live?.mode === "authority-invalid") {
+      if (live.mode === "authority-invalid" || !authority) {
+        return { accepted: false, reason: "unavailable" };
+      }
+      return treeAuthorityDropEligibility(nodesRef.current, live.subject, authority, intent);
+    }
+    return treeDropEligibility(nodesRef.current, subject.id, intent);
   }
 
-  function handleDrop(intent: DropIntent): DragDropCommitResult {
-    const from = activeSourceIdRef.current;
+  function handleDrop(intent: DropIntent): DragDropCommitResult | Promise<DragDropCommitResult> {
+    const live = reorderSessionRef.current;
+    const authority = authorityRef.current;
+    if (live?.mode === "authority" || live?.mode === "authority-invalid") {
+      if (live.mode === "authority-invalid" || !authority) {
+        return { status: "rejected", reason: "unavailable" };
+      }
+      const eligibility = treeAuthorityDropEligibility(nodesRef.current, live.subject, authority, intent);
+      if (eligibility.accepted === false) {
+        return { status: "rejected", reason: eligibility.reason };
+      }
+      return authority.onDrop({
+        subject: Object.freeze({
+          sourceValue: live.subject.sourceValue,
+          movingValues: Object.freeze([...live.subject.movingValues]),
+        }),
+        intent: eligibility.intent,
+      });
+    }
+    const from = activeSourceIdRef.current ?? (live?.mode === "convenience" ? live.sourceValue : null);
     const dest = dropCommitDestination(intent);
     if (!from || !isTreeDropPosition(dest.position)) {
       return { status: "rejected", reason: "unavailable" };
     }
-    const eligibility = treeDropEligibility(nodes, from, intent);
-    if (!eligibility.accepted) {
+    const eligibility = treeDropEligibility(nodesRef.current, from, intent);
+    if (eligibility.accepted === false) {
       return { status: "rejected", reason: eligibility.reason };
     }
-    onReorder?.(from, dest.targetId, dest.position);
+    onReorderRef.current?.(from, dest.targetId, dest.position);
     return { status: "committed" };
   }
 
@@ -458,6 +486,7 @@ function TreeView({
         showGroup={Boolean(group)}
         row={rowMarkup(node, depth, branch, open)}
         group={group}
+        canDrop={resolveTreeCanDrop}
         onDrop={handleDrop}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -514,9 +543,9 @@ function TreeView({
     <>
     <TreeKeyboardTargets
       rows={visibleRows}
-      nodes={nodes}
       reorderable={reorderable}
       editingValue={editingValue}
+      canDrop={resolveTreeCanDrop}
       onDrop={handleDrop}
     />
     <div

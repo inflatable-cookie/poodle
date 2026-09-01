@@ -175,7 +175,7 @@ export { SegmentedControl, type SegmentedControlProps } from "./SegmentedControl
 export { Stepper, type StepperProps } from "./Stepper";
 export { Slider, type SliderProps } from "./Slider";
 export { ToggleGroup, type ToggleGroupProps } from "./ToggleGroup";
-export { Tree, type TreeProps } from "./Tree";
+export { Tree } from "./Tree";
 export { TriStateSwitch, type TriStateSwitchProps } from "./TriStateSwitch";
 export { AgentChatInput, type AgentChatInputProps } from "./AgentChatInput";
 export { Meter, type MeterProps } from "./Meter";

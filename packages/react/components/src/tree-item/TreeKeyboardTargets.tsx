@@ -1,4 +1,10 @@
-import { isTreeBranch, treeDropEligibility, type DragDropCommitResult, type DropIntent } from "@inflatable-cookie/poodle-core";
+import {
+  isTreeBranch,
+  type DragDropCommitResult,
+  type DragSubject,
+  type DropEligibility,
+  type DropIntent,
+} from "@inflatable-cookie/poodle-core";
 
 import { useKeyboardDropTarget } from "../drag-drop";
 import type { TreeNode } from "../types";
@@ -12,15 +18,15 @@ interface Row {
 function TreeKeyboardTarget({
   row,
   index,
-  nodes,
   disabled,
+  canDrop,
   onDrop,
 }: {
   row: Row;
   index: number;
-  nodes: TreeNode[];
   disabled: boolean;
-  onDrop: (intent: DropIntent) => DragDropCommitResult;
+  canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
+  onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
 }) {
   useKeyboardDropTarget({
     targetId: row.node.value,
@@ -33,7 +39,7 @@ function TreeKeyboardTarget({
       if (!isTreeBranch(row.node)) return "after";
       return input.direction === "last" ? "after" : "inside";
     },
-    canDrop: (intent, subject) => treeDropEligibility(nodes, subject.id, intent),
+    canDrop,
     onDrop,
   });
   return null;
@@ -41,16 +47,16 @@ function TreeKeyboardTarget({
 
 export function TreeKeyboardTargets({
   rows,
-  nodes,
   reorderable,
   editingValue,
+  canDrop,
   onDrop,
 }: {
   rows: Row[];
-  nodes: TreeNode[];
   reorderable: boolean;
   editingValue: string | null;
-  onDrop: (intent: DropIntent) => DragDropCommitResult;
+  canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
+  onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
 }) {
   if (!reorderable) return null;
   return (
@@ -60,8 +66,8 @@ export function TreeKeyboardTargets({
           key={row.node.value}
           row={row}
           index={index}
-          nodes={nodes}
           disabled={Boolean(row.node.isDisabled) || editingValue === row.node.value}
+          canDrop={canDrop}
           onDrop={onDrop}
         />
       ))}

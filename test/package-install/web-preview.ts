@@ -395,6 +395,238 @@ async function provePackedHistoryEntryTypes(
   };
 }
 
+const PACKED_TREE_REORDER_DIAGNOSTIC = "Types of property 'onReorder' are incompatible.";
+const REACT_PUBLIC_SPECIFIER = "@inflatable-cookie/poodle-react";
+const REACT_ROOT_RESOLVE_CONFIG = "tsconfig.tree-react-root-resolve.json";
+const REACT_ROOT_RESOLVE_FILE = "tree-reorder-react-root-resolve.ts";
+const REACT_ROOT_TYPE_EXPORTS = [
+  "TreeProps",
+  "TreeReorderSubject",
+  "TreeReorderCandidate",
+  "TreeReorderAuthority",
+  "TreeReorderProps",
+] as const;
+
+async function proveInstalledReactPublicRoot(
+  consumerRoot: string,
+  compiler: string,
+): Promise<Record<string, unknown>> {
+  const packageRoot = realpathSync(
+    join(consumerRoot, "node_modules", "@inflatable-cookie", "poodle-react"),
+  );
+  const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8")) as {
+    exports?: { "."?: { types?: string; default?: string } };
+  };
+  const typesEntry = manifest.exports?.["."]?.types;
+  if (typesEntry !== "./src/index.ts") {
+    throw new Error(
+      `installed React package types export is ${JSON.stringify(typesEntry)}, not ./src/index.ts`,
+    );
+  }
+  const indexPath = realpathSync(join(packageRoot, "src", "index.ts"));
+  const typesPath = realpathSync(join(packageRoot, "src", "types.ts"));
+  const process = Bun.spawn(
+    [
+      compiler,
+      "--project",
+      join(PACKED_TYPE_PROOF_DIR, REACT_ROOT_RESOLVE_CONFIG),
+      "--traceResolution",
+      "--pretty",
+      "false",
+      "--noEmit",
+    ],
+    { cwd: consumerRoot, stdout: "pipe", stderr: "pipe" },
+  );
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(process.stdout).text(),
+    new Response(process.stderr).text(),
+    process.exited,
+  ]);
+  const trace = `${stdout}\n${stderr}`;
+  const fromProbe = `Resolving module '${REACT_PUBLIC_SPECIFIER}' from '${join(
+    consumerRoot,
+    PACKED_TYPE_PROOF_DIR,
+    REACT_ROOT_RESOLVE_FILE,
+  )}'`;
+  if (!trace.includes(fromProbe)) {
+    throw new Error(
+      `TypeScript did not resolve ${REACT_PUBLIC_SPECIFIER} from ${REACT_ROOT_RESOLVE_FILE} with no paths map`,
+    );
+  }
+  const resolvedMarker = `Module name '${REACT_PUBLIC_SPECIFIER}' was successfully resolved to '`;
+  const resolvedStart = trace.indexOf(resolvedMarker);
+  if (resolvedStart < 0) {
+    throw new Error(
+      `TypeScript did not report a successful resolution for ${REACT_PUBLIC_SPECIFIER}`,
+    );
+  }
+  const resolvedFrom = resolvedStart + resolvedMarker.length;
+  const resolvedFile = trace.slice(resolvedFrom, trace.indexOf("'", resolvedFrom));
+  if (realpathSync(resolvedFile) !== indexPath) {
+    throw new Error(
+      `public specifier resolved to ${resolvedFile}, not the installed types entry ${indexPath}`,
+    );
+  }
+  if (realpathSync(resolvedFile) === typesPath) {
+    throw new Error(
+      "public specifier resolved through a types.ts paths bypass, not package exports",
+    );
+  }
+  const indexSource = readFileSync(indexPath, "utf8");
+  if (!indexSource.includes('export { Tree } from "./Tree"')) {
+    throw new Error('installed React root omitted `export { Tree } from "./Tree"`');
+  }
+  if (!indexSource.includes('export * from "./types"')) {
+    throw new Error('installed React root omitted `export * from "./types"`');
+  }
+  const typesSource = readFileSync(typesPath, "utf8");
+  for (const name of REACT_ROOT_TYPE_EXPORTS) {
+    if (!typesSource.includes(name)) {
+      throw new Error(`installed React types module omitted ${name}`);
+    }
+  }
+  if (!typesSource.includes("export type TreeProps")) {
+    throw new Error("installed React types module omitted exported TreeProps");
+  }
+  return {
+    specifier: REACT_PUBLIC_SPECIFIER,
+    packageTypesExport: typesEntry,
+    compilerResolvedFile: resolvedFile,
+    resolvedVia: "package.json exports types + tsc --traceResolution (no paths)",
+    resolveConfig: REACT_ROOT_RESOLVE_CONFIG,
+    compilerPathsMapped: false,
+    valueBarrelCompileExitCode: exitCode,
+    reexportsTree: true,
+    reexportsTypesModule: true,
+    typesModuleExports: [...REACT_ROOT_TYPE_EXPORTS],
+    valueBarrelCompiled: false,
+  };
+}
+
+async function provePackedTreeReorderTypes(
+  consumerRoot: string,
+): Promise<Record<string, unknown>> {
+  const compiler = join(consumerRoot, "node_modules", ".bin", "tsc");
+  if (!existsSync(compiler)) {
+    throw new Error(
+      "the packed consumer did not install a TypeScript compiler; the Tree reorder type proof cannot run",
+    );
+  }
+
+  const installedReactTypes = join(
+    consumerRoot,
+    "node_modules",
+    "@inflatable-cookie",
+    "poodle-react",
+    "src",
+    "types.ts",
+  );
+  if (!existsSync(installedReactTypes)) {
+    throw new Error(
+      "the packed React tarball omitted src/types.ts; the Tree reorder React type proof cannot run",
+    );
+  }
+
+  const publicPositives = [
+    { file: "tree-reorder-positive.ts", config: "tsconfig.tree-positive.json" },
+  ] as const;
+  const mappedReactPositives = [
+    { file: "tree-reorder-react-positive.ts", config: "tsconfig.tree-react-positive.json" },
+  ] as const;
+  for (const item of [...publicPositives, ...mappedReactPositives]) {
+    const compile = await runTypeCompile(consumerRoot, compiler, item.config);
+    if (compile.exitCode !== 0 || compile.output.length > 0) {
+      throw new Error(
+        `packed Tree reorder positive proof failed on the installed tarball (${item.file}):\n${compile.output}`,
+      );
+    }
+  }
+
+  const publicNegatives = [
+    {
+      importPath: "@inflatable-cookie/poodle-svelte",
+      file: "tree-reorder-root-negative.ts",
+      config: "tsconfig.tree-root-negative.json",
+    },
+    {
+      importPath: "@inflatable-cookie/poodle-svelte/types",
+      file: "tree-reorder-types-negative.ts",
+      config: "tsconfig.tree-types-negative.json",
+    },
+    {
+      importPath: "@inflatable-cookie/poodle-core",
+      file: "tree-reorder-core-negative.ts",
+      config: "tsconfig.tree-core-negative.json",
+    },
+  ] as const;
+  const mappedReactNegatives = [
+    {
+      importPath: REACT_PUBLIC_SPECIFIER,
+      file: "tree-reorder-react-negative.tsx",
+      config: "tsconfig.tree-react-negative.json",
+    },
+  ] as const;
+
+  const negativeEvidence = [];
+  for (const negative of [...publicNegatives, ...mappedReactNegatives]) {
+    assertUnsuppressed(consumerRoot, negative.file);
+    const compile = await runTypeCompile(consumerRoot, compiler, negative.config);
+    if (compile.exitCode === 0) {
+      throw new Error(
+        `packed ${negative.importPath} still accepts reorderAuthority together with onReorder`,
+      );
+    }
+    if (!compile.output.includes(PACKED_TREE_REORDER_DIAGNOSTIC)) {
+      throw new Error(
+        `packed ${negative.importPath} rejected the exclusive union with the wrong diagnostic:\n${compile.output}`,
+      );
+    }
+    if (!compile.output.includes(negative.file)) {
+      throw new Error(
+        `packed ${negative.importPath} reported its diagnostic against another file:\n${compile.output}`,
+      );
+    }
+    negativeEvidence.push({
+      importPath: negative.importPath,
+      file: negative.file,
+      exitCode: compile.exitCode,
+      diagnostic: compile.output,
+      suppressed: false,
+      compilerPathsMapped: negative.file.includes("react"),
+    });
+  }
+
+  return {
+    compiler: realpathSync(compiler),
+    importPaths: [...publicNegatives, ...mappedReactNegatives].map((negative) => negative.importPath),
+    publicSpecifierCompile: {
+      files: publicPositives.map((item) => item.file),
+      sourceImports: false,
+      workspaceAliases: false,
+      compilerPathsMapped: false,
+    },
+    reactMappedAssignability: {
+      files: [
+        ...mappedReactPositives.map((item) => item.file),
+        ...mappedReactNegatives.map((item) => item.file),
+      ],
+      pathsMappedTo: "src/types.ts",
+      reason: "src/index.ts value barrel is not tsc-clean",
+      compilerPathsMapped: true,
+      valueBarrelCompiled: false,
+      sourceImports: false,
+      workspaceAliases: false,
+    },
+    reactPublicRoot: await proveInstalledReactPublicRoot(consumerRoot, compiler),
+    expectedFailures: negativeEvidence,
+    sourceImports: false,
+    workspaceAliases: false,
+    declarationTextSubstitute: false,
+    compilerPathsMapped: true,
+    valueBarrelCompiled: false,
+  };
+}
+
 function sortedUnique(values: Iterable<string>): string[] {
   return [...new Set(values)].sort();
 }
@@ -504,6 +736,8 @@ const consumerManifest = {
     "@sveltejs/vite-plugin-svelte": "6.2.1",
     "@testing-library/react": "16.3.0",
     "@testing-library/svelte": "5.4.2",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
     "happy-dom": "20.11.1",
     typescript: "7.0.2",
     vite: "7.3.1",
@@ -565,6 +799,7 @@ for (const packageEntry of packages) {
 await run(["bunx", "vitest", "run"], consumerRoot);
 
 const packedHistoryEntryProof = await provePackedHistoryEntryTypes(consumerRoot);
+const packedTreeReorderProof = await provePackedTreeReorderTypes(consumerRoot);
 
 const artifacts = await Promise.all(
   packedPackages.map(async (packedPackage) => {
@@ -620,6 +855,7 @@ const evidence = {
   },
   packedTarballs: Object.fromEntries(packedBoundaries),
   packedHistoryEntryProof,
+  packedTreeReorderProof,
   mountedProof: {
     svelte: {
       components: [

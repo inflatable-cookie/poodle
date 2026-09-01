@@ -1,6 +1,6 @@
 # g16.036 — Tree External Drop Authority
 
-Status: ready
+Status: in-review
 Opened: 2026-09-01
 Depends on: merged `g16.028`, `g16.024`, and PR #125 at
 `a980cb7748fdf9751dd4ca64b02903111a44d59f`; independent of `g16.034`
@@ -177,3 +177,30 @@ or sibling-repository commands.
 After accepted merge, the orchestrator sends Figmatic the exact Poodle merge
 head, public type signatures, package import paths, and validation receipt.
 Figmatic then owns `g01.016 / 016-22` and removes its local pointer controller.
+
+## Implementation
+
+Paired Svelte/React Tree now takes `reorderAuthority` over the existing
+controller. Shared core owns `TreeReorderSubject`, `TreeReorderCandidate`,
+`TreeReorderAuthority`, `TreeReorderProps`, validity helpers, and
+`treeAcceptedDropDepth`. Both packages re-export the types. `reorderable`
+stays the enable switch. Authority mode never calls `onReorder`.
+
+Native delta is unchanged and explicit: no TreeSpec field, no pending Node
+commit, no rewritten full intent on native events, no multi-row `DragSubject`.
+`reorderAuthority` remains in `WEB_ONLY_PROPS`. Diff contains no Rust/GPUI
+source.
+
+PR #127 changes-requested repair: `treeAuthorityDropEligibility`
+snapshots hover fields, hands the host a detached intent, and builds
+accepted state from the snapshot so in-place mutation of target, position,
+or operation is refused. The latched `TreeReorderSubject` is frozen; `canDrop`
+receives a detached subject so hostile replacement of `movingValues` /
+`sourceValue` cannot skip dest validation or corrupt `onDrop`.
+`treeAcceptedDropDepth` walks the full tree so a collapsed rewritten dest
+still paints dest depth. Paired tests change selection after pickup and
+before release. A pending Promise is proven on one mounted controller
+(exactly one `onDrop`, exact rejected/failed announcement, source-loss then
+a later dropping session). Packed tarball types cover core, both Svelte
+paths, mapped React `TreeProps` assignability, and an honest installed
+public-root resolution/export proof (value barrel is not compiled).

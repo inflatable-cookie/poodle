@@ -1,12 +1,14 @@
 import { useLayoutEffect, useRef, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import {
-  treeDropEligibility,
+  treeAcceptedDropDepth,
   treeResolveOutlineDrop,
   readTreeDropMetrics,
   type DragDropCommitResult,
+  type DragSubject,
   type TreeOutlineRow,
   type DragSession,
   type DragTerminalOutcome,
+  type DropEligibility,
   type DropIntent,
 } from "@inflatable-cookie/poodle-core";
 
@@ -29,7 +31,8 @@ export interface TreeItemProps {
   showGroup: boolean;
   row: ReactNode;
   group?: ReactNode;
-  onDrop: (intent: DropIntent) => DragDropCommitResult;
+  canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
+  onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
   onDragStart: (session: DragSession) => void;
   onDragEnd: (outcome: DragTerminalOutcome) => void;
   onClick: (event: MouseEvent) => void;
@@ -53,6 +56,7 @@ export function TreeItem({
   showGroup,
   row,
   group,
+  canDrop,
   onDrop,
   onDragStart,
   onDragEnd,
@@ -64,8 +68,8 @@ export function TreeItem({
   const canDrag = reorderable && !node.isDisabled && !editing;
   const rowRef = useRef<HTMLDivElement | null>(null);
   const itemRef = useRef<HTMLDivElement | null>(null);
-  const outlineRowsRef = useRef(outlineRows);
-  outlineRowsRef.current = outlineRows;
+  const nodesRef = useRef(nodes);
+  nodesRef.current = nodes;
   const dragDrop = useOptionalDragDrop();
   const { getSourceProps } = useDragSource({
     sourceId: node.value,
@@ -102,7 +106,7 @@ export function TreeItem({
         destination: { targetId: placement.to, position: placement.position },
       };
     },
-    canDrop: (intent, subject) => treeDropEligibility(nodes, subject.id, intent),
+    canDrop,
     onDrop,
   });
 
@@ -111,22 +115,13 @@ export function TreeItem({
     if (!controller) return;
     const apply = (): void => {
       const item = itemRef.current;
-      const row = rowRef.current;
       if (!item) return;
       const snap = controller.getSnapshot();
-      if (snap.targetId !== node.value || snap.targetPosture !== "accepted" || !snap.pointer || !row) {
+      if (snap.targetId !== node.value || snap.targetPosture !== "accepted" || !snap.session?.intent) {
         item.style.removeProperty("--poodle-tree-drop-depth");
         return;
       }
-      const depth = treeResolveOutlineDrop({
-        rows: outlineRowsRef.current,
-        from: snap.session?.subject.id ?? "",
-        to: node.value,
-        x: snap.pointer.x,
-        y: snap.pointer.y,
-        rect: row.getBoundingClientRect(),
-        ...readTreeDropMetrics(row),
-      })?.depth;
+      const depth = treeAcceptedDropDepth(nodesRef.current, snap.session.intent);
       if (depth == null) item.style.removeProperty("--poodle-tree-drop-depth");
       else item.style.setProperty("--poodle-tree-drop-depth", String(depth));
     };

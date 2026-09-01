@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import type { ModelCatalogueItem } from "@inflatable-cookie/poodle-core";
+import { useEffect, useRef, useState } from "react";
+import type { ModelCatalogueItem, TreeReorderAuthority } from "@inflatable-cookie/poodle-core";
 
 import { BlockEditor } from "../../packages/react/components/src/BlockEditor";
 import { DockRegion } from "../../packages/react/components/src/DockRegion";
@@ -7,6 +7,7 @@ import { EditableList } from "../../packages/react/components/src/EditableList";
 import { DragDropProvider } from "../../packages/react/components/src/drag-drop";
 import { ModelCatalogueEditor } from "../../packages/react/components/src/ModelCatalogueEditor";
 import { OrderBy } from "../../packages/react/components/src/OrderBy";
+import { Tree } from "../../packages/react/components/src/Tree";
 import type { EditorBlock, OrderByValue } from "../../packages/react/components/src/types";
 
 function model(id: string, label: string): ModelCatalogueItem {
@@ -62,6 +63,35 @@ export function ComponentsHarness() {
   ]);
   const [rowCount, setRowCount] = useState(0);
 
+  const treeNodes = [
+    { value: "a.ts", label: "a.ts" },
+    { value: "b.ts", label: "b.ts" },
+    { value: "c.ts", label: "c.ts" },
+  ];
+  const [treeSelected, setTreeSelected] = useState<string[]>(["a.ts"]);
+  const [treeDrops, setTreeDrops] = useState(0);
+  const [treeMoving, setTreeMoving] = useState("");
+  const [treeDest, setTreeDest] = useState("");
+  const treeRefuseRef = useRef(false);
+  const treeAuthority: TreeReorderAuthority = {
+    projectMovingValues: (source, selected) =>
+      selected.includes(source) && selected.length > 0 ? [...selected] : [source],
+    canDrop: (candidate) =>
+      treeRefuseRef.current
+        ? { accepted: false, reason: "occupied" }
+        : { accepted: true, intent: candidate.intent },
+    onDrop: (candidate) => {
+      setTreeMoving(candidate.subject.movingValues.join(","));
+      const dest = candidate.intent.destination ?? {
+        targetId: candidate.intent.targetId,
+        position: candidate.intent.position,
+      };
+      setTreeDest(`${dest.targetId}:${dest.position}`);
+      setTreeDrops((count) => count + 1);
+      return { status: "committed" };
+    },
+  };
+
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__reactFixture = {
       removeCatalogueItem(id: string) {
@@ -78,6 +108,12 @@ export function ComponentsHarness() {
       },
       replaceBlocks(ids: string[]) {
         setBlocks((current) => ids.map((id) => current.find((entry) => entry.id === id)!).filter(Boolean));
+      },
+      selectTree(values: string[]) {
+        setTreeSelected(values);
+      },
+      refuseTree() {
+        treeRefuseRef.current = true;
       },
     };
   }, []);
@@ -98,6 +134,9 @@ export function ComponentsHarness() {
         data-rows-count={rowCount}
         data-order-c={orderC.join(",")}
         data-order-c-count={orderCCount}
+        data-tree-drops={treeDrops}
+        data-tree-moving={treeMoving}
+        data-tree-dest={treeDest}
       />
 
       <div
@@ -193,6 +232,16 @@ export function ComponentsHarness() {
         />
       </div>
       </DragDropProvider>
+
+      <div id="react-tree-auth">
+        <Tree
+          nodes={treeNodes}
+          selectedValues={treeSelected}
+          reorderable
+          reorderAuthority={treeAuthority}
+          ariaLabel="Authority tree"
+        />
+      </div>
     </div>
   );
 }

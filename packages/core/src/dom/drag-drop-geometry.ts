@@ -6,6 +6,7 @@
  * intent (or null). Leaves have no inside zone.
  */
 
+import { dropCommitDestination, type DropIntent } from "../drag-drop";
 import { flattenVisibleTreeRows, isTreeBranch, type TreeNodeLike } from "../tree";
 
 export type NestedDropKind = "item" | "container";
@@ -73,6 +74,38 @@ export function treeOutlineRows<T extends TreeNodeLike>(
     parent: row.parent,
     branch: isTreeBranch(row.node),
   }));
+}
+
+/** Depth of `value` in the full tree, including collapsed branches. */
+function treeNodeDepth(nodes: readonly TreeNodeLike[], value: string): number | null {
+  const walk = (list: readonly TreeNodeLike[], depth: number): number | null => {
+    for (const node of list) {
+      if (node.value === value) return depth;
+      if (node.children?.length) {
+        const found = walk(node.children, depth + 1);
+        if (found != null) return found;
+      }
+    }
+    return null;
+  };
+  return walk(nodes, 0);
+}
+
+/**
+ * Indicator depth for an accepted intent's commit destination.
+ * Walks the full tree so a rewritten dest under a collapsed branch still
+ * paints dest depth on the hovered anchor.
+ */
+export function treeAcceptedDropDepth(
+  nodes: readonly TreeNodeLike[],
+  intent: DropIntent,
+): number | null {
+  const dest = dropCommitDestination(intent);
+  const depth = treeNodeDepth(nodes, dest.targetId);
+  if (depth == null) return null;
+  if (dest.position === "inside") return depth + 1;
+  if (dest.position === "before" || dest.position === "after") return depth;
+  return null;
 }
 
 export interface TreeOutlineDrop {

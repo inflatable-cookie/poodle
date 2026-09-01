@@ -2,9 +2,11 @@ import { describe, expect, test } from "bun:test";
 
 import {
   resolveNestedDropPosition,
+  treeAcceptedDropDepth,
   treeResolveDropPosition,
   treeResolveOutlineDrop,
 } from "../src/dom/drag-drop-geometry";
+import { flattenVisibleTreeRows } from "../src/tree.ts";
 
 const rect = { top: 100, height: 40 };
 
@@ -373,5 +375,53 @@ describe("treeResolveOutlineDrop", () => {
         ...indent,
       }),
     ).toEqual({ to: "docs", position: "before", depth: 0, indicator: "before" });
+  });
+});
+
+describe("treeAcceptedDropDepth", () => {
+  const nodes = [
+    { value: "docs", children: [{ value: "guide.md" }] },
+    { value: "notes.txt" },
+  ];
+
+  test("uses the commit destination, not the hovered row", () => {
+    expect(
+      treeAcceptedDropDepth(nodes, {
+        targetId: "notes.txt",
+        position: "before",
+        operation: "move",
+        destination: { targetId: "guide.md", position: "after" },
+      }),
+    ).toBe(1);
+    expect(
+      treeAcceptedDropDepth(nodes, {
+        targetId: "notes.txt",
+        position: "before",
+        operation: "move",
+        destination: { targetId: "docs", position: "after" },
+      }),
+    ).toBe(0);
+    expect(
+      treeAcceptedDropDepth(nodes, {
+        targetId: "docs",
+        position: "inside",
+        operation: "move",
+      }),
+    ).toBe(1);
+  });
+
+  test("uses full-tree depth when the dest row is collapsed", () => {
+    expect(flattenVisibleTreeRows(nodes, []).map((row) => row.node.value)).toEqual([
+      "docs",
+      "notes.txt",
+    ]);
+    expect(
+      treeAcceptedDropDepth(nodes, {
+        targetId: "notes.txt",
+        position: "before",
+        operation: "move",
+        destination: { targetId: "guide.md", position: "after" },
+      }),
+    ).toBe(1);
   });
 });

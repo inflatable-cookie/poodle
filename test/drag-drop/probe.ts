@@ -1276,6 +1276,65 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         `focused="${orderFocus}"`,
       );
 
+      // ── Tree reorderAuthority: latched moving set on pointer drop ──
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await page.evaluate((framework) => {
+        const fixture = (window as unknown as Record<string, { selectTree(values: string[]): void }>)[
+          `__${framework}Fixture`
+        ];
+        fixture.selectTree(["a.ts", "b.ts"]);
+      }, fw);
+      await frames(page);
+      await press(`#${fw}-tree-auth [data-value="a.ts"] .poodle-tree__row`);
+      await hover(`#${fw}-tree-auth [data-value="c.ts"]`);
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} Tree authority drop commits the latched moving set`,
+        (await attr(fw, "tree-drops")) === "1" &&
+          (await attr(fw, "tree-moving")) === "a.ts,b.ts" &&
+          (await attr(fw, "tree-dest")) === "c.ts:after",
+        `drops=${await attr(fw, "tree-drops")} moving=${await attr(fw, "tree-moving")} dest=${await attr(fw, "tree-dest")}`,
+      );
+
+      // ── Tree host withhold before accepted paint ──
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await page.evaluate((framework) => {
+        const fixture = (window as unknown as Record<string, { refuseTree(): void }>)[
+          `__${framework}Fixture`
+        ];
+        fixture.refuseTree();
+      }, fw);
+      await frames(page);
+      await press(`#${fw}-tree-auth [data-value="a.ts"] .poodle-tree__row`);
+      await hover(`#${fw}-tree-auth [data-value="c.ts"]`);
+      const treeAccepted = await page
+        .locator(`#${fw}-tree-auth [data-poodle-drop-target="accepted"]`)
+        .count();
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} Tree authority canDrop refusal never paints accepted or commits`,
+        treeAccepted === 0 && (await attr(fw, "tree-drops")) === "0",
+        `accepted=${treeAccepted} drops=${await attr(fw, "tree-drops")}`,
+      );
+
+      // ── Tree Alt+Arrow through the same authority path ──
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await page.locator(`#${fw}-tree-auth [data-value="a.ts"]`).focus();
+      await page.keyboard.press("Alt+ArrowDown");
+      await frames(page);
+      check(
+        `${name}: ${fw} Tree Alt+Arrow commits through reorderAuthority`,
+        (await attr(fw, "tree-drops")) === "1" &&
+          (await attr(fw, "tree-moving")) === "a.ts" &&
+          (await attr(fw, "tree-dest")) === "b.ts:after",
+        `drops=${await attr(fw, "tree-drops")} moving=${await attr(fw, "tree-moving")} dest=${await attr(fw, "tree-dest")}`,
+      );
+
       // ── Dock chrome: host radius, inset ring, strip overflow ──
       //
       // happy-dom cannot prove these. The drag-source chip uses the same
