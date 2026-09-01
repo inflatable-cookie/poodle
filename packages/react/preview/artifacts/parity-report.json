@@ -40,16 +40,16 @@
     "runtime": "gpui",
     "status": "current",
     "denominator": {
-      "publicSvelteComponents": 175,
-      "portableNativeComponents": 174,
+      "publicSvelteComponents": 176,
+      "portableNativeComponents": 175,
       "notApplicable": [
         "MeterSurface"
       ]
     },
     "construction": {
       "status": "focused",
-      "routeCount": 174,
-      "routeDenominator": 174,
+      "routeCount": 175,
+      "routeDenominator": 175,
       "claim": "Every portable component route constructs through the headless GPUI specimen probe.",
       "evidence": [
         "packages/gpui/preview/src/specimen_probe.rs#canonical_catalogue_constructs_every_route_and_axis_pane_1",
@@ -59,7 +59,7 @@
     },
     "mountedBehaviour": {
       "status": "mounted",
-      "scope": "bounded named regression set, not a 174-component behaviour pass",
+      "scope": "bounded named regression set, not a 175-component behaviour pass",
       "testFile": "packages/gpui/preview/tests/headless_regressions.rs",
       "namedTests": [
         "a_mounted_button_carries_its_controls_target",

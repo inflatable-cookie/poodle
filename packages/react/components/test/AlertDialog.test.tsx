@@ -6,7 +6,15 @@ import { AlertDialog } from "../src/AlertDialog";
 // The Dialog inside AlertDialog portals to the theme root, so its surface is
 // not reachable from the render container — same pattern as the Dialog suites.
 function flush(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 0));
+  return act(async () => {
+    await new Promise<void>((resolve) => {
+      if (typeof requestAnimationFrame === "function") {
+        requestAnimationFrame(() => resolve());
+        return;
+      }
+      setTimeout(resolve, 0);
+    });
+  });
 }
 
 async function actClick(el: HTMLElement): Promise<void> {

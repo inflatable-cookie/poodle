@@ -35,10 +35,10 @@ use std::rc::Rc;
 use std::sync::RwLock;
 use std::time::{Duration, Instant};
 
-/// The catalogue's portable-route denominator: 174 canonical entries. The
+/// The catalogue's portable-route denominator: 175 canonical entries. The
 /// web-only `MeterSurface` (spec 068) is the single native `n/a` and must
 /// never join this list.
-const EXPECTED_ROUTES: usize = 174;
+const EXPECTED_ROUTES: usize = 175;
 
 /// The card's stop condition: the post-compilation sweep body must stay under
 /// two minutes so the probe can live inside the QA boards.
@@ -201,7 +201,9 @@ impl gpui::Render for FallbackHost {
         _window: &mut gpui::Window,
         _cx: &mut gpui::Context<Self>,
     ) -> impl IntoElement {
-        self.content.take().unwrap_or_else(|| div().into_any_element())
+        self.content
+            .take()
+            .unwrap_or_else(|| div().into_any_element())
     }
 }
 
@@ -235,14 +237,14 @@ fn unknown_dispatch_paints_the_fallback_marker() {
 
 /// The durable sweep, sharded so wall time stays far under the two-minute
 /// budget on slower CI machines: each shard walks its contiguous slice of the
-/// canonical registry, and every shard re-asserts the 174-entry denominator
+/// canonical registry, and every shard re-asserts the 175-entry denominator
 /// so a registry change cannot silently shrink coverage. Between them the
 /// shards visit every route exactly once.
 fn sweep_shard(shard: usize, routes: &'static [crate::component_registry::CanonicalComponent]) {
     assert_eq!(
         CANONICAL_COMPONENTS.len(),
         EXPECTED_ROUTES,
-        "the native probe denominator is exactly the 174 portable catalogue \
+        "the native probe denominator is exactly the 175 portable catalogue \
          entries; a registry change must reconcile the audit, not this number"
     );
     assert!(
@@ -376,9 +378,7 @@ fn stepper_route_selection_and_rerun_run_through_the_preview_adapter() {
 
     // Exclusive: this is the one probe that clicks controls the shared render
     // gives no id, so no other thread may restart the id counter mid-click.
-    let _exclusive = NODE_TREE_RENDER
-        .write()
-        .unwrap_or_else(|e| e.into_inner());
+    let _exclusive = NODE_TREE_RENDER.write().unwrap_or_else(|e| e.into_inner());
     let app = TestAppContext::single();
     let (root, mut cx) = open_stateful_route_window(&app, "stepper", 3200.0);
     settle(&mut cx);

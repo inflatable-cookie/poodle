@@ -667,6 +667,15 @@
       "collections": []
     },
     {
+      "slug": "motion-policy-provider",
+      "displayName": "MotionPolicyProvider",
+      "description": "Scoped provider for the effective full, reduced, or frozen host motion policy.",
+      "section": "foundations",
+      "family": "content-identity",
+      "kind": "display",
+      "collections": []
+    },
+    {
       "slug": "pill",
       "displayName": "Pill",
       "description": "Small inline label chip with tone and size variants.",
@@ -697,15 +706,6 @@
       "slug": "ui-presentation-provider",
       "displayName": "UiPresentationProvider",
       "description": "Scoped provider for semantic density and size defaults.",
-      "section": "foundations",
-      "family": "content-identity",
-      "kind": "display",
-      "collections": []
-    },
-    {
-      "slug": "motion-policy-provider",
-      "displayName": "MotionPolicyProvider",
-      "description": "Scoped provider for the effective full, reduced, or frozen host motion policy.",
       "section": "foundations",
       "family": "content-identity",
       "kind": "display",

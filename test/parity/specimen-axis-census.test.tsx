@@ -720,10 +720,10 @@ describe("overlay axes open one at a time", () => {
   }
 });
 
-describe("web axis census (175 routes)", () => {
+describe("web axis census (176 routes)", () => {
   it("covers the full catalogue denominator", () => {
-    expect(ROUTES).toHaveLength(175);
-    expect(new Set(ROUTES).size).toBe(175);
+    expect(ROUTES).toHaveLength(176);
+    expect(new Set(ROUTES).size).toBe(176);
   });
 
   for (const slug of CORRECTED_ROUTES) {

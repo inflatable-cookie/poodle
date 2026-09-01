@@ -35,6 +35,15 @@ export function useMotionPolicy(): MotionPolicy {
 export function useMotionReady(enabled = true): boolean {
   const policy = useMotionPolicy();
   const [ready, setReady] = useState(false);
-  useEffect(() => bindMotionReady(policy, enabled, setReady), [policy, enabled]);
+  useEffect(() => {
+    let cancelled = false;
+    const stop = bindMotionReady(policy, enabled, (value) => {
+      if (!cancelled) setReady(value);
+    });
+    return () => {
+      cancelled = true;
+      stop();
+    };
+  }, [policy, enabled]);
   return ready;
 }

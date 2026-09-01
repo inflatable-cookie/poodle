@@ -2259,11 +2259,11 @@ function validateGpuiNativeAccessibilityProof(errors: string[]): {
     errors,
   );
   expect(
-    proof.currentPosture.publicSvelteComponents === 175 &&
-      proof.currentPosture.portableNativeComponents === 174 &&
+    proof.currentPosture.publicSvelteComponents === 176 &&
+      proof.currentPosture.portableNativeComponents === 175 &&
       proof.currentPosture.nativeNotApplicable.length === 1 &&
       proof.currentPosture.nativeNotApplicable[0] === "MeterSurface",
-    "packages/gpui/native-accessibility-proof.json must record the 175/174 native boundary.",
+    "packages/gpui/native-accessibility-proof.json must record the 176/175 native boundary.",
     errors,
   );
   expect(
@@ -2535,20 +2535,20 @@ function validateGpuiCrossRuntimeParityReport(errors: string[]): {
   expect(report.sourceLedger === "docs/roadmaps/g16/parity-evidence-ledger.md", "GPUI parity report must point at the g16 evidence ledger.", errors);
   expect(report.runtime === "gpui" && report.status === "current", "GPUI parity report must identify the current GPUI posture.", errors);
   expect(
-    report.denominator.publicSvelteComponents === 175 &&
-      report.denominator.portableNativeComponents === 174 &&
+    report.denominator.publicSvelteComponents === 176 &&
+      report.denominator.portableNativeComponents === 175 &&
       report.denominator.notApplicable.length === 1 &&
       report.denominator.notApplicable[0] === "MeterSurface",
-    "GPUI parity report must record the 175/174 native boundary.",
+    "GPUI parity report must record the 176/175 native boundary.",
     errors,
   );
 
   expect(
     report.construction.status === "focused" &&
-      report.construction.routeCount === 174 &&
-      report.construction.routeDenominator === 174 &&
+      report.construction.routeCount === 175 &&
+      report.construction.routeDenominator === 175 &&
       report.construction.claim.includes("headless GPUI specimen probe"),
-    "GPUI parity report must claim exactly 174/174 headless construction.",
+    "GPUI parity report must claim exactly 175/175 headless construction.",
     errors,
   );
   expectEvidence("construction", report.construction.evidence);
@@ -2556,7 +2556,7 @@ function validateGpuiCrossRuntimeParityReport(errors: string[]): {
   expect(
     report.mountedBehaviour.status === "mounted" &&
       report.mountedBehaviour.scope.includes("bounded") &&
-      report.mountedBehaviour.scope.includes("not a 174-component behaviour pass"),
+      report.mountedBehaviour.scope.includes("not a 175-component behaviour pass"),
     "GPUI parity report must bound mounted behaviour rather than promote it to roster coverage.",
     errors,
   );

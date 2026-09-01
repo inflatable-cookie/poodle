@@ -312,7 +312,12 @@ export function deriveLiveRoster(root = ROOT): LiveComponent[] {
   return entries;
 }
 
-function expectedComponentRow(root: string, component: LiveComponent, visualSkipped: Set<string>): ComponentRow {
+function expectedComponentRow(
+  root: string,
+  component: LiveComponent,
+  visualSkipped: Set<string>,
+  portableCount: number,
+): ComponentRow {
   const { name, slug, portable } = component;
   const contractPath = `docs/contracts/components/${slug}.md`;
   const svelteIndexPath = "packages/svelte/components/src/index.ts";
@@ -372,7 +377,7 @@ function expectedComponentRow(root: string, component: LiveComponent, visualSkip
 
   if (!portable) {
     base["Shared Rust surface"] = cell("not-applicable", `${pathRef(contractPath, "MeterSurface")}; web-only by the fixed native boundary`);
-    base["GPUI construction"] = cell("not-applicable", `MeterSurface is excluded from the 174-route native probe`);
+    base["GPUI construction"] = cell("not-applicable", `MeterSurface is excluded from the ${portableCount}-route native probe`);
     base["GPUI mounted behaviour"] = cell("not-applicable", `MeterSurface is web-only and has no GPUI mounted target`);
     base["GPUI accessibility"] = cell("not-applicable", `MeterSurface is web-only and has no GPUI accessibility target`);
     base["GPUI visual"] = cell("not-applicable", `MeterSurface is web-only and has no GPUI pixel target`);
@@ -389,7 +394,7 @@ function expectedComponentRow(root: string, component: LiveComponent, visualSkip
     );
     base["GPUI construction"] = cell(
       "focused",
-      `route ${pathRef(gpuiRegistryPath, slug)}; ${pathRef("packages/gpui/preview/src/specimen_probe.rs")} via effigy probe:gpui-specimens (174/174 routes)`,
+      `route ${pathRef(gpuiRegistryPath, slug)}; ${pathRef("packages/gpui/preview/src/specimen_probe.rs")} via effigy probe:gpui-specimens (${portableCount}/${portableCount} routes)`,
     );
 
     const mountedTests = MOUNTED_BEHAVIOUR_TESTS[name];
@@ -557,7 +562,8 @@ export function deriveRows(root = ROOT): ComponentRow[] {
     if (!slugPattern.test(reactRegistry)) throw new Error(`React specimen route missing for ${component.name}.`);
   }
 
-  return roster.map((component) => expectedComponentRow(root, component, visualSkipped));
+  const portableCount = roster.filter((component) => component.portable).length;
+  return roster.map((component) => expectedComponentRow(root, component, visualSkipped, portableCount));
 }
 
 function rowMarkdown(row: ComponentRow): string {
@@ -567,6 +573,9 @@ function rowMarkdown(row: ComponentRow): string {
 export function generateLedgerMarkdown(root = ROOT): string {
   const rows = deriveRows(root);
   const componentRows = rows.map(rowMarkdown).join("\n");
+  const roster = deriveLiveRoster(root);
+  const publicCount = roster.length;
+  const portableCount = roster.filter((component) => component.portable).length;
   return `# g16.001 — Active-Cohort Parity Evidence Ledger
 
 Status: current evidence snapshot
@@ -583,11 +592,11 @@ claim; one runtime's evidence never transfers to another runtime.
 
 ## Denominator
 
-- Public Svelte components: **176**, derived from
+- Public Svelte components: **${publicCount}**, derived from
   \`packages/svelte/components/src/index.ts\`.
-- Portable native components: **174**, derived from the generated catalogue.
+- Portable native components: **${portableCount}**, derived from the generated catalogue.
 - Native \`not-applicable\`: **MeterSurface** only, by the fixed web-only
-  boundary. It remains in the 176-component public denominator.
+  boundary. It remains in the ${publicCount}-component public denominator.
 - Jetstream: one program-level \`deferred\` target. Shared Rust composition and
   the in-repo adapter do not make the sibling backend pass.
 
@@ -614,8 +623,8 @@ ${summaryMarkdown(rows)}
 | --- | --- | --- |
 | Svelte | reference implementation; focused component tests and Svelte axe sweep are present | \`test/a11y/component-a11y.test.ts\` |
 | React | implementation and focused tests are present; React axe sweep is missing | no React axe equivalent; Svelte axe evidence does not transfer |
-| Shared Rust | 174 renderer-neutral surfaces present; MeterSurface is not-applicable | \`packages/contracts/components/src/\`; \`packages/render/src/\` |
-| GPUI | 174/174 portable specimen routes construct headlessly; mounted behaviour is bounded | \`packages/gpui/preview/src/specimen_probe.rs\`; \`packages/gpui/preview/tests/headless_regressions.rs\` |
+| Shared Rust | ${portableCount} renderer-neutral surfaces present; MeterSurface is not-applicable | \`packages/contracts/components/src/\`; \`packages/render/src/\` |
+| GPUI | ${portableCount}/${portableCount} portable specimen routes construct headlessly; mounted behaviour is bounded | \`packages/gpui/preview/src/specimen_probe.rs\`; \`packages/gpui/preview/tests/headless_regressions.rs\` |
 | Jetstream | deferred at program level | \`packages/jetstream/cross-runtime-parity-report.json\` |
 
 ## Component evidence ledger
@@ -626,7 +635,7 @@ ${componentRows}
 
 ## Limitations and measured next gaps
 
-- GPUI mounted behaviour is the named regression set, not a 174-component
+- GPUI mounted behaviour is the named regression set, not a ${portableCount}-component
   behaviour pass.
 - GPUI accessibility remains manual: shared specs and bounded mounted tests do
   not prove broad native semantics, focus, keyboard, announcement, or
@@ -736,8 +745,9 @@ export function validateLedgerText(markdown: string, root = ROOT): void {
     errors.push(error instanceof Error ? error.message : String(error));
   }
 
+  const portableCount = deriveLiveRoster(root).filter((component) => component.portable).length;
   const requiredPhrases = [
-    "174/174 portable specimen routes construct headlessly",
+    `${portableCount}/${portableCount} portable specimen routes construct headlessly`,
     "Button-only",
     "non-activating windowed",
     "Svelte axe evidence does not transfer",

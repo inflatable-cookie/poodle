@@ -42,10 +42,23 @@ function track(key: string, handle: WebMotionHandle): void {
 }
 
 export function afterFirstFrame(onReady: () => void): () => void {
-  const frame = requestAnimationFrame(() => {
-    onReady();
+  let cancelled = false;
+  const raf = globalThis.requestAnimationFrame;
+  if (typeof raf !== "function") {
+    return () => {
+      cancelled = true;
+    };
+  }
+  const frame = raf(() => {
+    if (!cancelled) onReady();
   });
-  return () => cancelAnimationFrame(frame);
+  return () => {
+    cancelled = true;
+    const cancel = globalThis.cancelAnimationFrame;
+    if (typeof cancel === "function") {
+      cancel(frame);
+    }
+  };
 }
 
 /** True only in full policy after the first committed frame. */

@@ -7,6 +7,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-09-01 — Adding one public portable catalogue component requires a
+  coordinated denominator bump across `specimen_probe.rs` `EXPECTED_ROUTES`,
+  `test/parity/specimen-axis-census.test.tsx`, `lint-docs.ts` GPUI/native
+  proofs, `packages/gpui/cross-runtime-parity-report.json`,
+  `packages/gpui/native-accessibility-proof.json`, the ledger generator's
+  required `N/N portable specimen routes` phrase, and
+  `packages/shared-demo-app-audit.json` export counts. Missing any one fails
+  a later board after `docs:check` already passed. Hit while closing g16.034.
+
 - 2026-09-01 — `rustfmt path/to/lib.rs` formats the whole crate because
   rustfmt follows `mod` declarations. Passing `packages/render/src/lib.rs`
   rewrote dozens of unrelated renderer files. Format only the edited leaf
