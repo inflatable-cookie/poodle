@@ -219,6 +219,16 @@ projection left the projection silent, contradicting spec 069. Ownership is now
 decided once, at the single session-prepare event every entry point sends, and
 a named native regression bites the pre-fix shape.
 
+## Review Round 4
+
+One blocker plus a front-door row. The native projection path discarded
+`CrossWindowDragProjection.source_label`, so an incoming cross-window drag was
+announced by its opaque subject id; round 3's own regression had codified that
+by asserting the id. `apply_projection` now retains the accessible name, and
+the regression requires it at pickup, intent, and terminal. The g16 front door
+no longer calls `g16.033` reserved: it is queued with its public API decision
+promoted and gated on this card being accepted and merged.
+
 ## Continuation
 
 After operator-authorized merge, close the drag-and-drop programme in g16. The

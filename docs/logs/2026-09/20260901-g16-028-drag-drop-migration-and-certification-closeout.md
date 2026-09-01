@@ -3,7 +3,7 @@
 Status: delivered — awaiting orchestrator review
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/118
-Review rounds: 3 (five blockers, then three, then one; all repaired on this branch)
+Review rounds: 4 (five blockers, then three, then one, then one plus a front-door row; all repaired on this branch)
 Card: `docs/roadmaps/g16/028-drag-drop-migration-and-certification-closeout.md`
 Handoff: `docs/handoffs/20260901-075640-g16-028-drag-closeout.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
@@ -254,6 +254,37 @@ nobody is watching.
 Under that plant the inbound-batch regressions stayed green, which is the other
 half of the reading: inbound was covered, the projection path was not.
 
+## Review round 4
+
+One blocker, surfaced by round 3's own proof, plus a front-door row.
+
+**The native projection path discarded the projection's accessible name.**
+`CrossWindowDragProjection.source_label` is the host's own name for a subject
+this window has no source for. The web controller stores it in
+`externalSourceLabel`; `apply_projection` never did, so announcements fell
+through to `session.subject.id`. Round 3's regression asserted `remote-row` and
+so codified the defect: it proved the projection was *narrated*, and blessed
+the fact that what it narrated was an opaque identifier. Read to the one person
+who cannot see the row, "Picked up remote-row" is the failure, not the pass.
+
+`apply_projection` now retains `projection.source_label` as the external source
+label, cleared by the same terminal cleanup as an inbound batch's and rewritten
+when a superseding projection installs. The regression requires the human label
+and rejects the subject id, at pickup, at intent, and at the terminal.
+
+**The g16 front door still called `g16.033` reserved.** Row 33 and the
+portfolio-papercut bullet contradicted the promoted card, the README status
+line, and the round-2 receipt. Both now read: queued, public API decision
+promoted, gated on accepted and merged `g16.028` — not dispatch-ready until
+this PR merges. The one remaining "reserved" mention sits inside the historical
+`g16.026` paragraph and was put into the past tense rather than rewritten.
+
+### Round-4 falsification
+
+| Repair | Planted counterexample | Named proof, and what it said |
+| --- | --- | --- |
+| A projection is announced by its accessible name | the `external_source_label` assignment removed from `apply_projection` | `an_incoming_projection_is_narrated_after_a_self_narrating_local_session` → `FAILED: an incoming projection is announced: ["Picked up remote-row.", "remote-row: after Zone A."]` |
+
 ## Evidence
 
 | Claim | Proof |
@@ -262,7 +293,7 @@ half of the reading: inbound was covered, the projection path was not.
 | Native completions behave | `packages/gpui/preview/tests/headless_regressions.rs#editable_list_substrate_reorder_rebuilds_the_host_spec`, `#order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec`, `#block_editor_grip_drag_and_move_controls_rebuild_the_host_spec` |
 | One voice per session, natively | `packages/gpui/preview/tests/headless_regressions.rs#model_catalogue_editor_pointer_drop_is_announced_once_by_the_editor` |
 | The announcement latch and its reset | `test/headless-dom/drag-drop-controller.test.ts#silences every announcement of a self-narrating session, and only that session`; `packages/gpui/preview/tests/headless_regressions.rs#a_self_narrating_source_silences_its_whole_session_and_only_that_session` |
-| An external session is never silenced by the one before it | `packages/gpui/preview/tests/headless_regressions.rs#an_incoming_projection_is_narrated_after_a_self_narrating_local_session` |
+| An external session is never silenced by the one before it, and is announced by its accessible name | `packages/gpui/preview/tests/headless_regressions.rs#an_incoming_projection_is_narrated_after_a_self_narrating_local_session` |
 | Contracts carry no removed-mechanism claim | `effigy drift:drag-inventory`, which reads the seven contracts as well as their sources |
 | Shared band/destination arithmetic | `packages/render/src/drag_drop.rs` unit tests for `arrival_band_resolver`, `reorder_destination`, and `apply_reorder` |
 | Programme absence | `effigy drift:drag-inventory` (`scripts/check-drag-inventory.ts`), wired into `ci:web` |

@@ -539,7 +539,13 @@ host terminal events are rejected by the kernel session id.
 `CrossWindowDragTargetBridge` is optional on one document or native window
 controller. The host resolves a receipt to the local semantic projection shown
 above. `subject`, `sourceId`, and `sourceLabel` are a host-local projection;
-they are not serialized beside the receipt. A projection names at most one
+they are not serialized beside the receipt. `sourceLabel` is the projection's
+**accessible name** and every runtime retains it for the session's lifetime:
+the receiving window has no local source to ask, so without it announcements
+fall through to the subject id — a value chosen for identity, and read aloud to
+the one person who cannot see the row it identifies. It is cleared by the same
+terminal cleanup as an inbound batch's label, and rewritten when a superseding
+projection installs. A projection names at most one
 registered Poodle target and position. Poodle re-runs that target's kind,
 disabled, and `canDrop` gates before `commit`, then maps the returned
 `DragDropCommitResult` through the ordinary kernel terminal path. Target

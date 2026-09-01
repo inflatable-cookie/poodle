@@ -1922,13 +1922,23 @@ impl DragDropController {
             committing: false,
         });
 
-        self.state.borrow_mut().input_kind = Some(match projection.input_kind {
-            poodle_node::CrossWindowDragInputKind::Keyboard => NodeDragInputKind::Keyboard,
-            poodle_node::CrossWindowDragInputKind::Touch => NodeDragInputKind::Touch,
-            // The host reports a pointer class; this window never observed the
-            // device, so there is no finer identity honestly available.
-            poodle_node::CrossWindowDragInputKind::Pointer => NodeDragInputKind::Mouse,
-        });
+        {
+            let mut state = self.state.borrow_mut();
+            state.input_kind = Some(match projection.input_kind {
+                poodle_node::CrossWindowDragInputKind::Keyboard => NodeDragInputKind::Keyboard,
+                poodle_node::CrossWindowDragInputKind::Touch => NodeDragInputKind::Touch,
+                // The host reports a pointer class; this window never observed
+                // the device, so there is no finer identity honestly available.
+                poodle_node::CrossWindowDragInputKind::Pointer => NodeDragInputKind::Mouse,
+            });
+            // The projection's accessible name. This window has no source to
+            // ask, so without it every announcement about a remote subject
+            // falls through to the opaque subject id — a name chosen for
+            // identity, not for a person to hear. Cleared by the same terminal
+            // cleanup as the inbound label, and rewritten when a superseding
+            // projection installs.
+            state.external_source_label = Some(projection.source_label.clone());
+        }
         self.dispatch(
             DragSessionEvent::Prepare {
                 session_id: session_id.clone(),

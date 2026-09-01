@@ -18184,8 +18184,16 @@ fn an_incoming_projection_is_narrated_after_a_self_narrating_local_session() {
         driver.drain();
         let spoken = controller.announcements();
         assert!(
-            spoken.iter().any(|line| line.contains("remote-row")),
+            spoken.iter().any(|line| line.contains("Remote")),
             "an incoming projection is announced: {spoken:?}"
+        );
+        // And announced by its *name*. The projection carries the host's own
+        // accessible label precisely because this window has no source to ask;
+        // falling back to the subject id would read an opaque identifier to
+        // the one person who cannot see the row it names.
+        assert!(
+            !spoken.iter().any(|line| line.contains("remote-row")),
+            "the accessible name is the projection's label, never its subject id: {spoken:?}"
         );
 
         // ── And so is its terminal ──
@@ -18201,6 +18209,10 @@ fn an_incoming_projection_is_narrated_after_a_self_narrating_local_session() {
         assert!(
             after.len() > spoken.len(),
             "the projection's terminal is announced too: {after:?}"
+        );
+        assert!(
+            after[spoken.len()..].iter().all(|line| !line.contains("remote-row")),
+            "including at the terminal, where the label must not decay: {after:?}"
         );
     });
 }

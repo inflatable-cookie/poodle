@@ -65,7 +65,7 @@ stay maintained; backend admission is not part of the first card.
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete; merged in PR #100; ledger 52 mounted / 122 missing
-33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — reserved after 026; public API decision required before dispatch; package-type source is already fixed, publication/pin movement stays separate
+33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — queued; the public API decision is promoted, and the lane is gated on accepted and merged `g16.028`, so it is not dispatch-ready yet; package-type source is already fixed, publication/pin movement stays separate
 
 ## Parallel Continuation
 
@@ -97,8 +97,9 @@ Two continuation programmes are now explicit:
   roles, the bounded opaque receipt codec, and one `DragDropWindowHost` per
   GPUI window. Tabs migrates with its real DockRegion consumer. Later cards
   remain gated by landed dependencies.
-- **Portfolio papercut follow-on:** `g16.033` is reserved after the merged
-  `g16.026` shared-file tranche. It gives HistoryCenter distinct Poodle-owned
+- **Portfolio papercut follow-on:** `g16.033` is queued after the merged
+  `g16.026` shared-file tranche, with its public API decision promoted and its
+  dispatch gated on accepted and merged `g16.028`. It gives HistoryCenter distinct Poodle-owned
   deletion-refusal semantics and adds packed-package proof for the already-fixed
   v3 `HistoryEntry` export. Keyboard vertical geometry remains design-deferred;
   Longhorn's `AlreadyAtTarget` wire code and Loophole adoption are complete in
@@ -347,8 +348,10 @@ back. The log is
 `../../logs/2026-08/20260831-g16-026-drag-drop-cross-window-bridge.md`. One
 consequence needs review attention: cross-region DockRegion transfer now
 requires one common `DragDropProvider`, per the operator decision recorded in
-spec 069. `g16.033` remains reserved until the operator chooses structured rejection
-codes or a host-owned message; EditableLabel stays decision-blocked.
+spec 069. At that point `g16.033` was still reserved pending the operator's
+choice between structured rejection codes and a host-owned message; that
+decision has since been made and the lane promoted. EditableLabel stays
+decision-blocked.
 
 `g16.027` merged in PR #115 after three Northstar repair rounds. Both external-file boundaries are paired and wired end to end: an
 export prepares an opaque receipt on the pre-drag gesture and the host runs
