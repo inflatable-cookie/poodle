@@ -9,8 +9,9 @@ Governing refs: `docs/contracts/components/tree.md`,
 `docs/specs/069-dependable-drag-and-drop-substrate.md`
 Branch: `feature/g16-036-tree-external-drop-authority`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-036-tree-external-drop-authority`
-Base: `origin/main` at `8f60700ffdde723c2e0ea009296cc20aacfe3e4f`
-Planning commit `169651f51b3443ffad08f4dd435198384deacebd` is an ancestor.
+Base: rebased onto `origin/main` at `06a42e3cc36b865344d0bf9e3b5c81bbd1c0a32d`
+(docs/triage; not g16.034). Planning commit
+`169651f51b3443ffad08f4dd435198384deacebd` is an ancestor.
 
 ## Outcome
 
