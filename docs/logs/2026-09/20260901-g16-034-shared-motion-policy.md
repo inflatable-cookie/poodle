@@ -3,9 +3,10 @@
 Status: implemented — production repair complete; exact-head evidence recorded
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/124
-Implementation commits: `bb656700f` (initial), `d99b9af83` + `f03f723bc` +
-`a9fa37d1e` + `9b4006a2d` (review repair), `e93cd3f29` (production execution
-repair)
+Rebased implementation commits: `473d874a7` (initial), `b92fdecd6` +
+`7230ad241` + `8daf60de5` + `757270766` + `92c26a9c9` + `c88941191`
+(review repair), `00174a219` (production execution repair), and
+`3a43c7701` + `408415f4a` (closeout evidence)
 Card: `docs/roadmaps/g16/034-shared-motion-policy-and-five-family-pilot.md`
 Handoff: `docs/handoffs/20260901-130224-g16-034-shared-motion-policy.md`
 Governing refs: `docs/architecture/012-semantic-motion-policy.md`,
@@ -15,12 +16,13 @@ Governing refs: `docs/architecture/012-semantic-motion-policy.md`,
 Branch: `feature/g16-034-shared-motion-policy`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-034-shared-motion-policy`
 Starting exact review head: `493735e8f15abdff646a9067ae9ca666a787eee5`
-Production repair commit: `e93cd3f29a61b9c7568fd066dd3b969f79083ec2`
-Base: PR #125 merged into `main` at
-`a980cb7748fdf9751dd4ca64b02903111a44d59f`; this branch's merge-base is that
-commit. `origin/main` later advanced to
-`8f60700ffdde723c2e0ea009296cc20aacfe3e4f` after this exact-head repair was
-based and is intentionally not integrated here.
+Rebased production repair commit:
+`00174a2195a0db38500ab3f7841f499c51478ecc`
+Rebase base: `origin/main` at
+`06a42e3cc36b865344d0bf9e3b5c81bbd1c0a32d`; this branch's merge-base is that
+live head. PR #125's merge at
+`a980cb7748fdf9751dd4ca64b02903111a44d59f` is included in the live base.
+PR #127 remains a separate, unmerged Tree lane.
 Planning base `b89c11275` is an ancestor.
 
 ## Outcome
@@ -59,7 +61,8 @@ construction cells now say 175/175 routes.
 
 ## Review repair (PR #124 changes requested)
 
-Addressed on `d99b9af83` + `f03f723bc` + `a9fa37d1e` + `9b4006a2d`:
+Addressed on the rebased review-repair sequence (`b92fdecd6`, `7230ad241`,
+`8daf60de5`, `757270766`, `92c26a9c9`, and `c88941191`):
 
 - Toast lifecycle uses WAAPI `finished` completion, not CSS `animationend`;
   exit rows are `inert` with `tabIndex=-1`; owner-scoped registry keys;
@@ -82,7 +85,7 @@ Addressed on `d99b9af83` + `f03f723bc` + `a9fa37d1e` + `9b4006a2d`:
   preserves a synchronous replacement; Tabs measurement rAF teardown is
   identity-safe in both web shells.
 
-Production execution repair (`e93cd3f29`):
+Production execution repair (`00174a219`):
 
 - GPUI `PreviewRoot` now carries first-frame commitment through the real
   `Window::on_next_frame` callback into the production Skeleton/Spinner route;
@@ -101,19 +104,23 @@ Production execution repair (`e93cd3f29`):
 ## Overlap
 
 PR #125 merged into `main` at
-`a980cb7748fdf9751dd4ca64b02903111a44d59f` before this production repair. The
-branch was already reconciled against that merge. The combined
+`a980cb7748fdf9751dd4ca64b02903111a44d59f` before this production repair, and
+that merge is an ancestor of the live rebase base
+`06a42e3cc36b865344d0bf9e3b5c81bbd1c0a32d`. The combined
 `Tabs.svelte`, `Tabs.tsx`, `packages/core/src/styles/tabs.css`, and
 `packages/render/src/tabs.rs` state preserves accepted drag/drop handlers and
 the g16.034 underline/motion observer behavior; this repair does not alter the
-accepted drag/drop semantics. Planning/index overlap remains documentation
-metadata only: the additive provider denominator is current, while Jetstream's
-static catalogue route is deferred registry metadata, not admission or mounted
-parity.
+accepted drag/drop semantics. The rebase conflict was limited to planning
+currentness in `docs/roadmaps/g16/README.md` and
+`docs/roadmaps/generation-index.md`; it did not require a source/API choice.
+Planning/index overlap remains documentation metadata only: the additive
+provider denominator is current, while Jetstream's static catalogue route is
+deferred registry metadata, not admission or mounted parity. PR #127 remains
+separate and unmerged.
 
 ## Falsification
 
-Real proofs were committed at `d99b9af83` before planting. The required
+Real proofs were committed before planting in the rebased repair sequence. The required
 plant → intended failure → restore → green rerun was completed for all 11
 rows before this recovery; restores used `git checkout --` against committed
 sources while the index was clean. The current recovery did not reset, clean,
