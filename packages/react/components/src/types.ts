@@ -10,6 +10,7 @@ import type { IconNodes } from "@inflatable-cookie/poodle-core/icons";
 // Generic in the panel and edge types; this target binds them to its own
 // `PanelTabItem` / `DockEdge` further down.
 import type {
+  TreeReorderProps,
 } from "@inflatable-cookie/poodle-core";
 
 export type {
@@ -403,6 +404,46 @@ export type {
   TreeReorderProps,
   TreeReorderSubject,
 } from "@inflatable-cookie/poodle-core";
+
+type TreeCommonProps = {
+  nodes?: TreeNode[];
+  selectedValues?: string[];
+  expandedValues?: string[] | null;
+  defaultExpandedValues?: string[];
+  checkedValues?: string[];
+  loadingValues?: string[];
+  editingValue?: string | null;
+  ariaLabel?: string | null;
+  showGuides?: boolean;
+  /**
+   * Reclaim the twisty gutter when nothing in the tree can expand.
+   *
+   * Leaves render a twisty-sized spacer so their labels align with branch
+   * labels; in a genuinely flat tree that aligns them with nothing. Opt in and
+   * it collapses, returning the moment any node becomes a branch. tree.md §7.
+   */
+  collapseTwistyWhenFlat?: boolean;
+  showIcons?: boolean;
+  showCheckboxes?: boolean;
+  reorderable?: boolean;
+  virtualized?: boolean;
+  virtualHeight?: number;
+  size?: ControlSize | null;
+  sizeRole?: SemanticControlSizeRole;
+  density?: ControlDensity | null;
+  onSelectionChange?: (values: string[]) => void;
+  onExpandedChange?: (values: string[]) => void;
+  onCheckedChange?: (values: string[]) => void;
+  onLoadChildren?: (value: string) => void;
+  onRenameCommit?: (value: string, text: string) => void;
+  onRenameCancel?: () => void;
+  onEditingChange?: (value: string | null) => void;
+  onContextMenu?: (value: string, x: number, y: number) => void;
+  onActivate?: (value: string) => void;
+};
+
+/** Exclusive Tree prop boundary: `TreeCommonProps & TreeReorderProps`. */
+export type TreeProps = TreeCommonProps & TreeReorderProps;
 
 export type TableSortDirection = "asc" | "desc";
 export type TableFilters = Record<string, string>;

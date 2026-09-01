@@ -29,7 +29,6 @@ import {
   type DragTerminalOutcome,
   type DropEligibility,
   type DropIntent,
-  type TreeReorderProps,
   type TreeReorderSubject,
 } from "@inflatable-cookie/poodle-core";
 
@@ -42,50 +41,11 @@ import { Spinner } from "./Spinner";
 import { TreeItem } from "./tree-item/TreeItem";
 import { TreeKeyboardTargets } from "./tree-item/TreeKeyboardTargets";
 import type {
-  ControlDensity,
-  ControlSize,
-  SemanticControlSizeRole,
   TreeNode,
+  TreeProps,
 } from "./types";
 
-interface TreeCommonProps {
-  nodes?: TreeNode[];
-  selectedValues?: string[];
-  expandedValues?: string[] | null;
-  defaultExpandedValues?: string[];
-  checkedValues?: string[];
-  loadingValues?: string[];
-  editingValue?: string | null;
-  ariaLabel?: string | null;
-  showGuides?: boolean;
-  /**
-   * Reclaim the twisty gutter when nothing in the tree can expand.
-   *
-   * Leaves render a twisty-sized spacer so their labels align with branch
-   * labels; in a genuinely flat tree that aligns them with nothing. Opt in and
-   * it collapses, returning the moment any node becomes a branch. tree.md §7.
-   */
-  collapseTwistyWhenFlat?: boolean;
-  showIcons?: boolean;
-  showCheckboxes?: boolean;
-  reorderable?: boolean;
-  virtualized?: boolean;
-  virtualHeight?: number;
-  size?: ControlSize | null;
-  sizeRole?: SemanticControlSizeRole;
-  density?: ControlDensity | null;
-  onSelectionChange?: (values: string[]) => void;
-  onExpandedChange?: (values: string[]) => void;
-  onCheckedChange?: (values: string[]) => void;
-  onLoadChildren?: (value: string) => void;
-  onRenameCommit?: (value: string, text: string) => void;
-  onRenameCancel?: () => void;
-  onEditingChange?: (value: string | null) => void;
-  onContextMenu?: (value: string, x: number, y: number) => void;
-  onActivate?: (value: string) => void;
-}
-
-export type TreeProps = TreeCommonProps & TreeReorderProps;
+export type { TreeProps };
 
 type Row = { node: TreeNode; depth: number; parent: string | null };
 

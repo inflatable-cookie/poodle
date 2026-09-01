@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/svelte";
+import { fireEvent, render, waitFor } from "@testing-library/svelte";
 import { tick } from "svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -957,27 +957,36 @@ describe("Tree reorderAuthority", () => {
     expect(onReorder).not.toHaveBeenCalled();
   });
 
-  it("a pending authority Promise settles its own session once", async () => {
-    let finish: ((value: { status: "rejected"; reason: string }) => void) | undefined;
-    const pending = new Promise<{ status: "rejected"; reason: string }>((resolve) => {
+  it.each([
+    { outcome: { status: "rejected" as const, reason: "late" }, announcement: "Drop rejected: late" },
+    { outcome: { status: "failed" as const, reason: "late" }, announcement: "Drop failed: late" },
+  ])("a pending authority Promise settles its own session once ($announcement)", async ({ outcome, announcement }) => {
+    let finish: ((value: typeof outcome) => void) | undefined;
+    const pending = new Promise<typeof outcome>((resolve) => {
       finish = resolve;
     });
-    const host = authority({ onDrop: () => pending });
+    const onDrop = vi.fn(() => pending);
+    const host = authority({ onDrop });
     const { container } = render(Tree, {
       props: { nodes: files, reorderable: true, reorderAuthority: host },
     });
     const rows = layoutTree(container);
     drag(rows.get("a.ts")!, rows.get("c.ts")!, rows.get("c.ts")!.getBoundingClientRect().top + 4);
+    expect(onDrop).toHaveBeenCalledTimes(1);
     expect(container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).toBe(
       "dropping",
     );
-    finish?.({ status: "rejected", reason: "late" });
+    finish?.(outcome);
     await pending;
     await tick();
+    expect(onDrop).toHaveBeenCalledTimes(1);
     expect(container.querySelector('[data-value="a.ts"]')?.getAttribute("data-poodle-drag-source")).not.toBe(
       "dropping",
     );
     expect(container.querySelector('[data-poodle-drag-source="dropping"]')).toBeNull();
+    await waitFor(() => {
+      expect(container.querySelector(".poodle-drag-live-region")?.textContent).toBe(announcement);
+    });
   });
 
   it("a stale authority Promise cannot settle a later session on the same controller", async () => {

@@ -191,10 +191,13 @@ commit, no rewritten full intent on native events, no multi-row `DragSubject`.
 `reorderAuthority` remains in `WEB_ONLY_PROPS`. Diff contains no Rust/GPUI
 source.
 
-PR #127 changes-requested repair: `treeAuthorityDropEligibility` refuses an
-accepted policy that mutates hover target, indicator position, or operation
-before dest rewrite. `treeAcceptedDropDepth` walks the full tree so a
+PR #127 changes-requested repair: `treeAuthorityDropEligibility`
+snapshots hover fields, hands the host a detached intent, and builds
+accepted state from the snapshot so in-place mutation of target, position,
+or operation is refused. `treeAcceptedDropDepth` walks the full tree so a
 collapsed rewritten dest still paints dest depth. Paired tests change
-selection after pickup and before release, and a pending Promise is proven
-on one mounted controller (matching terminal plus source-loss then a later
-dropping session).
+selection after pickup and before release. A pending Promise is proven on
+one mounted controller (exactly one `onDrop`, exact rejected/failed
+announcement, source-loss then a later dropping session). Packed tarball
+types cover core, both Svelte paths, and the React `TreeProps` JSX
+boundary.

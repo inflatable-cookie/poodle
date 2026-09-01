@@ -2,10 +2,10 @@
 //
 // A real installed consumer must see one `TreeReorderSubject`,
 // `TreeReorderCandidate`, `TreeReorderAuthority`, and `TreeReorderProps`
-// across core and both Svelte public import paths. React re-exports the same
-// core types from its package root; that root is a TSX graph, so this fixture
-// does not import it. Nothing here reaches into `src/` or reads a declaration
-// file as text.
+// across core and both Svelte public import paths. The React root lives in
+// `tree-reorder-react-positive.ts` so this Svelte/core compile can stay
+// jsx-free. Nothing here reaches into `src/` or reads a declaration file as
+// text.
 import type {
   TreeReorderAuthority as CoreAuthority,
   TreeReorderCandidate as CoreCandidate,

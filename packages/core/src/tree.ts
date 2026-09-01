@@ -409,6 +409,23 @@ export function treeLatchReorderSubject<T extends TreeNodeLike>(
   };
 }
 
+/** Detached copy so a host cannot alias controller-owned hover fields. */
+function snapshotDropIntent(intent: DropIntent): DropIntent {
+  return {
+    targetId: intent.targetId,
+    position: intent.position,
+    operation: intent.operation,
+    ...(intent.destination
+      ? {
+          destination: {
+            targetId: intent.destination.targetId,
+            position: intent.destination.position,
+          },
+        }
+      : {}),
+  };
+}
+
 /**
  * Generic Tree safety, then live host policy, then structural validation of
  * any rewritten destination. Hover target, indicator position, and operation
@@ -424,33 +441,35 @@ export function treeAuthorityDropEligibility<T extends TreeNodeLike>(
   if (!subject || !authority) {
     return { accepted: false, reason: "unavailable" };
   }
+  const hovered = snapshotDropIntent(intent);
   for (const moving of subject.movingValues) {
-    const safety = treeDropEligibility(nodes, moving, intent);
+    const safety = treeDropEligibility(nodes, moving, hovered);
     if (!safety.accepted) return safety;
   }
-  const policy = authority.canDrop({ subject, intent });
+  const policy = authority.canDrop({ subject, intent: snapshotDropIntent(intent) });
   if (!policy.accepted) return policy;
   if (
-    policy.intent.targetId !== intent.targetId ||
-    policy.intent.position !== intent.position ||
-    policy.intent.operation !== intent.operation
+    policy.intent.targetId !== hovered.targetId ||
+    policy.intent.position !== hovered.position ||
+    policy.intent.operation !== hovered.operation
   ) {
     return { accepted: false, reason: "unavailable" };
   }
-  const dest = dropCommitDestination(policy.intent);
-  if (!isTreeDropPosition(dest.position) || !isTreeDropPosition(intent.position)) {
+  const destSource = dropCommitDestination(policy.intent);
+  if (!isTreeDropPosition(destSource.position) || !isTreeDropPosition(hovered.position)) {
     return { accepted: false, reason: "unavailable" };
   }
+  const dest = { targetId: destSource.targetId, position: destSource.position };
   const acceptedIntent: DropIntent = {
-    targetId: intent.targetId,
-    position: intent.position,
-    operation: intent.operation,
+    targetId: hovered.targetId,
+    position: hovered.position,
+    operation: hovered.operation,
     destination: dest,
   };
   const destIntent: DropIntent = {
     targetId: dest.targetId,
     position: dest.position,
-    operation: intent.operation,
+    operation: hovered.operation,
   };
   for (const moving of subject.movingValues) {
     const safety = treeDropEligibility(nodes, moving, destIntent);

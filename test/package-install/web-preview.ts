@@ -407,11 +407,36 @@ async function provePackedTreeReorderTypes(
     );
   }
 
-  const positive = await runTypeCompile(consumerRoot, compiler, "tsconfig.tree-positive.json");
-  if (positive.exitCode !== 0 || positive.output.length > 0) {
+  const installedReactTypes = join(
+    consumerRoot,
+    "node_modules",
+    "@inflatable-cookie",
+    "poodle-react",
+    "src",
+    "types.ts",
+  );
+  if (!existsSync(installedReactTypes)) {
     throw new Error(
-      `packed Tree reorder positive proof failed on the installed tarball:\n${positive.output}`,
+      "the packed React tarball omitted src/types.ts; the Tree reorder React type proof cannot run",
     );
+  }
+  if (!readFileSync(installedReactTypes, "utf8").includes("export type TreeProps")) {
+    throw new Error(
+      "the packed React tarball types module omitted exported TreeProps; the exclusive Tree boundary cannot be proved",
+    );
+  }
+
+  const positives = [
+    { file: "tree-reorder-positive.ts", config: "tsconfig.tree-positive.json" },
+    { file: "tree-reorder-react-positive.ts", config: "tsconfig.tree-react-positive.json" },
+  ] as const;
+  for (const item of positives) {
+    const compile = await runTypeCompile(consumerRoot, compiler, item.config);
+    if (compile.exitCode !== 0 || compile.output.length > 0) {
+      throw new Error(
+        `packed Tree reorder positive proof failed on the installed tarball (${item.file}):\n${compile.output}`,
+      );
+    }
   }
 
   const negatives = [
@@ -429,6 +454,11 @@ async function provePackedTreeReorderTypes(
       importPath: "@inflatable-cookie/poodle-core",
       file: "tree-reorder-core-negative.ts",
       config: "tsconfig.tree-core-negative.json",
+    },
+    {
+      importPath: "@inflatable-cookie/poodle-react",
+      file: "tree-reorder-react-negative.tsx",
+      config: "tsconfig.tree-react-negative.json",
     },
   ] as const;
 
@@ -464,8 +494,8 @@ async function provePackedTreeReorderTypes(
     compiler: realpathSync(compiler),
     importPaths: negatives.map((negative) => negative.importPath),
     positive: {
-      file: "tree-reorder-positive.ts",
-      exitCode: positive.exitCode,
+      files: positives.map((item) => item.file),
+      exitCode: 0,
       diagnostics: [],
     },
     expectedFailures: negativeEvidence,
@@ -584,6 +614,8 @@ const consumerManifest = {
     "@sveltejs/vite-plugin-svelte": "6.2.1",
     "@testing-library/react": "16.3.0",
     "@testing-library/svelte": "5.4.2",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
     "happy-dom": "20.11.1",
     typescript: "7.0.2",
     vite: "7.3.1",
