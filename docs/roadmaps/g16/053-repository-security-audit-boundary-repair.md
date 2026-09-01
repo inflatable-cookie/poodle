@@ -1,7 +1,6 @@
 # g16.053 — Repository Security-Audit Boundary Repair
 
-Status: complete — implementation on `fix/g16-053-security-audit-boundary`;
-orchestrator review and merge pending
+Status: complete — PR #150; orchestrator review and merge pending
 Type: implementation — Papercuts
 Opened: 2026-09-01
 Completed: 2026-09-02

@@ -2,6 +2,7 @@
 
 Status: complete — awaiting orchestrator review
 Date: 2026-09-02
+PR: https://github.com/inflatable-cookie/poodle/pull/150
 Card: `docs/roadmaps/g16/053-repository-security-audit-boundary-repair.md`
 Handoff: `docs/handoffs/20260902-004205-g16-053-security-audit-boundary.md`
 Governing refs: `docs/contracts/001-working-rules.md`, `PAPERCUTS.md`
