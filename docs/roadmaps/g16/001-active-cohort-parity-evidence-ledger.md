@@ -232,7 +232,7 @@ measured missing cells.
   artifacts proven stale by this card
 - `docs/roadmaps/g15/release-gap-register.md` for the bounded capture
   supersession correction
-- `docs/triage/20260821-165500-longhorn-conformance-lab.md` for the shipped
+- `docs/triage/20260902-000958-conformance-lab-and-visual-gates.md` for the shipped
   GPUI capture boundary
 - `tasks/effigy.tasks.toml` only to expose the checker or correct stale task
   comments; no selector semantics may be weakened

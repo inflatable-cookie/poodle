@@ -25,20 +25,31 @@ Updated: 2026-09-01
     `034` merged in PR #124 after four exact-head review rounds and delivered
     the shared motion policy and five-family pilot; `035` merged in PR #123 after
     two native-oracle repair rounds and closed the independent MarkdownEditor
-    bounded-preview issue; `036` is in exact-head review for the paired-web
-    Tree external drop-authority adapter after PR #125 supplied the interaction
-    and outline geometry baseline; `037`–`044` completed the DesEngs research
-    wave in merged PRs #128–#135
+    bounded-preview issue; `036` merged in PR #127 with the paired-web Tree
+    external drop-authority adapter; `037`–`044` completed the DesEngs research
+    wave in merged PRs #128–#135; `045`–`054` are the canonical post-triage
+    continuation cards; independent `055` is ready on current main
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: finish `g16.036` with serial same-repository review and merge.
-    The remaining post-motion queue is
-    recorded in
-    `../triage/20260901-125758-post-motion-research-queue.md`; block sliders
-    follow the motion pilot, while icon feasibility and AgentSubagent shimmer
-    remain downstream evidence gates. Component continuation remains paused at
-    the separate EditableLabel decision gate.
+  - Ready frontier: `g16.045` EditableLabel, `g16.046` block sliders,
+    `g16.047` toast updates, `g16.048` AgentSubagent reconciliation/benchmark,
+    `g16.049` icon geometry foundation, and `g16.053` security-audit boundary
+    repair.
+  - Independent ready lane: `g16.055` drag-source pre-activation selection
+    suppression, with its own committed worker handoff; it is outside the
+    post-triage continuation map.
+  - Blocked frontier: `g16.050` on `049`; `g16.051` on `050`, the operational
+    Button lab, and its separately accepted icon adapter/manifest extension;
+    `g16.052` on named reviewers, approvals, and orchestrator run custody;
+    `g16.054` on accepted `053` plus an accepted, separately promoted
+    compiled-JS/declarations prerequisite whose mechanics remain unplanned.
+    Citations, nested menus, the visual tranche, public IconMorph,
+    publication/adoption, CS20, keyboard geometry, GPUI accessibility,
+    Jetstream, and the separate holistic promotion batch retain the gates
+    recorded in `g16/component-continuation-runway.md`.
+  - Next move: orchestrator reviews and merges the exact planning head, then
+    dispatches only the ready frontier with overlap-aware serialization.
 
 ## Latest Completed Track
 

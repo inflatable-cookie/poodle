@@ -1,65 +1,99 @@
 # g16 Component Continuation Runway
 
-Status: active planning map — TimeInput, NumberInput, continuous audio, and the
-drag programme complete; HistoryCenter portfolio follow-on ready separately as
-`g16.033`
-Compiled: 2026-08-28
-Source: `component-continuation-register.md`
+Status: canonical post-triage planning map
+Compiled: 2026-09-01
+Source head: `ec2c226db781e05db2642f77ff4c6fbfb0fcc94d`
+Sources: `component-continuation-register.md`, the accepted consolidation
+handoff, promoted cards, the remaining open triage gates, and the open
+holistic posture assessment
 
-This file routes the seven candidate lanes from the 175-row audit. It does not
-copy the register, change evidence, or turn a missing cell into a defect.
+This map replaces the stale post-motion queue with one bounded continuation
+frontier. It records promotion, serial edges, external gates, and holds. It
+does not change parity evidence, authorize release or sibling-repository
+mutation, or create a worker handoff.
 
-## Lane Map
+Current main also carries independent ready card
+[`g16.055`](055-drag-source-preactivation-selection-suppression.md) and its
+worker handoff. They remain outside this post-triage map and are neither
+absorbed nor renumbered here.
 
-| Order | Lane | Current state | Promotion gate |
-| ---: | --- | --- | --- |
-| 1 | TimeInput native entry | complete as `g16.029` | merged in PR #97; ledger 48 mounted / 126 missing |
-| 2 | NumberInput and EditableLabel editing models | NumberInput complete as `g16.030`; EditableLabel decision-blocked | merged in PR #98; resolve EditableLabel separately |
-| 3 | Dependable drag-and-drop family | complete through PR #118 | compiled separately as `g16.021`–`g16.028`; do not issue component-local drag repairs |
-| 4 | Fader, Knob, and XYPad interaction | complete through `g16.032` / PR #100 | native mounting landed; never overlap a Node/GPUI routing card with `g16.025` |
-| 5 | GPUI accessibility evidence | programme choice | operator selects it as a programme and accepts the manual/runtime evidence boundary |
-| 6 | Cross-runtime visual comparison | programme choice | operator selects a fixture/comparison tranche without reviving specimen snapshots or a component IR |
-| 7 | No current implementation lane | closed/evidence-only | 162 rows remain out of implementation until concrete evidence names work |
+## Closed Baseline
 
-## Next Component Decision
+- `g16.029`–`g16.035` are complete.
+- `g16.036` is complete in PR #127. Its paired-web Tree authority seam keeps
+  the existing native synchronous single-row route.
+- `g16.037`–`g16.044` are research-complete in PRs #128–#135.
+- The accepted consolidation resolves the previous EditableLabel,
+  block-slider, toast, shimmer, icon-geometry, design-guidance, release,
+  citations, nested-menu, lab, visual-tranche, and Jetstream questions.
 
-TimeInput's native editing decision is closed in `g16.029`. The contract keeps
-its canonical time string, makes partial/invalid drafts adapter-owned, defines
-valid-value-only callbacks, whole-second stepping and overnight ranges, and
-ships a segmented 24-hour GPUI editor plus a clean Rust `TimeInputSpec` /
-`time_input` rename.
+## Ready Frontier
 
-NumberInput's clean value-model decision is complete. Its contract now uses a
-typed committed `number | null`, an optional raw-draft channel, valid-value-only
-changes, explicit commit/revert behavior, and no string-value or redundant
-step-source callbacks. `g16.030` delivered the bounded clean migration and
-mounted proof in PR #98. EditableLabel remains behind its separate
-activation/draft/commit/focus decision.
+These cards have complete boundaries and no unmet serial dependency:
 
-The bounded Fader/Knob/XYPad audit is complete. The old register description
-was wrong: Rust scalar and XY machines exist, but they are not behaviorally
-paired or mounted. Fine movement is not anchored like TypeScript, Fader detents
-and Knob modes are absent, XYPad press semantics differ, web pointer lifetime
-can duplicate or strand gestures, and Svelte Knob/Fader entry blur can undo the
-intended Enter/Escape boundary. `g16.031` closed paired machine and web
-lifecycle behavior. `g16.032` added one bounded Node continuous-value event
-and mounted all three in GPUI. Payload drag-and-drop remains separate.
+| Card | Lane | Writable boundary | Result |
+| --- | --- | --- | --- |
+| [`g16.045`](045-editable-label-editing-model-and-mounted-parity.md) | EditableLabel | contract, paired runtime implementation, mounted proof | one committed/draft editing model |
+| [`g16.046`](046-block-slider-and-range-slider-appearance.md) | Slider / RangeSlider | additive appearance contract and active-runtime implementation | opt-in horizontal block treatment |
+| [`g16.047`](047-toast-same-id-update-convention.md) | ToastHost / ToastStack | existing host update path, timer, announcement, focus, native role | consumer-owned same-id settlement convention |
+| [`g16.048`](048-agent-subagent-ownership-and-shimmer-benchmark.md) | AgentSubagent | contract reconciliation, then disposable web benchmark | threshold verdict; no shipped shimmer |
+| [`g16.049`](049-icon-geometry-format-and-registry-foundation.md) | icon geometry IG-01/02 | internal architecture, format, vectors, generated registry | validated internal geometry foundation |
+| [`g16.053`](053-repository-security-audit-boundary-repair.md) | repository audit | existing OpenAI-key matcher and focused tests | green, non-waived security audit input |
 
-## Parallelism
+These six lanes are independently dispatchable after this planning PR is accepted.
+If implementation discovers shared barrel, registry, contract, or generated
+file ownership between cards, serialize the overlapping pair before edits.
+Global g16 front-door and closeout edits remain orchestrator-owned.
 
-`g16.029`–`g16.032` are merged. No accessibility, visual, motion,
-Longhorn-lab, or Jetstream worker is ready from this map. EditableLabel remains
-decision-blocked rather than becoming an implementation card by default.
+`g16.048` contains one internal phase gate: reconcile the stale contract only
+to current static Svelte, React, shared Rust, and GPUI ownership before running
+the disposable browser benchmark. The candidate lifecycle remains card/log
+evidence. A threshold pass can justify a later bounded implementation card;
+it cannot ship production shimmer or promise it in the contract itself.
 
-The Loophole portfolio refresh promoted `g16.033` outside the 175-component
-audit. Its public HistoryCenter rejection shape is chosen, PR #118 satisfied
-the sequencing gate, and the post-merge readiness review found the lane
-coherent. The existing Svelte v3 `HistoryEntry` source fix is evidence to
-preserve and prove through the packed candidate, not repeat.
+## Serial Frontier
+
+| Card or continuation | State | Opens when | Fixed boundary |
+| --- | --- | --- | --- |
+| [`g16.050`](050-icon-geometry-internal-runtime-substrate.md) | blocked | accepted `g16.049` | IG-03–IG-05; internal plan, node/GPUI headless proof, private web shells |
+| [`g16.051`](051-icon-geometry-native-visual-admission.md) | blocked | accepted `g16.050`, operational Button lab, and separately accepted icon adapter/manifest extension | IG-06 native visual admission only |
+| [`g16.052`](052-contributor-design-guidance-pilot.md) | gated | named human reviewers, two freeze approvals, and orchestrator execution custody | finite matched pilot; no ordinary worker judgment |
+| [`g16.054`](054-historycenter-v030-release-candidate.md) | blocked | accepted `g16.053` plus an accepted, separately promoted compiled-JS/declarations prerequisite whose mechanics remain unplanned | immutable `0.3.0` candidate and validation evidence; no release mutation |
+| AgentSubagent implementation | gated | `g16.048` meets every threshold and a new bounded card is accepted | web-only finite sweep; no generic effect API |
+| IconMorph public admission | gated | `g16.051` returns an admit verdict | IG-07 requires a later explicit public card |
+| HistoryCenter publication and Loophole adoption | gated | accepted `g16.054`, exact receipts, and separate orchestrator authority | tag/publish and sibling adoption stay distinct mutations |
+
+## Programme Gates And Holds
+
+| Programme | State | Missing authority or proof | Next planning event |
+| --- | --- | --- | --- |
+| nested menu pointer intent | gated | recursive React/Rust/GPUI substrate plus resolved focus-contract contradiction | compile only after both prerequisites are explicit; retain conditional pointer corridor and synchronized close grace |
+| agent citations | gated | authored rich semantic content carrier and paragraph-level consumer evidence | keep composition-owned; compile the carrier prerequisite separately |
+| dedicated conformance lab | external hold | separate repository authority and operator-approved Button-only capture environment | bootstrap the closed Button MVP outside this Poodle runway |
+| icon-geometry lab extension | blocked | operational Button MVP plus separately planned/authorized closed adapter and manifest extension | land external extension before `g16.051`; bootstrap alone is insufficient |
+| six-component / 24-fixture visual tranche | blocked | operational lab plus its own bounded adapter/manifest coverage | preserve the accepted fixture set; do not substitute local windowed runs |
+| CS20 `groupId` | owner hold | Loophole/Pulse recording-policy decision | no Poodle card; promote only in the owning repository if stable identity is selected |
+| keyboard vertical geometry | design hold | operator-selected component geometry | keep separate from HistoryCenter, release, and the closed drag programme |
+| GPUI accessibility | programme hold | explicit programme choice and accepted manual/runtime evidence boundary | no component-local card |
+| Jetstream | hold | backend admission remains outside the active cohort | no implementation card |
+
+The nested-menu direction remains conditional pointer intent: immediate sibling
+transfer only inside a valid corridor and accepted synchronized close grace.
+The citation direction remains composition-gated: paragraph proof first, with
+the full semantic content carrier as a separate serial prerequisite.
+
+### Separate Holistic Promotion Batch
+
+The [holistic posture assessment](../../triage/20260901-233708-holistic-posture-assessment.md)
+remains open input. Its Nucleus 29-component execution-backed GPUI parity
+programme, React drift gate, approved Linux web/Rust workflow card,
+direct-Underlay authority correction, and recurring consumer-papercut intake
+await a separate promotion batch. This runway compiles none of those cards.
 
 ## Promotion Rule
 
-For a candidate to become a numbered roadmap card, record the operator choice
-in its contract or architecture first, then supply bounded scope, acceptance,
-validation, evidence movement, stop conditions, and continuation. Do not send a
-worker to discover the decision inside implementation.
+A continuation becomes ready only when its authority, writable scope,
+acceptance, validation, evidence movement, stop conditions, and dependencies
+are explicit. A missing ledger cell alone is not a defect. External lab,
+release, adoption, and backend work never inherit authority from a planning
+card.

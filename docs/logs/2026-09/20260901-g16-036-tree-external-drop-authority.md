@@ -1,6 +1,6 @@
 # g16.036 — Tree External Drop Authority
 
-Status: in-review
+Status: complete — merged in PR #127
 Date: 2026-09-01
 Card: `docs/roadmaps/g16/036-tree-external-drop-authority.md`
 Handoff: `docs/handoffs/20260901-202401-g16-036-tree-external-drop-authority.md`
@@ -8,6 +8,7 @@ Governing refs: `docs/contracts/components/tree.md`,
 `docs/architecture/011-drag-and-drop-substrate.md`,
 `docs/specs/069-dependable-drag-and-drop-substrate.md`
 Branch: `feature/g16-036-tree-external-drop-authority`
+Merge: `f5663085aed62abd3d347931a7e7560465bd95ae`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-036-tree-external-drop-authority`
 Base: rebased onto `origin/main` at `c90ea1c6cec887c54827cbb518e0f3ba54901429`
 (PR #132 live-series research, PR #131 nested-menu research, PR #124 motion

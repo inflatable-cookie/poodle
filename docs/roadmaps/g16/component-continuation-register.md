@@ -1,12 +1,14 @@
 # g16.020 — Component Continuation Register
 
-Status: live continuation map — audit complete; promoted lanes reconciled
+Status: audit baseline plus canonical post-triage promotion overlay
 Date: 2026-08-28
-Updated: 2026-08-31
+Updated: 2026-09-01
 Card: docs/roadmaps/g16/020-component-continuation-audit.md
 Source authority: live public Svelte exports, generated portable catalogue, and docs/roadmaps/g16/parity-evidence-ledger.md
 
-This register accounts for the live roster once. It classifies continuation work; it does not duplicate the ledger, promote a repair, or mark a candidate ready.
+This register accounts for the live roster once. Its audit rows remain the
+point-in-time `g16.020` classification. The promotion overlay records current
+cards without changing parity evidence or silently rewriting the audit.
 
 ## Live accounting
 
@@ -14,7 +16,7 @@ The deterministic source check returned 175 Svelte exports, 174 portable native 
 
 The one-off accounting command used deriveLiveRoster() from scripts/parity-evidence-ledger.ts, the generated preview catalogue, and the live ledger section. No permanent schema or checker was added.
 
-### Classification counts
+### g16.020 audit-baseline classification counts
 
 | Continuation class | Count | Meaning |
 | --- | ---: | --- |
@@ -24,6 +26,21 @@ The one-off accounting command used deriveLiveRoster() from scripts/parity-evide
 | decision-blocked | 1 | EditableLabel still needs a contract/API decision before implementation. |
 | programme-owned | 5 | The single architecture 011/spec 069 drag programme. Closed by `g16.028`: all seven components are on the common substrate on every active runtime. |
 | unknown | 0 | The bounded continuous-audio audit resolved the final unknown family. |
+
+### 2026-09-01 promotion overlay
+
+| Surface | Audit posture | Current disposition |
+| --- | --- | --- |
+| EditableLabel | decision-blocked | decision resolved; `g16.045` ready |
+| Slider / RangeSlider | closed component baseline | additive block appearance promoted as `g16.046`; existing track behavior remains closed |
+| ToastHost / ToastStack | closed component baseline | same-id lifecycle repair promoted as `g16.047` |
+| AgentSubagent | closed component baseline | ownership reconciliation and disposable shimmer benchmark promoted as `g16.048`; no production effect yet |
+| Icon / IconProvider | closed component baseline | internal geometry chain promoted as `g16.049`–`g16.051`; existing Icon remains static |
+| Tree | closed component baseline | external drop authority complete in `g16.036` / PR #127 |
+
+The canonical ready, serial, gated, and held frontier lives in
+`component-continuation-runway.md`. The 175-row denominator and ledger cells
+remain unchanged by this planning overlay.
 
 ## Historical reconciliation
 

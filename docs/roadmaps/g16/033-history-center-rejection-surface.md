@@ -12,7 +12,7 @@ Governing refs: `../../contracts/components/history-center.md`,
 Source evidence: Loophole `PAPERCUTS.md` entries “HistoryCentre delete
 rejections collapse to UnknownEntry” and “Poodle-svelte types.ts still exports
 v2 HistoryEntry”, reassessed after Loophole PR #14 merged. Portfolio ownership
-is recorded in `../../triage/20260831-194043-history-papercut-ownership.md`.
+is recorded in `../../triage/20260902-000956-history-portfolio-holds.md`.
 
 ## Goal
 

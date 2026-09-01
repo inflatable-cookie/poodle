@@ -13,6 +13,17 @@ behavior repairs without inventing another conformance authority.
 ## Current State
 
 - [Generation index](generation-index.md) is the canonical status summary.
+- `g16.036` is complete in PR #127. The 2026-09-01 triage decisions are
+  consolidated in the [canonical continuation map](g16/component-continuation-runway.md):
+  `g16.045`–`g16.049` and `g16.053` are ready; `g16.050`, `g16.051`,
+  and `g16.052` keep explicit serial, ownership, or external gates. `g16.054`
+  stays blocked on both accepted `g16.053` and an accepted, separately promoted
+  compiled-JS/declarations prerequisite whose mechanics remain unplanned.
+  Citations, nested menus, the lab-backed visual tranche, public IconMorph,
+  release and adoption mutations, GPUI accessibility, Jetstream, and the
+  separate holistic promotion batch remain gated or held.
+  Independent `g16.055` is ready on current main with its own worker handoff;
+  it remains outside the post-triage continuation map.
 - `g16.001` is complete and operator-reviewed in PR #75. It repairs stale
   parity reporting and produces one component-level evidence ledger. `g16.002`
   closed — partial outcome: mounted GPUI behaviour for Checkbox, Switch, and
@@ -100,8 +111,8 @@ behavior repairs without inventing another conformance authority.
   The later Tabs/DockRegion drag migrations now have an
   approved clean public break: old DOM-shaped helpers disappear only after
   their mounted replacements pass, with no compatibility layer. Other
-  component-continuation decisions remain separate; EditableLabel is the next
-  unresolved editing contract.
+  component-continuation decisions remain separate; EditableLabel's accepted
+  editing contract is now ready as `g16.045`.
 - `g14` tested executable component conformance across Svelte, React, and
   GPUI. `g14.008` rejected the mechanism after its cost and coverage audit;
   `g14.021` preserved the useful fixes and removed the failed authority;
@@ -151,21 +162,11 @@ behavior repairs without inventing another conformance authority.
 - `g15` — completed v0.2.x release and adoption programme; corrected v0.2.2
   published from candidate `d5607def`, with all 16 authoritative consumers
   adopted and React retained as source-only
-- `g16` — active evidence-recovery checkpoint; `001` complete and
-  operator-reviewed; `002` closed — partial outcome; `003` merged in PR #77;
-  `004` merged in PR #78; `005` merged in PR #79; `006` merged in PR #80;
-  `007` merged in PR #81; `008` merged in PR #82; `009` merged in PR #83;
-  `010` merged in PR #84; `011` merged in PR #85; `012` merged in PR #86;
-  `013` merged in PR #87; `014` merged in PR #88; `015` merged in PR #90;
-  `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
-  `019` complete, merged in PR #94, ledger 47 mounted / 127 missing; `020`
-  complete, merged in PR #95. `029`–`032` are complete component-continuation
-  cards. `033` merged the HistoryCenter portfolio-papercut surface in PR #120;
-  `034` is ready for the promoted shared motion policy and five-family pilot.
-  Dependable drag-and-drop remains a
-  separate programme governed by architecture 011/spec 069 and compiled as
-  `021`–`028`; `021`–`027` are merged, and `028` is ready as the final
-  checkpoint.
+- `g16` — active evidence-led continuation generation. `001`–`044` are closed
+  or research-complete, including Tree authority in PR #127. The canonical
+  post-triage runway is compiled as `045`–`054`; six cards are ready and four
+  preserve serial, ownership, or external gates. Dependable drag-and-drop remains a
+  closed programme governed by architecture 011/spec 069.
 
 ## Rules
 

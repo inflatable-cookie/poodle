@@ -1,6 +1,8 @@
 # g16.036 — Tree External Drop Authority
 
-Status: in-review
+Status: complete — merged in PR #127
+Closed: 2026-09-01
+Merge: `f5663085aed62abd3d347931a7e7560465bd95ae`
 Opened: 2026-09-01
 Depends on: merged `g16.028`, `g16.024`, and PR #125 at
 `a980cb7748fdf9751dd4ca64b02903111a44d59f`; independent of `g16.034`
