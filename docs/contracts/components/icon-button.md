@@ -397,6 +397,21 @@ button-owned wrapper.
 | `white-space` | `nowrap` |
 | `pointer-events` | `none` |
 
+## 8a. Motion Policy
+
+Pressed, loading, label, busy, disabled, and activation semantics update
+immediately. Initial authored state paints its endpoint.
+
+For a same-slot icon/state replacement:
+
+- `full`: use one stable semantic owner key and a bounded crossfade or accepted
+  transform; latest state wins without queued phases;
+- `reduced`: use only a short opacity crossfade; and
+- `frozen`: paint the latest endpoint with no clock.
+
+Spinner loop policy follows the Spinner contract. Motion completion never
+activates the button or emits a pressed-state callback.
+
 ## 9. Svelte Notes
 
 - Uses native `<button>` element with `type` from prop (default `"button"`)

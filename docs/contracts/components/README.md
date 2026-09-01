@@ -1,7 +1,7 @@
 # Component Contracts
 
 Status: active
-Updated: 2026-04-11
+Updated: 2026-09-01
 
 Component contracts define every reusable surface in Poodle, from low-level
 primitives and layout surfaces through higher-order application components.
@@ -117,6 +117,7 @@ primitives and layout surfaces through higher-order application components.
 - `model-connection-picker.md`
 - `model-connection-setup.md`
 - `model-picker.md`
+- `motion-policy-provider.md`
 - `mod-matrix-grid.md`
 - `nav-card.md`
 - `navigation-menu.md`

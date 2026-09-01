@@ -21,17 +21,18 @@ Updated: 2026-09-01
     `029` complete and merged (TimeInput native parity, ledger 48/126); `030`
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
-    mounted parity, ledger 56/118 after `028`); `033` is ready for the
-    HistoryCenter rejection surface and packed v3 HistoryEntry proof, its public
-    API decision promoted and its sequencing gate satisfied by PR #118
+    mounted parity, ledger 56/118 after `028`); `033` merged in PR #120;
+    `034` is ready for the shared motion policy and five-family pilot after
+    planning PR #121 promoted architecture 012
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: dispatch the promoted `g16.033` HistoryCenter rejection surface
-    with the required `Papercuts` workspace label. The post-g16 research queue
-    (`../triage/20260901-080641-post-g16-research-queue.md`) sits behind that
-    lane and cannot displace it. Component continuation remains paused at the
-    separate EditableLabel decision gate.
+  - Next move: dispatch `g16.034`. The remaining post-motion research queue is
+    recorded in
+    `../triage/20260901-125758-post-motion-research-queue.md`; block sliders
+    follow the motion pilot, while icon feasibility and AgentSubagent shimmer
+    remain downstream evidence gates. Component continuation remains paused at
+    the separate EditableLabel decision gate.
 
 ## Latest Completed Track
 

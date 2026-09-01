@@ -1,7 +1,7 @@
 # Contracts
 
 Status: active
-Updated: 2026-08-16
+Updated: 2026-09-01
 
 Contracts are the docs-first source of truth for Poodle components.
 
@@ -160,6 +160,7 @@ contract references the rule rather than restating it:
 - `components/model-connection-picker.md`
 - `components/model-connection-setup.md`
 - `components/model-picker.md`
+- `components/motion-policy-provider.md`
 - `components/nav-card.md`
 - `components/navigation-menu.md`
 - `components/number-input.md`

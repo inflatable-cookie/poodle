@@ -1,7 +1,7 @@
 # 001 Poodle System Shape
 
 Status: active
-Updated: 2026-08-15
+Updated: 2026-09-01
 
 ## Purpose
 
@@ -27,7 +27,8 @@ component semantics               W3C DTCG token source
                               poodle-render
                      Spec + RenderContext -> Node
                   (context: borrowed theme + presentation
-                   defaults — architecture 010)
+                   defaults + effective motion policy —
+                   architectures 010 and 012)
                               /             \
                     GPUI node backend   Jetstream backend
 ```
@@ -104,6 +105,7 @@ The framework-free web package owns:
 - component state machines and prop getters
 - generated token data and CSS
 - shared component styles
+- motion-policy laws and framework-neutral context helpers
 - icon types, the scoped default Lucide set, and the icon build command
 
 It must not import Svelte or React.
@@ -142,9 +144,11 @@ These crates do not own GPUI or Jetstream widgets.
 ### Shared renderer
 
 `poodle-render` is the single Rust component implementation. Its functions
-accept a spec, a theme provider, and handlers where required, then return a
-`poodle-node` tree. Component composition, token selection, state treatment,
-and interaction intent belong here when they are shared across native targets.
+accept a spec, one `RenderContext`, and handlers where required, then return a
+`poodle-node` tree. The context carries theme, presentation defaults, and the
+effective motion policy. Component composition, token selection, state
+treatment, motion declarations, and interaction intent belong here when they
+are shared across native targets.
 
 ### GPUI
 

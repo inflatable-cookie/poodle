@@ -27,6 +27,7 @@ Updated: 2026-08-31
   │     │     │     └── [Label .poodle-tabs__label]  <span>
   │     │     ├── [Close .poodle-tabs__close] (optional, when closable)
   │     │     └── [Tooltip] (optional, when `showTooltips`; wraps the tab)
+  │     ├── [Underline Indicator .poodle-tabs__indicator] (conditional, when activeEdge="underline")
   │     ├── [Collapsed Menu] (optional, when `collapseWhenOverflow` and the list overflows; Menu replacing the tablist)
   │     └── [Actions .poodle-tabs__actions] (optional actions snippet)
   └── [Panel .poodle-tabs__panel]  role="tabpanel" (optional, when `children(activeValue)` snippet exists)
@@ -41,6 +42,7 @@ Updated: 2026-08-31
 | Label | yes | text content | whitespace, min-width |
 | Close | no | close button (when closable) | icon color, hover bg |
 | Tooltip | no | hover tooltip over a tab (when `showTooltips`) | Tooltip component tokens |
+| Underline Indicator | no | one paint-only measured indicator for `activeEdge="underline"` | accent fill, motion transform/size |
 | Collapsed Menu | no | overflow affordance: collapses the tablist into a `Menu` (when `collapseWhenOverflow` and the list overflows) | Menu component tokens |
 | Actions | no | trailing actions snippet | margin-left auto |
 | Panel | no | content region (when `children(activeValue)` snippet provided) | border, background, padding |
@@ -464,15 +466,14 @@ When `bordered` is `false`, the `border-bottom` is removed (set to `0`).
 
 ### The edge axis: one enum, mutually exclusive by construction
 
-`activeEdge` and `activeFill` apply to all variants. The border axis is a single
-enum because `outline` and `underline` are both borders on the item and conflict
-on the same property — a boolean pair would need suppression rules (the former
-`strip` variant carried exactly those: the boolean outline silently destroyed
-strip's indicator and was patched with strip-specific rules). The enum makes
-the conflict unrepresentable: exactly one edge value applies.
+`activeEdge` and `activeFill` apply to all variants. The edge axis is a single
+enum because `outline` and `underline` are mutually exclusive selection
+treatments. Outline paints the selected item border; underline paints one
+measured list indicator. A boolean pair would need suppression rules. The enum
+makes the conflict unrepresentable: exactly one edge value applies.
 
-`underline` draws the accent edge along the inline-end side — the former
-`strip` variant's indicator. `block` + `activeEdge="underline"` +
+`underline` draws one measured accent edge along the inline-end side — the
+former `strip` variant's visual result with a shared moving owner. `block` + `activeEdge="underline"` +
 `activeFill="none"` is exactly the deleted `strip` variant: underline and no
 fill. Block absorbs strip's list inline padding, item hover background,
 close-button margin-end tweak, and vertical-orientation handling, and keeps
@@ -506,39 +507,25 @@ item also carries the chip radius, so the outline is correctly rounded.
 This is the former `card` variant's selected-border value, so opting in restores
 exactly the outline the old variant drew by default.
 
-### Item (activeEdge="underline")
+### Underline indicator (`activeEdge="underline"`)
 
-Applies when `activeEdge` is `"underline"`, on every variant. The former strip
-indicator: a 0.125rem accent edge on the item, pulled over the list edge by a
-negative margin so it visually replaces the list's border line. The transparent
-reserve border keeps the bar from shifting when the selected item's edge
-becomes visible.
+One paint-only child of the tablist represents the selected underline. It is
+measured from the selected item rather than painted as a selected-item border.
 
-| Property | Value |
-|----------|-------|
-| `border-bottom` | `0.125rem solid transparent` |
-| `margin-bottom` | `-0.0625rem` |
+| Orientation | Geometry |
+| --- | --- |
+| horizontal | selected item's inline offset and width; 0.125rem block size on the list's bottom edge |
+| vertical | selected item's block offset and height; 0.125rem inline size on the list's right edge |
 
-### Item (activeEdge="underline", selected)
+The indicator uses `var(--poodle-recipe-tabs-active-underline-border,
+var(--poodle-color-accent-base))`. It never owns selection, focus, hit testing,
+or accessibility semantics.
 
-| Property | Value |
-|----------|-------|
-| `border-bottom-color` | `var(--poodle-color-accent-base)` |
-
-### Item (activeEdge="underline", vertical)
-
-| Property | Value |
-|----------|-------|
-| `border-bottom` | `0` |
-| `border-right` | `0.125rem solid transparent` |
-| `margin-bottom` | `0` |
-| `margin-right` | `-0.125rem` |
-
-### Item (activeEdge="underline", vertical, selected)
-
-| Property | Value |
-|----------|-------|
-| `border-right-color` | `var(--poodle-color-accent-base)` |
+First measurement paints the selected endpoint without motion. A semantic
+selection change against stable geometry retargets from the current rendered
+geometry to the latest selected tab. Orientation change, container resize,
+font reflow, and overflow-mode change cancel motion, remeasure, and snap. In
+`reduced` and `frozen`, every update snaps and schedules no indicator clock.
 
 ### Recipe hooks — the active axis
 
@@ -550,12 +537,12 @@ to the semantic token, so with no override active rendering is identical.
 | Hook | Applies To | Fallback |
 |------|------------|----------|
 | `--poodle-recipe-tabs-active-outline-border` | `activeEdge="outline"` selected item border | `color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle))` |
-| `--poodle-recipe-tabs-active-underline-border` | `activeEdge="underline"` selected item edge, both orientations (horizontal `border-bottom-color`, vertical `border-right-color`) | `var(--poodle-color-accent-base)` |
+| `--poodle-recipe-tabs-active-underline-border` | `activeEdge="underline"` measured indicator fill, both orientations | `var(--poodle-color-accent-base)` |
 | `--poodle-recipe-tabs-active-solid-fill` | `activeFill="solid"` selected item background | `var(--poodle-color-accent-base)` |
 | `--poodle-recipe-tabs-active-solid-text` | `activeFill="solid"` selected tab/close foreground | `var(--poodle-color-text-inverse)` |
 
-The underline hook is the same property family in both orientations — the
-inline-end border colour — so one variable covers horizontal and vertical.
+The underline hook is one paint role in both orientations, so one variable
+covers horizontal and vertical.
 
 ### Tab button (all variants)
 
@@ -726,9 +713,9 @@ unchanged).
 | `border-right` | `0.0625rem solid var(--poodle-color-border-subtle)` |
 | `overflow` | `visible` |
 
-Block absorbed the former strip variant's vertical list handling: the border
-shifts to the inline-end edge and the list stops clipping so the
-negative-margin underline can overlap it.
+Block preserves the former strip variant's vertical list handling. The
+measured indicator shifts to the inline-end edge and the list remains visible
+so the paint-only indicator is not clipped.
 
 ### Tab — Block vertical
 
@@ -870,6 +857,9 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - `showTooltips` wraps each tab in a `Tooltip`; for vertical/icon-only tabs the tooltip surfaces the hidden label
 - `collapseWhenOverflow` measures the tablist against its container and, on overflow, replaces the tabs with a `Menu` trigger labeled by `collapseLabel` (falling back to the active tab label)
 - Variant resolution: the rendered `data-variant` is the resolved `variant` prop; `"card"` is the canonical Svelte name and the default. `data-active-edge` and `data-active-fill` carry `activeEdge` / `activeFill` on the root
+- `activeEdge="underline"` uses one measured indicator child. ResizeObserver,
+  font/layout remeasurement, and policy changes clean up without leaving a
+  stale clock or geometry owner.
 
 ## 10. GPUI Notes
 
@@ -880,7 +870,10 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - The Rust `TabVariant` enum is `Card | Pill | Block`, matching the web union. The former `strip` variant rendered through the separate `TabStripSpec`/`TabStrip` component on the native targets; its look is now `Block` + `activeEdge::Underline`.
 - The renamed `Card` variant renders icon, count, and close-button accessories on every tab, with the close button wired to `on_close` (inert when unwired, so an unwired X does not bubble to the tab and select what it was closing).
 - `activeEdge::Outline` maps to a 1px border on the selected tab element: `mix_srgb(accent, border-subtle, 0.32)` — the former card selected-border value. All tabs get a transparent 1px border so selection does not shift layout.
-- `activeEdge::Underline` maps to a 2px accent border on the inline-end side of the selected tab element (`border-bottom` horizontal, `border-right` vertical — `border_color_bottom` / `descriptor.border.color`), with a transparent reserve border on every tab so selection does not shift layout.
+- `activeEdge::Underline` maps to one selected-tab geometry descriptor and one
+  paint-only indicator node. GPUI may use the named static/opacity
+  approximation until generic translation and scale exist; semantic selection
+  and the measured endpoint remain exact.
 - `activeFill="solid"` maps to a full `accent-base` background on the selected tab with `color.text.inverse` foreground. `activeFill="none"` maps to **no** background on the selected tab (the `is_active` branch skips the fill assignment entirely); the selected text colour and the `activeEdge` treatment are unaffected.
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
 - Card variant border opacity: 82% → `0.82` multiplier on border-subtle
@@ -919,12 +912,17 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - [ ] focus ring style matches
 - [ ] disabled opacity matches
 - [ ] drag-and-drop visual states match
+- [ ] underline first layout and environmental remeasurement snap to the
+  selected endpoint
+- [ ] full semantic selection retargets one stable indicator; reduced and
+  frozen schedule no indicator clock
 
 ### Tier 3: Implementation Freedom
 
 - [ ] panel mounting strategy (keep-alive vs unmount) is implementation-owned
 - [ ] ID generation scheme is implementation-owned
-- [ ] indicator animation internals are implementation-owned
+- [ ] indicator interpolation mechanism is implementation-owned within the
+  measured endpoint, policy, identity, interruption, and cleanup contract
 
 ## 12. Known Deltas
 

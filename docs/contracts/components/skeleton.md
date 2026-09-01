@@ -158,17 +158,18 @@ Resolved defaults when no width/height props: width `100%`, height `6rem`.
 
 | Property | Value |
 |----------|-------|
-| `animation` | `skeleton-shimmer 1.6s linear infinite` |
+| `animation` in effective `full` | `skeleton-pulse 1.6s ease-in-out infinite` |
+| `animation` in effective `reduced` / `frozen` | `none` |
 
 Preset containers also animate children via
 `.skeleton-preset[data-animated="true"] .skeleton` with the same animation.
 
-### Keyframes `@keyframes skeleton-shimmer`
+### Keyframes `@keyframes skeleton-pulse`
 
 | Step | Property | Value |
 |------|----------|-------|
-| `from` | `background-position` | `200% 0` |
-| `to` | `background-position` | `-20% 0` |
+| `0%, 100%` | `opacity` | `0.56` |
+| `50%` | `opacity` | `1` |
 
 ### Preset shared `.skeleton-preset`
 
@@ -333,6 +334,21 @@ Number of detail rows is controlled by the `lines` prop.
 Composes: avatar (2.25rem circle, same as list-item avatar) + line (width
 `10rem`).
 
+## 8a. Motion Policy
+
+Skeleton remains decorative and hidden from accessibility in every mode.
+Initial authored shapes paint their readable static frame.
+
+- `full` with `animated=true`: one 1.6s opacity pulse, beginning after the
+  first committed frame;
+- `reduced` or `frozen`: readable static frame with no loop; and
+- `animated=false`: static in every policy.
+
+The current web gradient-position shimmer is replaced by the shared opacity
+pulse. A parent-owned loading-to-content reveal may use one allowed opacity
+replacement; Skeleton never owns completion or content state. Hidden,
+unmounted, or policy-tightened instances release their clock.
+
 ## 9. Svelte Notes
 
 - Single shape renders a `<div>` with class `skeleton` and `data-animated`
@@ -350,9 +366,9 @@ Composes: avatar (2.25rem circle, same as list-item avatar) + line (width
 - expected crate/module surface: `poodle_gpui::primitives::skeleton`
 - GPUI color-mix: `color-mix(in srgb, X 88%, transparent)` maps to
   `color.opacity(color.a * 0.88)`
-- GPUI linear-gradient: must compose 3-stop gradient for shimmer base
-- Animation: GPUI must implement shimmer as a periodic background-position
-  shift using `gpui::Animation` or equivalent
+- Animation: GPUI uses the shared 1.6s opacity pulse in full policy and a
+  readable static frame in reduced/frozen. It must not schedule a loop before
+  the first committed frame or after teardown.
 - GPUI must keep skeleton placeholders decorative and out of the accessible tree
 - Preset layouts: GPUI should implement as compound components or factory
   methods that produce the correct child arrangement
@@ -368,10 +384,9 @@ Composes: avatar (2.25rem circle, same as list-item avatar) + line (width
 
 ### Tier 2: Visual Parity
 
-- [ ] shimmer gradient 3-stop color-mix matches
-- [ ] background-size 220% 100% matches
-- [ ] animation duration 1.6s linear infinite matches
-- [ ] keyframe positions 200% to -20% match
+- [ ] full-mode opacity pulse uses 1.6s ease-in-out and the same endpoints
+- [ ] reduced/frozen static frame matches
+- [ ] first committed frame is static and teardown leaves no loop
 - [ ] shape radius: line uses `--poodle-radius-control`, circle uses `999rem`,
       block uses `calc(--poodle-radius-surface - 0.25rem)`
 - [ ] all preset spacing (gap, padding) matches exactly
@@ -390,7 +405,7 @@ Composes: avatar (2.25rem circle, same as list-item avatar) + line (width
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| animation technique may differ | GPUI uses programmatic animation vs CSS keyframes | allowed | keep shimmer timing 1.6s linear |
+| animation mechanism may differ | GPUI uses programmatic animation vs CSS keyframes | allowed | keep the full-mode 1.6s opacity pulse and reduced/frozen static frames |
 
 ## 13. Specimen Definitions
 

@@ -302,6 +302,19 @@ current implementation gets association free from the wrapping `<label>`.
 | `lg` | `calc(icon-default + 0.375rem)` | `icon-default` |
 | `xl` | `calc(icon-default + 0.625rem)` | `calc(icon-default + 0.125rem)` |
 
+## 8a. Motion Policy
+
+Checked, unchecked, mixed, label, disabled, and accessibility state update
+immediately. Initial authored state paints its endpoint.
+
+- `full`: mark replacement may use a bounded state crossfade or transform from
+  the default property budget; interruption reverses from sampled progress.
+- `reduced`: only a short opacity crossfade is allowed.
+- `frozen`: the latest mark paints with no clock.
+
+Repeated assignment of the current value is inert. Unmount or policy tightening
+cancels every visual handle without firing `onCheckedChange`.
+
 ## 9. Svelte Notes
 
 - Uses a hidden native `<input type="checkbox">` for form semantics and

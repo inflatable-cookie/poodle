@@ -5,7 +5,8 @@ Accepted: 2026-08-23
 Owner: Poodle core
 Depends on: `001-poodle-system-shape.md`,
 `../contracts/001-working-rules.md`,
-`../contracts/components/ui-presentation-provider.md`
+`../contracts/components/ui-presentation-provider.md`,
+`012-semantic-motion-policy.md`
 Decision authority: operator approval after the `g15.043` impact audit
 
 ## Decision
@@ -14,7 +15,8 @@ Shared Rust composition receives one explicit `RenderContext`. It carries:
 
 - a borrowed `ThemeProvider` for token resolution; and
 - copyable effective UI-presentation defaults: semantic control-size scale and
-  density.
+  density; and
+- the copyable effective `MotionPolicy` from architecture 012.
 
 Every public component renderer in `poodle-render` receives that context.
 Component specs retain omission with `Option<ControlSize>` and
@@ -27,7 +29,10 @@ a non-default scope.
 `UiPresentationProvider` is a construction boundary, not a painted node. It
 creates a nested context, invokes a child-building closure with that context,
 and returns the resulting child unchanged. Nested providers replace the two
-defaults only for construction performed inside their closure.
+presentation defaults only for construction performed inside their closure;
+they preserve motion unchanged. `MotionPolicyProvider` uses the same
+construction boundary but combines its request with the inherited policy by
+restriction and never re-enables motion.
 
 This is a clean pre-v1 Rust API break. There is no old-signature wrapper,
 alias, default-value heuristic, or ambient fallback.
@@ -55,7 +60,9 @@ new scope for them.
 At the root:
 
 - size scale is `md`;
-- density is `default`.
+- density is `default`; and
+- motion policy is `full` unless the host supplies an explicit preference or
+  capture policy.
 
 For a component:
 
@@ -66,6 +73,8 @@ For a component:
 For a nested provider:
 
 - its `sizeScale` and `density` replace the parent defaults;
+- a motion provider resolves the more restrictive parent or child policy;
+- a presentation provider leaves the inherited motion policy unchanged;
 - its wrapper adds no layout, paint, accessibility node, focus target, or
   interaction state;
 - exiting the child closure restores the parent context by ordinary borrowing,
@@ -91,7 +100,7 @@ root md/default
 - `poodle-node` remains resolved renderer-neutral output and gains no provider
   metadata.
 - GPUI interprets the resulting nodes. It does not implement presentation
-  inheritance.
+  inheritance or motion-preference discovery.
 - Jetstream follows its current admission status. Required compile adaptation
   may consume the shared context API, but this decision does not claim
   Jetstream parity.

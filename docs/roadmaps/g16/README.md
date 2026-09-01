@@ -1,8 +1,7 @@
 # g16 — Next Work
 
-Status: active — the drag-and-drop programme is closed by merged g16.028 and
-g16.033 is complete in merged PR #120; the next continuation needs its own
-promotion checkpoint
+Status: active — g16.034 is ready after PR #121 promoted the shared motion
+policy and five-family pilot
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -66,6 +65,7 @@ stay maintained; backend admission is not part of the first card.
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete; merged in PR #100; ledger 52 mounted / 122 missing
 33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — complete; merged in PR #120 after one Northstar review round; five distinct refusal meanings across TypeScript, Rust, both web shells and mounted GPUI, plus an installed-tarball v3 `HistoryEntry` proof; publication/pin movement stays separate
+34. [034 — Shared motion policy and five-family pilot](034-shared-motion-policy-and-five-family-pilot.md) — ready; architecture 012 and the MotionPolicyProvider plus eight pilot contracts are promoted from merged planning PR #121
 
 ## Parallel Continuation
 
@@ -105,6 +105,12 @@ Two continuation programmes are now explicit:
   geometry remains design-deferred; Longhorn's `AlreadyAtTarget` wire code and
   Loophole adoption are complete in their owning repositories. Publication and
   Loophole pin movement stay with a separately authorized release lane.
+- **Shared motion continuation:** planning PR #121 is accepted and merged.
+  Architecture 012 now fixes explicit full/reduced/frozen host policy,
+  restriction-only inheritance, lifecycle, native approximation, and layered
+  evidence. `g16.034` is the next ready card. The additive block-slider lane
+  remains next after its merge; icon feasibility and AgentSubagent shimmer stay
+  downstream evidence gates.
 
 PR #94 merged the `g16.019` closeout. Its 47 mounted / 127 missing ledger is
 now current on `main`; PR #95 merged the independent audit without reopening

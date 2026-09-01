@@ -285,6 +285,20 @@ does not reconstruct single/multiple membership from the activated item.
 | `lg` | `1.0625rem` | `0.875rem` |
 | `xl` | `1.125rem` | `0.9375rem` |
 
+## 8a. Motion Policy
+
+Semantic open state, `aria-expanded`, focusability, and panel ownership update
+immediately in every policy. Authored initial state paints its endpoint.
+
+- `full`: the panel may animate clipped block-axis height for 180ms and the
+  indicator may rotate. Rapid reversal continues from sampled progress with
+  proportional remaining duration.
+- `reduced`: final layout and paint apply immediately; no opacity substitute.
+- `frozen`: final layout applies with no clock.
+
+Unmount cancels the panel and indicator clocks. Native may use the named
+static/opacity approximation from architecture 012; that remains a visual gap.
+
 ## 9. Svelte Notes
 
 - `data-size` attribute on root reflects the resolved size

@@ -160,7 +160,8 @@ behavior repairs without inventing another conformance authority.
   `016` merged in PR #91; `017` merged in PR #92; `018` merged in PR #93;
   `019` complete, merged in PR #94, ledger 47 mounted / 127 missing; `020`
   complete, merged in PR #95. `029`–`032` are complete component-continuation
-  cards. `033` is the reserved HistoryCenter portfolio-papercut follow-on.
+  cards. `033` merged the HistoryCenter portfolio-papercut surface in PR #120;
+  `034` is ready for the promoted shared motion policy and five-family pilot.
   Dependable drag-and-drop remains a
   separate programme governed by architecture 011/spec 069 and compiled as
   `021`–`028`; `021`–`027` are merged, and `028` is ready as the final

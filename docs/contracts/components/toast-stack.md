@@ -318,6 +318,26 @@ No overrides — uses base values.
 
 None.
 
+## 8a. Motion Policy
+
+Items join and leave live-region and accessibility ownership immediately.
+Motion never changes expiry, action, dismissal, or announcement timing.
+Preloaded initial items paint settled without enter motion.
+
+- `full`: keyed items may enter and exit with bounded opacity and translation.
+- `reduced`: translation is removed; short opacity enter and exit remain.
+- `frozen`: latest endpoints paint with no clock.
+
+An exiting remnant is `aria-hidden`, inert, unfocusable, and excluded from hit
+testing. Reorder, policy change, reversal, and visual completion do not
+reannounce an item. Reusing a key before cleanup retargets the same remnant; a
+new semantic item needs a new key.
+
+When a dismissed toast owns focus, move focus synchronously to the equivalent
+control on the next surviving item, then the previous item, then the still-
+connected element from which focus entered the stack. If none exists, resume
+ordinary host focus order. Only then retain any inert visual remnant.
+
 ## 9. Svelte Notes
 
 - `data-size` attribute on stack reflects the resolved size
@@ -366,7 +386,8 @@ None.
 ### Tier 3: Implementation Freedom
 
 - [ ] rendering internals stay internal
-- [ ] animation/transition approach may differ
+- [ ] interpolation mechanism may differ within the shared policy, semantic
+  identity, endpoint, inert-remnant, focus, announcement, and cleanup contract
 
 ## 12. Specimen Definitions
 

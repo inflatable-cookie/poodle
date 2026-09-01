@@ -189,6 +189,19 @@ rotating, so nothing suggests a wait with a definite end.
 | `cell opacity range` | `0.2` (idle floor) → `0.76` (phase peak); each cell ramps within this band |
 | `cell order` | top-left, top-right, middle-right, middle-left, bottom-left, bottom-right, middle-right, middle-left |
 
+## 8a. Motion Policy
+
+The optional status role and label remain present in every policy; animation
+does not own loading meaning.
+
+- `full`: ring uses rotation; grid and dots use their accepted opacity phasing,
+  beginning after the first committed frame;
+- `reduced` and `frozen`: each variant paints its named readable static frame
+  and schedules no loop.
+
+Unmount, hiding, or policy tightening releases every loop. Stopping the visual
+clock does not emit an event or change the host's loading state.
+
 ## 9. Svelte Notes
 
 - Decorative by default; `aria-hidden="true"` is set on the root when no `ariaLabel` is provided, and `role="status"` + `aria-live="polite"` are set only when `ariaLabel` is supplied

@@ -1,7 +1,7 @@
 # Architecture
 
 Status: active
-Updated: 2026-08-28
+Updated: 2026-09-01
 
 Architecture documents define Poodle's stable ownership and runtime boundaries.
 They explain the current system; milestone sequencing belongs in roadmaps.
@@ -34,3 +34,6 @@ current delivery status.
 - [Drag and drop substrate](011-drag-and-drop-substrate.md) — semantic session
   ownership, paired runtime machines, touch, cross-window host boundaries,
   inbound files, and native file drag-out
+- [Semantic motion policy](012-semantic-motion-policy.md) — explicit
+  full/reduced/frozen host policy, restriction-only inheritance, lifecycle,
+  property budget, native approximation, and first-pilot evidence
