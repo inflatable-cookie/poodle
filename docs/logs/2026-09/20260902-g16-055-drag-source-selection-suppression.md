@@ -43,7 +43,26 @@ public API, or Rust/GPUI change.
 
 ## Oracle falsification
 
-Recorded after the proof commit, then restored.
+Planted on `3c32234af` without committing. Removed `suppressRootUserSelect()`
+from accepted `onPointerDown` (left it in `activate()`), stopped arming the
+compatibility-click guard on pointerup/pointercancel, and unbound the capture
+`click` listener.
+
+Failures:
+
+- Controller `suppresses root user-select on accepted pointerdown before
+  activation`: `user-select` stayed `''` while phase was still `idle`.
+- Controller `consumes the source compatibility click after an activated
+  pointer gesture`: source click handler fired once (`committed`).
+- Svelte Tree `does not select a row from an activated drag's compatibility
+  click`: `onSelectionChange` fired with `["a.ts"]`.
+- Chromium probe: svelte/react reorderable Tree Selection `pre="l"`
+  `collapsed=false`; trailing `data-tree-select` was `alpha`. Tap and
+  non-reorderable counterexamples still passed.
+
+Restored with `git checkout -- packages/core/src/dom/drag-drop-controller.ts`.
+Focused controller pointerdown/click tests and Svelte Tree click test passed
+after restore.
 
 ## Validation
 
