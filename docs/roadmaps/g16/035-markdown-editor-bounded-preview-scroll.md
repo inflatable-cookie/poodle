@@ -103,6 +103,13 @@ stylesheet proof failed (`display` stayed `block`). Render tests failed on
 `LayoutOverflow::Scroll` and body `min_height: 0`. Restored from the committed
 proof and reran green.
 
+Review follow-up (`oracle-gap`): added
+`markdown_editor_bounded_preview_scrolls_under_host_height` in
+`packages/gpui/preview/tests/headless_regressions.rs`. Planted the same native
+pre-fix shape again; the mounted GPUI regression failed because production
+preview overflow stayed `Visible` (and render unit tests failed likewise).
+Restored and reran the mounted regression green.
+
 ## Writable Scope
 
 - `packages/core/src/styles/markdown-editor.css`;
@@ -166,4 +173,6 @@ intrinsic preview height won the layout.
 Repair: shared CSS column flex + `max-height: 100%` + shrink chain; native
 preview declares `LayoutOverflow::Scroll` with body/preview `min_height: 0`.
 No new public sizing prop. Evidence:
-`effigy test:markdown-editor-preview-scroll` plus focused shell/render tests.
+`effigy test:markdown-editor-preview-scroll`, focused shell/render tests, and
+the mounted GPUI regression
+`markdown_editor_bounded_preview_scrolls_under_host_height`.

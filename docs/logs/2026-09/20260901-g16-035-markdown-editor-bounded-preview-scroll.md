@@ -1,6 +1,6 @@
 # g16.035 — MarkdownEditor Bounded Preview Scroll
 
-Status: implemented, PR open
+Status: implemented, PR open (review follow-up)
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/123
 Card: `docs/roadmaps/g16/035-markdown-editor-bounded-preview-scroll.md`
@@ -38,23 +38,35 @@ supplies the shrink/scroll chain.
   constrained preview/split stay in a 16rem host, preview `scrollTop` moves,
   siblings stay put, short unconstrained preview stays natural.
 - `poodle-render` unit tests for preview Scroll + body shrink.
+- Mounted GPUI regression
+  `markdown_editor_bounded_preview_scrolls_under_host_height`: production
+  renderer + node backend, 16rem host, long preview content, real wheel input;
+  editor stays inside the host; clipped fixture tail activates only after
+  scroll. Fixture stamps runtime ids after render (no public id prop).
 - Oracle falsification: planted pre-fix (removed CSS shrink chain; cleared
   native Scroll/body shrink). Probe failed on internal overflow / stuck
   `scrollTop`; vitest and render tests failed for the intended reasons.
-  Restored and reran green.
+  Mounted GPUI regression failed when native Scroll/shrink was cleared
+  (`Visible` instead of `Scroll`). Restored and reran green.
 
 ## Validation run
 
 - `bunx vitest run` MarkdownEditor Svelte + React tests — pass
 - `cargo test --manifest-path packages/render/Cargo.toml markdown_editor` — pass
+- `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions markdown_editor_bounded_preview_scrolls_under_host_height` — pass
 - `effigy test:markdown-editor-preview-scroll` (chromium + webkit) — pass
-- `effigy docs:check` — pass
-- `effigy ci:rust` — pass
-- `effigy ci:native` — pass
-- `effigy ci:web` — pass
+- `effigy docs:check` — pass (prior head); re-run on follow-up head
+- `effigy ci:rust` / `effigy ci:native` — re-run on follow-up head
+- `effigy ci:web` — pass (web unchanged on follow-up)
 - `git diff --check origin/main...HEAD` — clean
+
+## Review follow-up
+
+Northstar `oracle-gap` on PR #123: declaration-only native tests were not
+enough. Added the mounted GPUI regression above and falsified it against the
+pre-fix native overflow shape.
 
 ## Scope kept honest
 
 Did not edit g16 README, generation-index, motion/g16.034 surfaces, or
-drag-and-drop. No public API change.
+drag-and-drop. No public API change. Web implementation left as accepted.

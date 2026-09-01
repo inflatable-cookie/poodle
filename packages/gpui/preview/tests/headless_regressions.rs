@@ -18323,3 +18323,201 @@ fn every_history_center_rejection_mounts_its_own_native_copy() {
         );
     });
 }
+
+/// g16.035. Production MarkdownEditor preview scroll under a definite host
+/// height, through the real GPUI node backend. Declaration-only tests cannot
+/// prove that `fill_height` + toolbar + preview `LayoutOverflow::Scroll`
+/// actually stays inside the host and moves under wheel input.
+#[test]
+fn markdown_editor_bounded_preview_scrolls_under_host_height() {
+    use poodle_render::markdown_editor;
+    use poodle_specs::MarkdownEditorSpec;
+
+    const HOST_W: f32 = 320.0;
+    const HOST_H: f32 = 256.0; // 16rem at 16px
+    const ROW_H: f32 = 28.0;
+    const ROW_COUNT: usize = 40;
+
+    fn long_markdown() -> String {
+        (1..=40)
+            .map(|n| {
+                format!(
+                    "## Heading {n}\n\nParagraph {n} forces the preview past a 16rem host.\n"
+                )
+            })
+            .collect()
+    }
+
+    /// Fixture-only identities and stacked rows that overflow the preview.
+    /// No public id prop — stamps land after the production render.
+    fn stamp_bounded_preview(editor: &mut Node, activated: &Arc<Mutex<bool>>) {
+        editor.runtime_id = Some("md-editor".to_owned());
+        // Host assigns available height (web: max-height 100% under a definite
+        // ancestor). Production body/preview already declare fill_height + Scroll.
+        editor.style.fill_height = true;
+        editor.style.fill_width = true;
+        editor.style.max_height = Some(HOST_H);
+
+        let body = editor.children.get_mut(1).expect("toolbar then body");
+        let preview = body
+            .children
+            .iter_mut()
+            .find(|child| child.a11y.label.as_deref() == Some("Preview"))
+            .expect("preview pane");
+        preview.runtime_id = Some("md-preview".to_owned());
+        preview.style.descriptor.layout.direction = LayoutDirection::Column;
+
+        for index in 0..(ROW_COUNT - 1) {
+            let mut row = Node::container();
+            row.runtime_id = Some(format!("md-preview-row-{index}"));
+            {
+                let s = &mut row.style;
+                s.descriptor.layout.width = LayoutSizing::Grow;
+                s.descriptor.layout.height = LayoutSizing::Fixed(ROW_H);
+                s.min_height = Some(ROW_H);
+                s.fill_width = true;
+            }
+            row = row.child(Node::text(format!("row {index}")));
+            preview.children.push(row);
+        }
+
+        let seen = Arc::clone(activated);
+        let mut tail = Node::button("tail").interaction_on_activate(move || {
+            *seen.lock().expect("activated lock") = true;
+        });
+        tail.runtime_id = Some("md-preview-tail".to_owned());
+        tail.a11y.label = Some("Preview tail".to_owned());
+        tail.interaction.focusable = true;
+        {
+            let s = &mut tail.style;
+            s.descriptor.layout.width = LayoutSizing::Grow;
+            s.descriptor.layout.height = LayoutSizing::Fixed(ROW_H);
+            s.min_height = Some(ROW_H);
+            s.fill_width = true;
+        }
+        preview.children.push(tail);
+    }
+
+    fn wrap_host(editor: Node) -> Node {
+        let mut host = Node::container();
+        host.runtime_id = Some("md-host".to_owned());
+        {
+            let s = &mut host.style;
+            s.descriptor.layout.direction = LayoutDirection::Column;
+            s.descriptor.layout.width = LayoutSizing::Fixed(HOST_W);
+            s.descriptor.layout.height = LayoutSizing::Fixed(HOST_H);
+            s.descriptor.layout.overflow_x = LayoutOverflow::Hidden;
+            s.descriptor.layout.overflow_y = LayoutOverflow::Hidden;
+        }
+        host.child(editor)
+    }
+
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = MarkdownEditorSpec::new()
+            .with_mode("preview")
+            .with_value(long_markdown());
+        let activated = Arc::new(Mutex::new(false));
+        let mut editor = markdown_editor(&spec, &ctx);
+        stamp_bounded_preview(&mut editor, &activated);
+        {
+            let preview = editor
+                .children
+                .get(1)
+                .expect("body")
+                .children
+                .iter()
+                .find(|child| child.a11y.label.as_deref() == Some("Preview"))
+                .expect("preview");
+            assert_eq!(
+                preview.style.descriptor.layout.overflow_y,
+                LayoutOverflow::Scroll,
+                "production render declares preview scroll"
+            );
+            assert_eq!(preview.style.min_height, Some(0.0));
+            assert!(preview.style.fill_height);
+        }
+
+        let mounted = Arc::new(Mutex::new(wrap_host(editor)));
+        let mut driver =
+            HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), HOST_W + 64.0, HOST_H + 64.0);
+        driver.draw_frame();
+
+        let host = poodle_gpui_node_backend::bounds_for("md-host").expect("host bounds");
+        let editor_bounds =
+            poodle_gpui_node_backend::bounds_for("md-editor").expect("editor bounds");
+        let preview = poodle_gpui_node_backend::bounds_for("md-preview").expect("preview bounds");
+        assert!(
+            (f32::from(host.size.height) - HOST_H).abs() < 1.0,
+            "host keeps the fixture height {}",
+            f32::from(host.size.height)
+        );
+        assert!(
+            f32::from(editor_bounds.size.height) <= f32::from(host.size.height) + 1.0,
+            "editor stays within host: editor={} host={}",
+            f32::from(editor_bounds.size.height),
+            f32::from(host.size.height)
+        );
+        assert!(
+            f32::from(preview.size.height) < f32::from(host.size.height),
+            "preview sits under the toolbar inside the host: preview={} host={}",
+            f32::from(preview.size.height),
+            f32::from(host.size.height)
+        );
+
+        let first = poodle_gpui_node_backend::bounds_for("md-preview-row-0").expect("first row");
+        let tail = poodle_gpui_node_backend::bounds_for("md-preview-tail").expect("tail bounds");
+        assert!(
+            f32::from(tail.origin.y) + f32::from(tail.size.height)
+                > f32::from(preview.origin.y) + f32::from(preview.size.height) + 8.0,
+            "fixture tail must sit past the preview viewport"
+        );
+        assert!(
+            (f32::from(first.size.height) - ROW_H).abs() < 2.0,
+            "fixture rows keep their fixed height {}",
+            f32::from(first.size.height)
+        );
+
+        driver.pointer_activate_id("md-preview-tail");
+        assert!(
+            !*activated.lock().expect("activated lock"),
+            "clipped preview tail must not activate before scroll"
+        );
+
+        // GPUI scroll offset is `[-max, 0]`. Negative pixel delta moves down.
+        // The long source text plus stacked rows need a large delta before the
+        // clipped tail enters hit-test (same pattern as the select listbox).
+        driver.scroll_vertical_id("md-preview", -5000.0);
+        let first_after =
+            poodle_gpui_node_backend::bounds_for("md-preview-row-0").expect("first row after scroll");
+        assert!(
+            f32::from(first_after.origin.y) < f32::from(first.origin.y) - 8.0,
+            "wheel must move preview content: before={} after={}",
+            f32::from(first.origin.y),
+            f32::from(first_after.origin.y)
+        );
+
+        let editor_after =
+            poodle_gpui_node_backend::bounds_for("md-editor").expect("editor after scroll");
+        let host_after = poodle_gpui_node_backend::bounds_for("md-host").expect("host after scroll");
+        assert!(
+            (f32::from(editor_after.origin.y) - f32::from(editor_bounds.origin.y)).abs() < 1.0
+                && (f32::from(editor_after.size.height) - f32::from(editor_bounds.size.height))
+                    .abs()
+                    < 1.0,
+            "editor root stays put while preview scrolls"
+        );
+        assert!(
+            (f32::from(host_after.origin.y) - f32::from(host.origin.y)).abs() < 1.0
+                && (f32::from(host_after.size.height) - f32::from(host.size.height)).abs() < 1.0,
+            "host stays put while preview scrolls"
+        );
+
+        driver.pointer_activate_id("md-preview-tail");
+        assert!(
+            *activated.lock().expect("activated lock"),
+            "wheel scrolling must bring the clipped preview tail into hit-test"
+        );
+    });
+}
