@@ -20,3 +20,6 @@ Current open notes:
   router pilot is settled as planning evidence; implementation held.
 - `20260901-125758-post-motion-research-queue.md` — motion policy is promoted;
   block slider, icon morph, and AgentSubagent shimmer remain gated.
+- `20260901-233708-holistic-posture-assessment.md` — independent advisory:
+  value/cost-centre split, ghost `0.2.3`, red `main`, consumer packaging,
+  React drift, docs compaction; native and validation sections pending.
