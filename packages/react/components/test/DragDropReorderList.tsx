@@ -43,6 +43,7 @@ export function DragDropReorderList({ items, kind = "item", reject = false, onDr
         {items.map((item) => <SourceRow key={item.id} item={item} kind={kind} />)}
       </ul>
       <div data-testid="announcement">{snapshot.announcement ?? ""}</div>
+      <div data-testid="preview-x">{snapshot.preview?.x ?? ""}</div>
     </>
   );
 }

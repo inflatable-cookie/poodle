@@ -10,7 +10,7 @@ import {
 import "@inflatable-cookie/poodle-core/styles/editable-list.css";
 
 import { Button } from "./Button";
-import { DragDropProvider, useDragDrop, useDragSource, useDropTarget, useKeyboardDropTarget } from "./drag-drop";
+import { DragDropProvider, useDragSource, useDropTarget, useKeyboardDropTarget, useOptionalDragDrop } from "./drag-drop";
 import { IconButton } from "./IconButton";
 import { resolveSemanticControlSize, UiPresentationProvider, useUiPresentation } from "./presentation";
 import { TextInput } from "./TextInput";
@@ -102,7 +102,7 @@ function EditableListRow<T extends EditableListItemLike>({
   onIdleKeydown,
 }: EditableListRowProps<T>) {
   const canDrag = reorderable && !isUnavailable;
-  const { snapshot } = useDragDrop();
+  const snapshot = useOptionalDragDrop()!.snapshot;
   const { getSourceProps, dragging } = useDragSource({
     sourceId: item.id,
     subject: { kind: "poodle.editable-list", id: item.id },

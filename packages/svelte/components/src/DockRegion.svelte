@@ -23,6 +23,7 @@
     tryDragDrop,
   } from "./drag-drop-context";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
+  import { setTabsForeignInsert } from "./tabs-foreign-insert";
   import type {
     ActiveEdge,
     ActiveFill,
@@ -332,9 +333,12 @@
         ? { accepted: true, intent }
         : { accepted: false, reason: "refused by host" };
     },
-    onDrop: (_intent): DragDropCommitResult => {
+    onDrop: (): DragDropCommitResult => {
       const panel = panelFrom($snapshot.session?.subject.id ?? "");
       if (!panel) return { status: "rejected", reason: "not a panel" };
+      if (canAcceptPanel !== null && !canAcceptPanel(panel.panelId, panel.sourceEdge as DockEdge)) {
+        return { status: "rejected", reason: "refused by host" };
+      }
       onPanelDrop?.({ panel, targetEdge: edge, index: items.length });
       return { status: "committed" };
     },
@@ -362,7 +366,15 @@
       targetId: `${dropZoneId}:slot:${item.value}`,
       acceptedKinds: [DOCK_PANEL_SUBJECT_KIND],
       label: item.label ?? `Panel ${index + 1}`,
-      resolvePosition: () => "inside",
+      resolvePosition: ({ x, y, rect }) => {
+        return stackDirection === "column"
+          ? y < rect.top + rect.height / 2
+            ? "before"
+            : "after"
+          : x < rect.left + rect.width / 2
+            ? "before"
+            : "after";
+      },
       canDrop: (intent, subject) => {
         const panel = decodeDockPanelSubject(subject.id);
         if (!panel) return { accepted: false, reason: "not a panel" };
@@ -373,30 +385,52 @@
           ? { accepted: true, intent }
           : { accepted: false, reason: "refused by host" };
       },
-      onDrop: (): DragDropCommitResult => {
+      onDrop: (intent): DragDropCommitResult => {
         const panel = panelFrom($snapshot.session?.subject.id ?? "");
         if (!panel) return { status: "rejected", reason: "not a panel" };
+        const after = intent.position === "after";
 
         if (panel.sourceZone === dropZoneId) {
           const order = items.map((entry) => entry.value);
           const from = order.indexOf(panel.panelId);
           if (from < 0) return { status: "rejected", reason: "unknown panel" };
+          const to = after
+            ? from < index
+              ? index
+              : index + 1
+            : from < index
+              ? index - 1
+              : index;
+          if (from === to) return { status: "rejected", reason: "same panel" };
           const [moved] = order.splice(from, 1);
-          order.splice(index, 0, moved);
+          order.splice(to, 0, moved);
           onReorder?.(order);
           return { status: "committed" };
         }
 
-        onPanelDrop?.({ panel, targetEdge: edge, index });
+        if (canAcceptPanel !== null && !canAcceptPanel(panel.panelId, panel.sourceEdge as DockEdge)) {
+          return { status: "rejected", reason: "refused by host" };
+        }
+        onPanelDrop?.({ panel, targetEdge: edge, index: after ? index + 1 : index });
         return { status: "committed" };
       },
     };
   }
 
-  function handleForeignDrop(subjectId: string, index: number): void {
+  function handleForeignDrop(subjectId: string, index: number): DragDropCommitResult {
     const panel = panelFrom(subjectId);
-    if (panel) onPanelDrop?.({ panel, targetEdge: edge, index });
+    if (!panel) return { status: "rejected", reason: "not a panel" };
+    if (canAcceptPanel !== null && !canAcceptPanel(panel.panelId, panel.sourceEdge as DockEdge)) {
+      return { status: "rejected", reason: "refused by host" };
+    }
+    onPanelDrop?.({ panel, targetEdge: edge, index });
+    return { status: "committed" };
   }
+
+  setTabsForeignInsert({
+    canAccept: (subjectId) => acceptsPanel({ targetId: "", position: "inside", operation: "move" }, subjectId),
+    commit: handleForeignDrop,
+  });
 
   function stackItemState(item: PanelTabItem): { dragging: boolean; over: boolean } {
     return {
@@ -486,7 +520,6 @@
           onClose={handleClose}
           crossWindowSourceBridge={crossWindowDragSource}
           dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
-          onForeignDrop={handleForeignDrop}
         />
       {/if}
     </div>
@@ -518,7 +551,6 @@
             onClose={handleClose}
           crossWindowSourceBridge={crossWindowDragSource}
           dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
-          onForeignDrop={handleForeignDrop}
           />
         </div>
       {/if}
@@ -559,7 +591,6 @@
             onClose={handleClose}
           crossWindowSourceBridge={crossWindowDragSource}
           dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
-          onForeignDrop={handleForeignDrop}
           />
         </div>
         {#if collapsible && showCollapseToggle}

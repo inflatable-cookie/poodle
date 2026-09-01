@@ -413,6 +413,7 @@ export {
   treeVirtualWindow,
   treeSubtreeContains,
   treeCanAcceptDrop,
+  treeDropEligibility,
   treeLocate,
   type TreeLocation,
   type TreeNodeLike,
@@ -768,6 +769,8 @@ export {
 } from "./dom/cross-window-data-transfer";
 export {
   dragSessionTransition,
+  dropCommitDestination,
+  asDropResolveResult,
   resolveDropTarget,
   type DragAnnouncementKind,
   type DragCancelReason,
@@ -782,8 +785,11 @@ export {
   type DragSubject,
   type DragTerminalOutcome,
   type DropEligibility,
+  type DropDestination,
   type DropIntent,
   type DropPosition,
+  type DropResolveResult,
+  type ResolvedDropPosition,
   type DropTargetCandidate,
   type StandardDropPosition,
 } from "./drag-drop";

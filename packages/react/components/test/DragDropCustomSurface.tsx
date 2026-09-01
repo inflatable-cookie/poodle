@@ -14,6 +14,7 @@ interface Props {
   rejectA?: boolean;
   onDropA?: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
   onDropB?: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
+  onPreviewX?: (x: number) => void;
 }
 
 export function DragDropCustomSurface({
@@ -22,11 +23,21 @@ export function DragDropCustomSurface({
   rejectA = false,
   onDropA,
   onDropB,
+  onPreviewX,
 }: Props) {
   return (
     <>
       <div data-testid="scope-a">
-        <DragDropProvider>
+        <DragDropProvider
+          preview={
+            onPreviewX
+              ? (pose) => {
+                  onPreviewX(pose.x);
+                  return pose.label;
+                }
+              : undefined
+          }
+        >
           <DragDropReorderList items={itemsA} kind="scope-a" reject={rejectA} onDrop={onDropA} />
         </DragDropProvider>
       </div>

@@ -12,6 +12,8 @@
   import { default as Pill } from "../Pill.svelte";
   import { anchored } from "../anchored";
   import { useDragDrop } from "../drag-drop";
+  import { dragDropSnapshotStore, tryDragDrop } from "../drag-drop-context";
+  import { getTabsForeignInsert } from "../tabs-foreign-insert";
   import type { ControlSize, TabItem } from "../types";
 
   /**
@@ -86,7 +88,9 @@
     anchorElement,
   }: Props = $props();
 
-  const { dragSource, dropTarget, snapshot } = useDragDrop();
+  const { dragSource, dropTarget } = useDragDrop();
+  const snapshot = dragDropSnapshotStore(tryDragDrop()!.controller);
+  const foreignInsert = getTabsForeignInsert();
 
   /** A disabled tab cannot be picked up. It is still a place to put one. */
   const canDrag = $derived(reorderable && item.disabled !== true);
@@ -141,8 +145,10 @@
       // Claiming it and rejecting at commit would swallow the drop instead.
       // An owning composite that wants the insert (DockRegion) opts in via
       // `acceptsForeign` instead of falling through to the region.
-      if (!ownsValue(subject.id) && !acceptsForeign) {
-        return { accepted: false, reason: "not this tab set" };
+      if (!ownsValue(subject.id)) {
+        if (!acceptsForeign || !foreignInsert?.canAccept(subject.id)) {
+          return { accepted: false, reason: "not this tab set" };
+        }
       }
       return subject.id === item.value
         ? { accepted: false, reason: "same tab" }

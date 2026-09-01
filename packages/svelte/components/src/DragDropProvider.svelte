@@ -55,7 +55,9 @@
   let root: HTMLDivElement | undefined;
   let previewEl: HTMLDivElement | undefined = $state();
   let snapshot: DragDropSnapshot = $state(ctrl.getSnapshot());
+  let previewPose = $state(ctrl.getSnapshot().preview);
   let presentation = presentationKey(ctrl.getSnapshot());
+  let lastPreviewPose = previewPoseKey(ctrl.getSnapshot().preview);
 
   setDragDrop({ controller: ctrl });
 
@@ -71,6 +73,11 @@
     ].join("|");
   }
 
+  function previewPoseKey(preview: DragPreviewSnapshot | null): string {
+    if (!preview) return "";
+    return `${preview.x}|${preview.y}|${preview.label}|${preview.sourceId}`;
+  }
+
   function applyPreview(next: DragDropSnapshot): void {
     if (!previewEl || !next.preview) return;
     previewEl.style.transform = `translate3d(${next.preview.x}px, ${next.preview.y}px, 0)`;
@@ -81,6 +88,11 @@
     const unsub = ctrl.subscribe(() => {
       const next = ctrl.getSnapshot();
       applyPreview(next);
+      const pose = previewPoseKey(next.preview);
+      if (pose !== lastPreviewPose) {
+        lastPreviewPose = pose;
+        previewPose = next.preview ? { ...next.preview } : null;
+      }
       const key = presentationKey(next);
       if (key === presentation) return;
       presentation = key;
@@ -95,21 +107,19 @@
   });
 
   const previewStyle = $derived(
-    snapshot.preview
-      ? `transform: translate3d(${snapshot.preview.x}px, ${snapshot.preview.y}px, 0)`
-      : "",
+    previewPose ? `transform: translate3d(${previewPose.x}px, ${previewPose.y}px, 0)` : "",
   );
 </script>
 
 <div bind:this={root} class="poodle-drag-drop-provider">
   {@render children?.()}
   <div class="poodle-drag-overlay" aria-hidden="true">
-    {#if snapshot.preview}
+    {#if previewPose}
       <div bind:this={previewEl} class="poodle-drag-preview" style={previewStyle}>
         {#if preview}
-          {@render preview(snapshot.preview)}
+          {@render preview(previewPose)}
         {:else}
-          {snapshot.preview.label}
+          {previewPose.label}
         {/if}
       </div>
     {/if}

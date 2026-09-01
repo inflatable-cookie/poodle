@@ -23,6 +23,7 @@
   import { default as Pill } from "./Pill.svelte";
   import { firstEnabledIndex } from "./internal";
   import { default as TabsItem } from "./tabs-parts/TabsItem.svelte";
+  import { getTabsForeignInsert } from "./tabs-foreign-insert";
   import { default as TabsKeyboardTargets } from "./tabs-parts/TabsKeyboardTargets.svelte";
   import { tryDragDrop } from "./drag-drop-context";
   import {
@@ -114,12 +115,6 @@
      * without taking over reorder, which stays Tabs' own.
      */
     dragSubjectKind?: string | null;
-    /**
-     * Owning composite hook: a subject of this strip's family that is not in
-     * `items` lands at the hovered tab and reports here instead of `onReorder`.
-     * Absent, the tab refuses so an ancestor target can take the drop.
-     */
-    onForeignDrop?: ((id: string, index: number) => void) | undefined;
     children?: Snippet<[string]>;
     actions?: Snippet<[]>;
   }
@@ -151,12 +146,12 @@
     onClose = undefined,
     crossWindowSourceBridge = undefined,
     dragSubjectKind = null,
-    onForeignDrop = undefined,
     children,
     actions,
   }: Props = $props();
 
   const tabsId = ++nextTabsId;
+  const foreignInsert = getTabsForeignInsert();
   const isBrowser = typeof window !== "undefined";
   const uiPresentation = getUiPresentation();
   let tabElements = $state<Record<string, HTMLButtonElement | null>>({});
@@ -559,12 +554,12 @@
     const subjectId = dragController.getSnapshot().session?.subject.id ?? "";
     const from = indexOfValue(subjectId);
     const target = indexOfValue(valueOfTargetId(intent.targetId));
+    const foreign = foreignInsert;
     if (from < 0) {
-      if (!onForeignDrop || target < 0) {
+      if (!foreign || target < 0) {
         return { status: "rejected", reason: "same tab" };
       }
-      onForeignDrop(subjectId, intent.position === "after" ? target + 1 : target);
-      return { status: "committed" };
+      return foreign.commit(subjectId, intent.position === "after" ? target + 1 : target);
     }
     if (target < 0 || from === target) {
       return { status: "rejected", reason: "same tab" };
@@ -743,7 +738,7 @@
           {crossWindowSourceBridge}
           {indexOfValue}
           {ownsValue}
-          acceptsForeign={onForeignDrop !== undefined}
+          acceptsForeign={foreignInsert !== null}
           sourceId={sourceIdOf(item.value)}
           targetId={targetIdOf(item.value)}
           selected={currentValue === item.value}

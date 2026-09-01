@@ -57,6 +57,28 @@ describe("DragDropProvider (react)", () => {
     });
   });
 
+  it("publishes consecutive preview coordinates to consumers and custom renderers", () => {
+    const renderer: number[] = [];
+    const view = render(<DragDropCustomSurface onPreviewX={(x) => renderer.push(x)} />);
+    const { source } = layout(view.container);
+    const consumer = () => view.container.querySelector('[data-testid="preview-x"]')?.textContent ?? "";
+
+    fireEvent.pointerDown(source, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    fireEvent.pointerMove(source, { pointerId: 1, clientX: 40, clientY: 20 });
+    const first = Number(consumer());
+    const firstRenderer = renderer.at(-1);
+    fireEvent.pointerMove(source, { pointerId: 1, clientX: 70, clientY: 20 });
+    const second = Number(consumer());
+    const secondRenderer = renderer.at(-1);
+    fireEvent.pointerUp(source, { pointerId: 1, clientX: 70, clientY: 20 });
+
+    expect(first).toBeGreaterThan(0);
+    expect(second).toBeGreaterThan(first);
+    expect(firstRenderer).toBe(first);
+    expect(secondRenderer).toBe(second);
+    expect(second - first).toBe(30);
+  });
+
   it("commits a pen-shaped pointer drag", () => {
     const onDropA = vi.fn(() => ({ status: "committed" as const }));
     const view = render(<DragDropCustomSurface onDropA={onDropA} />);

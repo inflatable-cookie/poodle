@@ -20,6 +20,7 @@ import {
 } from "@inflatable-cookie/poodle-core";
 import { DragDropProvider, useControllerDropTarget, useOptionalDragDrop } from "./drag-drop";
 import { DockStackItem } from "./dock-region-parts/DockStackItem";
+import { TabsForeignInsertProvider } from "./tabs-foreign-insert";
 
 import { CollapseToggle } from "./CollapseToggle";
 import { Tabs } from "./Tabs";
@@ -284,6 +285,9 @@ export function DockRegion({
     onDrop: (): DragDropCommitResult => {
       const panel = panelFrom(liveSubjectId());
       if (!panel) return { status: "rejected", reason: "not a panel" };
+      if (canAcceptPanel !== null && !canAcceptPanel(panel.panelId, panel.sourceEdge as DockEdge)) {
+        return { status: "rejected", reason: "refused by host" };
+      }
       onPanelDrop?.({ panel, targetEdge: edge, index: items.length });
       return { status: "committed" };
     },
@@ -291,6 +295,12 @@ export function DockRegion({
   const isDragOver = region.accepted;
 
   const stripTabs = (orientation: "horizontal" | "vertical", withTooltips: boolean) => (
+    <TabsForeignInsertProvider
+      value={{
+        canAccept: (subjectId) => acceptsPanel(subjectId),
+        commit: handleForeignDrop,
+      }}
+    >
     <Tabs
       variant={tabVariant}
       activeEdge={tabActiveEdge}
@@ -311,13 +321,18 @@ export function DockRegion({
       onClose={(next) => onClose?.(panelValueOf(next))}
       crossWindowSourceBridge={crossWindowDragSource}
       dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
-      onForeignDrop={handleForeignDrop}
     />
+    </TabsForeignInsertProvider>
   );
 
-  function handleForeignDrop(subjectId: string, index: number): void {
+  function handleForeignDrop(subjectId: string, index: number): DragDropCommitResult {
     const panel = panelFrom(subjectId);
-    if (panel) onPanelDrop?.({ panel, targetEdge: edge, index });
+    if (!panel) return { status: "rejected", reason: "not a panel" };
+    if (canAcceptPanel !== null && !canAcceptPanel(panel.panelId, panel.sourceEdge as DockEdge)) {
+      return { status: "rejected", reason: "refused by host" };
+    }
+    onPanelDrop?.({ panel, targetEdge: edge, index });
+    return { status: "committed" };
   }
 
   const region_ = (

@@ -30,8 +30,8 @@ use poodle_headless::time_input::{
 };
 use poodle_node::{
     ColorValue, ContinuousValuePhase, DismissReason, DragSession, DragSessionPhase, DragSubject,
-    DragTerminalOutcome, DropEligibility, FocusRing, LayoutDirection, LayoutOverflow, LayoutSizing, Node,
-    NodeContinuousValueEvent, NodeDragInputKind, NodeDragSource, NodeDropCommit,
+    DragTerminalOutcome, DropEligibility, FocusRing, LayoutDirection, LayoutOverflow, LayoutSizing,
+    Node, NodeContinuousValueEvent, NodeDragInputKind, NodeDragSource, NodeDropCommit,
     NodeDropCommitEvent, NodeDropIntentEvent, NodeDropTarget, NodeKind, NodePosition, NodeRole,
     NodeWheelEvent,
 };
@@ -39,9 +39,9 @@ use poodle_render::{
     audio_entry_id, fader_spec_from_context, fader_with_handlers, history_center,
     knob_spec_from_context, knob_with_handlers, time_input_with_persistent_context,
     ui_presentation_provider, xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id,
-    xy_pad_y_id, FaderHandlers, FaderLive, HistoryCenterHandlers, HistoryCenterView,
-    KnobHandlers, KnobLive, RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers,
-    TabsHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers, XYPadLive,
+    xy_pad_y_id, FaderHandlers, FaderLive, HistoryCenterHandlers, HistoryCenterView, KnobHandlers,
+    KnobLive, RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers, TabsHandlers,
+    ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers, XYPadLive,
 };
 use poodle_specs::{
     AccordionSelectionValue, AgentTranscriptSpec, ControlDensity, ControlSize, FaderSpec,
@@ -132,7 +132,6 @@ fn with_click_away(control: Node) -> Node {
     row.child(control).child(click_away_target())
 }
 
-
 fn button_node(
     spec: poodle_specs::ButtonSpec,
     handler: Option<Arc<dyn Fn() + Send + Sync>>,
@@ -201,7 +200,10 @@ fn a_provider_scope_cascades_to_mounted_geometry_without_a_wrapper_node() {
             )
         });
         // No wrapper: the returned node is the button itself.
-        assert!(matches!(scoped_button.kind, poodle_node::NodeKind::Button { .. }));
+        assert!(matches!(
+            scoped_button.kind,
+            poodle_node::NodeKind::Button { .. }
+        ));
         assert_eq!(scoped_button.a11y.role, Some(poodle_node::NodeRole::Button));
         scoped_button.id = Some(FIXTURE_ID.to_owned());
         let mut root_button = poodle_render::button(
@@ -1580,7 +1582,10 @@ fn releasing_outside_every_target_cancels_once_and_commits_nothing() {
         driver.pointer_release(point(px(4.0), px(4.0)));
 
         let events = trace_of(&trace);
-        assert!(events.contains(&"cleared:custom-zone-a".to_owned()), "{events:?}");
+        assert!(
+            events.contains(&"cleared:custom-zone-a".to_owned()),
+            "{events:?}"
+        );
         assert_eq!(count_starting_with(&events, "drop:"), 0, "{events:?}");
         assert_eq!(
             count_starting_with(&events, "end:cancelled:"),
@@ -1609,7 +1614,10 @@ fn escape_cancels_once_and_a_second_escape_is_inert() {
         driver.dispatch_key("escape");
 
         let events = trace_of(&trace);
-        assert!(events.contains(&"cleared:custom-zone-b".to_owned()), "{events:?}");
+        assert!(
+            events.contains(&"cleared:custom-zone-b".to_owned()),
+            "{events:?}"
+        );
         assert_eq!(count_starting_with(&events, "drop:"), 0, "{events:?}");
         assert_eq!(
             count_starting_with(&events, "end:cancelled:Escape"),
@@ -1636,8 +1644,14 @@ fn nested_targets_arbitrate_deepest_first_and_follow_a_live_eligibility_change()
         source.interaction.drag_source = Some(traced_source("nested-source", "Alpha", trace));
 
         let mut inner = drag_box("nested-inner", 90.0, 60.0);
-        let mut inner_target =
-            traced_target("nested-inner", "Inner", trace, false, 2, NodeDropCommit::Committed);
+        let mut inner_target = traced_target(
+            "nested-inner",
+            "Inner",
+            trace,
+            false,
+            2,
+            NodeDropCommit::Committed,
+        );
         inner_target.disabled = !inner_enabled;
         // Priority deliberately favours the OUTER target: depth must beat
         // priority, or a nested surface can never take its own drop.
@@ -1645,8 +1659,14 @@ fn nested_targets_arbitrate_deepest_first_and_follow_a_live_eligibility_change()
         inner.interaction.drop_target = Some(inner_target);
 
         let mut outer = drag_box("nested-outer", 90.0, 60.0);
-        let mut outer_target =
-            traced_target("nested-outer", "Outer", trace, false, 1, NodeDropCommit::Committed);
+        let mut outer_target = traced_target(
+            "nested-outer",
+            "Outer",
+            trace,
+            false,
+            1,
+            NodeDropCommit::Committed,
+        );
         outer_target.priority = 50;
         outer.interaction.drop_target = Some(outer_target);
         let outer = outer.child(inner);
@@ -1735,7 +1755,10 @@ fn removing_the_dragged_source_during_a_rebuild_cancels_once() {
             1,
             "{events:?}"
         );
-        assert!(events.contains(&"cleared:custom-zone-a".to_owned()), "{events:?}");
+        assert!(
+            events.contains(&"cleared:custom-zone-a".to_owned()),
+            "{events:?}"
+        );
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
 
         driver.pointer_release(payload_frac("custom-zone-a", 0.5, 0.75));
@@ -1814,16 +1837,14 @@ fn two_providers_own_independent_sessions() {
                 gpui::div()
                     .flex()
                     .flex_col()
-                    .child(
-                        poodle_gpui_node_backend::drag_drop_provider(&left_controller, || {
-                            gpui::div().child(poodle_gpui_node_backend::to_gpui(&left))
-                        }),
-                    )
-                    .child(
-                        poodle_gpui_node_backend::drag_drop_provider(&right_controller, || {
-                            gpui::div().child(poodle_gpui_node_backend::to_gpui(&right))
-                        }),
-                    )
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &left_controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&left)),
+                    ))
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &right_controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&right)),
+                    ))
                     .into_any_element()
             }) as Rc<dyn Fn() -> gpui::AnyElement>
         };
@@ -1849,7 +1870,8 @@ fn two_providers_own_independent_sessions() {
         // registry, so no intent may resolve and its callbacks stay silent.
         driver.pointer_drag(payload_frac("right-zone-a", 0.5, 0.75));
         assert_eq!(
-            left_controller.snapshot().target_id, None,
+            left_controller.snapshot().target_id,
+            None,
             "a target in another provider is not a candidate"
         );
         assert!(
@@ -1980,7 +2002,12 @@ impl HostStub {
         // answers anyway, so the *controller's* handling of a late answer is
         // what the test measures.
         if let Some(reason) = abort.reason() {
-            self.state.lock().expect("host state").log.aborts.push(reason);
+            self.state
+                .lock()
+                .expect("host state")
+                .log
+                .aborts
+                .push(reason);
         }
         complete(token.map(|token| poodle_node::CrossWindowDragReceipt {
             protocol_version: poodle_node::CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
@@ -2024,7 +2051,12 @@ impl HostStub {
         let entry = self.state.lock().expect("host state").pending_commit.take();
         if let Some((abort, complete)) = entry {
             if let Some(reason) = abort.reason() {
-                self.state.lock().expect("host state").log.aborts.push(reason);
+                self.state
+                    .lock()
+                    .expect("host state")
+                    .log
+                    .aborts
+                    .push(reason);
             }
             complete(result);
         }
@@ -2034,7 +2066,12 @@ impl HostStub {
         let entry = self.state.lock().expect("host state").pending_pick.take();
         if let Some((_receipt, abort, complete)) = entry {
             if let Some(reason) = abort.reason() {
-                self.state.lock().expect("host state").log.aborts.push(reason);
+                self.state
+                    .lock()
+                    .expect("host state")
+                    .log
+                    .aborts
+                    .push(reason);
             }
             complete(projection);
         }
@@ -2155,10 +2192,7 @@ fn receipt_for(token: &str) -> poodle_node::CrossWindowDragReceipt {
     }
 }
 
-fn projection_for(
-    token: &str,
-    target: Option<&str>,
-) -> poodle_node::CrossWindowDragProjection {
+fn projection_for(token: &str, target: Option<&str>) -> poodle_node::CrossWindowDragProjection {
     poodle_node::CrossWindowDragProjection {
         receipt: poodle_node::CrossWindowDragReceipt {
             protocol_version: poodle_node::CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
@@ -2255,7 +2289,10 @@ fn a_bridged_gpui_source_prepares_before_activation_and_ends_on_the_host_termina
             host.log(|log| log.cancels.is_empty()),
             "the host closed its own transaction; Poodle does not cancel it again"
         );
-        assert_eq!(host.log(|log| log.stops.clone()), vec!["lease-1".to_string()]);
+        assert_eq!(
+            host.log(|log| log.stops.clone()),
+            vec!["lease-1".to_string()]
+        );
 
         // A repeat is inert.
         host.report_terminal(poodle_node::DragTerminalOutcome::Committed {
@@ -2263,6 +2300,7 @@ fn a_bridged_gpui_source_prepares_before_activation_and_ends_on_the_host_termina
                 target_id: "xw-zone-a".to_string(),
                 position: "after".to_string(),
                 operation: poodle_node::DragOperation::Move,
+                destination: None,
             },
         });
         driver.draw_frame();
@@ -2390,7 +2428,8 @@ fn an_incoming_gpui_projection_revalidates_locally_and_commits_through_the_host(
         driver.draw_frame();
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
         assert_eq!(
-            controller.snapshot().target_id, None,
+            controller.snapshot().target_id,
+            None,
             "a target this window does not have resolves to no intent at all"
         );
 
@@ -2477,7 +2516,10 @@ fn a_cancelled_gpui_commit_and_a_mismatched_pick_are_both_inert() {
         // Refusing it at the picker is what leaves the live transaction alone;
         // letting it through would supersede a transaction this window is
         // still holding, which is the damage the receipt binding prevents.
-        host.settle_pick(Some(projection_for("someone-elses-lease", Some("xw-zone-a"))));
+        host.settle_pick(Some(projection_for(
+            "someone-elses-lease",
+            Some("xw-zone-a"),
+        )));
         driver.draw_frame();
         assert_eq!(
             controller.snapshot().target_id,
@@ -2485,7 +2527,8 @@ fn a_cancelled_gpui_commit_and_a_mismatched_pick_are_both_inert() {
             "a pick naming another receipt is refused, not trusted"
         );
         assert_eq!(
-            controller.snapshot().session_id, live_session,
+            controller.snapshot().session_id,
+            live_session,
             "and the live transaction is untouched"
         );
 
@@ -2503,7 +2546,10 @@ fn a_cancelled_gpui_commit_and_a_mismatched_pick_are_both_inert() {
         // A keyboard transaction is not released by a mouse-up, so the commit
         // case is its own pointer transaction — a different receipt, as it
         // would be in a real host.
-        host.cancel_from_host(receipt_for("lease-1"), poodle_node::DragCancelReason::Explicit);
+        host.cancel_from_host(
+            receipt_for("lease-1"),
+            poodle_node::DragCancelReason::Explicit,
+        );
         driver.draw_frame();
 
         host.project(projection_for("lease-2", Some("xw-zone-a")));
@@ -2515,7 +2561,10 @@ fn a_cancelled_gpui_commit_and_a_mismatched_pick_are_both_inert() {
             vec!["lease-2:xw-zone-a:after".to_string()]
         );
 
-        host.cancel_from_host(receipt_for("lease-2"), poodle_node::DragCancelReason::WindowLost);
+        host.cancel_from_host(
+            receipt_for("lease-2"),
+            poodle_node::DragCancelReason::WindowLost,
+        );
         driver.draw_frame();
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
 
@@ -2539,7 +2588,6 @@ fn a_cancelled_gpui_commit_and_a_mismatched_pick_are_both_inert() {
         );
     });
 }
-
 
 /// g16.026 round 2. A late preparation receipt goes back to the host that
 /// allocated it, and to no other.
@@ -2740,7 +2788,10 @@ fn installing_a_target_bridge_makes_no_host_request() {
         keyboard.input_kind = poodle_node::CrossWindowDragInputKind::Keyboard;
         host.project(keyboard);
         driver.drain();
-        assert_eq!(host.log(|log| log.picks.clone()), vec!["lease-1".to_string()]);
+        assert_eq!(
+            host.log(|log| log.picks.clone()),
+            vec!["lease-1".to_string()]
+        );
     });
 }
 
@@ -2801,7 +2852,8 @@ fn replacing_the_target_bridge_ends_the_outgoing_transaction() {
             "the outgoing host's transaction is ended, not stranded"
         );
         assert_eq!(
-            controller.snapshot().target_id, None,
+            controller.snapshot().target_id,
+            None,
             "and A's queued news did not start a transaction under B"
         );
 
@@ -2849,7 +2901,6 @@ fn attach_bridge(
         attach_bridge(child, source_id, Arc::clone(&bridge));
     }
 }
-
 
 /// g16.026, carried from g16.025. **Two windows, no false cancel.**
 ///
@@ -3043,7 +3094,11 @@ fn unmounting_a_provider_mid_drag_cancels_it_and_stops_the_native_drag() {
             !driver.has_active_native_drag(),
             "semantic idle is not enough: GPUI's own drag and preview must be gone too"
         );
-        assert_eq!(host.census_len(), 1, "the host forgets the departed provider");
+        assert_eq!(
+            host.census_len(),
+            1,
+            "the host forgets the departed provider"
+        );
 
         let entries = trace.lock().expect("trace").clone();
         let terminals: Vec<&String> = entries
@@ -3071,7 +3126,6 @@ fn unmounting_a_provider_mid_drag_cancels_it_and_stops_the_native_drag() {
         );
     });
 }
-
 
 /// g16.025. The keyboard route creates the same semantic session as the
 /// pointer: pickup on a focused opted-in source, ordered traversal, one
@@ -3134,11 +3188,15 @@ fn keyboard_pickup_traversal_and_drop_use_the_same_session() {
 
         let announcements = controller.announcements();
         assert!(
-            announcements.first().is_some_and(|text| text.contains("Picked up Alpha")),
+            announcements
+                .first()
+                .is_some_and(|text| text.contains("Picked up Alpha")),
             "{announcements:?}"
         );
         assert!(
-            announcements.last().is_some_and(|text| text.starts_with("Dropped Alpha")),
+            announcements
+                .last()
+                .is_some_and(|text| text.starts_with("Dropped Alpha")),
             "{announcements:?}"
         );
     });
@@ -4037,7 +4095,10 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
                 &SliderHandlers {
                     on_change: Some(Arc::new(move |next| {
                         *state.lock().expect("value lock") = next;
-                        events.lock().expect("trace lock").push("valueChange".into());
+                        events
+                            .lock()
+                            .expect("trace lock")
+                            .push("valueChange".into());
                     })),
                     on_value_commit: Some(Arc::new(move |next| {
                         *commit_state.lock().expect("value lock") = next;
@@ -4192,11 +4253,9 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
         assert_eq!(control.a11y.tab_index, None);
         assert!(control.interaction.on_key.is_none());
         assert!(control.style.focus_ring.is_none());
-        assert!(
-            disabled
-                .find(&|n| n.interaction.on_scrub.is_some())
-                .is_none()
-        );
+        assert!(disabled
+            .find(&|n| n.interaction.on_scrub.is_some())
+            .is_none());
     });
 }
 
@@ -4295,7 +4354,10 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
         let mut driver = HeadlessDriver::new_element(cx, build);
         driver.draw_frame();
         assert!(scroll.max_offset_y() > 0.0, "fixture must overflow");
-        assert!(scroll.is_pinned(), "initial render follows the latest block");
+        assert!(
+            scroll.is_pinned(),
+            "initial render follows the latest block"
+        );
         assert!(scroll.remaining_to_bottom() <= 0.5);
 
         driver.scroll_vertical(240.0);
@@ -4318,7 +4380,10 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
         driver.pointer_activate_id("transcript-headless-jump-control");
         driver.draw_frame();
         assert!(scroll.is_pinned(), "jump re-arms following");
-        assert!(scroll.remaining_to_bottom() <= 0.5, "jump reaches the bottom");
+        assert!(
+            scroll.remaining_to_bottom() <= 0.5,
+            "jump reaches the bottom"
+        );
         assert!(
             poodle_gpui_node_backend::bounds_for("transcript-headless-jump-control").is_none(),
             "the jump control leaves the mounted tree once pinned",
@@ -4327,7 +4392,10 @@ fn agent_transcript_detaches_jumps_and_resumes_following_on_a_real_viewport() {
         let followed_offset = scroll.offset_y();
         items.borrow_mut().push(message(25));
         driver.draw_frame();
-        assert!(scroll.offset_y() < followed_offset, "a pinned append follows");
+        assert!(
+            scroll.offset_y() < followed_offset,
+            "a pinned append follows"
+        );
         assert!(scroll.remaining_to_bottom() <= 0.5);
     });
 }
@@ -4471,11 +4539,7 @@ fn a_deferred_overlay_row_receives_pointer_after_host_rebuild() {
         root
     }
 
-    fn trigger_dismiss(
-        root: &mut Node,
-        host: &Arc<Mutex<Host>>,
-        mounted: &Arc<Mutex<Node>>,
-    ) {
+    fn trigger_dismiss(root: &mut Node, host: &Arc<Mutex<Host>>, mounted: &Arc<Mutex<Node>>) {
         let host = Arc::clone(host);
         let mounted = Arc::clone(mounted);
         if let Some(trigger) = root.children.first_mut() {
@@ -4485,7 +4549,8 @@ fn a_deferred_overlay_row_receives_pointer_after_host_rebuild() {
                 state.dismissals.push(reason);
                 state.open = false;
                 drop(state);
-                *mounted.lock().expect("mount lock") = build(Arc::clone(&host), Arc::clone(&mounted));
+                *mounted.lock().expect("mount lock") =
+                    build(Arc::clone(&host), Arc::clone(&mounted));
             }));
         }
     }
@@ -4679,11 +4744,9 @@ fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
         );
         // The slot row takes the keys; give it a stable identity for the
         // mounted window.
-        assert!(give_first_id(
-            &mut node,
-            "code-input-row",
-            &|n| n.interaction.focusable,
-        ));
+        assert!(give_first_id(&mut node, "code-input-row", &|n| n
+            .interaction
+            .focusable,));
         node.id = Some(FIXTURE_ID.to_owned());
         let node = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
@@ -4724,11 +4787,9 @@ fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
             );
             // A fresh id: the first mount's row state (and its focus handle)
             // is gone with its element, and the driver keeps one window.
-            assert!(give_first_id(
-                &mut node,
-                "code-input-row-2",
-                &|n| n.interaction.focusable,
-            ));
+            assert!(give_first_id(&mut node, "code-input-row-2", &|n| n
+                .interaction
+                .focusable,));
             node.id = Some(FIXTURE_ID.to_owned());
             node
         }
@@ -4755,8 +4816,7 @@ fn a_grouped_code_input_types_and_completes_through_the_real_tree() {
             driver.draw_frame();
         }
         assert_eq!(
-            value,
-            "abcd",
+            value, "abcd",
             "the row accumulates the joined value through the host loop"
         );
         assert_eq!(
@@ -4834,7 +4894,7 @@ fn a_stale_completion_result_cannot_render_in_a_mounted_window() {
 #[test]
 fn a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam() {
     use poodle_gpui_node_backend::file_capability::{
-        InjectedFileSource, PickedFile, SingleFilePickSpec, SingleFileSource, finish_file_pick,
+        finish_file_pick, InjectedFileSource, PickedFile, SingleFilePickSpec, SingleFileSource,
     };
 
     run_headless(|cx| {
@@ -4873,11 +4933,10 @@ fn a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam() {
         );
         // The dropzone carries the browse intent; give it a stable identity
         // for the mounted window.
-        assert!(give_first_id(
-            &mut node,
-            "file-upload-dropzone",
-            &|n| n.interaction.on_activate.is_some(),
-        ));
+        assert!(give_first_id(&mut node, "file-upload-dropzone", &|n| n
+            .interaction
+            .on_activate
+            .is_some(),));
         node.id = Some(FIXTURE_ID.to_owned());
         let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
 
@@ -4907,8 +4966,8 @@ fn a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam() {
 #[test]
 fn a_dropzone_browse_reports_accept_rejection_honestly() {
     use poodle_gpui_node_backend::file_capability::{
-        FilePickOutcome, InjectedFileSource, PickedFile, SingleFilePickSpec, SingleFileSource,
-        finish_file_pick,
+        finish_file_pick, FilePickOutcome, InjectedFileSource, PickedFile, SingleFilePickSpec,
+        SingleFileSource,
     };
 
     run_headless(|cx| {
@@ -4945,11 +5004,10 @@ fn a_dropzone_browse_reports_accept_rejection_honestly() {
                 ..poodle_render::FileUploadHandlers::default()
             },
         );
-        assert!(give_first_id(
-            &mut node,
-            "file-upload-dropzone",
-            &|n| n.interaction.on_activate.is_some(),
-        ));
+        assert!(give_first_id(&mut node, "file-upload-dropzone", &|n| n
+            .interaction
+            .on_activate
+            .is_some(),));
         node.id = Some(FIXTURE_ID.to_owned());
         let mut driver = HeadlessDriver::new(cx, Arc::new(Mutex::new(node)));
 
@@ -4958,9 +5016,7 @@ fn a_dropzone_browse_reports_accept_rejection_honestly() {
         assert_eq!(outcomes.len(), 1);
         assert_eq!(
             &outcomes[0],
-            &FilePickOutcome::Rejected(
-                "File type not accepted. Accepted types: .lic".to_string()
-            ),
+            &FilePickOutcome::Rejected("File type not accepted. Accepted types: .lic".to_string()),
             "the rejection names the accept rule, not a fake OS filter"
         );
     });
@@ -4975,9 +5031,9 @@ fn a_dropzone_browse_reports_accept_rejection_honestly() {
 #[test]
 fn licence_activation_key_entry_types_and_emits_through_the_real_tree() {
     use poodle_headless::licence::{
-        LicenceActivationMode, LicenceActivationRoute, LicenceCredential, LicenceKeyFormat,
-        LicenceKeyProblem, LicenceKeyResult, LicenceSubmitDraft, LicenceSubmitResolution,
-        resolve_licence_submit,
+        resolve_licence_submit, LicenceActivationMode, LicenceActivationRoute, LicenceCredential,
+        LicenceKeyFormat, LicenceKeyProblem, LicenceKeyResult, LicenceSubmitDraft,
+        LicenceSubmitResolution,
     };
     use poodle_specs::{LicenceActivationSpec, LicenceKeyCodeInputOptions};
 
@@ -5018,9 +5074,7 @@ fn licence_activation_key_entry_types_and_emits_through_the_real_tree() {
                 poodle_render::LicenceActivationHandlers {
                     on_key_change: Some({
                         let changes = Arc::clone(&changes);
-                        Arc::new(move |value: &str| {
-                            changes.lock().unwrap().push(value.to_string())
-                        })
+                        Arc::new(move |value: &str| changes.lock().unwrap().push(value.to_string()))
                     }),
                     on_key_check: Some(Arc::new(|input: &str| SpecimenKeyFormat.parse(input))),
                     on_submit: Some({
@@ -5043,20 +5097,18 @@ fn licence_activation_key_entry_types_and_emits_through_the_real_tree() {
                     ..poodle_render::LicenceActivationHandlers::default()
                 },
             );
-            assert!(give_first_id(&mut node, "la-code-row", &|n| n.interaction.focusable));
-            assert!(give_first_id(
-                &mut node,
-                "la-submit",
-                &|n| matches!(n.kind, poodle_node::NodeKind::Button { .. }),
-            ));
+            assert!(give_first_id(&mut node, "la-code-row", &|n| n
+                .interaction
+                .focusable));
+            assert!(give_first_id(&mut node, "la-submit", &|n| matches!(
+                n.kind,
+                poodle_node::NodeKind::Button { .. }
+            ),));
             node.id = Some(FIXTURE_ID.to_owned());
             node
         };
 
-        let node = Arc::new(Mutex::new(build(
-            String::new(),
-            Arc::clone(&submits),
-        )));
+        let node = Arc::new(Mutex::new(build(String::new(), Arc::clone(&submits))));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
 
         // Type a full alphanumeric key through the real dispatch tree, with
@@ -5150,12 +5202,13 @@ fn licence_seats_release_flows_through_confirm_in_a_mounted_window() {
             ["id-b"],
             "the confirm button releases the exact machine id"
         );
-        assert!(!node
-            .lock()
-            .unwrap()
-            .texts()
-            .iter()
-            .any(|t| t.contains("id-a") || t.contains("id-b")),
+        assert!(
+            !node
+                .lock()
+                .unwrap()
+                .texts()
+                .iter()
+                .any(|t| t.contains("id-a") || t.contains("id-b")),
             "raw machine ids never reach rendered or accessible text"
         );
     });
@@ -5176,7 +5229,9 @@ fn licence_status_renders_state_and_authority_reads_in_a_mounted_window() {
             .unwrap_or(0);
         let mut node = poodle_render::licence_status(
             &LicenceStatusSpec::new()
-                .with_usability(LicenceUsability::InGrace { until: now + 86_400 })
+                .with_usability(LicenceUsability::InGrace {
+                    until: now + 86_400,
+                })
                 .with_trust_basis(LicenceTrustBasis::OfflineSignature)
                 .with_use_until(Some(now + 86_400))
                 .with_update_until(None)
@@ -5279,11 +5334,10 @@ fn key_validation_copy_clears_on_edit_in_a_mounted_window() {
                     ..poodle_render::LicenceActivationHandlers::default()
                 },
             );
-            assert!(give_first_id(
-                &mut node,
-                "la-key-input",
-                &|n| n.interaction.on_text_change.is_some(),
-            ));
+            assert!(give_first_id(&mut node, "la-key-input", &|n| n
+                .interaction
+                .on_text_change
+                .is_some(),));
             node.id = Some(FIXTURE_ID.to_owned());
             node
         };
@@ -5351,11 +5405,10 @@ fn a_machine_name_escape_restores_the_original_in_a_mounted_window() {
                 },
             );
             if editing {
-                assert!(give_first_id(
-                    &mut node,
-                    "la-machine-input",
-                    &|n| n.interaction.on_text_change.is_some(),
-                ));
+                assert!(give_first_id(&mut node, "la-machine-input", &|n| n
+                    .interaction
+                    .on_text_change
+                    .is_some(),));
             }
             node.id = Some(FIXTURE_ID.to_owned());
             node
@@ -5377,7 +5430,11 @@ fn a_machine_name_escape_restores_the_original_in_a_mounted_window() {
         // Escape fires the cancel channel; the host restores the committed
         // value snapped at edit start and closes editing.
         driver.dispatch_key_raw("escape");
-        assert_eq!(*cancelled.lock().unwrap(), 1, "escape reached the cancel channel");
+        assert_eq!(
+            *cancelled.lock().unwrap(),
+            1,
+            "escape reached the cancel channel"
+        );
         *node.lock().unwrap() = build("Studio Mac", false);
         driver.draw_frame();
         assert!(
@@ -5450,9 +5507,7 @@ fn model_connection_picker_roving_focus_moves_real_backend_focus() {
 /// overflows above the window and its top rows cannot be hit-tested.
 #[test]
 fn model_connection_picker_ignores_a_click_on_an_unsupported_route() {
-    use poodle_headless::model_connection::{
-        ModelConnectionAvailability, ModelConnectionOption,
-    };
+    use poodle_headless::model_connection::{ModelConnectionAvailability, ModelConnectionOption};
     use poodle_render::model_connection_option_id;
     use poodle_specs::ModelConnectionPickerSpec;
 
@@ -5593,11 +5648,11 @@ fn model_connection_card_closes_and_returns_real_focus_to_the_disclosure() {
                 ..poodle_render::ModelConnectionCardHandlers::default()
             },
         );
-        assert!(give_first_id(
-            &mut node,
-            "card-switch",
-            &|n| n.a11y.label.as_deref() == Some("Enable OpenAI · Work"),
-        ));
+        assert!(give_first_id(&mut node, "card-switch", &|n| n
+            .a11y
+            .label
+            .as_deref()
+            == Some("Enable OpenAI · Work"),));
         node.id = Some(FIXTURE_ID.to_owned());
         let node = Arc::new(Mutex::new(node));
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&node));
@@ -5790,9 +5845,7 @@ fn model_connection_setup_stage_focus_lands_on_real_handles() {
     use poodle_headless::model_connection::{
         model_connection_picker_fixtures, ModelConnectionSetupStage,
     };
-    use poodle_render::{
-        model_connection_setup_action_id, model_connection_setup_title_focus_id,
-    };
+    use poodle_render::{model_connection_setup_action_id, model_connection_setup_title_focus_id};
     use poodle_specs::ModelConnectionSetupSpec;
 
     run_headless(|cx| {
@@ -5811,11 +5864,8 @@ fn model_connection_setup_stage_focus_lands_on_real_handles() {
                 &RenderContext::new(&theme()),
                 poodle_render::ModelConnectionSetupHandlers {
                     on_stage_change: Some(Arc::new(move |next| {
-                        let next_node = build(
-                            next,
-                            Arc::clone(&stage_mount),
-                            Arc::clone(&stage_requests),
-                        );
+                        let next_node =
+                            build(next, Arc::clone(&stage_mount), Arc::clone(&stage_requests));
                         *stage_mount.lock().unwrap() = next_node;
                     })),
                     on_focus_request: Some(Arc::new(move |id: &str| {
@@ -5893,9 +5943,7 @@ fn model_catalogue_editor_hiding_the_last_row_focuses_the_hidden_disclosure() {
             &RenderContext::new(&theme()),
             poodle_render::ModelCatalogueEditorHandlers {
                 on_visibility_change: Some(Arc::new(|_| {})),
-                on_hidden_open_change: Some(Arc::new(move |open| {
-                    sink.lock().unwrap().push(open)
-                })),
+                on_hidden_open_change: Some(Arc::new(move |open| sink.lock().unwrap().push(open))),
                 on_focus_request: Some(Arc::new(|id: &str| {
                     poodle_gpui_node_backend::request_focus(id);
                 })),
@@ -5933,8 +5981,7 @@ fn two_model_connection_pickers_do_not_share_backend_focus_handles() {
     run_headless(|cx| {
         let picker = |scope: &str| {
             poodle_render::model_connection_picker(
-                &ModelConnectionPickerSpec::new()
-                    .with_options(model_connection_picker_fixtures()),
+                &ModelConnectionPickerSpec::new().with_options(model_connection_picker_fixtures()),
                 &RenderContext::new(&theme()),
                 poodle_render::ModelConnectionPickerHandlers {
                     instance_id: Some(scope.to_string()),
@@ -6029,7 +6076,9 @@ fn radio_selects_on_activate_and_does_not_uncheck_itself() {
 /// host-owned confirm dialog, and confirming emits install.
 #[test]
 fn update_status_confirm_then_install_through_the_real_tree() {
-    use poodle_headless::update::{OfferReason, UpdateAvailabilityProjection, UpdateControllerStatus};
+    use poodle_headless::update::{
+        OfferReason, UpdateAvailabilityProjection, UpdateControllerStatus,
+    };
     use poodle_specs::UpdateStatusSpec;
 
     run_headless(|cx| {
@@ -6236,10 +6285,7 @@ fn settings_shell_navigates_and_refused_close_stays_open() {
 
         driver.wait_for_focus_handle("sidebar-nav-appearance");
         driver.keyboard_activate("sidebar-nav-appearance");
-        assert_eq!(
-            pages.lock().unwrap().as_slice(),
-            ["appearance".to_string()]
-        );
+        assert_eq!(pages.lock().unwrap().as_slice(), ["appearance".to_string()]);
     });
 
     run_headless(|cx| {
@@ -6318,8 +6364,7 @@ fn a_focused_resize_handle_steps_the_pane_and_its_declared_value() {
                 &RenderContext::new(&theme()),
                 Some(Arc::new(move |phase, delta| match phase {
                     ResizePhase::Start => {
-                        *gesture.lock().expect("gesture lock") =
-                            *state.lock().expect("pane lock");
+                        *gesture.lock().expect("gesture lock") = *state.lock().expect("pane lock");
                     }
                     ResizePhase::Move => {
                         let mut at = gesture.lock().expect("gesture lock");
@@ -6339,9 +6384,8 @@ fn a_focused_resize_handle_steps_the_pane_and_its_declared_value() {
 
         // The host derives the key from the scope it supplied — no orientation,
         // name, or value in it, so a relabelled handle keeps its focus handle.
-        let handle_id = poodle_render::resize_handle_focus_id(&ResizeHandleSpec::new(
-            "editor:sidebar",
-        ));
+        let handle_id =
+            poodle_render::resize_handle_focus_id(&ResizeHandleSpec::new("editor:sidebar"));
 
         let declared_value = || mounted.lock().unwrap().a11y.value;
         let declared_range = || {
@@ -6511,8 +6555,7 @@ fn callout_dismiss_rebuilds_the_host_spec_through_mounted_input() {
                 poodle_render::CalloutHandlers {
                     on_dismiss: Some(Arc::new(move || {
                         *flag.lock().unwrap() = true;
-                        *mount.lock().unwrap() =
-                            build(true, Arc::clone(&mount), Arc::clone(&flag));
+                        *mount.lock().unwrap() = build(true, Arc::clone(&mount), Arc::clone(&flag));
                     })),
                     ..poodle_render::CalloutHandlers::default()
                 },
@@ -6741,18 +6784,12 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
                 Some(Node::text(format!("Panel: {tab}"))),
                 poodle_render::DockRegionHandlers {
                     on_tab_change: Some(Arc::new(move |value| {
-                        *tab_mount.lock().unwrap() = build(
-                            value.to_string(),
-                            collapsed_for_tab,
-                            Arc::clone(&tab_mount),
-                        );
+                        *tab_mount.lock().unwrap() =
+                            build(value.to_string(), collapsed_for_tab, Arc::clone(&tab_mount));
                     })),
                     on_collapse_toggle: Some(Arc::new(move |next| {
-                        *collapse_mount.lock().unwrap() = build(
-                            tab_for_collapse.clone(),
-                            next,
-                            Arc::clone(&collapse_mount),
-                        );
+                        *collapse_mount.lock().unwrap() =
+                            build(tab_for_collapse.clone(), next, Arc::clone(&collapse_mount));
                     })),
                     ..poodle_render::DockRegionHandlers::default()
                 },
@@ -6760,11 +6797,7 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
             Node::container()
                 .child(dock)
                 .child(Node::text(format!("Tab: {tab}")))
-                .child(Node::text(if collapsed {
-                    "Collapsed"
-                } else {
-                    "Expanded"
-                }))
+                .child(Node::text(if collapsed { "Collapsed" } else { "Expanded" }))
         }
 
         let mounted = Arc::new(Mutex::new(Node::container()));
@@ -6805,6 +6838,169 @@ fn dock_region_tab_and_collapse_rebuild_the_host_spec_through_mounted_input() {
         assert!(
             after_collapse.iter().any(|t| t == "Tab: search"),
             "the stored tab survives collapse"
+        );
+    });
+}
+
+/// Hovered-tab `accept_panel` and static-stack before/after insert run through
+/// mounted pointer dispatch, not a direct handler poke.
+#[test]
+fn dock_region_hovered_tab_policy_and_static_insert_run_through_mounted_input() {
+    use poodle_render::DockPanelDrop;
+    use poodle_specs::{DockEdge, DockRegionSpec, DockSizing, PanelTabItem};
+
+    fn sized(id: &str, width: f32, height: f32, child: Node) -> Node {
+        let mut wrap = Node::container();
+        wrap.id = Some(id.to_owned());
+        wrap.style.descriptor.layout.width = LayoutSizing::Fixed(width);
+        wrap.style.descriptor.layout.height = LayoutSizing::Fixed(height);
+        wrap.child(child)
+    }
+
+    run_headless(|cx| {
+        let refused = Arc::new(Mutex::new(Vec::new()));
+        let left = DockRegionSpec::new(
+            DockEdge::Left,
+            vec![PanelTabItem::new("explorer", "Explorer")],
+        )
+        .with_can_accept_panel(true)
+        .with_drag_zone_id("zone-a")
+        .with_value("explorer");
+        let right = DockRegionSpec::new(
+            DockEdge::Left,
+            vec![PanelTabItem::new("outline", "Outline")],
+        )
+        .with_can_accept_panel(true)
+        .with_drag_zone_id("zone-b")
+        .with_value("outline");
+
+        let left_dock = poodle_render::dock_region(
+            &left,
+            &RenderContext::new(&theme()),
+            None,
+            poodle_render::DockRegionHandlers {
+                on_panel_drop: {
+                    let refused = Arc::clone(&refused);
+                    Some(Arc::new(move |drop: &DockPanelDrop| {
+                        refused.lock().unwrap().push(drop.clone());
+                    }))
+                },
+                accept_panel: Some(Arc::new(|panel_id: &str, _edge: &str| {
+                    panel_id != "explorer"
+                })),
+                ..poodle_render::DockRegionHandlers::default()
+            },
+        );
+        let right_dock = poodle_render::dock_region(
+            &right,
+            &RenderContext::new(&theme()),
+            None,
+            poodle_render::DockRegionHandlers {
+                on_panel_drop: {
+                    let refused = Arc::clone(&refused);
+                    Some(Arc::new(move |drop: &DockPanelDrop| {
+                        refused.lock().unwrap().push(drop.clone());
+                    }))
+                },
+                accept_panel: Some(Arc::new(|panel_id: &str, _edge: &str| {
+                    panel_id != "explorer"
+                })),
+                ..poodle_render::DockRegionHandlers::default()
+            },
+        );
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(400.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(160.0);
+        let node = Arc::new(Mutex::new(
+            row.child(sized("dock-a", 200.0, 160.0, left_dock))
+                .child(sized("dock-b", 200.0, 160.0, right_dock)),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 400.0, 160.0);
+        driver.draw_frame();
+
+        let source = payload_frac("dock-tab-explorer", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 8.0), source.y));
+        driver.pointer_drag(payload_frac("dock-tab-outline", 0.5, 0.5));
+        driver.pointer_release(payload_frac("dock-tab-outline", 0.5, 0.5));
+        assert!(
+            refused.lock().unwrap().is_empty(),
+            "accept_panel must refuse explorer on the hovered tab"
+        );
+    });
+
+    run_headless(|cx| {
+        let moved = Arc::new(Mutex::new(Vec::new()));
+        let source_spec = DockRegionSpec::new(
+            DockEdge::Top,
+            vec![PanelTabItem::new("explorer", "Explorer")],
+        )
+        .with_sizing(DockSizing::Static)
+        .with_can_accept_panel(true)
+        .with_drag_zone_id("stack-a");
+        let target_spec = DockRegionSpec::new(
+            DockEdge::Top,
+            vec![
+                PanelTabItem::new("outline", "Outline"),
+                PanelTabItem::new("inspector", "Inspector"),
+            ],
+        )
+        .with_sizing(DockSizing::Static)
+        .with_can_accept_panel(true)
+        .with_drag_zone_id("stack-b");
+
+        let source_dock = poodle_render::dock_region(
+            &source_spec,
+            &RenderContext::new(&theme()),
+            None,
+            poodle_render::DockRegionHandlers::default(),
+        );
+        let target_dock = poodle_render::dock_region(
+            &target_spec,
+            &RenderContext::new(&theme()),
+            None,
+            poodle_render::DockRegionHandlers {
+                on_panel_drop: {
+                    let moved = Arc::clone(&moved);
+                    Some(Arc::new(move |drop: &DockPanelDrop| {
+                        moved.lock().unwrap().push(drop.clone());
+                    }))
+                },
+                ..poodle_render::DockRegionHandlers::default()
+            },
+        );
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(400.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(160.0);
+        let node = Arc::new(Mutex::new(
+            row.child(sized("stack-a-host", 200.0, 160.0, source_dock))
+                .child(sized("stack-b-host", 200.0, 160.0, target_dock)),
+        ));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 400.0, 160.0);
+        driver.draw_frame();
+
+        let source = payload_frac("dock-stack-explorer", 0.5, 0.5);
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 8.0), source.y));
+        driver.pointer_drag(payload_frac("dock-stack-outline", 0.25, 0.5));
+        driver.pointer_release(payload_frac("dock-stack-outline", 0.25, 0.5));
+        assert_eq!(
+            moved.lock().unwrap().last().map(|drop| drop.index),
+            Some(0),
+            "left half of a static stack item inserts before"
+        );
+
+        moved.lock().unwrap().clear();
+        driver.pointer_press(source);
+        driver.pointer_drag(point(px(f32::from(source.x) + 8.0), source.y));
+        driver.pointer_drag(payload_frac("dock-stack-outline", 0.75, 0.5));
+        driver.pointer_release(payload_frac("dock-stack-outline", 0.75, 0.5));
+        assert_eq!(
+            moved.lock().unwrap().last().map(|drop| drop.index),
+            Some(1),
+            "right half of a static stack item inserts after"
         );
     });
 }
@@ -7070,13 +7266,11 @@ fn agent_subagent_disclosure_rebuilds_the_host_spec_through_mounted_input() {
                     instance_id: None,
                 },
             );
-            Node::container()
-                .child(node)
-                .child(Node::text(if expanded {
-                    "Child: open"
-                } else {
-                    "Child: shut"
-                }))
+            Node::container().child(node).child(Node::text(if expanded {
+                "Child: open"
+            } else {
+                "Child: shut"
+            }))
         }
 
         let mounted = Arc::new(Mutex::new(Node::container()));
@@ -7103,11 +7297,7 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
     use poodle_specs::ChangedFilesSpec;
 
     run_headless(|cx| {
-        fn build(
-            expanded: bool,
-            selected: Option<String>,
-            mounted: Arc<Mutex<Node>>,
-        ) -> Node {
+        fn build(expanded: bool, selected: Option<String>, mounted: Arc<Mutex<Node>>) -> Node {
             let spec = ChangedFilesSpec::new(
                 "worked",
                 vec![
@@ -7142,22 +7332,17 @@ fn changed_files_disclosure_and_selection_rebuild_the_host_spec() {
                         );
                     })),
                     on_file_select: Some(Arc::new(move |path| {
-                        *select_mount.lock().unwrap() = build(
-                            true,
-                            Some(path.to_string()),
-                            Arc::clone(&select_mount),
-                        );
+                        *select_mount.lock().unwrap() =
+                            build(true, Some(path.to_string()), Arc::clone(&select_mount));
                     })),
                     instance_id: None,
                 },
             );
-            let mut root = Node::container()
-                .child(node)
-                .child(Node::text(if expanded {
-                    "Files: open"
-                } else {
-                    "Files: shut"
-                }));
+            let mut root = Node::container().child(node).child(Node::text(if expanded {
+                "Files: open"
+            } else {
+                "Files: shut"
+            }));
             if let Some(path) = selected {
                 root = root.child(Node::text(format!("selected: {path}")));
             }
@@ -7215,13 +7400,11 @@ fn tool_call_disclosure_rebuilds_the_host_spec_through_mounted_input() {
                     ..poodle_render::ToolCallHandlers::default()
                 },
             );
-            Node::container()
-                .child(node)
-                .child(Node::text(if expanded {
-                    "Output: open"
-                } else {
-                    "Output: shut"
-                }))
+            Node::container().child(node).child(Node::text(if expanded {
+                "Output: open"
+            } else {
+                "Output: shut"
+            }))
         }
 
         let mounted = Arc::new(Mutex::new(Node::container()));
@@ -7260,8 +7443,11 @@ fn tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input() {
         }
 
         fn build(expanded: bool, mounted: Arc<Mutex<Node>>) -> Node {
-            let spec = ToolCallGroupSpec::new("three", vec![call("a", "one"), call("b", "two"), call("c", "three")])
-                .with_expanded(expanded);
+            let spec = ToolCallGroupSpec::new(
+                "three",
+                vec![call("a", "one"), call("b", "two"), call("c", "three")],
+            )
+            .with_expanded(expanded);
             let mount = Arc::clone(&mounted);
             let node = poodle_render::tool_call_group(
                 &spec,
@@ -7274,13 +7460,11 @@ fn tool_call_group_disclosure_rebuilds_the_host_spec_through_mounted_input() {
                     instance_id: None,
                 },
             );
-            Node::container()
-                .child(node)
-                .child(Node::text(if expanded {
-                    "Run: open"
-                } else {
-                    "Run: shut"
-                }))
+            Node::container().child(node).child(Node::text(if expanded {
+                "Run: open"
+            } else {
+                "Run: shut"
+            }))
         }
 
         let mounted = Arc::new(Mutex::new(Node::container()));
@@ -7420,7 +7604,14 @@ fn avatar_scene_matrix_uses_fixture_first_instance_with_xs_default() {
         .first()
         .and_then(|group| group.instances.first())
         .expect("avatar first instance");
-    assert_eq!(first.props.iter().find(|p| p.prop == "size").map(|p| p.value), Some("xs"));
+    assert_eq!(
+        first
+            .props
+            .iter()
+            .find(|p| p.prop == "size")
+            .map(|p| p.value),
+        Some("xs")
+    );
     assert_eq!(scene.size_axis, &["xs", "sm", "md", "lg", "xl"]);
 }
 
@@ -7820,7 +8011,10 @@ fn a_declared_ring_paints_outside_a_bordered_node_only_while_focused() {
         let painted = assert_ring_bounds("ring-proof", [58.0, 38.0, 108.0, 48.0]);
         assert_eq!(painted.ring.width, 2.0);
         assert_eq!(painted.ring.offset, 2.0);
-        assert_eq!(painted.ring.color, poodle_node::ColorValue(0.3, 0.6, 1.0, 1.0));
+        assert_eq!(
+            painted.ring.color,
+            poodle_node::ColorValue(0.3, 0.6, 1.0, 1.0)
+        );
 
         // The resting border is still the descriptor's — the ring did not
         // become a wider replacement border.
@@ -8229,7 +8423,6 @@ fn a_removed_focused_node_leaves_no_painted_ring() {
     });
 }
 
-
 // ── Inset shadow projection (g16.005) ──────────────────────────────────────
 //
 // crates.io `gpui::BoxShadow` has no `inset` flag, so the node backend paints
@@ -8470,10 +8663,8 @@ fn accordion_panel_id(scope: &str, value: &str) -> String {
 }
 
 fn accordion_target<'a>(root: &'a Node, id: &str) -> &'a Node {
-    root.find(&|node| {
-        node.runtime_id.as_deref() == Some(id) || node.id.as_deref() == Some(id)
-    })
-    .unwrap_or_else(|| panic!("{id}"))
+    root.find(&|node| node.runtime_id.as_deref() == Some(id) || node.id.as_deref() == Some(id))
+        .unwrap_or_else(|| panic!("{id}"))
 }
 
 fn spec_from_accordion_result(value: &AccordionSelectionValue) -> AccordionSelectionValue {
@@ -8485,7 +8676,9 @@ fn spec_from_accordion_result(value: &AccordionSelectionValue) -> AccordionSelec
 #[test]
 fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
     use poodle_render::{accordion_with_content, AccordionHandlers};
-    use poodle_specs::{AccordionItemSpec, AccordionSelectionMode, AccordionSelectionValue, AccordionSpec};
+    use poodle_specs::{
+        AccordionItemSpec, AccordionSelectionMode, AccordionSelectionValue, AccordionSpec,
+    };
 
     run_headless(|cx| {
         fn build(
@@ -8505,10 +8698,7 @@ fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
             let mut node = accordion_with_content(
                 &spec,
                 &RenderContext::new(&theme()),
-                &[(
-                    "first".to_string(),
-                    Node::text("First panel"),
-                )],
+                &[("first".to_string(), Node::text("First panel"))],
                 AccordionHandlers::new("single").on_value_change(Arc::new(move |next| {
                     sink.lock().unwrap().push(next.clone());
                     *mount.lock().unwrap() = build(
@@ -8568,13 +8758,11 @@ fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
                 AccordionSelectionValue::Single(None),
             ]
         );
-        assert!(
-            mounted
-                .lock()
-                .unwrap()
-                .find(&|node| node.a11y.role == Some(NodeRole::Region))
-                .is_none()
-        );
+        assert!(mounted
+            .lock()
+            .unwrap()
+            .find(&|node| node.a11y.role == Some(NodeRole::Region))
+            .is_none());
 
         driver.pointer_activate_id(&first);
         assert_eq!(
@@ -8603,8 +8791,11 @@ fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
                 &[],
                 AccordionHandlers::new("locked").on_value_change(Arc::new(move |next| {
                     sink.lock().unwrap().push(next.clone());
-                    *mount.lock().unwrap() =
-                        build(spec_from_accordion_result(&next), Arc::clone(&mount), Arc::clone(&sink));
+                    *mount.lock().unwrap() = build(
+                        spec_from_accordion_result(&next),
+                        Arc::clone(&mount),
+                        Arc::clone(&sink),
+                    );
                 })),
             );
             node.id = Some(FIXTURE_ID.to_owned());
@@ -8648,8 +8839,11 @@ fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
                 &[],
                 AccordionHandlers::new("multi").on_value_change(Arc::new(move |next| {
                     sink.lock().unwrap().push(next.clone());
-                    *mount.lock().unwrap() =
-                        build(spec_from_accordion_result(&next), Arc::clone(&mount), Arc::clone(&sink));
+                    *mount.lock().unwrap() = build(
+                        spec_from_accordion_result(&next),
+                        Arc::clone(&mount),
+                        Arc::clone(&sink),
+                    );
                 })),
             );
             node.id = Some(FIXTURE_ID.to_owned());
@@ -8664,10 +8858,7 @@ fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
             Arc::clone(&payloads),
         );
         let mut driver = HeadlessDriver::new(cx, Arc::clone(&mounted));
-        assert_eq!(
-            mounted.lock().unwrap().a11y.role,
-            Some(NodeRole::Group)
-        );
+        assert_eq!(mounted.lock().unwrap().a11y.role, Some(NodeRole::Group));
         let design = accordion_trigger_id("multi", "design");
         let keyboard = accordion_trigger_id("multi", "keyboard");
         driver.wait_for_focus_handle(&keyboard);
@@ -8719,7 +8910,7 @@ fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
             .child(marker("accordion-before", "Before"))
             .child(accordion_with_content(
                 &AccordionSpec::new(vec![
-                    AccordionItemSpec::new("locked", "Locked").with_disabled(true),
+                    AccordionItemSpec::new("locked", "Locked").with_disabled(true)
                 ])
                 .with_value(AccordionSelectionValue::Single(None)),
                 &RenderContext::new(&theme()),
@@ -8873,13 +9064,11 @@ fn accordion_result_disclosure_focus_identity_and_disabled_paths() {
                 .is_none(),
             "left rebuild removes its panel while the right panel stays mounted"
         );
-        assert!(
-            mounted
-                .lock()
-                .unwrap()
-                .find(&|node| node.runtime_id.as_deref() == Some(right_panel.as_str()))
-                .is_some()
-        );
+        assert!(mounted
+            .lock()
+            .unwrap()
+            .find(&|node| node.runtime_id.as_deref() == Some(right_panel.as_str()))
+            .is_some());
 
         driver.pointer_activate_id(&left_trigger);
         assert_eq!(
@@ -9440,10 +9629,8 @@ fn tri_state_marker(id: &str, label: &str) -> Node {
 }
 
 fn tri_state_target<'a>(root: &'a Node, id: &str) -> &'a Node {
-    root.find(&|node| {
-        node.runtime_id.as_deref() == Some(id) || node.id.as_deref() == Some(id)
-    })
-    .unwrap_or_else(|| panic!("{id}"))
+    root.find(&|node| node.runtime_id.as_deref() == Some(id) || node.id.as_deref() == Some(id))
+        .unwrap_or_else(|| panic!("{id}"))
 }
 
 fn tri_state_selected(node: &Node, scope: &str, value: TriStateValue) -> bool {
@@ -9515,8 +9702,7 @@ fn tri_state_switch_value_focus_identity_and_disabled_paths() {
                 TriStateSwitchHandlers::new("filter").on_value_change(Arc::new(
                     move |next: TriStateValue| {
                         sink.lock().unwrap().push(next);
-                        *mount.lock().unwrap() =
-                            build(next, Arc::clone(&mount), Arc::clone(&sink));
+                        *mount.lock().unwrap() = build(next, Arc::clone(&mount), Arc::clone(&sink));
                     },
                 )),
             );
@@ -9560,7 +9746,10 @@ fn tri_state_switch_value_focus_identity_and_disabled_paths() {
             "an unselected segment accepts programmatic focus"
         );
         driver.dispatch_key_raw("space");
-        assert_eq!(payloads.lock().unwrap().as_slice(), [TriStateValue::Excluded]);
+        assert_eq!(
+            payloads.lock().unwrap().as_slice(),
+            [TriStateValue::Excluded]
+        );
         assert_tri_state_radio_semantics(
             &mounted.lock().unwrap(),
             "filter",
@@ -9700,11 +9889,8 @@ fn tri_state_switch_value_focus_identity_and_disabled_paths() {
                     TriStateSwitchHandlers::new("left").on_value_change(Arc::new(
                         move |next: TriStateValue| {
                             sink.lock().unwrap().push(next);
-                            *mount.lock().unwrap() = build_pair(
-                                next,
-                                Arc::clone(&mount),
-                                Arc::clone(&sink),
-                            );
+                            *mount.lock().unwrap() =
+                                build_pair(next, Arc::clone(&mount), Arc::clone(&sink));
                         },
                     )),
                 );
@@ -9746,16 +9932,14 @@ fn tri_state_switch_value_focus_identity_and_disabled_paths() {
         ]);
 
         driver.pointer_activate_id(&left_excluded);
-        assert_eq!(left_events.lock().unwrap().as_slice(), [TriStateValue::Excluded]);
+        assert_eq!(
+            left_events.lock().unwrap().as_slice(),
+            [TriStateValue::Excluded]
+        );
         let root = mounted.lock().unwrap();
         let left_host = tri_state_target(&root, "tri-state-left-host");
         let right_host = tri_state_target(&root, "tri-state-right-host");
-        assert_tri_state_radio_semantics(
-            left_host,
-            "left",
-            TriStateValue::Excluded,
-            "Left filter",
-        );
+        assert_tri_state_radio_semantics(left_host, "left", TriStateValue::Excluded, "Left filter");
         assert_tri_state_radio_semantics(
             right_host,
             "right",
@@ -10495,8 +10679,12 @@ fn text_input_controlled_editing_and_identity_rebuild_the_host_spec() {
     run_headless(|cx| {
         let host = TextFieldHost::new(vec![
             TextFieldState::new("query", "kick").searchable(),
-            TextFieldState::new("locked", "sealed").searchable().disabled(),
-            TextFieldState::new("frozen", "fixed").searchable().read_only(),
+            TextFieldState::new("locked", "sealed")
+                .searchable()
+                .disabled(),
+            TextFieldState::new("frozen", "fixed")
+                .searchable()
+                .read_only(),
         ]);
         let (mut driver, mounted) = mount_text_fields(cx, &host);
         driver.wait_for_focus_handle(&field_id("query"));
@@ -10970,14 +11158,13 @@ fn direct_input_tree(host: &Arc<DirectInput>, mounted: &Arc<Mutex<Node>>) -> Nod
     // here would put the pre-undo one back.
     let select_host = Arc::clone(host);
     let select_mount = Arc::clone(mounted);
-    input.interaction.on_select_range = Some(Arc::new(
-        move |start: usize, end: usize, _granularity| {
+    input.interaction.on_select_range =
+        Some(Arc::new(move |start: usize, end: usize, _granularity| {
             *select_host.selection.lock().expect("selection") = (start, end);
             note(&select_host.log, format!("direct/select:{start}-{end}"));
             let tree = direct_input_tree(&select_host, &select_mount);
             *select_mount.lock().expect("mount") = tree;
-        },
-    ));
+        }));
 
     let log = Arc::clone(&host.log);
     routing_column(vec![
@@ -11104,11 +11291,16 @@ fn blur_clears_the_painted_field_state_and_keeps_its_undo_history() {
         // root id, so this survived a focus change and was spliced over the
         // next field to take the caret.
         poodle_gpui_node_backend::mark_composing(&field_value_id("name"), (6, 6), "\u{3053}");
-        assert!(poodle_gpui_node_backend::painted_text_state_for(&field_value_id("name")).composing);
+        assert!(
+            poodle_gpui_node_backend::painted_text_state_for(&field_value_id("name")).composing
+        );
 
         driver.blur_element_focus(&field_id("name"));
         let after = poodle_gpui_node_backend::painted_text_state_for(&field_value_id("name"));
-        assert!(!after.composing && !after.marked, "blur ends the composition");
+        assert!(
+            !after.composing && !after.marked,
+            "blur ends the composition"
+        );
         assert!(!after.blinking, "and the blink epoch it started");
         assert!(!after.scrolled, "and the scroll it was holding");
         assert!(
@@ -11671,10 +11863,7 @@ fn time_input_segmented_editor_commits_drafts_and_bounds() {
         driver.dispatch_key_raw("tab");
         driver.dispatch_key_raw("backspace");
         assert_eq!(committed(&host).as_deref(), None);
-        assert_eq!(
-            host.last_emit.lock().expect("emit").clone(),
-            Some(None)
-        );
+        assert_eq!(host.last_emit.lock().expect("emit").clone(), Some(None));
     });
 
     run_headless(|cx| {
@@ -11714,7 +11903,9 @@ fn time_input_segmented_editor_commits_drafts_and_bounds() {
         driver.dispatch_key_raw("up");
         assert_eq!(committed(&host).as_deref(), Some("18:00"));
         assert!(
-            !take_events(&host.log).iter().any(|entry| entry.starts_with("time/change:")),
+            !take_events(&host.log)
+                .iter()
+                .any(|entry| entry.starts_with("time/change:")),
             "linear max does not emit a duplicate bound step"
         );
     });
@@ -12060,7 +12251,9 @@ fn mounted_number(mounted: &Arc<Mutex<Node>>, name: &str) -> Node {
 #[test]
 fn number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value() {
     run_headless(|cx| {
-        let host = NumberFieldHost::new(vec![NumberFieldState::new("qty", Some(5.0)).bounded(0.0, 100.0)]);
+        let host = NumberFieldHost::new(vec![
+            NumberFieldState::new("qty", Some(5.0)).bounded(0.0, 100.0)
+        ]);
         let (mut driver, mounted) = mount_number_fields(cx, &host);
         driver.wait_for_focus_handle(&number_field_id("qty"));
         driver.focus_element(&number_field_id("qty"));
@@ -12087,7 +12280,9 @@ fn number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value() {
 #[test]
 fn number_input_mounted_partial_and_invalid_drafts_emit_no_value() {
     run_headless(|cx| {
-        let host = NumberFieldHost::new(vec![NumberFieldState::new("qty", Some(5.0)).bounded(0.0, 10.0)]);
+        let host = NumberFieldHost::new(vec![
+            NumberFieldState::new("qty", Some(5.0)).bounded(0.0, 10.0)
+        ]);
         let (mut driver, mounted) = mount_number_fields(cx, &host);
         driver.wait_for_focus_handle(&number_field_id("qty"));
         driver.focus_element(&number_field_id("qty"));
@@ -12098,7 +12293,10 @@ fn number_input_mounted_partial_and_invalid_drafts_emit_no_value() {
         assert_eq!(host.field("qty").draft.as_deref(), Some("-"));
         assert_eq!(host.field("qty").value, Some(5.0));
         assert!(
-            !host.take_log().iter().any(|entry| entry.starts_with("qty/value:")),
+            !host
+                .take_log()
+                .iter()
+                .any(|entry| entry.starts_with("qty/value:")),
             "incomplete drafts stay silent on the value channel"
         );
         assert_eq!(mounted_number(&mounted, "qty").a11y.invalid, Some(true));
@@ -12113,7 +12311,10 @@ fn number_input_mounted_partial_and_invalid_drafts_emit_no_value() {
         assert_eq!(host.field("qty").draft.as_deref(), Some("99"));
         assert_eq!(host.field("qty").value, Some(9.0));
         assert!(
-            !host.take_log().iter().any(|entry| entry.starts_with("qty/value:")),
+            !host
+                .take_log()
+                .iter()
+                .any(|entry| entry.starts_with("qty/value:")),
             "out-of-range complete drafts emit no further value"
         );
         assert_eq!(mounted_number(&mounted, "qty").a11y.invalid, Some(true));
@@ -12167,7 +12368,8 @@ fn number_input_mounted_blur_and_escape_revert_unresolved_drafts() {
             "Escape discards the draft: {log:?}"
         );
         assert!(
-            !log.iter().any(|entry| entry.starts_with("qty/value:") || entry.starts_with("qty/commit:")),
+            !log.iter()
+                .any(|entry| entry.starts_with("qty/value:") || entry.starts_with("qty/commit:")),
             "Escape emits neither value nor commit: {log:?}"
         );
     });
@@ -12235,7 +12437,10 @@ fn number_input_mounted_enter_commits_resolved_value() {
         assert_eq!(host.field("qty").draft.as_deref(), Some("-"));
         assert_eq!(host.field("qty").value, Some(5.0));
         assert!(
-            !host.take_log().iter().any(|entry| entry.starts_with("qty/commit:")),
+            !host
+                .take_log()
+                .iter()
+                .any(|entry| entry.starts_with("qty/commit:")),
             "Enter on an unresolved draft stays silent"
         );
     });
@@ -12284,7 +12489,10 @@ fn number_input_mounted_fractional_step_precision_bounds_and_home_end() {
         assert_eq!(host.field("price").draft.as_deref(), Some("1.234"));
         assert_eq!(host.field("price").value, Some(1.0));
         assert!(
-            !host.take_log().iter().any(|entry| entry.starts_with("price/value:")),
+            !host
+                .take_log()
+                .iter()
+                .any(|entry| entry.starts_with("price/value:")),
             "over-precision drafts emit no further value"
         );
 
@@ -12306,19 +12514,13 @@ fn number_input_mounted_controlled_replacement_discards_uncontrolled_draft() {
         driver.dispatch_key_raw("-");
         assert_eq!(host.field("qty").draft.as_deref(), Some("-"));
 
-        number_field_apply(
-            &host,
-            &mounted,
-            "qty",
-            "qty/replace:9".into(),
-            |field| {
-                field.value = Some(9.0);
-                field.draft = None;
-                let display = poodle_headless::number_input::format_number_committed(Some(9.0), None);
-                let len = display.chars().count();
-                field.selection = (len, len);
-            },
-        );
+        number_field_apply(&host, &mounted, "qty", "qty/replace:9".into(), |field| {
+            field.value = Some(9.0);
+            field.draft = None;
+            let display = poodle_headless::number_input::format_number_committed(Some(9.0), None);
+            let len = display.chars().count();
+            field.selection = (len, len);
+        });
         assert_eq!(host.field("qty").value, Some(9.0));
         assert_eq!(host.field("qty").draft, None);
 
@@ -12368,8 +12570,12 @@ fn number_input_mounted_two_instances_keep_independent_identity() {
 fn number_input_mounted_disabled_and_read_only_are_inert() {
     run_headless(|cx| {
         let host = NumberFieldHost::new(vec![
-            NumberFieldState::new("locked", Some(5.0)).disabled().with_steppers(),
-            NumberFieldState::new("frozen", Some(5.0)).read_only().with_steppers(),
+            NumberFieldState::new("locked", Some(5.0))
+                .disabled()
+                .with_steppers(),
+            NumberFieldState::new("frozen", Some(5.0))
+                .read_only()
+                .with_steppers(),
         ]);
         let (mut driver, mounted) = mount_number_fields(cx, &host);
 
@@ -12439,7 +12645,10 @@ fn number_input_mounted_accessibility_projects_spin_button_surface() {
         assert_eq!(qty.a11y.value, Some(3.0));
         assert_eq!(qty.a11y.value_min, Some(0.0));
         assert_eq!(qty.a11y.value_max, Some(10.0));
-        assert!(qty.style.focus.is_some(), "the field owns one focus treatment");
+        assert!(
+            qty.style.focus.is_some(),
+            "the field owns one focus treatment"
+        );
 
         let steppers = &qty.children[1];
         let inc = &steppers.children[0];
@@ -12760,8 +12969,11 @@ fn icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboar
     }
 
     fn icon(spec: IconButtonSpec, id: &str, handlers: IconButtonHandlers) -> Node {
-        let mut node =
-            poodle_render::icon_button_with_handlers(&spec, &RenderContext::new(&theme()), handlers);
+        let mut node = poodle_render::icon_button_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            handlers,
+        );
         node.id = Some(id.to_owned());
         node
     }
@@ -13094,11 +13306,8 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
     }
 
     fn target<'a>(root: &'a Node, id: &str) -> &'a Node {
-        root.find(&|node| {
-            node.runtime_id.as_deref() == Some(id)
-                || node.id.as_deref() == Some(id)
-        })
-        .unwrap_or_else(|| panic!("{id}"))
+        root.find(&|node| node.runtime_id.as_deref() == Some(id) || node.id.as_deref() == Some(id))
+            .unwrap_or_else(|| panic!("{id}"))
     }
 
     // ── Semantics, naming, inert skips ─────────────────────────────────
@@ -13138,7 +13347,9 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
                 Some(Node::text("secret")),
                 CollapsibleHandlers {
                     instance_id: Some("disabled".to_string()),
-                    on_open_change: Some(Arc::new(|_| panic!("disabled collapsible does not fire"))),
+                    on_open_change: Some(Arc::new(|_| {
+                        panic!("disabled collapsible does not fire")
+                    })),
                 },
             ))
             .child(marker("after", "After"));
@@ -13208,11 +13419,7 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
 
     // ── Controlled rebuild: pointer, Enter, Space ─────────────────────
     run_headless(|cx| {
-        fn build(
-            open: bool,
-            mounted: Arc<Mutex<Node>>,
-            events: Arc<Mutex<Vec<String>>>,
-        ) -> Node {
+        fn build(open: bool, mounted: Arc<Mutex<Node>>, events: Arc<Mutex<Vec<String>>>) -> Node {
             let event_sink = Arc::clone(&events);
             let mount = Arc::clone(&mounted);
             collapsible_with_handlers(
@@ -13220,11 +13427,7 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
                     .with_title("Advanced options")
                     .with_open(open),
                 &RenderContext::new(&theme()),
-                Some(Node::text(if open {
-                    "Cache TTL: 3600s"
-                } else {
-                    "hidden"
-                })),
+                Some(Node::text(if open { "Cache TTL: 3600s" } else { "hidden" })),
                 CollapsibleHandlers {
                     instance_id: Some("controlled".to_string()),
                     on_open_change: Some(Arc::new(move |next| {
@@ -13251,14 +13454,18 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
                 .expect("trigger");
             assert_eq!(trigger_node.a11y.expanded, Some(false));
             assert!(node
-                .find(&|n| n.runtime_id.as_deref() == Some(collapsible_content_focus_id("controlled").as_str()))
+                .find(&|n| n.runtime_id.as_deref()
+                    == Some(collapsible_content_focus_id("controlled").as_str()))
                 .is_none());
         }
 
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
         driver.wait_for_focus_handle(&trigger);
         driver.pointer_activate_id(&trigger);
-        assert_eq!(*events.lock().expect("event lock"), ["open:true".to_string()]);
+        assert_eq!(
+            *events.lock().expect("event lock"),
+            ["open:true".to_string()]
+        );
         assert_eq!(
             mounted
                 .lock()
@@ -13272,7 +13479,8 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
         assert!(mounted
             .lock()
             .expect("mount lock")
-            .find(&|n| n.runtime_id.as_deref() == Some(collapsible_content_focus_id("controlled").as_str()))
+            .find(&|n| n.runtime_id.as_deref()
+                == Some(collapsible_content_focus_id("controlled").as_str()))
             .is_some());
 
         driver.wait_for_focus_handle(&trigger);
@@ -13333,12 +13541,8 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
 
         let events = Arc::new(Mutex::new(Vec::<bool>::new()));
         let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().expect("mount lock") = build(
-            None,
-            true,
-            Arc::clone(&mounted),
-            Arc::clone(&events),
-        );
+        *mounted.lock().expect("mount lock") =
+            build(None, true, Arc::clone(&mounted), Arc::clone(&events));
         let trigger = collapsible_trigger_focus_id("seeded");
         {
             let node = mounted.lock().expect("mount lock");
@@ -13351,10 +13555,7 @@ fn collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard() {
                 .find(&|n| n.runtime_id.as_deref() == Some(content_id.as_str()))
                 .expect("region");
             assert_eq!(region.a11y.role, Some(NodeRole::Region));
-            assert_eq!(
-                region.a11y.labelled_by.as_deref(),
-                Some(trigger.as_str())
-            );
+            assert_eq!(region.a11y.labelled_by.as_deref(), Some(trigger.as_str()));
         }
 
         let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 240.0);
@@ -13519,7 +13720,9 @@ fn collapse_toggle_disclosure_focus_and_disabled_through_mounted_pointer_and_key
             .child(toggle(
                 CollapseToggleSpec::new().with_disabled(true),
                 "ct-disabled",
-                Some(Arc::new(|_| panic!("disabled collapse toggle does not fire"))),
+                Some(Arc::new(|_| {
+                    panic!("disabled collapse toggle does not fire")
+                })),
             ))
             .child(marker("ct-after", "After"));
 
@@ -14261,7 +14464,12 @@ fn rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboar
         driver.dispatch_key_raw("space");
         assert_eq!(host.lock().expect("host lock").value, None);
         assert_eq!(
-            mounted.lock().expect("mount lock").a11y.value_text.as_deref(),
+            mounted
+                .lock()
+                .expect("mount lock")
+                .a11y
+                .value_text
+                .as_deref(),
             Some("No rating selected out of 5")
         );
         // Enter clear uses on_submit on the focused slider root.
@@ -14271,7 +14479,12 @@ fn rating_nullable_fractional_and_whole_step_through_mounted_pointer_and_keyboar
         driver.dispatch_key_raw("enter");
         assert_eq!(host.lock().expect("host lock").value, None);
         assert_eq!(
-            mounted.lock().expect("mount lock").a11y.value_text.as_deref(),
+            mounted
+                .lock()
+                .expect("mount lock")
+                .a11y
+                .value_text
+                .as_deref(),
             Some("No rating selected out of 5")
         );
     });
@@ -14899,7 +15112,8 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
     fn nodes() -> Vec<TreeNode> {
         vec![
             TreeNode::new("alpha", "Alpha"),
-            TreeNode::new("bravo", "Bravo").with_children(vec![TreeNode::new("bravo-1", "Bravo 1")]),
+            TreeNode::new("bravo", "Bravo")
+                .with_children(vec![TreeNode::new("bravo-1", "Bravo 1")]),
             TreeNode::new("charlie", "Charlie"),
         ]
     }
@@ -15003,10 +15217,7 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
                                 let mut host = host.lock().expect("host lock");
                                 host.reorders
                                     .push((dragged.to_owned(), over.to_owned(), edge));
-                                let from = host
-                                    .nodes
-                                    .iter()
-                                    .position(|node| node.value == dragged);
+                                let from = host.nodes.iter().position(|node| node.value == dragged);
                                 let to = host.nodes.iter().position(|node| node.value == over);
                                 if let (Some(from), Some(to)) = (from, to) {
                                     let moved = host.nodes.remove(from);
@@ -15069,18 +15280,21 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
         }
 
         // ── Cancelled drag: hovered intent appears, then nothing commits ──
+        //
+        // Bravo is a branch. Its middle band nests. Charlie is a sibling leaf,
+        // so the same fraction would land after it rather than inside.
         let alpha = payload_frac("tree:alpha", 0.5, 0.5);
         driver.pointer_press(alpha);
         driver.pointer_drag(point(px(f32::from(alpha.x) + 4.0), alpha.y));
-        driver.pointer_drag(payload_frac("tree:charlie", 0.5, 0.5));
+        driver.pointer_drag(payload_frac("tree:bravo", 0.5, 0.5));
         {
             let host = host.lock().expect("host lock");
             assert_eq!(host.drag.as_deref(), Some("alpha"));
-            assert_eq!(host.drop_target.as_deref(), Some("charlie"));
+            assert_eq!(host.drop_target.as_deref(), Some("bravo"));
             assert_eq!(
                 host.drop_position,
                 TreeDropPosition::Inside,
-                "a tree row's middle band is a nested placement, not a sibling one"
+                "a branch row's middle band is a nested placement, not a sibling one"
             );
         }
         driver.dispatch_key("escape");
@@ -15088,7 +15302,10 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
             let host = host.lock().expect("host lock");
             assert!(host.reorders.is_empty(), "Escape commits nothing");
             assert_eq!(
-                host.nodes.iter().map(|node| node.value.as_str()).collect::<Vec<_>>(),
+                host.nodes
+                    .iter()
+                    .map(|node| node.value.as_str())
+                    .collect::<Vec<_>>(),
                 ["alpha", "bravo", "charlie"]
             );
             // `TreeHandlers` has no clear or terminal channel, so the host's
@@ -15098,7 +15315,7 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
             // changing Tree's public API.
             assert_eq!(
                 host.drop_target.as_deref(),
-                Some("charlie"),
+                Some("bravo"),
                 "the latched indicator is the documented Tree gap"
             );
         }
@@ -15121,7 +15338,10 @@ fn tree_selection_expand_and_substrate_reorder_rebuild_the_host_spec() {
             "exactly one reorder, carrying the resolved band"
         );
         assert_eq!(
-            host.nodes.iter().map(|node| node.value.as_str()).collect::<Vec<_>>(),
+            host.nodes
+                .iter()
+                .map(|node| node.value.as_str())
+                .collect::<Vec<_>>(),
             ["bravo", "charlie", "alpha"]
         );
         assert!(
@@ -15166,7 +15386,10 @@ fn a_release_away_from_the_hovered_target_commits_nothing() {
             0,
             "a stale hover must not commit when the release lands elsewhere: {events:?}"
         );
-        assert!(events.contains(&"cleared:custom-zone-a".to_owned()), "{events:?}");
+        assert!(
+            events.contains(&"cleared:custom-zone-a".to_owned()),
+            "{events:?}"
+        );
         assert_eq!(
             count_starting_with(&events, "end:cancelled:"),
             1,
@@ -15398,8 +15621,7 @@ fn two_reorder_surfaces_under_one_controller_cannot_cross_drop() {
 
         fn surface(scope: &str, trace: &Arc<Mutex<Vec<String>>>) -> Node {
             let mut source = drag_box(&format!("{scope}-row"), 60.0, 40.0);
-            let mut registration =
-                poodle_render::reorder_source(scope, "row", "Row");
+            let mut registration = poodle_render::reorder_source(scope, "row", "Row");
             let start = Arc::clone(trace);
             let scope_name = scope.to_string();
             registration.on_drag_start = Some(Arc::new(move |session: &DragSession| {
@@ -15450,10 +15672,7 @@ fn two_reorder_surfaces_under_one_controller_cannot_cross_drop() {
             Some(poodle_gpui_node_backend::DragDropTargetPosture::Rejected),
             "another reorder surface refuses this subject kind"
         );
-        assert_eq!(
-            snapshot.position, None,
-            "a refusal resolves no placement"
-        );
+        assert_eq!(snapshot.position, None, "a refusal resolves no placement");
         driver.pointer_release(payload_frac("list-b-row", 0.5, 0.75));
 
         let events = trace_of(&trace);
@@ -15524,7 +15743,10 @@ fn a_source_that_changes_subject_during_a_rebuild_cancels_once() {
         driver.pointer_press(source);
         driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
         driver.pointer_drag(payload_frac("subject-zone", 0.5, 0.75));
-        assert_eq!(trace_of(&trace).first().map(String::as_str), Some("start:first"));
+        assert_eq!(
+            trace_of(&trace).first().map(String::as_str),
+            Some("start:first")
+        );
 
         // Same source id, different subject: a different row now lives here.
         *node.lock().expect("mount lock") = subject_tree(&trace, "second");
@@ -15652,7 +15874,8 @@ fn the_pickup_key_cancels_a_session_that_never_chose_a_target() {
         driver.dispatch_key_raw("space");
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
         assert_eq!(
-            controller.snapshot().target_id, None,
+            controller.snapshot().target_id,
+            None,
             "a target this window does not have resolves to no intent at all"
         );
 
@@ -16208,7 +16431,10 @@ fn a_gpui_export_prepares_before_activation_and_ends_without_authorizing_deletio
         driver.draw_frame();
 
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
-        assert_eq!(host.log(|log| log.starts.clone()), vec!["export-1".to_string()]);
+        assert_eq!(
+            host.log(|log| log.starts.clone()),
+            vec!["export-1".to_string()]
+        );
         let armed = controller.snapshot().file_export.expect("export");
         assert_eq!(armed.state, poodle_node::DragExportState::Dragging);
         assert_eq!(armed.display_name.as_deref(), Some("take-01.wav"));
@@ -16226,7 +16452,10 @@ fn a_gpui_export_prepares_before_activation_and_ends_without_authorizing_deletio
             host.log(|log| log.cancels.is_empty()),
             "a settled receipt is never cancelled again"
         );
-        assert_eq!(host.log(|log| log.stops.clone()), vec!["export-1".to_string()]);
+        assert_eq!(
+            host.log(|log| log.stops.clone()),
+            vec!["export-1".to_string()]
+        );
         assert_eq!(
             host.artifacts(),
             vec!["export-1".to_string()],
@@ -16457,7 +16686,10 @@ fn an_inbound_gpui_batch_commits_through_the_common_target_path_and_releases_onc
         );
         assert_eq!(
             host.released(),
-            vec![("batch-1".to_string(), poodle_node::InboundFileOutcome::Committed)],
+            vec![(
+                "batch-1".to_string(),
+                poodle_node::InboundFileOutcome::Committed
+            )],
             "one release, with the outcome the session actually reached"
         );
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
@@ -16531,7 +16763,10 @@ fn an_inbound_gpui_batch_is_validated_before_the_targets_own_resolver() {
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
         assert_eq!(
             host.released(),
-            vec![("batch-1".to_string(), poodle_node::InboundFileOutcome::Cancelled)]
+            vec![(
+                "batch-1".to_string(),
+                poodle_node::InboundFileOutcome::Cancelled
+            )]
         );
     });
 }
@@ -16609,7 +16844,10 @@ fn a_disclosed_gpui_drop_is_validated_again_before_it_can_commit() {
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
         assert_eq!(
             host.released(),
-            vec![("batch-1".to_string(), poodle_node::InboundFileOutcome::Cancelled)]
+            vec![(
+                "batch-1".to_string(),
+                poodle_node::InboundFileOutcome::Cancelled
+            )]
         );
     });
 }
@@ -16627,75 +16865,78 @@ fn gpui_export_terminals_are_announced_in_their_own_words() {
         let announcement = Arc::new(Mutex::new(String::new()));
         let captured = Arc::clone(&announcement);
         run_headless(move |cx| {
-        let trace = Arc::new(Mutex::new(Vec::new()));
-        let host = ExportStub::default();
-        let controller = poodle_gpui_node_backend::DragDropController::new();
+            let trace = Arc::new(Mutex::new(Vec::new()));
+            let host = ExportStub::default();
+            let controller = poodle_gpui_node_backend::DragDropController::new();
 
-        let mut node = scoped_drag_tree("fx", &trace);
-        attach_export_bridge(&mut node, "fx-source", Arc::new(host.clone()));
-        let node = Arc::new(Mutex::new(node));
+            let mut node = scoped_drag_tree("fx", &trace);
+            attach_export_bridge(&mut node, "fx-source", Arc::new(host.clone()));
+            let node = Arc::new(Mutex::new(node));
 
-        let build = {
-            let controller = controller.clone();
-            let node = Arc::clone(&node);
-            Rc::new(move || {
-                let tree = node.lock().expect("lock").clone();
-                use gpui::{IntoElement as _, ParentElement as _};
-                gpui::div()
-                    .child(poodle_gpui_node_backend::drag_drop_provider(
-                        &controller,
-                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
-                    ))
-                    .into_any_element()
-            }) as Rc<dyn Fn() -> gpui::AnyElement>
-        };
+            let build = {
+                let controller = controller.clone();
+                let node = Arc::clone(&node);
+                Rc::new(move || {
+                    let tree = node.lock().expect("lock").clone();
+                    use gpui::{IntoElement as _, ParentElement as _};
+                    gpui::div()
+                        .child(poodle_gpui_node_backend::drag_drop_provider(
+                            &controller,
+                            || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                        ))
+                        .into_any_element()
+                }) as Rc<dyn Fn() -> gpui::AnyElement>
+            };
 
-        let mut driver = HeadlessDriver::new_element(cx, build);
-        driver.draw_frame();
+            let mut driver = HeadlessDriver::new_element(cx, build);
+            driver.draw_frame();
 
-        let source = payload_frac("fx-source", 0.5, 0.5);
-        driver.pointer_press(source);
-        driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
+            let source = payload_frac("fx-source", 0.5, 0.5);
+            driver.pointer_press(source);
+            driver.pointer_drag(point(px(f32::from(source.x) + 4.0), source.y));
 
-        match ending {
-            ExportEnding::Declined => {
-                host.settle(0, None);
-                driver.draw_frame();
+            match ending {
+                ExportEnding::Declined => {
+                    host.settle(0, None);
+                    driver.draw_frame();
+                }
+                ExportEnding::Ended => {
+                    host.settle(0, Some(("export-1", 1)));
+                    driver.draw_frame();
+                    host.report(poodle_node::DragExportTerminal::Ended);
+                    driver.draw_frame();
+                }
+                ExportEnding::Cancelled => {
+                    host.settle(0, Some(("export-1", 1)));
+                    driver.draw_frame();
+                    host.report(poodle_node::DragExportTerminal::Cancelled {
+                        reason: poodle_node::DragCancelReason::WindowLost,
+                    });
+                    driver.draw_frame();
+                }
+                ExportEnding::Failed => {
+                    host.settle(0, Some(("export-1", 1)));
+                    driver.draw_frame();
+                    host.report(poodle_node::DragExportTerminal::Failed {
+                        reason: Some("disk full".to_string()),
+                    });
+                    driver.draw_frame();
+                }
             }
-            ExportEnding::Ended => {
-                host.settle(0, Some(("export-1", 1)));
-                driver.draw_frame();
-                host.report(poodle_node::DragExportTerminal::Ended);
-                driver.draw_frame();
-            }
-            ExportEnding::Cancelled => {
-                host.settle(0, Some(("export-1", 1)));
-                driver.draw_frame();
-                host.report(poodle_node::DragExportTerminal::Cancelled {
-                    reason: poodle_node::DragCancelReason::WindowLost,
-                });
-                driver.draw_frame();
-            }
-            ExportEnding::Failed => {
-                host.settle(0, Some(("export-1", 1)));
-                driver.draw_frame();
-                host.report(poodle_node::DragExportTerminal::Failed {
-                    reason: Some("disk full".to_string()),
-                });
-                driver.draw_frame();
-            }
-        }
 
-        *captured.lock().expect("announcement") = controller
-            .snapshot()
-            .announcement
-            .expect("an announcement for every terminal");
+            *captured.lock().expect("announcement") = controller
+                .snapshot()
+                .announcement
+                .expect("an announcement for every terminal");
         });
         let text = announcement.lock().expect("announcement").clone();
         text
     }
 
-    assert_eq!(announcement_for(ExportEnding::Ended), "Finished exporting Alpha.");
+    assert_eq!(
+        announcement_for(ExportEnding::Ended),
+        "Finished exporting Alpha."
+    );
     assert_eq!(
         announcement_for(ExportEnding::Cancelled),
         "Cancelled exporting Alpha."
@@ -16987,9 +17228,7 @@ fn replacing_the_gpui_inbound_bridge_ends_the_session_and_answers_the_old_host()
             y,
         });
 
-        driver.update_app(|cx| {
-            controller.set_inbound_file_bridge(Arc::new(second.clone()), cx)
-        });
+        driver.update_app(|cx| controller.set_inbound_file_bridge(Arc::new(second.clone()), cx));
 
         // Checked *before* the next frame: the replacement ends the session
         // itself. Leaving a live session behind for the end-of-frame sweep to
@@ -17223,9 +17462,7 @@ fn a_finished_gpui_batch_id_stays_inert_until_its_bridge_is_replaced() {
 
         // A replacement host is a different relationship. The same text may
         // name a batch this window has never seen.
-        driver.update_app(|cx| {
-            controller.set_inbound_file_bridge(Arc::new(second.clone()), cx)
-        });
+        driver.update_app(|cx| controller.set_inbound_file_bridge(Arc::new(second.clone()), cx));
         driver.drain();
 
         second.send(poodle_node::InboundFileEvent::Entered {
@@ -17374,9 +17611,7 @@ fn the_first_answered_gpui_batch_id_stays_inert_after_thousands_of_later_ones() 
         );
 
         // And a replacement installation still starts with no history.
-        driver.update_app(|cx| {
-            controller.set_inbound_file_bridge(Arc::new(second.clone()), cx)
-        });
+        driver.update_app(|cx| controller.set_inbound_file_bridge(Arc::new(second.clone()), cx));
         driver.drain();
         second.send(poodle_node::InboundFileEvent::Entered {
             batch: batch("answered-0"),
@@ -17519,7 +17754,11 @@ fn editable_list_substrate_reorder_rebuilds_the_host_spec() {
                 )],
                 "exactly one reorder, carrying the whole next order"
             );
-            assert_eq!(ids(&host.b), ["row-1", "row-2", "row-3"], "list B is untouched");
+            assert_eq!(
+                ids(&host.b),
+                ["row-1", "row-2", "row-3"],
+                "list B is untouched"
+            );
         }
 
         // ── Keyboard pickup commits through the same path ──
@@ -17544,7 +17783,11 @@ fn editable_list_substrate_reorder_rebuilds_the_host_spec() {
             assert_eq!(host.orders.len(), 2, "one keystroke pair, one commit");
             assert_eq!(
                 host.orders[1].1,
-                ["row-3".to_string(), "row-2".to_string(), "row-1".to_string()]
+                [
+                    "row-3".to_string(),
+                    "row-2".to_string(),
+                    "row-1".to_string()
+                ]
             );
         }
         // The keyboard terminal is announced once, and focus stays on the
@@ -17641,7 +17884,10 @@ fn order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec() {
         let on_remove = {
             let host = Arc::clone(host);
             Arc::new(move |key: &str| {
-                host.lock().expect("host lock").removed.push(key.to_string());
+                host.lock()
+                    .expect("host lock")
+                    .removed
+                    .push(key.to_string());
             }) as Arc<dyn Fn(&str) + Send + Sync>
         };
 
@@ -17727,7 +17973,11 @@ fn order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec() {
             .iter()
             .filter(|line| line.starts_with("Dropped "))
             .collect();
-        assert_eq!(drops.len(), 1, "one drop, one terminal announcement: {spoken:?}");
+        assert_eq!(
+            drops.len(),
+            1,
+            "one drop, one terminal announcement: {spoken:?}"
+        );
 
         // ── Focus is where the keyboard left it ──
         //
@@ -17803,7 +18053,11 @@ fn block_editor_grip_drag_and_move_controls_rebuild_the_host_spec() {
         block_editor(
             &BlockEditorSpec::new()
                 .with_blocks(current)
-                .with_block_types(vec![BlockTypeDefinition::new("paragraph", "Paragraph", "text")]),
+                .with_block_types(vec![BlockTypeDefinition::new(
+                    "paragraph",
+                    "Paragraph",
+                    "text",
+                )]),
             &ctx,
             handlers,
         )
@@ -17852,7 +18106,11 @@ fn block_editor_grip_drag_and_move_controls_rebuild_the_host_spec() {
             .iter()
             .filter(|line| line.starts_with("Dropped "))
             .collect();
-        assert_eq!(drops.len(), 1, "one drop, one terminal announcement: {spoken:?}");
+        assert_eq!(
+            drops.len(),
+            1,
+            "one drop, one terminal announcement: {spoken:?}"
+        );
 
         // ── Move up reaches the same emitter, and keeps its own focus ──
         driver.wait_for_focus_handle("block-editor:editor:b1:up");
@@ -17961,7 +18219,11 @@ fn model_catalogue_editor_pointer_drop_is_announced_once_by_the_editor() {
         let handle = payload_frac("model-catalogue-editor:model-alpha:handle", 0.5, 0.5);
         driver.pointer_press(handle);
         driver.pointer_drag(point(px(f32::from(handle.x) + 4.0), handle.y));
-        driver.pointer_drag(payload_frac("model-catalogue-editor:model-gamma:handle", 0.5, 0.5));
+        driver.pointer_drag(payload_frac(
+            "model-catalogue-editor:model-gamma:handle",
+            0.5,
+            0.5,
+        ));
         driver.pointer_release(payload_frac(
             "model-catalogue-editor:model-gamma:handle",
             0.5,
@@ -18211,7 +18473,9 @@ fn an_incoming_projection_is_narrated_after_a_self_narrating_local_session() {
             "the projection's terminal is announced too: {after:?}"
         );
         assert!(
-            after[spoken.len()..].iter().all(|line| !line.contains("remote-row")),
+            after[spoken.len()..]
+                .iter()
+                .all(|line| !line.contains("remote-row")),
             "including at the terminal, where the label must not decay: {after:?}"
         );
     });
@@ -18287,7 +18551,8 @@ fn every_history_center_rejection_mounts_its_own_native_copy() {
 
             let notice = node
                 .find(&|candidate| {
-                    candidate.id.as_deref() == Some(poodle_render::history_center::HISTORY_CENTER_REJECTION_ID)
+                    candidate.id.as_deref()
+                        == Some(poodle_render::history_center::HISTORY_CENTER_REJECTION_ID)
                 })
                 .unwrap_or_else(|| panic!("{code:?} paints a rejection notice"))
                 .clone();
@@ -18341,9 +18606,7 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
     fn long_markdown() -> String {
         (1..=40)
             .map(|n| {
-                format!(
-                    "## Heading {n}\n\nParagraph {n} forces the preview past a 16rem host.\n"
-                )
+                format!("## Heading {n}\n\nParagraph {n} forces the preview past a 16rem host.\n")
             })
             .collect()
     }
@@ -18474,8 +18737,8 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
 
         // GPUI scroll offset is `[-max, 0]`. Negative pixel delta moves down.
         driver.scroll_vertical_id("md-preview", -5000.0);
-        let first_after =
-            poodle_gpui_node_backend::bounds_for("md-preview-row-0").expect("first row after scroll");
+        let first_after = poodle_gpui_node_backend::bounds_for("md-preview-row-0")
+            .expect("first row after scroll");
         assert!(
             f32::from(first_after.origin.y) < f32::from(first.origin.y) - 8.0,
             "wheel must move preview content: before={} after={}",
@@ -18485,7 +18748,8 @@ fn markdown_editor_bounded_preview_scrolls_under_host_height() {
 
         let editor_after =
             poodle_gpui_node_backend::bounds_for("md-editor").expect("editor after scroll");
-        let host_after = poodle_gpui_node_backend::bounds_for("md-host").expect("host after scroll");
+        let host_after =
+            poodle_gpui_node_backend::bounds_for("md-host").expect("host after scroll");
         assert!(
             (f32::from(editor_after.origin.y) - f32::from(editor_bounds.origin.y)).abs() < 1.0
                 && (f32::from(editor_after.size.height) - f32::from(editor_bounds.size.height))

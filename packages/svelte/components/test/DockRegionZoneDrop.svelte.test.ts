@@ -116,8 +116,8 @@ describe("DockRegion panel movement", () => {
     const [sourceItem] = stackItems(container);
     await fireEvent(sourceItem, pointer("pointerdown", 50, 50));
     await fireEvent(document, pointer("pointermove", 90, 50));
-    await fireEvent(document, pointer("pointermove", 450, 50));
-    await fireEvent(document, pointer("pointerup", 450, 50));
+    await fireEvent(document, pointer("pointermove", 420, 50));
+    await fireEvent(document, pointer("pointerup", 420, 50));
 
     expect(onPanelDropB).toHaveBeenCalledOnce();
     expect(onPanelDropB.mock.calls[0][0].panel).toEqual({
@@ -151,6 +151,52 @@ describe("DockRegion panel movement", () => {
 
     expect(onPanelDropB).toHaveBeenCalledOnce();
     expect(onPanelDropB.mock.calls[0][0].panel.panelId).toBe("explorer");
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
+  });
+
+  it("refuses a panel on a hovered flexible tab when canAcceptPanel says no", async () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(DockRegionZoneDropHarness, {
+      props: {
+        shared: true,
+        sizing: "flexible",
+        items,
+        itemsB: [{ value: "outline", label: "Outline" }],
+        canAcceptPanel: (panelId: string) => panelId !== "explorer",
+        onPanelDropB,
+      },
+    });
+    layoutTabs(container);
+
+    const source = container.querySelectorAll<HTMLElement>('[role="tab"]')[0]!;
+    await fireEvent(source, pointer("pointerdown", 50, 15));
+    await fireEvent(document, pointer("pointermove", 90, 15));
+    await fireEvent(document, pointer("pointermove", 420, 15));
+    expect(container.querySelectorAll("[data-drop-target]")).toHaveLength(0);
+    await fireEvent(document, pointer("pointerup", 420, 15));
+    expect(onPanelDropB).not.toHaveBeenCalled();
+  });
+
+  it("inserts before or after a static stack item from the hovered half", async () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(DockRegionZoneDropHarness, {
+      props: { shared: true, items, onPanelDropB },
+    });
+    layout(container);
+
+    const [sourceItem] = stackItems(container);
+    await fireEvent(sourceItem, pointer("pointerdown", 50, 50));
+    await fireEvent(document, pointer("pointermove", 90, 50));
+    await fireEvent(document, pointer("pointermove", 490, 50));
+    await fireEvent(document, pointer("pointerup", 490, 50));
+    expect(onPanelDropB).toHaveBeenCalledOnce();
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(1);
+
+    onPanelDropB.mockClear();
+    await fireEvent(sourceItem, pointer("pointerdown", 50, 50));
+    await fireEvent(document, pointer("pointermove", 90, 50));
+    await fireEvent(document, pointer("pointermove", 410, 50));
+    await fireEvent(document, pointer("pointerup", 410, 50));
     expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
   });
 

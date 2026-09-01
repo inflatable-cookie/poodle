@@ -6,8 +6,8 @@
     flattenVisibleTreeRows,
     isTreeBranch,
     treeOutlineRows,
-    treeResolveOutlineDrop,
-    readTreeDropMetrics,
+    treeCanAcceptDrop,
+    dropCommitDestination,
     treeCheckState,
     treeKeydownIntent,
     treeRangeSelection,
@@ -247,31 +247,14 @@
 
   function handleDrop(intent: DropIntent): DragDropCommitResult {
     const from = liveSourceId;
-    if (!from || !isTreeDropPosition(intent.position)) {
+    const dest = dropCommitDestination(intent);
+    if (!from || !isTreeDropPosition(dest.position)) {
       return { status: "rejected", reason: "unavailable" };
     }
-    const snap = dragController.getSnapshot();
-    if (snap.inputKind === "keyboard") {
-      if (from === intent.targetId) return { status: "rejected", reason: "self" };
-      onReorder?.(from, intent.targetId, intent.position);
-      return { status: "committed" };
+    if (!treeCanAcceptDrop(nodes, from, dest.targetId)) {
+      return { status: "rejected", reason: dest.targetId === from ? "self" : "subtree" };
     }
-    const row = rootEl?.querySelector<HTMLElement>(
-      `[data-value="${CSS.escape(intent.targetId)}"] .poodle-tree__row`,
-    );
-    const rect = row?.getBoundingClientRect();
-    const metrics = row ? readTreeDropMetrics(row) : { indentPx: 16, gutterPx: 24 };
-    const placement = treeResolveOutlineDrop({
-      rows: treeOutlineRows(visibleRows),
-      from,
-      to: intent.targetId,
-      x: snap.pointer?.x,
-      y: snap.pointer?.y ?? 0,
-      rect: rect ?? { top: 0, height: 1, left: 0, width: 1 },
-      ...metrics,
-    });
-    if (!placement || placement.to === from) return { status: "rejected", reason: "self" };
-    onReorder?.(from, placement.to, placement.position);
+    onReorder?.(from, dest.targetId, dest.position);
     return { status: "committed" };
   }
   // Alt+Up/Down moves the focused node among its siblings.

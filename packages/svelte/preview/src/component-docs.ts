@@ -4395,7 +4395,6 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "historyKey", type: "string | null", default: "null", description: "Optional URL query param key used to preserve the active tab in browser history." },
       { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the active tab changes." },
       { name: "onReorder", type: "((items: string[]) => void) | undefined", default: "undefined", description: "Called when tabs are reordered." },
-      { name: "onForeignDrop", type: "((id: string, index: number) => void) | undefined", default: "undefined", description: "Owning composite hook: a family subject not in items lands at the hovered tab and reports here instead of onReorder." },
       { name: "onClose", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a tab close button is requested." },
       { name: "onDragStart", type: "((value: string, event: DragEvent) => void) | undefined", default: "undefined", description: "Called when a reorderable tab starts dragging." },
       { name: "onDragEnd", type: "((value: string, event: DragEvent) => void) | undefined", default: "undefined", description: "Called when a reorderable tab drag ends." },

@@ -24,6 +24,7 @@ import {
 import { AnchoredSurface } from "./AnchoredSurface";
 import { Button } from "./Button";
 import { DragDropProvider, useOptionalDragDrop } from "./drag-drop";
+import { useTabsForeignInsert } from "./tabs-foreign-insert";
 import { Icon } from "./Icon";
 import { Menu } from "./Menu";
 import { Pill } from "./Pill";
@@ -118,12 +119,6 @@ export interface TabsProps {
    * without taking over reorder, which stays Tabs' own.
    */
   dragSubjectKind?: string | null;
-  /**
-   * Owning composite hook: a subject of this strip's family that is not in
-   * `items` lands at the hovered tab and reports here instead of `onReorder`.
-   * Absent, the tab refuses so an ancestor target can take the drop.
-   */
-  onForeignDrop?: ((id: string, index: number) => void) | undefined;
   onClose?: ((value: string) => void) | undefined;
   children?: (value: string) => ReactNode;
   actions?: ReactNode;
@@ -169,12 +164,12 @@ export function Tabs({
   onReorder = undefined,
   crossWindowSourceBridge = undefined,
   dragSubjectKind = null,
-  onForeignDrop = undefined,
   onClose = undefined,
   children,
   actions,
 }: TabsProps) {
   const tabsId = useId();
+  const foreignInsert = useTabsForeignInsert();
   const uiPresentation = useUiPresentation();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -538,11 +533,10 @@ export function Tabs({
     const from = indexOfValue(subjectId);
     const target = indexOfValue(valueOfTargetId(intent.targetId));
     if (from < 0) {
-      if (!onForeignDrop || target < 0) {
+      if (!foreignInsert || target < 0) {
         return { status: "rejected", reason: "same tab" };
       }
-      onForeignDrop(subjectId, intent.position === "after" ? target + 1 : target);
-      return { status: "committed" };
+      return foreignInsert.commit(subjectId, intent.position === "after" ? target + 1 : target);
     }
     if (target < 0 || from === target) {
       return { status: "rejected", reason: "same tab" };
@@ -709,7 +703,7 @@ export function Tabs({
                 crossWindowSourceBridge={crossWindowSourceBridge}
                 indexOfValue={indexOfValue}
                 ownsValue={ownsValue}
-                acceptsForeign={onForeignDrop !== undefined}
+                acceptsForeign={foreignInsert !== null}
                 isVertical={isVertical}
                 sourceId={sourceIdOf(item.value)}
                 targetId={targetIdOf(item.value)}

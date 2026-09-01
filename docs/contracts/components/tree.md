@@ -79,7 +79,11 @@ Updated: 2026-09-01
   renders the menu as a positioned overlay routed by token.
 - **Reorder** (`reorderable` + `onReorder`): rows are substrate drag sources; a drop fires
   `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`.
-  Y picks the band on the hovered row; `inside` on a folder appends as last
+  The hovered row is the indicator anchor; the session's commit destination is
+  the `{to, position}` the geometry resolved, and eligibility, announcements,
+  and `onReorder` all use that destination — never a privately recomputed one.
+  Hovering an expanded source does not land before its first child (own
+  subtree). Y picks the band on the hovered row; `inside` on a folder appends as last
   child, including when that folder is the dragged node's parent or an
   immediate sibling. An `after` on the last visible
   descendant of an open parent then offers every ancestor that ends at that

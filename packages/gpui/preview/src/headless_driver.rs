@@ -102,28 +102,28 @@ impl Render for HeadlessRoot {
         };
         let drag_host = self.drag_host.clone();
         poodle_gpui_node_backend::drag_drop_window_host(&drag_host, || {
-        poodle_gpui_node_backend::drag_drop_provider(&self.drag, || {
-            let content = match &content {
-                HeadlessContent::Node(node) => {
-                    let node = node.lock().expect("node lock").clone();
-                    poodle_gpui_node_backend::to_gpui(&node)
-                }
-                HeadlessContent::Element(build) => build(),
-            };
-            poodle_gpui_node_backend::attach_overlay_host(
-                div().size_full().track_focus(&focus).child(
-                    div()
-                        .w(px(box_width))
-                        .h(px(box_height))
-                        .ml(px(MOUNT_BOX_LEFT))
-                        .mt(px(MOUNT_BOX_TOP))
-                        .flex()
-                        .items_center()
-                        .justify_center()
-                        .child(content),
-                ),
-            )
-        })
+            poodle_gpui_node_backend::drag_drop_provider(&self.drag, || {
+                let content = match &content {
+                    HeadlessContent::Node(node) => {
+                        let node = node.lock().expect("node lock").clone();
+                        poodle_gpui_node_backend::to_gpui(&node)
+                    }
+                    HeadlessContent::Element(build) => build(),
+                };
+                poodle_gpui_node_backend::attach_overlay_host(
+                    div().size_full().track_focus(&focus).child(
+                        div()
+                            .w(px(box_width))
+                            .h(px(box_height))
+                            .ml(px(MOUNT_BOX_LEFT))
+                            .mt(px(MOUNT_BOX_TOP))
+                            .flex()
+                            .items_center()
+                            .justify_center()
+                            .child(content),
+                    ),
+                )
+            })
         })
     }
 }
@@ -212,7 +212,8 @@ impl<'a> HeadlessDriver<'a> {
     /// The mount host's drag controller — the one every source and target in
     /// a mounted node tree registers with.
     pub fn drag(&mut self) -> poodle_gpui_node_backend::DragDropController {
-        self.cx.update(|_window, cx| self.root.read(cx).drag.clone())
+        self.cx
+            .update(|_window, cx| self.root.read(cx).drag.clone())
     }
 
     /// This window's provider census — the seam that notices an unmounted

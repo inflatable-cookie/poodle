@@ -101,7 +101,7 @@ function presentationKey(snapshot: DragDropSnapshot): string {
   ].join("|");
 }
 
-/** An immutable presentation read of one controller, as a store. */
+/** Presentation-only read: skips pointer-only moves so drop-target trees stay quiet. */
 export function dragDropSnapshotStore(controller: DragDropController): Readable<DragDropSnapshot> {
   return readable(controller.getSnapshot(), (set) => {
     let last = presentationKey(controller.getSnapshot());
@@ -113,6 +113,11 @@ export function dragDropSnapshotStore(controller: DragDropController): Readable<
       set(next);
     });
   });
+}
+
+/** Public snapshot, including consecutive pointer/preview coordinates. */
+export function dragDropLiveSnapshotStore(controller: DragDropController): Readable<DragDropSnapshot> {
+  return readable(controller.getSnapshot(), (set) => controller.subscribe(() => set(controller.getSnapshot())));
 }
 
 /**
@@ -140,7 +145,7 @@ export function useDragDrop(): {
     throw new Error("useDragDrop must be used inside DragDropProvider");
   }
 
-  const snapshot = dragDropSnapshotStore(ctx.controller);
+  const snapshot = dragDropLiveSnapshotStore(ctx.controller);
 
   const dragSource = dragSourceAction(ctx.controller);
   const dropTarget = dropTargetAction(ctx.controller);

@@ -11,7 +11,9 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  asDropResolveResult,
   dragSessionTransition,
+  dropCommitDestination,
   resolveDropTarget,
   type DragSession,
   type DragSessionContext,
@@ -138,5 +140,30 @@ describe("resolveDropTarget", () => {
     ]);
 
     expect(winner).toEqual(accepted);
+  });
+});
+
+describe("dropCommitDestination", () => {
+  test("the hovered row is the commit when no remapped destination is set", () => {
+    expect(dropCommitDestination(intent)).toEqual({ targetId: "list", position: "before" });
+  });
+
+  test("a remapped destination is the commit, not the indicator anchor", () => {
+    expect(
+      dropCommitDestination({
+        targetId: "notes.txt",
+        position: "before",
+        operation: "move",
+        destination: { targetId: "guide.md", position: "after" },
+      }),
+    ).toEqual({ targetId: "guide.md", position: "after" });
+  });
+
+  test("asDropResolveResult keeps a bare position as the indicator", () => {
+    expect(asDropResolveResult("inside")).toEqual({ position: "inside" });
+    expect(asDropResolveResult({ position: "before", destination: { targetId: "guide.md", position: "after" } })).toEqual({
+      position: "before",
+      destination: { targetId: "guide.md", position: "after" },
+    });
   });
 });

@@ -183,6 +183,20 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
     `preview=${preview} posture=${posture} target=${hoverTarget}`,
   );
 
+  const previewBox = await box(page, ".poodle-drag-preview");
+  const overlayOutsideHost = await page.evaluate(() => {
+    const host = document.getElementById("transformed-host");
+    const chip = document.querySelector(".poodle-drag-preview");
+    return Boolean(host && chip && !host.contains(chip));
+  });
+  check(
+    `${name}: fixed preview stays viewport-relative outside a transformed host`,
+    overlayOutsideHost &&
+      Math.abs(previewBox.x - (target.x + 12)) < 2 &&
+      Math.abs(previewBox.y - (target.y + 12)) < 2,
+    `outside=${overlayOutsideHost} preview=${previewBox.x},${previewBox.y} pointer=${target.x},${target.y}`,
+  );
+
   await page.mouse.up();
   const afterPhase = await waitProbe(page, "phase", "idle");
   const afterPreview = await page.locator(".poodle-drag-preview").count();
@@ -1260,6 +1274,54 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         `${name}: ${fw} OrderBy keeps focus on the handle it reordered from`,
         orderFocus === "Reorder Size. Drag or use Alt plus arrow keys.",
         `focused="${orderFocus}"`,
+      );
+
+      // ── Dock chrome: host radius, inset ring, strip overflow ──
+      //
+      // happy-dom cannot prove these. The drag-source chip uses the same
+      // inset ring as :focus-visible, so a real pointer activation is the
+      // engine evidence.
+      const dock = `#${fw}-dock`;
+      await page.locator(dock).waitFor({ state: "attached" });
+      const listBefore = await page.evaluate((root) => {
+        const list = document.querySelector(`${root} .poodle-tabs__list`) as HTMLElement | null;
+        return list ? { scrollWidth: list.scrollWidth, clientWidth: list.clientWidth } : null;
+      }, dock);
+      await press(`${dock} [role="tab"]`);
+      await frames(page);
+      const chrome = await page.evaluate(
+        ({ root, before }) => {
+          const host = document.querySelector(root);
+          if (!host) return null;
+          const item = host.querySelector(".poodle-tabs__item") as HTMLElement | null;
+          const list = host.querySelector(".poodle-tabs__list") as HTMLElement | null;
+          if (!item || !list || !before) return null;
+          const itemStyle = getComputedStyle(item);
+          const listStyle = getComputedStyle(list);
+          return {
+            radius: itemStyle.borderTopLeftRadius,
+            outlineOffset: itemStyle.outlineOffset,
+            overflowX: listStyle.overflowX,
+            overflowY: listStyle.overflowY,
+            scrollGrew: list.scrollWidth > before.scrollWidth,
+            dragging: item.hasAttribute("data-drag-source") || item.hasAttribute("data-poodle-drag-source"),
+          };
+        },
+        { root: dock, before: listBefore },
+      );
+      await page.keyboard.press("Escape");
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} DockRegion chip radius follows the host and the inset ring does not scroll the strip`,
+        chrome !== null &&
+          chrome.radius === "12px" &&
+          chrome.outlineOffset === "-2px" &&
+          chrome.overflowX === "auto" &&
+          chrome.overflowY === "hidden" &&
+          chrome.scrollGrew === false &&
+          chrome.dragging === true,
+        `chrome=${JSON.stringify(chrome)}`,
       );
     }
   } finally {

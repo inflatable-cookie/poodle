@@ -11,6 +11,7 @@
 
   import { default as IconButton } from "../IconButton.svelte";
   import { useDragDrop } from "../drag-drop";
+  import { dragDropSnapshotStore, tryDragDrop } from "../drag-drop-context";
   import type { ControlDensity, ControlSize } from "../types";
 
   interface Props {
@@ -53,7 +54,8 @@
     onIdleKeydown,
   }: Props = $props();
 
-  const { dragSource, dropTarget, snapshot } = useDragDrop();
+  const { dragSource, dropTarget } = useDragDrop();
+  const snapshot = dragDropSnapshotStore(tryDragDrop()!.controller);
   const canDrag = $derived(reorderable && !isUnavailable);
   const dragging = $derived(
     $snapshot.sourceId === item.id &&

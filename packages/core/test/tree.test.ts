@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
   flattenVisibleTreeRows,
   treeCanAcceptDrop,
+  treeDropEligibility,
   treeLocate,
   treeCheckState,
   treeKeydownIntent,
@@ -149,6 +150,32 @@ describe("treeCanAcceptDrop", () => {
     expect(treeCanAcceptDrop(nodes, "src", "src/a.ts")).toBe(false);
     expect(treeSubtreeContains(nodes, "src", "src/lib/c.ts")).toBe(true);
     expect(treeCanAcceptDrop(nodes, "missing", "docs")).toBe(false);
+  });
+
+  test("eligibility uses the commit destination, not the hovered row", () => {
+    const hoveredSelf = treeDropEligibility(nodes, "src", {
+      targetId: "src",
+      position: "inside",
+      operation: "move",
+      destination: { targetId: "src/a.ts", position: "before" },
+    });
+    expect(hoveredSelf).toEqual({ accepted: false, reason: "subtree" });
+
+    const hoveredChildCommitsSibling = treeDropEligibility(nodes, "src", {
+      targetId: "src/a.ts",
+      position: "before",
+      operation: "move",
+      destination: { targetId: "docs", position: "after" },
+    });
+    expect(hoveredChildCommitsSibling).toEqual({
+      accepted: true,
+      intent: {
+        targetId: "src/a.ts",
+        position: "before",
+        operation: "move",
+        destination: { targetId: "docs", position: "after" },
+      },
+    });
   });
 });
 

@@ -1,4 +1,4 @@
-import { isTreeBranch, treeCanAcceptDrop, type DragDropCommitResult, type DropIntent } from "@inflatable-cookie/poodle-core";
+import { isTreeBranch, treeDropEligibility, type DragDropCommitResult, type DropIntent } from "@inflatable-cookie/poodle-core";
 
 import { useKeyboardDropTarget } from "../drag-drop";
 import type { TreeNode } from "../types";
@@ -33,10 +33,7 @@ function TreeKeyboardTarget({
       if (!isTreeBranch(row.node)) return "after";
       return input.direction === "last" ? "after" : "inside";
     },
-    canDrop: (intent, subject) =>
-      treeCanAcceptDrop(nodes, subject.id, intent.targetId)
-        ? { accepted: true, intent }
-        : { accepted: false, reason: subject.id === intent.targetId ? "self" : "subtree" },
+    canDrop: (intent, subject) => treeDropEligibility(nodes, subject.id, intent),
     onDrop,
   });
   return null;

@@ -58,11 +58,6 @@ pub struct DockRegionSpec {
     /// Exact drop-zone identity for the same-zone drop guard; when None the
     /// edge is the zone. Hosts mapping several regions onto one edge set a
     /// per-region id here.
-    ///
-    /// Carried for surface parity and read by nothing today: panel drag is a
-    /// drag-with-payload gesture the native event vocabulary does not have, so
-    /// the natives draw the drop zone and run no gesture. Recorded in
-    /// `dock-region.md` §12.
     pub drag_zone_id: Option<String>,
     /// Omitted (`None`) inherits from the presentation context; an explicit
     /// value always wins.
@@ -166,6 +161,11 @@ impl DockRegionSpec {
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = Some(density);
+        self
+    }
+
+    pub fn with_drag_zone_id(mut self, drag_zone_id: impl Into<String>) -> Self {
+        self.drag_zone_id = Some(drag_zone_id.into());
         self
     }
 }

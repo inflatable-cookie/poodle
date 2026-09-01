@@ -1,4 +1,5 @@
 import { fireEvent, render } from "@testing-library/svelte";
+import { tick } from "svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import Tree from "../src/Tree.svelte";
@@ -665,5 +666,49 @@ describe("Tree row metadata", () => {
     expect(container.querySelector('[data-value="n0"]')).not.toBeNull();
     document.dispatchEvent(pointer("pointercancel", { clientY: 30 }));
     expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("does not commit an expanded folder into its own first child", () => {
+    const onReorder = vi.fn();
+    const { container } = render(Tree, {
+      props: { nodes: nested, expandedValues: ["src", "lib"], reorderable: true, onReorder },
+    });
+    const rows = layoutTree(container);
+    const source = rows.get("src")!;
+    const rect = source.getBoundingClientRect();
+    const y = rect.top + rect.height - 2;
+    source.dispatchEvent(pointer("pointerdown", { clientY: rect.top + 4 }));
+    document.dispatchEvent(pointer("pointermove", { clientY: y }));
+    document.dispatchEvent(pointer("pointerup", { clientY: y }));
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("announces the committed destination, not the hovered row, on an origin-gap drop", async () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "docs",
+        label: "docs",
+        children: [
+          { value: "intro.md", label: "intro.md" },
+          { value: "guide.md", label: "guide.md" },
+        ],
+      },
+      { value: "notes.txt", label: "notes.txt" },
+    ];
+    const { container } = render(Tree, {
+      props: { nodes, expandedValues: ["docs"], reorderable: true, onReorder },
+    });
+    const rows = layoutTree(container);
+    const source = rows.get("notes.txt")!;
+    const y = source.getBoundingClientRect().top + 20;
+    source.dispatchEvent(pointer("pointerdown", { clientY: y, clientX: 40 }));
+    document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 150 }));
+    document.dispatchEvent(pointer("pointerup", { clientY: y, clientX: 150 }));
+    await tick();
+    expect(onReorder).toHaveBeenCalledWith("notes.txt", "guide.md", "after");
+    const live = container.querySelector(".poodle-drag-live-region")?.textContent ?? "";
+    expect(live).toContain("guide.md");
+    expect(live).not.toMatch(/on notes\.txt$/);
   });
 });

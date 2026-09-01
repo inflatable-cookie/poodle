@@ -8,6 +8,7 @@ import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 
 import { Icon } from "../Icon";
 import { useDragSource, useDropTarget } from "../drag-drop";
+import { useTabsForeignInsert } from "../tabs-foreign-insert";
 import type { ControlSize, TabItem } from "../types";
 
 /**
@@ -82,6 +83,7 @@ export function TabsItem({
 }: TabsItemProps) {
   /** A disabled tab cannot be picked up. It is still a place to put one. */
   const canDrag = reorderable && item.disabled !== true;
+  const foreignInsert = useTabsForeignInsert();
 
   const { getSourceProps, dragging } = useDragSource({
     sourceId,
@@ -122,8 +124,10 @@ export function TabsItem({
       // Claiming it and rejecting at commit would swallow the drop instead.
       // An owning composite that wants the insert (DockRegion) opts in via
       // `acceptsForeign` instead of falling through to the region.
-      if (!ownsValue(subject.id) && !acceptsForeign) {
-        return { accepted: false, reason: "not this tab set" };
+      if (!ownsValue(subject.id)) {
+        if (!acceptsForeign || !foreignInsert?.canAccept(subject.id)) {
+          return { accepted: false, reason: "not this tab set" };
+        }
       }
       return subject.id === item.value
         ? { accepted: false, reason: "same tab" }

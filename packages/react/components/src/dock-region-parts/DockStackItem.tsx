@@ -68,7 +68,16 @@ export function DockStackItem({
     targetId: `${dropZoneId}:slot:${item.value}`,
     acceptedKinds: [DOCK_PANEL_SUBJECT_KIND],
     label,
-    resolvePosition: () => "inside",
+    resolvePosition: ({ x, y, rect }) => {
+      const side = edge === "left" || edge === "right";
+      return side
+        ? y < rect.top + rect.height / 2
+          ? "before"
+          : "after"
+        : x < rect.left + rect.width / 2
+          ? "before"
+          : "after";
+    },
     canDrop: (intent, subject) => {
       const panel = decodeDockPanelSubject(subject.id);
       if (!panel) return { accepted: false, reason: "not a panel" };
@@ -80,20 +89,32 @@ export function DockStackItem({
       }
       return { accepted: true, intent };
     },
-    onDrop: (): DragDropCommitResult => {
+    onDrop: (intent): DragDropCommitResult => {
       const panel = decodeDockPanelSubject(liveSubjectId());
       if (!panel) return { status: "rejected", reason: "not a panel" };
+      const after = intent.position === "after";
 
       if (panel.sourceZone === dropZoneId) {
         const order = items.map((entry) => entry.value);
         const from = order.indexOf(panel.panelId);
         if (from < 0) return { status: "rejected", reason: "unknown panel" };
+        const to = after
+          ? from < index
+            ? index
+            : index + 1
+          : from < index
+            ? index - 1
+            : index;
+        if (from === to) return { status: "rejected", reason: "same panel" };
         const [moved] = order.splice(from, 1);
-        order.splice(index, 0, moved);
+        order.splice(to, 0, moved);
         onReorder?.(order);
         return { status: "committed" };
       }
 
+      if (canAcceptPanel !== null && !canAcceptPanel(panel.panelId, panel.sourceEdge as DockEdge)) {
+        return { status: "rejected", reason: "refused by host" };
+      }
       onPanelDrop?.({
         panel: {
           panelId: panel.panelId,
@@ -101,7 +122,7 @@ export function DockStackItem({
           sourceZone: panel.sourceZone,
         },
         targetEdge: edge,
-        index,
+        index: after ? index + 1 : index,
       });
       return { status: "committed" };
     },

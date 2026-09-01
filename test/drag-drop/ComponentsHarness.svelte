@@ -1,5 +1,6 @@
 <script lang="ts">
   import { default as BlockEditor } from "../../packages/svelte/components/src/BlockEditor.svelte";
+  import { default as DockRegion } from "../../packages/svelte/components/src/DockRegion.svelte";
   import { default as EditableList } from "../../packages/svelte/components/src/EditableList.svelte";
   import { default as DragDropProvider } from "../../packages/svelte/components/src/DragDropProvider.svelte";
   import { default as ModelCatalogueEditor } from "../../packages/svelte/components/src/ModelCatalogueEditor.svelte";
@@ -98,6 +99,20 @@
     data-order-c={orderC.join(",")}
     data-order-c-count={orderCCount}
   ></div>
+
+  <div
+    id="svelte-dock"
+    style="width: 280px; height: 160px; --poodle-radius-surface: 12px; --poodle-radius-control: 4px; --poodle-border-width-focus: 2px; --poodle-color-accent-focusRing: rgb(0, 0, 255);"
+  >
+    <DockRegion
+      edge="left"
+      items={[
+        { value: "explorer", label: "Explorer" },
+        { value: "search", label: "Search" },
+      ]}
+      value="explorer"
+    />
+  </div>
 
   <!-- One provider, two catalogues, the same three model ids. -->
   <DragDropProvider>

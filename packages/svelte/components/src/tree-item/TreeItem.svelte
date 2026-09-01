@@ -1,6 +1,6 @@
 <script lang="ts">
   import {
-    treeCanAcceptDrop,
+    treeDropEligibility,
     treeResolveOutlineDrop,
     readTreeDropMetrics,
     type DragDropCommitResult,
@@ -128,24 +128,22 @@
     resolvePosition: (input) => {
       const rect = rowEl?.getBoundingClientRect() ?? input.rect;
       const metrics = rowEl ? readTreeDropMetrics(rowEl) : { indentPx: 16, gutterPx: 24 };
-      return (
-        treeResolveOutlineDrop({
-          rows: outlineRows,
-          from: input.subject.id,
-          to: node.value,
-          x: input.x,
-          y: input.y,
-          rect,
-          ...metrics,
-        })?.indicator ?? null
-      );
+      const placement = treeResolveOutlineDrop({
+        rows: outlineRows,
+        from: input.subject.id,
+        to: node.value,
+        x: input.x,
+        y: input.y,
+        rect,
+        ...metrics,
+      });
+      if (!placement) return null;
+      return {
+        position: placement.indicator,
+        destination: { targetId: placement.to, position: placement.position },
+      };
     },
-    canDrop: (intent, subject) => {
-      if (subject.id === intent.targetId) return { accepted: true, intent };
-      return treeCanAcceptDrop(nodes, subject.id, intent.targetId)
-        ? { accepted: true, intent }
-        : { accepted: false, reason: "subtree" };
-    },
+    canDrop: (intent, subject) => treeDropEligibility(nodes, subject.id, intent),
     onDrop,
   });
 </script>

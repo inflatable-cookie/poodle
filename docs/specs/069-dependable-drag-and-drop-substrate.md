@@ -58,6 +58,7 @@ type DropIntent = {
   targetId: string;
   position: DropPosition;
   operation: DragOperation;
+  destination?: { targetId: string; position: DropPosition };
 };
 
 type DropEligibility =
@@ -67,6 +68,10 @@ type DropEligibility =
 
 `kind` selects a consumer-defined subject family. `id` resolves the live
 subject through consumer state. Neither field is display text or authority.
+`DropIntent.targetId` / `position` name the hovered registration (the
+indicator anchor). When geometry remaps the commit, `destination` is the
+authoritative placement: eligibility, revalidation, commit, and announcements
+use it; the indicator stays on the hovered target.
 
 Implementations may attach session-local presentation metadata behind a
 registration. That metadata is not serialized, compared for identity, or sent

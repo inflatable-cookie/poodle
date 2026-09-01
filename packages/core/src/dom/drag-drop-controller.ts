@@ -48,7 +48,9 @@ import {
   type AutoScrollRect,
 } from "./drag-drop-auto-scroll";
 import {
+  asDropResolveResult,
   dragSessionTransition,
+  dropCommitDestination,
   resolveDropTarget,
   type DragAnnouncementKind,
   type DragCancelReason,
@@ -65,9 +67,10 @@ import {
   type DropIntent,
   type DropPosition,
   type DropTargetCandidate,
+  type ResolvedDropPosition,
 } from "../drag-drop";
 
-export type { DragDropCommitResult };
+export type { DragDropCommitResult, ResolvedDropPosition };
 
 export type DragInputKind = "mouse" | "pen" | "touch" | "keyboard";
 
@@ -162,7 +165,7 @@ export interface DropTargetRegistration {
   readonly disabled?: boolean;
   readonly priority?: number;
   readonly label: string;
-  readonly resolvePosition: (input: DragPositionResolverInput) => DropPosition | null;
+  readonly resolvePosition: (input: DragPositionResolverInput) => ResolvedDropPosition | null;
   readonly canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
   readonly onDrop: (
     intent: DropIntent,
@@ -932,7 +935,14 @@ export function createDragDropController(options: DragDropControllerOptions = {}
           ...context.session,
           allowedOperations: Object.freeze([...context.session.allowedOperations]),
           subject: Object.freeze({ ...context.session.subject }),
-          intent: context.session.intent ? Object.freeze({ ...context.session.intent }) : null,
+          intent: context.session.intent
+            ? Object.freeze({
+                ...context.session.intent,
+                destination: context.session.intent.destination
+                  ? Object.freeze({ ...context.session.intent.destination })
+                  : undefined,
+              })
+            : null,
         })
       : null;
 
@@ -981,8 +991,9 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   function announce(kind: DragAnnouncementKind, outcome?: DragTerminalOutcome): void {
     const session = context.session;
+    const commit = session?.intent ? dropCommitDestination(session.intent) : null;
     const source = session ? sources.get(session.sourceId) : undefined;
-    const target = session?.intent ? targetForAnnouncement(session.intent.targetId) : undefined;
+    const target = commit ? targetForAnnouncement(commit.targetId) : undefined;
     const reason =
       outcome && (outcome.status === "rejected" || outcome.status === "failed" || outcome.status === "cancelled")
         ? "reason" in outcome
@@ -997,7 +1008,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       sourceLabel:
         source?.registration.label ?? externalSourceLabel ?? session?.subject.id ?? "item",
       targetLabel: target?.registration.label,
-      position: session?.intent?.position,
+      position: commit?.position,
       operation: session?.operation,
       reason,
     };
@@ -2639,16 +2650,19 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   ): { candidate: DropTargetCandidate; rejected?: { reason?: string } } {
     const rect = measure(entry.element);
     const inside = containsPoint(rect, x, y);
-    const position = inside
-      ? entry.registration.resolvePosition({
-          x,
-          y,
-          rect: rect as DOMRectReadOnly,
-          subject,
-          operation,
-          inputKind: kind,
-        })
+    const resolved = inside
+      ? asDropResolveResult(
+          entry.registration.resolvePosition({
+            x,
+            y,
+            rect: rect as DOMRectReadOnly,
+            subject,
+            operation,
+            inputKind: kind,
+          }),
+        )
       : null;
+    const position = resolved?.position ?? null;
 
     let eligibility: DropEligibility = { accepted: false };
     if (
@@ -2660,6 +2674,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         targetId: entry.registration.targetId,
         position,
         operation,
+        destination: resolved?.destination,
       };
       // External data is validated before the target is asked, so a consumer
       // resolver never has to defend itself against a hostile batch.

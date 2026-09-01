@@ -1999,6 +1999,7 @@ impl DragDropController {
             target_id: target_id.clone(),
             position,
             operation: projection.operation,
+            destination: None,
         };
 
         let registration = self
@@ -2920,6 +2921,7 @@ impl DragDropController {
             target_id: target_id.clone(),
             position,
             operation: session.operation,
+            destination: None,
         };
         let eligible = {
             let state = self.state.borrow();
@@ -3445,6 +3447,7 @@ fn pointer_candidate(
         target_id: record.registration.target_id.clone(),
         position,
         operation: session.operation,
+        destination: None,
     };
     Some(DropTargetCandidate {
         target_id: record.registration.target_id.clone(),
@@ -3519,6 +3522,7 @@ fn resolve_rejected_target(
                     target_id: candidate.target_id.clone(),
                     position: String::new(),
                     operation: DragOperation::Move,
+                    destination: None,
                 },
             },
             target_id: candidate.target_id.clone(),
@@ -3988,6 +3992,7 @@ mod tests {
             target_id: "row".to_string(),
             position: "after".to_string(),
             operation: DragOperation::Move,
+            destination: None,
         };
 
         assert!(matches!(
@@ -4006,6 +4011,7 @@ mod tests {
             target_id: "row".to_string(),
             position: "after".to_string(),
             operation: DragOperation::Move,
+            destination: None,
         };
 
         assert_eq!(

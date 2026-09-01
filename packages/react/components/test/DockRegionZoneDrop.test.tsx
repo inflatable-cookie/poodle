@@ -167,8 +167,8 @@ describe("DockRegion panel movement", () => {
     const [sourceItem] = stackItems(container);
     send(sourceItem, pointer("pointerdown", 50, 50));
     send(document, pointer("pointermove", 90, 50));
-    send(document, pointer("pointermove", 450, 50));
-    send(document, pointer("pointerup", 450, 50));
+    send(document, pointer("pointermove", 420, 50));
+    send(document, pointer("pointerup", 420, 50));
 
     expect(onPanelDropB).toHaveBeenCalledOnce();
     expect(onPanelDropB.mock.calls[0][0].panel).toEqual({
@@ -201,7 +201,50 @@ describe("DockRegion panel movement", () => {
     send(document, pointer("pointerup", 420, 15));
 
     expect(onPanelDropB).toHaveBeenCalledOnce();
-    expect(onPanelDropB.mock.calls[0][0].panel.panelId).toBe("explorer");
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
+  });
+
+  it("refuses a panel on a hovered flexible tab when canAcceptPanel says no", () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(
+      <Pair
+        shared
+        sizing="flexible"
+        itemsA={items}
+        itemsB={[{ value: "outline", label: "Outline" }]}
+        canAcceptPanel={(panelId) => panelId !== "explorer"}
+        onPanelDropB={onPanelDropB}
+      />,
+    );
+    layoutTabs(container);
+
+    const source = container.querySelectorAll<HTMLElement>('[role="tab"]')[0]!;
+    send(source, pointer("pointerdown", 50, 15));
+    send(document, pointer("pointermove", 90, 15));
+    send(document, pointer("pointermove", 420, 15));
+    expect(container.querySelectorAll("[data-drop-target]")).toHaveLength(0);
+    send(document, pointer("pointerup", 420, 15));
+    expect(onPanelDropB).not.toHaveBeenCalled();
+  });
+
+  it("inserts before or after a static stack item from the hovered half", () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(<Pair shared onPanelDropB={onPanelDropB} />);
+    layout(container);
+
+    const [sourceItem] = stackItems(container);
+    send(sourceItem, pointer("pointerdown", 50, 50));
+    send(document, pointer("pointermove", 90, 50));
+    send(document, pointer("pointermove", 490, 50));
+    send(document, pointer("pointerup", 490, 50));
+    expect(onPanelDropB).toHaveBeenCalledOnce();
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(1);
+
+    onPanelDropB.mockClear();
+    send(sourceItem, pointer("pointerdown", 50, 50));
+    send(document, pointer("pointermove", 90, 50));
+    send(document, pointer("pointermove", 410, 50));
+    send(document, pointer("pointerup", 410, 50));
     expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
   });
 

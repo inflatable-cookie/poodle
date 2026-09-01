@@ -347,10 +347,11 @@ is the window, and a window bridge belongs there.
 - A drop on a destination tab or stack item lands *at* that item: the hovered
   half chooses before/after, matching same-strip land-at. A drop on the region
   body (no tab under the pointer) appends (`index === items.length`).
-- Eligibility is `canAcceptPanel`, run during hover **and** again at commit.
-  The substrate carries the subject in the session, so the panel's identity is
-  known at hover without a side channel — which is the entire reason the old
-  global existed.
+- Eligibility is `canAcceptPanel`, run during hover **and** again at commit,
+  including when the pointer is over a destination tab. The same rule covers
+  the region body and static stack items. The substrate carries the subject in
+  the session, so the panel's identity is known at hover without a side
+  channel — which is the entire reason the old global existed.
 - A drop back onto the source zone is ineligible in flexible sizing, because
   same-strip reorder owns it. Zone identity is `dragZoneId` when set, else the
   edge.

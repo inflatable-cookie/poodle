@@ -28,6 +28,10 @@
 
 <div data-testid="scope-a">
   <DragDropProvider>
+    {#snippet preview(pose)}
+      <span data-testid="custom-preview-x">{pose.x}</span>
+      {pose.label}
+    {/snippet}
     <DragDropReorderList items={itemsA} kind="scope-a" reject={rejectA} onDrop={onDropA} />
   </DragDropProvider>
 </div>

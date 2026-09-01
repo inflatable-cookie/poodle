@@ -1,7 +1,7 @@
 <script lang="ts">
   import {
     isTreeBranch,
-    treeCanAcceptDrop,
+    treeDropEligibility,
     type DragDropCommitResult,
     type DropIntent,
     type KeyboardDropTargetHandle,
@@ -43,10 +43,7 @@
           if (!isTreeBranch(row.node as TreeNodeLike)) return "after";
           return input.direction === "last" ? "after" : "inside";
         },
-        canDrop: (intent, subject) =>
-          treeCanAcceptDrop(nodes, subject.id, intent.targetId)
-            ? { accepted: true, intent }
-            : { accepted: false, reason: subject.id === intent.targetId ? "self" : "subtree" },
+        canDrop: (intent, subject) => treeDropEligibility(nodes, subject.id, intent),
         onDrop,
       }),
     );

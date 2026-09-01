@@ -293,11 +293,7 @@ pub fn model_catalogue_editor_with_slots(
 
 /// Stamp the hidden-section disclosure on `Collapsible`'s direct trigger and
 /// optional content wrapper only. Nested focusable controls keep their own ids.
-fn mark_hidden_disclosure(
-    section: &mut Node,
-    instance_id: Option<&str>,
-    ctx: &RenderContext<'_>,
-) {
+fn mark_hidden_disclosure(section: &mut Node, instance_id: Option<&str>, ctx: &RenderContext<'_>) {
     let trigger_focus = model_catalogue_hidden_focus_id(instance_id);
     let content_focus = model_catalogue_hidden_content_focus_id(instance_id);
 
@@ -543,11 +539,8 @@ fn shown_row(
         }
 
         if spec.is_drag_enabled {
-            let mut source = crate::drag_drop::reorder_source(
-                &drag_scope(handlers),
-                &item.id,
-                &item.label,
-            );
+            let mut source =
+                crate::drag_drop::reorder_source(&drag_scope(handlers), &item.id, &item.label);
             // The editor has its own contract live region and announces every
             // move through `on_announce`. Without this the controller narrates
             // the same drop a second time, in different words.
@@ -1173,6 +1166,7 @@ mod tests {
                 target_id: target.target_id.clone(),
                 position: poodle_node::DROP_POSITION_AFTER.to_string(),
                 operation: poodle_node::DragOperation::Move,
+                destination: None,
             },
             inbound_files: None,
         });
@@ -1483,7 +1477,10 @@ mod tests {
             })
             .expect("hidden-section content");
         assert_eq!(trigger.runtime_id.as_deref(), Some(trigger_focus.as_str()));
-        assert_eq!(trigger.a11y.controls.as_deref(), Some(content_focus.as_str()));
+        assert_eq!(
+            trigger.a11y.controls.as_deref(),
+            Some(content_focus.as_str())
+        );
         assert_eq!(content.runtime_id.as_deref(), Some(content_focus.as_str()));
         assert_eq!(
             content.a11y.labelled_by.as_deref(),
@@ -1505,7 +1502,10 @@ mod tests {
         let trigger = node
             .find(&|n| n.id.as_deref() == Some(MODEL_CATALOGUE_HIDDEN_SECTION_ID))
             .expect("hidden-section trigger");
-        assert_eq!(trigger.a11y.controls.as_deref(), Some(content_focus.as_str()));
+        assert_eq!(
+            trigger.a11y.controls.as_deref(),
+            Some(content_focus.as_str())
+        );
 
         let restore = node
             .find(&|n| n.a11y.label.as_deref() == Some("Restore Archive Delta"))

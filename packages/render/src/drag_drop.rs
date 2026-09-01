@@ -184,7 +184,12 @@ pub fn rejects_foreign_or_self(
 /// A nested placement target: before / inside / after by thirds when the row
 /// can hold children, halves when it cannot. Same scope and self-drop rules as
 /// [`reorder_target`].
-pub fn nested_target(scope: &str, value: &str, label: &str, accepts_inside: bool) -> NodeDropTarget {
+pub fn nested_target(
+    scope: &str,
+    value: &str,
+    label: &str,
+    accepts_inside: bool,
+) -> NodeDropTarget {
     let mut target = NodeDropTarget::new(
         format!("{scope}:target:{value}"),
         reorder_kind(scope),
@@ -607,11 +612,15 @@ mod tests {
     #[test]
     fn a_reorder_row_rejects_itself_with_a_reason_rather_than_going_quiet() {
         let target = reorder_target("list", "kick", "Kick");
-        let eligibility = target.can_drop.clone().expect("self-rejection is installed");
+        let eligibility = target
+            .can_drop
+            .clone()
+            .expect("self-rejection is installed");
         let intent = DropIntent {
             target_id: target.target_id.clone(),
             position: DROP_POSITION_AFTER.to_string(),
             operation: DragOperation::Move,
+            destination: None,
         };
 
         let refused = eligibility(&intent, &reorder_subject("list", "kick"));

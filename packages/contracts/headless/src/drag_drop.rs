@@ -46,10 +46,18 @@ pub struct DragSubject {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DropDestination {
+    pub target_id: String,
+    pub position: DropPosition,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DropIntent {
     pub target_id: String,
     pub position: DropPosition,
     pub operation: DragOperation,
+    /// Authoritative commit placement when it differs from the hovered target.
+    pub destination: Option<DropDestination>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -732,6 +740,7 @@ mod tests {
             target_id: target_id.to_string(),
             position: DROP_POSITION_INSIDE.to_string(),
             operation: DragOperation::Move,
+            destination: None,
         }
     }
 

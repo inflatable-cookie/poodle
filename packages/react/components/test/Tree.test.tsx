@@ -723,4 +723,51 @@ describe("Tree row metadata (react)", () => {
     });
     expect(onReorder).not.toHaveBeenCalled();
   });
+
+  it("does not commit an expanded folder into its own first child", () => {
+    const onReorder = vi.fn();
+    const { container } = render(
+      <Tree nodes={nested} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const source = rows.get("src")!;
+    const rect = source.getBoundingClientRect();
+    const y = rect.top + rect.height - 2;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: rect.top + 4 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: y }));
+      document.dispatchEvent(pointer("pointerup", { clientY: y }));
+    });
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("announces the committed destination, not the hovered row, on an origin-gap drop", () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "docs",
+        label: "docs",
+        children: [
+          { value: "intro.md", label: "intro.md" },
+          { value: "guide.md", label: "guide.md" },
+        ],
+      },
+      { value: "notes.txt", label: "notes.txt" },
+    ];
+    const { container } = render(
+      <Tree nodes={nodes} expandedValues={["docs"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const source = rows.get("notes.txt")!;
+    const y = source.getBoundingClientRect().top + 20;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: y, clientX: 40 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 150 }));
+      document.dispatchEvent(pointer("pointerup", { clientY: y, clientX: 150 }));
+    });
+    expect(onReorder).toHaveBeenCalledWith("notes.txt", "guide.md", "after");
+    const live = container.querySelector(".poodle-drag-live-region")?.textContent ?? "";
+    expect(live).toContain("guide.md");
+    expect(live).not.toMatch(/on notes\.txt$/);
+  });
 });

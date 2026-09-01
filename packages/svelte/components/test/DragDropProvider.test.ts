@@ -53,6 +53,27 @@ describe("DragDropProvider (svelte)", () => {
     });
   });
 
+  it("publishes consecutive preview coordinates to consumers and custom renderers", async () => {
+    const { container } = render(DragDropCustomSurface);
+    const { source } = layout(container);
+    const consumer = () => container.querySelector('[data-testid="preview-x"]')?.textContent ?? "";
+
+    await fireEvent.pointerDown(source, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    await fireEvent.pointerMove(source, { pointerId: 1, clientX: 40, clientY: 20 });
+    const first = Number(consumer());
+    const firstRenderer = Number(container.querySelector('[data-testid="custom-preview-x"]')?.textContent);
+    await fireEvent.pointerMove(source, { pointerId: 1, clientX: 70, clientY: 20 });
+    const second = Number(consumer());
+    const secondRenderer = Number(container.querySelector('[data-testid="custom-preview-x"]')?.textContent);
+    await fireEvent.pointerUp(source, { pointerId: 1, clientX: 70, clientY: 20 });
+
+    expect(first).toBeGreaterThan(0);
+    expect(second).toBeGreaterThan(first);
+    expect(firstRenderer).toBe(first);
+    expect(secondRenderer).toBe(second);
+    expect(second - first).toBe(30);
+  });
+
   it("commits a touch-like pointer after travelling past mouse distance", async () => {
     const onDropA = vi.fn(() => ({ status: "committed" as const }));
     const { container } = render(DragDropCustomSurface, { props: { onDropA } });

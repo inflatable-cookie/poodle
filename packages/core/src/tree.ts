@@ -10,6 +10,8 @@
  * and focus calls stay adapter-side.
  */
 
+import { dropCommitDestination, type DropEligibility, type DropIntent } from "./drag-drop";
+
 export interface TreeNodeLike {
   value: string;
   children?: TreeNodeLike[];
@@ -289,6 +291,19 @@ export function treeCanAcceptDrop<T extends TreeNodeLike>(
   if (from === to) return false;
   if (!findTreeNode(nodes, from) || !findTreeNode(nodes, to)) return false;
   return !treeSubtreeContains(nodes, from, to);
+}
+
+/** Hover and commit eligibility against the authoritative destination. */
+export function treeDropEligibility<T extends TreeNodeLike>(
+  nodes: readonly T[],
+  from: string,
+  intent: DropIntent,
+): DropEligibility {
+  const dest = dropCommitDestination(intent);
+  if (!treeCanAcceptDrop(nodes, from, dest.targetId)) {
+    return { accepted: false, reason: dest.targetId === from ? "self" : "subtree" };
+  }
+  return { accepted: true, intent };
 }
 
 /** Where `value` sits in the tree: its parent, sibling list, and index. */
