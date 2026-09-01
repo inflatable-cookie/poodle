@@ -1,7 +1,7 @@
 # 069 Dependable Drag And Drop Substrate
 
-Status: active — compiled as g16.021–g16.028; g16.021–g16.027 merged;
-g16.028 is ready as the final migration and certification checkpoint
+Status: complete — compiled as g16.021–g16.028; g16.021–g16.027 merged and
+g16.028 closes the migration and certification
 Updated: 2026-09-01
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
@@ -133,6 +133,41 @@ Source registration does not make an element draggable when its required
 transport is unavailable. Capability is resolved before visual affordance and
 accessible instructions claim support.
 
+A component that cannot drag registers **nothing**, rather than registering a
+disabled source: a registered source is still reachable by ordered keyboard
+traversal and still nameable in an announcement. This is the rule the
+renderer-neutral `attach_source` / `attach_target` already followed; the web
+adapters follow it too, and a `null` registration is how a framework binding
+expresses it.
+
+A source may declare `ownsAnnouncements` / `owns_announcements`. Its sessions
+are then narrated only by the component, never by the controller's live region.
+A composite with a contract-mandated live region of its own cannot otherwise
+silence a provider it *joined* — `describeAnnouncement` belongs to whoever
+created the controller — so one drop is read out twice, in two different
+sentences, from two regions.
+
+The flag is **latched when the session begins** and held for that session's
+whole life: pickup, throttled intent, cancellation, and terminal all answer the
+way the pickup did, including after the source is re-registered without the
+flag or unregistered entirely mid-drag. It is per session, not a mode — the
+next session is read from its own source.
+
+An external session — an inbound file batch, an incoming cross-window
+projection — has no local source, so nothing on its side could have asked for
+silence and the controller always narrates it. That has to hold for the session
+*after* a self-narrating one, which is where deciding it per entry point fails:
+the entry that forgets is the one nobody is watching. The renderer-neutral
+controller therefore decides ownership once, at the single session-prepare
+event every entry point sends, rather than at each entry point.
+
+The keyboard-drop *command* is a web-only entry point. A native renderer builds
+nodes and cannot ask the controller to run a session, so a native component
+shortcut — OrderBy's `Alt+Arrow`, BlockEditor's move buttons — reaches the
+component's own emitter directly. The public result payload is identical on
+both runtimes; the native shortcut simply is not a session, so it produces no
+substrate announcement.
+
 The registration may be used by a component wrapper, a Svelte action, a React
 hook/prop getter, or a native node builder. Those framework surfaces translate
 to the same semantics.
@@ -189,7 +224,10 @@ The web pointer sensor uses Pointer Events. It must:
 
 - `createDragDropController(options?) -> DragDropController`;
 - `DragDropController.connect(root) -> cleanup`, with one connected root and
-  its owner document per controller;
+  its owner document per controller. A pointer press whose source element is
+  outside that root is not this controller's gesture, so a surface portalled
+  out of a provider's subtree cannot join that provider: it owns a controller,
+  and its own provider, or it does not drag at all;
 - `registerSource(element, registration) -> DragSourceHandle` and
   `registerTarget(element, registration) -> DropTargetHandle`;
 - `registerKeyboardTarget(registration) -> KeyboardDropTargetHandle` for an
@@ -501,7 +539,13 @@ host terminal events are rejected by the kernel session id.
 `CrossWindowDragTargetBridge` is optional on one document or native window
 controller. The host resolves a receipt to the local semantic projection shown
 above. `subject`, `sourceId`, and `sourceLabel` are a host-local projection;
-they are not serialized beside the receipt. A projection names at most one
+they are not serialized beside the receipt. `sourceLabel` is the projection's
+**accessible name** and every runtime retains it for the session's lifetime:
+the receiving window has no local source to ask, so without it announcements
+fall through to the subject id — a value chosen for identity, and read aloud to
+the one person who cannot see the row it identifies. It is cleared by the same
+terminal cleanup as an inbound batch's label, and rewritten when a superseding
+projection installs. A projection names at most one
 registered Poodle target and position. Poodle re-runs that target's kind,
 disabled, and `canDrop` gates before `commit`, then maps the returned
 `DragDropCommitResult` through the ordinary kernel terminal path. Target
@@ -876,6 +920,21 @@ those channels rather than discard working semantics.
 Migration happens in bounded waves. Old component-local session state and
 global side channels are deleted only after their mounted replacement passes.
 
+**Closed by `g16.028`.** All seven are migrated on every active runtime. No
+programme component owns an HTML drag lifecycle, a `DataTransfer` payload, or
+a component-local drag index any more, and EditableList, OrderBy, and
+BlockEditor expose a working native reorder result instead of a presentational
+handle. The claim is executable rather than narrative: `effigy
+drift:drag-inventory` reads the seven Svelte, React, and shared-Rust surfaces
+and fails when one banned token or one missing substrate reference reappears.
+
+Two `DataTransfer` uses are retained deliberately, both substrate-owned and
+neither a component lifecycle: the cross-window host bridge and the inbound
+file transport, which are the browser's own way in and out of the window. The
+controller also arms `draggable` on a bridged source, and disarms it on every
+terminal. The inventory carries each retained path with its contract reason and
+fails when an exemption goes stale.
+
 ### Approved public migration boundary
 
 The operator approved a clean pre-1.0 replacement on 2026-08-28:
@@ -913,7 +972,11 @@ period.
 
 ### Mounted web
 
-- Svelte and React custom consumer fixtures;
+- Svelte and React custom consumer fixtures, plus mounted *component* fixtures
+  for the migrated composites — two ModelCatalogueEditors holding the same
+  model ids under one provider, a BlockEditor whose grip is the only handle,
+  and an OrderBy panel driven by pointer and by Alt+Arrow
+  (`test/drag-drop/components.html`);
 - mouse, pen-shaped Pointer Events, touch-shaped Pointer Events, and keyboard;
 - tap/scroll versus drag arbitration;
 - pointer capture loss and source/target unmount;
@@ -928,6 +991,9 @@ period.
 - the adapter advertises pen, touch, and device-originated pointer cancel as
   unsupported on crates.io GPUI 0.2.2; tests must not infer them from mouse
   synthesis;
+- mounted component regressions for the completed native paths: EditableList
+  (isolation, drop, keyboard pickup, cancel), OrderBy (drop and Alt+Arrow), and
+  BlockEditor (grip-only drag and the move controls);
 - two independent sessions cannot collide;
 - source/target disappearance is safe; and
 - renderer-neutral Rust outputs remain consumable by deferred Jetstream.
@@ -985,11 +1051,11 @@ it. Cross-window and drag-out contracts shape the base even when their adapters
 land after the internal proof.
 
 The compiled runway is `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
-through `028-drag-drop-migration-and-certification-closeout.md`.
-`g16.021`–`g16.027` are merged. `g16.028` is ready: the remaining web HTML-drag
-owners are ModelCatalogueEditor, OrderBy, and BlockEditor; native
-EditableList, OrderBy, and BlockEditor still need their contract reorder result
-paths before final certification.
+through `028-drag-drop-migration-and-certification-closeout.md`, and it is
+complete. `g16.021`–`g16.028` are merged: the semantic kernels, the web
+custom-surface API, the simple and nested migrations, the Rust/GPUI
+controller, the cross-window bridge, inbound files and drag-out, and the final
+migration and certification closeout.
 
 ## Non-goals
 

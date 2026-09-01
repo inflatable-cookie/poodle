@@ -29,7 +29,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "Editable + reorderable",
             theme,
-            EditableList::new(theme)
+            EditableList::new(theme, "editable-list-1")
                 .aria_label("Tags")
                 .add_label("Add")
                 .placeholder("Add a tag…")
@@ -45,7 +45,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "Empty (add row only)",
             theme,
-            EditableList::new(theme)
+            EditableList::new(theme, "editable-list-2")
                 .aria_label("Tags")
                 .add_label("Add")
                 .placeholder("Add a tag…")
@@ -56,7 +56,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "With max items (5)",
             theme,
-            EditableList::new(theme)
+            EditableList::new(theme, "editable-list-3")
                 .aria_label("Limited list")
                 .add_label("Add")
                 .placeholder("Add item…")
@@ -73,7 +73,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "At max (3/3)",
             theme,
-            EditableList::new(theme)
+            EditableList::new(theme, "editable-list-4")
                 .aria_label("Full list")
                 .items(vec![
                     "alpha".to_string(),
@@ -87,7 +87,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "Removable only (no reorder, no add)",
             theme,
-            EditableList::new(theme)
+            EditableList::new(theme, "editable-list-5")
                 .aria_label("Static list")
                 .items(vec!["First item".to_string(), "Second item".to_string()])
                 .removable(true)
@@ -97,7 +97,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "Reorderable (drag handles)",
             theme,
-            EditableList::new(theme)
+            EditableList::new(theme, "editable-list-6")
                 .aria_label("Reorderable items")
                 .items(vec![
                     "One".to_string(),
@@ -112,7 +112,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "Workflow chrome (dirty)",
             theme,
-            EditableList::new(theme)
+            EditableList::new(theme, "editable-list-7")
                 .aria_label("Tags")
                 .items(vec![
                     "design-system".to_string(),
@@ -127,7 +127,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "Workflow chrome (saving)",
             theme,
-            EditableList::new(theme)
+            EditableList::new(theme, "editable-list-8")
                 .aria_label("Tags")
                 .items(vec![
                     "design-system".to_string(),
@@ -142,7 +142,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "Error banner",
             theme,
-            EditableList::new(theme)
+            EditableList::new(theme, "editable-list-9")
                 .aria_label("Tags")
                 .items(vec!["design-system".to_string(), "rust".to_string()])
                 .editable(true)
@@ -152,7 +152,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "Info banner",
             theme,
-            EditableList::new(theme)
+            EditableList::new(theme, "editable-list-10")
                 .aria_label("Tags")
                 .items(vec![
                     "design-system".to_string(),
@@ -166,7 +166,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "Disabled",
             theme,
-            EditableList::new(theme)
+            EditableList::new(theme, "editable-list-11")
                 .aria_label("Locked list")
                 .items(vec!["locked-item".to_string(), "frozen-value".to_string()])
                 .editable(true)
@@ -190,7 +190,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 }
 
 fn sample_list(theme: &GpuiThemeProvider) -> EditableList {
-    EditableList::new(theme)
+    EditableList::new(theme, "editable-list-12")
         .aria_label("Sized list")
         .add_label("Add")
         .placeholder("Add a tag…")

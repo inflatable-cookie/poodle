@@ -215,6 +215,76 @@ pub fn vertical_band_resolver(
     })
 }
 
+/// The band rule for a surface whose documented result lands a dropped row
+/// *at* the row it was dropped on.
+///
+/// Tabs, OrderBy, BlockEditor, and ModelCatalogueEditor all publish that
+/// result, and geometry cannot express it: which half the pointer is over says
+/// nothing about which side "at" is. The travelling direction does — a row
+/// coming from above arrives after its target, one coming from below arrives
+/// before it — and both web frameworks resolve it the same way, so the same
+/// gesture produces one order on every runtime.
+///
+/// `owned` is this surface's row values in their current order.
+pub fn arrival_band_resolver(
+    owned: Vec<String>,
+    index: usize,
+) -> Arc<dyn Fn(&NodeDropPositionInput) -> Option<DropPosition> + Send + Sync> {
+    Arc::new(move |input: &NodeDropPositionInput| {
+        let from = owned.iter().position(|value| *value == input.subject.id)?;
+        Some(
+            if from < index {
+                DROP_POSITION_AFTER
+            } else {
+                DROP_POSITION_BEFORE
+            }
+            .to_string(),
+        )
+    })
+}
+
+/// Where a row lands, given the band it was dropped on.
+///
+/// `before`/`after` are relative to the target's own position and the row is
+/// spliced into the *shortened* order, so the index shifts by one when the row
+/// is travelling forward. Every reorder surface needs this arithmetic and none
+/// of them should restate it.
+pub fn reorder_destination(from: usize, target: usize, edge: DropEdge, count: usize) -> usize {
+    let raw = match edge {
+        DropEdge::Before => {
+            if from < target {
+                target.saturating_sub(1)
+            } else {
+                target
+            }
+        }
+        DropEdge::Inside => target,
+        DropEdge::After => {
+            if from < target {
+                target
+            } else {
+                target + 1
+            }
+        }
+    };
+    raw.min(count.saturating_sub(1))
+}
+
+/// Apply an accepted reorder to a flat order, returning the complete next one.
+///
+/// The renderer-neutral mirror of core's `applyReorder`: a component's public
+/// result is the whole next order, never a pair of indices the host has to
+/// splice itself.
+pub fn apply_reorder<T: Clone>(items: &[T], from: usize, to: usize) -> Option<Vec<T>> {
+    if from >= items.len() || to >= items.len() {
+        return None;
+    }
+    let mut next = items.to_vec();
+    let moved = next.remove(from);
+    next.insert(to, moved);
+    Some(next)
+}
+
 /// Traversal-to-position for a linear list: `previous` lands before the
 /// target, `next` after it, and first/last stay explicit rather than being
 /// inferred from a synthetic midpoint.
@@ -616,6 +686,57 @@ mod tests {
             resolve(&input(NodeKeyboardDropDirection::Last)).as_deref(),
             Some(DROP_POSITION_AFTER)
         );
+    }
+
+    /// The arrival rule is direction-shaped, not geometry-shaped: the same
+    /// gesture must land the row *at* its target from either side.
+    #[test]
+    fn an_arrival_band_answers_from_the_travelling_direction() {
+        let owned = vec!["a".to_string(), "b".to_string(), "c".to_string()];
+        let resolve = arrival_band_resolver(owned.clone(), 2);
+        let input = |id: &str| NodeDropPositionInput {
+            fraction_x: 0.1,
+            fraction_y: 0.1,
+            subject: reorder_subject("list", id),
+            operation: DragOperation::Move,
+            input_kind: poodle_node::NodeDragInputKind::Mouse,
+        };
+
+        // Travelling down onto index 2 arrives after it; travelling up arrives
+        // before it. Both then resolve to the target index itself.
+        assert_eq!(resolve(&input("a")).as_deref(), Some(DROP_POSITION_AFTER));
+        assert_eq!(
+            reorder_destination(0, 2, DropEdge::After, 3),
+            2,
+            "a row moving forward lands at its target"
+        );
+        let resolve_first = arrival_band_resolver(owned, 0);
+        assert_eq!(
+            resolve_first(&input("c")).as_deref(),
+            Some(DROP_POSITION_BEFORE)
+        );
+        assert_eq!(reorder_destination(2, 0, DropEdge::Before, 3), 0);
+    }
+
+    /// The half-band surfaces still need the shortened-array arithmetic, and a
+    /// destination can never leave the order.
+    #[test]
+    fn a_reorder_destination_accounts_for_the_removed_row_and_stays_in_range() {
+        assert_eq!(reorder_destination(0, 2, DropEdge::Before, 3), 1);
+        assert_eq!(reorder_destination(2, 0, DropEdge::After, 3), 1);
+        assert_eq!(reorder_destination(0, 2, DropEdge::Inside, 3), 2);
+        assert_eq!(reorder_destination(0, 9, DropEdge::After, 3), 2);
+    }
+
+    /// A complete next order, or nothing: a partial payload is the failure the
+    /// contracts name.
+    #[test]
+    fn applying_a_reorder_returns_the_whole_next_order_or_none() {
+        let items = vec!["a", "b", "c"];
+        assert_eq!(apply_reorder(&items, 0, 2), Some(vec!["b", "c", "a"]));
+        assert_eq!(apply_reorder(&items, 2, 0), Some(vec!["c", "a", "b"]));
+        assert_eq!(apply_reorder(&items, 3, 0), None);
+        assert_eq!(apply_reorder(&items, 0, 3), None);
     }
 
     /// An inert row registers nothing: a registered-but-ignored source would

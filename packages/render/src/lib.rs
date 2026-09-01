@@ -224,7 +224,7 @@ pub use audio_player::audio_player;
 pub use avatar::avatar;
 pub use badge::badge;
 pub use banner::banner;
-pub use block_editor::{block_editor, block_editor_with_children};
+pub use block_editor::{block_editor, block_editor_with_children, BlockEditorHandlers};
 pub use breadcrumbs::breadcrumbs;
 pub use bulk_action_bar::{bulk_action_bar, BulkActionBarHandlers};
 pub use button::button;

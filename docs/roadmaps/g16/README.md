@@ -1,7 +1,8 @@
 # g16 — Next Work
 
-Status: active — g16.027 complete and merged; g16.028 ready as the final drag
-checkpoint; g16.033 reserved at its public API decision gate
+Status: active — the drag-and-drop programme is closed by g16.028; g16.033 is
+queued with its public API decision promoted, gated on accepted and merged
+g16.028
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -59,12 +60,12 @@ stay maintained; backend admission is not part of the first card.
 25. [025 — Drag-and-drop Rust and GPUI substrate](025-drag-drop-rust-gpui-substrate.md) — complete; merged in PR #108 after four orchestrator review rounds; ledger unchanged at 52 mounted / 122 missing
 26. [026 — Drag-and-drop cross-window bridge, Tabs, and DockRegion](026-drag-drop-cross-window-bridge-and-dock-region.md) — complete; merged in PR #113 after two Northstar review rounds; split source/window bridge, bounded opaque receipt, clean public migration, Tabs subject-family seam, and window-owned GPUI provider census
 27. [027 — Drag-and-drop inbound files and drag-out](027-drag-drop-inbound-files-and-drag-out.md) — complete; merged in PR #115 after three Northstar repair rounds; paired export/inbound contracts, exact per-installation inbound ownership, web and GPUI boundaries, curated specimens, and a new engine probe leg
-28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — ready; final web migrations, native reorder-result completion, exact absence inventory, and programme certification
+28. [028 — Drag-and-drop migration and certification closeout](028-drag-drop-migration-and-certification-closeout.md) — complete; final web migrations, native reorder-result completion, four moved GPUI mounted cells, mounted web component fixtures, and an executable absence inventory
 29. [029 — TimeInput semantic model and native parity](029-time-input-semantic-model-and-native-parity.md) — complete; merged in PR #97; ledger 48 mounted / 126 missing
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete; merged in PR #100; ledger 52 mounted / 122 missing
-33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — reserved after 026; public API decision required before dispatch; package-type source is already fixed, publication/pin movement stays separate
+33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — queued; the public API decision is promoted, and the lane is gated on accepted and merged `g16.028`, so it is not dispatch-ready yet; package-type source is already fixed, publication/pin movement stays separate
 
 ## Parallel Continuation
 
@@ -96,8 +97,9 @@ Two continuation programmes are now explicit:
   roles, the bounded opaque receipt codec, and one `DragDropWindowHost` per
   GPUI window. Tabs migrates with its real DockRegion consumer. Later cards
   remain gated by landed dependencies.
-- **Portfolio papercut follow-on:** `g16.033` is reserved after the merged
-  `g16.026` shared-file tranche. It gives HistoryCenter distinct Poodle-owned
+- **Portfolio papercut follow-on:** `g16.033` is queued after the merged
+  `g16.026` shared-file tranche, with its public API decision promoted and its
+  dispatch gated on accepted and merged `g16.028`. It gives HistoryCenter distinct Poodle-owned
   deletion-refusal semantics and adds packed-package proof for the already-fixed
   v3 `HistoryEntry` export. Keyboard vertical geometry remains design-deferred;
   Longhorn's `AlreadyAtTarget` wire code and Loophole adoption are complete in
@@ -346,8 +348,10 @@ back. The log is
 `../../logs/2026-08/20260831-g16-026-drag-drop-cross-window-bridge.md`. One
 consequence needs review attention: cross-region DockRegion transfer now
 requires one common `DragDropProvider`, per the operator decision recorded in
-spec 069. `g16.033` remains reserved until the operator chooses structured rejection
-codes or a host-owned message; EditableLabel stays decision-blocked.
+spec 069. At that point `g16.033` was still reserved pending the operator's
+choice between structured rejection codes and a host-owned message; that
+decision has since been made and the lane promoted. EditableLabel stays
+decision-blocked.
 
 `g16.027` merged in PR #115 after three Northstar repair rounds. Both external-file boundaries are paired and wired end to end: an
 export prepares an opaque receipt on the pre-drag gesture and the host runs
@@ -361,7 +365,15 @@ was already exempted for. Review then closed exact terminal ownership, replay
 resurrection, and the bounded-tombstone false negative. Twenty-seven claims
 were falsified by planting the pre-fix behaviour back. No ledger cell moved. The log is
 `../../logs/2026-08/20260831-g16-027-drag-drop-inbound-files-and-drag-out.md`.
-`g16.028` is now ready as the sole next ordered drag checkpoint. Its landed
-inventory names three remaining web HTML-drag owners and three missing native
-reorder-result paths; its review oracle fixes the isolation, exact callback,
-revalidation, control-preservation, terminal, absence, and evidence boundaries.
+`g16.028` closes the programme. ModelCatalogueEditor, OrderBy, and BlockEditor
+moved onto the common substrate in Svelte and React; EditableList, OrderBy, and
+BlockEditor gained their renderer-neutral reorder registrations and complete
+result callbacks, so no native grip or move control is drawn that cannot
+produce the order it promises. The band arithmetic three surfaces were about to
+restate moved into `crate::drag_drop`. The certification claim is executable:
+`effigy drift:drag-inventory` reads all seven programme surfaces in three
+languages and fails on one planted `draggable`, `DataTransfer`, or local drag
+index. Mounted Svelte *and* React component fixtures joined the headless
+Chromium/WebKit probe, and three named mounted GPUI regressions moved four
+ledger cells (52 → 56 mounted, 122 → 118 missing). The log is
+`../../logs/2026-09/20260901-g16-028-drag-drop-migration-and-certification-closeout.md`.

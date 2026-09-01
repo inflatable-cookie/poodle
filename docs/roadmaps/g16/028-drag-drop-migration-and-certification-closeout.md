@@ -1,6 +1,6 @@
 # g16.028 — Drag-And-Drop Migration And Certification Closeout
 
-Status: ready — final programme card
+Status: complete — final programme card; delivered on `codex/g16-028-drag-closeout`
 Depends on: complete and merged
 `027-drag-drop-inbound-files-and-drag-out.md`
 Governing refs: architecture 011, spec 069, the component continuation register,
@@ -16,17 +16,18 @@ window/file policy.
 
 ## Landed Inventory
 
-`g16.021`–`g16.027` are merged. EditableList, Tree, Tabs, and DockRegion use
-the common web substrate. Tree, Tabs, ModelCatalogueEditor, and DockRegion
-project payload drag through renderer-neutral Rust registrations.
+State at dispatch. `g16.021`–`g16.027` are merged. EditableList, Tree, Tabs,
+and DockRegion use the common web substrate. Tree, Tabs, ModelCatalogueEditor,
+and DockRegion project payload drag through renderer-neutral Rust
+registrations.
 
-Three web components still own native HTML drag state and events:
+Three web components still owned native HTML drag state and events:
 
 - ModelCatalogueEditor;
 - OrderBy; and
 - BlockEditor.
 
-Three native components still lack their contract's reorder result path:
+Three native components still lacked their contract's reorder result path:
 EditableList, OrderBy, and BlockEditor. Their visible handles or move controls
 cannot stand in for an unwired payload lifecycle. ModelCatalogueEditor's
 landed Rust path is the reference migration, not a second design.
@@ -86,20 +87,20 @@ points, or XY pads; those are continuous gestures, not payload drag/drop.
 
 ## Acceptance Criteria
 
-- [ ] All seven programme-owned components use the common substrate on every
+- [x] All seven programme-owned components use the common substrate on every
       active runtime where they expose payload drag/drop. EditableList,
       OrderBy, and BlockEditor expose a working native reorder result rather
       than presentational handles.
-- [ ] Replaced local controllers, HTML drag source-of-truth state, and global
+- [x] Replaced local controllers, HTML drag source-of-truth state, and global
       side channels are gone; no compatibility aliases remain.
-- [ ] Named mounted regressions move only newly proved GPUI component cells in
+- [x] Named mounted regressions move only newly proved GPUI component cells in
       the live ledger.
-- [ ] Custom consumer APIs remain usable without a Poodle composite.
-- [ ] Accessibility instructions, announcements, focus return, and reduced
+- [x] Custom consumer APIs remain usable without a Poodle composite.
+- [x] Accessibility instructions, announcements, focus return, and reduced
       motion/preview behavior are documented and tested.
-- [ ] Cross-window and file capability limits are honest; manual downstream OS
+- [x] Cross-window and file capability limits are honest; manual downstream OS
       acceptance is recorded separately.
-- [ ] One closeout log records code removal, final evidence, unresolved platform
+- [x] One closeout log records code removal, final evidence, unresolved platform
       limits, and the next non-drag programme choice.
 
 ## Review Oracle
@@ -150,8 +151,86 @@ selectors.
   focus-taking automation, or claims OS consumption from a callback.
 - Another programme or sibling repository is needed to close Poodle-owned work.
 
+## Delivered
+
+- Contracts first: `order-by.md`, `block-editor.md`,
+  `model-catalogue-editor.md`, and `editable-list.md` now describe substrate
+  behaviour and the complete result each callback carries.
+- Web migrations: ModelCatalogueEditor, OrderBy, and BlockEditor in Svelte and
+  React. Each joins an ambient provider when present and owns an isolated
+  controller otherwise; registration ids and subject kinds are instance-scoped.
+- Native completion: `poodle_render::editable_list`, `order_by`, and
+  `block_editor` take handlers, register renderer-neutral sources and targets,
+  and emit the complete next order. No grip or move control is drawn that
+  cannot produce it.
+- Shared arithmetic moved into `crate::drag_drop`: `arrival_band_resolver`,
+  `reorder_destination`, and `apply_reorder`, so four surfaces stop restating
+  the same rule.
+- Evidence: mounted Svelte and React component fixtures in the headless
+  Chromium/WebKit probe, three named mounted GPUI regressions, and an
+  executable absence inventory (`effigy drift:drag-inventory`).
+- Ledger: EditableList, OrderBy, BlockEditor, and Tree move from `missing` to
+  `mounted`, each backed by its exact named regression.
+
+## Review Round 1
+
+Five blockers, all repaired on this branch:
+
+1. an ambient-provider OrderBy drew grips that never dragged — its panel is
+   portalled outside every ancestor's connected root, so it now always owns its
+   controller;
+2. an ambient ModelCatalogueEditor read one drop out twice — the substrate
+   gained `ownsAnnouncements` / `owns_announcements` so a source that narrates
+   itself silences the controller's region;
+3. registration semantics are now exact and contract-written:
+   `isDragEnabled=false` registers nothing, a lock disables both ends, and
+   `item.isDisabled` disables the source only;
+4. the terminal oracle gained its missing cases — source unmount, one-voice
+   announcement, focus return, and a keyboard-pickup drop;
+5. rebased onto current `main` and reconciled with the promoted `g16.033` and
+   the post-g16 research queue.
+
+Each repair is closed by a proof that fails against the planted pre-fix
+behaviour; the results are in the closeout log.
+
+## Review Round 2
+
+Three closeout blockers, all repaired:
+
+1. the seven authoritative contracts still described removed mechanisms —
+   BlockEditor's `draggable` grip, OrderBy's `draggable` handle and "joined or
+   owned controller", Tabs' component-owned drag indices and a drag sub-machine
+   its machine never had. All were removed, and `drift:drag-inventory` now
+   reads the contracts too: a contract may say a mechanism is absent, never
+   that it is present;
+2. the terminal oracle was proven on the wrong subset. OrderBy and BlockEditor
+   gained post-terminal focus and announcement assertions in both web
+   frameworks and in their native regressions, and where the honest answer was
+   weaker than the claim the claim moved into the log's accepted limits;
+3. the `ownsAnnouncements` seam gained a focused controller regression for its
+   latch and reset boundary, plus a native regression for the same shape.
+
+## Review Round 3
+
+One blocker: the native announcement latch was set per entry point, and
+`apply_projection` — the third way a session starts — set neither the latch nor
+its reset. A self-narrating local terminal followed by an incoming cross-window
+projection left the projection silent, contradicting spec 069. Ownership is now
+decided once, at the single session-prepare event every entry point sends, and
+a named native regression bites the pre-fix shape.
+
+## Review Round 4
+
+One blocker plus a front-door row. The native projection path discarded
+`CrossWindowDragProjection.source_label`, so an incoming cross-window drag was
+announced by its opaque subject id; round 3's own regression had codified that
+by asserting the id. `apply_projection` now retains the accessible name, and
+the regression requires it at pickup, intent, and terminal. The g16 front door
+no longer calls `g16.033` reserved: it is queued with its public API decision
+promoted and gated on this card being accepted and merged.
+
 ## Continuation
 
-After operator-authorized merge, close the drag-and-drop programme in g16 and
-choose the next component, accessibility, visual, motion, or Jetstream planning
-checkpoint from the continuation register. Do not start it from this card.
+After operator-authorized merge, close the drag-and-drop programme in g16. The
+ordered runway continues to `g16.033`, which is queued on this card being
+accepted and merged. Do not start it from this card.

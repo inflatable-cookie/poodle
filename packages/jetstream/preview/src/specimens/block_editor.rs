@@ -50,6 +50,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     .with_content("fn main() { println!(\"Hello, world!\"); }"),
             ]),
         theme,
+        "block-editor-1",
     );
 
     // ── 2. Consumer-driven block types (full vocabulary + list) ─────────
@@ -69,6 +70,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                 EditorBlock::new("b5", "list").with_content("First item\nSecond item\nThird item"),
             ]),
         theme,
+        "block-editor-2",
     );
 
     // ── 3. Single posture — reorder/add/remove hidden, TypeSelect inset ─
@@ -84,6 +86,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                  inset to align with content.",
             )]),
         theme,
+        "block-editor-3",
     );
 
     // ── 4. Disabled — dimmed via state.opacity.disabled ─────────────────
@@ -97,6 +100,7 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
             ])
             .with_disabled(true),
         theme,
+        "block-editor-4",
     );
 
     div()

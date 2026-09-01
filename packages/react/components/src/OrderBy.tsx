@@ -1,10 +1,18 @@
-import { useEffect, useId, useRef, useState, type DragEvent, type MouseEvent } from "react";
-import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
+import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
+import {
+  createDragDropController,
+  layerContains,
+  registerDismissLayer,
+  type DragDropCommitResult,
+  type DropIntent,
+} from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/order-by.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
+import { DragDropProvider } from "./drag-drop";
 import { IconButton } from "./IconButton";
+import { OrderByRow } from "./order-by/OrderByRow";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import { Select } from "./Select";
 import type {
@@ -59,13 +67,22 @@ export function OrderBy({
 
   const [open, setOpen] = useState(false);
   const [addFieldValue, setAddFieldValue] = useState("");
-  const [dragIndex, setDragIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [uncontrolledValue, setUncontrolledValue] = useState<OrderByValue>([]);
   // The root is state, not a ref: the portalled surface has to re-render
   // once it exists so it can be positioned against it.
   const [rootElement, setRootElement] = useState<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
+
+  /**
+   * OrderBy always owns its controller. It is the one programme component that
+   * cannot join an ambient provider.
+   *
+   * The sort panel is portalled to the document body, so it is not inside any
+   * ancestor provider's connected root — and the substrate refuses a pointer
+   * press whose source is outside the root it was connected to
+   * (`onPointerDown`). A joined OrderBy would draw grips that never drag.
+   */
+  const [dragController] = useState(() => createDragDropController());
 
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
@@ -152,24 +169,83 @@ export function OrderBy({
     );
   }
 
-  function moveField(index: number, offset: -1 | 1): void {
-    if (disabled) return;
-    const nextIndex = index + offset;
-    if (nextIndex < 0 || nextIndex >= effectiveValue.length) return;
-    const nextValue = [...effectiveValue];
-    const [item] = nextValue.splice(index, 1);
-    nextValue.splice(nextIndex, 0, item);
-    sync(nextValue);
+  /**
+   * The registration namespace and the semantic family are both scoped to this
+   * builder: two mounted OrderBys can legitimately sort the same field keys,
+   * and under one ambient provider neither duplicate ids nor a cross-instance
+   * drop are acceptable.
+   */
+  /** A single clause has nowhere to go, and a disabled builder moves nothing. */
+  const canReorder = !disabled && effectiveValue.length > 1;
+
+  const subjectKind = `poodle.reorder-item:order-by:${panelId}`;
+  const registrationScope = `order-by:${panelId}`;
+
+  function sourceIdOf(key: string): string {
+    return `${registrationScope}:source:${key}`;
   }
 
-  function handleDrop(index: number): void {
-    if (dragIndex === null || disabled) return;
+  function targetIdOf(key: string): string {
+    return `${registrationScope}:target:${key}`;
+  }
+
+  function keyOfTargetId(targetId: string): string {
+    const prefix = `${registrationScope}:target:`;
+    return targetId.startsWith(prefix) ? targetId.slice(prefix.length) : "";
+  }
+
+  function indexOfKey(key: string): number {
+    return effectiveValue.findIndex((item) => item.key === key);
+  }
+
+  /**
+   * One accepted drop, one complete ordering.
+   *
+   * Both indices are resolved again here rather than trusted from hover: the
+   * host may have replaced `value` while the pointer was down, and a stale
+   * index would move the wrong field.
+   */
+  function handleDrop(intent: DropIntent): DragDropCommitResult {
+    if (disabled) return { status: "rejected", reason: "disabled" };
+
+    const from = indexOfKey(dragController.getSnapshot().session?.subject.id ?? "");
+    const target = indexOfKey(keyOfTargetId(intent.targetId));
+    if (from < 0 || target < 0 || from === target) {
+      return { status: "rejected", reason: "missing field" };
+    }
+
+    const to =
+      intent.position === "before"
+        ? from < target
+          ? target - 1
+          : target
+        : from < target
+          ? target
+          : target + 1;
+
     const nextValue = [...effectiveValue];
-    const [item] = nextValue.splice(dragIndex, 1);
-    nextValue.splice(index, 0, item);
-    setDragIndex(null);
-    setDragOverIndex(null);
+    const [item] = nextValue.splice(from, 1);
+    nextValue.splice(to, 0, item);
     sync(nextValue);
+    return { status: "committed" };
+  }
+
+  /**
+   * Alt+Arrow: the contract's keyboard reorder, run as a real session so it
+   * shares eligibility, revalidation, and the single commit with a drop.
+   */
+  function moveField(index: number, offset: -1 | 1): void {
+    if (disabled) return;
+
+    const from = effectiveValue[index];
+    const target = effectiveValue[index + offset];
+    if (!from || !target) return;
+
+    dragController.requestKeyboardDrop({
+      sourceId: sourceIdOf(from.key),
+      targetId: targetIdOf(target.key),
+      position: offset === 1 ? "after" : "before",
+    });
   }
 
   function clearAll(): void {
@@ -262,6 +338,7 @@ export function OrderBy({
           aria-label={ariaLabel}
           tabIndex={-1}
         >
+          <DragDropProvider controller={dragController}>
           <div className="poodle-order-by__panel">
             {triggerVariant === "icon" ? (
               <div className="poodle-order-by__panel-header">
@@ -282,79 +359,25 @@ export function OrderBy({
 
             {effectiveValue.length > 0 ? (
               <div className="poodle-order-by__list" role="list">
-                {effectiveValue.map((item, index) => {
-                  const field = fieldMap.get(item.key);
-                  return (
-                    <div
-                      key={`${item.key}-${index}`}
-                      className={[
-                        "poodle-order-by__item",
-                        dragIndex === index ? "poodle-order-by__item--dragging" : "",
-                        dragOverIndex === index && dragIndex !== index ? "poodle-order-by__item--drop-target" : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                      role="listitem"
-                    >
-                      <button
-                        type="button"
-                        className="poodle-order-by__drag-handle"
-                        draggable={!disabled}
-                        disabled={disabled}
-                        aria-label={`Reorder ${field?.label ?? item.key}. Drag or use Alt plus arrow keys.`}
-                        onDragStart={() => {
-                          if (disabled) return;
-                          setDragIndex(index);
-                          setDragOverIndex(index);
-                        }}
-                        onDragEnter={() => {
-                          if (dragIndex === null || disabled) return;
-                          setDragOverIndex(index);
-                        }}
-                        onDragOver={(event: DragEvent) => event.preventDefault()}
-                        onDrop={(event: DragEvent) => {
-                          event.preventDefault();
-                          handleDrop(index);
-                        }}
-                        onDragEnd={() => {
-                          setDragIndex(null);
-                          setDragOverIndex(null);
-                        }}
-                        onKeyDown={(event) => {
-                          if (event.altKey && event.key === "ArrowUp" && index > 0) {
-                            event.preventDefault();
-                            moveField(index, -1);
-                          }
-                          if (event.altKey && event.key === "ArrowDown" && index < effectiveValue.length - 1) {
-                            event.preventDefault();
-                            moveField(index, 1);
-                          }
-                        }}
-                      >
-                        ⠿
-                      </button>
-                      <span className="poodle-order-by__item-label">{field?.label ?? item.key}</span>
-                      <IconButton
-                        icon={item.direction === "asc" ? "arrow-up" : "arrow-down"}
-                        ariaLabel={`${field?.label ?? item.key}: ${item.direction === "asc" ? "ascending" : "descending"}. Click to toggle.`}
-                        tooltip={item.direction === "asc" ? "Asc" : "Desc"}
-                        size="xs"
-                        variant="ghost"
-                        disabled={disabled}
-                        onClick={() => toggleDirection(index)}
-                      />
-                      <IconButton
-                        icon="x"
-                        ariaLabel={`Remove ${field?.label ?? item.key}`}
-                        tooltip="Remove"
-                        size="xs"
-                        variant="ghost"
-                        disabled={disabled}
-                        onClick={() => removeField(index)}
-                      />
-                    </div>
-                  );
-                })}
+                {effectiveValue.map((item, index) => (
+                  <OrderByRow
+                    key={item.key}
+                    item={item}
+                    index={index}
+                    total={effectiveValue.length}
+                    label={fieldMap.get(item.key)?.label ?? item.key}
+                    disabled={disabled}
+                    subjectKind={subjectKind}
+                    sourceId={sourceIdOf(item.key)}
+                    targetId={targetIdOf(item.key)}
+                    indexOfKey={indexOfKey}
+                    canReorder={canReorder}
+                    onDrop={handleDrop}
+                    onMove={moveField}
+                    onToggleDirection={toggleDirection}
+                    onRemove={removeField}
+                  />
+                ))}
               </div>
             ) : (
               <p className="poodle-order-by__empty">No sort fields</p>
@@ -378,6 +401,7 @@ export function OrderBy({
               </div>
             ) : null}
           </div>
+          </DragDropProvider>
         </AnchoredSurface>
       ) : null}
     </div>

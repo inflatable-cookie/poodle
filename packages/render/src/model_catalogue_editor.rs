@@ -543,15 +543,16 @@ fn shown_row(
         }
 
         if spec.is_drag_enabled {
-            crate::drag_drop::attach_source(
-                &mut handle,
-                true,
-                crate::drag_drop::reorder_source(
-                    &drag_scope(handlers),
-                    &item.id,
-                    &item.label,
-                ),
+            let mut source = crate::drag_drop::reorder_source(
+                &drag_scope(handlers),
+                &item.id,
+                &item.label,
             );
+            // The editor has its own contract live region and announces every
+            // move through `on_announce`. Without this the controller narrates
+            // the same drop a second time, in different words.
+            source.owns_announcements = true;
+            crate::drag_drop::attach_source(&mut handle, true, source);
         }
     }
 

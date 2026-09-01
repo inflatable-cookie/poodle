@@ -237,6 +237,16 @@ struct ControllerState {
     /// every frame: a host that removes the dragged row still has to receive
     /// its own terminal callback and get focus back.
     active_source: Option<(NodeDragSource, String)>,
+    /// Whether the live session's source narrates itself, latched in
+    /// `dispatch` when the session is prepared.
+    ///
+    /// A latch and not a lookup: `active_source` is cleared during terminal
+    /// cleanup, which is exactly when a late announcement lands. Latched at
+    /// the one event every entry point sends, and not per entry point, because
+    /// the entry that forgets is the one nobody notices — an incoming
+    /// projection has no local source, so its silence would come from a
+    /// session that ended.
+    session_owns_announcements: bool,
     last_outcome: Option<DragTerminalOutcome>,
     next_session: u64,
     keyboard_index: Option<usize>,
@@ -570,6 +580,7 @@ impl DragDropController {
                 rejected: None,
                 conflicts: Vec::new(),
                 active_source: None,
+                session_owns_announcements: false,
                 last_outcome: None,
                 next_session: 0,
                 keyboard_index: None,
@@ -1737,6 +1748,9 @@ impl DragDropController {
             state.keyboard_index = None;
             state.keyboard_origin = None;
             state.last_outcome = None;
+            // An external batch has no local source, so nobody narrates it but
+            // this controller. `dispatch` reads that from `active_source` when
+            // the session is prepared.
             state.active_source = None;
             state.pointer = Some((x, y));
             state.external_source_label = Some(inbound_label(&batch));
@@ -1908,13 +1922,23 @@ impl DragDropController {
             committing: false,
         });
 
-        self.state.borrow_mut().input_kind = Some(match projection.input_kind {
-            poodle_node::CrossWindowDragInputKind::Keyboard => NodeDragInputKind::Keyboard,
-            poodle_node::CrossWindowDragInputKind::Touch => NodeDragInputKind::Touch,
-            // The host reports a pointer class; this window never observed the
-            // device, so there is no finer identity honestly available.
-            poodle_node::CrossWindowDragInputKind::Pointer => NodeDragInputKind::Mouse,
-        });
+        {
+            let mut state = self.state.borrow_mut();
+            state.input_kind = Some(match projection.input_kind {
+                poodle_node::CrossWindowDragInputKind::Keyboard => NodeDragInputKind::Keyboard,
+                poodle_node::CrossWindowDragInputKind::Touch => NodeDragInputKind::Touch,
+                // The host reports a pointer class; this window never observed
+                // the device, so there is no finer identity honestly available.
+                poodle_node::CrossWindowDragInputKind::Pointer => NodeDragInputKind::Mouse,
+            });
+            // The projection's accessible name. This window has no source to
+            // ask, so without it every announcement about a remote subject
+            // falls through to the opaque subject id — a name chosen for
+            // identity, not for a person to hear. Cleared by the same terminal
+            // cleanup as the inbound label, and rewritten when a superseding
+            // projection installs.
+            state.external_source_label = Some(projection.source_label.clone());
+        }
         self.dispatch(
             DragSessionEvent::Prepare {
                 session_id: session_id.clone(),
@@ -2951,6 +2975,22 @@ impl DragDropController {
     /// calls consumer code that may rebuild the host, and a nested
     /// `borrow_mut` there would panic.
     fn dispatch(&self, event: DragSessionEvent, cx: &mut App) {
+        // Announcement ownership is decided once, where a session begins.
+        //
+        // `Prepare` is the one event every entry point sends — a local pickup,
+        // an inbound file batch, and an incoming cross-window projection — so
+        // it is the only place that cannot be forgotten. Setting it per entry
+        // point is what let a projection inherit the previous local session's
+        // silence: a projection has no local source, so nothing on its side
+        // could have asked for it.
+        if matches!(event, DragSessionEvent::Prepare { .. }) {
+            let mut state = self.state.borrow_mut();
+            state.session_owns_announcements = state
+                .active_source
+                .as_ref()
+                .is_some_and(|(source, _)| source.owns_announcements);
+        }
+
         let mut queue = VecDeque::from([event]);
         while let Some(event) = queue.pop_front() {
             let effects = {
@@ -3252,6 +3292,13 @@ impl DragDropController {
             let Some(session) = state.context.session.as_ref() else {
                 return;
             };
+            // A source that narrates its own sessions has already said what
+            // happened, in its own words, in its own region. Latched at
+            // session start: `active_source` is gone by the time a terminal
+            // announcement lands.
+            if state.session_owns_announcements {
+                return;
+            }
             let source_label = state
                 .active_source
                 .as_ref()

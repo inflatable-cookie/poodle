@@ -1,6 +1,11 @@
+<script module lang="ts">
+  let nextModelCatalogueId = 0;
+</script>
+
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/model-connection.css";
   import {
+    createDragDropController,
     listReorderKeyIntent,
     modelCatalogueFocusAfterHide,
     modelCatalogueReorderAnnouncement,
@@ -10,6 +15,11 @@
     requestModelCatalogueVisibility,
     shownModelCatalogueItems,
     hiddenModelCatalogueItems,
+    type DragDropCommitResult,
+    type DragSourceRegistration,
+    type DropIntent,
+    type DropPosition,
+    type DropTargetRegistration,
     type ModelCatalogueItem,
     type ModelCatalogueState,
   } from "@inflatable-cookie/poodle-core";
@@ -17,11 +27,18 @@
 
   import { default as Collapsible } from "./Collapsible.svelte";
   import { default as Callout } from "./Callout.svelte";
+  import { default as DragDropProvider } from "./DragDropProvider.svelte";
   import { default as EmptyState } from "./EmptyState.svelte";
   import { default as Icon } from "./Icon.svelte";
   import { default as IconButton } from "./IconButton.svelte";
   import { default as Pill } from "./Pill.svelte";
   import { default as Spinner } from "./Spinner.svelte";
+  import {
+    dragDropSnapshotStore,
+    dragSourceAction,
+    dropTargetAction,
+    tryDragDrop,
+  } from "./drag-drop-context";
 
   interface ItemProps {
     item: ModelCatalogueItem;
@@ -68,11 +85,10 @@
   }: Props = $props();
 
   let grabbedId = $state<string | null>(null);
-  let draggingId = $state<string | null>(null);
-  let dropTargetId = $state<string | null>(null);
   let liveMessage = $state("");
   let rootEl = $state<HTMLElement | null>(null);
   let hiddenOpen = $state(false);
+  const instanceId = ++nextModelCatalogueId;
 
   const shown = $derived(shownModelCatalogueItems(items));
   const hidden = $derived(hiddenModelCatalogueItems(items));
@@ -165,40 +181,114 @@
     }
   }
 
-  function handleDragStart(event: DragEvent, index: number): void {
-    if (locked || !isDragEnabled) return;
-    draggingId = shown[index]?.id ?? null;
-    dropTargetId = shown[index]?.id ?? null;
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", String(index));
+  /**
+   * Join the nearest provider, or own a controller.
+   *
+   * The registration ids and the subject family are both scoped to this
+   * editor, so two catalogues showing the same model ids under one ambient
+   * provider can neither mint one id nor resolve each other's rows.
+   */
+  const ambient = tryDragDrop();
+  const ownDragController = ambient ? undefined : createDragDropController();
+  const dragController = ambient?.controller ?? ownDragController!;
+  const dragSource = dragSourceAction(dragController);
+  const dropTarget = dropTargetAction(dragController);
+  const dragSnapshot = dragDropSnapshotStore(dragController);
+
+  const subjectKind = `poodle.reorder-item:model-catalogue-editor:${instanceId}`;
+  const registrationScope = `model-catalogue-editor:${instanceId}`;
+
+  function sourceIdOf(id: string): string {
+    return `${registrationScope}:source:${id}`;
+  }
+
+  function targetIdOf(id: string): string {
+    return `${registrationScope}:target:${id}`;
+  }
+
+  function idOfTargetId(targetId: string): string {
+    const prefix = `${registrationScope}:target:`;
+    return targetId.startsWith(prefix) ? targetId.slice(prefix.length) : "";
+  }
+
+  function indexOfShown(id: string): number {
+    return shown.findIndex((item) => item.id === id);
+  }
+
+  function sourceRegistration(item: ModelCatalogueItem): DragSourceRegistration {
+    return {
+      sourceId: sourceIdOf(item.id),
+      subject: { kind: subjectKind, id: item.id },
+      allowedOperations: ["move"],
+      label: item.label,
+      // A locked editor or a disabled model cannot be picked up. It is still a
+      // place to put one, which is why the target below does not read
+      // `item.isDisabled`.
+      disabled: locked || item.isDisabled,
+      // This editor has its own contract live region and announces every move
+      // through it. Without this, an editor that joined an ambient provider
+      // would have one drop read out twice: once as "Dropped Alpha on Gamma"
+      // by the provider, once as "Moved Alpha to position 3 of 4" here.
+      ownsAnnouncements: true,
+    };
+  }
+
+  function targetRegistration(item: ModelCatalogueItem, index: number): DropTargetRegistration {
+    return {
+      targetId: targetIdOf(item.id),
+      acceptedKinds: [subjectKind],
+      disabled: locked,
+      label: item.label,
+      // One band per row: a model travelling down lands after its target and
+      // one travelling up lands before it, so the dropped model ends up *at*
+      // the row it was dropped on — the same result the native renderer emits.
+      resolvePosition: ({ subject }): DropPosition =>
+        indexOfShown(subject.id) < index ? "after" : "before",
+      canDrop: (intent, subject) => {
+        if (indexOfShown(subject.id) < 0) {
+          return { accepted: false, reason: "not this catalogue" };
+        }
+        return subject.id === item.id
+          ? { accepted: false, reason: "same model" }
+          : { accepted: true, intent };
+      },
+      onDrop: handleDrop,
+    };
+  }
+
+  /**
+   * One accepted drop, one complete shown-id order.
+   *
+   * Both indices are resolved again here: `items` may have been replaced while
+   * the pointer was down, and a stale index would move the wrong model.
+   */
+  function handleDrop(intent: DropIntent): DragDropCommitResult {
+    if (locked) return { status: "rejected", reason: "locked" };
+
+    const from = indexOfShown($dragSnapshot.session?.subject.id ?? "");
+    const target = indexOfShown(idOfTargetId(intent.targetId));
+    if (from < 0 || target < 0 || from === target) {
+      return { status: "rejected", reason: "missing model" };
     }
-  }
 
-  function handleDragOver(event: DragEvent, index: number): void {
-    if (locked || draggingId === null) return;
-    event.preventDefault();
-    dropTargetId = shown[index]?.id ?? null;
-  }
+    const to =
+      intent.position === "before"
+        ? from < target
+          ? target - 1
+          : target
+        : from < target
+          ? target
+          : target + 1;
 
-  function handleDrop(event: DragEvent, index: number): void {
-    event.preventDefault();
-    const fromIndex = draggingId === null
-      ? -1
-      : shown.findIndex((item) => item.id === draggingId);
-    if (fromIndex >= 0 && fromIndex !== index) {
-      emitOrder(fromIndex, index);
-    }
-    draggingId = null;
-    dropTargetId = null;
-  }
-
-  function handleDragEnd(): void {
-    draggingId = null;
-    dropTargetId = null;
+    // A pointer drop ends any live keyboard grab: one row cannot be both
+    // dropped and still held.
+    grabbedId = null;
+    emitOrder(from, to);
+    return { status: "committed" };
   }
 </script>
 
+{#snippet editor()}
 <section
   class="poodle-model-catalogue-editor"
   bind:this={rootEl}
@@ -253,10 +343,11 @@
           class="poodle-model-catalogue-editor__row"
           data-model-catalogue-id={item.id}
           data-grabbed={grabbedId === item.id ? "true" : "false"}
-          data-drop-target={dropTargetId === item.id ? "true" : "false"}
-          ondragover={(event) => handleDragOver(event, index)}
-          ondrop={(event) => handleDrop(event, index)}
-          ondragend={handleDragEnd}
+          data-drop-target={$dragSnapshot.targetId === targetIdOf(item.id) &&
+            $dragSnapshot.targetPosture === "accepted"
+            ? "true"
+            : "false"}
+          use:dropTarget={isDragEnabled ? targetRegistration(item, index) : null}
         >
           <button
             type="button"
@@ -264,11 +355,10 @@
             data-variant="ghost"
             data-size-role="chrome"
             data-reorder-handle=""
-            draggable={isDragEnabled && !locked && !item.isDisabled}
             aria-pressed={grabbedId === item.id}
             aria-label={`${item.label}, position ${index + 1} of ${shown.length}`}
             disabled={locked || item.isDisabled}
-            ondragstart={(event) => handleDragStart(event, index)}
+            use:dragSource={isDragEnabled ? sourceRegistration(item) : null}
             onkeydown={(event) => handleKeydown(event, index)}
             onclick={() => {
               if (locked || item.isDisabled) return;
@@ -389,3 +479,14 @@
     {/if}
   {/if}
 </section>
+{/snippet}
+
+{#if ambient}
+  {@render editor()}
+{:else}
+  <!-- The editor owns its live region, so the substrate's own announcements
+       are suppressed: one terminal must not be read out twice. -->
+  <DragDropProvider controller={ownDragController} describeAnnouncement={() => null}>
+    {@render editor()}
+  </DragDropProvider>
+{/if}

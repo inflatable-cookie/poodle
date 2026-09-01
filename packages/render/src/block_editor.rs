@@ -3,14 +3,23 @@
 //! Contract: `docs/contracts/components/block-editor.md`
 //! Ported from: `packages/jetstream/components/src/block_editor.rs`.
 //!
-//! Pure shell: renders the contract chrome (per-block toolbar with drag grip,
-//! TypeSelect, move buttons, AddSelect, remove button) plus a content area
-//! that renders each block by its type. Block payloads are consumer-owned.
-//! Interactivity is host-bound; the controls render at the current spec state.
+//! Renders the contract chrome (per-block toolbar with drag grip, TypeSelect,
+//! move buttons, AddSelect, remove button) plus a content area that renders
+//! each block by its type. Block payloads are consumer-owned.
+//!
+//! Reordering is wired: `on_reorder` carries the **complete next block order**,
+//! the renderer-neutral mirror of the web `onChange` reorder payload. The grip
+//! is the substrate drag source, every reorderable block a drop target, and
+//! the move up / move down buttons reach the same emitter — so a block editor
+//! never draws a grip or a move control it cannot honour. The TypeSelect,
+//! AddSelect, and remove controls remain host-bound; they render at the
+//! current spec state.
+
+use std::sync::Arc;
 
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
-    Node,
+    Node, NodeDropCommit, NodeRole, StylePatch,
 };
 use poodle_specs::{
     BlockEditorMode, BlockEditorSpec, ChoiceOption, ControlDensity, ControlSize, EditorBlock,
@@ -19,8 +28,55 @@ use poodle_specs::{
 
 use crate::color::with_alpha;
 use crate::context::{RenderContext, SlotBuilder};
+use crate::drag_drop::{
+    apply_reorder, arrival_band_resolver, attach_source, attach_target, edge_from_position,
+    reorder_destination, reorder_source, reorder_target,
+};
 use crate::presentation::rem_to_px;
 use crate::select::{select, SelectHandlers};
+
+/// Host-owned native interaction for one BlockEditor instance.
+///
+/// `instance_id` is the lifetime-stable scope for this editor's drag
+/// registrations. It is not a web public prop, and the renderer never invents
+/// one from render order.
+pub struct BlockEditorHandlers {
+    pub instance_id: String,
+    /// Fires with the complete next block order after an accepted reorder.
+    pub on_reorder: Option<Arc<dyn Fn(&[EditorBlock]) + Send + Sync>>,
+}
+
+impl BlockEditorHandlers {
+    pub fn new(instance_id: impl Into<String>) -> Self {
+        let instance_id = instance_id.into();
+        assert!(
+            !instance_id.trim().is_empty(),
+            "BlockEditorHandlers requires a non-empty lifetime-stable instance_id"
+        );
+        Self {
+            instance_id,
+            on_reorder: None,
+        }
+    }
+}
+
+/// One accepted reorder, one complete block order.
+fn reorder_emitter(
+    blocks: Vec<EditorBlock>,
+    handlers: Arc<BlockEditorHandlers>,
+) -> Arc<dyn Fn(usize, usize) + Send + Sync> {
+    Arc::new(move |from: usize, to: usize| {
+        if from == to {
+            return;
+        }
+        let Some(next) = apply_reorder(&blocks, from, to) else {
+            return;
+        };
+        if let Some(handler) = &handlers.on_reorder {
+            handler(&next);
+        }
+    })
+}
 
 /// Contract `--poodle-block-editor-control-size` per size (rem).
 fn control_size_rem(size: ControlSize) -> f32 {
@@ -48,11 +104,16 @@ fn density_recipe(density: ControlDensity) -> (f32, f32, f32, f32, f32, f32) {
 /// rounded, icon glyph. `disabled` dims to the contract `0.3` opacity.
 fn tool_btn(
     icon_name: &str,
+    focus_ring: ColorValue,
     icon_color: ColorValue,
     icon_size: f32,
     control_size: f32,
     radius: f32,
     disabled: bool,
+    // A named, activatable control, or a rendered-only one. A button with an
+    // accessible name and no handler is the dead affordance this card removes,
+    // so the two travel together.
+    action: Option<(&str, Arc<dyn Fn() + Send + Sync>)>,
 ) -> Node {
     let mut btn = Node::container();
     {
@@ -72,6 +133,20 @@ fn tool_btn(
             s.descriptor.opacity = 0.3;
         } else {
             s.descriptor.cursor = CursorHint::Pointer;
+        }
+    }
+    if let Some((label, on_activate)) = action {
+        btn.a11y.role = Some(NodeRole::Button);
+        btn.a11y.label = Some(label.to_string());
+        if !disabled {
+            btn.interaction.focusable = true;
+            // Contract §Focus: the tool button draws an accent focus ring, and
+            // the backend only tracks a focusable node that declares one.
+            btn.style.focus = Some(StylePatch {
+                border_color: Some(focus_ring),
+                ..StylePatch::default()
+            });
+            btn.interaction.on_activate = Some(on_activate);
         }
     }
     let mut glyph = Node::icon(icon_name, icon_size);
@@ -210,8 +285,12 @@ fn render_block_content(
     }
 }
 
-pub fn block_editor(spec: &BlockEditorSpec, ctx: &RenderContext<'_>) -> Node {
-    block_editor_with_children(spec, ctx, Vec::new())
+pub fn block_editor(
+    spec: &BlockEditorSpec,
+    ctx: &RenderContext<'_>,
+    handlers: BlockEditorHandlers,
+) -> Node {
+    block_editor_with_children(spec, ctx, Vec::new(), handlers)
 }
 
 /// Block editor with caller-owned block bodies.
@@ -229,7 +308,12 @@ pub fn block_editor_with_children(
     spec: &BlockEditorSpec,
     ctx: &RenderContext<'_>,
     children: Vec<SlotBuilder<'_>>,
+    handlers: BlockEditorHandlers,
 ) -> Node {
+    let handlers = Arc::new(handlers);
+    let drag_scope = format!("block-editor:{}", handlers.instance_id);
+    let block_ids: Vec<String> = spec.blocks.iter().map(|block| block.id.clone()).collect();
+    let reorder = reorder_emitter(spec.blocks.clone(), Arc::clone(&handlers));
     let theme = ctx.theme();
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
@@ -249,6 +333,7 @@ pub fn block_editor_with_children(
     let text_secondary = theme.resolve_color("color.text.secondary");
     let text_tertiary = theme.resolve_color("color.text.tertiary");
     let accent = theme.resolve_color("color.accent.base");
+    let focus_ring = theme.resolve_color("color.accent.focusRing");
 
     let control_size = rem_to_px(control_size_rem(effective_size));
     let (toolbar_y, toolbar_x, content_x, content_y, stack_gap, input_x) = density_recipe(density);
@@ -308,7 +393,26 @@ pub fn block_editor_with_children(
             }
             let mut glyph = Node::icon("grip-vertical", icon_size);
             glyph.style.descriptor.text_color = Some(text_tertiary);
-            toolbar_left = toolbar_left.child(grip.child(glyph));
+            let mut grip = grip.child(glyph);
+            grip.runtime_id = Some(format!(
+                "block-editor:{}:{}:grip",
+                handlers.instance_id, block.id
+            ));
+            // The grip is the pointer handle only. The keyboard route is the
+            // move buttons below, exactly as on the web, so the grip stays out
+            // of the tab order and out of the accessibility tree.
+            if !disabled && block_count > 1 {
+                attach_source(
+                    &mut grip,
+                    true,
+                    reorder_source(
+                        &drag_scope,
+                        &block.id,
+                        &format!("{} block", block.block_type),
+                    ),
+                );
+            }
+            toolbar_left = toolbar_left.child(grip);
         }
 
         if can_type_change {
@@ -342,23 +446,43 @@ pub fn block_editor_with_children(
         let mut toolbar_right = toolbar_right;
 
         if can_reorder {
-            toolbar_right = toolbar_right
-                .child(tool_btn(
-                    "arrow-up",
-                    text_tertiary,
-                    icon_size,
-                    control_size,
-                    radius_control,
-                    disabled || i == 0,
-                ))
-                .child(tool_btn(
-                    "arrow-down",
-                    text_tertiary,
-                    icon_size,
-                    control_size,
-                    radius_control,
-                    disabled || i == block_count - 1,
-                ));
+            let up = {
+                let reorder = reorder.clone();
+                Arc::new(move || reorder(i, i.saturating_sub(1))) as Arc<dyn Fn() + Send + Sync>
+            };
+            let down = {
+                let reorder = reorder.clone();
+                Arc::new(move || reorder(i, i + 1)) as Arc<dyn Fn() + Send + Sync>
+            };
+            let mut up_btn = tool_btn(
+                "arrow-up",
+                focus_ring,
+                text_tertiary,
+                icon_size,
+                control_size,
+                radius_control,
+                disabled || i == 0,
+                Some(("Move up", up)),
+            );
+            up_btn.runtime_id = Some(format!(
+                "block-editor:{}:{}:up",
+                handlers.instance_id, block.id
+            ));
+            let mut down_btn = tool_btn(
+                "arrow-down",
+                focus_ring,
+                text_tertiary,
+                icon_size,
+                control_size,
+                radius_control,
+                disabled || i == block_count - 1,
+                Some(("Move down", down)),
+            );
+            down_btn.runtime_id = Some(format!(
+                "block-editor:{}:{}:down",
+                handlers.instance_id, block.id
+            ));
+            toolbar_right = toolbar_right.child(up_btn).child(down_btn);
         }
 
         if can_add {
@@ -373,11 +497,13 @@ pub fn block_editor_with_children(
             toolbar_right = toolbar_right
                 .child(tool_btn(
                     "plus",
+                    focus_ring,
                     text_tertiary,
                     icon_size,
                     control_size,
                     radius_control,
                     disabled,
+                    None,
                 ))
                 .child(add_wrap.child(build_type_select(
                     spec,
@@ -391,11 +517,13 @@ pub fn block_editor_with_children(
         if can_remove && block_count > 1 {
             toolbar_right = toolbar_right.child(tool_btn(
                 "x",
+                focus_ring,
                 text_tertiary,
                 icon_size,
                 control_size,
                 radius_control,
                 disabled,
+                None,
             ));
         }
 
@@ -431,6 +559,40 @@ pub fn block_editor_with_children(
             c.bottom_right = radius_control;
             c.bottom_left = radius_control;
             s.descriptor.background = Some(block_bg);
+        }
+        block_el.runtime_id = Some(format!(
+            "block-editor:{}:{}:block",
+            handlers.instance_id, block.id
+        ));
+        block_el.a11y.role = Some(NodeRole::Group);
+        block_el.a11y.label = Some(format!("{} block", block.block_type));
+        if can_reorder && !disabled && block_count > 1 {
+            let mut target = reorder_target(
+                &drag_scope,
+                &block.id,
+                &format!("{} block", block.block_type),
+            );
+            // The documented result lands the block *at* the block it was
+            // dropped on, which is a direction question, not a geometry one.
+            target.resolve_position = Some(arrival_band_resolver(block_ids.clone(), i));
+            let reorder = reorder.clone();
+            let ids = block_ids.clone();
+            let count = block_count;
+            target.on_drop = Some(Arc::new(move |event| {
+                let Some(from) = ids.iter().position(|id| *id == event.subject.id) else {
+                    return NodeDropCommit::Rejected {
+                        reason: Some("That block is no longer in this editor".to_string()),
+                    };
+                };
+                let Some(edge) = edge_from_position(&event.intent.position) else {
+                    return NodeDropCommit::Rejected {
+                        reason: Some("Unknown drop position".to_string()),
+                    };
+                };
+                reorder(from, reorder_destination(from, i, edge, count));
+                NodeDropCommit::Committed
+            }));
+            attach_target(&mut block_el, true, target);
         }
         root = root.child(block_el.child(toolbar).child(render_block_content(
             block,
@@ -518,7 +680,7 @@ mod tests {
                 EditorBlock::new("block-a", "paragraph"),
                 EditorBlock::new("block-b", "heading"),
             ]);
-        let node = block_editor(&spec, &ctx);
+        let node = block_editor(&spec, &ctx, BlockEditorHandlers::new("block-editor"));
         let ids = runtime_ids(&node);
         let unique: BTreeSet<_> = ids.iter().cloned().collect();
         assert_eq!(ids.len(), unique.len(), "duplicate runtime_id in {ids:?}");

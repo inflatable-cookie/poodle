@@ -24,7 +24,7 @@ Updated: 2026-07-10
   └── [Block .block-editor__block]  (repeated, keyed by block.id) role="group"
         ├── [Toolbar .block-editor__toolbar]
         │     ├── [ToolbarLeft .block-editor__toolbar-left]
-        │     │     ├── [DragGrip .block-editor__drag-grip]  <span> draggable, Icon grip-vertical
+        │     │     ├── [DragGrip .block-editor__drag-grip]  <span> drag handle, Icon grip-vertical
         │     │     └── [TypeSelect .block-editor__type-select]  Select (variant="ghost", menuMinWidth="10rem")
         │     └── [ToolbarRight .block-editor__toolbar-right]
         │           ├── [MoveUpBtn .block-editor__tool-btn]  <button> Icon arrow-up
@@ -42,7 +42,7 @@ Updated: 2026-07-10
 | Root | `<div>` | yes | Flex column container with `aria-label`, wraps in `UiPresentationProvider` |
 | Block | `<div>` | yes (repeated) | `role="group"`, `aria-label="{type} block"`, drag-and-drop target |
 | Toolbar | `<div>` | yes (per block) | Flex row, space-between, transparent background |
-| DragGrip | `<span>` | yes (per block) | `draggable="true"`, `aria-hidden="true"`, `grab` cursor |
+| DragGrip | `<span>` | yes (per block) | the block source's pointer handle, `aria-hidden="true"`, `grab` cursor |
 | TypeSelect | Select | yes (per block) | Poodle Select component, `variant="ghost"`, `menuMinWidth="10rem"`, `ariaLabel="Block type"`; gains `--inset` margin-left when reordering is disabled (drag grip hidden) to keep alignment with block content |
 | MoveUpBtn | `<button>` | yes (per block) | Disabled when first block or editor disabled |
 | MoveDownBtn | `<button>` | yes (per block) | Disabled when last block or editor disabled |
@@ -124,16 +124,19 @@ When the `block` snippet is not provided, the only fallback is a minimal `<texta
 | disabled | `disabled=true` | Root has `opacity: disabled`, `pointer-events: none` |
 | single-posture | `mode="single"` | Reorder, add, and remove controls hidden unless explicitly re-enabled |
 | active-block | block receives focus | Block background increases to 72% elevated mix |
-| dragging | drag grip held | Source block at 40% opacity |
-| drag-over | dragging over another block | Target block shows accent box-shadow ring |
+| dragging | the block is the substrate's active drag source | Source block at 40% opacity |
+| drag-over | the substrate accepts an intent on another block | Target block shows accent box-shadow ring |
 
 ### Component States
 
 | State | Description |
 |-------|-------------|
 | `activeBlockId` | ID of the currently focused block |
-| `dragSourceIndex` | Index of the block being dragged |
-| `dragOverIndex` | Index of the current drop target |
+
+Drag posture is not component state. The dragged block and the current drop
+target are read from the drag substrate's session snapshot, keyed by the
+block's own registration ids. There is no `dragSourceIndex`, `dragOverIndex`,
+`draggable` attribute, or `DataTransfer` payload.
 
 ### Behavior Machine
 
@@ -148,6 +151,10 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | Callback | When It Runs | Payload | Notes |
 |----------|--------------|---------|-------|
 | `onChange` | after any mutation (add, remove, move, type change, content update) | `EditorBlock[]` | runs with a shallow copy of the blocks array |
+
+One accepted reorder emits `onChange` exactly once, carrying the complete next
+block order. A drop whose source or target block is no longer present is
+rejected rather than committed against a stale index.
 
 ## 6. Accessibility
 
@@ -167,6 +174,12 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 |-----|----------|
 | `Tab` | Navigates between toolbar controls and content inputs |
 | `Space` / `Enter` | Activates focused buttons |
+
+The move up / move down buttons are the keyboard reorder route. Each issues a
+keyboard drop command against the same source and target registrations the
+pointer uses, so both routes share eligibility, drop-time revalidation, the
+single commit, and the `onChange` payload. A button never edits the block array
+behind the substrate's back.
 
 ### Focus
 
@@ -441,15 +454,54 @@ are currently unused by the root itself.
 - Type-switch per block: `Select` with `variant="ghost"`, `native={false}`, `menuMinWidth="10rem"`, bound to `block.type`
 - Add-block: `Select` with `variant="ghost"`, `native={false}`, `menuMinWidth="10rem"`, `value={null}`, and a trigger slot containing a plus icon styled as a tool button; selecting a value calls `addBlock(value, index)`
 - New block IDs generated with `crypto.randomUUID()`
-- Native HTML drag-and-drop for block reordering
+- Block reordering runs on the common drag-and-drop substrate (architecture
+  011, spec 069): the block registers a drag source whose handle selector is
+  `.poodle-block-editor__drag-grip`, and every reorderable block is a drop
+  target. Registration ids and the subject kind
+  (`poodle.reorder-item:block-editor:{instance}`) are scoped to the editor
+  instance, so two mounted editors holding the same block ids under one ambient
+  provider can never cross-drop. The editor joins an ambient
+  `DragDropProvider` when one exists and owns an isolated controller otherwise
+- A block's own toolbar controls (type select, add, remove, move, textarea) are
+  reachable during and outside a drag: the drag source is the grip, not the
+  block body
+- An editor that cannot reorder — `disabled`, `allowReorder=false`, or holding a
+  single block — registers no source and no target at all rather than
+  registering disabled ones. A registered source is still keyboard-reachable and
+  still nameable in an announcement
 - `focusin` event on blocks tracks `activeBlockId`
 - After adding a block, uses `tick().then()` to set `activeBlockId` on the new block
 
 ## 10. GPUI Notes
 
-- Expected crate/module surface: `poodle_gpui::composites::block_editor`
-- Drag-and-drop reordering may use move-up/move-down button approach
-- Block slot rendering needs GPUI component composition pattern
+- Implemented: `BlockEditorSpec`
+  (`packages/contracts/components/src/block_editor.rs`),
+  `poodle_render::block_editor` / `block_editor_with_children` taking
+  `BlockEditorHandlers`, GPUI specimen
+  `packages/gpui/preview/src/specimens/block_editor_specimen.rs`.
+- `BlockEditorHandlers::new(instance_id)` carries `on_change`, which fires with
+  the **complete next block order** — the renderer-neutral mirror of the web
+  `onChange` reorder payload. `on_type_change`, `on_add`, and `on_remove` carry
+  the block id (and the chosen type) for the other toolbar intents.
+- Reordering runs on the renderer-neutral substrate: the grip registers a
+  `NodeDragSource` and every reorderable block a `NodeDropTarget`, both scoped
+  to `instance_id`. The band rule is
+  `crate::drag_drop::vertical_band_resolver`, a block dropped onto itself is
+  rejected, and the drop is revalidated against the spec's live block list.
+- Move up / move down reach the same emitter as a drop, so the native keyboard
+  and pointer routes produce one identical order payload. They are ordinary
+  controls, not substrate sessions — natively because the controller exposes no
+  keyboard-drop command to a renderer — so they produce no substrate
+  announcement and keep focus on the control that was activated.
+- On the web a move control commits once and leaves focus inside the block it
+  moved, not on the control: the control is re-rendered at its new position.
+  Nothing is stranded. Returning focus to the control itself would be a
+  BlockEditor focus decision, and no card has taken it.
+- A grip is drawn only when the editor can actually reorder; a spec with no
+  reorder handler draws no grip and no move buttons rather than a dead
+  affordance.
+- Block slot rendering uses `block_editor_with_children`, whose builders run in
+  the component's own presentation scope.
 
 ## 11. Parity Checklist
 

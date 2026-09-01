@@ -88,8 +88,17 @@
     box-shadow: var(--poodle-recipe-block-editor-block-shadow, 0 0 0 0.125rem var(--poodle-color-accent-base));
   }
 
-  .poodle-block-editor__block.poodle-dragging {
+  .poodle-block-editor__block.poodle-dragging,
+  .poodle-drag-drop-provider .poodle-block-editor__block[data-poodle-drag-source="dragging"],
+  .poodle-drag-drop-provider .poodle-block-editor__block[data-poodle-drag-source="dropping"] {
     opacity: 0.4;
+  }
+
+  /* The generic provider outline is unlayered and would otherwise replace the
+     contract's accent ring on the drop target. */
+  .poodle-drag-drop-provider .poodle-block-editor__block[data-poodle-drop-target="accepted"],
+  .poodle-drag-drop-provider .poodle-block-editor__block[data-poodle-drop-target="rejected"] {
+    outline: none;
   }
 
   .poodle-block-editor__toolbar {

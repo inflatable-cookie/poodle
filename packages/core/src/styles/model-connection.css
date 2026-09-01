@@ -394,6 +394,18 @@
   background: var(--poodle-color-background-surface);
 }
 
+/* The generic provider posture is unlayered and would otherwise replace the
+   contract's own grabbed / drop-target treatment. */
+.poodle-drag-drop-provider .poodle-model-catalogue-editor__row[data-poodle-drop-target="accepted"],
+.poodle-drag-drop-provider .poodle-model-catalogue-editor__row[data-poodle-drop-target="rejected"] {
+  outline: none;
+}
+
+.poodle-drag-drop-provider .poodle-model-catalogue-editor__row [data-poodle-drag-source="dragging"],
+.poodle-drag-drop-provider .poodle-model-catalogue-editor__row [data-poodle-drag-source="dropping"] {
+  opacity: 1;
+}
+
 .poodle-model-catalogue-editor__row[data-grabbed="true"],
 .poodle-model-catalogue-editor__row[data-drop-target="true"] {
   border-color: var(--poodle-color-accent-base);

@@ -17387,3 +17387,832 @@ fn the_first_answered_gpui_batch_id_stays_inert_after_thousands_of_later_ones() 
         assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
     });
 }
+
+// ── g16.028 migrated composites on the native substrate ───────────────────
+//
+// EditableList, OrderBy, and BlockEditor drew reorder affordances that could
+// not produce their contract result. These drive the completed paths through
+// real mounted GPUI dispatch and assert the host spec each component rebuilt
+// from — never a directly invoked handler.
+
+/// EditableList's native reorder: two mounted lists holding the same item ids
+/// cannot cross-drop, an accepted drop emits one complete next order, a
+/// keyboard pickup commits through the same path, and a cancelled session
+/// commits nothing.
+#[test]
+fn editable_list_substrate_reorder_rebuilds_the_host_spec() {
+    use poodle_render::{editable_list, EditableListHandlers};
+    use poodle_specs::{EditableListItem, EditableListSpec};
+
+    struct ListHost {
+        a: Vec<EditableListItem>,
+        b: Vec<EditableListItem>,
+        orders: Vec<(String, Vec<String>)>,
+    }
+
+    fn rows() -> Vec<EditableListItem> {
+        vec![
+            EditableListItem::new("row-1").with_label("One"),
+            EditableListItem::new("row-2").with_label("Two"),
+            EditableListItem::new("row-3").with_label("Three"),
+        ]
+    }
+
+    fn ids(items: &[EditableListItem]) -> Vec<String> {
+        items.iter().map(|item| item.id.clone()).collect()
+    }
+
+    fn build(host: &Arc<Mutex<ListHost>>, mounted: &Arc<Mutex<Node>>) -> Node {
+        let rebuild = {
+            let host = Arc::clone(host);
+            let mounted = Arc::clone(mounted);
+            move || {
+                let next = build(&host, &mounted);
+                *mounted.lock().expect("mount lock") = next;
+            }
+        };
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let (a, b) = {
+            let host = host.lock().expect("host lock");
+            (host.a.clone(), host.b.clone())
+        };
+
+        let list = |scope: &'static str, items: Vec<EditableListItem>| {
+            let mut handlers = EditableListHandlers::new(scope);
+            let host = Arc::clone(host);
+            let rebuild = rebuild.clone();
+            handlers.on_reorder = Some(Arc::new(move |next: &[EditableListItem]| {
+                {
+                    let mut host = host.lock().expect("host lock");
+                    host.orders.push((scope.to_string(), ids(next)));
+                    if scope == "list-a" {
+                        host.a = next.to_vec();
+                    } else {
+                        host.b = next.to_vec();
+                    }
+                }
+                rebuild();
+            }));
+            editable_list(
+                &EditableListSpec::new()
+                    .with_items(items)
+                    .with_aria_label("Rows"),
+                &ctx,
+                handlers,
+            )
+        };
+
+        let mut root = Node::container();
+        root.style.descriptor.layout.direction = LayoutDirection::Column;
+        root.style.descriptor.layout.spacing.gap = 8.0;
+        root.child(list("list-a", a)).child(list("list-b", b))
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(ListHost {
+            a: rows(),
+            b: rows(),
+            orders: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 320.0, 560.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        // ── The same item ids in two lists never cross ──
+        let handle = payload_frac("editable-list:list-a:row-1:handle", 0.5, 0.5);
+        driver.pointer_press(handle);
+        driver.pointer_drag(point(px(f32::from(handle.x) + 4.0), handle.y));
+        driver.pointer_drag(payload_frac("editable-list:list-b:row-3:row", 0.5, 0.9));
+        let snapshot = controller.snapshot();
+        assert_eq!(
+            snapshot.target_posture,
+            Some(poodle_gpui_node_backend::DragDropTargetPosture::Rejected),
+            "the other list refuses this subject rather than accepting it"
+        );
+        assert_eq!(snapshot.position, None, "a refusal resolves no placement");
+        driver.pointer_release(payload_frac("editable-list:list-b:row-3:row", 0.5, 0.9));
+        assert!(
+            host.lock().expect("host lock").orders.is_empty(),
+            "a cross-list drop commits nothing"
+        );
+
+        // ── One accepted drop, one complete order ──
+        let handle = payload_frac("editable-list:list-a:row-1:handle", 0.5, 0.5);
+        driver.pointer_press(handle);
+        driver.pointer_drag(point(px(f32::from(handle.x) + 4.0), handle.y));
+        driver.pointer_drag(payload_frac("editable-list:list-a:row-3:row", 0.5, 0.9));
+        driver.pointer_release(payload_frac("editable-list:list-a:row-3:row", 0.5, 0.9));
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(
+                host.orders,
+                [(
+                    "list-a".to_string(),
+                    vec![
+                        "row-2".to_string(),
+                        "row-3".to_string(),
+                        "row-1".to_string()
+                    ]
+                )],
+                "exactly one reorder, carrying the whole next order"
+            );
+            assert_eq!(ids(&host.b), ["row-1", "row-2", "row-3"], "list B is untouched");
+        }
+
+        // ── Keyboard pickup commits through the same path ──
+        let drops_before = controller
+            .announcements()
+            .iter()
+            .filter(|line| line.starts_with("Dropped "))
+            .count();
+        driver.wait_for_focus_handle("editable-list:list-a:row-2:handle");
+        driver.focus_element("editable-list:list-a:row-2:handle");
+        driver.dispatch_key_raw("space");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Dragging);
+        driver.dispatch_key_raw("down");
+        assert_eq!(
+            controller.snapshot().target_id.as_deref(),
+            Some("editable-list:list-a:target:row-3"),
+            "traversal follows list order"
+        );
+        driver.dispatch_key_raw("space");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.orders.len(), 2, "one keystroke pair, one commit");
+            assert_eq!(
+                host.orders[1].1,
+                ["row-3".to_string(), "row-2".to_string(), "row-1".to_string()]
+            );
+        }
+        // The keyboard terminal is announced once, and focus stays on the
+        // handle that was carrying the row.
+        {
+            let spoken = controller.announcements();
+            let drops: Vec<&String> = spoken
+                .iter()
+                .filter(|line| line.starts_with("Dropped "))
+                .collect();
+            assert_eq!(
+                drops.len() - drops_before,
+                1,
+                "one keyboard drop, one terminal: {spoken:?}"
+            );
+            assert_eq!(drops[drops.len() - 1], "Dropped Two after Three.");
+        }
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("editable-list:list-a:row-2:handle"),
+            Some(true),
+            "focus follows the row that was carried, not the row it passed"
+        );
+
+        // ── A cancelled keyboard session commits nothing and clears posture ──
+        driver.wait_for_focus_handle("editable-list:list-a:row-3:handle");
+        driver.focus_element("editable-list:list-a:row-3:handle");
+        driver.dispatch_key_raw("space");
+        driver.dispatch_key_raw("down");
+        driver.dispatch_key_raw("escape");
+        let snapshot = controller.snapshot();
+        assert_eq!(snapshot.phase, DragSessionPhase::Idle);
+        assert_eq!(snapshot.target_id, None);
+        assert_eq!(snapshot.target_posture, None);
+        assert_eq!(
+            host.lock().expect("host lock").orders.len(),
+            2,
+            "Escape commits nothing"
+        );
+    });
+}
+
+/// OrderBy's native reorder: a pointer drop and the contract's Alt+Arrow both
+/// emit one complete next ordering, and a clause's own controls still work.
+#[test]
+fn order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec() {
+    use poodle_render::{order_by, OrderByHandlers};
+    use poodle_specs::{OrderByField, OrderBySpec, SortDirection, SortField};
+
+    struct SortHost {
+        value: Vec<OrderByField>,
+        orderings: Vec<Vec<String>>,
+        removed: Vec<String>,
+    }
+
+    fn keys(value: &[OrderByField]) -> Vec<String> {
+        value.iter().map(|item| item.key.clone()).collect()
+    }
+
+    fn build(host: &Arc<Mutex<SortHost>>, mounted: &Arc<Mutex<Node>>) -> Node {
+        let rebuild = {
+            let host = Arc::clone(host);
+            let mounted = Arc::clone(mounted);
+            move || {
+                let next = build(&host, &mounted);
+                *mounted.lock().expect("mount lock") = next;
+            }
+        };
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let value = host.lock().expect("host lock").value.clone();
+
+        let spec = OrderBySpec::new()
+            .with_fields(vec![
+                SortField::new("name", "Name"),
+                SortField::new("date", "Date"),
+                SortField::new("size", "Size"),
+            ])
+            .with_value(value)
+            .with_open(true);
+
+        let on_reorder = {
+            let host = Arc::clone(host);
+            let rebuild = rebuild.clone();
+            Arc::new(move |next: &[OrderByField]| {
+                {
+                    let mut host = host.lock().expect("host lock");
+                    host.orderings.push(keys(next));
+                    host.value = next.to_vec();
+                }
+                rebuild();
+            }) as Arc<dyn Fn(&[OrderByField]) + Send + Sync>
+        };
+        let on_remove = {
+            let host = Arc::clone(host);
+            Arc::new(move |key: &str| {
+                host.lock().expect("host lock").removed.push(key.to_string());
+            }) as Arc<dyn Fn(&str) + Send + Sync>
+        };
+
+        order_by(
+            &spec,
+            &ctx,
+            OrderByHandlers {
+                on_reorder: Some(on_reorder),
+                on_remove: Some(on_remove),
+                ..OrderByHandlers::new("sort")
+            },
+        )
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(SortHost {
+            value: vec![
+                OrderByField::new("name", SortDirection::Asc),
+                OrderByField::new("date", SortDirection::Desc),
+                OrderByField::new("size", SortDirection::Asc),
+            ],
+            orderings: Vec::new(),
+            removed: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 360.0, 400.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        // ── A drop lands the clause *at* the row it was dropped on ──
+        let handle = payload_frac("order-by:sort:name:handle", 0.5, 0.5);
+        driver.pointer_press(handle);
+        driver.pointer_drag(point(px(f32::from(handle.x) + 4.0), handle.y));
+        driver.pointer_drag(payload_frac("order-by:sort:size:row", 0.5, 0.5));
+        let snapshot = controller.snapshot();
+        assert_eq!(
+            snapshot.target_id.as_deref(),
+            Some("order-by:sort:target:size"),
+            "the hovered row is the target the pointer is over"
+        );
+        assert_eq!(
+            snapshot.position.as_deref(),
+            Some("after"),
+            "a clause travelling down arrives after its target"
+        );
+        driver.pointer_release(payload_frac("order-by:sort:size:row", 0.5, 0.5));
+        assert_eq!(
+            host.lock().expect("host lock").orderings,
+            [vec![
+                "date".to_string(),
+                "size".to_string(),
+                "name".to_string()
+            ]],
+            "one drop, one complete ordering"
+        );
+
+        // ── Alt+Arrow reaches the same emitter ──
+        driver.keyboard_key("order-by:sort:size:handle", "alt-up");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.orderings.len(), 2, "one keystroke, one commit");
+            assert_eq!(
+                host.orderings[1],
+                ["size".to_string(), "date".to_string(), "name".to_string()]
+            );
+        }
+
+        // ── A plain Arrow on the handle is not a reorder ──
+        driver.keyboard_key("order-by:sort:size:handle", "down");
+        assert_eq!(
+            host.lock().expect("host lock").orderings.len(),
+            2,
+            "the reorder chord is Alt+Arrow, not Arrow"
+        );
+
+        // ── The terminal is announced once, by the controller ──
+        //
+        // OrderBy has no live region of its own, so the substrate's is the
+        // only voice and its source does not claim otherwise.
+        let spoken = controller.announcements();
+        let drops: Vec<&String> = spoken
+            .iter()
+            .filter(|line| line.starts_with("Dropped "))
+            .collect();
+        assert_eq!(drops.len(), 1, "one drop, one terminal announcement: {spoken:?}");
+
+        // ── Focus is where the keyboard left it ──
+        //
+        // Alt+Arrow reaches the same emitter as a drop but is not a substrate
+        // session: the native controller exposes no keyboard-drop command to a
+        // renderer, so there is no session to announce or to return focus
+        // from. The handle the person is on keeps focus, which is the part
+        // that matters.
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("order-by:sort:size:handle"),
+            Some(true),
+            "the reorder chord leaves focus on the handle it was pressed on"
+        );
+        assert_eq!(
+            controller.announcements().len(),
+            spoken.len(),
+            "and being no session, it adds no announcement: {:?}",
+            controller.announcements()
+        );
+    });
+}
+
+/// BlockEditor's native reorder: the grip is the drag source, the move buttons
+/// are the keyboard route, and both emit one complete next block order. The
+/// content area is not a drag handle.
+#[test]
+fn block_editor_grip_drag_and_move_controls_rebuild_the_host_spec() {
+    use poodle_render::{block_editor, BlockEditorHandlers};
+    use poodle_specs::{BlockEditorSpec, BlockTypeDefinition, EditorBlock};
+
+    struct BlockHost {
+        blocks: Vec<EditorBlock>,
+        orders: Vec<Vec<String>>,
+    }
+
+    fn blocks() -> Vec<EditorBlock> {
+        vec![
+            EditorBlock::new("b1", "paragraph").with_content("one"),
+            EditorBlock::new("b2", "paragraph").with_content("two"),
+            EditorBlock::new("b3", "paragraph").with_content("three"),
+        ]
+    }
+
+    fn ids(blocks: &[EditorBlock]) -> Vec<String> {
+        blocks.iter().map(|block| block.id.clone()).collect()
+    }
+
+    fn build(host: &Arc<Mutex<BlockHost>>, mounted: &Arc<Mutex<Node>>) -> Node {
+        let rebuild = {
+            let host = Arc::clone(host);
+            let mounted = Arc::clone(mounted);
+            move || {
+                let next = build(&host, &mounted);
+                *mounted.lock().expect("mount lock") = next;
+            }
+        };
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let current = host.lock().expect("host lock").blocks.clone();
+
+        let mut handlers = BlockEditorHandlers::new("editor");
+        let sink = Arc::clone(host);
+        handlers.on_reorder = Some(Arc::new(move |next: &[EditorBlock]| {
+            {
+                let mut host = sink.lock().expect("host lock");
+                host.orders.push(ids(next));
+                host.blocks = next.to_vec();
+            }
+            rebuild();
+        }));
+
+        block_editor(
+            &BlockEditorSpec::new()
+                .with_blocks(current)
+                .with_block_types(vec![BlockTypeDefinition::new("paragraph", "Paragraph", "text")]),
+            &ctx,
+            handlers,
+        )
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(BlockHost {
+            blocks: blocks(),
+            orders: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 560.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        // ── The block body is an editing surface, not a grip ──
+        let body = payload_frac("block-editor:editor:b1:block", 0.5, 0.85);
+        driver.pointer_press(body);
+        driver.pointer_drag(point(px(f32::from(body.x) + 24.0), body.y));
+        assert_eq!(
+            controller.snapshot().phase,
+            DragSessionPhase::Idle,
+            "a press in the block body never arms a drag"
+        );
+        driver.pointer_release(point(px(f32::from(body.x) + 24.0), body.y));
+
+        // ── The grip drags, and the drop lands the block at its target ──
+        let grip = payload_frac("block-editor:editor:b1:grip", 0.5, 0.5);
+        driver.pointer_press(grip);
+        driver.pointer_drag(point(px(f32::from(grip.x) + 4.0), grip.y));
+        driver.pointer_drag(payload_frac("block-editor:editor:b3:block", 0.5, 0.5));
+        driver.pointer_release(payload_frac("block-editor:editor:b3:block", 0.5, 0.5));
+        assert_eq!(
+            host.lock().expect("host lock").orders,
+            [vec!["b2".to_string(), "b3".to_string(), "b1".to_string()]],
+            "one drop, one complete block order"
+        );
+
+        // ── The terminal is announced once, by the controller ──
+        //
+        // BlockEditor has no live region of its own, so the substrate's is the
+        // only voice.
+        let spoken = controller.announcements();
+        let drops: Vec<&String> = spoken
+            .iter()
+            .filter(|line| line.starts_with("Dropped "))
+            .collect();
+        assert_eq!(drops.len(), 1, "one drop, one terminal announcement: {spoken:?}");
+
+        // ── Move up reaches the same emitter, and keeps its own focus ──
+        driver.wait_for_focus_handle("block-editor:editor:b1:up");
+        driver.keyboard_activate("block-editor:editor:b1:up");
+        {
+            let host = host.lock().expect("host lock");
+            assert_eq!(host.orders.len(), 2, "one activation, one commit");
+            assert_eq!(
+                host.orders[1],
+                ["b2".to_string(), "b1".to_string(), "b3".to_string()]
+            );
+        }
+        driver.draw_frame();
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("block-editor:editor:b1:up"),
+            Some(true),
+            "the move control keeps focus on the block it moved"
+        );
+        assert_eq!(
+            controller.announcements().len(),
+            spoken.len(),
+            "a move control is not a substrate session, so it adds no announcement: {:?}",
+            controller.announcements()
+        );
+    });
+}
+
+/// g16.028 review. A composite with its own live region narrates its own
+/// sessions, and the controller says nothing about them.
+///
+/// The catalogue announces "Moved X to position N of M" through `on_announce`.
+/// Without `NodeDragSource::owns_announcements` the controller also composes
+/// "Dropped X on Y", so one drop is read out twice in two different sentences.
+#[test]
+fn model_catalogue_editor_pointer_drop_is_announced_once_by_the_editor() {
+    use poodle_headless::model_connection::ModelCatalogueItem;
+    use poodle_specs::ModelCatalogueEditorSpec;
+
+    struct CatalogueHost {
+        items: Vec<ModelCatalogueItem>,
+        orders: Vec<Vec<String>>,
+        announcements: Vec<String>,
+    }
+
+    fn build(host: &Arc<Mutex<CatalogueHost>>, mounted: &Arc<Mutex<Node>>) -> Node {
+        let rebuild = {
+            let host = Arc::clone(host);
+            let mounted = Arc::clone(mounted);
+            move || {
+                let next = build(&host, &mounted);
+                *mounted.lock().expect("mount lock") = next;
+            }
+        };
+        let theme = theme();
+        let items = host.lock().expect("host lock").items.clone();
+        let order_sink = Arc::clone(host);
+        let announce_sink = Arc::clone(host);
+        poodle_render::model_catalogue_editor(
+            &ModelCatalogueEditorSpec::new().with_items(items),
+            &RenderContext::new(&theme),
+            poodle_render::ModelCatalogueEditorHandlers {
+                on_order_change: Some(Arc::new(move |order: &[String]| {
+                    {
+                        let mut host = order_sink.lock().expect("host lock");
+                        host.orders.push(order.to_vec());
+                        let mut next = Vec::new();
+                        for id in order {
+                            if let Some(item) =
+                                host.items.iter().find(|item| &item.id == id).cloned()
+                            {
+                                next.push(item);
+                            }
+                        }
+                        host.items = next;
+                    }
+                    rebuild();
+                })),
+                on_announce: Some(Arc::new(move |message: &str| {
+                    announce_sink
+                        .lock()
+                        .expect("host lock")
+                        .announcements
+                        .push(message.to_string())
+                })),
+                ..poodle_render::ModelCatalogueEditorHandlers::default()
+            },
+        )
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(CatalogueHost {
+            items: vec![
+                ModelCatalogueItem::new("model-alpha", "Alpha"),
+                ModelCatalogueItem::new("model-beta", "Beta"),
+                ModelCatalogueItem::new("model-gamma", "Gamma"),
+            ],
+            orders: Vec::new(),
+            announcements: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 420.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        let handle = payload_frac("model-catalogue-editor:model-alpha:handle", 0.5, 0.5);
+        driver.pointer_press(handle);
+        driver.pointer_drag(point(px(f32::from(handle.x) + 4.0), handle.y));
+        driver.pointer_drag(payload_frac("model-catalogue-editor:model-gamma:handle", 0.5, 0.5));
+        driver.pointer_release(payload_frac(
+            "model-catalogue-editor:model-gamma:handle",
+            0.5,
+            0.5,
+        ));
+
+        let host = host.lock().expect("host lock");
+        assert_eq!(
+            host.orders,
+            [vec![
+                "model-beta".to_string(),
+                "model-gamma".to_string(),
+                "model-alpha".to_string()
+            ]],
+            "one drop, one complete shown order"
+        );
+        assert_eq!(
+            host.announcements,
+            ["Moved Alpha to position 3 of 3."],
+            "the editor's own region says it once"
+        );
+        assert!(
+            controller.announcements().is_empty(),
+            "and the controller says nothing about a session its source narrates: {:?}",
+            controller.announcements()
+        );
+    });
+}
+
+/// g16.028 review round 2. The renderer-neutral half of `ownsAnnouncements`:
+/// a self-narrating source silences the controller for its whole session, and
+/// for no other session.
+///
+/// The guarantee is a latch taken at session start, not a lookup. `active_source`
+/// is cleared during terminal cleanup, and the node tree can drop the
+/// registration mid-drag, so a lookup would find nothing exactly when the
+/// terminal announcement lands and would narrate it after all.
+#[test]
+fn a_self_narrating_source_silences_its_whole_session_and_only_that_session() {
+    fn tree(trace: &Arc<Mutex<Vec<String>>>, quiet_present: bool) -> Node {
+        let mut quiet = drag_box("quiet-source", 60.0, 40.0);
+        quiet.interaction.focusable = true;
+        quiet.a11y.tab_index = Some(0);
+        if quiet_present {
+            let mut registration = traced_source("quiet-source", "Quiet", trace);
+            registration.owns_announcements = true;
+            quiet.interaction.drag_source = Some(registration);
+        }
+
+        let mut loud = drag_box("loud-source", 60.0, 40.0);
+        loud.interaction.focusable = true;
+        loud.interaction.drag_source = Some(traced_source("loud-source", "Loud", trace));
+
+        let mut zone = drag_box("quiet-zone", 60.0, 40.0);
+        zone.interaction.drop_target = Some(traced_target(
+            "quiet-zone",
+            "Zone",
+            trace,
+            false,
+            1,
+            NodeDropCommit::Committed,
+        ));
+
+        let mut row = Node::container();
+        row.id = Some("quiet-row".to_owned());
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(180.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        row.child(quiet).child(loud).child(zone)
+    }
+
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let node = Arc::new(Mutex::new(tree(&trace, true)));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&node), 260.0, 80.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        // ── Pickup and hover intent are silent ──
+        let origin = payload_frac("quiet-source", 0.5, 0.5);
+        driver.pointer_press(origin);
+        driver.pointer_drag(point(px(f32::from(origin.x) + 4.0), origin.y));
+        driver.pointer_drag(payload_frac("quiet-zone", 0.5, 0.5));
+        assert_eq!(
+            controller.snapshot().target_posture,
+            Some(poodle_gpui_node_backend::DragDropTargetPosture::Accepted)
+        );
+        assert!(
+            controller.announcements().is_empty(),
+            "pickup and intent are the source's to narrate: {:?}",
+            controller.announcements()
+        );
+
+        // ── The registration leaves mid-drag; the terminal is still silent ──
+        //
+        // This is the case a live lookup gets wrong: there is no source to ask
+        // by the time the drop is announced.
+        driver.mount_node(Arc::new(Mutex::new(tree(&trace, false))));
+        driver.draw_frame();
+        driver.pointer_release(payload_frac("quiet-zone", 0.5, 0.5));
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert!(
+            controller.announcements().is_empty(),
+            "a terminal after the source left is still the source's: {:?}",
+            controller.announcements()
+        );
+
+        // ── A cancelled self-narrated session is silent too ──
+        driver.mount_node(Arc::new(Mutex::new(tree(&trace, true))));
+        driver.draw_frame();
+        let origin = payload_frac("quiet-source", 0.5, 0.5);
+        driver.pointer_press(origin);
+        driver.pointer_drag(point(px(f32::from(origin.x) + 4.0), origin.y));
+        driver.pointer_drag(payload_frac("quiet-zone", 0.5, 0.5));
+        driver.dispatch_key("escape");
+        assert_eq!(controller.snapshot().phase, DragSessionPhase::Idle);
+        assert!(
+            controller.announcements().is_empty(),
+            "cancel is a terminal, and this session's terminals are silent: {:?}",
+            controller.announcements()
+        );
+
+        // ── The latch resets: an ordinary source in the same controller is
+        //    narrated again ──
+        let origin = payload_frac("loud-source", 0.5, 0.5);
+        driver.pointer_press(origin);
+        driver.pointer_drag(point(px(f32::from(origin.x) + 4.0), origin.y));
+        driver.pointer_drag(payload_frac("quiet-zone", 0.5, 0.5));
+        driver.pointer_release(payload_frac("quiet-zone", 0.5, 0.5));
+        let spoken = controller.announcements();
+        assert!(
+            spoken.iter().any(|line| line.contains("Loud")),
+            "the next ordinary session is narrated: {spoken:?}"
+        );
+        assert!(
+            !spoken.iter().any(|line| line.contains("Quiet")),
+            "and the silenced session never appears late: {spoken:?}"
+        );
+    });
+}
+
+/// g16.028 review round 3. An incoming cross-window projection is never
+/// silenced by the local session that ran before it.
+///
+/// `owns_announcements` belongs to a *source*, and a projection has none: it
+/// arrives from another window with no local registration at all, so this
+/// controller's live region is the only voice it will ever have. Leaving the
+/// previous session's latch in place would hand a remote drag the silence a
+/// local composite asked for, and there is nothing on the other side to notice.
+#[test]
+fn an_incoming_projection_is_narrated_after_a_self_narrating_local_session() {
+    fn tree(trace: &Arc<Mutex<Vec<String>>>) -> Node {
+        let mut source = drag_box("xw-source", 60.0, 40.0);
+        source.interaction.focusable = true;
+        source.a11y.tab_index = Some(0);
+        let mut registration = traced_source("xw-source", "Local", trace);
+        registration.owns_announcements = true;
+        source.interaction.drag_source = Some(registration);
+
+        let mut zone = drag_box("xw-zone-a", 60.0, 40.0);
+        zone.interaction.drop_target = Some(traced_target(
+            "xw-zone-a",
+            "Zone A",
+            trace,
+            false,
+            1,
+            NodeDropCommit::Committed,
+        ));
+
+        let mut row = Node::container();
+        row.id = Some("xw-row".to_owned());
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+        row.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        row.child(source).child(zone)
+    }
+
+    run_headless(|cx| {
+        let trace = Arc::new(Mutex::new(Vec::new()));
+        let host = HostStub::default();
+        let controller = poodle_gpui_node_backend::DragDropController::new();
+        cx.update(|cx| controller.set_cross_window_target_bridge(Arc::new(host.clone()), cx));
+
+        let node = Arc::new(Mutex::new(tree(&trace)));
+        let build = {
+            let controller = controller.clone();
+            let node = Arc::clone(&node);
+            Rc::new(move || {
+                let tree = node.lock().expect("lock").clone();
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::drag_drop_provider(
+                        &controller,
+                        || gpui::div().child(poodle_gpui_node_backend::to_gpui(&tree)),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+        driver.drain();
+
+        // ── A complete local session from the self-narrating source ──
+        let origin = payload_frac("xw-source", 0.5, 0.5);
+        driver.pointer_press(origin);
+        driver.pointer_drag(point(px(f32::from(origin.x) + 4.0), origin.y));
+        driver.pointer_drag(payload_frac("xw-zone-a", 0.5, 0.5));
+        driver.pointer_release(payload_frac("xw-zone-a", 0.5, 0.5));
+        driver.drain();
+        assert!(
+            controller.announcements().is_empty(),
+            "the local session narrates itself: {:?}",
+            controller.announcements()
+        );
+
+        // ── An incoming projection right afterwards is the controller's to
+        //    narrate: it has no local source to have asked for silence ──
+        host.project(projection_for("lease-1", Some("xw-zone-a")));
+        driver.drain();
+        let spoken = controller.announcements();
+        assert!(
+            spoken.iter().any(|line| line.contains("Remote")),
+            "an incoming projection is announced: {spoken:?}"
+        );
+        // And announced by its *name*. The projection carries the host's own
+        // accessible label precisely because this window has no source to ask;
+        // falling back to the subject id would read an opaque identifier to
+        // the one person who cannot see the row it names.
+        assert!(
+            !spoken.iter().any(|line| line.contains("remote-row")),
+            "the accessible name is the projection's label, never its subject id: {spoken:?}"
+        );
+
+        // ── And so is its terminal ──
+        host.cancel_from_host(
+            poodle_node::CrossWindowDragReceipt {
+                protocol_version: poodle_node::CROSS_WINDOW_DRAG_PROTOCOL_VERSION,
+                token: "lease-1".to_string(),
+            },
+            poodle_node::DragCancelReason::TransportLost,
+        );
+        driver.drain();
+        let after = controller.announcements();
+        assert!(
+            after.len() > spoken.len(),
+            "the projection's terminal is announced too: {after:?}"
+        );
+        assert!(
+            after[spoken.len()..].iter().all(|line| !line.contains("remote-row")),
+            "including at the terminal, where the label must not decay: {after:?}"
+        );
+    });
+}

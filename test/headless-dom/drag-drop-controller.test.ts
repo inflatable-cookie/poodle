@@ -1293,6 +1293,76 @@ describe("createDragDropController", () => {
     controller.destroy();
   });
 
+  /**
+   * g16.028. A source that narrates its own sessions silences the controller
+   * for the *whole* session, and only for its own.
+   *
+   * The guarantee is a latch, not a lookup: it is read once when the session
+   * begins. A lookup would answer differently after the source re-registers
+   * mid-drag or unregisters at a terminal, which is exactly when a late
+   * announcement lands.
+   */
+  it("silences every announcement of a self-narrating session, and only that session", () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+    const controller = createDragDropController();
+    controller.connect(root);
+    const handle = controller.registerSource(sourceEl, sourceReg({ ownsAnnouncements: true }));
+    controller.registerTarget(targetEl, targetReg());
+
+    // Pickup, hover intent, and the throttled flush all stay quiet.
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    expect(controller.getSnapshot().announcement).toBeNull();
+
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().targetPosture).toBe("accepted");
+    vi.advanceTimersByTime(400);
+    expect(controller.getSnapshot().announcement).toBeNull();
+
+    // A rebuild that re-registers the same source *without* the flag does not
+    // hand the live session back to the controller. This is the case a live
+    // registration lookup gets wrong: it would narrate the rest of a session
+    // the component is already narrating, mid-drag.
+    handle.update(sourceReg({ ownsAnnouncements: false }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 32, clientY: 92 }));
+    vi.advanceTimersByTime(400);
+    expect(controller.getSnapshot().announcement).toBeNull();
+
+    document.dispatchEvent(pointer("pointerup", { clientX: 32, clientY: 92 }));
+    vi.advanceTimersByTime(400);
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(controller.getSnapshot().announcement).toBeNull();
+    handle.unregister();
+
+    // The next ordinary session is narrated again: the latch is per session,
+    // not a mode the controller falls into.
+    controller.registerSource(sourceEl, sourceReg());
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    expect(controller.getSnapshot().announcement).toBe("Picked up Alpha");
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
+    vi.advanceTimersByTime(400);
+    expect(controller.getSnapshot().announcement).toBe("Dropped Alpha on List");
+    controller.destroy();
+  });
+
+  /** A cancelled self-narrated session is silent too — cancel is a terminal. */
+  it("silences a cancelled self-narrating session", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ ownsAnnouncements: true }));
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(controller.getSnapshot().phase).toBe("idle");
+    expect(controller.getSnapshot().announcement).toBeNull();
+    controller.destroy();
+  });
+
   it("restores authored source attributes and ignores post-destroy handles", () => {
     sourceEl.setAttribute("tabindex", "2");
     sourceEl.setAttribute("aria-label", "Mine");

@@ -412,8 +412,13 @@ describe("ModelCatalogueEditor (react)", () => {
       '[data-model-catalogue-id="model-alpha"]',
     ) as HTMLElement;
 
+    // g16.028: pointer drag moved onto the common substrate. The row owns no
+    // drag attribute at all, and the handle carries only the substrate's own
+    // disarmed `draggable="false"` — the controller arms a native drag on a
+    // bridged source and on nothing else. The keyboard grab stays the
+    // component's own, because each arrow press is a committed move.
     expect(row.getAttribute("draggable")).toBeNull();
-    expect(handle.getAttribute("draggable")).toBe("true");
+    expect(handle.getAttribute("draggable")).toBe("false");
     fireEvent.keyDown(handle, { key: " " });
     fireEvent.keyDown(handle, { key: "ArrowDown" });
     expect(row.getAttribute("data-grabbed")).toBe("true");

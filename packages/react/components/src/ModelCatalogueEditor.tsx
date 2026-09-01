@@ -1,8 +1,9 @@
 import "@inflatable-cookie/poodle-core/styles/model-connection.css";
 
-import { useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 
 import {
+  createDragDropController,
   hiddenModelCatalogueItems,
   listReorderKeyIntent,
   modelCatalogueFocusAfterHide,
@@ -12,15 +13,18 @@ import {
   requestModelCatalogueOrder,
   requestModelCatalogueVisibility,
   shownModelCatalogueItems,
+  type DragDropCommitResult,
+  type DropIntent,
   type ModelCatalogueItem,
   type ModelCatalogueState,
 } from "@inflatable-cookie/poodle-core";
 
 import { Collapsible } from "./Collapsible";
 import { Callout } from "./Callout";
+import { DragDropProvider, useOptionalDragDrop } from "./drag-drop";
 import { EmptyState } from "./EmptyState";
-import { Icon } from "./Icon";
 import { IconButton } from "./IconButton";
+import { ModelCatalogueRow } from "./model-catalogue-editor/ModelCatalogueRow";
 import { Pill } from "./Pill";
 import { Spinner } from "./Spinner";
 
@@ -70,10 +74,20 @@ export function ModelCatalogueEditor({
   const rootRef = useRef<HTMLElement | null>(null);
 
   const [grabbedId, setGrabbedId] = useState<string | null>(null);
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [dropTargetId, setDropTargetId] = useState<string | null>(null);
   const [liveMessage, setLiveMessage] = useState("");
   const [hiddenOpen, setHiddenOpen] = useState(false);
+  const instanceId = useId();
+
+  /**
+   * Join the nearest provider, or own a controller.
+   *
+   * The registration ids and the subject family are both scoped to this
+   * editor, so two catalogues showing the same model ids under one ambient
+   * provider can neither mint one id nor resolve each other's rows.
+   */
+  const ambient = useOptionalDragDrop();
+  const [ownDragController] = useState(() => (ambient ? null : createDragDropController()));
+  const dragController = ambient?.controller ?? ownDragController!;
 
   const shown = useMemo(() => shownModelCatalogueItems(items), [items]);
   const hidden = useMemo(() => hiddenModelCatalogueItems(items), [items]);
@@ -168,40 +182,58 @@ export function ModelCatalogueEditor({
     }
   }
 
-  function handleDragStart(event: DragEvent<HTMLButtonElement>, index: number): void {
-    if (locked || !isDragEnabled) return;
-    setDraggingId(shown[index]?.id ?? null);
-    setDropTargetId(shown[index]?.id ?? null);
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain", String(index));
+  const subjectKind = `poodle.reorder-item:model-catalogue-editor:${instanceId}`;
+  const registrationScope = `model-catalogue-editor:${instanceId}`;
+
+  function sourceIdOf(id: string): string {
+    return `${registrationScope}:source:${id}`;
+  }
+
+  function targetIdOf(id: string): string {
+    return `${registrationScope}:target:${id}`;
+  }
+
+  function idOfTargetId(targetId: string): string {
+    const prefix = `${registrationScope}:target:`;
+    return targetId.startsWith(prefix) ? targetId.slice(prefix.length) : "";
+  }
+
+  function indexOfShown(id: string): number {
+    return shown.findIndex((item) => item.id === id);
+  }
+
+  /**
+   * One accepted drop, one complete shown-id order.
+   *
+   * Both indices are resolved again here: `items` may have been replaced while
+   * the pointer was down, and a stale index would move the wrong model.
+   */
+  function handleDrop(intent: DropIntent): DragDropCommitResult {
+    if (locked) return { status: "rejected", reason: "locked" };
+
+    const from = indexOfShown(dragController.getSnapshot().session?.subject.id ?? "");
+    const target = indexOfShown(idOfTargetId(intent.targetId));
+    if (from < 0 || target < 0 || from === target) {
+      return { status: "rejected", reason: "missing model" };
     }
+
+    const to =
+      intent.position === "before"
+        ? from < target
+          ? target - 1
+          : target
+        : from < target
+          ? target
+          : target + 1;
+
+    // A pointer drop ends any live keyboard grab: one row cannot be both
+    // dropped and still held.
+    setGrabbedId(null);
+    emitOrder(from, to);
+    return { status: "committed" };
   }
 
-  function handleDragOver(event: DragEvent<HTMLLIElement>, index: number): void {
-    if (locked || draggingId === null) return;
-    event.preventDefault();
-    setDropTargetId(shown[index]?.id ?? null);
-  }
-
-  function handleDrop(event: DragEvent<HTMLLIElement>, index: number): void {
-    event.preventDefault();
-    const fromIndex = draggingId === null
-      ? -1
-      : shown.findIndex((item) => item.id === draggingId);
-    if (fromIndex >= 0 && fromIndex !== index) {
-      emitOrder(fromIndex, index);
-    }
-    setDraggingId(null);
-    setDropTargetId(null);
-  }
-
-  function handleDragEnd(): void {
-    setDraggingId(null);
-    setDropTargetId(null);
-  }
-
-  return (
+  const editor = (
     <section
       ref={rootRef}
       className="poodle-model-catalogue-editor"
@@ -252,46 +284,33 @@ export function ModelCatalogueEditor({
         <>
           <ol className="poodle-model-catalogue-editor__list" aria-label="Shown models">
             {shown.map((item, index) => (
-              <li
+              <ModelCatalogueRow
                 key={item.id}
-                className="poodle-model-catalogue-editor__row"
-                data-model-catalogue-id={item.id}
-                data-grabbed={grabbedId === item.id ? "true" : "false"}
-                data-drop-target={dropTargetId === item.id ? "true" : "false"}
-                onDragOver={(event) => handleDragOver(event, index)}
-                onDrop={(event) => handleDrop(event, index)}
-                onDragEnd={handleDragEnd}
+                item={item}
+                index={index}
+                total={shown.length}
+                grabbed={grabbedId === item.id}
+                locked={locked}
+                isDragEnabled={isDragEnabled}
+                subjectKind={subjectKind}
+                sourceId={sourceIdOf(item.id)}
+                targetId={targetIdOf(item.id)}
+                indexOfShown={indexOfShown}
+                onDrop={handleDrop}
+                onHandleKeyDown={handleKeydown}
+                onToggleGrab={() => {
+                  if (locked || item.isDisabled) return;
+                  if (grabbedId === item.id) {
+                    setGrabbedId(null);
+                    announce("Dropped item.");
+                  } else {
+                    setGrabbedId(item.id);
+                    announce(
+                      `Grabbed ${item.label}. Use arrow keys to move, Escape to cancel.`,
+                    );
+                  }
+                }}
               >
-                <button
-                  type="button"
-                  className="poodle-icon-button"
-                  data-variant="ghost"
-                  data-size-role="chrome"
-                  data-reorder-handle=""
-                  draggable={isDragEnabled && !locked && !item.isDisabled}
-                  aria-pressed={grabbedId === item.id}
-                  aria-label={`${item.label}, position ${index + 1} of ${shown.length}`}
-                  disabled={locked || item.isDisabled}
-                  onDragStart={(event) => handleDragStart(event, index)}
-                  onKeyDown={(event) => handleKeydown(event, index)}
-                  onClick={() => {
-                    if (locked || item.isDisabled) return;
-                    if (grabbedId === item.id) {
-                      setGrabbedId(null);
-                      announce("Dropped item.");
-                    } else {
-                      setGrabbedId(item.id);
-                      announce(
-                        `Grabbed ${item.label}. Use arrow keys to move, Escape to cancel.`,
-                      );
-                    }
-                  }}
-                >
-                  <span className="poodle-icon-button__glyph" aria-hidden="true">
-                    <Icon name="grip-vertical" />
-                  </span>
-                </button>
-
                 <div className="poodle-model-catalogue-editor__identity">
                   <div className="poodle-model-catalogue-editor__label-row">
                     {leading ? (
@@ -361,7 +380,7 @@ export function ModelCatalogueEditor({
                     onClick={() => hideItem(item)}
                   />
                 </div>
-              </li>
+              </ModelCatalogueRow>
             ))}
           </ol>
 
@@ -409,5 +428,17 @@ export function ModelCatalogueEditor({
         </>
       )}
     </section>
+  );
+
+  // An editor that joined a provider contributes registrations to it. One with
+  // no provider owns a controller so it still reorders on its own. The editor
+  // owns its live region either way, so the substrate's own announcements are
+  // suppressed on the owned controller: one terminal must not be read twice.
+  return ambient ? (
+    editor
+  ) : (
+    <DragDropProvider controller={ownDragController!} describeAnnouncement={() => null}>
+      {editor}
+    </DragDropProvider>
   );
 }

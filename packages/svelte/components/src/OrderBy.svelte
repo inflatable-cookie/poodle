@@ -4,13 +4,28 @@
 
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/order-by.css";
-  import { layerContains, registerDismissLayer } from "@inflatable-cookie/poodle-core";
+  import {
+    createDragDropController,
+    layerContains,
+    registerDismissLayer,
+    type DragDropCommitResult,
+    type DragSourceRegistration,
+    type DropIntent,
+    type DropPosition,
+    type DropTargetRegistration,
+  } from "@inflatable-cookie/poodle-core";
   import { tick } from "svelte";
 
   import { anchored } from "./anchored";
   import { default as Button } from "./Button.svelte";
+  import { default as DragDropProvider } from "./DragDropProvider.svelte";
   import { default as IconButton } from "./IconButton.svelte";
   import { default as Select } from "./Select.svelte";
+  import {
+    dragDropSnapshotStore,
+    dragSourceAction,
+    dropTargetAction,
+  } from "./drag-drop-context";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type {
@@ -63,8 +78,6 @@
   const panelId = `poodle-order-by-${++nextOrderById}`;
   let open = $state(false);
   let addFieldValue = $state("");
-  let dragIndex = $state<number | null>(null);
-  let dragOverIndex = $state<number | null>(null);
   let rootElement = $state<HTMLDivElement | null>(null);
   let panelElement = $state<HTMLDivElement | null>(null);
   let uncontrolledValue = $state<OrderByValue>([]);
@@ -187,43 +200,136 @@
     );
   }
 
+  /**
+   * OrderBy always owns its controller. It is the one programme component that
+   * cannot join an ambient provider.
+   *
+   * The sort panel is portalled to the document body, so it is not inside any
+   * ancestor provider's connected root — and the substrate refuses a pointer
+   * press whose source is outside the root it was connected to
+   * (`onPointerDown`). A joined OrderBy would draw grips that never drag. So
+   * the panel carries its own provider and its own controller, which is also
+   * the only thing a portalled surface could be arbitrated by.
+   */
+  const dragController = createDragDropController();
+  const dragSource = dragSourceAction(dragController);
+  const dropTarget = dropTargetAction(dragController);
+  const dragSnapshot = dragDropSnapshotStore(dragController);
+
+  /**
+   * The registration namespace and the semantic family are both scoped to this
+   * builder: two mounted OrderBys can legitimately sort the same field keys,
+   * and under one ambient provider neither duplicate ids nor a cross-instance
+   * drop are acceptable.
+   */
+  /** A single clause has nowhere to go, and a disabled builder moves nothing. */
+  const canReorder = $derived(!disabled && effectiveValue.length > 1);
+
+  const subjectKind = `poodle.reorder-item:order-by:${panelId}`;
+  const registrationScope = `order-by:${panelId}`;
+
+  function sourceIdOf(key: string): string {
+    return `${registrationScope}:source:${key}`;
+  }
+
+  function targetIdOf(key: string): string {
+    return `${registrationScope}:target:${key}`;
+  }
+
+  function keyOfTargetId(targetId: string): string {
+    const prefix = `${registrationScope}:target:`;
+    return targetId.startsWith(prefix) ? targetId.slice(prefix.length) : "";
+  }
+
+  function indexOfKey(key: string): number {
+    return effectiveValue.findIndex((item) => item.key === key);
+  }
+
+  function ownsKey(key: string): boolean {
+    return indexOfKey(key) >= 0;
+  }
+
+  function sourceRegistration(key: string, label: string): DragSourceRegistration {
+    return {
+      sourceId: sourceIdOf(key),
+      subject: { kind: subjectKind, id: key },
+      allowedOperations: ["move"],
+      label,
+      disabled,
+    };
+  }
+
+  function targetRegistration(key: string, label: string, index: number): DropTargetRegistration {
+    return {
+      targetId: targetIdOf(key),
+      acceptedKinds: [subjectKind],
+      disabled,
+      label,
+      // The whole row is one band: a field travelling down lands after its
+      // target, one travelling up lands before it, so the dropped field ends
+      // up *at* the row it was dropped on — the pre-substrate result.
+      resolvePosition: ({ subject }): DropPosition =>
+        indexOfKey(subject.id) < index ? "after" : "before",
+      canDrop: (intent, subject) => {
+        if (!ownsKey(subject.id)) {
+          return { accepted: false, reason: "not this sort builder" };
+        }
+        return subject.id === key
+          ? { accepted: false, reason: "same field" }
+          : { accepted: true, intent };
+      },
+      onDrop: handleDrop,
+    };
+  }
+
+  /**
+   * One accepted drop, one complete ordering.
+   *
+   * Both indices are resolved again here rather than trusted from hover: the
+   * host may have replaced `value` while the pointer was down, and a stale
+   * index would move the wrong field.
+   */
+  function handleDrop(intent: DropIntent): DragDropCommitResult {
+    if (disabled) return { status: "rejected", reason: "disabled" };
+
+    const from = indexOfKey($dragSnapshot.session?.subject.id ?? "");
+    const target = indexOfKey(keyOfTargetId(intent.targetId));
+    if (from < 0 || target < 0 || from === target) {
+      return { status: "rejected", reason: "missing field" };
+    }
+
+    const to =
+      intent.position === "before"
+        ? from < target
+          ? target - 1
+          : target
+        : from < target
+          ? target
+          : target + 1;
+
+    const nextValue = [...effectiveValue];
+    const [item] = nextValue.splice(from, 1);
+    nextValue.splice(to, 0, item);
+    sync(nextValue);
+    return { status: "committed" };
+  }
+
+  /**
+   * Alt+Arrow: the contract's keyboard reorder, run as a real session so it
+   * shares eligibility, revalidation, and the single commit with a drop.
+   */
   function moveField(index: number, offset: -1 | 1): void {
     if (disabled) return;
 
-    const nextIndex = index + offset;
-    if (nextIndex < 0 || nextIndex >= effectiveValue.length) return;
+    const from = effectiveValue[index];
+    const target = effectiveValue[index + offset];
+    if (!from || !target) return;
 
-    const nextValue = [...effectiveValue];
-    const [item] = nextValue.splice(index, 1);
-    nextValue.splice(nextIndex, 0, item);
-    sync(nextValue);
-  }
-
-  function handleDragStart(index: number): void {
-    if (disabled) return;
-    dragIndex = index;
-    dragOverIndex = index;
-  }
-
-  function handleDragEnter(index: number): void {
-    if (dragIndex === null || disabled) return;
-    dragOverIndex = index;
-  }
-
-  function handleDrop(index: number): void {
-    if (dragIndex === null || disabled) return;
-
-    const nextValue = [...effectiveValue];
-    const [item] = nextValue.splice(dragIndex, 1);
-    nextValue.splice(index, 0, item);
-    dragIndex = null;
-    dragOverIndex = null;
-    sync(nextValue);
-  }
-
-  function clearDragState(): void {
-    dragIndex = null;
-    dragOverIndex = null;
+    dragController.requestKeyboardDrop({
+      sourceId: sourceIdOf(from.key),
+      targetId: targetIdOf(target.key),
+      position: offset === 1 ? "after" : "before",
+    });
   }
 
   function clearAll(): void {
@@ -244,15 +350,6 @@
     event.preventDefault();
     event.stopPropagation();
     clearAll();
-  }
-
-  function handleDragOver(event: DragEvent): void {
-    event.preventDefault();
-  }
-
-  function handleDropEvent(event: DragEvent, index: number): void {
-    event.preventDefault();
-    handleDrop(index);
   }
 
   $effect(() => {
@@ -343,6 +440,14 @@
       aria-label={ariaLabel}
       tabindex="-1"
     >
+      <DragDropProvider controller={dragController}>
+        {@render panel()}
+      </DragDropProvider>
+    </div>
+  {/if}
+</div>
+
+{#snippet panel()}
       <div class="poodle-order-by__panel">
         {#if triggerVariant === "icon"}
           <div class="poodle-order-by__panel-header">
@@ -363,25 +468,24 @@
 
         {#if effectiveValue.length > 0}
           <div class="poodle-order-by__list" role="list">
-            {#each effectiveValue as item, index (`${item.key}-${index}`)}
+            {#each effectiveValue as item, index (item.key)}
               {@const field = fieldMap.get(item.key)}
+              {@const label = field?.label ?? item.key}
               <div
                 class="poodle-order-by__item"
-                class:poodle-order-by__item--dragging={dragIndex === index}
-                class:poodle-order-by__item--drop-target={dragOverIndex === index && dragIndex !== index}
+                class:poodle-order-by__item--dragging={$dragSnapshot.sourceId === sourceIdOf(item.key) &&
+                  ($dragSnapshot.phase === "dragging" || $dragSnapshot.phase === "dropping")}
+                class:poodle-order-by__item--drop-target={$dragSnapshot.targetId === targetIdOf(item.key) &&
+                  $dragSnapshot.targetPosture === "accepted"}
                 role="listitem"
+                use:dropTarget={canReorder ? targetRegistration(item.key, label, index) : null}
               >
                 <button
                   type="button"
                   class="poodle-order-by__drag-handle"
-                  draggable={!disabled}
                   disabled={disabled}
-                  aria-label={`Reorder ${field?.label ?? item.key}. Drag or use Alt plus arrow keys.`}
-                  ondragstart={() => handleDragStart(index)}
-                  ondragenter={() => handleDragEnter(index)}
-                  ondragover={handleDragOver}
-                  ondrop={(event) => handleDropEvent(event, index)}
-                  ondragend={clearDragState}
+                  aria-label={`Reorder ${label}. Drag or use Alt plus arrow keys.`}
+                  use:dragSource={canReorder ? sourceRegistration(item.key, label) : null}
                   onkeydown={(event) => {
                     if (event.altKey && event.key === "ArrowUp" && index > 0) {
                       event.preventDefault();
@@ -436,6 +540,4 @@
           </div>
         {/if}
       </div>
-    </div>
-  {/if}
-</div>
+{/snippet}

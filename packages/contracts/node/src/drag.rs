@@ -197,6 +197,14 @@ pub struct NodeDragSource {
     /// Opt-in keyboard pickup, and the origin for ordered logical traversal.
     /// A source that omits it leaves Space and Enter to the host component.
     pub keyboard_order: Option<i32>,
+    /// This source narrates its own sessions, so the controller's live region
+    /// says nothing about them.
+    ///
+    /// A composite with a contract-mandated live region of its own — the model
+    /// catalogue announces "Moved X to position 3 of 4" — otherwise has one
+    /// move read out twice, in two different sentences, from two regions. The
+    /// renderer-neutral half of core's `ownsAnnouncements`.
+    pub owns_announcements: bool,
     /// Host preparation for a drag that may leave this window.
     ///
     /// Optional and per source, because a lease belongs to the subject being
@@ -228,6 +236,7 @@ impl NodeDragSource {
             label: label.into(),
             instructions: None,
             keyboard_order: None,
+            owns_announcements: false,
             cross_window_source_bridge: None,
             file_export_bridge: None,
             on_drag_start: None,
