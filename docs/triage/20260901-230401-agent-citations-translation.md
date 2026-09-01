@@ -31,53 +31,51 @@ keeps citation meaning outside raw `AgentMessage` markdown and outside
 
 ### 1. Smallest candidate split
 
-The first candidate is one per-message `AgentCitations` composition. It owns
-the relationship between authored semantic blocks, inline reference marks, and
-one compact source list. It can reuse `AgentMessage` typography, `TextLink`,
-and an ordinary disclosure control where their existing semantics fit.
+The first candidate is one per-message `AgentCitations` composition. Its
+smallest proof is the dossier's paragraph/inline fixture: authored paragraphs,
+inline text, and inline reference marks with one compact source list. It can
+reuse `AgentMessage` typography, `TextLink`, and an ordinary disclosure control
+where their existing semantics fit.
 
 `InlineReference` and `SourceList` are composition roles first, not public
 primitives. Admit either as a primitive only after it has a distinct second
 use outside the agent-citation composition, with no agent/provider fields and
 its own semantic proof. Current evidence does not meet that bar.
 
-The existing message surface may be extended only at an authored semantic
-content seam. Do not add `sources`, marker regexes, parser offsets, or source
+The citation seam may be extended only at an authored semantic-content
+boundary. Do not add `sources`, marker regexes, parser offsets, or source
 records to raw `AgentMessage` markdown or to `TranscriptMessage`. The
 transcript receives a composed message surface; it does not infer citations
 from child text.
 
-### 2. Authored semantic content shape
+### 2. Bounded citation fixture and identity
 
-The shape below is a planning fixture, not a public TypeScript or Rust API.
-It describes the smallest renderer-neutral input that can carry identity
-through streaming replacement without exposing `marked`, pulldown-cmark, or a
-provider schema:
+The shape below is the dossier's paragraph/inline planning fixture, not a
+public TypeScript or Rust API. It carries citation identity through streaming
+replacement without exposing `marked`, pulldown-cmark, or a provider schema:
 
 ```ts
-type AuthoredAgentContent = {
-  messageId: string;
-  blocks: readonly AuthoredBlock[];
-  targets: readonly AuthoredTarget[];
-};
-
-type AuthoredInline =
+type InlinePart =
   | { kind: "text"; value: string }
   | { kind: "reference"; targetId: string; label: string };
 
-type AuthoredTarget = {
+type ReferenceTarget = {
   id: string;
   title: string;
   href?: string | null; // present only when the host has admitted it
   availability: "available" | "unavailable";
 };
+
+type CitedMessageContent = {
+  messageId: string;
+  blocks: readonly { inlines: readonly InlinePart[] }[];
+  targets: readonly ReferenceTarget[];
+};
 ```
 
-`AuthoredBlock` must cover the existing semantic block families — paragraph,
-heading, code, list, blockquote, and rule — with authored inline content where
-the block accepts it. The fixture must grow from that renderer-neutral block
-surface, not from the current markdown AST. A composition slot is preferable
-to making the parser's `MdInline` or Rust equivalent the cross-runtime API.
+`blocks` is deliberately paragraph-only in this smallest proof. It does not
+settle headings, code, lists, blockquotes, rules, or any other rich authored
+content carrier.
 
 Identity rules:
 
@@ -93,7 +91,26 @@ Identity rules:
   whose target disappears stays tied to its old `targetId` and becomes
   unresolved until the host supplies an explicit association.
 
-### 3. Source-list placement and ownership
+### 3. Serial prerequisite: full authored semantic-content carrier
+
+Production rich content needs a separate, serial architecture decision before
+any implementation card opens. That decision must choose one route:
+
+- an existing-contract-aligned authored semantic surface, derived from the
+  current `AgentMessage`/shared semantic-block authority and extended only with
+  the identity needed by authored references; or
+- a documented composition-slot route whose authored content remains
+  renderer-neutral and projects through the active runtime boundary.
+
+This packet does not choose between those routes and does not define an
+`AuthoredBlock` type. The full carrier is not settled, promotion-ready, or part
+of the smallest citations seam. The paragraph/inline fixture above remains
+the complete citation proof until that architecture decision is recorded in a
+canonical destination. Citation identity, source-list, accessibility, URL,
+and consumer-boundary decisions in this packet remain accepted inputs to that
+later decision.
+
+### 4. Source-list placement and ownership
 
 The first placement is a source list inside the per-message composition,
 following the authored message body and behind one disclosure button. It is
@@ -112,7 +129,7 @@ controlled source-list region. Enter and Space toggle it; focus stays on the
 button. Source rows enter the normal tab sequence only when the list is
 disclosed.
 
-### 4. Inline-mark interaction
+### 5. Inline-mark interaction
 
 Inline marks are visual, noninteractive text by default. They do not create a
 tab stop, intercept a click, or turn every repeated occurrence into another
@@ -126,7 +143,7 @@ and source-list parity. A tooltip is not required for the first surface and
 must never be the only source of identity; if added later, it must work on
 keyboard focus and have a real trigger-to-tooltip relationship.
 
-### 5. Mark-to-source accessibility
+### 6. Mark-to-source accessibility
 
 The composition owns the semantic association between each occurrence and its
 target; the consumer owns the target's meaning and data. Renderers preserve
@@ -151,7 +168,7 @@ Web automated checks and manual screen-reader review must cover names, roles,
 expanded state, source-row relationships, unavailable status, one settled
 message announcement, and absence of a nested/conflicting live region.
 
-### 6. Unavailable and missing targets
+### 7. Unavailable and missing targets
 
 - A target record with `availability: "unavailable"`, a missing admitted URL,
   or a rejected URL keeps its source row. The row is named text with an
@@ -169,7 +186,7 @@ message announcement, and absence of a nested/conflicting live region.
 - Ellipsis may reduce visual density, but it must not remove the useful title,
   label, or status from the accessible name at a narrow width.
 
-### 7. Copied text and selection
+### 8. Copied text and selection
 
 The first copy rule is ordinary selection. Do not intercept selection to make a
 citation action work, and do not add a copy button to `AgentCitations`.
@@ -181,7 +198,7 @@ labels, and provenance are not appended to message copy. A user can select and
 copy the disclosed source list separately. Any future explicit copy action
 must declare a new projection rather than silently changing this rule.
 
-### 8. URL rendering invariant
+### 9. URL rendering invariant
 
 The consumer validates and admits URLs before they reach the composition.
 Poodle does not fetch, canonicalize, verify, redirect, authenticate, or cache a
@@ -200,7 +217,7 @@ in its `target`/`rel` policy, including `noopener` (and `noreferrer` when the
 consumer's policy requires it). Poodle does not infer trust from a title,
 domain, redirect result, or demo default.
 
-### 9. First consumer evidence
+### 10. First consumer evidence
 
 The first proof must use a host-authored fixture and one real downstream
 consumer adapter. The in-repo preview specimen is useful for rendering checks,
@@ -220,18 +237,22 @@ promotion hold, not permission to use a preview fixture as a substitute.
 
 ## Cohort Boundary
 
-The future contract covers the current Poodle implementation cohort: Svelte,
-React, renderer-neutral shared Rust composition, and GPUI through `poodle-node`.
-Parity means the same authored inputs, identity, states, interaction intent,
-and token usage; it does not mean one parser or four copied implementations.
+The bounded paragraph/inline citation proof covers the current Poodle
+implementation cohort: Svelte, React, renderer-neutral shared Rust composition,
+and GPUI through `poodle-node`. Parity means the same authored inputs, identity,
+states, interaction intent, and token usage; it does not mean one parser or four
+copied implementations. The full authored rich-content carrier has no settled
+cohort contract until the serial architecture prerequisite is resolved.
 
-- Svelte and React must render the same authored fixture and preserve target
-  associations through initial, streaming-replacement, and settled snapshots.
-- Shared Rust vectors must cover repeated, duplicate-definition, unresolved,
-  unavailable, and safe/unsafe URL states without markdown-parser or provider
-  fields in the public shape.
-- `poodle-render` and headless GPUI proof must show node order, labels, stable
-  IDs, source-row state, disclosure intent, activation intent, and focus intent.
+- Svelte and React must render the same paragraph/inline fixture and preserve
+  target associations through initial, streaming-replacement, and settled
+  snapshots.
+- Shared Rust vectors must cover the fixture's repeated,
+  duplicate-definition, unresolved, unavailable, and safe/unsafe URL states
+  without markdown-parser or provider fields in the public shape.
+- `poodle-render` and headless GPUI proof must show paragraph/inline order,
+  labels, stable IDs, source-row state, disclosure intent, activation intent,
+  and focus intent.
 - The current GPUI 0.2.2 boundary cannot provide a mounted native accessibility
   tree. Headless construction is evidence of structure/intent only; it is not
   mounted assistive-technology proof and must not be described as such.
@@ -248,26 +269,32 @@ path.
 ### Promotion oracle
 
 Promotion can open a bounded contract/package card only when every item below
-is true:
+is true. The full authored semantic-content carrier is a serial prerequisite,
+not a decision this citation packet silently supplies:
 
-1. The authored `messageId`/`targetId` lifecycle is explicit and survives
+1. A separate architecture decision has selected and canonically recorded
+   either an existing-contract-aligned authored semantic surface or a
+   composition-slot route for the full authored semantic-content carrier. No
+   implementation card opens before that prerequisite is resolved; the
+   citations proof remains bounded to paragraph/inline content.
+2. The authored `messageId`/`targetId` lifecycle is explicit and survives
    stream replacement, reparse, removal, and settlement without positional
    rebinding.
-2. Per-message source-list placement, noninteractive mark default, disclosure
+3. Per-message source-list placement, noninteractive mark default, disclosure
    keyboard behavior, mark-to-source reading path, copy projection, and
    unavailable presentation are all fixed in the contract.
-3. The consumer URL-admission boundary and new-context opener policy are
+4. The consumer URL-admission boundary and new-context opener policy are
    documented; no unsafe value can reach an anchor.
-4. The dense/repeated, missing/unavailable, unsafe-link, narrow, reduced-motion,
+5. The dense/repeated, missing/unavailable, unsafe-link, narrow, reduced-motion,
    stream-replacement, keyboard, ordinary-selection, and assistive-technology
-   fixtures pass in Svelte and React, with the same semantic cases in shared
-   Rust and a headless GPUI construction/interaction proof.
-5. One real consumer adapter passes the fixture. A second independent consumer
+   paragraph/inline fixtures pass in Svelte and React, with the same semantic
+   cases in shared Rust and a headless GPUI construction/interaction proof.
+6. One real consumer adapter passes the fixture. A second independent consumer
    shape exists before the data model is called generalized.
-6. Each proposed public primitive has an independent reuse case. Otherwise
+7. Each proposed public primitive has an independent reuse case. Otherwise
    `InlineReference` and `SourceList` remain internal roles of
    `AgentCitations`.
-7. Licensing/provenance review accounts for code, CSS, icons, images, fonts,
+8. Licensing/provenance review accounts for code, CSS, icons, images, fonts,
    copied text, and consumer source metadata. Named demos remain evidence, not
    copy permission.
 
@@ -275,6 +302,7 @@ is true:
 
 | Invariant | Smallest adversarial counterexample | Expected failure or stop | Required proof |
 | --- | --- | --- | --- |
+| Full carrier has an explicit architecture owner | The citation packet introduces an undefined `AuthoredBlock` for headings, code, lists, or other rich content | Stop; no production rich-content implementation card opens until the architecture decision chooses the existing-contract-aligned or composition-slot route | Separate architecture decision recorded before any implementation card |
 | Identity is authored | A streamed reparse inserts text before `[1]` and a positional marker now points at source B | Stop; never infer a new target from position, number, URL, title, or DOM key | Svelte/React replacement trace plus shared vector |
 | Removed targets do not rebind | Target A disappears and the next target array entry is B | Stop with the old mark unresolved; no silent retarget | Stable-ID stream fixture |
 | Source rows are scoped | A transcript-level registry merges two messages that reuse a local target ID | Hold per-message composition; no global source table without a new namespace contract | Two-message isolation test |
@@ -302,6 +330,7 @@ is true:
 | Adopt Beautiful UI/AICSS provider fields, fetching, or demo assets | Their behavior is useful evidence, but provider vocabulary, source trust, licensing, and assets belong elsewhere. |
 | Append source titles or URLs to every message copy | It changes ordinary selection and duplicates source-list content without a host request. |
 | Promote from a preview-only Svelte specimen | A specimen cannot prove consumer ownership, cross-runtime semantics, or independent reuse. |
+| Define a full `AuthoredBlock` in this packet | It silently creates a parallel rich-content model and makes the smallest citation seam depend on an unresolved architecture choice. |
 | Extend the current GPUI or Jetstream boundary in this lane | GPUI lacks a mounted native accessibility tree; Jetstream remains a separately deferred backend. |
 
 ## Evidence Used
@@ -326,9 +355,9 @@ is true:
   backend is separately deferred by the architecture.
 - [g16.038 dossier](../research/value-tracks/agent-citations-and-sources.md):
   Beautiful UI and AICSS behavior observations, pinned public-repository and
-  licensing limits, Figmatic/Bovine consumer-boundary comparisons, stable-ID
-  fixture, accessibility recommendation, link-safety gate, cohort feasibility,
-  and smallest proof.
+  licensing limits, Figmatic/Bovine consumer-boundary comparisons, the bounded
+  paragraph/inline stable-ID fixture, accessibility recommendation, link-safety
+  gate, cohort feasibility, and smallest proof.
 - [Beautiful UI Streaming Text](https://www.beautifului.dev/r/streaming-text.json),
   [AICSS Inline Citations](https://www.aicss.dev/components/inline-citations),
   WAI-ARIA/APG, OWASP, and MDN are behavior and safety evidence only. No code,
@@ -338,12 +367,14 @@ is true:
 
 | Meaning | Destination after separate intake and promotion |
 | --- | --- |
-| Authored semantic content and `AgentCitations` behavior | Agent-message/composition contract, with the active Svelte/React/Rust/GPUI surface named explicitly |
+| Bounded paragraph/inline citation fixture and identity/source semantics | A citation composition/contract surface limited to the dossier fixture; no full authored block carrier is implied |
+| Full authored semantic-content carrier | A separate serial architecture decision choosing an existing-contract-aligned semantic surface or a composition-slot route; canonical architecture/contract destination must be selected before any implementation card |
+| `AgentCitations` behavior after the prerequisite | Agent-message/composition contract, with the active Svelte/React/Rust/GPUI surface named explicitly |
 | Transcript announcement, focus, and virtualization boundary | `AgentTranscript` contract; no transcript-owned source records |
 | Admitted anchors and unavailable text | Composition contract over existing `TextLink`; URL admission and redirect/auth policy remain in the consumer |
-| Stable semantic vectors and renderer proof | Shared core/Rust/headless vectors, `poodle-render`, `poodle-node`, and focused Svelte/React/GPUI evidence |
+| Stable paragraph/inline vectors and renderer proof | Shared core/Rust/headless vectors, `poodle-render`, `poodle-node`, and focused Svelte/React/GPUI evidence; rich-content vectors wait for the serial prerequisite |
 | First consumer adapter | Owning downstream product; its source schema and provenance remain outside Poodle |
-| Promotion sequencing and hold state | One future bounded roadmap card and completion log after orchestrator intake; no card is ready from this packet alone |
+| Promotion sequencing and hold state | One future bounded roadmap card and completion log after the serial prerequisite and orchestrator intake; no implementation card is ready from this packet alone |
 
 No contract, package, roadmap, consumer, or research file is changed by this
 packet. The packet is the complete translation deliverable; its PR remains
