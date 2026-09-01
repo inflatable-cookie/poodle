@@ -9,9 +9,10 @@ Governing refs: `docs/contracts/components/tree.md`,
 `docs/specs/069-dependable-drag-and-drop-substrate.md`
 Branch: `feature/g16-036-tree-external-drop-authority`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-036-tree-external-drop-authority`
-Base: rebased onto `origin/main` at `83e290cb996b202c0b7fa43bdf9eec6e7b3590e4`
-(PR #131 nested-menu research plus PR #124 motion closeout). Planning commit
-`169651f51b3443ffad08f4dd435198384deacebd` is an ancestor.
+Base: rebased onto `origin/main` at `c90ea1c6cec887c54827cbb518e0f3ba54901429`
+(PR #132 live-series research, PR #131 nested-menu research, PR #124 motion
+closeout). Planning commit `169651f51b3443ffad08f4dd435198384deacebd` is an
+ancestor.
 
 ## Outcome
 
@@ -92,8 +93,9 @@ Earlier card-oracle plants remain in the history at `8d074c279`.
 - `bun test packages/core/test/tree.test.ts packages/core/test/drag-drop-geometry.test.ts` — 40 pass
 - `bunx vitest run packages/svelte/components/test/Tree.test.ts packages/react/components/test/Tree.test.tsx` — 80 pass
 - `effigy test:web-pack-install` — pass, `packedTreeReorderProof` includes
-  `@inflatable-cookie/poodle-react`
-- `effigy ci:web` / `effigy docs:check` — rerun after rebase onto `83e290cb9`
-- `git diff --check origin/main...HEAD` — rerun after rebase
+  `@inflatable-cookie/poodle-react`; installed roster counts 176/176
+- `effigy ci:web` — pass
+- `effigy docs:check` — pass
+- `git diff --check origin/main...HEAD` — clean
 - writable scope: no Rust/GPUI/Jetstream/headless/render/contracts crate files;
-  no g16 README or generation-index edits in the repair commit
+  no g16 README or generation-index edits in the repair commits
