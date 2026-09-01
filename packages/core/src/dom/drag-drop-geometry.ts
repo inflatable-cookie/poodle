@@ -6,6 +6,7 @@
  * intent (or null). Leaves have no inside zone.
  */
 
+import { dropCommitDestination, type DropIntent } from "../drag-drop";
 import { flattenVisibleTreeRows, isTreeBranch, type TreeNodeLike } from "../tree";
 
 export type NestedDropKind = "item" | "container";
@@ -73,6 +74,19 @@ export function treeOutlineRows<T extends TreeNodeLike>(
     parent: row.parent,
     branch: isTreeBranch(row.node),
   }));
+}
+
+/** Indicator depth for an accepted intent's commit destination, not a second pointer pass. */
+export function treeAcceptedDropDepth(
+  rows: readonly TreeOutlineRow[],
+  intent: DropIntent,
+): number | null {
+  const dest = dropCommitDestination(intent);
+  const destRow = rows.find((row) => row.value === dest.targetId);
+  if (!destRow) return null;
+  if (dest.position === "inside") return destRow.depth + 1;
+  if (dest.position === "before" || dest.position === "after") return destRow.depth;
+  return null;
 }
 
 export interface TreeOutlineDrop {

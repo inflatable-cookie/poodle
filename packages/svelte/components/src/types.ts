@@ -714,6 +714,11 @@ export type MessageCenterItem = {
 export type {
   HistoryEntry,
   HistoryEntryPosition,
+  TreeDropPosition,
+  TreeReorderAuthority,
+  TreeReorderCandidate,
+  TreeReorderProps,
+  TreeReorderSubject,
 } from "@inflatable-cookie/poodle-core";
 
 export type HistoryBranch = {

@@ -10,7 +10,12 @@
  * and focus calls stay adapter-side.
  */
 
-import { dropCommitDestination, type DropEligibility, type DropIntent } from "./drag-drop";
+import {
+  dropCommitDestination,
+  type DragDropCommitResult,
+  type DropEligibility,
+  type DropIntent,
+} from "./drag-drop";
 
 export interface TreeNodeLike {
   value: string;
@@ -335,4 +340,108 @@ export function treeLocate<T extends TreeNodeLike>(
     return null;
   };
   return search(nodes, null);
+}
+
+export type TreeDropPosition = "before" | "after" | "inside";
+
+export interface TreeReorderSubject {
+  readonly sourceValue: string;
+  readonly movingValues: readonly string[];
+}
+
+export interface TreeReorderCandidate {
+  readonly subject: TreeReorderSubject;
+  readonly intent: DropIntent;
+}
+
+export interface TreeReorderAuthority {
+  projectMovingValues(
+    sourceValue: string,
+    selectedValues: readonly string[],
+  ): readonly string[];
+  canDrop(candidate: TreeReorderCandidate): DropEligibility;
+  onDrop(
+    candidate: TreeReorderCandidate,
+  ): DragDropCommitResult | Promise<DragDropCommitResult>;
+}
+
+export type TreeReorderProps =
+  | {
+      reorderAuthority?: null;
+      onReorder?: (from: string, to: string, position: TreeDropPosition) => void;
+    }
+  | { reorderAuthority: TreeReorderAuthority; onReorder?: never };
+
+export function isTreeDropPosition(position: DropIntent["position"]): position is TreeDropPosition {
+  return position === "before" || position === "after" || position === "inside";
+}
+
+/**
+ * True when a projected moving set is non-empty, unique, contains the source,
+ * and every value exists in the current tree. Invalid sets are refused, never
+ * reduced to `[sourceValue]`.
+ */
+export function treeMovingValuesAreValid<T extends TreeNodeLike>(
+  nodes: readonly T[],
+  sourceValue: string,
+  movingValues: readonly string[],
+): boolean {
+  if (movingValues.length === 0) return false;
+  const seen = new Set<string>();
+  for (const value of movingValues) {
+    if (seen.has(value)) return false;
+    seen.add(value);
+    if (findTreeNode(nodes, value) === null) return false;
+  }
+  return seen.has(sourceValue);
+}
+
+/** Latch a valid projected subject, or `null` when the projection is refused. */
+export function treeLatchReorderSubject<T extends TreeNodeLike>(
+  nodes: readonly T[],
+  sourceValue: string,
+  movingValues: readonly string[],
+): TreeReorderSubject | null {
+  if (!treeMovingValuesAreValid(nodes, sourceValue, movingValues)) return null;
+  return {
+    sourceValue,
+    movingValues: Object.freeze([...movingValues]),
+  };
+}
+
+/**
+ * Generic Tree safety, then live host policy, then structural validation of
+ * any rewritten destination. Hover fields stay on the accepted intent; only
+ * `destination` may change.
+ */
+export function treeAuthorityDropEligibility<T extends TreeNodeLike>(
+  nodes: readonly T[],
+  subject: TreeReorderSubject | null,
+  authority: TreeReorderAuthority | null | undefined,
+  intent: DropIntent,
+): DropEligibility {
+  if (!subject || !authority) {
+    return { accepted: false, reason: "unavailable" };
+  }
+  for (const moving of subject.movingValues) {
+    const safety = treeDropEligibility(nodes, moving, intent);
+    if (!safety.accepted) return safety;
+  }
+  const policy = authority.canDrop({ subject, intent });
+  if (!policy.accepted) return policy;
+  const dest = dropCommitDestination(policy.intent);
+  if (!isTreeDropPosition(dest.position) || !isTreeDropPosition(intent.position)) {
+    return { accepted: false, reason: "unavailable" };
+  }
+  const acceptedIntent: DropIntent = {
+    targetId: intent.targetId,
+    position: intent.position,
+    operation: intent.operation,
+    destination: dest,
+  };
+  for (const moving of subject.movingValues) {
+    const safety = treeDropEligibility(nodes, moving, acceptedIntent);
+    if (!safety.accepted) return safety;
+  }
+  return { accepted: true, intent: acceptedIntent };
 }

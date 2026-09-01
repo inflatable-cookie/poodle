@@ -12,7 +12,11 @@ import {
   treeSubtreeContains,
   treeToggleCheck,
   treeVirtualWindow,
+  treeMovingValuesAreValid,
+  treeLatchReorderSubject,
+  treeAuthorityDropEligibility,
   type TreeNodeLike,
+  type TreeReorderAuthority,
 } from "../src/tree.ts";
 
 const nodes: TreeNodeLike[] = [
@@ -213,5 +217,106 @@ describe("treeLocate", () => {
     expect(treeLocate(nodes, "src/a.ts")).toMatchObject({ parent: "src", index: 0 });
     expect(treeLocate(nodes, "src/lib/c.ts")).toMatchObject({ parent: "src/lib", index: 0 });
     expect(treeLocate(nodes, "missing")).toBeNull();
+  });
+});
+
+describe("tree reorder authority helpers", () => {
+  test("refuses empty, duplicate, source-omitting, and missing projections", () => {
+    expect(treeMovingValuesAreValid(nodes, "src/a.ts", [])).toBe(false);
+    expect(treeMovingValuesAreValid(nodes, "src/a.ts", ["src/a.ts", "src/a.ts"])).toBe(false);
+    expect(treeMovingValuesAreValid(nodes, "src/a.ts", ["src/lib"])).toBe(false);
+    expect(treeMovingValuesAreValid(nodes, "src/a.ts", ["src/a.ts", "ghost"])).toBe(false);
+    expect(treeMovingValuesAreValid(nodes, "src/a.ts", ["src/a.ts", "src/lib"])).toBe(true);
+    expect(treeLatchReorderSubject(nodes, "src/a.ts", [])).toBeNull();
+    expect(treeLatchReorderSubject(nodes, "src/a.ts", ["src/a.ts", "src/lib"])).toEqual({
+      sourceValue: "src/a.ts",
+      movingValues: ["src/a.ts", "src/lib"],
+    });
+  });
+
+  test("does not normalize an invalid projection to the source row", () => {
+    expect(treeLatchReorderSubject(nodes, "src/a.ts", ["docs"])).toBeNull();
+  });
+
+  test("generic safety plus host refusal paints no accepted intent", () => {
+    const subject = treeLatchReorderSubject(nodes, "src/a.ts", ["src/a.ts", "README.md"])!;
+    const authority: TreeReorderAuthority = {
+      projectMovingValues: () => subject.movingValues,
+      canDrop: () => ({ accepted: false, reason: "host" }),
+      onDrop: () => ({ status: "committed" }),
+    };
+    expect(
+      treeAuthorityDropEligibility(nodes, subject, authority, {
+        targetId: "docs",
+        position: "before",
+        operation: "move",
+      }),
+    ).toEqual({ accepted: false, reason: "host" });
+  });
+
+  test("a host rewrite keeps hover fields and validates the new destination", () => {
+    const subject = treeLatchReorderSubject(nodes, "README.md", ["README.md"])!;
+    const authority: TreeReorderAuthority = {
+      projectMovingValues: () => subject.movingValues,
+      canDrop: (candidate) => ({
+        accepted: true,
+        intent: {
+          ...candidate.intent,
+          destination: { targetId: "src/a.ts", position: "after" },
+        },
+      }),
+      onDrop: () => ({ status: "committed" }),
+    };
+    const hovered = {
+      targetId: "docs",
+      position: "before" as const,
+      operation: "move" as const,
+      destination: { targetId: "docs", position: "after" as const },
+    };
+    expect(treeAuthorityDropEligibility(nodes, subject, authority, hovered)).toEqual({
+      accepted: true,
+      intent: {
+        targetId: "docs",
+        position: "before",
+        operation: "move",
+        destination: { targetId: "src/a.ts", position: "after" },
+      },
+    });
+  });
+
+  test("a rewritten destination into a moving subtree is refused", () => {
+    const subject = treeLatchReorderSubject(nodes, "src", ["src"])!;
+    const authority: TreeReorderAuthority = {
+      projectMovingValues: () => subject.movingValues,
+      canDrop: (candidate) => ({
+        accepted: true,
+        intent: {
+          ...candidate.intent,
+          destination: { targetId: "src/a.ts", position: "before" },
+        },
+      }),
+      onDrop: () => ({ status: "committed" }),
+    };
+    expect(
+      treeAuthorityDropEligibility(nodes, subject, authority, {
+        targetId: "docs",
+        position: "before",
+        operation: "move",
+      }),
+    ).toEqual({ accepted: false, reason: "subtree" });
+  });
+
+  test("a missing authority or subject is unavailable, not a convenience fallback", () => {
+    const subject = treeLatchReorderSubject(nodes, "README.md", ["README.md"])!;
+    const intent = { targetId: "docs", position: "before" as const, operation: "move" as const };
+    expect(treeAuthorityDropEligibility(nodes, subject, null, intent)).toEqual({
+      accepted: false,
+      reason: "unavailable",
+    });
+    expect(treeAuthorityDropEligibility(nodes, null, {
+      projectMovingValues: () => ["README.md"],
+      canDrop: () => ({ accepted: true, intent }),
+      onDrop: () => ({ status: "committed" }),
+    }, intent)).toEqual({ accepted: false, reason: "unavailable" });
   });
 });

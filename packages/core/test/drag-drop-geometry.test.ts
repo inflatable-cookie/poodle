@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 
 import {
   resolveNestedDropPosition,
+  treeAcceptedDropDepth,
+  treeOutlineRows,
   treeResolveDropPosition,
   treeResolveOutlineDrop,
 } from "../src/dom/drag-drop-geometry";
@@ -373,5 +375,39 @@ describe("treeResolveOutlineDrop", () => {
         ...indent,
       }),
     ).toEqual({ to: "docs", position: "before", depth: 0, indicator: "before" });
+  });
+});
+
+describe("treeAcceptedDropDepth", () => {
+  const rows = treeOutlineRows([
+    { node: { value: "docs", children: [{ value: "guide.md" }] }, depth: 0, parent: null },
+    { node: { value: "guide.md" }, depth: 1, parent: "docs" },
+    { node: { value: "notes.txt" }, depth: 0, parent: null },
+  ]);
+
+  test("uses the commit destination, not the hovered row", () => {
+    expect(
+      treeAcceptedDropDepth(rows, {
+        targetId: "notes.txt",
+        position: "before",
+        operation: "move",
+        destination: { targetId: "guide.md", position: "after" },
+      }),
+    ).toBe(1);
+    expect(
+      treeAcceptedDropDepth(rows, {
+        targetId: "notes.txt",
+        position: "before",
+        operation: "move",
+        destination: { targetId: "docs", position: "after" },
+      }),
+    ).toBe(0);
+    expect(
+      treeAcceptedDropDepth(rows, {
+        targetId: "docs",
+        position: "inside",
+        operation: "move",
+      }),
+    ).toBe(1);
   });
 });

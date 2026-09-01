@@ -1,6 +1,6 @@
 # g16.036 — Tree External Drop Authority
 
-Status: ready
+Status: in-review
 Opened: 2026-09-01
 Depends on: merged `g16.028`, `g16.024`, and PR #125 at
 `a980cb7748fdf9751dd4ca64b02903111a44d59f`; independent of `g16.034`
@@ -177,3 +177,16 @@ or sibling-repository commands.
 After accepted merge, the orchestrator sends Figmatic the exact Poodle merge
 head, public type signatures, package import paths, and validation receipt.
 Figmatic then owns `g01.016 / 016-22` and removes its local pointer controller.
+
+## Implementation
+
+Paired Svelte/React Tree now takes `reorderAuthority` over the existing
+controller. Shared core owns `TreeReorderSubject`, `TreeReorderCandidate`,
+`TreeReorderAuthority`, `TreeReorderProps`, validity helpers, and
+`treeAcceptedDropDepth`. Both packages re-export the types. `reorderable`
+stays the enable switch. Authority mode never calls `onReorder`.
+
+Native delta is unchanged and explicit: no TreeSpec field, no pending Node
+commit, no rewritten full intent on native events, no multi-row `DragSubject`.
+`reorderAuthority` remains in `WEB_ONLY_PROPS`. Diff contains no Rust/GPUI
+source.

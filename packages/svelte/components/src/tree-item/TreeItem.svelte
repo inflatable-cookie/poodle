@@ -1,13 +1,15 @@
 <script lang="ts">
   import {
-    treeDropEligibility,
+    treeAcceptedDropDepth,
     treeResolveOutlineDrop,
     readTreeDropMetrics,
     type DragDropCommitResult,
+    type DragSubject,
     type TreeOutlineRow,
     type DragSession,
     type DragSourceRegistration,
     type DragTerminalOutcome,
+    type DropEligibility,
     type DropIntent,
     type DropTargetRegistration,
   } from "@inflatable-cookie/poodle-core";
@@ -19,7 +21,6 @@
 
   interface Props {
     node: TreeNode;
-    nodes: TreeNode[];
     outlineRows: TreeOutlineRow[];
     depth: number;
     parent: string | null;
@@ -33,7 +34,8 @@
     row: Snippet;
     group?: Snippet;
     showGroup?: boolean;
-    onDrop: (intent: DropIntent) => DragDropCommitResult;
+    canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
+    onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
     onDragStart: (session: DragSession) => void;
     onDragEnd: (outcome: DragTerminalOutcome) => void;
     onClick: (event: MouseEvent) => void;
@@ -44,7 +46,6 @@
 
   let {
     node,
-    nodes,
     outlineRows,
     depth,
     parent: _parent,
@@ -58,6 +59,7 @@
     row,
     group,
     showGroup = false,
+    canDrop,
     onDrop,
     onDragStart,
     onDragEnd,
@@ -76,27 +78,16 @@
   function applyDropDepth(): void {
     if (!itemEl) return;
     const snap = controller?.getSnapshot();
-    const rect = rowEl?.getBoundingClientRect();
     if (
       !snap ||
       snap.targetId !== node.value ||
       snap.targetPosture !== "accepted" ||
-      !snap.pointer ||
-      !rect
+      !snap.session?.intent
     ) {
       itemEl.style.removeProperty("--poodle-tree-drop-depth");
       return;
     }
-    const metrics = rowEl ? readTreeDropMetrics(rowEl) : { indentPx: 16, gutterPx: 24 };
-    const depth = treeResolveOutlineDrop({
-      rows: outlineRows,
-      from: snap.session?.subject.id ?? "",
-      to: node.value,
-      x: snap.pointer.x,
-      y: snap.pointer.y,
-      rect,
-      ...metrics,
-    })?.depth;
+    const depth = treeAcceptedDropDepth(outlineRows, snap.session.intent);
     if (depth == null) itemEl.style.removeProperty("--poodle-tree-drop-depth");
     else itemEl.style.setProperty("--poodle-tree-drop-depth", String(depth));
   }
@@ -104,6 +95,7 @@
   $effect(() => {
     void itemEl;
     void rowEl;
+    void outlineRows;
     if (!controller) return;
     applyDropDepth();
     return controller.subscribe(applyDropDepth);
@@ -143,7 +135,7 @@
         destination: { targetId: placement.to, position: placement.position },
       };
     },
-    canDrop: (intent, subject) => treeDropEligibility(nodes, subject.id, intent),
+    canDrop,
     onDrop,
   });
 </script>

@@ -397,6 +397,13 @@ export type TreeNode = {
 };
 export type TreeDropPosition = "before" | "after" | "inside";
 
+export type {
+  TreeReorderAuthority,
+  TreeReorderCandidate,
+  TreeReorderProps,
+  TreeReorderSubject,
+} from "@inflatable-cookie/poodle-core";
+
 export type TableSortDirection = "asc" | "desc";
 export type TableFilters = Record<string, string>;
 export type TablePagination = {

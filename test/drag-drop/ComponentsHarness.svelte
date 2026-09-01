@@ -5,8 +5,9 @@
   import { default as DragDropProvider } from "../../packages/svelte/components/src/DragDropProvider.svelte";
   import { default as ModelCatalogueEditor } from "../../packages/svelte/components/src/ModelCatalogueEditor.svelte";
   import { default as OrderBy } from "../../packages/svelte/components/src/OrderBy.svelte";
+  import { default as Tree } from "../../packages/svelte/components/src/Tree.svelte";
   import type { EditorBlock, OrderByValue } from "../../packages/svelte/components/src/types";
-  import type { ModelCatalogueItem } from "@inflatable-cookie/poodle-core";
+  import type { ModelCatalogueItem, TreeReorderAuthority } from "@inflatable-cookie/poodle-core";
 
   function model(id: string, label: string): ModelCatalogueItem {
     return {
@@ -58,6 +59,36 @@
   ]);
   let rowCount = $state(0);
 
+  const treeNodes = [
+    { value: "a.ts", label: "a.ts" },
+    { value: "b.ts", label: "b.ts" },
+    { value: "c.ts", label: "c.ts" },
+  ];
+  let treeSelected = $state<string[]>(["a.ts"]);
+  let treeRefuse = $state(false);
+  let treeDrops = $state(0);
+  let treeMoving = $state("");
+  let treeDest = $state("");
+  const treeAuthority: TreeReorderAuthority = {
+    projectMovingValues(source, selected) {
+      return selected.includes(source) && selected.length > 0 ? [...selected] : [source];
+    },
+    canDrop(candidate) {
+      if (treeRefuse) return { accepted: false, reason: "occupied" };
+      return { accepted: true, intent: candidate.intent };
+    },
+    onDrop(candidate) {
+      treeMoving = candidate.subject.movingValues.join(",");
+      const dest = candidate.intent.destination ?? {
+        targetId: candidate.intent.targetId,
+        position: candidate.intent.position,
+      };
+      treeDest = `${dest.targetId}:${dest.position}`;
+      treeDrops += 1;
+      return { status: "committed" };
+    },
+  };
+
   function applyOrder(items: ModelCatalogueItem[], ids: string[]): ModelCatalogueItem[] {
     return ids.map((id) => items.find((item) => item.id === id)!).filter(Boolean);
   }
@@ -79,6 +110,12 @@
       replaceBlocks(ids: string[]) {
         blocks = ids.map((id) => blocks.find((entry) => entry.id === id)!).filter(Boolean);
       },
+      selectTree(values: string[]) {
+        treeSelected = values;
+      },
+      refuseTree() {
+        treeRefuse = true;
+      },
     };
   });
 </script>
@@ -98,6 +135,9 @@
     data-rows-count={rowCount}
     data-order-c={orderC.join(",")}
     data-order-c-count={orderCCount}
+    data-tree-drops={treeDrops}
+    data-tree-moving={treeMoving}
+    data-tree-dest={treeDest}
   ></div>
 
   <div
@@ -183,4 +223,14 @@
     />
   </div>
   </DragDropProvider>
+
+  <div id="svelte-tree-auth">
+    <Tree
+      nodes={treeNodes}
+      selectedValues={treeSelected}
+      reorderable
+      reorderAuthority={treeAuthority}
+      ariaLabel="Authority tree"
+    />
+  </div>
 </div>

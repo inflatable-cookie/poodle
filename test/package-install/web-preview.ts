@@ -395,6 +395,86 @@ async function provePackedHistoryEntryTypes(
   };
 }
 
+const PACKED_TREE_REORDER_DIAGNOSTIC = "Types of property 'onReorder' are incompatible.";
+
+async function provePackedTreeReorderTypes(
+  consumerRoot: string,
+): Promise<Record<string, unknown>> {
+  const compiler = join(consumerRoot, "node_modules", ".bin", "tsc");
+  if (!existsSync(compiler)) {
+    throw new Error(
+      "the packed consumer did not install a TypeScript compiler; the Tree reorder type proof cannot run",
+    );
+  }
+
+  const positive = await runTypeCompile(consumerRoot, compiler, "tsconfig.tree-positive.json");
+  if (positive.exitCode !== 0 || positive.output.length > 0) {
+    throw new Error(
+      `packed Tree reorder positive proof failed on the installed tarball:\n${positive.output}`,
+    );
+  }
+
+  const negatives = [
+    {
+      importPath: "@inflatable-cookie/poodle-svelte",
+      file: "tree-reorder-root-negative.ts",
+      config: "tsconfig.tree-root-negative.json",
+    },
+    {
+      importPath: "@inflatable-cookie/poodle-svelte/types",
+      file: "tree-reorder-types-negative.ts",
+      config: "tsconfig.tree-types-negative.json",
+    },
+    {
+      importPath: "@inflatable-cookie/poodle-core",
+      file: "tree-reorder-core-negative.ts",
+      config: "tsconfig.tree-core-negative.json",
+    },
+  ] as const;
+
+  const negativeEvidence = [];
+  for (const negative of negatives) {
+    assertUnsuppressed(consumerRoot, negative.file);
+    const compile = await runTypeCompile(consumerRoot, compiler, negative.config);
+    if (compile.exitCode === 0) {
+      throw new Error(
+        `packed ${negative.importPath} still accepts reorderAuthority together with onReorder`,
+      );
+    }
+    if (!compile.output.includes(PACKED_TREE_REORDER_DIAGNOSTIC)) {
+      throw new Error(
+        `packed ${negative.importPath} rejected the exclusive union with the wrong diagnostic:\n${compile.output}`,
+      );
+    }
+    if (!compile.output.includes(negative.file)) {
+      throw new Error(
+        `packed ${negative.importPath} reported its diagnostic against another file:\n${compile.output}`,
+      );
+    }
+    negativeEvidence.push({
+      importPath: negative.importPath,
+      file: negative.file,
+      exitCode: compile.exitCode,
+      diagnostic: compile.output,
+      suppressed: false,
+    });
+  }
+
+  return {
+    compiler: realpathSync(compiler),
+    importPaths: negatives.map((negative) => negative.importPath),
+    positive: {
+      file: "tree-reorder-positive.ts",
+      exitCode: positive.exitCode,
+      diagnostics: [],
+    },
+    expectedFailures: negativeEvidence,
+    sourceImports: false,
+    workspaceAliases: false,
+    declarationTextSubstitute: false,
+  };
+}
+
 function sortedUnique(values: Iterable<string>): string[] {
   return [...new Set(values)].sort();
 }
@@ -565,6 +645,7 @@ for (const packageEntry of packages) {
 await run(["bunx", "vitest", "run"], consumerRoot);
 
 const packedHistoryEntryProof = await provePackedHistoryEntryTypes(consumerRoot);
+const packedTreeReorderProof = await provePackedTreeReorderTypes(consumerRoot);
 
 const artifacts = await Promise.all(
   packedPackages.map(async (packedPackage) => {
@@ -620,6 +701,7 @@ const evidence = {
   },
   packedTarballs: Object.fromEntries(packedBoundaries),
   packedHistoryEntryProof,
+  packedTreeReorderProof,
   mountedProof: {
     svelte: {
       components: [

@@ -14,10 +14,17 @@
     treeSiblingReorderTarget,
     treeToggleCheck,
     treeVirtualWindow,
+    treeLatchReorderSubject,
+    treeAuthorityDropEligibility,
+    isTreeDropPosition,
     type DragDropCommitResult,
     type DragSession,
+    type DragSubject,
     type DragTerminalOutcome,
+    type DropEligibility,
     type DropIntent,
+    type TreeReorderProps,
+    type TreeReorderSubject,
   } from "@inflatable-cookie/poodle-core";
   import { onDestroy, untrack } from "svelte";
   import { default as Icon } from "./Icon.svelte";
@@ -33,7 +40,7 @@
     TreeNode,
   } from "./types";
 
-  interface Props {
+  interface TreeCommonProps {
     nodes?: TreeNode[];
     selectedValues?: string[];
     expandedValues?: string[] | null;
@@ -68,14 +75,27 @@
     onRenameCommit?: ((value: string, text: string) => void) | undefined;
     onRenameCancel?: (() => void) | undefined;
     onContextMenu?: ((value: string, x: number, y: number) => void) | undefined;
-    onReorder?: ((from: string, to: string, position: DropPosition) => void) | undefined;
     onActivate?: ((value: string) => void) | undefined;
   }
 
-  type DropPosition = "before" | "after" | "inside";
+  type ReorderSession =
+    | { mode: "authority"; subject: TreeReorderSubject }
+    | { mode: "authority-invalid"; sourceValue: string }
+    | { mode: "convenience"; sourceValue: string };
+
+  type Props = TreeCommonProps & TreeReorderProps;
 
   const dragController = createDragDropController();
-  onDestroy(() => dragController.destroy());
+  let reorderSession: ReorderSession | null = $state(null);
+
+  function clearReorderSession(): void {
+    reorderSession = null;
+  }
+
+  onDestroy(() => {
+    clearReorderSession();
+    dragController.destroy();
+  });
 
   let {
     nodes = [],
@@ -103,6 +123,7 @@
     onRenameCommit = undefined,
     onRenameCancel = undefined,
     onContextMenu = undefined,
+    reorderAuthority = null,
     onReorder = undefined,
     onActivate = undefined,
   }: Props = $props();
@@ -233,20 +254,53 @@
     return null;
   }
 
+  function latchReorderSession(sourceValue: string): void {
+    if (reorderAuthority) {
+      const projected = reorderAuthority.projectMovingValues(sourceValue, selectedValues);
+      const subject = treeLatchReorderSubject(nodes, sourceValue, projected);
+      reorderSession = subject
+        ? { mode: "authority", subject }
+        : { mode: "authority-invalid", sourceValue };
+      return;
+    }
+    reorderSession = { mode: "convenience", sourceValue };
+  }
+
   function handleDragStart(session: DragSession): void {
     liveSourceId = session.subject.id;
     activeSourceId = session.subject.id;
+    latchReorderSession(session.subject.id);
   }
   function handleDragEnd(_outcome: DragTerminalOutcome): void {
     liveSourceId = null;
     activeSourceId = null;
-  }
-  function isTreeDropPosition(position: DropIntent["position"]): position is DropPosition {
-    return position === "before" || position === "after" || position === "inside";
+    clearReorderSession();
   }
 
-  function handleDrop(intent: DropIntent): DragDropCommitResult {
-    const from = liveSourceId;
+  function resolveTreeCanDrop(intent: DropIntent, subject: DragSubject): DropEligibility {
+    const live = reorderSession;
+    if (live?.mode === "authority" || live?.mode === "authority-invalid") {
+      if (live.mode === "authority-invalid" || !reorderAuthority) {
+        return { accepted: false, reason: "unavailable" };
+      }
+      return treeAuthorityDropEligibility(nodes, live.subject, reorderAuthority, intent);
+    }
+    return treeDropEligibility(nodes, subject.id, intent);
+  }
+
+  function handleDrop(intent: DropIntent): DragDropCommitResult | Promise<DragDropCommitResult> {
+    const live = reorderSession;
+    if (live?.mode === "authority" || live?.mode === "authority-invalid") {
+      if (live.mode === "authority-invalid" || !reorderAuthority) {
+        return { status: "rejected", reason: "unavailable" };
+      }
+      const eligibility = treeAuthorityDropEligibility(nodes, live.subject, reorderAuthority, intent);
+      if (!eligibility.accepted) {
+        return { status: "rejected", reason: eligibility.reason };
+      }
+      return reorderAuthority.onDrop({ subject: live.subject, intent: eligibility.intent });
+    }
+    const from = liveSourceId ?? live?.sourceValue ?? null;
     const dest = dropCommitDestination(intent);
     if (!from || !isTreeDropPosition(dest.position)) {
       return { status: "rejected", reason: "unavailable" };
@@ -438,7 +492,7 @@
 </script>
 
 <DragDropProvider controller={dragController}>
-  <TreeKeyboardTargets rows={visibleRows} {nodes} {reorderable} {editingValue} onDrop={handleDrop} />
+  <TreeKeyboardTargets rows={visibleRows} {reorderable} {editingValue} canDrop={resolveTreeCanDrop} onDrop={handleDrop} />
   <div
     bind:this={rootEl}
     class="poodle-tree"
@@ -542,7 +596,6 @@
   {@const open = branch && isExpanded(node.value)}
   <TreeItem
     {node}
-    {nodes}
     outlineRows={treeOutlineRows(visibleRows)}
     {depth}
     {parent}
@@ -553,6 +606,7 @@
     focused={effectiveFocus === node.value}
     {reorderable}
     editing={isEditing(node.value)}
+    canDrop={resolveTreeCanDrop}
     onDrop={handleDrop}
     onDragStart={handleDragStart}
     onDragEnd={handleDragEnd}
@@ -576,7 +630,6 @@
   {@const open = branch && isExpanded(node.value)}
   <TreeItem
     {node}
-    {nodes}
     outlineRows={treeOutlineRows(visibleRows)}
     {depth}
     {parent}
@@ -587,6 +640,7 @@
     focused={effectiveFocus === node.value}
     {reorderable}
     editing={isEditing(node.value)}
+    canDrop={resolveTreeCanDrop}
     onDrop={handleDrop}
     onDragStart={handleDragStart}
     onDragEnd={handleDragEnd}

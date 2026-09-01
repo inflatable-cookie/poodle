@@ -1,8 +1,9 @@
 <script lang="ts">
   import {
     isTreeBranch,
-    treeDropEligibility,
     type DragDropCommitResult,
+    type DragSubject,
+    type DropEligibility,
     type DropIntent,
     type KeyboardDropTargetHandle,
     type TreeNodeLike,
@@ -19,13 +20,13 @@
 
   interface Props {
     rows: Row[];
-    nodes: TreeNode[];
     reorderable: boolean;
     editingValue: string | null;
-    onDrop: (intent: DropIntent) => DragDropCommitResult;
+    canDrop: (intent: DropIntent, subject: DragSubject) => boolean | DropEligibility;
+    onDrop: (intent: DropIntent) => DragDropCommitResult | Promise<DragDropCommitResult>;
   }
 
-  let { rows, nodes, reorderable, editingValue, onDrop }: Props = $props();
+  let { rows, reorderable, editingValue, canDrop, onDrop }: Props = $props();
 
   const { keyboardDropTarget } = useDragDrop();
 
@@ -43,7 +44,7 @@
           if (!isTreeBranch(row.node as TreeNodeLike)) return "after";
           return input.direction === "last" ? "after" : "inside";
         },
-        canDrop: (intent, subject) => treeDropEligibility(nodes, subject.id, intent),
+        canDrop,
         onDrop,
       }),
     );
