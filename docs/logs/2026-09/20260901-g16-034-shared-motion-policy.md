@@ -168,6 +168,20 @@ or discard workspace changes.
 
 ## Validation
 
+Live-base rebase validation (after rebasing onto
+`06a42e3cc36b865344d0bf9e3b5c81bbd1c0a32d`):
+
+- Core motion/runtime/Tabs focus — 37 pass, 0 fail, 132 expect calls.
+- React Tabs/disclosure/family focus — 6 files, 39 pass.
+- Svelte Tabs/disclosure/family/ToastStack focus — 6 files, 44 pass; SSR
+  ToastStack receipt — 1 file, 1 pass.
+- `effigy test:motion-policy-browser-chromium` and
+  `effigy test:motion-policy-browser-webkit` — all Svelte and React checks
+  pass, including underline resize and motion-policy lifecycle receipts.
+- `effigy docs:check` — pass; 176 evidence rows and zero drift.
+- `git diff --check` and `git diff --check origin/main...HEAD` — pass; no
+  conflict markers or source/API conflict was introduced by the rebase.
+
 Focused (post-production-repair):
 
 - `bun test packages/core/test/motion-runtime.test.ts packages/core/test/motion-policy.test.ts packages/core/test/tabs.test.ts` — 37 pass, 0 fail, 132 expect.
