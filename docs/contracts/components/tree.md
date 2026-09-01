@@ -561,7 +561,7 @@ None.
   deepest-target arbitration, cancellation, and exactly-once cleanup, and the
   band rule (`before` / `inside` / `after`) lives in
   `poodle_render::drag_drop`. Web also walks last-descendant ancestors from
-  pointer X so a leftward move un-nests after an open parent. A row dropped onto itself is rejected, and a
+  pointer X so a leftward move un-nests after an open parent. A row dropped onto itself is rejected. A disabled row is not a live destination even when an enabled hover remaps onto it. A
   row's subject kind is scoped to Tree, so a drag from another reorder surface
   sharing the controller is never eligible here. `on_drag_over` and
   `on_reorder` keep their `(dragged, over, DropEdge)` shape: the component

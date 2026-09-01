@@ -20,6 +20,7 @@
     onPanelDropA?: (payload: DockPanelDropPayload) => void;
     onPanelDropB?: (payload: DockPanelDropPayload) => void;
     onReorderA?: (order: string[]) => void;
+    edge?: DockEdge;
   }
 
   let {
@@ -31,13 +32,14 @@
     onPanelDropA,
     onPanelDropB,
     onReorderA,
+    edge = "top",
   }: Props = $props();
 </script>
 
 {#snippet pair()}
   <DockRegion
     {sizing}
-    edge="top"
+    {edge}
     dragZoneId="region:a"
     {items}
     {canAcceptPanel}
@@ -50,7 +52,7 @@
   </DockRegion>
   <DockRegion
     {sizing}
-    edge="top"
+    {edge}
     dragZoneId="region:b"
     items={itemsB}
     {canAcceptPanel}

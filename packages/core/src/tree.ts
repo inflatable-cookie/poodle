@@ -300,6 +300,13 @@ export function treeDropEligibility<T extends TreeNodeLike>(
   intent: DropIntent,
 ): DropEligibility {
   const dest = dropCommitDestination(intent);
+  const destNode = findTreeNode(nodes, dest.targetId);
+  if (!destNode) {
+    return { accepted: false, reason: "missing" };
+  }
+  if (destNode.isDisabled) {
+    return { accepted: false, reason: "disabled" };
+  }
   if (!treeCanAcceptDrop(nodes, from, dest.targetId)) {
     return { accepted: false, reason: dest.targetId === from ? "self" : "subtree" };
   }

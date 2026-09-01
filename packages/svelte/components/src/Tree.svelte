@@ -6,7 +6,7 @@
     flattenVisibleTreeRows,
     isTreeBranch,
     treeOutlineRows,
-    treeCanAcceptDrop,
+    treeDropEligibility,
     dropCommitDestination,
     treeCheckState,
     treeKeydownIntent,
@@ -251,8 +251,9 @@
     if (!from || !isTreeDropPosition(dest.position)) {
       return { status: "rejected", reason: "unavailable" };
     }
-    if (!treeCanAcceptDrop(nodes, from, dest.targetId)) {
-      return { status: "rejected", reason: dest.targetId === from ? "self" : "subtree" };
+    const eligibility = treeDropEligibility(nodes, from, intent);
+    if (!eligibility.accepted) {
+      return { status: "rejected", reason: eligibility.reason };
     }
     onReorder?.(from, dest.targetId, dest.position);
     return { status: "committed" };

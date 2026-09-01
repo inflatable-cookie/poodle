@@ -770,4 +770,31 @@ describe("Tree row metadata (react)", () => {
     expect(live).toContain("guide.md");
     expect(live).not.toMatch(/on notes\.txt$/);
   });
+
+  it("does not commit a remapped drop onto a disabled destination", () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "docs",
+        label: "docs",
+        children: [
+          { value: "intro.md", label: "intro.md" },
+          { value: "guide.md", label: "guide.md", isDisabled: true },
+        ],
+      },
+      { value: "notes.txt", label: "notes.txt" },
+    ];
+    const { container } = render(
+      <Tree nodes={nodes} expandedValues={["docs"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const source = rows.get("notes.txt")!;
+    const y = source.getBoundingClientRect().top + 20;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: y, clientX: 40 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: y, clientX: 150 }));
+      document.dispatchEvent(pointer("pointerup", { clientY: y, clientX: 150 }));
+    });
+    expect(onReorder).not.toHaveBeenCalled();
+  });
 });

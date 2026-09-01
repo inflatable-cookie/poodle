@@ -26,6 +26,7 @@ interface PairProps {
   itemsA?: PanelTabItem[];
   itemsB?: PanelTabItem[];
   sizing?: "static" | "flexible";
+  edge?: DockEdge;
   canAcceptPanel?: ((panelId: string, sourceEdge: DockEdge) => boolean) | null;
   onPanelDropA?: (payload: DockPanelDropPayload) => void;
   onPanelDropB?: (payload: DockPanelDropPayload) => void;
@@ -37,6 +38,7 @@ function Pair({
   itemsA = items,
   itemsB = items,
   sizing = "static",
+  edge = "top",
   canAcceptPanel = null,
   onPanelDropA,
   onPanelDropB,
@@ -46,7 +48,7 @@ function Pair({
     <>
       <DockRegion
         sizing={sizing}
-        edge="top"
+        edge={edge}
         dragZoneId="region:a"
         items={itemsA}
         canAcceptPanel={canAcceptPanel}
@@ -56,7 +58,7 @@ function Pair({
       />
       <DockRegion
         sizing={sizing}
-        edge="top"
+        edge={edge}
         dragZoneId="region:b"
         items={itemsB}
         canAcceptPanel={canAcceptPanel}
@@ -82,6 +84,18 @@ function layout(container: HTMLElement): void {
     [...region.querySelectorAll<HTMLElement>(".poodle-dock-region__stack-item")].forEach(
       (item, index) => {
         box(item, originX + index * 100, 20, 100, 60);
+      },
+    );
+  });
+}
+
+function layoutColumn(container: HTMLElement): void {
+  [...container.querySelectorAll<HTMLElement>("section")].forEach((region, regionIndex) => {
+    const originX = regionIndex * 400;
+    box(region, originX, 0, 120, 200);
+    [...region.querySelectorAll<HTMLElement>(".poodle-dock-region__stack-item")].forEach(
+      (item, index) => {
+        box(item, originX + 20, index * 80, 80, 80);
       },
     );
   });
@@ -231,6 +245,9 @@ describe("DockRegion panel movement", () => {
     const onPanelDropB = vi.fn();
     const { container } = render(<Pair shared onPanelDropB={onPanelDropB} />);
     layout(container);
+    expect(container.querySelector(".poodle-dock-region__stack")?.getAttribute("data-direction")).toBe(
+      "row",
+    );
 
     const [sourceItem] = stackItems(container);
     send(sourceItem, pointer("pointerdown", 50, 50));
@@ -245,6 +262,30 @@ describe("DockRegion panel movement", () => {
     send(document, pointer("pointermove", 90, 50));
     send(document, pointer("pointermove", 410, 50));
     send(document, pointer("pointerup", 410, 50));
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
+  });
+
+  it("inserts before or after a side-edge static stack item from the hovered Y half", () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(<Pair shared edge="left" onPanelDropB={onPanelDropB} />);
+    layoutColumn(container);
+    expect(container.querySelector(".poodle-dock-region__stack")?.getAttribute("data-direction")).toBe(
+      "column",
+    );
+
+    const [sourceItem] = stackItems(container);
+    send(sourceItem, pointer("pointerdown", 50, 40));
+    send(document, pointer("pointermove", 90, 40));
+    send(document, pointer("pointermove", 460, 100));
+    send(document, pointer("pointerup", 460, 100));
+    expect(onPanelDropB).toHaveBeenCalledOnce();
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(1);
+
+    onPanelDropB.mockClear();
+    send(sourceItem, pointer("pointerdown", 50, 40));
+    send(document, pointer("pointermove", 90, 40));
+    send(document, pointer("pointermove", 460, 20));
+    send(document, pointer("pointerup", 460, 20));
     expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
   });
 

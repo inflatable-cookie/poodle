@@ -299,8 +299,11 @@ to keep in step.
 
 ### Stack Direction (static mode)
 
-- Left/right edge: panels stack in a `row` (horizontally)
-- Top/bottom edge: panels stack in a `column` (vertically)
+Side docks are tall; top/bottom docks are wide. The stack follows that axis,
+and the hovered half is read along it:
+
+- Left/right edge: panels stack in a `column` (vertically); before/after is Y
+- Top/bottom edge: panels stack in a `row` (horizontally); before/after is X
 
 ### Composition
 
@@ -722,7 +725,7 @@ Left/right edges use the vertical strip's own `border-right` (or `border-left` f
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Static dock -- vertical (left edge) | `edge="left"`, `sizing="static"`, 2 items (Toolbar, Inspector), reorderable | Vertical left-edge dock with panels stacked horizontally (row direction), each panel labeled and reorderable |
+| Static dock -- vertical (left edge) | `edge="left"`, `sizing="static"`, 2 items (Toolbar, Inspector), reorderable | Vertical left-edge dock with panels stacked in a column, each panel labeled and reorderable |
 
 ### Flexible Dock -- Expanded (Left Edge)
 

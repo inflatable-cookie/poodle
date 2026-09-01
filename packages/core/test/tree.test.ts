@@ -177,6 +177,34 @@ describe("treeCanAcceptDrop", () => {
       },
     });
   });
+
+  test("eligibility refuses a remapped disabled destination", () => {
+    const outline: TreeNodeLike[] = [
+      {
+        value: "docs",
+        children: [
+          { value: "intro" },
+          { value: "guide", isDisabled: true },
+        ],
+      },
+      { value: "notes" },
+    ];
+    const remappedDisabled = treeDropEligibility(outline, "notes", {
+      targetId: "notes",
+      position: "before",
+      operation: "move",
+      destination: { targetId: "guide", position: "after" },
+    });
+    expect(remappedDisabled).toEqual({ accepted: false, reason: "disabled" });
+
+    const remappedLive = treeDropEligibility(outline, "notes", {
+      targetId: "notes",
+      position: "before",
+      operation: "move",
+      destination: { targetId: "intro", position: "after" },
+    });
+    expect(remappedLive.accepted).toBe(true);
+  });
 });
 
 describe("treeLocate", () => {
