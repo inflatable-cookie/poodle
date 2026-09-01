@@ -22,8 +22,8 @@ Updated: 2026-09-01
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
     mounted parity, ledger 56/118 after `028`); `033` merged in PR #120;
-    `034` is in flight for the shared motion policy and five-family pilot after
-    planning PR #121 promoted architecture 012; `035` merged in PR #123 after
+    `034` implemented the shared motion policy and five-family pilot from
+    architecture 012 and is awaiting review; `035` merged in PR #123 after
     two native-oracle repair rounds and closed the independent MarkdownEditor
     bounded-preview issue; `036` is ready for the paired-web Tree external
     drop-authority adapter after PR #125 supplied the interaction and outline

@@ -149,15 +149,15 @@ may schedule a clock; it does not redefine token values.
 
 ## 12. Parity Checklist
 
-- [ ] one closed `MotionPolicy` union/enum exists in TypeScript and Rust
-- [ ] missing root preference resolves to full
-- [ ] nesting can only move toward reduced or frozen
-- [ ] Svelte, React, and Rust composition expose the same effective value
-- [ ] presentation scopes do not reset motion
-- [ ] frozen descendants schedule no clocks
-- [ ] policy changes emit no semantic callback
-- [ ] provider adds no layout, accessibility, or focus surface
-- [ ] Jetstream remains deferred
+- [x] one closed `MotionPolicy` union/enum exists in TypeScript and Rust
+- [x] missing root preference resolves to full
+- [x] nesting can only move toward reduced or frozen
+- [x] Svelte, React, and Rust composition expose the same effective value
+- [x] presentation scopes do not reset motion
+- [x] frozen descendants schedule no clocks
+- [x] policy changes emit no semantic callback
+- [x] provider adds no layout, accessibility, or focus surface
+- [x] Jetstream remains deferred
 
 ## 13. Specimen Definitions
 

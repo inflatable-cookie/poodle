@@ -1,6 +1,6 @@
 # g16.034 — Shared Motion Policy And Five-Family Pilot
 
-Status: ready
+Status: implemented — awaiting review
 Opened: 2026-09-01
 Depends on: merged planning intake PR #121 and promoted architecture 012;
 `g16.033` is complete
