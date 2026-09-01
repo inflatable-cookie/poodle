@@ -218,12 +218,14 @@ pub fn vertical_band_resolver(
 /// The band rule for a surface whose documented result lands a dropped row
 /// *at* the row it was dropped on.
 ///
-/// Tabs, OrderBy, BlockEditor, and ModelCatalogueEditor all publish that
-/// result, and geometry cannot express it: which half the pointer is over says
-/// nothing about which side "at" is. The travelling direction does — a row
-/// coming from above arrives after its target, one coming from below arrives
-/// before it — and both web frameworks resolve it the same way, so the same
-/// gesture produces one order on every runtime.
+/// OrderBy, BlockEditor, and ModelCatalogueEditor publish that result, and
+/// geometry cannot express it: which half the pointer is over says nothing
+/// about which side "at" is. The travelling direction does — a row coming
+/// from above arrives after its target, one coming from below arrives before
+/// it — and both web frameworks resolve it the same way, so the same gesture
+/// produces one order on every runtime. Tabs is not in this set: its contract
+/// reads the fraction of the tab's own bounds, so origin-facing half is
+/// `before`.
 ///
 /// `owned` is this surface's row values in their current order.
 pub fn arrival_band_resolver(

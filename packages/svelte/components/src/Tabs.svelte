@@ -561,6 +561,10 @@
           ? target
           : target + 1;
 
+    if (from === to) {
+      return { status: "rejected", reason: "same tab" };
+    }
+
     send({ type: "REORDER", fromIndex: from, toIndex: to });
     return { status: "committed" };
   }
@@ -711,7 +715,6 @@
       {#each renderedItems as item, index (item.value)}
         <TabsItem
           {item}
-          {index}
           {tabsId}
           {subjectKind}
           {reorderable}
@@ -719,7 +722,6 @@
           {hasTooltips}
           {isVertical}
           {crossWindowSourceBridge}
-          {indexOfValue}
           {ownsValue}
           sourceId={sourceIdOf(item.value)}
           targetId={targetIdOf(item.value)}

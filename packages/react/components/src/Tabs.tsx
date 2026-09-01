@@ -540,6 +540,10 @@ export function Tabs({
           ? target
           : target + 1;
 
+    if (from === to) {
+      return { status: "rejected", reason: "same tab" };
+    }
+
     send({ type: "REORDER", fromIndex: from, toIndex: to });
     return { status: "committed" };
   }
@@ -680,13 +684,12 @@ export function Tabs({
             <Fragment key={item.value}>
               <TabsItem
                 item={item}
-                index={index}
                 tabsId={tabsId}
                 subjectKind={subjectKind}
                 reorderable={reorderable}
                 hasPanel={hasPanel}
+                isVertical={isVertical}
                 crossWindowSourceBridge={crossWindowSourceBridge}
-                indexOfValue={indexOfValue}
                 ownsValue={ownsValue}
                 sourceId={sourceIdOf(item.value)}
                 targetId={targetIdOf(item.value)}

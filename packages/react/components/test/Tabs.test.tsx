@@ -158,8 +158,7 @@ describe("Tabs (react)", () => {
 
     send(document, pointer("pointerup", 250, 15));
 
-    // The tab lands *at* the tab it was dropped on, which is exactly where the
-    // DOM-event implementation put it.
+    // Trailing half of the target: the tab lands at that tab.
     expect(onReorder).toHaveBeenCalledWith(["master", "notes", "mix"]);
     expect(container.querySelector("[data-drag-source]")).toBeNull();
     expect(container.querySelector("[data-drop-target]")).toBeNull();
@@ -184,6 +183,59 @@ describe("Tabs (react)", () => {
     expect(onReorder).not.toHaveBeenCalled();
     expect(container.querySelector("[data-drag-source]")).toBeNull();
     expect(container.querySelector("[data-drop-target]")).toBeNull();
+  });
+
+  it("dragging over a sibling then back to origin does not swap", () => {
+    const onReorder = vi.fn();
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+      { value: "utils.ts", label: "utils.ts", closable: true },
+      { value: "types.ts", label: "types.ts", closable: true },
+    ];
+    const { container } = render(
+      <Tabs items={files} defaultValue="App.svelte" reorderable onReorder={onReorder} />,
+    );
+    layout(container);
+    const source = tabs()[1];
+    const [, sourceItem, siblingItem] = itemsOf(container);
+
+    send(source, pointer("pointerdown", 150, 15));
+    send(document, pointer("pointermove", 190, 15));
+    send(document, pointer("pointermove", 270, 15));
+    expect(siblingItem.getAttribute("data-drop-target")).toBe("true");
+
+    send(document, pointer("pointermove", 150, 15));
+    expect(sourceItem.getAttribute("data-drop-target")).toBeNull();
+    expect(siblingItem.getAttribute("data-drop-target")).toBeNull();
+
+    send(document, pointer("pointerup", 150, 15));
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("the origin-facing half of a sibling is a return to origin, not a swap", () => {
+    const onReorder = vi.fn();
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+      { value: "utils.ts", label: "utils.ts", closable: true },
+      { value: "types.ts", label: "types.ts", closable: true },
+    ];
+    const { container } = render(
+      <Tabs items={files} defaultValue="App.svelte" reorderable onReorder={onReorder} />,
+    );
+    layout(container);
+    const source = tabs()[1];
+    const [, , siblingItem] = itemsOf(container);
+
+    send(source, pointer("pointerdown", 150, 15));
+    send(document, pointer("pointermove", 190, 15));
+    send(document, pointer("pointermove", 270, 15));
+    expect(siblingItem.getAttribute("data-drop-target")).toBe("true");
+
+    send(document, pointer("pointermove", 220, 15));
+    send(document, pointer("pointerup", 220, 15));
+    expect(onReorder).not.toHaveBeenCalled();
   });
 
   it("a tab dropped on itself is refused rather than reordered", () => {
