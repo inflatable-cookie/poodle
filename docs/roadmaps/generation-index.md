@@ -23,13 +23,13 @@ Updated: 2026-09-01
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
     mounted parity, ledger 56/118 after `028`); `033` merged in PR #120;
     `034` is in flight for the shared motion policy and five-family pilot after
-    planning PR #121 promoted architecture 012; `035` is ready as an
-    independent MarkdownEditor bounded-preview issue fix
+    planning PR #121 promoted architecture 012; `035` merged in PR #123 after
+    two native-oracle repair rounds and closed the independent MarkdownEditor
+    bounded-preview issue
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: continue `g16.034` and dispatch independent `g16.035`. The
-    remaining post-motion research queue is
+  - Next move: continue `g16.034`. The remaining post-motion research queue is
     recorded in
     `../triage/20260901-125758-post-motion-research-queue.md`; block sliders
     follow the motion pilot, while icon feasibility and AgentSubagent shimmer

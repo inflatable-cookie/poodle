@@ -1,8 +1,9 @@
 # g16.035 — MarkdownEditor Bounded Preview Scroll
 
-Status: implemented, PR open (second oracle-gap follow-up)
+Status: complete; merged
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/123
+Merge: `8a15fcf5d131bca6b5fcd88e79e25e16527ae005`
 Card: `docs/roadmaps/g16/035-markdown-editor-bounded-preview-scroll.md`
 Handoff: `docs/handoffs/20260901-142220-g16-035-markdown-editor-preview-scroll.md`
 Governing refs: `docs/contracts/components/markdown-editor.md`,

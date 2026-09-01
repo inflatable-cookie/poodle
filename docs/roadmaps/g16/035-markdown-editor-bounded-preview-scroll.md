@@ -1,6 +1,6 @@
 # g16.035 — MarkdownEditor Bounded Preview Scroll
 
-Status: implemented
+Status: complete
 Opened: 2026-09-01
 Closed: 2026-09-01
 Depends on: current MarkdownEditor contract and active-cohort implementations;
@@ -12,6 +12,7 @@ Reported failure: a long rendered preview contributes its full intrinsic height,
 so the MarkdownEditor expands its surrounding editor layout instead of keeping
 the preview inside a scroll viewport
 PR: https://github.com/inflatable-cookie/poodle/pull/123
+Merge: `8a15fcf5d131bca6b5fcd88e79e25e16527ae005`
 
 ## Goal
 
