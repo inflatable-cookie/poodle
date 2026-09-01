@@ -132,6 +132,7 @@ export function DragDropProvider({
       : controller!,
   );
   const rootRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [snapshot, setSnapshot] = useState(() => ctrl.getSnapshot());
   const connectGenerationRef = useRef(0);
 
@@ -156,15 +157,19 @@ export function DragDropProvider({
     };
   }, [ctrl]);
 
+  const overlayOrigin = overlayRef.current?.getBoundingClientRect();
   const previewStyle: CSSProperties | undefined = snapshot.preview
-    ? { left: snapshot.preview.x, top: snapshot.preview.y }
+    ? {
+        left: snapshot.preview.x - (overlayOrigin?.left ?? 0),
+        top: snapshot.preview.y - (overlayOrigin?.top ?? 0),
+      }
     : undefined;
 
   return (
     <DragDropContext.Provider value={{ controller: ctrl, snapshot }}>
       <div ref={rootRef} className="poodle-drag-drop-provider">
         {children}
-        <div className="poodle-drag-overlay" aria-hidden="true">
+        <div ref={overlayRef} className="poodle-drag-overlay" aria-hidden="true">
           {snapshot.preview ? (
             <div className="poodle-drag-preview" style={previewStyle}>
               {preview ? preview(snapshot.preview) : snapshot.preview.label}

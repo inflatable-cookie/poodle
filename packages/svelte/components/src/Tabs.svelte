@@ -715,6 +715,7 @@
       {#each renderedItems as item, index (item.value)}
         <TabsItem
           {item}
+          {index}
           {tabsId}
           {subjectKind}
           {reorderable}
@@ -722,6 +723,7 @@
           {hasTooltips}
           {isVertical}
           {crossWindowSourceBridge}
+          {indexOfValue}
           {ownsValue}
           sourceId={sourceIdOf(item.value)}
           targetId={targetIdOf(item.value)}

@@ -209,7 +209,7 @@ describe("Tabs (svelte)", () => {
     expect(onReorder).not.toHaveBeenCalled();
   });
 
-  it("the origin-facing half of a sibling is a return to origin, not a swap", async () => {
+  it("dropping on a sibling lands at that sibling even on the origin-facing half", async () => {
     const onReorder = vi.fn();
     const files = [
       { value: "index.ts", label: "index.ts" },
@@ -226,13 +226,50 @@ describe("Tabs (svelte)", () => {
 
     await fireEvent(source, pointer("pointerdown", 150, 15));
     await fireEvent(document, pointer("pointermove", 190, 15));
-    await fireEvent(document, pointer("pointermove", 270, 15));
+    await fireEvent(document, pointer("pointermove", 220, 15));
     expect(siblingItem.getAttribute("data-drop-target")).toBe("true");
 
-    await fireEvent(document, pointer("pointermove", 220, 15));
     await fireEvent(document, pointer("pointerup", 220, 15));
     await Promise.resolve();
-    expect(onReorder).not.toHaveBeenCalled();
+    expect(onReorder).toHaveBeenCalledWith(["index.ts", "utils.ts", "App.svelte", "types.ts"]);
+  });
+
+  it("the drag preview tracks the pointer in overlay-local coordinates", async () => {
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+    ];
+    const { container } = render(Tabs, {
+      props: { items: files, defaultValue: "App.svelte", reorderable: true },
+    });
+    layout(container);
+    const overlay = container.querySelector<HTMLElement>(".poodle-drag-overlay");
+    if (overlay) {
+      overlay.getBoundingClientRect = () =>
+        ({
+          x: 40,
+          y: 80,
+          width: 800,
+          height: 600,
+          top: 80,
+          left: 40,
+          right: 840,
+          bottom: 680,
+          toJSON() {
+            return this;
+          },
+        }) as DOMRect;
+    }
+
+    await fireEvent(tabs()[1], pointer("pointerdown", 150, 15));
+    await fireEvent(document, pointer("pointermove", 190, 15));
+
+    const preview = container.querySelector<HTMLElement>(".poodle-drag-preview");
+    expect(preview).not.toBeNull();
+    // Snapshot is client + 12; the overlay origin is subtracted so the chip
+    // sits next to the pointer rather than the overlay's (0, 0).
+    expect(preview?.style.left).toBe(`${190 + 12 - 40}px`);
+    expect(preview?.style.top).toBe(`${15 + 12 - 80}px`);
   });
 
   it("a tab dropped on itself is refused rather than reordered", async () => {

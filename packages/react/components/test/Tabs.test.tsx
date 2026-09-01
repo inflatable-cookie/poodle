@@ -213,7 +213,7 @@ describe("Tabs (react)", () => {
     expect(onReorder).not.toHaveBeenCalled();
   });
 
-  it("the origin-facing half of a sibling is a return to origin, not a swap", () => {
+  it("dropping on a sibling lands at that sibling even on the origin-facing half", () => {
     const onReorder = vi.fn();
     const files = [
       { value: "index.ts", label: "index.ts" },
@@ -230,12 +230,45 @@ describe("Tabs (react)", () => {
 
     send(source, pointer("pointerdown", 150, 15));
     send(document, pointer("pointermove", 190, 15));
-    send(document, pointer("pointermove", 270, 15));
+    send(document, pointer("pointermove", 220, 15));
     expect(siblingItem.getAttribute("data-drop-target")).toBe("true");
 
-    send(document, pointer("pointermove", 220, 15));
     send(document, pointer("pointerup", 220, 15));
-    expect(onReorder).not.toHaveBeenCalled();
+    expect(onReorder).toHaveBeenCalledWith(["index.ts", "utils.ts", "App.svelte", "types.ts"]);
+  });
+
+  it("the drag preview tracks the pointer in overlay-local coordinates", () => {
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+    ];
+    const { container } = render(<Tabs items={files} defaultValue="App.svelte" reorderable />);
+    layout(container);
+    const overlay = container.querySelector<HTMLElement>(".poodle-drag-overlay");
+    if (overlay) {
+      overlay.getBoundingClientRect = () =>
+        ({
+          x: 40,
+          y: 80,
+          width: 800,
+          height: 600,
+          top: 80,
+          left: 40,
+          right: 840,
+          bottom: 680,
+          toJSON() {
+            return this;
+          },
+        }) as DOMRect;
+    }
+
+    send(tabs()[1], pointer("pointerdown", 150, 15));
+    send(document, pointer("pointermove", 190, 15));
+
+    const preview = container.querySelector<HTMLElement>(".poodle-drag-preview");
+    expect(preview).not.toBeNull();
+    expect(preview?.style.left).toBe(`${190 + 12 - 40}px`);
+    expect(preview?.style.top).toBe(`${15 + 12 - 80}px`);
   });
 
   it("a tab dropped on itself is refused rather than reordered", () => {

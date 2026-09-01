@@ -433,9 +433,9 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
     crate::drag_drop::attach_source(node, true, source);
 
     // Target. A tab bar reorders along its main axis, so the band rule reads
-    // the fraction of this tab's own bounds. The drop uses that edge: the
-    // origin-facing half is `before` (stay when the neighbour is adjacent),
-    // the trailing half is `after` (land at this tab).
+    // the horizontal fraction; the drop itself reorders onto this tab's index
+    // and does not branch on the band. The indicator paints the whole tab, so
+    // a drop on a sibling lands at that sibling.
     let mut target = crate::drag_drop::reorder_target_in_family(
         &scope,
         &kind,
@@ -460,8 +460,7 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
     let on_reorder = handlers.on_reorder.clone();
     let on_focus = handlers.on_focus.clone();
     let instance_id = handlers.instance_id.clone();
-    let target_index = index;
-    let count = items.len();
+    let to_index = index;
     target.on_drop = Some(Arc::new(move |event| {
         let Some(from_index) = items
             .iter()
@@ -471,17 +470,6 @@ fn wire_reorder(node: &mut Node, spec: &TabsSpec, index: usize, handlers: &TabsH
                 reason: Some("The dragged tab is no longer in this tab set".to_string()),
             };
         };
-        let Some(edge) = crate::drag_drop::edge_from_position(&event.intent.position) else {
-            return NodeDropCommit::Rejected {
-                reason: Some("Unknown drop position".to_string()),
-            };
-        };
-        let to_index = crate::drag_drop::reorder_destination(from_index, target_index, edge, count);
-        if from_index == to_index {
-            return NodeDropCommit::Rejected {
-                reason: Some("same tab".to_string()),
-            };
-        }
         let context = poodle_headless::tabs::TabsContext {
             items: items.clone(),
             value: None,
@@ -1478,43 +1466,6 @@ mod tests {
             ]]
         );
         assert_eq!(*focused.lock().unwrap(), vec!["a"]);
-    }
-
-    #[test]
-    fn pointer_drop_on_the_origin_facing_half_is_refused() {
-        let theme = theme();
-        let ctx = RenderContext::new(&theme);
-        let orders = Arc::new(Mutex::new(Vec::new()));
-        let root = tabs_with_handlers(
-            &reorder_spec(),
-            &ctx,
-            TabsHandlers {
-                on_reorder: Some({
-                    let orders = Arc::clone(&orders);
-                    Arc::new(move |order: Vec<String>| {
-                        orders.lock().unwrap().push(order);
-                    })
-                }),
-                ..TabsHandlers::default()
-            },
-        );
-        let target = tab_of(&root, "b").interaction.drop_target.clone().expect("target");
-        let commit = (target.on_drop.as_ref().expect("drop"))(&poodle_node::NodeDropCommitEvent {
-            subject: crate::drag_drop::reorder_subject("tabs", "a"),
-            intent: poodle_node::DropIntent {
-                target_id: target.target_id.clone(),
-                position: poodle_node::DROP_POSITION_BEFORE.to_string(),
-                operation: poodle_node::DragOperation::Move,
-            },
-            inbound_files: None,
-        });
-        assert_eq!(
-            commit,
-            poodle_node::NodeDropCommit::Rejected {
-                reason: Some("same tab".to_string()),
-            }
-        );
-        assert!(orders.lock().unwrap().is_empty());
     }
 
     #[test]

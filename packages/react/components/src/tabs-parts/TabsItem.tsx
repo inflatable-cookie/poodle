@@ -20,15 +20,17 @@ import type { ControlSize, TabItem } from "../types";
  */
 export interface TabsItemProps {
   item: TabItem;
+  index: number;
   tabsId: string;
   subjectKind: string;
   selected: boolean;
   focused: boolean;
   hasPanel: boolean;
-  isVertical: boolean;
   reorderable: boolean;
   iconSize: ControlSize;
   crossWindowSourceBridge?: CrossWindowDragSourceBridge;
+  /** Index of the value being dragged, so the whole-tab band can resolve. */
+  indexOfValue: (value: string) => number;
   /** Whether a subject id belongs to this strip at all. */
   ownsValue: (value: string) => boolean;
   sourceId: string;
@@ -48,15 +50,16 @@ export interface TabsItemProps {
 
 export function TabsItem({
   item,
+  index,
   tabsId,
   subjectKind,
   selected,
   focused,
   hasPanel,
-  isVertical,
   reorderable,
   iconSize,
   crossWindowSourceBridge,
+  indexOfValue,
   ownsValue,
   sourceId,
   targetId,
@@ -85,24 +88,18 @@ export function TabsItem({
   });
 
   /**
-   * Contract: the band rule reads the fraction of this tab's own bounds along
-   * the strip axis. The origin-facing half is `before`, the trailing half is
-   * `after`, so dragging over a sibling and back toward origin is a no-op
-   * rather than a swap.
+   * The drop indicator paints the whole tab, so the band must too: a drop on
+   * this sibling lands *at* this sibling. Which half the pointer is over does
+   * not change that public result. Coming from the left, "at" is after; coming
+   * from the right, it is before.
    */
   const { getTargetProps, accepted } = useDropTarget({
     targetId,
     acceptedKinds: [subjectKind],
     disabled: !reorderable,
     label: item.label,
-    resolvePosition: ({ x, y, rect }): DropPosition =>
-      isVertical
-        ? y < rect.top + rect.height / 2
-          ? "before"
-          : "after"
-        : x < rect.left + rect.width / 2
-          ? "before"
-          : "after",
+    resolvePosition: ({ subject }): DropPosition =>
+      indexOfValue(subject.id) < index ? "after" : "before",
     canDrop: (intent, subject) => {
       // A shared family means another surface's subject can reach this target.
       // Refusing it *here*, during eligibility, is what lets arbitration

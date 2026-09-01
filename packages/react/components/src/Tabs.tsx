@@ -684,12 +684,13 @@ export function Tabs({
             <Fragment key={item.value}>
               <TabsItem
                 item={item}
+                index={index}
                 tabsId={tabsId}
                 subjectKind={subjectKind}
                 reorderable={reorderable}
                 hasPanel={hasPanel}
-                isVertical={isVertical}
                 crossWindowSourceBridge={crossWindowSourceBridge}
+                indexOfValue={indexOfValue}
                 ownsValue={ownsValue}
                 sourceId={sourceIdOf(item.value)}
                 targetId={targetIdOf(item.value)}

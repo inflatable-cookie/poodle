@@ -53,6 +53,7 @@
       }),
   );
   let root: HTMLDivElement | undefined;
+  let overlay: HTMLDivElement | undefined;
   let snapshot: DragDropSnapshot = $state(ctrl.getSnapshot());
 
   setDragDrop({ controller: ctrl });
@@ -70,16 +71,18 @@
     };
   });
 
-  const previewStyle = $derived(
-    snapshot.preview
-      ? `left: ${snapshot.preview.x}px; top: ${snapshot.preview.y}px`
-      : "",
-  );
+  const previewStyle = $derived.by(() => {
+    if (!snapshot.preview) return "";
+    const origin = overlay?.getBoundingClientRect();
+    const left = snapshot.preview.x - (origin?.left ?? 0);
+    const top = snapshot.preview.y - (origin?.top ?? 0);
+    return `left: ${left}px; top: ${top}px`;
+  });
 </script>
 
 <div bind:this={root} class="poodle-drag-drop-provider">
   {@render children?.()}
-  <div class="poodle-drag-overlay" aria-hidden="true">
+  <div bind:this={overlay} class="poodle-drag-overlay" aria-hidden="true">
     {#if snapshot.preview}
       <div class="poodle-drag-preview" style={previewStyle}>
         {#if preview}
