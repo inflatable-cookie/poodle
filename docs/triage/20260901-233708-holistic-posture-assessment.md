@@ -111,12 +111,53 @@ React quietly drifts because nothing gates it. Options:
   consumer and a gate; if it goes, that is an explicit operator decision the
   vision must record.
 
-### E. Native pair (pending)
+### E. Native pair (high)
 
-The native-pair audit (poodle-headless/poodle-render/node-backend boundary,
-god files, dead IR crates, `too_many_arguments` clusters, test reality of
-"mounted" cells, Jetstream cost) is still running. This section will be
-updated in a follow-up commit on this branch.
+Targeted runs pass (headless 238, GPUI backend 49, Jetstream adapter 162)
+and the render → node → GPUI interpreter boundary is real for layout, paint,
+text, input, and lifecycle. The pair is not sound as an *admitted* pair:
+
+- **Jetstream's in-repo adapter is a second component implementation.**
+  `packages/jetstream/adapter` depends on neither `poodle-render` nor
+  `poodle-node` (0 references across its 11 source files) and directly
+  implements 108 components (`lib.rs:126-264`, pinned by a count test at
+  `:313-320`). Its README says it does not implement components. The
+  node-consuming path lives only in `packages/jetstream/preview` via the
+  sibling `jetstream-poodle` crate. Architecture 001 says "a native component
+  should not be reimplemented separately in both backends"; today it is. This
+  belongs in front of the Jetstream readiness delegate
+  (`docs/handoffs/20260901-230409-*.md`) before it audits "adapter gaps".
+- **Paired-machine divergences the corpora miss.** TypeScript HistoryCenter
+  deletion writes a nested invalidation into the root map
+  (`packages/core/src/history-center.ts:1010-1019`) while Rust replaces the
+  level in place (`history_center.rs:733-750`); no nested-delete vector
+  exists. Slider rounding differs at negative half-steps (`f64::round` vs
+  `Math.round`). Tabs `showTooltips` is contracted and implemented in core
+  (`tabs.ts:247-278`) but absent from `poodle-headless` and `render/tabs.rs`.
+  These are exactly the class the ledger's "focused"/"mounted" columns cannot
+  see.
+- **Semantic policy leaking into the GPUI backend.** `drag.rs:2617-2646`
+  and `:3498-3589` run a second refusal-selection and eligibility pass around
+  the headless kernel; the file is 4,191 lines mixing controller, input,
+  transport, file export, announcements, and tests. Continuous-value gestures
+  (Fader/Knob/XYPad) still sit in one thread-local session
+  (`interaction.rs:5-15,71-84`), the same ownership class g16.025 removed for
+  drag.
+- **Public-input panics.** `licence.rs:428-437` panics on a missing key
+  adapter although a `Reject` path exists; `audio.rs:87-114` asserts value-law
+  parameters; `render/select.rs:54-64` asserts non-empty scope; `drag.rs:437`
+  aborts on a poisoned host inbox.
+- **Structure.** The `too_many_arguments` cluster (15 sites, mostly
+  `render/history_center.rs`) marks missing argument structs, not lint noise.
+  `poodle-ir` is used only by `poodle-codegen`; it is retired-pilot schema
+  living as a contracts crate. `packages/render` is not rustfmt-clean on main
+  so no worker can verify its own formatting.
+- **Test reality.** Mounted GPUI regressions do drive production dispatch
+  through a real driver (`headless_driver.rs:67-127,252-277`); that claim
+  holds. The corpus runners are 21 loop tests over vectors whose expected
+  fields are optional on the TypeScript side (`conformance.test.ts:47-53`),
+  so a vector can pass while asserting little. Default mount geometry is a
+  fixed 160×60 box.
 
 ### F. Validation gates (high)
 
@@ -226,13 +267,18 @@ The spine records process faithfully and serves readers poorly:
    and have the ledger consume test execution output; admit or delete
    `machine-shape-drift`; ratchet `value-domain-drift`; add `poodle-node` to
    `test:contracts` and a React typecheck to `ci:web`; tune doctor excludes.
-7. **Native pacing decision** — ask the operator to name the first GPUI
+7. **Native source-of-truth repairs** — nested history deletion, Tabs
+   tooltip machine, drag refusal policy into headless, owner-scoped
+   continuous gestures, four public-input panics. Bounded, one card each,
+   and they are real defects regardless of the pacing decision.
+8. **Native pacing decision** — ask the operator to name the first GPUI
    consumer milestone (Loophole GPUI-second, or a Longhorn shell). Until one is
    named, cap native work at "keep it compiling and honest" and stop selecting
-   cards by ledger cell count alone. Revisit after the pending native and
-   validation audits report.
+   cards by ledger cell count alone. Before any Jetstream admission
+   planning, the 108-component direct adapter must be quarantined or
+   deleted; there is no honest admission audit while it exists.
 
-Items 1, 2, 5, and 6 are mechanical and suit cheap models. Items 3, 4, and 7
+Items 1, 2, 5, 6, and 7 are mechanical and suit cheap models. Items 3, 4, and 8
 need the operator or the orchestrator's judgment.
 
 ## Questions Only The Operator Can Answer
@@ -249,10 +295,10 @@ need the operator or the orchestrator's judgment.
 
 ## Promotion Route
 
-1. Orchestrator reads this note and the pending native/validation updates.
-2. Recommendations 1, 2, and 6 become mechanical cards; no operator
+1. Orchestrator reads this note; hand section E to the Jetstream readiness delegate.
+2. Recommendations 1, 2, 6, and 7 become mechanical cards; no operator
    question is needed except the workflow-edit approval.
-3. Recommendations 3 and 7 go to the operator as decisions; record answers in
+3. Recommendations 3 and 8 go to the operator as decisions; record answers in
    vision/architecture, then compile cards.
 4. Recommendations 4 and 5 become recurring cheap-model lanes.
 5. Remove this note when each item is promoted or rejected; carry any

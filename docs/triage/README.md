@@ -22,4 +22,4 @@ Current open notes:
   block slider, icon morph, and AgentSubagent shimmer remain gated.
 - `20260901-233708-holistic-posture-assessment.md` — independent advisory:
   value/cost-centre split, ghost `0.2.3`, red `main`, consumer packaging,
-  React drift, docs compaction; native and validation sections pending.
+  React drift, docs compaction, Jetstream direct adapter, validation gates.
