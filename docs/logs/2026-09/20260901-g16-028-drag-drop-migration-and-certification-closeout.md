@@ -2,7 +2,7 @@
 
 Status: delivered — awaiting orchestrator review
 Date: 2026-09-01
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/118
 Card: `docs/roadmaps/g16/028-drag-drop-migration-and-certification-closeout.md`
 Handoff: `docs/handoffs/20260901-075640-g16-028-drag-closeout.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
