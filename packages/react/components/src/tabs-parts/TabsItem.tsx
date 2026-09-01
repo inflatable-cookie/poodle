@@ -135,6 +135,10 @@ export function TabsItem({
           onBlur,
           onClick: onSelect,
           onKeyDown,
+          onPointerDown: (event) => {
+            if (item.disabled === true) return;
+            event.currentTarget.focus({ preventScroll: true });
+          },
           ref: onElement as never,
         })}
         type="button"

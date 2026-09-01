@@ -1825,7 +1825,9 @@ describe("createDragDropController", () => {
     Object.defineProperty(catalog, "clientHeight", { configurable: true, get: () => catalogState.clientHeight });
 
     const strip = document.createElement("div");
-    layout(sourceEl, { x: 8, y: 8, width: 80, height: 24 });
+    // A focus-ring's worth of ink can poke 2px past the clip; that must not
+    // count as "clipped work" or the strip wobbles under the pointer.
+    layout(sourceEl, { x: 8, y: -2, width: 80, height: 24 });
     layout(targetEl, { x: 96, y: 8, width: 80, height: 24 });
     strip.append(sourceEl, targetEl);
     catalog.append(strip);

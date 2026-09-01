@@ -2527,11 +2527,14 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   }
 
   function rectOverflowsClip(rect: CachedRect, clip: AutoScrollRect): boolean {
+    // Ignore a focus-ring's worth of ink (~width-focus + offset) so a tab
+    // strip does not start auto-scrolling from outline overflow.
+    const slop = 4;
     return (
-      rect.top < clip.top - 0.5 ||
-      rect.bottom > clip.bottom + 0.5 ||
-      rect.left < clip.left - 0.5 ||
-      rect.right > clip.right + 0.5
+      rect.top < clip.top - slop ||
+      rect.bottom > clip.bottom + slop ||
+      rect.left < clip.left - slop ||
+      rect.right > clip.right + slop
     );
   }
 

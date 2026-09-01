@@ -95,6 +95,14 @@
     min-width: 0;
   }
 
+  /* Tabs' contracted focus ring sits 0.125rem outside the button. The strip
+     list is overflow:auto, so that ink extends the scrollport by a pixel or
+     two and the strip wobbles under a drag. Keep the ring, pull it inside. */
+  .poodle-dock-region__strip .poodle-tabs__tab:focus-visible,
+  .poodle-dock-region__strip .poodle-tabs__close:focus-visible {
+    outline-offset: calc(-1 * var(--poodle-border-width-focus));
+  }
+
   .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs[data-variant="block"] .poodle-tabs__list {
     border-bottom: 0;
   }

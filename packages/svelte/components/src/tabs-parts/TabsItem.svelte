@@ -164,6 +164,10 @@
     onblur={onBlur}
     onclick={onSelect}
     onkeydown={onKeydown}
+    onpointerdown={(event) => {
+      if (item.disabled === true) return;
+      event.currentTarget.focus({ preventScroll: true });
+    }}
     use:dragSource={sourceRegistration}
   >
     {#if item.icon}
