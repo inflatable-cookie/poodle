@@ -84,3 +84,11 @@ index. After the last restore, 74 paired Tree tests passed.
 - `effigy test:drag-drop-browser-chromium` — pass, including Tree authority rows
 - `effigy test:drag-drop-browser-webkit` — pass, including Tree authority rows
 - `effigy test:web-pack-install` — pass, `packedTreeReorderProof` present
+- `effigy drift:drag-inventory` — pass
+- `effigy docs:contract-drift` — pass
+- `effigy docs:spec-drift` — pass (`reorderAuthority` remains web-only)
+- `effigy ci:web` — pass
+- `effigy docs:check` — pass
+- `git diff --check origin/main...HEAD` — clean
+- writable scope: no Rust/GPUI/Jetstream/headless/render/contracts crate files;
+  no g16 README or generation-index edits
