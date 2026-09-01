@@ -2953,6 +2953,10 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       return;
     }
 
+    // A committed drop (or any other DOM move) can relocate the same
+    // registered elements without a resize. Remeasure from this press.
+    layoutDirty = true;
+
     const kind = asInputKind(event.pointerType);
     const sessionId = createSessionId();
     inputKind = kind;

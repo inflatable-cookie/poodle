@@ -1118,6 +1118,54 @@ describe("createDragDropController", () => {
     expect(sourceEl.getAttribute("draggable")).toBeNull();
   });
 
+  it("a new gesture remasures after a committed drop moved the elements", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    const left = layout(document.createElement("button"), { x: 0, y: 0, width: 100, height: 30 });
+    const right = layout(document.createElement("button"), { x: 100, y: 0, width: 100, height: 30 });
+    left.textContent = "A";
+    right.textContent = "B";
+    root.append(left, right);
+
+    const rejectSelf = (id: string): DropTargetRegistration["canDrop"] => (intent, subject) =>
+      subject.id === id ? { accepted: false, reason: "same" } : { accepted: true, intent };
+
+    controller.registerSource(left, sourceReg({ sourceId: "src-a", subject: { kind: "item", id: "a" } }));
+    controller.registerSource(right, sourceReg({ sourceId: "src-b", subject: { kind: "item", id: "b" } }));
+    controller.registerTarget(
+      left,
+      targetReg({
+        targetId: "tgt-a",
+        canDrop: rejectSelf("a"),
+        resolvePosition: () => "before",
+      }),
+    );
+    controller.registerTarget(
+      right,
+      targetReg({
+        targetId: "tgt-b",
+        canDrop: rejectSelf("b"),
+        resolvePosition: () => "after",
+      }),
+    );
+
+    left.dispatchEvent(pointer("pointerdown", { clientX: 50, clientY: 15 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 150, clientY: 15 }));
+    expect(controller.getSnapshot().targetId).toBe("tgt-b");
+    document.dispatchEvent(pointer("pointerup", { clientX: 150, clientY: 15 }));
+
+    // The drop reordered the row: A now sits where B was.
+    layout(left, { x: 100, y: 0, width: 100, height: 30 });
+    layout(right, { x: 0, y: 0, width: 100, height: 30 });
+
+    left.dispatchEvent(pointer("pointerdown", { clientX: 150, clientY: 15 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 160, clientY: 15 }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    expect(controller.getSnapshot().targetId).not.toBe("tgt-b");
+    expect(right.getAttribute("data-poodle-drop-target")).toBeNull();
+    controller.destroy();
+  });
+
   it("re-hit-tests after invalidateLayout", () => {
     const controller = createDragDropController();
     controller.connect(root);

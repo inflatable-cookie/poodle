@@ -234,6 +234,37 @@ describe("Tabs (svelte)", () => {
     expect(onReorder).toHaveBeenCalledWith(["index.ts", "utils.ts", "App.svelte", "types.ts"]);
   });
 
+  it("a second drag uses the post-reorder layout, not the original slots", async () => {
+    const onReorder = vi.fn();
+    const files = [
+      { value: "index.ts", label: "index.ts" },
+      { value: "App.svelte", label: "App.svelte", closable: true },
+      { value: "utils.ts", label: "utils.ts", closable: true },
+      { value: "types.ts", label: "types.ts", closable: true },
+    ];
+    const { container } = render(Tabs, {
+      props: { items: files, defaultValue: "App.svelte", reorderable: true, onReorder },
+    });
+    layout(container);
+    const source = tabs()[1];
+
+    await fireEvent(source, pointer("pointerdown", 150, 15));
+    await fireEvent(document, pointer("pointermove", 190, 15));
+    await fireEvent(document, pointer("pointermove", 250, 15));
+    await fireEvent(document, pointer("pointerup", 250, 15));
+    await Promise.resolve();
+    expect(onReorder).toHaveBeenCalledWith(["index.ts", "utils.ts", "App.svelte", "types.ts"]);
+
+    layout(container);
+    const moved = [...tabs()].find((tab) => tab.getAttribute("data-value") === "App.svelte")!;
+    const occupant = itemsOf(container)[1];
+
+    await fireEvent(moved, pointer("pointerdown", 250, 15));
+    await fireEvent(document, pointer("pointermove", 260, 15));
+    expect(occupant.getAttribute("data-drop-target")).toBeNull();
+    expect(moved.closest(".poodle-tabs__item")?.getAttribute("data-drop-target")).toBeNull();
+  });
+
   it("the drag preview tracks the pointer in overlay-local coordinates", async () => {
     const files = [
       { value: "index.ts", label: "index.ts" },
