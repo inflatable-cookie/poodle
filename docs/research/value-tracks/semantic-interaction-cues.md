@@ -82,7 +82,8 @@ audit read the repository authority chain before source inspection:
   `docs/contracts/components/toast-stack.md`, and
   `docs/specs/069-dependable-drag-and-drop-substrate.md`;
 - the two pinned library sources cloned to fixed commits and read in full
-  (engine, context, recipes, bindings, CLI, tests, licenses);
+  (engine, context, recipes, bindings, CLI, tests, licenses); every material
+  claim below cites a pinned raw file at the audited revision;
 - a full-tree grep of `packages/` for any audio/haptic implementation;
 - platform guidance from Apple, Microsoft, Google, W3C, WHATWG, and WebKit
   primary sources.
@@ -95,8 +96,39 @@ dossier.
 
 | Source | Pin | Evidence used | Licence/access record |
 | --- | --- | --- | --- |
-| [Cuelume](https://github.com/Danilaa1/cuelume) | commit `b879b72c01f3b3fa74c45c9b20bbd064baffb282` (2026-08-04, tag `0.2.2`), npm `cuelume` 0.2.2 | 17-cue synthesized palette; shared lazy `AudioContext`; `navigator.userActivation` gate; `setEnabled`/`setVolume` with app-owned preference storage; `bind()` delegated `data-cuelume-*` wiring; hover throttle; limiter; cleanup; runtime test | MIT © 2026 Daniel Belyi. Zero runtime dependencies; no audio files. Site [cuelume.dev](https://cuelume.dev) checked 2026-09-01. |
-| [@web-kits/audio](https://github.com/raphaelsalaja/audio) | commit `3a9fe941c589d26d3487db17f5183eb9cecf3258` (2026-04-26, release `#14`); package `0.2.0` at HEAD; npm published `0.1.0` | Declarative `defineSound` synthesis engine; `SoundPatch` JSON + CLI/registry; `OfflineAudioContext` `renderToBuffer`/`renderToWav` determinism path; `VoiceHandle.stop`; master bus; React `useSound` gated on `prefers-reduced-motion` + provider state; jitter option | MIT © 2026 Raphael Salaja. Site [audio.raphaelsalaja.com](https://audio.raphaelsalaja.com) checked 2026-09-01. Registry API base `https://audio.raphaelsalaja.com/api` ([LF] `packages/audio/src/commands/utils.ts:6` in the pinned clone). In-repo patch sets (`core`, `crisp`, `drums`, `mechanical`, `minimal`, `organic`, `playful`, `retro`, `soft`, `synths`) carry no per-file license field; the repository is MIT. |
+| [Cuelume](https://github.com/Danilaa1/cuelume) | commit `b879b72c01f3b3fa74c45c9b20bbd064baffb282` (2026-08-04, tag `0.2.2`), npm `cuelume` 0.2.2 | 17-cue synthesized palette; shared lazy `AudioContext`; `navigator.userActivation` gate; `setEnabled`/`setVolume` with app-owned preference storage; `bind()` delegated `data-cuelume-*` wiring; hover throttle; limiter; cleanup; runtime test | [LICENSE](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/LICENSE) — MIT © 2026 Daniel Belyi. Zero runtime dependencies; no audio files. Site [cuelume.dev](https://cuelume.dev) is mutable (checked 2026-09-01); the pinned raw files below are the authoritative read. |
+| [@web-kits/audio](https://github.com/raphaelsalaja/audio) | commit `3a9fe941c589d26d3487db17f5183eb9cecf3258` (2026-04-26, release `#14`); package `0.2.0` at HEAD; npm published `0.1.0` | Declarative `defineSound` synthesis engine; `SoundPatch` JSON + CLI/registry; `OfflineAudioContext` `renderToBuffer`/`renderToWav` determinism path; `VoiceHandle.stop`; master bus; React `useSound` gated on `prefers-reduced-motion` + provider state; jitter option | [LICENSE](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/LICENSE) — MIT © 2026 Raphael Salaja. Site [audio.raphaelsalaja.com](https://audio.raphaelsalaja.com) is mutable (checked 2026-09-01); the pinned raw files below are the authoritative read. Registry API base `https://audio.raphaelsalaja.com/api` ([pinned `commands/utils.ts:6`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/src/commands/utils.ts)). In-repo patch sets (`core`, `crisp`, `drums`, `mechanical`, `minimal`, `organic`, `playful`, `retro`, `soft`, `synths`) carry no per-file license field; the repository is MIT. |
+
+#### Pinned raw files at the audited revisions
+
+Cuelume at `b879b72c01f3b3fa74c45c9b20bbd064baffb282`:
+
+| Pinned file | Evidence |
+| --- | --- |
+| [`src/audio/engine.ts`](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/src/audio/engine.ts) | `play` no-op without user activation; lazy shared `AudioContext`; `resume()` on suspended context; constructor-throw catch; `setEnabled`/`setVolume` with app-owned preference storage; master gain + `DynamicsCompressor` limiter; `setTimeout` cleanup. |
+| [`src/interactions/bind.ts`](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/src/interactions/bind.ts) | Delegated `data-cuelume-hover/press/release/toggle` wiring; mouse-only hover via `(hover: hover) and (pointer: fine)`; 150 ms hover throttle; per-event dedupe. |
+| [`src/sounds/recipes.ts`](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/src/sounds/recipes.ts) | The 17 `RECIPES` and `SoundName` union (`chime sparkle droplet bloom whisper tick press release toggle success error page loading ready pulse scan arrival`). |
+| [`test/runtime.test.mjs`](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/test/runtime.test.mjs) | 17-sound assertion; `play` waits for user activation before creating `AudioContext`. |
+| [`package.json`](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/package.json) | Version 0.2.2; no runtime dependencies; TypeScript dev-dependency only. |
+| [`README.md`](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/README.md) | Cue names and characters; "Cuelume starts enabled at full volume and does not read or write storage"; ESM-only. |
+| [`LICENSE`](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/LICENSE) | MIT, © 2026 Daniel Belyi. |
+
+@web-kits/audio at `3a9fe941c589d26d3487db17f5183eb9cecf3258`:
+
+| Pinned file | Evidence |
+| --- | --- |
+| [`packages/audio/src/engine.ts`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/src/engine.ts) | `render()` graph building (sources, envelopes, filters, LFOs, panners, effects); `VoiceHandle.stop(releaseTime)`; per-voice jitter. |
+| [`packages/audio/src/context.ts`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/src/context.ts) | One shared `AudioContext`, auto-`resume()`, `dispose()`, master bus. |
+| [`packages/audio/src/offline.ts`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/src/offline.ts) | `renderToBuffer` via `OfflineAudioContext`; `renderToWav`/`bufferToWav` 16-bit PCM — in-memory deterministic evidence path. |
+| [`packages/audio/src/react.tsx`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/src/react.tsx) | `SoundProvider` (enabled/volume); `useSound` gates on provider state **and** `prefers-reduced-motion`. |
+| [`packages/audio/src/patch.ts`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/src/patch.ts) | `AudioPatch` (`ready`, `play`, `get`, `toJSON`) and `createPatchInstance`. |
+| [`packages/audio/src/types.ts`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/src/types.ts) | `PlayOptions` (volume/pan/detune/playbackRate/velocity/jitter), `VoiceHandle`, `SoundPatch`, `OfflineRenderOptions`. |
+| [`packages/audio/src/commands/utils.ts`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/src/commands/utils.ts) | `REGISTRY_BASE = "https://audio.raphaelsalaja.com/api"` (line 6); GitHub-repo and URL patch sources. |
+| [`packages/audio/package.json`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/package.json) | Version 0.2.0 at the pinned revision; MIT; `main`/`types`/`bin` exports. |
+| [`packages/audio/CHANGELOG.md`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/CHANGELOG.md) | 0.2.0 adds jitter; 0.1.0 renames packs→patches (breaking). |
+| [`packages/audio/README.md`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/README.md) | `defineSound`/`ensureReady` usage, CLI commands, patch authoring JSON. |
+| [`.web-kits/core.json`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/.web-kits/core.json) | Patch manifest shape: `name`/`author`/`version`/`description` + `sounds` definitions (Core, version 3.1.0). |
+| [`LICENSE`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/LICENSE) | MIT, © 2026 Raphael Salaja. |
 
 ### Normative and platform sources
 
@@ -129,8 +161,8 @@ dossier.
 
 | Precedent | Evidence used | Licence/access record |
 | --- | --- | --- |
-| [Cuelume](https://cuelume.dev) (pinned above) | Curated 17-cue palette with no samples; declarative attribute binding; app-owned preferences; autoplay-gated engine | MIT; no code copied. |
-| [@web-kits/audio](https://audio.raphaelsalaja.com) (pinned above) | Declarative synthesis as data (`SoundPatch`); registry/CLI distribution; offline rendering for determinism; React provider gating sound on motion preference | MIT; no code copied. |
+| [Cuelume](https://cuelume.dev) (mutable site; pinned files above are authoritative) | Curated 17-cue palette with no samples; declarative attribute binding; app-owned preferences; autoplay-gated engine | [MIT LICENSE at `b879b72c`](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/LICENSE); no code copied. |
+| [@web-kits/audio](https://audio.raphaelsalaja.com) (mutable site; pinned files above are authoritative) | Declarative synthesis as data (`SoundPatch`); registry/CLI distribution; offline rendering for determinism; React provider gating sound on motion preference | [MIT LICENSE at `3a9fe94`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/LICENSE); no code copied. |
 
 The precedents are evidence of viable design choices, not Poodle authorities.
 Poodle's architecture, component contracts, and active-runtime admission
@@ -247,17 +279,7 @@ one shared lazy `AudioContext`, no audio files, zero runtime dependencies,
 MIT. The site claims all seventeen sounds together are smaller than one MP3
 click; the published package is ~2 KB-class.
 
-**[LF]** Pinned engine facts (`/tmp/cuelume-pin/src/audio/engine.ts`): `play`
-is a no-op when `navigator.userActivation?.hasBeenActive === false` (autoplay
-gate, proven by its runtime test), lazily creates the context, `resume()`s a
-suspended context before rendering, and catches synchronous constructor
-throws; `setEnabled`/`setVolume` are global with "preference storage stays
-with the app"; output runs through a master gain and a `DynamicsCompressor`
-limiter (−8 dB threshold, 12:1); nodes are disconnected via `setTimeout`
-after the recipe tail. `bind()` wires delegated `data-cuelume-hover`
-(mouse-only via `(hover: hover) and (pointer: fine)`, throttled to one tick
-per 150 ms), `data-cuelume-press` (pointerdown), `data-cuelume-release`
-(pointerup), and `data-cuelume-toggle` (click) — `src/interactions/bind.ts`.
+**[SF]** Pinned engine facts ([`src/audio/engine.ts` at `b879b72c`](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/src/audio/engine.ts)): `play` is a no-op when `navigator.userActivation?.hasBeenActive === false` (autoplay gate, proven by the [pinned runtime test](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/test/runtime.test.mjs)), lazily creates the context, `resume()`s a suspended context before rendering, and catches synchronous constructor throws; `setEnabled`/`setVolume` are global with "preference storage stays with the app"; output runs through a master gain and a `DynamicsCompressor` limiter (−8 dB threshold, 12:1); nodes are disconnected via `setTimeout` after the recipe tail. [`bind()`](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/src/interactions/bind.ts) wires delegated `data-cuelume-hover` (mouse-only via `(hover: hover) and (pointer: fine)`, throttled to one tick per 150 ms), `data-cuelume-press` (pointerdown), `data-cuelume-release` (pointerup), and `data-cuelume-toggle` (click).
 
 **[SF]** @web-kits/audio (pin `3a9fe94…`, MIT) is a declarative synthesizer:
 sounds are plain JSON-serializable objects (`SoundDefinition`/`SoundPatch`
@@ -270,12 +292,11 @@ bus, `dispose()`, and `ensureReady()`.
 **[SF]** @web-kits/audio ships a deterministic evidence path absent from
 Cuelume: `renderToBuffer` renders a definition through an
 `OfflineAudioContext` into an in-memory `AudioBuffer`, and `renderToWav`
-encodes 16-bit PCM WAV — no speakers involved (`packages/audio/src/offline.ts`
-in the pin).
+encodes 16-bit PCM WAV — no speakers involved ([`src/offline.ts` at `3a9fe94`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/src/offline.ts)).
 
 **[SF]** @web-kits/audio React integration (`useSound`) gates playback on
 provider state (`enabled`, `volume`) **and** on `prefers-reduced-motion`
-(`packages/audio/src/react.tsx` in the pin). This is a design choice, not a
+([`src/react.tsx` at `3a9fe94`](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/packages/audio/src/react.tsx)). This is a design choice, not a
 standard: MQ5 defines no sound-reduction preference, so sound is being
 conservatively tied to the motion signal.
 
@@ -476,9 +497,11 @@ cohort.
 
 ## Licensing Record
 
-- Cuelume: MIT, © 2026 Daniel Belyi, pin `b879b72c…`. Zero runtime
+- Cuelume: MIT, © 2026 Daniel Belyi, pin `b879b72c…`
+  ([LICENSE](https://raw.githubusercontent.com/Danilaa1/cuelume/b879b72c01f3b3fa74c45c9b20bbd064baffb282/LICENSE)). Zero runtime
   dependencies; no audio assets; no code copied.
-- @web-kits/audio: MIT, © 2026 Raphael Salaja, pin `3a9fe94…`. Core engine
+- @web-kits/audio: MIT, © 2026 Raphael Salaja, pin `3a9fe94…`
+  ([LICENSE](https://raw.githubusercontent.com/raphaelsalaja/audio/3a9fe941c589d26d3487db17f5183eb9cecf3258/LICENSE)). Core engine
   has no runtime dependencies (React integration is a separate entry point);
   patch JSONs carry no per-file license but live in an MIT repository; the
   registry service (`audio.raphaelsalaja.com/api`) and GitHub-repo patch
