@@ -42,6 +42,8 @@ things that the 16 live consumers feel today at the front of the runway.
 | npm `latest` is `0.2.2`; no `0.2.3` on npm; no `v0.2.3` git tag | `npm view` both packages; `git tag` |
 | `CHANGELOG.md` and `docs/release-notes/README.md` record `0.2.3` as released 2026-08-30; all package.json/Cargo.toml say `0.2.3` | `CHANGELOG.md:14`, `docs/release-notes/README.md:23` |
 | `effigy qa` is red on `main` | `audit:security` OpenAI regex (`scripts/audit-repository-security.ts:23`) has no left boundary; now matches 5 files (PAPERCUTS recorded 1) |
+| All five GitHub workflows are `workflow_dispatch` only; no push/PR trigger exists; `effigy qa` runs only inside a manual `release.yml` dispatch | `.github/workflows/*.yml` `on:` blocks |
+| `effigy qa` on `main`: 2:47 wall-clock, single red child `audit:security`; ledger "mounted" is a static name map (`parity-evidence-ledger.ts:72,444,512`) | validation audit run 22:29Z |
 | `effigy doctor` reports 3 error classes: 30 generated-in-src, 67 god-files (12 critical), 22 stale suppressions (19 errors) | `.effigy/reports/doctor/` |
 | Published web packages are raw source: 0 `.js`, 0 `.d.ts`; `files: ["src"]`, exports point at `src/index.ts` | `packages/svelte/components/package.json`, packed tarballs |
 | Neither web package declares `sideEffects`; 172 Svelte components import their own CSS as a side effect | grep; fresh Vite app with Button + Select builds a 684 kB CSS bundle containing list-card and tabs styles |
@@ -116,12 +118,54 @@ god files, dead IR crates, `too_many_arguments` clusters, test reality of
 "mounted" cells, Jetstream cost) is still running. This section will be
 updated in a follow-up commit on this branch.
 
-### F. Validation gates (pending)
+### F. Validation gates (high)
 
-The validation audit (`effigy qa` timing and composition, doctor tuning,
-drift-script inventory and overlap, denominator coupling, flake root causes,
-ledger classification mechanics, papercut triage) is still running. This
-section will be updated in a follow-up commit on this branch.
+Measured on `main` at 22:29Z: `effigy qa` takes 2:47 wall-clock, 3,498 web
+tests and 167 native regressions pass, and the only red child is
+`audit:security`. The lattice is large and mostly fast; its problems are
+shape, not cost.
+
+- **No automated board exists.** Every workflow under `.github/workflows/`
+  is `workflow_dispatch` only, by a documented decision after macOS lanes
+  exhausted the Actions allowance. `effigy qa` is the release gate but runs
+  only when a human dispatches `release.yml`. At 28 merged PRs in one day,
+  "main is green" is whatever the last worker said it was. A cheap headless
+  push/PR board (ci:web + ci:rust, Linux, no macOS) restores a shared signal
+  for a few minutes of runner time per merge.
+- **"Mounted" is a name map, not execution.** `parity-evidence-ledger.ts:72`
+  is a component→test-name table; a cell is `mounted` when the map has an
+  entry and the string appears anywhere in the cited file (`:512-529`). The
+  generator never runs cargo or a browser. Fine as an expected-test manifest;
+  it should not be read as proof, and the g16 runway reads it as proof.
+- **Red or unenforced checks outside the board.** `docs:machine-shape-drift`
+  exits 1 with 20 findings and is in no board. `docs:value-domain-drift` has
+  20 findings but is report-only unless `VALUE_DOMAIN_ENFORCE=1`. `drift:roles`
+  fails because it shells into the Jetstream preview, which no longer
+  compiles. `lint-docs.ts:3093` adds only contract-only prop errors, so
+  Svelte-only drift is green in the composed docs gate while red standalone.
+- **Coverage narrower than claimed.** `test:contracts` omits
+  `packages/contracts/node`. There is no `check:react` typecheck in any board.
+  Visual capture skips nine nondeterministic components.
+- **Validation dirties the checkout.** `test:web-pack-install` leaves two
+  tarballs in the tree (found in the orchestrator's `main` checkout after the
+  audit; removed). Doctor then reads them as invalid UTF-8 and reports scan
+  errors. `gate-tree-guard.ts:27` keys its snapshot on one global
+  `/tmp/poodle-gate-tree-guard.json`, so concurrent worktrees can consume each
+  other's state.
+- **Doctor is mis-tuned.** `quality/effigy.scan.toml:72-87` scans
+  generated-in-src but excludes only token/icon roots, not the committed
+  catalogue/specimen roots that `tasks/effigy.tasks.toml:14-25` calls
+  intentional inputs. Every `#[allow(` is scored high. A permanently red
+  doctor has the same effect as a red qa: nobody reads it.
+- **Denominator in seven places.** `specimen_probe.rs:41` hard-codes 175;
+  the census test, ledger script, `parity.ts:754`, two JSON reports, and the
+  demo audit repeat it. One `public-surface.json` manifest with per-runtime
+  flags would derive all of them.
+- **Flake root causes are concrete.** `window_capture.rs:820-836` builds a
+  temp dir from pid + body length so parallel empty-manifest tests collide;
+  the smoke wrapper drops stderr. `specimen_probe.rs:295-346` asserts a
+  120 s wall clock while four shards run concurrently behind one global
+  registry lock, so any neighbouring Vitest run trips it.
 
 ### G. Docs and planning posture (medium, compounding)
 
@@ -160,9 +204,12 @@ The spine records process faithfully and serves readers poorly:
 
 ## Recommendations, Ranked
 
-1. **Release truth and green main** — one mechanical batch: regex boundary,
-   `0.2.3` disposition, changelog rewrite, delete merged branches. No design
-   decisions, no contract changes. Do this before PR #144 lands.
+1. **Release truth and green main** — one mechanical batch: regex boundary
+   plus a prose fixture, `0.2.3` disposition, changelog rewrite, pack-install
+   output to a temp dir, worktree-keyed gate state, delete merged branches.
+   No design decisions, no contract changes. Do this before PR #144 lands.
+   Then a Linux-only push/PR board running `ci` so main has a shared signal
+   (needs operator approval for workflow edits).
 2. **Consumer packaging trio** — `sideEffects`, `marked` isolation, README
    statement of the toolchain boundary (or a `dist/` build if the operator
    wants a broader boundary). Ships in `0.3.0` alongside the HistoryEntry break
@@ -175,11 +222,18 @@ The spine records process faithfully and serves readers poorly:
 5. **Docs compaction** — roadmap status tables, archive handoffs/parity, spec
    purge, guide snippet check, Underlay rule reconciliation. Docs-only, can run
    on a cheap model in parallel with everything else.
-6. **Native pacing decision** — ask the operator to name the first GPUI
+6. **Ledger honesty** — rename the mounted map to an expected-test manifest
+   and have the ledger consume test execution output; admit or delete
+   `machine-shape-drift`; ratchet `value-domain-drift`; add `poodle-node` to
+   `test:contracts` and a React typecheck to `ci:web`; tune doctor excludes.
+7. **Native pacing decision** — ask the operator to name the first GPUI
    consumer milestone (Loophole GPUI-second, or a Longhorn shell). Until one is
    named, cap native work at "keep it compiling and honest" and stop selecting
    cards by ledger cell count alone. Revisit after the pending native and
    validation audits report.
+
+Items 1, 2, 5, and 6 are mechanical and suit cheap models. Items 3, 4, and 7
+need the operator or the orchestrator's judgment.
 
 ## Questions Only The Operator Can Answer
 
@@ -196,9 +250,9 @@ The spine records process faithfully and serves readers poorly:
 ## Promotion Route
 
 1. Orchestrator reads this note and the pending native/validation updates.
-2. Recommendations 1 and 2 become one or two mechanical cards; no operator
-   question is needed for them.
-3. Recommendations 3 and 6 go to the operator as decisions; record answers in
+2. Recommendations 1, 2, and 6 become mechanical cards; no operator
+   question is needed except the workflow-edit approval.
+3. Recommendations 3 and 7 go to the operator as decisions; record answers in
    vision/architecture, then compile cards.
 4. Recommendations 4 and 5 become recurring cheap-model lanes.
 5. Remove this note when each item is promoted or rejected; carry any
