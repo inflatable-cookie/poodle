@@ -74,19 +74,47 @@ unnamed state.
   mode shows the unchanged `value`.
 
 Do not add a live public draft channel on web (`onChange`, `draftValue`).
-Draft is session-private until commit or cancel.
+Draft is session-private until commit or cancel. Native `draft_value` is
+resolved paint for that session, not a web public prop. Native `value` stays
+committed.
 
 ### Editing ownership
 
 | Runtime | Default owner | Host override |
 | --- | --- | --- |
 | Svelte / React | Adapter owns `isEditing` and draft | None in this proposal. Programmatic entry is `startEditing()` / `cancelEditing()` |
-| Native spec | `is_editing` is resolved render state | Composites may keep driving it (LicenceActivation, LicenceSeats) |
-| GPUI standalone | Session/host wrapper owns editing, draft, selection, and focus between rebuilds | Same wrapper exposes start/cancel; it writes `is_editing` into the spec |
+| Native spec | Resolved render state only | `value` committed; `draft_value: Option<String>` painted draft; `is_editing`. Composites may drive the triple (LicenceActivation, LicenceSeats) |
+| GPUI standalone | Session/host wrapper owns editing, draft, selection, and focus between rebuilds | Wrapper writes the spec triple; it never stores the live draft in `value` |
 
-This is the NumberInput pattern: declarative spec carries resolved state;
-the wrapper retains the session. It is not a public controlled `editing` prop
-on web.
+Web follows NumberInput's *ownership* split, not its public draft channel:
+the spec carries resolved state; the wrapper retains the session. It is not a
+public controlled `editing` or `draftValue` prop on web.
+
+### Native resolved projection
+
+`value` is never the live editor string. Do not overload it.
+
+Renderer-neutral native spec fields:
+
+| Field | Meaning |
+| --- | --- |
+| `value: String` | Committed label. Unchanged while a session is open. `onCommit.previousValue` is this string |
+| `draft_value: Option<String>` | Resolved painted draft. `None` in view mode. `Some(draft)` while editing |
+| `is_editing: bool` | Resolved mode |
+
+Paint law:
+
+- `is_editing == false` → `draft_value` is `None`; the display paints `value`.
+- `is_editing == true` → `draft_value` is `Some(session draft)`; the input
+  paints that string. `value` stays the committed snapshot.
+
+A wrapper or composite keystroke updates `draft_value` only. Render and
+callback proofs must show that after a typed change, the input text equals
+`draft_value`, `value` still equals the pre-session committed string, and
+`onCommit.previousValue` equals that committed string.
+
+`on_change` may exist as render-layer plumbing that writes `draft_value`.
+It is not a portable callback and must not write `value`.
 
 ### Callbacks
 
@@ -95,15 +123,14 @@ Keep the current web names. Make native match them.
 | Callback | When | Payload |
 | --- | --- | --- |
 | `onEditStart` | view → editing | none |
-| `onCommit` | editing → view by Enter, Tab/blur, or pointer/window blur | `{ value: string; previousValue: string }` |
+| `onCommit` | editing → view by Enter, or by user-caused focus departure (Tab, pointer, window) | `{ value: string; previousValue: string }` |
 | `onCancel` | editing → view by Escape or `cancelEditing()` | none |
 
 Native `on_commit: Fn(&str)` is a clean pre-1.0 break. Replace it with the
 same `{ value, previousValue }` meaning. No alias.
 
-No public `onChange` for keystrokes. Native `on_change` may remain as a
-render-layer channel for the wrapper or a composite that already stores a
-draft; it is not the portable commit contract.
+No public `onChange` or `draftValue` on web. Native `on_change` may write
+`draft_value` for the wrapper or a composite; it must not write `value`.
 
 ### Programmatic API
 
@@ -125,24 +152,55 @@ distinct event that still checks disabled and view state.
 - `START_EDIT` seeds draft from the current committed `value`, never from a
   stale buffer.
 - Draft is not trimmed while typing.
-- `COMMIT` trims leading and trailing Unicode whitespace, then reports the
-  trimmed string. Interior spaces stay.
+- `COMMIT` trims with the portable algorithm below, then reports the result.
+  Interior non-trim characters stay.
 - Empty after trim is a valid committed value. Mapping `""` → `null` for a
   domain label remains the host's job (LicenceSeats and loophole already do).
-- `maxLength` uses TextInput / `poodle_headless::text_input` character-count
-  enforcement (`chars().count()`). Over-long insert truncates to fit;
-  a keystroke into a full field is consumed and reports nothing.
+- `maxLength` counts Unicode scalar values, the same unit as
+  `poodle_headless::text_input` (`chars().count()`). Over-long insert
+  truncates to fit; a keystroke that would exceed the limit is consumed and
+  reports nothing. Both web and native adapters enforce this unit. HTML
+  `maxlength` is UTF-16 and is not the authority; web must clamp through the
+  shared insert path (or an equivalent scalar-count clamp), not by relying
+  on the native attribute.
 - Unchanged accepted keystrokes are silent on any live native channel
   (g16.007 `report_edit` rule).
-- External committed `value` replacement while editing discards the draft and
-  returns to view with the new value. No `onCommit`. A host echo of the value
-  just emitted by this session must not restart or cancel the session.
+- External committed `value` replacement while editing discards the draft,
+  sets native `draft_value` to `None`, and returns to view with the new
+  `value`. No `onCommit`. A host echo of the value just emitted by this
+  session must not restart or cancel the session.
 - Becoming disabled while editing cancels, restores the last committed
   display, and emits `onCancel`.
 
 Do not compose the TextInput component. Anatomy, chrome, validation, and
 affixes are wrong for a label. Reuse the headless text transitions and
 TextInput's composition, caret, undo, and max-length ownership.
+
+### Portable commit trim
+
+Paired machines must not call ECMAScript `String.prototype.trim` or Rust
+`str::trim`. Those sets differ: ES also removes U+FEFF; Rust `char::is_whitespace`
+also removes U+0085 NEXT LINE.
+
+Portable set **T** is the union: Unicode White_Space
+(U+0009, U+000A, U+000B, U+000C, U+000D, U+0020, U+0085, U+00A0, U+1680,
+U+2000–U+200A, U+2028, U+2029, U+202F, U+205F, U+3000) ∪ {U+FEFF ZERO WIDTH
+NO-BREAK SPACE}.
+
+Algorithm: drop the longest prefix in **T** and the longest suffix in **T**.
+One shared function, identical TypeScript and Rust.
+
+Required vectors (same corpus in both languages):
+
+| Input | Output | Why |
+| --- | --- | --- |
+| `"  Take  "` | `"Take"` | ASCII space |
+| `"Take  Two"` | `"Take  Two"` | interior space stays |
+| `"\u00A0Take\u00A0"` | `"Take"` | NBSP is White_Space |
+| `"\u0085Take"` | `"Take"` | NEL; ES `trim` would keep it |
+| `"Take\uFEFF"` | `"Take"` | BOM; Rust `str::trim` would keep it |
+| `"\u200BTake"` | `"\u200BTake"` | ZWSP is not in **T** |
+| `" \u00A0\u0085 "` | `""` | trim-only → empty |
 
 ## Activation Law
 
@@ -175,6 +233,7 @@ Native caret-at-end-only editing is a gap to port, not an accepted delta.
 [editing] --Escape or cancelEditing--> [view] cancel + restore focus to display
 [editing] --Tab / Shift+Tab--> [view] commit, focus continues
 [editing] --pointer or window blur--> [view] commit, no restore
+[editing] --teardown / unmount--> [gone] no commit, no cancel
 ```
 
 - Enter commits and prevents ancestor form submit. Direct commit, not a
@@ -183,14 +242,23 @@ Native caret-at-end-only editing is a gap to port, not an accepted delta.
 - Tab and Shift+Tab are sequential traversal. Focus leaves first; the
   resulting blur commits once. Do not restore to the display. This is the
   g16.008 observable result and the only law that lets Tab leave the control.
-- Pointer blur and window blur commit once and do not restore.
+- Pointer blur and window blur are user-caused focus departures: commit once
+  and do not restore.
 - After cancel, a trailing blur must not emit commit. The machine already
   no-ops `COMMIT` in view; React adapters must hold mode in a ref so a
   same-tick unmount blur cannot see stale `isEditing`.
 - Enter then blur of the unmounting input must not emit a second commit.
   Same guard.
-- Teardown of the whole control while editing does not invent a second
-  commit. If the runtime delivers a real blur, the blur law applies once.
+
+Teardown is not a focus-departure commit:
+
+- A user-caused focus departure that happens *before* removal (Tab, click
+  away, window blur) commits once. Later teardown emits nothing.
+- Removal, unmount, or spec teardown itself emits neither `onCommit` nor
+  `onCancel`, even if the runtime synthesizes a blur on the dying input.
+- Adapters must ignore teardown-caused blur. A focused editing control that
+  is removed with no prior user focus departure ends with zero session
+  callbacks.
 
 The current contract line "commit or cancel returns focus to the display
 label" is too broad. Restore only for Enter and Escape / `cancelEditing()`.
@@ -253,8 +321,8 @@ Pre-1.0 clean break. No compatibility aliases.
 | Default `ariaLabel` becomes `null` | Hosts that omit `ariaLabel` | Visible text becomes the name; pass `ariaLabel` to keep an action name |
 | Native `on_commit` payload | In-repo Rust callers | Switch to `{ value, previousValue }` |
 | Native DoubleClick uses `on_double_activate` | GPUI default specimens, any host relying on click-to-edit under DoubleClick | Use `enterOrSpace` if they wanted click |
-| Native commit trims | Native hosts that stored raw spaces | Align with web |
-| Native live `on_change` leaves the public contract | LicenceActivation native draft | Keep as composite/wrapper plumbing, not portable API |
+| Native commit trims with set **T** | Native hosts that stored raw spaces or BOM/NEL | Align with the shared function |
+| Native live draft leaves `value` | LicenceActivation native draft | Store session text in `draft_value`; `value` stays committed |
 | `startEditing` / `cancelEditing` | New | Additive |
 
 In-repository LicenceActivation and LicenceSeats migrate in the
@@ -275,22 +343,24 @@ Accepted:
 | Platform double-click timing | Pointer ergonomics; keyboard entry stays strict |
 | Web `focus()` / `startEditing()` vs native wrapper / `is_editing` | Imperative vs declarative hosts; same observable session |
 | Web focus event objects | Not portable value semantics |
-| HTML `maxlength` UTF-16 vs headless Unicode scalar count | Web platform attribute; accepted text still goes through the shared character-count rule where the adapter owns insertion |
 | Caret, IME, undo, and composition mechanism | TextInput adapter-owned; observable accepted text and selection match |
 | Jetstream editing evidence | Program-deferred |
 
 Rejected as deltas (must port):
 
 - Native `on_activate` for `doubleClick`
-- Native `spec.value` as the live draft with public `on_change` as the
-  commit model
-- Native no-trim commit
+- Native `spec.value` as the live draft, or painting the input from `value`
+  while `draft_value` differs
+- Native no-trim commit, or `String.prototype.trim` / `str::trim` in the
+  paired machines
+- HTML `maxlength` as the web `maxLength` authority
 - Native caret-at-end as the only editor
 - Missing `selectOnFocus`
 - Missing keyboard entry in `doubleClick`
 - Missing Enter/Escape focus restoration
 - Missing programmatic start API
 - Treating g16.008 Tab-commit evidence as a Tab-is-submit contract
+- Treating teardown/unmount blur as a user-caused commit
 
 ## Required Review Oracles
 
@@ -299,11 +369,20 @@ Rejected as deltas (must port):
 | Committed value is host-owned | `onCommit` ignored after rename | Display shows previous `value` | Svelte/React focused test |
 | Draft is session-private | Host has no `draftValue` and a keystroke emits a public change callback | Public surface audit failure | Prop/callback audit plus web tests |
 | Start seeds from committed value | Edit, type, Escape, edit again | Second session shows original, not abandoned draft | Machine vector + web/native |
-| Commit trims once | Draft `"  Take  "` | `onCommit` value `"Take"`; `previousValue` original | Shared machine + all active adapters |
+| Native `value` stays committed while editing | Committed `"Kick"`, draft `"Kicks"` | Painted input `"Kicks"`; spec `value` still `"Kick"`; `draft_value` is `Some("Kicks")` | Render node assertion + wrapper state |
+| `previousValue` is committed, not draft | Same session, Enter | `onCommit` `{ value: "Kicks", previousValue: "Kick" }` | Callback proof on native and web |
+| Commit uses set **T**, not language trim | Draft `"\u0085Take\uFEFF"` | `onCommit` value `"Take"` in TypeScript and Rust | Shared trim vectors in both languages |
+| NEL is trimmed | Draft `"\u0085Take"` | `"Take"`; ES `trim` is not used | Paired machine corpus |
+| BOM is trimmed | Draft `"Take\uFEFF"` | `"Take"`; Rust `str::trim` is not used | Paired machine corpus |
+| ZWSP is kept | Draft `"\u200BTake"` | `"\u200BTake"` | Paired machine corpus |
 | Unchanged commit still emits | Enter with no edit | One `onCommit` with equal value and previousValue | Machine + web; hosts may skip persist |
-| Unchanged keystroke is silent | Native insert with no room under `maxLength` | No `on_change` | Headless text_input + native render |
+| Unchanged keystroke is silent | Native insert with no room under `maxLength` | No `draft_value` write | Headless text_input + native render |
+| `maxLength` is Unicode scalar count | `maxLength=1`, insert `"𝄞"` (U+1D11E) | Accepted `"𝄞"` (1 scalar, 2 UTF-16 units) | Shared insert + Svelte, React, native |
+| Astral then ASCII is rejected | After `"𝄞"`, insert `"A"` with `maxLength=1` | Stays `"𝄞"`; silent | Same proof; HTML `maxlength=1` must not be the only gate |
 | Escape then blur emits no commit | Escape, then unmount blur in React | `onCancel` once; `onCommit` absent | React focused test with ref-guard |
 | Enter then blur emits one commit | Enter, input unmounts | One `onCommit` | Svelte, React, GPUI mounted |
+| Teardown emits neither commit nor cancel | Focused editing with dirty draft; same-tick unmount; no Tab/click-away | Zero session callbacks | Svelte, React, native wrapper |
+| User blur then teardown | Tab away, then host removes | One commit from Tab; teardown adds nothing | Web + GPUI mounted |
 | Tab commits via blur and advances | Tab after typing | Commit then next tab stop focused; display not refocused | GPUI mounted (extend g16.008) + web |
 | Enter restores display focus | Enter after typing | Display button/node is `activeElement` / focused id | Web focused + GPUI mounted |
 | DoubleClick pointer does not start on single click | One click in default mode | Stays view | Svelte, React, GPUI pointer |
@@ -317,7 +396,7 @@ Rejected as deltas (must port):
 | Echo of just-committed value does not restart | Host writes `onCommit.value` back | Stays view | Web + native wrapper |
 | `selectOnFocus` true selects all | Start edit `"Studio"` | Selection covers the draft | Web `select()`; native selection range |
 | `selectOnFocus` false caret at end | Same, flag false | Caret after last character | Web + native |
-| `maxLength` is character-count | Value length 6, max 6, insert `"x"` | No accepted change | Shared text_input + adapters |
+| ASCII `maxLength` still scalar-counted | Value length 6, max 6, insert `"x"` | No accepted change | Shared text_input + adapters |
 | Accessible name prefers visible text | Omit `ariaLabel`, value `"Kick"` | Name is `"Kick"`, not `"Edit label"` | Web a11y assertion |
 | Same name on input | Start edit with `ariaLabel="Rename Kick"` | Input name `"Rename Kick"` | Web + native label |
 | LicenceSeats empty commit | Flush row, commit `""` | Host still maps to `null`; primitive emits `""` | In-repo composite regression |
@@ -333,21 +412,28 @@ Batches inside that one card:
 
 1. **Contract and paired machine.** Rewrite `editable-label.md`. Port
    `editLabelTransition` into idiomatic Rust headless beside the TypeScript
-   machine. Add a bounded vector corpus for start, draft, trim-commit,
-   unchanged commit, cancel, gesture vs API start, disabled cancel, and
-   external replacement. Reuse `poodle_headless::text_input` for max-length
-   and insert; do not fork it.
+   machine. Shared trim function over set **T** (not language `trim`). Spec
+   fields `value`, `draft_value`, `is_editing`. Vector corpus for start,
+   draft, trim-commit including NEL/BOM/ZWSP, unchanged commit, cancel,
+   gesture vs API start, disabled cancel, external replacement, Unicode-scalar
+   `maxLength` including `"𝄞"`. Reuse `poodle_headless::text_input` for
+   insert; do not fork it.
 2. **Web adapters.** Svelte and React: ref-guarded commit-after-cancel,
-   keyboard entry in `doubleClick`, Enter/Escape restore, `ariaLabel` default
-   null, `startEditing` / `cancelEditing`, TextInput max-length rule.
+   ignore teardown blur, keyboard entry in `doubleClick`, Enter/Escape
+   restore, `ariaLabel` default null, `startEditing` / `cancelEditing`,
+   scalar `maxLength` clamp (HTML `maxlength` not the authority).
    Focused tests. Curated specimens stay documentation, not a case corpus.
-3. **Native spec, render, wrapper, in-repo composites.** `on_double_activate`
-   vs `on_activate`; trim + `{ value, previousValue }`; session wrapper for
-   standalone GPUI; migrate LicenceActivation / LicenceSeats Rust hosts.
-   Mechanical Jetstream compile only.
+3. **Native spec, render, wrapper, in-repo composites.** Paint from
+   `draft_value` while editing; `value` stays committed; `on_double_activate`
+   vs `on_activate`; trim + `{ value, previousValue }` with `previousValue`
+   from `value`; session wrapper for standalone GPUI; migrate
+   LicenceActivation / LicenceSeats off live-`value` drafts. Mechanical
+   Jetstream compile only.
 4. **Mounted proof and closeout.** Named GPUI regressions for the oracle
-   rows that native can drive. Move only EditableLabel's GPUI mounted-behavior
-   ledger cell. Accessibility and visual-comparison cells do not move.
+   rows that native can drive, including astral `maxLength`, committed
+   `previousValue`, and same-tick teardown. Move only EditableLabel's GPUI
+   mounted-behavior ledger cell. Accessibility and visual-comparison cells
+   do not move.
 
 Stop the card if the operator changes commit-vs-restore, public draft
 ownership, or activation mapping. Stop if IME, multiline, validation, or a
@@ -358,9 +444,10 @@ new focus architecture is required to land the envelope.
 | Meaning | Destination after packet acceptance |
 | --- | --- |
 | Public props, callbacks, activation, commit/blur/focus, a11y, deltas | `docs/contracts/components/editable-label.md` |
-| Pure view/editing machine | `packages/core/src/edit.ts` and a paired Rust headless module; contract Behavior Machine section |
-| Text insert, max-length, selection, composition ownership | Reuse TextInput contract §6 and `poodle_headless::text_input`; project the reuse into EditableLabel notes |
-| Native session ownership | Contract active-cohort notes plus the GPUI wrapper; NumberInput's wrapper note is the pattern, not a shared type |
+| Pure view/editing machine and portable trim | `packages/core/src/edit.ts` and a paired Rust headless module; contract Behavior Machine section |
+| Native committed `value` vs resolved `draft_value` | EditableLabel spec + contract active-cohort notes; NumberInput's `draft_value` is the pattern, not a shared type |
+| Text insert, Unicode-scalar max-length, selection, composition | Reuse TextInput contract §6 and `poodle_headless::text_input`; project the reuse into EditableLabel notes |
+| Native session ownership | GPUI wrapper writes the spec triple; composites may drive the same fields |
 | Implementation sequencing, scope, stops, validation | One g16 card after promotion |
 | Register / runway / generation index | Clear the EditableLabel decision-blocked row after that card merges |
 | Jetstream | Mechanical spec compile only until backend admission |
@@ -373,11 +460,15 @@ ready from this packet alone.
 | Alternative | Reason |
 | --- | --- |
 | Accept current behavior as the contract | Handoff forbids treating disagreeing Enter/Escape/blur evidence as authority |
-| Public controlled `draftValue` like NumberInput | Draft is a rename session, not a standing raw field. Live draft would force every host to echo keystrokes |
+| Public controlled `draftValue` like NumberInput on web | Draft is a rename session, not a standing raw field. Live draft would force every host to echo keystrokes. Native `draft_value` is resolved projection, not a web public channel |
+| Store the live draft in native `spec.value` | Overloads committed identity; `previousValue` becomes unprovable |
 | Uncontrolled committed `defaultValue` | Persistence is host-owned; an internal committed store hides failed applies |
 | Controlled web `editing` prop | Extra value model. Native already has resolved `is_editing`. Web programmatic needs methods, not a second source of truth |
 | Compose TextInput | Wrong anatomy, chrome, validation, and size. Reuse headless text rules instead |
+| HTML `maxlength` as the web limiter | UTF-16; rejects `"𝄞"` under `maxLength={1}` |
+| ECMAScript `String.trim` or Rust `str::trim` in the machines | NEL and BOM diverge; paired vectors would lie |
 | Blur cancels | Current web, contract, Licence*, and g16.008 all commit on blur. Cancelling would drop inspector and sidebar renames on click-away |
+| Unmount blur commits | Runtime-order dependent; teardown must be silent |
 | Skip `onCommit` when unchanged | Hosts already filter. Hiding the session boundary makes "Enter to finish" indistinguishable from a swallowed key |
 | Restore focus on every commit, including Tab | Tab could not leave the control. Contradicts g16.008 |
 | Keep default `ariaLabel="Edit label"` | Overwrites the visible name. Breaking the default is the a11y fix |
@@ -398,7 +489,8 @@ ready from this packet alone.
 - Jetstream behavior, evidence, or admission.
 - Editing sibling repositories.
 - Repairing the historical `docs/parity/editable-label.md` in this PR.
-- A public live `onChange` or controlled draft on web.
+- A public live `onChange` or controlled `draftValue` on web. Native
+  `draft_value` is resolved spec projection, not that channel.
 
 ## Unresolved Questions
 
