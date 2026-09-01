@@ -6,6 +6,7 @@ Owner: Muse / desengs scout
 Source: [desengs.com](https://desengs.com) (homepage resource list plus
 `/inspiration`, `/minimum`, `/dsgnrs`)
 Promotion owner: Poodle Northstar orchestrator
+See also: `20260901-194146-desengs-reuse-candidates-pass-2.md`
 
 Scout pass over the live DesEngs index and the first-party sibling pages.
 This note keeps a few Poodle-reusable families. It does not implement, restyle,

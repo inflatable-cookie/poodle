@@ -23,3 +23,6 @@ Current open notes:
 - `20260901-192850-desengs-reuse-candidates.md` — desengs.com scout: HITL
   approval, citations, agent task list, numeric-change motion, semantic sound.
   Research lead only.
+- `20260901-194146-desengs-reuse-candidates-pass-2.md` — desengs.com pass 2:
+  live series, in-place toast lifecycle, nested-menu pointer intent.
+  Research lead only.
