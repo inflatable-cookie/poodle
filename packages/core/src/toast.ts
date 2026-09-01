@@ -70,35 +70,70 @@ export function isToastSticky(toast: ToastHostInput, stickyTones: readonly Toast
   return stickyTones.includes(resolveToastTone(toast));
 }
 
+/**
+ * One live row per `id`. First occurrence keeps order; last occurrence wins
+ * copy, tone, action, and sticky fields.
+ */
+export function uniqueToastInputs<T extends { id: string }>(next: readonly T[]): T[] {
+  const lastById = new Map<string, T>();
+  const order: string[] = [];
+  for (const toast of next) {
+    if (!lastById.has(toast.id)) {
+      order.push(toast.id);
+    }
+    lastById.set(toast.id, toast);
+  }
+  return order.map((id) => lastById.get(id)!);
+}
+
 export interface ToastTimerPlan {
-  /** Timer ids to cancel: their toasts left the store. */
+  /** Timer ids to cancel: their toasts left the store or became sticky. */
   clear: string[];
   /** Toast ids to start auto-dismiss timers for. */
   start: string[];
+  /** Delay used for every id in `start`; `0` when `start` is empty. */
+  delayMs: number;
 }
 
 /**
  * Reconcile running auto-dismiss timers against the next store snapshot.
- * Sticky toasts and non-positive `autoDismissMs` never get timers; existing
- * timers are preserved (a toast's clock does not restart on unrelated store
- * changes).
+ *
+ * Sticky rows own no clock. Become-sticky cancels a running clock.
+ * Become-non-sticky starts exactly one timer using the current configured
+ * `autoDismissMs` when that delay is positive. Copy, tone, or action churn
+ * and `autoDismissMs` changes preserve a running non-sticky clock.
+ * Non-positive `autoDismissMs` starts nothing.
  */
 export function reconcileToastTimers(
   runningTimerIds: readonly string[],
   next: readonly ToastHostInput[],
   options: { autoDismissMs: number; stickyTones: readonly ToastTone[] },
 ): ToastTimerPlan {
-  const nextIds = new Set(next.map((toast) => toast.id));
+  const unique = uniqueToastInputs(next);
+  const byId = new Map(unique.map((toast) => [toast.id, toast]));
   const running = new Set(runningTimerIds);
 
-  const clear = runningTimerIds.filter((id) => !nextIds.has(id));
+  const clear = runningTimerIds.filter((id) => {
+    const toast = byId.get(id);
+    return !toast || isToastSticky(toast, options.stickyTones);
+  });
+  const clearing = new Set(clear);
 
   const start =
     options.autoDismissMs <= 0
       ? []
-      : next
-          .filter((toast) => !isToastSticky(toast, options.stickyTones) && !running.has(toast.id))
+      : unique
+          .filter(
+            (toast) =>
+              !isToastSticky(toast, options.stickyTones) &&
+              !running.has(toast.id) &&
+              !clearing.has(toast.id),
+          )
           .map((toast) => toast.id);
 
-  return { clear, start };
+  return {
+    clear,
+    start,
+    delayMs: start.length > 0 ? options.autoDismissMs : 0,
+  };
 }

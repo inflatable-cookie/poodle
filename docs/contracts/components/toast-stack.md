@@ -1,7 +1,7 @@
 # ToastStack
 
 Status: detailed contract
-Updated: 2026-07-10
+Updated: 2026-09-02
 
 ## 1. Purpose
 
@@ -16,7 +16,8 @@ Updated: 2026-07-10
   bar, polite live-region posture, size-aware typography, density-aware
   spacing
 - Out of scope: long-lived inline status, blocking errors, background queue
-  persistence, system notification integration, auto-dismiss timers
+  persistence, system notification integration, auto-dismiss timers, operation
+  lifecycle fields, promise helpers, progress anatomy
 
 ## 2. Anatomy
 
@@ -73,8 +74,9 @@ type ToastItem = {
 
 ### Controlled And Uncontrolled
 
-- items list is externally driven; host owns add/remove logic
-- no internal state
+- items list is externally driven; host owns add/remove logic and uniqueness
+- same-id replacement updates copy, tone, and action in place
+- no internal behavioral state beyond presence visuals
 
 ## 4. States
 
@@ -133,9 +135,18 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - focus ring: dismiss buttons draw the standard ring (`border-width-focus` solid `accent-focusRing`, offset `0.125rem`)
 - transient notifications announce politely and avoid stealing focus
 - danger toasts escalate to assertive announcement
-- GPUI-native accessibility mapping notes: GPUI must preserve transient
-  notification meaning and dismiss/action reachability even where there is
-  no web-style live region
+- new rows and discrete settlement (title, message, or tone change) announce
+  once. Reorder, policy change, retarget, and visual completion do not
+  reannounce. Numeric progress never lives in the atomic toast copy.
+- action-label replacement keeps focus on that action control. Removing the
+  focused action moves focus to that row's dismiss control, then the next
+  surviving row, then the previous row, then the still-connected element from
+  which focus entered the stack.
+- GPUI-native accessibility mapping notes: native danger rows project
+  `NodeRole::Alert`; other native rows stay `ListItem`. That metadata is not a
+  GPUI assistive-technology parity claim. GPUI must still preserve transient
+  notification meaning and dismiss/action reachability even where there is no
+  web-style live region.
 
 ## 7. Layout
 
@@ -322,7 +333,8 @@ None.
 
 Items join and leave live-region and accessibility ownership immediately.
 Motion never changes expiry, action, dismissal, or announcement timing.
-Preloaded initial items paint settled without enter motion.
+Preloaded initial items paint settled without enter motion. Same-id field
+replacement keeps the visual row and phase; it does not restart enter.
 
 - `full`: keyed items may enter and exit with bounded opacity and translation.
 - `reduced`: translation is removed; short opacity enter and exit remain.
@@ -346,7 +358,10 @@ ordinary host focus order. Only then retain any inert visual remnant.
 - uses `Button` primitive (variant="secondary") for action buttons
 - uses `Icon` primitive (name="x") for dismiss button icon
 - toast tone set via `data-tone` attribute and `--poodle-toast-tone` CSS custom property
-- items keyed by `item.id` in `{#each}` block
+- items keyed by `item.id` in `{#each}` block; same-id field replacement
+  updates the retained item without changing presence phase
+- action-label swaps keep the focused action; removing it restores focus
+  through dismiss → next → previous → entered-from
 - `ToastItem` and `ToastTone` types imported from shared `types.ts`
 - resolves size via `resolveSemanticControlSize` from inherited `getUiPresentation`
 - resolves density via `getUiPresentation` store
@@ -356,7 +371,8 @@ ordinary host focus order. Only then retain any inert visual remnant.
 - expected crate/module surface: `poodle_gpui::composites::toast_stack`
 - spec struct: `ToastStackSpec` with items, size, density
 - tone-based accent bar may use platform-specific drawing
-- assertive announcement for danger tone must be preserved
+- danger toasts set `NodeRole::Alert`; other toasts stay `ListItem`. This is
+  renderer-role metadata, not GPUI assistive-technology proof.
 
 ## 10a. Jetstream Notes
 
@@ -373,6 +389,8 @@ ordinary host focus order. Only then retain any inert visual remnant.
 - [ ] tone mapping matches (info/success/warning/danger)
 - [ ] aria-live escalation for danger tone matches
 - [ ] dismiss button aria-label includes toast title
+- [ ] same-id field replacement keeps row and phase
+- [ ] native danger role is `Alert`; non-danger stays `ListItem`
 
 ### Tier 2: Visual Parity
 
@@ -398,6 +416,7 @@ ordinary host focus order. Only then retain any inert visual remnant.
 | Success toast | `title="Changes saved"`, `message="Your settings have been updated."`, `tone="success"` | Toast with success styling, dismiss affordance |
 | Info toast with action | `title="New version available"`, `message="Update to v2.1 for the latest features."`, `tone="info"`, `actionLabel="Update"` | Toast with info styling, action button, dismiss affordance |
 | Warning toast | `title="Rate limit warning"`, `message="You are approaching your API limit."`, `tone="warning"` | Toast with warning styling, dismiss affordance |
+| Same-id settle | One id replaces pending copy/tone with settled success; toast copy has no percent | Same visual row; no fresh enter |
 
 The specimen includes an "Add toast" button that appends new toasts cycling
 through info, success, warning, and danger tones. Dismiss and action handlers

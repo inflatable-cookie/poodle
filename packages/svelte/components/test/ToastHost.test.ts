@@ -114,6 +114,42 @@ describe("ToastHost (svelte)", () => {
     await fireEvent.click(action);
     expect(onAction).toHaveBeenCalledWith("t1");
   });
+
+  it("clears a running clock when the same id becomes sticky", async () => {
+    vi.useFakeTimers();
+    const { store, hostStore } = makeStore([
+      { id: "job", title: "Saving", tone: "info" },
+    ]);
+    render(ToastHost, { props: { store: hostStore, autoDismissMs: 100 } });
+    store.set([{ id: "job", title: "Failed", tone: "danger" }]);
+    await vi.advanceTimersByTimeAsync(300);
+    expect(getStoreSnapshot(store).map((toast) => toast.id)).toEqual(["job"]);
+  });
+
+  it("starts the configured delay when sticky pending settles to success", async () => {
+    vi.useFakeTimers();
+    const { store, hostStore } = makeStore([
+      { id: "job", title: "Publishing", sticky: true },
+    ]);
+    render(ToastHost, { props: { store: hostStore, autoDismissMs: 2500 } });
+    store.set([{ id: "job", title: "Published", tone: "success" }]);
+    await vi.advanceTimersByTimeAsync(2499);
+    expect(getStoreSnapshot(store).map((toast) => toast.id)).toEqual(["job"]);
+    await vi.advanceTimersByTimeAsync(2);
+    expect(getStoreSnapshot(store).map((toast) => toast.id)).toEqual([]);
+  });
+
+  it("keeps one live row when the store repeats an id", async () => {
+    const { hostStore } = makeStore([
+      { id: "job", title: "First" },
+      { id: "job", title: "Last", tone: "success" },
+    ]);
+    const { container } = render(ToastHost, { props: { store: hostStore } });
+    await waitFor(() => {
+      expect(container.querySelectorAll(".poodle-toast").length).toBe(1);
+    });
+    expect(container.querySelector(".poodle-toast")?.textContent).toContain("Last");
+  });
 });
 
 function getStoreSnapshot(store: ReturnType<typeof writable<ToastHostStoreItem[]>>) {

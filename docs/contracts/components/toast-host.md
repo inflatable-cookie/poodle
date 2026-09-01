@@ -1,7 +1,7 @@
 # ToastHost
 
 Status: detailed contract
-Updated: 2026-08-10
+Updated: 2026-09-02
 
 ## 1. Purpose
 
@@ -14,8 +14,10 @@ Updated: 2026-08-10
   timers, sticky toast treatment via tone or explicit flag, dismiss wiring,
   action callback passthrough, placement variants, responsive narrow-viewport
   treatment, variant-to-tone normalization
-- Out of scope: toast creation API, persistence, cross-tab sync, app-specific
-  retry logic, toast animation (owned by ToastStack)
+- Out of scope: toast creation API, a second creation helper, persistence,
+  cross-tab sync, app-specific retry or cancellation, promise ownership,
+  pending/settled lifecycle fields, progress anatomy, toast animation (owned
+  by ToastStack)
 
 ## 2. Anatomy
 
@@ -39,8 +41,8 @@ Updated: 2026-08-10
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
 | `store` | `ToastHostStore` | -- | yes | Store providing readable toasts plus `dismiss(id)` |
-| `autoDismissMs` | `number` | `6000` | no | Auto-dismiss delay for non-sticky toasts; `<= 0` disables timers |
-| `stickyTones` | `ToastTone[]` | `["danger"]` | no | Tones that should never auto-dismiss unless explicitly dismissed |
+| `autoDismissMs` | `number` | `6000` | no | Auto-dismiss delay for non-sticky toasts; `<= 0` disables new timers. `6000` is the default fixture, not universal settlement law. |
+| `stickyTones` | `ToastTone[]` | `["danger"]` | no | Tones that stay sticky without `sticky: true`. `["danger"]` is the default fixture, not universal settlement law. |
 | `placement` | `"bottom-end" \| "bottom-start" \| "top-end" \| "top-start"` | `"bottom-end"` | no | Viewport placement |
 | `ariaLabel` | `string` | `"Notifications"` | no | Forwarded to `ToastStack` |
 | `size` | `ControlSize \| null` | `null` | no | Forwarded to `ToastStack` |
@@ -86,6 +88,8 @@ None.
 
 Items are externally driven via the store. Auto-dismiss timers are managed
 internally but can be configured via `autoDismissMs` and `stickyTones`.
+Pending versus settled is consumer operation state plus those fields; the
+host stores no lifecycle enum.
 
 ## 4. States
 
@@ -93,8 +97,8 @@ internally but can be configured via `autoDismissMs` and `stickyTones`.
 |-------|---------|-----------------|
 | empty | Store has no toasts | Host `<div>` is not rendered at all |
 | populated | Store has one or more toasts | Host renders at viewport placement with ToastStack |
-| auto-dismissing | Non-sticky toast present and `autoDismissMs > 0` | Timer runs; toast auto-dismissed after delay |
-| sticky | Toast has `sticky: true` or tone matches `stickyTones` | No auto-dismiss timer; remains until explicitly dismissed |
+| auto-dismissing | Non-sticky toast present and `autoDismissMs > 0` | One clock from first non-sticky appearance using the current configured delay; toast auto-dismissed after that delay |
+| sticky | Toast has `sticky: true` or tone is in the current `stickyTones` | No clock; remains until explicitly dismissed |
 
 ### Internal State
 
@@ -113,12 +117,24 @@ subscription.
   error->danger, warning->warning, success->success; default `info`
 - `normalizeToast`: title falls back to message then "Notification";
   message is kept only alongside a real title
-- `isToastSticky`: explicit `sticky` flag, or tone listed in `stickyTones`
+- `isToastSticky`: explicit `sticky: true`, or tone listed in the current
+  `stickyTones`. There is no `pending | settled` field.
+- `uniqueToastInputs(next)`: one live row per `id`. First occurrence keeps
+  position; last occurrence wins copy, tone, action, and sticky fields.
 - `reconcileToastTimers(runningIds, next, { autoDismissMs, stickyTones })`
-  returns a plan `{ clear, start }`: clear timers whose toasts left the
-  store, start timers for new non-sticky toasts. Existing timers are
-  preserved (a toast's clock never restarts on unrelated store changes);
-  non-positive `autoDismissMs` starts nothing
+  returns a plan `{ clear, start }` over the unique snapshot:
+  - sticky rows own no clock
+  - clear timers whose toasts left the store, or whose live row became sticky
+  - start exactly one timer for a newly non-sticky row when `autoDismissMs > 0`,
+    using that current configured delay — never a baked-in `6000`
+  - copy, tone, or action churn on a running non-sticky row does not reset
+    the clock
+  - changing `autoDismissMs` preserves an existing non-sticky clock; changing
+    `stickyTones` (or `sticky`) clears when the row becomes sticky and starts
+    the current delay when a sticky row becomes non-sticky
+  - non-positive `autoDismissMs` starts nothing; removal clears the clock
+- Same-id replacement keeps the live row. Reuse after ToastStack exit cleanup
+  is a new record.
 - Machinery dependencies: none; ToastStack remains a presentational list
   (styled-only).
 
@@ -133,7 +149,9 @@ subscription.
 
 - Relies on `ToastStack` for live-region semantics (`aria-live`, `role="list"`) and per-toast dismissal
 - Viewport placement must not hide the stack behind application chrome
-- Sticky danger toasts remain present until explicitly dismissed
+- A row that is sticky under the current configuration remains until explicitly dismissed
+- Persistent failures remain reachable in a durable host surface; a toast must
+  not be the only record of an unresolved problem (spec 015)
 - `ariaLabel` forwarded to ToastStack for the `<section>` landmark
 
 ## 7. Layout
@@ -259,7 +277,12 @@ None (styling is minimal; visual treatment is owned by ToastStack).
   - when there is no explicit trimmed `title`, `message` becomes the `title` and the detail message is set to `null`
   - `actionLabel` passed through (defaults to `null`)
 - `isSticky` checks `toast.sticky === true` or tone membership in `stickyTones`
-- `reconcileTimers` adds timers for new non-sticky toasts and clears timers for removed toasts
+- Store snapshots are uniqued by `id` before mapping and timer reconcile
+- `reconcileTimers` applies the core plan: clear departed or become-sticky
+  clocks, start one current-delay clock for newly non-sticky rows, preserve a
+  running non-sticky clock across copy/tone/action churn and `autoDismissMs`
+  changes, and start nothing when `autoDismissMs` is not positive. Config
+  changes re-run the same plan against the current snapshot.
 - `handleDismiss`/`handleAction` forward into `ToastStack` and invoke the optional `onDismiss`/`onAction` callbacks
 - Forwards `size`, `sizeRole`, `density`, `ariaLabel` to `ToastStack`
 
@@ -270,7 +293,9 @@ None (styling is minimal; visual treatment is owned by ToastStack).
 - GPUI and Jetstream backends interpret the same placement, accessibility, and
   action metadata.
 - Store subscription, timer scheduling, and overlay mounting remain host-owned
-  runtime concerns.
+  runtime concerns. Native render does not own clocks.
+- Same-id uniqueness and sticky/timer laws are web-host machinery. Native
+  danger severity is ToastStack's `NodeRole` mapping, not a ToastHost timer API.
 
 ## 11. Parity Checklist
 
@@ -279,8 +304,10 @@ None (styling is minimal; visual treatment is owned by ToastStack).
 - [ ] all props have the same meaning and defaults
 - [ ] store subscription and item normalization logic matches
 - [ ] variant-to-tone mapping matches
-- [ ] sticky determination logic matches (explicit sticky flag + stickyTones)
-- [ ] auto-dismiss timer behavior matches
+- [ ] sticky determination logic matches (explicit sticky flag + current stickyTones)
+- [ ] auto-dismiss timer behavior matches, including become-sticky clear and
+      become-non-sticky start of the current configured delay
+- [ ] same-id uniqueness keeps one live row
 - [ ] `onDismiss` and `onAction` callback payloads match
 - [ ] host only renders when items exist
 
@@ -302,7 +329,13 @@ None (styling is minimal; visual treatment is owned by ToastStack).
 
 | Label | Props / Config | Expected Visual |
 |-------|---------------|-----------------|
-| Bottom-end placement | Store with success toast ("Saved", "Your changes were saved.") and error toast ("Publishing failed."), `placement="bottom-end"` | Toast stack anchored to bottom-right viewport corner; error toast persists (sticky), success toast auto-dismisses |
+| Bottom-end placement | Store with success toast ("Saved", "Your changes were saved.") and error toast ("Publishing failed."), `placement="bottom-end"` | Toast stack anchored to bottom-right viewport corner; error toast persists under default `stickyTones`, success toast auto-dismisses |
+
+### Same-Id Pending To Settled
+
+| Label | Props / Config | Expected Visual |
+|-------|---------------|-----------------|
+| Same-id settle | One store id starts sticky pending ("Publishing…") then upserts success ("Published") without a percent in toast copy | The same visual row stays; enter motion does not restart; Progress is not inside the toast |
 
 ### Top-Start Placement
 

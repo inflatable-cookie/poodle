@@ -709,6 +709,7 @@ export {
   resolveToastTone,
   normalizeToast,
   isToastSticky,
+  uniqueToastInputs,
   reconcileToastTimers,
   type ToastTone,
   type ToastHostInput,
