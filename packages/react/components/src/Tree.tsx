@@ -337,7 +337,7 @@ function TreeView({
         return { status: "rejected", reason: "unavailable" };
       }
       const eligibility = treeAuthorityDropEligibility(nodesRef.current, live.subject, authority, intent);
-      if (!eligibility.accepted) {
+      if (eligibility.accepted === false) {
         return { status: "rejected", reason: eligibility.reason };
       }
       return authority.onDrop({ subject: live.subject, intent: eligibility.intent });
@@ -348,7 +348,7 @@ function TreeView({
       return { status: "rejected", reason: "unavailable" };
     }
     const eligibility = treeDropEligibility(nodesRef.current, from, intent);
-    if (!eligibility.accepted) {
+    if (eligibility.accepted === false) {
       return { status: "rejected", reason: eligibility.reason };
     }
     onReorderRef.current?.(from, dest.targetId, dest.position);

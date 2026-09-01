@@ -295,7 +295,7 @@
         return { status: "rejected", reason: "unavailable" };
       }
       const eligibility = treeAuthorityDropEligibility(nodes, live.subject, reorderAuthority, intent);
-      if (!eligibility.accepted) {
+      if (eligibility.accepted === false) {
         return { status: "rejected", reason: eligibility.reason };
       }
       return reorderAuthority.onDrop({ subject: live.subject, intent: eligibility.intent });
