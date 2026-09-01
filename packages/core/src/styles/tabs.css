@@ -471,6 +471,16 @@
     background: var(--poodle-recipe-tabs-active-solid-fill, var(--poodle-color-accent-base));
   }
 
+  /* Close hover uses a surface mix for unfilled tabs. On solid fill that is a
+     dark chip on accent; wash inverse instead and keep the glyph inverse. */
+  .poodle-tabs[data-active-fill="solid"] .poodle-tabs__item[data-selected="true"] .poodle-tabs__close:hover {
+    background: var(
+      --poodle-recipe-tabs-active-solid-hover-close-fill,
+      color-mix(in srgb, var(--poodle-color-text-inverse) 18%, transparent)
+    );
+    color: var(--poodle-recipe-tabs-active-solid-hover-close-text, var(--poodle-color-text-inverse));
+  }
+
   /* activeFill="none": the off state of the fill axis — the selected item
      carries no fill, symmetric with activeEdge="none". Selection is then
      marked only by the edge and the selected text colour. The selected fill
