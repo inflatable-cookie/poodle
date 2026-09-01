@@ -1,7 +1,8 @@
 # History Papercut Ownership
 
-Status: open — external wire/adoption work is complete; Poodle rejection,
-package publication, CS20, and keyboard-geometry follow-ons remain
+Status: open — external wire/adoption work is complete; Poodle rejection shape
+is promoted; implementation, package publication/adoption, CS20, and
+keyboard-geometry follow-ons remain
 Captured: 2026-08-31
 Source: Loophole `PAPERCUTS.md` after PR #14 merged
 
@@ -17,8 +18,8 @@ Keep the existing sequence intact:
 
 1. `g16.026` and `g16.027` are merged.
 2. `g16.028` remains the ordered drag closeout.
-3. `g16.033` remains the reserved Poodle follow-on and cannot dispatch until
-   its public rejection-shape decision is recorded.
+3. `g16.033` is queued with its public rejection shape promoted and cannot
+   dispatch until `g16.028` is accepted and merged.
 
 Every papercut worker workspace created from this packet must carry the
 capitalized `Papercuts` label before launch. No papercut worker is launched
@@ -29,11 +30,11 @@ while the current drag runway is active.
 ### Poodle — `g16.033`
 
 Poodle owns reusable HistoryCenter semantics and copy across Svelte, React,
-shared Rust composition, and GPUI. `g16.033` may add renderer-neutral deletion
-refusal categories after the operator chooses structured Poodle codes or a
-host-owned message. Structured Poodle codes remain the recommendation because
-they preserve one localized, cross-runtime message surface without importing
-host protocol vocabulary.
+shared Rust composition, and GPUI. The operator chose structured Poodle codes
+with exact component-owned copy: preserve `AlreadyAtTarget` and `UnknownEntry`,
+then add `StaleHistory`, `ProtectedEntry`, and `DeletionUnavailable`.
+Current-line and pinned/protected refusal share `ProtectedEntry`; no host copy
+override or general localization API enters `g16.033`.
 
 Poodle source already re-exports the v3 `HistoryEntry` / `HistoryEntryPosition`
 shape. `g16.033` owns packed-candidate proof for both the package root and
@@ -82,7 +83,6 @@ settled.
 
 ## Open Decisions
 
-- Poodle `g16.033`: structured Poodle rejection codes or host-owned message?
 - CS20: label-only presentation or a stable group identity on the one
   coalesced node?
 - Keyboard: what vertical geometry should the component expose?
@@ -90,8 +90,8 @@ settled.
 ## Promotion Route
 
 1. Finish `g16.028` without inserting a papercut worker.
-2. Resolve the Poodle rejection-shape gate, then dispatch `g16.033` from this
-   thread with the required `Papercuts` label.
+2. After `g16.028` closes, readiness-check and dispatch the promoted `g16.033`
+   card from this thread with the required `Papercuts` label.
 3. After `g16.033` proves the packed v3 type surface, seek explicit release
    authority for publication and the remaining Loophole package adoption.
 4. Promote the CS20 decision into Loophole planning only if group identity is

@@ -1,11 +1,10 @@
 # g16.033 — HistoryCenter Rejection Surface
 
-Status: reserved — do not dispatch; follows `g16.028` and requires a public
-API decision
+Status: queued — public API decision promoted; do not dispatch before accepted
+and merged `g16.028`
 Opened: 2026-08-31
-Depends on: accepted and merged `g16.026` only for shared-file serialization;
-there is no drag-and-drop semantic dependency. Dispatch stays behind the
-ordered `g16.028` closeout.
+Depends on: accepted and merged `g16.028` for runway sequencing. There is no
+drag-and-drop semantic dependency.
 Governing refs: `../../contracts/components/history-center.md`,
 `../../contracts/001-working-rules.md`,
 `../../architecture/006-headless-core-and-machine-model.md`
@@ -26,31 +25,28 @@ the core v3 shape from `@inflatable-cookie/poodle-svelte`, but the latest
 published package remains `0.2.2`. This card proves the packed source surface;
 it does not repeat the source edit or claim that a consumer pin has moved.
 
-## Decision Gate
+## Promoted Decision
 
-Choose the public rejection shape before dispatch:
+Use the existing structured Poodle rejection seam with component-owned copy.
+Preserve `AlreadyAtTarget` → `"Already at the requested target"` and
+`UnknownEntry` → `"Entry does not exist"`. Add exactly:
 
-1. **Structured Poodle codes — recommended.** Extend the existing semantic
-   union/enum with generic categories for stale history, protected entry, and
-   unavailable deletion. Poodle retains the copy in every renderer; hosts map
-   their own protocols onto the categories.
-2. **Host-owned message.** Accept a message-bearing rejection value or a
-   separate message prop. This is more flexible, but moves operator copy,
-   localization, and cross-runtime consistency into every host.
+- `StaleHistory` → `"History changed; this entry was not deleted"`;
+- `ProtectedEntry` → `"This history entry is protected"`; and
+- `DeletionUnavailable` → `"History deletion is unavailable"`.
 
-Do not infer exact code names or messages in implementation. Record the
-operator's choice here and in the HistoryCenter contract first. The choice
-must keep `AlreadyAtTarget` and `UnknownEntry` source-compatible unless the
-operator explicitly authorizes a wider clean break.
+Current-line and pinned/protected refusal share `ProtectedEntry`. Hosts map
+their protocols onto the five Poodle meanings; no host message, message
+override, locale input, or general localization API enters this card.
 
-## Reserved Scope
+## Implementation Scope
 
-- Update the HistoryCenter contract before implementation.
-- Align the framework-free TypeScript rejection code/message resolver, Svelte
+- Implement the promoted HistoryCenter contract across the framework-free
+  TypeScript rejection code/message resolver, Svelte
   and React props/tests, Rust `HistoryCenterRejection` and
   `HistoryCenterSpec::rejection_message`, shared rendering, and the GPUI
   specimen/evidence.
-- Keep messages component-owned when structured codes are chosen. Do not
+- Keep messages component-owned. Do not
   import Longhorn types or copy Longhorn/Loophole wire strings into Poodle.
 - Add focused proof for every accepted category, including replacement and
   dismissal of one rejection by another.
@@ -88,7 +84,7 @@ operator explicitly authorizes a wider clean break.
 | Distinct refusal meanings remain distinct | stale revision, protected entry, and unavailable deletion all map to one fallback | each accepted category resolves to its own exact Poodle message in TypeScript and Rust, then mounts in both web shells and GPUI |
 | Hosts do not own Poodle copy | a renderer passes through “stale revision” or another protocol detail | public input is the approved Poodle semantic shape; absence search finds no Longhorn/Loophole vocabulary or dependency |
 | Existing navigation semantics survive | adding deletion categories changes `AlreadyAtTarget` or `UnknownEntry` copy | exact existing cases remain green in TypeScript, Svelte, React, Rust, and the native specimen |
-| Package type proof is not source-only | local tests import `../src/types` while the packed export still exposes v2 `branchCount` | a disposable consumer typechecks the packed root and `./types` exports with `continuationCount`; a negative `branchCount` fixture must fail |
+| Package type proof is not source-only | local tests import `../src/types` while the packed export still exposes v2 `branchCount` | an installed-tarball consumer typechecks the packed root and `./types` exports with `continuationCount`; one unsuppressed negative `branchCount` fixture per import path must fail with a named diagnostic |
 | The lane does not claim publication | source package is correct while npm `latest` is still older | closeout names the packed candidate evidence and leaves version, tag, publication, and Loophole adoption to a separate authorized lane |
 
 ## Writable Scope
@@ -133,8 +129,8 @@ workflow mutation, or sibling-repository commands.
 
 ## Stop Conditions
 
-- The operator has not chosen structured codes versus host-owned message.
-- The accepted categories or copy cannot remain renderer-neutral.
+- The promoted five-code vocabulary or exact component-owned copy cannot stay
+  exhaustive and renderer-neutral.
 - Correctness requires a Longhorn wire/API change, including the separate
   `AlreadyAtTarget` wire-code decision.
 - The packed type proof shows a release-build problem wider than the existing
@@ -145,9 +141,10 @@ workflow mutation, or sibling-repository commands.
 
 ## Continuation
 
-After `g16.028` closes, resolve the decision gate and only then prepare the
-worker handoff. The worker workspace must carry the capitalized `Papercuts`
-label before launch. This Poodle thread owns implementation review and merge.
+After `g16.028` closes, re-read this card against current `main`, run its
+readiness gate, and only then prepare the worker handoff. The worker workspace
+must carry the capitalized `Papercuts` label before launch. This Poodle thread
+owns implementation review and merge.
 A later explicitly authorized release/adoption lane may publish the corrected
 package and close Loophole's pin-lag entry. The ordered `g16.028`
 drag-and-drop closeout is not displaced by this reservation.

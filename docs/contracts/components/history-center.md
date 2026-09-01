@@ -146,7 +146,7 @@ reference stable until a new result replaces it (the same rule v2's
 | `busy` | `boolean` | `false` | Disables both undo and redo while an authority operation runs. |
 | `status` | `"idle" \| "loading" \| "failed"` | `"idle"` | Source status; loading shows a spinner row, failed shows `statusMessage`. |
 | `statusMessage` | `string \| null` | `null` | Copy for the failed status row. |
-| `rejection` | `HistoryCenterRejectionCode \| null` | `null` | A rejection code the host's bridge mapped from the protocol (`AlreadyAtTarget` \| `UnknownEntry`); the component owns the display copy. `null` clears the notice. |
+| `rejection` | `HistoryCenterRejectionCode \| null` | `null` | A rejection code the host mapped onto Poodle's five renderer-neutral meanings (`AlreadyAtTarget` \| `UnknownEntry` \| `StaleHistory` \| `ProtectedEntry` \| `DeletionUnavailable`); the component owns the exact display copy. `null` clears the notice. |
 | `continuationsResult` | `{ entryId: string; continuations: HistoryContinuation[] } \| null` | `null` | Host op 1 result: the continuations at an anchor, fed back after `onLoadContinuations`. A new non-null reference dispatches `CONTINUATIONS_LOADED`. |
 | `runResult` | `{ fromEntryId: string; pages: HistoryPathPage[] } \| null` | `null` | Host op 2 result: a continuation run's pages in fetch order, fed back after `onLoadContinuationRun`. A new non-null reference dispatches `RUN_LOADED`. |
 | `maxBranchNameBytes` | `number` | `256` | Client-side affordance only — caps inline rename input length. The component enforces no protocol rule. |
@@ -376,7 +376,7 @@ disclosure toggle because the focus is the row, not an index.
 | `CONFIRM` | — | picker confirm |
 | `RUN_LOADED` | `fromEntryId`, `pages` | adapter (host callback result) |
 | `RENAME` | `branchId`, `name` | rename input commit |
-| `SHOW_REJECTION` | `code: "AlreadyAtTarget" \| "UnknownEntry"` | adapter (rejection prop change) |
+| `SHOW_REJECTION` | `code: "AlreadyAtTarget" \| "UnknownEntry" \| "StaleHistory" \| "ProtectedEntry" \| "DeletionUnavailable"` | adapter (rejection prop change) |
 | `DISMISS_REJECTION` | — | notice dismiss button |
 
 The v1 expansion events (`TOGGLE_BRANCHES`, `EXPAND_BRANCHES`,
@@ -468,12 +468,25 @@ event — never speculatively. `PICK_CONTINUATION` emits at most
 emits `checkoutContinuation` alone — the fork's run was already previewed by
 the pick (R2).
 
-**Rejection handling.** The machine owns display copy for the two rejections
-it can show, declared structurally (R2): `AlreadyAtTarget` →
-`"Already at the requested target"` (the picked fork is already the preferred
-future), `UnknownEntry` → `"Entry does not exist"` (a continuation or run
-anchor no longer exists). The host's bridge maps protocol rejections onto
-these two codes; `SHOW_REJECTION` stores the mapped message.
+**Rejection handling.** The machine owns exact English display copy for five
+renderer-neutral meanings, declared structurally (R2):
+
+| Code | Meaning | Exact copy |
+| --- | --- | --- |
+| `AlreadyAtTarget` | Navigation would not change the current target. | `"Already at the requested target"` |
+| `UnknownEntry` | The referenced history entry does not exist. | `"Entry does not exist"` |
+| `StaleHistory` | History changed before deletion completed. | `"History changed; this entry was not deleted"` |
+| `ProtectedEntry` | The entry is current-line, pinned, or otherwise protected by entry-level policy. | `"This history entry is protected"` |
+| `DeletionUnavailable` | Deletion is unavailable at the capability or operation level. | `"History deletion is unavailable"` |
+
+Current-line and pinned/protected refusal deliberately share
+`ProtectedEntry`. Stale history, protected entry, unavailable deletion, and a
+genuinely unknown entry remain distinct. Hosts map their protocol failures onto
+these codes; they do not supply or override the copy. TypeScript and Rust keep
+the mapping exhaustive. This contract adds no locale input, message catalogue,
+or host escape hatch; a future general Poodle localization contract may change
+how Poodle resolves its own codes without moving copy ownership into hosts.
+`SHOW_REJECTION` stores the mapped message.
 
 Open/close focus management (focus the surface on open, restore trigger focus
 on close, dismiss-on-outside, focus trap) is adapter-owned: the composed
