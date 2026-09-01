@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    readTreeDropMetrics,
     treeCanAcceptDrop,
     treeResolveOutlineDrop,
     type DragDropCommitResult,
@@ -71,7 +70,6 @@
   let rowEl: HTMLElement | undefined;
 
   function outlineDrop(x: number, y: number, rect: DOMRectReadOnly) {
-    const metrics = rowEl ? readTreeDropMetrics(rowEl) : { indentPx: 16, gutterPx: 24 };
     return treeResolveOutlineDrop({
       rows: outlineRows,
       from: $snapshot.session?.subject.id ?? "",
@@ -79,7 +77,6 @@
       x,
       y,
       rect,
-      ...metrics,
     });
   }
 
@@ -109,7 +106,6 @@
     label: node.label,
     resolvePosition: (input) => {
       const rect = rowEl?.getBoundingClientRect() ?? input.rect;
-      const metrics = rowEl ? readTreeDropMetrics(rowEl) : { indentPx: 16, gutterPx: 24 };
       return (
         treeResolveOutlineDrop({
           rows: outlineRows,
@@ -118,7 +114,6 @@
           x: input.x,
           y: input.y,
           rect,
-          ...metrics,
         })?.position ?? null
       );
     },

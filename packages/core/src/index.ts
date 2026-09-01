@@ -798,7 +798,6 @@ export {
   type NestedDropPositionInput,
   type NestedDropRect,
 } from "./dom/drag-drop-geometry";
-export { readTreeDropMetrics } from "./dom/tree-drop-metrics";
 export {
   canScrollHorizontal,
   canScrollVertical,

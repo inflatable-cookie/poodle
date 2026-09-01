@@ -82,8 +82,9 @@ Updated: 2026-09-01
   Y picks the band on the hovered row; `inside` only for branches (never when
   the source is already a direct child). An `after` on the last visible
   descendant of an open parent then offers every ancestor that ends at that
-  gap — X walks the chain so a leftward move un-nests (after the parent) and
-  a rightward move stays inside. The drop line indents to the chosen depth.
+  gap. Those levels are equal bands across the row: move left to un-nest,
+  right to stay inside or nest into a collapsed folder. The drop line indents
+  to the icon column at the chosen depth.
   Same-parent leaves land *at* the hovered row.
   Alt+↑/↓ moves the focused node among siblings through
   `requestKeyboardDrop` over the visible logical target catalogue; it does
@@ -488,8 +489,8 @@ Focus lives on the `treeitem`; the ring is painted on its presentational row chi
 
 | Value | Rendering |
 |-------|-----------|
-| `before` | accent line (`0.125rem`, `var(--poodle-color-accent-base)`) at the row top, indented to the drop depth |
-| `after` | accent line at the row bottom, indented to the drop depth |
+| `before` | accent line (`0.125rem`, `var(--poodle-color-accent-base)`) at the row top, aligned to the icon column at the drop depth |
+| `after` | accent line at the row bottom, aligned to the icon column at the drop depth |
 | `inside` | row fill `color-mix(... accent-base 12%, transparent)` |
 
 GPUI draws the equivalent (top/bottom accent line or inside fill) via an absolute

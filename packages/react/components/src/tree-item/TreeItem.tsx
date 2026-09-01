@@ -1,6 +1,5 @@
 import { useRef, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import {
-  readTreeDropMetrics,
   treeCanAcceptDrop,
   treeResolveOutlineDrop,
   type DragDropCommitResult,
@@ -81,9 +80,6 @@ export function TreeItem({
     label: node.label,
     resolvePosition: (input) => {
       const rect = rowRef.current?.getBoundingClientRect() ?? input.rect;
-      const metrics = rowRef.current
-        ? readTreeDropMetrics(rowRef.current)
-        : { indentPx: 16, gutterPx: 24 };
       return (
         treeResolveOutlineDrop({
           rows: outlineRows,
@@ -92,7 +88,6 @@ export function TreeItem({
           x: input.x,
           y: input.y,
           rect,
-          ...metrics,
         })?.position ?? null
       );
     },
@@ -115,7 +110,6 @@ export function TreeItem({
           x: snapshot.pointer.x,
           y: snapshot.pointer.y,
           rect: rowRef.current.getBoundingClientRect(),
-          ...readTreeDropMetrics(rowRef.current),
         })?.depth ?? null
       : null;
 

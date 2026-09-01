@@ -101,7 +101,7 @@ const outlineRows = [
   { value: "a.ts", depth: 1, parent: "src", branch: false },
   { value: "b.ts", depth: 1, parent: "src", branch: false },
 ];
-const outlineRect = { top: 100, height: 40, left: 0 };
+const outlineRect = { top: 100, height: 40, left: 0, width: 200 };
 
 describe("treeResolveOutlineDrop", () => {
   test("after the last child, X walks out to after the parent", () => {
@@ -110,10 +110,8 @@ describe("treeResolveOutlineDrop", () => {
       from: "a.ts",
       to: "b.ts",
       y: 130,
-      x: 8 + 16,
+      x: 150,
       rect: outlineRect,
-      indentPx: 16,
-      gutterPx: 8,
     });
     expect(deep).toEqual({ to: "b.ts", position: "after", depth: 1 });
 
@@ -122,15 +120,13 @@ describe("treeResolveOutlineDrop", () => {
       from: "a.ts",
       to: "b.ts",
       y: 130,
-      x: 8,
+      x: 40,
       rect: outlineRect,
-      indentPx: 16,
-      gutterPx: 8,
     });
     expect(shallow).toEqual({ to: "src", position: "after", depth: 0 });
   });
 
-  test("a collapsed last folder nests when X is to the right of its depth", () => {
+  test("a collapsed last folder nests when X is on the right of the row", () => {
     const rows = [
       { value: "src", depth: 0, parent: null, branch: true },
       { value: "lib", depth: 1, parent: "src", branch: true },
@@ -141,10 +137,8 @@ describe("treeResolveOutlineDrop", () => {
         from: "docs",
         to: "lib",
         y: 130,
-        x: 8 + 32,
+        x: 170,
         rect: outlineRect,
-        indentPx: 16,
-        gutterPx: 8,
       }),
     ).toEqual({ to: "lib", position: "inside", depth: 2 });
   });

@@ -20,6 +20,8 @@
        above it. Same defaults; a consumer can now zero them. */
     --poodle-tree-pad-block: var(--poodle-space-panel-y);
     --poodle-tree-pad-inline: 0.25rem;
+    /* Drop line starts at the icon column, past the twisty gutter. */
+    --poodle-tree-drop-icon-inset: var(--poodle-tree-twisty-size);
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -110,6 +112,9 @@
      nothing and just leaves an empty column down the left. Reclaimed only when
      the consumer opts in, and only while the tree really is flat — the moment a
      node becomes a branch the spacer returns and alignment is right again. */
+  .poodle-tree[data-flat="true"] {
+    --poodle-tree-drop-icon-inset: 0px;
+  }
   .poodle-tree[data-flat="true"] .poodle-tree__twisty {
     display: none;
   }
@@ -260,7 +265,8 @@
     content: "";
     position: absolute;
     left: calc(
-      var(--poodle-tree-row-pad-inline) + var(--poodle-tree-drop-depth, 0) * var(--poodle-tree-indent)
+      var(--poodle-tree-row-pad-inline) + var(--poodle-tree-drop-depth, 0) * var(--poodle-tree-indent) +
+        var(--poodle-tree-drop-icon-inset)
     );
     right: var(--poodle-tree-row-pad-inline);
     height: 0.125rem;

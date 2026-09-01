@@ -87,21 +87,18 @@ export interface TreeOutlineDrop {
  *
  * Vertical band picks before / inside / after on the hovered row. An `after`
  * on the last visible descendant of an open parent then offers every ancestor
- * that ends at this gap; X walks that chain so a leftward move un-nests
- * (after the parent) and a rightward move stays inside (after the child, or
- * `inside` a collapsed folder). Same-parent leaves still land *at* the
- * hovered row. A child dropped on its parent has no `inside` (that would
- * no-op).
+ * that ends at this gap. Those levels are equal bands across the row: left
+ * un-nests, right stays inside (or nests into a collapsed folder). Same-parent
+ * leaves still land *at* the hovered row. A child dropped on its parent has
+ * no `inside` (that would no-op).
  */
 export function treeResolveOutlineDrop(input: {
   rows: readonly TreeOutlineRow[];
   from: string;
   to: string;
   y: number;
-  rect: NestedDropRect & { readonly left?: number };
+  rect: NestedDropRect & { readonly left?: number; readonly width?: number };
   x?: number;
-  indentPx?: number;
-  gutterPx?: number;
 }): TreeOutlineDrop | null {
   const hoveredIndex = input.rows.findIndex((row) => row.value === input.to);
   const fromIndex = input.rows.findIndex((row) => row.value === input.from);
@@ -131,28 +128,21 @@ export function treeResolveOutlineDrop(input: {
     return { to: hovered.value, position: "inside", depth: hovered.depth + 1 };
   }
 
-  const candidates = afterCandidates(input.rows, hoveredIndex);
-  const depths = candidates.map((candidate) => candidate.depth);
-  const minDepth = Math.min(...depths);
-  const maxDepth = Math.max(...depths);
-  let desired = maxDepth;
-  if (
-    input.x !== undefined &&
-    Number.isFinite(input.x) &&
-    (input.indentPx ?? 0) > 0
-  ) {
-    const left = input.rect.left ?? 0;
-    const gutter = input.gutterPx ?? 0;
-    desired = Math.round((input.x - left - gutter) / input.indentPx!);
+  const afterSlots = afterCandidates(input.rows, hoveredIndex).slice().reverse();
+  const nestInside =
+    hovered.branch && fromRow?.parent !== hovered.value
+      ? ({
+          to: hovered.value,
+          position: "inside" as const,
+          depth: hovered.depth + 1,
+        } satisfies TreeOutlineDrop)
+      : null;
+  const slots = nestInside ? [...afterSlots, nestInside] : afterSlots;
+  const deepestAfter = afterSlots[afterSlots.length - 1]!;
+  if (input.x === undefined || !Number.isFinite(input.x)) {
+    return deepestAfter;
   }
-
-  if (desired > maxDepth && hovered.branch && fromRow?.parent !== hovered.value) {
-    return { to: hovered.value, position: "inside", depth: hovered.depth + 1 };
-  }
-
-  const depth = clamp(desired, minDepth, maxDepth);
-  const picked = candidates.find((candidate) => candidate.depth === depth) ?? candidates[0]!;
-  return picked;
+  return pickHorizontalSlot(slots, input.x, input.rect.left ?? 0, input.rect.width ?? 0, deepestAfter);
 }
 
 function verticalBand(
@@ -211,8 +201,18 @@ function afterCandidates(rows: readonly TreeOutlineRow[], hoveredIndex: number):
   return candidates;
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
+function pickHorizontalSlot<T>(
+  slots: readonly T[],
+  x: number,
+  left: number,
+  width: number,
+  fallback: T,
+): T {
+  if (slots.length === 0 || !(width > 0)) return fallback;
+  if (slots.length === 1) return slots[0] ?? fallback;
+  const t = Math.min(1, Math.max(0, (x - left) / width));
+  const index = Math.min(slots.length - 1, Math.floor(t * slots.length));
+  return slots[index] ?? fallback;
 }
 
 function allBranchValues<T extends TreeNodeLike>(nodes: readonly T[]): string[] {
@@ -244,11 +244,9 @@ export function treeResolveDropPosition<T extends TreeNodeLike>(input: {
   from: string;
   to: string;
   y: number;
-  rect: NestedDropRect & { readonly left?: number };
+  rect: NestedDropRect & { readonly left?: number; readonly width?: number };
   targetIsBranch?: boolean;
   x?: number;
-  indentPx?: number;
-  gutterPx?: number;
 }): "before" | "inside" | "after" | null {
   const rows = flattenVisibleTreeRows(input.nodes, allBranchValues(input.nodes)).map((row) => ({
     value: row.node.value,
@@ -266,8 +264,6 @@ export function treeResolveDropPosition<T extends TreeNodeLike>(input: {
       y: input.y,
       rect: input.rect,
       x: input.x,
-      indentPx: input.indentPx,
-      gutterPx: input.gutterPx,
     })?.position ?? null
   );
 }

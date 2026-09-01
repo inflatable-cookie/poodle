@@ -11,7 +11,6 @@ import {
   findTreeNode,
   flattenVisibleTreeRows,
   isTreeBranch,
-  readTreeDropMetrics,
   treeOutlineRows,
   treeResolveOutlineDrop,
   treeCheckState,
@@ -294,15 +293,13 @@ function TreeView({
       `[data-value="${CSS.escape(intent.targetId)}"] .poodle-tree__row`,
     );
     const rect = row?.getBoundingClientRect();
-    const metrics = row ? readTreeDropMetrics(row) : { indentPx: 16, gutterPx: 24 };
     const placement = treeResolveOutlineDrop({
       rows: treeOutlineRows(visibleRows),
       from,
       to: intent.targetId,
       x: snap?.pointer?.x,
       y: snap?.pointer?.y ?? 0,
-      rect: rect ?? { top: 0, height: 1, left: 0 },
-      ...metrics,
+      rect: rect ?? { top: 0, height: 1, left: 0, width: 1 },
     });
     if (!placement || placement.to === from) return { status: "rejected", reason: "self" };
     onReorder?.(from, placement.to, placement.position);
