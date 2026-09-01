@@ -99,7 +99,7 @@ describe("Tree row metadata (react)", () => {
     expect(onSelectionChange).toHaveBeenCalledWith(["empty"]);
   });
 
-  it("maps row geometry to before, inside, and after on a nested branch", () => {
+  it("maps a child-on-parent drop to before or after, not inside", () => {
     const onReorder = vi.fn();
     const view = render(
       <Tree nodes={nested} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />,
@@ -116,13 +116,35 @@ describe("Tree row metadata (react)", () => {
     view.rerender(<Tree nodes={nested} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />);
     const rowsInside = layoutTree(view.container);
     drag(rowsInside.get("a.ts")!, top + 20);
-    expect(onReorder).toHaveBeenCalledWith("a.ts", "src", "inside");
+    // Child-on-parent: inside would no-op, so the lower half un-nests after.
+    expect(onReorder).toHaveBeenCalledWith("a.ts", "src", "after");
 
     onReorder.mockClear();
     view.rerender(<Tree nodes={nested} expandedValues={["src", "lib"]} reorderable onReorder={onReorder} />);
     const rowsAfter = layoutTree(view.container);
     drag(rowsAfter.get("a.ts")!, top + 36);
     expect(onReorder).toHaveBeenCalledWith("a.ts", "src", "after");
+  });
+
+  it("lands a sibling leaf at the hovered row even on the origin-facing half", () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "src",
+        label: "src",
+        children: [
+          { value: "a.ts", label: "a.ts" },
+          { value: "b.ts", label: "b.ts" },
+        ],
+      },
+    ];
+    const { container } = render(
+      <Tree nodes={nodes} expandedValues={["src"]} reorderable onReorder={onReorder} />,
+    );
+    const rows = layoutTree(container);
+    const target = rows.get("b.ts")!;
+    drag(rows.get("a.ts")!, target.getBoundingClientRect().top + 4);
+    expect(onReorder).toHaveBeenCalledWith("a.ts", "b.ts", "after");
   });
 
   it("rejects a drop into the source subtree and after the source is removed", () => {

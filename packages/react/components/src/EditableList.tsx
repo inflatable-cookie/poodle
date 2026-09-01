@@ -65,6 +65,7 @@ function destinationIndex(fromIndex: number, toIndex: number, position: string, 
 interface EditableListRowProps<T extends EditableListItemLike> {
   item: T;
   index: number;
+  indexOfId: (id: string) => number;
   total: number;
   reorderable: boolean;
   embeddedHandle: boolean;
@@ -84,6 +85,7 @@ interface EditableListRowProps<T extends EditableListItemLike> {
 function EditableListRow<T extends EditableListItemLike>({
   item,
   index,
+  indexOfId,
   total,
   reorderable,
   embeddedHandle,
@@ -117,7 +119,7 @@ function EditableListRow<T extends EditableListItemLike>({
     acceptedKinds: ["poodle.editable-list"],
     disabled: !canDrag,
     label: item.label ?? item.id,
-    resolvePosition: (input) => (input.y < input.rect.top + input.rect.height / 2 ? "before" : "after"),
+    resolvePosition: ({ subject }) => (indexOfId(subject.id) < index ? "after" : "before"),
     canDrop: (intent, subject) =>
       subject.id === intent.targetId ? { accepted: false, reason: "self" } : { accepted: true, intent },
     onDrop,
@@ -489,6 +491,7 @@ export function EditableList<T extends EditableListItemLike>({
                   key={reorderItem.id}
                   item={reorderItem}
                   index={index}
+                  indexOfId={(id) => items.findIndex((entry) => entry.id === id)}
                   total={items.length}
                   reorderable={reorderable}
                   embeddedHandle={embeddedHandle}

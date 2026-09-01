@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
   flattenVisibleTreeRows,
   treeCanAcceptDrop,
+  treeLocate,
   treeCheckState,
   treeKeydownIntent,
   treeRangeSelection,
@@ -148,5 +149,14 @@ describe("treeCanAcceptDrop", () => {
     expect(treeCanAcceptDrop(nodes, "src", "src/a.ts")).toBe(false);
     expect(treeSubtreeContains(nodes, "src", "src/lib/c.ts")).toBe(true);
     expect(treeCanAcceptDrop(nodes, "missing", "docs")).toBe(false);
+  });
+});
+
+describe("treeLocate", () => {
+  test("finds parent, siblings, and index", () => {
+    expect(treeLocate(nodes, "src")).toMatchObject({ parent: null, index: 0 });
+    expect(treeLocate(nodes, "src/a.ts")).toMatchObject({ parent: "src", index: 0 });
+    expect(treeLocate(nodes, "src/lib/c.ts")).toMatchObject({ parent: "src/lib", index: 0 });
+    expect(treeLocate(nodes, "missing")).toBeNull();
   });
 });

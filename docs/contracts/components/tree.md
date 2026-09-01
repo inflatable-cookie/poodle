@@ -1,7 +1,7 @@
 # Tree
 
 Status: detailed contract
-Updated: 2026-08-30
+Updated: 2026-09-01
 
 ## 1. Purpose
 
@@ -79,7 +79,10 @@ Updated: 2026-08-30
   renders the menu as a positioned overlay routed by token.
 - **Reorder** (`reorderable` + `onReorder`): rows are substrate drag sources; a drop fires
   `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`
-  (computed from pointer Y within the target row; `inside` only for branches).
+  (computed from pointer Y within the target row; `inside` only for branches,
+  and never when the source is already a direct child of the target — that
+  drop un-nests beside the parent. Same-parent leaves land *at* the hovered
+  row).
   Alt+↑/↓ moves the focused node among siblings through
   `requestKeyboardDrop` over the visible logical target catalogue; it does
   not call `onReorder` directly. Space/Enter remain selection/activation.

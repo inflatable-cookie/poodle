@@ -1,8 +1,8 @@
 import { useRef, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import {
   isTreeBranch,
-  resolveNestedDropPosition,
   treeCanAcceptDrop,
+  treeResolveDropPosition,
   type DragDropCommitResult,
   type DragSession,
   type DragTerminalOutcome,
@@ -77,10 +77,13 @@ export function TreeItem({
     label: node.label,
     resolvePosition: (input) => {
       const rect = rowRef.current?.getBoundingClientRect() ?? input.rect;
-      return resolveNestedDropPosition({
+      return treeResolveDropPosition({
+        nodes,
+        from: input.subject.id,
+        to: node.value,
         y: input.y,
         rect,
-        kind: isTreeBranch(node) ? "container" : "item",
+        targetIsBranch: isTreeBranch(node),
       });
     },
     canDrop: (intent, subject) =>

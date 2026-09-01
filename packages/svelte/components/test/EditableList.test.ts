@@ -204,6 +204,22 @@ describe("EditableList (svelte)", () => {
     expect((onReorder.mock.calls[0][0] as typeof items).map((item) => item.id)).toEqual(["b", "c", "a"]);
   });
 
+  it("lands at the hovered row even on the origin-facing half", async () => {
+    const onReorder = vi.fn();
+    const { container } = render(EditableList, { props: { items, onReorder } });
+    const rows = stackRows(container);
+    const handle = rows[0].querySelector(".poodle-editable-list__handle") as HTMLElement;
+
+    // Beta sits at top=50, height=32. y=60 is its origin-facing half, which
+    // used to resolve `before` and no-op the move back to Alpha's slot.
+    await fireEvent.pointerDown(handle, { button: 0, pointerId: 1, clientX: 20, clientY: 20 });
+    await fireEvent.pointerMove(handle, { pointerId: 1, clientX: 20, clientY: 60 });
+    await fireEvent.pointerUp(handle, { pointerId: 1, clientX: 20, clientY: 60 });
+
+    expect(onReorder).toHaveBeenCalledTimes(1);
+    expect((onReorder.mock.calls[0][0] as typeof items).map((item) => item.id)).toEqual(["b", "a", "c"]);
+  });
+
   it("reorders with a touch hold", async () => {
     vi.useFakeTimers();
     const onReorder = vi.fn();

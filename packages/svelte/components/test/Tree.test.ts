@@ -97,7 +97,7 @@ describe("Tree row metadata", () => {
     expect(onSelectionChange).toHaveBeenCalledWith(["empty"]);
   });
 
-  it("maps row geometry to before, inside, and after on a nested branch", async () => {
+  it("maps a child-on-parent drop to before or after, not inside", async () => {
     const onReorder = vi.fn();
     const { container, rerender } = render(Tree, {
       props: { nodes: nested, expandedValues: ["src", "lib"], reorderable: true, onReorder },
@@ -114,13 +114,36 @@ describe("Tree row metadata", () => {
     onReorder.mockClear();
     const rowsInside = layoutTree(container);
     drag(rowsInside.get("a.ts")!, rowsInside.get("src")!, top + 20);
-    expect(onReorder).toHaveBeenCalledWith("a.ts", "src", "inside");
+    // Child-on-parent: inside would no-op, so the lower half un-nests after.
+    expect(onReorder).toHaveBeenCalledWith("a.ts", "src", "after");
 
     await rerender({ nodes: nested, expandedValues: ["src", "lib"], reorderable: true, onReorder });
     onReorder.mockClear();
     const rowsAfter = layoutTree(container);
     drag(rowsAfter.get("a.ts")!, rowsAfter.get("src")!, top + 36);
     expect(onReorder).toHaveBeenCalledWith("a.ts", "src", "after");
+  });
+
+  it("lands a sibling leaf at the hovered row even on the origin-facing half", async () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "src",
+        label: "src",
+        children: [
+          { value: "a.ts", label: "a.ts" },
+          { value: "b.ts", label: "b.ts" },
+        ],
+      },
+    ];
+    const { container } = render(Tree, {
+      props: { nodes, expandedValues: ["src"], reorderable: true, onReorder },
+    });
+    const rows = layoutTree(container);
+    const source = rows.get("a.ts")!;
+    const target = rows.get("b.ts")!;
+    drag(source, target, target.getBoundingClientRect().top + 4);
+    expect(onReorder).toHaveBeenCalledWith("a.ts", "b.ts", "after");
   });
 
   it("rejects a drop into the source subtree and after the source is removed", async () => {

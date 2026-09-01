@@ -346,10 +346,22 @@ fn render_row(
             crate::drag_drop::reorder_source(TREE_DRAG_SCOPE, &value, &node.label),
         );
 
-        // Every tree row can take an `inside` drop: nesting is what the
-        // component is for, so the band splits in thirds rather than halves.
-        let mut target =
-            crate::drag_drop::nested_target(TREE_DRAG_SCOPE, &value, &node.label, true);
+        // Leaves have no inside band. A child dropped on its parent also
+        // splits in half so the lower half un-nests rather than no-op inside.
+        let mut target = crate::drag_drop::nested_target(
+            TREE_DRAG_SCOPE,
+            &value,
+            &node.label,
+            is_branch,
+        );
+        {
+            let nodes = spec.nodes.clone();
+            let to = value.clone();
+            let target_is_branch = is_branch;
+            target.resolve_position = Some(Arc::new(move |input: &poodle_node::NodeDropPositionInput| {
+                Some(tree_drop_position(&nodes, &input.subject.id, &to, input.fraction_y, target_is_branch))
+            }));
+        }
         if let Some(handler) = &handlers.on_drag_over {
             let handler = Arc::clone(handler);
             let over = value.clone();
@@ -621,4 +633,56 @@ fn render_row(
     }
 
     row
+}
+
+struct TreeLocation {
+    parent: Option<String>,
+    index: usize,
+}
+
+fn tree_locate(nodes: &[TreeNode], value: &str) -> Option<TreeLocation> {
+    fn search(siblings: &[TreeNode], parent: Option<&str>, value: &str) -> Option<TreeLocation> {
+        if let Some(index) = siblings.iter().position(|node| node.value == value) {
+            return Some(TreeLocation {
+                parent: parent.map(str::to_string),
+                index,
+            });
+        }
+        for node in siblings {
+            if let Some(found) = search(&node.children, Some(&node.value), value) {
+                return Some(found);
+            }
+        }
+        None
+    }
+    search(nodes, None, value)
+}
+
+fn tree_drop_position(
+    nodes: &[TreeNode],
+    from: &str,
+    to: &str,
+    fraction_y: f32,
+    target_is_branch: bool,
+) -> String {
+    let Some(from_loc) = tree_locate(nodes, from) else {
+        return crate::drag_drop::position_for_fraction(fraction_y, target_is_branch);
+    };
+    let Some(to_loc) = tree_locate(nodes, to) else {
+        return crate::drag_drop::position_for_fraction(fraction_y, target_is_branch);
+    };
+
+    if from_loc.parent.as_deref() == Some(to) && target_is_branch {
+        return crate::drag_drop::position_for_fraction(fraction_y, false);
+    }
+
+    if from_loc.parent == to_loc.parent && !target_is_branch {
+        return if from_loc.index < to_loc.index {
+            poodle_node::DROP_POSITION_AFTER.to_string()
+        } else {
+            poodle_node::DROP_POSITION_BEFORE.to_string()
+        };
+    }
+
+    crate::drag_drop::position_for_fraction(fraction_y, target_is_branch)
 }

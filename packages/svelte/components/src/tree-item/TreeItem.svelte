@@ -1,8 +1,8 @@
 <script lang="ts">
   import {
     isTreeBranch,
-    resolveNestedDropPosition,
     treeCanAcceptDrop,
+    treeResolveDropPosition,
     type DragDropCommitResult,
     type DragSession,
     type DragSourceRegistration,
@@ -85,10 +85,13 @@
     label: node.label,
     resolvePosition: (input) => {
       const rect = rowEl?.getBoundingClientRect() ?? input.rect;
-      return resolveNestedDropPosition({
+      return treeResolveDropPosition({
+        nodes,
+        from: input.subject.id,
+        to: node.value,
         y: input.y,
         rect,
-        kind: isTreeBranch(node) ? "container" : "item",
+        targetIsBranch: isTreeBranch(node),
       });
     },
     canDrop: (intent, subject) =>

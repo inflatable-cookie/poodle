@@ -6,6 +6,8 @@
  * intent (or null). Leaves have no inside zone.
  */
 
+import { isTreeBranch, treeLocate, type TreeNodeLike } from "../tree";
+
 export type NestedDropKind = "item" | "container";
 
 export interface NestedDropRect {
@@ -53,4 +55,43 @@ function clampEdgeRatio(value: number | undefined): number {
   if (value <= 0) return 0;
   if (value >= 0.5) return 0.5;
   return value;
+}
+
+/**
+ * Pointer placement for a tree drop.
+ *
+ * Same-parent leaves land *at* the hovered row (arrival-band), matching
+ * OrderBy / Tabs. A child dropped on its parent does not offer `inside` —
+ * that would no-op — so the row splits in half and the lower half un-nests
+ * the child to sit after the parent. Other branch targets keep the nested
+ * before / inside / after bands.
+ */
+export function treeResolveDropPosition<T extends TreeNodeLike>(input: {
+  nodes: readonly T[];
+  from: string;
+  to: string;
+  y: number;
+  rect: NestedDropRect;
+  targetIsBranch?: boolean;
+}): "before" | "inside" | "after" | null {
+  const fromLoc = treeLocate(input.nodes, input.from);
+  const toLoc = treeLocate(input.nodes, input.to);
+  if (!fromLoc || !toLoc) return null;
+
+  const target = toLoc.siblings[toLoc.index];
+  const targetIsBranch = input.targetIsBranch ?? (target !== undefined && isTreeBranch(target));
+
+  if (fromLoc.parent === input.to && targetIsBranch) {
+    return resolveNestedDropPosition({ y: input.y, rect: input.rect, kind: "item" });
+  }
+
+  if (fromLoc.parent === toLoc.parent && !targetIsBranch) {
+    return fromLoc.index < toLoc.index ? "after" : "before";
+  }
+
+  return resolveNestedDropPosition({
+    y: input.y,
+    rect: input.rect,
+    kind: targetIsBranch ? "container" : "item",
+  });
 }

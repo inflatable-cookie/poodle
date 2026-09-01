@@ -413,6 +413,8 @@ export {
   treeVirtualWindow,
   treeSubtreeContains,
   treeCanAcceptDrop,
+  treeLocate,
+  type TreeLocation,
   type TreeNodeLike,
   type TreeRow,
   type TreeCheckState,
@@ -787,6 +789,7 @@ export {
 } from "./drag-drop";
 export {
   resolveNestedDropPosition,
+  treeResolveDropPosition,
   type NestedDropKind,
   type NestedDropPositionInput,
   type NestedDropRect,

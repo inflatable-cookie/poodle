@@ -290,3 +290,27 @@ export function treeCanAcceptDrop<T extends TreeNodeLike>(
   if (!findTreeNode(nodes, from) || !findTreeNode(nodes, to)) return false;
   return !treeSubtreeContains(nodes, from, to);
 }
+
+/** Where `value` sits in the tree: its parent, sibling list, and index. */
+export interface TreeLocation<T extends TreeNodeLike = TreeNodeLike> {
+  parent: string | null;
+  siblings: readonly T[];
+  index: number;
+}
+
+export function treeLocate<T extends TreeNodeLike>(
+  nodes: readonly T[],
+  value: string,
+): TreeLocation<T> | null {
+  const search = (siblings: readonly T[], parent: string | null): TreeLocation<T> | null => {
+    const index = siblings.findIndex((node) => node.value === value);
+    if (index >= 0) return { parent, siblings, index };
+    for (const node of siblings) {
+      if (!node.children?.length) continue;
+      const found = search(node.children as T[], node.value);
+      if (found) return found;
+    }
+    return null;
+  };
+  return search(nodes, null);
+}

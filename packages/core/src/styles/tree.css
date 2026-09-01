@@ -245,6 +245,12 @@
   .poodle-tree__item > .poodle-tree__row {
     position: relative;
   }
+  /* The drop target is the treeitem (it wraps children). The generic
+     provider outline would ring the whole subtree and disagree with the
+     row's before/after line. */
+  .poodle-tree .poodle-tree__item[data-poodle-drop-target] {
+    outline: none;
+  }
   .poodle-tree .poodle-tree__item[data-poodle-drop-target="accepted"] > .poodle-tree__row,
   .poodle-tree .poodle-tree__item[data-poodle-drop-target="rejected"] > .poodle-tree__row {
     outline: none;
@@ -266,6 +272,8 @@
     bottom: -0.0625rem;
   }
   .poodle-tree__item[data-poodle-drop-position="inside"] > .poodle-tree__row {
-    box-shadow: var(--poodle-recipe-tree-row-shadow, inset 0 0 0 0.0625rem var(--poodle-color-accent-base));
-    background: var(--poodle-recipe-tree-inside-row-fill, color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent));
+    background: var(
+      --poodle-recipe-tree-inside-row-fill,
+      color-mix(in srgb, var(--poodle-color-accent-base) 12%, transparent)
+    );
   }
