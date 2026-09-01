@@ -228,10 +228,13 @@ describe("tree reorder authority helpers", () => {
     expect(treeMovingValuesAreValid(nodes, "src/a.ts", ["src/a.ts", "ghost"])).toBe(false);
     expect(treeMovingValuesAreValid(nodes, "src/a.ts", ["src/a.ts", "src/lib"])).toBe(true);
     expect(treeLatchReorderSubject(nodes, "src/a.ts", [])).toBeNull();
-    expect(treeLatchReorderSubject(nodes, "src/a.ts", ["src/a.ts", "src/lib"])).toEqual({
+    const latched = treeLatchReorderSubject(nodes, "src/a.ts", ["src/a.ts", "src/lib"]);
+    expect(latched).toEqual({
       sourceValue: "src/a.ts",
       movingValues: ["src/a.ts", "src/lib"],
     });
+    expect(Object.isFrozen(latched)).toBe(true);
+    expect(Object.isFrozen(latched?.movingValues)).toBe(true);
   });
 
   test("does not normalize an invalid projection to the source row", () => {
@@ -304,6 +307,39 @@ describe("tree reorder authority helpers", () => {
         operation: "move",
       }),
     ).toEqual({ accepted: false, reason: "subtree" });
+  });
+
+  test("a hostile canDrop cannot replace latched movingValues to skip dest validation", () => {
+    const subject = treeLatchReorderSubject(nodes, "src", ["src"])!;
+    const result = treeAuthorityDropEligibility(
+      nodes,
+      subject,
+      {
+        projectMovingValues: () => subject.movingValues,
+        canDrop: (candidate) => {
+          const hostile = candidate.subject as unknown as {
+            sourceValue: string;
+            movingValues: string[];
+          };
+          hostile.sourceValue = "README.md";
+          hostile.movingValues = ["README.md"];
+          return {
+            accepted: true,
+            intent: {
+              ...candidate.intent,
+              destination: { targetId: "src/a.ts", position: "before" },
+            },
+          };
+        },
+        onDrop: () => ({ status: "committed" }),
+      },
+      { targetId: "docs", position: "before", operation: "move" },
+    );
+    expect(result).toEqual({ accepted: false, reason: "subtree" });
+    expect(subject).toEqual({ sourceValue: "src", movingValues: ["src"] });
+    expect(() => {
+      (subject as unknown as { sourceValue: string }).sourceValue = "README.md";
+    }).toThrow();
   });
 
   test("refuses an accepted policy that mutates hover target, position, or operation", () => {

@@ -1,4 +1,7 @@
 {
+  // Mapped types-module assignability only. Does not prove package exports or
+  // src/index.ts. The public-root proof is TypeScript resolveModuleName plus
+  // installed package.json exports in web-preview.ts.
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",

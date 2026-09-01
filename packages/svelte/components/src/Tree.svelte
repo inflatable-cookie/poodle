@@ -298,7 +298,13 @@
       if (eligibility.accepted === false) {
         return { status: "rejected", reason: eligibility.reason };
       }
-      return reorderAuthority.onDrop({ subject: live.subject, intent: eligibility.intent });
+      return reorderAuthority.onDrop({
+        subject: Object.freeze({
+          sourceValue: live.subject.sourceValue,
+          movingValues: Object.freeze([...live.subject.movingValues]),
+        }),
+        intent: eligibility.intent,
+      });
     }
     const from = liveSourceId ?? live?.sourceValue ?? null;
     const dest = dropCommitDestination(intent);

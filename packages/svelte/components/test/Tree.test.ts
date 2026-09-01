@@ -837,6 +837,33 @@ describe("Tree reorderAuthority", () => {
     expect(host.drops.at(-1)?.subject.movingValues).toEqual(["c.ts"]);
   });
 
+  it("a hostile canDrop cannot replace the latched subject or committed candidate", () => {
+    let seen: TreeReorderCandidate | undefined;
+    const host = authority({
+      canDrop: (candidate) => {
+        const hostile = candidate.subject as unknown as {
+          sourceValue: string;
+          movingValues: string[];
+        };
+        hostile.sourceValue = "b.ts";
+        hostile.movingValues = ["b.ts"];
+        seen = candidate;
+        return { accepted: true, intent: candidate.intent };
+      },
+    });
+    const { container } = render(Tree, {
+      props: { nodes: files, reorderable: true, reorderAuthority: host },
+    });
+    const rows = layoutTree(container);
+    drag(rows.get("a.ts")!, rows.get("c.ts")!, rows.get("c.ts")!.getBoundingClientRect().top + 4);
+    expect(seen?.subject).toEqual({ sourceValue: "b.ts", movingValues: ["b.ts"] });
+    expect(host.drops).toHaveLength(1);
+    expect(host.drops[0]?.subject).toEqual({ sourceValue: "a.ts", movingValues: ["a.ts"] });
+    expect(host.drops[0]?.subject).not.toBe(seen?.subject);
+    expect(Object.isFrozen(host.drops[0]?.subject)).toBe(true);
+    expect(Object.isFrozen(host.drops[0]?.subject.movingValues)).toBe(true);
+  });
+
   it("refuses a generic-safe target the host withholds, before accepted paint", () => {
     const host = authority({
       canDrop: () => ({ accepted: false, reason: "occupied" }),

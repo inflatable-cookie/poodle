@@ -1,11 +1,11 @@
-// Positive packed proof for g16.036 Tree reorder types from the React root.
+// Mapped assignability proof for g16.036 Tree reorder types.
 //
 // The installed package `types` condition is `src/index.ts`, a value barrel.
 // Following it typechecks the whole React TSX graph, which is not tsc-clean.
-// This compile maps the public `@inflatable-cookie/poodle-react` specifier onto
-// the installed tarball's `src/types.ts` — the same module the root re-exports
-// — so the three shared identities and the exclusive `TreeProps` boundary are
-// proved from the artifact, not from a workspace path or a handwritten .d.ts.
+// This compile maps the public specifier onto the installed tarball's
+// `src/types.ts` so shared identities and exclusive `TreeProps` assignability
+// are proved from the artifact. It is not a package-exports / root resolution
+// proof; that lives in the pack harness (`reactPublicRoot`).
 import type {
   TreeReorderAuthority as CoreAuthority,
   TreeReorderCandidate as CoreCandidate,

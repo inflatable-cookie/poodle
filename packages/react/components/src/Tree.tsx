@@ -300,7 +300,13 @@ function TreeView({
       if (eligibility.accepted === false) {
         return { status: "rejected", reason: eligibility.reason };
       }
-      return authority.onDrop({ subject: live.subject, intent: eligibility.intent });
+      return authority.onDrop({
+        subject: Object.freeze({
+          sourceValue: live.subject.sourceValue,
+          movingValues: Object.freeze([...live.subject.movingValues]),
+        }),
+        intent: eligibility.intent,
+      });
     }
     const from = activeSourceIdRef.current ?? (live?.mode === "convenience" ? live.sourceValue : null);
     const dest = dropCommitDestination(intent);

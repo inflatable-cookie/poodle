@@ -194,10 +194,13 @@ source.
 PR #127 changes-requested repair: `treeAuthorityDropEligibility`
 snapshots hover fields, hands the host a detached intent, and builds
 accepted state from the snapshot so in-place mutation of target, position,
-or operation is refused. `treeAcceptedDropDepth` walks the full tree so a
-collapsed rewritten dest still paints dest depth. Paired tests change
-selection after pickup and before release. A pending Promise is proven on
-one mounted controller (exactly one `onDrop`, exact rejected/failed
-announcement, source-loss then a later dropping session). Packed tarball
-types cover core, both Svelte paths, and the React `TreeProps` JSX
-boundary.
+or operation is refused. The latched `TreeReorderSubject` is frozen; `canDrop`
+receives a detached subject so hostile replacement of `movingValues` /
+`sourceValue` cannot skip dest validation or corrupt `onDrop`.
+`treeAcceptedDropDepth` walks the full tree so a collapsed rewritten dest
+still paints dest depth. Paired tests change selection after pickup and
+before release. A pending Promise is proven on one mounted controller
+(exactly one `onDrop`, exact rejected/failed announcement, source-loss then
+a later dropping session). Packed tarball types cover core, both Svelte
+paths, mapped React `TreeProps` assignability, and an honest installed
+public-root resolution/export proof (value barrel is not compiled).

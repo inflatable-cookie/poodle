@@ -47,34 +47,41 @@ contract-spec-drift. No Rust, GPUI, or Jetstream source in the diff.
 
 ## Evidence
 
-- Core helpers: validity, latch, generic-then-host eligibility, rewrite keeps
-  hover fields, new-object and in-place hover-field mutation refuse with
-  `unavailable` (caller intent unchanged), rewritten dest into a moving
-  subtree refuses, `treeAcceptedDropDepth` uses commit dest from the full
-  tree (including collapsed dest rows).
+- Core helpers: validity, latch (frozen subject + frozen movingValues),
+  generic-then-host eligibility, rewrite keeps hover fields, new-object and
+  in-place hover-field mutation refuse with `unavailable` (caller intent
+  unchanged), rewritten dest into a moving subtree refuses, hostile
+  `canDrop` cannot replace `movingValues` to skip that subtree check,
+  `treeAcceptedDropDepth` uses commit dest from the full tree (including
+  collapsed dest rows).
 - Paired Svelte/React Tree tests: selection changes after pickup and before
   release keep the latched pair; host withhold before accepted paint;
   rewritten depth/announcement/commit; collapsed rewritten dest still paints
   dest depth; live `canDrop` at release; mid-session authority removal does
   not fall through to `onReorder`; a pending Promise calls `onDrop` once and
   surfaces the exact rejected/failed live-region text; source-loss then a
-  later dropping session ignores the old Promise; Alt+↑/↓; invalid
-  projection not normalized to `[source]`; convenience `onReorder` pointer +
-  Alt+↑/↓.
+  later dropping session ignores the old Promise; hostile `canDrop` cannot
+  replace the latched subject or the committed `onDrop` candidate; Alt+↑/↓;
+  invalid projection not normalized to `[source]`; convenience `onReorder`
+  pointer + Alt+↑/↓.
 - Mounted Chromium + WebKit: latched moving set on pointer drop, host refuse
   never paints accepted, Alt+Arrow through the same authority.
 - Packed tarball types: positive identity across core, both Svelte public
-  paths, and the installed React `TreeProps` boundary; exclusive union fails
-  with `Types of property 'onReorder' are incompatible.` on all four
-  import paths, unsuppressed. React value-barrel `index.ts` is not a
-  tsc-clean graph; the proof maps the public specifier onto the installed
-  tarball `src/types.ts` (the module the root re-exports).
+  paths, and mapped React `TreeProps` assignability against installed
+  `src/types.ts`; exclusive union fails with
+  `Types of property 'onReorder' are incompatible.` on those compiles,
+  unsuppressed. React public root is proved by package `exports["."].types`
+  plus TypeScript `tsc --traceResolution` to installed `src/index.ts`
+  (`export { Tree }` and `export * from "./types"`). Value-barrel `index.ts`
+  is not tsc-clean and is not compiled. Mapped React assignability sets
+  `compilerPathsMapped: true`; `reactPublicRoot.valueBarrelCompiled` is false.
+  Top-level `compilerPathsMapped: true` is that mapped compile, not the
+  public-root resolution.
 
 ## Oracle falsification
 
-Prior four-blocker plants remain at `5829bf7af` / `62f395010`. This round's
-plants were applied on the dirty repair tree and restored in place (HEAD did
-not yet contain the snapshot/`TreeProps` proofs).
+Prior four-blocker plants remain at `5829bf7af` / `62f395010`. Later plants
+were restored in place on the dirty repair tree.
 
 | Invariant | Plant | Failure |
 | --- | --- | --- |
@@ -85,15 +92,18 @@ not yet contain the snapshot/`TreeProps` proofs).
 | In-place hover mutation is refused | pass the live `intent` into `canDrop` and build accepted state from it | accepted with `targetId` `"src/a.ts"`; caller object mutated |
 | Matching Promise keeps its terminal | remap host Promise to `{ status: "committed" }` in `handleDrop` | live region `"Dropped a.ts on c.ts"`, not `"Drop rejected: late"` / `"Drop failed: late"` |
 | React `TreeProps` stays exclusive | `TreeProps` as an open intersection of optional `reorderAuthority` and `onReorder` | packed React negative would compile (harness: still accepts both) |
+| Latched subject is not aliased | pass live subject into `canDrop`; dest loop reads `subject.movingValues` | dest rewrite into `src/a.ts` accepted; shells commit `{ sourceValue: "b.ts", movingValues: ["b.ts"] }` |
+| React public root is resolved | `tsc --traceResolution` against mapped `paths` to `src/types.ts` | harness: resolved file is `types.ts`, not `src/index.ts` |
 
 Earlier card-oracle plants remain in the history at `8d074c279`.
 
 ## Validation
 
-- `bun test packages/core/test/tree.test.ts packages/core/test/drag-drop-geometry.test.ts` — 40 pass
-- `bunx vitest run packages/svelte/components/test/Tree.test.ts packages/react/components/test/Tree.test.tsx` — 80 pass
+- `bun test packages/core/test/tree.test.ts packages/core/test/drag-drop-geometry.test.ts` — 41 pass
+- `bunx vitest run packages/svelte/components/test/Tree.test.ts packages/react/components/test/Tree.test.tsx` — 82 pass
 - `effigy test:web-pack-install` — pass, `packedTreeReorderProof` includes
-  `@inflatable-cookie/poodle-react`; installed roster counts 176/176
+  `reactPublicRoot` (exports + `tsc --traceResolution` to `src/index.ts`) and
+  distinguished `reactMappedAssignability`; installed roster counts 176/176
 - `effigy ci:web` — pass
 - `effigy docs:check` — pass
 - `git diff --check origin/main...HEAD` — clean

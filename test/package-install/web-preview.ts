@@ -396,6 +396,112 @@ async function provePackedHistoryEntryTypes(
 }
 
 const PACKED_TREE_REORDER_DIAGNOSTIC = "Types of property 'onReorder' are incompatible.";
+const REACT_PUBLIC_SPECIFIER = "@inflatable-cookie/poodle-react";
+const REACT_ROOT_RESOLVE_CONFIG = "tsconfig.tree-react-root-resolve.json";
+const REACT_ROOT_RESOLVE_FILE = "tree-reorder-react-root-resolve.ts";
+const REACT_ROOT_TYPE_EXPORTS = [
+  "TreeProps",
+  "TreeReorderSubject",
+  "TreeReorderCandidate",
+  "TreeReorderAuthority",
+  "TreeReorderProps",
+] as const;
+
+async function proveInstalledReactPublicRoot(
+  consumerRoot: string,
+  compiler: string,
+): Promise<Record<string, unknown>> {
+  const packageRoot = realpathSync(
+    join(consumerRoot, "node_modules", "@inflatable-cookie", "poodle-react"),
+  );
+  const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8")) as {
+    exports?: { "."?: { types?: string; default?: string } };
+  };
+  const typesEntry = manifest.exports?.["."]?.types;
+  if (typesEntry !== "./src/index.ts") {
+    throw new Error(
+      `installed React package types export is ${JSON.stringify(typesEntry)}, not ./src/index.ts`,
+    );
+  }
+  const indexPath = realpathSync(join(packageRoot, "src", "index.ts"));
+  const typesPath = realpathSync(join(packageRoot, "src", "types.ts"));
+  const process = Bun.spawn(
+    [
+      compiler,
+      "--project",
+      join(PACKED_TYPE_PROOF_DIR, REACT_ROOT_RESOLVE_CONFIG),
+      "--traceResolution",
+      "--pretty",
+      "false",
+      "--noEmit",
+    ],
+    { cwd: consumerRoot, stdout: "pipe", stderr: "pipe" },
+  );
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(process.stdout).text(),
+    new Response(process.stderr).text(),
+    process.exited,
+  ]);
+  const trace = `${stdout}\n${stderr}`;
+  const fromProbe = `Resolving module '${REACT_PUBLIC_SPECIFIER}' from '${join(
+    consumerRoot,
+    PACKED_TYPE_PROOF_DIR,
+    REACT_ROOT_RESOLVE_FILE,
+  )}'`;
+  if (!trace.includes(fromProbe)) {
+    throw new Error(
+      `TypeScript did not resolve ${REACT_PUBLIC_SPECIFIER} from ${REACT_ROOT_RESOLVE_FILE} with no paths map`,
+    );
+  }
+  const resolvedMarker = `Module name '${REACT_PUBLIC_SPECIFIER}' was successfully resolved to '`;
+  const resolvedStart = trace.indexOf(resolvedMarker);
+  if (resolvedStart < 0) {
+    throw new Error(
+      `TypeScript did not report a successful resolution for ${REACT_PUBLIC_SPECIFIER}`,
+    );
+  }
+  const resolvedFrom = resolvedStart + resolvedMarker.length;
+  const resolvedFile = trace.slice(resolvedFrom, trace.indexOf("'", resolvedFrom));
+  if (realpathSync(resolvedFile) !== indexPath) {
+    throw new Error(
+      `public specifier resolved to ${resolvedFile}, not the installed types entry ${indexPath}`,
+    );
+  }
+  if (realpathSync(resolvedFile) === typesPath) {
+    throw new Error(
+      "public specifier resolved through a types.ts paths bypass, not package exports",
+    );
+  }
+  const indexSource = readFileSync(indexPath, "utf8");
+  if (!indexSource.includes('export { Tree } from "./Tree"')) {
+    throw new Error('installed React root omitted `export { Tree } from "./Tree"`');
+  }
+  if (!indexSource.includes('export * from "./types"')) {
+    throw new Error('installed React root omitted `export * from "./types"`');
+  }
+  const typesSource = readFileSync(typesPath, "utf8");
+  for (const name of REACT_ROOT_TYPE_EXPORTS) {
+    if (!typesSource.includes(name)) {
+      throw new Error(`installed React types module omitted ${name}`);
+    }
+  }
+  if (!typesSource.includes("export type TreeProps")) {
+    throw new Error("installed React types module omitted exported TreeProps");
+  }
+  return {
+    specifier: REACT_PUBLIC_SPECIFIER,
+    packageTypesExport: typesEntry,
+    compilerResolvedFile: resolvedFile,
+    resolvedVia: "package.json exports types + tsc --traceResolution (no paths)",
+    resolveConfig: REACT_ROOT_RESOLVE_CONFIG,
+    compilerPathsMapped: false,
+    valueBarrelCompileExitCode: exitCode,
+    reexportsTree: true,
+    reexportsTypesModule: true,
+    typesModuleExports: [...REACT_ROOT_TYPE_EXPORTS],
+    valueBarrelCompiled: false,
+  };
+}
 
 async function provePackedTreeReorderTypes(
   consumerRoot: string,
@@ -420,17 +526,14 @@ async function provePackedTreeReorderTypes(
       "the packed React tarball omitted src/types.ts; the Tree reorder React type proof cannot run",
     );
   }
-  if (!readFileSync(installedReactTypes, "utf8").includes("export type TreeProps")) {
-    throw new Error(
-      "the packed React tarball types module omitted exported TreeProps; the exclusive Tree boundary cannot be proved",
-    );
-  }
 
-  const positives = [
+  const publicPositives = [
     { file: "tree-reorder-positive.ts", config: "tsconfig.tree-positive.json" },
+  ] as const;
+  const mappedReactPositives = [
     { file: "tree-reorder-react-positive.ts", config: "tsconfig.tree-react-positive.json" },
   ] as const;
-  for (const item of positives) {
+  for (const item of [...publicPositives, ...mappedReactPositives]) {
     const compile = await runTypeCompile(consumerRoot, compiler, item.config);
     if (compile.exitCode !== 0 || compile.output.length > 0) {
       throw new Error(
@@ -439,7 +542,7 @@ async function provePackedTreeReorderTypes(
     }
   }
 
-  const negatives = [
+  const publicNegatives = [
     {
       importPath: "@inflatable-cookie/poodle-svelte",
       file: "tree-reorder-root-negative.ts",
@@ -455,15 +558,17 @@ async function provePackedTreeReorderTypes(
       file: "tree-reorder-core-negative.ts",
       config: "tsconfig.tree-core-negative.json",
     },
+  ] as const;
+  const mappedReactNegatives = [
     {
-      importPath: "@inflatable-cookie/poodle-react",
+      importPath: REACT_PUBLIC_SPECIFIER,
       file: "tree-reorder-react-negative.tsx",
       config: "tsconfig.tree-react-negative.json",
     },
   ] as const;
 
   const negativeEvidence = [];
-  for (const negative of negatives) {
+  for (const negative of [...publicNegatives, ...mappedReactNegatives]) {
     assertUnsuppressed(consumerRoot, negative.file);
     const compile = await runTypeCompile(consumerRoot, compiler, negative.config);
     if (compile.exitCode === 0) {
@@ -487,21 +592,38 @@ async function provePackedTreeReorderTypes(
       exitCode: compile.exitCode,
       diagnostic: compile.output,
       suppressed: false,
+      compilerPathsMapped: negative.file.includes("react"),
     });
   }
 
   return {
     compiler: realpathSync(compiler),
-    importPaths: negatives.map((negative) => negative.importPath),
-    positive: {
-      files: positives.map((item) => item.file),
-      exitCode: 0,
-      diagnostics: [],
+    importPaths: [...publicNegatives, ...mappedReactNegatives].map((negative) => negative.importPath),
+    publicSpecifierCompile: {
+      files: publicPositives.map((item) => item.file),
+      sourceImports: false,
+      workspaceAliases: false,
+      compilerPathsMapped: false,
     },
+    reactMappedAssignability: {
+      files: [
+        ...mappedReactPositives.map((item) => item.file),
+        ...mappedReactNegatives.map((item) => item.file),
+      ],
+      pathsMappedTo: "src/types.ts",
+      reason: "src/index.ts value barrel is not tsc-clean",
+      compilerPathsMapped: true,
+      valueBarrelCompiled: false,
+      sourceImports: false,
+      workspaceAliases: false,
+    },
+    reactPublicRoot: await proveInstalledReactPublicRoot(consumerRoot, compiler),
     expectedFailures: negativeEvidence,
     sourceImports: false,
     workspaceAliases: false,
     declarationTextSubstitute: false,
+    compilerPathsMapped: true,
+    valueBarrelCompiled: false,
   };
 }
 

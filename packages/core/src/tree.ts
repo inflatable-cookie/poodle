@@ -403,10 +403,21 @@ export function treeLatchReorderSubject<T extends TreeNodeLike>(
   movingValues: readonly string[],
 ): TreeReorderSubject | null {
   if (!treeMovingValuesAreValid(nodes, sourceValue, movingValues)) return null;
+  return freezeReorderSubject({ sourceValue, movingValues });
+}
+
+function cloneReorderSubject(subject: TreeReorderSubject): TreeReorderSubject {
   return {
-    sourceValue,
-    movingValues: Object.freeze([...movingValues]),
+    sourceValue: subject.sourceValue,
+    movingValues: [...subject.movingValues],
   };
+}
+
+function freezeReorderSubject(subject: TreeReorderSubject): TreeReorderSubject {
+  return Object.freeze({
+    sourceValue: subject.sourceValue,
+    movingValues: Object.freeze([...subject.movingValues]),
+  });
 }
 
 /** Detached copy so a host cannot alias controller-owned hover fields. */
@@ -431,6 +442,8 @@ function snapshotDropIntent(intent: DropIntent): DropIntent {
  * any rewritten destination. Hover target, indicator position, and operation
  * must match the hovered intent exactly; only `destination` may change.
  * Illegal hover-field edits are refused, not rewritten onto `destination`.
+ * The host sees a detached subject and intent; post-policy checks and the
+ * latched session keep the frozen copy.
  */
 export function treeAuthorityDropEligibility<T extends TreeNodeLike>(
   nodes: readonly T[],
@@ -441,12 +454,16 @@ export function treeAuthorityDropEligibility<T extends TreeNodeLike>(
   if (!subject || !authority) {
     return { accepted: false, reason: "unavailable" };
   }
+  const latched = freezeReorderSubject(subject);
   const hovered = snapshotDropIntent(intent);
-  for (const moving of subject.movingValues) {
+  for (const moving of latched.movingValues) {
     const safety = treeDropEligibility(nodes, moving, hovered);
     if (!safety.accepted) return safety;
   }
-  const policy = authority.canDrop({ subject, intent: snapshotDropIntent(intent) });
+  const policy = authority.canDrop({
+    subject: cloneReorderSubject(latched),
+    intent: snapshotDropIntent(intent),
+  });
   if (!policy.accepted) return policy;
   if (
     policy.intent.targetId !== hovered.targetId ||
@@ -471,7 +488,7 @@ export function treeAuthorityDropEligibility<T extends TreeNodeLike>(
     position: dest.position,
     operation: hovered.operation,
   };
-  for (const moving of subject.movingValues) {
+  for (const moving of latched.movingValues) {
     const safety = treeDropEligibility(nodes, moving, destIntent);
     if (!safety.accepted) return safety;
   }
