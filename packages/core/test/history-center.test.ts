@@ -9,6 +9,7 @@ import {
   historyCenterJoinPages,
   historyCenterKeydownEvent,
   historyCenterRejectionMessage,
+  type HistoryCenterRejectionCode,
   historyCenterTransition,
   historyCenterVisibleRows,
   type HistoryCenterContext,
@@ -1251,19 +1252,52 @@ describe("machine — rename and rejection", () => {
     expect(result.context).toEqual(ctx());
   });
 
-  test("SHOW_REJECTION maps the two codes to messages and is idempotent for the same one", () => {
-    expect(historyCenterRejectionMessage("AlreadyAtTarget")).toBe("Already at the requested target");
-    expect(historyCenterRejectionMessage("UnknownEntry")).toBe("Entry does not exist");
+  // The exact contract table (docs/contracts/components/history-center.md
+  // §"Rejection handling"), in code-declaration order. Every proof below reads
+  // this list, so deleting a category or pointing two codes at one message
+  // fails here rather than quietly narrowing the surface.
+  const rejectionCopy = [
+    ["AlreadyAtTarget", "Already at the requested target"],
+    ["UnknownEntry", "Entry does not exist"],
+    ["StaleHistory", "History changed; this entry was not deleted"],
+    ["ProtectedEntry", "This history entry is protected"],
+    ["DeletionUnavailable", "History deletion is unavailable"],
+  ] as const satisfies readonly (readonly [HistoryCenterRejectionCode, string])[];
 
-    const shown = historyCenterTransition("open", ctx(), { type: "SHOW_REJECTION", code: "AlreadyAtTarget" });
-    expect(shown.context.rejection).toBe("Already at the requested target");
+  test("every rejection code owns its own exact copy", () => {
+    for (const [code, message] of rejectionCopy) {
+      expect(historyCenterRejectionMessage(code)).toBe(message);
+    }
 
-    expect(
-      historyCenterTransition("open", shown.context, { type: "SHOW_REJECTION", code: "AlreadyAtTarget" }).effects,
-    ).toEqual([]);
+    // Five meanings, five messages: no category may collapse onto another —
+    // the papercut was three refusals sharing "Entry does not exist".
+    const messages = rejectionCopy.map(([, message]) => message);
+    expect(new Set(messages).size).toBe(rejectionCopy.length);
 
-    const other = historyCenterTransition("open", shown.context, { type: "SHOW_REJECTION", code: "UnknownEntry" });
-    expect(other.context.rejection).toBe("Entry does not exist");
+    // A deletion refusal is never reported as a missing entry.
+    for (const code of ["StaleHistory", "ProtectedEntry", "DeletionUnavailable"] as const) {
+      expect(historyCenterRejectionMessage(code)).not.toBe(
+        historyCenterRejectionMessage("UnknownEntry"),
+      );
+    }
+  });
+
+  test("SHOW_REJECTION displays each code, replaces the last one, and repeats inertly", () => {
+    let context = ctx();
+    for (const [code, message] of rejectionCopy) {
+      const shown = historyCenterTransition("open", context, { type: "SHOW_REJECTION", code });
+      expect(shown.context.rejection).toBe(message);
+
+      // The same code again is a no-op: no effects, and the context identity
+      // the adapters use to skip their write-back is preserved.
+      const again = historyCenterTransition("open", shown.context, { type: "SHOW_REJECTION", code });
+      expect(again.effects).toEqual([]);
+      expect(again.context).toBe(shown.context);
+
+      // The next iteration replaces this notice rather than stacking it.
+      context = shown.context;
+    }
+    expect(context.rejection).toBe("History deletion is unavailable");
   });
 
   test("DISMISS_REJECTION clears the notice and is inert when none is shown", () => {

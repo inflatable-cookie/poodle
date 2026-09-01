@@ -269,6 +269,131 @@ ${coreImportChecks}
 `;
 }
 
+/**
+ * The packed v3 `HistoryEntry` type proof (g16.033).
+ *
+ * `test:components` imports `../src/types`, so a source-only correction looks
+ * identical to a corrected package. This compiles a real consumer against the
+ * installed tarballs on both public Svelte import paths: `continuationCount`
+ * must typecheck, and the retired v2 `branchCount` must fail — unsuppressed,
+ * with the exact diagnostic named here rather than "the compiler said no".
+ */
+const PACKED_TYPE_PROOF_DIR = "packed-types";
+const PACKED_TYPE_PROOF_DIAGNOSTIC =
+  "error TS2339: Property 'branchCount' does not exist on type 'HistoryEntry'.";
+/** Anything that would turn an expected failure into a silent pass. */
+const SUPPRESSION_MARKERS = ["@ts-expect-error", "@ts-ignore", "as any", ": any"];
+
+type PackedTypeCompile = {
+  config: string;
+  exitCode: number;
+  output: string;
+};
+
+async function runTypeCompile(
+  consumerRoot: string,
+  compiler: string,
+  config: string,
+): Promise<PackedTypeCompile> {
+  const process = Bun.spawn([compiler, "--project", join(PACKED_TYPE_PROOF_DIR, config)], {
+    cwd: consumerRoot,
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(process.stdout).text(),
+    new Response(process.stderr).text(),
+    process.exited,
+  ]);
+  return { config, exitCode, output: `${stdout}${stderr}`.trim() };
+}
+
+function assertUnsuppressed(consumerRoot: string, file: string): void {
+  // Raw source, comments included: `@ts-expect-error` IS a comment, so a guard
+  // that strips comments first can never see the thing it exists to catch.
+  // The fixture banners are written to avoid these literals for that reason.
+  const source = readFileSync(join(consumerRoot, PACKED_TYPE_PROOF_DIR, file), "utf8");
+  const found = SUPPRESSION_MARKERS.filter((marker) => source.includes(marker));
+  if (found.length > 0) {
+    throw new Error(
+      `${file} suppresses its expected failure (${found.join(", ")}); the negative proof would pass for the wrong reason`,
+    );
+  }
+}
+
+async function provePackedHistoryEntryTypes(
+  consumerRoot: string,
+): Promise<Record<string, unknown>> {
+  const compiler = join(consumerRoot, "node_modules", ".bin", "tsc");
+  if (!existsSync(compiler)) {
+    throw new Error(
+      "the packed consumer did not install a TypeScript compiler; the v3 type proof cannot run",
+    );
+  }
+
+  const positive = await runTypeCompile(consumerRoot, compiler, "tsconfig.positive.json");
+  if (positive.exitCode !== 0 || positive.output.length > 0) {
+    throw new Error(
+      `packed HistoryEntry positive proof failed on the installed tarball:\n${positive.output}`,
+    );
+  }
+
+  const negatives = [
+    {
+      importPath: "@inflatable-cookie/poodle-svelte",
+      file: "history-entry-root-negative.ts",
+      config: "tsconfig.root-negative.json",
+    },
+    {
+      importPath: "@inflatable-cookie/poodle-svelte/types",
+      file: "history-entry-types-negative.ts",
+      config: "tsconfig.types-negative.json",
+    },
+  ] as const;
+
+  const negativeEvidence = [];
+  for (const negative of negatives) {
+    assertUnsuppressed(consumerRoot, negative.file);
+    const compile = await runTypeCompile(consumerRoot, compiler, negative.config);
+    if (compile.exitCode === 0) {
+      throw new Error(
+        `packed ${negative.importPath} still accepts the retired v2 branchCount field`,
+      );
+    }
+    if (!compile.output.includes(PACKED_TYPE_PROOF_DIAGNOSTIC)) {
+      throw new Error(
+        `packed ${negative.importPath} rejected branchCount with the wrong diagnostic:\n${compile.output}`,
+      );
+    }
+    if (!compile.output.includes(negative.file)) {
+      throw new Error(
+        `packed ${negative.importPath} reported its diagnostic against another file:\n${compile.output}`,
+      );
+    }
+    negativeEvidence.push({
+      importPath: negative.importPath,
+      file: negative.file,
+      exitCode: compile.exitCode,
+      diagnostic: compile.output,
+      suppressed: false,
+    });
+  }
+
+  return {
+    compiler: realpathSync(compiler),
+    importPaths: negatives.map((negative) => negative.importPath),
+    positive: {
+      file: "history-entry-positive.ts",
+      exitCode: positive.exitCode,
+      diagnostics: [],
+    },
+    expectedFailures: negativeEvidence,
+    sourceImports: false,
+    workspaceAliases: false,
+    declarationTextSubstitute: false,
+  };
+}
+
 function sortedUnique(values: Iterable<string>): string[] {
   return [...new Set(values)].sort();
 }
@@ -379,6 +504,7 @@ const consumerManifest = {
     "@testing-library/react": "16.3.0",
     "@testing-library/svelte": "5.4.2",
     "happy-dom": "20.11.1",
+    typescript: "7.0.2",
     vite: "7.3.1",
     vitest: "4.1.10",
   },
@@ -437,6 +563,8 @@ for (const packageEntry of packages) {
 
 await run(["bunx", "vitest", "run"], consumerRoot);
 
+const packedHistoryEntryProof = await provePackedHistoryEntryTypes(consumerRoot);
+
 const artifacts = await Promise.all(
   packedPackages.map(async (packedPackage) => {
     const path = packedPackage.archivePath;
@@ -490,6 +618,7 @@ const evidence = {
     svelteExactPublicSubpaths: ["types"],
   },
   packedTarballs: Object.fromEntries(packedBoundaries),
+  packedHistoryEntryProof,
   mountedProof: {
     svelte: {
       components: [

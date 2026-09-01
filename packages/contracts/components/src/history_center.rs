@@ -29,6 +29,9 @@ pub enum HistoryCenterStatus {
 pub enum HistoryCenterRejection {
     #[default] AlreadyAtTarget,
     UnknownEntry,
+    StaleHistory,
+    ProtectedEntry,
+    DeletionUnavailable,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -201,12 +204,19 @@ impl HistoryCenterSpec {
     }
 
     /// The display copy for a mapped rejection. The host's bridge maps its
-    /// protocol onto the two codes; the component owns the wording, so the
-    /// protocol's vocabulary never reaches an operator.
+    /// protocol onto the five codes; the component owns the wording, so the
+    /// protocol's vocabulary never reaches an operator. The three deletion
+    /// refusals stay distinct from `UnknownEntry`: a stale, protected, or
+    /// unavailable deletion is not a missing entry.
     pub fn rejection_message(&self) -> Option<&'static str> {
         match self.rejection? {
             HistoryCenterRejection::AlreadyAtTarget => Some("Already at the requested target"),
             HistoryCenterRejection::UnknownEntry => Some("Entry does not exist"),
+            HistoryCenterRejection::StaleHistory => {
+                Some("History changed; this entry was not deleted")
+            }
+            HistoryCenterRejection::ProtectedEntry => Some("This history entry is protected"),
+            HistoryCenterRejection::DeletionUnavailable => Some("History deletion is unavailable"),
         }
     }
 
@@ -256,15 +266,67 @@ mod tests {
         );
     }
 
+    /// The exact contract table (`docs/contracts/components/history-center.md`
+    /// §"Rejection handling"). Both rejection proofs below read this list, so
+    /// dropping a category or pointing two codes at one message fails here.
+    const REJECTION_COPY: [(HistoryCenterRejection, &str); 5] = [
+        (
+            HistoryCenterRejection::AlreadyAtTarget,
+            "Already at the requested target",
+        ),
+        (HistoryCenterRejection::UnknownEntry, "Entry does not exist"),
+        (
+            HistoryCenterRejection::StaleHistory,
+            "History changed; this entry was not deleted",
+        ),
+        (
+            HistoryCenterRejection::ProtectedEntry,
+            "This history entry is protected",
+        ),
+        (
+            HistoryCenterRejection::DeletionUnavailable,
+            "History deletion is unavailable",
+        ),
+    ];
+
     #[test]
     fn rejection_copy_is_component_owned() {
         assert_eq!(HistoryCenterSpec::new().rejection_message(), None);
-        assert_eq!(
-            HistoryCenterSpec::new()
-                .with_rejection(HistoryCenterRejection::UnknownEntry)
-                .rejection_message(),
-            Some("Entry does not exist"),
-        );
+        for (code, message) in REJECTION_COPY {
+            assert_eq!(
+                HistoryCenterSpec::new()
+                    .with_rejection(code)
+                    .rejection_message(),
+                Some(message),
+                "{code:?} must carry its own component-owned copy",
+            );
+        }
+    }
+
+    /// The papercut this replaced: a stale revision, a protected entry, and an
+    /// unavailable deletion all told the operator "Entry does not exist".
+    #[test]
+    fn every_refusal_meaning_stays_distinct() {
+        let mut messages: Vec<&str> = REJECTION_COPY.iter().map(|(_, m)| *m).collect();
+        let distinct = messages.len();
+        messages.sort_unstable();
+        messages.dedup();
+        assert_eq!(messages.len(), distinct, "no two codes may share copy");
+
+        let unknown = HistoryCenterSpec::new()
+            .with_rejection(HistoryCenterRejection::UnknownEntry)
+            .rejection_message();
+        for code in [
+            HistoryCenterRejection::StaleHistory,
+            HistoryCenterRejection::ProtectedEntry,
+            HistoryCenterRejection::DeletionUnavailable,
+        ] {
+            assert_ne!(
+                HistoryCenterSpec::new().with_rejection(code).rejection_message(),
+                unknown,
+                "{code:?} is a refused deletion, not a missing entry",
+            );
+        }
     }
 
     #[test]

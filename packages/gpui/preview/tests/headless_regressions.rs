@@ -36,18 +36,18 @@ use poodle_node::{
     NodeWheelEvent,
 };
 use poodle_render::{
-    audio_entry_id, fader_spec_from_context, fader_with_handlers, knob_spec_from_context,
-    knob_with_handlers, time_input_with_persistent_context, ui_presentation_provider,
-    xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id, xy_pad_y_id, FaderHandlers,
-    FaderLive, KnobHandlers, KnobLive, RadioGroupHandlers, RatingHandlers, RenderContext,
-    SliderHandlers, TabsHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers,
-    XYPadLive,
+    audio_entry_id, fader_spec_from_context, fader_with_handlers, history_center,
+    knob_spec_from_context, knob_with_handlers, time_input_with_persistent_context,
+    ui_presentation_provider, xy_pad_spec_from_context, xy_pad_with_handlers, xy_pad_x_id,
+    xy_pad_y_id, FaderHandlers, FaderLive, HistoryCenterHandlers, HistoryCenterView,
+    KnobHandlers, KnobLive, RadioGroupHandlers, RatingHandlers, RenderContext, SliderHandlers,
+    TabsHandlers, ToggleGroupHandlers, TriStateSwitchHandlers, XYPadHandlers, XYPadLive,
 };
 use poodle_specs::{
-    AccordionSelectionValue, AgentTranscriptSpec, ControlDensity, ControlSize, FaderSpec, KnobSpec,
-    Orientation, PopoverSpec, RangeSliderSpec, RatingSpec, SliderSpec, TabActivationMode,
-    TabDefinition, TabsSpec, TimeInputSpec, TriStateSwitchSpec, TriStateValue,
-    UiPresentationProviderSpec, XYPadSpec,
+    AccordionSelectionValue, AgentTranscriptSpec, ControlDensity, ControlSize, FaderSpec,
+    HistoryCenterRejection, HistoryCenterSpec, KnobSpec, Orientation, PopoverSpec, RangeSliderSpec,
+    RatingSpec, SliderSpec, TabActivationMode, TabDefinition, TabsSpec, TimeInputSpec,
+    TriStateSwitchSpec, TriStateValue, UiPresentationProviderSpec, XYPadSpec,
 };
 
 #[path = "../src/headless_driver.rs"]
@@ -18213,6 +18213,113 @@ fn an_incoming_projection_is_narrated_after_a_self_narrating_local_session() {
         assert!(
             after[spoken.len()..].iter().all(|line| !line.contains("remote-row")),
             "including at the terminal, where the label must not decay: {after:?}"
+        );
+    });
+}
+
+// ── HistoryCenter rejection surface (g16.033) ──────────────────────────────
+
+/// The exact contract table (`docs/contracts/components/history-center.md`
+/// §"Rejection handling"), in declaration order. Every native proof below
+/// reads this list, so deleting a category or collapsing one onto another
+/// fails here.
+const HISTORY_CENTER_REJECTION_COPY: [(HistoryCenterRejection, &str); 5] = [
+    (
+        HistoryCenterRejection::AlreadyAtTarget,
+        "Already at the requested target",
+    ),
+    (HistoryCenterRejection::UnknownEntry, "Entry does not exist"),
+    (
+        HistoryCenterRejection::StaleHistory,
+        "History changed; this entry was not deleted",
+    ),
+    (
+        HistoryCenterRejection::ProtectedEntry,
+        "This history entry is protected",
+    ),
+    (
+        HistoryCenterRejection::DeletionUnavailable,
+        "History deletion is unavailable",
+    ),
+];
+
+/// g16.033: every accepted refusal reaches a native operator as its own line.
+///
+/// This is the mounted counterpart of the resolver proofs in `poodle-core`,
+/// `poodle-headless`, `poodle-specs` and `poodle-render`: each of the five
+/// codes is mapped by the component, painted into a real GPUI window through
+/// the real node backend, and read back off the surface that actually mounted.
+/// The papercut this replaced showed a stale revision, a protected entry and
+/// an unavailable deletion all as "Entry does not exist" — so the assertion
+/// that matters is that the five lines are five, and that no deletion refusal
+/// is the unknown-entry line.
+#[test]
+fn every_history_center_rejection_mounts_its_own_native_copy() {
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let unknown = HistoryCenterSpec::new()
+            .with_rejection(HistoryCenterRejection::UnknownEntry)
+            .rejection_message()
+            .expect("the unknown-entry code resolves copy");
+        let mut mounted: Vec<String> = Vec::new();
+
+        for (code, expected) in HISTORY_CENTER_REJECTION_COPY {
+            let spec = HistoryCenterSpec::new()
+                .with_can_undo(true)
+                .with_open(true)
+                .with_rejection(code);
+            let message = spec
+                .rejection_message()
+                .unwrap_or_else(|| panic!("{code:?} resolves component-owned copy"));
+            assert_eq!(message, expected, "{code:?} owns exact copy");
+
+            let node = history_center(
+                &spec,
+                &ctx,
+                &HistoryCenterView {
+                    is_open: true,
+                    rejection: Some(message.to_owned()),
+                    ..HistoryCenterView::default()
+                },
+                &HistoryCenterHandlers::default(),
+            );
+
+            let notice = node
+                .find(&|candidate| {
+                    candidate.id.as_deref() == Some(poodle_render::history_center::HISTORY_CENTER_REJECTION_ID)
+                })
+                .unwrap_or_else(|| panic!("{code:?} paints a rejection notice"))
+                .clone();
+            assert_eq!(notice.a11y.role, Some(NodeRole::Status));
+            assert_eq!(notice.texts(), vec![expected]);
+            if code != HistoryCenterRejection::UnknownEntry {
+                assert_ne!(
+                    notice.texts(),
+                    vec![unknown],
+                    "{code:?} must not read as a missing entry",
+                );
+            }
+
+            // Mount the whole surface in a real window through the real
+            // backend. A node tree that only exists in memory proves nothing
+            // about what a native operator sees.
+            let mounted_node = Arc::new(Mutex::new(node));
+            let mut driver =
+                HeadlessDriver::new_in_box(cx, Arc::clone(&mounted_node), 640.0, 520.0);
+            driver.wait_for_focus_handle(poodle_render::history_center::HISTORY_CENTER_UNDO_ID);
+            driver.draw_frame();
+
+            mounted.push(notice.texts().join(""));
+        }
+
+        let distinct = mounted.len();
+        mounted.sort();
+        mounted.dedup();
+        assert_eq!(
+            mounted.len(),
+            distinct,
+            "five refusal meanings must mount as five distinct lines",
         );
     });
 }

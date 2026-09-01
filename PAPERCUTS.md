@@ -7,6 +7,18 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-09-01 — The HistoryCenter usage snippet in
+  `packages/svelte/preview/src/component-docs.ts:5145` still teaches the retired
+  v2/v1 API: `entries`/`branches` props, `branchCount` on `HistoryEntry`, and
+  `onSelectEntry` / `onCheckout` / `onLoadMoreEntries`. None of those exist on
+  the v3 surface. It is generated into both previews'
+  `artifacts/component-docs.json`, so the public docs are the last place still
+  advertising the shape `g16.033` proves the package no longer exports. A
+  reader who copies it gets four unknown props and a type error. Not fixed
+  here: `component-docs.ts` is outside this card's writable scope, and the
+  snippet needs a v3 rewrite rather than a field edit. Found while running the
+  v2 `branchCount` absence search for g16.033.
+
 - 2026-09-01 — `audit:security` fails on `main` on an English word.
   `docs/triage/20260901-080641-post-g16-research-queue.md:153` contains
   "mask-plus-translated-highlight", and the OpenAI matcher

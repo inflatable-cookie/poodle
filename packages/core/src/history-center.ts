@@ -419,9 +419,21 @@ export type HistoryCenterState = "closed" | "open";
 /**
  * Rejections the machine can display, structurally declared (R2 — no Longhorn
  * type reaches Poodle). The host's bridge maps protocol rejections onto these
- * two; the machine owns the display copy.
+ * five renderer-neutral meanings; the machine owns the display copy.
+ *
+ * The deletion refusals are deliberately three, not one: a stale revision, an
+ * entry the authority protects, and a deletion the authority cannot offer at
+ * all are different facts, and collapsing them onto `UnknownEntry` told an
+ * operator their entry had vanished when it had not. Current-line and
+ * pinned/checkpoint policy share `ProtectedEntry` — both are entry-level
+ * protection, and Poodle has no business splitting the host's reason.
  */
-export type HistoryCenterRejectionCode = "AlreadyAtTarget" | "UnknownEntry";
+export type HistoryCenterRejectionCode =
+  | "AlreadyAtTarget"
+  | "UnknownEntry"
+  | "StaleHistory"
+  | "ProtectedEntry"
+  | "DeletionUnavailable";
 
 export function historyCenterRejectionMessage(code: HistoryCenterRejectionCode): string {
   switch (code) {
@@ -429,6 +441,12 @@ export function historyCenterRejectionMessage(code: HistoryCenterRejectionCode):
       return "Already at the requested target";
     case "UnknownEntry":
       return "Entry does not exist";
+    case "StaleHistory":
+      return "History changed; this entry was not deleted";
+    case "ProtectedEntry":
+      return "This history entry is protected";
+    case "DeletionUnavailable":
+      return "History deletion is unavailable";
   }
 }
 

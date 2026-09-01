@@ -1,12 +1,25 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type {
+  HistoryCenterRejectionCode,
   HistoryContinuation,
   HistoryPathPage,
 } from "@inflatable-cookie/poodle-core";
 
 import { HistoryCenter } from "../src";
 import type { HistoryEntry } from "../src/types";
+
+// The exact contract table (docs/contracts/components/history-center.md
+// §"Rejection handling"). The web shell owns no copy — it mounts what the
+// machine resolved — so this list is the shell's read of the same five
+// meanings, and dropping one fails the mount proof below.
+const rejectionCopy = [
+  ["AlreadyAtTarget", "Already at the requested target"],
+  ["UnknownEntry", "Entry does not exist"],
+  ["StaleHistory", "History changed; this entry was not deleted"],
+  ["ProtectedEntry", "This history entry is protected"],
+  ["DeletionUnavailable", "History deletion is unavailable"],
+] as const satisfies readonly (readonly [HistoryCenterRejectionCode, string])[];
 
 // v3 data: root path pages arrive newest-first (R3); display is oldest-first.
 // `continuationCount` counts the run's own next row, so forkCount is one less
@@ -1272,6 +1285,41 @@ describe("HistoryCenter (react)", () => {
     render(<HistoryCenter pages={twoForkPages} defaultOpen rejection="UnknownEntry" />);
 
     expect(screen.getByText("Entry does not exist")).toBeTruthy();
+  });
+
+  // g16.033: a stale revision, a protected entry and an unavailable deletion
+  // used to reach the operator as "Entry does not exist". Each code now mounts
+  // its own copy in the live region. One mount per case, so a failure names
+  // the category that regressed.
+  it.each(rejectionCopy)("mounts %s as its own line in the live region", (code, message) => {
+    render(<HistoryCenter pages={twoForkPages} defaultOpen rejection={code} />);
+
+    const notice = screen.getByText(message).closest("[data-part='rejection']");
+    expect(notice).not.toBeNull();
+    expect(notice?.getAttribute("role")).toBe("status");
+    if (code !== "UnknownEntry") {
+      expect(notice?.textContent).not.toContain("Entry does not exist");
+    }
+  });
+
+  it("replaces one refusal with the next and clears on null", () => {
+    const { rerender } = render(
+      <HistoryCenter pages={twoForkPages} defaultOpen rejection="StaleHistory" />,
+    );
+
+    expect(screen.getByText("History changed; this entry was not deleted")).toBeTruthy();
+
+    rerender(<HistoryCenter pages={twoForkPages} defaultOpen rejection="ProtectedEntry" />);
+    expect(screen.queryByText("History changed; this entry was not deleted")).toBeNull();
+    expect(screen.getByText("This history entry is protected")).toBeTruthy();
+
+    // A repeat of the displayed code is inert rather than a second notice.
+    rerender(<HistoryCenter pages={twoForkPages} defaultOpen rejection="ProtectedEntry" />);
+    expect(screen.getAllByText("This history entry is protected")).toHaveLength(1);
+
+    rerender(<HistoryCenter pages={twoForkPages} defaultOpen rejection={null} />);
+    expect(screen.queryByText("This history entry is protected")).toBeNull();
+    expect(document.querySelector("[data-part='rejection']")).toBeNull();
   });
 
   it("renders the empty message, the loading row and the failed row when there are no rows", () => {
