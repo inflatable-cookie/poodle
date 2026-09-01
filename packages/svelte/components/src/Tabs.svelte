@@ -264,7 +264,7 @@
     }
     const observer = new ResizeObserver(() => measureIndicator(true));
     observer.observe(listElement);
-    const selected = tabElements[selectedIndex];
+    const selected = tabElements[renderedItems[selectedIndex]?.value ?? ""];
     if (selected) {
       observer.observe(selected);
     }

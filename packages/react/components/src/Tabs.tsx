@@ -276,7 +276,7 @@ export function Tabs({
       frame = requestAnimationFrame(() => setIndicatorSnap(false));
     });
     observer.observe(list);
-    const selected = tabRefs.current[selectedIndex];
+    const selected = tabRefs.current[renderedItems[selectedIndex]?.value ?? ""];
     if (selected) {
       observer.observe(selected);
     }
