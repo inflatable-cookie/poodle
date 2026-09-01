@@ -141,11 +141,11 @@ Use current Effigy names. `test:svelte-pack-install` is an alias of
 
 ### Required Papercuts worker before freeze
 
-`effigy qa` is red on current `main` because `audit:security` matches
-`sk-plus-translated-hi…` inside the English phrase
-`mask-plus-translated-highlight` (`scripts/audit-repository-security.ts`
-OpenAI pattern has no left boundary). Hits remain in `PAPERCUTS.md`, the
-`g16.033` handoff, and the `g16.033` / `g16.034` logs.
+`effigy qa` is red on current `main` because `audit:security` uses an
+unanchored OpenAI-key matcher that fires on the letters `sk-` inside a
+hyphenated English compound. The 2026-09-01 `PAPERCUTS.md` security-audit
+entry names the files; hits remain there plus the `g16.033` handoff and
+the `g16.033` / `g16.034` logs.
 
 That worker is a papercut lane. Its workspace **must** carry the capitalized
 label `Papercuts` before launch. Scope: anchor the matcher (the recorded
