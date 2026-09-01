@@ -86,7 +86,7 @@ behavior repairs without inventing another conformance authority.
   receipts, exact per-installation inbound ownership, validation before
   eligibility, host-owned retention, and no committed export terminal because
   a native drag ending never proves a destination took the file. `g16.028` is
-  the next ordered drag checkpoint, still planned pending readiness review.
+  ready as the final drag migration and certification checkpoint.
   `g16.033` is reserved after that shared-file tranche for HistoryCenter's
   Poodle-owned rejection surface and packed v3 `HistoryEntry` proof. It is not
   dispatchable until the public rejection shape is chosen; Keyboard vertical
@@ -158,7 +158,7 @@ behavior repairs without inventing another conformance authority.
   cards. `033` is the reserved HistoryCenter portfolio-papercut follow-on.
   Dependable drag-and-drop remains a
   separate programme governed by architecture 011/spec 069 and compiled as
-  `021`–`028`; `021`–`027` are merged, and `028` is the next ordered planned
+  `021`–`028`; `021`–`027` are merged, and `028` is ready as the final
   checkpoint.
 
 ## Rules

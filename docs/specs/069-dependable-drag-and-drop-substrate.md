@@ -1,7 +1,7 @@
 # 069 Dependable Drag And Drop Substrate
 
 Status: active — compiled as g16.021–g16.028; g16.021–g16.027 merged;
-g16.028 is the next ordered planned checkpoint
+g16.028 is ready as the final migration and certification checkpoint
 Updated: 2026-09-01
 Depends on: `../architecture/011-drag-and-drop-substrate.md`,
 `../contracts/001-working-rules.md`,
@@ -986,9 +986,10 @@ land after the internal proof.
 
 The compiled runway is `docs/roadmaps/g16/021-drag-drop-semantic-kernel.md`
 through `028-drag-drop-migration-and-certification-closeout.md`.
-`g16.021`–`g16.026` are merged. `g16.027` delivered the inbound-file and
-file-drag-out boundary and is under review. `g16.028` remains planned behind
-its landed dependency.
+`g16.021`–`g16.027` are merged. `g16.028` is ready: the remaining web HTML-drag
+owners are ModelCatalogueEditor, OrderBy, and BlockEditor; native
+EditableList, OrderBy, and BlockEditor still need their contract reorder result
+paths before final certification.
 
 ## Non-goals
 
