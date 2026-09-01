@@ -1,12 +1,13 @@
 # g16.034 — Shared Motion Policy And Five-Family Pilot
 
-Status: implemented — production repair complete; exact-head evidence recorded
+Status: implemented — exact-head blocker repair complete; ordinary web board green
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/124
 Rebased implementation commits: `473d874a7` (initial), `b92fdecd6` +
 `7230ad241` + `8daf60de5` + `757270766` + `92c26a9c9` + `c88941191`
 (review repair), `00174a219` (production execution repair), and
-`3a43c7701` + `408415f4a` (closeout evidence)
+`3a43c7701` + `408415f4a` (closeout evidence), and `6a6e776f2`
+(controlled-dismiss/config repair)
 Card: `docs/roadmaps/g16/034-shared-motion-policy-and-five-family-pilot.md`
 Handoff: `docs/handoffs/20260901-130224-g16-034-shared-motion-policy.md`
 Governing refs: `docs/architecture/012-semantic-motion-policy.md`,
@@ -37,9 +38,12 @@ The five pilot families consume that policy:
   after the first committed frame; reduced/frozen snap; closed panels stay
   inert and keep content in layout until the clip finishes.
 - ToastStack: WAAPI completion drives settle/drop; keyed enter/exit, inert exit
-  remnants, focus fallback next → previous → entered-from. Mounted policy
-  tightening cancels the old owner and re-drives the current visual state;
-  action teardown cancels the latest owner. Expiry still belongs to ToastHost.
+  remnants, focus fallback next → previous → entered-from. Dismiss moves focus
+  synchronously, while an externally controlled row stays live until its id
+  disappears from `items`; inert/exit is then derived from the removed visual
+  phase. Mounted policy tightening cancels the old owner and re-drives the
+  current visual state; action teardown cancels the latest owner. Expiry still
+  belongs to ToastHost.
 - Tabs `activeEdge="underline"`: one measured paint-only indicator. First
   layout and resize snap; semantic selection can retarget; rAF cancelled on
   teardown.
@@ -80,6 +84,10 @@ Addressed on the rebased review-repair sequence (`b92fdecd6`, `7230ad241`,
   Chromium + WebKit probe at `test/motion-policy-probe/`.
 - Empty ToastStack default `items` is a stable array; presence sync skips
   no-op Map/visual writes so omitted-items mounts (parity) cannot loop.
+- Externally controlled ToastStack dismiss moves focus synchronously without
+  mutating a still-present row; paired Svelte/React mounted no-removal and
+  no-op callback proofs keep it announced and operable. Removed-item
+  remnant/focus evidence remains green.
 - Mounted Svelte ToastStack policy changes now cancel the prior owner before
   replay; unsupported WAAPI exits abort their trace; registry cancellation
   preserves a synchronous replacement; Tabs measurement rAF teardown is
@@ -121,10 +129,11 @@ separate and unmerged.
 ## Falsification
 
 Real proofs were committed before planting in the rebased repair sequence. The required
-plant → intended failure → restore → green rerun was completed for all 11
-rows before this recovery; restores used `git checkout --` against committed
-sources while the index was clean. The current recovery did not reset, clean,
-or discard workspace changes.
+plant → intended failure → restore → green rerun was completed for rows 1–16
+before this recovery; restores used `git checkout --` against committed sources
+while the index was clean. Row 17 is the exact-head adversarial review catch,
+validated by paired mounted regressions. The current recovery did not reset,
+clean, or discard workspace changes.
 
 | Oracle row | Plant | Intended failure | Restore + rerun |
 | --- | --- | --- | --- |
@@ -144,6 +153,7 @@ or discard workspace changes.
 | 14 Exact clipped-height finish cleanup | animation finish deletes the handle without checking exact live-handle identity | replacement runtime receipt expects one live handle and receives zero | restored; runtime receipt green |
 | 15 Svelte SSR preloaded ToastStack | initial `visuals` is empty instead of synchronously seeded from authored items | SSR receipt emits an empty list and omits `Saved` | restored; SSR receipt green |
 | 16 React controlled close remnant | `Collapsible` keeps content only when `isOpen` | mounted close/reversal receipts see `hidden=true` before the remnant exists | restored; mounted receipt green |
+| 17 Controlled external dismiss ownership | `handleDismiss` calls `applyToastExitInert` while the id remains in `items` | paired no-removal/no-op mounted cases find `inert`/`aria-hidden`/`tabIndex=-1` on a row that is still live | removed; Svelte + React paired tests keep the row settled, announced, and operable while focus moves synchronously; removed-item remnant/focus proof remains green |
 
 ## Evidence
 
@@ -160,6 +170,11 @@ or discard workspace changes.
   cases use a live clipped height and proportional remaining duration.
 - Svelte SSR receipt: `packages/svelte/components/test/ssr/ToastStackSsr.test.ts`
   proves authored preloaded items are present and settled on the first paint.
+- Paired controlled-dismiss mounted receipts:
+  `packages/svelte/components/test/ToastStack.test.ts` and
+  `packages/react/components/test/ToastStack.test.tsx` prove no-removal and
+  no-op callback cases remain live while focus moves synchronously; the family
+  tests retain removed-item remnant/focus evidence.
 - GPUI mounted regressions: `mounted_motion_policy_construction_does_not_invent_clocks`
   and `production_loading_routes_commit_before_starting_full_mode_loops` in
   `packages/gpui/preview/src/specimen_probe.rs`; the latter mounts the real
@@ -179,6 +194,12 @@ Live-base rebase validation (after rebasing onto
   `effigy test:motion-policy-browser-webkit` — all Svelte and React checks
   pass, including underline resize and motion-policy lifecycle receipts.
 - `effigy docs:check` — pass; 176 evidence rows and zero drift.
+
+Exact-head blocker repair:
+
+- React ToastStack + motion-family focus — 2 files, 17 tests pass.
+- Svelte ToastStack + motion-family focus — 2 files, 18 tests pass.
+- Svelte SSR ToastStack receipt — 1 file, 1 test pass.
 - `git diff --check` and `git diff --check origin/main...HEAD` — pass; no
   conflict markers or source/API conflict was introduced by the rebase.
 
@@ -198,8 +219,11 @@ Focused (post-production-repair):
 
 Boards:
 
-- `effigy ci:web` — pass: 372 files, 3468 tests; packed consumer 10 files,
-  20 tests; 0 Svelte-check errors and 4 existing component warnings.
+- `effigy test:components` — clean pass at default Vitest parallelism and
+  normal V8 heap: 372 files, 3472 tests; no `NODE_OPTIONS` override or global
+  `maxWorkers` cap.
+- `effigy ci:web` — clean rerun pass: 372 files, 3472 tests; packed consumer
+  10 files, 20 tests; 0 Svelte-check errors and 4 existing component warnings.
 - `effigy ci:rust` — pass, including 197 headless and 289 component-spec
   tests.
 - `effigy ci:native` — pass; all drift checks, render/node-backend, GPUI,
@@ -230,5 +254,5 @@ intentional, documented boundaries:
   mounted parity; that route remains deferred to a later planning decision.
 - The earlier full-specimen heap papercut is resolved on this head. Ordinary
   `effigy test:components` and `effigy ci:web` use default Vitest parallelism
-  and the normal V8 heap; both pass with 372 files / 3468 tests. No
+  and the normal V8 heap; both pass with 372 files / 3472 tests. No
   `NODE_OPTIONS` override or global worker serialization remains.

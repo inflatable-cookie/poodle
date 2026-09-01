@@ -11,7 +11,7 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   specimen census at the ordinary V8 heap while closing g16.034. The shared
   rAF/cancel cleanup and React smoke cleanup removed the leak: ordinary
   `effigy test:components` and `effigy ci:web` now pass at default Vitest
-  parallelism and normal heap (372 files / 3468 tests). No heap override or
+  parallelism and normal heap (372 files / 3472 tests). No heap override or
   worker serialization is required.
 
 - 2026-09-01 — Adding one public portable catalogue component requires a
