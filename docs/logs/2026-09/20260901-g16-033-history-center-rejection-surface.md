@@ -1,8 +1,9 @@
 # g16.033 — HistoryCenter Rejection Surface
 
-Status: implemented on the worker branch — awaiting orchestrator review and merge
+Status: implemented and pushed — awaiting orchestrator review and merge
 Date: 2026-09-01
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/120
+Head: `ffe357d50753a6eb94c38bc77a585a3fdac57266`
 Card: `docs/roadmaps/g16/033-history-center-rejection-surface.md`
 Handoff: `docs/handoffs/20260901-105037-g16-033-history-center-rejection-surface.md`
 Governing refs: `docs/contracts/components/history-center.md`,
@@ -10,7 +11,8 @@ Governing refs: `docs/contracts/components/history-center.md`,
 `docs/contracts/001-working-rules.md`,
 `docs/triage/20260831-194043-history-papercut-ownership.md`
 Branch: `papercuts/g16-033-history-center-rejection-surface`
-Base: `main` at `8cccdc65c`
+Base: `main` at `9bdcf03e7` (rebased from `8cccdc65c` after PR #119 merged;
+the two incoming research/handoff docs overlap nothing here)
 
 ## Outcome
 
@@ -107,6 +109,20 @@ export to a real installed consumer.
 
 alongside the existing per-tarball `sha256`, the installed `realpath`, and the
 sibling-source / workspace-dependency refusals the harness already enforced.
+
+## Validation
+
+`ci:web`, `ci:rust`, `ci:native`, `docs:check`, `test:core`,
+`test:components`, `test:contracts`, `test:svelte-pack-install`, the five
+HistoryCenter-relevant drift checks, and `git diff --check origin/main...HEAD`
+all pass on the rebased head.
+
+`effigy qa` exits 1 on the known `main` baseline alone: `audit:security` reads
+`sk-plus-translated-hi…` inside the English phrase `mask-plus-translated-highlight`
+in `PAPERCUTS.md`, this card's own dispatch handoff, and
+`docs/triage/20260901-080641-post-g16-research-queue.md`. All three carry that
+phrase on `origin/main` already; this branch adds no `sk-` match. The
+unanchored matcher is recorded in `PAPERCUTS.md` and is not this card's to fix.
 
 ## Ledger
 

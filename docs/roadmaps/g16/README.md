@@ -1,7 +1,7 @@
 # g16 — Next Work
 
 Status: active — the drag-and-drop programme is closed by merged g16.028;
-g16.033 is implemented on its worker branch and awaiting review and merge
+g16.033 is implemented and open as PR #120, awaiting review and merge
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -64,7 +64,7 @@ stay maintained; backend admission is not part of the first card.
 30. [030 — NumberInput value, draft, and mounted parity](030-number-input-value-draft-and-mounted-parity.md) — complete; merged in PR #98; ledger 49 mounted / 125 missing
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete; merged in PR #100; ledger 52 mounted / 122 missing
-33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — implemented on `papercuts/g16-033-history-center-rejection-surface`, awaiting review and merge; five distinct refusal meanings across TypeScript, Rust, both web shells and mounted GPUI, plus an installed-tarball v3 `HistoryEntry` proof; publication/pin movement stays separate
+33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — implemented and open as PR #120, awaiting review and merge; five distinct refusal meanings across TypeScript, Rust, both web shells and mounted GPUI, plus an installed-tarball v3 `HistoryEntry` proof; publication/pin movement stays separate
 
 ## Parallel Continuation
 

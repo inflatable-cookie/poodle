@@ -1,8 +1,7 @@
 # History Papercut Ownership
 
 Status: open — external wire/adoption work is complete; the Poodle rejection
-surface is implemented on `papercuts/g16-033-history-center-rejection-surface`
-and awaiting review/merge; package publication/adoption, CS20, and
+surface is implemented and open as PR #120, awaiting review/merge; package publication/adoption, CS20, and
 keyboard-geometry follow-ons remain
 Captured: 2026-08-31
 Source: Loophole `PAPERCUTS.md` after PR #14 merged
