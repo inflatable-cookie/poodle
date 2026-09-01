@@ -13,7 +13,9 @@ consumer, or Jetstream change is authorized by this note.
 
 ## Operator-confirmed direction
 
-- The first post-g16 outcome is a shared, host-level motion policy.
+- The ordered runway is `g16.028` → promoted/readiness-checked `g16.033`;
+  only after that runway does the first post-g16 outcome begin: a shared,
+  host-level motion policy.
 - The first motion lane uses the five-family pilot: disclosure;
   transient notification; Tabs selection indicator; discrete state
   (`Checkbox` plus the same-slot `IconButton`/state-swap pattern); and
@@ -33,7 +35,9 @@ consumer, or Jetstream change is authorized by this note.
 - The shimmer candidate host is the `AgentSubagent` activity line. Its visual
   treatment is explicitly web-only for now; native semantics stay static and
   no active-cohort visual-parity claim is made.
-- `g16.028` remains the ordered first gate. This queue cannot displace,
+- `g16.028` remains the ordered first gate, followed by the
+  promoted/readiness-checked `g16.033` lane. No research implementation or
+  canonical promotion may outrun `g16.033`. This queue cannot displace,
   modify, or dispatch work against the active drag closeout.
 - Jetstream remains program-deferred.
 
@@ -41,6 +45,9 @@ consumer, or Jetstream change is authorized by this note.
 
 ```text
 g16.028 drag closeout
+        |
+        v
+promoted/readiness-checked g16.033
         |
         v
 host-level motion policy + five-family pilot
@@ -53,12 +60,15 @@ block-slider lane   icon feasibility / shimmer host gates
 later component/API promotion only after each track's evidence gate
 ```
 
-The block lane is independent of the motion implementation and is deliberately
-the next component bet, but it still waits for the current g16 runway to close.
-Icon feasibility and shimmer benchmarking are downstream gates of the grouped
-motion initiative. Their relative order is not material: both may be planned
-after the policy boundary is settled, with no public API admission until their
-own evidence is accepted.
+The queue starts only after the ordered runway reaches promoted/readiness-checked
+`g16.033`; no research implementation or canonical promotion outruns that
+boundary. The block lane is independent of the motion implementation and is
+deliberately the next component bet after the first post-g16 motion outcome,
+but it still waits for the current g16 gates to close. Icon feasibility and
+shimmer benchmarking are downstream gates of the grouped motion initiative.
+Their relative order is not material: both may be planned after the policy
+boundary is settled, with no public API admission until their own evidence is
+accepted.
 
 ## Evidence synthesis
 
@@ -160,10 +170,13 @@ open.
 
 ## Recommended promotion order
 
-1. **Finish `g16.028`.** Keep the drag closeout sole owner of its active files,
-   certification evidence, and current runway. Do not create a competing
-   motion or visual worker while it is active.
-2. **Promote the shared motion policy and five-family pilot.** Start with one
+1. **Finish `g16.028`, then readiness-check the promoted `g16.033` lane.** Keep
+   the drag closeout sole owner of its active files, certification evidence,
+   and current runway. Do not create a competing motion or visual worker while
+   it is active; no research implementation or canonical promotion may outrun
+   `g16.033`.
+2. **Promote the shared motion policy and five-family pilot as the first
+   post-g16 research outcome.** Start with one
    architecture/contract decision. Settle host-level policy propagation,
    semantic roles, full/reduced/frozen behavior, stable identity,
    interruption/cancellation, final-state rules, the native property subset,
@@ -181,8 +194,9 @@ open.
    resemblance alone.
 5. **Only after accepted evidence, promote canonical implementation cards.**
    The orchestrator re-reads this packet against current `main`, resolves any
-   g16.028 drift, chooses canonical destinations, and applies normal readiness
-   gates. Merge of this packet is intake, not feature promotion.
+   g16.028 or g16.033 runway drift, chooses canonical destinations, and applies
+   normal readiness gates. Merge of this packet is intake, not feature
+   promotion.
 
 ## Shared decisions and independent decisions
 
@@ -334,6 +348,8 @@ Before any effect implementation is admitted, require:
 - Do not implement, promote, mark ready, launch workers, edit canonical
   contracts/architecture/roadmaps/logs, mutate packages/releases/workflows,
   or change downstream consumers in this planning lane.
+- No research implementation or canonical promotion outruns the
+  promoted/readiness-checked `g16.033` boundary.
 
 ## Suggested canonical destinations
 
@@ -367,7 +383,8 @@ These are promotion destinations, not edits authorized by this packet.
   publication/adoption work.
 - No Dialog presence change, page-transition programme, broad visual sweep,
   native accessibility claim, Jetstream admission, or downstream migration.
-- No change to the ordered g16 runway or overlap with `g16.028`.
+- No change to the ordered g16 runway, no research implementation or canonical
+  promotion before `g16.033`, and no overlap with `g16.028`.
 
 ## Disposition
 
