@@ -44,11 +44,19 @@ export function ToastStack({
   const resolvedDensity = density ?? uiPresentation.density;
   const stackRef = useRef<HTMLUListElement | null>(null);
   const enteredFrom = useRef<Element | null>(null);
+  const mounted = useRef(true);
   const initialPass = useRef(false);
   const [visuals, setVisuals] = useState<ToastVisual[]>(() =>
     nextToastVisuals([], items.map((item) => item.id), true),
   );
   const [retained, setRetained] = useState(() => new Map(items.map((item) => [item.id, item])));
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const liveIds = items.map((item) => item.id);
@@ -72,6 +80,9 @@ export function ToastStack({
   }
 
   function prune(id: string) {
+    if (!mounted.current) {
+      return;
+    }
     setVisuals((current) => dropToastVisual(current, id));
     setRetained((current) => {
       const next = new Map(current);
@@ -111,7 +122,11 @@ export function ToastStack({
             resolvedDensity={resolvedDensity}
             onDismiss={handleDismiss}
             onAction={onAction}
-            onEnterDone={() => setVisuals((current) => settleToastVisual(current, visual.id))}
+            onEnterDone={() => {
+              if (mounted.current) {
+                setVisuals((current) => settleToastVisual(current, visual.id));
+              }
+            }}
             onExitDone={() => prune(visual.id)}
           />
         );

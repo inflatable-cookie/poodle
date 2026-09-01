@@ -16,7 +16,7 @@
   } from "@inflatable-cookie/poodle-core";
   import { default as Button } from "./Button.svelte";
   import { default as Icon } from "./Icon.svelte";
-  import { untrack } from "svelte";
+  import { onDestroy, untrack } from "svelte";
   import { getMotionPolicy } from "./motion-policy";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -49,9 +49,16 @@
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   let visuals = $state<ToastVisual[]>([]);
   let initialPass = true;
+  let mounted = true;
   let stackElement: HTMLUListElement | null = null;
   let enteredFrom: Element | null = null;
   let retainedItems = $state(new Map<string, ToastItem>());
+  const rows = $derived(
+    visuals.flatMap((visual) => {
+      const item = retainedItems.get(visual.id);
+      return item ? [{ visual, item }] : [];
+    }),
+  );
 
   $effect(() => {
     const liveIds = items.map((item) => item.id);
@@ -66,7 +73,17 @@
     initialPass = false;
   });
 
+  onDestroy(() => {
+    mounted = false;
+    for (const visual of visuals) {
+      cancelToastPresence(`${stackId}:${visual.id}`);
+    }
+  });
+
   function prune(id: string) {
+    if (!mounted) {
+      return;
+    }
     visuals = dropToastVisual(visuals, id);
     const nextRetained = new Map(retainedItems);
     nextRetained.delete(id);
@@ -87,7 +104,7 @@
         policy: $motionPolicy,
         initial: false,
         onComplete: (status) => {
-          if (status !== "finish") {
+          if (!mounted || status !== "finish") {
             return;
           }
           if (exiting) {
@@ -132,9 +149,7 @@
     }
   }}
 >
-  {#each visuals as visual (visual.id)}
-    {@const item = retainedItems.get(visual.id)}
-    {#if item}
+  {#each rows as { visual, item } (visual.id)}
     <li
       class="poodle-toast"
       data-tone={item.tone ?? "info"}
@@ -171,6 +186,5 @@
         </div>
       {/if}
     </li>
-    {/if}
   {/each}
 </ul>
