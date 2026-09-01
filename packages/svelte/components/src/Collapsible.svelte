@@ -8,6 +8,7 @@
   import type { Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
+  import { clippedHeight } from "./disclosure-motion";
   import { useMotionReady } from "./motion-ready.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -136,8 +137,14 @@
 
   <div
     class="poodle-collapsible__content-clip"
-    ontransitionend={() => {
-      if (!isOpen) closing = false;
+    use:clippedHeight={{
+      owner: `collapsible-${collapsibleId}`,
+      open: isOpen,
+      policy: motionReady.policy,
+      ready: motionReady.ready,
+      onCloseFinished: () => {
+        closing = false;
+      },
     }}
   >
     <div
@@ -153,4 +160,3 @@
     </div>
   </div>
 </section>
-

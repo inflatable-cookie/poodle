@@ -94,6 +94,8 @@ actions!(poodle_preview, [Quit, CloseWindow]);
 /// Root view for the preview application.
 struct PreviewRoot {
     state: AppState,
+    first_frame_committed: bool,
+    first_frame_commit_scheduled: bool,
     catalogue_sidebar: Entity<CatalogueSidebar>,
     component_page_list: ListState,
     component_page_key: Option<ComponentPageKey>,
@@ -361,12 +363,20 @@ impl PreviewRoot {
         let catalogue_sidebar = cx.new(|_| CatalogueSidebar::new(&state));
         Self {
             state,
+            first_frame_committed: false,
+            first_frame_commit_scheduled: false,
             catalogue_sidebar,
             component_page_list: ListState::new(3, ListAlignment::Top, px(256.0)),
             component_page_key: None,
             drag: poodle_gpui_node_backend::DragDropController::new(),
             drag_host: poodle_gpui_node_backend::DragDropWindowHost::new(),
         }
+    }
+
+    fn commit_first_frame(&mut self, cx: &mut Context<Self>) {
+        self.first_frame_committed = true;
+        self.first_frame_commit_scheduled = false;
+        cx.notify();
     }
 }
 
@@ -390,6 +400,12 @@ fn sidebar_nav_size(size: ControlSize) -> SpecControlSize {
 
 impl Render for PreviewRoot {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        if !self.first_frame_committed && !self.first_frame_commit_scheduled {
+            self.first_frame_commit_scheduled = true;
+            cx.on_next_frame(window, |root, _window, cx| {
+                root.commit_first_frame(cx);
+            });
+        }
         // The overlay host's frame boundary: the layer registry, bounds, and
         // focus queue are rebuilt once per rendered frame, not per converted
         // component — the same boundary the headless test driver uses.
@@ -1370,7 +1386,10 @@ impl PreviewRoot {
 
     /// Render a single specimen for a specific component by slug.
     fn render_component_specimen(&self, slug: &str, cx: &mut Context<Self>) -> Div {
-        specimens::render_single_specimen(slug, &self.state, cx)
+        let base_motion_context = poodle_render::RenderContext::new(&self.state.theme);
+        let motion_context = base_motion_context
+            .with_first_frame_committed(self.first_frame_committed);
+        specimens::render_single_specimen(slug, &self.state, cx, &motion_context)
     }
 }
 

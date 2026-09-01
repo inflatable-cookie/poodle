@@ -206,6 +206,16 @@ function reducedOpacityFor(intent: MotionIntent): boolean {
   return intent.reducedOpacity ?? roleAllowsReducedOpacity(intent.role);
 }
 
+function axisForTarget(target: string): number | undefined {
+  if (target === "open") {
+    return 1;
+  }
+  if (target === "closed") {
+    return 0;
+  }
+  return undefined;
+}
+
 export function activateMotion(trace: MotionTrace, intent: MotionIntent): MotionDecision {
   const key = motionKey(intent.owner, intent.role, intent.channel);
   const reducedOpacity = reducedOpacityFor(intent);
@@ -230,7 +240,7 @@ export function activateMotion(trace: MotionTrace, intent: MotionIntent): Motion
 
   if (existing && existing.reversible && intent.reversible) {
     const current = existing.axisFrom + (existing.axisTo - existing.axisFrom) * existing.progress;
-    const axisTo = existing.axisTo === 1 ? 0 : 1;
+    const axisTo = axisForTarget(intent.target) ?? (existing.axisTo === 1 ? 0 : 1);
     const durationMs = Math.round(Math.abs(axisTo - current) * existing.originalDurationMs);
     existing.target = intent.target;
     existing.progress = 0;
@@ -276,6 +286,7 @@ export function activateMotion(trace: MotionTrace, intent: MotionIntent): Motion
 
   const schedule = shouldSchedule(trace.policy, intent, properties);
   if (schedule) {
+    const axisTo = axisForTarget(intent.target) ?? 1;
     trace.clocks.push({
       key,
       target: intent.target,
@@ -283,8 +294,8 @@ export function activateMotion(trace: MotionTrace, intent: MotionIntent): Motion
       properties,
       durationMs: intent.durationMs,
       originalDurationMs: intent.durationMs,
-      axisFrom: 0,
-      axisTo: 1,
+      axisFrom: 1 - axisTo,
+      axisTo,
       loop: intent.loop === true,
       reversible: intent.reversible === true,
       reducedOpacity,

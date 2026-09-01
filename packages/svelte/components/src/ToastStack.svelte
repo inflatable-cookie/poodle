@@ -48,12 +48,12 @@
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
-  let visuals = $state<ToastVisual[]>([]);
-  let initialPass = true;
+  let visuals = $state<ToastVisual[]>(untrack(() => nextToastVisuals([], items.map((item) => item.id), true)));
+  let initialPass = false;
   let mounted = true;
   let stackElement: HTMLUListElement | null = null;
   let enteredFrom: Element | null = null;
-  let retainedItems = $state(new Map<string, ToastItem>());
+  let retainedItems = $state(new Map(untrack(() => items.map((item) => [item.id, item] as const))));
   const rows = $derived(
     visuals.flatMap((visual) => {
       const item = retainedItems.get(visual.id);

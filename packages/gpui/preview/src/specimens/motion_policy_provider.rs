@@ -18,8 +18,11 @@ fn scoped_spinner(policy: MotionPolicy, ctx: &RenderContext<'_>) -> AnyElement {
     )
 }
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
-    let ctx = RenderContext::new(&state.theme);
+pub(crate) fn render(
+    state: &AppState,
+    cx: &mut Context<PreviewRoot>,
+    ctx: &RenderContext<'_>,
+) -> Div {
     let examples = div()
         .flex()
         .flex_col()

@@ -4,7 +4,8 @@ import { disclosureTransition } from "@inflatable-cookie/poodle-core";
 import "@inflatable-cookie/poodle-core/styles/collapsible.css";
 
 import { Icon } from "./Icon";
-import { useMotionReady } from "./motion-policy";
+import { useClippedHeightMotion } from "./disclosure-motion";
+import { useMotionPolicy, useMotionReady } from "./motion-policy";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -40,6 +41,7 @@ export function Collapsible({
   children,
 }: CollapsibleProps) {
   const uiPresentation = useUiPresentation();
+  const motionPolicy = useMotionPolicy();
   const motionReady = useMotionReady();
   const collapsibleId = useId();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
@@ -50,6 +52,15 @@ export function Collapsible({
   const resolvedDensity = density ?? uiPresentation.density;
   const isControlled = open !== undefined;
   const isOpen = isControlled ? open === true : uncontrolledOpen;
+  const wasOpenAtRender = wasOpen.current;
+  const contentRef = useClippedHeightMotion({
+    owner: `collapsible-${collapsibleId}`,
+    open: isOpen,
+    policy: motionPolicy,
+    ready: motionReady,
+    onCloseFinished: () => setClosing(false),
+  });
+  const keepContent = isOpen || closing || (wasOpenAtRender && motionReady);
 
   useEffect(() => {
     if (isOpen) {
@@ -114,16 +125,14 @@ export function Collapsible({
 
       <div
         className="poodle-collapsible__content-clip"
-        onTransitionEnd={() => {
-          if (!isOpen) setClosing(false);
-        }}
+        ref={contentRef}
       >
         <div
           className="poodle-collapsible__content"
           id={`${collapsibleId}-content`}
           role="region"
           aria-labelledby={`${collapsibleId}-trigger`}
-          hidden={!isOpen && !closing}
+          hidden={!keepContent}
           inert={!isOpen}
           aria-hidden={!isOpen}
         >

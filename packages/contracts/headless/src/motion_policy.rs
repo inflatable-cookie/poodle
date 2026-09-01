@@ -281,6 +281,14 @@ fn remove_clock(trace: &mut MotionTrace, key: &str) {
     trace.clocks.retain(|clock| clock.key != key);
 }
 
+fn axis_for_target(target: &str) -> Option<f32> {
+    match target {
+        "open" => Some(1.0),
+        "closed" => Some(0.0),
+        _ => None,
+    }
+}
+
 pub fn activate_motion(trace: &mut MotionTrace, intent: MotionIntent) -> MotionDecision {
     let key = motion_key(&intent.owner, &intent.role, &intent.channel);
     let reduced_opacity = reduced_opacity_for(&intent);
@@ -311,7 +319,8 @@ pub fn activate_motion(trace: &mut MotionTrace, intent: MotionIntent) -> MotionD
             let existing = &trace.clocks[index];
             let current =
                 existing.axis_from + (existing.axis_to - existing.axis_from) * existing.progress;
-            let axis_to = if existing.axis_to == 1.0 { 0.0 } else { 1.0 };
+            let axis_to = axis_for_target(&intent.target)
+                .unwrap_or(if existing.axis_to == 1.0 { 0.0 } else { 1.0 });
             let duration_ms =
                 ((axis_to - current).abs() * existing.original_duration_ms as f32).round() as u32;
             let mut continue_intent = intent.clone();
@@ -369,6 +378,7 @@ pub fn activate_motion(trace: &mut MotionTrace, intent: MotionIntent) -> MotionD
 
     let schedule = should_schedule(trace.policy, &intent, &properties);
     if schedule {
+        let axis_to = axis_for_target(&intent.target).unwrap_or(1.0);
         trace.clocks.push(MotionClock {
             key: key.clone(),
             target: intent.target,
@@ -376,8 +386,8 @@ pub fn activate_motion(trace: &mut MotionTrace, intent: MotionIntent) -> MotionD
             properties: properties.clone(),
             duration_ms: intent.duration_ms,
             original_duration_ms: intent.duration_ms,
-            axis_from: 0.0,
-            axis_to: 1.0,
+            axis_from: 1.0 - axis_to,
+            axis_to,
             looped: intent.looped,
             reversible: intent.reversible,
             reduced_opacity,
@@ -639,6 +649,22 @@ mod tests {
         assert_eq!(reopen.interruption, MotionInterruption::Reverse);
         assert_eq!(reopen.duration_ms, 144);
         assert_eq!(trace.clocks[0].target, "open");
+    }
+
+    #[test]
+    fn controlled_close_starts_at_closed_direction_and_reverses_proportionally() {
+        let mut trace = create_motion_trace(MotionPolicy::Full);
+        let close = activate_motion(&mut trace, one_shot("closed", vec![MotionProperty::Height]));
+        assert!(close.schedule);
+        assert_eq!(trace.clocks[0].axis_from, 1.0);
+        assert_eq!(trace.clocks[0].axis_to, 0.0);
+
+        sample_motion(&mut trace, &close.key, 0.25);
+        let reopen = activate_motion(&mut trace, one_shot("open", vec![MotionProperty::Height]));
+        assert_eq!(reopen.interruption, MotionInterruption::Reverse);
+        assert_eq!(reopen.duration_ms, 45);
+        assert_eq!(trace.clocks[0].axis_from, 0.75);
+        assert_eq!(trace.clocks[0].axis_to, 1.0);
     }
 
     #[test]

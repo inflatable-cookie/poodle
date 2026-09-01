@@ -90,22 +90,14 @@
   }
 
   .poodle-accordion__panel-clip {
-    display: grid;
-    grid-template-rows: 0fr;
+    display: block;
+    height: 0;
+    overflow: hidden;
     min-width: 0;
   }
 
   .poodle-accordion__item[data-open="true"] .poodle-accordion__panel-clip {
-    grid-template-rows: 1fr;
-  }
-
-  .poodle-accordion[data-motion-ready="true"] .poodle-accordion__panel-clip {
-    transition: grid-template-rows 180ms ease-out;
-  }
-
-  [data-poodle-motion-policy="reduced"] .poodle-accordion__panel-clip,
-  [data-poodle-motion-policy="frozen"] .poodle-accordion__panel-clip {
-    transition: none;
+    height: auto;
   }
 
   .poodle-accordion__panel {

@@ -8,6 +8,7 @@
   import { untrack, type Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
+  import { clippedHeight } from "./disclosure-motion";
   import { useMotionReady } from "./motion-ready.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { AccordionItem, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -151,12 +152,16 @@
 
       <div
         class="poodle-accordion__panel-clip"
-        ontransitionend={() => {
-          if (!openValues.includes(item.value)) {
+        use:clippedHeight={{
+          owner: `accordion-${accordionId}-${item.value}`,
+          open: openValues.includes(item.value),
+          policy: motionReady.policy,
+          ready: motionReady.ready,
+          onCloseFinished: () => {
             const nextClosing = new Set(closing);
             nextClosing.delete(item.value);
             closing = nextClosing;
-          }
+          },
         }}
       >
         <div
@@ -174,4 +179,3 @@
     </section>
   {/each}
 </div>
-

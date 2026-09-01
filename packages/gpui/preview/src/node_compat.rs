@@ -77,7 +77,15 @@ pub(crate) struct Skeleton;
 
 impl Skeleton {
     pub(crate) fn from_spec(spec: SkeletonSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::skeleton(&spec, &RenderContext::new(theme)))
+        let context = RenderContext::new(theme);
+        Self::from_spec_with_context(spec, &context)
+    }
+
+    pub(crate) fn from_spec_with_context(
+        spec: SkeletonSpec,
+        context: &RenderContext<'_>,
+    ) -> AnyElement {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::skeleton(&spec, context))
     }
 }
 
@@ -85,7 +93,15 @@ pub(crate) struct Spinner;
 
 impl Spinner {
     pub(crate) fn from_spec(spec: SpinnerSpec, theme: &GpuiThemeProvider) -> AnyElement {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::spinner(&spec, &RenderContext::new(theme)))
+        let context = RenderContext::new(theme);
+        Self::from_spec_with_context(spec, &context)
+    }
+
+    pub(crate) fn from_spec_with_context(
+        spec: SpinnerSpec,
+        context: &RenderContext<'_>,
+    ) -> AnyElement {
+        poodle_gpui_node_backend::to_gpui(&poodle_render::spinner(&spec, context))
     }
 }
 

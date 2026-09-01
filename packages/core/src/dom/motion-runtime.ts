@@ -12,6 +12,7 @@ import {
   completeMotion,
   createMotionTrace,
   motionKey,
+  sampleMotion,
   setMotionTracePolicy,
   type MotionDecision,
   type MotionIntent,
@@ -24,6 +25,7 @@ export interface WebMotionHandle {
 }
 
 const handles = new Map<string, WebMotionHandle>();
+const animations = new Map<string, Animation>();
 const traces = new Map<string, MotionTrace>();
 
 export function liveWebMotionCount(): number {
@@ -33,6 +35,7 @@ export function liveWebMotionCount(): number {
 export function cancelWebMotion(key?: string): void {
   if (key) {
     const handle = handles.get(key);
+    const animation = animations.get(key);
     const trace = traces.get(key);
     handle?.cancel();
     if (handles.get(key) === handle) {
@@ -41,9 +44,13 @@ export function cancelWebMotion(key?: string): void {
     if (traces.get(key) === trace) {
       traces.delete(key);
     }
+    if (animations.get(key) === animation) {
+      animations.delete(key);
+    }
     return;
   }
   const currentHandles = [...handles.entries()];
+  const currentAnimations = [...animations.entries()];
   const currentTraces = [...traces.entries()];
   for (const [motionKey, handle] of currentHandles) {
     handle.cancel();
@@ -56,11 +63,17 @@ export function cancelWebMotion(key?: string): void {
       traces.delete(motionKey);
     }
   }
+  for (const [motionKey, animation] of currentAnimations) {
+    if (animations.get(motionKey) === animation) {
+      animations.delete(motionKey);
+    }
+  }
 }
 
 function track(key: string, handle: WebMotionHandle): void {
-  handles.get(key)?.cancel();
+  const previous = handles.get(key);
   handles.set(key, handle);
+  previous?.cancel();
 }
 
 function retainedTrace(key: string, policy: MotionPolicy): MotionTrace {
@@ -115,25 +128,81 @@ function registerAnimation(
   onComplete?: (status: "finish" | "cancel") => void,
 ): void {
   let settled = false;
+  let handle: WebMotionHandle;
   const finish = (status: "finish" | "cancel") => {
     if (settled) {
       return;
     }
     settled = true;
-    if (handles.get(key)?.cancel === cancel) {
+    if (handles.get(key) === handle) {
       handles.delete(key);
+    }
+    if (animations.get(key) === animation) {
+      animations.delete(key);
     }
     onComplete?.(status);
   };
   const cancel = () => {
+    if (settled) {
+      return;
+    }
     animation.cancel();
     finish("cancel");
   };
+  handle = { cancel };
+  animations.set(key, animation);
   animation.finished.then(
     () => finish("finish"),
     () => finish("cancel"),
   );
-  track(key, { cancel });
+  track(key, handle);
+}
+
+function liveClippedHeight(
+  element: HTMLElement,
+  key: string,
+  trace: MotionTrace,
+): number | null {
+  const animation = animations.get(key);
+  const naturalHeight = element.scrollHeight;
+  if (!animation || naturalHeight <= 0) {
+    return null;
+  }
+
+  const clock = trace.clocks.find((entry) => entry.key === key);
+  const sampleAxis = (axis: number) => {
+    if (!clock) {
+      return;
+    }
+    const span = clock.axisTo - clock.axisFrom;
+    const progress = span === 0 ? 0 : (axis - clock.axisFrom) / span;
+    sampleMotion(trace, key, progress);
+  };
+
+  try {
+    const computedHeight = Number.parseFloat(globalThis.getComputedStyle(element).height);
+    if (Number.isFinite(computedHeight) && computedHeight >= 0) {
+      sampleAxis(Math.min(1, Math.max(0, computedHeight / naturalHeight)));
+      return computedHeight;
+    }
+  } catch {
+    // Headless/non-DOM hosts may not expose computed style; use WAAPI time below.
+  }
+
+  const currentTime = animation.currentTime;
+  if (typeof currentTime === "number") {
+    const timing = animation.effect?.getComputedTiming();
+    const duration = timing?.duration;
+    if (typeof duration === "number" && duration > 0) {
+      const progress = Math.min(1, Math.max(0, currentTime / duration));
+      sampleMotion(trace, key, progress);
+      if (clock) {
+        const axis = clock.axisFrom + (clock.axisTo - clock.axisFrom) * progress;
+        return naturalHeight * axis;
+      }
+    }
+  }
+  return null;
 }
 
 export function playWebAnimation(
@@ -158,6 +227,11 @@ export function playWebAnimation(
     return decision;
   }
   if (typeof element.animate !== "function") {
+    const existing = handles.get(decision.key);
+    existing?.cancel();
+    if (handles.get(decision.key) === existing) {
+      handles.delete(decision.key);
+    }
     abortMotion(trace, decision.key);
     return { ...decision, schedule: false, liveClock: false, paintEndpoint: true };
   }
@@ -201,20 +275,31 @@ export function playClippedHeight(
   };
   const key = motionKey(intent.owner, intent.role, intent.channel);
   const trace = retainedTrace(key, options.policy);
-  const from = options.open ? 0 : element.scrollHeight;
+  const from = liveClippedHeight(element, key, trace) ?? (options.open ? 0 : element.scrollHeight);
   const to = options.open ? element.scrollHeight : 0;
   element.style.overflow = "hidden";
+  const settle = () => {
+    element.style.height = options.open ? "" : "0px";
+    element.style.overflow = options.open ? "" : "hidden";
+  };
   const decision = playWebAnimation(
     trace,
     intent,
     element,
     [{ height: `${from}px` }, { height: `${to}px` }],
     "ease-out",
-    options.onComplete,
+    (status) => {
+      if (status === "finish") {
+        settle();
+      }
+      options.onComplete?.(status);
+    },
   );
   if (!decision.schedule) {
-    element.style.height = options.open ? "" : "0px";
-    element.style.overflow = options.open ? "" : "hidden";
+    if (decision.interruption !== "inert") {
+      settle();
+      options.onComplete?.("finish");
+    }
     return decision;
   }
   const handle = handles.get(key);
@@ -222,13 +307,7 @@ export function playClippedHeight(
   if (handle && originalCancel) {
     handle.cancel = () => {
       originalCancel();
-      if (options.open) {
-        element.style.height = "";
-        element.style.overflow = "";
-      } else {
-        element.style.height = "0px";
-        element.style.overflow = "hidden";
-      }
+      settle();
     };
   }
   return decision;

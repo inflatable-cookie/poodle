@@ -108,6 +108,30 @@ describe("web motion runtime", () => {
     expect(liveWebMotionCount()).toBe(1);
   });
 
+  test("natural clipped-height completion removes the exact live handle", async () => {
+    const holds: Hold[] = [];
+    const element = fakeElement((hold) => holds.push(hold));
+    let completion: string | undefined;
+    const decision = playClippedHeight(element, {
+      owner: "panel",
+      open: true,
+      policy: "full",
+      initial: false,
+      onComplete: (status) => {
+        completion = status;
+      },
+    });
+
+    expect(decision.schedule).toBe(true);
+    expect(liveWebMotionCount()).toBe(1);
+    holds[0]?.finish();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(completion).toBe("finish");
+    expect(liveWebMotionCount()).toBe(0);
+    expect(element.style.height).toBe("");
+  });
+
   test("unsupported WAAPI paints the endpoint without retaining a clock", () => {
     const element = { style: {} as CSSStyleDeclaration } as unknown as HTMLElement;
     const trace = createMotionTrace("full");

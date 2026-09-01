@@ -108,6 +108,21 @@ describe("motion policy laws", () => {
     expect(trace.clocks[0]?.target).toBe("open");
   });
 
+  test("a controlled close starts at closed direction and reverses proportionally", () => {
+    const trace = createMotionTrace("full");
+    const close = activateMotion(trace, oneShot("closed", ["height"]));
+    expect(close.schedule).toBe(true);
+    expect(trace.clocks[0]?.axisFrom).toBe(1);
+    expect(trace.clocks[0]?.axisTo).toBe(0);
+
+    sampleMotion(trace, close.key, 0.25);
+    const reopen = activateMotion(trace, oneShot("open", ["height"]));
+    expect(reopen.interruption).toBe("reverse");
+    expect(reopen.durationMs).toBe(45);
+    expect(trace.clocks[0]?.axisFrom).toBe(0.75);
+    expect(trace.clocks[0]?.axisTo).toBe(1);
+  });
+
   test("multi-target retarget does not queue", () => {
     const trace = createMotionTrace("full");
     const base: MotionIntent = {

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { liveWebMotionCount } from "@inflatable-cookie/poodle-core";
 
+import Accordion from "../src/Accordion.svelte";
 import Checkbox from "../src/Checkbox.svelte";
 import Collapsible from "../src/Collapsible.svelte";
 import Tabs from "../src/Tabs.svelte";
@@ -10,12 +11,17 @@ import ToastStack from "../src/ToastStack.svelte";
 import MotionFamilyHarness from "./MotionFamilyHarness.svelte";
 import { asSnippet } from "./snippet";
 
-type PresenceHold = { finish: () => void };
+type PresenceHold = {
+  finish: () => void;
+  keyframes: Keyframe[];
+  options?: KeyframeAnimationOptions;
+};
 
 const presenceHolds: PresenceHold[] = [];
+const animationCalls: PresenceHold[] = [];
 
 (Element.prototype as unknown as { animate: (keyframes: Keyframe[], options?: KeyframeAnimationOptions) => Animation }).animate =
-  function animate() {
+  function animate(keyframes, options) {
     let settled = false;
     let resolve!: (value: unknown) => void;
     let reject!: (reason?: unknown) => void;
@@ -24,6 +30,8 @@ const presenceHolds: PresenceHold[] = [];
       reject = fail;
     });
     const hold: PresenceHold = {
+      keyframes,
+      options,
       finish() {
         if (settled) {
           return;
@@ -33,6 +41,7 @@ const presenceHolds: PresenceHold[] = [];
       },
     };
     presenceHolds.push(hold);
+    animationCalls.push(hold);
     return {
       cancel() {
         if (settled) {
@@ -62,6 +71,7 @@ async function finishPresence(): Promise<void> {
 describe("g16.034 mounted family receipts (svelte)", () => {
   afterEach(() => {
     presenceHolds.length = 0;
+    animationCalls.length = 0;
     cleanup();
   });
 
@@ -137,6 +147,54 @@ describe("g16.034 mounted family receipts (svelte)", () => {
     const content = container.querySelector(".poodle-collapsible__content") as HTMLElement;
     expect(content.hasAttribute("inert")).toBe(true);
     expect(content.hasAttribute("hidden")).toBe(false);
+  });
+
+  it("rapid controlled Collapsible and Accordion reversal uses the live height", async () => {
+    const collapsibleProps = {
+      open: true,
+      title: "Details",
+      children: asSnippet(() => "Content"),
+    };
+    const collapsible = render(Collapsible, { props: collapsibleProps });
+    await frame();
+    const collapsibleClip = collapsible.container.querySelector(
+      ".poodle-collapsible__content-clip",
+    ) as HTMLElement;
+    Object.defineProperty(collapsibleClip, "scrollHeight", { configurable: true, value: 80 });
+
+    const accordionProps = {
+      items: [{ value: "one", label: "One" }],
+      selectionMode: "multiple" as const,
+      value: ["one"],
+      children: asSnippet(() => "Content"),
+    };
+    const accordion = render(Accordion, { props: accordionProps });
+    await frame();
+    const accordionClip = accordion.container.querySelector(
+      ".poodle-accordion__panel-clip",
+    ) as HTMLElement;
+    Object.defineProperty(accordionClip, "scrollHeight", { configurable: true, value: 80 });
+    animationCalls.length = 0;
+
+    await collapsible.rerender({ ...collapsibleProps, open: false });
+    await accordion.rerender({ ...accordionProps, value: [] });
+    expect(collapsible.container.querySelector(".poodle-collapsible__content")?.hasAttribute("hidden")).toBe(false);
+    expect(accordion.container.querySelector(".poodle-accordion__panel")?.hasAttribute("hidden")).toBe(false);
+
+    collapsibleClip.style.height = "60px";
+    accordionClip.style.height = "60px";
+    await collapsible.rerender(collapsibleProps);
+    await accordion.rerender(accordionProps);
+
+    const reversalCalls = animationCalls.slice(-2);
+    expect(reversalCalls).toHaveLength(2);
+    for (const call of reversalCalls) {
+      expect(call.options?.duration).toBe(45);
+      expect(call.keyframes[0]).toEqual({ height: "60px" });
+    }
+    expect(collapsible.container.querySelector(".poodle-collapsible__content")?.hasAttribute("hidden")).toBe(false);
+    expect(accordion.container.querySelector(".poodle-accordion__panel")?.hasAttribute("hidden")).toBe(false);
+    expect(liveWebMotionCount()).toBe(2);
   });
 
   it("reduced IconButton lives under the reduced policy hook", () => {

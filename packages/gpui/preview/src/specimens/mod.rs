@@ -204,6 +204,7 @@ use gpui::*;
 use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_render::audio_specimens::AudioSpecimen;
+use poodle_render::RenderContext;
 
 /// Render a specimen card wrapper with title.
 pub fn specimen_card(title: &str, theme: &GpuiThemeProvider, content: impl IntoElement) -> Div {
@@ -294,7 +295,12 @@ pub fn missing_specimen(display_name: &str, theme: &GpuiThemeProvider) -> Div {
 }
 
 /// Render a single specimen by component slug.
-pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+pub fn render_single_specimen(
+    slug: &str,
+    state: &AppState,
+    cx: &mut Context<PreviewRoot>,
+    motion_context: &RenderContext<'_>,
+) -> Div {
     let theme = &state.theme;
     match slug {
         // ── Structural ──────────────────────────────────────────
@@ -319,7 +325,7 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "motion-policy-provider" => specimen_card(
             "MotionPolicyProvider",
             theme,
-            motion_policy_provider::render(state, cx),
+            motion_policy_provider::render(state, cx, motion_context),
         ),
 
         // ── Action ──────────────────────────────────────────────
@@ -485,8 +491,8 @@ pub fn render_single_specimen(slug: &str, state: &AppState, cx: &mut Context<Pre
         "meta-bar" => specimen_card("MetaBar", theme, meta_bar::render(theme)),
         "meta-item" => specimen_card("MetaItem", theme, meta_item::render(theme)),
         "rating" => specimen_card("Rating", theme, rating::render(state, cx)),
-        "skeleton" => specimen_card("Skeleton", theme, skeleton::render(theme)),
-        "spinner" => specimen_card("Spinner", theme, spinner::render(state, cx)),
+        "skeleton" => specimen_card("Skeleton", theme, skeleton::render(theme, motion_context)),
+        "spinner" => specimen_card("Spinner", theme, spinner::render(state, cx, motion_context)),
         "remediation-banner" => specimen_card(
             "RemediationBanner",
             theme,

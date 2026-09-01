@@ -1,10 +1,11 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { toggleGroupTransition } from "@inflatable-cookie/poodle-core";
+import { toggleGroupTransition, type MotionPolicy } from "@inflatable-cookie/poodle-core";
 
 import "@inflatable-cookie/poodle-core/styles/accordion.css";
 
 import { Icon } from "./Icon";
-import { useMotionReady } from "./motion-policy";
+import { useClippedHeightMotion } from "./disclosure-motion";
+import { useMotionPolicy, useMotionReady } from "./motion-policy";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { AccordionItem, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -22,6 +23,79 @@ export interface AccordionProps {
   children?: (item: AccordionItem, open: boolean) => ReactNode;
 }
 
+function AccordionPanel({
+  accordionId,
+  item,
+  open,
+  closing,
+  wasOpen,
+  motionReady,
+  motionPolicy,
+  onToggle,
+  onCloseFinished,
+  children,
+}: {
+  accordionId: string;
+  item: AccordionItem;
+  open: boolean;
+  closing: boolean;
+  wasOpen: boolean;
+  motionReady: boolean;
+  motionPolicy: MotionPolicy;
+  onToggle: () => void;
+  onCloseFinished: () => void;
+  children: ReactNode;
+}) {
+  const triggerId = `${accordionId}-trigger-${item.value}`;
+  const panelId = `${accordionId}-panel-${item.value}`;
+  const panelRef = useClippedHeightMotion({
+    owner: `accordion-${accordionId}-${item.value}`,
+    open,
+    policy: motionPolicy,
+    ready: motionReady,
+    onCloseFinished,
+  });
+  const keepContent = open || closing || (wasOpen && motionReady);
+
+  return (
+    <section className="poodle-accordion__item" data-open={open}>
+      <h3 className="poodle-accordion__heading">
+        <button
+          type="button"
+          className="poodle-accordion__trigger"
+          id={triggerId}
+          disabled={item.disabled === true}
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={onToggle}
+        >
+          <span className="poodle-accordion__summary">
+            <span className="poodle-accordion__title">{item.label}</span>
+            {item.description ? <span className="poodle-accordion__description">{item.description}</span> : null}
+          </span>
+          <span className="poodle-accordion__indicator" aria-hidden="true">
+            <Icon name="chevron-down" />
+          </span>
+        </button>
+      </h3>
+
+      <div className="poodle-accordion__panel-clip" ref={panelRef}>
+        <div
+          className="poodle-accordion__panel"
+          id={panelId}
+          role="region"
+          aria-labelledby={triggerId}
+          hidden={!keepContent}
+          inert={!open}
+          aria-hidden={!open}
+        >
+          {children}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function Accordion({
   items = [],
   value = null,
@@ -36,6 +110,7 @@ export function Accordion({
   children,
 }: AccordionProps) {
   const uiPresentation = useUiPresentation();
+  const motionPolicy = useMotionPolicy();
   const motionReady = useMotionReady();
   const accordionId = useId();
   const [uncontrolledValue, setUncontrolledValue] = useState<string | string[] | null>(
@@ -49,6 +124,7 @@ export function Accordion({
   const openValues = Array.isArray(currentValue) ? currentValue : currentValue ? [currentValue] : [];
   const [closing, setClosing] = useState(() => new Set<string>());
   const previousOpen = useRef(new Set(openValues));
+  const previousOpenAtRender = previousOpen.current;
 
   useEffect(() => {
     const next = new Set(openValues);
@@ -120,55 +196,27 @@ export function Accordion({
     >
       {items.map((item) => {
         const open = openValues.includes(item.value);
-        const triggerId = `${accordionId}-trigger-${item.value}`;
-        const panelId = `${accordionId}-panel-${item.value}`;
         return (
-          <section key={item.value} className="poodle-accordion__item" data-open={open}>
-            <h3 className="poodle-accordion__heading">
-              <button
-                type="button"
-                className="poodle-accordion__trigger"
-                id={triggerId}
-                disabled={item.disabled === true}
-                aria-expanded={open}
-                aria-controls={panelId}
-                onClick={() => toggle(item.value)}
-              >
-                <span className="poodle-accordion__summary">
-                  <span className="poodle-accordion__title">{item.label}</span>
-                  {item.description ? <span className="poodle-accordion__description">{item.description}</span> : null}
-                </span>
-                <span className="poodle-accordion__indicator" aria-hidden="true">
-                  <Icon name="chevron-down" />
-                </span>
-              </button>
-            </h3>
-
-            <div
-              className="poodle-accordion__panel-clip"
-              onTransitionEnd={() => {
-                if (!open) {
-                  setClosing((current) => {
-                    const nextClosing = new Set(current);
-                    nextClosing.delete(item.value);
-                    return nextClosing;
-                  });
-                }
-              }}
-            >
-              <div
-                className="poodle-accordion__panel"
-                id={panelId}
-                role="region"
-                aria-labelledby={triggerId}
-                hidden={!open && !closing.has(item.value)}
-                inert={!open}
-                aria-hidden={!open}
-              >
-                {children?.(item, open)}
-              </div>
-            </div>
-          </section>
+          <AccordionPanel
+            key={item.value}
+            accordionId={accordionId}
+            item={item}
+            open={open}
+            closing={closing.has(item.value)}
+            wasOpen={previousOpenAtRender.has(item.value)}
+            motionReady={motionReady}
+            motionPolicy={motionPolicy}
+            onToggle={() => toggle(item.value)}
+            onCloseFinished={() => {
+              setClosing((current) => {
+                const next = new Set(current);
+                next.delete(item.value);
+                return next;
+              });
+            }}
+          >
+            {children?.(item, open)}
+          </AccordionPanel>
         );
       })}
     </div>

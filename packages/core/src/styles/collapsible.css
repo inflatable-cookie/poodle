@@ -92,22 +92,14 @@
   }
 
   .poodle-collapsible__content-clip {
-    display: grid;
-    grid-template-rows: 0fr;
+    display: block;
+    height: 0;
+    overflow: hidden;
     min-width: 0;
   }
 
   .poodle-collapsible[data-open="true"] .poodle-collapsible__content-clip {
-    grid-template-rows: 1fr;
-  }
-
-  .poodle-collapsible[data-motion-ready="true"] .poodle-collapsible__content-clip {
-    transition: grid-template-rows 180ms ease-out;
-  }
-
-  [data-poodle-motion-policy="reduced"] .poodle-collapsible__content-clip,
-  [data-poodle-motion-policy="frozen"] .poodle-collapsible__content-clip {
-    transition: none;
+    height: auto;
   }
 
   .poodle-collapsible__content {
