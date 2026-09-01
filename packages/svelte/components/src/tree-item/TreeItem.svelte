@@ -1,9 +1,10 @@
 <script lang="ts">
   import {
-    isTreeBranch,
+    readTreeDropMetrics,
     treeCanAcceptDrop,
-    treeResolveDropPosition,
+    treeResolveOutlineDrop,
     type DragDropCommitResult,
+    type TreeOutlineRow,
     type DragSession,
     type DragSourceRegistration,
     type DragTerminalOutcome,
@@ -18,6 +19,7 @@
   interface Props {
     node: TreeNode;
     nodes: TreeNode[];
+    outlineRows: TreeOutlineRow[];
     depth: number;
     parent: string | null;
     branch: boolean;
@@ -42,6 +44,7 @@
   let {
     node,
     nodes,
+    outlineRows,
     depth,
     parent: _parent,
     branch,
@@ -63,9 +66,30 @@
     onKeyDown,
   }: Props = $props();
 
-  const { dragSource, dropTarget } = useDragDrop();
+  const { dragSource, dropTarget, snapshot } = useDragDrop();
   const canDrag = $derived(reorderable && !node.isDisabled && !editing);
   let rowEl: HTMLElement | undefined;
+
+  function outlineDrop(x: number, y: number, rect: DOMRectReadOnly) {
+    const metrics = rowEl ? readTreeDropMetrics(rowEl) : { indentPx: 16, gutterPx: 24 };
+    return treeResolveOutlineDrop({
+      rows: outlineRows,
+      from: $snapshot.session?.subject.id ?? "",
+      to: node.value,
+      x,
+      y,
+      rect,
+      ...metrics,
+    });
+  }
+
+  const dropDepth = $derived.by(() => {
+    if ($snapshot.targetId !== node.value || $snapshot.targetPosture !== "accepted") return null;
+    const pointer = $snapshot.pointer;
+    const rect = rowEl?.getBoundingClientRect();
+    if (!pointer || !rect) return null;
+    return outlineDrop(pointer.x, pointer.y, rect)?.depth ?? null;
+  });
 
   const sourceRegistration = $derived<DragSourceRegistration>({
     sourceId: node.value,
@@ -85,14 +109,18 @@
     label: node.label,
     resolvePosition: (input) => {
       const rect = rowEl?.getBoundingClientRect() ?? input.rect;
-      return treeResolveDropPosition({
-        nodes,
-        from: input.subject.id,
-        to: node.value,
-        y: input.y,
-        rect,
-        targetIsBranch: isTreeBranch(node),
-      });
+      const metrics = rowEl ? readTreeDropMetrics(rowEl) : { indentPx: 16, gutterPx: 24 };
+      return (
+        treeResolveOutlineDrop({
+          rows: outlineRows,
+          from: input.subject.id,
+          to: node.value,
+          x: input.x,
+          y: input.y,
+          rect,
+          ...metrics,
+        })?.position ?? null
+      );
     },
     canDrop: (intent, subject) =>
       treeCanAcceptDrop(nodes, subject.id, intent.targetId)
@@ -109,6 +137,7 @@
   data-branch={branch ? "true" : undefined}
   data-selected={selected ? "true" : undefined}
   data-muted={muted ? "true" : undefined}
+  style={dropDepth === null ? undefined : `--poodle-tree-drop-depth:${dropDepth}`}
   tabindex={focused ? 0 : -1}
   aria-level={depth + 1}
   aria-selected={selected}

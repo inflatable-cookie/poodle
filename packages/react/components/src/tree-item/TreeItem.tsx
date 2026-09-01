@@ -1,20 +1,22 @@
-import { useRef, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { useRef, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import {
-  isTreeBranch,
+  readTreeDropMetrics,
   treeCanAcceptDrop,
-  treeResolveDropPosition,
+  treeResolveOutlineDrop,
   type DragDropCommitResult,
+  type TreeOutlineRow,
   type DragSession,
   type DragTerminalOutcome,
   type DropIntent,
 } from "@inflatable-cookie/poodle-core";
 
-import { useDragSource, useDropTarget } from "../drag-drop";
+import { useDragDrop, useDragSource, useDropTarget } from "../drag-drop";
 import type { TreeNode } from "../types";
 
 export interface TreeItemProps {
   node: TreeNode;
   nodes: TreeNode[];
+  outlineRows: TreeOutlineRow[];
   depth: number;
   parent: string | null;
   branch: boolean;
@@ -39,6 +41,7 @@ export interface TreeItemProps {
 export function TreeItem({
   node,
   nodes,
+  outlineRows,
   depth,
   branch,
   open,
@@ -60,6 +63,7 @@ export function TreeItem({
 }: TreeItemProps) {
   const canDrag = reorderable && !node.isDisabled && !editing;
   const rowRef = useRef<HTMLDivElement | null>(null);
+  const { snapshot } = useDragDrop();
   const { getSourceProps } = useDragSource({
     sourceId: node.value,
     subject: { kind: "poodle.tree", id: node.value },
@@ -77,14 +81,20 @@ export function TreeItem({
     label: node.label,
     resolvePosition: (input) => {
       const rect = rowRef.current?.getBoundingClientRect() ?? input.rect;
-      return treeResolveDropPosition({
-        nodes,
-        from: input.subject.id,
-        to: node.value,
-        y: input.y,
-        rect,
-        targetIsBranch: isTreeBranch(node),
-      });
+      const metrics = rowRef.current
+        ? readTreeDropMetrics(rowRef.current)
+        : { indentPx: 16, gutterPx: 24 };
+      return (
+        treeResolveOutlineDrop({
+          rows: outlineRows,
+          from: input.subject.id,
+          to: node.value,
+          x: input.x,
+          y: input.y,
+          rect,
+          ...metrics,
+        })?.position ?? null
+      );
     },
     canDrop: (intent, subject) =>
       treeCanAcceptDrop(nodes, subject.id, intent.targetId)
@@ -92,6 +102,22 @@ export function TreeItem({
         : { accepted: false, reason: subject.id === intent.targetId ? "self" : "subtree" },
     onDrop,
   });
+
+  const dropDepth =
+    snapshot.targetId === node.value &&
+    snapshot.targetPosture === "accepted" &&
+    snapshot.pointer &&
+    rowRef.current
+      ? treeResolveOutlineDrop({
+          rows: outlineRows,
+          from: snapshot.session?.subject.id ?? "",
+          to: node.value,
+          x: snapshot.pointer.x,
+          y: snapshot.pointer.y,
+          rect: rowRef.current.getBoundingClientRect(),
+          ...readTreeDropMetrics(rowRef.current),
+        })?.depth ?? null
+      : null;
 
   const itemProps = getSourceProps(
     getTargetProps({
@@ -111,6 +137,11 @@ export function TreeItem({
       data-branch={branch ? "true" : undefined}
       data-selected={selected ? "true" : undefined}
       data-muted={muted ? "true" : undefined}
+      style={
+        dropDepth === null
+          ? undefined
+          : ({ ["--poodle-tree-drop-depth"]: dropDepth } as CSSProperties)
+      }
       tabIndex={focused ? 0 : -1}
       aria-level={depth + 1}
       aria-selected={selected}

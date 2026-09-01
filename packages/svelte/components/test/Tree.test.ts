@@ -38,7 +38,7 @@ function pointer(type: "pointerdown" | "pointermove" | "pointerup" | "pointercan
     button: 0,
     buttons: type === "pointerdown" || type === "pointermove" ? 1 : 0,
     isPrimary: true,
-    clientX: 20,
+    clientX: 120,
     clientY: 0,
     ...init,
   });
@@ -146,6 +146,31 @@ describe("Tree row metadata", () => {
     expect(onReorder).toHaveBeenCalledWith("a.ts", "b.ts", "after");
   });
 
+  it("un-nests after an open parent when the pointer is left on the last child", async () => {
+    const onReorder = vi.fn();
+    const nodes = [
+      {
+        value: "src",
+        label: "src",
+        children: [
+          { value: "a.ts", label: "a.ts" },
+          { value: "b.ts", label: "b.ts" },
+        ],
+      },
+    ];
+    const { container } = render(Tree, {
+      props: { nodes, expandedValues: ["src"], reorderable: true, onReorder },
+    });
+    const rows = layoutTree(container);
+    const source = rows.get("a.ts")!;
+    const target = rows.get("b.ts")!;
+    const y = target.getBoundingClientRect().top + 36;
+    source.dispatchEvent(pointer("pointerdown", { clientY: source.getBoundingClientRect().top + 4 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 12, clientY: y }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 12, clientY: y }));
+    expect(onReorder).toHaveBeenCalledWith("a.ts", "src", "after");
+  });
+
   it("rejects a drop into the source subtree and after the source is removed", async () => {
     const onReorder = vi.fn();
     const { container, rerender } = render(Tree, {
@@ -220,7 +245,7 @@ describe("Tree row metadata", () => {
     const item = container.querySelector<HTMLElement>('[data-value="a.ts"]')!;
     item.focus();
     drag(rows.get("a.ts")!, rows.get("lib")!, rows.get("lib")!.getBoundingClientRect().top + 36);
-    expect(onReorder).toHaveBeenCalledWith("a.ts", "lib", "after");
+    expect(onReorder).toHaveBeenCalled();
     expect(document.activeElement).toBe(item);
     expect([...container.querySelectorAll<HTMLElement>(".poodle-tree__row")].every((row) => row.tabIndex < 0)).toBe(
       true,

@@ -78,11 +78,13 @@ Updated: 2026-09-01
   pointer (items are app-specific). Jetstream polls the platform right-button and
   renders the menu as a positioned overlay routed by token.
 - **Reorder** (`reorderable` + `onReorder`): rows are substrate drag sources; a drop fires
-  `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`
-  (computed from pointer Y within the target row; `inside` only for branches,
-  and never when the source is already a direct child of the target — that
-  drop un-nests beside the parent. Same-parent leaves land *at* the hovered
-  row).
+  `onReorder(from, to, position)` where `position` ∈ `before`/`after`/`inside`.
+  Y picks the band on the hovered row; `inside` only for branches (never when
+  the source is already a direct child). An `after` on the last visible
+  descendant of an open parent then offers every ancestor that ends at that
+  gap — X walks the chain so a leftward move un-nests (after the parent) and
+  a rightward move stays inside. The drop line indents to the chosen depth.
+  Same-parent leaves land *at* the hovered row.
   Alt+↑/↓ moves the focused node among siblings through
   `requestKeyboardDrop` over the visible logical target catalogue; it does
   not call `onReorder` directly. Space/Enter remain selection/activation.
@@ -486,9 +488,9 @@ Focus lives on the `treeitem`; the ring is painted on its presentational row chi
 
 | Value | Rendering |
 |-------|-----------|
-| `before` | accent line (`0.125rem`, `var(--poodle-color-accent-base)`) at the row top |
-| `after` | accent line at the row bottom |
-| `inside` | inset accent ring + `color-mix(... accent-base 12%, transparent)` fill |
+| `before` | accent line (`0.125rem`, `var(--poodle-color-accent-base)`) at the row top, indented to the drop depth |
+| `after` | accent line at the row bottom, indented to the drop depth |
+| `inside` | row fill `color-mix(... accent-base 12%, transparent)` |
 
 GPUI draws the equivalent (top/bottom accent line or inside fill) via an absolute
 child; the position comes from pointer Y within the row during `on_drag_move`.
@@ -542,8 +544,9 @@ None.
   Every enabled row registers a `NodeDragSource` and a nested `NodeDropTarget`;
   the GPUI `DragDropController` owns capture, hit testing, deterministic
   deepest-target arbitration, cancellation, and exactly-once cleanup, and the
-  band rule (`before` / `inside` / `after` by thirds) lives in
-  `poodle_render::drag_drop`. A row dropped onto itself is rejected, and a
+  band rule (`before` / `inside` / `after`) lives in
+  `poodle_render::drag_drop`. Web also walks last-descendant ancestors from
+  pointer X so a leftward move un-nests after an open parent. A row dropped onto itself is rejected, and a
   row's subject kind is scoped to Tree, so a drag from another reorder surface
   sharing the controller is never eligible here. `on_drag_over` and
   `on_reorder` keep their `(dragged, over, DropEdge)` shape: the component

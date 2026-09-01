@@ -11,6 +11,9 @@ import {
   findTreeNode,
   flattenVisibleTreeRows,
   isTreeBranch,
+  readTreeDropMetrics,
+  treeOutlineRows,
+  treeResolveOutlineDrop,
   treeCheckState,
   treeKeydownIntent,
   treeRangeSelection,
@@ -26,7 +29,7 @@ import {
 import "@inflatable-cookie/poodle-core/styles/tree.css";
 
 import { Checkbox } from "./Checkbox";
-import { DragDropProvider, useDragDrop } from "./drag-drop";
+import { DragDropProvider, useDragDrop, useOptionalDragDrop } from "./drag-drop";
 import { Icon } from "./Icon";
 import { Spinner } from "./Spinner";
 import { TreeItem } from "./tree-item/TreeItem";
@@ -121,6 +124,7 @@ function TreeView({
 }: TreeProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const { requestKeyboardDrop } = useDragDrop();
+  const dragDrop = useOptionalDragDrop();
 
   // Bindable pairs: controlled when prop provided, internal otherwise.
   const [internalSelected, setInternalSelected] = useState<string[]>([]);
@@ -280,8 +284,28 @@ function TreeView({
     if (!from || !isTreeDropPosition(intent.position)) {
       return { status: "rejected", reason: "unavailable" };
     }
-    if (from === intent.targetId) return { status: "rejected", reason: "self" };
-    onReorder?.(from, intent.targetId, intent.position);
+    const snap = dragDrop?.controller.getSnapshot();
+    if (snap?.inputKind === "keyboard") {
+      if (from === intent.targetId) return { status: "rejected", reason: "self" };
+      onReorder?.(from, intent.targetId, intent.position);
+      return { status: "committed" };
+    }
+    const row = rootRef.current?.querySelector<HTMLElement>(
+      `[data-value="${CSS.escape(intent.targetId)}"] .poodle-tree__row`,
+    );
+    const rect = row?.getBoundingClientRect();
+    const metrics = row ? readTreeDropMetrics(row) : { indentPx: 16, gutterPx: 24 };
+    const placement = treeResolveOutlineDrop({
+      rows: treeOutlineRows(visibleRows),
+      from,
+      to: intent.targetId,
+      x: snap?.pointer?.x,
+      y: snap?.pointer?.y ?? 0,
+      rect: rect ?? { top: 0, height: 1, left: 0 },
+      ...metrics,
+    });
+    if (!placement || placement.to === from) return { status: "rejected", reason: "self" };
+    onReorder?.(from, placement.to, placement.position);
     return { status: "committed" };
   }
 
@@ -437,6 +461,7 @@ function TreeView({
         key={node.value}
         node={node}
         nodes={nodes}
+        outlineRows={treeOutlineRows(visibleRows)}
         depth={depth}
         parent={parent}
         branch={branch}

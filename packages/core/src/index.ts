@@ -790,10 +790,15 @@ export {
 export {
   resolveNestedDropPosition,
   treeResolveDropPosition,
+  treeResolveOutlineDrop,
+  treeOutlineRows,
+  type TreeOutlineDrop,
+  type TreeOutlineRow,
   type NestedDropKind,
   type NestedDropPositionInput,
   type NestedDropRect,
 } from "./dom/drag-drop-geometry";
+export { readTreeDropMetrics } from "./dom/tree-drop-metrics";
 export {
   canScrollHorizontal,
   canScrollVertical,

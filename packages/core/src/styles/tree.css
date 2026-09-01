@@ -259,8 +259,10 @@
   .poodle-tree__item[data-poodle-drop-position="after"] > .poodle-tree__row::after {
     content: "";
     position: absolute;
-    left: 0;
-    right: 0;
+    left: calc(
+      var(--poodle-tree-row-pad-inline) + var(--poodle-tree-drop-depth, 0) * var(--poodle-tree-indent)
+    );
+    right: var(--poodle-tree-row-pad-inline);
     height: 0.125rem;
     background: var(--poodle-recipe-tree-before-after-row-after-fill, var(--poodle-color-accent-base));
     pointer-events: none;
