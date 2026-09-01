@@ -1039,6 +1039,145 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
         `dragging=${draggingFromContent} count=${await attr(fw, "blocks-count")}`,
       );
 
+      // ── The move is announced once, in the editor's own region ──
+      //
+      // The editor joined the harness's provider. Both have a live region, and
+      // one drop must not be read out twice.
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await press(`#${fw}-mce-a [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
+      await hover(`#${fw}-mce-a [data-model-catalogue-id="gamma"]`);
+      await page.mouse.up();
+      await frames(page);
+      const ownRegion = (
+        await page.locator(`#${fw}-mce-a .poodle-model-catalogue-editor__live`).textContent()
+      )?.trim();
+      const providerRegions = await page.evaluate(
+        (framework) =>
+          [...document.querySelectorAll(".poodle-drag-live-region")]
+            .map((node) => node.textContent?.trim() ?? "")
+            .filter((text) => text.length > 0)
+            .join("|") + `:${framework}`,
+        fw,
+      );
+      check(
+        `${name}: ${fw} ModelCatalogueEditor announces its move once, in its own region`,
+        ownRegion === "Moved Alpha to position 3 of 3." &&
+          providerRegions === `:${fw}`,
+        `own="${ownRegion}" provider="${providerRegions}"`,
+      );
+
+      // ── Focus follows the moved model to its new position ──
+      const focusedLabel = await page.evaluate(
+        () => (document.activeElement as HTMLElement | null)?.getAttribute("aria-label") ?? "",
+      );
+      check(
+        `${name}: ${fw} ModelCatalogueEditor returns focus to the moved model's handle`,
+        focusedLabel === "Alpha, position 3 of 3",
+        `focused="${focusedLabel}"`,
+      );
+
+      // ── The dragged model leaving mid-drag is a terminal, not a commit ──
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await press(`#${fw}-mce-a [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
+      await hover(`#${fw}-mce-a [data-model-catalogue-id="gamma"]`);
+      await page.evaluate((framework) => {
+        const fixture = (window as unknown as Record<string, { removeCatalogueItem(id: string): void }>)[
+          `__${framework}Fixture`
+        ];
+        fixture.removeCatalogueItem("alpha");
+      }, fw);
+      await frames(page);
+      await page.mouse.up();
+      await frames(page);
+      const strandedSource = await page.locator(`#${fw}-mce-a [data-poodle-drag-source]`).count();
+      const strandedTarget = await page.locator(`#${fw}-mce-a [data-drop-target="true"]`).count();
+      check(
+        `${name}: ${fw} ModelCatalogueEditor source unmount ends the session cleanly`,
+        (await attr(fw, "order-a-count")) === "0" &&
+          strandedSource === 0 &&
+          strandedTarget === 0,
+        `count=${await attr(fw, "order-a-count")} source=${strandedSource} target=${strandedTarget}`,
+      );
+
+      // ── EditableList: a keyboard pickup drops through the same session ──
+      //
+      // The web keyboard sensor owns Space/arrows here, so this is the
+      // "successful drop after keyboard pickup" terminal.
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await page.locator(`#${fw}-list [data-reorder-index="0"]`).focus();
+      await page.keyboard.press("Space");
+      await page.keyboard.press("ArrowDown");
+      await page.keyboard.press("Space");
+      await frames(page);
+      const listGrabbed = await page.locator(`#${fw}-list .poodle-editable-list__item--grabbed`).count();
+      check(
+        `${name}: ${fw} EditableList keyboard pickup commits and leaves no posture`,
+        (await attr(fw, "rows")) === "r2,r1,r3" &&
+          (await attr(fw, "rows-count")) === "1" &&
+          listGrabbed === 0,
+        `rows=${await attr(fw, "rows")} count=${await attr(fw, "rows-count")} grabbed=${listGrabbed}`,
+      );
+
+      // ── A disabled model cannot be picked up, and is still a place to
+      //    put one ──
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await press(`#${fw}-mce-c [data-model-catalogue-id="beta"] [data-reorder-handle]`);
+      await hover(`#${fw}-mce-c [data-model-catalogue-id="gamma"]`);
+      const disabledPickup = await page.locator(`#${fw}-mce-c [data-poodle-drag-source]`).count();
+      await page.mouse.up();
+      await frames(page);
+      const afterDisabledPickup = await attr(fw, "order-c-count");
+
+      await press(`#${fw}-mce-c [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
+      await hover(`#${fw}-mce-c [data-model-catalogue-id="beta"]`);
+      await page.mouse.up();
+      await frames(page);
+      check(
+        `${name}: ${fw} ModelCatalogueEditor disabled model is unpickable but droppable-onto`,
+        disabledPickup === 0 &&
+          afterDisabledPickup === "0" &&
+          (await attr(fw, "order-c")) === "beta,alpha,gamma" &&
+          (await attr(fw, "order-c-count")) === "1",
+        `pickup=${disabledPickup} order=${await attr(fw, "order-c")} count=${await attr(fw, "order-c-count")}`,
+      );
+
+      // ── `isDragEnabled=false` is pointer drag only ──
+      //
+      // Nothing is registered, so no gesture arms; the keyboard grab and the
+      // move buttons are untouched, which is what the contract promises.
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await page.evaluate((framework) => {
+        const fixture = (window as unknown as Record<string, { disableDragC(): void }>)[
+          `__${framework}Fixture`
+        ];
+        fixture.disableDragC();
+      }, fw);
+      await frames(page);
+      await press(`#${fw}-mce-c [data-model-catalogue-id="alpha"] [data-reorder-handle]`);
+      await hover(`#${fw}-mce-c [data-model-catalogue-id="gamma"]`);
+      const inertSources = await page.locator(`#${fw}-mce-c [data-poodle-drag-source]`).count();
+      await page.mouse.up();
+      await frames(page);
+      const afterInertDrag = await attr(fw, "order-c-count");
+
+      await page.locator(`#${fw}-mce-c [data-model-catalogue-id="alpha"] [data-reorder-handle]`).focus();
+      await page.keyboard.press("Space");
+      await page.keyboard.press("ArrowDown");
+      await frames(page);
+      check(
+        `${name}: ${fw} ModelCatalogueEditor isDragEnabled=false stops pointer drag only`,
+        inertSources === 0 &&
+          afterInertDrag === "0" &&
+          (await attr(fw, "order-c")) === "beta,alpha,gamma" &&
+          (await attr(fw, "order-c-count")) === "1",
+        `sources=${inertSources} afterDrag=${afterInertDrag} order=${await attr(fw, "order-c")} count=${await attr(fw, "order-c-count")}`,
+      );
+
       // ── OrderBy: pointer and Alt+Arrow reach one commit path ──
       await page.locator(`#${fw}-order .poodle-order-by__trigger`).click();
       await page.locator(".poodle-order-by__item").first().waitFor();
@@ -1047,7 +1186,7 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
       await page.mouse.up();
       await frames(page);
       check(
-        `${name}: ${fw} OrderBy drop emits one complete ordering`,
+        `${name}: ${fw} OrderBy reorders inside an ambient provider it cannot join`,
         (await attr(fw, "sort")) === "updated,size,title" && (await attr(fw, "sort-count")) === "1",
         `sort=${await attr(fw, "sort")} count=${await attr(fw, "sort-count")}`,
       );

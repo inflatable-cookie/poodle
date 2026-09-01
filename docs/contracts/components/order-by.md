@@ -583,8 +583,18 @@ drop command against the same source and target registrations, so the
 eligibility, revalidation, commit, and `onChange` payload are the pointer
 route's — not a second code path that mutates the array directly.
 
-When OrderBy finds an ambient `DragDropProvider` it joins it; otherwise it owns
-an isolated controller for its own panel. Joining changes who arbitrates, never
+OrderBy **always owns its controller**, and is the one programme component that
+never joins an ambient provider. Its panel is portalled to the document body,
+so it is not inside any ancestor provider's connected root, and the substrate
+refuses a pointer press whose source is outside the root it was connected to. A
+joined OrderBy would draw grips that never drag. The panel therefore carries
+its own provider — which is also the only thing a portalled surface could be
+arbitrated by.
+
+A builder that cannot reorder — `disabled`, or holding a single clause —
+registers no source and no target at all rather than registering disabled ones.
+A registered source is still keyboard-reachable and still nameable in an
+announcement. Joining changes who arbitrates, never
 which rows are eligible.
 
 ## 11. Internal Sub-Components

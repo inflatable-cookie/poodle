@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import {
   createDragDropController,
   layerContains,
@@ -10,7 +10,7 @@ import {
 import "@inflatable-cookie/poodle-core/styles/order-by.css";
 
 import { AnchoredSurface } from "./AnchoredSurface";
-import { DragDropProvider, useOptionalDragDrop } from "./drag-drop";
+import { DragDropProvider } from "./drag-drop";
 import { IconButton } from "./IconButton";
 import { OrderByRow } from "./order-by/OrderByRow";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
@@ -74,14 +74,15 @@ export function OrderBy({
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   /**
-   * Join the nearest provider, or own a controller.
+   * OrderBy always owns its controller. It is the one programme component that
+   * cannot join an ambient provider.
    *
-   * The sort panel is portalled out of the trigger's subtree, so an owned
-   * provider wraps the *panel* rather than the root.
+   * The sort panel is portalled to the document body, so it is not inside any
+   * ancestor provider's connected root — and the substrate refuses a pointer
+   * press whose source is outside the root it was connected to
+   * (`onPointerDown`). A joined OrderBy would draw grips that never drag.
    */
-  const ambient = useOptionalDragDrop();
-  const [ownDragController] = useState(() => (ambient ? null : createDragDropController()));
-  const dragController = ambient?.controller ?? ownDragController!;
+  const [dragController] = useState(() => createDragDropController());
 
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
@@ -174,6 +175,9 @@ export function OrderBy({
    * and under one ambient provider neither duplicate ids nor a cross-instance
    * drop are acceptable.
    */
+  /** A single clause has nowhere to go, and a disabled builder moves nothing. */
+  const canReorder = !disabled && effectiveValue.length > 1;
+
   const subjectKind = `poodle.reorder-item:order-by:${panelId}`;
   const registrationScope = `order-by:${panelId}`;
 
@@ -334,7 +338,7 @@ export function OrderBy({
           aria-label={ariaLabel}
           tabIndex={-1}
         >
-          <OrderByPanelSurface ambient={ambient !== null} controller={ownDragController}>
+          <DragDropProvider controller={dragController}>
           <div className="poodle-order-by__panel">
             {triggerVariant === "icon" ? (
               <div className="poodle-order-by__panel-header">
@@ -367,6 +371,7 @@ export function OrderBy({
                     sourceId={sourceIdOf(item.key)}
                     targetId={targetIdOf(item.key)}
                     indexOfKey={indexOfKey}
+                    canReorder={canReorder}
                     onDrop={handleDrop}
                     onMove={moveField}
                     onToggleDirection={toggleDirection}
@@ -396,26 +401,9 @@ export function OrderBy({
               </div>
             ) : null}
           </div>
-          </OrderByPanelSurface>
+          </DragDropProvider>
         </AnchoredSurface>
       ) : null}
     </div>
   );
-}
-
-/**
- * A builder that joined a provider contributes registrations to it. One with
- * no provider owns a controller so it still reorders on its own.
- */
-function OrderByPanelSurface({
-  ambient,
-  controller,
-  children,
-}: {
-  ambient: boolean;
-  controller: ReturnType<typeof createDragDropController> | null;
-  children: ReactNode;
-}) {
-  if (ambient) return <>{children}</>;
-  return <DragDropProvider controller={controller!}>{children}</DragDropProvider>;
 }

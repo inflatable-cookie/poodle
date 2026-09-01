@@ -25,7 +25,6 @@
     dragDropSnapshotStore,
     dragSourceAction,
     dropTargetAction,
-    tryDragDrop,
   } from "./drag-drop-context";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -202,15 +201,17 @@
   }
 
   /**
-   * Join the nearest provider, or own a controller.
+   * OrderBy always owns its controller. It is the one programme component that
+   * cannot join an ambient provider.
    *
-   * The sort panel is portalled out of the trigger's subtree, so an owned
-   * provider wraps the *panel* rather than the root: a controller connected to
-   * the root would never see a pointer press on a row.
+   * The sort panel is portalled to the document body, so it is not inside any
+   * ancestor provider's connected root — and the substrate refuses a pointer
+   * press whose source is outside the root it was connected to
+   * (`onPointerDown`). A joined OrderBy would draw grips that never drag. So
+   * the panel carries its own provider and its own controller, which is also
+   * the only thing a portalled surface could be arbitrated by.
    */
-  const ambient = tryDragDrop();
-  const ownDragController = ambient ? undefined : createDragDropController();
-  const dragController = ambient?.controller ?? ownDragController!;
+  const dragController = createDragDropController();
   const dragSource = dragSourceAction(dragController);
   const dropTarget = dropTargetAction(dragController);
   const dragSnapshot = dragDropSnapshotStore(dragController);
@@ -221,6 +222,9 @@
    * and under one ambient provider neither duplicate ids nor a cross-instance
    * drop are acceptable.
    */
+  /** A single clause has nowhere to go, and a disabled builder moves nothing. */
+  const canReorder = $derived(!disabled && effectiveValue.length > 1);
+
   const subjectKind = `poodle.reorder-item:order-by:${panelId}`;
   const registrationScope = `order-by:${panelId}`;
 
@@ -436,13 +440,9 @@
       aria-label={ariaLabel}
       tabindex="-1"
     >
-      {#if ambient}
+      <DragDropProvider controller={dragController}>
         {@render panel()}
-      {:else}
-        <DragDropProvider controller={ownDragController}>
-          {@render panel()}
-        </DragDropProvider>
-      {/if}
+      </DragDropProvider>
     </div>
   {/if}
 </div>
@@ -478,14 +478,14 @@
                 class:poodle-order-by__item--drop-target={$dragSnapshot.targetId === targetIdOf(item.key) &&
                   $dragSnapshot.targetPosture === "accepted"}
                 role="listitem"
-                use:dropTarget={targetRegistration(item.key, label, index)}
+                use:dropTarget={canReorder ? targetRegistration(item.key, label, index) : null}
               >
                 <button
                   type="button"
                   class="poodle-order-by__drag-handle"
                   disabled={disabled}
                   aria-label={`Reorder ${label}. Drag or use Alt plus arrow keys.`}
-                  use:dragSource={sourceRegistration(item.key, label)}
+                  use:dragSource={canReorder ? sourceRegistration(item.key, label) : null}
                   onkeydown={(event) => {
                     if (event.altKey && event.key === "ArrowUp" && index > 0) {
                       event.preventDefault();

@@ -221,7 +221,15 @@
       subject: { kind: subjectKind, id: item.id },
       allowedOperations: ["move"],
       label: item.label,
-      disabled: !isDragEnabled || locked || item.isDisabled,
+      // A locked editor or a disabled model cannot be picked up. It is still a
+      // place to put one, which is why the target below does not read
+      // `item.isDisabled`.
+      disabled: locked || item.isDisabled,
+      // This editor has its own contract live region and announces every move
+      // through it. Without this, an editor that joined an ambient provider
+      // would have one drop read out twice: once as "Dropped Alpha on Gamma"
+      // by the provider, once as "Moved Alpha to position 3 of 4" here.
+      ownsAnnouncements: true,
     };
   }
 
@@ -229,7 +237,7 @@
     return {
       targetId: targetIdOf(item.id),
       acceptedKinds: [subjectKind],
-      disabled: !isDragEnabled || locked,
+      disabled: locked,
       label: item.label,
       // One band per row: a model travelling down lands after its target and
       // one travelling up lands before it, so the dropped model ends up *at*
@@ -339,7 +347,7 @@
             $dragSnapshot.targetPosture === "accepted"
             ? "true"
             : "false"}
-          use:dropTarget={targetRegistration(item, index)}
+          use:dropTarget={isDragEnabled ? targetRegistration(item, index) : null}
         >
           <button
             type="button"
@@ -350,7 +358,7 @@
             aria-pressed={grabbedId === item.id}
             aria-label={`${item.label}, position ${index + 1} of ${shown.length}`}
             disabled={locked || item.isDisabled}
-            use:dragSource={sourceRegistration(item)}
+            use:dragSource={isDragEnabled ? sourceRegistration(item) : null}
             onkeydown={(event) => handleKeydown(event, index)}
             onclick={() => {
               if (locked || item.isDisabled) return;

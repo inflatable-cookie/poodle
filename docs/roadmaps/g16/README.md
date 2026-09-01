@@ -1,7 +1,8 @@
 # g16 — Next Work
 
-Status: active — the drag-and-drop programme is closed by g16.028; g16.033
-reserved at its public API decision gate
+Status: active — the drag-and-drop programme is closed by g16.028; g16.033 is
+queued with its public API decision promoted, gated on accepted and merged
+g16.028
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,

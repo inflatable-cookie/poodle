@@ -177,6 +177,9 @@ export function BlockEditor({
     emitChange(blocks.filter((_, blockIndex) => blockIndex !== index));
   }
 
+  /** A single block has nowhere to go, and a disabled editor moves nothing. */
+  const canDragBlocks = canReorder && !disabled && blocks.length > 1;
+
   const subjectKind = `poodle.reorder-item:block-editor:${editorId}`;
   const registrationScope = `block-editor:${editorId}`;
 
@@ -272,7 +275,7 @@ export function BlockEditor({
             block={blockItem}
             index={index}
             active={activeBlockId === blockItem.id}
-            disabled={disabled || !canReorder}
+            canDrag={canDragBlocks}
             subjectKind={subjectKind}
             sourceId={sourceIdOf(blockItem.id)}
             targetId={targetIdOf(blockItem.id)}

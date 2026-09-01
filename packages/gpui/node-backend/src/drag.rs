@@ -3252,6 +3252,15 @@ impl DragDropController {
             let Some(session) = state.context.session.as_ref() else {
                 return;
             };
+            // A source that narrates its own sessions has already said what
+            // happened, in its own words, in its own region.
+            if state
+                .active_source
+                .as_ref()
+                .is_some_and(|(source, _)| source.owns_announcements)
+            {
+                return;
+            }
             let source_label = state
                 .active_source
                 .as_ref()

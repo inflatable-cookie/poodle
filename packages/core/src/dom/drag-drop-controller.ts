@@ -112,6 +112,20 @@ export interface DragSourceRegistration {
   /** When set, Space/Enter pick up this focused source. Also the origin for ordered logical keyboard traversal. */
   readonly keyboardOrder?: number;
   /**
+   * This source narrates its own sessions, so the provider's live region says
+   * nothing about them.
+   *
+   * A component with a contract-mandated live region of its own — the model
+   * catalogue announces "Moved X to position 3 of 4" — has no way to silence
+   * the provider it *joined*: `describeAnnouncement` belongs to whoever
+   * created the controller, and a joined component did not. Without this,
+   * one drop is read out twice, in two different sentences, from two regions.
+   *
+   * Scoped to sessions from this source. An inbound file batch or an incoming
+   * cross-window projection has no local source and is unaffected.
+   */
+  readonly ownsAnnouncements?: boolean;
+  /**
    * Host preparation for a drag that may leave this window.
    *
    * Optional and per source, because a lease belongs to the subject being
@@ -702,6 +716,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   let rejectedTargetId: string | null = null;
   let lastAnnounceAt = 0;
   let pendingIntentAnnouncement: DragAnnouncementEvent | null = null;
+  /** Whether the live session's source narrates itself. See `ownsAnnouncements`. */
+  let sessionOwnsAnnouncements = false;
   let announceTimer: ReturnType<typeof setTimeout> | null = null;
 
   const sources = new Map<string, SourceEntry>();
@@ -1000,6 +1016,12 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   }
 
   function publishAnnouncement(event: DragAnnouncementEvent): void {
+    // A source that narrates its own sessions has already said what happened,
+    // in its own words, in its own region. The decision is taken once when the
+    // session begins and held for its whole life: a throttled intent and a
+    // terminal that arrives after the session is cleared must answer the same
+    // way as the pickup did.
+    if (sessionOwnsAnnouncements) return;
     const text = describeAnnouncement ? describeAnnouncement(event) : defaultAnnouncement(event);
     if (text === null) return;
     announcement = text;
@@ -1808,6 +1830,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
         released: false,
       };
       externalSourceLabel = inboundLabel(event.batch);
+      // An external session has no local source, so nobody narrates it but us.
+      sessionOwnsAnnouncements = false;
       inputKind = "mouse";
       pointerPosition = { x: event.x, y: event.y };
 
@@ -2001,6 +2025,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
       };
       crossWindowTarget = transaction;
       externalSourceLabel = projection.sourceLabel;
+      // An external session has no local source, so nobody narrates it but us.
+      sessionOwnsAnnouncements = false;
       inputKind = projectedInputKind(projection.inputKind);
       // No local pointer was ever observed, so there is no local preview: a
       // cross-window drag's preview belongs to whoever owns the cursor.
@@ -2324,6 +2350,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     // would leave the host's completion naming a session nobody is waiting on.
     const sessionId = reuseSessionId ?? createSessionId();
     inputKind = kind;
+    sessionOwnsAnnouncements = source.registration.ownsAnnouncements === true;
     keyboardLogicalSession = kind === "keyboard" && matchingLogicalKeyboard(source);
     pointerPosition = { x, y };
     dispatch({

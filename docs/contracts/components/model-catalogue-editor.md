@@ -183,8 +183,22 @@ and disclosure transition for the hidden section.
   editor instance, so two catalogues holding the same model ids under one
   ambient provider can never cross-drop.
 - The editor joins an ambient `DragDropProvider` when one exists and owns an
-  isolated controller otherwise. `isDragEnabled=false` registers nothing at
-  all; the keyboard and move-button routes stay.
+  isolated controller otherwise.
+- Registration semantics are exact, and identical to the native path:
+  - `isDragEnabled=false` registers **no source and no target at all**, rather
+    than registering disabled ones. A registered source is still
+    keyboard-reachable and still nameable in an announcement. The keyboard grab
+    and the move buttons are unaffected — `isDragEnabled` is pointer drag only.
+  - `isDisabled` / `isPending` disable both the source and the target: a locked
+    editor neither gives up a row nor takes one.
+  - `item.isDisabled` disables that row's **source only**. A disabled model
+    cannot be picked up, and is still a place to put one — the same rule Tabs
+    publishes for a disabled tab. Refusing it would make a disabled row an
+    unpassable wall in the middle of the list.
+- The editor's drag sources declare that they own their announcements, so the
+  provider's live region says nothing about the editor's own sessions. Without
+  it, an editor that joined an ambient provider would have one drop read out
+  twice, in two different sentences, from two regions.
 - A drop is revalidated against the live shown list: the dragged model and the
   target row are located again at commit, and a model that is no longer shown
   rejects instead of moving the wrong row. One accepted drop emits

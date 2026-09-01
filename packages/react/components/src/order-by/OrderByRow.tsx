@@ -30,6 +30,8 @@ export interface OrderByRowProps {
   onToggleDirection: (index: number) => void;
   onRemove: (index: number) => void;
   total: number;
+  /** A disabled builder, or a single clause, registers nothing at all. */
+  canReorder: boolean;
 }
 
 export function OrderByRow({
@@ -46,6 +48,7 @@ export function OrderByRow({
   onToggleDirection,
   onRemove,
   total,
+  canReorder,
 }: OrderByRowProps) {
   const { getSourceProps, dragging } = useDragSource({
     sourceId,
@@ -76,9 +79,29 @@ export function OrderByRow({
     onDrop,
   });
 
+  // Registering nothing is not the same as registering and disabling: a
+  // registered source is still keyboard-reachable and still nameable in an
+  // announcement. The hooks still run — their order is fixed — but no element
+  // reaches them, so no registration exists.
+  const targetProps = canReorder ? getTargetProps() : {};
+  const sourceProps = canReorder
+    ? getSourceProps({
+        onKeyDown: (event) => {
+          if (event.altKey && event.key === "ArrowUp" && index > 0) {
+            event.preventDefault();
+            onMove(index, -1);
+          }
+          if (event.altKey && event.key === "ArrowDown" && index < total - 1) {
+            event.preventDefault();
+            onMove(index, 1);
+          }
+        },
+      })
+    : {};
+
   return (
     <div
-      {...getTargetProps()}
+      {...targetProps}
       className={[
         "poodle-order-by__item",
         dragging ? "poodle-order-by__item--dragging" : "",
@@ -89,18 +112,7 @@ export function OrderByRow({
       role="listitem"
     >
       <button
-        {...getSourceProps({
-          onKeyDown: (event) => {
-            if (event.altKey && event.key === "ArrowUp" && index > 0) {
-              event.preventDefault();
-              onMove(index, -1);
-            }
-            if (event.altKey && event.key === "ArrowDown" && index < total - 1) {
-              event.preventDefault();
-              onMove(index, 1);
-            }
-          },
-        })}
+        {...sourceProps}
         type="button"
         className="poodle-order-by__drag-handle"
         disabled={disabled}

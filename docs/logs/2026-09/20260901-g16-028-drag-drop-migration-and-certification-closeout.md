@@ -3,6 +3,7 @@
 Status: delivered — awaiting orchestrator review
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/118
+Review rounds: 1 (five blockers, all repaired on this branch)
 Card: `docs/roadmaps/g16/028-drag-drop-migration-and-certification-closeout.md`
 Handoff: `docs/handoffs/20260901-075640-g16-028-drag-closeout.md`
 Governing refs: `docs/architecture/011-drag-and-drop-substrate.md`,
@@ -103,12 +104,77 @@ Two findings came out of the falsification rather than the implementation.
   `"./drag-drop"` is a prefix of it. The markers are exact import specifiers
   now, and the same plant fails.
 
+## Review round 1
+
+Five blockers, all repaired on this branch and each closed by a proof that
+fails against the pre-fix behaviour.
+
+- **An ambient-provider OrderBy drew grips that never dragged.** The sort panel
+  is portalled to the document body, and `onPointerDown` refuses a press whose
+  source element is outside the root the controller was connected to. A joined
+  OrderBy registered rows the ambient controller could never see. OrderBy now
+  **always owns its controller** — it is the one programme component that
+  cannot join, and the contract says so rather than repeating the blanket rule.
+  Planting the join back returns `count=0`: the exact inert affordance.
+
+- **An ambient ModelCatalogueEditor read one drop out twice.** The editor has a
+  contract-mandated live region and announces "Moved Alpha to position 3 of 3."
+  through it; the provider it joined also announced "Dropped Alpha on Gamma".
+  `describeAnnouncement` belongs to whoever created the controller, and a
+  joined component did not — so there was no way to silence it. The substrate
+  gained `ownsAnnouncements` / `owns_announcements` on the source registration,
+  in both languages: the controller narrates nothing for sessions whose source
+  narrates itself. The decision is taken once at session start and held for the
+  session's whole life, so a throttled intent and a late terminal answer the
+  same way as the pickup did. External sessions have no local source and are
+  unaffected.
+
+- **Registration semantics were vaguer than the contract.** Three fixes, all
+  now written down and tested: `isDragEnabled=false` registers **nothing** —
+  not a disabled source — because a registered source is still
+  keyboard-reachable and still nameable in an announcement, and the keyboard
+  grab and move buttons are untouched; a locked editor disables source *and*
+  target; `item.isDisabled` disables that row's **source only**, so a disabled
+  model cannot be picked up and is still a place to put one. Refusing drops
+  onto it would make a disabled row an unpassable wall in the middle of the
+  list, which is the rule Tabs already publishes for a disabled tab. The same
+  "register nothing" rule now covers OrderBy and BlockEditor, and the Svelte
+  registration actions accept a `null` registration to express it.
+
+- **The terminal oracle was proven for two of its four cases.** Added: the
+  dragged model leaving mid-drag (source unmount) ends the session with no
+  commit and no stranded posture; the move is announced once, in the editor's
+  own region, with the provider's region empty; focus returns to the moved
+  model's handle at its new position; and an EditableList keyboard pickup drops
+  and commits with no grabbed posture left behind — the "successful drop after
+  keyboard pickup" case. Native gained
+  `model_catalogue_editor_pointer_drop_is_announced_once_by_the_editor`.
+
+- **The branch was behind main.** Rebased onto `1d834be9f`. No file overlapped,
+  so the rebase was mechanical, but the planning claims were stale: `g16.033`
+  is now queued with its public API decision promoted and gated on accepted and
+  merged `g16.028`, not reserved at a decision gate, and the post-g16 research
+  queue sits behind that lane. The milestone status, generation index, roadmap
+  front door, card, and this log say that.
+
+### Round-1 falsification
+
+| Repair | Planted counterexample | Named proof, and what it said |
+| --- | --- | --- |
+| OrderBy owns its controller | OrderBy joins the ambient provider again | `svelte OrderBy reorders inside an ambient provider it cannot join` → `FAIL sort=title,updated,size count=0` |
+| The editor narrates its own sessions | `ownsAnnouncements` removed (web); `owns_announcements = false` (native) | `svelte ModelCatalogueEditor announces its move once, in its own region` → `FAIL provider="Dropped Alpha on Gamma"`; `model_catalogue_editor_pointer_drop_is_announced_once_by_the_editor` → FAILED |
+| A disabled model is still a place to put one | the target starts reading `item.isDisabled` | `svelte ModelCatalogueEditor disabled model is unpickable but droppable-onto` → `FAIL order= count=0` |
+| `isDragEnabled` is pointer drag only | the keyboard grab starts reading `isDragEnabled` | `svelte ModelCatalogueEditor isDragEnabled=false stops pointer drag only` → `FAIL order= count=0` |
+| Focus follows the moved model | the focus request is removed from `emitOrder` | `svelte ModelCatalogueEditor returns focus to the moved model's handle` → `FAIL focused=""` |
+| Keyboard pickup commits | `keyboardOrder` removed from the EditableList row | `svelte EditableList keyboard pickup commits and leaves no posture` → `FAIL rows=r1,r2,r3 count=0` |
+
 ## Evidence
 
 | Claim | Proof |
 | --- | --- |
-| Web migrations behave | `test/drag-drop/components.html` mounted in Chromium and WebKit via `effigy test:drag-drop-browser`: 12 checks per framework, 48 across both engines |
+| Web migrations behave | `test/drag-drop/components.html` mounted in Chromium and WebKit via `effigy test:drag-drop-browser`: 16 checks per framework, 64 across both engines |
 | Native completions behave | `packages/gpui/preview/tests/headless_regressions.rs#editable_list_substrate_reorder_rebuilds_the_host_spec`, `#order_by_substrate_reorder_and_alt_arrow_rebuild_the_host_spec`, `#block_editor_grip_drag_and_move_controls_rebuild_the_host_spec` |
+| One voice per session, natively | `packages/gpui/preview/tests/headless_regressions.rs#model_catalogue_editor_pointer_drop_is_announced_once_by_the_editor` |
 | Shared band/destination arithmetic | `packages/render/src/drag_drop.rs` unit tests for `arrival_band_resolver`, `reorder_destination`, and `apply_reorder` |
 | Programme absence | `effigy drift:drag-inventory` (`scripts/check-drag-inventory.ts`), wired into `ci:web` |
 | Ledger movement | `effigy check:parity-evidence-ledger`; four cells move, each naming its exact regression |
@@ -137,8 +203,9 @@ which g16.025 landed and which no ledger row had ever named.
 
 ## Next
 
-The drag-and-drop programme is complete. The next checkpoint is an ordinary
-continuation choice from `docs/roadmaps/g16/component-continuation-register.md`
-— component evidence, accessibility, visual comparison, motion, or Jetstream
-admission. `g16.033` stays reserved at its public API decision gate. This log
-does not compile that card.
+The drag-and-drop programme is complete. The ordered runway continues to
+`g16.033`, the HistoryCenter rejection surface, which is queued with its public
+API decision promoted and gated on this card being accepted and merged. The
+post-g16 research queue
+(`docs/triage/20260901-080641-post-g16-research-queue.md`) sits behind that lane
+and cannot displace it. This log compiles neither.

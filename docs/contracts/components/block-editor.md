@@ -465,6 +465,10 @@ are currently unused by the root itself.
 - A block's own toolbar controls (type select, add, remove, move, textarea) are
   reachable during and outside a drag: the drag source is the grip, not the
   block body
+- An editor that cannot reorder — `disabled`, `allowReorder=false`, or holding a
+  single block — registers no source and no target at all rather than
+  registering disabled ones. A registered source is still keyboard-reachable and
+  still nameable in an announcement
 - `focusin` event on blocks tracks `activeBlockId`
 - After adding a block, uses `tick().then()` to set `activeBlockId` on the new block
 

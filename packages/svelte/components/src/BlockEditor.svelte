@@ -196,6 +196,9 @@
   const dropTarget = dropTargetAction(dragController);
   const dragSnapshot = dragDropSnapshotStore(dragController);
 
+  /** A single block has nowhere to go, and a disabled editor moves nothing. */
+  const canDragBlocks = $derived(canReorder && !disabled && blocks.length > 1);
+
   const subjectKind = `poodle.reorder-item:block-editor:${editorId}`;
   const registrationScope = `block-editor:${editorId}`;
 
@@ -372,8 +375,8 @@
         onfocusin={() => (activeBlockId = blockItem.id)}
         role="group"
         aria-label={`${blockItem.type} block`}
-        use:dragSource={sourceRegistration(blockItem)}
-        use:dropTarget={targetRegistration(blockItem, index)}
+        use:dragSource={canDragBlocks ? sourceRegistration(blockItem) : null}
+        use:dropTarget={canDragBlocks ? targetRegistration(blockItem, index) : null}
       >
         <div class="poodle-block-editor__toolbar">
           <div class="poodle-block-editor__toolbar-left">

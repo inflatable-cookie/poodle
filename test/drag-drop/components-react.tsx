@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { ModelCatalogueItem } from "@inflatable-cookie/poodle-core";
 
 import { BlockEditor } from "../../packages/react/components/src/BlockEditor";
+import { EditableList } from "../../packages/react/components/src/EditableList";
 import { DragDropProvider } from "../../packages/react/components/src/drag-drop";
 import { ModelCatalogueEditor } from "../../packages/react/components/src/ModelCatalogueEditor";
 import { OrderBy } from "../../packages/react/components/src/OrderBy";
@@ -30,6 +31,14 @@ export function ComponentsHarness() {
   const [orderACount, setOrderACount] = useState(0);
   const [hides, setHides] = useState<string[]>([]);
   const [pendingA, setPendingA] = useState(false);
+  const [dragEnabledC, setDragEnabledC] = useState(true);
+  const [catalogueC, setCatalogueC] = useState<ModelCatalogueItem[]>(() => [
+    model("alpha", "Alpha"),
+    { ...model("beta", "Beta"), isDisabled: true },
+    model("gamma", "Gamma"),
+  ]);
+  const [orderC, setOrderC] = useState<string[]>([]);
+  const [orderCCount, setOrderCCount] = useState(0);
 
   const [blocks, setBlocks] = useState<EditorBlock[]>([
     { id: "b1", type: "paragraph", content: "one", data: {} },
@@ -45,6 +54,13 @@ export function ComponentsHarness() {
   ]);
   const [sortCount, setSortCount] = useState(0);
 
+  const [rows, setRows] = useState([
+    { id: "r1", label: "One" },
+    { id: "r2", label: "Two" },
+    { id: "r3", label: "Three" },
+  ]);
+  const [rowCount, setRowCount] = useState(0);
+
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__reactFixture = {
       removeCatalogueItem(id: string) {
@@ -55,6 +71,9 @@ export function ComponentsHarness() {
       },
       lockCatalogue() {
         setPendingA(true);
+      },
+      disableDragC() {
+        setDragEnabledC(false);
       },
       replaceBlocks(ids: string[]) {
         setBlocks((current) => ids.map((id) => current.find((entry) => entry.id === id)!).filter(Boolean));
@@ -74,6 +93,10 @@ export function ComponentsHarness() {
         data-blocks-count={blockCount}
         data-sort={sort.map((entry) => entry.key).join(",")}
         data-sort-count={sortCount}
+        data-rows={rows.map((row) => row.id).join(",")}
+        data-rows-count={rowCount}
+        data-order-c={orderC.join(",")}
+        data-order-c-count={orderCCount}
       />
 
       {/* One provider, two catalogues, the same three model ids. */}
@@ -88,6 +111,17 @@ export function ComponentsHarness() {
               setCatalogueA((current) => ids.map((id) => current.find((item) => item.id === id)!).filter(Boolean));
             }}
             onVisibilityChange={(change) => setHides((current) => [...current, `${change.id}:${change.visible}`])}
+          />
+        </div>
+        <div id="react-mce-c">
+          <ModelCatalogueEditor
+            items={catalogueC}
+            isDragEnabled={dragEnabledC}
+            onOrderChange={(ids) => {
+              setOrderC(ids);
+              setOrderCCount((count) => count + 1);
+              setCatalogueC((current) => ids.map((id) => current.find((item) => item.id === id)!).filter(Boolean));
+            }}
           />
         </div>
         <div id="react-mce-b">
@@ -106,6 +140,22 @@ export function ComponentsHarness() {
         />
       </div>
 
+      {/* An EditableList owns its own provider; it is the web keyboard-pickup route. */}
+      <div id="react-list">
+        <EditableList
+          items={rows}
+          ariaLabel="Rows"
+          reorderable
+          onReorder={(next) => {
+            setRows(next);
+            setRowCount((count) => count + 1);
+          }}
+        />
+      </div>
+
+      {/* OrderBy inside an ambient provider: its panel is portalled out of that
+          provider's root, so it must still reorder on its own controller. */}
+      <DragDropProvider>
       <div id="react-order">
         <OrderBy
           fields={[
@@ -120,6 +170,7 @@ export function ComponentsHarness() {
           }}
         />
       </div>
+      </DragDropProvider>
     </div>
   );
 }

@@ -19,7 +19,8 @@ export interface BlockEditorBlockProps {
   block: EditorBlock;
   index: number;
   active: boolean;
-  disabled: boolean;
+  /** Whether this editor can reorder at all. `false` registers nothing. */
+  canDrag: boolean;
   subjectKind: string;
   sourceId: string;
   targetId: string;
@@ -34,7 +35,7 @@ export function BlockEditorBlock({
   block,
   index,
   active,
-  disabled,
+  canDrag,
   subjectKind,
   sourceId,
   targetId,
@@ -50,7 +51,7 @@ export function BlockEditorBlock({
     subject: { kind: subjectKind, id: block.id },
     allowedOperations: ["move"],
     label,
-    disabled,
+    disabled: !canDrag,
     // The grip is the handle; the block body stays an ordinary editing
     // surface, so a press in the textarea or a toolbar control never starts a
     // drag.
@@ -60,7 +61,7 @@ export function BlockEditorBlock({
   const { getTargetProps, accepted } = useDropTarget({
     targetId,
     acceptedKinds: [subjectKind],
-    disabled,
+    disabled: !canDrag,
     label,
     // One band per block: a block travelling down lands after its target and
     // one travelling up lands before it, so the dropped block ends up *at* the
@@ -78,17 +79,25 @@ export function BlockEditorBlock({
     onDrop,
   });
 
-  const sourceProps = getSourceProps();
-  const targetProps = getTargetProps();
+  // Registering nothing is not the same as registering and disabling: a
+  // registered source is still keyboard-reachable and still nameable in an
+  // announcement. The hooks still run — their order is fixed — but no element
+  // reaches them, so no registration exists.
+  const sourceProps = canDrag ? getSourceProps() : {};
+  const targetProps = canDrag ? getTargetProps() : {};
 
   return (
     <div
       {...targetProps}
       {...sourceProps}
-      ref={(node) => {
-        sourceProps.ref(node);
-        targetProps.ref(node);
-      }}
+      ref={
+        canDrag
+          ? (node) => {
+              sourceProps.ref?.(node);
+              targetProps.ref?.(node);
+            }
+          : undefined
+      }
       className={[
         "poodle-block-editor__block",
         active ? "poodle-active" : "",

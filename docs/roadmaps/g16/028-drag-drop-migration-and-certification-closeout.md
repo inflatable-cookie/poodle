@@ -172,8 +172,29 @@ selectors.
 - Ledger: EditableList, OrderBy, BlockEditor, and Tree move from `missing` to
   `mounted`, each backed by its exact named regression.
 
+## Review Round 1
+
+Five blockers, all repaired on this branch:
+
+1. an ambient-provider OrderBy drew grips that never dragged — its panel is
+   portalled outside every ancestor's connected root, so it now always owns its
+   controller;
+2. an ambient ModelCatalogueEditor read one drop out twice — the substrate
+   gained `ownsAnnouncements` / `owns_announcements` so a source that narrates
+   itself silences the controller's region;
+3. registration semantics are now exact and contract-written:
+   `isDragEnabled=false` registers nothing, a lock disables both ends, and
+   `item.isDisabled` disables the source only;
+4. the terminal oracle gained its missing cases — source unmount, one-voice
+   announcement, focus return, and a keyboard-pickup drop;
+5. rebased onto current `main` and reconciled with the promoted `g16.033` and
+   the post-g16 research queue.
+
+Each repair is closed by a proof that fails against the planted pre-fix
+behaviour; the results are in the closeout log.
+
 ## Continuation
 
-After operator-authorized merge, close the drag-and-drop programme in g16 and
-choose the next component, accessibility, visual, motion, or Jetstream planning
-checkpoint from the continuation register. Do not start it from this card.
+After operator-authorized merge, close the drag-and-drop programme in g16. The
+ordered runway continues to `g16.033`, which is queued on this card being
+accepted and merged. Do not start it from this card.

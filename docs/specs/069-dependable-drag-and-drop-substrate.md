@@ -133,6 +133,23 @@ Source registration does not make an element draggable when its required
 transport is unavailable. Capability is resolved before visual affordance and
 accessible instructions claim support.
 
+A component that cannot drag registers **nothing**, rather than registering a
+disabled source: a registered source is still reachable by ordered keyboard
+traversal and still nameable in an announcement. This is the rule the
+renderer-neutral `attach_source` / `attach_target` already followed; the web
+adapters follow it too, and a `null` registration is how a framework binding
+expresses it.
+
+A source may declare `ownsAnnouncements` / `owns_announcements`. Its sessions
+are then narrated only by the component, never by the controller's live region.
+A composite with a contract-mandated live region of its own cannot otherwise
+silence a provider it *joined* — `describeAnnouncement` belongs to whoever
+created the controller — so one drop is read out twice, in two different
+sentences, from two regions. The flag is decided when the session begins and
+held for its whole life, so a throttled intent and a late terminal answer the
+same way as the pickup. An external session has no local source and is
+unaffected.
+
 The registration may be used by a component wrapper, a Svelte action, a React
 hook/prop getter, or a native node builder. Those framework surfaces translate
 to the same semantics.
@@ -189,7 +206,10 @@ The web pointer sensor uses Pointer Events. It must:
 
 - `createDragDropController(options?) -> DragDropController`;
 - `DragDropController.connect(root) -> cleanup`, with one connected root and
-  its owner document per controller;
+  its owner document per controller. A pointer press whose source element is
+  outside that root is not this controller's gesture, so a surface portalled
+  out of a provider's subtree cannot join that provider: it owns a controller,
+  and its own provider, or it does not drag at all;
 - `registerSource(element, registration) -> DragSourceHandle` and
   `registerTarget(element, registration) -> DropTargetHandle`;
 - `registerKeyboardTarget(registration) -> KeyboardDropTargetHandle` for an

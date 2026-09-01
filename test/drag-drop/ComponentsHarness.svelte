@@ -1,5 +1,6 @@
 <script lang="ts">
   import { default as BlockEditor } from "../../packages/svelte/components/src/BlockEditor.svelte";
+  import { default as EditableList } from "../../packages/svelte/components/src/EditableList.svelte";
   import { default as DragDropProvider } from "../../packages/svelte/components/src/DragDropProvider.svelte";
   import { default as ModelCatalogueEditor } from "../../packages/svelte/components/src/ModelCatalogueEditor.svelte";
   import { default as OrderBy } from "../../packages/svelte/components/src/OrderBy.svelte";
@@ -26,6 +27,14 @@
   let orderACount = $state(0);
   let hides = $state<string[]>([]);
   let pendingA = $state(false);
+  let dragEnabledC = $state(true);
+  let catalogueC = $state([
+    model("alpha", "Alpha"),
+    { ...model("beta", "Beta"), isDisabled: true },
+    model("gamma", "Gamma"),
+  ]);
+  let orderC = $state<string[]>([]);
+  let orderCCount = $state(0);
 
   let blocks = $state<EditorBlock[]>([
     { id: "b1", type: "paragraph", content: "one", data: {} },
@@ -41,6 +50,13 @@
   ]);
   let sortCount = $state(0);
 
+  let rows = $state([
+    { id: "r1", label: "One" },
+    { id: "r2", label: "Two" },
+    { id: "r3", label: "Three" },
+  ]);
+  let rowCount = $state(0);
+
   function applyOrder(items: ModelCatalogueItem[], ids: string[]): ModelCatalogueItem[] {
     return ids.map((id) => items.find((item) => item.id === id)!).filter(Boolean);
   }
@@ -55,6 +71,9 @@
       },
       lockCatalogue() {
         pendingA = true;
+      },
+      disableDragC() {
+        dragEnabledC = false;
       },
       replaceBlocks(ids: string[]) {
         blocks = ids.map((id) => blocks.find((entry) => entry.id === id)!).filter(Boolean);
@@ -74,6 +93,10 @@
     data-blocks-count={blockCount}
     data-sort={sort.map((entry) => entry.key).join(",")}
     data-sort-count={sortCount}
+    data-rows={rows.map((row) => row.id).join(",")}
+    data-rows-count={rowCount}
+    data-order-c={orderC.join(",")}
+    data-order-c-count={orderCCount}
   ></div>
 
   <!-- One provider, two catalogues, the same three model ids. -->
@@ -88,6 +111,17 @@
           catalogueA = applyOrder(catalogueA, ids);
         }}
         onVisibilityChange={(change) => (hides = [...hides, `${change.id}:${change.visible}`])}
+      />
+    </div>
+    <div id="svelte-mce-c">
+      <ModelCatalogueEditor
+        items={catalogueC}
+        isDragEnabled={dragEnabledC}
+        onOrderChange={(ids) => {
+          orderC = ids;
+          orderCCount += 1;
+          catalogueC = applyOrder(catalogueC, ids);
+        }}
       />
     </div>
     <div id="svelte-mce-b">
@@ -106,6 +140,19 @@
     />
   </div>
 
+  <!-- An EditableList owns its own provider; it is the web keyboard-pickup route. -->
+  <div id="svelte-list">
+    <EditableList
+      bind:items={rows}
+      ariaLabel="Rows"
+      reorderable
+      onReorder={() => (rowCount += 1)}
+    />
+  </div>
+
+  <!-- OrderBy inside an ambient provider: its panel is portalled out of that
+       provider's root, so it must still reorder on its own controller. -->
+  <DragDropProvider>
   <div id="svelte-order">
     <OrderBy
       fields={[
@@ -120,4 +167,5 @@
       }}
     />
   </div>
+  </DragDropProvider>
 </div>

@@ -55,13 +55,20 @@ export function ModelCatalogueRow({
     subject: { kind: subjectKind, id: item.id },
     allowedOperations: ["move"],
     label: item.label,
-    disabled: !isDragEnabled || locked || item.isDisabled,
+    // A locked editor or a disabled model cannot be picked up. It is still a
+    // place to put one, which is why the target below does not read
+    // `item.isDisabled`.
+    disabled: locked || item.isDisabled,
+    // This editor has its own contract live region and announces every move
+    // through it. Without this, an editor that joined an ambient provider
+    // would have one drop read out twice.
+    ownsAnnouncements: true,
   });
 
   const { getTargetProps, accepted } = useDropTarget({
     targetId,
     acceptedKinds: [subjectKind],
-    disabled: !isDragEnabled || locked,
+    disabled: locked,
     label: item.label,
     // One band per row: a model travelling down lands after its target and one
     // travelling up lands before it, so the dropped model ends up *at* the row
@@ -79,18 +86,27 @@ export function ModelCatalogueRow({
     onDrop,
   });
 
+  // `isDragEnabled=false` registers nothing at all rather than registering and
+  // disabling: a registered source is still keyboard-reachable and still
+  // nameable in an announcement. The hooks still run — their order is fixed —
+  // but no element reaches them, so no registration exists.
+  const targetProps = isDragEnabled ? getTargetProps() : {};
+  const sourceProps = isDragEnabled
+    ? getSourceProps({
+        onKeyDown: (event) => onHandleKeyDown(event as KeyboardEvent<HTMLButtonElement>, index),
+      })
+    : { onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => onHandleKeyDown(event, index) };
+
   return (
     <li
-      {...getTargetProps()}
+      {...targetProps}
       className="poodle-model-catalogue-editor__row"
       data-model-catalogue-id={item.id}
       data-grabbed={grabbed ? "true" : "false"}
       data-drop-target={accepted ? "true" : "false"}
     >
       <button
-        {...getSourceProps({
-          onKeyDown: (event) => onHandleKeyDown(event as KeyboardEvent<HTMLButtonElement>, index),
-        })}
+        {...sourceProps}
         type="button"
         className="poodle-icon-button"
         data-variant="ghost"

@@ -28,25 +28,35 @@ export function setDragDrop(value: DragDropContextValue): void {
  * Split out of `useDragDrop` so a component that owns its controller — a
  * DockRegion with no ambient provider — registers through exactly the same
  * code path as one that joined somebody else's.
+ *
+ * A `null` registration registers nothing at all, and un-registers what was
+ * there. That is the same rule the renderer-neutral `attach_source` /
+ * `attach_target` follow, and for the same reason: a registered-and-disabled
+ * source is still reachable by keyboard traversal and still nameable in an
+ * announcement, so a component that cannot drag must not appear to.
  */
 export function dragSourceAction(
   controller: DragDropController,
-): Action<HTMLElement, DragSourceRegistration> {
+): Action<HTMLElement, DragSourceRegistration | null> {
   return (node, registration) => {
-    let current = registration;
-    let handle = controller.registerSource(node, current);
+    let current = registration ?? null;
+    let handle = current ? controller.registerSource(node, current) : null;
     return {
       update(next) {
-        if (next.sourceId !== current.sourceId) {
-          handle.unregister();
-          handle = controller.registerSource(node, next);
+        const value = next ?? null;
+        if (value === null) {
+          handle?.unregister();
+          handle = null;
+        } else if (handle === null || current === null || value.sourceId !== current.sourceId) {
+          handle?.unregister();
+          handle = controller.registerSource(node, value);
         } else {
-          handle.update(next);
+          handle.update(value);
         }
-        current = next;
+        current = value;
       },
       destroy() {
-        handle.unregister();
+        handle?.unregister();
       },
     };
   };
@@ -54,22 +64,26 @@ export function dragSourceAction(
 
 export function dropTargetAction(
   controller: DragDropController,
-): Action<HTMLElement, DropTargetRegistration> {
+): Action<HTMLElement, DropTargetRegistration | null> {
   return (node, registration) => {
-    let current = registration;
-    let handle = controller.registerTarget(node, current);
+    let current = registration ?? null;
+    let handle = current ? controller.registerTarget(node, current) : null;
     return {
       update(next) {
-        if (next.targetId !== current.targetId) {
-          handle.unregister();
-          handle = controller.registerTarget(node, next);
+        const value = next ?? null;
+        if (value === null) {
+          handle?.unregister();
+          handle = null;
+        } else if (handle === null || current === null || value.targetId !== current.targetId) {
+          handle?.unregister();
+          handle = controller.registerTarget(node, value);
         } else {
-          handle.update(next);
+          handle.update(value);
         }
-        current = next;
+        current = value;
       },
       destroy() {
-        handle.unregister();
+        handle?.unregister();
       },
     };
   };
@@ -98,8 +112,8 @@ export function useDragDrop(): {
   snapshot: Readable<DragDropSnapshot>;
   cancel: () => void;
   requestKeyboardDrop: (command: KeyboardDropCommand) => boolean;
-  dragSource: Action<HTMLElement, DragSourceRegistration>;
-  dropTarget: Action<HTMLElement, DropTargetRegistration>;
+  dragSource: Action<HTMLElement, DragSourceRegistration | null>;
+  dropTarget: Action<HTMLElement, DropTargetRegistration | null>;
   keyboardDropTarget: (registration: KeyboardDropTargetRegistration) => KeyboardDropTargetHandle;
 } {
   const ctx = getContext<DragDropContextValue | undefined>(POODLE_DRAG_DROP);

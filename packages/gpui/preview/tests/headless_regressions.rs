@@ -17799,3 +17799,114 @@ fn block_editor_grip_drag_and_move_controls_rebuild_the_host_spec() {
         }
     });
 }
+
+/// g16.028 review. A composite with its own live region narrates its own
+/// sessions, and the controller says nothing about them.
+///
+/// The catalogue announces "Moved X to position N of M" through `on_announce`.
+/// Without `NodeDragSource::owns_announcements` the controller also composes
+/// "Dropped X on Y", so one drop is read out twice in two different sentences.
+#[test]
+fn model_catalogue_editor_pointer_drop_is_announced_once_by_the_editor() {
+    use poodle_headless::model_connection::ModelCatalogueItem;
+    use poodle_specs::ModelCatalogueEditorSpec;
+
+    struct CatalogueHost {
+        items: Vec<ModelCatalogueItem>,
+        orders: Vec<Vec<String>>,
+        announcements: Vec<String>,
+    }
+
+    fn build(host: &Arc<Mutex<CatalogueHost>>, mounted: &Arc<Mutex<Node>>) -> Node {
+        let rebuild = {
+            let host = Arc::clone(host);
+            let mounted = Arc::clone(mounted);
+            move || {
+                let next = build(&host, &mounted);
+                *mounted.lock().expect("mount lock") = next;
+            }
+        };
+        let theme = theme();
+        let items = host.lock().expect("host lock").items.clone();
+        let order_sink = Arc::clone(host);
+        let announce_sink = Arc::clone(host);
+        poodle_render::model_catalogue_editor(
+            &ModelCatalogueEditorSpec::new().with_items(items),
+            &RenderContext::new(&theme),
+            poodle_render::ModelCatalogueEditorHandlers {
+                on_order_change: Some(Arc::new(move |order: &[String]| {
+                    {
+                        let mut host = order_sink.lock().expect("host lock");
+                        host.orders.push(order.to_vec());
+                        let mut next = Vec::new();
+                        for id in order {
+                            if let Some(item) =
+                                host.items.iter().find(|item| &item.id == id).cloned()
+                            {
+                                next.push(item);
+                            }
+                        }
+                        host.items = next;
+                    }
+                    rebuild();
+                })),
+                on_announce: Some(Arc::new(move |message: &str| {
+                    announce_sink
+                        .lock()
+                        .expect("host lock")
+                        .announcements
+                        .push(message.to_string())
+                })),
+                ..poodle_render::ModelCatalogueEditorHandlers::default()
+            },
+        )
+    }
+
+    run_headless(|cx| {
+        let host = Arc::new(Mutex::new(CatalogueHost {
+            items: vec![
+                ModelCatalogueItem::new("model-alpha", "Alpha"),
+                ModelCatalogueItem::new("model-beta", "Beta"),
+                ModelCatalogueItem::new("model-gamma", "Gamma"),
+            ],
+            orders: Vec::new(),
+            announcements: Vec::new(),
+        }));
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount lock") = build(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 420.0);
+        driver.draw_frame();
+        let controller = driver.drag();
+
+        let handle = payload_frac("model-catalogue-editor:model-alpha:handle", 0.5, 0.5);
+        driver.pointer_press(handle);
+        driver.pointer_drag(point(px(f32::from(handle.x) + 4.0), handle.y));
+        driver.pointer_drag(payload_frac("model-catalogue-editor:model-gamma:handle", 0.5, 0.5));
+        driver.pointer_release(payload_frac(
+            "model-catalogue-editor:model-gamma:handle",
+            0.5,
+            0.5,
+        ));
+
+        let host = host.lock().expect("host lock");
+        assert_eq!(
+            host.orders,
+            [vec![
+                "model-beta".to_string(),
+                "model-gamma".to_string(),
+                "model-alpha".to_string()
+            ]],
+            "one drop, one complete shown order"
+        );
+        assert_eq!(
+            host.announcements,
+            ["Moved Alpha to position 3 of 3."],
+            "the editor's own region says it once"
+        );
+        assert!(
+            controller.announcements().is_empty(),
+            "and the controller says nothing about a session its source narrates: {:?}",
+            controller.announcements()
+        );
+    });
+}
