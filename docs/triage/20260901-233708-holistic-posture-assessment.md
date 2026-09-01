@@ -10,30 +10,39 @@ pair, docs/planning, packaging/consumers). Audit reports were kept outside the
 repo; every claim below was spot-verified against the tree before inclusion.
 Promotion route: see the final section
 
-## Thesis
+## Thesis (revised 2026-09-02 after operator input)
 
-Poodle's value centre and cost centre have separated.
+First draft read the split below as "value centre versus cost centre". The
+operator corrected that on 2026-09-02: *"The lack of parity is what is
+stopping commitment to GPUI in the first place. If we reach real parity I
+would switch a bunch of apps to it."* Parity is the product goal, and the
+Svelte-only consumer base is a symptom of native not being there yet, not a
+verdict on native.
 
-- **Value centre:** `@inflatable-cookie/poodle-svelte` + `poodle-core`.
-  Nineteen app manifests across 16 sibling repos consume it, every one pinned
-  to npm `0.2.2`, most importing 20–80 distinct components.
-- **Cost centre:** the native Rust pair. No shipping product depends on
-  `poodle-render`, `poodle-gpui`, or the node backend. Longhorn's
-  `crates/longhorn-poodle` pulls only `poodle-specs` (data types) by git tag and
-  is used only by Longhorn `prototypes/`. Jetstream's `jetstream-poodle` is a
-  path-linked engine adapter, not a product. Finch's GPUI app is archived.
-  Loophole desktop is Tauri + Svelte; Loophole's own vision says
-  "Tauri-first / GPUI-second … GPUI backend later".
+The facts stand; the conclusion changes:
+
+- **Consumers today:** `@inflatable-cookie/poodle-svelte` + `poodle-core`.
+  Nineteen app manifests across 16 sibling repos, every one pinned to npm
+  `0.2.2`, most importing 20–80 distinct components.
+- **Native today:** no shipping product depends on `poodle-render`,
+  `poodle-gpui`, or the node backend. Longhorn's `crates/longhorn-poodle`
+  pulls only `poodle-specs` by git tag for prototypes; Jetstream's
+  `jetstream-poodle` is a path-linked engine adapter; Finch's GPUI app is
+  archived; Loophole is Tauri + Svelte, "GPUI-second".
 - **Effort split since 2026-08-01 (lines changed):** gpui 213k, render 103k,
   jetstream 100k, codegen 82k, contracts 56k versus svelte 93k, react 64k,
-  core 54k. Native ≈ 2.2× web. Most g16 cards exist to move one or two
-  "GPUI mounted" ledger cells; 119 remain at roughly one cell per card.
-- **React:** 176 shells, zero consumers, unpublished, and prop drift against
-  Svelte in 32 components is not gated.
+  core 54k. Native ≈ 2.2× web. That is the intended investment.
+- **The gap:** GPUI mounted 56 / missing 119, GPUI accessibility manual for
+  175, GPUI visual missing for 174, at roughly one cell per card.
+- **React:** 176 shells, zero consumers, unpublished; prop drift against
+  Svelte in 32 components is not gated. Operator decision: retain + gate.
 
-This is not "stop native". Loophole's GPUI-second posture is a real bet. The
-advice is to pace the native pair to a named consumer milestone and to put the
-things that the 16 live consumers feel today at the front of the runway.
+So the question is not "how much native" but "what is *real* parity, and
+what is the shortest honest path to it". Today the ledger cannot answer the
+first half: `mounted` is a name map, accessibility is `manual`, visual is
+`missing`, the Jetstream adapter reimplements 108 components, and paired
+machines diverge in places no corpus covers. Reaching a bar nobody can
+measure is not possible; making the bar measurable is the first parity card.
 
 ## Verified Facts
 
@@ -250,7 +259,7 @@ The spine records process faithfully and serves readers poorly:
    output to a temp dir, worktree-keyed gate state, delete merged branches.
    No design decisions, no contract changes. Do this before PR #144 lands.
    Then a Linux-only push/PR board running `ci` so main has a shared signal
-   (needs operator approval for workflow edits).
+   (operator approved a Linux-only web + Rust PR/main board on 2026-09-02).
 2. **Consumer packaging trio** — `sideEffects`, `marked` isolation, README
    statement of the toolchain boundary (or a `dist/` build if the operator
    wants a broader boundary). Ships in `0.3.0` alongside the HistoryEntry break
@@ -271,12 +280,16 @@ The spine records process faithfully and serves readers poorly:
    tooltip machine, drag refusal policy into headless, owner-scoped
    continuous gestures, four public-input panics. Bounded, one card each,
    and they are real defects regardless of the pacing decision.
-8. **Native pacing decision** — ask the operator to name the first GPUI
-   consumer milestone (Loophole GPUI-second, or a Longhorn shell). Until one is
-   named, cap native work at "keep it compiling and honest" and stop selecting
-   cards by ledger cell count alone. Before any Jetstream admission
-   planning, the 108-component direct adapter must be quarantined or
-   deleted; there is no honest admission audit while it exists.
+8. **Define "real parity" as a switch trigger, then select cards by it** —
+   the operator will move apps once parity is real. Make that operational:
+   pick the first app to switch (Nucleus imports 29 components, Soundcheck
+   11, Finch 8, Loophole 1) and define parity as *that app's component set*
+   at mounted + accessibility + visual in GPUI, proven by execution not by
+   name map. Select ledger cells in that app's order instead of alphabetical
+   or "next bounded seam". A 29-component target is roughly a quarter of the
+   remaining mounted gap and yields a shippable GPUI app as the proof, which
+   is the evidence the operator says would unlock commitment. Jetstream
+   admission stays behind the adapter quarantine.
 
 Items 1, 2, 5, 6, and 7 are mechanical and suit cheap models. Items 3, 4, and 8
 need the operator or the orchestrator's judgment.
@@ -285,11 +298,13 @@ need the operator or the orchestrator's judgment.
 
 - Is `0.2.3` published under a different mechanism, or is it a ghost? If a
   ghost, fold it into `0.3.0`?
-- Does React stay without a consumer? If yes, who is its first consumer?
+- Answered 2026-09-02: retain React source-only and add a Svelte↔React
+  prop-drift gate; publication waits for a named consumer.
 - Is "Svelte 5 + Vite/SvelteKit only" the intended consumer boundary for the
   web packages pre-1.0?
-- Which product ships GPUI Poodle first, and roughly when? That answer sets
-  the native pair's budget.
+- Answered 2026-09-02: parity is the goal; real parity triggers switching
+  several apps. Open follow-up: which app is the first switch candidate, so
+  its component set can define the parity bar?
 - Which Underlay rule is current: adapter-wrapped (AGENTS.md) or direct import
   (architecture 001)?
 
