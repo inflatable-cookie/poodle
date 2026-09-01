@@ -97,8 +97,8 @@
 
   /* The chip is __item (tab + close). A button ring leaves the X outside.
      Inset so the ring cannot extend the strip's overflow:auto scrollport.
-     Outer corners follow the host surface radius so the ring is not clipped
-     by a rounded overflow ancestor. */
+     Block-only: outer corners follow the host surface radius so the ring is
+     not clipped; pill/card keep their own chip radii. */
   .poodle-dock-region__strip .poodle-tabs__tab:focus-visible,
   .poodle-dock-region__strip .poodle-tabs__close:focus-visible {
     outline: none;
@@ -109,39 +109,44 @@
   .poodle-dock-region__strip .poodle-tabs__item[data-drag-source] {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: calc(-1 * var(--poodle-border-width-focus));
+  }
+
+  .poodle-dock-region__strip .poodle-tabs[data-variant="block"] .poodle-tabs__item:has(.poodle-tabs__tab:focus-visible),
+  .poodle-dock-region__strip .poodle-tabs[data-variant="block"] .poodle-tabs__item:has(.poodle-tabs__close:focus-visible),
+  .poodle-dock-region__strip .poodle-tabs[data-variant="block"] .poodle-tabs__item[data-drag-source] {
     border-radius: var(--poodle-radius-control);
   }
 
-  .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs__list > .poodle-tabs__item:first-child {
+  .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:first-child {
     border-top-left-radius: var(--poodle-radius-surface);
   }
 
-  .poodle-dock-region[data-edge="top"] .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs__list > .poodle-tabs__item:last-child {
+  .poodle-dock-region[data-edge="top"] .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:last-child {
     border-top-right-radius: var(--poodle-radius-surface);
   }
 
-  .poodle-dock-region[data-edge="bottom"] .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs__list > .poodle-tabs__item:first-child {
+  .poodle-dock-region[data-edge="bottom"] .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:first-child {
     border-top-left-radius: 0;
     border-bottom-left-radius: var(--poodle-radius-surface);
   }
 
-  .poodle-dock-region[data-edge="bottom"] .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs__list > .poodle-tabs__item:last-child {
+  .poodle-dock-region[data-edge="bottom"] .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:last-child {
     border-bottom-right-radius: var(--poodle-radius-surface);
   }
 
-  .poodle-dock-region[data-edge="left"] .poodle-dock-region__strip[data-orientation="vertical"] .poodle-tabs__list > .poodle-tabs__item:first-child {
+  .poodle-dock-region[data-edge="left"] .poodle-dock-region__strip[data-orientation="vertical"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:first-child {
     border-top-left-radius: var(--poodle-radius-surface);
   }
 
-  .poodle-dock-region[data-edge="left"] .poodle-dock-region__strip[data-orientation="vertical"] .poodle-tabs__list > .poodle-tabs__item:last-child {
+  .poodle-dock-region[data-edge="left"] .poodle-dock-region__strip[data-orientation="vertical"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:last-child {
     border-bottom-left-radius: var(--poodle-radius-surface);
   }
 
-  .poodle-dock-region[data-edge="right"] .poodle-dock-region__strip[data-orientation="vertical"] .poodle-tabs__list > .poodle-tabs__item:first-child {
+  .poodle-dock-region[data-edge="right"] .poodle-dock-region__strip[data-orientation="vertical"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:first-child {
     border-top-right-radius: var(--poodle-radius-surface);
   }
 
-  .poodle-dock-region[data-edge="right"] .poodle-dock-region__strip[data-orientation="vertical"] .poodle-tabs__list > .poodle-tabs__item:last-child {
+  .poodle-dock-region[data-edge="right"] .poodle-dock-region__strip[data-orientation="vertical"] .poodle-tabs[data-variant="block"] .poodle-tabs__list > .poodle-tabs__item:last-child {
     border-bottom-right-radius: var(--poodle-radius-surface);
   }
 
