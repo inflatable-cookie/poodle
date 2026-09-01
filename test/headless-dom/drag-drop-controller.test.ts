@@ -1798,4 +1798,57 @@ describe("createDragDropController", () => {
     document.elementFromPoint = originalFromPoint;
     controller.destroy();
   });
+
+  it("does not auto-scroll an ancestor that already shows every source and target", () => {
+    const frames: FrameRequestCallback[] = [];
+    let now = 1000;
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    vi.stubGlobal("cancelAnimationFrame", () => {
+      frames.length = 0;
+    });
+
+    const catalogState = { scrollTop: 80, scrollHeight: 800, clientHeight: 200 };
+    const catalog = document.createElement("div");
+    catalog.style.overflow = "auto";
+    layout(catalog, { x: 0, y: 0, width: 400, height: 200 });
+    Object.defineProperty(catalog, "scrollTop", {
+      configurable: true,
+      get: () => catalogState.scrollTop,
+      set: (value: number) => {
+        catalogState.scrollTop = value;
+      },
+    });
+    Object.defineProperty(catalog, "scrollHeight", { configurable: true, get: () => catalogState.scrollHeight });
+    Object.defineProperty(catalog, "clientHeight", { configurable: true, get: () => catalogState.clientHeight });
+
+    const strip = document.createElement("div");
+    layout(sourceEl, { x: 8, y: 8, width: 80, height: 24 });
+    layout(targetEl, { x: 96, y: 8, width: 80, height: 24 });
+    strip.append(sourceEl, targetEl);
+    catalog.append(strip);
+    root.append(catalog);
+
+    const originalFromPoint = document.elementFromPoint.bind(document);
+    document.elementFromPoint = () => sourceEl;
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 16 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 40, clientY: 12 }));
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    now += 16;
+    frames.splice(0).forEach((frame) => frame(now));
+    expect(catalogState.scrollTop).toBe(80);
+
+    document.elementFromPoint = originalFromPoint;
+    controller.destroy();
+  });
 });

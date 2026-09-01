@@ -45,6 +45,7 @@ import {
   resolveAutoScroll,
   type AutoScrollCandidate,
   type AutoScrollMetrics,
+  type AutoScrollRect,
 } from "./drag-drop-auto-scroll";
 import {
   dragSessionTransition,
@@ -2515,6 +2516,46 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     return list;
   }
 
+  function isExplicitAutoScrollTree(element: HTMLElement): boolean {
+    for (const target of targets.values()) {
+      if (!target.registration.autoScroll) continue;
+      if (target.element === element || element.contains(target.element) || target.element.contains(element)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function rectOverflowsClip(rect: CachedRect, clip: AutoScrollRect): boolean {
+    return (
+      rect.top < clip.top - 0.5 ||
+      rect.bottom > clip.bottom + 0.5 ||
+      rect.left < clip.left - 0.5 ||
+      rect.right > clip.right + 0.5
+    );
+  }
+
+  /**
+   * Page-level (and other ancestor) auto-scroll is for revealing clipped
+   * sources or drop targets. A tab strip fully visible in a catalogue scroller
+   * must not shove the strip away from the pointer.
+   */
+  function candidateRevealsClippedWork(
+    owner: AutoScrollCandidate & { element: HTMLElement },
+    source: SourceEntry | undefined,
+  ): boolean {
+    if (isExplicitAutoScrollTree(owner.element)) return true;
+    const clip = owner.metrics.rect;
+    const kind = context.session?.subject.kind;
+    if (source && rectOverflowsClip(measure(source.element), clip)) return true;
+    if (!kind) return false;
+    for (const target of targets.values()) {
+      if (!target.registration.acceptedKinds.includes(kind)) continue;
+      if (rectOverflowsClip(measure(target.element), clip)) return true;
+    }
+    return false;
+  }
+
   function applyAutoScroll(id: string, dx: number, dy: number, owners: Array<AutoScrollCandidate & { element: HTMLElement }>): boolean {
     const owner = owners.find((entry) => entry.id === id);
     if (!owner) return false;
@@ -2561,7 +2602,10 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     const dt = lastAutoScrollTs === null ? 16 : Math.min(Math.max(now - lastAutoScrollTs, 0), 64);
     if (dt === 0) return true;
     lastAutoScrollTs = now;
-    const owners = collectAutoScrollCandidates();
+    refreshLayout();
+    const owners = collectAutoScrollCandidates().filter((owner) =>
+      candidateRevealsClippedWork(owner, currentSource()),
+    );
     const intent = resolveAutoScroll(owners, pointerPosition, dt);
     if (!intent || !applyAutoScroll(intent.id, intent.dx, intent.dy, owners)) {
       lastAutoScrollTs = null;
