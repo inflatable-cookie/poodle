@@ -1,6 +1,6 @@
 # g16.028 — Drag-And-Drop Migration And Certification Closeout
 
-Status: complete — final programme card; delivered on `codex/g16-028-drag-closeout`
+Status: complete — accepted and merged in PR #118 as `17a25d633`
 Depends on: complete and merged
 `027-drag-drop-inbound-files-and-drag-out.md`
 Governing refs: architecture 011, spec 069, the component continuation register,

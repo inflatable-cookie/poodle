@@ -1,10 +1,10 @@
 # g16.033 — HistoryCenter Rejection Surface
 
-Status: queued — public API decision promoted; do not dispatch before accepted
-and merged `g16.028`
+Status: ready — public API decision promoted; `g16.028` accepted and merged in
+PR #118 as `17a25d633`
 Opened: 2026-08-31
-Depends on: accepted and merged `g16.028` for runway sequencing. There is no
-drag-and-drop semantic dependency.
+Depends on: accepted and merged `g16.028` for runway sequencing — satisfied by
+PR #118 / `17a25d633`. There is no drag-and-drop semantic dependency.
 Governing refs: `../../contracts/components/history-center.md`,
 `../../contracts/001-working-rules.md`,
 `../../architecture/006-headless-core-and-machine-model.md`
@@ -98,7 +98,7 @@ override, locale input, or general localization API enters this card.
   renderer change;
 - exact GPUI HistoryCenter specimen and headless regression files;
 - the existing Svelte packed-package install fixture;
-- this card, g16/front-door currentness, one August log, and `PAPERCUTS.md`
+- this card, g16/front-door currentness, one September log, and `PAPERCUTS.md`
   only for new execution friction.
 
 Do not edit drag-and-drop behavior, Keyboard geometry, Longhorn, Loophole,
@@ -141,10 +141,11 @@ workflow mutation, or sibling-repository commands.
 
 ## Continuation
 
-After `g16.028` closes, re-read this card against current `main`, run its
-readiness gate, and only then prepare the worker handoff. The worker workspace
-must carry the capitalized `Papercuts` label before launch. This Poodle thread
-owns implementation review and merge.
+The post-merge readiness review classified the lane `strict-ready` and planning
+`coherent`: scope, authority, exact API, oracle, validation, and stop conditions
+are settled. Dispatch through the committed worker handoff. The worker
+workspace must carry the capitalized `Papercuts` label before launch. This
+Poodle thread owns implementation review and merge.
 A later explicitly authorized release/adoption lane may publish the corrected
 package and close Loophole's pin-lag entry. The ordered `g16.028`
-drag-and-drop closeout is not displaced by this reservation.
+drag-and-drop closeout merged before this lane opened.

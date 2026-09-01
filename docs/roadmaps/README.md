@@ -90,10 +90,10 @@ behavior repairs without inventing another conformance authority.
   EditableList/OrderBy/BlockEditor gained their native reorder result paths,
   four GPUI mounted cells moved (52 → 56 mounted, 122 → 118 missing), and the
   absence claim became executable as `effigy drift:drag-inventory`.
-  `g16.033` is queued after that tranche for HistoryCenter's
+  `g16.033` is ready after that tranche for HistoryCenter's
   Poodle-owned rejection surface and packed v3 `HistoryEntry` proof. Its public
-  rejection shape is decided and promoted; it is gated on accepted and merged
-  `g16.028`; Keyboard vertical
+  rejection shape is decided and promoted; PR #118 satisfied its sequencing
+  gate. Keyboard vertical
   geometry and Longhorn's `AlreadyAtTarget` wire code remain separate deferred
   decisions.
   The later Tabs/DockRegion drag migrations now have an

@@ -1,8 +1,11 @@
 # g16.028 — Drag-And-Drop Migration And Certification Closeout
 
-Status: delivered — awaiting orchestrator review
+Status: accepted and merged — PR #118 exact head `2e57e829b`; merge
+`17a25d633`
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/118
+Accepted head: `2e57e829b2cd991c9456a77257659ebb5c650d9c`
+Merge: `17a25d633b7f953aa0e9cf2e14b8e91a6074ffae`
 Review rounds: 4 (five blockers, then three, then one, then one plus a front-door row; all repaired on this branch)
 Card: `docs/roadmaps/g16/028-drag-drop-migration-and-certification-closeout.md`
 Handoff: `docs/handoffs/20260901-075640-g16-028-drag-closeout.md`

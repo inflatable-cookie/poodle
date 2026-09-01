@@ -16,21 +16,19 @@ Updated: 2026-09-01
     `022` merged in PR #101 (web custom-surface substrate, no ledger movement);
     `023` merged in PR #104; `024` merged in PR #107; `025` merged in PR #108;
     `026` merged in PR #113 after two Northstar review rounds; `027` merged in
-    PR #115 after three Northstar repair rounds; `028` is ready as the final
-    migration and certification checkpoint;
+    PR #115 after three Northstar repair rounds; `028` merged in PR #118 after
+    four Northstar repair rounds and closed the drag programme;
     `029` complete and merged (TimeInput native parity, ledger 48/126); `030`
     merged in PR #98 (NumberInput value/draft/mounted parity, ledger 49/125);
     `031` merged in PR #99; `032` merged in PR #100 (continuous audio native
-    mounted parity, ledger 56/118 after `028`); `033` is queued for the
+    mounted parity, ledger 56/118 after `028`); `033` is ready for the
     HistoryCenter rejection surface and packed v3 HistoryEntry proof, its public
-    API decision promoted, gated on accepted and merged `g16.028`
+    API decision promoted and its sequencing gate satisfied by PR #118
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Next move: the drag-and-drop programme is closed by `g16.028`. The ordered
-    runway continues to the promoted `g16.033` HistoryCenter rejection surface,
-    which is queued on accepted and merged `g16.028` and whose public API
-    decision has landed. The post-g16 research queue
+  - Next move: dispatch the promoted `g16.033` HistoryCenter rejection surface
+    with the required `Papercuts` workspace label. The post-g16 research queue
     (`../triage/20260901-080641-post-g16-research-queue.md`) sits behind that
     lane and cannot displace it. Component continuation remains paused at the
     separate EditableLabel decision gate.

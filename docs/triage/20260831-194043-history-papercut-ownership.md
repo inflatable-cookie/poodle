@@ -1,7 +1,7 @@
 # History Papercut Ownership
 
 Status: open — external wire/adoption work is complete; Poodle rejection shape
-is promoted; implementation, package publication/adoption, CS20, and
+is promoted and ready for implementation; package publication/adoption, CS20, and
 keyboard-geometry follow-ons remain
 Captured: 2026-08-31
 Source: Loophole `PAPERCUTS.md` after PR #14 merged
@@ -17,13 +17,13 @@ Poodle lane. Longhorn source work keeps its own repository authority.
 Keep the existing sequence intact:
 
 1. `g16.026` and `g16.027` are merged.
-2. `g16.028` remains the ordered drag closeout.
-3. `g16.033` is queued with its public rejection shape promoted and cannot
-   dispatch until `g16.028` is accepted and merged.
+2. `g16.028` is accepted and merged in PR #118.
+3. `g16.033` is ready with its public rejection shape promoted and its
+   sequencing gate satisfied.
 
 Every papercut worker workspace created from this packet must carry the
-capitalized `Papercuts` label before launch. No papercut worker is launched
-while the current drag runway is active.
+capitalized `Papercuts` label before launch. The drag runway is closed;
+`g16.033` is the next bounded papercut worker.
 
 ## Ownership Split
 
@@ -89,9 +89,9 @@ settled.
 
 ## Promotion Route
 
-1. Finish `g16.028` without inserting a papercut worker.
-2. After `g16.028` closes, readiness-check and dispatch the promoted `g16.033`
-   card from this thread with the required `Papercuts` label.
+1. `g16.028` closed without an inserted papercut worker.
+2. The post-merge readiness review classified `g16.033` coherent; dispatch it
+   from this thread with the required `Papercuts` label.
 3. After `g16.033` proves the packed v3 type surface, seek explicit release
    authority for publication and the remaining Loophole package adoption.
 4. Promote the CS20 decision into Loophole planning only if group identity is

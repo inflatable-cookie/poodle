@@ -1,7 +1,8 @@
 # g16 Component Continuation Runway
 
-Status: active planning map — TimeInput, NumberInput, and continuous audio complete;
-HistoryCenter portfolio follow-on reserved separately as `g16.033`
+Status: active planning map — TimeInput, NumberInput, continuous audio, and the
+drag programme complete; HistoryCenter portfolio follow-on ready separately as
+`g16.033`
 Compiled: 2026-08-28
 Source: `component-continuation-register.md`
 
@@ -14,7 +15,7 @@ copy the register, change evidence, or turn a missing cell into a defect.
 | ---: | --- | --- | --- |
 | 1 | TimeInput native entry | complete as `g16.029` | merged in PR #97; ledger 48 mounted / 126 missing |
 | 2 | NumberInput and EditableLabel editing models | NumberInput complete as `g16.030`; EditableLabel decision-blocked | merged in PR #98; resolve EditableLabel separately |
-| 3 | Dependable drag-and-drop family | programme-owned | compiled separately as `g16.021`–`g16.028`; do not issue component-local drag repairs |
+| 3 | Dependable drag-and-drop family | complete through PR #118 | compiled separately as `g16.021`–`g16.028`; do not issue component-local drag repairs |
 | 4 | Fader, Knob, and XYPad interaction | complete through `g16.032` / PR #100 | native mounting landed; never overlap a Node/GPUI routing card with `g16.025` |
 | 5 | GPUI accessibility evidence | programme choice | operator selects it as a programme and accepts the manual/runtime evidence boundary |
 | 6 | Cross-runtime visual comparison | programme choice | operator selects a fixture/comparison tranche without reviving specimen snapshots or a component IR |
@@ -50,10 +51,11 @@ and mounted all three in GPUI. Payload drag-and-drop remains separate.
 Longhorn-lab, or Jetstream worker is ready from this map. EditableLabel remains
 decision-blocked rather than becoming an implementation card by default.
 
-The Loophole portfolio refresh reserves `g16.033` after `g16.026`. It is not a
-new row selected by the 175-component audit and is not ready until the public
-HistoryCenter rejection shape is chosen. The existing Svelte v3 `HistoryEntry`
-source fix is evidence to preserve, not another implementation lane.
+The Loophole portfolio refresh promoted `g16.033` outside the 175-component
+audit. Its public HistoryCenter rejection shape is chosen, PR #118 satisfied
+the sequencing gate, and the post-merge readiness review found the lane
+coherent. The existing Svelte v3 `HistoryEntry` source fix is evidence to
+preserve and prove through the packed candidate, not repeat.
 
 ## Promotion Rule
 
