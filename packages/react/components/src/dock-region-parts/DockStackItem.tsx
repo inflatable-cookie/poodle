@@ -8,7 +8,7 @@ import {
 import type { ReactNode } from "react";
 
 import { useDragSource, useDropTarget } from "../drag-drop";
-import type { DockEdge, PanelDragData, PanelTabItem } from "../types";
+import type { DockEdge, DockPanelDropPayload, PanelTabItem } from "../types";
 
 /**
  * One stacked panel: a drag source, and a target for the insert position.
@@ -30,7 +30,7 @@ export interface DockStackItemProps {
   crossWindowDragSource?: CrossWindowDragSourceBridge;
   liveSubjectId: () => string;
   onReorder?: (items: string[]) => void;
-  onPanelDrop?: (payload: { panel: PanelDragData; targetEdge: DockEdge }) => void;
+  onPanelDrop?: (payload: DockPanelDropPayload) => void;
   children: ReactNode;
 }
 
@@ -101,6 +101,7 @@ export function DockStackItem({
           sourceZone: panel.sourceZone,
         },
         targetEdge: edge,
+        index,
       });
       return { status: "committed" };
     },

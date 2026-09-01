@@ -79,6 +79,18 @@ function stackItems(container: HTMLElement): HTMLElement[] {
   return [...container.querySelectorAll<HTMLElement>(".poodle-dock-region__stack-item")];
 }
 
+function layoutTabs(container: HTMLElement): void {
+  [...container.querySelectorAll<HTMLElement>("section")].forEach((region, regionIndex) => {
+    const originX = regionIndex * 400;
+    box(region, originX, 0, 400, 100);
+    [...region.querySelectorAll<HTMLElement>(".poodle-tabs__item")].forEach((item, index) => {
+      box(item, originX + index * 100, 0, 100, 30);
+      const tab = item.querySelector<HTMLElement>(".poodle-tabs__tab");
+      if (tab) box(tab, originX + index * 100, 0, 100, 30);
+    });
+  });
+}
+
 describe("DockRegion panel movement", () => {
   beforeEach(() => {
     vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
@@ -114,7 +126,32 @@ describe("DockRegion panel movement", () => {
       sourceZone: "region:a",
     });
     expect(onPanelDropB.mock.calls[0][0].targetEdge).toBe("top");
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
     expect(onPanelDropA).not.toHaveBeenCalled();
+  });
+
+  it("a flexible strip drop lands at the hovered tab, not the end", async () => {
+    const onPanelDropB = vi.fn();
+    const { container } = render(DockRegionZoneDropHarness, {
+      props: {
+        shared: true,
+        sizing: "flexible",
+        items,
+        itemsB: [{ value: "outline", label: "Outline" }],
+        onPanelDropB,
+      },
+    });
+    layoutTabs(container);
+
+    const source = container.querySelectorAll<HTMLElement>('[role="tab"]')[0]!;
+    await fireEvent(source, pointer("pointerdown", 50, 15));
+    await fireEvent(document, pointer("pointermove", 90, 15));
+    await fireEvent(document, pointer("pointermove", 420, 15));
+    await fireEvent(document, pointer("pointerup", 420, 15));
+
+    expect(onPanelDropB).toHaveBeenCalledOnce();
+    expect(onPanelDropB.mock.calls[0][0].panel.panelId).toBe("explorer");
+    expect(onPanelDropB.mock.calls[0][0].index).toBe(0);
   });
 
   it("keeps local reorder but discovers no sibling when each region provides itself", async () => {

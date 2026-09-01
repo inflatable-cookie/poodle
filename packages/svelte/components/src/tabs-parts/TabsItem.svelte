@@ -39,6 +39,8 @@
     indexOfValue: (value: string) => number;
     /** Whether a subject id belongs to this strip at all. */
     ownsValue: (value: string) => boolean;
+    /** Accept a family member that is not in this strip, so an owning composite can insert. */
+    acceptsForeign?: boolean;
     sourceId: string;
     targetId: string;
     onDrop: (intent: DropIntent) => DragDropCommitResult;
@@ -69,6 +71,7 @@
     crossWindowSourceBridge,
     indexOfValue,
     ownsValue,
+    acceptsForeign = false,
     sourceId,
     targetId,
     onDrop,
@@ -115,16 +118,30 @@
   const targetRegistration = $derived<DropTargetRegistration>({
     targetId,
     acceptedKinds: [subjectKind],
-    disabled: !reorderable,
+    disabled: !reorderable && !acceptsForeign,
     label: item.label,
-    resolvePosition: ({ subject }): DropPosition =>
-      indexOfValue(subject.id) < index ? "after" : "before",
+    resolvePosition: ({ subject, x, y, rect }): DropPosition => {
+      if (!ownsValue(subject.id)) {
+        // Incoming: the hovered half is the insert side, so a drop on the
+        // leading half of the first tab can still land at index 0.
+        return isVertical
+          ? y < rect.top + rect.height / 2
+            ? "before"
+            : "after"
+          : x < rect.left + rect.width / 2
+            ? "before"
+            : "after";
+      }
+      return indexOfValue(subject.id) < index ? "after" : "before";
+    },
     canDrop: (intent, subject) => {
       // A shared family means another surface's subject can reach this target.
       // Refusing it *here*, during eligibility, is what lets arbitration
       // discard this tab and hand the drop to an eligible ancestor composite.
       // Claiming it and rejecting at commit would swallow the drop instead.
-      if (!ownsValue(subject.id)) {
+      // An owning composite that wants the insert (DockRegion) opts in via
+      // `acceptsForeign` instead of falling through to the region.
+      if (!ownsValue(subject.id) && !acceptsForeign) {
         return { accepted: false, reason: "not this tab set" };
       }
       return subject.id === item.value

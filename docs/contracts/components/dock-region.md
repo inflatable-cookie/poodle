@@ -1,7 +1,7 @@
 # DockRegion
 
 Status: active contract
-Updated: 2026-08-13
+Updated: 2026-09-01
 
 ## 1. Purpose
 
@@ -220,7 +220,7 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 | `onCollapsedChange` | region collapses or expands | `boolean` | toggle click or tab click when collapsed |
 | `onClose` | closable tab dismissed | `string` | forwarded from Tabs |
 | `onReorder` | tabs or stack items reordered | `string[]` | within-region reorder |
-| `onPanelDrop` | panel dropped from another region | `{ panel: PanelDragData; targetEdge: DockEdge }` | cross-region transfer |
+| `onPanelDrop` | panel dropped from another region | `{ panel: PanelDragData; targetEdge: DockEdge; index: number }` | cross-region transfer; `index` is the insert slot in the destination `items`. A drop on a tab or stack item lands at that item. A drop on the region body appends. |
 
 `crossWindowDragSource` and `crossWindowDropTarget` are the host bridge, not
 Poodle callbacks masquerading as app policy. Their field and method contract is
@@ -341,8 +341,12 @@ is the window, and a window bridge belongs there.
 
 ### Cross-Region Transfer
 
-- A stack item dragged into another region on the same controller reports
-  `onPanelDrop` with the complete `PanelDragData`.
+- A stack item or tab dragged into another region on the same controller
+  reports `onPanelDrop` with the complete `PanelDragData`, the destination
+  edge, and the insert `index`.
+- A drop on a destination tab or stack item lands *at* that item: the hovered
+  half chooses before/after, matching same-strip land-at. A drop on the region
+  body (no tab under the pointer) appends (`index === items.length`).
 - Eligibility is `canAcceptPanel`, run during hover **and** again at commit.
   The substrate carries the subject in the session, so the panel's identity is
   known at hover without a side channel — which is the entire reason the old
@@ -350,10 +354,11 @@ is the window, and a window bridge belongs there.
 - A drop back onto the source zone is ineligible in flexible sizing, because
   same-strip reorder owns it. Zone identity is `dragZoneId` when set, else the
   edge.
-- A stack item beats the region it sits in: nested arbitration prefers the
-  deepest target, and the region registers at a lower priority.
-- Visual feedback: dashed accent-coloured border overlay while the region holds
-  the accepted intent. Drop-zone overlay is absolute-positioned and
+- A tab or stack item beats the region it sits in: nested arbitration prefers
+  the deepest target, and the region registers at a lower priority.
+- Visual feedback: the hovered tab or stack item posts `data-drop-target`. The
+  dashed region overlay still paints when the region itself holds the intent
+  (body / empty strip). Drop-zone overlay is absolute-positioned and
   `pointer-events: none`.
 
 ### Cross-Window Transfer

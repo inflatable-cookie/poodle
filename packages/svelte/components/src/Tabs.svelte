@@ -114,6 +114,12 @@
      * without taking over reorder, which stays Tabs' own.
      */
     dragSubjectKind?: string | null;
+    /**
+     * Owning composite hook: a subject of this strip's family that is not in
+     * `items` lands at the hovered tab and reports here instead of `onReorder`.
+     * Absent, the tab refuses so an ancestor target can take the drop.
+     */
+    onForeignDrop?: ((id: string, index: number) => void) | undefined;
     children?: Snippet<[string]>;
     actions?: Snippet<[]>;
   }
@@ -145,6 +151,7 @@
     onClose = undefined,
     crossWindowSourceBridge = undefined,
     dragSubjectKind = null,
+    onForeignDrop = undefined,
     children,
     actions,
   }: Props = $props();
@@ -549,9 +556,17 @@
    * one when the tab is moving forward.
    */
   function handleDrop(intent: DropIntent): DragDropCommitResult {
-    const from = indexOfValue(dragController.getSnapshot().session?.subject.id ?? "");
+    const subjectId = dragController.getSnapshot().session?.subject.id ?? "";
+    const from = indexOfValue(subjectId);
     const target = indexOfValue(valueOfTargetId(intent.targetId));
-    if (from < 0 || target < 0 || from === target) {
+    if (from < 0) {
+      if (!onForeignDrop || target < 0) {
+        return { status: "rejected", reason: "same tab" };
+      }
+      onForeignDrop(subjectId, intent.position === "after" ? target + 1 : target);
+      return { status: "committed" };
+    }
+    if (target < 0 || from === target) {
       return { status: "rejected", reason: "same tab" };
     }
 
@@ -728,6 +743,7 @@
           {crossWindowSourceBridge}
           {indexOfValue}
           {ownsValue}
+          acceptsForeign={onForeignDrop !== undefined}
           sourceId={sourceIdOf(item.value)}
           targetId={targetIdOf(item.value)}
           selected={currentValue === item.value}

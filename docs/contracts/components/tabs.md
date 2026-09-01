@@ -66,6 +66,7 @@ Updated: 2026-08-31
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"chrome"` | no | semantic size offset from inherited presentation |
 | `reorderable` | `boolean` | `false` | no | enables drag-and-drop and keyboard reorder |
 | `dragSubjectKind` | `string \| null` | `null` | no | semantic drag family used by an owning composite; `null` creates a kind scoped to this Tabs instance |
+| `onForeignDrop` | `(id: string, index: number) => void` | `undefined` | no | owning composite hook: a family subject that is not in `items` lands at the hovered tab and reports here instead of `onReorder`. Absent, the tab refuses so an ancestor target can take the drop |
 | `collapseWhenOverflow` | `boolean` | `false` | no | when the tablist overflows its container, collapse the tabs into a `Menu` affordance |
 | `overflowStrategy` | `"collapse" \| "shed"` | `"collapse"` | no | `collapse` is the single threshold into a `Menu`; `shed` gives up decoration first |
 | `shed` | `("icon" \| "count")[]` | `["icon", "count"]` | no | which parts to give up, in order, when `overflowStrategy` is `shed` |

@@ -127,26 +127,45 @@
     return true;
   }
 
-  function handleLeftDrop({ panel }: { panel: { panelId: string; sourceEdge: DockEdge }; targetEdge: DockEdge }): void {
+  function insertAt<T>(list: T[], item: T, index: number): T[] {
+    const at = Math.max(0, Math.min(index, list.length));
+    return [...list.slice(0, at), item, ...list.slice(at)];
+  }
+
+  function handleLeftDrop({
+    panel,
+    index,
+  }: {
+    panel: { panelId: string; sourceEdge: DockEdge };
+    targetEdge: DockEdge;
+    index: number;
+  }): void {
     const { panelId, sourceEdge } = panel;
     if (sourceEdge === "right") {
       const item = rightItems.find((i) => i.value === panelId);
       if (!item) return;
       rightItems = rightItems.filter((i) => i.value !== panelId);
-      leftItems = [...leftItems, item];
+      leftItems = insertAt(leftItems, item, index);
       if (rightActive === panelId) {
         rightActive = rightItems[0]?.value ?? "";
       }
     }
   }
 
-  function handleRightDrop({ panel }: { panel: { panelId: string; sourceEdge: DockEdge }; targetEdge: DockEdge }): void {
+  function handleRightDrop({
+    panel,
+    index,
+  }: {
+    panel: { panelId: string; sourceEdge: DockEdge };
+    targetEdge: DockEdge;
+    index: number;
+  }): void {
     const { panelId, sourceEdge } = panel;
     if (sourceEdge === "left") {
       const item = leftItems.find((i) => i.value === panelId);
       if (!item) return;
       leftItems = leftItems.filter((i) => i.value !== panelId);
-      rightItems = [...rightItems, item];
+      rightItems = insertAt(rightItems, item, index);
       if (leftActive === panelId) {
         leftActive = leftItems[0]?.value ?? "";
       }

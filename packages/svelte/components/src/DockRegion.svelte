@@ -32,6 +32,7 @@
     DockEdge,
     DockEmphasis,
     DockSizing,
+    DockPanelDropPayload,
     PanelDragData,
     PanelTabItem,
     SemanticControlSizeRole,
@@ -93,7 +94,7 @@
     onCollapsedChange?: ((isCollapsed: boolean) => void) | undefined;
     onClose?: ((value: string) => void) | undefined;
     onReorder?: ((items: string[]) => void) | undefined;
-    onPanelDrop?: ((payload: { panel: PanelDragData; targetEdge: DockEdge }) => void) | undefined;
+    onPanelDrop?: ((payload: DockPanelDropPayload) => void) | undefined;
     panel?: Snippet<[PanelTabItem]>;
     children?: Snippet<[PanelTabItem | null]>;
   }
@@ -331,10 +332,10 @@
         ? { accepted: true, intent }
         : { accepted: false, reason: "refused by host" };
     },
-    onDrop: (intent): DragDropCommitResult => {
+    onDrop: (_intent): DragDropCommitResult => {
       const panel = panelFrom($snapshot.session?.subject.id ?? "");
       if (!panel) return { status: "rejected", reason: "not a panel" };
-      onPanelDrop?.({ panel, targetEdge: edge });
+      onPanelDrop?.({ panel, targetEdge: edge, index: items.length });
       return { status: "committed" };
     },
   });
@@ -386,10 +387,15 @@
           return { status: "committed" };
         }
 
-        onPanelDrop?.({ panel, targetEdge: edge });
+        onPanelDrop?.({ panel, targetEdge: edge, index });
         return { status: "committed" };
       },
     };
+  }
+
+  function handleForeignDrop(subjectId: string, index: number): void {
+    const panel = panelFrom(subjectId);
+    if (panel) onPanelDrop?.({ panel, targetEdge: edge, index });
   }
 
   function stackItemState(item: PanelTabItem): { dragging: boolean; over: boolean } {
@@ -480,6 +486,7 @@
           onClose={handleClose}
           crossWindowSourceBridge={crossWindowDragSource}
           dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
+          onForeignDrop={handleForeignDrop}
         />
       {/if}
     </div>
@@ -511,6 +518,7 @@
             onClose={handleClose}
           crossWindowSourceBridge={crossWindowDragSource}
           dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
+          onForeignDrop={handleForeignDrop}
           />
         </div>
       {/if}
@@ -551,6 +559,7 @@
             onClose={handleClose}
           crossWindowSourceBridge={crossWindowDragSource}
           dragSubjectKind={DOCK_PANEL_SUBJECT_KIND}
+          onForeignDrop={handleForeignDrop}
           />
         </div>
         {#if collapsible && showCollapseToggle}

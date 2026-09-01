@@ -1394,7 +1394,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "onCollapsedChange", type: "((isCollapsed: boolean) => void) | undefined", default: "undefined", description: "Called when the collapsed state changes." },
       { name: "onClose", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a panel tab is closed." },
       { name: "onReorder", type: "((items: string[]) => void) | undefined", default: "undefined", description: "Called when panel tabs are reordered." },
-      { name: "onPanelDrop", type: "((payload: { panel: PanelDragData; targetEdge: DockEdge }) => void) | undefined", default: "undefined", description: "Called when a panel is dropped onto this dock." },
+      { name: "onPanelDrop", type: "((payload: { panel: PanelDragData; targetEdge: DockEdge; index: number }) => void) | undefined", default: "undefined", description: "Called when a panel is dropped onto this dock. `index` is the insert slot in the destination items; a drop on the region body appends." },
     ],
     slots: [
       { name: "panel", description: "Static-panel snippet. Receives the current panel item." },
@@ -4395,6 +4395,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "historyKey", type: "string | null", default: "null", description: "Optional URL query param key used to preserve the active tab in browser history." },
       { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the active tab changes." },
       { name: "onReorder", type: "((items: string[]) => void) | undefined", default: "undefined", description: "Called when tabs are reordered." },
+      { name: "onForeignDrop", type: "((id: string, index: number) => void) | undefined", default: "undefined", description: "Owning composite hook: a family subject not in items lands at the hovered tab and reports here instead of onReorder." },
       { name: "onClose", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a tab close button is requested." },
       { name: "onDragStart", type: "((value: string, event: DragEvent) => void) | undefined", default: "undefined", description: "Called when a reorderable tab starts dragging." },
       { name: "onDragEnd", type: "((value: string, event: DragEvent) => void) | undefined", default: "undefined", description: "Called when a reorderable tab drag ends." },
