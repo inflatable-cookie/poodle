@@ -11,8 +11,8 @@
 use std::sync::Arc;
 
 use poodle_node::{
-    AnimEasing, AnimKeyframe, AnimLoop, AnimProperty, CrossAxisAlignment, CursorHint,
-    LayoutDirection, LayoutSizing, Node, NodeAnimation, NodePosition, NodeRole, TextAlign,
+    CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, NodeRole,
+    TextAlign,
 };
 use poodle_specs::{ControlDensity, ControlSize, ToastPosition, ToastStackSpec};
 
@@ -74,32 +74,6 @@ fn all_corners(node: &mut Node, r: f32) {
     c.top_right = r;
     c.bottom_right = r;
     c.bottom_left = r;
-}
-
-/// One-shot enter animation: fade in + rise 0.5rem, ease-out.
-fn toast_enter(key: String) -> NodeAnimation {
-    NodeAnimation {
-        key,
-        keyframes: vec![
-            AnimKeyframe {
-                at: 0.0,
-                values: vec![
-                    (AnimProperty::Opacity, 0.0),
-                    (AnimProperty::TranslateY, rem_to_px(0.5)),
-                ],
-            },
-            AnimKeyframe {
-                at: 1.0,
-                values: vec![
-                    (AnimProperty::Opacity, 1.0),
-                    (AnimProperty::TranslateY, 0.0),
-                ],
-            },
-        ],
-        duration_secs: 0.18,
-        easing: AnimEasing::EaseOut,
-        loop_mode: AnimLoop::Once,
-    }
 }
 
 pub fn toast_stack(
@@ -253,7 +227,8 @@ pub fn toast_stack(
         }
 
         // Toast box: tinted fill + fade gradient, tone border,
-        // elevation-overlay shadow, clipped, listitem role, enter animation.
+        // elevation-overlay shadow, clipped, listitem role. Authored items
+        // paint the settled endpoint; construction does not attach enter.
         let mut toast_el = Node::container();
         toast_el.a11y.role = Some(NodeRole::ListItem);
         toast_el.position = NodePosition::Relative;
@@ -284,8 +259,6 @@ pub fn toast_stack(
             s.descriptor.layout.direction = LayoutDirection::Row;
             s.descriptor.layout.alignment.cross = CrossAxisAlignment::Start;
             s.descriptor.layout.spacing.gap = item_gap;
-            // Enter animation: fade + rise, one-shot, keyed by the stable id.
-            s.animation = Some(toast_enter(format!("poodle-toast-{}", toast.id)));
         }
         all_corners(&mut toast_el, radius);
 
@@ -300,4 +273,26 @@ pub fn toast_stack(
     // Contract: the stack is a list of toasts.
     el.a11y.role = Some(NodeRole::List);
     el
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use poodle_specs::Toast;
+
+    #[test]
+    fn preloaded_items_do_not_enter() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
+        let spec = ToastStackSpec::new().with_toasts(vec![Toast::new("save", "Saved")]);
+        let node = toast_stack(&spec, &ctx, ToastStackHandlers::default());
+        let toast = node
+            .find(&|n| n.id.as_deref() == Some("poodle-toast-save"))
+            .expect("toast exists");
+        assert!(
+            toast.style.animation.is_none(),
+            "authored items paint the endpoint; construction does not attach enter"
+        );
+    }
 }

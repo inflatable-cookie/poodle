@@ -1,5 +1,29 @@
 import { afterEach, beforeEach, vi } from "vitest";
 
+// happy-dom implements requestAnimationFrame but not cancelAnimationFrame.
+// Own both sides of the pair so motion-ready callbacks are teardown-safe and
+// test state cannot accumulate across roster sweeps.
+const pendingFrames = new Map<number, ReturnType<typeof setTimeout>>();
+let nextFrameId = 1;
+globalThis.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+  const id = nextFrameId++;
+  pendingFrames.set(
+    id,
+    setTimeout(() => {
+      pendingFrames.delete(id);
+      cb(Date.now());
+    }, 0),
+  );
+  return id;
+}) as typeof requestAnimationFrame;
+globalThis.cancelAnimationFrame = ((id: number) => {
+  const timer = pendingFrames.get(id);
+  if (timer !== undefined) {
+    clearTimeout(timer);
+    pendingFrames.delete(id);
+  }
+}) as typeof cancelAnimationFrame;
+
 // Smoke-test guard: any console.error during a render fails the test. Catches
 // React key warnings, invalid DOM nesting, Svelte binding errors, etc. — the
 // silent breakage a plain "did it mount" assertion would miss.
@@ -13,6 +37,10 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  for (const timer of pendingFrames.values()) {
+    clearTimeout(timer);
+  }
+  pendingFrames.clear();
   const spy = console.error as unknown as { mockRestore?: () => void };
   spy.mockRestore?.();
   if (captured.length > 0) {

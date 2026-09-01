@@ -426,29 +426,41 @@
     border-color: var(--poodle-recipe-tabs-active-outline-border, color-mix(in srgb, var(--poodle-color-accent-base) 32%, var(--poodle-color-border-subtle)));
   }
 
-  /* activeEdge="underline": the accent edge along the inline-end side —
-     bottom when horizontal, right when vertical. The former strip variant's
-     indicator, pulled over the list edge by a negative margin so it visually
-     replaces the list's border line. The edge axis is an enum, so underline
-     and outline can never both apply — no suppression rules needed. */
-  .poodle-tabs[data-active-edge="underline"] .poodle-tabs__item {
-    border-bottom: 0.125rem solid transparent;
-    margin-bottom: -0.0625rem;
+  /* activeEdge="underline": one paint-only measured indicator, not a
+     selected-item border. Outline/fill treatments stay unchanged. */
+  .poodle-tabs[data-active-edge="underline"] .poodle-tabs__list {
+    position: relative;
   }
 
-  .poodle-tabs[data-active-edge="underline"] .poodle-tabs__item[data-selected="true"] {
-    border-bottom-color: var(--poodle-recipe-tabs-active-underline-border, var(--poodle-color-accent-base));
+  .poodle-tabs__indicator {
+    position: absolute;
+    pointer-events: none;
+    background: var(--poodle-recipe-tabs-active-underline-border, var(--poodle-color-accent-base));
   }
 
-  .poodle-tabs[data-active-edge="underline"][data-orientation="vertical"] .poodle-tabs__item {
-    border-bottom: 0;
-    border-right: 0.125rem solid transparent;
-    margin-bottom: 0;
-    margin-right: -0.125rem;
+  .poodle-tabs[data-orientation="horizontal"] .poodle-tabs__indicator,
+  .poodle-tabs:not([data-orientation]) .poodle-tabs__indicator {
+    bottom: 0;
+    height: 0.125rem;
   }
 
-  .poodle-tabs[data-active-edge="underline"][data-orientation="vertical"] .poodle-tabs__item[data-selected="true"] {
-    border-right-color: var(--poodle-recipe-tabs-active-underline-border, var(--poodle-color-accent-base));
+  .poodle-tabs[data-orientation="vertical"] .poodle-tabs__indicator {
+    right: 0;
+    width: 0.125rem;
+  }
+
+  .poodle-tabs[data-motion-ready="true"][data-active-edge="underline"] .poodle-tabs__indicator {
+    transition:
+      left var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      width var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      top var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard),
+      height var(--poodle-motion-duration-interaction) var(--poodle-motion-easing-standard);
+  }
+
+  [data-poodle-motion-policy="reduced"] .poodle-tabs__indicator,
+  [data-poodle-motion-policy="frozen"] .poodle-tabs__indicator,
+  .poodle-tabs[data-indicator-snap="true"] .poodle-tabs__indicator {
+    transition: none;
   }
 
   /* activeFill="solid": fully accent-filled active tab. The foreground uses

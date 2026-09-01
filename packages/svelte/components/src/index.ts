@@ -118,6 +118,9 @@ export { default as Tooltip } from "./Tooltip.svelte";
 export { default as TriStateSwitch } from "./TriStateSwitch.svelte";
 export { default as Menubar } from "./Menubar.svelte";
 export { default as UiPresentationProvider } from "./UiPresentationProvider.svelte";
+export { default as MotionPolicyProvider } from "./MotionPolicyProvider.svelte";
+export { getMotionPolicy } from "./motion-policy";
+export type { MotionPolicy } from "@inflatable-cookie/poodle-core";
 export { DragDropProvider, useDragDrop } from "./drag-drop";
 export type {
   DragActivationConstraints,

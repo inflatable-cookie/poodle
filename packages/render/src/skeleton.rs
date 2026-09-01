@@ -63,12 +63,16 @@ fn skeleton_pulse() -> NodeAnimation {
                 values: vec![(AnimProperty::Opacity, 0.5)],
             },
             AnimKeyframe {
-                at: 1.0,
+                at: 0.5,
                 values: vec![(AnimProperty::Opacity, 0.8)],
+            },
+            AnimKeyframe {
+                at: 1.0,
+                values: vec![(AnimProperty::Opacity, 0.5)],
             },
         ],
         duration_secs: 1.6,
-        easing: AnimEasing::Linear,
+        easing: AnimEasing::EaseInOut,
         loop_mode: AnimLoop::Loop,
     }
 }
@@ -162,7 +166,11 @@ pub fn skeleton(spec: &SkeletonSpec, ctx: &RenderContext<'_>) -> Node {
     let Some(ref preset) = spec.preset else {
         let mut el = single_shape(fill, radius, spec);
         if spec.is_animated {
-            el.style.animation = Some(skeleton_pulse());
+            el.style.animation = crate::motion::loop_animation_for_policy(
+                ctx.motion_policy(),
+                skeleton_pulse(),
+                ctx.first_frame_committed(),
+            );
         }
         return el;
     };
@@ -255,7 +263,11 @@ pub fn skeleton(spec: &SkeletonSpec, ctx: &RenderContext<'_>) -> Node {
     };
     // The whole skeleton breathes; opacity cascades to every shape.
     if spec.is_animated {
-        built.style.animation = Some(skeleton_pulse());
+        built.style.animation = crate::motion::loop_animation_for_policy(
+            ctx.motion_policy(),
+            skeleton_pulse(),
+            ctx.first_frame_committed(),
+        );
     }
     built
 }
@@ -299,5 +311,15 @@ mod tests {
             rem_to_px(0.625)
         );
         assert!(table.style.fill_width);
+    }
+
+    #[test]
+    fn initial_construction_schedules_no_pulse() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = skeleton(&SkeletonSpec::new(), &ctx);
+        assert!(node.style.animation.is_none());
+        let after = skeleton(&SkeletonSpec::new(), &ctx.with_first_frame_committed(true));
+        assert!(after.style.animation.is_some());
     }
 }

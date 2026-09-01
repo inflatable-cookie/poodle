@@ -3,6 +3,7 @@
   import { checkboxParts, checkboxTransition, type CheckboxContext } from "@inflatable-cookie/poodle-core";
 
   import { default as Icon } from "./Icon.svelte";
+  import { useMotionReady } from "./motion-ready.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -25,6 +26,7 @@
 
   let input: HTMLInputElement | null = null;
   const uiPresentation = getUiPresentation();
+  const motionReady = useMotionReady();
 
   let {
     id = undefined,
@@ -103,7 +105,7 @@
   }
 </script>
 
-<label {...parts.root} class="poodle-checkbox" data-size={resolvedSize} data-density={resolvedDensity} style={checkboxStyles}>
+<label {...parts.root} class="poodle-checkbox" data-size={resolvedSize} data-density={resolvedDensity} data-motion-ready={motionReady.ready} style={checkboxStyles}>
   <input
     bind:this={input}
     {...parts.control}

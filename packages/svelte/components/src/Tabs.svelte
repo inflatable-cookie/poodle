@@ -8,6 +8,7 @@
 
   import {
     createDragDropController,
+    tabIndicatorBox,
     tabsKeydownEvent,
     tabsTransition,
     type CrossWindowDragSourceBridge,
@@ -22,6 +23,7 @@
   import { default as Menu } from "./Menu.svelte";
   import { default as Pill } from "./Pill.svelte";
   import { firstEnabledIndex } from "./internal";
+  import { useMotionReady } from "./motion-ready.svelte";
   import { default as TabsItem } from "./tabs-parts/TabsItem.svelte";
   import { getTabsForeignInsert } from "./tabs-foreign-insert";
   import { default as TabsKeyboardTargets } from "./tabs-parts/TabsKeyboardTargets.svelte";
@@ -155,6 +157,10 @@
   const isBrowser = typeof window !== "undefined";
   const uiPresentation = getUiPresentation();
   let tabElements = $state<Record<string, HTMLButtonElement | null>>({});
+  let listElement = $state<HTMLDivElement | null>(null);
+  let indicatorBox = $state<{ left: number; top: number; width: number; height: number } | null>(null);
+  let indicatorSnap = $state(false);
+  const motionReady = useMotionReady();
   let rootElement = $state<HTMLDivElement | null>(null);
   let measureListElement = $state<HTMLDivElement | null>(null);
   /** How many entries of `shed` are currently given up. */
@@ -169,6 +175,8 @@
    * collapsed menu before settling on shed icons.
    */
   let measuring = false;
+  let measuringFrame: number | null = null;
+  let destroyed = false;
   let uncontrolledValue = $state<string | null>(null);
   let seededDefaultValue = $state(false);
   let focusIndex = $state(0);
@@ -218,8 +226,54 @@
       null,
   );
   const selectedIndex = $derived(renderedItems.findIndex((item) => item.value === currentValue));
-  const hasPanel = $derived(children !== undefined);
   const isVertical = $derived(orientation === "vertical");
+
+  let indicatorSnapFrame = 0;
+
+  function measureIndicator(snap: boolean): void {
+    if (activeEdge !== "underline" || !listElement) {
+      indicatorBox = null;
+      return;
+    }
+    if (snap) {
+      indicatorSnap = true;
+    }
+    indicatorBox = tabIndicatorBox(
+      listElement,
+      tabElements[renderedItems[selectedIndex]?.value ?? ""] ?? null,
+      isVertical ? "vertical" : "horizontal",
+    );
+    if (snap) {
+      cancelAnimationFrame(indicatorSnapFrame);
+      indicatorSnapFrame = requestAnimationFrame(() => {
+        indicatorSnap = false;
+      });
+    }
+  }
+
+  $effect(() => {
+    currentValue;
+    orientation;
+    activeEdge;
+    measureIndicator(false);
+  });
+
+  $effect(() => {
+    if (!listElement) {
+      return;
+    }
+    const observer = new ResizeObserver(() => measureIndicator(true));
+    observer.observe(listElement);
+    const selected = tabElements[renderedItems[selectedIndex]?.value ?? ""];
+    if (selected) {
+      observer.observe(selected);
+    }
+    return () => {
+      cancelAnimationFrame(indicatorSnapFrame);
+      observer.disconnect();
+    };
+  });
+  const hasPanel = $derived(children !== undefined);
   const hasTooltips = $derived(isVertical || showTooltips);
   const canCollapse = $derived(collapseWhenOverflow && !isVertical);
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
@@ -268,15 +322,17 @@
 
     await tick();
 
-    if (!rootElement || !measureListElement) {
+    const root = rootElement;
+    const measureList = measureListElement;
+    if (destroyed || !root || !measureList) {
       return;
     }
 
     measuring = true;
-    const availableWidth = rootElement.getBoundingClientRect().width;
+    const availableWidth = root.getBoundingClientRect().width;
     const fits = (level: number): boolean => {
-      measureListElement!.dataset.shed = shed.slice(0, level).join(" ");
-      const width = measureListElement!.getBoundingClientRect().width;
+      measureList.dataset.shed = shed.slice(0, level).join(" ");
+      const width = measureList.getBoundingClientRect().width;
       return width <= availableWidth + 1;
     };
 
@@ -304,11 +360,16 @@
       // hides the icon on the menu's own trigger. Parts return with the menu.
       shedCount = canCollapse ? 0 : shed.length;
     } finally {
-      delete measureListElement.dataset.shed;
+      delete measureList.dataset.shed;
       // Released after a frame: the observer fires asynchronously, so clearing
       // it synchronously would let the restore-width notification through and
       // re-enter anyway.
-      requestAnimationFrame(() => {
+      if (destroyed) {
+        measuring = false;
+        return;
+      }
+      measuringFrame = requestAnimationFrame(() => {
+        measuringFrame = null;
         measuring = false;
       });
     }
@@ -337,7 +398,15 @@
     }
   }
 
-  onDestroy(() => clearTooltip());
+  onDestroy(() => {
+    destroyed = true;
+    clearTooltip();
+    if (measuringFrame !== null) {
+      cancelAnimationFrame(measuringFrame);
+      measuringFrame = null;
+    }
+    measuring = false;
+  });
 
   // Environment paths (URL history restore) apply values directly and keep
   // the old unknown-value semantics; user interactions go through the machine
@@ -648,6 +717,8 @@
   data-collapsed={collapsedByOverflow || undefined}
   data-shed={shedCount > 0 ? shed.slice(0, shedCount).join(" ") : undefined}
   data-full-width={fullWidth || undefined}
+  data-motion-ready={motionReady.ready}
+  data-indicator-snap={indicatorSnap}
 >
   {#if canCollapse}
     <div class="poodle-tabs__measure-shell" aria-hidden="true">
@@ -720,6 +791,7 @@
     </div>
   {:else}
     <div
+      bind:this={listElement}
       class="poodle-tabs__list"
       role="tablist"
       aria-label={ariaLabel ?? undefined}
@@ -766,6 +838,14 @@
           <span class="poodle-tabs__separator" aria-hidden="true"></span>
         {/if}
       {/each}
+
+      {#if activeEdge === "underline" && indicatorBox}
+        <span
+          class="poodle-tabs__indicator"
+          aria-hidden="true"
+          style="left: {indicatorBox.left}px; top: {indicatorBox.top}px; width: {indicatorBox.width}px; height: {indicatorBox.height}px"
+        ></span>
+      {/if}
 
       {#if actions}
         <div class="poodle-tabs__actions">

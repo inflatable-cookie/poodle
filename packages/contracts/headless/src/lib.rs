@@ -27,6 +27,7 @@ pub mod licence;
 pub mod menu;
 pub mod modal;
 pub mod model_connection;
+pub mod motion_policy;
 pub mod nav;
 pub mod pagination;
 pub mod popover;

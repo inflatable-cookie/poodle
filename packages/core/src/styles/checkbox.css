@@ -61,6 +61,14 @@
     line-height: 1;
   }
 
+  .poodle-checkbox[data-motion-ready="true"] .poodle-checkbox__mark {
+    transition: opacity var(--poodle-motion-duration-fast) var(--poodle-motion-easing-standard);
+  }
+
+  [data-poodle-motion-policy="frozen"] .poodle-checkbox__mark {
+    transition: none;
+  }
+
   .poodle-checkbox__label {
     font-family: var(--poodle-typography-label-family);
     font-size: var(--poodle-typography-label-size);

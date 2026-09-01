@@ -33,11 +33,11 @@ describe("Collapsible (svelte)", () => {
     });
     const trigger = getByRole("button");
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
-    expect(container.querySelector(".poodle-collapsible__content")).not.toBeNull();
+    expect(container.querySelector(".poodle-collapsible__content")?.hasAttribute("hidden")).toBe(false);
 
     await fireEvent.click(trigger);
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
-    expect(container.querySelector(".poodle-collapsible__content")).toBeNull();
+    expect(container.querySelector(".poodle-collapsible__content")?.hasAttribute("hidden")).toBe(true);
   });
 
   it("keeps content closed until the trigger is pressed", async () => {
@@ -46,7 +46,7 @@ describe("Collapsible (svelte)", () => {
     });
     const trigger = getByRole("button");
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
-    expect(container.querySelector(".poodle-collapsible__content")).toBeNull();
+    expect(container.querySelector(".poodle-collapsible__content")?.hasAttribute("hidden")).toBe(true);
 
     await fireEvent.click(trigger);
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
@@ -74,6 +74,6 @@ describe("Collapsible (svelte)", () => {
       props: { open: false, children: asSnippet(() => "Content") },
     });
     expect(getByRole("button").getAttribute("aria-expanded")).toBe("false");
-    expect(container.querySelector(".poodle-collapsible__content")).toBeNull();
+    expect(container.querySelector(".poodle-collapsible__content")?.hasAttribute("hidden")).toBe(true);
   });
 });

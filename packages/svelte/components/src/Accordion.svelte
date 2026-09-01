@@ -5,10 +5,11 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/accordion.css";
   import { toggleGroupTransition } from "@inflatable-cookie/poodle-core";
-  import type { Snippet } from "svelte";
-  import { slide } from "svelte/transition";
+  import { untrack, type Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
+  import { clippedHeight } from "./disclosure-motion";
+  import { useMotionReady } from "./motion-ready.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
   import type { AccordionItem, ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
@@ -41,6 +42,7 @@
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+  const motionReady = useMotionReady();
   const accordionId = ++nextAccordionId;
   let uncontrolledValue = $state<string | string[] | null>(null);
   let seededDefaultValue = $state(false);
@@ -61,6 +63,36 @@
     : currentValue
       ? [currentValue]
       : []);
+  let closing = $state(new Set<string>());
+  let previousOpen = new Set<string>();
+
+  $effect.pre(() => {
+    const next = new Set(openValues);
+    const ready = motionReady.ready;
+    const prev = previousOpen;
+    previousOpen = next;
+    const nextClosing = new Set<string>();
+    if (ready) {
+      const current = untrack(() => closing);
+      for (const value of current) {
+        if (!next.has(value)) {
+          nextClosing.add(value);
+        }
+      }
+      for (const value of prev) {
+        if (!next.has(value)) {
+          nextClosing.add(value);
+        }
+      }
+    }
+    const current = untrack(() => closing);
+    if (
+      current.size !== nextClosing.size ||
+      [...nextClosing].some((value) => !current.has(value))
+    ) {
+      closing = nextClosing;
+    }
+  });
 
   function toggle(itemValue: string): void {
     const result = toggleGroupTransition(
@@ -94,6 +126,7 @@
   aria-label={ariaLabel ?? undefined}
   data-size={resolvedSize}
   data-density={resolvedDensity}
+  data-motion-ready={motionReady.ready}
 >
   {#each items as item (item.value)}
     <section class="poodle-accordion__item" data-open={openValues.includes(item.value)}>
@@ -117,18 +150,32 @@
         </button>
       </h3>
 
-      {#if openValues.includes(item.value)}
+      <div
+        class="poodle-accordion__panel-clip"
+        use:clippedHeight={{
+          owner: `accordion-${accordionId}-${item.value}`,
+          open: openValues.includes(item.value),
+          policy: motionReady.policy,
+          ready: motionReady.ready,
+          onCloseFinished: () => {
+            const nextClosing = new Set(closing);
+            nextClosing.delete(item.value);
+            closing = nextClosing;
+          },
+        }}
+      >
         <div
           class="poodle-accordion__panel"
           id={`poodle-accordion-panel-${accordionId}-${item.value}`}
           role="region"
           aria-labelledby={`poodle-accordion-trigger-${accordionId}-${item.value}`}
-          transition:slide={{ duration: 180 }}
+          hidden={!openValues.includes(item.value) && !closing.has(item.value)}
+          inert={!openValues.includes(item.value)}
+          aria-hidden={!openValues.includes(item.value) ? "true" : undefined}
         >
-          {@render children?.(item, true)}
+          {@render children?.(item, openValues.includes(item.value))}
         </div>
-      {/if}
+      </div>
     </section>
   {/each}
 </div>
-

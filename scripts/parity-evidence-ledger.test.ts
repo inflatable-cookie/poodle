@@ -8,10 +8,10 @@ const ledgerPath = path.join(root, "docs/roadmaps/g16/parity-evidence-ledger.md"
 setDefaultTimeout(30_000);
 
 describe("g16.001 parity evidence ledger", () => {
-  it("derives the fixed 175/174 roster", () => {
+  it("derives the fixed 176/175 roster", () => {
     const roster = deriveLiveRoster(root);
-    expect(roster).toHaveLength(175);
-    expect(roster.filter((component) => component.portable)).toHaveLength(174);
+    expect(roster).toHaveLength(176);
+    expect(roster.filter((component) => component.portable)).toHaveLength(175);
     expect(roster.find((component) => component.name === "MeterSurface")?.portable).toBe(false);
   });
 

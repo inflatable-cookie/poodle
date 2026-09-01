@@ -1,5 +1,5 @@
 <!-- parity consv=gap gpui=1 jetstream=0 specimen=ok -->
-<!-- g16.034 promotes one 1.6s opacity pulse in full policy and static reduced/frozen frames. Web still implements the retired gradient-position shimmer; GPUI has a pulse but lacks the new host policy, first-frame, and teardown proofs. The card owns both migrations. Existing preset/shape fixes remain valid. -->
+<!-- g16.034 landed the shared 1.6s opacity pulse in full policy and static reduced/frozen frames. GPUI still cannot claim exact visual parity for unsupported channels; that remains a named approximation gap, not a ledger move. Existing preset/shape fixes remain valid. -->
 # Parity: Skeleton
 
 > Status line above is machine-read. `consv` = contract↔Svelte (`ok`/`fixed`/`gap`);
@@ -20,18 +20,16 @@ Contract and Svelte agree on the public prop surface (`shape`/`preset`/`width`/`
 
 - [x] FIXED (contract already correct): Contract §3 names the shape union `"line" | "block" | "circle"` and Svelte matches it (`SkeletonShape`, `data-shape={shape}`). The divergence is the Rust `SkeletonSpec.shape` (`"rectangle"`/`"text"`/`"circle"`, `skeleton.rs:35,86-89`) — a **Rust spec rename (code, out of scope here)**. The contract needs no change; do NOT change the contract.
 - [x] FIXED: Contract §6 now states the single-shape element also sets `aria-hidden="true"` (matching Svelte's single-shape `<span>`, `Skeleton.svelte:78`), not just preset containers.
-- [ ] G16.034 PROMOTED CHANGE: contract §8 now normalizes full mode to a
-  1.6s opacity pulse and reduced/frozen to static output. Svelte still carries
-  the retired gradient-position shimmer until the card lands.
+- [x] G16.034: web Skeleton now uses the shared 1.6s opacity pulse after the
+  first committed frame. `animated=false`, reduced, and frozen schedule none.
 
 ## GPUI gap (vs Svelte + contract)
 
 Behavior + visual gaps. `[ ]` open, `[x]` done. Mark accepted runtime limits.
 
-- [ ] G16.034: GPUI's existing opacity pulse is the accepted property shape,
-  but it must consume the effective policy, start after the first committed
-  frame, use the contracted endpoints/easing, stop in reduced/frozen, and prove
-  teardown leaves no loop.
+- [x] G16.034: GPUI pulse now goes through `animation_for_policy`. Reduced and
+  frozen declare no clock. First-frame start is a web-runtime concern; native
+  declarations are present or absent per policy, not a second clock owner.
 - [x] FIXED (GPUI): static fill is now the token-resolved shimmer mid-tone (`color_mix(highlight, base, 0.5)` from `shimmer_*_token`), not a bare opacity. Static fill uses hardcoded `el.opacity(0.5)` (`skeleton.rs:99,222`) — no token; the gradient fill is also absent (single flat `bg(fill)`), so the contract's 3-stop gradient never renders.
 - [x] FIXED (GPUI): preset bones now percentage-driven (`w(relative(frac))` for 40/60/60/20%, 80/100/60%) or exact rem (avatar 2.25rem, header 6rem, line 10rem). No raw px. Hardcoded pixel literals throughout preset bones: `px(120.0)`, `px(80.0)`, `px(200.0)`, `px(60.0)` (table-row `skeleton.rs:115-118`); `px(9999.0)`, `px(180.0)`, `px(240.0)` (card `skeleton.rs:127-129`); `px(160.0)`, `px(100.0)` (list-item `skeleton.rs:146-148`); `px(140.0)`, `px(9999.0)` (detail `skeleton.rs:156,159`); `px(120.0)`, `px(80.0)` (avatar-line `skeleton.rs:175-176`). Contract widths are percentages/rem (40/60/60/20%, 80/100/60%, 10rem) — resolve from rem or percentage relatives, not raw px.
 - [x] FIXED (GPUI): line-sm height now `rem_to_px(0.6875)` constant; ad-hoc `*1.2`/`*0.85` multipliers gone (heading 1rem, lines 0.875rem per contract). Hardcoded radius magic number `px(rem_to_px(0.6875))` for line-sm height (`skeleton.rs:148`) and ad-hoc multipliers `default_height * 1.2` (`skeleton.rs:156`), `default_height * 0.85` (`skeleton.rs:176`) — invent values not traceable to any contract token.

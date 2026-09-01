@@ -1,6 +1,8 @@
-import { render } from "@testing-library/react";
+import { cleanup, render } from "@testing-library/react";
 import { createElement } from "react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
+
+afterEach(cleanup);
 
 import { COMPONENT_PROPS, SMOKE_EXCLUDE, SMOKE_EXCLUDE_REACT } from "../../../../test/fixtures/component-props";
 

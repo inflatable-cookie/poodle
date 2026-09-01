@@ -35,10 +35,10 @@ use std::rc::Rc;
 use std::sync::RwLock;
 use std::time::{Duration, Instant};
 
-/// The catalogue's portable-route denominator: 174 canonical entries. The
+/// The catalogue's portable-route denominator: 175 canonical entries. The
 /// web-only `MeterSurface` (spec 068) is the single native `n/a` and must
 /// never join this list.
-const EXPECTED_ROUTES: usize = 174;
+const EXPECTED_ROUTES: usize = 175;
 
 /// The card's stop condition: the post-compilation sweep body must stay under
 /// two minutes so the probe can live inside the QA boards.
@@ -90,7 +90,13 @@ fn probe_viewport() -> Size<Pixels> {
 /// clear `debug_bounds`, so a reused window would keep reporting an earlier
 /// route's tabs. A fresh root is also the route-state reset — no specimen's
 /// retained tab or toggle can leak into another route.
-fn open_route_window(app: &TestAppContext, slug: &str) -> VisualTestContext {
+fn open_route_window(
+    app: &TestAppContext,
+    slug: &str,
+) -> (gpui::Entity<PreviewRoot>, VisualTestContext) {
+    let root_holder: Rc<RefCell<Option<gpui::Entity<PreviewRoot>>>> = Rc::default();
+    let captured_root = Rc::clone(&root_holder);
+    let slug = slug.to_string();
     let window = app.update(|app| {
         app.open_window(
             WindowOptions {
@@ -100,24 +106,34 @@ fn open_route_window(app: &TestAppContext, slug: &str) -> VisualTestContext {
                 })),
                 ..Default::default()
             },
-            |_window, cx| {
-                cx.new(|cx| {
+            move |_window, cx| {
+                let root = cx.new(|cx| {
                     let mut root = PreviewRoot::new(cx);
-                    root.state.active_component_slug = Some(slug.to_string());
+                    root.state.active_component_slug = Some(slug);
                     root
-                })
+                });
+                *captured_root.borrow_mut() = Some(root.clone());
+                root
             },
         )
         .expect("probe window opens")
     });
-    VisualTestContext::from_window(window.into(), app)
+    let root = root_holder
+        .borrow_mut()
+        .take()
+        .expect("probe root captured");
+    (root, VisualTestContext::from_window(window.into(), app))
 }
 
 /// Let queued work land, then flush once more so any state it dirtied is
 /// drawn into the rendered frame before assertions read it.
 fn settle(cx: &mut VisualTestContext) {
     cx.run_until_parked();
-    cx.update(|_window, _app| {});
+    cx.update(|window, app| {
+        window.refresh();
+        let _ = window.draw(app);
+    });
+    cx.run_until_parked();
 }
 
 /// The route painted a real specimen card and did not reach the fallback.
@@ -167,7 +183,7 @@ fn exercise_axis_tabs(cx: &mut VisualTestContext, slug: &str) -> (usize, usize) 
 fn ordinary_route_constructs_a_real_specimen_card() {
     let _shared = shared_render_guard();
     let app = TestAppContext::single();
-    let mut cx = open_route_window(&app, "region");
+    let (_root, mut cx) = open_route_window(&app, "region");
     settle(&mut cx);
     assert_real_specimen(&mut cx, "region");
 }
@@ -178,7 +194,7 @@ fn ordinary_route_constructs_a_real_specimen_card() {
 fn axis_route_opens_every_advertised_pane() {
     let _shared = shared_render_guard();
     let app = TestAppContext::single();
-    let mut cx = open_route_window(&app, "button");
+    let (_root, mut cx) = open_route_window(&app, "button");
     settle(&mut cx);
     assert_real_specimen(&mut cx, "button");
     assert_eq!(
@@ -186,6 +202,39 @@ fn axis_route_opens_every_advertised_pane() {
         (1, 1),
         "button advertises one Sizes tab and one Densities tab"
     );
+}
+
+/// g16.034 production-host proof: the real `PreviewRoot` builds loading nodes
+/// without a clock on its first paint, then marks that frame committed through
+/// `Window::on_next_frame` and rebuilds the same route with its loop enabled.
+#[test]
+fn production_loading_routes_commit_before_starting_full_mode_loops() {
+    let _shared = shared_render_guard();
+    for slug in ["skeleton", "spinner"] {
+        let app = TestAppContext::single();
+        poodle_gpui_node_backend::begin_probe_capture();
+        let (root, mut cx) = open_route_window(&app, slug);
+        let initial = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            !initial.contains(&"surface.animation.scheduled"),
+            "{slug}: first production paint must not schedule a loading loop"
+        );
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        // The test platform intentionally leaves `on_request_frame` inert, so
+        // it cannot dispatch Window::on_next_frame. Invoke the exact
+        // production callback body through the mounted PreviewRoot entity;
+        // the route remains a real PreviewRoot/node-backend paint.
+        cx.update(|_window, app| {
+            root.update(app, |root, cx| root.commit_first_frame(cx));
+        });
+        settle(&mut cx);
+        let committed = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            committed.contains(&"surface.animation.scheduled"),
+            "{slug}: the production first-frame callback must enable the full-mode loop"
+        );
+    }
 }
 
 /// Test-only host that paints one pre-built element as a window root, so the
@@ -201,7 +250,9 @@ impl gpui::Render for FallbackHost {
         _window: &mut gpui::Window,
         _cx: &mut gpui::Context<Self>,
     ) -> impl IntoElement {
-        self.content.take().unwrap_or_else(|| div().into_any_element())
+        self.content
+            .take()
+            .unwrap_or_else(|| div().into_any_element())
     }
 }
 
@@ -215,7 +266,15 @@ fn unknown_dispatch_paints_the_fallback_marker() {
         let (root, cx) = app.add_window_view(|_window, cx| PreviewRoot::new(cx));
         cx.update(|_window, app: &mut App| {
             root.update(app, |root, cx| {
-                specimens::render_single_specimen("not-a-catalogue-route", &root.state, cx)
+                let base_motion_context = poodle_render::RenderContext::new(&root.state.theme);
+                let motion_context = base_motion_context
+                    .with_first_frame_committed(root.first_frame_committed);
+                specimens::render_single_specimen(
+                    "not-a-catalogue-route",
+                    &root.state,
+                    cx,
+                    &motion_context,
+                )
                     .into_any_element()
             })
         })
@@ -235,14 +294,14 @@ fn unknown_dispatch_paints_the_fallback_marker() {
 
 /// The durable sweep, sharded so wall time stays far under the two-minute
 /// budget on slower CI machines: each shard walks its contiguous slice of the
-/// canonical registry, and every shard re-asserts the 174-entry denominator
+/// canonical registry, and every shard re-asserts the 175-entry denominator
 /// so a registry change cannot silently shrink coverage. Between them the
 /// shards visit every route exactly once.
 fn sweep_shard(shard: usize, routes: &'static [crate::component_registry::CanonicalComponent]) {
     assert_eq!(
         CANONICAL_COMPONENTS.len(),
         EXPECTED_ROUTES,
-        "the native probe denominator is exactly the 174 portable catalogue \
+        "the native probe denominator is exactly the 175 portable catalogue \
          entries; a registry change must reconcile the audit, not this number"
     );
     assert!(
@@ -262,7 +321,7 @@ fn sweep_shard(shard: usize, routes: &'static [crate::component_registry::Canoni
         let slug = component.slug;
         // Last-route marker in captured output, so a panic still names its slug.
         eprintln!("probe: mounting {slug}");
-        let mut cx = open_route_window(&app, slug);
+        let (_root, mut cx) = open_route_window(&app, slug);
         settle(&mut cx);
         assert_real_specimen(&mut cx, slug);
         let (sizes, densities) = exercise_axis_tabs(&mut cx, slug);
@@ -376,9 +435,7 @@ fn stepper_route_selection_and_rerun_run_through_the_preview_adapter() {
 
     // Exclusive: this is the one probe that clicks controls the shared render
     // gives no id, so no other thread may restart the id counter mid-click.
-    let _exclusive = NODE_TREE_RENDER
-        .write()
-        .unwrap_or_else(|e| e.into_inner());
+    let _exclusive = NODE_TREE_RENDER.write().unwrap_or_else(|e| e.into_inner());
     let app = TestAppContext::single();
     let (root, mut cx) = open_stateful_route_window(&app, "stepper", 3200.0);
     settle(&mut cx);

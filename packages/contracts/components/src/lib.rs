@@ -96,6 +96,7 @@ mod tooltip;
 mod tri_state_switch;
 mod types;
 mod ui_presentation_provider;
+mod motion_policy_provider;
 
 // Composite modules
 mod action_discovery_panel;
@@ -320,6 +321,8 @@ pub use toggle_group::{ToggleGroupOption, ToggleGroupSelectionMode, ToggleGroupS
 pub use tooltip::TooltipSpec;
 pub use tri_state_switch::TriStateSwitchSpec;
 pub use ui_presentation_provider::UiPresentationProviderSpec;
+pub use motion_policy_provider::MotionPolicyProviderSpec;
+pub use poodle_headless::motion_policy::MotionPolicy;
 /// Deprecated: Use `DateTimeZonePickerSpec` instead.
 pub type ZonedDateTimePickerSpec = DateTimeZonePickerSpec;
 pub use types::{

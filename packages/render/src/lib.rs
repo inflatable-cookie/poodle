@@ -52,6 +52,7 @@ pub mod command_palette;
 pub mod confirm_action;
 pub mod context;
 pub mod context_menu;
+pub mod motion;
 pub mod data_table;
 pub mod date_picker;
 pub mod date_range_picker;
@@ -248,7 +249,7 @@ pub use command_palette::{command_palette, command_palette_with_handlers, Comman
 pub use confirm_action::{confirm_action, confirm_action_with_slots, ConfirmActionHandlers};
 // The fixed public path for the construction-time presentation API
 // (architecture 010): `poodle_render::RenderContext`.
-pub use context::{ui_presentation_provider, RenderContext, SlotBuilder};
+pub use context::{motion_policy_provider, ui_presentation_provider, RenderContext, SlotBuilder};
 pub use context_menu::context_menu;
 pub use data_table::{data_table, data_table_loading, DataTableHandlers};
 pub use date_picker::{date_picker, DatePickerHandlers};
@@ -354,6 +355,7 @@ pub use pagination_summary::pagination_summary;
 pub use password_requirements::password_requirements;
 pub use picker_shell::picker_shell;
 pub use pill::{pill, pill_with_remove};
+pub use poodle_headless::motion_policy::MotionPolicy;
 pub use poodle_headless::select::{SelectContext, SelectEffect, SelectEvent};
 pub use popover::{
     popover, popover_surface, PopoverHandlers, POPOVER_ANCHOR_HEIGHT_PX, POPOVER_ANCHOR_WIDTH_PX,

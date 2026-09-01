@@ -148,6 +148,7 @@ pub mod tooltip;
 pub mod tree;
 pub mod tri_state_switch;
 pub mod ui_presentation_provider;
+pub mod motion_policy_provider;
 pub mod validation_summary;
 pub mod video_player;
 
@@ -508,6 +509,7 @@ pub fn render_specimen(
         "tree" => Some(el(tree::render(state, theme))),
         "tri-state-switch" => Some(el(tri_state_switch::render(theme))),
         "ui-presentation-provider" => Some(el(ui_presentation_provider::render(theme))),
+        "motion-policy-provider" => Some(el(motion_policy_provider::render(theme))),
         "validation-summary" => Some(el(validation_summary::render(theme))),
         "video-player" => Some(el(video_player::render(theme))),
         "date-time-zone-picker" => Some(el(date_time_zone_picker::render(theme))),

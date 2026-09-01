@@ -1,6 +1,6 @@
 # g16.034 — Shared Motion Policy And Five-Family Pilot
 
-Status: ready
+Status: implemented — production repair complete; final evidence in execution log
 Opened: 2026-09-01
 Depends on: merged planning intake PR #121 and promoted architecture 012;
 `g16.033` is complete
@@ -53,7 +53,9 @@ claim.
    do not restart.
 9. Normalize Skeleton to the 1.6s opacity pulse and retain Spinner's rotation/
    opacity variants. Loops start after the first committed frame in full;
-   reduced/frozen and `Skeleton.animated=false` schedule none. Prove the
+   reduced/frozen and `Skeleton.animated=false` schedule none. Wire the
+   production GPUI preview through `Window::on_next_frame` and prove the
+   mounted loading routes commit before starting full-mode loops. Prove the
    host-owned loading-to-content boundary.
 10. Add the layered pilot evidence, update exact contracts/log/currentness, run
     the full headless boards, falsify every oracle row, and close the card.
@@ -81,8 +83,11 @@ claim.
 - No Dialog state, icon morphing, shimmer, block slider, arbitrary easing,
   blur/path/filter/canvas/3D system, Jetstream admission, or permanent
   conformance authority enters the diff.
-- No parity-ledger cell moves. This card adds semantic/lifecycle evidence and
-  explicit capability gaps, not broad visual or accessibility completion.
+- No established parity-ledger cell moves. The additive public
+  `MotionPolicyProvider` export is reflected by the live 176 public / 175
+  portable denominator (with `MeterSurface` fixed web-only / n/a); this card
+  adds semantic/lifecycle evidence and explicit capability gaps, not broad
+  visual or accessibility completion.
 
 ## Review Oracle
 
@@ -121,6 +126,24 @@ real proof before planting so restoration cannot discard it.
 Do not create an exhaustive family × mode × runtime corpus or a new generated
 interface.
 
+Production repair evidence:
+
+- `packages/core/test/motion-runtime.test.ts` proves natural clipped-height
+  completion removes the exact live handle.
+- `packages/svelte/components/src/disclosure-motion.ts` and
+  `packages/react/components/src/disclosure-motion.ts` are wired into the
+  actual Accordion/Collapsible paths; mounted rapid controlled reversal cases
+  use a live clipped height and proportional remaining duration.
+- `packages/svelte/components/test/ssr/ToastStackSsr.test.ts` proves authored
+  preloaded ToastStack items are present and settled on the first/SSR paint.
+- `production_loading_routes_commit_before_starting_full_mode_loops` in
+  `packages/gpui/preview/src/specimen_probe.rs` mounts the real PreviewRoot
+  Skeleton/Spinner routes and proves full-mode loops start only after the
+  production first-frame commit path.
+- The mounted React close receipt keeps controlled prop-driven content visible
+  until the close remnant exists; the accepted PR #125 Tabs drag/drop handlers
+  remain unchanged.
+
 ## Writable Scope
 
 - `packages/core/` motion policy/lifecycle helpers, focused tests, and shared
@@ -139,8 +162,11 @@ interface.
   `PAPERCUTS.md` for new execution friction.
 
 Do not edit block sliders, icon morphing, shimmer, Dialog, package versions,
-release workflows, downstream consumers, the parity denominator, or Jetstream
-admission.
+release workflows, or downstream consumers. Do not move established parity
+evidence cells or change runtime admission. The additive provider export/row
+is reflected by the current 176 public / 175 portable denominator; do not
+admit Jetstream. A generated/static Jetstream catalogue route is registry
+metadata only, not Jetstream admission or mounted parity.
 
 ## Validation
 

@@ -14,11 +14,11 @@ describe("Accordion (react)", () => {
     const triggers = getAllByRole("button");
 
     expect(triggers[0].getAttribute("aria-expanded")).toBe("false");
-    expect(container.querySelector(".poodle-accordion__panel")).toBeNull();
+    expect(container.querySelector(".poodle-accordion__panel")?.hasAttribute("hidden")).toBe(true);
 
     fireEvent.click(triggers[0]);
     expect(triggers[0].getAttribute("aria-expanded")).toBe("true");
-    expect(container.querySelector(".poodle-accordion__panel")).not.toBeNull();
+    expect(container.querySelector(".poodle-accordion__panel")?.hasAttribute("hidden")).toBe(false);
 
     fireEvent.click(triggers[0]);
     expect(triggers[0].getAttribute("aria-expanded")).toBe("false");

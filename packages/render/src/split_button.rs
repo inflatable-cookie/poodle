@@ -92,7 +92,9 @@ pub fn split_button(
     // layering. At base tokens (the Jetstream provider, no axes) md/default
     // reproduces the old fixed values; under a preview axis the control now
     // follows the axis like Svelte does.
-    let height = ctx.theme().resolve_space(spec.control_height_token(ctx.base_size(spec.size)))
+    let height = ctx
+        .theme()
+        .resolve_space(spec.control_height_token(ctx.base_size(spec.size)))
         + rem_to_px(size_height_offset_rem(effective_size));
     let font_size = rem_to_px(size_font_rem(effective_size));
     let pad_x = ctx.theme().resolve_space("space.control.x")
@@ -196,7 +198,11 @@ pub fn split_button(
     if spec.is_loading {
         let mut spin = Node::icon("spinner", rem_to_px(0.75));
         spin.style.descriptor.text_color = Some(colors.text);
-        spin.style.animation = Some(NodeAnimation::spin("poodle-spinner-ring", 0.8));
+        spin.style.animation = crate::motion::loop_animation_for_policy(
+            ctx.motion_policy(),
+            NodeAnimation::spin("poodle-spinner-ring", 0.8),
+            ctx.first_frame_committed(),
+        );
         primary = primary.child(spin);
     }
     if !label.is_empty() {
@@ -733,7 +739,23 @@ mod tests {
             _ => unreachable!(),
         }
         assert_eq!(spinner.style.descriptor.text_color, Some(text_primary));
-        assert!(spinner.style.animation.is_some());
+        assert!(
+            spinner.style.animation.is_none(),
+            "loading loops wait for the first committed frame"
+        );
+        let after = split_button(
+            &spec,
+            &ctx.with_first_frame_committed(true),
+            SplitButtonHandlers::default(),
+        );
+        assert!(after
+            .find(
+                &|n| matches!(&n.kind, poodle_node::NodeKind::Icon { name, .. } if name == "spinner"),
+            )
+            .expect("loading spinner glyph")
+            .style
+            .animation
+            .is_some());
         // Loading is unavailable: dimmed, no activation.
         assert!(primary_half(&node).interaction.on_activate.is_none());
     }
@@ -833,7 +855,9 @@ mod tests {
 
         // Refusal: the open menu surface carries the inert activation marker
         // a host keys outside-dismissal on.
-        let refusing = spec().with_open(true).with_dismiss_on_outside_interact(false);
+        let refusing = spec()
+            .with_open(true)
+            .with_dismiss_on_outside_interact(false);
         let node = split_button(&refusing, &ctx, SplitButtonHandlers::default());
         let menu_node = node
             .find(&|n| n.a11y.role == Some(NodeRole::Menu))

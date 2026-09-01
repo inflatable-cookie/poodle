@@ -59,6 +59,9 @@
     border-top-color: currentColor;
     border-radius: 999px;
     box-sizing: border-box;
+  }
+
+  .poodle-spinner[data-motion-ready="true"] .poodle-spinner__ring {
     animation: poodle-spinner-ring 0.8s linear infinite;
   }
 
@@ -76,6 +79,9 @@
     border-radius: 999px;
     background: currentColor;
     opacity: 0.3;
+  }
+
+  .poodle-spinner[data-motion-ready="true"] .poodle-spinner__dot {
     animation: poodle-spinner-dot 1.05s ease-in-out infinite;
   }
 
@@ -102,6 +108,9 @@
     border-radius: 0.125rem;
     background: currentColor;
     opacity: 0.2;
+  }
+
+  .poodle-spinner[data-motion-ready="true"] .poodle-spinner__cell {
     animation: poodle-spinner-grid-idle 1.24s linear infinite;
   }
 
@@ -127,6 +136,15 @@
 
   .poodle-spinner__cell[data-phase="br"] {
     animation-name: poodle-spinner-grid-br;
+  }
+
+  [data-poodle-motion-policy="reduced"] .poodle-spinner__ring,
+  [data-poodle-motion-policy="frozen"] .poodle-spinner__ring,
+  [data-poodle-motion-policy="reduced"] .poodle-spinner__dot,
+  [data-poodle-motion-policy="frozen"] .poodle-spinner__dot,
+  [data-poodle-motion-policy="reduced"] .poodle-spinner__cell,
+  [data-poodle-motion-policy="frozen"] .poodle-spinner__cell {
+    animation: none;
   }
 
   @keyframes poodle-spinner-ring {

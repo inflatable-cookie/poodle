@@ -162,7 +162,7 @@ fn rounded_all(node: &mut Node, r: f32) {
 fn apply_active_edge(
     node: &mut Node,
     is_active: bool,
-    vertical: bool,
+    _vertical: bool,
     spec: &TabsSpec,
     ctx: &RenderContext<'_>,
 ) {
@@ -176,17 +176,65 @@ fn apply_active_edge(
             node.style.descriptor.border.color = if is_active { selected } else { TRANSPARENT };
         }
         ActiveEdge::Underline => {
-            let accent = ctx.theme().resolve_color(spec.indicator_token());
-            let edge = if is_active { accent } else { TRANSPARENT };
-            if vertical {
-                node.style.border_right_width = Some(rem_to_px(0.125));
-                node.style.descriptor.border.color = edge;
-            } else {
-                node.style.border_bottom_width = Some(rem_to_px(0.125));
-                node.style.border_color_bottom = Some(edge);
-            }
+            // Underline is one paint-only indicator owned by the tablist, not
+            // a selected-item border. See `attach_underline_slots`.
         }
     }
+}
+
+fn underline_bar(ctx: &RenderContext<'_>, spec: &TabsSpec, vertical: bool, selected: bool) -> Node {
+    let thickness = rem_to_px(0.125);
+    let mut bar = Node::container();
+    if selected {
+        bar.id = Some("poodle-tabs-indicator".into());
+        bar.style.descriptor.background = Some(ctx.theme().resolve_color(spec.indicator_token()));
+    }
+    {
+        let s = &mut bar.style;
+        if vertical {
+            s.descriptor.layout.width = LayoutSizing::Fixed(thickness);
+            s.fill_height = true;
+        } else {
+            s.descriptor.layout.height = LayoutSizing::Fixed(thickness);
+            s.fill_width = true;
+        }
+    }
+    bar
+}
+
+fn attach_underline_slots(
+    mut list: Node,
+    spec: &TabsSpec,
+    ctx: &RenderContext<'_>,
+    vertical: bool,
+) -> Node {
+    if spec.active_edge != ActiveEdge::Underline {
+        return list;
+    }
+    let children = std::mem::take(&mut list.children);
+    for child in children {
+        let selected = child.a11y.selected == Some(true);
+        let mut slot = Node::container();
+        {
+            let s = &mut slot.style;
+            s.descriptor.layout.direction = if vertical {
+                LayoutDirection::Row
+            } else {
+                LayoutDirection::Column
+            };
+            if child.style.flex_fill {
+                s.flex_fill = true;
+            }
+            if child.style.fill_width {
+                s.fill_width = true;
+            }
+        }
+        slot = slot
+            .child(child)
+            .child(underline_bar(ctx, spec, vertical, selected));
+        list = list.child(slot);
+    }
+    list
 }
 
 /// Icon + label + count badge, the anatomy shared by all variants.
@@ -741,7 +789,7 @@ fn render_card(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers
         wire_collection_semantics(&mut tab_el, spec, tab_bar.children.len(), handlers, ctx);
         tab_bar = tab_bar.child(tab_el);
     }
-    tab_bar
+    attach_underline_slots(tab_bar, spec, ctx, vertical)
 }
 
 fn render_pill(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers) -> Node {
@@ -830,7 +878,7 @@ fn render_pill(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers
         wire_collection_semantics(&mut tab_el, spec, container.children.len(), handlers, ctx);
         container = container.child(tab_el);
     }
-    container
+    attach_underline_slots(container, spec, ctx, false)
 }
 
 fn render_block(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandlers) -> Node {
@@ -937,7 +985,7 @@ fn render_block(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandler
         wire_collection_semantics(&mut tab_el, spec, tab_bar.children.len(), handlers, ctx);
         tab_bar = tab_bar.child(tab_el);
     }
-    tab_bar
+    attach_underline_slots(tab_bar, spec, ctx, vertical)
 }
 
 #[cfg(test)]
@@ -1091,14 +1139,17 @@ mod tests {
         let accent = theme.resolve_color(spec.indicator_token());
 
         let active = tab_of(&root, "a");
-        assert_eq!(active.style.border_bottom_width, Some(rem_to_px(0.125)));
-        assert_eq!(active.style.border_color_bottom, Some(accent));
+        assert_eq!(active.style.border_bottom_width, None);
+        assert_eq!(active.style.border_color_bottom, None);
 
-        // Unselected tabs keep a transparent reserve edge so the underline
-        // never shifts the bar when selection moves.
+        let indicator = root
+            .find(&|n| n.id.as_deref() == Some("poodle-tabs-indicator"))
+            .expect("one paint-only underline indicator");
+        assert_eq!(indicator.style.descriptor.background, Some(accent));
+
         let inactive = tab_of(&root, "b");
-        assert_eq!(inactive.style.border_bottom_width, Some(rem_to_px(0.125)));
-        assert_eq!(inactive.style.border_color_bottom, Some(TRANSPARENT));
+        assert_eq!(inactive.style.border_bottom_width, None);
+        assert_eq!(inactive.style.border_color_bottom, None);
     }
 
     #[test]
@@ -1118,8 +1169,16 @@ mod tests {
         let accent = theme.resolve_color(spec.indicator_token());
 
         let active = tab_of(&root, "a");
-        assert_eq!(active.style.border_right_width, Some(rem_to_px(0.125)));
-        assert_eq!(active.style.descriptor.border.color, accent);
+        assert_eq!(active.style.border_right_width, None);
+
+        let indicator = root
+            .find(&|n| n.id.as_deref() == Some("poodle-tabs-indicator"))
+            .expect("one paint-only underline indicator");
+        assert_eq!(indicator.style.descriptor.background, Some(accent));
+        assert_eq!(
+            indicator.style.descriptor.layout.width,
+            LayoutSizing::Fixed(rem_to_px(0.125))
+        );
     }
 
     #[test]
@@ -1196,18 +1255,16 @@ mod tests {
         .with_value("a");
 
         let root = tabs(&spec, &ctx, None, None);
-        let accent = theme.resolve_color(spec.indicator_token());
 
         // The strip equivalent: underline and no fill.
         let active = tab_of(&root, "a");
         assert_eq!(active.style.descriptor.background, None);
-        assert_eq!(active.style.border_bottom_width, Some(rem_to_px(0.125)));
-        assert_eq!(active.style.border_color_bottom, Some(accent));
+        assert!(root
+            .find(&|n| n.id.as_deref() == Some("poodle-tabs-indicator"))
+            .is_some());
 
-        // Unselected tabs keep the transparent reserve edge.
         let inactive = tab_of(&root, "b");
-        assert_eq!(inactive.style.border_bottom_width, Some(rem_to_px(0.125)));
-        assert_eq!(inactive.style.border_color_bottom, Some(TRANSPARENT));
+        assert_eq!(inactive.style.border_bottom_width, None);
     }
 
     #[test]

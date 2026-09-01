@@ -8,6 +8,7 @@
   import { onDestroy, type Snippet } from "svelte";
 
   import { default as Icon } from "./Icon.svelte";
+  import { useMotionReady } from "./motion-ready.svelte";
   import {
     getUiPresentation,
     resolveSemanticControlSize,
@@ -75,6 +76,7 @@
   }: Props = $props();
 
   const uiPresentation = getUiPresentation();
+  const motionReady = useMotionReady();
 
   const tooltipId = `poodle-icon-tooltip-${++nextTooltipId}`;
   let tooltipOpen = $state(false);
@@ -179,6 +181,7 @@
     data-tone={tone !== "default" ? tone : undefined}
     data-size={resolvedSize}
     data-density={resolvedDensity}
+    data-motion-ready={motionReady.ready}
     data-loading={loading}
     data-pressed={isToggle ? currentPressed : undefined}
     disabled={isUnavailable}

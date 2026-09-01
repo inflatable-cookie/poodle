@@ -4,6 +4,7 @@ use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
 use crate::PreviewRoot;
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_render::RenderContext;
 use poodle_specs::{
     ControlSize, EyebrowSpec, SpinnerSize, SpinnerSpec, SpinnerTone, SpinnerVariant,
 };
@@ -30,8 +31,13 @@ fn group(label: &str, theme: &GpuiThemeProvider, child: impl IntoElement) -> Div
         .child(child)
 }
 
-pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
+pub(crate) fn render(
+    state: &AppState,
+    cx: &mut Context<PreviewRoot>,
+    context: &RenderContext<'_>,
+) -> Div {
     let theme = &state.theme;
+    let from_spec = |spec: SpinnerSpec| Spinner::from_spec_with_context(spec, context);
     let examples = div()
         .flex()
         .flex_col()
@@ -39,16 +45,15 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .child(group(
             "Ring",
             theme,
-            Spinner::from_spec(SpinnerSpec::new().with_variant(SpinnerVariant::Ring), theme),
+            from_spec(SpinnerSpec::new().with_variant(SpinnerVariant::Ring)),
         ))
         .child(group(
             "CLI grid",
             theme,
-            Spinner::from_spec(
+            from_spec(
                 SpinnerSpec::new()
                     .with_variant(SpinnerVariant::Grid)
                     .with_tone(SpinnerTone::Muted),
-                theme,
             ),
         ))
         .child(group(
@@ -58,23 +63,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .flex()
                 .gap(px(16.0))
                 .items_center()
-                .child(Spinner::from_spec(
+                .child(from_spec(
                     SpinnerSpec::new()
                         .with_variant(SpinnerVariant::Ring)
                         .with_tone(SpinnerTone::Current),
-                    theme,
                 ))
-                .child(Spinner::from_spec(
+                .child(from_spec(
                     SpinnerSpec::new()
                         .with_variant(SpinnerVariant::Ring)
                         .with_tone(SpinnerTone::Accent),
-                    theme,
                 ))
-                .child(Spinner::from_spec(
+                .child(from_spec(
                     SpinnerSpec::new()
                         .with_variant(SpinnerVariant::Grid)
                         .with_tone(SpinnerTone::Muted),
-                    theme,
                 )),
         ))
         .into_any_element();
@@ -85,20 +87,18 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         "spinner",
         examples,
         SpecimenAxes::examples_only()
-            .with_sizes(|size, theme: &GpuiThemeProvider| {
-                Spinner::from_spec(
+            .with_sizes(|size, _theme: &GpuiThemeProvider| {
+                from_spec(
                     SpinnerSpec::new()
                         .with_variant(SpinnerVariant::Ring)
                         .with_size(spinner_size(size)),
-                    theme,
                 )
             })
-            .with_densities(|density, theme: &GpuiThemeProvider| {
-                Spinner::from_spec(
+            .with_densities(|density, _theme: &GpuiThemeProvider| {
+                from_spec(
                     SpinnerSpec::new()
                         .with_variant(SpinnerVariant::Ring)
                         .with_density(density),
-                    theme,
                 )
             }),
     )

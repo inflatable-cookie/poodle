@@ -65,7 +65,7 @@ stay maintained; backend admission is not part of the first card.
 31. [031 — Continuous audio machine and web lifecycle](031-continuous-audio-machine-and-web-lifecycle.md) — complete; merged in PR #99; no ledger cell moved
 32. [032 — Continuous audio native mounted parity](032-continuous-audio-native-mounted-parity.md) — complete; merged in PR #100; ledger 52 mounted / 122 missing
 33. [033 — HistoryCenter rejection surface](033-history-center-rejection-surface.md) — complete; merged in PR #120 after one Northstar review round; five distinct refusal meanings across TypeScript, Rust, both web shells and mounted GPUI, plus an installed-tarball v3 `HistoryEntry` proof; publication/pin movement stays separate
-34. [034 — Shared motion policy and five-family pilot](034-shared-motion-policy-and-five-family-pilot.md) — ready; architecture 012 and the MotionPolicyProvider plus eight pilot contracts are promoted from merged planning PR #121
+34. [034 — Shared motion policy and five-family pilot](034-shared-motion-policy-and-five-family-pilot.md) — implemented; awaiting review. Architecture 012, MotionPolicyProvider, and the eight pilot contracts are the authority. No ledger cell moves.
 35. [035 — MarkdownEditor bounded preview scroll](035-markdown-editor-bounded-preview-scroll.md) — complete; merged in PR #123 after two native-oracle repair rounds; long preview content now scrolls inside a constrained host across Svelte, React, and mounted GPUI without a new sizing API
 36. [036 — Tree external drop authority](036-tree-external-drop-authority.md)
     — ready; paired Svelte/React `reorderAuthority` adapter over the existing
@@ -121,9 +121,9 @@ Two continuation programmes are now explicit:
 - **Shared motion continuation:** planning PR #121 is accepted and merged.
   Architecture 012 now fixes explicit full/reduced/frozen host policy,
   restriction-only inheritance, lifecycle, native approximation, and layered
-  evidence. `g16.034` is the next ready card. The additive block-slider lane
-  remains next after its merge; icon feasibility and AgentSubagent shimmer stay
-  downstream evidence gates.
+  evidence. `g16.034` is implemented and awaiting review. The additive
+  block-slider lane remains next after its merge; icon feasibility and
+  AgentSubagent shimmer stay downstream evidence gates.
 - **Independent MarkdownEditor issue fix:** `g16.035` is complete in PR #123.
   Shared web CSS now supplies the shrink chain, and the native preview declares
   and proves the same bounded scroll ownership through mounted GPUI wheel input.

@@ -168,12 +168,13 @@ describe("DockRegion underline recipe hook (tabs.css)", () => {
   );
   const hook = "var(--poodle-recipe-tabs-active-underline-border, var(--poodle-color-accent-base))";
 
-  it("wraps the horizontal underline colour in the hook", () => {
-    expect(tabsCss).toContain(`border-bottom-color: ${hook}`);
+  it("wraps the measured indicator colour in the hook", () => {
+    expect(tabsCss).toContain(`background: ${hook}`);
   });
 
-  it("wraps the vertical underline colour in the same hook", () => {
-    expect(tabsCss).toContain(`border-right-color: ${hook}`);
+  it("uses the same hook for both orientations", () => {
+    expect(tabsCss).toContain('.poodle-tabs[data-orientation="horizontal"] .poodle-tabs__indicator');
+    expect(tabsCss).toContain('.poodle-tabs[data-orientation="vertical"] .poodle-tabs__indicator');
   });
 
   it("leaves the current accent colour as the fallback", () => {

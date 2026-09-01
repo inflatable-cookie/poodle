@@ -900,6 +900,13 @@ where
         return el.into_any_element();
     };
     record_probe_channel("surface.animation.scheduled");
+    if sample_property(anim, AnimProperty::TranslateX, 0.0).is_some()
+        || sample_property(anim, AnimProperty::TranslateY, 0.0).is_some()
+        || sample_property(anim, AnimProperty::ScaleX, 0.0).is_some()
+        || sample_property(anim, AnimProperty::ScaleY, 0.0).is_some()
+    {
+        record_probe_channel("surface.animation.approximation.opacity-stand-in");
+    }
     let anim = anim.clone();
     let id = element_id(node);
     el.with_animation(id, gpui_animation(&anim), move |el, t| {

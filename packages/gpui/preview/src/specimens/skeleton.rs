@@ -6,10 +6,12 @@
 use crate::node_compat::{Eyebrow, Skeleton};
 use gpui::*;
 use poodle_gpui::GpuiThemeProvider;
+use poodle_render::RenderContext;
 
 use poodle_specs::{EyebrowSpec, SkeletonPreset, SkeletonSpec};
 
-pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
+pub(crate) fn render(theme: &GpuiThemeProvider, context: &RenderContext<'_>) -> Div {
+    let from_spec = |spec: SkeletonSpec| Skeleton::from_spec_with_context(spec, context);
     div()
         .flex()
         .flex_col()
@@ -24,32 +26,28 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex_wrap()
                 .gap(px(12.0))
                 .items_center()
-                .child(Skeleton::from_spec(
+                .child(from_spec(
                     SkeletonSpec::new().with_shape("line").with_width("12rem"),
-                    theme,
                 ))
-                .child(Skeleton::from_spec(
+                .child(from_spec(
                     SkeletonSpec::new()
                         .with_shape("circle")
                         .with_width("2.5rem")
                         .with_height("2.5rem"),
-                    theme,
                 ))
-                .child(Skeleton::from_spec(
+                .child(from_spec(
                     SkeletonSpec::new()
                         .with_shape("block")
                         .with_width("8rem")
                         .with_height("3rem"),
-                    theme,
                 )),
         ))
         // --- Preset: avatar-line ---
         .child(group(
             theme,
             "Preset: avatar-line",
-            Skeleton::from_spec(
+            from_spec(
                 SkeletonSpec::new().with_preset(SkeletonPreset::AvatarLine),
-                theme,
             ),
         ))
         // --- Preset: list-item (x3) ---
@@ -60,17 +58,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex()
                 .flex_col()
                 .gap(px(2.0))
-                .child(Skeleton::from_spec(
+                .child(from_spec(
                     SkeletonSpec::new().with_preset(SkeletonPreset::ListItem),
-                    theme,
                 ))
-                .child(Skeleton::from_spec(
+                .child(from_spec(
                     SkeletonSpec::new().with_preset(SkeletonPreset::ListItem),
-                    theme,
                 ))
-                .child(Skeleton::from_spec(
+                .child(from_spec(
                     SkeletonSpec::new().with_preset(SkeletonPreset::ListItem),
-                    theme,
                 )),
         ))
         // --- Preset: table-row (x3) ---
@@ -81,17 +76,14 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex()
                 .flex_col()
                 .w(px(rem_px(37.5)))
-                .child(Skeleton::from_spec(
+                .child(from_spec(
                     SkeletonSpec::new().with_preset(SkeletonPreset::TableRow),
-                    theme,
                 ))
-                .child(Skeleton::from_spec(
+                .child(from_spec(
                     SkeletonSpec::new().with_preset(SkeletonPreset::TableRow),
-                    theme,
                 ))
-                .child(Skeleton::from_spec(
+                .child(from_spec(
                     SkeletonSpec::new().with_preset(SkeletonPreset::TableRow),
-                    theme,
                 )),
         ))
         // --- Preset: card (2-up) ---
@@ -102,36 +94,32 @@ pub(crate) fn render(theme: &GpuiThemeProvider) -> Div {
                 .flex()
                 .flex_row()
                 .gap(px(16.0))
-                .child(div().flex_1().child(Skeleton::from_spec(
+                .child(div().flex_1().child(from_spec(
                     SkeletonSpec::new().with_preset(SkeletonPreset::Card),
-                    theme,
                 )))
-                .child(div().flex_1().child(Skeleton::from_spec(
+                .child(div().flex_1().child(from_spec(
                     SkeletonSpec::new().with_preset(SkeletonPreset::Card),
-                    theme,
                 ))),
         ))
         // --- Preset: detail-section (lines=4) ---
         .child(group(
             theme,
             "Preset: detail-section",
-            Skeleton::from_spec(
+            from_spec(
                 SkeletonSpec::new()
                     .with_preset(SkeletonPreset::DetailSection)
                     .with_lines(4),
-                theme,
             ),
         ))
         // --- Static (no animation) ---
         .child(group(
             theme,
             "Static (no animation)",
-            Skeleton::from_spec(
+            from_spec(
                 SkeletonSpec::new()
                     .with_shape("line")
                     .with_width("10rem")
                     .with_animated(false),
-                theme,
             ),
         ))
 }

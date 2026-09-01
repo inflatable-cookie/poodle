@@ -179,6 +179,7 @@
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
 # Verifies the machine -> DOM wiring the framework packages add on top of the
 # @inflatable-cookie/poodle-core machines (which test:core covers).
+# Component tests use the ordinary Vitest heap and worker scheduling.
 "test:components" = "bunx vitest run"
 "test:web-pack-install" = "bun test/package-install/web-preview.ts"
 # Compatibility selector for existing downstream handoffs and historical docs.
@@ -239,6 +240,15 @@
 "test:markdown-editor-preview-scroll" = [
   { task = "test:markdown-editor-preview-scroll-chromium" },
   { task = "test:markdown-editor-preview-scroll-webkit" },
+]
+# g16.034 shared motion policy: disclosure geometry, Tabs resize snap, toast
+# focus fallback, live-region non-reannouncement. Headless Chromium + WebKit;
+# stays out of ci:web like the other real-browser probes.
+"test:motion-policy-browser-chromium" = "bun test/motion-policy-probe/probe.ts --browser=chromium"
+"test:motion-policy-browser-webkit" = "bun test/motion-policy-probe/probe.ts --browser=webkit"
+"test:motion-policy-browser" = [
+  { task = "test:motion-policy-browser-chromium" },
+  { task = "test:motion-policy-browser-webkit" },
 ]
 # Reference performance evidence for g14.024 (recorded in the implementation
 # log, not a CI threshold).
