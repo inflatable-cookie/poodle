@@ -2,8 +2,8 @@
 
 Status: implemented — awaiting review
 Date: 2026-09-01
-PR: pending
-Implementation commit: `c4ede32be`
+PR: https://github.com/inflatable-cookie/poodle/pull/124
+Implementation commit: `bb656700f`
 Card: `docs/roadmaps/g16/034-shared-motion-policy-and-five-family-pilot.md`
 Handoff: `docs/handoffs/20260901-130224-g16-034-shared-motion-policy.md`
 Governing refs: `docs/architecture/012-semantic-motion-policy.md`,
@@ -12,8 +12,8 @@ Governing refs: `docs/architecture/012-semantic-motion-policy.md`,
 `docs/contracts/001-working-rules.md`
 Branch: `feature/g16-034-shared-motion-policy`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-034-shared-motion-policy`
-Base: rebased onto `origin/main` at `701ab1c11` after design-guidance PR #122
-and the g16.035 dispatch; planning base `b89c11275` is an ancestor
+Base: rebased onto `origin/main` at `b682ebfed` after merged PR #123
+(g16.035 closeout); planning base `b89c11275` is an ancestor
 
 ## Outcome
 
@@ -87,3 +87,5 @@ Boards:
   (no assertion failures). Recorded as a papercut.
 - Headless `effigy qa` not re-run after that OOM; native/docs/pack-install
   and focused motion suites are the local proof.
+- Refresh onto `b682ebfed` (PR #123): docs front-door integration only.
+  `g16.035` stays complete; `g16.034` stays implemented awaiting review.
