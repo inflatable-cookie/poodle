@@ -1,12 +1,12 @@
-# Block Slider And RangeSlider Promotion Decision
+# Block Slider And RangeSlider Promotion Decision Proposal
 
-Status: ready for orchestrator review; no open contract choice
+Status: delegate proposal awaiting operator acceptance or revision
 Captured: 2026-09-01
 Owner: Poodle Northstar orchestrator
 Scope: additive block appearance for `Slider` and `RangeSlider`
-Promotion authority: orchestrator after accepted review and merge
+Promotion authority: orchestrator after operator acceptance; merge is intake only
 
-This packet resolves the choices named by
+This packet proposes exact resolutions for the choices named by
 `docs/handoffs/20260901-221756-block-slider-promotion-planning.md`. It is not
 contract, roadmap, implementation, or merge authority.
 
@@ -24,15 +24,18 @@ contract, roadmap, implementation, or merge authority.
 - Architecture 012 and g16.034 remain motion authority.
 - Jetstream remains deferred. No default migration is in scope.
 
-## New Operator Decisions
+## Delegate Authority
 
-The launch added one instruction: use the dossier recommendation where no
-contrary operator preference exists. No contrary preference was supplied.
-The resolutions below therefore apply the dossier defaults and make their
-previously open edges exact. They remain proposed contract meaning until the
-orchestrator accepts and promotes this packet.
+No operator conversation occurred in this delegate thread. The handoff said to
+use the dossier recommendation where no contrary operator preference exists.
+That instruction authorizes an exact delegate proposal; it does not make the
+proposal an operator decision.
 
-## Resolved Contract
+Every exact name and law below is a delegate recommendation. The operator must
+accept, revise, or reject the proposed surface before canonical promotion. PR
+merge is intake for that review, not acceptance of the API or behavior.
+
+## Proposed Contract Surface
 
 ### Appearance
 
@@ -162,8 +165,12 @@ direction?: "ltr" | "rtl"; // default: "ltr"
 - Home selects the focused thumb's lowest permitted value. End selects its
   highest permitted value. Dependent RangeSlider bounds still apply.
 
-Page keys become strict shared behavior for custom and native-backed block
-controls. Let `span = safeMax - min`:
+Page keys keep the current component law for both appearances in the first
+block visual card: browser-owned/optional, not strict cross-runtime parity.
+`appearance` cannot branch keyboard behavior.
+
+A separate all-appearance Slider/RangeSlider behavior migration is recommended.
+If the operator accepts it, let `span = safeMax - min`:
 
 ```text
 rawPage = span / 10
@@ -177,9 +184,12 @@ pageStep = step > 0
   subtracting `pageStep`.
 - Page amount uses the declared full span, not the current distance to the
   sibling.
-- The rule applies only to the block appearance in this promotion. Existing
-  track/native browser-owned paging remains unchanged until a separate
-  migration decision.
+- The migration applies identically to `track` and `block`, standard and
+  embedded variants, and every active runtime.
+- It is outside the first block visual card and cannot be conditioned on
+  `appearance`.
+- Until operator acceptance and canonical promotion, the formula is a delegate
+  recommendation. Current paging remains unchanged.
 
 ### Range Ownership And Exact Overlap
 
@@ -295,10 +305,13 @@ Indeterminate remains out of scope too.
 ## Recommendations
 
 - Promote the appearance, content, fit, direction, interaction, forced-colour,
-  and evidence laws together. Partial promotion would leave runtime adapters
-  choosing public behavior.
+  and evidence proposals together after operator acceptance. Partial promotion
+  would leave runtime adapters choosing public behavior.
 - Reuse the current normalized Slider/RangeSlider machines. Extend their
-  terminal and paging events; do not fork value math for block rendering.
+  terminal events; do not fork value math for block rendering.
+- Keep PageUp/PageDown unchanged in the first block visual card. If the operator
+  accepts strict paging, promote and sequence it as a separate all-appearance
+  behavior migration.
 - Keep fit metrics internal. Expose semantic recipe colours, not consumer
   thresholds or hit-wrapper dimensions.
 - Keep the first block card horizontal for active-cohort acceptance. Carry the
@@ -319,7 +332,8 @@ Indeterminate remains out of scope too.
 | Always external readout | Valid but discards the approved inline direction when space exists. |
 | Thumb-following fallback tooltip | Unstable under overlap and insufficient for keyboard, touch, and magnification users. |
 | Last-focused overlap tie | Adds hidden history to pointer ownership and diverges from the current core law. |
-| Browser-owned PageUp/PageDown | Preserves current runtime drift instead of defining block parity. |
+| Block-only strict PageUp/PageDown | Makes a presentation field change keyboard semantics and creates two behavioral contracts. |
+| Defer PageUp/PageDown without a migration proposal | Preserves current runtime drift; valid if the operator rejects the separate all-appearance migration. |
 | Physical-direction arrow keys in RTL | Makes key meaning depend on layout direction and conflicts with current numeric mapping. |
 | Roll back on cancel | Requires transaction state and a new callback contract. |
 | Web-only forced-colour CSS | Leaves shared native roles undefined and weakens semantic parity. |
@@ -334,6 +348,7 @@ Indeterminate remains out of scope too.
 - Marks, ticks, editable hot text, whole-window dragging, thumb swapping,
   minimum-distance policy, or more than two thumbs.
 - Tooltip-only output or a required tooltip in the first appearance.
+- Changing PageUp/PageDown behavior in the first block visual card.
 - Vertical active-cohort admission before native RangeSlider geometry exists.
 - Jetstream implementation, evidence, or parity claims.
 - Claiming native assistive-technology support from node metadata.
@@ -350,7 +365,8 @@ Indeterminate remains out of scope too.
 | Fit is all-or-nothing | Slider label fits but value misses by one logical pixel | Inline text must be absent; fallback line present | Boundary tests at `required-1`, `required`, `required+1` |
 | Fallback placement is stable | Range lower and upper overlap at 50 and readout follows the focused thumb | Visual/layout failure | Geometry assertion and representative captures |
 | RTL geometry and numeric keys agree | RTL Slider at 40 receives ArrowRight | Value becomes 41 and thumb moves toward logical inline-end | Paired web/core/native traces plus geometry assertion |
-| Page step is exact | `min=0`, `max=100`, `step=6` | PageUp adds 12, not browser 10 or step×10 | Shared machine trace in all active runtimes |
+| Appearance cannot change paging | Same Slider props, only `track` changes to `block`, then PageUp | Both appearances produce the same current runtime result | Paired appearance trace before first visual-card acceptance |
+| Separate paging migration formula is exact | `min=0`, `max=100`, `step=6` | PageUp adds 12 in both appearances, not browser 10 or step×10 | Shared machine trace in all active runtimes after separate operator acceptance |
 | Exact pointer tie chooses lower | `[50,50]`, press exactly at 50 after upper was focused | Lower owns gesture; focus history is ignored | Core trace and mounted web/GPUI pointer proof |
 | Gesture ownership never swaps | Lower chosen at 40, dragged beyond upper at 60 | Lower clamps at 60; upper unchanged | Shared core and adapter trace |
 | Terminal is idempotent | `pointercancel` followed by `lostpointercapture` | One commit total, no rollback, no second change | Ordered effect trace in Svelte, React, Rust, GPUI |
@@ -373,16 +389,24 @@ Indeterminate remains out of scope too.
 | Motion statement | Reference `docs/architecture/012-semantic-motion-policy.md`; no architecture change expected |
 | Effective-target minimum | Reference `docs/contracts/components/size-and-density.md`; add component-specific proof rows only |
 | GPUI evidence boundary | `docs/contracts/003-native-accessibility.md` and later parity evidence ledger updates |
-| Sequencing, implementation scope, stop conditions, and validation | One additive Slider/RangeSlider roadmap card after canonical promotion |
+| First visual implementation sequencing, scope, stops, and validation | One additive Slider/RangeSlider block card after operator acceptance and canonical promotion; no paging change |
+| Optional strict PageUp/PageDown behavior | A separate all-appearance Slider/RangeSlider behavior-migration card after operator acceptance and canonical promotion |
 
 The orchestrator chooses the final promotion split. No implementation card is
 ready from this packet alone.
 
 ## Unresolved Questions
 
-None inside the dispatched boundary. Promotion may expose integration drift
-against newer `main`; that is an orchestrator reconciliation, not a hidden
-choice in this packet.
+Operator acceptance or revision of the exact delegate proposal remains open.
+That gate includes the public names, formatter fields, fit law, direction,
+overlap tie, terminal law, forced-colour map, effective-target evidence, native
+prerequisites, and wrapper-owned state boundary.
+
+The operator must also accept the separate all-appearance PageUp/PageDown
+migration or keep current paging unchanged. The first block visual card never
+changes paging. Merge is intake for these decisions, not acceptance. Promotion
+may also expose integration drift against newer `main`; the orchestrator owns
+that reconciliation after the operator gate.
 
 ## Evidence Used
 
