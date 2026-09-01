@@ -3,7 +3,7 @@
 Status: implemented and pushed — awaiting orchestrator review and merge
 Date: 2026-09-01
 PR: https://github.com/inflatable-cookie/poodle/pull/120
-Head: `ffe357d50753a6eb94c38bc77a585a3fdac57266`
+Implementation commit: `ffe357d50753a6eb94c38bc77a585a3fdac57266`
 Card: `docs/roadmaps/g16/033-history-center-rejection-surface.md`
 Handoff: `docs/handoffs/20260901-105037-g16-033-history-center-rejection-surface.md`
 Governing refs: `docs/contracts/components/history-center.md`,
@@ -73,6 +73,25 @@ export to a real installed consumer.
 - **This is a source candidate, not a release.** npm `latest` is still
   `0.2.2`. No package version, tag, release note, publication workflow, or
   Loophole pin moved, and none may move without separate release authority.
+
+- **A falsification restore silently reverted two proofs, and review caught
+  it.** Planting a pre-fix behaviour and restoring with `git checkout --` reads
+  from the index, so on an unstaged tree it restores `HEAD`, not the working
+  state. That wiped the `poodle-headless` and `poodle-specs` rejection tests
+  along with the plant. `ci:rust` stayed green because it counts passes, not
+  absences, and the card claimed proofs the head no longer carried. Both test
+  surfaces are restored and re-falsified, and the working rule is to commit
+  before planting.
+
+- **Rust cannot assert the `SHOW_REJECTION` short-circuit, so it does not
+  claim to.** The guard returns the very context it was handed, which is what
+  lets the web adapters skip their write-back. A moved `HistoryCenterContext`
+  has no identity to compare, so a plant that rebuilds an equal context is
+  invisible there. The headless proof therefore asserts what the result does
+  expose — a repeat does not stack and emits no second effect, and a
+  replacement leaves no residue of the notice it displaced — and the doc
+  comment says which of the two it is proving. The TypeScript proof, where
+  reference identity is observable, keeps the stricter `toBe` assertion.
 
 ## Changed surfaces
 

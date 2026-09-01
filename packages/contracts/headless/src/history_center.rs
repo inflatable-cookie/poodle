@@ -1998,4 +1998,142 @@ mod tests {
         assert_eq!(depth_of("f1b"), 1);
         assert_eq!(depth_of("f1b1"), 2);
     }
+
+    /// The exact contract table (`docs/contracts/components/history-center.md`
+    /// §"Rejection handling"). The proofs below read this list, so dropping a
+    /// category or pointing two codes at one message fails here.
+    const REJECTION_COPY: [(HistoryCenterRejectionCode, &str); 5] = [
+        (
+            HistoryCenterRejectionCode::AlreadyAtTarget,
+            "Already at the requested target",
+        ),
+        (
+            HistoryCenterRejectionCode::UnknownEntry,
+            "Entry does not exist",
+        ),
+        (
+            HistoryCenterRejectionCode::StaleHistory,
+            "History changed; this entry was not deleted",
+        ),
+        (
+            HistoryCenterRejectionCode::ProtectedEntry,
+            "This history entry is protected",
+        ),
+        (
+            HistoryCenterRejectionCode::DeletionUnavailable,
+            "History deletion is unavailable",
+        ),
+    ];
+
+    /// Five meanings, five messages. The papercut this replaced reported a
+    /// stale revision, a protected entry, and an unavailable deletion all as
+    /// "Entry does not exist".
+    #[test]
+    fn every_rejection_code_owns_its_own_exact_copy() {
+        let mut messages: Vec<&str> = Vec::new();
+        for (code, expected) in REJECTION_COPY {
+            assert_eq!(
+                history_center_rejection_message(code),
+                expected,
+                "{code:?} must carry its own copy",
+            );
+            messages.push(expected);
+        }
+        let distinct = messages.len();
+        messages.sort_unstable();
+        messages.dedup();
+        assert_eq!(messages.len(), distinct, "no two codes may share copy");
+
+        let unknown = history_center_rejection_message(HistoryCenterRejectionCode::UnknownEntry);
+        for code in [
+            HistoryCenterRejectionCode::StaleHistory,
+            HistoryCenterRejectionCode::ProtectedEntry,
+            HistoryCenterRejectionCode::DeletionUnavailable,
+        ] {
+            assert_ne!(
+                history_center_rejection_message(code),
+                unknown,
+                "{code:?} is a refused deletion, not a missing entry",
+            );
+        }
+    }
+
+    /// Display, replacement, idempotence and dismissal are unchanged by the
+    /// three added categories.
+    ///
+    /// "Repeats inertly" is asserted through what the result actually exposes:
+    /// a repeat leaves the displayed message exactly as it was and emits no
+    /// effect. The guard's short-circuit — returning the very context it was
+    /// handed rather than rebuilding an equal one — is load-bearing for the
+    /// web adapters' write-back skip, but a moved `HistoryCenterContext` has
+    /// no identity to compare here, so this proof claims the observable
+    /// behaviour (no stacking, no second effect) rather than the mechanism.
+    #[test]
+    fn show_rejection_displays_replaces_and_repeats_inertly() {
+        let mut context = HistoryCenterContext::default();
+        for (code, expected) in REJECTION_COPY {
+            let shown = history_center_transition(
+                HistoryCenterState::Open,
+                context.clone(),
+                HistoryCenterEvent::ShowRejection(code),
+            );
+            assert_eq!(shown.context.rejection.as_deref(), Some(expected));
+            assert!(shown.effects.is_empty());
+
+            let again = history_center_transition(
+                HistoryCenterState::Open,
+                shown.context.clone(),
+                HistoryCenterEvent::ShowRejection(code),
+            );
+            assert_eq!(again.context, shown.context, "the same code is a no-op");
+            assert!(again.effects.is_empty());
+
+            // The next code replaces this notice rather than stacking it.
+            context = shown.context;
+        }
+        assert_eq!(
+            context.rejection.as_deref(),
+            Some("History deletion is unavailable"),
+        );
+
+        // Replacement leaves no residue of the notice it displaced: the
+        // operator reads one refusal, not an accumulated transcript of them.
+        let first = history_center_transition(
+            HistoryCenterState::Open,
+            HistoryCenterContext::default(),
+            HistoryCenterEvent::ShowRejection(HistoryCenterRejectionCode::StaleHistory),
+        );
+        let second = history_center_transition(
+            HistoryCenterState::Open,
+            first.context,
+            HistoryCenterEvent::ShowRejection(HistoryCenterRejectionCode::ProtectedEntry),
+        );
+        assert_eq!(
+            second.context.rejection.as_deref(),
+            Some("This history entry is protected"),
+        );
+        assert!(
+            !second
+                .context
+                .rejection
+                .as_deref()
+                .unwrap_or_default()
+                .contains("History changed"),
+            "the displaced notice must not survive alongside its replacement",
+        );
+
+        let cleared = history_center_transition(
+            HistoryCenterState::Open,
+            context,
+            HistoryCenterEvent::DismissRejection,
+        );
+        assert_eq!(cleared.context.rejection, None);
+        let inert = history_center_transition(
+            HistoryCenterState::Open,
+            HistoryCenterContext::default(),
+            HistoryCenterEvent::DismissRejection,
+        );
+        assert!(inert.effects.is_empty());
+        assert_eq!(inert.context, HistoryCenterContext::default());
+    }
 }
