@@ -93,6 +93,22 @@ function composeHandler<E>(theirs?: (event: E) => void, ours?: (event: E) => voi
   };
 }
 
+function presentationKey(snapshot: DragDropSnapshot): string {
+  return [
+    snapshot.phase,
+    snapshot.sourceId ?? "",
+    snapshot.targetId ?? "",
+    snapshot.targetPosture ?? "",
+    snapshot.announcement ?? "",
+    snapshot.preview?.label ?? "",
+    snapshot.preview ? "1" : "0",
+  ].join("|");
+}
+
+function previewTransform(preview: DragPreviewSnapshot): string {
+  return `translate3d(${preview.x}px, ${preview.y}px, 0)`;
+}
+
 export interface DragDropProviderProps {
   controller?: DragDropController;
   describeAnnouncement?: (event: DragAnnouncementEvent) => string | null;
@@ -132,13 +148,24 @@ export function DragDropProvider({
       : controller!,
   );
   const rootRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [snapshot, setSnapshot] = useState(() => ctrl.getSnapshot());
+  const presentationKeyRef = useRef(presentationKey(snapshot));
   const connectGenerationRef = useRef(0);
 
   useLayoutEffect(() => {
     const generation = ++connectGenerationRef.current;
-    const unsub = ctrl.subscribe(() => setSnapshot(ctrl.getSnapshot()));
+    const unsub = ctrl.subscribe(() => {
+      const next = ctrl.getSnapshot();
+      const node = previewRef.current;
+      if (node && next.preview) {
+        node.style.transform = previewTransform(next.preview);
+      }
+      const key = presentationKey(next);
+      if (key === presentationKeyRef.current) return;
+      presentationKeyRef.current = key;
+      setSnapshot(next);
+    });
     const root = rootRef.current;
     if (!root) {
       unsub();
@@ -157,21 +184,17 @@ export function DragDropProvider({
     };
   }, [ctrl]);
 
-  const overlayOrigin = overlayRef.current?.getBoundingClientRect();
   const previewStyle: CSSProperties | undefined = snapshot.preview
-    ? {
-        left: snapshot.preview.x - (overlayOrigin?.left ?? 0),
-        top: snapshot.preview.y - (overlayOrigin?.top ?? 0),
-      }
+    ? { transform: previewTransform(snapshot.preview) }
     : undefined;
 
   return (
     <DragDropContext.Provider value={{ controller: ctrl, snapshot }}>
       <div ref={rootRef} className="poodle-drag-drop-provider">
         {children}
-        <div ref={overlayRef} className="poodle-drag-overlay" aria-hidden="true">
+        <div className="poodle-drag-overlay" aria-hidden="true">
           {snapshot.preview ? (
-            <div className="poodle-drag-preview" style={previewStyle}>
+            <div ref={previewRef} className="poodle-drag-preview" style={previewStyle}>
               {preview ? preview(snapshot.preview) : snapshot.preview.label}
             </div>
           ) : null}

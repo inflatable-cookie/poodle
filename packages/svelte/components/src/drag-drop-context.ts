@@ -89,11 +89,30 @@ export function dropTargetAction(
   };
 }
 
+function presentationKey(snapshot: DragDropSnapshot): string {
+  return [
+    snapshot.phase,
+    snapshot.sourceId ?? "",
+    snapshot.targetId ?? "",
+    snapshot.targetPosture ?? "",
+    snapshot.announcement ?? "",
+    snapshot.preview?.label ?? "",
+    snapshot.preview ? "1" : "0",
+  ].join("|");
+}
+
 /** An immutable presentation read of one controller, as a store. */
 export function dragDropSnapshotStore(controller: DragDropController): Readable<DragDropSnapshot> {
-  return readable(controller.getSnapshot(), (set) =>
-    controller.subscribe(() => set(controller.getSnapshot())),
-  );
+  return readable(controller.getSnapshot(), (set) => {
+    let last = presentationKey(controller.getSnapshot());
+    return controller.subscribe(() => {
+      const next = controller.getSnapshot();
+      const key = presentationKey(next);
+      if (key === last) return;
+      last = key;
+      set(next);
+    });
+  });
 }
 
 /**

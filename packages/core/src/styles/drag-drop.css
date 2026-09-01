@@ -13,10 +13,10 @@
 }
 
 .poodle-drag-preview {
-  /* Viewport coordinates from the snapshot. `fixed` keeps that mapping when a
-     transformed ancestor (or `display: contents` on the provider) makes the
-     overlay's containing block something other than the viewport. */
   position: fixed;
+  left: 0;
+  top: 0;
+  will-change: transform;
   padding: 0.25rem 0.5rem;
   border-radius: var(--poodle-radius-control, 0.25rem);
   background: var(--poodle-color-background-elevated, Canvas);

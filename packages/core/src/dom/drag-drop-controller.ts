@@ -3039,7 +3039,12 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     }
 
     hitTest(x, y);
-    if (gesture?.activated) scheduleAutoScroll();
+    if (gesture?.activated) {
+      scheduleAutoScroll();
+      // Target-intent is inert when the hover has not changed, but the
+      // preview still has to follow the pointer on that frame.
+      notify();
+    }
   }
 
   function suppressScroll(event: Event): void {

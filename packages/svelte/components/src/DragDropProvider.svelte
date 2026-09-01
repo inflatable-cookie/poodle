@@ -53,15 +53,38 @@
       }),
   );
   let root: HTMLDivElement | undefined;
-  let overlay: HTMLDivElement | undefined;
+  let previewEl: HTMLDivElement | undefined = $state();
   let snapshot: DragDropSnapshot = $state(ctrl.getSnapshot());
+  let presentation = presentationKey(ctrl.getSnapshot());
 
   setDragDrop({ controller: ctrl });
+
+  function presentationKey(next: DragDropSnapshot): string {
+    return [
+      next.phase,
+      next.sourceId ?? "",
+      next.targetId ?? "",
+      next.targetPosture ?? "",
+      next.announcement ?? "",
+      next.preview?.label ?? "",
+      next.preview ? "1" : "0",
+    ].join("|");
+  }
+
+  function applyPreview(next: DragDropSnapshot): void {
+    if (!previewEl || !next.preview) return;
+    previewEl.style.transform = `translate3d(${next.preview.x}px, ${next.preview.y}px, 0)`;
+  }
 
   onMount(() => {
     if (!root) return;
     const unsub = ctrl.subscribe(() => {
-      snapshot = ctrl.getSnapshot();
+      const next = ctrl.getSnapshot();
+      applyPreview(next);
+      const key = presentationKey(next);
+      if (key === presentation) return;
+      presentation = key;
+      snapshot = next;
     });
     const disconnect = ctrl.connect(root);
     return () => {
@@ -71,20 +94,18 @@
     };
   });
 
-  const previewStyle = $derived.by(() => {
-    if (!snapshot.preview) return "";
-    const origin = overlay?.getBoundingClientRect();
-    const left = snapshot.preview.x - (origin?.left ?? 0);
-    const top = snapshot.preview.y - (origin?.top ?? 0);
-    return `left: ${left}px; top: ${top}px`;
-  });
+  const previewStyle = $derived(
+    snapshot.preview
+      ? `transform: translate3d(${snapshot.preview.x}px, ${snapshot.preview.y}px, 0)`
+      : "",
+  );
 </script>
 
 <div bind:this={root} class="poodle-drag-drop-provider">
   {@render children?.()}
-  <div bind:this={overlay} class="poodle-drag-overlay" aria-hidden="true">
+  <div class="poodle-drag-overlay" aria-hidden="true">
     {#if snapshot.preview}
-      <div class="poodle-drag-preview" style={previewStyle}>
+      <div bind:this={previewEl} class="poodle-drag-preview" style={previewStyle}>
         {#if preview}
           {@render preview(snapshot.preview)}
         {:else}

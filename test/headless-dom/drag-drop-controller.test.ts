@@ -1166,6 +1166,26 @@ describe("createDragDropController", () => {
     controller.destroy();
   });
 
+  it("preview position follows the pointer while the target stays the same", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    expect(controller.getSnapshot().preview).toEqual(
+      expect.objectContaining({ x: 42, y: 32, label: "Alpha" }),
+    );
+
+    document.dispatchEvent(pointer("pointermove", { clientX: 70, clientY: 24 }));
+    expect(controller.getSnapshot().preview).toEqual(
+      expect.objectContaining({ x: 82, y: 36, label: "Alpha" }),
+    );
+    controller.destroy();
+  });
+
   it("re-hit-tests after invalidateLayout", () => {
     const controller = createDragDropController();
     controller.connect(root);

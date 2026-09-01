@@ -265,7 +265,7 @@ describe("Tabs (svelte)", () => {
     expect(moved.closest(".poodle-tabs__item")?.getAttribute("data-drop-target")).toBeNull();
   });
 
-  it("the drag preview tracks the pointer in overlay-local coordinates", async () => {
+  it("the drag preview follows the pointer while the hover target stays put", async () => {
     const files = [
       { value: "index.ts", label: "index.ts" },
       { value: "App.svelte", label: "App.svelte", closable: true },
@@ -274,33 +274,15 @@ describe("Tabs (svelte)", () => {
       props: { items: files, defaultValue: "App.svelte", reorderable: true },
     });
     layout(container);
-    const overlay = container.querySelector<HTMLElement>(".poodle-drag-overlay");
-    if (overlay) {
-      overlay.getBoundingClientRect = () =>
-        ({
-          x: 40,
-          y: 80,
-          width: 800,
-          height: 600,
-          top: 80,
-          left: 40,
-          right: 840,
-          bottom: 680,
-          toJSON() {
-            return this;
-          },
-        }) as DOMRect;
-    }
 
     await fireEvent(tabs()[1], pointer("pointerdown", 150, 15));
     await fireEvent(document, pointer("pointermove", 190, 15));
-
     const preview = container.querySelector<HTMLElement>(".poodle-drag-preview");
     expect(preview).not.toBeNull();
-    // Snapshot is client + 12; the overlay origin is subtracted so the chip
-    // sits next to the pointer rather than the overlay's (0, 0).
-    expect(preview?.style.left).toBe(`${190 + 12 - 40}px`);
-    expect(preview?.style.top).toBe(`${15 + 12 - 80}px`);
+    expect(preview?.style.transform).toBe(`translate3d(${190 + 12}px, ${15 + 12}px, 0)`);
+
+    await fireEvent(document, pointer("pointermove", 170, 18));
+    expect(preview?.style.transform).toBe(`translate3d(${170 + 12}px, ${18 + 12}px, 0)`);
   });
 
   it("a tab dropped on itself is refused rather than reordered", async () => {
