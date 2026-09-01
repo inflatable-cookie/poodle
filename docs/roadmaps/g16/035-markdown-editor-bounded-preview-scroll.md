@@ -11,7 +11,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 Reported failure: a long rendered preview contributes its full intrinsic height,
 so the MarkdownEditor expands its surrounding editor layout instead of keeping
 the preview inside a scroll viewport
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/123
 
 ## Goal
 
