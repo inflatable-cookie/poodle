@@ -109,6 +109,7 @@
   .poodle-dock-region__strip .poodle-tabs__item[data-drag-source] {
     outline: var(--poodle-border-width-focus) solid var(--poodle-color-accent-focusRing);
     outline-offset: calc(-1 * var(--poodle-border-width-focus));
+    border-radius: var(--poodle-radius-control);
   }
 
   .poodle-dock-region__strip[data-orientation="horizontal"] .poodle-tabs__list > .poodle-tabs__item:first-child {
