@@ -71,6 +71,11 @@ export type IconGeometryRuntime = {
   frame: GeometryFrameBuffer;
 };
 
+export type IconGeometryClockTiming = {
+  progress: number;
+  durationMs: number;
+};
+
 export function createIconGeometryRuntime(
   policy: MotionPolicy = "full",
 ): IconGeometryRuntime {
@@ -86,6 +91,15 @@ export function createIconGeometryRuntime(
 
 export function liveGeometryClockCount(runtime: IconGeometryRuntime): number {
   return runtime.clock ? 1 : 0;
+}
+
+export function iconGeometryClockTiming(
+  runtime: IconGeometryRuntime,
+  key: string,
+): IconGeometryClockTiming | null {
+  const clock = runtime.clock;
+  if (!clock || clock.key !== key) return null;
+  return { progress: clock.progress, durationMs: clock.durationMs };
 }
 
 export function candidateFixtureIds(): readonly string[] {
@@ -321,10 +335,17 @@ export function startIconGeometryFrameLoop(
   key: string,
   onFrame: () => void,
 ): () => void {
+  const timing = iconGeometryClockTiming(runtime, key);
+  if (!timing) return () => {};
   const started = performance.now();
+  const initialProgress = timing.progress;
+  const remainingDuration = timing.durationMs * (1 - initialProgress);
   let handle = 0;
   const tick = (now: number) => {
-    const progress = Math.min(1, (now - started) / ICON_GEOMETRY_DURATION_MS);
+    const elapsedProgress = remainingDuration <= 0
+      ? 1
+      : Math.min(1, (now - started) / remainingDuration);
+    const progress = initialProgress + (1 - initialProgress) * elapsedProgress;
     sampleIconGeometry(runtime, key, progress);
     onFrame();
     if (progress < 1) {

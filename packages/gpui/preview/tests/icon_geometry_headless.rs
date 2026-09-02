@@ -2,7 +2,10 @@
 //!
 //! No native pixels, no windowed capture. Candidate geometry is fixture input.
 
+use std::alloc::{GlobalAlloc, Layout, System};
+use std::cell::Cell;
 use std::hint::black_box;
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
 use gpui::TestAppContext;
@@ -24,7 +27,55 @@ mod headless_driver;
 mod icon_geometry_host;
 
 use headless_driver::HeadlessDriver;
-use icon_geometry_host::IconGeometryHost;
+use icon_geometry_host::{IconGeometryHost, ScheduledTickProbe};
+
+struct CountingAllocator;
+
+thread_local! {
+    static COUNT_THIS_THREAD: Cell<bool> = const { Cell::new(false) };
+}
+static TICK_ALLOCATIONS: AtomicUsize = AtomicUsize::new(0);
+static TICK_PROBE_ARMED: AtomicBool = AtomicBool::new(false);
+
+#[global_allocator]
+static ALLOCATOR: CountingAllocator = CountingAllocator;
+
+unsafe impl GlobalAlloc for CountingAllocator {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        let pointer = unsafe { System.alloc(layout) };
+        COUNT_THIS_THREAD.with(|active| {
+            if active.get() {
+                TICK_ALLOCATIONS.fetch_add(1, Ordering::SeqCst);
+            }
+        });
+        pointer
+    }
+
+    unsafe fn dealloc(&self, pointer: *mut u8, layout: Layout) {
+        unsafe { System.dealloc(pointer, layout) };
+    }
+
+    unsafe fn realloc(&self, pointer: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
+        let pointer = unsafe { System.realloc(pointer, layout, new_size) };
+        COUNT_THIS_THREAD.with(|active| {
+            if active.get() {
+                TICK_ALLOCATIONS.fetch_add(1, Ordering::SeqCst);
+            }
+        });
+        pointer
+    }
+}
+
+fn begin_tick_allocation_probe() {
+    if TICK_PROBE_ARMED.load(Ordering::SeqCst) {
+        TICK_ALLOCATIONS.store(0, Ordering::SeqCst);
+        COUNT_THIS_THREAD.with(|active| active.set(true));
+    }
+}
+
+fn end_tick_allocation_probe() {
+    COUNT_THIS_THREAD.with(|active| active.set(false));
+}
 
 fn run_headless(body: impl FnOnce(&mut TestAppContext)) {
     poodle_gpui_node_backend::reset_focus_registry();
@@ -92,17 +143,20 @@ fn resolved_geometry_paints_without_pair_lookup_and_tears_down() {
             assert!(!guard.has_text("chevron-left-to-chevron-right"));
         }
 
-        driver.update_app(|cx| {
-            cx.background_executor()
-                .advance_clock(Duration::from_millis(16));
-        });
+        poodle_gpui_node_backend::begin_probe_capture();
+        driver.advance_clock(Duration::from_millis(16));
         driver.drain();
-        driver.draw_frame();
+        driver.draw_if_invalidated();
         assert!(
             host.scheduled_wakeups() >= 1,
             "production scheduler must advance the 180ms clock, duration={ICON_GEOMETRY_DURATION_MS}"
         );
         assert_eq!(host.live_clocks(), 1);
+        let scheduled_paint = poodle_gpui_node_backend::take_probe_capture();
+        assert!(
+            scheduled_paint.contains(&"content.text-icon.resolved-geometry"),
+            "scheduler invalidation must repaint the mounted geometry: {scheduled_paint:?}"
+        );
 
         let channels = poodle_gpui_node_backend::take_probe_capture();
         assert!(
@@ -118,15 +172,12 @@ fn resolved_geometry_paints_without_pair_lookup_and_tears_down() {
 
         let wakeups_at_teardown = host.scheduled_wakeups();
         host.teardown();
+        driver.draw_frame();
         assert!(
             host.scheduled_task_dropped(),
             "teardown must drop the scheduled native task"
         );
-        driver.draw_frame();
-        driver.update_app(|cx| {
-            cx.background_executor()
-                .advance_clock(Duration::from_millis(u64::from(ICON_GEOMETRY_DURATION_MS)));
-        });
+        driver.advance_clock(Duration::from_millis(u64::from(ICON_GEOMETRY_DURATION_MS)));
         driver.drain();
         driver.draw_frame();
         assert_eq!(
@@ -142,6 +193,120 @@ fn resolved_geometry_paints_without_pair_lookup_and_tears_down() {
                 NodeKind::Container
             ));
         }
+        drop(driver);
+    });
+}
+
+#[test]
+fn host_keeps_inert_clock_uses_reverse_duration_and_cancels_on_policy_tightening() {
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let mut host = IconGeometryHost::new(MotionPolicy::Full, 16.0, &ctx);
+        let mut driver = HeadlessDriver::new(cx, host.node());
+        let first = driver.with_window(|window, cx| {
+            host.activate(
+                intent(
+                    "lifecycle",
+                    "chevron-left-to-chevron-right",
+                    GeometryEndpoint::To,
+                ),
+                window,
+                cx,
+                &ctx,
+            )
+        });
+        driver.draw_frame();
+        driver.advance_clock(Duration::from_millis(72));
+        driver.draw_frame();
+        let repeated = driver.with_window(|window, cx| {
+            host.activate(
+                intent(
+                    "lifecycle",
+                    "chevron-left-to-chevron-right",
+                    GeometryEndpoint::To,
+                ),
+                window,
+                cx,
+                &ctx,
+            )
+        });
+        assert_eq!(
+            repeated.interruption,
+            poodle_headless::motion_policy::MotionInterruption::Inert
+        );
+        assert_eq!(host.live_key().as_deref(), Some(first.key.as_str()));
+        assert!(
+            !host.scheduled_task_dropped(),
+            "inert repeat must keep the task alive"
+        );
+
+        let reverse = driver.with_window(|window, cx| {
+            host.activate(
+                intent(
+                    "lifecycle",
+                    "chevron-left-to-chevron-right",
+                    GeometryEndpoint::From,
+                ),
+                window,
+                cx,
+                &ctx,
+            )
+        });
+        assert_eq!(
+            reverse.interruption,
+            poodle_headless::motion_policy::MotionInterruption::Reverse
+        );
+        let reverse_ms = host.scheduled_duration_ms().expect("reverse duration");
+        assert!(reverse_ms > 0 && reverse_ms < u64::from(ICON_GEOMETRY_DURATION_MS));
+
+        driver.with_window(|window, _cx| {
+            let decisions = host.set_policy(MotionPolicy::Frozen, window, &ctx);
+            assert_eq!(decisions.len(), 1);
+        });
+        assert_eq!(host.live_clocks(), 0);
+        driver.draw_frame();
+        assert!(host.scheduled_task_dropped());
+        drop(driver);
+    });
+}
+
+#[test]
+fn scheduled_tick_allocates_nothing_after_plan_creation() {
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let mut host = IconGeometryHost::new(MotionPolicy::Full, 16.0, &ctx);
+        host.set_tick_probe(ScheduledTickProbe {
+            before: begin_tick_allocation_probe,
+            after: end_tick_allocation_probe,
+        });
+        let mut driver = HeadlessDriver::new(cx, host.node());
+        driver.with_window(|window, cx| {
+            host.activate(
+                intent(
+                    "allocation",
+                    "chevron-left-to-chevron-right",
+                    GeometryEndpoint::To,
+                ),
+                window,
+                cx,
+                &ctx,
+            );
+        });
+        driver.draw_frame();
+        TICK_PROBE_ARMED.store(true, Ordering::SeqCst);
+        TICK_ALLOCATIONS.store(usize::MAX, Ordering::SeqCst);
+        driver.advance_clock(Duration::from_millis(16));
+        driver.drain();
+        driver.draw_if_invalidated();
+        TICK_PROBE_ARMED.store(false, Ordering::SeqCst);
+        assert_eq!(
+            TICK_ALLOCATIONS.load(Ordering::SeqCst),
+            0,
+            "scheduled tick allocated"
+        );
+        host.teardown();
         drop(driver);
     });
 }

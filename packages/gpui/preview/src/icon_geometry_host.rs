@@ -14,11 +14,18 @@ use poodle_node::Node;
 use poodle_render::context::RenderContext;
 use poodle_render::icon_geometry::{
     activate_icon_geometry, complete_icon_geometry, create_icon_geometry_runtime,
-    live_geometry_clock_count, sample_icon_geometry, teardown_icon_geometry, write_resolved_frame,
+    icon_geometry_clock_timing, live_geometry_clock_count, sample_icon_geometry,
+    set_icon_geometry_policy, teardown_icon_geometry, write_resolved_frame,
     GeometryRuntimeDecision, GeometryRuntimeIntent, IconGeometryRuntime, ICON_GEOMETRY_DURATION_MS,
 };
 
 const FRAME_INTERVAL: Duration = Duration::from_millis(16);
+
+#[derive(Clone, Copy)]
+pub struct ScheduledTickProbe {
+    pub before: fn(),
+    pub after: fn(),
+}
 
 struct HostInner {
     runtime: IconGeometryRuntime,
@@ -34,6 +41,7 @@ pub struct IconGeometryHost {
     task: Option<Task<()>>,
     wakeups: Arc<AtomicUsize>,
     task_dropped: Arc<AtomicBool>,
+    tick_probe: Option<ScheduledTickProbe>,
 }
 
 impl IconGeometryHost {
@@ -52,6 +60,7 @@ impl IconGeometryHost {
             task: None,
             wakeups: Arc::new(AtomicUsize::new(0)),
             task_dropped: Arc::new(AtomicBool::new(false)),
+            tick_probe: None,
         }
     }
 
@@ -75,6 +84,15 @@ impl IconGeometryHost {
         self.inner.lock().expect("geometry host").key.clone()
     }
 
+    pub fn scheduled_duration_ms(&self) -> Option<u64> {
+        let inner = self.inner.lock().expect("geometry host");
+        inner.started_at.map(|_| inner.duration.as_millis() as u64)
+    }
+
+    pub fn set_tick_probe(&mut self, probe: ScheduledTickProbe) {
+        self.tick_probe = Some(probe);
+    }
+
     pub fn with_runtime<R>(&self, body: impl FnOnce(&mut IconGeometryRuntime) -> R) -> R {
         let mut inner = self.inner.lock().expect("geometry host");
         body(&mut inner.runtime)
@@ -87,7 +105,6 @@ impl IconGeometryHost {
         cx: &mut App,
         ctx: &RenderContext<'_>,
     ) -> GeometryRuntimeDecision {
-        self.cancel_task();
         let decision = {
             let mut inner = self.inner.lock().expect("geometry host");
             let decision = activate_icon_geometry(&mut inner.runtime, intent);
@@ -98,18 +115,53 @@ impl IconGeometryHost {
                 ctx,
             );
             if decision.schedule {
+                let (_, duration_ms) = icon_geometry_clock_timing(&inner.runtime, &decision.key)
+                    .expect("scheduled geometry timing");
                 inner.key = Some(decision.key.clone());
                 inner.started_at = Some(cx.background_executor().now());
-            } else {
+                inner.duration = Duration::from_millis(u64::from(duration_ms));
+            } else if !decision.live_clock {
                 inner.key = None;
                 inner.started_at = None;
             }
             decision
         };
         if decision.schedule {
+            self.cancel_task();
             self.spawn(window, cx);
+        } else if !decision.live_clock {
+            self.cancel_task();
         }
+        window.refresh();
         decision
+    }
+
+    pub fn set_policy(
+        &mut self,
+        policy: MotionPolicy,
+        window: &mut Window,
+        ctx: &RenderContext<'_>,
+    ) -> Vec<GeometryRuntimeDecision> {
+        let decisions = {
+            let mut inner = self.inner.lock().expect("geometry host");
+            let decisions = set_icon_geometry_policy(&mut inner.runtime, policy);
+            let mut node = self.node.lock().expect("geometry node");
+            *node = poodle_render::icon_geometry::resolved_icon_geometry(
+                &inner.runtime,
+                inner.size,
+                ctx,
+            );
+            if !decisions.iter().any(|decision| decision.live_clock) {
+                inner.key = None;
+                inner.started_at = None;
+            }
+            decisions
+        };
+        if !decisions.iter().any(|decision| decision.live_clock) {
+            self.cancel_task();
+        }
+        window.refresh();
+        decisions
     }
 
     pub fn teardown(&mut self) {
@@ -131,6 +183,7 @@ impl IconGeometryHost {
         let node = Arc::clone(&self.node);
         let wakeups = Arc::clone(&self.wakeups);
         let task_dropped = Arc::clone(&self.task_dropped);
+        let tick_probe = self.tick_probe;
         self.task_dropped.store(false, Ordering::SeqCst);
         self.task = Some(window.spawn(cx, async move |cx| {
             let _probe = TaskDropProbe(task_dropped);
@@ -138,9 +191,17 @@ impl IconGeometryHost {
                 cx.background_executor().timer(FRAME_INTERVAL).await;
                 wakeups.fetch_add(1, Ordering::SeqCst);
                 let keep = cx
-                    .update(|_window, cx| {
+                    .update(|window, cx| {
                         let now = cx.background_executor().now();
-                        tick_scheduled_frame(&inner, &node, now)
+                        if let Some(probe) = tick_probe {
+                            (probe.before)();
+                        }
+                        let keep = tick_scheduled_frame(&inner, &node, now);
+                        window.refresh();
+                        if let Some(probe) = tick_probe {
+                            (probe.after)();
+                        }
+                        keep
                     })
                     .unwrap_or(false);
                 if !keep {
@@ -165,23 +226,29 @@ fn tick_scheduled_frame(
     now: Instant,
 ) -> bool {
     let mut inner = inner.lock().expect("geometry host");
-    let (Some(key), Some(started)) = (inner.key.clone(), inner.started_at) else {
+    let HostInner {
+        runtime,
+        key: key_slot,
+        started_at,
+        duration,
+        ..
+    } = &mut *inner;
+    let (Some(key), Some(started)) = (key_slot.as_deref(), *started_at) else {
         return false;
     };
-    let progress = (now.saturating_duration_since(started).as_secs_f32()
-        / inner.duration.as_secs_f32())
-    .clamp(0.0, 1.0);
+    let progress = (now.saturating_duration_since(started).as_secs_f32() / duration.as_secs_f32())
+        .clamp(0.0, 1.0);
     if progress >= 1.0 {
-        complete_icon_geometry(&mut inner.runtime, &key);
-        inner.key = None;
-        inner.started_at = None;
+        complete_icon_geometry(runtime, key);
+        *key_slot = None;
+        *started_at = None;
         let mut node = node.lock().expect("geometry node");
-        write_resolved_frame(&inner.runtime, &mut node);
+        write_resolved_frame(runtime, &mut node);
         return false;
     }
-    sample_icon_geometry(&mut inner.runtime, &key, progress);
+    sample_icon_geometry(runtime, key, progress);
     let mut node = node.lock().expect("geometry node");
-    write_resolved_frame(&inner.runtime, &mut node);
+    write_resolved_frame(runtime, &mut node);
     true
 }
 

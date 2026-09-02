@@ -250,6 +250,13 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.update(|_window, cx| body(cx))
     }
 
+    /// Advance the test executor without holding the app's RefCell borrow.
+    /// Async window tasks must be able to re-enter the app when their timer
+    /// wakes; advancing through `update_app` would make that re-entry fail.
+    pub fn advance_clock(&mut self, duration: std::time::Duration) {
+        self.cx.background_executor.advance_clock(duration);
+    }
+
     pub fn with_window<R>(&mut self, body: impl FnOnce(&mut Window, &mut gpui::App) -> R) -> R {
         self.cx.update(|window, cx| body(window, cx))
     }
@@ -273,6 +280,16 @@ impl<'a> HeadlessDriver<'a> {
     /// frame boundary (layer registry, bounds, focus queue) is this draw.
     pub fn draw_frame(&mut self) {
         self.paint_frame();
+    }
+
+    /// Draw without notifying the root or refreshing the window first.
+    /// Animation tests use this to prove the production scheduler performed
+    /// the invalidation rather than letting the harness supply it.
+    pub fn draw_if_invalidated(&mut self) {
+        self.cx.update(|window, cx| {
+            let _ = window.draw(cx);
+        });
+        self.cx.run_until_parked();
     }
 
     /// Same production frame lifetime as the preview root: `overlay_frame_begin`

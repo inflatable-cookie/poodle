@@ -91,6 +91,11 @@ pub fn live_geometry_clock_count(runtime: &IconGeometryRuntime) -> usize {
     usize::from(runtime.clock.is_some())
 }
 
+pub fn icon_geometry_clock_timing(runtime: &IconGeometryRuntime, key: &str) -> Option<(f32, u32)> {
+    let clock = runtime.clock.as_ref()?;
+    (clock.key == key).then_some((clock.progress, clock.duration_ms))
+}
+
 pub fn candidate_fixture_ids() -> Vec<&'static str> {
     ICON_GEOMETRY_REGISTRY
         .iter()

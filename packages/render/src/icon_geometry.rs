@@ -14,11 +14,11 @@ mod runtime;
 #[allow(unused_imports)]
 pub use runtime::{
     abort_icon_geometry, activate_icon_geometry, candidate_fixture_ids, complete_icon_geometry,
-    create_icon_geometry_runtime, current_icon_geometry_frame, live_geometry_clock_count,
-    planned_candidate_fixture, sample_icon_geometry, set_icon_geometry_policy,
-    teardown_icon_geometry, CompactGeometryFrame, GeometryEndpoint, GeometryRuntimeDecision,
-    GeometryRuntimeIntent, IconGeometryRuntime, ICON_GEOMETRY_CHANNEL, ICON_GEOMETRY_DURATION_MS,
-    ICON_GEOMETRY_ROLE,
+    create_icon_geometry_runtime, current_icon_geometry_frame, icon_geometry_clock_timing,
+    live_geometry_clock_count, planned_candidate_fixture, sample_icon_geometry,
+    set_icon_geometry_policy, teardown_icon_geometry, CompactGeometryFrame, GeometryEndpoint,
+    GeometryRuntimeDecision, GeometryRuntimeIntent, IconGeometryRuntime, ICON_GEOMETRY_CHANNEL,
+    ICON_GEOMETRY_DURATION_MS, ICON_GEOMETRY_ROLE,
 };
 
 use poodle_node::{

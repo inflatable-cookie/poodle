@@ -84,4 +84,50 @@ describe("IconGeometryShell (svelte, private)", () => {
     cancel.mockRestore();
     raf.mockRestore();
   });
+
+  it("keeps inert progress, reverses proportionally, and cancels when frozen", async () => {
+    let now = 0;
+    let nextId = 1;
+    const callbacks = new Map<number, FrameRequestCallback>();
+    const clock = vi.spyOn(performance, "now").mockImplementation(() => now);
+    const raf = vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation((callback) => {
+      const id = nextId++;
+      callbacks.set(id, callback);
+      return id;
+    });
+    const cancel = vi.spyOn(globalThis, "cancelAnimationFrame").mockImplementation((id) => {
+      callbacks.delete(id);
+    });
+    const run = async (at: number) => {
+      now = at;
+      const [id, callback] = callbacks.entries().next().value as [number, FrameRequestCallback];
+      callbacks.delete(id);
+      callback(at);
+      await tick();
+    };
+
+    const view = render(IconGeometryShell, { props: { pairId: PAIR, target: "to" } });
+    await tick();
+    const start = svgOf(view.container).querySelector("path")?.getAttribute("d");
+    await run(72);
+    const partial = svgOf(view.container).querySelector("path")?.getAttribute("d");
+    expect(partial).not.toBe(start);
+
+    await view.rerender({ pairId: PAIR, target: "to", initial: true });
+    expect(callbacks.size).toBe(1);
+    await view.rerender({ pairId: PAIR, target: "from", initial: false });
+    await run(144);
+    expect(svgOf(view.container).querySelector("path")?.getAttribute("d")).toBe(start);
+    expect(callbacks.size).toBe(0);
+
+    await view.rerender({ pairId: PAIR, target: "to", initial: false });
+    expect(callbacks.size).toBe(1);
+    await view.rerender({ pairId: PAIR, target: "to", policy: "frozen" });
+    expect(callbacks.size).toBe(0);
+    expect(cancel).toHaveBeenCalled();
+    view.unmount();
+    cancel.mockRestore();
+    raf.mockRestore();
+    clock.mockRestore();
+  });
 });

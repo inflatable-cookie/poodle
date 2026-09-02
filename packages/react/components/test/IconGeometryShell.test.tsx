@@ -115,6 +115,50 @@ describe("IconGeometryShell (react, private)", () => {
     raf.mockRestore();
   });
 
+  it("keeps inert progress, reverses proportionally, and cancels when frozen", () => {
+    let now = 0;
+    let nextId = 1;
+    const callbacks = new Map<number, FrameRequestCallback>();
+    const clock = vi.spyOn(performance, "now").mockImplementation(() => now);
+    const raf = vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation((callback) => {
+      const id = nextId++;
+      callbacks.set(id, callback);
+      return id;
+    });
+    const cancel = vi.spyOn(globalThis, "cancelAnimationFrame").mockImplementation((id) => {
+      callbacks.delete(id);
+    });
+    const run = (at: number) => {
+      now = at;
+      const [id, callback] = callbacks.entries().next().value as [number, FrameRequestCallback];
+      callbacks.delete(id);
+      act(() => callback(at));
+    };
+
+    const view = render(<IconGeometryShell pairId={PAIR} target="to" />);
+    const start = svgOf(view.container).querySelector("path")?.getAttribute("d");
+    run(72);
+    const partial = svgOf(view.container).querySelector("path")?.getAttribute("d");
+    expect(partial).not.toBe(start);
+
+    view.rerender(<IconGeometryShell pairId={PAIR} target="to" initial />);
+    expect(callbacks.size).toBe(1);
+    view.rerender(<IconGeometryShell pairId={PAIR} target="from" />);
+    run(144);
+    expect(svgOf(view.container).querySelector("path")?.getAttribute("d")).toBe(start);
+    expect(callbacks.size).toBe(0);
+
+    view.rerender(<IconGeometryShell pairId={PAIR} target="to" />);
+    expect(callbacks.size).toBe(1);
+    view.rerender(<IconGeometryShell pairId={PAIR} target="to" policy="frozen" />);
+    expect(callbacks.size).toBe(0);
+    expect(cancel).toHaveBeenCalled();
+    view.unmount();
+    cancel.mockRestore();
+    raf.mockRestore();
+    clock.mockRestore();
+  });
+
   it("rejected pair paints no path and keeps the svg root", () => {
     const view = render(
       <IconGeometryShell pairId="menu-to-ellipsis" target="to" progress={0.5} />,
