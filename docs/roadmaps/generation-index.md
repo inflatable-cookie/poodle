@@ -30,27 +30,27 @@ Updated: 2026-09-02
     wave in merged PRs #128–#135; `045` merged in PR #155; `046` merged in PR
     #154; `047` merged in PR #152 after one exact-head repair round; `048`
     merged in PR #153 with a verified static-fallback benchmark verdict; `049`
-    merged in PR #156; `050`–`054` and `056`–`059` are the current canonical
-    continuation; independent `055` merged in PR #151
+    merged in PR #156; `050`, `056`, and `057` are complete; `051`–`054` and
+    `058`–`059` are the current canonical continuation; independent `055`
+    merged in PR #151
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: independent `g16.050` icon geometry internal runtime and
-    `g16.057` core build substrate. `g16.045`–`g16.049`, `g16.053`, and
-    `g16.056` are complete.
+  - Ready frontier: `g16.058` shell distributions. `g16.045`–`g16.050`,
+    `g16.053`, and `g16.056`–`g16.057` are complete.
   - Independent completed lane: `g16.055` drag-source pointer-gesture browser
     suppression merged in PR #151; it remains outside the post-triage
     continuation map.
   - Blocked frontier: `g16.051` on `050`, the operational
     Button lab, and its separately accepted icon adapter/manifest extension;
     `g16.052` on named reviewers, approvals, and orchestrator run custody;
-    `g16.058` on `057`, `g16.059` on `058`, and `g16.054`
+    `g16.059` on `058`, and `g16.054`
     on completed `g16.059`; `g16.053` is complete.
     Citations, nested menus, the visual tranche, public IconMorph,
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: continue `g16.050` and dispatch `g16.057` in parallel with global
+  - Next move: dispatch `g16.058`; keep `g16.059` serial and retain global
     front-door integration reserved to the orchestrator.
 
 ## Latest Completed Track

@@ -84,23 +84,23 @@ stay maintained; backend admission is not part of the first card.
 47. [047 — Toast same-id update convention](047-toast-same-id-update-convention.md) — complete; merged in PR #152 after one exact-head repair round
 48. [048 — AgentSubagent ownership and shimmer benchmark](048-agent-subagent-ownership-and-shimmer-benchmark.md) — complete; merged in PR #153 with a verified static-fallback verdict and no production effect
 49. [049 — Icon geometry format and registry foundation](049-icon-geometry-format-and-registry-foundation.md) — complete; merged in PR #156; IG-01/02 only, six candidates, six rejections, zero accepted/runtime-eligible pairs
-50. [050 — Icon geometry internal runtime substrate](050-icon-geometry-internal-runtime-substrate.md) — ready; candidate geometry is fixture-only and cannot be promoted by this card
+50. [050 — Icon geometry internal runtime substrate](050-icon-geometry-internal-runtime-substrate.md) — complete; merged in PR #160 with scheduled web/GPUI lifecycle, allocation, and sealed internal geometry proofs
 51. [051 — Icon geometry native visual admission](051-icon-geometry-native-visual-admission.md) — blocked on completed `g16.050`, the operational Button lab, and a separately completed icon adapter/manifest extension
 52. [052 — Contributor design-guidance pilot](052-contributor-design-guidance-pilot.md) — gated on named human reviewers, freeze approvals, and orchestrator execution custody
 53. [053 — Repository security-audit boundary repair](053-repository-security-audit-boundary-repair.md) — complete in PR #150; the production matcher is boundary-safe and the repository audit is green without exclusions
 54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — blocked on completed `g16.059`; `g16.053` is complete and no release mutation is authorized
 55. [055 — Drag source pointer-gesture browser suppression](055-drag-source-preactivation-selection-suppression.md) — complete; merged in PR #151 with shared-controller pre-activation selection suppression and one-shot post-drag compatibility-click cancellation
 56. [056 — Web distribution contract](056-web-distribution-contract.md) — complete; merged in PR #159 after one exact-head repair round with frozen 176/167/108 inventories and byte-exact receipts
-57. [057 — Core build substrate](057-core-build-substrate.md) — ready; deterministic source-free core build and receipt
-58. [058 — Shell distributions](058-shell-distributions.md) — blocked on completed `g16.057`
+57. [057 — Core build substrate](057-core-build-substrate.md) — complete; merged in PR #161 with deterministic source-free core output and receipt-backed audits
+58. [058 — Shell distributions](058-shell-distributions.md) — ready; compile dual-lane Svelte and private React distributions on the merged core substrate
 59. [059 — Installed web distribution certification](059-installed-web-distribution-certification.md) — blocked on completed `g16.058`; sole permanent installed-tarball oracle and receipt
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
-ready, serial, gated, and held frontier. `g16.045`–`g16.049` and `g16.053` are
-complete. Ready cards are independent `g16.050` and `g16.057`; the latter
-continues serial `g16.058`–`g16.059`. `g16.051` and `g16.052` retain their explicit
+ready, serial, gated, and held frontier. `g16.045`–`g16.050`, `g16.053`, and
+`g16.056`–`g16.057` are complete. The ready frontier is `g16.058`, continuing
+serially to `g16.059`. `g16.051` and `g16.052` retain their explicit
 serial or external gates. `g16.054` is blocked on completed `g16.059` and does
 not inherit release authority from the distribution programme. Citations,
 nested-menu pointer intent, the dedicated lab,

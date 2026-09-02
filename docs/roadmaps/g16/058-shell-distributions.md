@@ -1,6 +1,6 @@
 # g16.058 — Shell Distributions
 
-Status: blocked — requires accepted `g16.057`
+Status: ready — `g16.057` merged as `0af7e7fa5`
 Type: implementation — compiled Svelte and private React packages
 Opened: 2026-09-02
 Depends on: accepted `g16.057`
