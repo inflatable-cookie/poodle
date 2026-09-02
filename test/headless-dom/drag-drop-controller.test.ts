@@ -1618,6 +1618,7 @@ describe("createDragDropController", () => {
 
       document.dispatchEvent(pointer("pointerup", { clientX: 20, clientY: 20 }));
       expect(root.style.getPropertyValue("user-select")).toBe(authored);
+      expect(root.style.getPropertyPriority("user-select")).toBe("");
       expect(controller.getSnapshot().phase).toBe("idle");
     }
 
@@ -1682,6 +1683,30 @@ describe("createDragDropController", () => {
     root.style.removeProperty("user-select");
   });
 
+  it("restores authored user-select and -webkit-user-select including !important", () => {
+    root.style.setProperty("user-select", "text", "important");
+    root.style.setProperty("-webkit-user-select", "all", "important");
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    expect(root.style.getPropertyValue("-webkit-user-select")).toBe("none");
+
+    document.dispatchEvent(pointer("pointerup", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("text");
+    expect(root.style.getPropertyPriority("user-select")).toBe("important");
+    expect(root.style.getPropertyValue("-webkit-user-select")).toBe("all");
+    expect(root.style.getPropertyPriority("-webkit-user-select")).toBe("important");
+    controller.destroy();
+
+    root.style.removeProperty("user-select");
+    root.style.removeProperty("-webkit-user-select");
+  });
+
   it("does not suppress user-select for a disabled source or a secondary button", () => {
     const controller = createDragDropController();
     controller.connect(root);
@@ -1740,8 +1765,10 @@ describe("createDragDropController", () => {
       sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
       expect(controller.getSnapshot().phase).toBe("dragging");
       document.dispatchEvent(pointer("pointerup", outcome.up));
-      sourceEl.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+      const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+      sourceEl.dispatchEvent(click);
       expect(saw, outcome.name).not.toHaveBeenCalled();
+      expect(click.defaultPrevented, outcome.name).toBe(true);
       controller.destroy();
     }
   });
@@ -1756,16 +1783,54 @@ describe("createDragDropController", () => {
 
     sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
     document.dispatchEvent(pointer("pointerup", { clientX: 20, clientY: 20 }));
-    sourceEl.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    const tap = new MouseEvent("click", { bubbles: true, cancelable: true });
+    sourceEl.dispatchEvent(tap);
     expect(saw).toHaveBeenCalledTimes(1);
+    expect(tap.defaultPrevented).toBe(false);
 
     saw.mockClear();
     sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
     sourceEl.dispatchEvent(pointer("pointermove", { clientX: 22, clientY: 20 }));
     document.dispatchEvent(pointer("pointerup", { clientX: 22, clientY: 20 }));
-    sourceEl.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    const subThreshold = new MouseEvent("click", { bubbles: true, cancelable: true });
+    sourceEl.dispatchEvent(subThreshold);
     expect(saw).toHaveBeenCalledTimes(1);
+    expect(subThreshold.defaultPrevented).toBe(false);
     controller.destroy();
+  });
+
+  it("prevents the compatibility click default on a registered link source", () => {
+    const link = layout(document.createElement("a"), SOURCE_BOX);
+    link.setAttribute("href", "#compat-click");
+    link.textContent = "Alpha";
+    root.replaceChildren(link, targetEl);
+    const hashBefore = window.location.hash;
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(link, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    link.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    link.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    link.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    expect(window.location.hash).toBe(hashBefore);
+    expect(window.location.hash).not.toBe("#compat-click");
+    controller.destroy();
+
+    const tapController = createDragDropController();
+    tapController.connect(root);
+    tapController.registerSource(link, sourceReg());
+    link.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 20, clientY: 20 }));
+    const tap = new MouseEvent("click", { bubbles: true, cancelable: true });
+    link.dispatchEvent(tap);
+    expect(tap.defaultPrevented).toBe(false);
+    tapController.destroy();
   });
 
   it("expires a stale compatibility-click guard before a later click", async () => {
@@ -1806,8 +1871,10 @@ describe("createDragDropController", () => {
     sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
     document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
     expect(controller.getSnapshot().phase).toBe("dropping");
-    sourceEl.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    sourceEl.dispatchEvent(click);
     expect(saw).not.toHaveBeenCalled();
+    expect(click.defaultPrevented).toBe(true);
     finish?.({ status: "committed" });
     expect(saw).not.toHaveBeenCalled();
     controller.destroy();

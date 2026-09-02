@@ -224,10 +224,12 @@ The web pointer sensor uses Pointer Events. It must:
   pointerdown resolves to an accepted, enabled registered source, keep that
   suppression through the pre-threshold candidate and the active pointer drag,
   and restore the root's exact prior inline `user-select` / `-webkit-user-select`
-  declarations on every exit;
+  declarations (value and priority) on every exit;
 - consume an activated pointer gesture's browser compatibility click at the
-  document capture boundary on that source path, independent of drop outcome,
-  and expire the one-shot guard so a later unrelated click is not swallowed;
+  document capture boundary on that source path, independent of drop outcome:
+  stop immediate propagation and, when the click is cancelable, prevent its
+  default so a registered link or button source does not navigate or submit;
+  expire the one-shot guard so a later unrelated click is not swallowed;
   taps and pre-threshold abandonment still click; and
 - handle `pointercancel`, lost capture, visibility loss, source unmount, and
   target unmount.

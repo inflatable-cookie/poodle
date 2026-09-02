@@ -323,6 +323,36 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   );
 
   await page.reload({ waitUntil: "load" });
+  await page.locator("#link-source").waitFor();
+  const hashBefore = await page.evaluate(() => location.hash);
+  const link = center(await box(page, "#link-source"));
+  const linkDrop = center(await box(page, "#target"));
+  await page.mouse.move(link.x, link.y);
+  await page.mouse.down();
+  await page.mouse.move(link.x + 28, link.y, { steps: 8 });
+  await waitProbe(page, "phase", "dragging");
+  await page.mouse.move(linkDrop.x, linkDrop.y, { steps: 8 });
+  await page.mouse.up();
+  await frames(page);
+  const hashAfterDrag = await page.evaluate(() => location.hash);
+  check(
+    `${name}: activated drag of a link source does not follow the compatibility click href`,
+    hashAfterDrag === hashBefore && hashAfterDrag !== "#compat-click",
+    `hash=${hashAfterDrag || "(empty)"}`,
+  );
+
+  await page.reload({ waitUntil: "load" });
+  await page.locator("#link-source").waitFor();
+  await page.locator("#link-source").click();
+  await frames(page);
+  const hashAfterTap = await page.evaluate(() => location.hash);
+  check(
+    `${name}: tap on a registered link source still follows href`,
+    hashAfterTap === "#compat-click",
+    `hash=${hashAfterTap || "(empty)"}`,
+  );
+
+  await page.goto(url, { waitUntil: "load" });
   await page.locator("#nested-source").waitFor();
   await page.locator("#inner-scroll").evaluate((node) => {
     (node as HTMLElement).scrollTop = 80;

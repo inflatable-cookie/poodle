@@ -825,8 +825,8 @@ export function createDragDropController(options: DragDropControllerOptions = {}
 
   const documentListeners: Array<[string, EventListener, AddEventListenerOptions | boolean | undefined]> = [];
   let resizeObserver: ResizeObserver | null = null;
-  let restoredRootUserSelect: string | null | undefined;
-  let restoredRootWebkitUserSelect: string | null | undefined;
+  let restoredRootUserSelect: { value: string; priority: string } | undefined;
+  let restoredRootWebkitUserSelect: { value: string; priority: string } | undefined;
   let compatibilityClickSource: Element | null = null;
   let compatibilityClickExpiry: ReturnType<typeof setTimeout> | null = null;
 
@@ -2315,17 +2315,23 @@ export function createDragDropController(options: DragDropControllerOptions = {}
   function restoreInlineUserSelect(
     style: CSSStyleDeclaration,
     property: string,
-    value: string | null | undefined,
+    restored: { value: string; priority: string } | undefined,
   ): void {
-    if (value === null || value === undefined || value === "") style.removeProperty(property);
-    else style.setProperty(property, value);
+    if (!restored || restored.value === "") style.removeProperty(property);
+    else style.setProperty(property, restored.value, restored.priority);
   }
 
   function suppressRootUserSelect(): void {
     const rootStyle = connectedRoot ? styledElement(connectedRoot) : null;
     if (!rootStyle || restoredRootUserSelect !== undefined) return;
-    restoredRootUserSelect = rootStyle.style.getPropertyValue("user-select");
-    restoredRootWebkitUserSelect = rootStyle.style.getPropertyValue("-webkit-user-select");
+    restoredRootUserSelect = {
+      value: rootStyle.style.getPropertyValue("user-select"),
+      priority: rootStyle.style.getPropertyPriority("user-select"),
+    };
+    restoredRootWebkitUserSelect = {
+      value: rootStyle.style.getPropertyValue("-webkit-user-select"),
+      priority: rootStyle.style.getPropertyPriority("-webkit-user-select"),
+    };
     rootStyle.style.setProperty("user-select", "none");
     rootStyle.style.setProperty("-webkit-user-select", "none");
   }
@@ -2371,6 +2377,7 @@ export function createDragDropController(options: DragDropControllerOptions = {}
     if (!eventPath(event).includes(source)) return;
     clearCompatibilityClickGuard();
     event.stopImmediatePropagation();
+    if (event.cancelable) event.preventDefault();
   }
 
   /**
