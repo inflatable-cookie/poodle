@@ -72,13 +72,13 @@ The current ledger mixes useful expected-test-manifest data with execution claim
 | --- | --- | --- |
 | `M0` construction | The spec can be constructed or appears in the specimen catalogue. It proves neither mounting nor behavior. | `effigy probe:gpui-specimens` output naming the route and commit. This is a discovery baseline only. |
 | `M1` mounted execution | A real GPUI in-memory `TestAppContext`/`VisualTestContext` mounts the production render/node/backend path and drives pointer, keyboard, text, focus, overlay, or timer input as applicable. | Component ID, scenario, runtime, action sequence, observed callbacks/state/tree/focus result, assertion result, command, commit, and artifact path. The driver must dispatch through the mounted tree; direct handler calls do not count. |
-| `M2` Nucleus cohort journey | A composed Nucleus-shaped GPUI root reaches every denominator component in product context and preserves cross-component state, focus, overlay, and callback flow. | One replayable journey receipt plus per-component links to `M1`, accessibility, and visual receipts. |
+| `M2` consumer cohort journey | The actual Nucleus application, or a Nucleus-owned integration harness, reaches every denominator component with Nucleus-owned data/actions and preserves cross-component state, focus, overlay, and callback flow. Poodle may provide reusable generic composition fixtures, but it does not seed or own Nucleus product behavior. | One replayable Nucleus-owned journey receipt plus per-component links to Poodle `M1`, accessibility, and visual receipts. |
 | `A0` manual accessibility posture | Existing manual/native posture only. It is a gap marker, not a passing proof. | Current `packages/gpui/native-accessibility-proof.json#currentPosture` reference. No promotion. |
 | `A1` executable native semantics | The mounted node tree exposes the contract-required role, name/description, value, checked/selected/expanded state, controls/label relationship, disabled state, and tab index; transitions are asserted after real input. Non-interactive primitives must assert their hidden/decorative or text semantics. | Machine-readable node/accessibility snapshot before and after actions, with component and scenario IDs. |
 | `A2` native accessibility authority | Independent validation through the agreed GPUI/native accessibility authority, including keyboard traversal and assistive-technology or platform-inspector evidence where required. | External lab or authority receipt tied to the exact build, OS/runtime, scenario set, and findings. A1 cannot self-waive A2. |
 | `V0` visual gap | No GPUI comparison evidence. | None; remains missing. |
 | `V1` component visual parity | Deterministic Svelte/React/GPUI captures for the component states Nucleus uses, with fixed theme/density/control-size/viewport and an explicit diff rule. | Capture manifest, hashes, runtime/build receipt, diff output, and reviewer disposition. Local `*-windowed` selectors are not a substitute for the dedicated lab. |
-| `V2` composed Nucleus visual parity | The Nucleus-shaped shell and journey states are compared in the dedicated conformance lab. | External lab receipt covering the accepted cohort and exact adapter/manifest versions. |
+| `V2` consumer visual parity | The actual Nucleus application, or a Nucleus-owned integration harness, is captured in the dedicated conformance lab at the exact Poodle build. | External lab receipt covering the accepted cohort, consumer state, and exact adapter/manifest/package versions. |
 
 For a component to pass the first switch gate, the minimum is `M1 + A1 + A2 + V1`; the composed target additionally needs `M2 + V2`. A component can be source-ready while `A2` or `V2` remains externally blocked. That keeps unrelated Poodle repairs moving without making an unverified switch claim.
 
@@ -90,7 +90,7 @@ The current GPUI mounted evidence is real headless execution through `packages/g
 
 | # | Component | Nucleus use | Current `M / A / V` | Shortest honest gap |
 | ---: | --- | --- | --- | --- |
-| 1 | `Icon` | `App.svelte:400`; `AgentChatPanel.svelte:1227,1291,1300`; `ProjectRail.svelte` throughout | `M0 / A0 / V0` | Mount both decorative and named icons through `IconProvider`; assert hidden/name semantics and Nucleus icon states; then supply geometry/token captures. Icon geometry remains coupled to the g16.049/g16.050 and lab path. |
+| 1 | `Icon` | `App.svelte:400`; `AgentChatPanel.svelte:1227,1291,1300`; `ProjectRail.svelte` throughout | `M0 / A0 / V0` | Mount both decorative and named static icons through `IconProvider`; assert hidden/name semantics and Nucleus icon states; then supply geometry/token captures. Static `Icon` proof can proceed independently of any future icon-morph substrate. |
 | 2 | `Text` | `AgentChatPanel.svelte:1224-1229`; `ProjectWorkspaceStage.svelte:874-899,1124-1125` | `M0 / A0 / V0` | Mount the typography variants used by shell, transcript, and empty states; assert the contract's roleless/text semantics and compare typography under Cobalt/compact/sm. |
 | 3 | `Surface` | `ProjectWorkspaceStage.svelte:868,885,1122`; `DiffPanel.svelte:229`; settings pages | `M0 / A0 / V0` | Mount nested shell/panel surfaces with their token boundaries; assert composition and region semantics where supplied; compare borders, fills, radius, and density. |
 | 4 | `Button` | `App.svelte:456,464`; project rail, agent panel, settings and dialogs | `M1 / A0 / V1` — `a_mounted_button_carries_its_controls_target`; GPUI has 18 visual fixtures | Add Nucleus action states (submit, stop, retry, accept, revise, dismiss, destructive confirm), keyboard/focus/disabled/pressed assertions, A1/A2, and reuse/extend the visual fixture set. |
@@ -128,11 +128,11 @@ These are source/test repair proposals. They must be dispatched as bounded imple
 
 ### `PAIR-H1` — recursive HistoryCenter continuation deletion
 
-Evidence: `packages/core/src/history-center.ts:989-1027` creates a new map and calls `next.set(level.anchorEntryId, invalidated)`, which is correct for the root level but leaves a nested child in its parent map. The headless contract already uses recursive `replace_level` in `packages/contracts/headless/src/history_center.rs:1099-1138`, and its nested test at `1810-1849` expresses the intended result.
+Evidence: `packages/core/src/history-center.ts:989-1027` creates a new map and calls `next.set(level.anchorEntryId, invalidated)`, which is correct for the root level but leaves a nested child in its parent map. The headless implementation uses recursive `replace_level` in `packages/contracts/headless/src/history_center.rs:1099-1138`, but the Rust test around `1810-1849` is `delete_invalidates_the_offered_fork_and_reloads_its_anchor` and exercises a top-level level. It is not nested-delete evidence. The current TypeScript coverage is likewise root-level; there is no paired nested-delete vector proving the divergence.
 
-Bounded scope: align the TypeScript machine's deletion/replacement operation with the recursive headless behavior; add a nested continuation test covering the nested vector, retained sibling/anchor behavior, and existing delete/load effects. Re-run the paired core/headless contract checks. Do not alter Nucleus or claim a GPUI visual result.
+Bounded scope: add one explicit nested continuation counterexample to both machines, then align the TypeScript machine's deletion/replacement operation with the recursive headless behavior. Cover the nested vector, retained sibling/anchor behavior, and existing delete/load effects in paired tests. Re-run the paired core/headless contract checks. Do not alter Nucleus or claim a GPUI visual result.
 
-Exit: deleting a nested continuation removes that level from the actual nested context, does not leave stale descendants, preserves unrelated branches, and emits the same intended effects in both machines.
+Exit: the paired nested counterexample fails before the repair and passes after it; deleting a nested continuation removes that level from the actual nested context, does not leave stale descendants, preserves unrelated branches, and emits the same intended effects in both machines.
 
 ### `PAIR-S1` — Slider negative-half rounding law
 
@@ -154,50 +154,65 @@ Exit: `showTooltips` has one documented cross-runtime meaning; native mounted ex
 
 ## Dependency graph
 
-The proposed order follows the Nucleus journey from shell substrate to cross-component behavior. It intentionally groups high-leverage composition before lower-frequency leaf states and is not alphabetical.
+The proposed order follows the Nucleus journey from shell substrate to cross-component behavior. It intentionally groups high-leverage composition before lower-frequency leaf states and is not alphabetical. NP-1 through NP-5 are programme tranches; only their later child cards are dispatchable.
 
 ```text
 NP-0 execution receipt contract and fixed 29-row cohort manifest
-  ├──> NP-1 shell substrate (IconProvider, Icon, Text, Surface, Button, IconButton,
-  │    AppHeader, SplitView)
-  │      └──> NP-2 navigation and overlay spine (SegmentedControl, Tabs, Menu,
-  │           Dialog, Popover, Select, EditableLabel)
-  │                ├──> NP-3 agent workflow (AgentTranscript, AgentChatInput,
-  │                │    AgentPlan, AgentQuestion, ModelPicker, StatusIndicator)
-  │                └──> NP-4 settings and remediation (RadioGroup, Switch,
-  │                     TextInput, Callout, ConfirmAction, DetailItem)
-  │                          └──> NP-5 command and attention (CommandPalette,
-  │                               MessageCenter, ToastHost)
+  ├──> NP-1 tranche: shell substrate (IconProvider, Icon, Text, Surface, Button,
+  │    IconButton, AppHeader, SplitView)
+  ├──> NP-2 tranche: navigation and overlay spine (SegmentedControl, Tabs, Menu,
+  │    Dialog, Popover, Select, EditableLabel)
+  ├──> NP-3 tranche: agent workflow (AgentTranscript, AgentChatInput, AgentPlan,
+  │    AgentQuestion, ModelPicker, StatusIndicator)
+  ├──> NP-4 tranche: settings and remediation (RadioGroup, Switch, TextInput,
+  │    Callout, ConfirmAction, DetailItem)
+  ├──> NP-5 tranche: command and attention (CommandPalette, MessageCenter, ToastHost)
   ├──> PAIR-H1 HistoryCenter repair (parallel)
   ├──> PAIR-S1 Slider repair (parallel)
-  └──> PAIR-T1 Tabs tooltip repair ───────────────> NP-2
+  └──> PAIR-T1 Tabs tooltip repair ───────────────> NP-2 child cards
 
-NP-1..NP-5 component receipts
-  └──> NP-6 composed Nucleus-shaped M2 journey receipt
-             ├── waits for A2 GPUI accessibility authority
-             └── waits for V2 dedicated conformance lab
+NP-1..NP-5 promoted child receipts
+  └──> NP-6 Poodle-owned reusable composition fixtures and evidence index
+             └── exact Poodle build + component receipts ──> NP-7 Nucleus-owned M2/V2
+                                                              consumer journey proof
+                                                               ├── waits for A2 authority
+                                                               └── waits for V2 lab
 
-NP-6 Poodle proof and version receipt
-  └──> NP-7 Nucleus-owned GPUI adoption and switch decision
+NP-7 actual Nucleus consumer proof
+  └──> NP-8 operator switch decision / Nucleus adoption
 
 Jetstream direct adapter ── quarantine / separate admission decision; no edge into proof
 ```
 
-### Proposed cards
+### Programme tranches and later card promotion
 
-| Order | Card | Small bounded outcome | Dependencies and non-goals |
+NP-1 through NP-5 are programme tranches, not dispatchable cards. They group the work by Nucleus leverage so the orchestrator can see the product path; they do not authorize a 6–8-component implementation batch. After `NP-0` establishes the receipt format, the orchestrator promotes small child cards from each tranche.
+
+| Order | Tranche or card | Programme outcome or later small-card examples | Dependencies and non-goals |
 | ---: | --- | --- | --- |
 | 0 | `NP-0` Execution receipt and cohort manifest | Define the machine-readable receipt shape and freeze the 29-row Nucleus manifest, including the `IconProvider` prerequisite and version receipt fields. | Uses existing headless/visual runners. Does not rewrite the current ledger or invent broad cross-runtime claims. |
-| 1 | `NP-1` Shell substrate | Produce mounted and semantic receipts for the root theme/density/control-size path, icon registry, typography/surfaces, primary actions, titlebar, and split layout. | `IconProvider` is setup, not a denominator row. Coordinate icon geometry gates. No Nucleus source change. |
-| 2 | `NP-2` Navigation and overlay spine | Cover project filtering, tabs, menus, dialogs, popovers, selects, and editable rename as one navigable product spine, with focus/overlay restoration. | Depends on shell and `PAIR-T1` for Tabs tooltip behavior. Coordinate with g16.045 rather than duplicating EditableLabel work. |
-| 3 | `NP-3` Agent workflow | Cover transcript, composer, pending plan, question, model/actor selection, and status transitions in a composed chat fixture. | Depends on shell/overlay focus substrate. Does not move Nucleus's agent data/orchestration into Poodle. |
-| 4 | `NP-4` Settings and remediation | Cover settings controls and restore remediation, including radio/switch/input validation, callouts, explicit confirmation, and details. | Depends on shell and overlay semantics. Destructive actions remain fixture-only until Nucleus adoption proves its data path. |
-| 5 | `NP-5` Command and attention | Cover command palette, notification center, portalled surface observation, and store-driven toast lifecycle. | Depends on overlay/focus receipts. The Nucleus observer remains an adoption composition concern. |
-| 6 | `NP-6` Nucleus-shaped acceptance journey | Replay the first shippable journey below and link all 29 component receipts into one M2 receipt. | Blocks the switch decision; does not itself waive A2 or V2. |
-| 7 | `NP-7` External proof gates | Run the agreed GPUI accessibility authority and dedicated visual conformance lab against the fixed build and fixture manifest. | External authority/lab work. No local `*-windowed` conformance. Source-ready Poodle cards remain unblocked while these gates are unavailable. |
-| 8 | `NP-8` Nucleus adoption and switch decision | Pin the exact package/commit/lock resolution, mount the Nucleus-owned data/actions on GPUI, and record a go/no-go decision. | Nucleus-owned. Starts only after Poodle proof and external gates; no Jetstream evidence substitution. |
+| 1 | `NP-1` Shell substrate tranche | Promote cards such as `Icon` static mount/semantics, `Text` or `Surface` token state, `Button` action states, `IconButton` tooltip/activation, `AppHeader` root semantics, and `SplitView` divider behavior. Each card owns one component or one tightly coupled boundary and one receipt slice. | `IconProvider` is setup, not a denominator row. Static `Icon` proof has no dependency on future icon-morph work. No Nucleus source change. |
+| 2 | `NP-2` Navigation and overlay spine tranche | Promote cards for project filtering, Tabs semantics/tooltip, menu keyboard flow, dialog focus restoration, popover portalling, Select search/selection, and EditableLabel rename. | Child cards depend only on their direct shell/overlay contracts; Tabs waits for `PAIR-T1`. Coordinate with g16.045 rather than duplicating EditableLabel work. |
+| 3 | `NP-3` Agent workflow tranche | Promote cards for transcript log/toggle behavior, composer submit/stop, plan decisions, question selection, model/actor selection, and status transitions. | Child cards depend on the specific focus/overlay or shared agent contract they exercise. They do not move Nucleus data/orchestration into Poodle. |
+| 4 | `NP-4` Settings and remediation tranche | Promote cards for radio/switch state, validated text input, restore callouts, explicit confirmation, and detail presentation. | Child cards can proceed independently where contracts are independent. Destructive actions remain fixture-only until Nucleus-owned consumer proof exercises its data path. |
+| 5 | `NP-5` Command and attention tranche | Promote cards for command-palette session behavior, MessageCenter notification lifecycle/portalled surface, and ToastHost store/timer/action states. | The generic Poodle receipts stay separate from the Nucleus observer and notification data path. Overlay dependencies are direct edges only. |
+| 6 | `NP-6` Poodle reusable composition/evidence bundle | Index the accepted component receipts and provide reusable generic composition fixtures or harness utilities that do not contain Nucleus projects, agent orchestration, restore data, or app callbacks. | Poodle-owned. It is not an M2 consumer proof and cannot claim that Nucleus ships. |
+| 7 | `NP-7` Nucleus-owned M2/V2 consumer proof | Run the first shippable journey below in the actual Nucleus application or a Nucleus-owned integration harness, with Nucleus-owned data/actions, exact Poodle build, A2 authority receipt, and V2 lab receipt. | Nucleus owns the integration and shipping receipt. No Poodle fake journey and no local `*-windowed` conformance. |
+| 8 | `NP-8` Switch decision / adoption | Record the operator go/no-go decision and, if accepted, Nucleus's GPUI adoption/version migration receipt. | Nucleus/operator-owned. Starts only after actual consumer proof and external gates; no Jetstream evidence substitution. |
 
-`PAIR-H1` and `PAIR-S1` may run alongside `NP-1` unless review identifies a direct contract dependency. `PAIR-T1` must complete before Tabs is admitted to `NP-2`'s full proof. These cards are proposals, not promoted runway items.
+`PAIR-H1` and `PAIR-S1` may run alongside `NP-1` unless review identifies a direct contract dependency. `PAIR-T1` must complete before Tabs is admitted to `NP-2`'s full proof. These are proposals, not promoted runway items.
+
+### Promotion and parallel ready frontier
+
+The promotion rule is deliberately small and falsifiable:
+
+1. `NP-0` freezes the exact component, scenario, runtime, action/assertion, artifact, and build fields required in a receipt. It also freezes the 29-row manifest and the `IconProvider` prerequisite.
+2. A child card names one denominator component and one behavior/state slice, or one tightly coupled shared boundary of at most two components. It names its owner, direct dependencies, proof levels, expected artifacts, and stop conditions. It does not inherit the whole tranche's scope.
+3. At each frontier, promote every child whose direct shared-authority dependencies are complete. Independent cards within a tranche, and independent cards across tranches, are ready in parallel.
+4. Serialize only a real edge: for example, a Tabs child waits for `PAIR-T1`; a child needing a shared overlay contract waits for that contract; a consumer M2/V2 run waits for the exact Poodle build and the accepted component receipt bundle. A tranche being incomplete is not a dependency for an unrelated ready child.
+5. Close a tranche only when its promoted child cards are accepted or explicitly deferred with an owner and reason. External A2/V2 unavailability blocks the consumer gate, not unrelated source-ready Poodle cards.
+
+This rule keeps the leverage order visible while avoiding a serial 29-component batch or a false requirement that all work in NP-1 precede all work in NP-2.
 
 ## Making the existing ledger execution-backed
 
@@ -214,15 +229,15 @@ This ledger work is a future implementation card under `NP-0`; this packet does 
 
 ## First shippable Nucleus-on-GPUI journey
 
-The first acceptance journey is a seeded, Nucleus-shaped workspace fixture. It is not a fake component gallery and it does not require the Nucleus repository to be mutated during Poodle proof work.
+This is a Nucleus-owned consumer acceptance journey. It must run in the actual Nucleus application or a Nucleus-owned integration harness at an exact Poodle build. Poodle owns the generalized 29-component receipts and may provide reusable composition fixtures or harness utilities, but it must not seed Nucleus projects, agent orchestration, restore data, notifications, or app callbacks inside Poodle. There is one consumer proof, not a Poodle imitation followed by a second adoption proof.
 
-1. Start the real GPUI root with `IconProvider`, Cobalt theme, compact density, `sm` control size, overlay host wiring, drag/drop host, and a two-panel `SplitView`. Seed one project, one workspace tab, one thread, one agent turn, one pending plan/question, one resource, one notification, and one danger toast.
+1. Nucleus starts its real GPUI root with `IconProvider`, Cobalt theme, compact density, `sm` control size, overlay host wiring, drag/drop host, and a two-panel `SplitView`. Nucleus seeds one project, one workspace tab, one thread, one agent turn, one pending plan/question, one resource, one notification, and one danger toast through its own data/actions.
 2. In the project rail, choose a project through `SegmentedControl`, expand it, open its `Menu`, rename a thread through `EditableLabel`, and switch the workspace `Tabs`. Open project details through the header `Popover`, exercise an `IconButton`, and change the split divider/collapse state.
-3. Open a resource `Dialog`/`Select` path and a command palette session. Search and choose an actor/provider/model. Type in `AgentChatInput`, submit, stop a busy run, and exercise disabled and reviewing-plan states.
-4. Accept, revise, and dismiss `AgentPlan` in separate seeded checkpoints. For a question checkpoint, choose single and multi options in `AgentQuestion`, submit, and dismiss. The transcript must append output, expand a tool run/call and changed files, and open a child while preserving log/live and focus semantics. `StatusIndicator` must follow the seeded state transitions.
-5. Navigate to settings. Change `RadioGroup` and `Switch` values, edit and validate the `TextInput`, render `Callout` states, inspect `DetailItem`, and invoke `ConfirmAction` only after the restore warning. Verify cancel/confirm and focus restoration.
+3. Open a resource `Dialog`/`Select` path and a command palette session. Search and choose an actor/provider/model. Type in `AgentChatInput`, submit, stop a busy run, and exercise disabled and reviewing-plan states through Nucleus callbacks.
+4. Accept, revise, and dismiss `AgentPlan` in separate seeded checkpoints. For a question checkpoint, choose single and multi options in `AgentQuestion`, submit, and dismiss. The transcript must append output, expand a tool run/call and changed files, and open a child while preserving log/live and focus semantics. `StatusIndicator` must follow the Nucleus-owned state transitions.
+5. Navigate to settings. Change `RadioGroup` and `Switch` values, edit and validate the `TextInput`, render `Callout` states, inspect `DetailItem`, and invoke `ConfirmAction` only after the restore warning. Verify cancel/confirm and focus restoration through the Nucleus data path.
 6. Open `MessageCenter`, mark an item read, remove one, mark all read, select an admitted action, and verify the portalled surface observer. Add, act on, dismiss, auto-dismiss, and retain a sticky-danger `ToastHost` item. Return focus to the originating controls and complete the journey through keyboard navigation.
-7. Emit one M2 receipt that names all 29 denominator components and links each to its M1, A1, and V1 artifacts. Attach the external A2 and V2 receipts for the accepted build and fixture set. Record the Poodle package/commit and the Nucleus consumer resolution separately.
+7. Nucleus emits the single M2 consumer receipt naming all 29 denominator components and linking each to the Poodle M1/A1/V1 artifacts. The dedicated lab emits the V2 receipt, and the accessibility authority emits A2. Record the Poodle package/commit and Nucleus consumer resolution in the same consumer proof bundle.
 
 ### Stop conditions
 
@@ -230,7 +245,8 @@ Stop the relevant card or switch decision when any of these occurs:
 
 - A component has only a specimen route, source import, expected selector, or test-name reference.
 - A mounted test bypasses the real render/node/backend path, calls handlers directly, or lacks action-and-observation output.
-- Any denominator row lacks its required `M1`, `A1`, `A2`, or `V1` receipt, or the composed journey lacks an `M2` link.
+- Any denominator row lacks its required `M1`, `A1`, `A2`, or `V1` receipt, or the actual Nucleus consumer journey lacks its `M2` link.
+- A Poodle-owned fixture or harness is presented as proof that Nucleus ships, or a Poodle-generated V2 capture is used in place of the actual Nucleus application or Nucleus-owned integration harness.
 - The dedicated visual lab or GPUI accessibility authority is absent, mismatched to the build, or has unresolved findings. Do not waive the gate; continue unrelated source-ready work where it is safe.
 - `PAIR-H1`, `PAIR-S1`, or `PAIR-T1` exposes a runtime divergence in the affected journey. Repair the source/test pair before promoting that component; do not rewrite the ledger to describe the divergence away.
 - Nucleus's committed `0.2.2` resolution and the actual Poodle runtime differ without an explicit version/commit receipt.
@@ -242,9 +258,9 @@ Stop the relevant card or switch decision when any of these occurs:
 
 | Concern | Owner and allowed work | Explicit boundary |
 | --- | --- | --- |
-| Poodle parity implementation | Poodle contracts, specs, renderers, GPUI node/backend, headless execution, receipt/checker, and the three paired repairs. | Shared semantics stay in Poodle's contract/spec path; no app-specific Nucleus workflow logic in Poodle. |
-| Nucleus adoption | Nucleus owns GPUI root adoption, data/orchestration, callbacks, app-owned native controls, package/version resolution, and consumer migration. | Nucleus does not define Poodle parity evidence by source presence, and this packet does not mutate Nucleus. |
-| Dedicated conformance lab | External lab owns approved visual capture, adapter/manifest versions, diff review, and any native visual authority required by the lab. | The accepted Button tranche is not 29-component Nucleus coverage. No local windowed substitute. |
+| Poodle parity implementation | Poodle contracts, specs, renderers, GPUI node/backend, headless execution, generalized `M1/A1/V1` receipts, reusable composition fixtures, receipt/checker, and the three paired repairs. | Shared semantics stay in Poodle's contract/spec path; Poodle does not own Nucleus data, actions, app callbacks, M2, or V2. |
+| Nucleus consumer proof and adoption | Nucleus owns the actual GPUI root, data/orchestration, callbacks, app-owned native controls, package/version resolution, Nucleus-owned integration harness if used, M2 consumer journey, V2 consumer capture, and consumer migration. | Nucleus does not define Poodle parity evidence by source presence, and this packet does not mutate Nucleus. |
+| Dedicated conformance lab | External lab owns approved V2 capture of the actual Nucleus application or Nucleus-owned integration harness, adapter/manifest versions, diff review, and any native visual authority required by the lab. | The accepted Button tranche is not 29-component Nucleus coverage. No local windowed substitute. |
 | GPUI accessibility authority | Agreed native platform/accessibility reviewer owns A2 validation and findings. | Poodle's A1 node snapshot is necessary but cannot self-certify broad assistive-technology parity. |
 | Jetstream | Remains quarantined under its existing hold; admission is a separate review of the direct adapter and 108-component surface. | No Jetstream component count, adapter, or visual result enters the Nucleus/Poodle proof denominator. |
 | Orchestrator/operator | Promote these proposals, sequence dispatch, review receipts, decide external authority, and merge approved PRs. | This packet grants no implementation, release, or merge authority. |
