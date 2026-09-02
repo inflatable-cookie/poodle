@@ -13,6 +13,8 @@ Branch: `feature/g16-049-icon-geometry-foundation`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-049-icon-geometry`
 Starting exact head: `c1a527898e7425853359bd72b7113a8cf38b8d97`
 Planning base ancestor: `7f59ae42f4917c675968819eb23a5e41dc90013c`
+Rebased onto live `origin/main`: `fa8e65796f94eedcef7a6e168ba49aec41a178b5`
+Post-rebase implementation head: `cd3088ce8962a01a6f4a0a081393ee18a789f5e0`
 PR: pending
 
 ## Outcome
@@ -81,11 +83,17 @@ Final board results:
   checks.
 - `effigy ci:rust` — pass; the component suite reports 291 passed tests and
   the full contract board is green.
-- `effigy qa` — all substantive selectors passed, including native/headless
-  tests and license compliance. Aggregate exit 1 is only
-  `audit:security`, which reports token-shaped substrings in six pre-existing
-  docs/handoff files; no credential is present and no new geometry file was
-  reported.
+- The pre-rebase `effigy qa` reached native/headless and license checks, then
+  exited 1 at the old baseline `audit:security` false positive. After the
+  required rebase onto `fa8e657`, direct `bun scripts/audit-repository-security.ts`
+  is clean.
+- The standalone post-rebase `effigy ci:web` passed: 372 files / 3,535 tests,
+  20 packed-consumer tests, zero Svelte-check errors, and the composed tree
+  guard passed. The final post-rebase `effigy qa` reached its nested `ci:web`
+  but exited 1 when that invocation lost the fixed `os.tmpdir()` gate snapshot;
+  the same known Effigy shared-temp-path race is recorded in `PAPERCUTS.md`.
+- No geometry-related selector failed, and no new geometry or public-icon file
+  was reported by any board.
 - Final `git diff --check` — pass. The exact `git diff --check
   origin/main...HEAD` check is run again after the implementation commit.
 
