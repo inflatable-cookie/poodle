@@ -1,6 +1,7 @@
 # g16.057 — Core Build Substrate
 
 Status: complete — awaiting orchestrator review
+PR: https://github.com/inflatable-cookie/poodle/pull/161
 Type: implementation — build substrate
 Opened: 2026-09-02
 Depends on: accepted `g16.056`

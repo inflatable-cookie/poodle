@@ -2,6 +2,7 @@
 
 Status: complete — awaiting orchestrator review
 Date: 2026-09-02
+PR: https://github.com/inflatable-cookie/poodle/pull/161
 Card: `docs/roadmaps/g16/057-core-build-substrate.md`
 Handoff: `docs/handoffs/20260902-102700-g16-057-core-build-substrate.md`
 Governing refs: `docs/architecture/014-compiled-web-package-distribution.md`,
