@@ -22,61 +22,96 @@
     "ui",
     "typescript"
   ],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "bin": {
-    "poodle-icons": "./src/icons/build.mjs"
+    "poodle-icons": "./dist/icons/build.mjs"
   },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
-    "./styles/*": "./src/styles/*",
-    "./icons": "./src/icons/index.ts",
-    "./icons/*": "./src/icons/icons/*.ts",
+    "./icons": {
+      "types": "./dist/icons/index.d.ts",
+      "import": "./dist/icons/index.js",
+      "default": "./dist/icons/index.js"
+    },
     "./icons/build": {
-      "types": "./src/icons/build.d.mts",
-      "default": "./src/icons/build.mjs"
+      "types": "./dist/icons/build.d.mts",
+      "import": "./dist/icons/build.mjs",
+      "default": "./dist/icons/build.mjs"
+    },
+    "./icons/*": {
+      "types": "./dist/icons/icons/*.d.ts",
+      "import": "./dist/icons/icons/*.js",
+      "default": "./dist/icons/icons/*.js"
     },
     "./tokens": {
-      "svelte": "./src/tokens/index.ts",
-      "default": "./src/tokens/index.ts"
+      "types": "./dist/tokens/index.d.ts",
+      "import": "./dist/tokens/index.js",
+      "default": "./dist/tokens/index.js"
     },
-    "./tokens/runtime": "./src/tokens/runtime.ts",
-    "./tokens/css": "./src/tokens/css.ts",
-    "./tokens/styles.css": "./src/tokens/generated/css/poodle-tokens.css",
-    "./tokens/css/poodle-tokens.css": "./src/tokens/generated/css/poodle-tokens.css",
-    "./tokens/themes.css": "./src/tokens/generated/css/poodle-themes.css",
-    "./tokens/themes": "./src/tokens/themes.ts",
-    "./tokens/metadata": "./src/tokens/metadata.ts",
-    "./tokens/units": "./src/tokens/units.ts",
-    "./tokens/theme-iceberg.css": "./src/tokens/generated/css/poodle-theme-iceberg.css",
-    "./tokens/theme-eclipse.css": "./src/tokens/generated/css/poodle-theme-eclipse.css",
-    "./tokens/theme-graphite.css": "./src/tokens/generated/css/poodle-theme-graphite.css",
-    "./tokens/theme-midnight.css": "./src/tokens/generated/css/poodle-theme-midnight.css",
-    "./tokens/theme-nord.css": "./src/tokens/generated/css/poodle-theme-nord.css",
-    "./tokens/theme-rose.css": "./src/tokens/generated/css/poodle-theme-rose.css",
-    "./tokens/theme-forest.css": "./src/tokens/generated/css/poodle-theme-forest.css",
-    "./tokens/theme-solarized.css": "./src/tokens/generated/css/poodle-theme-solarized.css",
-    "./tokens/theme-hornet.css": "./src/tokens/generated/css/poodle-theme-hornet.css",
-    "./tokens/theme-cobalt.css": "./src/tokens/generated/css/poodle-theme-cobalt.css",
-    "./tokens/theme-clay.css": "./src/tokens/generated/css/poodle-theme-clay.css",
-    "./tokens/theme-meadow.css": "./src/tokens/generated/css/poodle-theme-meadow.css",
-    "./tokens/density-compact.css": "./src/tokens/generated/css/poodle-density-compact.css",
-    "./tokens/density-default.css": "./src/tokens/generated/css/poodle-density-default.css",
-    "./tokens/density-comfortable.css": "./src/tokens/generated/css/poodle-density-comfortable.css",
-    "./tokens/control-size-xs.css": "./src/tokens/generated/css/poodle-control-size-xs.css",
-    "./tokens/control-size-sm.css": "./src/tokens/generated/css/poodle-control-size-sm.css",
-    "./tokens/control-size-md.css": "./src/tokens/generated/css/poodle-control-size-md.css",
-    "./tokens/control-size-lg.css": "./src/tokens/generated/css/poodle-control-size-lg.css",
-    "./tokens/control-size-xl.css": "./src/tokens/generated/css/poodle-control-size-xl.css"
+    "./tokens/runtime": {
+      "types": "./dist/tokens/runtime.d.ts",
+      "import": "./dist/tokens/runtime.js",
+      "default": "./dist/tokens/runtime.js"
+    },
+    "./tokens/css": {
+      "types": "./dist/tokens/css.d.ts",
+      "import": "./dist/tokens/css.js",
+      "default": "./dist/tokens/css.js"
+    },
+    "./tokens/themes": {
+      "types": "./dist/tokens/themes.d.ts",
+      "import": "./dist/tokens/themes.js",
+      "default": "./dist/tokens/themes.js"
+    },
+    "./tokens/metadata": {
+      "types": "./dist/tokens/metadata.d.ts",
+      "import": "./dist/tokens/metadata.js",
+      "default": "./dist/tokens/metadata.js"
+    },
+    "./tokens/units": {
+      "types": "./dist/tokens/units.d.ts",
+      "import": "./dist/tokens/units.js",
+      "default": "./dist/tokens/units.js"
+    },
+    "./styles/*": "./dist/styles/*",
+    "./tokens/styles.css": "./dist/tokens/generated/css/poodle-tokens.css",
+    "./tokens/css/poodle-tokens.css": "./dist/tokens/generated/css/poodle-tokens.css",
+    "./tokens/themes.css": "./dist/tokens/generated/css/poodle-themes.css",
+    "./tokens/theme-clay.css": "./dist/tokens/generated/css/poodle-theme-clay.css",
+    "./tokens/theme-cobalt.css": "./dist/tokens/generated/css/poodle-theme-cobalt.css",
+    "./tokens/theme-eclipse.css": "./dist/tokens/generated/css/poodle-theme-eclipse.css",
+    "./tokens/theme-forest.css": "./dist/tokens/generated/css/poodle-theme-forest.css",
+    "./tokens/theme-graphite.css": "./dist/tokens/generated/css/poodle-theme-graphite.css",
+    "./tokens/theme-hornet.css": "./dist/tokens/generated/css/poodle-theme-hornet.css",
+    "./tokens/theme-iceberg.css": "./dist/tokens/generated/css/poodle-theme-iceberg.css",
+    "./tokens/theme-meadow.css": "./dist/tokens/generated/css/poodle-theme-meadow.css",
+    "./tokens/theme-midnight.css": "./dist/tokens/generated/css/poodle-theme-midnight.css",
+    "./tokens/theme-nord.css": "./dist/tokens/generated/css/poodle-theme-nord.css",
+    "./tokens/theme-rose.css": "./dist/tokens/generated/css/poodle-theme-rose.css",
+    "./tokens/theme-solarized.css": "./dist/tokens/generated/css/poodle-theme-solarized.css",
+    "./tokens/density-comfortable.css": "./dist/tokens/generated/css/poodle-density-comfortable.css",
+    "./tokens/density-compact.css": "./dist/tokens/generated/css/poodle-density-compact.css",
+    "./tokens/density-default.css": "./dist/tokens/generated/css/poodle-density-default.css",
+    "./tokens/control-size-lg.css": "./dist/tokens/generated/css/poodle-control-size-lg.css",
+    "./tokens/control-size-md.css": "./dist/tokens/generated/css/poodle-control-size-md.css",
+    "./tokens/control-size-sm.css": "./dist/tokens/generated/css/poodle-control-size-sm.css",
+    "./tokens/control-size-xl.css": "./dist/tokens/generated/css/poodle-control-size-xl.css",
+    "./tokens/control-size-xs.css": "./dist/tokens/generated/css/poodle-control-size-xs.css"
   },
   "files": [
-    "src",
+    "dist",
     "README.md",
     "LICENSE",
     "THIRD_PARTY_NOTICES.md"
   ],
   "scripts": {
+    "build": "bun ../../scripts/web-distribution/core-build.ts",
     "test": "bun test",
     "check": "bun x tsc -p ./tsconfig.json"
   },

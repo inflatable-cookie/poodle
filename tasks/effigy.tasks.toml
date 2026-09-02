@@ -175,6 +175,8 @@
 # Longhorn. Includes a negative control. Headless; no window, no permission.
 "drift:gpui-consumer-identity" = "bun test/consumer-dual-dependency/run.ts"
 "check:release-automation" = "bun scripts/check-release-automation.ts"
+"core:build" = "bun scripts/web-distribution/core-build.ts"
+"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts"
 "test:core" = "bun run --cwd packages/core test"
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
 # Verifies the machine -> DOM wiring the framework packages add on top of the
@@ -462,11 +464,13 @@
 
 "ci:web" = [
   { task = "gate:snapshot" },
+  { task = "core:build" },
   { task = "audit:icons" },
   { task = "audit:tokens" },
   { task = "drift:recipes" },
   { task = "drift:drag-inventory" },
   { task = "test:core" },
+  { task = "test:core-build" },
   { task = "test:components" },
   # The packaged counterpart of test:components. Cheap (~4s against ci:web's
   # ~21s) and it catches a class nothing else here can see: g13-b041 had a
@@ -560,6 +564,7 @@
 "docs:build" = [{ task = "svelte:build" }]
 "docs:check" = [
   { task = "gate:snapshot" },
+  { task = "core:build" },
   { task = "drift:recipes" },
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },

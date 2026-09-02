@@ -1,6 +1,6 @@
 # g16.057 — Core Build Substrate
 
-Status: ready — `g16.056` merged in PR #159
+Status: complete — awaiting orchestrator review
 Type: implementation — build substrate
 Opened: 2026-09-02
 Depends on: accepted `g16.056`
@@ -99,3 +99,5 @@ or any release/workflow/registry mutation appears.
 ## Continuation
 
 Accepted merge unlocks `g16.058`. `g16.054` remains blocked.
+
+Execution log: `docs/logs/2026-09/20260902-g16-057-core-build-substrate.md`.

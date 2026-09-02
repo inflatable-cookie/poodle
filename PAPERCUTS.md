@@ -5,7 +5,13 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
-<!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
+- 2026-09-02 — After core exports moved to `dist/`, `docs:lint` (and therefore
+  `health`) fails on a fresh checkout until `core:build` has produced
+  `packages/core/dist`. `docs:check` and `ci:web` now run `core:build` first.
+  `test:web-pack-install` still special-cases only the `src` files directory
+  when checking archive members, so `files: ["dist"]` fails the exact
+  `package/dist` lookup even though `package/dist/**` is packed. g16.059 owns
+  that harness. Hit while closing g16.057.
 
 - 2026-09-02 — `scripts/gate-tree-guard.ts` writes `poodle-gate-tree-guard.json`
   into the shared OS temp dir. Parallel worktrees (`docs:check` / `ci:web`)
