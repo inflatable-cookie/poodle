@@ -13,6 +13,8 @@ Branch: `feature/g16-047-toast-same-id`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-047-toast-same-id`
 Planning base: `7f59ae42f4917c675968819eb23a5e41dc90013c` (ancestor)
 Live `origin/main` at dispatch: `c1a527898e7425853359bd72b7113a8cf38b8d97`
+Rebased onto live `origin/main`: `ccb2ebd5bec2627b28f3cf589d4e4297780438ba`
+(includes merged g16.053 PR #150 and g16.055 PR #151)
 
 ## Outcome
 
@@ -53,20 +55,37 @@ Committed proofs first. Plants used a clean index and `git checkout --`.
 | Become-sticky | clear only departed ids | `plan.clear` empty instead of `["job"]` |
 | Custom stickyTones become-sticky | same plant | same empty clear |
 | Duplicate last-fields | same plant | danger duplicate did not clear |
+| Custom delay 2500 | `delayMs` hardcoded to 6000 | expected 2500, received 6000 |
+| Disabled / negative expiry | drop `autoDismissMs <= 0` guard | start included `job` / `a` |
 | Same-id phase | always enter | expected settled, received enter |
 | Focus fallback | skip action-removal restore | focus landed on `body` |
 | Native Alert | always ListItem | expected Alert, received ListItem |
+| API-zero | add `createToastPromise` | source scan matched the helper |
 
 Restored sources reran green.
 
 ## Validation
 
-Recorded after the closeout boards finish. Focused runs before those boards:
+Focused, then required boards, including a rerun after rebasing onto
+`ccb2ebd5bec2627b28f3cf589d4e4297780438ba`:
 
 - `bun run --cwd packages/core test test/toast.test.ts test/motion-runtime.test.ts`
-- `bunx vitest run` ToastHost, ToastStack, motion-families (Svelte + React)
+  — 26 pass, 0 fail
+- `bunx vitest run` ToastHost, ToastStack, motion-families (Svelte + React),
+  and SSR ToastStack — 7 files, 62 pass
 - `cargo test --manifest-path packages/render/Cargo.toml danger_uses_alert_and_other_tones`
+  — pass
 - `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test headless_regressions mounted_toast_danger_uses_alert_role`
+  — pass
+- `effigy ci:web` — pass (svelte-check 0 errors; existing warnings only)
+- `effigy ci:rust` — pass
+- `effigy ci:native` — pass, including handler/event/adapter/presentation
+  drift, render/node-backend, GPUI, Jetstream adapter, headless regressions,
+  specimen probe, consumer-identity, and window-capture smoke
+- `effigy docs:check` — pass; 176 evidence rows, 0 recipe/surface drift
+- `effigy qa` — pass, including `audit:security` after the g16.053 matcher
+  repair
+- `git diff --check origin/main...HEAD` — pass
 
 ## Unresolved
 
@@ -74,5 +93,3 @@ Recorded after the closeout boards finish. Focused runs before those boards:
 - GPUI still has no assistive-technology mapping. Alert is node metadata.
 - Jetstream remains deferred. Shared render role change flows through the
   existing node tree; no Jetstream behavior was edited.
-- `effigy qa` still includes `audit:security`, which is red on `main` for the
-  unanchored `sk-` matcher papercut. That gate is outside this lane.

@@ -143,18 +143,20 @@ Proofs were committed first. Restores used `git checkout --` on a clean index.
 | Sticky owns no clock | existing sticky-pending case | start empty (already green pre-fix) | n/a |
 | Become-sticky clears | `clear` only departed ids | `plan.clear` expected `["job"]`, received `[]` | green |
 | Default 6000 ms start | existing settle case | start `["job"]`, delay 6000 | n/a |
-| Custom delay 2500 | existing settle case | delay 2500, not 6000 | n/a |
+| Custom delay 2500 | `delayMs` hardcoded to 6000 | expected 2500, received 6000 | green |
 | Custom sticky tones | existing two-row settle | start `["fail"]` only | n/a |
-| Disabled expiry | existing `autoDismissMs=0` | start empty | n/a |
+| Disabled expiry | drop `autoDismissMs <= 0` guard | start included `job` | green |
 | Same-id keeps row/phase | `nextToastVisuals` always enters | phase expected settled, received enter | green |
 | Focus fallback | skip `moveToastFocusFromRemovedAction` | activeElement is `body`, not dismiss | green |
 | Native danger Alert | always `ListItem` | expected Alert, received ListItem | green |
-| API-zero | source scan for promise/lifecycle/slot | already absent | n/a |
+| API-zero | add `createToastPromise` | source scan matched the helper | green |
 
 ## Validation
 
 Focused `packages/core/test/toast.test.ts`, `motion-runtime.test.ts`, paired
 ToastHost/ToastStack/motion-family tests, `poodle-render`
 `danger_uses_alert_and_other_tones`, and mounted
-`mounted_toast_danger_uses_alert_role`. Required boards recorded in the
-execution log.
+`mounted_toast_danger_uses_alert_role`. After rebasing onto live `main`
+(`ccb2ebd5`, including g16.053 and g16.055): `effigy ci:web`, `effigy ci:rust`,
+`effigy ci:native`, `effigy docs:check`, `effigy qa`, and
+`git diff --check origin/main...HEAD` all pass.
