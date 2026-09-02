@@ -92,16 +92,16 @@ stay maintained; backend admission is not part of the first card.
 55. [055 — Drag source pointer-gesture browser suppression](055-drag-source-preactivation-selection-suppression.md) — complete; merged in PR #151 with shared-controller pre-activation selection suppression and one-shot post-drag compatibility-click cancellation
 56. [056 — Web distribution contract](056-web-distribution-contract.md) — complete; merged in PR #159 after one exact-head repair round with frozen 176/167/108 inventories and byte-exact receipts
 57. [057 — Core build substrate](057-core-build-substrate.md) — complete; merged in PR #161 with deterministic source-free core output and receipt-backed audits
-58. [058 — Shell distributions](058-shell-distributions.md) — ready; compile dual-lane Svelte and private React distributions on the merged core substrate
+58. [058 — Shell distributions](058-shell-distributions.md) — implementation repair in PR #162; operator decisions promoted for the markdown root, real Svelte declarations, and the existing roster gate
 59. [059 — Installed web distribution certification](059-installed-web-distribution-certification.md) — blocked on completed `g16.058`; sole permanent installed-tarball oracle and receipt
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`, `g16.053`, and
-`g16.056`–`g16.057` are complete. The ready frontier is `g16.058`, continuing
-serially to `g16.059`. `g16.051` and `g16.052` retain their explicit
-serial or external gates. `g16.054` is blocked on completed `g16.059` and does
+`g16.056`–`g16.057` are complete. `g16.058` is in implementation repair in PR
+#162, continuing serially to `g16.059`. `g16.051` and `g16.052` retain their
+explicit serial or external gates. `g16.054` is blocked on completed `g16.059` and does
 not inherit release authority from the distribution programme. Citations,
 nested-menu pointer intent, the dedicated lab,
 its six-component / 24-fixture visual tranche, GPUI accessibility, public

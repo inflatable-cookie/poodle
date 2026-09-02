@@ -43,7 +43,10 @@ contract. React `publicIntent: true` is not publication authority.
 
 All three packages use `sideEffects: ["**/*.css"]`. Permitted declaration
 suffixes are `.d.ts`, `.d.mts`, and `.d.cts`. `declarationMap` is false.
-Declarations must resolve under TypeScript `Bundler` and `NodeNext`.
+Declarations must resolve under TypeScript `Bundler` and `NodeNext`. The
+distribution build pins TypeScript `6.0.3` so `@sveltejs/package` emits the
+actual Svelte prop, snippet, bindable, and callback types; a bare generic
+`Component` declaration is invalid.
 
 `bin.poodle-icons` targets the compiled core CLI, not source:
 
@@ -691,12 +694,14 @@ Laws:
   `default` → server.
 - `./*.svelte` may resolve only the 176 roster names. Extra public matches
   fail.
-- Root `.` exports the 174 non-markdown roster components plus existing helper
-  values/types. It does not export `AgentMessage` or `MarkdownEditor`.
-- `./markdown` exports `AgentMessage` and `MarkdownEditor` and their public
+- Root `.` exports the 173 non-markdown roster components plus existing helper
+  values/types. It does not export `AgentMessage`, `AgentTranscript`, or
+  `MarkdownEditor`.
+- `./markdown` exports `AgentMessage`, `AgentTranscript`, and `MarkdownEditor` and their public
   types. No root alias points at it.
 - `./types` is compiled JS plus declarations. Declarations-only fails.
-- Direct `./AgentMessage.svelte` and `./MarkdownEditor.svelte` remain valid.
+- Direct `./AgentMessage.svelte`, `./AgentTranscript.svelte`, and
+  `./MarkdownEditor.svelte` remain valid.
   They are not a compatibility shim for the retired root import.
 
 ## React export map
@@ -724,8 +729,9 @@ Direct barrels are derived, not a `./*` wildcard: for each frozen name `N`,
 export `./N` → `./dist/N.js` + `./dist/N.d.ts`. A wildcard that can resolve
 `file-upload`, chunks, or other internals fails.
 
-Root `.` keeps today's non-component helpers and the 174 non-markdown
-components. `AgentMessage` and `MarkdownEditor` move to `./markdown`.
+Root `.` keeps today's non-component helpers and the 173 non-markdown
+components. `AgentMessage`, `AgentTranscript`, and `MarkdownEditor` move to
+`./markdown`.
 `./types` keeps runtime plus declaration reachability even when the source
 module is type-only.
 
@@ -889,19 +895,20 @@ Breaking at `0.3.0`. No shim, alias, or silent fallback.
 Retired:
 
 ```ts
-import { AgentMessage, MarkdownEditor } from "@inflatable-cookie/poodle-svelte";
-import { AgentMessage, MarkdownEditor } from "@inflatable-cookie/poodle-react";
+import { AgentMessage, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-svelte";
+import { AgentMessage, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-react";
 ```
 
 Required:
 
 ```ts
-import { AgentMessage, MarkdownEditor } from "@inflatable-cookie/poodle-svelte/markdown";
-import { AgentMessage, MarkdownEditor } from "@inflatable-cookie/poodle-react/markdown";
+import { AgentMessage, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-svelte/markdown";
+import { AgentMessage, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-react/markdown";
 ```
 
-Direct Svelte `./AgentMessage.svelte` / `./MarkdownEditor.svelte` and React
-`./AgentMessage` / `./MarkdownEditor` stay. `g16.054` writes the `0.3.0`
+Direct Svelte `./AgentMessage.svelte` / `./AgentTranscript.svelte` /
+`./MarkdownEditor.svelte` and React `./AgentMessage` / `./AgentTranscript` /
+`./MarkdownEditor` stay. `g16.054` writes the `0.3.0`
 release notes and candidate history. This spec does not edit those files.
 
 Current-state drift this card does not repair: Svelte peer `>=5.38.6 <6`;
@@ -934,7 +941,9 @@ that card, one log, papercuts.
 
 Writable: Svelte/React build and staging, their manifests/exports, root and
 markdown barrels, peer/CSS declarations, focused build and disposable smoke
-fixtures, that card, one log, papercuts. Not `test:web-pack-install`.
+fixtures, that card, one log, papercuts, and only the existing
+`test/package-install/roster.ts` expectation needed to keep the accepted
+173-root/three-markdown split green. No new permanent certification behavior.
 
 | Invariant | Smallest counterexample | Proof |
 | --- | --- | --- |
@@ -946,7 +955,7 @@ fixtures, that card, one log, papercuts. Not `test:web-pack-install`.
 | Types reachable | `./types` declarations-only | inventory check fails |
 | Floor | browser or SSR fails at `5.56.8` | floor check fails |
 | React private | `private` cleared or publishConfig public | publication-state check fails |
-| Harness serial | card edits `test:web-pack-install` | scope check fails |
+| Harness serial | card adds certification behavior beyond the current roster expectation | scope check fails |
 
 ### g16.059 installed certification
 

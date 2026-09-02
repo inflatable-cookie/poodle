@@ -1,6 +1,6 @@
 # g16.058 — Shell Distributions
 
-Status: ready — `g16.057` merged as `0af7e7fa5`
+Status: implementation repair — PR #162; operator boundary decisions promoted
 Type: implementation — compiled Svelte and private React packages
 Opened: 2026-09-02
 Depends on: accepted `g16.057`
@@ -19,25 +19,31 @@ disposable installed browser/SSR exit smoke. Leave permanent certification to
 
 - Compile Svelte browser output as `*.client.js` and Vite `build.ssr: true`
   output as `*.server.js` from one sorted entry inventory.
-- Copy only Svelte declarations from declaration staging. Public `*.svelte`
-  subpaths target `*.svelte.d.ts` and compiled JavaScript, never source.
+- Pin the distribution declaration toolchain to TypeScript `6.0.3`. Copy the
+  real `@sveltejs/package` declarations from staging. Public `*.svelte`
+  subpaths target `*.svelte.d.ts` and compiled JavaScript, never source. Bare
+  generic `Component` declarations fail.
 - Use `browser` → client and non-browser `default` → server. Do not add an
   `import` environment branch, raw-source fallback, top-level `svelte` field,
   or unproved `svelte` condition.
 - Compile private React to the same source-free/declaration/CSS standard. It
   stays private and unpublished.
-- Root shells exclude AgentMessage/MarkdownEditor; `./markdown` owns them and
-  the optional `marked` peer. Ordinary graphs stay parser-free.
+- Root shells exclude AgentMessage, AgentTranscript, and MarkdownEditor;
+  `./markdown` owns them and the optional `marked` peer. Ordinary root graphs
+  stay parser-free.
 - Card 3's installed smoke is disposable and narrow. It must not edit or own
-  `test:web-pack-install` or its permanent receipt.
+  the permanent receipt or add certification behavior. This repair may update
+  only the current `test/package-install/roster.ts` expectation for the
+  173-root/three-markdown split so the existing web gate stays green.
 - No version, release-note, workflow, tag, registry, or sibling mutation.
 
 ## Ordered Work
 
 1. Add Svelte client/server builds on the core driver with stable public/chunk
    names and exact external dependencies.
-2. Emit/copy declarations without raw `.svelte`; implement root, direct,
-   markdown, and `./types` exports exactly as contracted.
+2. Emit/copy real Svelte declarations with TypeScript `6.0.3` and
+   `@sveltejs/package`, without raw `.svelte`; implement root, direct, markdown,
+   and `./types` exports exactly as contracted.
 3. Compile the private React package and its root/direct/markdown/type barrels
    without source mapping or publication authority.
 4. Apply exact files/sideEffects arrays, Svelte peer floor, optional `marked`
@@ -55,6 +61,8 @@ disposable installed browser/SSR exit smoke. Leave permanent certification to
 - Directly rendering client output through `svelte/server` fails.
 - Root/direct/markdown and `./types` runtime/declaration targets exist inside
   `dist`; no raw source or map is packed.
+- Invalid public props, callbacks, snippets, and bindable assignments fail
+  unsuppressed installed-package type fixtures under Bundler and NodeNext.
 - Root graphs remain parser-free, markdown missing-peer behavior is clear, and
   focused CSS graphs contain no unrelated component styles.
 - Private React value/declaration imports compile without source mapping, and
@@ -68,22 +76,27 @@ disposable installed browser/SSR exit smoke. Leave permanent certification to
 | Conditions describe environment | `import` selects client | worker/Node resolution proof fails |
 | Svelte output is source-free | wildcard points to `.svelte` | archive/export audit fails |
 | Markdown is isolated | Button root resolves `marked` | graph assertion fails |
-| Permanent harness ownership is serial | card edits `test:web-pack-install` | scope check fails |
+| Root is parser-free | AgentTranscript remains in root | fresh root import without `marked` fails |
+| Declarations preserve the API | a public component emits bare `Component` | negative prop/callback fixture compiles |
+| Permanent harness ownership is serial | card adds certification beyond the roster expectation | scope check fails |
 
 ## Writable Scope
 
 Svelte/React build and staging configuration, their package manifests/exports,
 shell root/markdown barrel migration, peer/CSS declarations, focused build and
-disposable smoke fixtures, this card, one log, and new papercuts. Do not edit
-the permanent `test:web-pack-install` harness, version/release surfaces,
+disposable smoke fixtures, only the current
+`test/package-install/roster.ts` root/markdown expectation, this card, one log,
+and new papercuts. Do not add permanent certification behavior or edit its
+receipt, version/release surfaces,
 workflows, tags, registries, sibling repositories, or React publication state.
 
 ## Validation
 
 Run focused shell builds, declaration checks under Bundler and NodeNext,
 source/export/content audits, the disposable browser and SSR installed smoke,
-the client-artifact SSR negative, Svelte floor check, React value/declaration
-compile, relevant Effigy web selectors, `effigy docs:check`, and `git diff
+the client-artifact SSR negative, Svelte floor check, unsuppressed installed
+Svelte declaration negatives, React value/declaration compile, the existing
+`test:web-pack-install`, `effigy ci:web`, `effigy docs:check`, and `git diff
 --check origin/main...HEAD`. Remove all disposable consumers/tarballs. Never
 run release or windowed selectors.
 
@@ -93,7 +106,9 @@ Stop if either lane needs raw source; browser/SSR resolution is ambiguous; a
 client artifact serves SSR; `./types` loses runtime or types; the Svelte floor
 fails; declarations need paths/sibling source/suppression; CSS or parser
 isolation drifts; React becomes publishable; permanent certification is edited;
-or any release/workflow/registry mutation appears.
+or any release/workflow/registry mutation appears. Stop if
+`@sveltejs/package` cannot emit the real public surface under the pinned
+TypeScript `6.0.3` toolchain.
 
 ## Continuation
 

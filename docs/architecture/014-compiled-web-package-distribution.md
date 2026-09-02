@@ -21,8 +21,9 @@ compiled and installed-certification shape, but stays private and unpublished
 until a named consumer is admitted. Preview applications consume built package
 outputs; they do not define release semantics.
 
-The breaking `0.3.0` boundary moves `AgentMessage` and `MarkdownEditor` out of
-the Svelte and React root barrels and into explicit `./markdown` entries. Root
+The breaking `0.3.0` boundary moves `AgentMessage`, `AgentTranscript`, and
+`MarkdownEditor` out of the Svelte and React root barrels and into explicit
+`./markdown` entries. Root
 Button/Select stays parser-free. No alias, compatibility shim, or silent
 fallback preserves the retired root markdown imports.
 
@@ -71,7 +72,9 @@ Svelte is compiled twice from one explicit, sorted entry inventory. Vite
 library mode produces stable public and chunk names. The browser lane emits
 `*.client.js`; Vite `build.ssr: true` produces `*.server.js`. Declaration emit
 is separate. `@sveltejs/package` output is staging input only: only declaration
-files are copied, never raw `.svelte` files.
+files are copied, never raw `.svelte` files. The distribution toolchain pins
+TypeScript `6.0.3`, the newest supported major for the locked `svelte2tsx`
+emitter; TypeScript 7 returns only after upstream declaration support exists.
 
 The target shape is:
 
