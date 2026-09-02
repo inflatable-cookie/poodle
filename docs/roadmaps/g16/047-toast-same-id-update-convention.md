@@ -1,6 +1,6 @@
 # g16.047 — Toast Same-Id Update Convention
 
-Status: ready
+Status: implemented — awaiting orchestrator review
 Type: implementation
 Opened: 2026-09-01
 Depends on: merged `g16.034`, completed `g16.043` research, and operator
@@ -11,6 +11,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/toast-stack.md`, `../../specs/015-loading-empty-error-notification-and-remediation-rules.md`,
 `../../contracts/003-native-accessibility.md`,
 `../../architecture/012-semantic-motion-policy.md`
+Log: `../../logs/2026-09/20260902-g16-047-toast-same-id-update-convention.md`
 
 ## Goal
 
@@ -115,3 +116,45 @@ consumer changes, or a second motion/expiry owner.
 
 After accepted merge, the convention is complete in Poodle. Consumer upsert
 adoption remains consumer-owned and needs separate repository authority.
+
+## Evidence
+
+- ToastHost/ToastStack contracts now own uniqueness, configured timer
+  transitions, discrete announcement, action-focus fallback, spec 015
+  remediation, and native `Alert` vs `ListItem` without a GPUI AT claim.
+- `uniqueToastInputs` plus `reconcileToastTimers` prove the complete
+  configured timer table, including custom `autoDismissMs`, custom
+  `stickyTones`, disabled expiry, become-sticky clear, and copy churn.
+- `nextToastVisuals` keeps phase on same-id replacement. Paired Svelte/React
+  stacks keep the settled row, announce the settled copy, restore action
+  focus, and keep percents out of toast copy.
+- Shared Rust danger rows set `NodeRole::Alert`. Mounted GPUI
+  `mounted_toast_danger_uses_alert_role` draws that tree without claiming
+  assistive-technology parity.
+- One pending-to-settled specimen exists on Svelte, React, and GPUI ToastHost
+  and ToastStack construction paths.
+
+## Falsification
+
+Proofs were committed first. Restores used `git checkout --` on a clean index.
+
+| Oracle row | Plant | Intended failure | Restore |
+| --- | --- | --- | --- |
+| Sticky owns no clock | existing sticky-pending case | start empty (already green pre-fix) | n/a |
+| Become-sticky clears | `clear` only departed ids | `plan.clear` expected `["job"]`, received `[]` | green |
+| Default 6000 ms start | existing settle case | start `["job"]`, delay 6000 | n/a |
+| Custom delay 2500 | existing settle case | delay 2500, not 6000 | n/a |
+| Custom sticky tones | existing two-row settle | start `["fail"]` only | n/a |
+| Disabled expiry | existing `autoDismissMs=0` | start empty | n/a |
+| Same-id keeps row/phase | `nextToastVisuals` always enters | phase expected settled, received enter | green |
+| Focus fallback | skip `moveToastFocusFromRemovedAction` | activeElement is `body`, not dismiss | green |
+| Native danger Alert | always `ListItem` | expected Alert, received ListItem | green |
+| API-zero | source scan for promise/lifecycle/slot | already absent | n/a |
+
+## Validation
+
+Focused `packages/core/test/toast.test.ts`, `motion-runtime.test.ts`, paired
+ToastHost/ToastStack/motion-family tests, `poodle-render`
+`danger_uses_alert_and_other_tones`, and mounted
+`mounted_toast_danger_uses_alert_role`. Required boards recorded in the
+execution log.
