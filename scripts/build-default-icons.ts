@@ -1,4 +1,5 @@
 import { createRequire } from "node:module";
+import { createHash } from "node:crypto";
 import {
   existsSync,
   mkdirSync,
@@ -8,12 +9,45 @@ import {
   writeFileSync,
 } from "node:fs";
 import { basename, join, resolve } from "node:path";
+import {
+  ICON_GEOMETRY_NORMALIZER_VERSION,
+  ICON_GEOMETRY_SCHEMA_VERSION,
+  geometryToWire,
+  pairPlanToWire,
+  planIconGeometryPairWithEndpoints,
+  tryNormalizeIconGeometry,
+  IconGeometryError,
+  type IconGeometryInput,
+  type NormalizedIconGeometry,
+  type PlannedIconGeometryPair,
+} from "../packages/core/src/icons/geometry";
 
 type IconNodes = [string, Record<string, string>][];
 type Manifest = {
   lucideVersion: string;
   icons: string[];
   aliases: Record<string, string>;
+};
+
+type PairStatus = "candidate" | "accepted" | "rejected";
+type PairReview = "candidate" | "accepted" | "rejected";
+type PairManifestEntry = {
+  id: string;
+  from: string;
+  to: string;
+  semantic: string;
+  status: PairStatus;
+  rejectionReason?: string;
+  quality: {
+    review: PairReview;
+    reviewer: string;
+    notes: string;
+  };
+};
+type PairManifest = {
+  schemaVersion: number;
+  normalizerVersion: string;
+  pairs: PairManifestEntry[];
 };
 
 const checkOnly = process.argv.includes("--check");
@@ -26,6 +60,13 @@ const tsRoot = join(repoRoot, "packages/core/src/icons");
 const moduleRoot = join(tsRoot, "icons");
 const svgRoot = join(repoRoot, "packages/render/assets/icons");
 const legacySvgRoot = join(repoRoot, "packages/gpui/preview/assets/icons");
+const morphPairManifestPath = join(tsRoot, "morph-pairs.json");
+const morphPairTsPath = join(tsRoot, "morph-pairs.generated.ts");
+const morphPairRustPath = join(
+  repoRoot,
+  "packages/contracts/components/src/icon_geometry.generated.rs",
+);
+const iconNoticePath = join(svgRoot, "LICENSE.txt");
 const requireFromRoot = createRequire(join(repoRoot, "package.json"));
 const cataloguePath = requireFromRoot.resolve("lucide-static/icon-nodes.json");
 const lucidePackagePath = requireFromRoot.resolve("lucide-static/package.json");
@@ -38,6 +79,9 @@ const catalogue = JSON.parse(readFileSync(cataloguePath, "utf8")) as Record<
   string,
   IconNodes
 >;
+const morphPairManifest = JSON.parse(
+  readFileSync(morphPairManifestPath, "utf8"),
+) as PairManifest;
 
 if (lucidePackage.version !== manifest.lucideVersion) {
   throw new Error(
@@ -157,6 +201,498 @@ function renderSvg(name: string): string {
   ].join("\n");
 }
 
+type GeometryDiagnostic = {
+  code: string;
+  message: string;
+};
+
+type GeneratedPairRecord = {
+  id: string;
+  authoredFrom: string;
+  authoredTo: string;
+  canonicalFrom: string;
+  canonicalTo: string;
+  semantic: string;
+  status: PairStatus;
+  sourceDigestLeft: string;
+  sourceDigestRight: string;
+  assetDigestLeft: string;
+  assetDigestRight: string;
+  normalizerVersion: string;
+  schemaVersion: number;
+  qualityStatus: PairReview;
+  qualityReviewer: string;
+  qualityNotes: string;
+  rejectionReason: string | null;
+  topologyLeft: object | null;
+  topologyRight: object | null;
+  diagnostics: {
+    left: GeometryDiagnostic | null;
+    right: GeometryDiagnostic | null;
+    pair: GeometryDiagnostic | null;
+  };
+  geometryLeft: object | null;
+  geometryRight: object | null;
+  plan: object | null;
+  derivedDigest: string | null;
+  payloadBytes: number;
+};
+
+type GeneratedPairRegistry = {
+  schemaVersion: number;
+  normalizerVersion: string;
+  source: {
+    package: string;
+    version: string;
+    manifest: string;
+  };
+  notice: {
+    id: string;
+    path: string;
+  };
+  pairs: GeneratedPairRecord[];
+  registryDigest: string;
+};
+
+const ICON_GEOMETRY_NOTICE_ID = "lucide-static-isc-feather-mit";
+const ICON_GEOMETRY_PAYLOAD_LIMIT = 16 * 1024;
+
+function sha256(value: string | Buffer): string {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function canonicalIconName(name: string): string {
+  const seen = new Set<string>();
+  let current = name;
+  while (manifest.aliases[current]) {
+    if (seen.has(current)) throw new Error("Icon alias cycle includes " + name + ".");
+    seen.add(current);
+    current = manifest.aliases[current];
+  }
+  if (!canonicalNames.includes(current)) {
+    throw new Error("Icon geometry pair references unknown icon " + name + ".");
+  }
+  return current;
+}
+
+function geometryInput(name: string): IconGeometryInput {
+  return {
+    viewBox: [0, 0, 24, 24],
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    nodes: nodesFor(name),
+  };
+}
+
+function diagnostic(error: IconGeometryError): GeometryDiagnostic {
+  return { code: error.code, message: error.message };
+}
+
+function pairKey(left: string, right: string): string {
+  return [left, right].sort().join("\u0000");
+}
+
+function validatePairManifestShape(): void {
+  if (morphPairManifest.schemaVersion !== ICON_GEOMETRY_SCHEMA_VERSION) {
+    throw new Error(
+      "Icon geometry pair schema " + morphPairManifest.schemaVersion + " is unsupported.",
+    );
+  }
+  if (morphPairManifest.normalizerVersion !== ICON_GEOMETRY_NORMALIZER_VERSION) {
+    throw new Error(
+      "Icon geometry normalizer " + morphPairManifest.normalizerVersion + " is unsupported.",
+    );
+  }
+  if (
+    !Array.isArray(morphPairManifest.pairs) ||
+    morphPairManifest.pairs.length < 8 ||
+    morphPairManifest.pairs.length > 12
+  ) {
+    throw new Error("Icon geometry pair manifest must contain 8–12 entries.");
+  }
+
+  const ids = morphPairManifest.pairs.map((pair) => pair.id);
+  if (ids.some((id) => typeof id !== "string" || id.length === 0)) {
+    throw new Error("Icon geometry pair ids must be non-empty strings.");
+  }
+  if (ids.join("\n") !== [...ids].sort().join("\n")) {
+    throw new Error("Icon geometry pair ids must be sorted.");
+  }
+
+  const seenIds = new Set<string>();
+  const seenPairs = new Set<string>();
+  for (const pair of morphPairManifest.pairs) {
+    if (seenIds.has(pair.id)) throw new Error("Duplicate icon geometry pair id " + pair.id + ".");
+    seenIds.add(pair.id);
+    const left = canonicalIconName(pair.from);
+    const right = canonicalIconName(pair.to);
+    if (left === right) {
+      throw new Error("Icon geometry pair " + pair.id + " resolves to a self-pair.");
+    }
+    const key = pairKey(left, right);
+    if (seenPairs.has(key)) {
+      throw new Error("Icon geometry pair " + pair.id + " duplicates or reverses another pair.");
+    }
+    seenPairs.add(key);
+
+    if (!["candidate", "accepted", "rejected"].includes(pair.status)) {
+      throw new Error("Icon geometry pair " + pair.id + " has an invalid status.");
+    }
+    if (!pair.quality || !pair.quality.reviewer || !pair.quality.notes) {
+      throw new Error("Icon geometry pair " + pair.id + " has no quality review record.");
+    }
+    if (pair.quality.review !== pair.status) {
+      throw new Error(
+        "Icon geometry pair " +
+          pair.id +
+          " has an unreviewed-candidate or mismatched quality state.",
+      );
+    }
+    if (pair.status === "rejected" && !pair.rejectionReason) {
+      throw new Error("Rejected icon geometry pair " + pair.id + " needs a reason.");
+    }
+    if (pair.status !== "rejected" && pair.rejectionReason) {
+      throw new Error("Only rejected icon geometry pairs may have a rejection reason.");
+    }
+  }
+}
+
+function sourceAssetDigest(name: string): string {
+  const expected = renderSvg(name);
+  const path = join(svgRoot, name + ".svg");
+  if (checkOnly) {
+    if (!existsSync(path)) throw new Error("Missing generated icon asset " + path + ".");
+    const actual = sha256(readFileSync(path));
+    const expectedDigest = sha256(expected);
+    if (actual !== expectedDigest) {
+      throw new Error("Icon geometry source-byte drift in " + path + ".");
+    }
+  }
+  return sha256(expected);
+}
+
+function buildMorphPairRecord(entry: PairManifestEntry): GeneratedPairRecord {
+  const canonicalFrom = canonicalIconName(entry.from);
+  const canonicalTo = canonicalIconName(entry.to);
+  const left = tryNormalizeIconGeometry(geometryInput(canonicalFrom));
+  const right = tryNormalizeIconGeometry(geometryInput(canonicalTo));
+  let planned: PlannedIconGeometryPair | null = null;
+  let pairError: GeometryDiagnostic | null = null;
+
+  if (left.ok && right.ok) {
+    try {
+      planned = planIconGeometryPairWithEndpoints(left.value, right.value);
+    } catch (error) {
+      if (!(error instanceof IconGeometryError)) throw error;
+      pairError = diagnostic(error);
+    }
+  }
+
+  if (entry.status === "accepted" && (!planned || !left.ok || !right.ok)) {
+    const reason = pairError ?? (!left.ok ? diagnostic(left.error) : diagnostic(right.error));
+    throw new Error(
+      "Accepted icon geometry pair " + entry.id + " is not normalizable: " + reason.code + ".",
+    );
+  }
+
+  const geometryPayload =
+    planned && entry.status !== "rejected"
+      ? {
+          schemaVersion: ICON_GEOMETRY_SCHEMA_VERSION,
+          normalizerVersion: ICON_GEOMETRY_NORMALIZER_VERSION,
+          canonicalFrom,
+          canonicalTo,
+          left: geometryToWire(planned.left),
+          right: geometryToWire(planned.right),
+          plan: pairPlanToWire(planned.plan),
+        }
+      : null;
+  const payloadBytes = geometryPayload
+    ? Buffer.byteLength(JSON.stringify(geometryPayload), "utf8")
+    : 0;
+  if (payloadBytes > ICON_GEOMETRY_PAYLOAD_LIMIT) {
+    throw new Error(
+      "Icon geometry pair " +
+        entry.id +
+        " exceeds the " +
+        ICON_GEOMETRY_PAYLOAD_LIMIT +
+        "-byte payload limit.",
+    );
+  }
+
+  const sourceDigestLeft = sha256(JSON.stringify(nodesFor(canonicalFrom)));
+  const sourceDigestRight = sha256(JSON.stringify(nodesFor(canonicalTo)));
+  const assetDigestLeft = sourceAssetDigest(canonicalFrom);
+  const assetDigestRight = sourceAssetDigest(canonicalTo);
+  const derivedDigest = geometryPayload ? sha256(JSON.stringify(geometryPayload)) : null;
+  const topology = (value: NormalizedIconGeometry | null): object | null =>
+    value
+      ? {
+          contourCount: value.topology.contourCount,
+          closed: value.topology.closed,
+          segmentCounts: value.topology.segmentCounts,
+          sampleCount: value.topology.sampleCount,
+          elementTypes: value.elementTypes,
+        }
+      : null;
+
+  return {
+    id: entry.id,
+    authoredFrom: entry.from,
+    authoredTo: entry.to,
+    canonicalFrom,
+    canonicalTo,
+    semantic: entry.semantic,
+    status: entry.status,
+    sourceDigestLeft,
+    sourceDigestRight,
+    assetDigestLeft,
+    assetDigestRight,
+    normalizerVersion: ICON_GEOMETRY_NORMALIZER_VERSION,
+    schemaVersion: ICON_GEOMETRY_SCHEMA_VERSION,
+    qualityStatus: entry.quality.review,
+    qualityReviewer: entry.quality.reviewer,
+    qualityNotes: entry.quality.notes,
+    rejectionReason: entry.rejectionReason ?? null,
+    topologyLeft: left.ok ? topology(left.value) : null,
+    topologyRight: right.ok ? topology(right.value) : null,
+    diagnostics: {
+      left: left.ok ? null : diagnostic(left.error),
+      right: right.ok ? null : diagnostic(right.error),
+      pair: pairError,
+    },
+    geometryLeft: geometryPayload ? geometryPayload.left : null,
+    geometryRight: geometryPayload ? geometryPayload.right : null,
+    plan: geometryPayload ? geometryPayload.plan : null,
+    derivedDigest,
+    payloadBytes,
+  };
+}
+
+function buildMorphPairRegistry(): GeneratedPairRegistry {
+  validatePairManifestShape();
+  if (!existsSync(iconNoticePath)) {
+    throw new Error("Icon geometry notice is missing or incomplete: " + iconNoticePath + ".");
+  }
+  const notice = readFileSync(iconNoticePath, "utf8");
+  if (!notice.includes("ISC License") || !notice.includes("MIT License")) {
+    throw new Error("Icon geometry notice is missing or incomplete: " + iconNoticePath + ".");
+  }
+  const pairs = morphPairManifest.pairs.map(buildMorphPairRecord);
+  const base = {
+    schemaVersion: ICON_GEOMETRY_SCHEMA_VERSION,
+    normalizerVersion: ICON_GEOMETRY_NORMALIZER_VERSION,
+    source: {
+      package: "lucide-static",
+      version: manifest.lucideVersion,
+      manifest: "packages/core/src/icons/default-icons.json",
+    },
+    notice: {
+      id: ICON_GEOMETRY_NOTICE_ID,
+      path: "packages/render/assets/icons/LICENSE.txt",
+    },
+    pairs,
+  };
+  return {
+    ...base,
+    registryDigest: sha256(JSON.stringify(base)),
+  };
+}
+
+function renderMorphPairModule(registry: GeneratedPairRegistry): string {
+  return [
+    "// Generated by scripts/build-default-icons.ts. Do not edit.",
+    "export const ICON_GEOMETRY_REGISTRY = " +
+      JSON.stringify(registry, null, 2) +
+      " as const;",
+    "",
+  ].join("\n");
+}
+
+type GeometryWire = {
+  canonical: {
+    contours: readonly {
+      closed: boolean;
+      segments: readonly (readonly [number, number, number, number, boolean])[];
+    }[];
+  };
+  sampled: {
+    contours: readonly {
+      closed: boolean;
+      points: readonly (readonly [number, number])[];
+    }[];
+  };
+  elementTypes: readonly string[];
+};
+
+type PlanWire = {
+  costMicros: number;
+  contourMappings: readonly {
+    leftIndex: number;
+    rightIndex: number;
+    reversed: boolean;
+    offset: number;
+    costMicros: number;
+  }[];
+};
+
+function rustString(value: string): string {
+  return (
+    '"' +
+    value
+      .replaceAll("\\", "\\\\")
+      .replaceAll('"', '\\"')
+      .replaceAll("\r", "\\r")
+      .replaceAll("\n", "\\n") +
+    '"'
+  );
+}
+
+function rustPoint(point: readonly [number, number]): string {
+  return `GeometryPoint { x: ${point[0]}, y: ${point[1]} }`;
+}
+
+function rustOptionString(value: string | null): string {
+  return value === null ? "None" : `Some(${rustString(value)})`;
+}
+
+function rustStatus(status: PairStatus): string {
+  return `GeneratedPairStatus::${status[0].toUpperCase()}${status.slice(1)}`;
+}
+
+function rustStem(id: string): string {
+  return id.replace(/[^a-zA-Z0-9]+/g, "_").toUpperCase();
+}
+
+function renderRustGeometry(
+  value: object,
+  stem: string,
+  side: "LEFT" | "RIGHT",
+): { name: string; source: string } {
+  const geometry = value as GeometryWire;
+  const declarations: string[] = [];
+  const contourNames: string[] = [];
+  geometry.canonical.contours.forEach((contour, index) => {
+    const segmentName = `ICON_GEOMETRY_${stem}_${side}_CONTOUR_${index}_SEGMENTS`;
+    const sampleName = `ICON_GEOMETRY_${stem}_${side}_CONTOUR_${index}_SAMPLES`;
+    const contourName = `ICON_GEOMETRY_${stem}_${side}_CONTOUR_${index}`;
+    declarations.push(
+      `static ${segmentName}: &[GeometrySegment] = &[${contour.segments
+        .map(
+          ([startX, startY, endX, endY, closing]) =>
+            `GeometrySegment { start: ${rustPoint([startX, startY])}, end: ${rustPoint([endX, endY])}, closing: ${closing} }`,
+        )
+        .join(", ")}];`,
+    );
+    declarations.push(
+      `static ${sampleName}: &[GeometryPoint] = &[${geometry.sampled.contours[index].points
+        .map(rustPoint)
+        .join(", ")}];`,
+    );
+    declarations.push(
+      `static ${contourName}: GeneratedGeometryContour = GeneratedGeometryContour { closed: ${contour.closed}, segments: ${segmentName}, samples: ${sampleName} };`,
+    );
+    contourNames.push(contourName);
+  });
+  const name = `ICON_GEOMETRY_${stem}_${side}`;
+  declarations.push(
+    `static ${name}: GeneratedIconGeometry = GeneratedIconGeometry { element_types: &[${geometry.elementTypes
+      .map(rustString)
+      .join(", ")}], contours: &[${contourNames.join(", ")}] };`,
+  );
+  return { name, source: declarations.join("\n") };
+}
+
+function renderRustPlan(
+  value: object,
+  stem: string,
+): { name: string; source: string } {
+  const plan = value as PlanWire;
+  const mappingName = `ICON_GEOMETRY_${stem}_MAPPINGS`;
+  const name = `ICON_GEOMETRY_${stem}_PLAN`;
+  const source = [
+    `static ${mappingName}: &[GeneratedContourCorrespondence] = &[${plan.contourMappings
+      .map(
+        (mapping) =>
+          `GeneratedContourCorrespondence { left_index: ${mapping.leftIndex}, right_index: ${mapping.rightIndex}, reversed: ${mapping.reversed}, offset: ${mapping.offset}, cost_micros: ${mapping.costMicros} }`,
+      )
+      .join(", ")}];`,
+    `static ${name}: GeneratedIconGeometryPlan = GeneratedIconGeometryPlan { cost_micros: ${plan.costMicros}, contour_mappings: ${mappingName} };`,
+  ].join("\n");
+  return { name, source };
+}
+
+function renderRustMorphRegistry(registry: GeneratedPairRegistry): string {
+  const declarations: string[] = [];
+  const entries = registry.pairs.map((pair) => {
+    const stem = rustStem(pair.id);
+    const left = pair.geometryLeft
+      ? renderRustGeometry(pair.geometryLeft, stem, "LEFT")
+      : null;
+    const right = pair.geometryRight
+      ? renderRustGeometry(pair.geometryRight, stem, "RIGHT")
+      : null;
+    const plan = pair.plan ? renderRustPlan(pair.plan, stem) : null;
+    if (left) declarations.push(left.source);
+    if (right) declarations.push(right.source);
+    if (plan) declarations.push(plan.source);
+    const diagnosticCode =
+      pair.diagnostics.pair?.code ??
+      pair.diagnostics.left?.code ??
+      pair.diagnostics.right?.code ??
+      null;
+    return [
+      "GeneratedIconGeometryPair {",
+      `  id: ${rustString(pair.id)},`,
+      `  authored_from: ${rustString(pair.authoredFrom)},`,
+      `  authored_to: ${rustString(pair.authoredTo)},`,
+      `  canonical_from: ${rustString(pair.canonicalFrom)},`,
+      `  canonical_to: ${rustString(pair.canonicalTo)},`,
+      `  semantic: ${rustString(pair.semantic)},`,
+      `  status: ${rustStatus(pair.status)},`,
+      `  source_digest_left: ${rustString(pair.sourceDigestLeft)},`,
+      `  source_digest_right: ${rustString(pair.sourceDigestRight)},`,
+      `  asset_digest_left: ${rustString(pair.assetDigestLeft)},`,
+      `  asset_digest_right: ${rustString(pair.assetDigestRight)},`,
+      `  normalizer_version: ${rustString(pair.normalizerVersion)},`,
+      `  schema_version: ${pair.schemaVersion},`,
+      `  quality_status: ${rustString(pair.qualityStatus)},`,
+      `  quality_reviewer: ${rustString(pair.qualityReviewer)},`,
+      `  quality_notes: ${rustString(pair.qualityNotes)},`,
+      `  rejection_reason: ${rustOptionString(pair.rejectionReason)},`,
+      `  diagnostic_code: ${rustOptionString(diagnosticCode)},`,
+      `  derived_digest: ${rustOptionString(pair.derivedDigest)},`,
+      `  payload_bytes: ${pair.payloadBytes},`,
+      `  geometry_left: ${left ? `Some(&${left.name})` : "None"},`,
+      `  geometry_right: ${right ? `Some(&${right.name})` : "None"},`,
+      `  plan: ${plan ? `Some(&${plan.name})` : "None"},`,
+      "}",
+    ].join("\n");
+  });
+
+  return [
+    "// Generated by scripts/build-default-icons.ts. Do not edit.",
+    `pub(crate) const ICON_GEOMETRY_REGISTRY_SCHEMA_VERSION: u32 = ${registry.schemaVersion};`,
+    `pub(crate) const ICON_GEOMETRY_NORMALIZER_VERSION: &str = ${rustString(registry.normalizerVersion)};`,
+    `pub(crate) const ICON_GEOMETRY_SOURCE_PACKAGE: &str = ${rustString(registry.source.package)};`,
+    `pub(crate) const ICON_GEOMETRY_SOURCE_VERSION: &str = ${rustString(registry.source.version)};`,
+    `pub(crate) const ICON_GEOMETRY_SOURCE_MANIFEST: &str = ${rustString(registry.source.manifest)};`,
+    `pub(crate) const ICON_GEOMETRY_NOTICE_ID: &str = ${rustString(registry.notice.id)};`,
+    `pub(crate) const ICON_GEOMETRY_NOTICE_PATH: &str = ${rustString(registry.notice.path)};`,
+    `pub(crate) const ICON_GEOMETRY_REGISTRY_DIGEST: &str = ${rustString(registry.registryDigest)};`,
+    ...declarations,
+    "",
+    "pub(crate) static ICON_GEOMETRY_REGISTRY: &[GeneratedIconGeometryPair] = &[",
+    entries,
+    "];",
+    "",
+  ].join("\n");
+}
+
+const morphPairRegistry = buildMorphPairRegistry();
 const expected = new Map<string, string>();
 for (const name of supportedNames) {
   expected.set(join(moduleRoot, `${name}.ts`), renderModule(name));
@@ -164,6 +700,8 @@ for (const name of supportedNames) {
 }
 expected.set(join(tsRoot, "generated.ts"), renderIndex());
 expected.set(join(tsRoot, "aliases.generated.ts"), renderAliases());
+expected.set(morphPairTsPath, renderMorphPairModule(morphPairRegistry));
+expected.set(morphPairRustPath, renderRustMorphRegistry(morphPairRegistry));
 
 function generatedFiles(root: string, extension: string): string[] {
   if (!existsSync(root)) return [];

@@ -1,6 +1,6 @@
 # g16.049 — Icon Geometry Format And Registry Foundation
 
-Status: ready
+Status: implementation complete — PR pending
 Type: implementation — internal architecture foundation
 Opened: 2026-09-01
 Depends on: merged `g16.034` and the funded icon-geometry programme recorded in
@@ -9,6 +9,8 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/icon.md`,
 `../../contracts/components/icon-provider.md`,
 `../../architecture/012-semantic-motion-policy.md`
+Architecture: `../../architecture/013-icon-geometry-substrate.md`
+Execution log: `../../logs/2026-09/20260902-g16-049-icon-geometry-format-and-registry-foundation.md`
 
 ## Goal
 
@@ -84,11 +86,32 @@ consumers, or Jetstream behavior.
 
 ## Validation
 
-Run focused TypeScript/Rust vectors and generation tests, deterministic
-regeneration, `effigy audit:icons`, relevant licence/docs checks,
-`effigy ci:web`, `effigy ci:rust`, `effigy docs:check`, one final headless
-`effigy qa`, and `git diff --check origin/main...HEAD`. No windowed/native-
-visual selector is allowed.
+Validation completed in the execution log: focused TypeScript/Rust vectors and
+generation checks, deterministic regeneration, `effigy audit:icons`, licence
+and docs checks, `effigy ci:rust`, `effigy docs:check`, and one headless
+`effigy qa` run. `ci:web` passed its substantive checks but its composed
+`gate:clean` could not see the shared temporary snapshot; the direct guard
+pair passes. The QA board reached only the known baseline security false
+positive. No windowed/native-visual selector was run.
+
+## Completion Evidence
+
+- The pure normalizers live in `packages/core/src/icons/geometry.ts` and
+  `packages/contracts/components/src/icon_geometry.rs`; neither is re-exported
+  through the public icon or component surfaces.
+- `packages/core/src/icons/geometry-vectors.json` contains 13 shared positive,
+  negative, topology, reverse, and closed-start vectors consumed by both
+  languages.
+- `packages/core/src/icons/morph-pairs.json` contains 11 explicit entries:
+  five accepted, one candidate, and five rejected. Alias `home` resolves to
+  canonical `house` and remains an explicit rejection.
+- The generator emits the TypeScript and Rust projections with source-node and
+  asset digests, schema/normalizer versions, topology, diagnostics, quality
+  review, notice identity, and derived registry digest. The largest accepted
+  payload is 14,023 bytes against the 16 KiB limit.
+- The static `Icon` contract and public icon barrels are unchanged. The
+  adversarial plant/restore record and exact validation results are in the
+  execution log.
 
 ## Stop Conditions
 

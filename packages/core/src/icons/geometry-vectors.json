@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "vectors": [
+    {
+      "id": "path-relative-and-commands",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "m2 12h8v-4l4 4z"}]]
+      },
+      "expect": {
+        "left": {
+          "status": "accepted",
+          "contourCount": 1,
+          "closed": [true],
+          "segmentCounts": [4],
+          "canonicalPoints": [[[20000, 120000], [100000, 120000], [100000, 80000], [140000, 120000]]]
+        }
+      }
+    },
+    {
+      "id": "primitive-elements",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [
+          ["line", {"x1": "2", "y1": "2", "x2": "6", "y2": "2"}],
+          ["polyline", {"points": "8,2 10,4 8,6"}],
+          ["polygon", {"points": "12,2 16,2 14,6"}],
+          ["rect", {"x": "18", "y": "2", "width": "4", "height": "4"}]
+        ]
+      },
+      "expect": {
+        "left": {
+          "status": "accepted",
+          "contourCount": 4,
+          "closed": [false, false, true, true],
+          "segmentCounts": [1, 2, 3, 4]
+        }
+      }
+    },
+    {
+      "id": "circle-and-ellipse",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [
+          ["circle", {"cx": "6", "cy": "6", "r": "3"}],
+          ["ellipse", {"cx": "16", "cy": "16", "rx": "4", "ry": "2"}]
+        ]
+      },
+      "expect": {
+        "left": {
+          "status": "accepted",
+          "contourCount": 2,
+          "closed": [true, true],
+          "segmentCounts": [32, 32]
+        }
+      }
+    },
+    {
+      "id": "reverse-open-correspondence",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M2 12L8 4L14 12"}]]
+      },
+      "right": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M14 12L8 4L2 12"}]]
+      },
+      "expect": {
+        "left": {"status": "accepted", "contourCount": 1, "closed": [false], "segmentCounts": [2]},
+        "right": {"status": "accepted", "contourCount": 1, "closed": [false], "segmentCounts": [2]},
+        "pair": {"status": "accepted", "reversed": [true], "offsets": [63]}
+      }
+    },
+    {
+      "id": "closed-loop-offset",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M12 4L20 12L12 20L4 12Z"}]]
+      },
+      "right": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M20 12L12 20L4 12L12 4Z"}]]
+      },
+      "expect": {
+        "left": {"status": "accepted", "contourCount": 1, "closed": [true], "segmentCounts": [4]},
+        "right": {"status": "accepted", "contourCount": 1, "closed": [true], "segmentCounts": [4]},
+        "pair": {"status": "accepted", "reversed": [false], "offsets": [48]}
+      }
+    },
+    {
+      "id": "topology-mismatch",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [
+          ["path", {"d": "M4 5h16"}],
+          ["path", {"d": "M4 12h16"}],
+          ["path", {"d": "M4 19h16"}]
+        ]
+      },
+      "right": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [
+          ["path", {"d": "M18 6L6 18"}],
+          ["path", {"d": "M6 6l12 12"}]
+        ]
+      },
+      "expect": {
+        "left": {"status": "accepted", "contourCount": 3, "closed": [false, false, false], "segmentCounts": [1, 1, 1]},
+        "right": {"status": "accepted", "contourCount": 2, "closed": [false, false], "segmentCounts": [1, 1]},
+        "pair": {"status": "rejected", "code": "pair-contour-count"}
+      }
+    },
+    {
+      "id": "closure-mismatch",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M4 4L20 4L20 20"}]]
+      },
+      "right": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M4 4L20 4L20 20Z"}]]
+      },
+      "expect": {
+        "left": {"status": "accepted", "contourCount": 1, "closed": [false], "segmentCounts": [2]},
+        "right": {"status": "accepted", "contourCount": 1, "closed": [true], "segmentCounts": [3]},
+        "pair": {"status": "rejected", "code": "pair-closure"}
+      }
+    },
+    {
+      "id": "off-grid-view-box",
+      "left": {
+        "viewBox": [0, 0, 23, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M2 12L22 12"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "invalid-view-box"}}
+    },
+    {
+      "id": "transformed-element",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["line", {"x1": "2", "y1": "12", "x2": "22", "y2": "12", "transform": "rotate(45 12 12)"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "unsupported-transform"}}
+    },
+    {
+      "id": "unsupported-curve-command",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M2 12C6 2 18 2 22 12"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "unsupported-path-command"}}
+    },
+    {
+      "id": "paint-boundary",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 1,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M2 12L22 12"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "invalid-paint"}}
+    },
+    {
+      "id": "malformed-path",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M2 12L"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "malformed-path"}}
+    },
+    {
+      "id": "unsupported-element",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["g", {"children": "path"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "unsupported-element"}}
+    }
+  ]
+}

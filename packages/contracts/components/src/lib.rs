@@ -40,6 +40,7 @@ mod form_layout;
 mod grid;
 mod hover_card;
 mod icon;
+mod icon_geometry;
 mod icon_button;
 mod icon_provider;
 mod list_card;

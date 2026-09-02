@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "normalizerVersion": "1.0.0",
+  "pairs": [
+    {
+      "id": "arrow-down-to-arrow-up",
+      "from": "arrow-down",
+      "to": "arrow-up",
+      "semantic": "directional-state",
+      "status": "accepted",
+      "quality": {
+        "review": "accepted",
+        "reviewer": "poodle-core",
+        "notes": "Two open contours; arrow direction changes without contour invention."
+      }
+    },
+    {
+      "id": "arrow-left-to-arrow-right",
+      "from": "arrow-left",
+      "to": "arrow-right",
+      "semantic": "directional-state",
+      "status": "accepted",
+      "quality": {
+        "review": "accepted",
+        "reviewer": "poodle-core",
+        "notes": "Two open contours; shared shaft and arrowhead remain readable."
+      }
+    },
+    {
+      "id": "chevron-left-to-chevron-right",
+      "from": "chevron-left",
+      "to": "chevron-right",
+      "semantic": "directional-state",
+      "status": "accepted",
+      "quality": {
+        "review": "accepted",
+        "reviewer": "poodle-core",
+        "notes": "One open contour; reversal preserves the chevron silhouette."
+      }
+    },
+    {
+      "id": "ellipsis-to-ellipsis-vertical",
+      "from": "ellipsis",
+      "to": "ellipsis-vertical",
+      "semantic": "orientation-state",
+      "status": "accepted",
+      "quality": {
+        "review": "accepted",
+        "reviewer": "poodle-core",
+        "notes": "Three closed contours; cyclic starts and contour ordering are deterministic."
+      }
+    },
+    {
+      "id": "home-to-arrow-left",
+      "from": "home",
+      "to": "arrow-left",
+      "semantic": "unsupported-boundary",
+      "status": "rejected",
+      "rejectionReason": "Alias resolves home to house, whose generated path uses unsupported curve commands.",
+      "quality": {
+        "review": "rejected",
+        "reviewer": "poodle-core",
+        "notes": "Alias canonicalization is retained as rejection evidence; no pair geometry is emitted."
+      }
+    },
+    {
+      "id": "lock-to-lock-open",
+      "from": "lock",
+      "to": "lock-open",
+      "semantic": "security-state",
+      "status": "rejected",
+      "rejectionReason": "Rounded rectangles and curve commands are outside the v1 normalizer subset.",
+      "quality": {
+        "review": "rejected",
+        "reviewer": "poodle-core",
+        "notes": "Static icon fallback remains the only result for this pair."
+      }
+    },
+    {
+      "id": "menu-to-ellipsis",
+      "from": "menu",
+      "to": "ellipsis",
+      "semantic": "overflow-state",
+      "status": "candidate",
+      "quality": {
+        "review": "candidate",
+        "reviewer": "poodle-core",
+        "notes": "Retained for review only; open menu strokes and closed dots are not currently compatible."
+      }
+    },
+    {
+      "id": "menu-to-x",
+      "from": "menu",
+      "to": "x",
+      "semantic": "dismiss-state",
+      "status": "rejected",
+      "rejectionReason": "Three open contours cannot correspond to two open contours without inventing topology.",
+      "quality": {
+        "review": "rejected",
+        "reviewer": "poodle-core",
+        "notes": "Numerical contour duplication is deliberately not allowed."
+      }
+    },
+    {
+      "id": "play-to-pause",
+      "from": "play",
+      "to": "pause",
+      "semantic": "transport-state",
+      "status": "rejected",
+      "rejectionReason": "Play uses unsupported curves and pause uses rounded rectangles with incompatible topology.",
+      "quality": {
+        "review": "rejected",
+        "reviewer": "poodle-core",
+        "notes": "The pair remains explicit negative evidence rather than an automatic fallback."
+      }
+    },
+    {
+      "id": "plus-to-x",
+      "from": "plus",
+      "to": "x",
+      "semantic": "toggle-state",
+      "status": "accepted",
+      "quality": {
+        "review": "accepted",
+        "reviewer": "poodle-core",
+        "notes": "Two open contours; orthogonal strokes map to the two diagonals."
+      }
+    },
+    {
+      "id": "volume-2-to-volume-x",
+      "from": "volume-2",
+      "to": "volume-x",
+      "semantic": "audio-state",
+      "status": "rejected",
+      "rejectionReason": "The shared speaker path uses unsupported curves and arcs.",
+      "quality": {
+        "review": "rejected",
+        "reviewer": "poodle-core",
+        "notes": "A valid static icon pair is not enough to approve geometry continuity."
+      }
+    }
+  ]
+}
