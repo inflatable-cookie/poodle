@@ -52,6 +52,9 @@ pub struct LicenceActivationHandlers {
     pub on_machine_label_edit: Option<Arc<dyn Fn() + Send + Sync>>,
     /// Caret into the machine-name draft moved.
     pub on_machine_label_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
+    /// Enter/Escape asked the host to restore display focus on the next
+    /// view-mode paint of the machine name.
+    pub on_machine_label_restore_display_focus: Option<Arc<dyn Fn() + Send + Sync>>,
     /// The account/offline route switch was pressed.
     pub on_view_change: Option<Arc<dyn Fn(LicenceActivationRoute) + Send + Sync>>,
     /// The form's submit button was pressed. The host runs the shared submit
@@ -308,6 +311,7 @@ fn machine_name(
                 spec.machine_label_selection.1,
             )
             .with_editing(spec.machine_label_editing)
+            .with_request_focus(spec.machine_label_request_focus)
             .with_activation_mode(EditableLabelActivation::EnterOrSpace)
             .with_variant(EditableLabelVariant::Default)
             .with_empty_text("unnamed machine")
@@ -326,6 +330,7 @@ fn machine_name(
                 handlers.on_machine_label_commit.clone(),
             ),
             on_cancel: handlers.on_machine_label_cancel.clone(),
+            on_restore_display_focus: handlers.on_machine_label_restore_display_focus.clone(),
             ..EditableLabelHandlers::default()
         },
     );
@@ -784,5 +789,41 @@ mod tests {
             .expect("the editing input");
         (input.interaction.on_cancel.as_ref().unwrap())();
         assert_eq!(events.lock().unwrap().as_slice(), ["cancel"]);
+    }
+
+    #[test]
+    fn machine_label_enter_and_escape_restore_display_focus_blur_does_not() {
+        let restore = Arc::new(std::sync::Mutex::new(0usize));
+        let spec = LicenceActivationSpec::new()
+            .with_mode(LicenceActivationMode::Key)
+            .with_machine_label(Some("rig".to_string()))
+            .with_machine_label_editing(true)
+            .with_machine_label_draft(Some("rig".to_string()));
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = licence_activation(
+            &spec,
+            &ctx,
+            LicenceActivationHandlers {
+                on_machine_label_commit: Some(Arc::new(|_| {})),
+                on_machine_label_cancel: Some(Arc::new(|| {})),
+                on_machine_label_restore_display_focus: Some({
+                    let restore = Arc::clone(&restore);
+                    Arc::new(move || {
+                        *restore.lock().unwrap() += 1;
+                    })
+                }),
+                ..LicenceActivationHandlers::default()
+            },
+        );
+        let input = node
+            .find(&|n| n.interaction.on_submit.is_some())
+            .expect("the editing input");
+        (input.interaction.on_submit.as_ref().unwrap())();
+        assert_eq!(*restore.lock().unwrap(), 1, "Enter restores display focus");
+        (input.interaction.on_cancel.as_ref().unwrap())();
+        assert_eq!(*restore.lock().unwrap(), 2, "Escape restores display focus");
+        (input.interaction.on_focus_change.as_ref().unwrap())(false);
+        assert_eq!(*restore.lock().unwrap(), 2, "blur commit does not restore");
     }
 }

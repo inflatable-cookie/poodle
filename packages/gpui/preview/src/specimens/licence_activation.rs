@@ -100,6 +100,7 @@ fn label_handlers(
     Arc<dyn Fn(&str) + Send + Sync>,
     Arc<dyn Fn() + Send + Sync>,
     Arc<dyn Fn(usize, usize) + Send + Sync>,
+    Arc<dyn Fn() + Send + Sync>,
 ) {
     let committed = committed.to_string();
 
@@ -170,7 +171,16 @@ fn label_handlers(
             });
         })
     };
-    (edit, change, commit, cancel, selection)
+    let restore = {
+        let queue = Arc::clone(queue);
+        Arc::new(move || {
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                key: "la-machine-restore-focus".to_string(),
+                value: true,
+            });
+        })
+    };
+    (edit, change, commit, cancel, selection, restore)
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -215,8 +225,21 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .get("la-machine-label")
         .copied()
         .unwrap_or((0, machine_live_len));
-    let (on_label_edit, on_label_change, on_label_commit, on_label_cancel, on_label_selection) =
-        label_handlers(&queue, machine_label.as_str());
+    let machine_restore = state.specimens.is_on("la-machine-restore-focus");
+    if machine_restore {
+        queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: "la-machine-restore-focus".to_string(),
+            value: false,
+        });
+    }
+    let (
+        on_label_edit,
+        on_label_change,
+        on_label_commit,
+        on_label_cancel,
+        on_label_selection,
+        on_label_restore,
+    ) = label_handlers(&queue, machine_label.as_str());
     let offline = state.specimens.is_on("la-offline");
     let route = if offline {
         LicenceActivationRoute::LicenceFile
@@ -281,6 +304,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_machine_label_editing(machine_editing)
             .with_machine_label_draft(machine_draft.clone())
             .with_machine_label_selection(machine_sel_start, machine_sel_end)
+            .with_machine_label_request_focus(machine_restore)
             .with_key_selection(
                 state
                     .specimens
@@ -326,6 +350,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     .on_machine_label_commit(Arc::clone(&on_label_commit))
     .on_machine_label_cancel(Arc::clone(&on_label_cancel))
     .on_machine_label_selection_change(Arc::clone(&on_label_selection))
+    .on_machine_label_restore_display_focus(Arc::clone(&on_label_restore))
     .on_submit(key_submit);
 
     // Embedded account activation: host-owned account content beside the
@@ -462,6 +487,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_machine_label_editing(machine_editing)
             .with_machine_label_draft(machine_draft.clone())
             .with_machine_label_selection(machine_sel_start, machine_sel_end)
+            .with_machine_label_request_focus(machine_restore)
             .with_file_name(file_name.clone().unwrap_or_default())
             .with_file_contents_base64(file_contents_base64.clone().unwrap_or_default())
             .with_route_message(embedded_route_message.clone()),
@@ -495,6 +521,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     .on_machine_label_commit(on_label_commit)
     .on_machine_label_cancel(on_label_cancel)
     .on_machine_label_selection_change(on_label_selection)
+    .on_machine_label_restore_display_focus(on_label_restore)
     .on_submit(embedded_submit)
     .on_file_browse({
         let queue = Arc::clone(&queue);

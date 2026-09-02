@@ -4311,6 +4311,19 @@ impl LicenceSeats {
         self
     }
 
+    pub(crate) fn on_rename_cancel(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+        self.handlers.on_rename_cancel = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_rename_restore_display_focus(
+        mut self,
+        handler: Arc<dyn Fn(&str) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_rename_restore_display_focus = Some(handler);
+        self
+    }
+
     pub(crate) fn on_release(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.handlers.on_release = Some(handler);
         self
@@ -4405,6 +4418,14 @@ impl LicenceActivation {
         handler: Arc<dyn Fn(usize, usize) + Send + Sync>,
     ) -> Self {
         self.handlers.on_machine_label_selection_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_machine_label_restore_display_focus(
+        mut self,
+        handler: Arc<dyn Fn() + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_machine_label_restore_display_focus = Some(handler);
         self
     }
 

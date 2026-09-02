@@ -108,8 +108,14 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   Popover: "a_nested_popover_paints_without_nesting_deferred_draws",
   CodeInput: "a_grouped_code_input_types_and_completes_through_the_real_tree",
   FileUpload: "a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam",
-  LicenceActivation: "licence_activation_key_entry_types_and_emits_through_the_real_tree",
-  LicenceSeats: "licence_seats_release_flows_through_confirm_in_a_mounted_window",
+  LicenceActivation: [
+    "licence_activation_key_entry_types_and_emits_through_the_real_tree",
+    "licence_activation_machine_name_enter_and_escape_restore_display_focus",
+  ],
+  LicenceSeats: [
+    "licence_seats_release_flows_through_confirm_in_a_mounted_window",
+    "licence_seats_seat_row_enter_and_escape_restore_display_focus",
+  ],
   LicenceStatus: "licence_status_renders_state_and_authority_reads_in_a_mounted_window",
   ModelConnectionPicker: "model_connection_picker_roving_focus_moves_real_backend_focus",
   ModelConnectionSetup: "model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window",

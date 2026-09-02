@@ -30,6 +30,9 @@ pub struct LicenceSeatsSpec {
     pub editing_draft: Option<String>,
     /// Caret into the editing row's draft.
     pub editing_selection: (usize, usize),
+    /// One-shot: the named row's EditableLabel requests display focus after
+    /// Enter/Escape, including once the row has left edit mode.
+    pub request_focus_machine_id: Option<String>,
     pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
     pub density: Option<ControlDensity>,
@@ -47,6 +50,7 @@ impl Default for LicenceSeatsSpec {
             editing_machine_id: None,
             editing_draft: None,
             editing_selection: (0, 0),
+            request_focus_machine_id: None,
             size: None,
             size_role: SemanticControlSizeRole::Control,
             density: None,
@@ -106,6 +110,11 @@ impl LicenceSeatsSpec {
 
     pub fn with_editing_selection(mut self, start: usize, end: usize) -> Self {
         self.editing_selection = (start, end);
+        self
+    }
+
+    pub fn with_request_focus_machine(mut self, machine_id: Option<String>) -> Self {
+        self.request_focus_machine_id = machine_id;
         self
     }
 

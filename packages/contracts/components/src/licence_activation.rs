@@ -62,6 +62,9 @@ pub struct LicenceActivationSpec {
     pub machine_label_draft: Option<String>,
     /// Caret into the machine-name draft.
     pub machine_label_selection: (usize, usize),
+    /// One-shot: the next view-mode paint of the machine name requests
+    /// display focus after Enter/Escape.
+    pub machine_label_request_focus: bool,
     /// Submit override; `None` resolves mode/view copy.
     pub activate_label: Option<String>,
     /// Opt-in segmented key entry; `None` renders the free-form TextInput.
@@ -100,6 +103,7 @@ impl Default for LicenceActivationSpec {
             machine_label_editing: false,
             machine_label_draft: None,
             machine_label_selection: (0, 0),
+            machine_label_request_focus: false,
             activate_label: None,
             key_code_input: None,
             key_draft: String::new(),
@@ -261,6 +265,11 @@ impl LicenceActivationSpec {
 
     pub fn with_machine_label_selection(mut self, start: usize, end: usize) -> Self {
         self.machine_label_selection = (start, end);
+        self
+    }
+
+    pub fn with_machine_label_request_focus(mut self, request_focus: bool) -> Self {
+        self.machine_label_request_focus = request_focus;
         self
     }
 

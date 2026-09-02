@@ -277,6 +277,56 @@ describe("EditableLabel (svelte)", () => {
     expect(document.activeElement).not.toBe(container.querySelector(".poodle-editable-label__display"));
   });
 
+  it("restores display focus on Enter and Escape, not on Tab blur", async () => {
+    const onEnterCommit = vi.fn();
+    const enter = render(EditableLabel, { props: { value: "Kick", onCommit: onEnterCommit } });
+    await fireEvent.dblClick(enter.container.querySelector(".poodle-editable-label__display") as HTMLElement);
+    await waitFor(() => {
+      expect(enter.container.querySelector(".poodle-editable-label__input")).not.toBeNull();
+    });
+    await fireEvent.keyDown(enter.container.querySelector(".poodle-editable-label__input") as HTMLInputElement, {
+      key: "Enter",
+    });
+    await waitFor(() => {
+      expect(onEnterCommit).toHaveBeenCalledWith({ value: "Kick", previousValue: "Kick" });
+      expect(document.activeElement).toBe(enter.container.querySelector(".poodle-editable-label__display"));
+    });
+    enter.unmount();
+
+    const onCancel = vi.fn();
+    const escape = render(EditableLabel, { props: { value: "Kick", onCancel } });
+    await fireEvent.dblClick(escape.container.querySelector(".poodle-editable-label__display") as HTMLElement);
+    await waitFor(() => {
+      expect(escape.container.querySelector(".poodle-editable-label__input")).not.toBeNull();
+    });
+    await fireEvent.input(escape.container.querySelector(".poodle-editable-label__input") as HTMLInputElement, {
+      target: { value: "Kicks" },
+    });
+    await fireEvent.keyDown(escape.container.querySelector(".poodle-editable-label__input") as HTMLInputElement, {
+      key: "Escape",
+    });
+    await waitFor(() => {
+      expect(onCancel).toHaveBeenCalledTimes(1);
+      expect(document.activeElement).toBe(escape.container.querySelector(".poodle-editable-label__display"));
+    });
+    escape.unmount();
+
+    const onTabCommit = vi.fn();
+    const tab = render(EditableLabel, { props: { value: "Kick", onCommit: onTabCommit } });
+    await fireEvent.dblClick(tab.container.querySelector(".poodle-editable-label__display") as HTMLElement);
+    await waitFor(() => {
+      expect(tab.container.querySelector(".poodle-editable-label__input")).not.toBeNull();
+    });
+    const tabInput = tab.container.querySelector(".poodle-editable-label__input") as HTMLInputElement;
+    await fireEvent.keyDown(tabInput, { key: "Tab" });
+    await fireEvent.blur(tabInput);
+    await waitFor(() => {
+      expect(onTabCommit).toHaveBeenCalledWith({ value: "Kick", previousValue: "Kick" });
+    });
+    expect(document.activeElement).not.toBe(tab.container.querySelector(".poodle-editable-label__display"));
+    tab.unmount();
+  });
+
   it("returns to view on a new committed value without committing", async () => {
     const onCommit = vi.fn();
     const onCancel = vi.fn();

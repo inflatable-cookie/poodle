@@ -42,6 +42,10 @@ pub struct LicenceSeatsHandlers {
     pub on_rename_change: Option<Arc<dyn Fn(&str, &str) + Send + Sync>>,
     /// Caret into the rename draft moved.
     pub on_rename_selection_change: Option<Arc<dyn Fn(&str, usize, usize) + Send + Sync>>,
+    /// Escape cancelled the rename without committing.
+    pub on_rename_cancel: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Enter/Escape asked the host to restore display focus on that row.
+    pub on_rename_restore_display_focus: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// A release was confirmed/requested.
     pub on_release: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// The release trigger was pressed (host opens that row's confirm).
@@ -145,6 +149,17 @@ fn seat_row(
         Arc::new(move |start: usize, end: usize| handler(&machine_id, start, end))
             as Arc<dyn Fn(usize, usize) + Send + Sync>
     });
+    let cancel = handlers.on_rename_cancel.clone().map(|handler| {
+        let machine_id = row.machine_id.clone();
+        Arc::new(move || handler(&machine_id)) as Arc<dyn Fn() + Send + Sync>
+    });
+    let restore = handlers
+        .on_rename_restore_display_focus
+        .clone()
+        .map(|handler| {
+            let machine_id = row.machine_id.clone();
+            Arc::new(move || handler(&machine_id)) as Arc<dyn Fn() + Send + Sync>
+        });
     let editable = editable_label_with_handlers(
         &EditableLabelSpec::new()
             .with_value(if row.named {
@@ -159,6 +174,9 @@ fn seat_row(
             })
             .with_selection(spec.editing_selection.0, spec.editing_selection.1)
             .with_editing(editing_this_row)
+            .with_request_focus(
+                spec.request_focus_machine_id.as_deref() == Some(row.machine_id.as_str()),
+            )
             .with_activation_mode(EditableLabelActivation::EnterOrSpace)
             .with_variant(EditableLabelVariant::Flush)
             .with_empty_text(poodle_headless::licence::LICENCE_UNNAMED_MACHINE)
@@ -177,6 +195,8 @@ fn seat_row(
             on_change: change,
             on_selection_change: selection,
             on_commit: crate::editable_label::adapt_commit(commit),
+            on_cancel: cancel,
+            on_restore_display_focus: restore,
             ..EditableLabelHandlers::default()
         },
     );
@@ -472,5 +492,43 @@ mod tests {
         assert!(node
             .find(&|n| n.a11y.label.as_deref() == Some("Release unnamed machine"))
             .is_some());
+    }
+
+    #[test]
+    fn rename_enter_and_escape_restore_display_focus_blur_does_not() {
+        let restore = Arc::new(std::sync::Mutex::new(Vec::new()));
+        let spec = LicenceSeatsSpec::new()
+            .with_seats(vec![seat("id-a", Some("Studio rig"), true)])
+            .with_editing_machine(Some("id-a".to_string()))
+            .with_editing_draft(Some("Studio rig".to_string()))
+            .with_editing_selection(10, 10);
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = licence_seats(
+            &spec,
+            &ctx,
+            LicenceSeatsHandlers {
+                on_rename: Some(Arc::new(|_, _| {})),
+                on_rename_cancel: Some(Arc::new(|_| {})),
+                on_rename_restore_display_focus: Some({
+                    let restore = Arc::clone(&restore);
+                    Arc::new(move |machine_id: &str| {
+                        restore.lock().unwrap().push(machine_id.to_string());
+                    })
+                }),
+                ..LicenceSeatsHandlers::default()
+            },
+        );
+        let input = node
+            .find(&|n| n.interaction.on_submit.is_some())
+            .expect("the editing input");
+        (input.interaction.on_submit.as_ref().unwrap())();
+        (input.interaction.on_cancel.as_ref().unwrap())();
+        (input.interaction.on_focus_change.as_ref().unwrap())(false);
+        assert_eq!(
+            restore.lock().unwrap().as_slice(),
+            ["id-a", "id-a"],
+            "Enter and Escape restore; blur commit does not"
+        );
     }
 }

@@ -34,6 +34,13 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
     let queue = Arc::clone(&state.node_events);
     let _ = cx;
 
+    let restore_machine = state.licence_seats.request_focus_machine_id.clone();
+    if restore_machine.is_some() {
+        queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
+            LicenceSeatsEvent::ClearRestoreFocus,
+        ));
+    }
+
     // The mixed group is interactive: rename, edit, and release run through
     // the real handlers and the preview's host loop.
     let mixed =
@@ -46,6 +53,7 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     state.licence_seats.editing_selection.0,
                     state.licence_seats.editing_selection.1,
                 )
+                .with_request_focus_machine(restore_machine)
                 .with_open_confirm(state.licence_seats.open_confirm_machine_id.clone()),
             theme,
         )
@@ -89,6 +97,24 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         machine_id: machine_id.to_string(),
                         start,
                         end,
+                    },
+                ));
+            })
+        })
+        .on_rename_cancel({
+            let queue = Arc::clone(&queue);
+            Arc::new(move |_machine_id: &str| {
+                queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
+                    LicenceSeatsEvent::CancelEdit,
+                ));
+            })
+        })
+        .on_rename_restore_display_focus({
+            let queue = Arc::clone(&queue);
+            Arc::new(move |machine_id: &str| {
+                queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
+                    LicenceSeatsEvent::RestoreFocus {
+                        machine_id: machine_id.to_string(),
                     },
                 ));
             })

@@ -685,6 +685,7 @@ pub struct LicencePreviewState {
     pub editing_machine_id: Option<String>,
     pub editing_draft: Option<String>,
     pub editing_selection: (usize, usize),
+    pub request_focus_machine_id: Option<String>,
     pub open_confirm_machine_id: Option<String>,
 }
 
@@ -712,6 +713,7 @@ impl LicencePreviewState {
             editing_machine_id: None,
             editing_draft: None,
             editing_selection: (0, 0),
+            request_focus_machine_id: None,
             open_confirm_machine_id: None,
         }
     }
@@ -724,6 +726,12 @@ impl LicencePreviewState {
         {
             seat.label = label;
         }
+        self.editing_machine_id = None;
+        self.editing_draft = None;
+        self.editing_selection = (0, 0);
+    }
+
+    pub fn cancel_edit(&mut self) {
         self.editing_machine_id = None;
         self.editing_draft = None;
         self.editing_selection = (0, 0);
@@ -762,6 +770,11 @@ pub enum LicenceSeatsEvent {
         start: usize,
         end: usize,
     },
+    CancelEdit,
+    RestoreFocus {
+        machine_id: String,
+    },
+    ClearRestoreFocus,
     ReleaseTrigger {
         machine_id: String,
     },
@@ -1064,6 +1077,15 @@ impl AppState {
                         {
                             self.licence_seats.editing_selection = (start, end);
                         }
+                    }
+                    LicenceSeatsEvent::CancelEdit => {
+                        self.licence_seats.cancel_edit();
+                    }
+                    LicenceSeatsEvent::RestoreFocus { machine_id } => {
+                        self.licence_seats.request_focus_machine_id = Some(machine_id);
+                    }
+                    LicenceSeatsEvent::ClearRestoreFocus => {
+                        self.licence_seats.request_focus_machine_id = None;
                     }
                     LicenceSeatsEvent::ReleaseTrigger { machine_id } => {
                         self.licence_seats.open_confirm_machine_id = Some(machine_id);
