@@ -35,6 +35,8 @@ renumbered here.
   parent-width native fit, real web hit targets, and no accessible-name leak.
 - `g16.049` is complete in PR #156. Its registry has six candidates, six
   rejections, and no accepted or runtime-eligible pair.
+- `g16.056` is complete in PR #159. Spec 070 freezes the compiled-distribution
+  inventories, condition maps, migration, and byte-exact receipt formulas.
 - The accepted consolidation resolves the previous EditableLabel,
   block-slider, toast, shimmer, icon-geometry, design-guidance, release,
   citations, nested-menu, lab, visual-tranche, and Jetstream questions.
@@ -46,7 +48,7 @@ These cards have complete boundaries and no unmet serial dependency:
 | Card | Lane | Writable boundary | Result |
 | --- | --- | --- | --- |
 | [`g16.050`](050-icon-geometry-internal-runtime-substrate.md) | icon geometry IG-03–IG-05 | internal runtime/node/private-shell substrate | fixture-only runtime proof; no public or eligible pair |
-| [`g16.056`](056-web-distribution-contract.md) | compiled web distribution | architecture/package contract and migration boundary | frozen source-free `dist` contract |
+| [`g16.057`](057-core-build-substrate.md) | compiled web distribution | core build/staging driver, declarations, assets, receipt | deterministic source-free core output |
 
 These two lanes are independently dispatchable.
 If implementation discovers shared barrel, registry, contract, or generated
@@ -59,7 +61,6 @@ Global g16 front-door and closeout edits remain orchestrator-owned.
 | --- | --- | --- | --- |
 | [`g16.051`](051-icon-geometry-native-visual-admission.md) | blocked | completed `g16.050`, operational Button lab, and separately completed icon adapter/manifest extension | IG-06 native visual admission only |
 | [`g16.052`](052-contributor-design-guidance-pilot.md) | gated | named human reviewers, two freeze approvals, and orchestrator execution custody | finite matched pilot; no ordinary worker judgment |
-| [`g16.057`](057-core-build-substrate.md) | blocked | completed `g16.056` | deterministic source-free core build and receipt |
 | [`g16.058`](058-shell-distributions.md) | blocked | completed `g16.057` | dual-lane Svelte plus private React distribution |
 | [`g16.059`](059-installed-web-distribution-certification.md) | blocked | completed `g16.058` | sole permanent installed browser/SSR oracle and promotion receipt |
 | [`g16.054`](054-historycenter-v030-release-candidate.md) | blocked | completed `g16.059`; `g16.053` is complete | immutable `0.3.0` candidate and validation evidence; no release mutation |

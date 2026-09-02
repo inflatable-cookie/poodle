@@ -15,8 +15,8 @@ behavior repairs without inventing another conformance authority.
 - [Generation index](generation-index.md) is the canonical status summary.
 - `g16.036` is complete in PR #127. The 2026-09-01 triage decisions are
   consolidated in the [canonical continuation map](g16/component-continuation-runway.md):
-  `g16.045`–`g16.049` and `g16.053` are complete. `g16.050` and `g16.056` are
-  ready and independent; `g16.057`–`g16.059` are serial behind `g16.056`.
+  `g16.045`–`g16.049`, `g16.053`, and `g16.056` are complete. `g16.050` and
+  `g16.057` are ready and independent; `g16.058`–`g16.059` remain serial.
   `g16.051` and `g16.052` keep explicit serial, ownership, or external gates.
   `g16.054` stays blocked on completed `g16.059`; its security-audit dependency
   is complete and architecture 014 owns the compiled-distribution mechanics.

@@ -1,7 +1,9 @@
 # g16.056 — Web Distribution Contract
 
-Status: complete — awaiting orchestrator review
+Status: complete — merged in PR #159 after one exact-head repair round
 PR: https://github.com/inflatable-cookie/poodle/pull/159
+Closed: 2026-09-02
+Merge: `b69e5c34b03796e7aec2eaf1e0dc1d04fe32f5f5`
 Type: implementation — contract and migration boundary
 Opened: 2026-09-02
 Depends on: accepted [compiled web package distribution](../../architecture/014-compiled-web-package-distribution.md)

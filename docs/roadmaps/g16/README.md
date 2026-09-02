@@ -90,8 +90,8 @@ stay maintained; backend admission is not part of the first card.
 53. [053 — Repository security-audit boundary repair](053-repository-security-audit-boundary-repair.md) — complete in PR #150; the production matcher is boundary-safe and the repository audit is green without exclusions
 54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — blocked on completed `g16.059`; `g16.053` is complete and no release mutation is authorized
 55. [055 — Drag source pointer-gesture browser suppression](055-drag-source-preactivation-selection-suppression.md) — complete; merged in PR #151 with shared-controller pre-activation selection suppression and one-shot post-drag compatibility-click cancellation
-56. [056 — Web distribution contract](056-web-distribution-contract.md) — ready; freezes the compiled `dist` and breaking `./markdown` boundary
-57. [057 — Core build substrate](057-core-build-substrate.md) — blocked on completed `g16.056`
+56. [056 — Web distribution contract](056-web-distribution-contract.md) — complete; merged in PR #159 after one exact-head repair round with frozen 176/167/108 inventories and byte-exact receipts
+57. [057 — Core build substrate](057-core-build-substrate.md) — ready; deterministic source-free core build and receipt
 58. [058 — Shell distributions](058-shell-distributions.md) — blocked on completed `g16.057`
 59. [059 — Installed web distribution certification](059-installed-web-distribution-certification.md) — blocked on completed `g16.058`; sole permanent installed-tarball oracle and receipt
 
@@ -99,8 +99,8 @@ stay maintained; backend admission is not part of the first card.
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.049` and `g16.053` are
-complete. Ready cards are independent `g16.050` and `g16.056`; the latter
-opens serial `g16.057`–`g16.059`. `g16.051` and `g16.052` retain their explicit
+complete. Ready cards are independent `g16.050` and `g16.057`; the latter
+continues serial `g16.058`–`g16.059`. `g16.051` and `g16.052` retain their explicit
 serial or external gates. `g16.054` is blocked on completed `g16.059` and does
 not inherit release authority from the distribution programme. Citations,
 nested-menu pointer intent, the dedicated lab,

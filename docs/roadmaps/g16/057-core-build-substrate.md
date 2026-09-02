@@ -1,6 +1,6 @@
 # g16.057 — Core Build Substrate
 
-Status: blocked — requires accepted `g16.056`
+Status: ready — `g16.056` merged in PR #159
 Type: implementation — build substrate
 Opened: 2026-09-02
 Depends on: accepted `g16.056`
