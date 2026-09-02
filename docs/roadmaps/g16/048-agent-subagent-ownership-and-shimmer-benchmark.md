@@ -1,7 +1,6 @@
 # g16.048 — AgentSubagent Ownership And Shimmer Benchmark
 
-Status: ready — benchmark is serial behind the contract/runtime reconciliation
-inside this card
+Status: complete — static fallback; no candidate effect promoted
 Type: benchmark
 Opened: 2026-09-01
 Depends on: merged `g16.034` and operator acceptance recorded in
@@ -58,6 +57,29 @@ geometry, paint, layer/memory, frame, selection/copy, DOM/accessibility, and
 fallback results. Raw sanitized evidence stays outside canonical source through
 the verdict plus 90 days. The compact manifest, thresholds, and verdict go in
 one execution log.
+
+## Execution Result
+
+The contract phase gate passed for the active Svelte, React, shared Rust, and
+GPUI paths. The bounded smoke run then closed on the packet's hard-stop rule:
+
+| Engine receipt | Cells | Failed cells | Lifecycle runs | Failed lifecycle |
+| --- | ---: | ---: | ---: | ---: |
+| Chromium `151.0.7922.34` | 8 | 2 | 8 | 0 |
+| Firefox `153.0` | 8 | 5 | 8 | 0 |
+| WebKit `26.5` | 8 | 8 | 8 | 0 |
+
+The cell shape was `C1/N1/320/Eclipse/desktop/DPR1`, across Svelte and React,
+with static, background-position, mask-transform, and background-clip
+treatments. All semantic, geometry, selection, live-region, focus, and
+one-shot lifecycle gates passed except `source-readable` for background-clip
+(6 cells) and `frame-p95` in the Firefox/WebKit receipts (13 cells). The
+background-clip source became transparent, so it is rejected. No production
+effect, public API, native mask, or GPU claim was promoted. The full review
+matrix was not continued after these hard failures; the result is static text.
+
+Receipts, digests, thresholds, and the retained raw-evidence location are in
+`docs/logs/2026-09/20260902-g16-048-agent-subagent-shimmer-benchmark.md`.
 
 ## Acceptance
 

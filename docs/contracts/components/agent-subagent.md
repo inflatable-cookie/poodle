@@ -1,16 +1,16 @@
 # AgentSubagent
 
-Status: draft
-Updated: 2026-08-10
+Status: detailed contract
+Updated: 2026-09-02
 
 ## 1. Purpose
 
 - Component name: `AgentSubagent`
 - Layer: `composites`
 - Summary: an inline group for a provider-owned child agent's (sub-agent's)
-  work in the transcript — identity and status in the header, a live one-line
-  activity while the child runs, expandable detail, and a click-through to the
-  child's work
+  work in the transcript — identity and status in the header, a host-supplied
+  one-line activity while the child is non-terminal, expandable detail, and a
+  click-through to the child's work
 - In scope: the header (label + status badge), the live activity line, the
   terminal summary, the expanded detail region, the disclosure, the
   click-through action, the status vocabulary
@@ -24,6 +24,12 @@ feeds observations; the component never asks the child for anything. The
 status vocabulary is Swallowtail's `SubagentStatus` exactly
 (`swallowtail-runtime/src/activity/subagent.rs`), so a badge never says
 something the provider never said.
+
+The active implementation surfaces are the Svelte and React web shells, the
+shared headless model/spec/render path, and the GPUI preview adapter. They all
+render the current static group semantics below. Jetstream remains deferred at
+the program level and is not an implementation or effect target of this
+contract.
 
 `unknown` renders literally as "Unknown". It means "no portable status was
 supplied", and any prettier word would be a fact the provider did not give —
@@ -51,7 +57,7 @@ window on it, not its controller.
   │   └── [Detail Line .poodle-agent-subagent__detail-line] <li> (repeated)
   └── [Actions .poodle-agent-subagent__actions] <div>
       ├── [Toggle .poodle-agent-subagent__action] <button type="button" data-kind="toggle">  (conditional: detailLines non-empty)
-      └── [Open Child .poodle-agent-subagent__action] <button type="button" data-kind="open">
+      └── [Open Child .poodle-agent-subagent__action] <button type="button" data-kind="open">  (web conditional on handler; native renderer emits the labeled action)
 ```
 
 | Part | Required | Description | Token Targets |
@@ -60,7 +66,7 @@ window on it, not its controller.
 | Header | yes | identity and status at a glance | `--poodle-space-stack-sm` |
 | Label | yes | the child's short label, at full strength | `--poodle-color-text-primary` |
 | Badge | yes | the status in words — never colour alone | per status: `--poodle-color-accent-base` (running), `--poodle-color-status-danger` (failed), `--poodle-color-status-success` (completed), `--poodle-color-text-secondary` otherwise — `unknown` claims nothing, so it reads at meta strength |
-| Activity | no | the live one-line activity while the child works | `--poodle-color-text-secondary` |
+| Activity | no | the host-supplied one-line activity while the child is non-terminal | `--poodle-color-text-secondary` |
 | Spinner | no | the running indicator; `dots` is the quietest variant, matching the transcript's activity footer | (Spinner contract) |
 | Activity Line | no | one line of what the child is doing right now | `--poodle-color-text-secondary` |
 | Summary | no | what the child accomplished, once terminal | `--poodle-color-text-secondary` |
@@ -68,7 +74,7 @@ window on it, not its controller.
 | Detail Line | no | one recent activity line | `--poodle-color-text-secondary` |
 | Actions | yes | the disclosure and the click-through | `--poodle-space-stack-sm` |
 | Toggle | no | opens and closes the detail region; exists only when there is detail to reveal | `--poodle-color-text-tertiary` |
-| Open Child | yes | the click-through to the child's work — "Open child work" | `--poodle-color-text-tertiary` |
+| Open Child | yes | the labeled click-through action — "Open child work"; web shells omit it without a handler, while the native renderer currently keeps the unlatchable action in the tree | `--poodle-color-text-tertiary` |
 
 ## 4. Props And Inputs
 
@@ -76,7 +82,7 @@ window on it, not its controller.
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `item` | `AgentSubagentItem` | — | yes | the child work this group renders |
+| `item` | `AgentSubagentItem` | — | yes | the child work this group renders; the React and native surfaces require it, while the Svelte adapter accepts omission as an empty render |
 | `expanded` | `boolean` | `false` | no | bindable disclosure state; the detail region shows while expanded |
 | `detailLines` | `string[]` | `[]` | no | recent activity lines shown when expanded; a simple block list is enough for v1 |
 | `expandLabel` | `string` | `"Show activity"` | no | collapsed disclosure label |
@@ -86,7 +92,7 @@ window on it, not its controller.
 | `size` | `ControlSize \| null` | `null` | no | explicit size override |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override |
 | `onToggle` | `((expanded: boolean) => void) \| null` | `null` | no | the disclosure was used |
-| `onOpenChild` | `(() => void) \| null` | `null` | no | the click-through was used; the host owns what "open" means. When unset, the open action does not render at all |
+| `onOpenChild` | `(() => void) \| null` | `null` | no | the web click-through was used; the host owns what "open" means. Web shells omit the action when unset; native handlers are supplied separately to `poodle-render` and an absent native handler leaves its labeled action inert |
 
 ### Shared Types
 
@@ -109,7 +115,7 @@ type AgentSubagentItem = {
   id: string;
   label: string;
   status: AgentSubagentStatus;
-  /** One line of live activity while the child is still working. */
+  /** One host-supplied activity line while the child is non-terminal. */
   activityLine?: string;
   /** What the child accomplished, once terminal. */
   summary?: string;
@@ -145,9 +151,10 @@ type AgentSubagentItem = {
 ### Behavior Machine
 
 Behavior classification: styled-only (no machine). The only interactive parts
-are two buttons with no state of their own: the disclosure flips `expanded`,
-and the click-through is a signal to the host. There is no async behaviour and
-no keyboard-driven mode, so a machine would have nothing to own.
+are the disclosure and the click-through: the web disclosure flips local
+`expanded` state and the click-through signals the host; native composition
+receives its state and handlers through the shared spec/render boundary. There
+is no child-control or transport behavior here.
 
 ## 6. Events
 
@@ -159,21 +166,25 @@ no keyboard-driven mode, so a machine would have nothing to own.
 No event carries a payload beyond the toggle's next state: the child's status
 and lines are the host's data, and the host persists them. The click-through
 carries nothing because the component renders exactly one child — "open" is a
-signal, and the host decides what that means for its session.
+signal, and the host decides what that means for its session. Native handlers
+use the same two actions through `AgentSubagentHandlers`.
 
 ## 7. Accessibility
 
 ### Semantics
 
-- The root is a plain group inside the transcript's `log` region; the viewport
-  already provides `aria-live="polite"`, so the group adds nothing of its own.
+- The root is a plain group inside the transcript's `log` region; Svelte and
+  React `AgentTranscript` own `role="log"` and `aria-live="polite"`, so the
+  group adds no live region of its own. The shared native transcript renderer
+  owns the surrounding transcript surface as well.
 - The badge is text, not colour: the status is announced in words, and the
   `data-status` colours are a second channel, never the only one.
 - The spinner is decorative (`aria-hidden`), exactly as in the transcript's
   activity footer: the label next to it is the announcement.
 - The disclosure button carries `aria-expanded`, so the region's state is
   announced rather than inferred from the label swap.
-- Both buttons are real `<button>`s with accessible names from their labels.
+- Web actions are real `<button>`s with accessible names from their labels;
+  native composition emits button nodes with the same labels.
 - A running child does not steal focus and is not announced on every line —
   the transcript's `polite` region announces when it settles.
 
@@ -200,10 +211,11 @@ signal, and the host decides what that means for its session.
 ### Composition
 
 Rendered as a transcript block (`data-kind="subagent-group"`) between the
-turn's other blocks, sized and densitied by the transcript's own ladder. It
-owns its disclosure state; the transcript does not hold expansion lists for it.
-The host feeds observations — a group appears, its status and lines update,
-and terminal statuses settle it in place.
+turn's other blocks, sized and densitied by the transcript's own ladder. The
+web group owns its disclosure state; the web transcript does not hold an
+expansion list for it. The native transcript spec can supply expanded group
+ids to the shared renderer. The host feeds observations — a group appears, its
+status and lines update, and terminal statuses settle it in place.
 
 ## 9. Token Usage
 
@@ -230,7 +242,7 @@ and terminal statuses settle it in place.
 | `data-size` / `data-density` | the ladders | root |
 | `data-kind` | `toggle`/`open` | each action |
 
-## 10. Svelte Notes
+## 10. Web Notes
 
 - The spinner is the poodle `Spinner` with `variant="dots"` and `tone="muted"`,
   the same quiet variant the transcript's activity footer uses.
@@ -239,13 +251,28 @@ and terminal statuses settle it in place.
 - `expanded` is `$bindable`; unbound, the component owns it as local state.
 - Rendered without an `item`, the component renders nothing — an empty group
   would reserve space for a child that is not there.
+- React requires `item`, uses local uncontrolled disclosure state unless
+  `expanded` is supplied, and reports the same two callbacks.
+- Both web shells consume the shared status helpers and AgentSubagent CSS. Both
+  render the activity line only for non-terminal statuses, the summary only for
+  terminal statuses, and a spinner only for `running`.
 
-## 11. GPUI And Jetstream Notes
+## 11. Shared Rust, GPUI, And Jetstream Notes
 
-Deferred. Svelte is the first and only component implementation in this batch;
-the shared headless core, the conformance vectors, the spec struct and the
-`poodle-render` function (`agent_subagent`) already land, so a native variant
-is wiring, not design. See §13.
+The shared headless core owns the status vocabulary, terminal mapping, and
+spinner mapping. `AgentSubagentSpec` carries the item, disclosure state, detail
+lines, labels, size and density. `poodle-render::agent_subagent` renders the
+same static header/body/detail/action structure and accepts native handlers.
+Its current native behavior emits the labeled open action even without an open
+handler; without a handler it has no activation callback.
+
+The GPUI preview uses `node_compat::AgentSubagent::from_spec` and the shared
+renderer for its running, waiting, completed, failed, unknown, size and
+density specimens. It is a shipped static composition path, not a deferred
+variant.
+
+Jetstream remains program-deferred. This contract makes no Jetstream variant,
+effect, or admission claim.
 
 ## 12. Parity Checklist
 
@@ -274,22 +301,24 @@ is wiring, not design. See §13.
 
 | Delta | Why Allowed | Approval Status | Follow-Up |
 |-------|-------------|-----------------|-----------|
-| React/GPUI/Jetstream variants deferred — svelte is the first implementation | the consumer integrating sub-agent work (nucleus) is svelte-only today; the headless core, vectors, spec and shared renderer already landed, so each variant is wiring | pending review | build the variants when a second target needs them |
+| Jetstream remains program-deferred; Svelte, React, shared Rust composition and GPUI preview are active static surfaces | Jetstream follows the current program admission posture; the active cohort already uses the shared AgentSubagent model and rendering path | accepted for this lane | any Jetstream admission is a separate program decision |
+| Web shells omit the open action without a handler; the native renderer emits an inert labeled action when its handler is absent | the adapters currently expose different handler boundaries, and the observable output must remain documented until a parity change is separately approved | current implementation delta | reconcile action presence only in a scoped parity change |
 | The disclosure exists only when `detailLines` is non-empty | an expand control opening an empty region is noise; the host decides when there is detail to reveal | pending review | none |
 | The Svelte transcript passes no expansion state for groups | a child's expansion is local state the transcript host does not need to hold; the native spec carries `expanded_subagent_groups` for hosts that want to drive it | pending review | none |
+| Svelte accepts an omitted item and renders no group; React and native require the semantic item | the web adapter surfaces have different type/runtime boundaries today, while a present item has the same shared shape | current implementation delta | reconcile input optionality only in a scoped API migration |
 
 ## 14. Approval And Adoption Notes
 
-- contract status: `draft`
+- contract status: `detailed contract`
 - approvers: pending review
 - downstream adopters: nucleus (provider sub-agent work in the transcript),
   future agent surfaces
-- future follow-up: the React and native variants, richer detail than plain
-  activity lines
+- future follow-up: native/web action-presence parity and richer detail than
+  plain activity lines
 
 ## 15. Specimen Definitions
 
-Required specimen coverage (Svelte preview authoritative): running with a
-spinner and a live activity line; waiting; completed with a summary; failed;
-unknown reading literally as "Unknown"; the expanded detail region; the size
-ladder; density variants.
+Required specimen coverage (Svelte, React and GPUI preview surfaces): running
+with a spinner and a host-supplied activity line; waiting; completed with a
+summary; failed; unknown reading literally as "Unknown"; the expanded detail
+region; the size ladder; density variants.
