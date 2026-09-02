@@ -29,14 +29,15 @@ Updated: 2026-09-02
     external drop-authority adapter; `037`–`044` completed the DesEngs research
     wave in merged PRs #128–#135; `045`–`054` are the canonical post-triage
     continuation cards; `047` merged in PR #152 after one exact-head repair
-    round; independent `055` merged in PR #151
+    round; `048` merged in PR #153 with a verified static-fallback benchmark
+    verdict; independent `055` merged in PR #151
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: `g16.045` EditableLabel, `g16.046` block sliders,
-    `g16.048` AgentSubagent reconciliation/benchmark, and `g16.049` icon
-    geometry foundation. `g16.047` is complete in PR #152; `g16.053` is
-    complete in PR #150.
+  - Ready frontier: `g16.045` EditableLabel, `g16.046` block sliders, and
+    `g16.049` icon geometry foundation. `g16.047` is complete in PR #152;
+    `g16.048` is complete in PR #153 with production shimmer rejected; `g16.053`
+    is complete in PR #150.
   - Independent completed lane: `g16.055` drag-source pointer-gesture browser
     suppression merged in PR #151; it remains outside the post-triage
     continuation map.

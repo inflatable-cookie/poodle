@@ -8,6 +8,8 @@ Handoff: `docs/handoffs/20260902-004203-g16-048-agent-subagent-benchmark.md`
 Branch: `research/g16-048-agent-subagent-benchmark`
 Base: `origin/main` at `f645091f17a10b0ab8af82c200d5c21107cabb47`
 Rebased before repair onto the current `main` head.
+Reviewed head: `7b0dddcbdec01fa01daa7581eade29cd72444a3f`
+Merged: PR #153 at `fa8e65796f94eedcef7a6e168ba49aec41a178b5`
 
 ## Contract gate
 
@@ -110,3 +112,12 @@ and lifecycle files remain outside canonical source through the verdict plus
 
 No parity-ledger, roadmap front-door, package, workflow, release, or
 production-runtime surface changed.
+
+## Orchestrator closeout
+
+Exact-head review independently verified all 432 artifact references across
+the three retained runs, their unique paths and digests, and the receipt-level
+manifest/results hashes. Svelte, React, core, shared Rust, mounted GPUI, and
+`effigy docs:check` passed. PR #153 merged with the static-fallback verdict;
+production shimmer is closed rather than deferred to another implementation
+card.

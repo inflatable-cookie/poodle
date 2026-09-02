@@ -9,6 +9,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/agent-subagent.md`,
 `../../contracts/components/agent-transcript.md`,
 `../../architecture/012-semantic-motion-policy.md`
+Merge: `fa8e65796f94eedcef7a6e168ba49aec41a178b5`
 
 ## Goal
 
