@@ -5,7 +5,6 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 import { auditPackageDependencies, auditStagedDist } from "./audit";
 import { buildCore, findRepoRoot } from "./core-build";
-import { emitDeclarations } from "./declarations";
 import { generateSvelteComponentDeclarations } from "./copy-svelte-declarations";
 import { buildViteLibrary, type ViteLibraryGraph } from "./vite-library";
 import { readLockedTools } from "./lockfile";
@@ -54,7 +53,7 @@ export function svelteBuildSpec(repoRoot: string): PackageBuildSpec {
     markdownPolicy: "optional-peer-on-./markdown",
     entries,
     assets: [],
-    declarationTsconfig: "tsconfig.build.json",
+    declarationTsconfig: "tsconfig.declarations.json",
     forbiddenModules: [],
     externalModules: [...SVELTE_EXTERNAL_MODULES],
   };
@@ -152,11 +151,6 @@ export async function buildSvelte(repoRoot: string = findRepoRoot()): Promise<Bu
   const viteSources = packageRelativeViteSources(packageRoot, graph.moduleIds);
   assertTypeScriptAuthority(viteSources);
 
-  emitDeclarations({
-    repoRoot,
-    packageRoot,
-    tsconfigPath: spec.declarationTsconfig,
-  });
   generateSvelteComponentDeclarations(packageRoot);
 
   const tools = readLockedTools(repoRoot);

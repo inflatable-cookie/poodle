@@ -478,6 +478,8 @@
   { task = "test:core" },
   { task = "test:core-build" },
   { task = "test:components" },
+  { task = "svelte:package" },
+  { task = "react:package" },
   # The packaged counterpart of test:components. Cheap (~4s against ci:web's
   # ~21s) and it catches a class nothing else here can see: g13-b041 had a
   # component import its generated artifact from the preview package, which

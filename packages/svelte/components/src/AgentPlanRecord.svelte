@@ -7,7 +7,6 @@
     type AgentPlanSettledStatus,
   } from "@inflatable-cookie/poodle-core";
 
-  import AgentMessage from "./AgentMessage.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -80,7 +79,9 @@
     <p class="poodle-agent-plan-record__summary">{summary}</p>
   {:else}
     <div class="poodle-agent-plan-record__body">
-      <AgentMessage markdown={plan} role="assistant" size={resolvedSize} density={resolvedDensity} />
+      {#await import("./AgentMessage.svelte") then { default: AgentMessage }}
+        <AgentMessage markdown={plan} role="assistant" size={resolvedSize} density={resolvedDensity} />
+      {/await}
     </div>
   {/if}
 

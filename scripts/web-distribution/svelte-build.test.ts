@@ -5,6 +5,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -14,12 +15,18 @@ import { join } from "node:path";
 
 import { auditStagedDist } from "./audit";
 import { findRepoRoot } from "./core-build";
+import {
+  DECLARATION_TYPESCRIPT_VERSION,
+  ensureDeclarationTools,
+} from "./copy-svelte-declarations";
 import { sha256File } from "./hash";
 import { readReceipt } from "./receipt";
 import {
   INTERNAL_SVELTE_NAMES,
+  MARKDOWN_COMPONENT_NAMES,
   SHELL_ROSTER_NAMES,
   SVELTE_PACKAGE_DIR,
+  rootRosterNames,
   sveltePackageExports,
   sveltePublicFiles,
 } from "./shell-contract";
@@ -28,7 +35,7 @@ import { assertSvelteManifest, buildSvelte } from "./svelte-build";
 const repoRoot = findRepoRoot();
 const svelteRoot = join(repoRoot, SVELTE_PACKAGE_DIR);
 
-function runTsc(moduleResolution: "bundler" | "nodenext"): void {
+function writeConsumer(moduleResolution: "bundler" | "nodenext", probe: string): string {
   const consumer = mkdtempSync(join(tmpdir(), `poodle-svelte-${moduleResolution}-`));
   mkdirSync(join(consumer, "node_modules", "@inflatable-cookie"), { recursive: true });
   symlinkSync(svelteRoot, join(consumer, "node_modules", "@inflatable-cookie", "poodle-svelte"));
@@ -36,27 +43,12 @@ function runTsc(moduleResolution: "bundler" | "nodenext"): void {
     join(repoRoot, "packages/core"),
     join(consumer, "node_modules", "@inflatable-cookie", "poodle-core"),
   );
+  symlinkSync(join(repoRoot, "node_modules/svelte"), join(consumer, "node_modules", "svelte"));
   writeFileSync(
     join(consumer, "package.json"),
     `${JSON.stringify({ name: "probe", type: "module", private: true })}\n`,
   );
-  writeFileSync(
-    join(consumer, "probe.ts"),
-    `import { Button as RootButton, DragDropProvider } from "@inflatable-cookie/poodle-svelte";
-import DirectButton from "@inflatable-cookie/poodle-svelte/Button.svelte";
-import { AgentMessage, MarkdownEditor } from "@inflatable-cookie/poodle-svelte/markdown";
-import type { ControlSize } from "@inflatable-cookie/poodle-svelte/types";
-import type { ControlSize as TypesSize } from "@inflatable-cookie/poodle-svelte/types";
-void RootButton;
-void DragDropProvider;
-void DirectButton;
-void AgentMessage;
-void MarkdownEditor;
-const size: ControlSize = "md";
-const typesSize: TypesSize = size;
-void typesSize;
-`,
-  );
+  writeFileSync(join(consumer, "probe.ts"), probe);
   const tsconfig =
     moduleResolution === "bundler"
       ? {
@@ -82,6 +74,35 @@ void typesSize;
           include: ["probe.ts"],
         };
   writeFileSync(join(consumer, "tsconfig.json"), `${JSON.stringify(tsconfig, null, 2)}\n`);
+  return consumer;
+}
+
+function runTsc(moduleResolution: "bundler" | "nodenext"): void {
+  const consumer = writeConsumer(
+    moduleResolution,
+    `import { Button as RootButton, DragDropProvider } from "@inflatable-cookie/poodle-svelte";
+import DirectButton from "@inflatable-cookie/poodle-svelte/Button.svelte";
+import { AgentMessage, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-svelte/markdown";
+import type { ControlSize } from "@inflatable-cookie/poodle-svelte/types";
+import type { ControlSize as TypesSize } from "@inflatable-cookie/poodle-svelte/types";
+import type { ComponentProps } from "svelte";
+void RootButton;
+void DragDropProvider;
+void DirectButton;
+void AgentMessage;
+void AgentTranscript;
+void MarkdownEditor;
+const size: ControlSize = "md";
+const typesSize: TypesSize = size;
+void typesSize;
+const okButton: ComponentProps<typeof DirectButton> = {
+  disabled: false,
+  onClick: (_event: MouseEvent) => {},
+  pressed: false,
+};
+void okButton;
+`,
+  );
   const result = spawnSync("bun", ["x", "tsc", "-p", "tsconfig.json", "--pretty", "false"], {
     cwd: consumer,
     encoding: "utf8",
@@ -93,9 +114,50 @@ void typesSize;
   }
 }
 
+function runNegativeTsc(moduleResolution: "bundler" | "nodenext"): {
+  status: number | null;
+  output: string;
+} {
+  const consumer = writeConsumer(
+    moduleResolution,
+    `import type { ComponentProps } from "svelte";
+import Button from "@inflatable-cookie/poodle-svelte/Button.svelte";
+import Select from "@inflatable-cookie/poodle-svelte/Select.svelte";
+const badButtonDisabled: ComponentProps<typeof Button> = { disabled: "yes" };
+const badButtonClick: ComponentProps<typeof Button> = { onClick: 123 };
+const badButtonSnippet: ComponentProps<typeof Button> = { children: 123 };
+const badButtonBindable: ComponentProps<typeof Button> = { pressed: "yes" };
+const badSelectCallback: ComponentProps<typeof Select> = { onValueChange: 123 };
+const badSelectSnippet: ComponentProps<typeof Select> = { trigger: 123 };
+void badButtonDisabled;
+void badButtonClick;
+void badButtonSnippet;
+void badButtonBindable;
+void badSelectCallback;
+void badSelectSnippet;
+`,
+  );
+  const result = spawnSync("bun", ["x", "tsc", "-p", "tsconfig.json", "--pretty", "false"], {
+    cwd: consumer,
+    encoding: "utf8",
+  });
+  return {
+    status: result.status,
+    output: `${result.stdout ?? ""}${result.stderr ?? ""}`,
+  };
+}
+
 describe("Svelte compiled distribution", () => {
   test("frozen roster and package exports match spec 070", () => {
     expect(SHELL_ROSTER_NAMES).toHaveLength(176);
+    expect(rootRosterNames()).toHaveLength(173);
+    expect([...MARKDOWN_COMPONENT_NAMES]).toEqual([
+      "AgentMessage",
+      "AgentTranscript",
+      "MarkdownEditor",
+    ]);
+    expect(ensureDeclarationTools()).toContain("declaration-tools");
+    expect(DECLARATION_TYPESCRIPT_VERSION).toBe("6.0.3");
     const manifest = JSON.parse(readFileSync(join(svelteRoot, "package.json"), "utf8")) as {
       exports: unknown;
       files: string[];
@@ -128,6 +190,10 @@ describe("Svelte compiled distribution", () => {
       expect(existsSync(join(svelteRoot, "dist", `${name}.client.js`))).toBe(false);
       expect(existsSync(join(svelteRoot, "dist", `${name}.svelte.d.ts`))).toBe(false);
     }
+    const jsWithSvelteName = readdirSync(join(svelteRoot, "dist"), { recursive: true })
+      .map(String)
+      .filter((name) => name.endsWith(".js") && name.includes(".svelte"));
+    expect(jsWithSvelteName).toEqual([]);
     const buttonClient = readFileSync(join(svelteRoot, "dist/Button.client.js"), "utf8");
     const buttonServer = readFileSync(join(svelteRoot, "dist/Button.server.js"), "utf8");
     expect(buttonClient).toContain("svelte/internal/client");
@@ -142,7 +208,17 @@ describe("Svelte compiled distribution", () => {
       /from ["']marked["']/,
     );
     expect(readFileSync(join(svelteRoot, "dist/index.d.ts"), "utf8")).not.toContain("AgentMessage");
-    expect(readFileSync(join(svelteRoot, "dist/markdown.d.ts"), "utf8")).toContain("AgentMessage");
+    expect(readFileSync(join(svelteRoot, "dist/index.d.ts"), "utf8")).not.toContain(
+      "AgentTranscript",
+    );
+    expect(readFileSync(join(svelteRoot, "dist/index.d.ts"), "utf8")).not.toContain("MarkdownEditor");
+    const markdownDts = readFileSync(join(svelteRoot, "dist/markdown.d.ts"), "utf8");
+    expect(markdownDts).toContain("AgentMessage");
+    expect(markdownDts).toContain("AgentTranscript");
+    expect(markdownDts).toContain("MarkdownEditor");
+    const buttonDts = readFileSync(join(svelteRoot, "dist/Button.svelte.d.ts"), "utf8");
+    expect(buttonDts).not.toMatch(/declare const Button: Component;/);
+    expect(buttonDts).toMatch(/disabled|onClick|variant/);
 
     const second = await buildSvelte(repoRoot);
     expect(second.receipt.outputs).toEqual(first.receipt.outputs);
@@ -153,6 +229,15 @@ describe("Svelte compiled distribution", () => {
   test("Svelte declarations resolve under Bundler and NodeNext", () => {
     runTsc("bundler");
     runTsc("nodenext");
+  }, 60_000);
+
+  test("invalid Button/Select props fail unsuppressed under Bundler and NodeNext", () => {
+    for (const resolution of ["bundler", "nodenext"] as const) {
+      const negative = runNegativeTsc(resolution);
+      expect(negative.status).not.toBe(0);
+      expect(negative.output).toMatch(/TS2322/);
+      expect((negative.output.match(/TS2322/g) ?? []).length).toBeGreaterThanOrEqual(6);
+    }
   }, 60_000);
 
   test("client artifacts fail svelte/server while server artifacts render", async () => {
@@ -199,6 +284,29 @@ describe("Svelte compiled distribution", () => {
       auditStagedDist({ distDir, publicFiles, forbiddenModules: [] }),
     ).not.toThrow();
 
+    const buttonDts = join(distDir, "Button.svelte.d.ts");
+    const selectDts = join(distDir, "Select.svelte.d.ts");
+    const realButtonDts = readFileSync(buttonDts, "utf8");
+    const realSelectDts = readFileSync(selectDts, "utf8");
+    const shim = (stem: string) =>
+      [
+        `import type { Component } from "svelte";`,
+        `declare const ${stem}: Component;`,
+        `export default ${stem};`,
+        "",
+      ].join("\n");
+    writeFileSync(buttonDts, shim("Button"));
+    writeFileSync(selectDts, shim("Select"));
+    try {
+      const planted = runNegativeTsc("bundler");
+      expect(planted.status).toBe(0);
+    } finally {
+      writeFileSync(buttonDts, realButtonDts);
+      writeFileSync(selectDts, realSelectDts);
+    }
+    const restored = runNegativeTsc("bundler");
+    expect(restored.status).not.toBe(0);
+
     const plantedImport = mkdtempSync(join(tmpdir(), "poodle-import-oracle-"));
     writeFileSync(
       join(plantedImport, "package.json"),
@@ -243,6 +351,13 @@ describe("Svelte compiled distribution", () => {
       ["diff", "--name-only", "origin/main", "--", "test/package-install"],
       { cwd: repoRoot, encoding: "utf8" },
     );
-    expect(packInstallDiff.stdout.trim()).toBe("");
+    expect(packInstallDiff.stdout.trim().split("\n").filter(Boolean).sort()).toEqual([
+      "test/package-install/fixture/packed-types/tsconfig.slider-react-negative.json",
+      "test/package-install/fixture/packed-types/tsconfig.slider-react-positive.json",
+      "test/package-install/fixture/packed-types/tsconfig.tree-react-negative.json",
+      "test/package-install/fixture/packed-types/tsconfig.tree-react-positive.json",
+      "test/package-install/roster.ts",
+      "test/package-install/web-preview.ts",
+    ]);
   });
 });

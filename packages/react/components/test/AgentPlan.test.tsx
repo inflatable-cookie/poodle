@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { AgentChatInput } from "../src/AgentChatInput";
@@ -14,7 +14,7 @@ import { AgentPlan } from "../src/AgentPlan";
 describe("AgentChatInput plan region (react)", () => {
   const plan = ["## Proposed plan", "", "1. Add the surface", "2. Wire the callbacks"].join("\n");
 
-  it("renders AgentPlan through the plan prop while reviewing-plan", () => {
+  it("renders AgentPlan through the plan prop while reviewing-plan", async () => {
     const { container } = render(
       <AgentChatInput status="reviewing-plan" plan={<AgentPlan plan={plan} />} />,
     );
@@ -27,8 +27,10 @@ describe("AgentChatInput plan region (react)", () => {
     expect(planEl.dataset.status).toBe("pending");
     // The markdown went through the lexer: the heading is a real element, not
     // raw text, and the list items rendered.
-    expect(planEl.querySelector("h2")?.textContent).toBe("Proposed plan");
-    expect(planEl.querySelectorAll("li")).toHaveLength(2);
+    await waitFor(() => {
+      expect(planEl.querySelector("h2")?.textContent).toBe("Proposed plan");
+      expect(planEl.querySelectorAll("li")).toHaveLength(2);
+    });
   });
 
   it("routes the decision controls to the host callbacks", () => {

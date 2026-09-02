@@ -215,7 +215,6 @@ export { AgentPlanRecord, type AgentPlanRecordProps } from "./AgentPlanRecord";
 export { AgentQuestion, agentQuestionCanSubmit, type AgentQuestionProps } from "./AgentQuestion";
 export { AgentQuestionRecord, type AgentQuestionRecordProps } from "./AgentQuestionRecord";
 export { AgentSubagent, type AgentSubagentProps } from "./AgentSubagent";
-export { AgentTranscript, type AgentTranscriptProps } from "./AgentTranscript";
 export { ChangedFiles, type ChangedFilesProps } from "./ChangedFiles";
 export { ToolCall, iconForToolCallLabel, type ToolCallProps } from "./ToolCall";
 export { ToolCallGroup, type ToolCallGroupProps } from "./ToolCallGroup";

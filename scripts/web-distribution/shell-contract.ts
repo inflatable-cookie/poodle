@@ -188,7 +188,11 @@ export const SHELL_ROSTER_NAMES = [
   "XYPad",
 ] as const;
 
-export const MARKDOWN_COMPONENT_NAMES = ["AgentMessage", "MarkdownEditor"] as const;
+export const MARKDOWN_COMPONENT_NAMES = [
+  "AgentMessage",
+  "AgentTranscript",
+  "MarkdownEditor",
+] as const;
 export const INTERNAL_SVELTE_NAMES = ["DragDropProvider", "MenuSurface"] as const;
 
 export const SHELL_EXTERNAL_MODULES = [

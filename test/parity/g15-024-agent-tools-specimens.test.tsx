@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  act,
   cleanup as cleanupReact,
   fireEvent as fireEventReact,
   render as renderReact,
@@ -14,6 +15,7 @@ import iconNodes from "lucide-static/icon-nodes.json";
 import { createElement, type ComponentType } from "react";
 import { describe, expect, it } from "vitest";
 
+import { loadAgentMessage } from "../../packages/react/components/src/agent-message-load";
 import { IconProvider, type IconSet } from "../../packages/react/components/src";
 import { specimenMap as reactMap } from "../../packages/react/preview/src/gallery/specimen-map";
 import { specimenMap as svelteMap } from "../../packages/svelte/preview/src/specimens/registry";
@@ -139,10 +141,14 @@ function renderReactSpecimen(Specimen: ComponentType) {
   );
 }
 
-function reactCaptions(page: Page): string[] {
+async function reactCaptions(page: Page): Promise<string[]> {
   const Specimen = reactMap[page.slug] as ComponentType | undefined;
   expect(Specimen, `${page.slug} missing from the React registry`).toBeTruthy();
-  renderReactSpecimen(Specimen!);
+  await act(async () => {
+    renderReactSpecimen(Specimen!);
+    await loadAgentMessage();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+  });
   const rendered = captions();
   cleanupReact();
   return rendered;
@@ -166,8 +172,8 @@ describe("g15.024 agent and tools specimens", () => {
         expect(svelteCaptions(page)).toEqual(page.expected);
       });
 
-      it("keeps Svelte and React captions identical", () => {
-        expect(reactCaptions(page)).toEqual(svelteCaptions(page));
+      it("keeps Svelte and React captions identical", async () => {
+        expect(await reactCaptions(page)).toEqual(svelteCaptions(page));
       });
 
       it("stays inside the outline's section budget", () => {
@@ -233,7 +239,7 @@ describe("g15.024 agent and tools specimens", () => {
     cleanupSvelte();
   });
 
-  it("keeps AgentQuestion hosted override, choice modes, batch, dismissal, and shortcut limits live", () => {
+  it("keeps AgentQuestion hosted override, choice modes, batch, dismissal, and shortcut limits live", async () => {
     renderSvelte(PilotSpecimenHarness, {
       props: { specimen: svelteMap["agent-question"] as never },
     });
@@ -276,7 +282,11 @@ describe("g15.024 agent and tools specimens", () => {
     expect(questions[1]!.querySelectorAll(".poodle-agent-question__option-shortcut").length).toBe(0);
     cleanupSvelte();
 
-    renderReactSpecimen(reactMap["agent-question"] as ComponentType);
+    await act(async () => {
+      renderReactSpecimen(reactMap["agent-question"] as ComponentType);
+      await loadAgentMessage();
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    });
     const reactHosted = groupByCaption("Hosted by the composer");
     const reactOption = reactHosted.querySelector(
       ".poodle-agent-question__option",
@@ -310,7 +320,7 @@ describe("g15.024 agent and tools specimens", () => {
     cleanupSvelte();
   });
 
-  it("updates AgentChatInput submit, stop, and attachment removal in both web runtimes", () => {
+  it("updates AgentChatInput submit, stop, and attachment removal in both web runtimes", async () => {
     renderSvelte(PilotSpecimenHarness, {
       props: { specimen: svelteMap["agent-chat-input"] as never },
     });
@@ -349,7 +359,11 @@ describe("g15.024 agent and tools specimens", () => {
     expect(sends[1]!.disabled).toBe(false);
     cleanupSvelte();
 
-    renderReactSpecimen(reactMap["agent-chat-input"] as ComponentType);
+    await act(async () => {
+      renderReactSpecimen(reactMap["agent-chat-input"] as ComponentType);
+      await loadAgentMessage();
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    });
     const reactComposer = groupByCaption("Default composer");
     const reactSend = [...reactComposer.querySelectorAll("button")].find(
       (button) => button.getAttribute("aria-label") === "Send",

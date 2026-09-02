@@ -628,7 +628,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AgentTranscript, type TranscriptItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items: TranscriptItem[] = [\n    { kind: \"message\", id: \"m1\", role: \"assistant\", markdown: \"Checking the package surface.\" },\n    { kind: \"tool-call\", id: \"t1\", label: \"Ran command\", status: \"success\", detail: \"effigy docs:check\" },\n  ];\n</script>\n\n<AgentTranscript {items} ariaLabel=\"Release audit conversation\" />"
+    "usage": "<script lang=\"ts\">\n  import { AgentTranscript } from \"@inflatable-cookie/poodle-svelte/markdown\";\n  import type { TranscriptItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items: TranscriptItem[] = [\n    { kind: \"message\", id: \"m1\", role: \"assistant\", markdown: \"Checking the package surface.\" },\n    { kind: \"tool-call\", id: \"t1\", label: \"Ran command\", status: \"success\", detail: \"effigy docs:check\" },\n  ];\n</script>\n\n<AgentTranscript {items} ariaLabel=\"Release audit conversation\" />"
   },
   "changed-files": {
     "props": [

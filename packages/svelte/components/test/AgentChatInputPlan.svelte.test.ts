@@ -1,4 +1,4 @@
-import { fireEvent, render } from "@testing-library/svelte";
+import { fireEvent, render, waitFor } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import AgentChatInputPlanHarness from "./AgentChatInputPlanHarness.svelte";
@@ -12,7 +12,7 @@ import AgentChatInputPlanHarness from "./AgentChatInputPlanHarness.svelte";
 describe("AgentChatInput plan region (svelte)", () => {
   const plan = ["## Proposed plan", "", "1. Add the surface", "2. Wire the callbacks"].join("\n");
 
-  it("renders AgentPlan through the plan snippet while reviewing-plan", () => {
+  it("renders AgentPlan through the plan snippet while reviewing-plan", async () => {
     const { container } = render(AgentChatInputPlanHarness, { props: { plan } });
 
     const region = container.querySelector(".poodle-agent-chat-input__plan") as HTMLElement;
@@ -23,8 +23,10 @@ describe("AgentChatInput plan region (svelte)", () => {
     expect(planEl.dataset.status).toBe("pending");
     // The markdown went through the lexer: the heading is a real element, not
     // raw text, and the list items rendered.
-    expect(planEl.querySelector("h2")?.textContent).toBe("Proposed plan");
-    expect(planEl.querySelectorAll("li")).toHaveLength(2);
+    await waitFor(() => {
+      expect(planEl.querySelector("h2")?.textContent).toBe("Proposed plan");
+      expect(planEl.querySelectorAll("li")).toHaveLength(2);
+    });
   });
 
   it("routes the decision controls to the host callbacks", async () => {

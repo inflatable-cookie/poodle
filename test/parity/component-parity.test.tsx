@@ -1,9 +1,11 @@
-import { cleanup as cleanupReact, render as renderReact } from "@testing-library/react";
+import { act, cleanup as cleanupReact, render as renderReact } from "@testing-library/react";
 import { cleanup as cleanupSvelte, render as renderSvelte } from "@testing-library/svelte";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 
+import { loadAgentMessage } from "../../packages/react/components/src/agent-message-load";
 import { COMPONENT_PROPS, PARITY_EXCLUDE } from "../fixtures/component-props";
+import { settleLazyMarkdown } from "../fixtures/settle-react-lazy-markdown";
 
 // Svelte <-> React anatomy parity across EVERY component present in both
 // packages. Each side renders with the SAME props and no children (symmetric by
@@ -76,15 +78,21 @@ describe("svelte <-> react anatomy parity", () => {
   });
 
   for (const name of shared) {
-    it(`${name} emits matching poodle- anatomy classes`, () => {
+    it(`${name} emits matching poodle- anatomy classes`, async () => {
       const props = COMPONENT_PROPS[name] ?? {};
 
       const svContainer = renderSvelte(svelteByName.get(name) as never, { props }).container;
+      await settleLazyMarkdown(svContainer.parentNode ?? svContainer);
       const svClasses = anatomy(svContainer.parentNode ?? svContainer);
       cleanupSvelte();
 
-      const reContainer = renderReact(createElement(reactByName.get(name) as never, props)).container;
-      const reClasses = anatomy(reContainer.parentNode ?? reContainer);
+      let reContainer: HTMLElement;
+      await act(async () => {
+        reContainer = renderReact(createElement(reactByName.get(name) as never, props)).container;
+        await loadAgentMessage();
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      });
+      const reClasses = anatomy(reContainer!.parentNode ?? reContainer!);
       cleanupReact();
 
       const allowed = new Set(KNOWN_DIVERGENCE[name] ?? []);

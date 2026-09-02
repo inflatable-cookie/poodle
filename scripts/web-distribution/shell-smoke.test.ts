@@ -37,7 +37,7 @@ function listArchive(archivePath: string): string[] {
 }
 
 function run(command: string, args: string[], cwd: string): string {
-  const result = spawnSync(command, args, { cwd, encoding: "utf8" });
+  const result = spawnSync(command, args, { cwd, encoding: "utf8", timeout: 60_000 });
   if (result.status !== 0) {
     throw new Error(
       `${command} ${args.join(" ")} failed:\n${result.stdout ?? ""}${result.stderr ?? ""}`,
@@ -167,11 +167,15 @@ for (const key of Object.getOwnPropertyNames(window)) {
 const previous = {
   window: globalThis.window,
   document: globalThis.document,
-  navigator: globalThis.navigator,
 };
 globalThis.window = window;
 globalThis.document = window.document;
-globalThis.navigator = window.navigator;
+try {
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    get: () => window.navigator,
+  });
+} catch {}
 try {
   const { default: Button } = await import("@inflatable-cookie/poodle-svelte/Button.svelte");
   const target = window.document.createElement("div");
@@ -250,8 +254,8 @@ try {
       );
 
       const mountOut = run(
-        "bun",
-        ["--conditions=browser", "./mount.mjs"],
+        "node",
+        ["--conditions=browser", "--import", "./css-register.mjs", "./mount.mjs"],
         consumer,
       );
       expect(mountOut).toContain("mount-ok");
@@ -269,6 +273,19 @@ try {
       );
       expect(missingMarked.status).not.toBe(0);
       expect(`${missingMarked.stdout}${missingMarked.stderr}`).toMatch(/marked/i);
+
+      writeFileSync(
+        join(consumer, "root-import.mjs"),
+        `import { Button } from "@inflatable-cookie/poodle-svelte";
+import { Button as ReactButton } from "@inflatable-cookie/poodle-react";
+if (typeof Button !== "function") throw new Error("svelte root Button missing");
+if (typeof ReactButton !== "function") throw new Error("react root Button missing");
+process.stdout.write("root-parser-free\\n");
+`,
+      );
+      expect(
+        run("node", ["--import", "./css-register.mjs", "./root-import.mjs"], consumer),
+      ).toContain("root-parser-free");
 
       writeFileSync(
         join(consumer, "package.json"),

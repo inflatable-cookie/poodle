@@ -253,7 +253,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AgentTranscript, type TranscriptItem } from "@inflatable-cookie/poodle-svelte";
+  import { AgentTranscript } from "@inflatable-cookie/poodle-svelte/markdown";
+  import type { TranscriptItem } from "@inflatable-cookie/poodle-svelte";
 
   const items: TranscriptItem[] = [
     { kind: "message", id: "m1", role: "assistant", markdown: "Checking the package surface." },

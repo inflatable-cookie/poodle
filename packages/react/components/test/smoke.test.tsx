@@ -1,10 +1,11 @@
-import { cleanup, render } from "@testing-library/react";
+import { act, cleanup, render } from "@testing-library/react";
 import { createElement } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 
 afterEach(cleanup);
 
 import { COMPONENT_PROPS, SMOKE_EXCLUDE, SMOKE_EXCLUDE_REACT } from "../../../../test/fixtures/component-props";
+import { loadAgentMessage } from "../src/agent-message-load";
 
 // Anatomy smoke across EVERY React component. The module glob means new
 // components are covered automatically — coverage cannot silently regress.
@@ -38,10 +39,15 @@ describe("react component smoke", () => {
   });
 
   for (const [name, Comp] of entries) {
-    it(`${name} mounts and emits a poodle- class`, () => {
-      const { container } = render(
-        createElement(Comp as never, COMPONENT_PROPS[name] ?? {}),
-      );
+    it(`${name} mounts and emits a poodle- class`, async () => {
+      let container: HTMLElement;
+      await act(async () => {
+        container = render(
+          createElement(Comp as never, COMPONENT_PROPS[name] ?? {}),
+        ).container;
+        await loadAgentMessage();
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      });
       // Overlays portal into document.body, so fall back to the document when
       // the render container itself is empty.
       const found =

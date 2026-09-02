@@ -8,13 +8,22 @@ export type ViteLibraryBuild = {
   externals?: string[];
   plugins?: PluginOption[];
   ssr?: boolean;
-  chunkFileNames?: string;
+  chunkFileNames?: string | ((chunk: { name: string }) => string);
 };
 
 export function isExternalId(id: string, modules: readonly string[]): boolean {
   if (id.startsWith("\0") || id.startsWith(".") || id.startsWith("/")) return false;
   if (/^[A-Za-z]:[\\/]/.test(id)) return false;
   return modules.some((name) => id === name || id.startsWith(`${name}/`));
+}
+
+function chunkFileName(
+  spec: string | ((chunk: { name: string }) => string) | undefined,
+  chunk: { name: string },
+): string {
+  const name = chunk.name.replace(/\.svelte$/, "");
+  if (typeof spec === "function") return spec({ name });
+  return (spec ?? "chunks/[name].js").replace("[name]", name);
 }
 
 export type ViteLibraryGraph = {
@@ -81,7 +90,7 @@ export async function buildViteLibrary(options: ViteLibraryBuild): Promise<ViteL
         external: (id) => isExternalId(id, externals),
         output: {
           entryFileNames: (chunk) => options.fileName(chunk.name),
-          chunkFileNames: options.chunkFileNames ?? "chunks/[name].js",
+          chunkFileNames: (chunk) => chunkFileName(options.chunkFileNames, chunk),
           assetFileNames: "[name][extname]",
         },
       },

@@ -1,10 +1,17 @@
+import { lazy, Suspense } from "react";
+
 import "@inflatable-cookie/poodle-core/styles/agent-plan.css";
 
 import { canDecidePlan, planStatusLabel, type AgentPlanStatus } from "@inflatable-cookie/poodle-core";
 
-import { AgentMessage } from "./AgentMessage";
+import { loadAgentMessage } from "./agent-message-load";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
+
+const AgentMessage = lazy(async () => {
+  const module = await loadAgentMessage();
+  return { default: module.AgentMessage };
+});
 
 export interface AgentPlanProps {
   /** Raw markdown of the proposed plan. Rendered, never pre-rendered by the host. */
@@ -57,7 +64,9 @@ export function AgentPlan({
     >
       {/* The plan is markdown, rendered by the same path as the turn's prose. */}
       <div className="poodle-agent-plan__body">
-        <AgentMessage markdown={plan} role="assistant" size={resolvedSize} density={resolvedDensity} />
+        <Suspense fallback={null}>
+          <AgentMessage markdown={plan} role="assistant" size={resolvedSize} density={resolvedDensity} />
+        </Suspense>
       </div>
 
       {isPending ? (

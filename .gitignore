@@ -75,6 +75,7 @@ Cargo.lock
 
 # SvelteKit
 .svelte-kit/
+.declaration-staging/
 .vercel/
 .netlify/
 

@@ -34,11 +34,12 @@ function runTsc(moduleResolution: "bundler" | "nodenext"): void {
     join(consumer, "probe.ts"),
     `import { Button as RootButton } from "@inflatable-cookie/poodle-react";
 import { Button as DirectButton } from "@inflatable-cookie/poodle-react/Button";
-import { AgentMessage, MarkdownEditor } from "@inflatable-cookie/poodle-react/markdown";
+import { AgentMessage, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-react/markdown";
 import type { ControlSize } from "@inflatable-cookie/poodle-react/types";
 void RootButton;
 void DirectButton;
 void AgentMessage;
+void AgentTranscript;
 void MarkdownEditor;
 const size: ControlSize = "md";
 void size;
@@ -119,7 +120,12 @@ describe("React compiled distribution", () => {
       /from ["']marked["']/,
     );
     expect(readFileSync(join(reactRoot, "dist/index.d.ts"), "utf8")).not.toContain("AgentMessage");
-    expect(readFileSync(join(reactRoot, "dist/markdown.d.ts"), "utf8")).toContain("AgentMessage");
+    expect(readFileSync(join(reactRoot, "dist/index.d.ts"), "utf8")).not.toContain("AgentTranscript");
+    expect(readFileSync(join(reactRoot, "dist/index.d.ts"), "utf8")).not.toContain("MarkdownEditor");
+    const markdownDts = readFileSync(join(reactRoot, "dist/markdown.d.ts"), "utf8");
+    expect(markdownDts).toContain("AgentMessage");
+    expect(markdownDts).toContain("AgentTranscript");
+    expect(markdownDts).toContain("MarkdownEditor");
 
     const second = await buildReact(repoRoot);
     expect(second.receipt.outputs).toEqual(first.receipt.outputs);

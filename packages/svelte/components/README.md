@@ -30,7 +30,7 @@ bun add @inflatable-cookie/poodle-svelte@0.2.3 @inflatable-cookie/poodle-core@0.
 }
 ```
 
-Svelte 5 (`>=5.38.6 <6`) is a peer dependency.
+Svelte 5 (`>=5.56.8 <6`) is a peer dependency.
 
 Import the token stylesheet once at the application entry:
 
