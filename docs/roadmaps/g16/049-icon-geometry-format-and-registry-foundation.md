@@ -1,6 +1,6 @@
 # g16.049 — Icon Geometry Format And Registry Foundation
 
-Status: implementation complete — PR pending
+Status: implementation complete — PR #156
 Type: implementation — internal architecture foundation
 Opened: 2026-09-01
 Depends on: merged `g16.034` and the funded icon-geometry programme recorded in
@@ -11,6 +11,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../architecture/012-semantic-motion-policy.md`
 Architecture: `../../architecture/013-icon-geometry-substrate.md`
 Execution log: `../../logs/2026-09/20260902-g16-049-icon-geometry-format-and-registry-foundation.md`
+PR: https://github.com/inflatable-cookie/poodle/pull/156
 
 ## Goal
 

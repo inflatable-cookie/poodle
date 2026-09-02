@@ -1,6 +1,6 @@
 # g16.049 — Icon Geometry Format And Registry Foundation
 
-Status: implementation complete — PR pending
+Status: implementation complete — PR #156
 Date: 2026-09-02
 Card: `docs/roadmaps/g16/049-icon-geometry-format-and-registry-foundation.md`
 Handoff: `docs/handoffs/20260902-004204-g16-049-icon-geometry-foundation.md`
@@ -16,7 +16,7 @@ Planning base ancestor: `7f59ae42f4917c675968819eb23a5e41dc90013c`
 Rebased onto live `origin/main`: `a52d0d32bdcf78d219c22449ad870ff3641e2569`
 Post-rebase implementation commit: `f617a37d3`
 Current closeout head: `ffedba0e098d973100584a1f18d17e819861ee76`
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/156
 
 ## Outcome
 
