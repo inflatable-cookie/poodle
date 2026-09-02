@@ -20,7 +20,10 @@ exists yet.
 
 ## Versions
 
-- [0.2.3](0.2.3.md) — 2026-08-30 — triggerless `ContextMenu` overlay
+- [0.3.0](0.3.0.md) — 2026-09-02 — immutable candidate with HistoryCenter
+  v3 and the root markdown migration; not published
+- [0.2.3](0.2.3.md) — 2026-08-30 — prepared but unpublished triggerless
+  `ContextMenu` overlay, carried into the `0.3.0` candidate
   composition (`trigger={false}`)
 - [0.2.2](0.2.2.md) — 2026-08-24 — corrects the `0.2.1` public GPUI
   dependency-identity defect; restores crates.io GPUI 0.2.2 and replaces

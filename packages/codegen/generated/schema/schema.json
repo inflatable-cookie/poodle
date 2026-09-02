@@ -801,7 +801,7 @@
   ],
   "description": "Validates the documents emitted by the poodle-codegen `json` target (per-component prop-surface documents and index.json). Hand-emitted from the validated IR model; the component-id and shared-type-id enums are exactly this model's ids.",
   "generated": {
-    "generator": "poodle-codegen 0.2.2",
+    "generator": "poodle-codegen 0.3.0",
     "ir_schema_version": 1,
     "source": "packages/codegen/fixtures/synthetic-model.json"
   },

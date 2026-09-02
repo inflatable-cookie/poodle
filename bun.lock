@@ -28,7 +28,7 @@
     },
     "packages/core": {
       "name": "@inflatable-cookie/poodle-core",
-      "version": "0.2.3",
+      "version": "0.3.0",
       "bin": {
         "poodle-icons": "./dist/icons/build.mjs",
       },
@@ -38,9 +38,9 @@
     },
     "packages/react/components": {
       "name": "@inflatable-cookie/poodle-react",
-      "version": "0.2.3",
+      "version": "0.3.0",
       "dependencies": {
-        "@inflatable-cookie/poodle-core": "0.2.3",
+        "@inflatable-cookie/poodle-core": "0.3.0",
       },
       "devDependencies": {
         "@types/react": "^19.2.18",
@@ -76,9 +76,9 @@
     },
     "packages/svelte/components": {
       "name": "@inflatable-cookie/poodle-svelte",
-      "version": "0.2.3",
+      "version": "0.3.0",
       "dependencies": {
-        "@inflatable-cookie/poodle-core": "0.2.3",
+        "@inflatable-cookie/poodle-core": "0.3.0",
       },
       "peerDependencies": {
         "marked": "^18.0.9",
