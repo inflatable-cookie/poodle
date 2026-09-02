@@ -323,6 +323,7 @@ export type {
   SurfaceBorder,
   SurfaceTone,
   TabActivationMode,
+  TabsFocusOnValueChange,
   TabDefinition,
   TabItem,
   TabStripItem,

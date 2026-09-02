@@ -1,7 +1,7 @@
 # Tabs
 
 Status: detailed contract
-Updated: 2026-08-31
+Updated: 2026-09-02
 
 ## 1. Purpose
 
@@ -76,9 +76,14 @@ Updated: 2026-08-31
 | `historyKey` | `string \| null` | `null` | no | syncs the active tab to a URL query param with replaceState |
 | `density` | `ControlDensity \| null` | `null` | no | explicit density override for spacing |
 | `onValueChange` | `(value: string) => void` | `undefined` | no | callback fired when the active tab changes |
+| `focusOnValueChange` | `"preserve" \| "selected-tab"` | `"preserve"` | no | controlled-value focus policy. `"preserve"` never moves focus. `"selected-tab"` focuses the newly selected enabled tab after render when `document.activeElement` was contained by the outgoing selected panel. Missing, disabled, superseded, or torn-down destinations are inert. Focus already on a tab, outside Tabs, in an overlay, or in another document is never stolen |
 | `onReorder` | `(items: string[]) => void` | `undefined` | no | callback fired when tabs are reordered |
 | `onClose` | `(value: string) => void` | `undefined` | no | callback fired when a tab close is requested |
 | `crossWindowSourceBridge` | `CrossWindowDragSourceBridge \| undefined` | `undefined` | no | semantic host preparation and terminal bridge for a tab that may leave this window; only an opaque receipt crosses the bounded transport |
+
+`focusOnValueChange` is web-only and is deliberately absent from `TabsSpec`.
+Capture and transfer are DOM adapter effects; this bounded consumer unblock
+does not add a GPUI or Jetstream focus promise.
 
 The old DOM-shaped `onDragPrepare`, `onDragStart`, and `onDragEnd` escape
 hatches are deleted by g16.026. `crossWindowSourceBridge` owns asynchronous host
@@ -130,6 +135,9 @@ all end as cancellation. End fires exactly once in every case, so host-owned
 - fallback: first non-disabled tab is selected when neither value nor defaultValue is set
 - `activationMode` changes whether focus movement commits selection
 - `historyKey` mirrors the current tab into `?{historyKey}=...` and restores it on back/forward navigation
+- `focusOnValueChange` applies only to externally controlled value changes.
+  It does not turn ordinary tablist selection into autofocus. The default
+  `"preserve"` keeps current behaviour exactly.
 
 ### Graded Overflow
 
@@ -376,6 +384,15 @@ the spec.
 - focus entry: roving tabindex — one tab at `tabindex="0"`, all others at `-1`
 - focus tracks selectedIndex: when selectedIndex changes, focusIndex updates to match
 - focus exit: panel is focusable via `tabindex="0"`
+- controlled `focusOnValueChange="selected-tab"`: if focus was inside the
+  outgoing selected panel immediately before that panel is replaced, focus the
+  newly selected enabled tab after render. Default `"preserve"` does not move
+  focus. Capture uses the owned panel node; the destination is the owned tab
+  ref. Svelte captures in `$effect.pre`; React captures during render against
+  `panelRef` while the outgoing panel is still mounted. No consumer selector,
+  panel initial-focus callback, or body/panel fallback. Repeated or superseded
+  controlled changes focus only the latest eligible destination once. Teardown,
+  a missing tab, or a disabled tab makes the request inert.
 
 ## 7. Layout
 
@@ -855,6 +872,8 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - Module-level `nextTabsId` counter for unique IDs across instances
 - Close button stops click propagation so the parent tab does not also activate
 - `children(activeValue)` receives `activeValue` as snippet argument
+- `focusOnValueChange` is captured in `$effect.pre` against the still-mounted
+  outgoing panel, then applied after render through the owned tab registry.
 - `data-full-width` — set when `fullWidth` is true; drives the full-width flex layout (non-vertical only)
 - `showTooltips` wraps each tab in a `Tooltip`; for vertical/icon-only tabs the tooltip surfaces the hidden label
 - `collapseWhenOverflow` measures the tablist against its container and, on overflow, replaces the tabs with a `Menu` trigger labeled by `collapseLabel` (falling back to the active tab label)
@@ -932,6 +951,7 @@ Applies when `fullWidth` is set and orientation is horizontal.
 |-------|-------------|-----------------|-----------|
 | Jetstream has no reorder or drag events | `onReorder` and the `onDrag*` trio are keyboard- and drag-driven on the web; neither route exists on this target yet | accepted, tracked | g12.017 |
 | Inactive panels may stay mounted or unmounted | runtime rendering strategy differs | allowed | keep semantics and state continuity strict |
+| `focusOnValueChange` is web-only | DOM panel-unmount capture has no GPUI/Jetstream equivalent in this bounded consumer unblock | accepted, this card | later native focus-adapter work if a consumer needs it |
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
 
 ## 13. Specimen Definitions

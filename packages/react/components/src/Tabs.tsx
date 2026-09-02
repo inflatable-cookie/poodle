@@ -4,6 +4,7 @@ import {
   Fragment,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -13,6 +14,8 @@ import {
 import {
   createDragDropController,
   firstEnabledIndex,
+  nextTabsControlledFocusDestination,
+  resolveTabsControlledFocusDestination,
   tabIndicatorBox,
   tabsKeydownEvent,
   tabsTransition,
@@ -43,6 +46,7 @@ import type {
   Orientation,
   SemanticControlSizeRole,
   TabItem,
+  TabsFocusOnValueChange,
 } from "./types";
 
 /** @deprecated Use TabItem instead (pilot-era alias). */
@@ -100,6 +104,12 @@ export interface TabsProps {
   collapseLabel?: string | null;
   showTooltips?: boolean;
   historyKey?: string | null;
+  /**
+   * Controlled-value focus policy. `"preserve"` never moves focus.
+   * `"selected-tab"` focuses the newly selected enabled tab after render
+   * when focus was inside the outgoing selected panel.
+   */
+  focusOnValueChange?: TabsFocusOnValueChange;
   onValueChange?: ((value: string) => void) | undefined;
   onReorder?: ((items: string[]) => void) | undefined;
   // Forwarded so a host (DockRegion) can run its own drag session on top of
@@ -162,6 +172,7 @@ export function Tabs({
   ariaLabel = null,
   showTooltips = false,
   historyKey = null,
+  focusOnValueChange = "preserve",
   onValueChange = undefined,
   onReorder = undefined,
   crossWindowSourceBridge = undefined,
@@ -176,9 +187,17 @@ export function Tabs({
   const motionReady = useMotionReady();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const measureListRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const aliveRef = useRef(true);
+  const seededPolicyValueRef = useRef(false);
+  const lastPolicyValueRef = useRef<string | null>(null);
+  const pendingFocusDestinationRef = useRef<string | null>(null);
+  const pendingFocusGenerationRef = useRef(0);
+  const focusTransferTimerRef = useRef<number | null>(null);
+  const [focusTransferEpoch, setFocusTransferEpoch] = useState(0);
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingTabFocus = useRef<string | null>(null);
   const lastItemsSignature = useRef("");
@@ -235,6 +254,32 @@ export function Tabs({
     null;
   const selectedIndex = renderedItems.findIndex((item) => item.value === currentValue);
   const hasPanel = children !== undefined;
+
+  if (!seededPolicyValueRef.current) {
+    seededPolicyValueRef.current = true;
+    lastPolicyValueRef.current = currentValue;
+  } else if (lastPolicyValueRef.current !== currentValue) {
+    const previousValue = lastPolicyValueRef.current;
+    lastPolicyValueRef.current = currentValue;
+    const active = typeof document === "undefined" ? null : document.activeElement;
+    const nextPending = nextTabsControlledFocusDestination({
+      policy: focusOnValueChange,
+      controlled: isControlled,
+      previousValue,
+      nextValue: currentValue,
+      focusWasInOutgoingPanel:
+        panelRef.current !== null &&
+        active instanceof Node &&
+        panelRef.current.contains(active),
+      pendingValue: pendingFocusDestinationRef.current,
+    });
+
+    if (nextPending !== pendingFocusDestinationRef.current) {
+      pendingFocusDestinationRef.current = nextPending;
+      pendingFocusGenerationRef.current += 1;
+      setFocusTransferEpoch((epoch) => epoch + 1);
+    }
+  }
   const isVertical = orientation === "vertical";
   const hasTooltips = isVertical || showTooltips;
   const canCollapse = collapseWhenOverflow && !isVertical;
@@ -360,6 +405,59 @@ export function Tabs({
     tabRefs.current[pendingTabFocus.current]?.focus();
     pendingTabFocus.current = null;
   });
+
+  useEffect(() => {
+    aliveRef.current = true;
+    return () => {
+      aliveRef.current = false;
+      pendingFocusDestinationRef.current = null;
+      if (focusTransferTimerRef.current !== null) {
+        window.clearTimeout(focusTransferTimerRef.current);
+        focusTransferTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    if (focusTransferEpoch === 0) {
+      return;
+    }
+
+    const dest = pendingFocusDestinationRef.current;
+    const generation = pendingFocusGenerationRef.current;
+    if (dest === null) {
+      return;
+    }
+
+    if (focusTransferTimerRef.current !== null) {
+      window.clearTimeout(focusTransferTimerRef.current);
+      focusTransferTimerRef.current = null;
+    }
+
+    focusTransferTimerRef.current = window.setTimeout(() => {
+      focusTransferTimerRef.current = null;
+      if (!aliveRef.current || generation !== pendingFocusGenerationRef.current) {
+        return;
+      }
+
+      pendingFocusDestinationRef.current = null;
+      const resolved = resolveTabsControlledFocusDestination({
+        pendingValue: dest,
+        items: renderedItems,
+        alive: aliveRef.current,
+      });
+      if (resolved !== null) {
+        tabRefs.current[resolved]?.focus();
+      }
+    }, 0);
+
+    return () => {
+      if (focusTransferTimerRef.current !== null) {
+        window.clearTimeout(focusTransferTimerRef.current);
+        focusTransferTimerRef.current = null;
+      }
+    };
+  }, [focusTransferEpoch]);
 
   // ── Tooltip (vertical icon-only mode) ──
 
@@ -833,6 +931,7 @@ export function Tabs({
       {hasPanel && currentValue ? (
         <div
           className="poodle-tabs__panel"
+          ref={panelRef}
           id={`poodle-tabpanel-${tabsId}-${currentValue}`}
           data-value={currentValue}
           role="tabpanel"

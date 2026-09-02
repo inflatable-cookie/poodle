@@ -8,6 +8,8 @@
 
   import {
     createDragDropController,
+    nextTabsControlledFocusDestination,
+    resolveTabsControlledFocusDestination,
     tabIndicatorBox,
     tabsKeydownEvent,
     tabsTransition,
@@ -40,6 +42,7 @@
     Orientation,
     SemanticControlSizeRole,
     TabItem,
+    TabsFocusOnValueChange,
   } from "./types";
 
   /**
@@ -97,6 +100,12 @@
     collapseLabel?: string | null;
     showTooltips?: boolean;
     historyKey?: string | null;
+    /**
+     * Controlled-value focus policy. `"preserve"` never moves focus.
+     * `"selected-tab"` focuses the newly selected enabled tab after render
+     * when focus was inside the outgoing selected panel.
+     */
+    focusOnValueChange?: TabsFocusOnValueChange;
     onValueChange?: ((value: string) => void) | undefined;
     onReorder?: ((items: string[]) => void) | undefined;
     onClose?: ((value: string) => void) | undefined;
@@ -143,6 +152,7 @@
     ariaLabel = null,
     showTooltips = false,
     historyKey = null,
+    focusOnValueChange = "preserve",
     onValueChange = undefined,
     onReorder = undefined,
     onClose = undefined,
@@ -162,6 +172,12 @@
   let indicatorSnap = $state(false);
   const motionReady = useMotionReady();
   let rootElement = $state<HTMLDivElement | null>(null);
+  let panelElement = $state<HTMLDivElement | null>(null);
+  let pendingFocusDestination: string | null = null;
+  let pendingFocusGeneration = 0;
+  let seededPolicyValue = false;
+  let lastPolicyValue: string | null = null;
+  let focusTransferTimer: ReturnType<typeof setTimeout> | null = null;
   let measureListElement = $state<HTMLDivElement | null>(null);
   /** How many entries of `shed` are currently given up. */
   let shedCount = $state(0);
@@ -398,8 +414,67 @@
     }
   }
 
+  $effect.pre(() => {
+    const nextValue = currentValue;
+    if (!seededPolicyValue) {
+      seededPolicyValue = true;
+      lastPolicyValue = nextValue;
+      return;
+    }
+
+    const previousValue = lastPolicyValue;
+    lastPolicyValue = nextValue;
+    const active = typeof document === "undefined" ? null : document.activeElement;
+    const nextPending = nextTabsControlledFocusDestination({
+      policy: focusOnValueChange,
+      controlled: isControlled,
+      previousValue,
+      nextValue,
+      focusWasInOutgoingPanel:
+        panelElement !== null && active instanceof Node && panelElement.contains(active),
+      pendingValue: pendingFocusDestination,
+    });
+
+    if (nextPending !== pendingFocusDestination) {
+      pendingFocusDestination = nextPending;
+      pendingFocusGeneration += 1;
+      if (focusTransferTimer !== null) {
+        clearTimeout(focusTransferTimer);
+        focusTransferTimer = null;
+      }
+
+      const dest = nextPending;
+      const generation = pendingFocusGeneration;
+      if (dest === null) {
+        return;
+      }
+
+      focusTransferTimer = setTimeout(() => {
+        focusTransferTimer = null;
+        if (destroyed || generation !== pendingFocusGeneration) {
+          return;
+        }
+
+        const resolved = resolveTabsControlledFocusDestination({
+          pendingValue: dest,
+          items: renderedItems,
+          alive: !destroyed,
+        });
+        pendingFocusDestination = null;
+        if (resolved !== null) {
+          tabElements[resolved]?.focus();
+        }
+      }, 0);
+    }
+  });
+
   onDestroy(() => {
     destroyed = true;
+    pendingFocusDestination = null;
+    if (focusTransferTimer !== null) {
+      clearTimeout(focusTransferTimer);
+      focusTransferTimer = null;
+    }
     clearTooltip();
     if (measuringFrame !== null) {
       cancelAnimationFrame(measuringFrame);
@@ -858,6 +933,7 @@
   {#if hasPanel && currentValue}
     <div
       class="poodle-tabs__panel"
+      bind:this={panelElement}
       id={`poodle-tabpanel-${tabsId}-${currentValue}`}
       data-value={currentValue}
       role="tabpanel"

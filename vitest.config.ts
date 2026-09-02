@@ -89,6 +89,7 @@ export default defineConfig({
         },
       },
       {
+        resolve: { alias: workspaceAliases },
         test: {
           name: "react-components",
           environment: "happy-dom",
@@ -98,6 +99,7 @@ export default defineConfig({
         },
       },
       {
+        resolve: { alias: workspaceAliases },
         test: {
           name: "react-preview",
           environment: "happy-dom",

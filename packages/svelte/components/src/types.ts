@@ -80,6 +80,7 @@ export type PillSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type PillFont = "normal" | "mono";
 export type Orientation = "vertical" | "horizontal";
 export type TabActivationMode = "automatic" | "manual";
+export type TabsFocusOnValueChange = "preserve" | "selected-tab";
 export type OverlayPlacement =
   | "top"
   | "top-start"

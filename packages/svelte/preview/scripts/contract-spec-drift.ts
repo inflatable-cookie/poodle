@@ -165,6 +165,9 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   // / `visible_range_text` instead of the functions.
   slider: ["formatVisibleValue"],
   "range-slider": ["formatVisibleValue", "formatVisibleRange"],
+  // g16.060. Controlled-panel focus transfer is a DOM adapter effect.
+  // Native has no panel-unmount capture in this bounded consumer unblock.
+  tabs: ["focusOnValueChange"],
 };
 
 /**
