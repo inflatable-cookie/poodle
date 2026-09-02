@@ -5,6 +5,7 @@ Type: implementation
 Opened: 2026-09-01
 Closed: 2026-09-02 (implementation; merge belongs to the orchestrator)
 Proof head: `8fd0a885a03147451affc937447f61f0cfeba4af`
+Repair head: `50d8df605339c928c61e6c95912c877c549015dc`
 Repair: parent-owned native fit, real 44×44 web hits, React teardown refs (see log)
 Log: `../../logs/2026-09/20260902-g16-046-block-sliders.md`
 Depends on: merged `g16.034` and operator acceptance recorded in
