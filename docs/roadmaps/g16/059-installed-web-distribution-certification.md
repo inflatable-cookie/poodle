@@ -8,7 +8,7 @@ Governing refs: `../../architecture/014-compiled-web-package-distribution.md`,
 `056-web-distribution-contract.md`, `057-core-build-substrate.md`,
 `058-shell-distributions.md`
 
-Proof commit: `e4812c89977bb56ee65acd368b1f95da21703d65`
+Proof commit: `ba08070f9f89fb5c405d853095df68e95546db5c`
 Worker PR: not opened — launcher instruction forbids PR creation
 
 ## Goal
@@ -84,10 +84,10 @@ public roster. This is the prerequisite that can unblock `g16.054`.
   below-floor failure, and the retained HistoryEntry/Slider/Tree proofs.
 - Result: 11 test files and 22 tests passed. The receipt and all seven
   falsification receipts are recorded in the execution log.
-- Deterministic receipt identity: `ee50c9c6301f8d18b62e0e5d57fa90c1be3aaa689c24af8fde96b40db0ab9679`.
-- Receipt source commit: `e4812c89977bb56ee65acd368b1f95da21703d65`.
+- Deterministic receipt identity: `5d44f1c16ff8843c8271399f7ed39a7928fc811e362b08604bc18bc4daa8b58e`.
+- Receipt source commit: `ba08070f9f89fb5c405d853095df68e95546db5c`.
 - Roster: 176 names; `f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a`.
-- Artifact set: `bc50b1b50a79e20f8651ee8f2565efc23fea1e753435b0cd0a4252da96e94990`.
+- Artifact set: `0316246f1afc88032066113f2d3b07ede4c48b57ef992dec949f47fd11ae3dbc`.
 
 ## Limits
 
@@ -128,6 +128,22 @@ selectors, CSS/parser and notices audits, roster drift checks, `effigy
 docs:check`, one final headless `effigy qa`, and `git diff --check
 origin/main...HEAD`. No release, workflow-dispatch, windowed, or native-visual
 selector is authorized.
+
+## Validation Result
+
+- `effigy test:shell-build` from a cold nested declaration-tools cache: 31
+  pass / 0 fail, 1,084 expects; the selector installed and validated
+  TypeScript `6.0.3` before its parallel test workers started.
+- `effigy test:web-pack-install`: 11 files / 22 tests passed from a clean
+  detached checkout of the exact proof commit.
+- `effigy docs:check`: pass.
+- `effigy qa`: broad headless board reached the existing license-audit failure:
+  `scripts/web-distribution/declaration-tools/package.json: expected license "MIT"`.
+  Its preceding release-automation, web 3,606-test, Rust/headless, and GPUI
+  consumer sections passed. The missing license is pre-existing and outside
+  this handoff's two named repairs, so it was not changed.
+- `git diff --check origin/main...HEAD`: pending final closeout after the
+  receipt/log update.
 
 ## Stop Conditions
 

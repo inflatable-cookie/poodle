@@ -10,7 +10,7 @@ Branch: `feature/g16-059-installed-web-certification`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-059-installed-web-certification`
 Base: `origin/main` at `721b17791946a6a7dcf254de0775f353d47090eb`
 Required ancestor: PR #162 merge `b43481dff4e25b70fc0b0b076cee116f5e97d93b`
-Proof commit: `e4812c89977bb56ee65acd368b1f95da21703d65`
+Proof commit: `ba08070f9f89fb5c405d853095df68e95546db5c`
 Worker PR: not opened — launcher instruction forbids PR creation
 
 ## Outcome
@@ -50,36 +50,36 @@ publication, native, sibling, or component-behavior surface changed.
   `branchCount`, `SliderAppearance`, and forbidden Tree reorder callbacks.
 - Roster denominator: `176`.
 - Roster names SHA-256: `f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a`.
-- Artifact-set ID: `bc50b1b50a79e20f8651ee8f2565efc23fea1e753435b0cd0a4252da96e94990`.
+- Artifact-set ID: `0316246f1afc88032066113f2d3b07ede4c48b57ef992dec949f47fd11ae3dbc`.
 
 ### Deterministic receipt
 
-Receipt SHA-256: `ee50c9c6301f8d18b62e0e5d57fa90c1be3aaa689c24af8fde96b40db0ab9679`
+Receipt SHA-256: `5d44f1c16ff8843c8271399f7ed39a7928fc811e362b08604bc18bc4daa8b58e`
 
 ```json
 {
   "schemaVersion": 1,
   "kind": "poodle-installed-web-distribution",
-  "sourceCommit": "e4812c89977bb56ee65acd368b1f95da21703d65",
+  "sourceCommit": "ba08070f9f89fb5c405d853095df68e95546db5c",
   "svelteFloor": "5.56.8",
   "belowFloorNegative": "5.38.6",
   "rosterDenominator": 176,
   "rosterNamesSha256": "f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a",
-  "artifactSetId": "bc50b1b50a79e20f8651ee8f2565efc23fea1e753435b0cd0a4252da96e94990",
+  "artifactSetId": "0316246f1afc88032066113f2d3b07ede4c48b57ef992dec949f47fd11ae3dbc",
   "packages": {
     "@inflatable-cookie/poodle-core": {
-      "archiveSha256": "02deab1ef790ae4562567521a11ee03a12c3caf3dbfb2412b4e10601064c70ce",
-      "buildReceiptSha256": "fdffd6d0eb9dbb9977abda638f3dd12daed845dbad7884a5f206acdf6176d5c1",
+      "archiveSha256": "32bb872aa6dc8b92c99970b1530b1820ccddc951b1d5ccb38474b791b69d94c7",
+      "buildReceiptSha256": "e47c0704d64f9b7d919b4075886d2941915e8d8b79543c055fafb6c7147174bb",
       "version": "0.2.3"
     },
     "@inflatable-cookie/poodle-react": {
-      "archiveSha256": "8fdc6c47fd9c93b5b5a3fe35a4bfa71b7c2682f040af5f2332d8399be277a570",
-      "buildReceiptSha256": "87a69bcb4eb6b5a89cde7b04f555e3f6f9159b45612d7d990b7f355bbd027833",
+      "archiveSha256": "78abc5eff0e07b111715e240eaa45977706df008a706b36472bcb1c8284c0ed5",
+      "buildReceiptSha256": "1fdbfbdf3100eab6b7704418567a0a2cb4ad0138dbf18790f44f737b7dbcefa4",
       "version": "0.2.3"
     },
     "@inflatable-cookie/poodle-svelte": {
-      "archiveSha256": "82715264dc5a650a159c5bc92485e53d83255d6321f9d44fdec0a9c4bcba0625",
-      "buildReceiptSha256": "3f6629e8fc502495193ca23ce77f751dddd372854be152685bcab1a2f570ac2c",
+      "archiveSha256": "50d6e367137429f95483e4ab3917c86c602b4c6fb3369f87d1f79efba2b12ceb",
+      "buildReceiptSha256": "7b98abfd4356fc3e2034fe317184c924afc198d42ed2285cc4483edf7280711b",
       "version": "0.2.3"
     }
   }
@@ -113,13 +113,17 @@ restored before the passing run.
 
 ## Validation
 
-- `effigy test:shell-build` — 31 pass / 0 fail, 1,084 expects.
+- `effigy test:shell-build` from a cold nested declaration-tools cache — 31
+  pass / 0 fail, 1,084 expects; nested TypeScript `6.0.3` was installed before
+  parallel test workers started.
 - `effigy test:web-pack-install` — 11 files / 22 tests passed from the clean
   detached proof checkout.
-- `git diff --check` passed before the proof commit.
-- Final `effigy docs:check`, final headless `effigy qa`, and final
-  `git diff --check origin/main...HEAD` remain the orchestrator closeout checks
-  after this documentation commit.
+- `effigy docs:check` — pass.
+- `effigy qa` — broad headless board reached the existing license-audit failure:
+  `scripts/web-distribution/declaration-tools/package.json: expected license "MIT"`.
+  Release automation, web 3,606-test, Rust/headless, and GPUI consumer sections
+  passed before that out-of-scope failure.
+- `git diff --check origin/main...HEAD` — pending after this log update.
 
 No windowed, native-visual, release, workflow-dispatch, merge, or `g16.054`
 selector/action was run.
@@ -129,7 +133,7 @@ selector/action was run.
 - The launcher explicitly forbade creation of a PR, so no PR URL exists for
   this worker branch. The orchestrator owns any PR creation/review needed for
   integration.
-- The receipt certifies `e4812c89977bb56ee65acd368b1f95da21703d65`. This log and
+- The receipt certifies `ba08070f9f89fb5c405d853095df68e95546db5c`. This log and
   card are documentation-only closeout changes; changing certified code,
   package inputs, or receipt inputs requires rerunning the installed oracle.
 - The receipt is promotion evidence, not a release or publication authority.
