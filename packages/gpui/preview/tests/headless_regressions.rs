@@ -46,7 +46,7 @@ use poodle_render::{
 use poodle_specs::{
     AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ControlDensity, ControlSize, FaderSpec,
     HistoryCenterRejection, HistoryCenterSpec, KnobSpec, Orientation, PopoverSpec, RangeSliderSpec,
-    RatingSpec, SkeletonSpec, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition, TabVariant,
+    RatingSpec, SkeletonSpec, SliderAppearance, SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition, TabVariant,
     TabsSpec, TimeInputSpec, Toast, ToastStackSpec, ToastTone, TriStateSwitchSpec, TriStateValue,
     UiPresentationProviderSpec, XYPadSpec,
 };
@@ -4199,6 +4199,91 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
                 .find(&|n| n.interaction.on_scrub.is_some())
                 .is_none()
         );
+    });
+}
+
+/// g16.046. Block Slider hit is a real 44×44 target; RTL remaps scrub; a
+/// second terminal is inert. Vertical block panics in the renderer, not here.
+#[test]
+fn block_slider_hit_rtl_and_terminal_on_the_mounted_host() {
+    run_headless(|cx| {
+        let live = Arc::new(Mutex::new(0.0f64));
+        let sink = Arc::clone(&live);
+        let commits = Arc::new(Mutex::new(0u32));
+        let commit_count = Arc::clone(&commits);
+        let spec = SliderSpec::new(0.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_direction(SliderDirection::Rtl)
+            .with_size(ControlSize::Xs)
+            .with_visible_label("Volume");
+        let mut spec = spec;
+        spec.aria_label = Some("Volume".into());
+        spec.step = 1.0;
+        let mut node = poodle_render::slider(
+            &spec,
+            &RenderContext::new(&theme()),
+            &SliderHandlers {
+                on_change: Some(Arc::new(move |next| {
+                    *sink.lock().expect("value lock") = next;
+                })),
+                on_value_commit: Some(Arc::new(move |_| {
+                    *commit_count.lock().expect("commit lock") += 1;
+                })),
+            },
+        );
+        stamp_slider_id(&mut node, FIXTURE_ID);
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 80.0);
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        let bounds = poodle_gpui_node_backend::bounds_for(FIXTURE_ID).expect("block hit bounds");
+        assert_eq!(f32::from(bounds.size.width), 44.0);
+        assert_eq!(f32::from(bounds.size.height), 44.0);
+        driver.pointer_scrub_at(0.2, "press");
+        driver.pointer_scrub_at(0.2, "drag");
+        driver.pointer_scrub_at(0.2, "release");
+        assert_eq!(*live.lock().expect("value lock"), 80.0);
+        driver.pointer_scrub_at(0.2, "release");
+        assert_eq!(*commits.lock().expect("commit lock"), 1);
+        tab_until_focused(&mut driver, FIXTURE_ID);
+        driver.dispatch_key_raw("right");
+        assert_eq!(*live.lock().expect("value lock"), 81.0);
+    });
+
+    run_headless(|cx| {
+        let live = Arc::new(Mutex::new((50.0f64, 50.0f64)));
+        let sink = Arc::clone(&live);
+        let spec = RangeSliderSpec::new(50.0, 50.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_size(ControlSize::Xs)
+            .with_aria_label("Range");
+        let node = poodle_render::range_slider(
+            &spec,
+            &RenderContext::new(&theme()),
+            poodle_render::RangeSliderHandlers {
+                on_change: Some(Arc::new(move |lo, hi| {
+                    *sink.lock().expect("value lock") = (lo, hi);
+                })),
+                on_value_commit: None,
+            },
+        );
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 80.0);
+        driver.wait_for_focus_handle("range-slider-lower");
+        let lower = poodle_gpui_node_backend::bounds_for("range-slider-lower").expect("lower hit");
+        let upper = poodle_gpui_node_backend::bounds_for("range-slider-upper").expect("upper hit");
+        assert_eq!(f32::from(lower.size.width), 44.0);
+        assert_eq!(f32::from(lower.size.height), 44.0);
+        assert_eq!(f32::from(upper.size.width), 44.0);
+        assert_eq!(f32::from(upper.size.height), 44.0);
+        driver.pointer_scrub_at(0.5, "press");
+        driver.pointer_scrub_at(0.48, "drag");
+        driver.pointer_scrub_at(0.2, "drag");
+        assert_eq!(*live.lock().expect("value lock"), (20.0, 50.0));
+        tab_until_focused(&mut driver, "range-slider-upper");
+        driver.dispatch_key_raw("right");
+        assert_eq!(*live.lock().expect("value lock"), (20.0, 51.0));
     });
 }
 

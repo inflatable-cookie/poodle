@@ -153,6 +153,7 @@ pub mod shell_status_bar;
 pub mod sidebar_nav;
 pub mod skeleton;
 pub mod slider;
+pub mod slider_block;
 pub mod spacer;
 pub mod spinner;
 pub mod split_button;

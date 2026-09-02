@@ -11,16 +11,25 @@
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 
-use poodle_headless::slider::{safe_slider_max, SliderEffect};
+use poodle_headless::slider::{
+    layout_slider_block, measure_block_advance, physical_to_value_norm, resolved_visible_text,
+    safe_slider_max, SliderEffect, SLIDER_BLOCK_HIT_PX,
+};
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, Node,
     NodeKey, NodeModifiers, NodePosition, NodeRole, ScrubAxis, ScrubPhase, ShadowValue,
 };
-use poodle_specs::{ControlSize, Orientation, SliderSpec, SliderVariant};
+use poodle_specs::{
+    reject_vertical_block, ControlSize, Orientation, SliderAppearance, SliderSpec, SliderVariant,
+};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
+use crate::slider_block::{
+    block_grab, block_hit, block_surface, capsule_height_rem, font_size_rem, fraction_anchor,
+    stamp_disabled_roles, stamp_forced_color, visible_thumb, NATIVE_CAPSULE_SPAN_PX,
+};
 
 /// Thumb diameter in rem — contract §8 size table.
 fn thumb_diameter_rem(size: ControlSize) -> f32 {
@@ -153,6 +162,7 @@ pub struct SliderHandlers {
 }
 
 pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandlers) -> Node {
+    reject_vertical_block(spec.appearance, spec.orientation, "Slider");
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
 
     let thumb_size = rem_to_px(thumb_diameter_rem(effective_size));
@@ -220,20 +230,20 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
         let active = Arc::clone(&pointer_active);
         let on_change = handlers.on_change.clone();
         let on_value_commit = handlers.on_value_commit.clone();
+        let rtl = spec.direction.is_rtl();
         Some(Arc::new(move |fraction: f32, phase| {
             let current = f64::from_bits(live.load(Ordering::SeqCst));
             let pointer_active = active.load(Ordering::SeqCst);
+            let value_norm = physical_to_value_norm(fraction as f64, rtl);
             let event = match phase {
                 ScrubPhase::Press => poodle_headless::slider::SliderControlEvent::PointerBegin {
-                    value_norm: fraction as f64,
+                    value_norm,
                 },
                 ScrubPhase::Drag if pointer_active => {
-                    poodle_headless::slider::SliderControlEvent::PointerMove {
-                        value_norm: fraction as f64,
-                    }
+                    poodle_headless::slider::SliderControlEvent::PointerMove { value_norm }
                 }
                 ScrubPhase::Drag => poodle_headless::slider::SliderControlEvent::PointerBegin {
-                    value_norm: fraction as f64,
+                    value_norm,
                 },
                 ScrubPhase::Release => poodle_headless::slider::SliderControlEvent::PointerEnd,
             };
@@ -303,6 +313,25 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
         } else {
             None
         };
+
+    if spec.appearance == SliderAppearance::Block {
+        return paint_slider_block(
+            spec,
+            ctx,
+            effective_size,
+            &visual,
+            fraction,
+            accent,
+            negative,
+            surface,
+            border_default,
+            elevated,
+            pill_radius,
+            scrub_handler,
+            key_handler,
+            interactive,
+        );
+    }
 
     let mut thumb = Node::container();
     {
@@ -480,9 +509,162 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
     el
 }
 
+fn paint_slider_block(
+    spec: &SliderSpec,
+    ctx: &RenderContext<'_>,
+    effective_size: ControlSize,
+    visual: &poodle_headless::slider::SliderVisualState,
+    fraction: f32,
+    accent: ColorValue,
+    negative: ColorValue,
+    surface: ColorValue,
+    border_default: ColorValue,
+    elevated: ColorValue,
+    pill_radius: f32,
+    scrub_handler: Option<Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>>,
+    key_handler: Option<Arc<dyn Fn(NodeKey, NodeModifiers) -> Option<String> + Send + Sync>>,
+    interactive: bool,
+) -> Node {
+    let rtl = spec.direction.is_rtl();
+    let capsule_h = rem_to_px(capsule_height_rem(effective_size));
+    let font_px = rem_to_px(font_size_rem(effective_size));
+    let hit_px = SLIDER_BLOCK_HIT_PX;
+    let physical = if rtl { 1.0 - fraction } else { fraction };
+    let selected_color = if visual.fill_tone == poodle_headless::slider::SliderFillTone::Negative {
+        negative
+    } else {
+        accent
+    };
+    let remainder_fill = with_alpha(surface, surface.3 * 0.88);
+    let selected_text_color = ctx.theme().resolve_color("color.text.inverse");
+    let remainder_text_color = ctx.theme().resolve_color("color.text.primary");
+    let label = omit_empty_owned(spec.visible_label.as_deref());
+    let value_text = resolved_visible_text(visual.value, spec.visible_value_text.as_deref());
+    let layout = layout_slider_block(
+        NATIVE_CAPSULE_SPAN_PX,
+        fraction,
+        label.as_deref(),
+        value_text.as_deref(),
+        |text| measure_block_advance(text, font_px),
+    );
+
+    let mut selected = Node::container();
+    selected.style.width_pct = Some(fraction.clamp(0.0, 1.0));
+    selected.style.fill_height = true;
+    selected.style.descriptor.background = Some(selected_color);
+    stamp_forced_color(&mut selected, "selection", "selection-text");
+    if layout.inline {
+        if let Some(label) = &label {
+            selected = selected.child(inline_text(label, selected_text_color, font_px));
+        }
+    }
+
+    let mut remainder = Node::container();
+    remainder.style.flex_fill = true;
+    remainder.style.fill_height = true;
+    remainder.style.descriptor.background = Some(remainder_fill);
+    stamp_forced_color(&mut remainder, "canvas", "canvas-text");
+    if layout.inline {
+        if let Some(value) = &value_text {
+            remainder = remainder.child(inline_text(value, remainder_text_color, font_px));
+        }
+    }
+
+    let mut capsule = Node::container();
+    capsule.style.fill_width = true;
+    capsule.style.descriptor.layout.height = LayoutSizing::Fixed(capsule_h);
+    capsule.style.min_height = Some(capsule_h);
+    capsule.style.descriptor.layout.direction = LayoutDirection::Row;
+    capsule.style.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
+    capsule.style.descriptor.background = Some(remainder_fill);
+    let corners = &mut capsule.style.descriptor.corner_radii;
+    corners.top_left = pill_radius;
+    corners.top_right = pill_radius;
+    corners.bottom_right = pill_radius;
+    corners.bottom_left = pill_radius;
+    capsule.position = NodePosition::Relative;
+    stamp_forced_color(&mut capsule, "canvas", "canvas-text");
+    capsule = if rtl {
+        capsule.child(remainder).child(selected)
+    } else {
+        capsule.child(selected).child(remainder)
+    };
+
+    let thumb = visible_thumb(effective_size, elevated, border_default);
+    let mut hit = block_hit(hit_px, thumb, "value");
+    bind_slider_control(
+        &mut hit,
+        spec,
+        visual.value,
+        safe_slider_max(spec.min, spec.max),
+        if interactive { key_handler.clone() } else { None },
+        standard_focus_ring(ctx, spec),
+    );
+    if spec.is_disabled {
+        stamp_disabled_roles(&mut hit);
+    }
+
+    let inset = ((hit_px - capsule_h) * 0.5).max(0.0);
+    capsule.position = NodePosition::Absolute {
+        top: Some(inset),
+        left: Some(0.0),
+        right: Some(0.0),
+        bottom: None,
+    };
+    let mut surface = block_surface(hit_px);
+    surface = surface
+        .child(capsule)
+        .child(fraction_anchor(physical, hit_px, hit, hit_px * 0.5));
+    if let Some(handler) = scrub_handler {
+        surface = surface.child(block_grab(handler));
+    }
+
+    let mut root = Node::container();
+    root.style.fill_width = true;
+    root.style.descriptor.layout.direction = LayoutDirection::Column;
+    root.roles
+        .insert("appearance".to_owned(), "block".to_owned());
+    root.roles.insert(
+        "direction".to_owned(),
+        if rtl { "rtl" } else { "ltr" }.to_owned(),
+    );
+    root = root.child(surface);
+    if let Some(fallback) = layout.fallback {
+        let mut line = inline_text(&fallback, remainder_text_color, font_px);
+        line.roles
+            .insert("part".to_owned(), "fallback".to_owned());
+        stamp_forced_color(&mut line, "canvas", "canvas-text");
+        if spec.is_disabled {
+            stamp_disabled_roles(&mut line);
+        }
+        root = root.child(line);
+    }
+    if spec.is_disabled {
+        root.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
+        stamp_disabled_roles(&mut root);
+    }
+    root
+}
+
+fn omit_empty_owned(text: Option<&str>) -> Option<String> {
+    match text {
+        Some(value) if !value.is_empty() => Some(value.to_owned()),
+        _ => None,
+    }
+}
+
+fn inline_text(content: &str, color: ColorValue, size: f32) -> Node {
+    let mut node = Node::text(content);
+    node.style.descriptor.text_color = Some(color);
+    node.style.text_size = Some(size);
+    node.style.no_wrap = true;
+    node
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use poodle_node::NodeKind;
 
     fn theme() -> poodle_jetstream::JetstreamThemeProvider {
         poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE)
@@ -691,5 +873,134 @@ mod tests {
         assert_eq!(track_thickness_rem(ControlSize::Md), 0.375);
         assert_eq!(track_thickness_rem(ControlSize::Lg), 0.5);
         assert_eq!(track_thickness_rem(ControlSize::Xl), 0.625);
+    }
+
+    fn block_hit_node(node: &Node) -> &Node {
+        node.find(&|n| n.roles.get("part").map(String::as_str) == Some("hit"))
+            .expect("block hit")
+    }
+
+    #[test]
+    fn block_hit_is_forty_four_and_forced_colors_keep_roles() {
+        let spec = SliderSpec::new(50.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_visible_label("Blur")
+            .with_visible_value_text("50");
+        let (node, _) = armed(spec);
+        let hit = block_hit_node(&node);
+        assert_eq!(hit.style.descriptor.layout.width, LayoutSizing::Fixed(44.0));
+        assert_eq!(hit.style.descriptor.layout.height, LayoutSizing::Fixed(44.0));
+        assert_eq!(hit.a11y.role, Some(NodeRole::Slider));
+        let selected = node
+            .find(&|n| n.roles.get("forced-color-fill").map(String::as_str) == Some("selection"))
+            .expect("selected fill");
+        let remainder = node
+            .find(&|n| n.roles.get("forced-color-fill").map(String::as_str) == Some("canvas"))
+            .expect("remainder fill");
+        assert_eq!(
+            selected.roles.get("forced-color-text").map(String::as_str),
+            Some("selection-text")
+        );
+        assert_eq!(
+            remainder.roles.get("forced-color-text").map(String::as_str),
+            Some("canvas-text")
+        );
+        assert_ne!(
+            selected.roles.get("forced-color-fill"),
+            remainder.roles.get("forced-color-fill")
+        );
+        assert!(node.find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback")).is_none());
+        let texts = node.texts().join(" ");
+        assert!(!texts.contains("Volume"));
+    }
+
+    #[test]
+    fn block_falls_back_when_an_item_misses() {
+        let spec = SliderSpec::new(10.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_visible_label("Compressor makeup gain")
+            .with_visible_value_text("10");
+        let (node, _) = armed(spec);
+        let fallback = node
+            .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
+            .expect("fallback");
+        assert!(matches!(fallback.kind, NodeKind::Text { .. }));
+        assert!(
+            node.find(&|n| matches!(&n.kind, NodeKind::Text { content } if content == "Compressor makeup gain"))
+                .is_none()
+                || node
+                    .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
+                    .is_some()
+        );
+    }
+
+    #[test]
+    fn block_rtl_remaps_scrub_without_changing_keys() {
+        let spec = SliderSpec::new(0.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_direction(poodle_specs::SliderDirection::Rtl);
+        let (node, seen) = armed(spec);
+        let scrub = Arc::clone(
+            find_scrub(&node)
+                .unwrap()
+                .interaction
+                .on_scrub
+                .as_ref()
+                .unwrap(),
+        );
+        scrub(0.2, ScrubPhase::Press);
+        assert_eq!(seen.lock().unwrap().last().unwrap(), &("change".into(), 80.0));
+        let key = slider_control(&node).interaction.on_key.as_ref().unwrap();
+        key(NodeKey::ArrowRight, NodeModifiers::default());
+        assert_eq!(seen.lock().unwrap().last().unwrap().1, 81.0);
+    }
+
+    #[test]
+    fn a_second_scrub_release_is_inert() {
+        let spec = SliderSpec::new(0.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block);
+        let (node, seen) = armed(spec);
+        let scrub = Arc::clone(
+            find_scrub(&node)
+                .unwrap()
+                .interaction
+                .on_scrub
+                .as_ref()
+                .unwrap(),
+        );
+        scrub(0.4, ScrubPhase::Press);
+        scrub(0.4, ScrubPhase::Release);
+        scrub(0.4, ScrubPhase::Release);
+        let events = seen.lock().unwrap();
+        assert_eq!(
+            events.as_slice(),
+            [("change".into(), 40.0), ("commit".into(), 40.0)]
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "appearance=\"block\" rejects orientation=\"vertical\"")]
+    fn vertical_block_is_rejected_before_paint() {
+        let spec = SliderSpec::new(40.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_orientation(Orientation::Vertical);
+        let _ = armed(spec);
+    }
+
+    #[test]
+    fn aria_label_never_becomes_visible_block_text() {
+        let mut spec = SliderSpec::new(50.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block);
+        spec.aria_label = Some("Gain".into());
+        let (node, _) = armed(spec);
+        let texts = node.texts().join(" ");
+        assert!(!texts.contains("Gain"));
+        assert_eq!(slider_control(&node).a11y.label.as_deref(), Some("Gain"));
     }
 }

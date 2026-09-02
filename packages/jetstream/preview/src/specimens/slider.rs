@@ -10,7 +10,7 @@ use crate::compat::js_slider;
 use crate::nel::*;
 use poodle_jetstream::JetstreamThemeProvider;
 
-use poodle_specs::{ControlDensity, ControlSize, SliderPolarity, SliderSpec};
+use poodle_specs::{ControlDensity, ControlSize, SliderAppearance, SliderDirection, SliderPolarity, SliderSpec};
 
 pub fn render(theme: &JetstreamThemeProvider) -> El {
     let secondary = resolve_color(theme, "color.text.secondary");
@@ -101,6 +101,28 @@ pub fn render(theme: &JetstreamThemeProvider) -> El {
                     &SliderSpec::new(-0.45)
                         .with_bounds(-1.0, 1.0)
                         .with_embedded_control(SliderPolarity::Bipolar),
+                    theme,
+                ))),
+        ))
+        .child(group(
+            "Block appearance",
+            secondary,
+            div()
+                .flex_col()
+                .gap(12.0)
+                .child(row(js_slider(
+                    &SliderSpec::new(65.0)
+                        .with_bounds(0.0, 100.0)
+                        .with_appearance(SliderAppearance::Block)
+                        .with_visible_label("Volume"),
+                    theme,
+                )))
+                .child(row(js_slider(
+                    &SliderSpec::new(100.0)
+                        .with_bounds(0.0, 100.0)
+                        .with_appearance(SliderAppearance::Block)
+                        .with_direction(SliderDirection::Rtl)
+                        .with_visible_label("Opacity"),
                     theme,
                 ))),
         ))

@@ -16,11 +16,17 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, Node, NodePosition, NodeRole,
     ScrubAxis, ScrubPhase, ShadowValue, StylePatch,
 };
-use poodle_specs::{ControlSize, RangeSliderSpec, SliderVariant};
+use poodle_specs::{
+    reject_vertical_block, ControlSize, RangeSliderSpec, SliderAppearance, SliderVariant,
+};
 
 use crate::color::with_alpha;
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
+use crate::slider_block::{
+    block_grab, block_hit, block_surface, capsule_height_rem, font_size_rem, fraction_anchor,
+    stamp_disabled_roles, stamp_forced_color, visible_thumb, NATIVE_CAPSULE_SPAN_PX,
+};
 
 /// Host callbacks: continuous change + end-of-drag commit, both `(low, high)`.
 #[derive(Default)]
@@ -56,6 +62,10 @@ pub fn range_slider(
     ctx: &RenderContext<'_>,
     handlers: RangeSliderHandlers,
 ) -> Node {
+    reject_vertical_block(spec.appearance, spec.orientation, "RangeSlider");
+    if spec.appearance == SliderAppearance::Block {
+        return range_slider_block(spec, ctx, handlers);
+    }
     let effective_size = ctx.resolve_size(spec.size, spec.size_role);
     let density = ctx.resolve_density(spec.density);
 
@@ -235,6 +245,7 @@ pub fn range_slider(
 
             let on_change = handlers.on_change.clone();
             let on_value_commit = handlers.on_value_commit.clone();
+            let rtl = spec.direction.is_rtl();
 
             let bind_key = |thumb_kind: RangeThumb,
                             target: &mut Node,
@@ -344,6 +355,8 @@ pub fn range_slider(
                         2 => Some(RangeThumb::Upper),
                         _ => None,
                     };
+                    let value_norm =
+                        poodle_headless::slider::physical_to_value_norm(fraction as f64, rtl);
                     let event = match phase {
                         ScrubPhase::Press => {
                             if dragged.swap(false, Ordering::SeqCst) {
@@ -351,20 +364,14 @@ pub fn range_slider(
                                 // commit already landed on Release.
                                 return;
                             }
-                            RangeSliderControlEvent::PointerBegin {
-                                value_norm: fraction as f64,
-                            }
+                            RangeSliderControlEvent::PointerBegin { value_norm }
                         }
                         ScrubPhase::Drag => {
                             dragged.store(true, Ordering::SeqCst);
                             if active_thumb.is_some() {
-                                RangeSliderControlEvent::PointerMove {
-                                    value_norm: fraction as f64,
-                                }
+                                RangeSliderControlEvent::PointerMove { value_norm }
                             } else {
-                                RangeSliderControlEvent::PointerBegin {
-                                    value_norm: fraction as f64,
-                                }
+                                RangeSliderControlEvent::PointerBegin { value_norm }
                             }
                         }
                         ScrubPhase::Release => RangeSliderControlEvent::PointerEnd,
@@ -553,6 +560,431 @@ pub fn range_slider(
         el.interaction.disabled = true;
     }
 
+    el
+}
+
+fn range_slider_block(
+    spec: &RangeSliderSpec,
+    ctx: &RenderContext<'_>,
+    handlers: RangeSliderHandlers,
+) -> Node {
+    use poodle_headless::slider::{
+        layout_range_slider_block, measure_block_advance, physical_to_value_norm,
+        range_slider_control_transition, range_slider_transition, range_slider_visual_state,
+        resolved_range_text, resolved_visible_text, RangeSliderControlContext,
+        RangeSliderControlEvent, RangeSliderContext, RangeSliderEffect, RangeSliderEvent,
+        RangeThumb, SLIDER_BLOCK_HIT_PX,
+    };
+    use poodle_node::{NodeKey, NodeModifiers};
+
+    let effective_size = ctx.resolve_size(spec.size, spec.size_role);
+    let density = ctx.resolve_density(spec.density);
+    let rtl = spec.direction.is_rtl();
+    let capsule_h = rem_to_px(capsule_height_rem(effective_size));
+    let font_px = rem_to_px(font_size_rem(effective_size));
+    let hit_px = SLIDER_BLOCK_HIT_PX;
+    let pill = ctx.theme().resolve_radius("radius.pill");
+    let accent = ctx.theme().resolve_color(spec.range_fill_token());
+    let negative = ctx.theme().resolve_color("color.status.danger");
+    let surface = ctx.theme().resolve_color("color.background.surface");
+    let border_default = ctx.theme().resolve_color("color.border.default");
+    let elevated = ctx.theme().resolve_color("color.background.elevated");
+    let selected_text_color = ctx.theme().resolve_color("color.text.inverse");
+    let remainder_text_color = ctx.theme().resolve_color("color.text.primary");
+    let remainder_fill = with_alpha(surface, surface.3 * 0.88);
+
+    let visual = range_slider_visual_state(RangeSliderControlContext {
+        value: (spec.low, spec.high),
+        min: spec.min,
+        max: spec.max,
+        step: spec.step,
+        disabled: spec.is_disabled,
+        law: spec.law,
+        polarity: spec.polarity,
+        center_value: spec.center_value,
+        pointer_active: false,
+        active_thumb: None,
+    });
+    let lo = visual.lower_norm as f32;
+    let hi = visual.upper_norm.max(visual.lower_norm) as f32;
+    let physical_lo = if rtl { 1.0 - lo } else { lo };
+    let physical_hi = if rtl { 1.0 - hi } else { hi };
+
+    let label = spec
+        .visible_label
+        .as_deref()
+        .filter(|text| !text.is_empty())
+        .map(ToOwned::to_owned);
+    let lower_text = resolved_visible_text(visual.value.0, spec.visible_lower_text.as_deref());
+    let upper_text = resolved_visible_text(visual.value.1, spec.visible_upper_text.as_deref());
+    let range_text = resolved_range_text(
+        visual.value.0,
+        visual.value.1,
+        spec.visible_range_text.as_deref(),
+        lower_text.as_deref(),
+        upper_text.as_deref(),
+    );
+    let layout = layout_range_slider_block(
+        NATIVE_CAPSULE_SPAN_PX,
+        lo,
+        hi,
+        label.as_deref(),
+        lower_text.as_deref(),
+        upper_text.as_deref(),
+        range_text.as_deref(),
+        |text| measure_block_advance(text, font_px),
+    );
+
+    let lower_label = match spec.aria_label.as_deref() {
+        Some(name) if !name.is_empty() => format!("{name} minimum"),
+        _ => "Minimum value".to_owned(),
+    };
+    let upper_label = match spec.aria_label.as_deref() {
+        Some(name) if !name.is_empty() => format!("{name} maximum"),
+        _ => "Maximum value".to_owned(),
+    };
+
+    let make_hit = |id: &str, thumb_name: &str, name: String, value: f64| -> Node {
+        let thumb = visible_thumb(effective_size, elevated, border_default);
+        let mut hit = block_hit(hit_px, thumb, thumb_name);
+        hit.id = Some(id.to_owned());
+        hit.a11y.role = Some(NodeRole::Slider);
+        hit.a11y.label = Some(name);
+        hit.a11y.value = Some(value);
+        hit.a11y.orientation = Some("horizontal".to_owned());
+        if spec.is_disabled {
+            hit.interaction.disabled = true;
+            stamp_disabled_roles(&mut hit);
+        } else {
+            hit.interaction.focusable = true;
+            hit.style.focus = Some(StylePatch {
+                background: None,
+                border_color: Some(ctx.theme().resolve_color(spec.focus_ring_color_token())),
+                text_color: None,
+                opacity: None,
+            });
+        }
+        hit
+    };
+    let mut thumb_lo = make_hit(
+        "range-slider-lower",
+        "lower",
+        lower_label,
+        spec.low,
+    );
+    let mut thumb_hi = make_hit(
+        "range-slider-upper",
+        "upper",
+        upper_label,
+        spec.high,
+    );
+
+    let mut scrub_handler: Option<Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>> = None;
+    if !(spec.is_disabled || (handlers.on_change.is_none() && handlers.on_value_commit.is_none()))
+    {
+        let low = Arc::new(AtomicU64::new(spec.low.to_bits()));
+        let high = Arc::new(AtomicU64::new(spec.high.to_bits()));
+        let context = RangeSliderControlContext {
+            value: (spec.low, spec.high),
+            min: spec.min,
+            max: spec.max,
+            step: spec.step,
+            disabled: false,
+            law: spec.law,
+            polarity: spec.polarity,
+            center_value: spec.center_value,
+            pointer_active: false,
+            active_thumb: None,
+        };
+        let active = Arc::new(AtomicU8::new(0));
+        let dragged = Arc::new(AtomicBool::new(false));
+        let on_change = handlers.on_change.clone();
+        let on_value_commit = handlers.on_value_commit.clone();
+
+        let bind_key = |thumb_kind: RangeThumb,
+                        target: &mut Node,
+                        low: Arc<AtomicU64>,
+                        high: Arc<AtomicU64>,
+                        on_change: Option<Arc<dyn Fn(f64, f64) + Send + Sync>>,
+                        on_value_commit: Option<Arc<dyn Fn(f64, f64) + Send + Sync>>,
+                        min: f64,
+                        max: f64,
+                        step: f64| {
+            target.interaction.on_key = Some(Arc::new(move |key: NodeKey, _mods: NodeModifiers| {
+                let live = (
+                    f64::from_bits(low.load(Ordering::SeqCst)),
+                    f64::from_bits(high.load(Ordering::SeqCst)),
+                );
+                let current = match thumb_kind {
+                    RangeThumb::Lower => live.0,
+                    RangeThumb::Upper => live.1,
+                };
+                let direction = match key {
+                    NodeKey::ArrowLeft | NodeKey::ArrowDown => -1.0,
+                    NodeKey::ArrowRight | NodeKey::ArrowUp => 1.0,
+                    _ => 0.0,
+                };
+                let raw = match key {
+                    NodeKey::Home => min,
+                    NodeKey::End => max,
+                    NodeKey::ArrowLeft
+                    | NodeKey::ArrowDown
+                    | NodeKey::ArrowRight
+                    | NodeKey::ArrowUp => current + direction * step,
+                    _ => return None,
+                };
+                let context = RangeSliderContext {
+                    value: live,
+                    min,
+                    max,
+                    step,
+                    disabled: false,
+                };
+                let (changed, change_effects) =
+                    range_slider_transition(context, RangeSliderEvent::Input { thumb: thumb_kind, raw });
+                let commit_raw = match thumb_kind {
+                    RangeThumb::Lower => changed.value.0,
+                    RangeThumb::Upper => changed.value.1,
+                };
+                let (committed, commit_effects) = range_slider_transition(
+                    changed,
+                    RangeSliderEvent::Commit {
+                        thumb: thumb_kind,
+                        raw: commit_raw,
+                    },
+                );
+                low.store(committed.value.0.to_bits(), Ordering::SeqCst);
+                high.store(committed.value.1.to_bits(), Ordering::SeqCst);
+                for effect in change_effects.into_iter().chain(commit_effects) {
+                    match effect {
+                        RangeSliderEffect::EmitValueChange { value } => {
+                            if let Some(handler) = &on_change {
+                                handler(value.0, value.1);
+                            }
+                        }
+                        RangeSliderEffect::EmitValueCommit { value } => {
+                            if let Some(handler) = &on_value_commit {
+                                handler(value.0, value.1);
+                            }
+                        }
+                    }
+                }
+                None
+            }));
+        };
+
+        bind_key(
+            RangeThumb::Lower,
+            &mut thumb_lo,
+            Arc::clone(&low),
+            Arc::clone(&high),
+            on_change.clone(),
+            on_value_commit.clone(),
+            spec.min,
+            spec.max,
+            spec.step,
+        );
+        bind_key(
+            RangeThumb::Upper,
+            &mut thumb_hi,
+            Arc::clone(&low),
+            Arc::clone(&high),
+            on_change.clone(),
+            on_value_commit.clone(),
+            spec.min,
+            spec.max,
+            spec.step,
+        );
+
+        scrub_handler = Some(Arc::new(move |fraction: f32, phase: ScrubPhase| {
+            let live = (
+                f64::from_bits(low.load(Ordering::SeqCst)),
+                f64::from_bits(high.load(Ordering::SeqCst)),
+            );
+            let active_thumb = match active.load(Ordering::SeqCst) {
+                1 => Some(RangeThumb::Lower),
+                2 => Some(RangeThumb::Upper),
+                _ => None,
+            };
+            let value_norm = physical_to_value_norm(fraction as f64, rtl);
+            let event = match phase {
+                ScrubPhase::Press => {
+                    if dragged.swap(false, Ordering::SeqCst) {
+                        return;
+                    }
+                    RangeSliderControlEvent::PointerBegin { value_norm }
+                }
+                ScrubPhase::Drag => {
+                    dragged.store(true, Ordering::SeqCst);
+                    if active_thumb.is_some() {
+                        RangeSliderControlEvent::PointerMove { value_norm }
+                    } else {
+                        RangeSliderControlEvent::PointerBegin { value_norm }
+                    }
+                }
+                ScrubPhase::Release => RangeSliderControlEvent::PointerEnd,
+            };
+            let context = RangeSliderControlContext {
+                value: live,
+                pointer_active: active_thumb.is_some(),
+                active_thumb,
+                ..context
+            };
+            let (next, effects) = range_slider_control_transition(context, event);
+            low.store(next.value.0.to_bits(), Ordering::SeqCst);
+            high.store(next.value.1.to_bits(), Ordering::SeqCst);
+            active.store(
+                match next.active_thumb {
+                    Some(RangeThumb::Lower) => 1,
+                    Some(RangeThumb::Upper) => 2,
+                    None => 0,
+                },
+                Ordering::SeqCst,
+            );
+            for effect in effects {
+                match effect {
+                    RangeSliderEffect::EmitValueChange { value } => {
+                        if value == live {
+                            continue;
+                        }
+                        if let Some(handler) = &on_change {
+                            handler(value.0, value.1);
+                        }
+                    }
+                    RangeSliderEffect::EmitValueCommit { value } => {
+                        if let Some(handler) = &on_value_commit {
+                            handler(value.0, value.1);
+                        }
+                    }
+                }
+            }
+        }));
+    }
+
+    let mut selected = Node::container();
+    selected.style.width_pct = Some((hi - lo).max(0.0));
+    selected.style.fill_height = true;
+    selected.style.descriptor.background = Some(if visual.negative_fill_span_norm > 0.0 {
+        negative
+    } else {
+        accent
+    });
+    stamp_forced_color(&mut selected, "selection", "selection-text");
+    if layout.inline {
+        if let Some(text) = &layout.selected_text {
+            let mut label_node = Node::text(text.clone());
+            label_node.style.descriptor.text_color = Some(selected_text_color);
+            label_node.style.text_size = Some(font_px);
+            label_node.style.no_wrap = true;
+            selected = selected.child(label_node);
+        }
+    }
+
+    let mut leading = Node::container();
+    leading.style.width_pct = Some(if rtl { (1.0 - hi).max(0.0) } else { lo });
+    leading.style.fill_height = true;
+    leading.style.descriptor.background = Some(remainder_fill);
+    stamp_forced_color(&mut leading, "canvas", "canvas-text");
+    if layout.inline {
+        let text = if rtl { upper_text.as_deref() } else { lower_text.as_deref() };
+        if let Some(text) = text {
+            let mut node = Node::text(text);
+            node.style.descriptor.text_color = Some(remainder_text_color);
+            node.style.text_size = Some(font_px);
+            node.style.no_wrap = true;
+            leading = leading.child(node);
+        }
+    }
+
+    let mut trailing = Node::container();
+    trailing.style.flex_fill = true;
+    trailing.style.fill_height = true;
+    trailing.style.descriptor.background = Some(remainder_fill);
+    stamp_forced_color(&mut trailing, "canvas", "canvas-text");
+    if layout.inline {
+        let text = if rtl { lower_text.as_deref() } else { upper_text.as_deref() };
+        if let Some(text) = text {
+            let mut node = Node::text(text);
+            node.style.descriptor.text_color = Some(remainder_text_color);
+            node.style.text_size = Some(font_px);
+            node.style.no_wrap = true;
+            trailing = trailing.child(node);
+        }
+    }
+
+    let mut capsule = Node::container();
+    capsule.style.fill_width = true;
+    capsule.style.descriptor.layout.height = LayoutSizing::Fixed(capsule_h);
+    capsule.style.min_height = Some(capsule_h);
+    capsule.style.descriptor.layout.direction = LayoutDirection::Row;
+    capsule.style.descriptor.background = Some(remainder_fill);
+    let corners = &mut capsule.style.descriptor.corner_radii;
+    corners.top_left = pill;
+    corners.top_right = pill;
+    corners.bottom_right = pill;
+    corners.bottom_left = pill;
+    capsule.position = NodePosition::Relative;
+    stamp_forced_color(&mut capsule, "canvas", "canvas-text");
+    capsule = capsule.child(leading).child(selected).child(trailing);
+    let inset = ((hit_px - capsule_h) * 0.5).max(0.0);
+    capsule.position = NodePosition::Absolute {
+        top: Some(inset),
+        left: Some(0.0),
+        right: Some(0.0),
+        bottom: None,
+    };
+    let mut surface = block_surface(hit_px);
+    surface = surface
+        .child(capsule)
+        .child(fraction_anchor(physical_lo, hit_px, thumb_lo, hit_px * 0.5))
+        .child(fraction_anchor(physical_hi, hit_px, thumb_hi, hit_px * 0.5));
+    if let Some(handler) = scrub_handler {
+        surface = surface.child(block_grab(handler));
+    }
+
+    let mut el = Node::container();
+    el.style.fill_width = true;
+    el.style.descriptor.layout.direction = LayoutDirection::Column;
+    el.a11y.role = Some(NodeRole::Group);
+    el.roles.insert("appearance".to_owned(), "block".to_owned());
+    el.roles.insert(
+        "direction".to_owned(),
+        if rtl { "rtl" } else { "ltr" }.to_owned(),
+    );
+    el.roles.insert(
+        "size".to_owned(),
+        match effective_size {
+            ControlSize::Xs => "xs",
+            ControlSize::Sm => "sm",
+            ControlSize::Md => "md",
+            ControlSize::Lg => "lg",
+            ControlSize::Xl => "xl",
+        }
+        .to_owned(),
+    );
+    el.roles.insert(
+        "density".to_owned(),
+        match density {
+            poodle_specs::ControlDensity::Compact => "compact",
+            poodle_specs::ControlDensity::Default => "default",
+            poodle_specs::ControlDensity::Comfortable => "comfortable",
+        }
+        .to_owned(),
+    );
+    el = el.child(surface);
+    if let Some(fallback) = layout.fallback {
+        let mut line = Node::text(fallback);
+        line.style.descriptor.text_color = Some(remainder_text_color);
+        line.style.text_size = Some(font_px);
+        line.roles.insert("part".to_owned(), "fallback".to_owned());
+        stamp_forced_color(&mut line, "canvas", "canvas-text");
+        el = el.child(line);
+    }
+    if spec.is_disabled {
+        el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
+        el.interaction.disabled = true;
+        stamp_disabled_roles(&mut el);
+    }
     el
 }
 
@@ -760,5 +1192,77 @@ mod tests {
             .expect("lower thumb");
         assert_eq!(lower.a11y.label.as_deref(), Some("Minimum value"));
         assert_eq!(lower.a11y.role, Some(NodeRole::Slider));
+    }
+
+    #[test]
+    fn block_hits_are_forty_four() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = range_slider(
+            &RangeSliderSpec::new(50.0, 50.0)
+                .with_bounds(0.0, 100.0)
+                .with_appearance(poodle_specs::SliderAppearance::Block)
+                .with_size(poodle_specs::ControlSize::Xs),
+            &ctx,
+            RangeSliderHandlers {
+                on_change: Some(Arc::new(|_, _| {})),
+                ..RangeSliderHandlers::default()
+            },
+        );
+        for id in ["range-slider-lower", "range-slider-upper"] {
+            let hit = node.find(&|n| n.id.as_deref() == Some(id)).expect(id);
+            assert_eq!(hit.style.descriptor.layout.width, LayoutSizing::Fixed(44.0));
+            assert_eq!(hit.style.descriptor.layout.height, LayoutSizing::Fixed(44.0));
+            assert_eq!(hit.a11y.role, Some(NodeRole::Slider));
+            assert!(hit.interaction.focusable);
+        }
+        let selected = node
+            .find(&|n| n.roles.get("forced-color-fill").map(String::as_str) == Some("selection"));
+        let remainder = node
+            .find(&|n| n.roles.get("forced-color-fill").map(String::as_str) == Some("canvas"));
+        assert!(selected.is_some());
+        assert!(remainder.is_some());
+        assert_ne!(
+            selected.unwrap().roles.get("forced-color-fill"),
+            remainder.unwrap().roles.get("forced-color-fill")
+        );
+    }
+
+    #[test]
+    fn block_pointer_tie_chooses_lower_and_does_not_swap() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let sink = std::sync::Arc::clone(&seen);
+        let node = range_slider(
+            &RangeSliderSpec::new(50.0, 50.0)
+                .with_bounds(0.0, 100.0)
+                .with_appearance(poodle_specs::SliderAppearance::Block),
+            &ctx,
+            RangeSliderHandlers {
+                on_change: Some(Arc::new(move |lo, hi| sink.lock().unwrap().push((lo, hi)))),
+                on_value_commit: None,
+            },
+        );
+        let scrub = scrub(&node);
+        scrub(0.5, ScrubPhase::Press);
+        scrub(0.2, ScrubPhase::Drag);
+        let last = seen.lock().unwrap().last().copied().unwrap();
+        assert_eq!(last, (20.0, 50.0));
+        let upper = node
+            .find(&|n| n.id.as_deref() == Some("range-slider-upper"))
+            .expect("upper");
+        assert!(upper.interaction.on_key.is_some());
+    }
+
+    #[test]
+    #[should_panic(expected = "appearance=\"block\" rejects orientation=\"vertical\"")]
+    fn vertical_block_range_is_rejected_before_paint() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = spec()
+            .with_appearance(poodle_specs::SliderAppearance::Block)
+            .with_orientation(Orientation::Vertical);
+        let _ = range_slider(&spec, &ctx, RangeSliderHandlers::default());
     }
 }
