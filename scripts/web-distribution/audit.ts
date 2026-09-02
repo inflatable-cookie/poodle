@@ -4,7 +4,6 @@ import { join, posix, relative } from "node:path";
 const DECLARATION_SUFFIX = /\.d\.[cm]?ts$/;
 const TIMESTAMP_KEY = /timestamp|builtAt|generatedAt|createdAt/i;
 const ISO_DATE = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
-const ABSOLUTE_PATH = /(?:\/(?:Users|home|tmp)\/|[A-Za-z]:(?:\\+|\/(?!\/)))/;
 const MANIFEST_DEP_SECTIONS = [
   "dependencies",
   "devDependencies",
@@ -33,12 +32,98 @@ function walkFiles(root: string): string[] {
   return files;
 }
 
-function sourceWithoutComments(bytes: string): string {
-  return bytes.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
-}
-
 function toDistPath(distDir: string, abs: string): string {
   return posix.join("dist", relative(distDir, abs).split("\\").join("/"));
+}
+
+function isAbsolutePathValue(value: string): boolean {
+  const leadingBackslashes = /^\\+/.exec(value)?.[0].length ?? 0;
+  const uncRemainder = value.slice(leadingBackslashes);
+  const authoredUncPath =
+    leadingBackslashes >= 4 && /\\+[^\\\r\n]+/.test(uncRemainder);
+  return (
+    /^(?:\/[^/\r\n]+){2,}\/?$/.test(value) ||
+    /^[A-Za-z]:[\\/]/.test(value) ||
+    authoredUncPath ||
+    /^file:(?:\/\/)?\//i.test(value)
+  );
+}
+
+function quotedValues(source: string): string[] {
+  const values: string[] = [];
+  let index = 0;
+  while (index < source.length) {
+    const current = source[index];
+    const next = source[index + 1];
+    if (current === "/" && next === "/") {
+      index = source.indexOf("\n", index + 2);
+      if (index === -1) break;
+      continue;
+    }
+    if (current === "/" && next === "*") {
+      const end = source.indexOf("*/", index + 2);
+      index = end === -1 ? source.length : end + 2;
+      continue;
+    }
+    if (current !== '"' && current !== "'" && current !== "`") {
+      index += 1;
+      continue;
+    }
+    const quote = current;
+    let value = "";
+    index += 1;
+    while (index < source.length) {
+      const character = source[index];
+      if (character === "\\" && index + 1 < source.length) {
+        value += character + source[index + 1];
+        index += 2;
+        continue;
+      }
+      if (character === quote) {
+        index += 1;
+        break;
+      }
+      value += character;
+      index += 1;
+    }
+    values.push(value);
+  }
+  return values;
+}
+
+function absolutePathInSource(source: string): string | null {
+  return quotedValues(source).find(isAbsolutePathValue) ?? null;
+}
+
+function absolutePathInJson(value: unknown): string | null {
+  if (typeof value === "string") return isAbsolutePathValue(value) ? value : null;
+  if (Array.isArray(value)) {
+    for (const member of value) {
+      const hit = absolutePathInJson(member);
+      if (hit) return hit;
+    }
+    return null;
+  }
+  if (value && typeof value === "object") {
+    for (const member of Object.values(value)) {
+      const hit = absolutePathInJson(member);
+      if (hit) return hit;
+    }
+  }
+  return null;
+}
+
+function npmAliasTarget(specifier: unknown): string | null {
+  if (typeof specifier !== "string" || !specifier.startsWith("npm:")) return null;
+  const target = specifier.slice(4);
+  if (target.startsWith("@")) {
+    const slash = target.indexOf("/");
+    if (slash === -1) return target;
+    const version = target.indexOf("@", slash + 1);
+    return version === -1 ? target : target.slice(0, version);
+  }
+  const version = target.indexOf("@");
+  return version === -1 ? target : target.slice(0, version);
 }
 
 function escapeRegExp(value: string): string {
@@ -88,9 +173,13 @@ export function auditPackageDependencies(
   for (const section of MANIFEST_DEP_SECTIONS) {
     const deps = manifest[section];
     if (!deps || typeof deps !== "object" || Array.isArray(deps)) continue;
-    for (const name of forbiddenModules) {
-      if (Object.hasOwn(deps, name)) {
-        throw new Error(`package.json ${section} lists forbidden module ${name}`);
+    for (const [dependencyName, dependencySpecifier] of Object.entries(deps)) {
+      const aliasTarget = npmAliasTarget(dependencySpecifier);
+      for (const name of forbiddenModules) {
+        if (dependencyName === name || aliasTarget === name) {
+          const detail = aliasTarget ? `${dependencyName} aliases ${aliasTarget}` : name;
+          throw new Error(`package.json ${section} lists forbidden module ${detail}`);
+        }
       }
     }
   }
@@ -129,7 +218,13 @@ export function auditStagedDist(options: DistAuditOptions): void {
       if (TIMESTAMP_KEY.test(bytes) || ISO_DATE.test(bytes)) {
         throw new Error("receipt contains a timestamp");
       }
-      if (ABSOLUTE_PATH.test(bytes)) {
+      let receipt: unknown;
+      try {
+        receipt = JSON.parse(bytes);
+      } catch {
+        throw new Error("receipt is not valid JSON");
+      }
+      if (absolutePathInJson(receipt)) {
         throw new Error("receipt contains an absolute path");
       }
       continue;
@@ -155,8 +250,9 @@ export function auditStagedDist(options: DistAuditOptions): void {
           throw new Error(`forbidden parser or shell module entered ${distPath}: ${name}`);
         }
       }
-      if (ABSOLUTE_PATH.test(sourceWithoutComments(bytes))) {
-        throw new Error(`workspace path leaked into ${distPath}`);
+      const pathHit = absolutePathInSource(bytes);
+      if (pathHit) {
+        throw new Error(`workspace path leaked into ${distPath}: ${pathHit}`);
       }
     }
   }

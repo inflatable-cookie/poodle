@@ -90,7 +90,7 @@ export function assertReceiptCoversViteSources(
 
 export function collectInputs(packageRoot: string, spec: PackageBuildSpec): string[] {
   assertNoParallelJavascript(packageRoot);
-  const inputs = new Set<string>();
+  const inputs = new Set<string>(["package.json", spec.declarationTsconfig]);
   for (const entry of spec.entries) inputs.add(entry.source);
   for (const asset of spec.assets) inputs.add(asset.from);
   for (const extra of spec.extraDeclarationCopies ?? []) inputs.add(extra.from);

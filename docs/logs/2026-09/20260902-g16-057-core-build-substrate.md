@@ -30,6 +30,13 @@ workspace paths. Public `.d.ts`/`.d.mts` targets are required. `marked` left
 the core manifest; root `devDependencies` still resolve the lexer fixture.
 g16.059 receipt/consumer/two-pack work stayed out.
 
+The second exact-head review closed three further fail-open edges. Receipt
+inputs now include the package manifest and declaration config alongside every
+source/asset/Vite input. Absolute paths are rejected by value across emitted
+JavaScript, declarations, and parsed receipt JSON without mistaking URLs,
+module schemes, protocol-relative URLs, or regex syntax for paths. npm alias
+targets cannot hide any forbidden module in any dependency section.
+
 ## Driver
 
 `scripts/web-distribution/` is the reusable substrate. Core fills a
@@ -66,15 +73,17 @@ emit-clean under it.
 | Card stays core-only | `from "svelte"` in `dist/index.js` | forbidden parser or shell module |
 | Repository routes | delete `packages/core/dist`, then `health`; pack `files: ["dist"]` | `core:build` runs first; packed `package/dist/**` accepted; omitted dist tree rejected |
 | TypeScript authority | sibling `src/tokens/units.js` next to `.ts` | parallel JavaScript source shadows TypeScript |
-| Module-edge audit | `import "svelte"`; `import("react/jsx-runtime")`; bundled stub `marked`; sibling-workspace module; `"/home/..."`; `"C:\\Users\\..."` | each fails closed |
+| Module-edge audit | `import "svelte"`; `import("react/jsx-runtime")`; bundled stub `marked`; sibling-workspace module; generic Unix roots; `"C:\\Users\\..."` | each fails closed; URLs/module schemes/regex remain valid |
 | Public declarations | delete `dist/icons/icons/x.d.ts` | missing staged public file |
 | No marked edge | `marked` in core `devDependencies` | package.json devDependencies lists forbidden module marked |
+| Complete receipt inputs | omit `package.json` or `tsconfig.build.json` | focused receipt inventory assertion fails |
+| Alias-safe dependency audit | `hidden: "npm:react-dom@1.0.0"` in any dependency section | alias target is rejected |
 
 All plants restored. Focused tests repeat them against disposable fixtures.
 
 ## Validation
 
-- `bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts` — 26/0
+- `bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts` — 29/0
 - Core unit tests — 1,221/0.
 - Clean-state `effigy health` — pass after moving the ignored core `dist/` out
   of the worktree; the route rebuilt it before docs lint.

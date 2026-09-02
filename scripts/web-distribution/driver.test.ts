@@ -142,27 +142,60 @@ describe("web distribution driver", () => {
     rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
-  test("a unix workspace path in compiled JS fails the audit", () => {
+  test("generic unix workspace paths in compiled JS fail the audit", () => {
     const distDir = fixtureDist();
-    writeFileSync(
-      join(distDir, "index.js"),
-      `export const path = "/home/reviewer/src/x.ts";\n`,
-    );
-    expect(() =>
-      auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
-    ).toThrow(/workspace path/);
+    for (const path of [
+      "/workspace/poodle/src/x.ts",
+      "/root/poodle/src/x.ts",
+      "/opt/build/poodle/src/x.ts",
+      "/private/var/folders/x/src/x.ts",
+    ]) {
+      writeFileSync(join(distDir, "index.js"), `export const path = ${JSON.stringify(path)};\n`);
+      expect(() =>
+        auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
+      ).toThrow(/workspace path/);
+    }
     rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
-  test("a windows workspace path in a declaration fails the audit", () => {
+  test("valid URL, module, and regex syntax does not look like a workspace path", () => {
     const distDir = fixtureDist();
     writeFileSync(
-      join(distDir, "index.d.ts"),
-      'export type Leak = "C:\\Users\\reviewer\\src\\x.ts";\n',
+      join(distDir, "index.js"),
+      `export const url = "https://example.com/a";\n` +
+        `export const protocolRelative = "//cdn.example.com/a";\n` +
+        `export const moduleId = "node:fs";\n` +
+        `export const matcher = /\\/workspace\\//;\n`,
     );
     expect(() =>
       auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
-    ).toThrow(/workspace path/);
+    ).not.toThrow();
+    rmSync(join(distDir, ".."), { recursive: true, force: true });
+  });
+
+  test("a generic unix path in the receipt input inventory fails the audit", () => {
+    const distDir = fixtureDist();
+    const receiptPath = join(distDir, ".poodle-build.json");
+    const receipt = JSON.parse(readFileSync(receiptPath, "utf8")) as { inputs: string[] };
+    receipt.inputs.push("/workspace/poodle/src/index.ts");
+    writeFileSync(receiptPath, stableJson(receipt));
+    expect(() =>
+      auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
+    ).toThrow(/receipt contains an absolute path/);
+    rmSync(join(distDir, ".."), { recursive: true, force: true });
+  });
+
+  test("unix and windows workspace paths in declarations fail the audit", () => {
+    const distDir = fixtureDist();
+    for (const path of ["/opt/build/poodle/src/x.ts", "C:\\Users\\reviewer\\src\\x.ts"]) {
+      writeFileSync(
+        join(distDir, "index.d.ts"),
+        `export type Leak = ${JSON.stringify(path)};\n`,
+      );
+      expect(() =>
+        auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
+      ).toThrow(/workspace path/);
+    }
     rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
@@ -186,6 +219,25 @@ describe("web distribution driver", () => {
         CORE_FORBIDDEN_MODULES,
       ),
     ).toThrow(/devDependencies lists forbidden module marked/);
+  });
+
+  test("npm aliases cannot hide forbidden modules in any dependency section", () => {
+    const sections = [
+      "dependencies",
+      "devDependencies",
+      "peerDependencies",
+      "optionalDependencies",
+    ] as const;
+    for (const section of sections) {
+      for (const name of CORE_FORBIDDEN_MODULES) {
+        expect(() =>
+          auditPackageDependencies(
+            { [section]: { hidden: `npm:${name}@1.0.0` } },
+            CORE_FORBIDDEN_MODULES,
+          ),
+        ).toThrow(new RegExp(`${section} lists forbidden module hidden aliases ${name}`));
+      }
+    }
   });
 
   test("a sibling .js next to a compiled .ts fails TypeScript authority", () => {

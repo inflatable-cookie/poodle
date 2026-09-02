@@ -122,6 +122,8 @@ describe("core compiled distribution", () => {
     expect(first.receipt.sourceMaps).toBe(false);
     expect(first.receipt.schemaVersion).toBe(1);
     expect(first.receipt.sourceCommit).toMatch(/^[0-9a-f]{40}$/);
+    expect(first.receipt.inputs).toContain("package.json");
+    expect(first.receipt.inputs).toContain("tsconfig.build.json");
     expect(firstReceipt).not.toContain("/Users/");
     expect(firstReceipt.toLowerCase()).not.toContain("timestamp");
     for (const path of [
