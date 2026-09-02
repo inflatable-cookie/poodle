@@ -18,7 +18,7 @@ tags: [coordination, handoff, worker, pr, g16, icon-geometry]
 
 ## What This Thread Was Doing
 
-Poodle accepted a renderer-neutral icon-geometry programme after the native
+Poodle recorded a renderer-neutral icon-geometry programme after the native
 feasibility spike. This handoff dispatches only `g16.049`: the deterministic
 24×24 stroke-geometry format, paired TypeScript/Rust normalizers, and curated
 generated registry foundation. It does not dispatch the runtime substrate,
@@ -32,8 +32,9 @@ part of the authority chain.
 Future icon continuity needs one reproducible geometry and provenance layer
 before any renderer receives a path frame. This card establishes that internal
 truth while keeping the current Icon, provider, nodes, packages, and public API
-unchanged. An accepted merge opens the separately reviewed `g16.050`; it does
-not itself admit a component or visual capability.
+unchanged. Once this foundation is merged, orchestrator review may continue
+with `g16.050`; candidate geometry remains fixture-only and this card does not
+admit a pair, component, or visual capability.
 
 ## Current State
 
@@ -48,7 +49,7 @@ Here is the state the worker is inheriting:
 - **Worker mode:** implementation worker dispatched by the orchestrator; this
   handoff activates the worker-only worktree preflight
 - **Planning artifacts included at the base:** merged PR #148, `g16.049`, the
-  canonical continuation runway, and the accepted icon-geometry programme
+  canonical continuation runway, and the operator-approved icon-geometry programme
 - **Worker branch:** `feat/g16-049-icon-geometry-foundation`
 - **Worker worktree:** `/Users/tom/.t3/worktrees/poodle/g16-049-icon-geometry-foundation`
 - **Worktree creation command:** fallback only:
@@ -109,7 +110,7 @@ Here is the state the worker is inheriting:
 - **PR URL:** pending
 - **Review state:** awaiting worker implementation and PR, then exact-head
   orchestrator review
-- **Merge path:** orchestrator after accepted review of the current head and
+- **Merge path:** orchestrator after exact-head review of the current head and
   passing required checks
 
 ## Boundaries
@@ -119,8 +120,9 @@ Please keep this run inside the named runway:
 - **In scope:** deliver every ordered-work, acceptance, evidence, and review-
   oracle row in `g16.049`: the architecture record; closed 24×24 stroke format;
   deterministic TypeScript/Rust normalization; shared positive/negative vectors;
-  curated 8–12-pair candidate manifest with distinct candidate/accepted/rejected
-  states; paired generated internal projections; provenance, notice, payload,
+  curated 8–12-pair candidate manifest with distinct candidate/rejected states
+  and an accepted state reserved for a later visual gate; paired generated
+  internal projections; provenance, notice, payload,
   drift, and clean-regeneration proof; one execution log and reviewable PR.
 - **Out of scope:** `g16.050` or `g16.051`; runtime planning/interpolation;
   clocks or scheduling; a geometry node; GPUI production painting; Svelte or
@@ -140,17 +142,17 @@ Please keep this run inside the named runway:
   report it instead of resolving it yourself.
 - Work only in the clean worker worktree selected by `Completion Protocol`.
   Never edit the planning checkout or an unrelated dirty checkout.
-- Do not merge the PR. Merge belongs to the orchestrator after its accepted
+- Do not merge the PR. Merge belongs to the orchestrator after its exact-head
   review/check gate.
 
 ## Important Context
 
 - **Planning lineage:** the native feasibility dossier proved dynamic GPUI path
-  construction but not production transport or pixels. The accepted icon-
+  construction but not production transport or pixels. The operator-approved icon-
   geometry packet funded a curated, renderer-neutral programme while keeping
   Icon static. PR #148 compiled IG-01/02 as `g16.049`; later runtime and visual
   stages remain serially blocked.
-- **Why this card is ready:** the accepted programme fixes the subset,
+- **Why this card is ready:** the operator-approved programme fixes the subset,
   canonical grid, contour/correspondence laws, budgets, provenance, public-
   surface exclusions, review counterexamples, and validation boundary.
 - **Decisions and preferences:** canonical endpoints stay separate from sampled
@@ -168,7 +170,7 @@ Please keep this run inside the named runway:
 ## Suggested Next Move
 
 Run the `Completion Protocol` preflight before broad reads. Then read
-`AGENTS.md`, the canonical continuation runway, `g16.049`, the accepted icon-
+`AGENTS.md`, the canonical continuation runway, `g16.049`, the operator-approved icon-
 geometry packet, Icon/IconProvider contracts, architecture 012, and the current
 icon generator/audit lineage. Start with the architecture and shared vector
 contract before writing generator or registry code.
@@ -240,7 +242,7 @@ generated artifacts, vector parity, and validation. Shared-identity review is
 posted as the canonical PR comment when formal self-approval is unavailable.
 Requested changes stay on this branch. Blocking classes are `execution-miss`,
 `oracle-gap`, `planning-change`, `validation-gap`, and `integration-drift`.
-Requested changes: none. The orchestrator alone merges an accepted, current,
+Requested changes: none. The orchestrator alone merges a current,
 mergeable head after required checks.
 
 - **Closeout refs:**
@@ -251,6 +253,7 @@ mergeable head after required checks.
 ### Handoff closeout
 
 Before calling the runway complete, leave the card, log, generated lineage,
-and next-task state honest. An accepted `g16.049` merge only unlocks
-orchestrator review of `g16.050`; it does not launch it or admit IconMorph. If
+and next-task state honest. Once the `g16.049` foundation is merged,
+orchestrator review may continue with `g16.050`; it does not launch it or admit
+IconMorph. Candidate geometry remains fixture-only. If
 blocked, record the blocker and stop.

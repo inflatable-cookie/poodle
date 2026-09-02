@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "normalizerVersion": "1.0.0",
+  "pairs": [
+    {
+      "id": "arrow-down-to-arrow-up",
+      "from": "arrow-down",
+      "to": "arrow-up",
+      "semantic": "directional-state",
+      "status": "candidate",
+      "quality": {
+        "review": "candidate",
+        "notes": "Structurally plannable; awaiting human visual review."
+      }
+    },
+    {
+      "id": "arrow-left-to-arrow-right",
+      "from": "arrow-left",
+      "to": "arrow-right",
+      "semantic": "directional-state",
+      "status": "candidate",
+      "quality": {
+        "review": "candidate",
+        "notes": "Structurally plannable; awaiting human visual review."
+      }
+    },
+    {
+      "id": "chevron-left-to-chevron-right",
+      "from": "chevron-left",
+      "to": "chevron-right",
+      "semantic": "directional-state",
+      "status": "candidate",
+      "quality": {
+        "review": "candidate",
+        "notes": "Structurally plannable; awaiting human visual review."
+      }
+    },
+    {
+      "id": "circle-to-dot",
+      "from": "circle",
+      "to": "dot",
+      "semantic": "shape-state",
+      "status": "candidate",
+      "quality": {
+        "review": "candidate",
+        "notes": "Structurally plannable; awaiting human visual review."
+      }
+    },
+    {
+      "id": "ellipsis-to-ellipsis-vertical",
+      "from": "ellipsis",
+      "to": "ellipsis-vertical",
+      "semantic": "orientation-state",
+      "status": "candidate",
+      "quality": {
+        "review": "candidate",
+        "notes": "Structurally plannable; awaiting human visual review."
+      }
+    },
+    {
+      "id": "home-to-arrow-left",
+      "from": "home",
+      "to": "arrow-left",
+      "semantic": "unsupported-boundary",
+      "status": "rejected",
+      "rejectionReason": "Alias resolves home to house, whose generated path uses unsupported curve commands.",
+      "quality": {
+        "review": "rejected",
+        "notes": "Alias canonicalization is retained as rejection evidence; no pair geometry is emitted."
+      }
+    },
+    {
+      "id": "lock-to-lock-open",
+      "from": "lock",
+      "to": "lock-open",
+      "semantic": "security-state",
+      "status": "rejected",
+      "rejectionReason": "Rounded rectangles and curve commands are outside the v1 normalizer subset.",
+      "quality": {
+        "review": "rejected",
+        "notes": "Static icon fallback remains the only result for this pair."
+      }
+    },
+    {
+      "id": "menu-to-ellipsis",
+      "from": "menu",
+      "to": "ellipsis",
+      "semantic": "overflow-state",
+      "status": "rejected",
+      "rejectionReason": "Open menu strokes and closed ellipsis dots have incompatible closure signatures.",
+      "quality": {
+        "review": "rejected",
+        "notes": "Closure mismatch is retained as explicit negative evidence; no pair geometry is emitted."
+      }
+    },
+    {
+      "id": "menu-to-x",
+      "from": "menu",
+      "to": "x",
+      "semantic": "dismiss-state",
+      "status": "rejected",
+      "rejectionReason": "Three open contours cannot correspond to two open contours without inventing topology.",
+      "quality": {
+        "review": "rejected",
+        "notes": "Numerical contour duplication is deliberately not allowed."
+      }
+    },
+    {
+      "id": "play-to-pause",
+      "from": "play",
+      "to": "pause",
+      "semantic": "transport-state",
+      "status": "rejected",
+      "rejectionReason": "Play uses unsupported curves and pause uses rounded rectangles with incompatible topology.",
+      "quality": {
+        "review": "rejected",
+        "notes": "The pair remains explicit negative evidence rather than an automatic fallback."
+      }
+    },
+    {
+      "id": "plus-to-x",
+      "from": "plus",
+      "to": "x",
+      "semantic": "toggle-state",
+      "status": "candidate",
+      "quality": {
+        "review": "candidate",
+        "notes": "Structurally plannable; awaiting human visual review."
+      }
+    },
+    {
+      "id": "volume-2-to-volume-x",
+      "from": "volume-2",
+      "to": "volume-x",
+      "semantic": "audio-state",
+      "status": "rejected",
+      "rejectionReason": "The shared speaker path uses unsupported curves and arcs.",
+      "quality": {
+        "review": "rejected",
+        "notes": "A valid static icon pair is not enough to approve geometry continuity."
+      }
+    }
+  ]
+}

@@ -1,10 +1,10 @@
 # g16.051 — Icon Geometry Native Visual Admission
 
-Status: blocked — requires accepted `g16.050`, an operational Button-only lab,
-and an accepted icon-geometry lab adapter/manifest extension
+Status: blocked — requires completed `g16.050`, an operational Button-only
+lab, and a completed icon-geometry lab adapter/manifest extension
 Type: external evidence / admission
 Opened: 2026-09-01
-Depends on: accepted `g16.050` and every serial gate in
+Depends on: completed `g16.050` and every serial gate in
 `../../triage/20260902-000958-conformance-lab-and-visual-gates.md`, including a
 separately planned, reviewed, authorized, and landed icon-geometry lab adapter
 and manifest extension
@@ -13,7 +13,7 @@ Governing refs: the icon-geometry architecture and evidence from `g16.049`–
 
 ## Goal
 
-Deliver IG-06 only: curate every accepted pair's intermediate geometry and
+Deliver IG-06 only: curate the candidate pairs' intermediate geometry and
 obtain exact-window GPUI visual evidence through the dedicated lab. Decide
 admit/revise/reject. Do not create the lab, run a local Poodle windowed selector,
 or add public IconMorph in this card.
@@ -40,9 +40,9 @@ or add public IconMorph in this card.
 
 ## Ordered Work
 
-1. Verify exact reviewed `g16.050` head, green headless evidence, accepted pair
+1. Verify the exact `g16.050` head, green headless evidence, candidate pair
    inventory, fixture hashes, comparison rules, operational Button MVP, and
-   the separately accepted icon adapter/manifest-extension receipts.
+   the separately completed icon adapter/manifest-extension receipts.
 2. Perform Poodle-owned intermediate-frame review in both directions.
 3. Through separately authorized lab operations, collect two exact-window
    receipts per named native state. Do not invoke a Poodle local selector.
@@ -53,8 +53,8 @@ or add public IconMorph in this card.
 
 ## Acceptance
 
-- Every accepted pair has complete reviewed web/headless/native evidence for
-  both directions and the named states.
+- Every pair admitted by this gate has complete reviewed web/headless/native
+  evidence for both directions and the named states.
 - Native capture is exact-window, non-activating, foreground-proved, sanitized,
   reproducible, and tied to immutable Poodle/lab/toolchain inputs.
 - Endpoint geometry, intermediate quality, stroke/color, frozen output,
@@ -69,7 +69,7 @@ or add public IconMorph in this card.
 | Invariant | Smallest counterexample | Required proof |
 | --- | --- | --- |
 | Headless is not pixels | GPUI path assertion passes, lab absent | status stays blocked; no native visual claim |
-| Button bootstrap is not icon support | operational Button MVP rejects an icon fixture ID | status stays blocked until the separately accepted icon adapter/manifest extension lands |
+| Button bootstrap is not icon support | operational Button MVP rejects an icon fixture ID | status stays blocked until the separately completed icon adapter/manifest extension lands |
 | Capture is exact and non-activating | foreground changes or desktop fallback | typed failure; bundle is rejected |
 | Repeats are deterministic | midpoint captures disagree | pair/state fails; no frame picking or averaging |
 | Pair quality is human-reviewed | numeric residual passes visible twist | explicit rejection despite numeric result |

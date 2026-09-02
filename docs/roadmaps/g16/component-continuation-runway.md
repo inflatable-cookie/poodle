@@ -41,7 +41,7 @@ These cards have complete boundaries and no unmet serial dependency:
 | --- | --- | --- | --- |
 | [`g16.045`](045-editable-label-editing-model-and-mounted-parity.md) | EditableLabel | contract, paired runtime implementation, mounted proof | one committed/draft editing model |
 | [`g16.046`](046-block-slider-and-range-slider-appearance.md) | Slider / RangeSlider | additive appearance contract and active-runtime implementation | opt-in horizontal block treatment |
-| [`g16.049`](049-icon-geometry-format-and-registry-foundation.md) | icon geometry IG-01/02 | internal architecture, format, vectors, generated registry | validated internal geometry foundation |
+| [`g16.049`](049-icon-geometry-format-and-registry-foundation.md) | icon geometry IG-01/02 | internal architecture, format, vectors, generated registry | validated candidate geometry foundation; no runtime-eligible pair |
 
 These three lanes are independently dispatchable after this planning PR is accepted.
 If implementation discovers shared barrel, registry, contract, or generated
@@ -52,8 +52,8 @@ Global g16 front-door and closeout edits remain orchestrator-owned.
 
 | Card or continuation | State | Opens when | Fixed boundary |
 | --- | --- | --- | --- |
-| [`g16.050`](050-icon-geometry-internal-runtime-substrate.md) | blocked | accepted `g16.049` | IG-03–IG-05; internal plan, node/GPUI headless proof, private web shells |
-| [`g16.051`](051-icon-geometry-native-visual-admission.md) | blocked | accepted `g16.050`, operational Button lab, and separately accepted icon adapter/manifest extension | IG-06 native visual admission only |
+| [`g16.050`](050-icon-geometry-internal-runtime-substrate.md) | blocked | merged `g16.049` foundation | IG-03–IG-05; candidate geometry as internal fixtures only; internal plan, node/GPUI headless proof, private web shells |
+| [`g16.051`](051-icon-geometry-native-visual-admission.md) | blocked | completed `g16.050`, operational Button lab, and separately completed icon adapter/manifest extension | IG-06 native visual admission only |
 | [`g16.052`](052-contributor-design-guidance-pilot.md) | gated | named human reviewers, two freeze approvals, and orchestrator execution custody | finite matched pilot; no ordinary worker judgment |
 | [`g16.054`](054-historycenter-v030-release-candidate.md) | blocked | `g16.053` is complete; an accepted, separately promoted compiled-JS/declarations prerequisite whose mechanics remain unplanned is still missing | immutable `0.3.0` candidate and validation evidence; no release mutation |
 | IconMorph public admission | gated | `g16.051` returns an admit verdict | IG-07 requires a later explicit public card |

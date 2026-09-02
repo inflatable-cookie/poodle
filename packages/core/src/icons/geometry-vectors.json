@@ -1,0 +1,395 @@
+{
+  "schemaVersion": 1,
+  "vectors": [
+    {
+      "id": "path-relative-and-commands",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "m2 12h8v-4l4 4z"}]]
+      },
+      "expect": {
+        "left": {
+          "status": "accepted",
+          "contourCount": 1,
+          "closed": [true],
+          "segmentCounts": [4],
+          "canonicalPoints": [[[20000, 120000], [100000, 120000], [100000, 80000], [140000, 120000]]],
+          "wireDigest": "d8890248c59f8211"
+        }
+      }
+    },
+    {
+      "id": "primitive-elements",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [
+          ["line", {"x1": "2", "y1": "2", "x2": "6", "y2": "2"}],
+          ["polyline", {"points": "8,2 10,4 8,6"}],
+          ["polygon", {"points": "12,2 16,2 14,6"}],
+          ["rect", {"x": "18", "y": "2", "width": "4", "height": "4"}]
+        ]
+      },
+      "expect": {
+        "left": {
+          "status": "accepted",
+          "contourCount": 4,
+          "closed": [false, false, true, true],
+          "segmentCounts": [1, 2, 3, 4],
+          "wireDigest": "a6b3b493d1504d54"
+        }
+      }
+    },
+    {
+      "id": "malformed-attribute-hex-number",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["line", {"x1": "0x10", "y1": "2", "x2": "20", "y2": "2"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "invalid-number"}}
+    },
+    {
+      "id": "malformed-attribute-binary-number",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["line", {"x1": "0b10", "y1": "2", "x2": "20", "y2": "2"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "invalid-number"}}
+    },
+    {
+      "id": "malformed-attribute-trailing-number",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["rect", {"x": "2", "y": "2", "width": "4px", "height": "4"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "invalid-number"}}
+    },
+    {
+      "id": "attribute-number-grammar",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["line", {"x1": " 2 ", "y1": ".5", "x2": "2e1", "y2": "2."}]]
+      },
+      "expect": {
+        "left": {
+          "status": "accepted",
+          "contourCount": 1,
+          "closed": [false],
+          "segmentCounts": [1],
+          "canonicalPoints": [[[20000, 5000], [200000, 20000]]],
+          "wireDigest": "50582f5d95f4252c"
+        }
+      }
+    },
+    {
+      "id": "circle-and-ellipse",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [
+          ["circle", {"cx": "6", "cy": "6", "r": "3"}],
+          ["ellipse", {"cx": "16", "cy": "16", "rx": "4", "ry": "2"}]
+        ]
+      },
+      "expect": {
+        "left": {
+          "status": "accepted",
+          "contourCount": 2,
+          "closed": [true, true],
+          "segmentCounts": [32, 32],
+          "wireDigest": "30494cadafe64aa6"
+        }
+      }
+    },
+    {
+      "id": "reverse-open-correspondence",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M2 12L8 4L14 12"}]]
+      },
+      "right": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M14 12L8 4L2 12"}]]
+      },
+      "expect": {
+        "left": {"status": "accepted", "contourCount": 1, "closed": [false], "segmentCounts": [2], "wireDigest": "bd9352167c5658ae"},
+        "right": {"status": "accepted", "contourCount": 1, "closed": [false], "segmentCounts": [2], "wireDigest": "93e658faec7c7808"},
+        "pair": {
+          "status": "accepted",
+          "reversed": [true],
+          "offsets": [63],
+          "oracle": {
+            "leftDigest": "bd9352167c5658ae",
+            "rightDigest": "93e658faec7c7808",
+            "pairDigest": "3d5068f01f9e23a5",
+            "mappings": [{"leftIndex": 0, "rightIndex": 0, "reversed": true, "offset": 63, "costMicros": 0}],
+            "costMicros": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "closed-loop-offset",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M12 4L20 12L12 20L4 12Z"}]]
+      },
+      "right": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M20 12L12 20L4 12L12 4Z"}]]
+      },
+      "expect": {
+        "left": {"status": "accepted", "contourCount": 1, "closed": [true], "segmentCounts": [4], "wireDigest": "1f0e170ba4a42ad1"},
+        "right": {"status": "accepted", "contourCount": 1, "closed": [true], "segmentCounts": [4], "wireDigest": "ceb14e664203d591"},
+        "pair": {
+          "status": "accepted",
+          "reversed": [false],
+          "offsets": [48],
+          "oracle": {
+            "leftDigest": "1f0e170ba4a42ad1",
+            "rightDigest": "ceb14e664203d591",
+            "pairDigest": "3126562101d000af",
+            "mappings": [{"leftIndex": 0, "rightIndex": 0, "reversed": false, "offset": 48, "costMicros": 0}],
+            "costMicros": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "mixed-closure-cross-cost",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [
+          ["path", {"d": "M2 2L10 2L10 10L2 10"}],
+          ["path", {"d": "M14 14L18 14L18 18L14 18Z"}]
+        ]
+      },
+      "right": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [
+          ["path", {"d": "M14 14L18 14L18 18L14 18"}],
+          ["path", {"d": "M2 2L10 2L10 10L2 10Z"}]
+        ]
+      },
+      "expect": {
+        "left": {"status": "accepted", "contourCount": 2, "closed": [false, true], "segmentCounts": [3, 4], "wireDigest": "31857b84b5591104"},
+        "right": {"status": "accepted", "contourCount": 2, "closed": [false, true], "segmentCounts": [3, 4], "wireDigest": "89594a79653db06d"},
+        "pair": {
+          "status": "accepted",
+          "reversed": [false, false],
+          "offsets": [0, 0],
+          "oracle": {
+            "leftDigest": "31857b84b5591104",
+            "rightDigest": "89594a79653db06d",
+            "pairDigest": "56a3f427c3c87d1f",
+            "mappings": [
+              {"leftIndex": 0, "rightIndex": 0, "reversed": false, "offset": 0, "costMicros": 1822668},
+              {"leftIndex": 1, "rightIndex": 1, "reversed": false, "offset": 0, "costMicros": 2029089}
+            ],
+            "costMicros": 3851756
+          }
+        }
+      }
+    },
+    {
+      "id": "topology-mismatch",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [
+          ["path", {"d": "M4 5h16"}],
+          ["path", {"d": "M4 12h16"}],
+          ["path", {"d": "M4 19h16"}]
+        ]
+      },
+      "right": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [
+          ["path", {"d": "M18 6L6 18"}],
+          ["path", {"d": "M6 6l12 12"}]
+        ]
+      },
+      "expect": {
+        "left": {"status": "accepted", "contourCount": 3, "closed": [false, false, false], "segmentCounts": [1, 1, 1], "wireDigest": "3df204f832890d0b"},
+        "right": {"status": "accepted", "contourCount": 2, "closed": [false, false], "segmentCounts": [1, 1], "wireDigest": "42cefd2b6120c59b"},
+        "pair": {"status": "rejected", "code": "pair-contour-count"}
+      }
+    },
+    {
+      "id": "closure-mismatch",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M4 4L20 4L20 20"}]]
+      },
+      "right": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M4 4L20 4L20 20Z"}]]
+      },
+      "expect": {
+        "left": {"status": "accepted", "contourCount": 1, "closed": [false], "segmentCounts": [2], "wireDigest": "8d202cc076ee83fa"},
+        "right": {"status": "accepted", "contourCount": 1, "closed": [true], "segmentCounts": [3], "wireDigest": "4c566dc9cf875a82"},
+        "pair": {"status": "rejected", "code": "pair-closure"}
+      }
+    },
+    {
+      "id": "off-grid-view-box",
+      "left": {
+        "viewBox": [0, 0, 23, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M2 12L22 12"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "invalid-view-box"}}
+    },
+    {
+      "id": "transformed-element",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["line", {"x1": "2", "y1": "12", "x2": "22", "y2": "12", "transform": "rotate(45 12 12)"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "unsupported-transform"}}
+    },
+    {
+      "id": "unsupported-curve-command",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M2 12C6 2 18 2 22 12"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "unsupported-path-command"}}
+    },
+    {
+      "id": "paint-boundary",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 1,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M2 12L22 12"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "invalid-paint"}}
+    },
+    {
+      "id": "malformed-path",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["path", {"d": "M2 12L"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "malformed-path"}}
+    },
+    {
+      "id": "unsupported-element",
+      "left": {
+        "viewBox": [0, 0, 24, 24],
+        "fill": "none",
+        "stroke": "currentColor",
+        "strokeWidth": 2,
+        "strokeLinecap": "round",
+        "strokeLinejoin": "round",
+        "nodes": [["g", {"children": "path"}]]
+      },
+      "expect": {"left": {"status": "rejected", "code": "unsupported-element"}}
+    }
+  ]
+}
