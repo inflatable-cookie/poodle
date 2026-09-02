@@ -61,13 +61,17 @@ one execution log.
 ## Execution Result
 
 The contract phase gate passed for the active Svelte, React, shared Rust, and
-GPUI paths. The bounded smoke run then closed on the packet's hard-stop rule:
+GPUI paths. The repaired bounded smoke run then closed on the packet's
+hard-stop rule. Each receipt now records explicit `baseline`, `observed`, or
+`lifecycle` artifact phases and passes the receipt-integrity gate: 144 refs,
+144 unique paths, no missing files, no hash mismatches, and no conflicting path
+digests.
 
 | Engine receipt | Cells | Failed cells | Lifecycle runs | Failed lifecycle |
 | --- | ---: | ---: | ---: | ---: |
-| Chromium `151.0.7922.34` | 8 | 2 | 8 | 0 |
-| Firefox `153.0` | 8 | 5 | 8 | 0 |
-| WebKit `26.5` | 8 | 8 | 8 | 0 |
+| Chromium `20260902004348` (`151.0.7922.34`) | 8 | 2 | 8 | 0 |
+| Firefox `20260902004506` (`153.0`) | 8 | 5 | 8 | 0 |
+| WebKit `20260902004622` (`26.5`) | 8 | 8 | 8 | 0 |
 
 The cell shape was `C1/N1/320/Eclipse/desktop/DPR1`, across Svelte and React,
 with static, background-position, mask-transform, and background-clip
