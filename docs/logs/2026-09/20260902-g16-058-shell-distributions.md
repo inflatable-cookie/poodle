@@ -77,7 +77,7 @@ All plants restored. Focused tests repeat them against disposable fixtures.
 
 - `effigy test:shell-build` — 31 pass / 0 fail (driver, svelte-build,
   react-build, shell-smoke; compiler/shim oracle 30s subprocess / 60s test)
-- `effigy test:web-pack-install` / `ci:web` pack-install — 10 files / 19 tests
+- `effigy test:web-pack-install` / `ci:web` pack-install — 10 files / 20 tests
   plus HistoryEntry / Slider / Tree type proofs; roster root 171
 - `effigy ci:web` — `test:components` 376 files / 3606 tests; public Svelte
   surface 171; svelte-check 0 errors
@@ -93,9 +93,9 @@ All plants restored. Focused tests repeat them against disposable fixtures.
   Node. Existing HistoryEntry/Slider/Tree React proofs also required
   `src/types.ts`. This card pinned the existing consumer to `5.56.8`, stubbed
   CSS the same way the disposable smoke already does, and retargeted those
-  proofs to `dist/*.d.ts`. The packed React AgentPlan root-mount left with the
-  171-root split. No 059 receipt, below-floor negative, or new certification
-  probe.
+  proofs to `dist/*.d.ts`. The packed React AgentPlan/AgentPlanRecord mount
+  retargets to `/markdown` with optional `marked ^18.0.9` in that consumer. No
+  059 receipt, below-floor negative, or new certification probe.
 - `ci:web` runs `svelte:package` and `react:package` before pack-install
   because archives are `dist`-only.
 - Chunk JS must not be named `*.svelte.client.js` or installed

@@ -872,6 +872,7 @@ const consumerManifest = {
     react: "18.0.0",
     "react-dom": "18.0.0",
     svelte: "5.56.8",
+    marked: "^18.0.9",
   },
   overrides: tarballDependencies,
   devDependencies: {
@@ -1055,6 +1056,8 @@ const evidence = {
         "ModelConnectionCard",
         "ModelCatalogueEditor",
         "MeterSurface",
+        "AgentPlan",
+        "AgentPlanRecord",
       ],
       publicImportsOnly: true,
       licenceStyleSubpath: true,
