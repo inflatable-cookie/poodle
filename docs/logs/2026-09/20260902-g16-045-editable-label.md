@@ -55,14 +55,19 @@ plus spec `request_focus` on the next view paint.
 
 ## Oracle falsification
 
-Recorded after the implementation commit, then restored.
+Planted after `b4a822a4b`, confirmed intended proofs failed, then restored with
+`git checkout HEAD --` on the four files. Clean tree after restore.
 
-| Invariant | Plant | Failure |
+| Invariant | Plant | Actual failure |
 | --- | --- | --- |
-| Committed and draft stay distinct | native paint uses committed `value` while editing | mounted oracle: painted `"Kick"` not `"Kicks"` |
-| Trim is portable | JS `String.trim` / Rust `str::trim` as authority | NEL/BOM `\u0085Take\uFEFF` stays untrimmed in the language-native plant |
-| Length is scalar-based | HTML `maxlength={1}` / no scalar clamp | insert `𝄞` then `A` keeps `𝄞A` |
-| Teardown is silent | unmount blur commits | unmount-while-editing test sees a commit |
+| Distinct committed/draft | renderer paints `spec.value` instead of `live_text()` while editing | `editable_label_live_draft_stays_off_the_committed_value`: `left: "Kick"` `right: "Kicks"` |
+| Portable trim (JS) | `trimEditableLabel` = `value.trim()` | `edit-code-token`: Expected `"Take"`, Received `"\u0085Take"`. Svelte commit: `onCommit` `{ value: "\u0085Take", previousValue: "Kick" }` |
+| Portable trim (Rust) | `trim_editable_label` = `value.trim()` | `portable_trim_drops_nel_and_bom_that_str_trim_does_not_both_drop`: `left: "Take\u{feff}"` `right: "Take"` |
+| Scalar length | Svelte `maxlength={maxLength}` | `clamps maxLength to Unicode scalar values`: `expected true to be false` at `input.hasAttribute("maxlength")` |
+| Silent teardown | `onDestroy` sends `COMMIT_BLUR` | `emits neither commit nor cancel when unmounted while editing`: `onCommit` called once with `{ previousValue: "Kick", value: "Kicks" }` |
+
+Tab-via-blur, activation, name, and handle oracles already fail on the focused
+web tests without extra plants; g16.008 still owns the mounted Tab routing test.
 
 ## Validation
 
