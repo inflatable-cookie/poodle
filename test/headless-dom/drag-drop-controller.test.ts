@@ -392,6 +392,7 @@ describe("createDragDropController", () => {
     controller.registerTarget(targetEl, targetReg());
 
     twisty.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("");
     twisty.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
     expect(controller.getSnapshot().phase).toBe("idle");
     controller.destroy();
@@ -409,6 +410,7 @@ describe("createDragDropController", () => {
     controller.registerTarget(targetEl, targetReg());
 
     button.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("");
     button.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
     expect(controller.getSnapshot().phase).toBe("idle");
     controller.destroy();
@@ -427,6 +429,7 @@ describe("createDragDropController", () => {
     controller.registerTarget(targetEl, targetReg());
 
     editor.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("");
     editor.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
     expect(controller.getSnapshot().phase).toBe("idle");
     controller.destroy();
@@ -1573,6 +1576,308 @@ describe("createDragDropController", () => {
     first.destroy();
     second.destroy();
     document.body.style.removeProperty("user-select");
+  });
+
+  it("suppresses root user-select on accepted pointerdown before activation", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    expect(root.style.getPropertyValue("-webkit-user-select")).toBe("none");
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    sourceEl.dispatchEvent(pointer("pointermove", { clientX: 22, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    expect(controller.getSnapshot().phase).toBe("dragging");
+
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("");
+    controller.destroy();
+  });
+
+  it("restores empty, text, and authored user-select after a pre-threshold release", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    for (const authored of ["", "text", "all"] as const) {
+      if (authored === "") root.style.removeProperty("user-select");
+      else root.style.setProperty("user-select", authored);
+
+      sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+      expect(root.style.getPropertyValue("user-select")).toBe("none");
+      expect(controller.getSnapshot().phase).toBe("idle");
+
+      document.dispatchEvent(pointer("pointerup", { clientX: 20, clientY: 20 }));
+      expect(root.style.getPropertyValue("user-select")).toBe(authored);
+      expect(root.style.getPropertyPriority("user-select")).toBe("");
+      expect(controller.getSnapshot().phase).toBe("idle");
+    }
+
+    controller.destroy();
+    root.style.removeProperty("user-select");
+  });
+
+  it("restores authored user-select after cancel, source loss, disconnect, and destroy", () => {
+    root.style.setProperty("user-select", "text");
+
+    const cancelled = createDragDropController();
+    cancelled.connect(root);
+    cancelled.registerSource(sourceEl, sourceReg());
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    document.dispatchEvent(pointer("pointercancel", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("text");
+    cancelled.destroy();
+
+    const escaped = createDragDropController();
+    escaped.connect(root);
+    escaped.registerSource(sourceEl, sourceReg());
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(root.style.getPropertyValue("user-select")).toBe("text");
+    escaped.destroy();
+
+    const lost = createDragDropController();
+    lost.connect(root);
+    const handle = lost.registerSource(sourceEl, sourceReg());
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    handle.unregister();
+    expect(root.style.getPropertyValue("user-select")).toBe("text");
+    lost.destroy();
+
+    const disconnected = createDragDropController();
+    const disconnect = disconnected.connect(root);
+    disconnected.registerSource(sourceEl, sourceReg());
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    disconnect();
+    expect(root.style.getPropertyValue("user-select")).toBe("text");
+    disconnected.destroy();
+
+    const destroyed = createDragDropController();
+    destroyed.connect(root);
+    destroyed.registerSource(sourceEl, sourceReg());
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    destroyed.destroy();
+    expect(root.style.getPropertyValue("user-select")).toBe("text");
+
+    const later = createDragDropController();
+    later.connect(root);
+    later.registerSource(sourceEl, sourceReg());
+    later.registerTarget(targetEl, targetReg());
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    expect(later.getSnapshot().phase).toBe("dragging");
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("text");
+    later.destroy();
+    root.style.removeProperty("user-select");
+  });
+
+  it("restores authored user-select and -webkit-user-select including !important", () => {
+    root.style.setProperty("user-select", "text", "important");
+    root.style.setProperty("-webkit-user-select", "all", "important");
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    expect(root.style.getPropertyValue("-webkit-user-select")).toBe("none");
+
+    document.dispatchEvent(pointer("pointerup", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("text");
+    expect(root.style.getPropertyPriority("user-select")).toBe("important");
+    expect(root.style.getPropertyValue("-webkit-user-select")).toBe("all");
+    expect(root.style.getPropertyPriority("-webkit-user-select")).toBe("important");
+    controller.destroy();
+
+    root.style.removeProperty("user-select");
+    root.style.removeProperty("-webkit-user-select");
+  });
+
+  it("does not suppress user-select for a disabled source or a secondary button", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg({ disabled: true }));
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("");
+    controller.destroy();
+
+    const armed = createDragDropController();
+    armed.connect(root);
+    armed.registerSource(sourceEl, sourceReg());
+    sourceEl.dispatchEvent(pointer("pointerdown", { button: 2, buttons: 2, clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("");
+    armed.destroy();
+  });
+
+  it("suppresses user-select for a touch candidate and restores after tolerance cancel", () => {
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { pointerType: "touch", clientX: 20, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("none");
+    expect(controller.getSnapshot().phase).toBe("idle");
+
+    document.dispatchEvent(pointer("pointermove", { pointerType: "touch", clientX: 40, clientY: 20 }));
+    expect(root.style.getPropertyValue("user-select")).toBe("");
+    expect(controller.getSnapshot().phase).toBe("idle");
+    controller.destroy();
+  });
+
+  it("consumes the source compatibility click after an activated pointer gesture", () => {
+    const saw = vi.fn();
+    sourceEl.addEventListener("click", saw);
+
+    const outcomes: Array<{
+      name: string;
+      onDrop: DropTargetRegistration["onDrop"];
+      up: PointerEventInit;
+    }> = [
+      { name: "committed", onDrop: () => ({ status: "committed" }), up: { clientX: 30, clientY: 90 } },
+      { name: "rejected", onDrop: () => ({ status: "rejected", reason: "occupied" }), up: { clientX: 30, clientY: 90 } },
+      { name: "failed", onDrop: () => ({ status: "failed", reason: "io" }), up: { clientX: 30, clientY: 90 } },
+      { name: "cancelled", onDrop: () => ({ status: "committed" }), up: { clientX: 30, clientY: 400 } },
+    ];
+
+    for (const outcome of outcomes) {
+      saw.mockClear();
+      const controller = createDragDropController();
+      controller.connect(root);
+      controller.registerSource(sourceEl, sourceReg());
+      controller.registerTarget(targetEl, targetReg({ onDrop: outcome.onDrop }));
+
+      sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+      sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+      expect(controller.getSnapshot().phase).toBe("dragging");
+      document.dispatchEvent(pointer("pointerup", outcome.up));
+      const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+      sourceEl.dispatchEvent(click);
+      expect(saw, outcome.name).not.toHaveBeenCalled();
+      expect(click.defaultPrevented, outcome.name).toBe(true);
+      controller.destroy();
+    }
+  });
+
+  it("does not consume a tap or pre-threshold click", () => {
+    const saw = vi.fn();
+    sourceEl.addEventListener("click", saw);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 20, clientY: 20 }));
+    const tap = new MouseEvent("click", { bubbles: true, cancelable: true });
+    sourceEl.dispatchEvent(tap);
+    expect(saw).toHaveBeenCalledTimes(1);
+    expect(tap.defaultPrevented).toBe(false);
+
+    saw.mockClear();
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    sourceEl.dispatchEvent(pointer("pointermove", { clientX: 22, clientY: 20 }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 22, clientY: 20 }));
+    const subThreshold = new MouseEvent("click", { bubbles: true, cancelable: true });
+    sourceEl.dispatchEvent(subThreshold);
+    expect(saw).toHaveBeenCalledTimes(1);
+    expect(subThreshold.defaultPrevented).toBe(false);
+    controller.destroy();
+  });
+
+  it("prevents the compatibility click default on a registered link source", () => {
+    const link = layout(document.createElement("a"), SOURCE_BOX);
+    link.setAttribute("href", "#compat-click");
+    link.textContent = "Alpha";
+    root.replaceChildren(link, targetEl);
+    const hashBefore = window.location.hash;
+
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(link, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    link.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    link.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    expect(controller.getSnapshot().phase).toBe("dragging");
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    link.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    expect(window.location.hash).toBe(hashBefore);
+    expect(window.location.hash).not.toBe("#compat-click");
+    controller.destroy();
+
+    const tapController = createDragDropController();
+    tapController.connect(root);
+    tapController.registerSource(link, sourceReg());
+    link.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 20, clientY: 20 }));
+    const tap = new MouseEvent("click", { bubbles: true, cancelable: true });
+    link.dispatchEvent(tap);
+    expect(tap.defaultPrevented).toBe(false);
+    tapController.destroy();
+  });
+
+  it("expires a stale compatibility-click guard before a later click", async () => {
+    const saw = vi.fn();
+    sourceEl.addEventListener("click", saw);
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(targetEl, targetReg());
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 20 }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    sourceEl.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect(saw).toHaveBeenCalledTimes(1);
+    controller.destroy();
+  });
+
+  it("consumes the compatibility click before an async drop settles", () => {
+    const saw = vi.fn();
+    sourceEl.addEventListener("click", saw);
+    let finish: ((result: { status: "committed" }) => void) | undefined;
+    const controller = createDragDropController();
+    controller.connect(root);
+    controller.registerSource(sourceEl, sourceReg());
+    controller.registerTarget(
+      targetEl,
+      targetReg({
+        onDrop: () =>
+          new Promise((resolve) => {
+            finish = resolve;
+          }),
+      }),
+    );
+
+    sourceEl.dispatchEvent(pointer("pointerdown", { clientX: 20, clientY: 20 }));
+    sourceEl.dispatchEvent(pointer("pointermove", { clientX: 30, clientY: 90 }));
+    document.dispatchEvent(pointer("pointerup", { clientX: 30, clientY: 90 }));
+    expect(controller.getSnapshot().phase).toBe("dropping");
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    sourceEl.dispatchEvent(click);
+    expect(saw).not.toHaveBeenCalled();
+    expect(click.defaultPrevented).toBe(true);
+    finish?.({ status: "committed" });
+    expect(saw).not.toHaveBeenCalled();
+    controller.destroy();
   });
 
   it("captures an SVG source after activation", () => {

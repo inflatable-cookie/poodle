@@ -600,6 +600,178 @@ describe("Tree row metadata (react)", () => {
     expect(onReorder).not.toHaveBeenCalled();
   });
 
+  it("selects a reorderable row on click without committing a drag", () => {
+    const onReorder = vi.fn();
+    const onSelectionChange = vi.fn();
+    const { container } = render(
+      <Tree
+        nodes={nested}
+        expandedValues={["src"]}
+        reorderable
+        onReorder={onReorder}
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    const rows = layoutTree(container);
+    const row = rows.get("a.ts")!;
+    const item = container.querySelector<HTMLElement>('[data-value="a.ts"]')!;
+    const provider = container.querySelector<HTMLElement>(".poodle-drag-drop-provider")!;
+    const y = row.getBoundingClientRect().top + 4;
+
+    act(() => {
+      row.dispatchEvent(pointer("pointerdown", { clientY: y }));
+    });
+    expect(provider.style.getPropertyValue("user-select")).toBe("none");
+    act(() => {
+      document.dispatchEvent(pointer("pointerup", { clientY: y }));
+    });
+    expect(provider.style.getPropertyValue("user-select")).toBe("");
+
+    fireEvent.click(item);
+    expect(onSelectionChange).toHaveBeenCalledTimes(1);
+    expect(onSelectionChange).toHaveBeenCalledWith(["a.ts"]);
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("does not suppress root selection when pressing a rename field", () => {
+    const onReorder = vi.fn();
+    const { container } = render(
+      <Tree
+        nodes={nested}
+        expandedValues={["src"]}
+        reorderable
+        editingValue="a.ts"
+        onReorder={onReorder}
+      />,
+    );
+    layoutTree(container);
+    const provider = container.querySelector<HTMLElement>(".poodle-drag-drop-provider")!;
+    const rename = container.querySelector(".poodle-tree__rename") as HTMLInputElement;
+
+    act(() => {
+      rename.dispatchEvent(pointer("pointerdown", { clientY: 54 }));
+    });
+    expect(provider.style.getPropertyValue("user-select")).toBe("");
+    rename.setSelectionRange(0, 2);
+    expect(rename.selectionStart).toBe(0);
+    expect(rename.selectionEnd).toBe(2);
+    act(() => {
+      document.dispatchEvent(pointer("pointerup", { clientY: 54 }));
+    });
+    expect(onReorder).not.toHaveBeenCalled();
+  });
+
+  it("does not select a row from an activated drag's compatibility click", () => {
+    const onReorder = vi.fn();
+    const onSelectionChange = vi.fn();
+    const { container } = render(
+      <Tree nodes={files} reorderable onReorder={onReorder} onSelectionChange={onSelectionChange} />,
+    );
+    const rows = layoutTree(container);
+    const item = container.querySelector<HTMLElement>('[data-value="a.ts"]')!;
+
+    drag(rows.get("a.ts")!, rows.get("c.ts")!.getBoundingClientRect().top + 4);
+    act(() => {
+      item.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    });
+    expect(onReorder).toHaveBeenCalledTimes(1);
+    expect(onSelectionChange).not.toHaveBeenCalled();
+  });
+
+  it("does not select after rejected, failed, or cancelled activated drags", () => {
+    const onSelectionChange = vi.fn();
+    const rejected = authority({
+      onDrop: () => ({ status: "rejected", reason: "occupied" }),
+    });
+    const first = render(
+      <Tree nodes={files} reorderable reorderAuthority={rejected} onSelectionChange={onSelectionChange} />,
+    );
+    const rows = layoutTree(first.container);
+    drag(rows.get("a.ts")!, rows.get("c.ts")!.getBoundingClientRect().top + 4);
+    act(() => {
+      first.container.querySelector<HTMLElement>('[data-value="a.ts"]')!.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+    });
+    expect(onSelectionChange).not.toHaveBeenCalled();
+    first.unmount();
+
+    const failed = authority({
+      onDrop: () => ({ status: "failed", reason: "io" }),
+    });
+    const again = render(
+      <Tree nodes={files} reorderable reorderAuthority={failed} onSelectionChange={onSelectionChange} />,
+    );
+    const failedRows = layoutTree(again.container);
+    drag(failedRows.get("a.ts")!, failedRows.get("c.ts")!.getBoundingClientRect().top + 4);
+    act(() => {
+      again.container.querySelector<HTMLElement>('[data-value="a.ts"]')!.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+    });
+    expect(onSelectionChange).not.toHaveBeenCalled();
+    again.unmount();
+
+    const onReorder = vi.fn();
+    const cancelled = render(
+      <Tree nodes={files} reorderable onReorder={onReorder} onSelectionChange={onSelectionChange} />,
+    );
+    const cancelRows = layoutTree(cancelled.container);
+    const source = cancelRows.get("a.ts")!;
+    act(() => {
+      source.dispatchEvent(pointer("pointerdown", { clientY: source.getBoundingClientRect().top + 4 }));
+      document.dispatchEvent(pointer("pointermove", { clientY: 90 }));
+      document.dispatchEvent(pointer("pointerup", { clientY: 800 }));
+      cancelled.container.querySelector<HTMLElement>('[data-value="a.ts"]')!.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+    });
+    expect(onReorder).not.toHaveBeenCalled();
+    expect(onSelectionChange).not.toHaveBeenCalled();
+    cancelled.unmount();
+  });
+
+  it("still selects after a stale activated-drag click guard expires", async () => {
+    const onReorder = vi.fn();
+    const onSelectionChange = vi.fn();
+    const { container } = render(
+      <Tree nodes={files} reorderable onReorder={onReorder} onSelectionChange={onSelectionChange} />,
+    );
+    const rows = layoutTree(container);
+    drag(rows.get("a.ts")!, rows.get("c.ts")!.getBoundingClientRect().top + 4);
+    expect(onReorder).toHaveBeenCalledTimes(1);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fireEvent.click(container.querySelector<HTMLElement>('[data-value="a.ts"]')!);
+    expect(onSelectionChange).toHaveBeenCalledTimes(1);
+    expect(onSelectionChange).toHaveBeenCalledWith(["a.ts"]);
+  });
+
+  it("does not select from a compatibility click before an async drop settles", async () => {
+    const onSelectionChange = vi.fn();
+    let finish: ((result: { status: "committed" }) => void) | undefined;
+    const host = authority({
+      onDrop: () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        }),
+    });
+    const { container } = render(
+      <Tree nodes={files} reorderable reorderAuthority={host} onSelectionChange={onSelectionChange} />,
+    );
+    const rows = layoutTree(container);
+    drag(rows.get("a.ts")!, rows.get("c.ts")!.getBoundingClientRect().top + 4);
+    act(() => {
+      container.querySelector<HTMLElement>('[data-value="a.ts"]')!.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+    });
+    expect(onSelectionChange).not.toHaveBeenCalled();
+    await act(async () => {
+      finish?.({ status: "committed" });
+    });
+    expect(onSelectionChange).not.toHaveBeenCalled();
+  });
+
   it("prefers a nested descendant when ancestor and descendant both contain the pointer", () => {
     const onReorder = vi.fn();
     const { container } = render(

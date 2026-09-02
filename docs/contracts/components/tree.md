@@ -1,7 +1,7 @@
 # Tree
 
 Status: detailed contract
-Updated: 2026-09-01
+Updated: 2026-09-02
 
 ## 1. Purpose
 
@@ -104,7 +104,9 @@ Updated: 2026-09-01
   `requestKeyboardDrop` over the visible logical target catalogue; it does
   not call `onReorder` directly. Space/Enter remain selection/activation.
   The shared `reorder_nodes(nodes, from, to, position)` helper performs the
-  move (no-op for self / missing / dropping into own subtree). Svelte and
+  move (no-op for self / missing / dropping into own subtree). An activated
+  pointer drag does not deliver a trailing row click or selection change; a tap
+  or pre-threshold release still selects. Svelte and
   React use the shared web drag substrate (source/focus owner on the
   `treeitem`, pointer/touch on the row handle, no HTML `DataTransfer`). GPUI
   uses `on_drag`/`on_drop`/`drag_over`; Jetstream tracks mouse down→up over

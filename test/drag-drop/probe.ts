@@ -323,6 +323,36 @@ async function run(page: Page, name: string, cdp: CDPSession | null): Promise<vo
   );
 
   await page.reload({ waitUntil: "load" });
+  await page.locator("#link-source").waitFor();
+  const hashBefore = await page.evaluate(() => location.hash);
+  const link = center(await box(page, "#link-source"));
+  const linkDrop = center(await box(page, "#target"));
+  await page.mouse.move(link.x, link.y);
+  await page.mouse.down();
+  await page.mouse.move(link.x + 28, link.y, { steps: 8 });
+  await waitProbe(page, "phase", "dragging");
+  await page.mouse.move(linkDrop.x, linkDrop.y, { steps: 8 });
+  await page.mouse.up();
+  await frames(page);
+  const hashAfterDrag = await page.evaluate(() => location.hash);
+  check(
+    `${name}: activated drag of a link source does not follow the compatibility click href`,
+    hashAfterDrag === hashBefore && hashAfterDrag !== "#compat-click",
+    `hash=${hashAfterDrag || "(empty)"}`,
+  );
+
+  await page.reload({ waitUntil: "load" });
+  await page.locator("#link-source").waitFor();
+  await page.locator("#link-source").click();
+  await frames(page);
+  const hashAfterTap = await page.evaluate(() => location.hash);
+  check(
+    `${name}: tap on a registered link source still follows href`,
+    hashAfterTap === "#compat-click",
+    `hash=${hashAfterTap || "(empty)"}`,
+  );
+
+  await page.goto(url, { waitUntil: "load" });
   await page.locator("#nested-source").waitFor();
   await page.locator("#inner-scroll").evaluate((node) => {
     (node as HTMLElement).scrollTop = 80;
@@ -888,6 +918,34 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
     await frames(page);
   };
 
+  const selectionState = async (): Promise<{ text: string; collapsed: boolean }> =>
+    page.evaluate(() => {
+      const sel = window.getSelection();
+      return { text: sel?.toString() ?? "", collapsed: sel?.isCollapsed ?? true };
+    });
+
+  const dragAcrossTreeLabels = async (treeId: string): Promise<{
+    pre: { text: string; collapsed: boolean };
+    crossed: { text: string; collapsed: boolean };
+  }> => {
+    const first = page.locator(`#${treeId} [data-value="alpha"] .poodle-tree__label`).first();
+    const last = page.locator(`#${treeId} [data-value="gamma"] .poodle-tree__label`).first();
+    await first.scrollIntoViewIfNeeded();
+    const start = await first.boundingBox();
+    const end = await last.boundingBox();
+    if (!start || !end) throw new Error(`no label box in ${treeId}`);
+    await page.mouse.move(start.x + 12, start.y + start.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(start.x + 13, start.y + start.height / 2 + 2);
+    await frames(page);
+    const pre = await selectionState();
+    await page.mouse.move(end.x + Math.min(24, end.width - 4), end.y + end.height / 2, { steps: 24 });
+    await frames(page);
+    const crossed = await selectionState();
+    await page.mouse.up();
+    return { pre, crossed };
+  };
+
   try {
     for (const fw of ["svelte", "react"]) {
       await page.goto(componentsUrl, { waitUntil: "load" });
@@ -1333,6 +1391,44 @@ async function runComponents(name: string, browser: Browser): Promise<void> {
           (await attr(fw, "tree-moving")) === "a.ts" &&
           (await attr(fw, "tree-dest")) === "b.ts:after",
         `drops=${await attr(fw, "tree-drops")} moving=${await attr(fw, "tree-moving")} dest=${await attr(fw, "tree-dest")}`,
+      );
+
+      // ── Tree label drag: no browser Selection on a reorderable source ──
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      const reorderableSelection = await dragAcrossTreeLabels(`${fw}-tree-select`);
+      check(
+        `${name}: ${fw} reorderable Tree drag creates no Selection before or after threshold`,
+        reorderableSelection.pre.text === "" &&
+          reorderableSelection.pre.collapsed &&
+          reorderableSelection.crossed.text === "" &&
+          reorderableSelection.crossed.collapsed,
+        `pre="${reorderableSelection.pre.text}" collapsed=${reorderableSelection.pre.collapsed} crossed="${reorderableSelection.crossed.text}" collapsed=${reorderableSelection.crossed.collapsed}`,
+      );
+      await frames(page);
+      check(
+        `${name}: ${fw} reorderable Tree drag does not deliver a trailing row selection`,
+        (await attr(fw, "tree-select")) === "",
+        `selected=${await attr(fw, "tree-select")}`,
+      );
+
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      await page.locator(`#${fw}-tree-select [data-value="beta"] .poodle-tree__label`).click();
+      await frames(page);
+      check(
+        `${name}: ${fw} reorderable Tree tap still selects the row`,
+        (await attr(fw, "tree-select")) === "beta",
+        `selected=${await attr(fw, "tree-select")}`,
+      );
+
+      await page.reload({ waitUntil: "load" });
+      await page.locator(`#${fw}-probe`).waitFor({ state: "attached" });
+      const staticSelection = await dragAcrossTreeLabels(`${fw}-tree-static`);
+      check(
+        `${name}: ${fw} non-reorderable Tree drag produces a real Selection range`,
+        staticSelection.crossed.text.length > 0 && !staticSelection.crossed.collapsed,
+        `crossed="${staticSelection.crossed.text}" collapsed=${staticSelection.crossed.collapsed}`,
       );
 
       // ── Dock chrome: host radius, inset ring, strip overflow ──

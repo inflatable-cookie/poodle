@@ -7,6 +7,7 @@ import "@inflatable-cookie/poodle-core/styles/drag-drop.css";
 const root = document.getElementById("root") as HTMLElement;
 const source = document.getElementById("source") as HTMLButtonElement;
 const target = document.getElementById("target") as HTMLElement;
+const linkSource = document.getElementById("link-source") as HTMLAnchorElement;
 const probe = document.getElementById("probe") as HTMLElement;
 const overlay = document.getElementById("overlay") as HTMLElement;
 const live = document.getElementById("live") as HTMLElement;
@@ -34,6 +35,13 @@ controller.registerSource(source, {
   allowedOperations: ["move"],
   label: "Alpha",
   keyboardOrder: 0,
+});
+
+controller.registerSource(linkSource, {
+  sourceId: "link-alpha",
+  subject: { kind: "item", id: "link-alpha" },
+  allowedOperations: ["move"],
+  label: "Link source",
 });
 
 controller.registerTarget(target, {

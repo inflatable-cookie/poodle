@@ -1,6 +1,6 @@
 # g16.055 — Drag Source Pointer-gesture Browser Suppression
 
-Status: ready
+Status: in-review
 Opened: 2026-09-02
 Depends on: g16.021–g16.028 drag substrate and the merged Tree interaction
 repair from PR #125; independent of the post-triage product runway
@@ -36,9 +36,10 @@ logic.
 - Pointerup, pointercancel, lost capture, Escape, pre-threshold abandonment,
   touch tolerance cancellation, source loss, disconnect, destroy, native drag
   handoff, and any other hardware-release path restore the root's exact prior
-  inline `user-select` declaration.
+  inline `user-select` / `-webkit-user-select` value and priority.
 - An activated pointer drag consumes only its own compatibility click at the
-  shared controller capture boundary. The rule is independent of whether the
+  shared controller capture boundary: stop immediate propagation and prevent
+  the cancelable click's default. The rule is independent of whether the
   eventual drop commits, rejects, fails, or cancels after activation.
 - Compatibility-click suppression is bounded to that completed activated
   gesture and source path. If no compatibility click arrives, it expires
@@ -87,8 +88,12 @@ logic.
 - A tap and a gesture abandoned before the activation threshold still deliver
   their ordinary click and select the row. Keyboard reorder is unchanged.
 - Pointerup or cancellation before activation restores the connected root's
-  exact prior authored inline `user-select` value. Empty, `text`, and one
-  non-default authored value are covered.
+  exact prior authored inline `user-select` / `-webkit-user-select` value and
+  priority. Empty, `text`, one non-default authored value, and `!important`
+  are covered.
+- An activated pointer drag's compatibility click is cancelled at capture,
+  including the default action of a registered link or button source. A tap
+  still follows that default.
 - Rename/input text remains selectable and receives no root suppression because
   its pointerdown is rejected by the existing interactive-host boundary.
 - A non-reorderable Tree does not register drag sources and its labels retain
@@ -102,8 +107,10 @@ logic.
 | --- | --- | --- |
 | Suppression precedes browser selection | press a label, move less than the activation distance across text, then cross several sibling labels | Chromium and WebKit mounted Tree probe has an empty Selection throughout; planting suppression back in `activate()` creates a non-empty range or visible paint |
 | Abandoned gestures restore authored style | root begins with inline `user-select: text`; press and release below threshold | focused controller proof observes `none` during the candidate and exactly `text` after release; empty and a second authored value also restore |
+| Authored `!important` is restored | root begins with inline `user-select: text !important` and `-webkit-user-select: all !important` | focused controller proof observes both values and `getPropertyPriority()` `important` after pre-threshold release |
 | Click semantics survive | press and release one reorderable row without crossing threshold | paired mounted Svelte/React proof records one row-selection callback and no drag commit |
 | Activated drag has no trailing row click | complete one pointer move, then let the browser dispatch its compatibility click before an async commit settles | paired shells record one reorder request and zero selection requests; controller capture proves the click never reaches the source row |
+| Compatibility click default is cancelled | register an `<a href>` as the source, activate, then let the browser dispatch the compatibility click | controller proof records `defaultPrevented`; Chromium/WebKit probe hash stays off the href; a tap still follows href |
 | Drop outcome does not reopen click | resolve activated gestures as committed, rejected, failed, and no-intent cancelled | each consumes its gesture-bound compatibility click; no outcome-dependent Tree selection path exists |
 | Suppression cannot eat later input | finish an activated drag whose browser emits no click, then click the row later | stale guard expires; the later click selects exactly once |
 | Interactive text remains selectable | begin a selection inside the Tree rename/input descendant | controller never suppresses the root; real Selection/input selection changes normally in both shells |
@@ -165,3 +172,24 @@ After accepted merge, this repair rides the next unreleased `0.3.0` candidate.
 Do not create a `0.2.x` patch publication lane. Figmatic may verify against the
 merged source head immediately, but package adoption waits for the separately
 authorized compiled-distribution `0.3.0` release lane.
+
+## Implementation
+
+Shared DOM controller suppresses `user-select` and `-webkit-user-select` on the
+connected root at accepted primary pointerdown, restores the exact prior inline
+value and priority on every exit, and consumes one source-path compatibility
+click after an activated pointerup/cancel: stop immediate propagation and
+preventDefault when cancelable. The guard expires on timeout/rAF, the next
+press, consume, disconnect, or destroy. Keyboard pickup is unchanged. No Tree
+CSS, public API, or native parity change.
+
+Focused controller tests cover pre-threshold suppression, authored-style
+restore including `!important`, exclusions, source-loss/disconnect/destroy,
+activated click consumption and default cancellation for commit/reject/fail/
+cancel, a registered link source, async dropping, and stale-guard expiry.
+Paired Svelte/React Tree tests cover tap selection, rename/input exclusion,
+and no trailing selection after those drop outcomes. Chromium and WebKit
+probes prove empty Selection through a reorderable label drag, no trailing
+selected value, a tap that still selects, a non-reorderable counterexample
+that produces a real range, and a registered link source whose drag does not
+follow href while a tap still does.
