@@ -13,11 +13,12 @@ Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-050-icon-geometry-runtime`
 Starting exact head: `9e8e646f25a1dfde818083c798ffba53adea3e95`
 Planning base ancestor: `a809792c6cd9873f9716b4954d2b4b803c6b65eb`
 Rebased onto live `origin/main`: `595bec72825a9b830edb2b46f82b4ece049f8e1b`
-Post-rebase implementation head: `4f71bf3899d0d9678b4cac58ffac8476721a07fb`
-Reviewed head (blocked): `63ea7582ec7e596b067b878e804bf717464b2a4b`
-Repair code head: `a225058a3a0b200d5508835d41777f0e989ec19e`
-Second-review lifecycle repair: `6906c4438`
-Second-review scheduler oracle: `e1041024f`
+Latest integration base: `8132d01ff528ab7654331f22ed1c07949db158b3`
+Post-rebase implementation record: `36455c80c`
+Reviewed head record: `2b873fb3d`
+First repair code: `a4dcd5d5d`
+Second-review lifecycle repair: `92d82b9ec`
+Second-review scheduler oracle: `cb1d203b5`
 PR: https://github.com/inflatable-cookie/poodle/pull/160
 
 ## Outcome
@@ -46,7 +47,7 @@ behavior, native pixel, AT, Jetstream, or package-export change.
 
 ## Exact-head repair
 
-Review of `63ea7582e` blocked four claims. This repair keeps the same branch
+Review of the first PR head blocked four claims. This repair keeps the same branch
 and PR.
 
 1. Production scheduler. GPUI `IconGeometryHost` spawns a window task, ticks
@@ -70,7 +71,7 @@ and PR.
 
 ## Second exact-head repair
 
-Review of `dda88f992` found that the scheduler wakeup did not prove a window
+Review of the second PR head found that the scheduler wakeup did not prove a window
 invalidation, host/shell clocks did not preserve the pure runtime's inert and
 proportional laws, and the native scheduler still cloned its key each tick.
 
