@@ -1,6 +1,8 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
+use poodle_headless::motion_policy::{motion_key, MotionInterruption, MotionPolicy, MotionRemnant};
+
 const GRID_SIZE: i64 = 24;
 const QUANTIZATION_SCALE: f64 = 10_000.0;
 const SAMPLE_COUNT: usize = 64;
@@ -1436,3 +1438,4 @@ pub(crate) struct GeneratedIconGeometryPair {
 }
 
 include!("icon_geometry.generated.rs");
+include!("icon_geometry_runtime.rs");

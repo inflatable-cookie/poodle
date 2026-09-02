@@ -409,4 +409,89 @@ mod tests {
             assert!(pair.payload_bytes <= 16 * 1024);
         }
     }
+
+    #[test]
+    fn runtime_paints_exact_endpoints_and_rebases_reversals() {
+        use poodle_headless::motion_policy::MotionPolicy;
+
+        let mut runtime = create_icon_geometry_runtime(MotionPolicy::Full);
+        let intent = GeometryRuntimeIntent {
+            owner: String::from("fixture-owner"),
+            pair_id: String::from("chevron-left-to-chevron-right"),
+            target: GeometryEndpoint::To,
+            initial: true,
+        };
+        let initial = activate_icon_geometry(&mut runtime, intent.clone());
+        assert!(!initial.schedule);
+        assert!(initial.paint_endpoint);
+        assert_eq!(live_geometry_clock_count(&runtime), 0);
+
+        let mut live = intent;
+        live.initial = false;
+        let forward = activate_icon_geometry(&mut runtime, live.clone());
+        assert!(forward.schedule);
+        sample_icon_geometry(&mut runtime, &forward.key, 0.4);
+        live.target = GeometryEndpoint::From;
+        let reverse = activate_icon_geometry(&mut runtime, live);
+        assert_eq!(reverse.interruption, poodle_headless::motion_policy::MotionInterruption::Reverse);
+        assert!(reverse.schedule);
+        assert_eq!(live_geometry_clock_count(&runtime), 1);
+
+        let mut other = GeometryRuntimeIntent {
+            owner: String::from("fixture-owner"),
+            pair_id: String::from("circle-to-dot"),
+            target: GeometryEndpoint::To,
+            initial: false,
+        };
+        let replaced = activate_icon_geometry(&mut runtime, other.clone());
+        assert_eq!(
+            replaced.interruption,
+            poodle_headless::motion_policy::MotionInterruption::Retarget
+        );
+        assert_eq!(replaced.pair_id, Some("circle-to-dot"));
+
+        other.pair_id = String::from("menu-to-ellipsis");
+        let rejected = activate_icon_geometry(&mut runtime, other);
+        assert!(!rejected.accepted);
+        assert_eq!(live_geometry_clock_count(&runtime), 0);
+        assert!(current_icon_geometry_frame(&runtime).is_none());
+
+        let mut frozen = create_icon_geometry_runtime(MotionPolicy::Full);
+        let start = activate_icon_geometry(
+            &mut frozen,
+            GeometryRuntimeIntent {
+                owner: String::from("fixture-owner"),
+                pair_id: String::from("chevron-left-to-chevron-right"),
+                target: GeometryEndpoint::To,
+                initial: false,
+            },
+        );
+        sample_icon_geometry(&mut frozen, &start.key, 0.5);
+        set_icon_geometry_policy(&mut frozen, MotionPolicy::Frozen);
+        assert_eq!(live_geometry_clock_count(&frozen), 0);
+        teardown_icon_geometry(&mut frozen, None);
+        assert!(current_icon_geometry_frame(&frozen).is_none());
+    }
+
+    #[test]
+    fn hot_path_samples_reuse_buffer_capacity() {
+        use poodle_headless::motion_policy::MotionPolicy;
+
+        let mut runtime = create_icon_geometry_runtime(MotionPolicy::Full);
+        let start = activate_icon_geometry(
+            &mut runtime,
+            GeometryRuntimeIntent {
+                owner: String::from("fixture-owner"),
+                pair_id: String::from("chevron-left-to-chevron-right"),
+                target: GeometryEndpoint::To,
+                initial: false,
+            },
+        );
+        sample_icon_geometry(&mut runtime, &start.key, 0.2);
+        let first_capacity = runtime.frame.contours[0].points.capacity();
+        let first_ptr = runtime.frame.contours[0].points.as_ptr();
+        sample_icon_geometry(&mut runtime, &start.key, 0.8);
+        assert_eq!(runtime.frame.contours[0].points.capacity(), first_capacity);
+        assert_eq!(runtime.frame.contours[0].points.as_ptr(), first_ptr);
+    }
 }

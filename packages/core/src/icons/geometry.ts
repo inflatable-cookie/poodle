@@ -125,6 +125,11 @@ export type GeometryFrame = {
   readonly contours: readonly SampledContour[];
 };
 
+/** Mutable sampled frame reused on the hot path after plan creation. */
+export type GeometryFrameBuffer = {
+  contours: Array<{ closed: boolean; points: Array<[number, number]> }>;
+};
+
 type FloatPoint = [number, number];
 type RawContour = { points: FloatPoint[]; closed: boolean };
 type PathToken =
@@ -788,41 +793,88 @@ export function planIconGeometryPairWithEndpoints(
   return { left, right, plan: planIconGeometryPair(left, right) };
 }
 
-function canonicalFrame(geometry: NormalizedIconGeometry): GeometryFrame {
-  return {
-    contours: geometry.canonical.contours.map((contour) => ({
-      closed: contour.closed,
-      points: canonicalPoints(contour),
-    })),
-  };
-}
-
 export function frameAt(
   pair: PlannedIconGeometryPair,
   progress: number,
 ): GeometryFrame {
+  const buffer: GeometryFrameBuffer = { contours: [] };
+  writeFrameAt(pair, progress, buffer);
+  return buffer;
+}
+
+/** Write a sampled or canonical frame into `out` without allocating new contour rows. */
+export function writeFrameAt(
+  pair: PlannedIconGeometryPair,
+  progress: number,
+  out: GeometryFrameBuffer,
+): void {
   if (!Number.isFinite(progress)) fail("pair-planning", "progress is not finite");
-  if (progress <= 0) return canonicalFrame(pair.left);
-  if (progress >= 1) return canonicalFrame(pair.right);
+  if (progress <= 0) {
+    writeCanonicalFrame(pair.left, out);
+    return;
+  }
+  if (progress >= 1) {
+    writeCanonicalFrame(pair.right, out);
+    return;
+  }
 
   const rightByLeft = new Map(
     pair.plan.contourMappings.map((mapping) => [mapping.leftIndex, mapping]),
   );
-  return {
-    contours: pair.left.sampled.contours.map((leftContour, leftIndex) => {
-      const mapping = rightByLeft.get(leftIndex);
-      if (!mapping) fail("pair-planning", `missing mapping for contour ${leftIndex}`);
-      const rightContour = pair.right.sampled.contours[mapping.rightIndex]!;
-      const rightPoints = orientedPoints(rightContour, mapping.reversed, mapping.offset);
-      return {
-        closed: leftContour.closed,
-        points: leftContour.points.map((leftPoint, index) => [
-          Math.round(leftPoint[0] + (rightPoints[index]![0] - leftPoint[0]) * progress),
-          Math.round(leftPoint[1] + (rightPoints[index]![1] - leftPoint[1]) * progress),
-        ]),
-      };
-    }),
-  };
+  const contourCount = pair.left.sampled.contours.length;
+  ensureContourRows(out, contourCount);
+  for (let leftIndex = 0; leftIndex < contourCount; leftIndex += 1) {
+    const leftContour = pair.left.sampled.contours[leftIndex]!;
+    const mapping = rightByLeft.get(leftIndex);
+    if (!mapping) fail("pair-planning", `missing mapping for contour ${leftIndex}`);
+    const rightContour = pair.right.sampled.contours[mapping.rightIndex]!;
+    const dest = out.contours[leftIndex]!;
+    dest.closed = leftContour.closed;
+    ensurePointRows(dest.points, leftContour.points.length);
+    for (let index = 0; index < leftContour.points.length; index += 1) {
+      const leftPoint = leftContour.points[index]!;
+      const rightPoint =
+        rightContour.points[
+          orientedIndex(index, rightContour.points.length, mapping.reversed, mapping.offset)
+        ]!;
+      const point = dest.points[index]!;
+      point[0] = Math.round(leftPoint[0] + (rightPoint[0] - leftPoint[0]) * progress);
+      point[1] = Math.round(leftPoint[1] + (rightPoint[1] - leftPoint[1]) * progress);
+    }
+  }
+}
+
+function writeCanonicalFrame(geometry: NormalizedIconGeometry, out: GeometryFrameBuffer): void {
+  ensureContourRows(out, geometry.canonical.contours.length);
+  for (let index = 0; index < geometry.canonical.contours.length; index += 1) {
+    const contour = geometry.canonical.contours[index]!;
+    const points = canonicalPoints(contour);
+    const dest = out.contours[index]!;
+    dest.closed = contour.closed;
+    ensurePointRows(dest.points, points.length);
+    for (let pointIndex = 0; pointIndex < points.length; pointIndex += 1) {
+      dest.points[pointIndex]![0] = points[pointIndex]![0];
+      dest.points[pointIndex]![1] = points[pointIndex]![1];
+    }
+  }
+}
+
+function ensureContourRows(out: GeometryFrameBuffer, count: number): void {
+  while (out.contours.length < count) {
+    out.contours.push({ closed: false, points: [] });
+  }
+  if (out.contours.length > count) {
+    out.contours.length = count;
+  }
+}
+
+function ensurePointRows(points: Array<[number, number]>, count: number): void {
+  while (points.length < count) {
+    points.push([0, 0]);
+  }
+  if (points.length > count) {
+    points.length = count;
+  }
 }
 
 export function reversePairPlan(plan: IconGeometryPairPlan): IconGeometryPairPlan {
