@@ -1,12 +1,15 @@
 # g16.059 — Installed Web Distribution Certification
 
-Status: ready — `g16.058` merged as `b43481dff`
+Status: complete — awaiting orchestrator review
 Type: implementation — installed package oracle and promotion receipt
 Opened: 2026-09-02
 Depends on: accepted `g16.058`
 Governing refs: `../../architecture/014-compiled-web-package-distribution.md`,
 `056-web-distribution-contract.md`, `057-core-build-substrate.md`,
 `058-shell-distributions.md`
+
+Proof commit: `e4812c89977bb56ee65acd368b1f95da21703d65`
+Worker PR: not opened — launcher instruction forbids PR creation
 
 ## Goal
 
@@ -70,6 +73,30 @@ public roster. This is the prerequisite that can unblock `g16.054`.
 - Two builds and packs are identical. Receipt provenance is stable and names
   the canonical roster denominator, artifact set, archive hashes, and commit.
 - React remains private/validation-only. No release mutation occurs.
+
+## Evidence
+
+- The outer `effigy test:web-pack-install` selector ran from a disposable
+  detached checkout of the exact proof commit. It performed two clean builds,
+  two packs, archive-boundary/export/declaration/CSS/parser/notice checks,
+  installed browser and Node SSR probes, default-resolution and direct-client
+  SSR rejection, Svelte `5.56.8` floor success, the visible `5.38.6`
+  below-floor failure, and the retained HistoryEntry/Slider/Tree proofs.
+- Result: 11 test files and 22 tests passed. The receipt and all seven
+  falsification receipts are recorded in the execution log.
+- Deterministic receipt identity: `ee50c9c6301f8d18b62e0e5d57fa90c1be3aaa689c24af8fde96b40db0ab9679`.
+- Receipt source commit: `e4812c89977bb56ee65acd368b1f95da21703d65`.
+- Roster: 176 names; `f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a`.
+- Artifact set: `bc50b1b50a79e20f8651ee8f2565efc23fea1e753435b0cd0a4252da96e94990`.
+
+## Limits
+
+- This worker did not create a PR, merge, release, workflow dispatch, windowed
+  selector run, or `g16.054` dispatch. The orchestrator must create/review the
+  PR if required by its integration workflow.
+- The receipt certifies the committed proof point above. Subsequent
+  documentation-only closeout commits, if any, must not be substituted for
+  that receipt source commit without rerunning the installed oracle.
 
 ## Review Oracle
 
