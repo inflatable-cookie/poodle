@@ -1,8 +1,11 @@
 # g16.046 — Block Slider And RangeSlider Appearance
 
-Status: ready
+Status: implementation-complete — PR pending orchestrator review
 Type: implementation
 Opened: 2026-09-01
+Closed: 2026-09-02 (implementation; merge belongs to the orchestrator)
+Proof head: `7e8d302c8c847b84da805c0b2f1a01c6165dd35e`
+Log: `../../logs/2026-09/20260902-g16-046-block-sliders.md`
 Depends on: merged `g16.034` and operator acceptance recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -138,3 +141,15 @@ vertical block input is also a stop.
 
 After accepted merge, any PageUp/PageDown convergence is a separate all-
 appearance decision. It is not implied by this card.
+
+## Closeout
+
+Implementation landed on `feature/g16-046-block-sliders`. Public names, fit
+arithmetic, tie/clamp, terminal, 44×44 hits, forced-color roles, and
+horizontal-only rejection match this card. Visual ledger cells were not moved.
+Jetstream remains compile-compat specimens only.
+
+Oracle plant-and-restore ran against pre-rebase proof
+`eedb4a38ae4ac010aeb86e998b113b7a1d8d0a2c` (`7e8d302c8c847b84da805c0b2f1a01c6165dd35e`
+on this branch). Every row failed under the planted pre-fix and passed after
+restore. See the execution log for the plant table.
