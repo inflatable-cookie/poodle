@@ -1146,6 +1146,7 @@ struct NodeTooltip {
 
 impl gpui::Render for NodeTooltip {
     fn render(&mut self, _window: &mut Window, _cx: &mut gpui::Context<Self>) -> impl IntoElement {
+        record_painted_tooltip(self.text.as_ref());
         div()
             .px(px(8.0))
             .py(px(4.0))

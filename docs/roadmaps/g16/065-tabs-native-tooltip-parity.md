@@ -1,11 +1,12 @@
 # g16.065 — Tabs Native Tooltip Parity
 
-Status: ready
+Status: in review
 Type: cross-runtime semantic and mounted repair
 Opened: 2026-09-02
 Depends on: current Tabs contract, completed `g16.060`
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/tabs.md`
+Log: `../../logs/2026-09/20260902-g16-065-tabs-native-tooltip-parity.md`
 
 ## Goal
 
@@ -64,3 +65,10 @@ using preview-only state.
 
 Accepted merge unblocks the later Nucleus Tabs component card. It does not
 claim Nucleus M2, accessibility A2, or visual V2.
+
+## Outcome
+
+`shows_tooltips` now projects each tab's trimmed label onto `Node.tooltip`
+when the flag is true or the strip is vertical. GPUI `.tooltip()` owns delay
+and hide. No new Node field. Web 300ms overlay plus blur/Escape dismiss is
+unchanged. Native delay is GPUI's 500ms hover timer.

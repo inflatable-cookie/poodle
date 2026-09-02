@@ -91,6 +91,7 @@ pub fn overlay_frame_begin() {
     // must not survive it.
     crate::clear_painted_rings();
     super::clear_painted_inset_shadows();
+    crate::clear_painted_tooltip();
     crate::interaction::prepare_continuous_value_frame();
 }
 

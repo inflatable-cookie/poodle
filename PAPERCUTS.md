@@ -5,6 +5,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-02 — `effigy ci:web` `test:components` (`bunx vitest run`) includes
+  `react-preview`, which resolves `@inflatable-cookie/poodle-react` from the
+  workspace symlink to `packages/react/components` **dist exports**. `react:package`
+  runs later in the same board. A worktree without `dist/` fails three
+  preview suites (`catalogue-nav`, `g15-031-*`, `g15-033-*`) after every
+  aliased suite already passed. Warm the React dist (`effigy react:package`)
+  before a first `ci:web` on a cold worktree, or give `react-preview` the same
+  src alias `react-components` already has. Hit while closing g16.065.
+
 - 2026-09-02 — RESOLVED 2026-09-02 by g16.061. Unset `effigy test:web-pack-install`
   was still g16.059 strict certification. Empty `origin/main..HEAD` and ordinary
   feature ranges failed before build/pack (`certification scope found no changed

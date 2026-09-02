@@ -17,7 +17,9 @@ use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, LayoutDirection, LayoutSizing, MainAxisAlignment,
     Node, NodeDropCommit, NodeKey, NodeRole, ShadowLayer, StylePatch,
 };
-use poodle_specs::{ActiveEdge, ActiveFill, Orientation, TabActivationMode, TabVariant, TabsSpec};
+use poodle_specs::{
+    ActiveEdge, ActiveFill, Orientation, TabActivationMode, TabDefinition, TabVariant, TabsSpec,
+};
 
 use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
 use crate::context::RenderContext;
@@ -440,6 +442,20 @@ pub fn tabs_with_panel(
     root
 }
 
+/// Native hover help-text. Same `Node.tooltip` field IconButton and
+/// SegmentedControl already project; GPUI `.tooltip()` owns delay and hide.
+fn tab_tooltip_text(spec: &TabsSpec, tab: &TabDefinition) -> Option<String> {
+    if !(spec.shows_tooltips || spec.is_vertical()) {
+        return None;
+    }
+    let label = tab.label.trim();
+    if label.is_empty() {
+        None
+    } else {
+        Some(label.to_string())
+    }
+}
+
 fn wire_select(node: &mut Node, is_disabled: bool, value: &str, on_change: Option<&TabHandler>) {
     if let (false, Some(handler)) = (is_disabled, on_change) {
         let handler = Arc::clone(handler);
@@ -555,6 +571,7 @@ fn wire_collection_semantics(
         .or_else(|| spec.current_value());
     node.interaction.disabled = tab.is_disabled;
     node.interaction.focusable = !tab.is_disabled;
+    node.tooltip = tab_tooltip_text(spec, tab);
     if !tab.is_disabled {
         node.style.focus = Some(StylePatch {
             border_color: Some(ctx.theme().resolve_color(spec.focus_ring_color_token())),
@@ -992,7 +1009,7 @@ fn render_block(spec: &TabsSpec, ctx: &RenderContext<'_>, handlers: &TabsHandler
 mod tests {
     use super::*;
     use poodle_adapter::ThemeProvider;
-    use poodle_specs::{ActiveEdge, ActiveFill, TabDefinition};
+    use poodle_specs::{ActiveEdge, ActiveFill, Orientation, TabDefinition, TabVariant};
     use std::sync::Mutex;
 
     /// The real token resolver over the ECLIPSE theme. Pure — no backend.
@@ -1638,5 +1655,97 @@ mod tests {
             .expect("key handler");
         a_keys(NodeKey::Delete, poodle_node::NodeModifiers::default());
         assert_eq!(*closed.lock().unwrap(), vec!["b"]);
+    }
+
+    #[test]
+    fn show_tooltips_false_does_not_project_hover_text() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("explorer", "Explorer").with_icon("folder"),
+            TabDefinition::new("search", "Search").with_icon("search"),
+        ])
+        .with_value("explorer");
+        let root = tabs(&spec, &ctx, None, None);
+        assert!(tab_of(&root, "explorer").tooltip.is_none());
+        assert!(tab_of(&root, "search").tooltip.is_none());
+    }
+
+    #[test]
+    fn show_tooltips_true_projects_each_tab_label() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("explorer", "Explorer").with_icon("folder"),
+            TabDefinition::new("search", "Search").with_icon("search"),
+            TabDefinition::new("git", "Source")
+                .with_icon("git-branch")
+                .with_disabled(true),
+        ])
+        .with_value("explorer")
+        .with_shows_tooltips(true);
+        let root = tabs(&spec, &ctx, None, None);
+        assert_eq!(
+            tab_of(&root, "explorer").tooltip.as_deref(),
+            Some("Explorer")
+        );
+        assert_eq!(tab_of(&root, "search").tooltip.as_deref(), Some("Search"));
+        assert_eq!(tab_of(&root, "git").tooltip.as_deref(), Some("Source"));
+    }
+
+    #[test]
+    fn vertical_projects_hidden_labels_without_show_tooltips() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = TabsSpec::new(vec![
+            TabDefinition::new("explorer", "Explorer").with_icon("folder"),
+            TabDefinition::new("search", "Search").with_icon("search"),
+        ])
+        .with_value("explorer")
+        .with_orientation(Orientation::Vertical);
+        let root = tabs(&spec, &ctx, None, None);
+        assert_eq!(
+            tab_of(&root, "explorer").tooltip.as_deref(),
+            Some("Explorer")
+        );
+        assert_eq!(tab_of(&root, "search").tooltip.as_deref(), Some("Search"));
+    }
+
+    #[test]
+    fn empty_tab_label_is_not_a_tooltip() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let spec = TabsSpec::new(vec![TabDefinition::new("blank", "   ")])
+            .with_value("blank")
+            .with_shows_tooltips(true);
+        let root = tabs(&spec, &ctx, None, None);
+        assert!(tab_of(&root, "blank").tooltip.is_none());
+    }
+
+    #[test]
+    fn pill_and_block_project_the_same_tooltip_text() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let tabs_def = vec![
+            TabDefinition::new("home", "Home"),
+            TabDefinition::new("settings", "Settings"),
+        ];
+        for variant in [TabVariant::Pill, TabVariant::Block] {
+            let spec = TabsSpec::new(tabs_def.clone())
+                .with_variant(variant)
+                .with_value("home")
+                .with_shows_tooltips(true);
+            let root = tabs(&spec, &ctx, None, None);
+            assert_eq!(
+                tab_of(&root, "home").tooltip.as_deref(),
+                Some("Home"),
+                "{variant:?}"
+            );
+            assert_eq!(
+                tab_of(&root, "settings").tooltip.as_deref(),
+                Some("Settings"),
+                "{variant:?}"
+            );
+        }
     }
 }

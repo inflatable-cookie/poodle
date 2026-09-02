@@ -905,6 +905,13 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
 - Card variant border opacity: 82% → `0.82` multiplier on border-subtle
 - Panel border: 74% → `0.74` on border-subtle; panel bg: 96% → `0.96` on background-panel
+- `shows_tooltips` (and every vertical strip) projects each tab's trimmed
+  label onto `Node.tooltip`. Empty labels are omitted. GPUI `.tooltip()` owns
+  show, hide, and delay — the same house path IconButton and SegmentedControl
+  already use. No new Node field.
+- GPUI 0.2.2 hardcodes a 500ms hover delay (`TOOLTIP_SHOW_DELAY`). Web stays
+  at the contract 300ms. Show and hide are hover-owned; web also dismisses on
+  blur and Escape.
 
 ## 10a. Jetstream Notes
 
@@ -959,6 +966,8 @@ Applies when `fullWidth` is set and orientation is horizontal.
 | Inactive panels may stay mounted or unmounted | runtime rendering strategy differs | allowed | keep semantics and state continuity strict |
 | `focusOnValueChange` is web-only | DOM panel-unmount capture has no GPUI/Jetstream equivalent in this bounded consumer unblock | accepted, this card | later native focus-adapter work if a consumer needs it |
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
+| GPUI tooltip delay is 500ms; web is 300ms | GPUI 0.2.2 `.tooltip()` hardcodes 500ms; public meaning is delayed hover help-text, mechanism may differ | accepted, this card | none |
+| Native tooltip is hover-only; web also hides on blur and Escape | GPUI `.tooltip()` is mouse-hover; focus/Escape overlay dismiss is web adapter behavior | accepted, this card | none |
 
 ## 13. Specimen Definitions
 

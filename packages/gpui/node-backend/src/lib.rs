@@ -688,6 +688,9 @@ thread_local! {
     // were emitted rather than that a style was declared.
     static PAINTED_INSET_SHADOWS: RefCell<std::collections::HashMap<String, Vec<PaintedInsetShadow>>> =
         RefCell::new(std::collections::HashMap::new());
+    // GPUI native tooltip chrome painted this frame. Cleared at
+    // overlay_frame_begin so a hide cannot leak the previous text.
+    static PAINTED_TOOLTIP: RefCell<Option<String>> = const { RefCell::new(None) };
 }
 
 /// One inset shadow band as the paint pass actually drew it: the per-side
@@ -722,6 +725,21 @@ pub(crate) fn record_painted_inset_shadows(id: &str, painted: Vec<PaintedInsetSh
 /// Frame boundary for the inset-shadow registry, called beside the ring one.
 pub(crate) fn clear_painted_inset_shadows() {
     PAINTED_INSET_SHADOWS.with(|r| r.borrow_mut().clear());
+}
+
+/// Native hover tooltip text painted this frame, or `None` when GPUI did not
+/// paint one. Frame-scoped like [`painted_ring_for`]: [`overlay_frame_begin`]
+/// clears it; the tooltip view records during paint.
+pub fn painted_tooltip_text() -> Option<String> {
+    PAINTED_TOOLTIP.with(|text| text.borrow().clone())
+}
+
+pub(crate) fn record_painted_tooltip(text: &str) {
+    PAINTED_TOOLTIP.with(|slot| *slot.borrow_mut() = Some(text.to_string()));
+}
+
+pub(crate) fn clear_painted_tooltip() {
+    PAINTED_TOOLTIP.with(|slot| *slot.borrow_mut() = None);
 }
 
 /// What the focus-ring paint pass last painted for one tracked element: the

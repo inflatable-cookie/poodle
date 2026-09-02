@@ -4001,6 +4001,166 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
     });
 }
 
+/// g16.065. Compact chrome Tabs project `shows_tooltips` onto `Node.tooltip`;
+/// GPUI `.tooltip()` owns delay and hide. Nucleus-shaped fixture, no Nucleus
+/// source. Hover-only: web still owns blur/Escape dismiss.
+#[test]
+fn tabs_show_tooltips_delay_and_hide_through_mounted_gpui() {
+    fn nav_items() -> Vec<TabDefinition> {
+        vec![
+            TabDefinition::new("explorer", "Explorer").with_icon("folder"),
+            TabDefinition::new("search", "Search").with_icon("search"),
+            TabDefinition::new("git", "Git").with_icon("git-branch"),
+            TabDefinition::new("terminal", "Terminal").with_icon("terminal"),
+        ]
+    }
+
+    fn chrome_tabs(shows_tooltips: bool, items: Vec<TabDefinition>, value: &str) -> Node {
+        let spec = TabsSpec::new(items)
+            .with_value(value)
+            .with_size(ControlSize::Sm)
+            .with_density(ControlDensity::Compact)
+            .with_shows_tooltips(shows_tooltips)
+            .with_aria_label("Activity");
+        let mut node = poodle_render::tabs_with_handlers(
+            &spec,
+            &RenderContext::new(&theme()),
+            TabsHandlers {
+                instance_id: Some("nav".into()),
+                ..TabsHandlers::default()
+            },
+        );
+        node.id = Some(FIXTURE_ID.to_owned());
+        node
+    }
+
+    fn wait_ms(driver: &mut HeadlessDriver, ms: u64) {
+        driver.advance_clock(std::time::Duration::from_millis(ms));
+        driver.drain();
+        driver.draw_frame();
+    }
+
+    fn hover_search(driver: &mut HeadlessDriver) {
+        driver.pointer_hover(payload_frac("tabs:nav:tab:search", 0.5, 0.5));
+    }
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_in_box(
+            cx,
+            Arc::new(Mutex::new(chrome_tabs(false, nav_items(), "explorer"))),
+            420.0,
+            80.0,
+        );
+        hover_search(&mut driver);
+        wait_ms(&mut driver, 500);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip_text(),
+            None,
+            "showTooltips=false stays inert after the GPUI delay"
+        );
+    });
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_in_box(
+            cx,
+            Arc::new(Mutex::new(chrome_tabs(true, nav_items(), "explorer"))),
+            420.0,
+            80.0,
+        );
+        hover_search(&mut driver);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip_text(),
+            None,
+            "tooltip must not appear on hover"
+        );
+        wait_ms(&mut driver, 300);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip_text(),
+            None,
+            "GPUI delay is 500ms, not the web 300ms"
+        );
+        wait_ms(&mut driver, 200);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip_text().as_deref(),
+            Some("Search")
+        );
+    });
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_in_box(
+            cx,
+            Arc::new(Mutex::new(chrome_tabs(true, nav_items(), "explorer"))),
+            420.0,
+            80.0,
+        );
+        hover_search(&mut driver);
+        wait_ms(&mut driver, 500);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip_text().as_deref(),
+            Some("Search")
+        );
+        driver.pointer_hover(point(px(8.0), px(8.0)));
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip_text(),
+            None,
+            "leave hides in the same frame"
+        );
+    });
+
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(chrome_tabs(true, nav_items(), "explorer")));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 80.0);
+        hover_search(&mut driver);
+        let remaining = vec![
+            TabDefinition::new("explorer", "Explorer").with_icon("folder"),
+            TabDefinition::new("git", "Git").with_icon("git-branch"),
+            TabDefinition::new("terminal", "Terminal").with_icon("terminal"),
+        ];
+        *mounted.lock().unwrap() = chrome_tabs(true, remaining, "explorer");
+        driver.draw_frame();
+        wait_ms(&mut driver, 500);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip_text(),
+            None,
+            "removing the hovered tab cancels the pending show"
+        );
+    });
+
+    run_headless(|cx| {
+        let mounted = Arc::new(Mutex::new(chrome_tabs(true, nav_items(), "explorer")));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 80.0);
+        hover_search(&mut driver);
+        *mounted.lock().unwrap() = Node::container();
+        driver.draw_frame();
+        wait_ms(&mut driver, 500);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip_text(),
+            None,
+            "teardown while pending leaves no late tooltip"
+        );
+    });
+
+    run_headless(|cx| {
+        let mut items = nav_items();
+        items[2] = TabDefinition::new("git", "Git")
+            .with_icon("git-branch")
+            .with_disabled(true);
+        let mut driver = HeadlessDriver::new_in_box(
+            cx,
+            Arc::new(Mutex::new(chrome_tabs(true, items, "explorer"))),
+            420.0,
+            80.0,
+        );
+        driver.pointer_hover(payload_frac("tabs:nav:tab:git", 0.5, 0.5));
+        wait_ms(&mut driver, 500);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip_text().as_deref(),
+            Some("Git"),
+            "disabled tabs still project labels, matching web"
+        );
+    });
+}
+
 fn stamp_slider_id(node: &mut Node, id: &str) {
     if node.a11y.role == Some(NodeRole::Slider) {
         node.id = Some(id.to_owned());
