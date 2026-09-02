@@ -11,8 +11,8 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 
-use serde::Serialize;
 use crate::headless_driver::MountedObservation;
+use serde::Serialize;
 
 const RECEIPT_SCHEMA: &str = "poodle.g16-nucleus-parity-receipt.v1";
 const RUNTIME: &str = "gpui-headless";
