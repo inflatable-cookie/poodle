@@ -12,6 +12,8 @@ Branch: `feature/g16-050-icon-geometry-runtime`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-050-icon-geometry-runtime`
 Starting exact head: `9e8e646f25a1dfde818083c798ffba53adea3e95`
 Planning base ancestor: `a809792c6cd9873f9716b4954d2b4b803c6b65eb`
+Rebased onto live `origin/main`: `595bec72825a9b830edb2b46f82b4ece049f8e1b`
+Post-rebase implementation head: `cf8e1ebe8`
 
 ## Outcome
 
