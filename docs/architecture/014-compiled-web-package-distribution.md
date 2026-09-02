@@ -21,9 +21,9 @@ compiled and installed-certification shape, but stays private and unpublished
 until a named consumer is admitted. Preview applications consume built package
 outputs; they do not define release semantics.
 
-The breaking `0.3.0` boundary moves `AgentMessage`, `AgentTranscript`, and
-`MarkdownEditor` out of the Svelte and React root barrels and into explicit
-`./markdown` entries. Root
+The breaking `0.3.0` boundary moves `AgentMessage`, `AgentPlan`,
+`AgentPlanRecord`, `AgentTranscript`, and `MarkdownEditor` out of the Svelte
+and React root barrels and into explicit `./markdown` entries. Root
 Button/Select stays parser-free. No alias, compatibility shim, or silent
 fallback preserves the retired root markdown imports.
 

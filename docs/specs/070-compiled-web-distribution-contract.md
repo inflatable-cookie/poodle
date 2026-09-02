@@ -694,13 +694,14 @@ Laws:
   `default` → server.
 - `./*.svelte` may resolve only the 176 roster names. Extra public matches
   fail.
-- Root `.` exports the 173 non-markdown roster components plus existing helper
-  values/types. It does not export `AgentMessage`, `AgentTranscript`, or
-  `MarkdownEditor`.
-- `./markdown` exports `AgentMessage`, `AgentTranscript`, and `MarkdownEditor` and their public
-  types. No root alias points at it.
+- Root `.` exports the 171 non-markdown roster components plus existing helper
+  values/types. It does not export `AgentMessage`, `AgentPlan`,
+  `AgentPlanRecord`, `AgentTranscript`, or `MarkdownEditor`.
+- `./markdown` exports those five components and their public types. No root
+  alias points at it.
 - `./types` is compiled JS plus declarations. Declarations-only fails.
-- Direct `./AgentMessage.svelte`, `./AgentTranscript.svelte`, and
+- Direct `./AgentMessage.svelte`, `./AgentPlan.svelte`,
+  `./AgentPlanRecord.svelte`, `./AgentTranscript.svelte`, and
   `./MarkdownEditor.svelte` remain valid.
   They are not a compatibility shim for the retired root import.
 
@@ -729,9 +730,9 @@ Direct barrels are derived, not a `./*` wildcard: for each frozen name `N`,
 export `./N` → `./dist/N.js` + `./dist/N.d.ts`. A wildcard that can resolve
 `file-upload`, chunks, or other internals fails.
 
-Root `.` keeps today's non-component helpers and the 173 non-markdown
-components. `AgentMessage`, `AgentTranscript`, and `MarkdownEditor` move to
-`./markdown`.
+Root `.` keeps today's non-component helpers and the 171 non-markdown
+components. `AgentMessage`, `AgentPlan`, `AgentPlanRecord`, `AgentTranscript`,
+and `MarkdownEditor` move to `./markdown`.
 `./types` keeps runtime plus declaration reachability even when the source
 module is type-only.
 
@@ -895,20 +896,21 @@ Breaking at `0.3.0`. No shim, alias, or silent fallback.
 Retired:
 
 ```ts
-import { AgentMessage, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-svelte";
-import { AgentMessage, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-react";
+import { AgentMessage, AgentPlan, AgentPlanRecord, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-svelte";
+import { AgentMessage, AgentPlan, AgentPlanRecord, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-react";
 ```
 
 Required:
 
 ```ts
-import { AgentMessage, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-svelte/markdown";
-import { AgentMessage, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-react/markdown";
+import { AgentMessage, AgentPlan, AgentPlanRecord, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-svelte/markdown";
+import { AgentMessage, AgentPlan, AgentPlanRecord, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-react/markdown";
 ```
 
-Direct Svelte `./AgentMessage.svelte` / `./AgentTranscript.svelte` /
-`./MarkdownEditor.svelte` and React `./AgentMessage` / `./AgentTranscript` /
-`./MarkdownEditor` stay. `g16.054` writes the `0.3.0`
+Direct Svelte `./AgentMessage.svelte` / `./AgentPlan.svelte` /
+`./AgentPlanRecord.svelte` / `./AgentTranscript.svelte` /
+`./MarkdownEditor.svelte` and matching React direct entries stay. `g16.054`
+writes the `0.3.0`
 release notes and candidate history. This spec does not edit those files.
 
 Current-state drift this card does not repair: Svelte peer `>=5.38.6 <6`;
@@ -941,9 +943,10 @@ that card, one log, papercuts.
 
 Writable: Svelte/React build and staging, their manifests/exports, root and
 markdown barrels, peer/CSS declarations, focused build and disposable smoke
-fixtures, that card, one log, papercuts, and only the existing
-`test/package-install/roster.ts` expectation needed to keep the accepted
-173-root/three-markdown split green. No new permanent certification behavior.
+fixtures, that card, one log, papercuts, and only the existing package-install
+roster, compiled-path, Svelte-floor, and CSS-execution retargeting needed to
+keep the accepted 171-root/five-markdown split green. No new permanent
+certification behavior or receipt.
 
 | Invariant | Smallest counterexample | Proof |
 | --- | --- | --- |

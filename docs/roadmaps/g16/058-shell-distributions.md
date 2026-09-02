@@ -28,13 +28,15 @@ disposable installed browser/SSR exit smoke. Leave permanent certification to
   or unproved `svelte` condition.
 - Compile private React to the same source-free/declaration/CSS standard. It
   stays private and unpublished.
-- Root shells exclude AgentMessage, AgentTranscript, and MarkdownEditor;
-  `./markdown` owns them and the optional `marked` peer. Ordinary root graphs
-  stay parser-free.
+- Root shells exclude AgentMessage, AgentPlan, AgentPlanRecord,
+  AgentTranscript, and MarkdownEditor; `./markdown` owns them and the optional
+  `marked` peer. Ordinary root graphs stay parser-free. Do not defer markdown
+  through a lazy import: all five render synchronously in browser and SSR.
 - Card 3's installed smoke is disposable and narrow. It must not edit or own
   the permanent receipt or add certification behavior. This repair may update
-  only the current `test/package-install/roster.ts` expectation for the
-  173-root/three-markdown split so the existing web gate stays green.
+  only the existing package-install roster, compiled-path, Svelte-floor, and
+  CSS-execution retargeting for the 171-root/five-markdown split so the current
+  web gate stays green.
 - No version, release-note, workflow, tag, registry, or sibling mutation.
 
 ## Ordered Work
@@ -76,7 +78,7 @@ disposable installed browser/SSR exit smoke. Leave permanent certification to
 | Conditions describe environment | `import` selects client | worker/Node resolution proof fails |
 | Svelte output is source-free | wildcard points to `.svelte` | archive/export audit fails |
 | Markdown is isolated | Button root resolves `marked` | graph assertion fails |
-| Root is parser-free | AgentTranscript remains in root | fresh root import without `marked` fails |
+| Root is parser-free | any of the five markdown components remains in root, or uses a lazy parser import | fresh root import or synchronous browser/SSR render fails |
 | Declarations preserve the API | a public component emits bare `Component` | negative prop/callback fixture compiles |
 | Permanent harness ownership is serial | card adds certification beyond the roster expectation | scope check fails |
 
@@ -84,8 +86,8 @@ disposable installed browser/SSR exit smoke. Leave permanent certification to
 
 Svelte/React build and staging configuration, their package manifests/exports,
 shell root/markdown barrel migration, peer/CSS declarations, focused build and
-disposable smoke fixtures, only the current
-`test/package-install/roster.ts` root/markdown expectation, this card, one log,
+disposable smoke fixtures, only the existing package-install roster,
+compiled-path, Svelte-floor, and CSS-execution retargeting, this card, one log,
 and new papercuts. Do not add permanent certification behavior or edit its
 receipt, version/release surfaces,
 workflows, tags, registries, sibling repositories, or React publication state.
