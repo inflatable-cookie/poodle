@@ -80,6 +80,31 @@ with no receipt emission:
 Candidate Cargo and evidence-head messages match the merged g16.054 log
 wording.
 
+## Validation
+
+- Focused routing plants: `effigy test:core-build` — 44 pass / 0 fail, including
+  14 production-guard plants in `test/package-install/scope.test.ts`.
+- Ordinary empty-range inner smoke on `ab5ab1dce6df39c98b3a51160e41fac4da1d6d49`:
+  11 files / 22 tests; stdout `mode: ordinary`; no `receiptSha256`; no
+  `installed-receipt.json`.
+- Ordinary committed feature-range `effigy ci:web`: pass. Pack-install cloned
+  `5d3095929e569d252477156f1a53cb3b2fcaba3c`, printed `mode: ordinary`, and
+  did not print `receiptSha256`.
+- Explicit strict on this branch range: rejected before build/pack
+  (`docs/architecture/014-compiled-web-package-distribution.md`,
+  `docs/logs/2026-09/20260902-g16-061-installed-web-smoke-certification-routing.md`,
+  `docs/roadmaps/g16/061-installed-web-smoke-certification-routing.md`).
+- Unknown mode at the production entry: exit 1,
+  `must be ordinary, strict, or g16.054-candidate: typo`.
+- `effigy docs:check`: pass.
+- `effigy qa`: pass. Ordinary pack-install again printed `mode: ordinary`
+  with no `receiptSha256`. License compliance 9 package / 17 Cargo / 4 notice
+  surfaces; security hygiene 4804 files, no credential patterns.
+- `git diff --check origin/main...HEAD`: pass.
+
+No `release prepare/execute/simulate`, tag, publish, workflow dispatch, windowed
+selector, or native-visual selector was run.
+
 ## Limits
 
 - This worker has not merged, rebased PR #164, tagged, published, dispatched a

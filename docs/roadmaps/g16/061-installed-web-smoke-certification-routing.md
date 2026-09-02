@@ -107,4 +107,6 @@ passed 11 files / 22 tests with `mode: ordinary` and no receipt or receipt
 hash. Focused plants and the merged candidate Cargo/evidence-head failures
 are recorded in
 `docs/logs/2026-09/20260902-g16-061-installed-web-smoke-certification-routing.md`.
-PR #164 rebase stays with the orchestrator.
+`effigy ci:web`, `effigy docs:check`, and `effigy qa` passed on
+`5d3095929e569d252477156f1a53cb3b2fcaba3c`. PR #164 rebase stays with the
+orchestrator.
