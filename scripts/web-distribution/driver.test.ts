@@ -172,6 +172,8 @@ describe("web distribution driver", () => {
         `export const assetUrl = "/assets/app.js";\n` +
         String.raw`export const escapedAssetUrl = "\u002fassets\u002fapp.js";` +
         "\n" +
+        `export const constructed = new URL("/assets/chunk.js", "https://example.com");\n` +
+        `import "/assets/module.js";\n` +
         `export const moduleId = "node:fs";\n` +
         `export const segments = "a/b".split("/");\n` +
         `export const matcher = /\\/workspace\\//;\n`,
@@ -194,9 +196,14 @@ describe("web distribution driver", () => {
     rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
-  test("unix and windows workspace paths in declarations fail the audit", () => {
+  test("unix, windows, UNC, and file paths in declarations fail the audit", () => {
     const distDir = fixtureDist();
-    for (const path of ["/opt/build/poodle/src/x.ts", "C:\\Users\\reviewer\\src\\x.ts"]) {
+    for (const path of [
+      "/opt/build/poodle/src/x.ts",
+      "C:\\Users\\reviewer\\src\\x.ts",
+      "\\\\server\\share\\src\\x.ts",
+      "file:///workspace/poodle/src/x.ts",
+    ]) {
       writeFileSync(
         join(distDir, "index.d.ts"),
         `export type Leak = ${JSON.stringify(path)};\n`,
