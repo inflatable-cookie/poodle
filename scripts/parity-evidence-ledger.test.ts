@@ -60,7 +60,7 @@ describe("g16.001 parity evidence ledger", () => {
         ledger.replace("a_pointer_press_reaches_the_backend_listener_once", "missing_mounted_test_name"),
         root,
       ),
-    ).toThrow(/unresolved evidence reference|unresolved claim/);
+    ).toThrow(/unresolved evidence reference|unresolved claim|Nucleus receipt ledger row/);
   });
 
   it("can reproduce the checked-in document from live sources", () => {

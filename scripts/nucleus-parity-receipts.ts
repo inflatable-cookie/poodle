@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 export const NUCLEUS_MANIFEST_PATH = "docs/roadmaps/g16/nucleus-parity-manifest.json";
+export const NUCLEUS_MANIFEST_SCHEMA_PATH = "docs/roadmaps/g16/nucleus-parity-manifest.schema.json";
 export const NUCLEUS_SCHEMA_PATH = "docs/roadmaps/g16/nucleus-parity-receipt.schema.json";
 export const NUCLEUS_RECEIPT_DIR = "docs/roadmaps/g16/nucleus-parity-receipts";
 export const NUCLEUS_RECEIPT_SCHEMA = "poodle.g16-nucleus-parity-receipt.v1";
@@ -137,7 +138,7 @@ export function loadNucleusManifest(root = ROOT): NucleusManifest {
 
 export function validateNucleusManifest(manifest: NucleusManifest, root = ROOT): void {
   const errors: string[] = [];
-  assert(manifest.$schema === "./nucleus-parity-receipt.schema.json", "manifest $schema is not the receipt schema", errors);
+  assert(manifest.$schema === "./nucleus-parity-manifest.schema.json", "manifest $schema is not the manifest schema", errors);
   assert(manifest.schema === "poodle.g16.062-nucleus-parity-manifest.v1", "manifest schema is not current", errors);
   assert(manifest.program === "g16.062", "manifest program is not g16.062", errors);
   assert(manifest.rendered_component_count === 29, `manifest rendered denominator is ${manifest.rendered_component_count}, expected 29`, errors);
@@ -229,6 +230,7 @@ export function validateNucleusReceipt(receipt: NucleusReceipt, manifest = loadN
 function currentSourceMatchesReceipt(manifest: NucleusManifest, root: string): boolean {
   try {
     execFileSync("git", ["diff", "--quiet", manifest.resolution.source_commit, "HEAD", "--", ...SOURCE_PATHS], { cwd: root, stdio: "ignore" });
+    execFileSync("git", ["diff", "--quiet", "HEAD", "--", ...SOURCE_PATHS], { cwd: root, stdio: "ignore" });
     return true;
   } catch {
     return false;

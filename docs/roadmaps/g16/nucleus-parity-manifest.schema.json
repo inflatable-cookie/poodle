@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://poodle.inflatable-cookie.com/schemas/g16/nucleus-parity-manifest.v1.json",
+  "title": "Poodle g16.062 Nucleus parity manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema",
+    "program",
+    "rendered_component_count",
+    "prerequisites",
+    "resolution",
+    "components"
+  ],
+  "properties": {
+    "$schema": { "const": "./nucleus-parity-manifest.schema.json" },
+    "schema": { "const": "poodle.g16.062-nucleus-parity-manifest.v1" },
+    "program": { "const": "g16.062" },
+    "rendered_component_count": { "const": 29 },
+    "prerequisites": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": { "$ref": "#/$defs/entry" }
+    },
+    "resolution": { "$ref": "#/$defs/resolution" },
+    "components": {
+      "type": "array",
+      "minItems": 29,
+      "maxItems": 29,
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "scenario_id", "direct_dependencies", "expected_selector", "expected_test"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "rendered": { "type": "boolean" },
+        "scenario_id": { "type": "string", "pattern": "^nucleus\\.[a-z-]+\\.[a-z0-9-]+$" },
+        "direct_dependencies": { "type": "array", "items": { "type": "string" } },
+        "expected_selector": { "const": "effigy regressions:native" },
+        "expected_test": { "type": ["string", "null"], "pattern": "^[a-z0-9_]+$" }
+      }
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package", "version", "source_commit", "lockfile", "lockfile_sha256", "distribution", "lock_resolution"],
+      "properties": {
+        "package": { "const": "poodle-gpui-preview" },
+        "version": { "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "source_commit": { "pattern": "^[0-9a-f]{40}$" },
+        "lockfile": { "const": "packages/gpui/preview/Cargo.lock" },
+        "lockfile_sha256": { "pattern": "^[0-9a-f]{64}$" },
+        "distribution": { "const": "workspace" },
+        "lock_resolution": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/locked_package" } }
+      }
+    },
+    "locked_package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "source"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "source": { "enum": ["crates.io", "workspace"] },
+        "checksum": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    }
+  }
+}
