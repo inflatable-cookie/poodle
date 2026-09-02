@@ -52,7 +52,6 @@ export function ensureDeclarationTools(): string {
       ownsInstallLock = true;
       break;
     } catch {
-      if (existsSync(typescriptPkg)) break;
       Atomics.wait(lockWaiter, 0, 0, 100);
     }
   }

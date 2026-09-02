@@ -179,7 +179,13 @@
 "svelte:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/svelte-build.ts" }]
 "react:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/react-build.ts" }]
 "test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts"
-"test:shell-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/svelte-build.test.ts scripts/web-distribution/react-build.test.ts scripts/web-distribution/shell-smoke.test.ts"
+# Bootstrap the isolated TypeScript 6 declaration toolchain before Bun starts
+# its parallel test-file workers; the helper still validates the exact nested
+# realpath on every build.
+"test:shell-build" = [
+  { run = "bun install --frozen-lockfile --cwd scripts/web-distribution/declaration-tools" },
+  { run = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/svelte-build.test.ts scripts/web-distribution/react-build.test.ts scripts/web-distribution/shell-smoke.test.ts" },
+]
 "test:core" = "bun run --cwd packages/core test"
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
 # Verifies the machine -> DOM wiring the framework packages add on top of the
