@@ -15,7 +15,7 @@ Starting exact head: `c1a527898e7425853359bd72b7113a8cf38b8d97`
 Planning base ancestor: `7f59ae42f4917c675968819eb23a5e41dc90013c`
 Rebased onto live `origin/main`: `a52d0d32bdcf78d219c22449ad870ff3641e2569`
 Post-rebase implementation commit: `f617a37d3`
-Current closeout head: `28dd15ab7`
+Current closeout head: `8d56191b5`
 PR: https://github.com/inflatable-cookie/poodle/pull/156
 
 ## Outcome
