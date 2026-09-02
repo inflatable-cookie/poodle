@@ -11,6 +11,7 @@ Branch: `fix/g16-061-installed-routing`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-061-installed-routing`
 Base: `origin/main` at `ab5ab1dce6df39c98b3a51160e41fac4da1d6d49`
 Required ancestor: PR #165 merge `9e38e7971d3acc6d530e83f5e640feac27bbff00`
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/166
 
 ## Outcome
 
