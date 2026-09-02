@@ -2,6 +2,7 @@
 
 Status: complete — awaiting orchestrator review
 Date: 2026-09-02
+PR: https://github.com/inflatable-cookie/poodle/pull/162
 Card: `docs/roadmaps/g16/058-shell-distributions.md`
 Handoff: `docs/handoffs/20260902-125334-g16-058-shell-distributions.md`
 Governing refs: `docs/architecture/014-compiled-web-package-distribution.md`,
