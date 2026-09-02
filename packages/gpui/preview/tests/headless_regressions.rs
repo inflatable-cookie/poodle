@@ -5505,6 +5505,7 @@ fn machine_name_focus_tree(host: &Arc<MachineNameFocusHost>, mounted: &Arc<Mutex
             })),
             on_machine_label_restore_display_focus: Some(Arc::new(move || {
                 *restore_host.request_focus.lock().expect("request_focus") = true;
+                note(&restore_host.log, "machine/restore".to_owned());
                 let tree = machine_name_focus_tree(&restore_host, &restore_mount);
                 *restore_mount.lock().expect("mount") = tree;
             })),
@@ -5545,7 +5546,7 @@ fn licence_activation_machine_name_enter_and_escape_restore_display_focus() {
         take_events(&host.log);
         driver.dispatch_key_raw("enter");
         driver.draw_frame();
-        assert_eq!(take_events(&host.log), vec!["machine/commit:Studio Mac2"]);
+        assert_eq!(take_events(&host.log), vec!["machine/commit:Studio Mac2", "machine/restore"]);
         assert_eq!(*host.label.lock().expect("label"), "Studio Mac2");
         assert!(!*host.editing.lock().expect("editing"));
         assert_eq!(
@@ -5566,7 +5567,7 @@ fn licence_activation_machine_name_enter_and_escape_restore_display_focus() {
         take_events(&host.log);
         driver.dispatch_key_raw("escape");
         driver.draw_frame();
-        assert_eq!(take_events(&host.log), vec!["machine/cancel"]);
+        assert_eq!(take_events(&host.log), vec!["machine/cancel", "machine/restore"]);
         assert_eq!(*host.label.lock().expect("label"), "Studio Mac");
         assert_eq!(
             poodle_gpui_node_backend::focus_state_for(MACHINE_NAME_FOCUS_ID),
@@ -5693,6 +5694,7 @@ fn seat_rename_focus_tree(host: &Arc<SeatRenameFocusHost>, mounted: &Arc<Mutex<N
             })),
             on_rename_restore_display_focus: Some(Arc::new(move |_id| {
                 *restore_host.request_focus.lock().expect("request_focus") = true;
+                note(&restore_host.log, "seat/restore".to_owned());
                 let tree = seat_rename_focus_tree(&restore_host, &restore_mount);
                 *restore_mount.lock().expect("mount") = tree;
             })),
@@ -5742,7 +5744,7 @@ fn licence_seats_seat_row_enter_and_escape_restore_display_focus() {
         take_events(&host.log);
         driver.dispatch_key_raw("enter");
         driver.draw_frame();
-        assert_eq!(take_events(&host.log), vec!["seat/commit:Studio rig2"]);
+        assert_eq!(take_events(&host.log), vec!["seat/commit:Studio rig2", "seat/restore"]);
         assert_eq!(
             host.label.lock().expect("label").as_deref(),
             Some("Studio rig2")
@@ -5766,7 +5768,7 @@ fn licence_seats_seat_row_enter_and_escape_restore_display_focus() {
         take_events(&host.log);
         driver.dispatch_key_raw("escape");
         driver.draw_frame();
-        assert_eq!(take_events(&host.log), vec!["seat/cancel"]);
+        assert_eq!(take_events(&host.log), vec!["seat/cancel", "seat/restore"]);
         assert_eq!(
             host.label.lock().expect("label").as_deref(),
             Some("Studio rig")
@@ -11553,6 +11555,7 @@ fn label_routing_tree(host: &Arc<LabelRouting>, mounted: &Arc<Mutex<Node>>) -> N
             })),
             on_restore_display_focus: Some(Arc::new(move || {
                 *restore_host.request_focus.lock().expect("request_focus") = true;
+                note(&restore_host.log, "label/restore".to_owned());
                 let tree = label_routing_tree(&restore_host, &restore_mount);
                 *restore_mount.lock().expect("mount") = tree;
             })),
@@ -13202,7 +13205,7 @@ fn editable_label_commits_on_enter_and_once_through_the_blur_tab_causes() {
         driver.draw_frame();
         assert_eq!(
             take_events(&host.log),
-            vec!["label/commit:Kicks"],
+            vec!["label/commit:Kicks", "label/restore"],
             "Enter commits directly, exactly once"
         );
         assert_eq!(*host.value.lock().expect("value"), "Kicks");
@@ -13227,7 +13230,7 @@ fn editable_label_commits_on_enter_and_once_through_the_blur_tab_causes() {
 
         driver.dispatch_key_raw("escape");
         driver.draw_frame();
-        assert_eq!(take_events(&host.log), vec!["label/cancel"]);
+        assert_eq!(take_events(&host.log), vec!["label/cancel", "label/restore"]);
         assert_eq!(
             *host.value.lock().expect("value"),
             "Kick",
@@ -13307,7 +13310,7 @@ fn editable_label_live_draft_stays_off_the_committed_value() {
 
         driver.dispatch_key_raw("enter");
         driver.draw_frame();
-        assert_eq!(take_events(&host.log), vec!["label/commit:Kicks"]);
+        assert_eq!(take_events(&host.log), vec!["label/commit:Kicks", "label/restore"]);
         assert_eq!(
             host.last_previous.lock().expect("previous").as_deref(),
             Some("Kick")
