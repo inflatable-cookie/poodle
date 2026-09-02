@@ -38,6 +38,10 @@ pub struct LicenceSeatsHandlers {
     pub on_rename: Option<Arc<dyn Fn(&str, Option<&str>) + Send + Sync>>,
     /// A machine-name edit was started (host flips the row into editing).
     pub on_rename_edit: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    /// Live rename draft changed.
+    pub on_rename_change: Option<Arc<dyn Fn(&str, &str) + Send + Sync>>,
+    /// Caret into the rename draft moved.
+    pub on_rename_selection_change: Option<Arc<dyn Fn(&str, usize, usize) + Send + Sync>>,
     /// A release was confirmed/requested.
     pub on_release: Option<Arc<dyn Fn(&str) + Send + Sync>>,
     /// The release trigger was pressed (host opens that row's confirm).
@@ -62,8 +66,11 @@ pub fn licence_seats(
     let text_tertiary = ctx.theme().resolve_color("color.text.tertiary");
     let monitor_size = rem_to_px(1.25);
 
-    let rows =
-        licence_seat_rows(&spec.seats, spec.pending_machine_id.as_deref(), &spec.release_label);
+    let rows = licence_seat_rows(
+        &spec.seats,
+        spec.pending_machine_id.as_deref(),
+        &spec.release_label,
+    );
 
     // ── List ──
     let mut list = Node::container();
@@ -129,6 +136,15 @@ fn seat_row(
             handler(&machine_id, label.as_deref());
         }) as Arc<dyn Fn(&str) + Send + Sync>
     });
+    let change = handlers.on_rename_change.clone().map(|handler| {
+        let machine_id = row.machine_id.clone();
+        Arc::new(move |value: &str| handler(&machine_id, value)) as Arc<dyn Fn(&str) + Send + Sync>
+    });
+    let selection = handlers.on_rename_selection_change.clone().map(|handler| {
+        let machine_id = row.machine_id.clone();
+        Arc::new(move |start: usize, end: usize| handler(&machine_id, start, end))
+            as Arc<dyn Fn(usize, usize) + Send + Sync>
+    });
     let editable = editable_label_with_handlers(
         &EditableLabelSpec::new()
             .with_value(if row.named {
@@ -136,6 +152,12 @@ fn seat_row(
             } else {
                 String::new()
             })
+            .with_draft_value(if editing_this_row {
+                spec.editing_draft.clone()
+            } else {
+                None
+            })
+            .with_selection(spec.editing_selection.0, spec.editing_selection.1)
             .with_editing(editing_this_row)
             .with_activation_mode(EditableLabelActivation::EnterOrSpace)
             .with_variant(EditableLabelVariant::Flush)
@@ -152,7 +174,9 @@ fn seat_row(
         ctx,
         EditableLabelHandlers {
             on_edit_start: edit_start,
-            on_commit: commit,
+            on_change: change,
+            on_selection_change: selection,
+            on_commit: crate::editable_label::adapt_commit(commit),
             ..EditableLabelHandlers::default()
         },
     );
@@ -193,30 +217,21 @@ fn seat_row(
                 Some(trigger),
                 None,
                 ConfirmActionHandlers {
-                    on_trigger: handlers
-                        .on_release_trigger
-                        .as_ref()
-                        .map(|handler| {
-                            let machine_id = row.machine_id.clone();
-                            let handler = Arc::clone(handler);
-                            Arc::new(move || handler(&machine_id)) as Arc<dyn Fn() + Send + Sync>
-                        }),
-                    on_confirm: handlers
-                        .on_release
-                        .as_ref()
-                        .map(|handler| {
-                            let machine_id = row.machine_id.clone();
-                            let handler = Arc::clone(handler);
-                            Arc::new(move || handler(&machine_id)) as Arc<dyn Fn() + Send + Sync>
-                        }),
-                    on_cancel: handlers
-                        .on_release_cancel
-                        .as_ref()
-                        .map(|handler| {
-                            let machine_id = row.machine_id.clone();
-                            let handler = Arc::clone(handler);
-                            Arc::new(move || handler(&machine_id)) as Arc<dyn Fn() + Send + Sync>
-                        }),
+                    on_trigger: handlers.on_release_trigger.as_ref().map(|handler| {
+                        let machine_id = row.machine_id.clone();
+                        let handler = Arc::clone(handler);
+                        Arc::new(move || handler(&machine_id)) as Arc<dyn Fn() + Send + Sync>
+                    }),
+                    on_confirm: handlers.on_release.as_ref().map(|handler| {
+                        let machine_id = row.machine_id.clone();
+                        let handler = Arc::clone(handler);
+                        Arc::new(move || handler(&machine_id)) as Arc<dyn Fn() + Send + Sync>
+                    }),
+                    on_cancel: handlers.on_release_cancel.as_ref().map(|handler| {
+                        let machine_id = row.machine_id.clone();
+                        let handler = Arc::clone(handler);
+                        Arc::new(move || handler(&machine_id)) as Arc<dyn Fn() + Send + Sync>
+                    }),
                 },
             )
         } else {
@@ -322,7 +337,9 @@ mod tests {
         assert!(texts.iter().any(|t| t == "Unnamed machine"));
         assert!(texts.iter().any(|t| t == LICENCE_THIS_MACHINE));
         assert!(
-            !texts.iter().any(|t| t.contains("id-a") || t.contains("id-b")),
+            !texts
+                .iter()
+                .any(|t| t.contains("id-a") || t.contains("id-b")),
             "raw machine ids never reach rendered or accessible text"
         );
     }

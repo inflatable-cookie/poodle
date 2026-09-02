@@ -310,6 +310,9 @@ export {
 
 export {
   editLabelTransition,
+  editLabelContext,
+  trimEditableLabel,
+  clampEditableLabelDraft,
   listReorderKeyIntent,
   type EditLabelState,
   type EditLabelContext,

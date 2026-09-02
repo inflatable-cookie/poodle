@@ -34,10 +34,17 @@ pub struct EditableLabelSpec {
     pub variant: EditableLabelVariant,
     /// Italic text shown when value is empty (display mode only).
     pub empty_text: Option<String>,
-    /// Maximum character count for the input.
+    /// Maximum length in Unicode scalar values.
     pub max_length: Option<usize>,
     /// Show pencil icon on hover/focus to signal editability.
     pub show_edit_icon: bool,
+    /// Session-private live draft while `is_editing`. `None` paints `value`.
+    pub draft_value: Option<String>,
+    /// Caret/selection into the live draft, as Unicode scalar indices.
+    pub selection_start: usize,
+    pub selection_end: usize,
+    /// Queue backend focus for this node on the next paint.
+    pub request_focus: bool,
     /// Omitted (`None`) inherits from the presentation context; an explicit
     /// value always wins.
     pub size: Option<ControlSize>,
@@ -62,6 +69,10 @@ impl Default for EditableLabelSpec {
             empty_text: None,
             max_length: None,
             show_edit_icon: false,
+            draft_value: None,
+            selection_start: 0,
+            selection_end: 0,
+            request_focus: false,
             size: None,
             size_role: SemanticControlSizeRole::Control,
             density: None,
@@ -128,6 +139,48 @@ impl EditableLabelSpec {
     pub fn with_show_edit_icon(mut self, v: bool) -> Self {
         self.show_edit_icon = v;
         self
+    }
+
+    pub fn with_draft_value(mut self, draft_value: impl Into<Option<String>>) -> Self {
+        self.draft_value = draft_value.into();
+        self
+    }
+
+    pub fn with_selection(mut self, start: usize, end: usize) -> Self {
+        self.selection_start = start;
+        self.selection_end = end;
+        self
+    }
+
+    pub fn with_request_focus(mut self, request_focus: bool) -> Self {
+        self.request_focus = request_focus;
+        self
+    }
+
+    pub fn live_text(&self) -> &str {
+        if self.is_editing {
+            self.draft_value.as_deref().unwrap_or(&self.value)
+        } else {
+            &self.value
+        }
+    }
+
+    pub fn resolved_accessible_name(&self) -> String {
+        if let Some(label) = self.aria_label.as_deref().filter(|label| !label.is_empty()) {
+            return label.to_string();
+        }
+        if !self.value.is_empty() {
+            return self.value.clone();
+        }
+        if let Some(empty) = self.empty_text.as_deref().filter(|label| !label.is_empty()) {
+            return empty.to_string();
+        }
+        "Edit label".to_string()
+    }
+
+    pub fn selection_range(&self) -> (usize, usize) {
+        let len = self.live_text().chars().count();
+        (self.selection_start.min(len), self.selection_end.min(len))
     }
 
     pub fn text_color_token(&self) -> &'static str {

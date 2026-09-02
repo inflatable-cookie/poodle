@@ -58,6 +58,10 @@ pub struct LicenceActivationSpec {
     /// Whether the machine-name EditableLabel is editing (Rust targets own
     /// the edit state, like every other composed control).
     pub machine_label_editing: bool,
+    /// Session-private live draft while the machine name is editing.
+    pub machine_label_draft: Option<String>,
+    /// Caret into the machine-name draft.
+    pub machine_label_selection: (usize, usize),
     /// Submit override; `None` resolves mode/view copy.
     pub activate_label: Option<String>,
     /// Opt-in segmented key entry; `None` renders the free-form TextInput.
@@ -94,6 +98,8 @@ impl Default for LicenceActivationSpec {
             title: "Activate licence".to_string(),
             machine_label: None,
             machine_label_editing: false,
+            machine_label_draft: None,
+            machine_label_selection: (0, 0),
             activate_label: None,
             key_code_input: None,
             key_draft: String::new(),
@@ -223,7 +229,11 @@ impl LicenceActivationSpec {
         self
     }
 
-    pub fn with_file(mut self, name: impl Into<String>, contents_base64: impl Into<String>) -> Self {
+    pub fn with_file(
+        mut self,
+        name: impl Into<String>,
+        contents_base64: impl Into<String>,
+    ) -> Self {
         self.file_name = Some(name.into());
         self.file_contents_base64 = Some(contents_base64.into());
         self
@@ -241,6 +251,16 @@ impl LicenceActivationSpec {
 
     pub fn with_machine_label_editing(mut self, editing: bool) -> Self {
         self.machine_label_editing = editing;
+        self
+    }
+
+    pub fn with_machine_label_draft(mut self, draft: impl Into<Option<String>>) -> Self {
+        self.machine_label_draft = draft.into();
+        self
+    }
+
+    pub fn with_machine_label_selection(mut self, start: usize, end: usize) -> Self {
+        self.machine_label_selection = (start, end);
         self
     }
 
@@ -275,7 +295,10 @@ mod tests {
         assert_eq!(keyed.default_submit_label(), "Activate");
 
         let offline = spec.with_route(LicenceActivationRoute::LicenceFile);
-        assert_eq!(offline.effective_route(), LicenceActivationRoute::LicenceFile);
+        assert_eq!(
+            offline.effective_route(),
+            LicenceActivationRoute::LicenceFile
+        );
         assert_eq!(offline.default_submit_label(), "Activate");
         assert!(offline.shows_route_switch());
     }
@@ -302,8 +325,12 @@ mod tests {
 
     #[test]
     fn pending_or_disabled_freezes_interaction() {
-        assert!(LicenceActivationSpec::new().with_pending(true).interaction_frozen());
-        assert!(LicenceActivationSpec::new().with_disabled(true).interaction_frozen());
+        assert!(LicenceActivationSpec::new()
+            .with_pending(true)
+            .interaction_frozen());
+        assert!(LicenceActivationSpec::new()
+            .with_disabled(true)
+            .interaction_frozen());
         assert!(!LicenceActivationSpec::new().interaction_frozen());
     }
 }

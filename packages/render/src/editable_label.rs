@@ -28,7 +28,7 @@ use poodle_specs::{
     ControlDensity, ControlSize, EditableLabelActivation, EditableLabelSpec, EditableLabelVariant,
 };
 
-use crate::color::{mix_srgb, TRANSPARENT};
+use crate::color::{mix_srgb, with_alpha, TRANSPARENT};
 use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 
@@ -87,20 +87,28 @@ fn limit_edit_value(value: String, max_length: Option<usize>) -> String {
     value.chars().take(max_length).collect()
 }
 
-fn end_edit_state(value: &str) -> poodle_headless::text_input::EditState {
-    let end = value.chars().count();
-    poodle_headless::text_input::EditState {
-        anchor: end,
-        head: end,
-    }
+fn live_edit_state(spec: &EditableLabelSpec) -> poodle_headless::text_input::EditState {
+    let (anchor, head) = spec.selection_range();
+    poodle_headless::text_input::EditState { anchor, head }
 }
 
 #[derive(Default, Clone)]
 pub struct EditableLabelHandlers {
     pub on_edit_start: Option<Arc<dyn Fn() + Send + Sync>>,
     pub on_change: Option<TextChangeHandler>,
-    pub on_commit: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+    pub on_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
+    pub on_commit: Option<Arc<dyn Fn(&str, &str) + Send + Sync>>,
     pub on_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
+    pub on_restore_display_focus: Option<Arc<dyn Fn() + Send + Sync>>,
+}
+
+pub(crate) fn adapt_commit(
+    handler: Option<Arc<dyn Fn(&str) + Send + Sync>>,
+) -> Option<Arc<dyn Fn(&str, &str) + Send + Sync>> {
+    handler.map(|handler| {
+        Arc::new(move |value: &str, _previous: &str| handler(value))
+            as Arc<dyn Fn(&str, &str) + Send + Sync>
+    })
 }
 
 pub fn editable_label(
@@ -145,22 +153,22 @@ pub fn editable_label_with_handlers(
 
     let is_flush = spec.variant == EditableLabelVariant::Flush;
     let is_empty = spec.value.is_empty();
+    let live = spec.live_text().to_string();
+    let accessible_name = spec.resolved_accessible_name();
+    let selection = spec.selection_range();
 
     let mut el = if spec.is_editing {
-        // ── Editing mode: input node seeded with value + placeholder ────
-        // The native subset edits at the end of the controlled value. The
-        // component owns max_length because the host sees only the result.
+        // ── Editing mode: input node seeded with the session draft ────
         let edit_border = ctx.theme().resolve_color(spec.edit_border_token());
         let surface_bg = ctx.theme().resolve_color(spec.fill_token());
+        let selection_fill = ctx.theme().resolve_color("color.accent.base");
 
-        let mut input = Node::input(
-            spec.value.clone(),
-            spec.placeholder.clone().unwrap_or_default(),
-        );
-        input.a11y.label = Some(
-            spec.aria_label
-                .clone()
-                .unwrap_or_else(|| "Edit label".to_string()),
+        let mut input = Node::input(live.clone(), spec.placeholder.clone().unwrap_or_default());
+        input.a11y.label = Some(accessible_name.clone());
+        input = input.with_caret(
+            selection,
+            text_color,
+            with_alpha(selection_fill, selection_fill.3 * 0.30),
         );
         {
             let s = &mut input.style;
@@ -189,48 +197,73 @@ pub fn editable_label_with_handlers(
             }
         }
         input.interaction.focusable = true;
+        if spec.request_focus {
+            input.interaction.request_focus = true;
+        }
         if !spec.is_disabled {
+            let live_for_change = live.clone();
             if let Some(change) = handlers.on_change.clone() {
-                let value = spec.value.clone();
                 let max_length = spec.max_length;
                 input.interaction.on_text_change = Some(Arc::new(move |next: &str| {
                     let next = limit_edit_value(next.to_string(), max_length);
-                    if next != value {
+                    if next != live_for_change {
                         change(&next);
                     }
                 }));
             }
-            input.interaction.on_cancel = handlers.on_cancel.clone();
-            // The editing input rings in the accent focus colour when
-            // focused — the same focus-visible signal a TextInput carries —
-            // which is also what lets the GPUI backend track its focus.
+            let cancel = handlers.on_cancel.clone();
+            let restore = handlers.on_restore_display_focus.clone();
+            if cancel.is_some() || restore.is_some() {
+                input.interaction.on_cancel = Some(Arc::new(move || {
+                    if let Some(cancel) = &cancel {
+                        cancel();
+                    }
+                    if let Some(restore) = &restore {
+                        restore();
+                    }
+                }));
+            }
             input.style.focus = Some(StylePatch {
                 background: None,
                 border_color: Some(ctx.theme().resolve_color("color.accent.focusRing")),
                 text_color: None,
                 opacity: None,
             });
-            // Typing reaches the controlled draft through the shared edit
-            // transitions. GPUI's admitted subset keeps the caret at the end;
-            // the host re-renders with the reported value after each edit.
-            if let Some(change) = handlers.on_change.clone() {
-                let value = spec.value.clone();
-                let max_length = spec.max_length;
-                let insert_change = change.clone();
-                let insert_value = value.clone();
-                input.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
-                    let outcome = poodle_headless::text_input::insert_transition(
-                        &insert_value,
-                        end_edit_state(&insert_value),
-                        text,
-                        max_length,
-                    );
-                    if let Some(next) = outcome.value {
-                        if next != insert_value {
-                            insert_change(&next);
+            let report_edit = {
+                let change = handlers.on_change.clone();
+                let select = handlers.on_selection_change.clone();
+                let live = live.clone();
+                move |outcome: poodle_headless::text_input::EditOutcome| {
+                    if let Some(next) = outcome.value.clone() {
+                        if next != live {
+                            if let Some(change) = &change {
+                                change(&next);
+                            }
                         }
                     }
+                    let moved = (outcome.state.anchor, outcome.state.head);
+                    if moved != selection {
+                        if let Some(select) = &select {
+                            select(moved.0, moved.1);
+                        }
+                    }
+                }
+            };
+            if handlers.on_change.is_some() || handlers.on_selection_change.is_some() {
+                let live_insert = live.clone();
+                let max_length = spec.max_length;
+                let state = live_edit_state(spec);
+                let report = report_edit.clone();
+                input.interaction.on_edit_insert = Some(Arc::new(move |text: &str| {
+                    report(poodle_headless::text_input::insert_transition(
+                        &live_insert,
+                        state,
+                        text,
+                        max_length,
+                    ));
                 }));
+                let live_key = live.clone();
+                let report = report_edit;
                 input.interaction.on_edit_key = Some(Arc::new(move |key, mods| {
                     let key = if key == "space" {
                         " ".to_string()
@@ -240,39 +273,31 @@ pub fn editable_label_with_handlers(
                         key.to_string()
                     };
                     let Some(outcome) = poodle_headless::text_input::edit_transition(
-                        &value,
-                        end_edit_state(&value),
-                        &key,
-                        false,
-                        mods.accel,
-                        max_length,
+                        &live_key, state, &key, false, mods.accel, max_length,
                     ) else {
                         return;
                     };
-                    if let Some(next) = outcome.value {
-                        if next != value {
-                            change(&next);
-                        }
-                    }
+                    report(outcome);
                 }));
             }
-            if let Some(handler) = &handlers.on_commit {
-                let submit_handler = Arc::clone(handler);
-                let submit_value = spec.value.clone();
-                input.interaction.on_submit =
-                    Some(Arc::new(move || submit_handler(&submit_value)));
-                // Contract §6: Tab in edit mode commits — *because* Tab moves
-                // focus and blur commits, not because a backend treats Tab as
-                // a submit gesture. Enter keeps the explicit channel above;
-                // this covers every other way focus leaves the field. The host
-                // owns `is_editing`, so a commit that ends the edit unmounts
-                // this node before a second one can arrive, and the shared
-                // machine guards commit-after-cancel.
-                let blur_handler = Arc::clone(handler);
-                let blur_value = spec.value.clone();
+            if let Some(handler) = handlers.on_commit.clone() {
+                let committed = spec.value.clone();
+                let draft = live.clone();
+                let restore = handlers.on_restore_display_focus.clone();
+                let submit_handler = Arc::clone(&handler);
+                input.interaction.on_submit = Some(Arc::new(move || {
+                    let value = poodle_headless::edit::trim_editable_label(&draft);
+                    submit_handler(&value, &committed);
+                    if let Some(restore) = &restore {
+                        restore();
+                    }
+                }));
+                let blur_committed = spec.value.clone();
+                let blur_draft = live.clone();
                 input.interaction.on_focus_change = Some(Arc::new(move |focused: bool| {
                     if !focused {
-                        blur_handler(&blur_value);
+                        let value = poodle_headless::edit::trim_editable_label(&blur_draft);
+                        handler(&value, &blur_committed);
                     }
                 }));
             }
@@ -353,23 +378,31 @@ pub fn editable_label_with_handlers(
     if spec.is_disabled {
         el.style.descriptor.opacity = ctx.theme().resolve_opacity(spec.disabled_opacity_token());
         el.interaction.disabled = true;
-    }
-
-    if !spec.is_editing
-        && !spec.is_disabled
-        && spec.activation_mode != EditableLabelActivation::Programmatic
-    {
+    } else if !spec.is_editing {
+        el.interaction.focusable = true;
+        if spec.request_focus {
+            el.interaction.request_focus = true;
+        }
         if let Some(handler) = handlers.on_edit_start {
-            el.interaction.focusable = true;
-            el.interaction.on_activate = Some(Arc::new(move || handler()));
+            match spec.activation_mode {
+                EditableLabelActivation::EnterOrSpace => {
+                    el.interaction.on_activate = Some(handler);
+                }
+                EditableLabelActivation::DoubleClick => {
+                    let key_handler = Arc::clone(&handler);
+                    el.interaction.on_double_activate = Some(Arc::new(move |_mods| handler()));
+                    el.interaction.on_edit_key = Some(Arc::new(move |key, _mods| {
+                        if key == "enter" || key == "space" {
+                            key_handler();
+                        }
+                    }));
+                }
+                EditableLabelActivation::Programmatic => {}
+            }
         }
     }
 
-    if let Some(label) = spec.aria_label.as_deref() {
-        if !label.is_empty() {
-            el.a11y.label = Some(label.to_string());
-        }
-    }
+    el.a11y.label = Some(accessible_name);
     el
 }
 
@@ -391,8 +424,10 @@ mod tests {
         let sink = Arc::clone(&values);
         let theme = theme();
         let ctx = RenderContext::new(&theme);
+        let spec = spec.with_editing(true);
+        let len = spec.live_text().chars().count();
         let node = editable_label_with_handlers(
-            &spec.with_editing(true),
+            &spec.with_selection(len, len),
             &ctx,
             EditableLabelHandlers {
                 on_change: Some(Arc::new(move |value| {
@@ -402,8 +437,8 @@ mod tests {
             },
         );
         (node.interaction.on_edit_key.as_ref().expect("key handler"))(key, modifiers);
-        let result = values.lock().unwrap().clone();
-        result
+        let recorded = values.lock().unwrap().clone();
+        recorded
     }
 
     fn inserted_change(spec: EditableLabelSpec, inserted: &str) -> Vec<String> {
@@ -411,8 +446,10 @@ mod tests {
         let sink = Arc::clone(&values);
         let theme = theme();
         let ctx = RenderContext::new(&theme);
+        let spec = spec.with_editing(true);
+        let len = spec.live_text().chars().count();
         let node = editable_label_with_handlers(
-            &spec.with_editing(true),
+            &spec.with_selection(len, len),
             &ctx,
             EditableLabelHandlers {
                 on_change: Some(Arc::new(move |value| {
@@ -426,8 +463,8 @@ mod tests {
             .on_edit_insert
             .as_ref()
             .expect("insert handler"))(inserted);
-        let result = values.lock().unwrap().clone();
-        result
+        let recorded = values.lock().unwrap().clone();
+        recorded
     }
 
     #[test]
@@ -483,5 +520,63 @@ mod tests {
             " rig",
         )
         .is_empty());
+    }
+
+    #[test]
+    fn live_draft_paints_without_moving_committed_value() {
+        let theme = theme();
+        const CLEF: &str = "𝄞";
+        let spec = EditableLabelSpec::new()
+            .with_value("Kick")
+            .with_draft_value(Some("Kicks".to_string()))
+            .with_editing(true);
+        let node = editable_label_with_handlers(
+            &spec,
+            &RenderContext::new(&theme),
+            EditableLabelHandlers::default(),
+        );
+        match &node.kind {
+            poodle_node::NodeKind::Input { value, .. } => assert_eq!(value, "Kicks"),
+            _ => panic!("expected an input node"),
+        }
+
+        let mut spec = EditableLabelSpec::new()
+            .with_value("Kick")
+            .with_draft_value(Some(String::new()))
+            .with_editing(true)
+            .with_max_length(1)
+            .with_selection(0, 0);
+        let first = inserted_change(spec.clone(), CLEF);
+        assert_eq!(first, [CLEF]);
+        spec = spec
+            .with_draft_value(Some(CLEF.to_string()))
+            .with_selection(1, 1);
+        assert!(inserted_change(spec, "A").is_empty());
+    }
+
+    #[test]
+    fn commit_reports_trimmed_value_and_committed_previous() {
+        let theme = theme();
+        let payload = Arc::new(Mutex::new(None));
+        let sink = Arc::clone(&payload);
+        let spec = EditableLabelSpec::new()
+            .with_value("Kick")
+            .with_draft_value(Some("\u{0085}Take\u{FEFF}".to_string()))
+            .with_editing(true);
+        let node = editable_label_with_handlers(
+            &spec,
+            &RenderContext::new(&theme),
+            EditableLabelHandlers {
+                on_commit: Some(Arc::new(move |value, previous| {
+                    *sink.lock().unwrap() = Some((value.to_string(), previous.to_string()));
+                })),
+                ..EditableLabelHandlers::default()
+            },
+        );
+        (node.interaction.on_submit.as_ref().expect("submit"))();
+        assert_eq!(
+            payload.lock().unwrap().clone(),
+            Some(("Take".to_string(), "Kick".to_string()))
+        );
     }
 }

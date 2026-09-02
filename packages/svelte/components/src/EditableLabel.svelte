@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/editable-label.css";
   import { editLabelTransition, type EditLabelEvent } from "@inflatable-cookie/poodle-core";
-  import { tick } from "svelte";
+  import { onDestroy, tick, untrack } from "svelte";
 
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
@@ -12,7 +12,7 @@
     sizeRole?: SemanticControlSizeRole;
     density?: ControlDensity | null;
     value?: string;
-    ariaLabel?: string;
+    ariaLabel?: string | undefined;
     disabled?: boolean;
     activationMode?: EditableLabelActivationMode;
     selectOnFocus?: boolean;
@@ -31,7 +31,7 @@
     sizeRole = "control",
     density = null,
     value = $bindable(""),
-    ariaLabel = "Edit label",
+    ariaLabel = undefined,
     disabled = false,
     activationMode = "doubleClick",
     selectOnFocus = true,
@@ -49,33 +49,68 @@
 
   let isEditing = $state(false);
   let draftValue = $state(value);
+  let committedValue = value;
   let inputElement = $state<HTMLInputElement | null>(null);
+  let displayElement = $state<HTMLButtonElement | null>(null);
+  let tearingDown = false;
 
   const resolvedSize = $derived(size ?? resolveSemanticControlSize($uiPresentation.sizeScale, sizeRole));
   const resolvedDensity = $derived(density ?? $uiPresentation.density);
   const displayValue = $derived(value || emptyText || "");
   const isEmpty = $derived(!value && !!emptyText);
+  const accessibleName = $derived(ariaLabel || value || emptyText || "Edit label");
 
   $effect(() => {
-    if (!isEditing) {
-      draftValue = value;
-    }
+    const next = value;
+    untrack(() => {
+      void send({ type: "REPLACE_VALUE", value: next });
+    });
+  });
+
+  $effect(() => {
+    const next = disabled;
+    untrack(() => {
+      void send({ type: "SET_DISABLED", disabled: next });
+    });
+  });
+
+  $effect(() => {
+    const onWindowBlur = (): void => {
+      queueMicrotask(() => {
+        if (!tearingDown) void send({ type: "COMMIT_BLUR" });
+      });
+    };
+
+    window.addEventListener("blur", onWindowBlur);
+    return () => window.removeEventListener("blur", onWindowBlur);
+  });
+
+  onDestroy(() => {
+    tearingDown = true;
+    untrack(() => {
+      void send({ type: "TEARDOWN" });
+    });
   });
 
   async function send(event: EditLabelEvent): Promise<void> {
     const result = editLabelTransition(
       isEditing ? "editing" : "view",
       {
-        value,
+        value: committedValue,
         draft: draftValue,
         disabled,
-        canStartEdit: activationMode !== "programmatic",
+        maxLength,
       },
       event,
     );
 
     isEditing = result.state === "editing";
     draftValue = result.context.draft;
+    committedValue = result.context.value;
+
+    if (event.type === "SET_DRAFT" && inputElement && inputElement.value !== draftValue) {
+      inputElement.value = draftValue;
+    }
 
     for (const effect of result.effects) {
       switch (effect.type) {
@@ -88,29 +123,56 @@
           if (inputElement) {
             inputElement.focus();
             if (selectOnFocus) inputElement.select();
+            else {
+              const end = inputElement.value.length;
+              inputElement.setSelectionRange(end, end);
+            }
           }
           break;
         }
         case "emitCommit":
           onCommit?.({ value: effect.value, previousValue: effect.previousValue });
+          if (effect.restoreFocus) {
+            await tick();
+            displayElement?.focus();
+          }
           break;
         case "emitCancel":
           onCancel?.();
+          if (effect.restoreFocus) {
+            await tick();
+            displayElement?.focus();
+          }
           break;
       }
     }
   }
 
-  function startEditing(): void {
+  export function focus(): void {
+    if (isEditing) inputElement?.focus();
+    else displayElement?.focus();
+  }
+
+  export function startEditing(): void {
     void send({ type: "START_EDIT" });
   }
 
-  function commit(): void {
-    void send({ type: "COMMIT" });
+  export function cancelEditing(): void {
+    void send({ type: "CANCEL" });
   }
 
-  function cancel(): void {
-    void send({ type: "CANCEL" });
+  function activateFromKey(event: KeyboardEvent): void {
+    if (activationMode === "programmatic") return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      void send({ type: "START_EDIT" });
+    }
+  }
+
+  function handleBlur(): void {
+    queueMicrotask(() => {
+      if (!tearingDown) void send({ type: "COMMIT_BLUR" });
+    });
   }
 </script>
 
@@ -127,32 +189,37 @@
       bind:this={inputElement}
       class="poodle-editable-label__input"
       type="text"
-      aria-label={ariaLabel}
+      aria-label={accessibleName}
       value={draftValue}
       {placeholder}
-      maxlength={maxLength}
-      oninput={(event) => (draftValue = (event.currentTarget).value)}
-      onblur={() => commit()}
+      oninput={(event) => void send({ type: "SET_DRAFT", draft: event.currentTarget.value })}
+      onblur={handleBlur}
       onkeydown={(event) => {
-        if (event.key === "Enter") { event.preventDefault(); commit(); }
-        if (event.key === "Escape") { event.preventDefault(); cancel(); }
+        if (event.key === "Enter") {
+          event.preventDefault();
+          void send({ type: "COMMIT" });
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          void send({ type: "CANCEL" });
+        }
       }}
     />
   {:else}
     <button
+      bind:this={displayElement}
       type="button"
       class="poodle-editable-label__display"
       class:poodle-editable-label__display--empty={isEmpty}
       disabled={disabled}
-      aria-label={ariaLabel}
-      ondblclick={() => { if (activationMode === "doubleClick") startEditing(); }}
-      onclick={() => { if (activationMode === "enterOrSpace") startEditing(); }}
-      onkeydown={(event) => {
-        if (activationMode === "enterOrSpace" && (event.key === "Enter" || event.key === " ")) {
-          event.preventDefault();
-          startEditing();
-        }
+      aria-label={accessibleName}
+      ondblclick={() => {
+        if (activationMode === "doubleClick") void send({ type: "START_EDIT" });
       }}
+      onclick={() => {
+        if (activationMode === "enterOrSpace") void send({ type: "START_EDIT" });
+      }}
+      onkeydown={activateFromKey}
     >
       <span class="poodle-editable-label__text">{displayValue}</span>
       {#if showEditIcon}

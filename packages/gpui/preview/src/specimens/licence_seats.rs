@@ -36,63 +36,91 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
 
     // The mixed group is interactive: rename, edit, and release run through
     // the real handlers and the preview's host loop.
-    let mixed = LicenceSeats::from_spec(
-        LicenceSeatsSpec::new()
-            .with_seats(state.licence_seats.seats.clone())
-            .with_editing_machine(state.licence_seats.editing_machine_id.clone())
-            .with_open_confirm(state.licence_seats.open_confirm_machine_id.clone()),
-        theme,
-    )
-    .on_rename_edit({
-        let queue = Arc::clone(&queue);
-        Arc::new(move |machine_id: &str| {
-            queue
-                .lock()
-                .unwrap()
-                .push(NodeSpecimenEvent::LicenceSeats(LicenceSeatsEvent::Edit {
-                    machine_id: machine_id.to_string(),
-                }));
+    let mixed =
+        LicenceSeats::from_spec(
+            LicenceSeatsSpec::new()
+                .with_seats(state.licence_seats.seats.clone())
+                .with_editing_machine(state.licence_seats.editing_machine_id.clone())
+                .with_editing_draft(state.licence_seats.editing_draft.clone())
+                .with_editing_selection(
+                    state.licence_seats.editing_selection.0,
+                    state.licence_seats.editing_selection.1,
+                )
+                .with_open_confirm(state.licence_seats.open_confirm_machine_id.clone()),
+            theme,
+        )
+        .on_rename_edit({
+            let queue = Arc::clone(&queue);
+            Arc::new(move |machine_id: &str| {
+                queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
+                    LicenceSeatsEvent::Edit {
+                        machine_id: machine_id.to_string(),
+                    },
+                ));
+            })
         })
-    })
-    .on_rename({
-        let queue = Arc::clone(&queue);
-        Arc::new(move |machine_id: &str, label: Option<&str>| {
-            queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
-                LicenceSeatsEvent::Rename {
-                    machine_id: machine_id.to_string(),
-                    label: label.map(str::to_string),
-                },
-            ));
+        .on_rename({
+            let queue = Arc::clone(&queue);
+            Arc::new(move |machine_id: &str, label: Option<&str>| {
+                queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
+                    LicenceSeatsEvent::Rename {
+                        machine_id: machine_id.to_string(),
+                        label: label.map(str::to_string),
+                    },
+                ));
+            })
         })
-    })
-    .on_release_trigger({
-        let queue = Arc::clone(&queue);
-        Arc::new(move |machine_id: &str| {
-            queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
-                LicenceSeatsEvent::ReleaseTrigger {
-                    machine_id: machine_id.to_string(),
-                },
-            ));
+        .on_rename_change({
+            let queue = Arc::clone(&queue);
+            Arc::new(move |machine_id: &str, draft: &str| {
+                queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
+                    LicenceSeatsEvent::Draft {
+                        machine_id: machine_id.to_string(),
+                        draft: draft.to_string(),
+                    },
+                ));
+            })
         })
-    })
-    .on_release({
-        let queue = Arc::clone(&queue);
-        Arc::new(move |machine_id: &str| {
-            queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
-                LicenceSeatsEvent::ReleaseConfirm {
-                    machine_id: machine_id.to_string(),
-                },
-            ));
+        .on_rename_selection_change({
+            let queue = Arc::clone(&queue);
+            Arc::new(move |machine_id: &str, start: usize, end: usize| {
+                queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
+                    LicenceSeatsEvent::Selection {
+                        machine_id: machine_id.to_string(),
+                        start,
+                        end,
+                    },
+                ));
+            })
         })
-    })
-    .on_release_cancel({
-        let queue = Arc::clone(&queue);
-        Arc::new(move |_machine_id: &str| {
-            queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
-                LicenceSeatsEvent::ReleaseCancel,
-            ));
+        .on_release_trigger({
+            let queue = Arc::clone(&queue);
+            Arc::new(move |machine_id: &str| {
+                queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
+                    LicenceSeatsEvent::ReleaseTrigger {
+                        machine_id: machine_id.to_string(),
+                    },
+                ));
+            })
         })
-    });
+        .on_release({
+            let queue = Arc::clone(&queue);
+            Arc::new(move |machine_id: &str| {
+                queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
+                    LicenceSeatsEvent::ReleaseConfirm {
+                        machine_id: machine_id.to_string(),
+                    },
+                ));
+            })
+        })
+        .on_release_cancel({
+            let queue = Arc::clone(&queue);
+            Arc::new(move |_machine_id: &str| {
+                queue.lock().unwrap().push(NodeSpecimenEvent::LicenceSeats(
+                    LicenceSeatsEvent::ReleaseCancel,
+                ));
+            })
+        });
 
     let unnamed = vec![
         seat("cmd-2b90fe14", None, true),

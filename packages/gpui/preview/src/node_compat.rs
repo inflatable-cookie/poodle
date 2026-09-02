@@ -858,6 +858,7 @@ pub(crate) struct RelationPicker {
 pub(crate) struct EditableLabel {
     spec: EditableLabelSpec,
     theme: GpuiThemeProvider,
+    id_suffix: Option<String>,
     handlers: poodle_render::EditableLabelHandlers,
 }
 
@@ -1847,11 +1848,13 @@ impl EditableLabel {
         Self {
             spec,
             theme: theme.clone(),
+            id_suffix: None,
             handlers: poodle_render::EditableLabelHandlers::default(),
         }
     }
 
-    pub(crate) fn with_id(self, _id: impl Into<String>) -> Self {
+    pub(crate) fn with_id(mut self, id: impl Into<String>) -> Self {
+        self.id_suffix = Some(id.into());
         self
     }
 
@@ -1860,8 +1863,31 @@ impl EditableLabel {
         self
     }
 
-    pub(crate) fn on_commit(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
+    pub(crate) fn on_selection_change(
+        mut self,
+        handler: Arc<dyn Fn(usize, usize) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_selection_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_commit(mut self, handler: Arc<dyn Fn(&str, &str) + Send + Sync>) -> Self {
         self.handlers.on_commit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_cancel(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_cancel = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_edit_start(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_edit_start = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_restore_display_focus(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
+        self.handlers.on_restore_display_focus = Some(handler);
         self
     }
 
@@ -1874,17 +1900,25 @@ impl EditableLabel {
         self.spec.density = Some(density);
         self
     }
+
+    fn into_node(self) -> poodle_node::Node {
+        let mut node = poodle_render::editable_label_with_handlers(
+            &self.spec,
+            &RenderContext::new(&self.theme),
+            self.handlers,
+        );
+        if let Some(id) = self.id_suffix {
+            node.id = Some(format!("poodle-editable-label-{id}"));
+        }
+        node
+    }
 }
 
 impl IntoElement for EditableLabel {
     type Element = AnyElement;
 
     fn into_element(self) -> Self::Element {
-        poodle_gpui_node_backend::to_gpui(&poodle_render::editable_label_with_handlers(
-            &self.spec,
-            &RenderContext::new(&self.theme),
-            self.handlers,
-        ))
+        poodle_gpui_node_backend::to_gpui(&self.into_node())
     }
 }
 
@@ -4261,6 +4295,22 @@ impl LicenceSeats {
         self
     }
 
+    pub(crate) fn on_rename_change(
+        mut self,
+        handler: Arc<dyn Fn(&str, &str) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_rename_change = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_rename_selection_change(
+        mut self,
+        handler: Arc<dyn Fn(&str, usize, usize) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_rename_selection_change = Some(handler);
+        self
+    }
+
     pub(crate) fn on_release(mut self, handler: Arc<dyn Fn(&str) + Send + Sync>) -> Self {
         self.handlers.on_release = Some(handler);
         self
@@ -4347,6 +4397,14 @@ impl LicenceActivation {
 
     pub(crate) fn on_machine_label_edit(mut self, handler: Arc<dyn Fn() + Send + Sync>) -> Self {
         self.handlers.on_machine_label_edit = Some(handler);
+        self
+    }
+
+    pub(crate) fn on_machine_label_selection_change(
+        mut self,
+        handler: Arc<dyn Fn(usize, usize) + Send + Sync>,
+    ) -> Self {
+        self.handlers.on_machine_label_selection_change = Some(handler);
         self
     }
 

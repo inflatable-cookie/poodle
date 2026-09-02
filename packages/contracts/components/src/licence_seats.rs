@@ -26,6 +26,10 @@ pub struct LicenceSeatsSpec {
     pub open_confirm_machine_id: Option<String>,
     /// Host state for the composed per-row EditableLabel.
     pub editing_machine_id: Option<String>,
+    /// Session-private live draft for the row currently editing.
+    pub editing_draft: Option<String>,
+    /// Caret into the editing row's draft.
+    pub editing_selection: (usize, usize),
     pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
     pub density: Option<ControlDensity>,
@@ -41,6 +45,8 @@ impl Default for LicenceSeatsSpec {
             confirm_release: true,
             open_confirm_machine_id: None,
             editing_machine_id: None,
+            editing_draft: None,
+            editing_selection: (0, 0),
             size: None,
             size_role: SemanticControlSizeRole::Control,
             density: None,
@@ -90,6 +96,16 @@ impl LicenceSeatsSpec {
 
     pub fn with_editing_machine(mut self, machine_id: Option<String>) -> Self {
         self.editing_machine_id = machine_id;
+        self
+    }
+
+    pub fn with_editing_draft(mut self, draft: impl Into<Option<String>>) -> Self {
+        self.editing_draft = draft.into();
+        self
+    }
+
+    pub fn with_editing_selection(mut self, start: usize, end: usize) -> Self {
+        self.editing_selection = (start, end);
         self
     }
 

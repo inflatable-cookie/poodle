@@ -15,6 +15,7 @@ import {
 import { hitTestCircle, hitTestRect } from "../src/audio/types.ts";
 import { createXYPadContext, xyPadPointToNorm, xyPadTransition } from "../src/audio/xy-pad.ts";
 import { checkboxTransition } from "../src/checkbox.ts";
+import { editLabelTransition } from "../src/edit.ts";
 import { disclosureTransition } from "../src/disclosure.ts";
 import { dragSessionTransition, resolveDropTarget } from "../src/drag-drop.ts";
 import { hoverTransition } from "../src/hover.ts";
@@ -124,6 +125,13 @@ function runMachine(machine: string, vector: VectorCase): void {
     case "menu": {
       const result = menuTransition(vector.state as never, context, event);
       expect(result.state).toBe(vector.expect.state as never);
+      expect(result.effects).toEqual(vector.expect.effects as never);
+      return;
+    }
+    case "edit": {
+      const result = editLabelTransition(vector.state as never, context, event);
+      expect(result.state).toBe(vector.expect.state as never);
+      checkContextSubset(result.context as never, vector.expect.context);
       expect(result.effects).toEqual(vector.expect.effects as never);
       return;
     }

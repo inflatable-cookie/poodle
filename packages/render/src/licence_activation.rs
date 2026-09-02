@@ -50,6 +50,8 @@ pub struct LicenceActivationHandlers {
     pub on_machine_label_cancel: Option<Arc<dyn Fn() + Send + Sync>>,
     /// A machine-name edit was started.
     pub on_machine_label_edit: Option<Arc<dyn Fn() + Send + Sync>>,
+    /// Caret into the machine-name draft moved.
+    pub on_machine_label_selection_change: Option<Arc<dyn Fn(usize, usize) + Send + Sync>>,
     /// The account/offline route switch was pressed.
     pub on_view_change: Option<Arc<dyn Fn(LicenceActivationRoute) + Send + Sync>>,
     /// The form's submit button was pressed. The host runs the shared submit
@@ -152,9 +154,8 @@ pub fn licence_activation_with_slots(
                     view = view.child(slot.child(content));
                 }
                 None => {
-                    let mut explanation = Node::text(
-                        "Continue with your account to authorise this machine.",
-                    );
+                    let mut explanation =
+                        Node::text("Continue with your account to authorise this machine.");
                     explanation.style.descriptor.text_color = Some(text_secondary);
                     view = view.child(explanation);
                 }
@@ -185,9 +186,7 @@ pub fn licence_activation_with_slots(
                     }),
                 },
             );
-            if let (Some(name), Some(contents)) =
-                (&spec.file_name, &spec.file_contents_base64)
-            {
+            if let (Some(name), Some(contents)) = (&spec.file_name, &spec.file_contents_base64) {
                 let size = (contents.len() as u64) * 3 / 4;
                 let item = FileUploadItem::new("licence-file", name.clone(), size)
                     .with_status(poodle_specs::FileUploadStatus::Complete);
@@ -260,10 +259,7 @@ pub fn licence_activation_with_slots(
         s.descriptor.layout.direction = LayoutDirection::Column;
         s.descriptor.layout.spacing.gap = ctx.theme().resolve_space("space.stack.md");
     }
-    root = root
-        .child(header)
-        .child(with_message)
-        .child(actions);
+    root = root.child(header).child(with_message).child(actions);
 
     // ── Data state (the native data-* counterpart) ──
     root.roles.insert(
@@ -274,7 +270,8 @@ pub fn licence_activation_with_slots(
         "route".to_owned(),
         format!("{:?}", route).to_ascii_lowercase(),
     );
-    root.roles.insert("busy".to_owned(), spec.pending.to_string());
+    root.roles
+        .insert("busy".to_owned(), spec.pending.to_string());
     root.roles.insert(
         "size".to_owned(),
         format!("{effective_size:?}").to_ascii_lowercase(),
@@ -305,6 +302,11 @@ fn machine_name(
     let label = editable_label_with_handlers(
         &EditableLabelSpec::new()
             .with_value(spec.machine_label.clone().unwrap_or_default())
+            .with_draft_value(spec.machine_label_draft.clone())
+            .with_selection(
+                spec.machine_label_selection.0,
+                spec.machine_label_selection.1,
+            )
             .with_editing(spec.machine_label_editing)
             .with_activation_mode(EditableLabelActivation::EnterOrSpace)
             .with_variant(EditableLabelVariant::Default)
@@ -318,11 +320,11 @@ fn machine_name(
         ctx,
         EditableLabelHandlers {
             on_edit_start: handlers.on_machine_label_edit.clone(),
-            // Typing updates the controlled draft; commit and cancel are
-            // distinct so a host can close the edit state only on commit or
-            // escape, never on a keystroke.
             on_change: handlers.on_machine_label_change.clone(),
-            on_commit: handlers.on_machine_label_commit.clone(),
+            on_selection_change: handlers.on_machine_label_selection_change.clone(),
+            on_commit: crate::editable_label::adapt_commit(
+                handlers.on_machine_label_commit.clone(),
+            ),
             on_cancel: handlers.on_machine_label_cancel.clone(),
             ..EditableLabelHandlers::default()
         },
@@ -342,12 +344,16 @@ fn key_code_input_view(
     // tick/cross. Never an activation, and the result belongs to the exact
     // value shown — CodeInput drops it the moment the value edits away.
     let completion = match &handlers.on_key_check {
-        Some(check) if spec.key_draft.chars().count() == options.length => match check(&spec.key_draft) {
-            LicenceKeyResult::Ok { .. } => {
-                Some(CodeInputCompletion::Passed(spec.key_draft.clone()))
+        Some(check) if spec.key_draft.chars().count() == options.length => {
+            match check(&spec.key_draft) {
+                LicenceKeyResult::Ok { .. } => {
+                    Some(CodeInputCompletion::Passed(spec.key_draft.clone()))
+                }
+                LicenceKeyResult::Err(_) => {
+                    Some(CodeInputCompletion::Failed(spec.key_draft.clone()))
+                }
             }
-            LicenceKeyResult::Err(_) => Some(CodeInputCompletion::Failed(spec.key_draft.clone())),
-        },
+        }
         _ => None,
     };
 
@@ -538,9 +544,7 @@ mod tests {
         );
         // The accepted full key shows its tick.
         assert!(node
-            .find(&|n| {
-                n.a11y.label.as_deref() == Some("Code check passed")
-            })
+            .find(&|n| { n.a11y.label.as_deref() == Some("Code check passed") })
             .is_some());
 
         // A different full value resolves through the same parser and shows
@@ -709,9 +713,7 @@ mod tests {
                 }),
                 on_machine_label_cancel: Some({
                     let sink = Arc::clone(&events);
-                    Arc::new(move || {
-                        sink.lock().unwrap().push("cancel".to_string())
-                    })
+                    Arc::new(move || sink.lock().unwrap().push("cancel".to_string()))
                 }),
                 ..LicenceActivationHandlers::default()
             },
@@ -721,11 +723,18 @@ mod tests {
             .find(&|n| n.interaction.on_text_change.is_some())
             .expect("the editing input");
         (input.interaction.on_text_change.as_ref().unwrap())("rig-2");
-        assert_eq!(events.lock().unwrap().as_slice(), ["change:rig-2"], "typing is a change");
+        assert_eq!(
+            events.lock().unwrap().as_slice(),
+            ["change:rig-2"],
+            "typing is a change"
+        );
         // The host re-renders with the committed draft, then commit fires
         // with that value — distinct from the change channel.
         let node = licence_activation(
-            &spec.clone().with_machine_label(Some("rig-2".to_string())),
+            &spec
+                .clone()
+                .with_machine_label(Some("rig".to_string()))
+                .with_machine_label_draft(Some("rig-2".to_string())),
             &ctx,
             LicenceActivationHandlers {
                 on_machine_label_change: Some({
@@ -746,7 +755,11 @@ mod tests {
         let input = node
             .find(&|n| n.interaction.on_text_change.is_some())
             .expect("the editing input");
-        (input.interaction.on_submit.as_ref().expect("commit via submit"))();
+        (input
+            .interaction
+            .on_submit
+            .as_ref()
+            .expect("commit via submit"))();
         assert_eq!(
             events.lock().unwrap().as_slice(),
             ["change:rig-2", "commit:rig-2"],

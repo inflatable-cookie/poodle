@@ -93,6 +93,10 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
     "number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value",
     "number_input_mounted_accessibility_projects_spin_button_surface",
   ],
+  EditableLabel: [
+    "editable_label_commits_on_enter_and_once_through_the_blur_tab_causes",
+    "editable_label_live_draft_stays_off_the_committed_value",
+  ],
   Breadcrumbs: "breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard",
   IconButton: "icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard",
   Collapsible: "collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard",
