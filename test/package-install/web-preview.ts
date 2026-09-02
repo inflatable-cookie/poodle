@@ -401,7 +401,65 @@ async function provePackedSliderAppearanceTypes(
   consumerRoot: string,
 ): Promise<Record<string, unknown>> {
   const compiler = join(consumerRoot, "node_modules", ".bin", "tsc");
-  const negatives = [
+  if (!existsSync(compiler)) {
+    throw new Error(
+      "the packed consumer did not install a TypeScript compiler; the SliderAppearance type proof cannot run",
+    );
+  }
+
+  const installedReactTypes = join(
+    consumerRoot,
+    "node_modules",
+    "@inflatable-cookie",
+    "poodle-react",
+    "src",
+    "types.ts",
+  );
+  const installedReactIndex = join(
+    consumerRoot,
+    "node_modules",
+    "@inflatable-cookie",
+    "poodle-react",
+    "src",
+    "index.ts",
+  );
+  if (!existsSync(installedReactTypes) || !existsSync(installedReactIndex)) {
+    throw new Error(
+      "the packed React tarball omitted src/types.ts or src/index.ts; the SliderAppearance React type proof cannot run",
+    );
+  }
+  const typesSource = readFileSync(installedReactTypes, "utf8");
+  if (!typesSource.includes('export type SliderAppearance = "track" | "block"')) {
+    throw new Error(
+      "installed React src/types.ts does not export SliderAppearance as track | block",
+    );
+  }
+  const indexSource = readFileSync(installedReactIndex, "utf8");
+  if (!indexSource.includes('export * from "./types"')) {
+    throw new Error(
+      "installed React src/index.ts no longer re-exports ./types; SliderAppearance would drop off the public root",
+    );
+  }
+
+  const publicPositives = [
+    { file: "slider-appearance-positive.ts", config: "tsconfig.slider-positive.json" },
+  ] as const;
+  const mappedReactPositives = [
+    {
+      file: "slider-appearance-react-positive.ts",
+      config: "tsconfig.slider-react-positive.json",
+    },
+  ] as const;
+  for (const item of [...publicPositives, ...mappedReactPositives]) {
+    const compile = await runTypeCompile(consumerRoot, compiler, item.config);
+    if (compile.exitCode !== 0 || compile.output.length > 0) {
+      throw new Error(
+        `packed SliderAppearance positive proof failed on the installed tarball (${item.file}):\n${compile.output}`,
+      );
+    }
+  }
+
+  const publicNegatives = [
     {
       importPath: "@inflatable-cookie/poodle-svelte",
       file: "slider-appearance-root-negative.ts",
@@ -413,8 +471,15 @@ async function provePackedSliderAppearanceTypes(
       config: "tsconfig.slider-types-negative.json",
     },
   ] as const;
+  const mappedReactNegatives = [
+    {
+      importPath: "@inflatable-cookie/poodle-react",
+      file: "slider-appearance-react-negative.ts",
+      config: "tsconfig.slider-react-negative.json",
+    },
+  ] as const;
   const negativeEvidence = [];
-  for (const negative of negatives) {
+  for (const negative of [...publicNegatives, ...mappedReactNegatives]) {
     assertUnsuppressed(consumerRoot, negative.file);
     const compile = await runTypeCompile(consumerRoot, compiler, negative.config);
     if (compile.exitCode === 0) {
@@ -436,15 +501,31 @@ async function provePackedSliderAppearanceTypes(
       exitCode: compile.exitCode,
       diagnostic: compile.output,
       suppressed: false,
+      compilerPathsMapped: negative.file.includes("react"),
     });
   }
   return {
     compiler: realpathSync(compiler),
-    importPaths: negatives.map((negative) => negative.importPath),
-    positive: {
-      file: "slider-appearance-positive.ts",
-      exitCode: 0,
-      diagnostics: [],
+    importPaths: [...publicNegatives, ...mappedReactNegatives].map(
+      (negative) => negative.importPath,
+    ),
+    publicSpecifierCompile: {
+      files: publicPositives.map((item) => item.file),
+      sourceImports: false,
+      workspaceAliases: false,
+      compilerPathsMapped: false,
+    },
+    reactMappedAssignability: {
+      files: [
+        ...mappedReactPositives.map((item) => item.file),
+        ...mappedReactNegatives.map((item) => item.file),
+      ],
+      pathsMappedTo: "src/types.ts",
+      reason: "src/index.ts value barrel is not tsc-clean",
+      compilerPathsMapped: true,
+      valueBarrelCompiled: false,
+      sourceImports: false,
+      workspaceAliases: false,
     },
     expectedFailures: negativeEvidence,
     sourceImports: false,
