@@ -31,6 +31,10 @@ exists.
 
 - Wrong source commit, runtime, direct-handler observation, and `A1` proof
   substitutions are rejected.
+- Extra properties forbidden by the manifest and receipt schemas are rejected
+  by the production validator, including nested objects.
+- Empty M1 `artifact_paths` remain valid; every nonempty artifact must name a
+  repository-relative regular file and match its SHA-256 digest.
 - Promoting `IconProvider` to row 30 is rejected.
 - An unmanifested receipt component is rejected.
 - `M1` does not infer `A1` or `V1`.
@@ -38,7 +42,7 @@ exists.
 ## Validation
 
 - `effigy regressions:native` — 174 passed.
-- `effigy test:nucleus-parity-receipts` — 6 passed.
+- `effigy test:nucleus-parity-receipts` — 8 passed.
 - `effigy test:parity-evidence-ledger` — 6 passed.
 - `effigy check:parity-evidence-ledger` — passed.
 - `effigy docs:check` — passed.

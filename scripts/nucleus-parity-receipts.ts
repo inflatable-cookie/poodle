@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 export const NUCLEUS_MANIFEST_PATH = "docs/roadmaps/g16/nucleus-parity-manifest.json";
@@ -39,6 +39,11 @@ export type NucleusResolution = {
   }>;
 };
 
+export type NucleusArtifact = {
+  path: string;
+  sha256: string;
+};
+
 export type NucleusManifest = {
   $schema: string;
   schema: string;
@@ -72,7 +77,7 @@ export type NucleusReceipt = {
   actions: string[];
   assertions: string[];
   outcome: "passed";
-  artifact_paths: string[];
+  artifact_paths: NucleusArtifact[];
 };
 
 export type NucleusReceiptRow = {
@@ -91,6 +96,108 @@ function readJson<T>(root: string, relativePath: string): T {
 
 function assert(condition: unknown, message: string, errors: string[]): void {
   if (!condition) errors.push(message);
+}
+
+type JsonObject = Record<string, unknown>;
+
+function isJsonObject(value: unknown): value is JsonObject {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function assertExactObject(
+  value: unknown,
+  label: string,
+  required: readonly string[],
+  optional: readonly string[],
+  errors: string[],
+): value is JsonObject {
+  if (!isJsonObject(value)) {
+    errors.push(`${label} must be an object`);
+    return false;
+  }
+  const allowed = new Set([...required, ...optional]);
+  for (const key of Object.keys(value)) {
+    if (!allowed.has(key)) errors.push(`${label} has unexpected property ${key}`);
+  }
+  for (const key of required) {
+    if (!Object.hasOwn(value, key)) errors.push(`${label} is missing required property ${key}`);
+  }
+  return Object.keys(value).every((key) => allowed.has(key)) && required.every((key) => Object.hasOwn(value, key));
+}
+
+function assertArray(value: unknown, label: string, errors: string[]): value is unknown[] {
+  if (!Array.isArray(value)) {
+    errors.push(`${label} must be an array`);
+    return false;
+  }
+  return true;
+}
+
+const ENTRY_REQUIRED_KEYS = ["id", "name", "scenario_id", "direct_dependencies", "expected_selector", "expected_test"];
+const ENTRY_OPTIONAL_KEYS = ["rendered"];
+const RESOLUTION_REQUIRED_KEYS = ["package", "version", "source_commit", "lockfile", "lockfile_sha256", "distribution", "lock_resolution"];
+const LOCKED_PACKAGE_REQUIRED_KEYS = ["name", "version", "source"];
+const LOCKED_PACKAGE_OPTIONAL_KEYS = ["checksum"];
+const RECEIPT_REQUIRED_KEYS = [
+  "schema",
+  "component",
+  "scenario_id",
+  "proof_level",
+  "runtime",
+  "command",
+  "package",
+  "package_version",
+  "source_commit",
+  "lockfile",
+  "lockfile_sha256",
+  "lock_resolution",
+  "distribution",
+  "production_path_observation",
+  "actions",
+  "assertions",
+  "outcome",
+  "artifact_paths",
+];
+const OBSERVATION_REQUIRED_KEYS = ["observed", "mount", "render_path", "input_dispatch"];
+const ARTIFACT_REQUIRED_KEYS = ["path", "sha256"];
+
+function manifestShapeErrors(manifest: unknown): string[] {
+  const errors: string[] = [];
+  if (!assertExactObject(manifest, "manifest", ["$schema", "schema", "program", "rendered_component_count", "prerequisites", "resolution", "components"], [], errors)) {
+    return errors;
+  }
+
+  for (const [label, value] of [["manifest prerequisites", manifest.prerequisites], ["manifest components", manifest.components]] as const) {
+    if (!assertArray(value, label, errors)) continue;
+    value.forEach((entry, index) => assertExactObject(entry, `${label}[${index}]`, ENTRY_REQUIRED_KEYS, ENTRY_OPTIONAL_KEYS, errors));
+  }
+  if (assertExactObject(manifest.resolution, "manifest resolution", RESOLUTION_REQUIRED_KEYS, [], errors)) {
+    if (assertArray(manifest.resolution.lock_resolution, "manifest resolution lock_resolution", errors)) {
+      manifest.resolution.lock_resolution.forEach((packageEntry, index) =>
+        assertExactObject(packageEntry, `manifest resolution lock_resolution[${index}]`, LOCKED_PACKAGE_REQUIRED_KEYS, LOCKED_PACKAGE_OPTIONAL_KEYS, errors),
+      );
+    }
+  }
+  return errors;
+}
+
+function receiptShapeErrors(receipt: unknown): string[] {
+  const errors: string[] = [];
+  if (!assertExactObject(receipt, "receipt", RECEIPT_REQUIRED_KEYS, [], errors)) return errors;
+  if (assertArray(receipt.lock_resolution, "receipt lock_resolution", errors)) {
+    receipt.lock_resolution.forEach((packageEntry, index) =>
+      assertExactObject(packageEntry, `receipt lock_resolution[${index}]`, LOCKED_PACKAGE_REQUIRED_KEYS, LOCKED_PACKAGE_OPTIONAL_KEYS, errors),
+    );
+  }
+  assertExactObject(receipt.production_path_observation, "receipt production_path_observation", OBSERVATION_REQUIRED_KEYS, [], errors);
+  assertArray(receipt.actions, "receipt actions", errors);
+  assertArray(receipt.assertions, "receipt assertions", errors);
+  if (assertArray(receipt.artifact_paths, "receipt artifact_paths", errors)) {
+    receipt.artifact_paths.forEach((artifact, index) =>
+      assertExactObject(artifact, `receipt artifact_paths[${index}]`, ARTIFACT_REQUIRED_KEYS, [], errors),
+    );
+  }
+  return errors;
 }
 
 function sourceCommitIsValid(value: string): boolean {
@@ -137,6 +244,8 @@ export function loadNucleusManifest(root = ROOT): NucleusManifest {
 }
 
 export function validateNucleusManifest(manifest: NucleusManifest, root = ROOT): void {
+  const shapeErrors = manifestShapeErrors(manifest);
+  if (shapeErrors.length > 0) throw new Error(shapeErrors.join("\n"));
   const errors: string[] = [];
   assert(manifest.$schema === "./nucleus-parity-manifest.schema.json", "manifest $schema is not the manifest schema", errors);
   assert(manifest.schema === "poodle.g16.062-nucleus-parity-manifest.v1", "manifest schema is not current", errors);
@@ -193,7 +302,48 @@ function assertReceiptStringArray(value: unknown, label: string, errors: string[
   assert(Array.isArray(value) && value.length > 0 && value.every((item) => typeof item === "string" && item.length > 0), `${label} must be a non-empty string array`, errors);
 }
 
+function repositoryRelativeArtifactPath(root: string, artifactPath: unknown): string | undefined {
+  if (
+    typeof artifactPath !== "string" ||
+    artifactPath.length === 0 ||
+    path.isAbsolute(artifactPath) ||
+    /^[A-Za-z]:/.test(artifactPath) ||
+    artifactPath.includes("\\") ||
+    artifactPath.includes("\0") ||
+    artifactPath.split("/").some((segment) => segment.length === 0 || segment === "." || segment === "..")
+  ) {
+    return undefined;
+  }
+  const repositoryRoot = path.resolve(root);
+  const resolved = path.resolve(repositoryRoot, artifactPath);
+  const relativeToRoot = path.relative(repositoryRoot, resolved);
+  if (relativeToRoot === ".." || relativeToRoot.startsWith(`..${path.sep}`) || path.isAbsolute(relativeToRoot)) return undefined;
+  return resolved;
+}
+
+function validateArtifact(artifact: unknown, index: number, root: string, errors: string[]): void {
+  const label = `receipt artifact_paths[${index}]`;
+  if (!isJsonObject(artifact)) return;
+  const artifactPath = artifact.path;
+  const hash = artifact.sha256;
+  const filePath = repositoryRelativeArtifactPath(root, artifactPath);
+  assert(filePath !== undefined, `${label} path must be repository-relative`, errors);
+  assert(typeof hash === "string" && /^[0-9a-f]{64}$/.test(hash), `${label} SHA-256 must be 64 lowercase hex characters`, errors);
+  if (filePath === undefined || typeof hash !== "string" || !/^[0-9a-f]{64}$/.test(hash)) return;
+  assert(existsSync(filePath), `${label} path does not exist: ${artifactPath}`, errors);
+  if (!existsSync(filePath)) return;
+  try {
+    const file = lstatSync(filePath);
+    assert(file.isFile(), `${label} path is not a regular file: ${artifactPath}`, errors);
+    if (file.isFile()) assert(sha256File(filePath) === hash, `${label} SHA-256 does not match: ${artifactPath}`, errors);
+  } catch {
+    errors.push(`${label} path cannot be read: ${artifactPath}`);
+  }
+}
+
 export function validateNucleusReceipt(receipt: NucleusReceipt, manifest = loadNucleusManifest(), root = ROOT): void {
+  const shapeErrors = receiptShapeErrors(receipt);
+  if (shapeErrors.length > 0) throw new Error(shapeErrors.join("\n"));
   const errors: string[] = [];
   const entry = [...manifest.prerequisites, ...manifest.components].find((candidate) => candidate.name === receipt.component);
   assert(receipt.schema === NUCLEUS_RECEIPT_SCHEMA, "receipt schema is not current", errors);
@@ -217,10 +367,7 @@ export function validateNucleusReceipt(receipt: NucleusReceipt, manifest = loadN
   assertReceiptStringArray(receipt.actions, "receipt actions", errors);
   assertReceiptStringArray(receipt.assertions, "receipt assertions", errors);
   assert(receipt.outcome === "passed", "receipt outcome is not passed", errors);
-  assert(Array.isArray(receipt.artifact_paths), "receipt artifact_paths must be an array", errors);
-  for (const artifact of receipt.artifact_paths ?? []) {
-    assert(typeof artifact === "string" && !path.isAbsolute(artifact) && !artifact.split("/").includes(".."), `receipt artifact path is not repository-relative: ${artifact}`, errors);
-  }
+  for (const [index, artifact] of receipt.artifact_paths.entries()) validateArtifact(artifact, index, root, errors);
   assert(sourceCommitIsValid(receipt.source_commit), "receipt source_commit must be a 40-character lowercase commit", errors);
   const encoded = JSON.stringify(receipt);
   assert(!encoded.includes("/Users/") && !encoded.includes("/private/") && !encoded.includes("timestamp"), "receipt contains a machine path or timestamp", errors);

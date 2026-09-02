@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "bun:test";
@@ -89,6 +90,51 @@ describe("g16.062 Nucleus parity receipt contract", () => {
   it("accepts a receipt only for an observed mounted M1 execution", () => {
     const manifest = loadNucleusManifest(root);
     expect(() => validateNucleusReceipt(validButtonReceipt(manifest), manifest, root)).not.toThrow();
+  });
+
+  it("rejects properties forbidden by the checked-in manifest and receipt schemas", () => {
+    const manifest = loadNucleusManifest(root);
+    const manifestExtra = { ...manifest, invented: true } as NucleusManifest;
+    expect(() => validateNucleusManifest(manifestExtra, root)).toThrow(/manifest has unexpected property invented/);
+
+    const manifestNestedExtra = structuredClone(manifest) as NucleusManifest;
+    (manifestNestedExtra.resolution as Record<string, unknown>).invented = true;
+    expect(() => validateNucleusManifest(manifestNestedExtra, root)).toThrow(/manifest resolution has unexpected property invented/);
+
+    const receipt = validButtonReceipt(manifest);
+    const receiptExtra = { ...receipt, invented: true } as NucleusReceipt;
+    expect(() => validateNucleusReceipt(receiptExtra, manifest, root)).toThrow(/receipt has unexpected property invented/);
+
+    const receiptNestedExtra = structuredClone(receipt) as NucleusReceipt;
+    (receiptNestedExtra.production_path_observation as Record<string, unknown>).invented = true;
+    expect(() => validateNucleusReceipt(receiptNestedExtra, manifest, root)).toThrow(
+      /receipt production_path_observation has unexpected property invented/,
+    );
+  });
+
+  it("requires every nonempty artifact to identify an existing file by SHA-256", () => {
+    const manifest = loadNucleusManifest(root);
+    const receipt = validButtonReceipt(manifest);
+    const artifactPath = "docs/roadmaps/g16/nucleus-parity-receipts/README.md";
+    const artifactHash = createHash("sha256").update(readFileSync(path.join(root, artifactPath))).digest("hex");
+
+    expect(() => validateNucleusReceipt({ ...receipt, artifact_paths: [{ path: artifactPath, sha256: artifactHash }] }, manifest, root)).not.toThrow();
+    expect(() => validateNucleusReceipt({
+      ...receipt,
+      artifact_paths: [{ path: artifactPath, sha256: "0".repeat(64) }],
+    }, manifest, root)).toThrow(/SHA-256 does not match/);
+    expect(() => validateNucleusReceipt({
+      ...receipt,
+      artifact_paths: [{ path: "does/not/exist.png", sha256: "0".repeat(64) }],
+    }, manifest, root)).toThrow(/path does not exist/);
+    expect(() => validateNucleusReceipt({
+      ...receipt,
+      artifact_paths: [{ path: "../outside.png", sha256: "0".repeat(64) }],
+    }, manifest, root)).toThrow(/path must be repository-relative/);
+    expect(() => validateNucleusReceipt({
+      ...receipt,
+      artifact_paths: [{ path: artifactPath, sha256: artifactHash, invented: true } as never],
+    }, manifest, root)).toThrow(/receipt artifact_paths\[0\] has unexpected property invented/);
   });
 
   it("rejects wrong commit, runtime, direct-handler, and proof-level substitutions", () => {

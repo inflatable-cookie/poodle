@@ -41,6 +41,12 @@ struct ProductionPathObservation {
 }
 
 #[derive(Serialize)]
+struct Artifact {
+    path: &'static str,
+    sha256: &'static str,
+}
+
+#[derive(Serialize)]
 struct NucleusReceipt {
     schema: &'static str,
     component: &'static str,
@@ -59,7 +65,7 @@ struct NucleusReceipt {
     actions: Vec<&'static str>,
     assertions: Vec<&'static str>,
     outcome: &'static str,
-    artifact_paths: Vec<&'static str>,
+    artifact_paths: Vec<Artifact>,
 }
 
 fn lock_resolution() -> Vec<LockedPackage> {
