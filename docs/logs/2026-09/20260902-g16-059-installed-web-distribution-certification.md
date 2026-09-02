@@ -10,7 +10,7 @@ Branch: `feature/g16-059-installed-web-certification`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-059-installed-web-certification`
 Base: `origin/main` at `721b17791946a6a7dcf254de0775f353d47090eb`
 Required ancestor: PR #162 merge `b43481dff4e25b70fc0b0b076cee116f5e97d93b`
-Proof commit: `fb35a2eb83ddd060ca5d37377ff99c71c9c12189`
+Proof commit: `b37f404737062f9603c097dee0ee8b8916595d1f`
 Worker PR: https://github.com/inflatable-cookie/poodle/pull/163
 
 ## Outcome
@@ -31,6 +31,9 @@ The clean-main repairs are included:
   before export-target and docs audits.
 - declaration-tools carries the repository-required exact `MIT` license
   metadata; dependencies and package behavior are unchanged.
+- The scope guard derives the proof commit's changed paths against the
+  required base, enforces the explicit writable-path allowlist, and rejects
+  workflow, release, version, and registry surfaces.
 
 React remains `private: true`; no version, release, workflow, registry,
 publication, native, sibling, or component-behavior surface changed.
@@ -52,36 +55,36 @@ publication, native, sibling, or component-behavior surface changed.
   `branchCount`, `SliderAppearance`, and forbidden Tree reorder callbacks.
 - Roster denominator: `176`.
 - Roster names SHA-256: `f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a`.
-- Artifact-set ID: `1cf40d3bdd516f76af5ef44d246141a2ad148d948003a6fac91e207b95ed0347`.
+- Artifact-set ID: `2d2fac98557cd50cc4e01d265405771401049060b88776cfe6d4627523903577`.
 
 ### Deterministic receipt
 
-Receipt SHA-256: `f45f5f143df32da1e906c77acfb25e22935bfff88f8cba0efba4ee2ca80010bf`
+Receipt SHA-256: `5cb4b6d2f848e426de868fd56501b1d2c02c368f6ece7f2fb32692394c9f733c`
 
 ```json
 {
   "schemaVersion": 1,
   "kind": "poodle-installed-web-distribution",
-  "sourceCommit": "fb35a2eb83ddd060ca5d37377ff99c71c9c12189",
+  "sourceCommit": "b37f404737062f9603c097dee0ee8b8916595d1f",
   "svelteFloor": "5.56.8",
   "belowFloorNegative": "5.38.6",
   "rosterDenominator": 176,
   "rosterNamesSha256": "f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a",
-  "artifactSetId": "1cf40d3bdd516f76af5ef44d246141a2ad148d948003a6fac91e207b95ed0347",
+  "artifactSetId": "2d2fac98557cd50cc4e01d265405771401049060b88776cfe6d4627523903577",
   "packages": {
     "@inflatable-cookie/poodle-core": {
-      "archiveSha256": "a20d18cfc85cb0d7f73cef6054427c1039c09e2e9ad8a89e49b73128c7f7ff3b",
-      "buildReceiptSha256": "c11b72992391a7bb876fdf08e21d073aae1ff72b7b6319ed6d99012fa517b033",
+      "archiveSha256": "48a6bb351cfa6e0deb9a58749439761b6144ac28d5904da91cf22629d7073793",
+      "buildReceiptSha256": "ab491a66187f7eebe5204d84ce19285229177a505a87f555e17fc6de1ee5e28e",
       "version": "0.2.3"
     },
     "@inflatable-cookie/poodle-react": {
-      "archiveSha256": "2f9df2c4eba97270a6104faa91cfb8598fd84720dc85439195819b8bcaf4761c",
-      "buildReceiptSha256": "10882d4fb89bdcd05136ab95a29b2b2be96deba44878408e537ff21afa820486",
+      "archiveSha256": "7bdd27881379ab965441caff19980c3d6ce6c1cb526e91ea7850c645c9caed12",
+      "buildReceiptSha256": "13207cf17a9f4d89c78ca5fd167b34d6a77ae7b3b8b78891524f04aa7d572699",
       "version": "0.2.3"
     },
     "@inflatable-cookie/poodle-svelte": {
-      "archiveSha256": "31f0121dd32717ca71105e891d7bf89e5e3163228404925dd9fb1838ec061702",
-      "buildReceiptSha256": "8a396cb075578f4737d31d9fb37c7244f571969ea9563dd8af5f7335bb060469",
+      "archiveSha256": "0ddc8b8caa36b1d9b96d2ff0b43828239be1c98287ade025e12f90ab5799f2f3",
+      "buildReceiptSha256": "87b6508be16a44a58d94c0906a7b69a8bf1c8ca7ee1c90c6193b5627e5a3bdb3",
       "version": "0.2.3"
     }
   }
@@ -101,7 +104,7 @@ restored before the passing run.
 | Unsuppressed packed declaration negatives bite | `branchCount`, `SliderAppearance`, and Tree reorder callback fixtures returned unsuppressed TypeScript errors with `suppressed: false` |
 | Receipt identity changes when evidence is edited | `Error: edited receipt hash differs from the certified identity` |
 | Canonical roster denominator rejects a 175-name plant | `Error: Frozen roster denominator changed: expected 176, found 175` |
-| Green certification is not a release | `Error: release/workflow path rejected: .github/workflows/release.yml` |
+| Green certification is not a release | `Error: certification scope rejected forbidden workflow surface: .github/workflows/release.yml` |
 
 ## Baseline repairs
 
@@ -120,6 +123,8 @@ restored before the passing run.
   parallel test workers started.
 - `effigy test:web-pack-install` — 11 files / 22 tests passed from the clean
   detached proof checkout.
+- Scope falsification — a real temporary two-commit repository changed
+  `.github/workflows/release.yml`; the production guard rejected it.
 - `effigy docs:check` — pass.
 - `effigy qa` — pass. The full headless board passed release automation, web,
   Rust/headless, GPUI consumer, license, security, and advisory checks; license
@@ -135,7 +140,7 @@ selector/action was run.
 - This worker has not merged, released, dispatched a workflow, run a windowed
   selector, or dispatched `g16.054`. The single authorized worker PR is
   [#163](https://github.com/inflatable-cookie/poodle/pull/163).
-- The receipt certifies `fb35a2eb83ddd060ca5d37377ff99c71c9c12189`. This log and
+- The receipt certifies `b37f404737062f9603c097dee0ee8b8916595d1f`. This log and
   card are documentation-only closeout changes; changing certified code,
   package inputs, or receipt inputs requires rerunning the installed oracle.
 - The receipt is promotion evidence, not a release or publication authority.

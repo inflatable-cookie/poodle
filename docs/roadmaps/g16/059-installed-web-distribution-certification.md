@@ -8,7 +8,7 @@ Governing refs: `../../architecture/014-compiled-web-package-distribution.md`,
 `056-web-distribution-contract.md`, `057-core-build-substrate.md`,
 `058-shell-distributions.md`
 
-Proof commit: `fb35a2eb83ddd060ca5d37377ff99c71c9c12189`
+Proof commit: `b37f404737062f9603c097dee0ee8b8916595d1f`
 Worker PR: https://github.com/inflatable-cookie/poodle/pull/163
 
 ## Goal
@@ -86,10 +86,14 @@ public roster. This is the prerequisite that can unblock `g16.054`.
   below-floor failure, and the retained HistoryEntry/Slider/Tree proofs.
 - Result: 11 test files and 22 tests passed. The receipt and all seven
   falsification receipts are recorded in the execution log.
-- Deterministic receipt identity: `f45f5f143df32da1e906c77acfb25e22935bfff88f8cba0efba4ee2ca80010bf`.
-- Receipt source commit: `fb35a2eb83ddd060ca5d37377ff99c71c9c12189`.
+- The scope proof derived 20 changed paths from required base
+  `721b17791946a6a7dcf254de0775f353d47090eb`; all passed the writable
+  allowlist, and a real committed workflow mutation was rejected by the same
+  guard.
+- Deterministic receipt identity: `5cb4b6d2f848e426de868fd56501b1d2c02c368f6ece7f2fb32692394c9f733c`.
+- Receipt source commit: `b37f404737062f9603c097dee0ee8b8916595d1f`.
 - Roster: 176 names; `f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a`.
-- Artifact set: `1cf40d3bdd516f76af5ef44d246141a2ad148d948003a6fac91e207b95ed0347`.
+- Artifact set: `2d2fac98557cd50cc4e01d265405771401049060b88776cfe6d4627523903577`.
 
 ## Limits
 
@@ -110,7 +114,7 @@ public roster. This is the prerequisite that can unblock `g16.054`.
 | Negative type proofs bite | `branchCount` compiles | unsuppressed fixture fails harness |
 | Receipt matches immutable inputs | evidence edit changes package tree | certified tree hash changes |
 | Roster is canonical | fixture remains 175 | denominator gate fails |
-| Green certification is not a release | tag/workflow/npm change appears | scope gate fails |
+| Green certification is not a release | committed workflow/release/version/registry path appears | derived scope guard fails |
 
 ## Writable Scope
 
@@ -138,6 +142,8 @@ selector is authorized.
   TypeScript `6.0.3` before its parallel test workers started.
 - `effigy test:web-pack-install`: 11 files / 22 tests passed from a clean
   detached checkout of the exact proof commit.
+- Scope falsification: a real temporary two-commit repository changed
+  `.github/workflows/release.yml`; the production guard rejected it.
 - `effigy docs:check`: pass.
 - `effigy qa`: pass. The full headless board passed release automation, web,
   Rust/headless, GPUI consumer, license, security, and advisory checks; license
