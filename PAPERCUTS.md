@@ -5,6 +5,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-02 — RESOLVED 2026-09-02 by g16.061. Unset `effigy test:web-pack-install`
+  was still g16.059 strict certification. Empty `origin/main..HEAD` and ordinary
+  feature ranges failed before build/pack (`certification scope found no changed
+  paths` or the writable allowlist), so `ci:web` could not go green for feature
+  PRs. Default is now receipt-free ordinary smoke; `strict` and
+  `g16.054-candidate` stay explicit. Hit while reproducing g16.060 merge
+  validation.
+
 - 2026-09-02 — RESOLVED 2026-09-02. Lazy AgentMessage in root AgentPlan delayed
   the parser and emptied SSR plan bodies. Operator moved all five markdown
   components to `./markdown` and restored synchronous render. Hit while closing

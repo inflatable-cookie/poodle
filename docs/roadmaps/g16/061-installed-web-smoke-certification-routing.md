@@ -1,6 +1,6 @@
 # g16.061 — Installed Web Smoke / Certification Routing
 
-Status: ready — blocks accepted `g16.060` merge validation
+Status: complete — awaiting orchestrator review
 Type: validation infrastructure repair
 Opened: 2026-09-02
 Depends on: merged `g16.054` candidate (`9e38e7971`); completed `g16.059`
@@ -98,3 +98,13 @@ After accepted merge, rebase PR #164 onto current main, rerun its required
 boards, re-review the changed exact head, merge it, and return the merged SHA
 and local-link instructions to Figmatic. Tagging/publishing the accepted
 `0.3.0` candidate remains a separate operator-authorized release mutation.
+
+## Evidence
+
+Production router lives in `test/package-install/scope.ts`. Unset mode is
+ordinary. The empty-range inner smoke on `ab5ab1dce6df39c98b3a51160e41fac4da1d6d49`
+passed 11 files / 22 tests with `mode: ordinary` and no receipt or receipt
+hash. Focused plants and the merged candidate Cargo/evidence-head failures
+are recorded in
+`docs/logs/2026-09/20260902-g16-061-installed-web-smoke-certification-routing.md`.
+PR #164 rebase stays with the orchestrator.
