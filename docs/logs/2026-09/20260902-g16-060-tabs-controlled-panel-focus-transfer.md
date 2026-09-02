@@ -8,8 +8,9 @@ Governing refs: `docs/contracts/001-working-rules.md`,
 `docs/contracts/components/tabs.md`
 Branch: `fix/g16-060-tabs-controlled-focus`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-060-tabs-controlled-focus`
-Dispatch HEAD: `cf3d12853f9fa7e09ccc1c3a754fdcfe5e79cbe7`
+PR head before exact-head repair: `f0909735a25f7b9248971cc4e3448e20ced5f114`
 Live `origin/main` at worker close: `d82ba7202aaecff452ec2c59e79ea7be3be114af`
+Repaired head: `e96826f91` (code), receipt commit on top
 
 ## Outcome
 
@@ -29,15 +30,19 @@ Rust/GPUI/Jetstream change.
 
 - Core: `TabsFocusOnValueChange`, `nextTabsControlledFocusDestination`,
   `resolveTabsControlledFocusDestination`.
-- Svelte: capture in `$effect.pre` against the still-mounted panel, one
-  cancellable `setTimeout(0)` apply through `tabElements`.
-- React: capture during render against `panelRef`, epoch-gated layout effect
-  so later `setFocusIndex` / indicator commits do not cancel the timer, apply
-  through `tabRefs`, unmount clears the timer.
+- Svelte: capture through owned `focusin`/`focusout` lifecycle state, one
+  cancellable `setTimeout(0)` apply through `tabElements`, with live policy,
+  value, destination, and teardown checks.
+- React: capture through owned focus lifecycle state, record the committed
+  controlled value in `useLayoutEffect`, and apply one cancellable
+  `setTimeout(0)` through `tabRefs` with live policy, value, destination,
+  generation, and teardown checks. No focus-policy DOM read or state/ref
+  mutation occurs during render.
 - Public types/exports on both shells. Contract row, Focus section, Svelte
   notes, Known Deltas, catalogue prop, `WEB_ONLY_BY_SLUG.tabs`.
-- Paired lifecycle tests in dedicated files. Not in `Tabs.test.ts` /
-  `Tabs.test.tsx`, which stub `requestAnimationFrame` as sync.
+- Paired lifecycle tests in dedicated files, including stale disable and policy
+  change after scheduling. Not in `Tabs.test.ts` / `Tabs.test.tsx`, which stub
+  `requestAnimationFrame` as sync.
 
 ## Falsification
 
@@ -58,26 +63,38 @@ from `dist`, not source.
 Focused:
 
 - `bun run --cwd packages/core test test/tabs.test.ts` — 23 pass, 0 fail
-- `bunx vitest run` `Tabs.test.ts` / `Tabs.test.tsx`, both controlled-focus
-  files, and `catalogue-nav.test.tsx` — 5 files, 53 pass
+- `bunx vitest run --project react-components` on
+  `TabsControlledFocus.test.tsx` — 12 pass, 0 fail
+- `bunx vitest run --project svelte-components` on
+  `TabsControlledFocus.svelte.test.ts` — 12 pass, 0 fail
+- Adversarial rows: destination disabled after scheduling, and policy changed
+  to `"preserve"` after scheduling. Against the committed pre-repair React
+  source (`f0909735a`) both rows fail — the stale destination receives
+  `.focus()` once; the repaired source reruns green. Pre-repair Svelte already
+  revalidated through live state reads, so its rows lock that behaviour.
 
-Required boards on the dirty worker tree, then again after refresh onto
-`d82ba7202aaecff452ec2c59e79ea7be3be114af`:
+Public declarations/exports (built by `react:package` / `svelte:package`):
+`dist/Tabs.d.ts` and `dist/Tabs.svelte.d.ts` carry
+`focusOnValueChange?: TabsFocusOnValueChange`; both `dist/types.d.ts` declare
+`export type TabsFocusOnValueChange = "preserve" | "selected-tab"`; React root
+re-exports through `export * from "./types"`, Svelte root through its public
+type export list.
 
-- `effigy ci:web` — pass (gate-tree-guard clean after committing
-  `packages/react/preview/artifacts/component-docs.json`)
+Required boards on the repaired worker tree:
+
+- `effigy ci:web` — red only at `test:web-pack-install`, the inherited g16.059
+  ordinary-PR certification-routing defect: "certification scope rejected
+  paths outside writable allowlist" naming this lane's Tabs, core, and docs
+  paths. Steps 1-11 were green on the repaired head `e96826f91`; steps 13-22
+  were green on identical repaired content in the pre-commit board run. The
+  certification file is unchanged from `origin/main`; the defect stays open
+  and was not weakened here.
 - `effigy docs:check` — pass
 - `git diff --check origin/main...HEAD` — pass
 
-Also repaired Vitest `react-components` / `react-preview` to inherit
-`workspaceAliases` so `@inflatable-cookie/poodle-react` resolves to source
-after g16.058 dist-only exports.
-
-After rebase onto certified main, `test:web-pack-install` rejected the Tabs
-paths as outside the g16.059 certification allowlist. The scope guard now
-keeps forbidden-surface rejection, classifies ordinary/unchanged ranges
-without failing pack-install, and only treats allowlist-pure ranges as
-certification.
+Vitest `react-components` retains the required source alias for the focused
+source-helper proof. The `react-preview` alias and the attempted certification
+routing change are reverted.
 
 ## Figmatic
 

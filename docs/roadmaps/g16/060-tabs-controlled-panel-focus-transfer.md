@@ -111,11 +111,23 @@ origin/main...HEAD`. Do not run windowed or release selectors.
 
 ## Worker Receipt
 
-Paired web policy landed on `fix/g16-060-tabs-controlled-focus`. Capture is
-`$effect.pre` (Svelte) and render-time `panelRef` (React). Apply is one
-cancellable `setTimeout(0)` through the owned tab registry. Public prop is
-`focusOnValueChange?: "preserve" | "selected-tab"` with default `"preserve"`.
-`TabsSpec` is unchanged; `WEB_ONLY_BY_SLUG.tabs` records the delta.
+Paired web policy landed on `fix/g16-060-tabs-controlled-focus`. Both shells
+capture panel focus through their owned focus lifecycle. React records the
+committed controlled value and applies one cancellable `setTimeout(0)` after
+commit through the owned tab registry; both shells revalidate live policy,
+current value, enabled destination, generation, and teardown before focusing.
+Public prop is `focusOnValueChange?: "preserve" | "selected-tab"` with default
+`"preserve"`. `TabsSpec` is unchanged; `WEB_ONLY_BY_SLUG.tabs` records the
+delta.
+
+The paired lifecycle suite also covers a destination disabled and a policy
+changed to `"preserve"` after scheduling but before the timer fires. Against
+the pre-repair React head both rows fail by focusing the stale destination;
+against the repaired head the paired suites run 12 + 12 green with core at
+23. `effigy docs:check` and `git diff --check origin/main...HEAD` pass;
+`effigy ci:web` on the repaired head is red only at `test:web-pack-install`,
+the inherited g16.059 ordinary-PR certification-routing defect. The
+certification file is unchanged and the defect was not weakened in this lane.
 
 Orchestrator owns exact-head review, merge, roadmap closeout, and the Figmatic
 receipt. Do not merge from this worker.
