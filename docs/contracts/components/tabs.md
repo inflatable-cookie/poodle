@@ -905,6 +905,11 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - GPUI must model `color-mix` as `token.opacity(token.a * multiplier)` since GPUI has no CSS color-mix
 - Card variant border opacity: 82% → `0.82` multiplier on border-subtle
 - Panel border: 74% → `0.74` on border-subtle; panel bg: 96% → `0.96` on background-panel
+- `shows_tooltips` (and every vertical strip) projects each tab's trimmed
+  label onto `Node.tooltip`. Empty labels are omitted. That is the existing
+  house field IconButton and SegmentedControl already use. No new Node field.
+  Delay, leave, focus-departure, Escape, disablement, removal, and teardown
+  follow the shared GPUI `Node.tooltip` lifecycle.
 
 ## 10a. Jetstream Notes
 
