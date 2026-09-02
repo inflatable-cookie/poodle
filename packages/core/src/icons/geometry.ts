@@ -126,9 +126,25 @@ export type GeometryFrame = {
 };
 
 /** Mutable sampled frame reused on the hot path after plan creation. */
-export type GeometryFrameBuffer = {
-  contours: Array<{ closed: boolean; points: Array<[number, number]> }>;
+export type GeometryContourBuffer = {
+  closed: boolean;
+  points: Array<[number, number]>;
+  /** Painted vertex count. `points.length` is reserved capacity and never shrinks. */
+  count: number;
 };
+
+export type GeometryFrameBuffer = {
+  contours: Array<GeometryContourBuffer>;
+};
+
+export function paintedContours(frame: GeometryFrameBuffer): GeometryFrame {
+  return {
+    contours: frame.contours.map((contour) => ({
+      closed: contour.closed,
+      points: contour.points.slice(0, contour.count),
+    })),
+  };
+}
 
 type FloatPoint = [number, number];
 type RawContour = { points: FloatPoint[]; closed: boolean };
@@ -799,7 +815,7 @@ export function frameAt(
 ): GeometryFrame {
   const buffer: GeometryFrameBuffer = { contours: [] };
   writeFrameAt(pair, progress, buffer);
-  return buffer;
+  return paintedContours(buffer);
 }
 
 /** Write a sampled or canonical frame into `out` without allocating new contour rows. */
@@ -818,19 +834,16 @@ export function writeFrameAt(
     return;
   }
 
-  const rightByLeft = new Map(
-    pair.plan.contourMappings.map((mapping) => [mapping.leftIndex, mapping]),
-  );
   const contourCount = pair.left.sampled.contours.length;
   ensureContourRows(out, contourCount);
   for (let leftIndex = 0; leftIndex < contourCount; leftIndex += 1) {
     const leftContour = pair.left.sampled.contours[leftIndex]!;
-    const mapping = rightByLeft.get(leftIndex);
-    if (!mapping) fail("pair-planning", `missing mapping for contour ${leftIndex}`);
+    const mapping = mappingForLeft(pair.plan.contourMappings, leftIndex);
     const rightContour = pair.right.sampled.contours[mapping.rightIndex]!;
     const dest = out.contours[leftIndex]!;
     dest.closed = leftContour.closed;
     ensurePointRows(dest.points, leftContour.points.length);
+    dest.count = leftContour.points.length;
     for (let index = 0; index < leftContour.points.length; index += 1) {
       const leftPoint = leftContour.points[index]!;
       const rightPoint =
@@ -844,24 +857,72 @@ export function writeFrameAt(
   }
 }
 
+export function reserveFrameForPlan(
+  pair: PlannedIconGeometryPair,
+  out: GeometryFrameBuffer,
+): void {
+  const contourCount = pair.left.sampled.contours.length;
+  ensureContourRows(out, contourCount);
+  for (let index = 0; index < contourCount; index += 1) {
+    const sampled = pair.left.sampled.contours[index]!.points.length;
+    const leftCanonical = canonicalVertexCount(pair.left.canonical.contours[index]!);
+    const rightCanonical = canonicalVertexCount(pair.right.canonical.contours[index]!);
+    ensurePointRows(out.contours[index]!.points, Math.max(sampled, leftCanonical, rightCanonical));
+  }
+}
+
+function mappingForLeft(
+  mappings: readonly ContourCorrespondence[],
+  leftIndex: number,
+): ContourCorrespondence {
+  const direct = mappings[leftIndex];
+  if (direct && direct.leftIndex === leftIndex) {
+    return direct;
+  }
+  for (const mapping of mappings) {
+    if (mapping.leftIndex === leftIndex) {
+      return mapping;
+    }
+  }
+  fail("pair-planning", `missing mapping for contour ${leftIndex}`);
+}
+
+function canonicalVertexCount(contour: CanonicalContour): number {
+  let count = 1;
+  for (const segment of contour.segments) {
+    if (!segment.closing) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
 function writeCanonicalFrame(geometry: NormalizedIconGeometry, out: GeometryFrameBuffer): void {
   ensureContourRows(out, geometry.canonical.contours.length);
   for (let index = 0; index < geometry.canonical.contours.length; index += 1) {
     const contour = geometry.canonical.contours[index]!;
-    const points = canonicalPoints(contour);
     const dest = out.contours[index]!;
     dest.closed = contour.closed;
-    ensurePointRows(dest.points, points.length);
-    for (let pointIndex = 0; pointIndex < points.length; pointIndex += 1) {
-      dest.points[pointIndex]![0] = points[pointIndex]![0];
-      dest.points[pointIndex]![1] = points[pointIndex]![1];
+    const count = canonicalVertexCount(contour);
+    ensurePointRows(dest.points, count);
+    const first = contour.segments[0];
+    if (!first) fail("empty-contour", "contour has no segments");
+    dest.points[0]![0] = first.start[0];
+    dest.points[0]![1] = first.start[1];
+    let written = 1;
+    for (const segment of contour.segments) {
+      if (segment.closing) continue;
+      dest.points[written]![0] = segment.end[0];
+      dest.points[written]![1] = segment.end[1];
+      written += 1;
     }
+    dest.count = written;
   }
 }
 
 function ensureContourRows(out: GeometryFrameBuffer, count: number): void {
   while (out.contours.length < count) {
-    out.contours.push({ closed: false, points: [] });
+    out.contours.push({ closed: false, points: [], count: 0 });
   }
   if (out.contours.length > count) {
     out.contours.length = count;
@@ -871,9 +932,6 @@ function ensureContourRows(out: GeometryFrameBuffer, count: number): void {
 function ensurePointRows(points: Array<[number, number]>, count: number): void {
   while (points.length < count) {
     points.push([0, 0]);
-  }
-  if (points.length > count) {
-    points.length = count;
   }
 }
 

@@ -4,6 +4,7 @@
     currentIconGeometryFrame,
     sampleIconGeometry,
     setIconGeometryPolicy,
+    startIconGeometryFrameLoop,
     teardownIconGeometry,
     createIconGeometryRuntime,
     type GeometryEndpoint,
@@ -28,37 +29,67 @@
 
   const runtime = createIconGeometryRuntime("full");
 
-  $effect(() => {
-    return () => {
-      teardownIconGeometry(runtime);
-    };
-  });
-
-  function frame() {
+  function paintFromProps(): { closed: boolean; d: string }[] {
     setIconGeometryPolicy(runtime, policy);
     const decision = activateIconGeometry(runtime, { owner, pairId, target, initial });
     if (progress !== null) {
       sampleIconGeometry(runtime, decision.key, progress);
     }
     const current = currentIconGeometryFrame(runtime);
-    if (!current) return null;
-    return {
-      contours: current.contours.map((contour) => ({
-        closed: contour.closed,
-        points: contour.points.map((point) => [point[0], point[1]] as const),
-      })),
-    };
+    if (!current) return [];
+    return current.contours.map((contour) => ({
+      closed: contour.closed,
+      d: contourPath(contour.closed, contour.points, contour.count),
+    }));
   }
 
-  function contourPath(closed: boolean, points: readonly (readonly [number, number])[]): string {
-    if (points.length === 0) return "";
-    const commands = points.map(([x, y], index) => {
-      const prefix = index === 0 ? "M" : "L";
-      return `${prefix}${x / 10_000} ${y / 10_000}`;
-    });
+  let paths = $state(paintFromProps());
+
+  function snapshot() {
+    paths = paintFromProps();
+  }
+
+  function contourPath(
+    closed: boolean,
+    points: readonly (readonly [number, number])[],
+    count: number,
+  ): string {
+    if (count === 0) return "";
+    const commands: string[] = [];
+    for (let index = 0; index < count; index += 1) {
+      const point = points[index]!;
+      commands.push(`${index === 0 ? "M" : "L"}${point[0] / 10_000} ${point[1] / 10_000}`);
+    }
     if (closed) commands.push("Z");
     return commands.join(" ");
   }
+
+  $effect(() => {
+    setIconGeometryPolicy(runtime, policy);
+    const decision = activateIconGeometry(runtime, { owner, pairId, target, initial });
+    if (progress !== null) {
+      sampleIconGeometry(runtime, decision.key, progress);
+    }
+    snapshot();
+    if (progress !== null || !decision.liveClock || typeof requestAnimationFrame !== "function") {
+      return;
+    }
+    return startIconGeometryFrameLoop(runtime, decision.key, () => {
+      const current = currentIconGeometryFrame(runtime);
+      paths = current
+        ? current.contours.map((contour) => ({
+            closed: contour.closed,
+            d: contourPath(contour.closed, contour.points, contour.count),
+          }))
+        : [];
+    });
+  });
+
+  $effect(() => {
+    return () => {
+      teardownIconGeometry(runtime);
+    };
+  });
 </script>
 
 <svg
@@ -77,7 +108,7 @@
   role="presentation"
   aria-hidden="true"
 >
-  {#each frame()?.contours ?? [] as contour, index (index)}
-    <path d={contourPath(contour.closed, contour.points)} />
+  {#each paths as contour, index (index)}
+    <path d={contour.d} />
   {/each}
 </svg>

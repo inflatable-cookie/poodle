@@ -18,8 +18,8 @@ import {
   ICON_GEOMETRY_NORMALIZER_VERSION,
   ICON_GEOMETRY_SAMPLE_COUNT,
   ICON_GEOMETRY_SCHEMA_VERSION,
+  reserveFrameForPlan,
   writeFrameAt,
-  type GeometryFrame,
   type GeometryFrameBuffer,
   type GeometrySegment,
   type NormalizedIconGeometry,
@@ -64,7 +64,8 @@ type GeometryClock = {
 
 export type IconGeometryRuntime = {
   policy: MotionPolicy;
-  clocks: GeometryClock[];
+  owner: string | null;
+  clock: GeometryClock | null;
   pairId: string | null;
   plan: PlannedIconGeometryPair | null;
   frame: GeometryFrameBuffer;
@@ -75,7 +76,8 @@ export function createIconGeometryRuntime(
 ): IconGeometryRuntime {
   return {
     policy,
-    clocks: [],
+    owner: null,
+    clock: null,
     pairId: null,
     plan: null,
     frame: { contours: [] },
@@ -83,7 +85,7 @@ export function createIconGeometryRuntime(
 }
 
 export function liveGeometryClockCount(runtime: IconGeometryRuntime): number {
-  return runtime.clocks.length;
+  return runtime.clock ? 1 : 0;
 }
 
 export function candidateFixtureIds(): readonly string[] {
@@ -112,19 +114,16 @@ export function activateIconGeometry(
   intent: GeometryRuntimeIntent,
 ): GeometryRuntimeDecision {
   const key = motionKey(intent.owner, ICON_GEOMETRY_ROLE, ICON_GEOMETRY_CHANNEL);
-  const existing = runtime.clocks.find((clock) => clock.key === key);
+  const existing = runtime.clock;
+  const sameOwner = runtime.owner === intent.owner;
   const plan = plannedCandidateFixture(intent.pairId);
   if (!plan) {
-    if (existing) {
-      removeClock(runtime, key);
-    }
-    runtime.pairId = null;
-    runtime.plan = null;
-    runtime.frame.contours.length = 0;
+    const hadClock = existing !== null;
+    clearRuntime(runtime);
     return {
       key,
       schedule: false,
-      interruption: existing ? "retarget" : "none",
+      interruption: hadClock ? "retarget" : "none",
       remnant: "endpoint",
       liveClock: false,
       paintEndpoint: true,
@@ -133,7 +132,12 @@ export function activateIconGeometry(
     };
   }
 
-  if (existing && existing.pairId === intent.pairId && existing.target === intent.target) {
+  if (
+    sameOwner &&
+    existing &&
+    existing.pairId === intent.pairId &&
+    existing.target === intent.target
+  ) {
     return {
       key,
       schedule: false,
@@ -146,22 +150,24 @@ export function activateIconGeometry(
     };
   }
 
-  if (existing && existing.pairId === intent.pairId) {
+  if (sameOwner && existing && existing.pairId === intent.pairId) {
     const current = existing.axisFrom + (existing.axisTo - existing.axisFrom) * existing.progress;
     const axisTo = axisForTarget(intent.target);
     const durationMs = Math.round(Math.abs(axisTo - current) * existing.originalDurationMs);
+    existing.key = key;
     existing.target = intent.target;
     existing.progress = 0;
     existing.durationMs = durationMs;
     existing.axisFrom = current;
     existing.axisTo = axisTo;
     const schedule = durationMs > 0 && shouldSchedule(runtime.policy, intent);
+    runtime.owner = intent.owner;
+    runtime.pairId = intent.pairId;
+    bindPlan(runtime, plan);
     if (!schedule) {
-      removeClock(runtime, key);
+      runtime.clock = null;
       writeCurrentFrame(runtime, plan, axisTo);
     }
-    runtime.pairId = intent.pairId;
-    runtime.plan = plan;
     return {
       key,
       schedule,
@@ -174,16 +180,15 @@ export function activateIconGeometry(
     };
   }
 
-  if (existing) {
-    removeClock(runtime, key);
-  }
-
+  const interruption = existing ? "retarget" : "none";
+  runtime.clock = null;
+  runtime.owner = intent.owner;
   runtime.pairId = intent.pairId;
-  runtime.plan = plan;
+  bindPlan(runtime, plan);
   const axisTo = axisForTarget(intent.target);
   const schedule = shouldSchedule(runtime.policy, intent);
   if (schedule) {
-    runtime.clocks.push({
+    runtime.clock = {
       key,
       pairId: intent.pairId,
       target: intent.target,
@@ -192,7 +197,7 @@ export function activateIconGeometry(
       originalDurationMs: ICON_GEOMETRY_DURATION_MS,
       axisFrom: 1 - axisTo,
       axisTo,
-    });
+    };
     writeCurrentFrame(runtime, plan, 1 - axisTo);
   } else {
     writeCurrentFrame(runtime, plan, axisTo);
@@ -200,7 +205,7 @@ export function activateIconGeometry(
   return {
     key,
     schedule,
-    interruption: existing ? "retarget" : "none",
+    interruption,
     remnant: "endpoint",
     liveClock: schedule,
     paintEndpoint: !schedule,
@@ -213,9 +218,9 @@ export function sampleIconGeometry(
   runtime: IconGeometryRuntime,
   key: string,
   progress: number,
-): GeometryFrame | null {
-  const clock = runtime.clocks.find((entry) => entry.key === key);
-  if (!clock || !runtime.plan) {
+): GeometryFrameBuffer | null {
+  const clock = runtime.clock;
+  if (!clock || clock.key !== key || !runtime.plan) {
     return null;
   }
   clock.progress = Math.min(1, Math.max(0, progress));
@@ -224,7 +229,7 @@ export function sampleIconGeometry(
   return runtime.frame;
 }
 
-export function currentIconGeometryFrame(runtime: IconGeometryRuntime): GeometryFrame | null {
+export function currentIconGeometryFrame(runtime: IconGeometryRuntime): GeometryFrameBuffer | null {
   if (!runtime.plan || runtime.frame.contours.length === 0) {
     return null;
   }
@@ -235,8 +240,8 @@ export function completeIconGeometry(
   runtime: IconGeometryRuntime,
   key: string,
 ): GeometryRuntimeDecision {
-  const clock = runtime.clocks.find((entry) => entry.key === key);
-  if (!clock || !runtime.plan) {
+  const clock = runtime.clock;
+  if (!clock || clock.key !== key || !runtime.plan) {
     return {
       key,
       schedule: false,
@@ -249,7 +254,7 @@ export function completeIconGeometry(
     };
   }
   writeCurrentFrame(runtime, runtime.plan, clock.axisTo);
-  removeClock(runtime, key);
+  runtime.clock = null;
   return {
     key,
     schedule: false,
@@ -267,16 +272,19 @@ export function setIconGeometryPolicy(
   policy: MotionPolicy,
 ): GeometryRuntimeDecision[] {
   runtime.policy = policy;
+  const clock = runtime.clock;
+  if (!clock) {
+    return [];
+  }
   const snap = policy !== "full";
-  const decisions: GeometryRuntimeDecision[] = [];
-  for (const clock of [...runtime.clocks]) {
-    if (snap) {
-      if (runtime.plan) {
-        writeCurrentFrame(runtime, runtime.plan, clock.axisTo);
-      }
-      removeClock(runtime, clock.key);
+  if (snap) {
+    if (runtime.plan) {
+      writeCurrentFrame(runtime, runtime.plan, clock.axisTo);
     }
-    decisions.push({
+    runtime.clock = null;
+  }
+  return [
+    {
       key: clock.key,
       schedule: !snap,
       interruption: "none",
@@ -285,29 +293,51 @@ export function setIconGeometryPolicy(
       paintEndpoint: snap,
       accepted: true,
       pairId: clock.pairId,
-    });
-  }
-  return decisions;
+    },
+  ];
 }
 
 export function abortIconGeometry(
   runtime: IconGeometryRuntime,
   key?: string,
 ): GeometryRuntimeDecision[] {
-  return cancelClocks(runtime, key, "endpoint");
+  return cancelClock(runtime, key, "endpoint");
 }
 
 export function teardownIconGeometry(
   runtime: IconGeometryRuntime,
   key?: string,
 ): GeometryRuntimeDecision[] {
-  const decisions = cancelClocks(runtime, key, "none");
-  if (!key || runtime.clocks.length === 0) {
-    runtime.pairId = null;
-    runtime.plan = null;
-    runtime.frame.contours.length = 0;
+  const decisions = cancelClock(runtime, key, "none");
+  if (!key || runtime.clock === null) {
+    clearRuntime(runtime);
   }
   return decisions;
+}
+
+/** Web host: one rAF loop per runtime. Cancel the returned handle on unmount. */
+export function startIconGeometryFrameLoop(
+  runtime: IconGeometryRuntime,
+  key: string,
+  onFrame: () => void,
+): () => void {
+  const started = performance.now();
+  let handle = 0;
+  const tick = (now: number) => {
+    const progress = Math.min(1, (now - started) / ICON_GEOMETRY_DURATION_MS);
+    sampleIconGeometry(runtime, key, progress);
+    onFrame();
+    if (progress < 1) {
+      handle = requestAnimationFrame(tick);
+    } else {
+      completeIconGeometry(runtime, key);
+      onFrame();
+    }
+  };
+  handle = requestAnimationFrame(tick);
+  return () => {
+    cancelAnimationFrame(handle);
+  };
 }
 
 function shouldSchedule(policy: MotionPolicy, intent: GeometryRuntimeIntent): boolean {
@@ -321,6 +351,11 @@ function axisForTarget(target: GeometryEndpoint): number {
   return target === "to" ? 1 : 0;
 }
 
+function bindPlan(runtime: IconGeometryRuntime, plan: PlannedIconGeometryPair): void {
+  runtime.plan = plan;
+  reserveFrameForPlan(plan, runtime.frame);
+}
+
 function writeCurrentFrame(
   runtime: IconGeometryRuntime,
   plan: PlannedIconGeometryPair,
@@ -329,32 +364,39 @@ function writeCurrentFrame(
   writeFrameAt(plan, axis, runtime.frame);
 }
 
-function cancelClocks(
+function cancelClock(
   runtime: IconGeometryRuntime,
   key: string | undefined,
   remnant: "endpoint" | "none",
 ): GeometryRuntimeDecision[] {
-  const selected = key ? runtime.clocks.filter((clock) => clock.key === key) : [...runtime.clocks];
-  for (const clock of selected) {
-    if (remnant === "endpoint" && runtime.plan && clock.pairId === runtime.pairId) {
-      writeCurrentFrame(runtime, runtime.plan, clock.axisTo);
-    }
-    removeClock(runtime, clock.key);
+  const clock = runtime.clock;
+  if (!clock || (key && clock.key !== key)) {
+    return [];
   }
-  return selected.map((clock) => ({
-    key: clock.key,
-    schedule: false,
-    interruption: "none" as const,
-    remnant,
-    liveClock: false,
-    paintEndpoint: remnant === "endpoint",
-    accepted: true,
-    pairId: clock.pairId,
-  }));
+  if (remnant === "endpoint" && runtime.plan && clock.pairId === runtime.pairId) {
+    writeCurrentFrame(runtime, runtime.plan, clock.axisTo);
+  }
+  runtime.clock = null;
+  return [
+    {
+      key: clock.key,
+      schedule: false,
+      interruption: "none",
+      remnant,
+      liveClock: false,
+      paintEndpoint: remnant === "endpoint",
+      accepted: true,
+      pairId: clock.pairId,
+    },
+  ];
 }
 
-function removeClock(runtime: IconGeometryRuntime, key: string): void {
-  runtime.clocks = runtime.clocks.filter((clock) => clock.key !== key);
+function clearRuntime(runtime: IconGeometryRuntime): void {
+  runtime.owner = null;
+  runtime.clock = null;
+  runtime.pairId = null;
+  runtime.plan = null;
+  runtime.frame.contours.length = 0;
 }
 
 type GeneratedContour = {

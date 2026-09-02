@@ -43,7 +43,7 @@ gpui = "0.2.2"
 # Poodle adapter + contracts + real components
 poodle-gpui = { path = "../adapter" }
 poodle-gpui-node-backend = { path = "../node-backend" }
-poodle-render = { path = "../../render" }
+poodle-render = { path = "../../render", features = ["icon-geometry-internal"] }
 poodle-node = { path = "../../contracts/node" }
 poodle-adapter = { path = "../../contracts/adapter" }
 poodle-specs = { path = "../../contracts/components" }

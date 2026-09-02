@@ -65,13 +65,18 @@ describe("IconGeometryShell (svelte, private)", () => {
   });
 
   it("teardown leaves no late rAF write", async () => {
-    const raf = vi.spyOn(globalThis, "requestAnimationFrame");
+    let nextId = 1;
+    const raf = vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation(() => nextId++);
     const cancel = vi.spyOn(globalThis, "cancelAnimationFrame");
     const view = render(IconGeometryShell, {
-      props: { pairId: PAIR, target: "to", progress: 0.3 },
+      props: { pairId: PAIR, target: "to" },
     });
+    await tick();
     expect(svgOf(view.container).querySelector("path")).not.toBeNull();
+    expect(raf).toHaveBeenCalled();
+    const scheduledId = raf.mock.results[0]?.value as number;
     view.unmount();
+    expect(cancel).toHaveBeenCalledWith(scheduledId);
     const callsAfterUnmount = raf.mock.calls.length;
     await fireEvent.animationEnd(document.body);
     await tick();

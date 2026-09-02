@@ -41,9 +41,9 @@ mod grid;
 mod hover_card;
 mod icon;
 // g16.049/g16.050 geometry and its generated registry stay an internal
-// module: not re-exported as a public component API.
+// module: not a public component API, even as `pub mod`.
 #[allow(dead_code)]
-pub mod icon_geometry;
+pub(crate) mod icon_geometry;
 mod icon_button;
 mod icon_provider;
 mod list_card;

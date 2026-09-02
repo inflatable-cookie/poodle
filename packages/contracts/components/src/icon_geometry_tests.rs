@@ -433,7 +433,10 @@ mod tests {
         sample_icon_geometry(&mut runtime, &forward.key, 0.4);
         live.target = GeometryEndpoint::From;
         let reverse = activate_icon_geometry(&mut runtime, live);
-        assert_eq!(reverse.interruption, poodle_headless::motion_policy::MotionInterruption::Reverse);
+        assert_eq!(
+            reverse.interruption,
+            poodle_headless::motion_policy::MotionInterruption::Reverse
+        );
         assert!(reverse.schedule);
         assert_eq!(live_geometry_clock_count(&runtime), 1);
 
@@ -493,5 +496,70 @@ mod tests {
         sample_icon_geometry(&mut runtime, &start.key, 0.8);
         assert_eq!(runtime.frame.contours[0].points.capacity(), first_capacity);
         assert_eq!(runtime.frame.contours[0].points.as_ptr(), first_ptr);
+    }
+
+    #[test]
+    fn second_owner_retargets_and_separate_runtimes_stay_independent() {
+        use poodle_headless::motion_policy::MotionPolicy;
+
+        let mut shared = create_icon_geometry_runtime(MotionPolicy::Full);
+        let first = activate_icon_geometry(
+            &mut shared,
+            GeometryRuntimeIntent {
+                owner: String::from("owner-a"),
+                pair_id: String::from("chevron-left-to-chevron-right"),
+                target: GeometryEndpoint::To,
+                initial: false,
+            },
+        );
+        let second = activate_icon_geometry(
+            &mut shared,
+            GeometryRuntimeIntent {
+                owner: String::from("owner-b"),
+                pair_id: String::from("circle-to-dot"),
+                target: GeometryEndpoint::To,
+                initial: false,
+            },
+        );
+        assert_eq!(live_geometry_clock_count(&shared), 1);
+        assert_eq!(shared.pair_id, Some("circle-to-dot"));
+        assert!(sample_icon_geometry(&mut shared, &first.key, 0.5).is_none());
+        assert!(sample_icon_geometry(&mut shared, &second.key, 0.5).is_some());
+
+        let mut runtime_a = create_icon_geometry_runtime(MotionPolicy::Full);
+        let mut runtime_b = create_icon_geometry_runtime(MotionPolicy::Full);
+        let key_a = activate_icon_geometry(
+            &mut runtime_a,
+            GeometryRuntimeIntent {
+                owner: String::from("owner-a"),
+                pair_id: String::from("chevron-left-to-chevron-right"),
+                target: GeometryEndpoint::To,
+                initial: false,
+            },
+        )
+        .key;
+        let key_b = activate_icon_geometry(
+            &mut runtime_b,
+            GeometryRuntimeIntent {
+                owner: String::from("owner-b"),
+                pair_id: String::from("circle-to-dot"),
+                target: GeometryEndpoint::To,
+                initial: false,
+            },
+        )
+        .key;
+        sample_icon_geometry(&mut runtime_a, &key_a, 0.5);
+        let b_mid = sample_icon_geometry(&mut runtime_b, &key_b, 0.5)
+            .expect("b frame")
+            .contours[0]
+            .points
+            .clone();
+        sample_icon_geometry(&mut runtime_a, &key_a, 0.9);
+        let b_again = sample_icon_geometry(&mut runtime_b, &key_b, 0.5)
+            .expect("b frame")
+            .contours[0]
+            .points
+            .clone();
+        assert_eq!(b_mid, b_again);
     }
 }

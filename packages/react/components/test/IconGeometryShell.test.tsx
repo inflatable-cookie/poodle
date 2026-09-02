@@ -99,13 +99,19 @@ describe("IconGeometryShell (react, private)", () => {
   });
 
   it("teardown leaves no late rAF write", () => {
-    const raf = vi.spyOn(globalThis, "requestAnimationFrame");
-    const view = render(<IconGeometryShell pairId={PAIR} target="to" progress={0.3} />);
+    let nextId = 1;
+    const raf = vi.spyOn(globalThis, "requestAnimationFrame").mockImplementation(() => nextId++);
+    const cancel = vi.spyOn(globalThis, "cancelAnimationFrame");
+    const view = render(<IconGeometryShell pairId={PAIR} target="to" />);
     expect(svgOf(view.container).querySelector("path")).not.toBeNull();
-    const callsAtUnmount = raf.mock.calls.length;
+    expect(raf).toHaveBeenCalled();
+    const scheduledId = raf.mock.results[0]?.value as number;
     view.unmount();
+    expect(cancel).toHaveBeenCalledWith(scheduledId);
+    const callsAtUnmount = raf.mock.calls.length;
     fireEvent.animationEnd(document.body);
     expect(raf.mock.calls.length).toBe(callsAtUnmount);
+    cancel.mockRestore();
     raf.mockRestore();
   });
 

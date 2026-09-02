@@ -8,6 +8,8 @@ mod app_state;
 mod block_slider_host;
 mod component_registry;
 mod contract_usage_docs;
+#[allow(dead_code)]
+mod icon_geometry_host;
 mod node_compat;
 mod presentation_axes;
 mod providers;

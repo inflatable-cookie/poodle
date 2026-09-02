@@ -2,24 +2,29 @@
 //!
 //! No native pixels, no windowed capture. Candidate geometry is fixture input.
 
-use std::sync::{Arc, Mutex};
-use std::time::Instant;
+use std::hint::black_box;
+use std::time::{Duration, Instant};
 
 use gpui::TestAppContext;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_headless::motion_policy::MotionPolicy;
 use poodle_node::NodeKind;
 use poodle_render::context::RenderContext;
-use poodle_specs::icon_geometry::{
-    activate_icon_geometry, create_icon_geometry_runtime, sample_icon_geometry,
-    teardown_icon_geometry, GeometryEndpoint, GeometryRuntimeIntent,
+use poodle_render::icon_geometry::{
+    activate_icon_geometry, compact_frame_point_caps, compact_frame_point_ptrs,
+    create_icon_geometry_runtime, planned_candidate_fixture, resolved_frame_point_caps,
+    resolved_icon_geometry, sample_icon_geometry, write_resolved_frame, GeometryEndpoint,
+    GeometryRuntimeIntent, ICON_GEOMETRY_DURATION_MS,
 };
 use poodle_specs::IconSpec;
 
 #[path = "../src/headless_driver.rs"]
 mod headless_driver;
+#[path = "../src/icon_geometry_host.rs"]
+mod icon_geometry_host;
 
 use headless_driver::HeadlessDriver;
+use icon_geometry_host::IconGeometryHost;
 
 fn run_headless(body: impl FnOnce(&mut TestAppContext)) {
     poodle_gpui_node_backend::reset_focus_registry();
@@ -35,6 +40,21 @@ fn theme() -> GpuiThemeProvider {
     GpuiThemeProvider::new().with_theme(&poodle_tokens::themes::ECLIPSE)
 }
 
+fn intent(owner: &str, pair_id: &str, target: GeometryEndpoint) -> GeometryRuntimeIntent {
+    GeometryRuntimeIntent {
+        owner: String::from(owner),
+        pair_id: String::from(pair_id),
+        target,
+        initial: false,
+    }
+}
+
+fn p95_millis(samples: &mut [Duration]) -> f64 {
+    samples.sort_unstable();
+    let idx = ((samples.len() as f64) * 0.95).ceil() as usize - 1;
+    samples[idx.min(samples.len().saturating_sub(1))].as_secs_f64() * 1000.0
+}
+
 #[test]
 fn resolved_geometry_paints_without_pair_lookup_and_tears_down() {
     run_headless(|cx| {
@@ -43,43 +63,47 @@ fn resolved_geometry_paints_without_pair_lookup_and_tears_down() {
         let static_icon = poodle_render::icon(&IconSpec::new("plus"), &ctx);
         assert!(matches!(&static_icon.kind, NodeKind::Icon { name, .. } if name == "plus"));
 
-        let mut runtime = create_icon_geometry_runtime(MotionPolicy::Full);
-        let start = activate_icon_geometry(
-            &mut runtime,
-            GeometryRuntimeIntent {
-                owner: String::from("geometry-owner"),
-                pair_id: String::from("chevron-left-to-chevron-right"),
-                target: GeometryEndpoint::To,
-                initial: false,
-            },
-        );
-        let mut node = poodle_render::resolved_icon_geometry(&runtime, 16.0, &ctx);
-        node.id = Some("geometry-fixture".into());
-        match &node.kind {
-            NodeKind::ResolvedIconGeometry { frame, .. } => {
-                assert!(!frame.contours.is_empty());
-            }
-            _ => panic!("expected resolved geometry, got {node:?}"),
-        }
-        assert!(!node.has_text("chevron-left-to-chevron-right"));
-
-        let live = Arc::new(Mutex::new(node));
+        let mut host = IconGeometryHost::new(MotionPolicy::Full, 16.0, &ctx);
+        let live = host.node();
         poodle_gpui_node_backend::begin_probe_capture();
-        let mut driver = HeadlessDriver::new(cx, Arc::clone(&live));
+        let mut driver = HeadlessDriver::new(cx, live);
+        driver.with_window(|window, cx| {
+            host.activate(
+                intent(
+                    "geometry-owner",
+                    "chevron-left-to-chevron-right",
+                    GeometryEndpoint::To,
+                ),
+                window,
+                cx,
+                &ctx,
+            );
+        });
         driver.draw_frame();
-        let started = Instant::now();
-        sample_icon_geometry(&mut runtime, &start.key, 0.5);
         {
-            let mut guard = live.lock().expect("node lock");
-            *guard = poodle_render::resolved_icon_geometry(&runtime, 16.0, &ctx);
-            guard.id = Some("geometry-fixture".into());
+            let node = host.node();
+            let guard = node.lock().expect("node lock");
+            match &guard.kind {
+                NodeKind::ResolvedIconGeometry { frame, .. } => {
+                    assert!(!frame.contours.is_empty());
+                }
+                _ => panic!("expected resolved geometry, got {guard:?}"),
+            }
+            assert!(!guard.has_text("chevron-left-to-chevron-right"));
         }
+
+        driver.update_app(|cx| {
+            cx.background_executor()
+                .advance_clock(Duration::from_millis(16));
+        });
+        driver.drain();
         driver.draw_frame();
-        let elapsed = started.elapsed();
         assert!(
-            elapsed.as_millis() <= 4,
-            "geometry update exceeded the 1ms/instance budget: {elapsed:?}"
+            host.scheduled_wakeups() >= 1,
+            "production scheduler must advance the 180ms clock, duration={ICON_GEOMETRY_DURATION_MS}"
         );
+        assert_eq!(host.live_clocks(), 1);
+
         let channels = poodle_gpui_node_backend::take_probe_capture();
         assert!(
             channels
@@ -92,16 +116,32 @@ fn resolved_geometry_paints_without_pair_lookup_and_tears_down() {
             "backend must not record pair lookup, got {channels:?}"
         );
 
-        teardown_icon_geometry(&mut runtime, None);
-        {
-            let mut guard = live.lock().expect("node lock");
-            *guard = poodle_node::Node::container();
-        }
+        let wakeups_at_teardown = host.scheduled_wakeups();
+        host.teardown();
+        assert!(
+            host.scheduled_task_dropped(),
+            "teardown must drop the scheduled native task"
+        );
         driver.draw_frame();
-        assert!(matches!(
-            live.lock().expect("node lock").kind,
-            NodeKind::Container
-        ));
+        driver.update_app(|cx| {
+            cx.background_executor()
+                .advance_clock(Duration::from_millis(u64::from(ICON_GEOMETRY_DURATION_MS)));
+        });
+        driver.drain();
+        driver.draw_frame();
+        assert_eq!(
+            host.scheduled_wakeups(),
+            wakeups_at_teardown,
+            "teardown must cancel the scheduled native frame"
+        );
+        assert_eq!(host.live_clocks(), 0);
+        {
+            let node = host.node();
+            assert!(matches!(
+                node.lock().expect("node lock").kind,
+                NodeKind::Container
+            ));
+        }
         drop(driver);
     });
 }
@@ -111,26 +151,227 @@ fn missing_shared_lookup_cannot_recover_pair_meaning() {
     run_headless(|cx| {
         let theme = theme();
         let ctx = RenderContext::new(&theme);
-        let mut runtime = create_icon_geometry_runtime(MotionPolicy::Full);
-        activate_icon_geometry(
-            &mut runtime,
-            GeometryRuntimeIntent {
-                owner: String::from("geometry-owner"),
-                pair_id: String::from("menu-to-ellipsis"),
-                target: GeometryEndpoint::To,
-                initial: false,
-            },
-        );
-        let node = poodle_render::resolved_icon_geometry(&runtime, 16.0, &ctx);
-        match &node.kind {
+        let mut host = IconGeometryHost::new(MotionPolicy::Full, 16.0, &ctx);
+        let live = host.node();
+        let mut driver = HeadlessDriver::new(cx, live);
+        driver.with_window(|window, cx| {
+            host.activate(
+                intent("geometry-owner", "menu-to-ellipsis", GeometryEndpoint::To),
+                window,
+                cx,
+                &ctx,
+            );
+        });
+        driver.draw_frame();
+        let node = host.node();
+        let guard = node.lock().expect("node lock");
+        match &guard.kind {
             NodeKind::ResolvedIconGeometry { frame, .. } => {
                 assert!(frame.contours.is_empty());
             }
-            _ => panic!("expected empty resolved geometry, got {node:?}"),
+            _ => panic!("expected empty resolved geometry, got {guard:?}"),
         }
-        let live = Arc::new(Mutex::new(node));
+        drop(driver);
+    });
+}
+
+#[test]
+fn second_owner_on_one_host_retargets_and_two_hosts_stay_independent() {
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let mut host_a = IconGeometryHost::new(MotionPolicy::Full, 16.0, &ctx);
+        let mut host_b = IconGeometryHost::new(MotionPolicy::Full, 16.0, &ctx);
+        let live = host_a.node();
         let mut driver = HeadlessDriver::new(cx, live);
-        driver.draw_frame();
+        let mut owner_a_key = String::new();
+        let mut host_a_key = String::new();
+        let mut host_b_key = String::new();
+        driver.with_window(|window, cx| {
+            let first = host_a.activate(
+                intent(
+                    "owner-a",
+                    "chevron-left-to-chevron-right",
+                    GeometryEndpoint::To,
+                ),
+                window,
+                cx,
+                &ctx,
+            );
+            owner_a_key = first.key;
+            host_b_key = host_b
+                .activate(
+                    intent("owner-b", "circle-to-dot", GeometryEndpoint::To),
+                    window,
+                    cx,
+                    &ctx,
+                )
+                .key;
+            host_a_key = host_a
+                .activate(
+                    intent("owner-b", "circle-to-dot", GeometryEndpoint::To),
+                    window,
+                    cx,
+                    &ctx,
+                )
+                .key;
+        });
+        assert_eq!(host_a.live_clocks(), 1);
+        assert_eq!(host_b.live_clocks(), 1);
+        host_a.with_runtime(|runtime| {
+            assert!(
+                sample_icon_geometry(runtime, &owner_a_key, 0.5).is_none(),
+                "replaced owner must not keep a live clock"
+            );
+            assert!(sample_icon_geometry(runtime, &host_a_key, 0.5).is_some());
+        });
+        let a_points = host_a.with_runtime(|runtime| {
+            sample_icon_geometry(runtime, &host_a_key, 0.5)
+                .expect("host a frame")
+                .contours[0]
+                .points
+                .clone()
+        });
+        let b_points = host_b.with_runtime(|runtime| {
+            sample_icon_geometry(runtime, &host_b_key, 0.5)
+                .expect("host b frame")
+                .contours[0]
+                .points
+                .clone()
+        });
+        assert_eq!(
+            a_points, b_points,
+            "two hosts on the same pair remain independent clocks, not one global plan"
+        );
+        // Re-sample host B after mutating A: B must not pick up A's later axis.
+        host_a.with_runtime(|runtime| {
+            sample_icon_geometry(runtime, &host_a_key, 0.9);
+        });
+        let b_again = host_b.with_runtime(|runtime| {
+            sample_icon_geometry(runtime, &host_b_key, 0.5)
+                .expect("host b frame")
+                .contours[0]
+                .points
+                .clone()
+        });
+        assert_eq!(b_points, b_again);
+        host_a.teardown();
+        host_b.teardown();
+        drop(driver);
+    });
+}
+
+#[test]
+fn allocation_and_p95_budgets_match_the_card() {
+    run_headless(|cx| {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let mut host = IconGeometryHost::new(MotionPolicy::Full, 16.0, &ctx);
+        let live = host.node();
+        let mut driver = HeadlessDriver::new(cx, live);
+        driver.with_window(|window, cx| {
+            host.activate(
+                intent(
+                    "budget-owner",
+                    "chevron-left-to-chevron-right",
+                    GeometryEndpoint::To,
+                ),
+                window,
+                cx,
+                &ctx,
+            );
+        });
+        let key = host.live_key().expect("scheduled key");
+
+        let mut one_ms = Vec::with_capacity(40);
+        host.with_runtime(|runtime| {
+            sample_icon_geometry(runtime, &key, 0.2);
+            let node = host.node();
+            let mut guard = node.lock().expect("node lock");
+            write_resolved_frame(runtime, &mut guard);
+            let compact_caps = compact_frame_point_caps(runtime);
+            let compact_ptrs = compact_frame_point_ptrs(runtime);
+            let node_caps = resolved_frame_point_caps(&guard);
+            for i in 0..40 {
+                let started = Instant::now();
+                black_box(sample_icon_geometry(runtime, &key, 0.2 + (i as f32) * 0.01));
+                write_resolved_frame(runtime, &mut guard);
+                one_ms.push(started.elapsed());
+            }
+            assert_eq!(compact_frame_point_caps(runtime), compact_caps);
+            assert_eq!(compact_frame_point_ptrs(runtime), compact_ptrs);
+            assert_eq!(resolved_frame_point_caps(&guard), node_caps);
+        });
+        let one_p95 = p95_millis(&mut one_ms);
+        assert!(
+            one_p95 <= 1.0,
+            "p95 geometry update exceeded 1ms/instance: {one_p95}ms"
+        );
+
+        let mut four = [
+            create_icon_geometry_runtime(MotionPolicy::Full),
+            create_icon_geometry_runtime(MotionPolicy::Full),
+            create_icon_geometry_runtime(MotionPolicy::Full),
+            create_icon_geometry_runtime(MotionPolicy::Full),
+        ];
+        let mut four_nodes: Vec<_> = four
+            .iter()
+            .map(|runtime| resolved_icon_geometry(runtime, 16.0, &ctx))
+            .collect();
+        let keys: Vec<String> = (0..4)
+            .map(|index| {
+                let start = activate_icon_geometry(
+                    &mut four[index],
+                    intent(
+                        &format!("budget-{index}"),
+                        "chevron-left-to-chevron-right",
+                        GeometryEndpoint::To,
+                    ),
+                );
+                four_nodes[index] = resolved_icon_geometry(&four[index], 16.0, &ctx);
+                start.key
+            })
+            .collect();
+        let mut four_ms = Vec::with_capacity(40);
+        for i in 0..40 {
+            let started = Instant::now();
+            for index in 0..4 {
+                black_box(sample_icon_geometry(
+                    &mut four[index],
+                    &keys[index],
+                    0.2 + (i as f32) * 0.01,
+                ));
+                write_resolved_frame(&four[index], &mut four_nodes[index]);
+            }
+            four_ms.push(started.elapsed());
+        }
+        let four_p95 = p95_millis(&mut four_ms);
+        assert!(
+            four_p95 <= 4.0,
+            "p95 geometry update exceeded 4ms for four instances: {four_p95}ms"
+        );
+
+        let mut cold = Vec::with_capacity(40);
+        for _ in 0..40 {
+            let started = Instant::now();
+            black_box(planned_candidate_fixture("chevron-left-to-chevron-right"));
+            let mut runtime = create_icon_geometry_runtime(MotionPolicy::Full);
+            activate_icon_geometry(
+                &mut runtime,
+                GeometryRuntimeIntent {
+                    owner: String::from("cold-plan"),
+                    pair_id: String::from("chevron-left-to-chevron-right"),
+                    target: GeometryEndpoint::From,
+                    initial: true,
+                },
+            );
+            black_box(resolved_icon_geometry(&runtime, 16.0, &ctx));
+            cold.push(started.elapsed());
+        }
+        let cold_p95 = p95_millis(&mut cold);
+        assert!(cold_p95 <= 2.0, "p95 cold plan exceeded 2ms: {cold_p95}ms");
+
+        host.teardown();
         drop(driver);
     });
 }
