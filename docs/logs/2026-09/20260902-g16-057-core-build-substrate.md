@@ -75,9 +75,15 @@ All plants restored. Focused tests repeat them against disposable fixtures.
 ## Validation
 
 - `bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts` — 26/0
-- Remaining addendum gates recorded after this repair commit's local run:
-  core unit tests, clean-checkout `effigy health`, `effigy test:web-pack-install`,
-  `effigy ci:web`, `effigy docs:check`, `git diff --check origin/main...HEAD`.
+- Core unit tests — 1,221/0.
+- Clean-state `effigy health` — pass after moving the ignored core `dist/` out
+  of the worktree; the route rebuilt it before docs lint.
+- `effigy test:web-pack-install` — pass, 10 files / 20 tests; packed core
+  contained `package/dist/**` and the receipt.
+- `effigy ci:web` — pass, including 373 component files / 3,590 tests and the
+  current pack-install gate.
+- `effigy docs:check` — pass.
+- `git diff --check origin/main...HEAD` — pass.
 
 No windowed, native-visual, or release selector. No g16.059 redesign.
 
