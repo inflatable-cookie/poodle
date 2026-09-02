@@ -1,9 +1,14 @@
 # g16.054 — HistoryCenter v0.3.0 Release Candidate
 
-Status: ready — `g16.053` and serial `g16.056`–`g16.059` are complete; later
-release certification and Loophole adoption remain separate authority gates
+Status: candidate certified — awaiting orchestrator review; later release
+certification and Loophole adoption remain separate authority gates
 Type: release candidate — no release mutation
 Opened: 2026-09-01
+Candidate base: `0a4a329733dfb63bd5e70977d54581e4fef000c8`
+Candidate tree commit: `9b451c48d2fc8ea990313fcd441056169a40f26c`
+g16.059 prerequisite proof commit: `b37f404737062f9603c097dee0ee8b8916595d1f`
+g16.059 prerequisite PR #163 merge object: `536c9f7435c779e5829016432394d0c01ec442ee`
+Separate main docs correction: `d82ba7202` — candidate was not rebased
 Depends on: completed `g16.053`; completed `g16.059`, which certifies the
 compiled core/Svelte/private-React distribution from installed tarballs;
 merged `g16.033`; merged `g16.036`; and the accepted sequence recorded in
@@ -117,6 +122,26 @@ negative proof, absent compiled JavaScript/declarations prerequisite, incomplete
 public-intent notes, a candidate-bearing mainline change after freeze,
 workflow/tag/registry mismatch, requested compatibility shim, sibling mutation,
 or release/windowed action.
+
+## Candidate Evidence
+
+The exact candidate `9b451c48d2fc8ea990313fcd441056169a40f26c` passed from a
+clean detached checkout using the explicit
+`POODLE_WEB_PACK_INSTALL_SCOPE_MODE=g16.054-candidate` contract. That mode
+derives its required base as the merge-base of the certified commit with
+`origin/main` and requires the certified source to be the direct one-commit
+child of that base, so the evidence head and any hidden prior candidate commits
+are rejected as candidate sources. Cargo content on allowlisted manifests is
+restricted to `[package]` version changes and same-identity intra-repository
+Poodle requirement version changes; publication, registry/source, `[patch]`,
+`[replace]`, and unrelated dependency content is rejected by the production
+guard. The full receipt bytes, archive hashes, guard falsifications, review
+repair record, and validation packet are recorded in
+`docs/logs/2026-09/20260902-g16-054-v030-release-candidate.md`.
+
+The candidate is not a release and is not the default installed-certification
+mode. The evidence commit changes only this card and that log; it does not
+change the certified package tree.
 
 ## Continuation
 
