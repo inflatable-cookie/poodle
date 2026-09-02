@@ -1,6 +1,6 @@
 # g16.065 — Tabs Native Tooltip Parity
 
-Status: in review — PR #169
+Status: blocked — GPUI 0.2.2 tooltip lifecycle; PR #169
 Type: cross-runtime semantic and mounted repair
 Opened: 2026-09-02
 Depends on: current Tabs contract, completed `g16.060`
@@ -63,12 +63,46 @@ using preview-only state.
 
 ## Continuation
 
-Accepted merge unblocks the later Nucleus Tabs component card. It does not
-claim Nucleus M2, accessibility A2, or visual V2.
+This card does not complete. Nucleus Tabs stays blocked on a planned tooltip
+delay/dismiss contract, or a house backend runtime that is not GPUI
+`.tooltip()`. Do not treat merge of the projection work as native tooltip
+parity.
 
 ## Outcome
 
-`shows_tooltips` now projects each tab's trimmed label onto `Node.tooltip`
-when the flag is true or the strip is vertical. GPUI `.tooltip()` owns delay
-and hide. No new Node field. Web 300ms overlay plus blur/Escape dismiss is
-unchanged. Native delay is GPUI's 500ms hover timer.
+Stopped on the card stop condition. `shows_tooltips` now projects each tab's
+trimmed label onto `Node.tooltip` when the flag is true or the strip is
+vertical. That projection is kept. It is not the accepted lifecycle.
+
+The existing production boundary (`Node.tooltip` → GPUI 0.2.2 `.tooltip()`)
+cannot meet the contract 300ms delay or hide on focus departure. Those gaps
+are not accepted deltas.
+
+## Blocking Boundary
+
+Returned for planning. Do not invent a Tabs-only overlay, a `tooltip_delay`
+Node field, or a second tooltip mechanism in this lane.
+
+1. **Delay.** GPUI 0.2.2 `Interactivity::tooltip` hardcodes private
+   `TOOLTIP_SHOW_DELAY = 500ms`. There is no delay argument and no
+   `TooltipOptions`. `Node.tooltip` is `Option<String>` only.
+2. **Focus-departure / Escape dismiss.** Show and hide are mouse hitbox
+   (`handle_tooltip_mouse_move`, `check_visible_and_update`).
+   `clear_active_tooltip` is `pub(crate)` inside gpui. `Interaction::on_focus_change`
+   can observe blur; it cannot clear GPUI's private `ActiveTooltip`.
+
+A later card would need a public contract such as tooltip delay plus dismiss
+policy on Node, or an adopted backend-owned tooltip runtime that replaces
+`.tooltip()` as the house path.
+
+## Expressible On The Existing Boundary
+
+- `showTooltips=false` omits `Node.tooltip` (inert after any delay).
+- Trimmed label projection when `shows_tooltips` or vertical.
+- Hide on pointer leave (non-hoverable `.tooltip()`).
+- Cancel pending show on removal and teardown (unpaint drops `WaitingForShow`).
+
+Disable-hide is renderer policy: omit `Node.tooltip` when the tab is disabled.
+That does not need a new Node field. Current projection still emits the label
+on disabled tabs, matching web wrap. The card names hide. Unresolved; not
+forked here, and it does not unblock delay or focus-departure.

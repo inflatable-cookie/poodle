@@ -906,12 +906,15 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - Card variant border opacity: 82% → `0.82` multiplier on border-subtle
 - Panel border: 74% → `0.74` on border-subtle; panel bg: 96% → `0.96` on background-panel
 - `shows_tooltips` (and every vertical strip) projects each tab's trimmed
-  label onto `Node.tooltip`. Empty labels are omitted. GPUI `.tooltip()` owns
-  show, hide, and delay — the same house path IconButton and SegmentedControl
-  already use. No new Node field.
-- GPUI 0.2.2 hardcodes a 500ms hover delay (`TOOLTIP_SHOW_DELAY`). Web stays
-  at the contract 300ms. Show and hide are hover-owned; web also dismisses on
-  blur and Escape.
+  label onto `Node.tooltip`. Empty labels are omitted. That is the existing
+  house field IconButton and SegmentedControl already use. No new Node field.
+- GPUI 0.2.2 `.tooltip()` cannot meet the contract tooltip lifecycle.
+  `TOOLTIP_SHOW_DELAY` is a private 500ms const with no delay argument.
+  Show and hide are mouse hitbox; `clear_active_tooltip` is `pub(crate)`, so
+  blur and Escape cannot dismiss native chrome. Web stays at 300ms with
+  blur/Escape dismiss. This is a blocking gap (`g16.065`), not an accepted
+  delta. Planning needs delay plus dismiss policy on Node, or a house backend
+  runtime that is not `.tooltip()`.
 
 ## 10a. Jetstream Notes
 
@@ -966,8 +969,6 @@ Applies when `fullWidth` is set and orientation is horizontal.
 | Inactive panels may stay mounted or unmounted | runtime rendering strategy differs | allowed | keep semantics and state continuity strict |
 | `focusOnValueChange` is web-only | DOM panel-unmount capture has no GPUI/Jetstream equivalent in this bounded consumer unblock | accepted, this card | later native focus-adapter work if a consumer needs it |
 | GPUI uses opacity multiplication instead of CSS color-mix | platform capability | allowed | visual result must match |
-| GPUI tooltip delay is 500ms; web is 300ms | GPUI 0.2.2 `.tooltip()` hardcodes 500ms; public meaning is delayed hover help-text, mechanism may differ | accepted, this card | none |
-| Native tooltip is hover-only; web also hides on blur and Escape | GPUI `.tooltip()` is mouse-hover; focus/Escape overlay dismiss is web adapter behavior | accepted, this card | none |
 
 ## 13. Specimen Definitions
 

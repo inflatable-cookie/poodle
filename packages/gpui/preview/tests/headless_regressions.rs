@@ -4001,11 +4001,12 @@ fn tabs_drag_keyboard_and_identity_rebuild_the_host_spec() {
     });
 }
 
-/// g16.065. Compact chrome Tabs project `shows_tooltips` onto `Node.tooltip`;
-/// GPUI `.tooltip()` owns delay and hide. Nucleus-shaped fixture, no Nucleus
-/// source. Hover-only: web still owns blur/Escape dismiss.
+/// g16.065. Compact chrome Tabs project `shows_tooltips` onto `Node.tooltip`.
+/// Nucleus-shaped fixture, no Nucleus source. This is GPUI `.tooltip()`
+/// boundary evidence, not the card oracle: contract delay is 300ms with hide
+/// on leave, focus departure, disable, removal, and teardown.
 #[test]
-fn tabs_show_tooltips_delay_and_hide_through_mounted_gpui() {
+fn tabs_node_tooltip_gpui_boundary_evidence() {
     fn nav_items() -> Vec<TabDefinition> {
         vec![
             TabDefinition::new("explorer", "Explorer").with_icon("folder"),
@@ -4056,7 +4057,7 @@ fn tabs_show_tooltips_delay_and_hide_through_mounted_gpui() {
         assert_eq!(
             poodle_gpui_node_backend::painted_tooltip_text(),
             None,
-            "showTooltips=false stays inert after the GPUI delay"
+            "showTooltips=false stays inert after GPUI's hardcoded delay"
         );
     });
 
@@ -4077,12 +4078,13 @@ fn tabs_show_tooltips_delay_and_hide_through_mounted_gpui() {
         assert_eq!(
             poodle_gpui_node_backend::painted_tooltip_text(),
             None,
-            "GPUI delay is 500ms, not the web 300ms"
+            "GPUI `.tooltip()` is still silent at the contract 300ms — delay ceiling, not accepted parity"
         );
         wait_ms(&mut driver, 200);
         assert_eq!(
             poodle_gpui_node_backend::painted_tooltip_text().as_deref(),
-            Some("Search")
+            Some("Search"),
+            "GPUI `.tooltip()` paints at the hardcoded 500ms"
         );
     });
 
@@ -4104,6 +4106,34 @@ fn tabs_show_tooltips_delay_and_hide_through_mounted_gpui() {
             poodle_gpui_node_backend::painted_tooltip_text(),
             None,
             "leave hides in the same frame"
+        );
+    });
+
+    run_headless(|cx| {
+        let mut driver = HeadlessDriver::new_in_box(
+            cx,
+            Arc::new(Mutex::new(chrome_tabs(true, nav_items(), "explorer"))),
+            420.0,
+            80.0,
+        );
+        hover_search(&mut driver);
+        wait_ms(&mut driver, 500);
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip_text().as_deref(),
+            Some("Search")
+        );
+        driver.wait_for_focus_handle("tabs:nav:tab:search");
+        driver.focus_element("tabs:nav:tab:search");
+        driver.focus_next_tab_stop();
+        assert_ne!(
+            poodle_gpui_node_backend::focus_state_for("tabs:nav:tab:search"),
+            Some(true),
+            "focus must have left Search"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::painted_tooltip_text().as_deref(),
+            Some("Search"),
+            "GPUI `.tooltip()` stays after focus departure while hovered — not the card hide"
         );
     });
 
@@ -4156,7 +4186,7 @@ fn tabs_show_tooltips_delay_and_hide_through_mounted_gpui() {
         assert_eq!(
             poodle_gpui_node_backend::painted_tooltip_text().as_deref(),
             Some("Git"),
-            "disabled tabs still project labels, matching web"
+            "disabled tabs still project labels (web wrap); card hide unmet"
         );
     });
 }

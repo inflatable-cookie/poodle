@@ -443,7 +443,8 @@ pub fn tabs_with_panel(
 }
 
 /// Native hover help-text. Same `Node.tooltip` field IconButton and
-/// SegmentedControl already project; GPUI `.tooltip()` owns delay and hide.
+/// SegmentedControl already project. GPUI `.tooltip()` is the house mapping;
+/// it does not meet the Tabs 300ms / focus-departure contract.
 fn tab_tooltip_text(spec: &TabsSpec, tab: &TabDefinition) -> Option<String> {
     if !(spec.shows_tooltips || spec.is_vertical()) {
         return None;
