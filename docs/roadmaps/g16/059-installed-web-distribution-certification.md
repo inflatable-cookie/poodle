@@ -1,12 +1,15 @@
 # g16.059 — Installed Web Distribution Certification
 
-Status: ready — `g16.058` merged as `b43481dff`
+Status: complete — awaiting orchestrator review
 Type: implementation — installed package oracle and promotion receipt
 Opened: 2026-09-02
 Depends on: accepted `g16.058`
 Governing refs: `../../architecture/014-compiled-web-package-distribution.md`,
 `056-web-distribution-contract.md`, `057-core-build-substrate.md`,
 `058-shell-distributions.md`
+
+Proof commit: `b37f404737062f9603c097dee0ee8b8916595d1f`
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/163
 
 ## Goal
 
@@ -28,6 +31,8 @@ public roster. This is the prerequisite that can unblock `g16.054`.
   repeated build/pack hashes, receipt membership, notices, and roster identity.
 - This card does not change versions, edit release notes/history, tag, publish,
   dispatch workflows, mutate registries, or write sibling repositories.
+- The declaration-tools manifest carries the repository-required exact `MIT`
+  license metadata; dependencies and package behavior are unchanged.
 - Merged-main baseline is red from a clean checkout in two linked places:
   Bun's shared module cache can make the nested TypeScript 6.0.3 declaration
   check observe root TypeScript 7, and docs/export audits run before shell
@@ -71,6 +76,34 @@ public roster. This is the prerequisite that can unblock `g16.054`.
   the canonical roster denominator, artifact set, archive hashes, and commit.
 - React remains private/validation-only. No release mutation occurs.
 
+## Evidence
+
+- The outer `effigy test:web-pack-install` selector ran from a disposable
+  detached checkout of the exact proof commit. It performed two clean builds,
+  two packs, archive-boundary/export/declaration/CSS/parser/notice checks,
+  installed browser and Node SSR probes, default-resolution and direct-client
+  SSR rejection, Svelte `5.56.8` floor success, the visible `5.38.6`
+  below-floor failure, and the retained HistoryEntry/Slider/Tree proofs.
+- Result: 11 test files and 22 tests passed. The receipt and all seven
+  falsification receipts are recorded in the execution log.
+- The scope proof derived 20 changed paths from required base
+  `721b17791946a6a7dcf254de0775f353d47090eb`; all passed the writable
+  allowlist, and a real committed workflow mutation was rejected by the same
+  guard.
+- Deterministic receipt identity: `5cb4b6d2f848e426de868fd56501b1d2c02c368f6ece7f2fb32692394c9f733c`.
+- Receipt source commit: `b37f404737062f9603c097dee0ee8b8916595d1f`.
+- Roster: 176 names; `f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a`.
+- Artifact set: `2d2fac98557cd50cc4e01d265405771401049060b88776cfe6d4627523903577`.
+
+## Limits
+
+- This worker has not merged, released, dispatched a workflow, run a windowed
+  selector, or dispatched `g16.054`. The single authorized worker PR is
+  [#163](https://github.com/inflatable-cookie/poodle/pull/163).
+- The receipt certifies the committed proof point above. Subsequent
+  documentation-only closeout commits must not be substituted for that receipt
+  source commit without rerunning the installed oracle.
+
 ## Review Oracle
 
 | Invariant | Smallest counterexample | Required proof |
@@ -81,7 +114,7 @@ public roster. This is the prerequisite that can unblock `g16.054`.
 | Negative type proofs bite | `branchCount` compiles | unsuppressed fixture fails harness |
 | Receipt matches immutable inputs | evidence edit changes package tree | certified tree hash changes |
 | Roster is canonical | fixture remains 175 | denominator gate fails |
-| Green certification is not a release | tag/workflow/npm change appears | scope gate fails |
+| Green certification is not a release | committed workflow/release/version/registry path appears | derived scope guard fails |
 
 ## Writable Scope
 
@@ -101,6 +134,22 @@ selectors, CSS/parser and notices audits, roster drift checks, `effigy
 docs:check`, one final headless `effigy qa`, and `git diff --check
 origin/main...HEAD`. No release, workflow-dispatch, windowed, or native-visual
 selector is authorized.
+
+## Validation Result
+
+- `effigy test:shell-build` from a cold nested declaration-tools cache: 31
+  pass / 0 fail, 1,084 expects; the selector installed and validated
+  TypeScript `6.0.3` before its parallel test workers started.
+- `effigy test:web-pack-install`: 11 files / 22 tests passed from a clean
+  detached checkout of the exact proof commit.
+- Scope falsification: a real temporary two-commit repository changed
+  `.github/workflows/release.yml`; the production guard rejected it.
+- `effigy docs:check`: pass.
+- `effigy qa`: pass. The full headless board passed release automation, web,
+  Rust/headless, GPUI consumer, license, security, and advisory checks; license
+  compliance reported 9 package manifests, 17 Cargo manifests, and 4 notice
+  surfaces clean, with no vulnerabilities.
+- `git diff --check origin/main...HEAD`: pass.
 
 ## Stop Conditions
 

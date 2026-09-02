@@ -1,11 +1,4 @@
-// Mapped assignability proof for g16.036 Tree reorder types.
-//
-// The installed package `types` condition is `src/index.ts`, a value barrel.
-// Following it typechecks the whole React TSX graph, which is not tsc-clean.
-// This compile maps the public specifier onto the installed tarball's
-// `src/types.ts` so shared identities and exclusive `TreeProps` assignability
-// are proved from the artifact. It is not a package-exports / root resolution
-// proof; that lives in the pack harness (`reactPublicRoot`).
+// Installed package-export assignability proof for g16.036 Tree reorder types.
 import type {
   TreeReorderAuthority as CoreAuthority,
   TreeReorderCandidate as CoreCandidate,

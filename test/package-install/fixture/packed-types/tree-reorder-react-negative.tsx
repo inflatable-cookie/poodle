@@ -1,9 +1,8 @@
-// Expected-failure mapped assignability half of the packed TreeReorderProps
+// Expected-failure assignability half of the packed TreeReorderProps
 // proof. Authority and onReorder are mutually exclusive on exported `TreeProps`.
-// This file is compiled against installed `src/types.ts` via a paths map, not
-// against the value barrel. It MUST fail with a real diagnostic: no compiler-
-// suppression comment, escape-hatch type, or cast. Public-root resolution is
-// proved separately in the pack harness.
+// It MUST fail with a real diagnostic: no compiler-suppression comment,
+// escape-hatch type, or cast. Public-root resolution is proved separately in
+// the pack harness.
 import type { TreeProps, TreeReorderAuthority } from "@inflatable-cookie/poodle-react";
 
 const authority: TreeReorderAuthority = {

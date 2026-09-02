@@ -4,6 +4,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -22,6 +23,7 @@ const BARE_COMPONENT_SHIM =
 
 const toolsRoot = join(dirname(fileURLToPath(import.meta.url)), "declaration-tools");
 const internal = new Set<string>(INTERNAL_SVELTE_NAMES);
+const declarationInstallLock = join(toolsRoot, ".install.lock");
 
 function walkFiles(root: string): string[] {
   const files: string[] = [];
@@ -42,29 +44,55 @@ export function declarationToolsRoot(): string {
 
 export function ensureDeclarationTools(): string {
   const typescriptPkg = join(toolsRoot, "node_modules/typescript/package.json");
-  if (!existsSync(typescriptPkg)) {
-    const install = spawnSync("bun", ["install", "--frozen-lockfile"], {
-      cwd: toolsRoot,
-      encoding: "utf8",
-    });
-    if (install.status !== 0) {
-      throw new Error(
-        `declaration-tools install failed:\n${install.stdout ?? ""}${install.stderr ?? ""}`,
-      );
+  const lockWaiter = new Int32Array(new SharedArrayBuffer(4));
+  let ownsInstallLock = false;
+  for (let attempt = 0; attempt < 1_200; attempt += 1) {
+    try {
+      mkdirSync(declarationInstallLock);
+      ownsInstallLock = true;
+      break;
+    } catch {
+      Atomics.wait(lockWaiter, 0, 0, 100);
     }
   }
-  const version = JSON.parse(readFileSync(typescriptPkg, "utf8")) as { version?: string };
-  if (version.version !== DECLARATION_TYPESCRIPT_VERSION) {
-    throw new Error(
-      `declaration TypeScript must be ${DECLARATION_TYPESCRIPT_VERSION}, found ${version.version ?? "missing"}`,
-    );
-  }
-  const require = createRequire(join(toolsRoot, "package.json"));
-  const resolved = require("typescript") as { version?: string };
-  if (resolved.version !== DECLARATION_TYPESCRIPT_VERSION) {
-    throw new Error(
-      `declaration-tools resolved TypeScript ${resolved.version ?? "missing"} instead of ${DECLARATION_TYPESCRIPT_VERSION}`,
-    );
+
+  try {
+    if (!existsSync(typescriptPkg)) {
+      if (!ownsInstallLock) {
+        throw new Error("timed out waiting for the declaration-tools install lock");
+      }
+      const install = spawnSync("bun", ["install", "--frozen-lockfile"], {
+        cwd: toolsRoot,
+        encoding: "utf8",
+      });
+      if (install.status !== 0) {
+        throw new Error(
+          `declaration-tools install failed:\n${install.stdout ?? ""}${install.stderr ?? ""}`,
+        );
+      }
+    }
+
+    const version = JSON.parse(readFileSync(typescriptPkg, "utf8")) as { version?: string };
+    if (version.version !== DECLARATION_TYPESCRIPT_VERSION) {
+      throw new Error(
+        `declaration TypeScript must be ${DECLARATION_TYPESCRIPT_VERSION}, found ${version.version ?? "missing"}`,
+      );
+    }
+    const require = createRequire(join(toolsRoot, "package.json"));
+    const resolvedPackage = realpathSync(require.resolve("typescript/package.json"));
+    if (resolvedPackage !== realpathSync(typescriptPkg)) {
+      throw new Error(
+        `declaration-tools resolved TypeScript from ${resolvedPackage} instead of its pinned nested install`,
+      );
+    }
+    const resolved = require("typescript") as { version?: string };
+    if (resolved.version !== DECLARATION_TYPESCRIPT_VERSION) {
+      throw new Error(
+        `declaration-tools resolved TypeScript ${resolved.version ?? "missing"} instead of ${DECLARATION_TYPESCRIPT_VERSION}`,
+      );
+    }
+  } finally {
+    if (ownsInstallLock) rmSync(declarationInstallLock, { recursive: true, force: true });
   }
   return toolsRoot;
 }

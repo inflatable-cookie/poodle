@@ -106,7 +106,9 @@ function parseFrozenNames(rosterMarkdown: string): string[] {
     ...rosterMarkdown
       .slice(start, end)
       .matchAll(/^\| `([^`]+)` \|/gm),
-  ].map((match) => match[1]);
+  ]
+    .map((match) => match[1])
+    .sort();
 }
 
 function parseSvelteComponentExports(source: string): string[] {
