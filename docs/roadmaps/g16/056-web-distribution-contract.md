@@ -1,10 +1,11 @@
 # g16.056 — Web Distribution Contract
 
-Status: ready
+Status: complete — awaiting orchestrator review
 Type: implementation — contract and migration boundary
 Opened: 2026-09-02
 Depends on: accepted [compiled web package distribution](../../architecture/014-compiled-web-package-distribution.md)
 Governing refs: `../../architecture/014-compiled-web-package-distribution.md`,
+`../../specs/070-compiled-web-distribution-contract.md`,
 `../../specs/022-packaging-versioning-and-release-channel-rules.md`,
 `../../contracts/001-working-rules.md`
 
@@ -93,3 +94,12 @@ browser and server Svelte artifacts.
 
 Accepted merge unlocks `g16.057`. It does not unblock `g16.054`; only completed
 installed certification in `g16.059` does that.
+
+## Evidence
+
+Exact inventories, export maps, receipts, markdown migration, and successor
+oracles: `docs/specs/070-compiled-web-distribution-contract.md`. Architecture
+014 points at that spec and records the React single-lane map. Spec 022 names
+core+Svelte as the web public set. The g15 roster keeps the 176-name
+denominator through the root markdown break. Execution log:
+`docs/logs/2026-09/20260902-g16-056-web-distribution-contract.md`.

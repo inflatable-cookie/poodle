@@ -2,13 +2,13 @@
 
 Status: complete — measured by `g15.001`
 Date: 2026-08-16
-Updated: 2026-08-23 — `g15.050` reconciled the Rust render row after `g15.043` landed the UiPresentationProvider cascade
+Updated: 2026-09-02 — `g16.056` froze 176 as the compiled-distribution denominator and named the root markdown break
 Card: `docs/roadmaps/g15/001-release-baseline-roster-inventory.md`
-Governing refs: `docs/roadmaps/g15/001-release-baseline-roster-inventory.md`, `docs/roadmaps/g14/022-generation-closeout.md`, `docs/contracts/001-working-rules.md`, `docs/roadmaps/g14/conformance-estate.md`
+Governing refs: `docs/roadmaps/g15/001-release-baseline-roster-inventory.md`, `docs/roadmaps/g14/022-generation-closeout.md`, `docs/contracts/001-working-rules.md`, `docs/roadmaps/g14/conformance-estate.md`, `docs/specs/070-compiled-web-distribution-contract.md`
 
 ## Denominator
 
-The live public Svelte denominator is **176 component exports**, enumerated mechanically from `export { default as <Name> } from "./<Name>.svelte"` in `packages/svelte/components/src/index.ts` (176 matches) and verified one-to-one against the component files (176/176 `.svelte` files present). Packed reachability: the package `exports` map exposes `.` (index), `./*.svelte` (per-file), and `./types`; the `files` array ships `src`, so every component is reachable from the packed tarball both through the index and its per-file subpath. `MotionPolicyProvider` joined the roster in g16.034.
+The live public Svelte denominator is **176 component exports**, enumerated mechanically from `export { default as <Name> } from "./<Name>.svelte"` in `packages/svelte/components/src/index.ts` (176 matches) and verified one-to-one against those 176 component files. Two additional `.svelte` files (`DragDropProvider`, `MenuSurface`) exist as internals and are not denominator members. Packed reachability today still ships `src` through `.`, `./*.svelte`, and `./types`. The compiled `0.3.0` contract in spec 070 keeps the same 176 names: `AgentMessage` and `MarkdownEditor` stay in the denominator, leave shell root barrels for `./markdown`, and remain reachable as Svelte `./<Name>.svelte` and React `./<Name>`. Root-barrel membership becomes 174 components plus helpers. A 175/176 split between this roster, spec 070, and `test/package-install/roster.ts` is a blocking defect. `MotionPolicyProvider` joined the roster in g16.034.
 
 Public types and helpers are recorded separately and are **not** part of the denominator: the `types` block and the `file-upload`, `theme-controller`, `date`, `presentation`, `anchored`, `portal`, `embed-input`, `media-workflow`, `persistence`, and `icon-registry` exports. The canonical preview catalogue (175 portable slugs plus the web-only `meter-surface`) maps one-to-one onto this roster.
 

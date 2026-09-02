@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-09-02 — Worker handoff `Planning base commit` used a padded short SHA
+  (`a809792c62399523830068082454445123754879`) instead of `git rev-parse`
+  (`a809792c6cd9873f9716b4954d2b4b803c6b65eb`). The unique prefix is an
+  ancestor; the 40-char string is not an object. Record `git rev-parse --verify`
+  output. Hit while starting g16.056.
+
 - 2026-09-02 — WebKit refuses some ports as restricted (`4190` is one of
   them: `Not allowed to use restricted network port`). Local browser probes
   should pick a free port outside that list (`4187`–`4188` are already taken).
