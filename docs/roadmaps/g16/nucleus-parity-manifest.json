@@ -1,0 +1,84 @@
+{
+  "$schema": "./nucleus-parity-receipt.schema.json",
+  "schema": "poodle.g16.062-nucleus-parity-manifest.v1",
+  "program": "g16.062",
+  "rendered_component_count": 29,
+  "prerequisites": [
+    {
+      "id": "icon-provider",
+      "name": "IconProvider",
+      "rendered": false,
+      "scenario_id": "nucleus.setup.icon-provider",
+      "direct_dependencies": [],
+      "expected_selector": "effigy regressions:native",
+      "expected_test": null
+    }
+  ],
+  "resolution": {
+    "package": "poodle-gpui-preview",
+    "version": "0.3.0",
+    "source_commit": "a6a9d242a4473f2436e148b011c910f299ca6f36",
+    "lockfile": "packages/gpui/preview/Cargo.lock",
+    "lockfile_sha256": "8bb8f8edaba8f381b9dec39532f5299231d2dfaa1c4509c7f87e41ca27711a55",
+    "distribution": "workspace",
+    "lock_resolution": [
+      {
+        "name": "gpui",
+        "version": "0.2.2",
+        "source": "crates.io",
+        "checksum": "979b45cfa6ec723b6f42330915a1b3769b930d02b2d505f9697f8ca602bee707"
+      },
+      {
+        "name": "poodle-gpui",
+        "version": "0.3.0",
+        "source": "workspace"
+      },
+      {
+        "name": "poodle-gpui-preview",
+        "version": "0.3.0",
+        "source": "workspace"
+      },
+      {
+        "name": "poodle-node",
+        "version": "0.3.0",
+        "source": "workspace"
+      },
+      {
+        "name": "poodle-render",
+        "version": "0.3.0",
+        "source": "workspace"
+      }
+    ]
+  },
+  "components": [
+    { "id": "icon", "name": "Icon", "scenario_id": "nucleus.shell.icon", "direct_dependencies": ["icon-provider"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "text", "name": "Text", "scenario_id": "nucleus.shell.text", "direct_dependencies": [], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "surface", "name": "Surface", "scenario_id": "nucleus.shell.surface", "direct_dependencies": [], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "button", "name": "Button", "scenario_id": "nucleus.shell.button", "direct_dependencies": [], "expected_selector": "effigy regressions:native", "expected_test": "a_pointer_press_reaches_the_backend_listener_once" },
+    { "id": "icon-button", "name": "IconButton", "scenario_id": "nucleus.shell.icon-button", "direct_dependencies": ["icon"], "expected_selector": "effigy regressions:native", "expected_test": "icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard" },
+    { "id": "app-header", "name": "AppHeader", "scenario_id": "nucleus.shell.app-header", "direct_dependencies": ["icon", "text"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "split-view", "name": "SplitView", "scenario_id": "nucleus.shell.split-view", "direct_dependencies": ["icon"], "expected_selector": "effigy regressions:native", "expected_test": "two_composed_split_views_do_not_share_a_divider_focus_handle" },
+    { "id": "segmented-control", "name": "SegmentedControl", "scenario_id": "nucleus.navigation.segmented-control", "direct_dependencies": [], "expected_selector": "effigy regressions:native", "expected_test": "segmented_control_exclusive_focus_identity_and_disabled_paths" },
+    { "id": "tabs", "name": "Tabs", "scenario_id": "nucleus.navigation.tabs", "direct_dependencies": [], "expected_selector": "effigy regressions:native", "expected_test": "tabs_drag_keyboard_and_identity_rebuild_the_host_spec" },
+    { "id": "menu", "name": "Menu", "scenario_id": "nucleus.navigation.menu", "direct_dependencies": ["icon"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "dialog", "name": "Dialog", "scenario_id": "nucleus.navigation.dialog", "direct_dependencies": ["surface", "button"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "popover", "name": "Popover", "scenario_id": "nucleus.navigation.popover", "direct_dependencies": ["surface"], "expected_selector": "effigy regressions:native", "expected_test": "a_nested_popover_paints_without_nesting_deferred_draws" },
+    { "id": "select", "name": "Select", "scenario_id": "nucleus.navigation.select", "direct_dependencies": ["popover"], "expected_selector": "effigy regressions:native", "expected_test": "select_two_instances_search_pointer_and_dismiss_through_mounted_rebuilds" },
+    { "id": "editable-label", "name": "EditableLabel", "scenario_id": "nucleus.navigation.editable-label", "direct_dependencies": ["text-input"], "expected_selector": "effigy regressions:native", "expected_test": "editable_label_live_draft_stays_off_the_committed_value" },
+    { "id": "agent-transcript", "name": "AgentTranscript", "scenario_id": "nucleus.agent.agent-transcript", "direct_dependencies": ["text", "surface"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "agent-chat-input", "name": "AgentChatInput", "scenario_id": "nucleus.agent.agent-chat-input", "direct_dependencies": ["text-input", "button"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "agent-plan", "name": "AgentPlan", "scenario_id": "nucleus.agent.agent-plan", "direct_dependencies": ["text", "button"], "expected_selector": "effigy regressions:native", "expected_test": "agent_plan_decisions_rebuild_the_host_spec_through_mounted_input" },
+    { "id": "agent-question", "name": "AgentQuestion", "scenario_id": "nucleus.agent.agent-question", "direct_dependencies": ["text", "button"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "model-picker", "name": "ModelPicker", "scenario_id": "nucleus.agent.model-picker", "direct_dependencies": ["select"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "status-indicator", "name": "StatusIndicator", "scenario_id": "nucleus.agent.status-indicator", "direct_dependencies": ["icon"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "radio-group", "name": "RadioGroup", "scenario_id": "nucleus.settings.radio-group", "direct_dependencies": [], "expected_selector": "effigy regressions:native", "expected_test": "radio_group_exclusive_focus_identity_and_disabled_paths" },
+    { "id": "switch", "name": "Switch", "scenario_id": "nucleus.settings.switch", "direct_dependencies": [], "expected_selector": "effigy regressions:native", "expected_test": "switch_toggle_readonly_and_disabled_rebuild_the_host_spec" },
+    { "id": "text-input", "name": "TextInput", "scenario_id": "nucleus.settings.text-input", "direct_dependencies": [], "expected_selector": "effigy regressions:native", "expected_test": "text_input_controlled_editing_and_identity_rebuild_the_host_spec" },
+    { "id": "callout", "name": "Callout", "scenario_id": "nucleus.settings.callout", "direct_dependencies": ["icon"], "expected_selector": "effigy regressions:native", "expected_test": "callout_dismiss_rebuilds_the_host_spec_through_mounted_input" },
+    { "id": "confirm-action", "name": "ConfirmAction", "scenario_id": "nucleus.settings.confirm-action", "direct_dependencies": ["dialog", "button"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "detail-item", "name": "DetailItem", "scenario_id": "nucleus.settings.detail-item", "direct_dependencies": ["text"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "command-palette", "name": "CommandPalette", "scenario_id": "nucleus.attention.command-palette", "direct_dependencies": ["dialog", "text-input"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "message-center", "name": "MessageCenter", "scenario_id": "nucleus.attention.message-center", "direct_dependencies": ["toast-host"], "expected_selector": "effigy regressions:native", "expected_test": null },
+    { "id": "toast-host", "name": "ToastHost", "scenario_id": "nucleus.attention.toast-host", "direct_dependencies": ["icon"], "expected_selector": "effigy regressions:native", "expected_test": null }
+  ]
+}

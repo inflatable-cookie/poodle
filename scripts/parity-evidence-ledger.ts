@@ -1,6 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { canonicalComponents } from "../packages/svelte/preview/src/generated/catalogue/catalogue";
+import {
+  deriveNucleusReceiptRows,
+  NUCLEUS_MANIFEST_PATH,
+  NUCLEUS_RECEIPT_SCHEMA,
+  type NucleusReceiptRow,
+} from "./nucleus-parity-receipts";
 
 export const LEDGER_PATH = "docs/roadmaps/g16/parity-evidence-ledger.md";
 
@@ -69,7 +75,10 @@ const AUDIO_RENDER_COMPONENTS = new Set([
   "XYPad",
 ]);
 
-const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
+// Retained as an expected-test map for planning traceability. It is never
+// evidence by itself; GPUI mounted cells below are driven by validated M1
+// receipts only.
+const EXPECTED_MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   Button: "a_mounted_button_carries_its_controls_target",
   Checkbox: "checkbox_toggle_readonly_and_disabled_rebuild_the_host_spec",
   Switch: "switch_toggle_readonly_and_disabled_rebuild_the_host_spec",
@@ -148,6 +157,22 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
     "stepper_summary_takes_keyboard_entry_and_paints_the_inset_ring",
   ],
 };
+
+const EXPECTED_MOUNTED_COMPONENT_COUNT = Object.keys(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).length;
+const EXPECTED_MOUNTED_TEST_COUNT = Object.values(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).reduce(
+  (count, tests) => count + (Array.isArray(tests) ? tests.length : 1),
+  0,
+);
+
+const NUCLEUS_COLUMNS = [
+  "Component",
+  "Scenario",
+  "Direct dependencies",
+  "Expected mounted run",
+  "M1 execution",
+  "A1",
+  "V1",
+] as const;
 
 function read(root: string, relativePath: string): string {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
@@ -357,6 +382,7 @@ function expectedComponentRow(
   component: LiveComponent,
   visualSkipped: Set<string>,
   portableCount: number,
+  nucleusRows: Map<string, NucleusReceiptRow>,
 ): ComponentRow {
   const { name, slug, portable } = component;
   const contractPath = `docs/contracts/components/${slug}.md`;
@@ -437,16 +463,32 @@ function expectedComponentRow(
       `route ${pathRef(gpuiRegistryPath, slug)}; ${pathRef("packages/gpui/preview/src/specimen_probe.rs")} via effigy probe:gpui-specimens (${portableCount}/${portableCount} routes)`,
     );
 
-    const mountedTests = MOUNTED_BEHAVIOUR_TESTS[name];
-    base["GPUI mounted behaviour"] =
-      mountedTests === undefined
-        ? cell("missing", `no named mounted regression in ${pathRef("packages/gpui/preview/tests/headless_regressions.rs")}`)
-        : cell(
-            "mounted",
-            (Array.isArray(mountedTests) ? mountedTests : [mountedTests])
-              .map((testName) => pathRef("packages/gpui/preview/tests/headless_regressions.rs", testName))
-              .join("; "),
-          );
+    const nucleus = nucleusRows.get(name);
+    if (nucleus?.receipt !== undefined && nucleus.receiptPath !== undefined) {
+      base["GPUI mounted behaviour"] = cell(
+        "mounted",
+        `validated ${pathRef(nucleus.receiptPath, "proof_level")}; ${pathRef(nucleus.receiptPath, "production_path_observation")}; receipt schema ${NUCLEUS_RECEIPT_SCHEMA}`,
+      );
+    } else if (nucleus !== undefined) {
+      const expected = nucleus.entry.expected_test === null ? "no named test yet" : nucleus.entry.expected_test;
+      base["GPUI mounted behaviour"] = cell(
+        "missing",
+        `expected ${pathRef(NUCLEUS_MANIFEST_PATH, nucleus.entry.scenario_id)} via ${nucleus.entry.expected_selector} (${expected}); no validated M1 receipt`,
+      );
+    } else {
+      const mountedTests = EXPECTED_MOUNTED_BEHAVIOUR_TESTS[name];
+      base["GPUI mounted behaviour"] =
+        mountedTests === undefined
+          ? cell("missing", `no validated M1 receipt; expected map has no entry for ${name}`)
+          : cell(
+              "missing",
+              `expected-only ${
+                (Array.isArray(mountedTests) ? mountedTests : [mountedTests])
+                  .map((testName) => pathRef("packages/gpui/preview/tests/headless_regressions.rs", testName))
+                  .join("; ")
+              }; no validated execution receipt`,
+            );
+    }
     base["GPUI accessibility"] = cell(
       "manual",
       `${pathRef(nativeProofPath, "currentPosture")}; spec and bounded mounted evidence are not broad native assistive-technology proof`,
@@ -588,7 +630,7 @@ function summaryMarkdown(rows: ComponentRow[]): string {
   return lines.join("\n");
 }
 
-export function deriveRows(root = ROOT): ComponentRow[] {
+export function deriveRows(root = ROOT, nucleusRows = deriveNucleusReceiptRows(root)): ComponentRow[] {
   const roster = deriveLiveRoster(root);
   const svelteExports = parseSveltePublicExports(root);
   const svelteRegistry = read(root, "packages/svelte/preview/src/specimens/registry.ts");
@@ -603,15 +645,52 @@ export function deriveRows(root = ROOT): ComponentRow[] {
   }
 
   const portableCount = roster.filter((component) => component.portable).length;
-  return roster.map((component) => expectedComponentRow(root, component, visualSkipped, portableCount));
+  const nucleusByName = new Map(nucleusRows.map((row) => [row.entry.name, row]));
+  return roster.map((component) => expectedComponentRow(root, component, visualSkipped, portableCount, nucleusByName));
 }
 
 function rowMarkdown(row: ComponentRow): string {
   return `| ${COMPONENT_COLUMNS.map((column) => row[column]).join(" | ")} |`;
 }
 
+function nucleusRow(nucleus: NucleusReceiptRow): string[] {
+  const { entry, receipt, receiptPath } = nucleus;
+  return [
+    entry.name,
+    pathRef(NUCLEUS_MANIFEST_PATH, entry.scenario_id),
+    entry.direct_dependencies.length === 0 ? "none" : entry.direct_dependencies.join(", "),
+    entry.expected_test === null
+      ? `${entry.expected_selector}; no named test yet`
+      : `${entry.expected_selector}; ${pathRef("packages/gpui/preview/tests/headless_regressions.rs", entry.expected_test)}`,
+    receipt === undefined || receiptPath === undefined
+      ? cell("missing", "no validated execution receipt")
+      : cell("mounted", `validated ${pathRef(receiptPath, "proof_level")}; ${pathRef(receiptPath, "outcome")}`),
+    cell("missing", "M1 does not infer executable accessibility semantics"),
+    cell("missing", "M1 does not infer visual comparison"),
+  ];
+}
+
+function nucleusTable(rows: NucleusReceiptRow[]): string {
+  const header = `| ${NUCLEUS_COLUMNS.join(" | ")} |`;
+  const separator = `| ${NUCLEUS_COLUMNS.map(() => "---").join(" | ")} |`;
+  return [header, separator, ...rows.map((row) => `| ${nucleusRow(row).join(" | ")} |`)].join("\n");
+}
+
+function expectedMapTable(): string {
+  const rows = Object.entries(EXPECTED_MOUNTED_BEHAVIOUR_TESTS).map(([component, tests]) => {
+    const names = Array.isArray(tests) ? tests : [tests];
+    return `| ${component} | ${names.map((testName) => pathRef("packages/gpui/preview/tests/headless_regressions.rs", testName)).join("; ")} | expected only |`;
+  });
+  return [
+    "| Component | Expected test name(s) | Execution status |",
+    "| --- | --- | --- |",
+    ...rows,
+  ].join("\n");
+}
+
 export function generateLedgerMarkdown(root = ROOT): string {
-  const rows = deriveRows(root);
+  const nucleusRows = deriveNucleusReceiptRows(root);
+  const rows = deriveRows(root, nucleusRows);
   const componentRows = rows.map(rowMarkdown).join("\n");
   const roster = deriveLiveRoster(root);
   const publicCount = roster.length;
@@ -619,16 +698,17 @@ export function generateLedgerMarkdown(root = ROOT): string {
   return `# g16.001 — Active-Cohort Parity Evidence Ledger
 
 Status: current evidence snapshot
-Updated: 2026-08-26
-Source: live public Svelte exports, generated portable catalogue, runtime registries, focused tests, and retained g15 evidence
+Updated: 2026-09-02
+Source: live public Svelte exports, generated portable catalogue, runtime registries, focused tests, validated execution receipts, and retained g15 evidence
 
 ## Purpose
 
 This ledger records what Poodle proves today for the active cohort: Svelte,
 React, shared Rust composition, and GPUI. It separates implementation presence,
 focused tests, mounted behaviour, accessibility, and visual comparison. A
-specimen route proves construction only; a focused test proves only its named
-claim; one runtime's evidence never transfers to another runtime.
+specimen route proves construction only; a focused test or expected test name
+proves no mounted execution; one runtime's evidence never transfers to another
+runtime.
 
 ## Denominator
 
@@ -673,10 +753,37 @@ ${summaryMarkdown(rows)}
 | ${COMPONENT_COLUMNS.map(() => "---").join(" | ")} |
 ${componentRows}
 
+## Nucleus fixed cohort execution ledger
+
+The Nucleus denominator is **29 rendered components**. \`IconProvider\` is one
+separate construction prerequisite and is not row 30. A row is \`mounted\` only
+when its validated receipt was emitted after the real GPUI render, node backend,
+and test-platform input path completed successfully. \`M1\` does not imply \`A1\`
+or \`V1\`.
+
+Manifest: ${pathRef(NUCLEUS_MANIFEST_PATH)}; receipt schema: \`${NUCLEUS_RECEIPT_SCHEMA}\`.
+Poodle resolution: \`${nucleusRows[0]?.receipt?.package ?? "poodle-gpui-preview"}@${nucleusRows[0]?.receipt?.package_version ?? "0.3.0"}\`;
+source commit and Cargo.lock resolution are pinned in the manifest. A run that
+uses a published package must produce a separate resolution; this workspace
+receipt does not claim publication.
+
+${nucleusTable(nucleusRows)}
+
+## Historical mounted expectation map
+
+Before g16.062, the generator promoted **${EXPECTED_MOUNTED_COMPONENT_COUNT}
+component entries across ${EXPECTED_MOUNTED_TEST_COUNT} named tests** to
+\`mounted\`. The map remains planning input and is shown for traceability only;
+the current component ledger consumes validated receipts, so expected-without-
+receipt remains \`missing\`.
+
+${expectedMapTable()}
+
 ## Limitations and measured next gaps
 
 - GPUI mounted behaviour is the named regression set, not a ${portableCount}-component
-  behaviour pass.
+  behaviour pass. Expected test names are not execution evidence; the fixed
+  Nucleus cohort advances only from validated receipts.
 - GPUI accessibility remains manual: shared specs and bounded mounted tests do
   not prove broad native semantics, focus, keyboard, announcement, or
   assistive-technology parity.
@@ -708,15 +815,18 @@ Run \`effigy check:parity-evidence-ledger\` to derive the roster, validate every
 row and evidence reference, and verify that summary counts match the rows. The
 checker intentionally fails on missing, extra, duplicate, or unresolved
 component evidence rather than treating a specimen or another runtime's proof
-as a pass.
+as a pass. The Nucleus receipt directory is the only committed execution
+input for this foundation; unmanifested receipts are rejected.
 `;
 }
 
 export function validateLedgerText(markdown: string, root = ROOT): void {
   const errors: string[] = [];
   let expectedRows: ComponentRow[];
+  let expectedNucleusRows: NucleusReceiptRow[];
   try {
     expectedRows = deriveRows(root);
+    expectedNucleusRows = deriveNucleusReceiptRows(root);
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : String(error));
   }
@@ -767,6 +877,27 @@ export function validateLedgerText(markdown: string, root = ROOT): void {
   }
 
   try {
+    const actualNucleusRows = parseTable(markdown, "## Nucleus fixed cohort execution ledger");
+    const expectedHeader = NUCLEUS_COLUMNS.join("|");
+    if (actualNucleusRows.length === 0 || actualNucleusRows[0].join("|") !== expectedHeader) {
+      errors.push("Nucleus receipt ledger has unexpected columns");
+    } else {
+      const actualValues = actualNucleusRows.slice(1);
+      const expectedValues = expectedNucleusRows.map((row) => nucleusRow(row));
+      if (actualValues.length !== expectedValues.length) {
+        errors.push(`Nucleus receipt ledger has ${actualValues.length} rows; expected ${expectedValues.length}`);
+      }
+      for (let index = 0; index < Math.max(actualValues.length, expectedValues.length); index += 1) {
+        if (actualValues[index]?.join("|") !== expectedValues[index]?.join("|")) {
+          errors.push(`Nucleus receipt ledger row ${index + 1} differs from the manifest or validated receipts`);
+        }
+      }
+    }
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : String(error));
+  }
+
+  try {
     const actualSummary = parseSummary(markdown);
     const expectedSummaryValues = expectedSummary(expectedRows);
     for (const [claim, expected] of expectedSummaryValues) {
@@ -788,6 +919,8 @@ export function validateLedgerText(markdown: string, root = ROOT): void {
   const portableCount = deriveLiveRoster(root).filter((component) => component.portable).length;
   const requiredPhrases = [
     `${portableCount}/${portableCount} portable specimen routes construct headlessly`,
+    "29 rendered components",
+    "expected-without-",
     "Button-only",
     "non-activating windowed",
     "Svelte axe evidence does not transfer",

@@ -27,13 +27,23 @@ describe("g16.001 parity evidence ledger", () => {
     expect(buttonRow).not.toContain("Known Deltas` | not-applicable");
   });
 
+  it("keeps an expected mounted test missing until a receipt exists", () => {
+    const ledger = generateLedgerMarkdown(root);
+    const switchRow = ledger.split("\n").find((line) => line.startsWith("| Switch |"));
+    expect(switchRow).toContain("expected `docs/roadmaps/g16/nucleus-parity-manifest.json#nucleus.settings.switch`");
+    expect(switchRow).toContain("no validated M1 receipt");
+    expect(ledger).toContain(
+      "| Switch | `packages/gpui/preview/tests/headless_regressions.rs#switch_toggle_readonly_and_disabled_rebuild_the_host_spec` | expected only |",
+    );
+  });
+
   it("rejects missing, duplicate, extra, and unresolved evidence rows", () => {
     const ledger = fs.readFileSync(ledgerPath, "utf8");
     const buttonRow = ledger.split("\n").find((line) => line.startsWith("| Button |"));
     expect(buttonRow).toBeDefined();
 
     expect(() => validateLedgerText(ledger.replace(`${buttonRow}\n`, ""), root)).toThrow(/missing component rows/);
-    expect(() => validateLedgerText(ledger.replace("\n\n## Limitations and measured next gaps", `\n${buttonRow}\n\n## Limitations and measured next gaps`), root)).toThrow(
+    expect(() => validateLedgerText(ledger.replace(`${buttonRow}\n`, `${buttonRow}\n${buttonRow}\n`), root)).toThrow(
       /duplicate component rows/,
     );
     expect(() => validateLedgerText(ledger.replace("| Button |", "| NotAComponent |"), root)).toThrow(
@@ -47,10 +57,10 @@ describe("g16.001 parity evidence ledger", () => {
     ).toThrow(/unresolved claim|unresolved evidence path/);
     expect(() =>
       validateLedgerText(
-        ledger.replace("a_mounted_button_carries_its_controls_target", "missing_mounted_test_name"),
+        ledger.replace("a_pointer_press_reaches_the_backend_listener_once", "missing_mounted_test_name"),
         root,
       ),
-    ).toThrow(/unresolved evidence reference/);
+    ).toThrow(/unresolved evidence reference|unresolved claim/);
   });
 
   it("can reproduce the checked-in document from live sources", () => {

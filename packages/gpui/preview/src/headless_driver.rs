@@ -142,6 +142,23 @@ pub struct HeadlessDriver<'a> {
     root_focus: FocusHandle,
     box_width: f32,
     box_height: f32,
+    painted_frames: usize,
+    input_dispatches: usize,
+}
+
+/// Evidence that this driver actually painted and dispatched input through a
+/// mounted GPUI tree. The fields stay crate-private so receipt emitters cannot
+/// manufacture production-path observation tokens.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct MountedObservation {
+    painted_frames: usize,
+    input_dispatches: usize,
+}
+
+impl MountedObservation {
+    pub(crate) fn is_valid(self) -> bool {
+        self.painted_frames > 0 && self.input_dispatches > 0
+    }
 }
 
 impl<'a> HeadlessDriver<'a> {
@@ -177,6 +194,8 @@ impl<'a> HeadlessDriver<'a> {
             root_focus,
             box_width,
             box_height,
+            painted_frames: 0,
+            input_dispatches: 0,
         };
         driver.draw_frame();
         driver
@@ -214,6 +233,8 @@ impl<'a> HeadlessDriver<'a> {
             root_focus,
             box_width,
             box_height,
+            painted_frames: 0,
+            input_dispatches: 0,
         };
         driver.draw_frame();
         driver
@@ -299,6 +320,7 @@ impl<'a> HeadlessDriver<'a> {
     }
 
     fn paint_frame(&mut self) {
+        self.painted_frames += 1;
         self.root.update(self.cx, |_root, cx| cx.notify());
         self.cx.update(|window, cx| {
             window.refresh();
@@ -363,6 +385,7 @@ impl<'a> HeadlessDriver<'a> {
     /// Send one platform input through `TestWindow`'s real dispatch callback
     /// (hit testing, focus chain, listeners) and repaint afterwards.
     fn pointer_event(&mut self, event: PlatformInput) {
+        self.input_dispatches += 1;
         match event {
             PlatformInput::MouseDown(down) => self.cx.simulate_event(down),
             PlatformInput::MouseUp(up) => self.cx.simulate_event(up),
@@ -479,6 +502,7 @@ impl<'a> HeadlessDriver<'a> {
     }
 
     fn scroll_vertical_at(&mut self, position: Point<Pixels>, delta_y: f32) {
+        self.input_dispatches += 1;
         self.cx.simulate_event(ScrollWheelEvent {
             position,
             delta: ScrollDelta::Pixels(point(px(0.0), px(delta_y))),
@@ -550,6 +574,7 @@ impl<'a> HeadlessDriver<'a> {
     /// key-up, so anything that suppresses that has to survive whatever
     /// arrives between the two.
     pub fn dispatch_key_press(&mut self, key: &str) {
+        self.input_dispatches += 1;
         let keystroke = Keystroke::parse(key).expect("keystroke parses");
         self.cx.simulate_event(KeyDownEvent {
             keystroke,
@@ -561,6 +586,7 @@ impl<'a> HeadlessDriver<'a> {
 
     /// One key **release**, with no preceding press.
     pub fn dispatch_key_release(&mut self, key: &str) {
+        self.input_dispatches += 1;
         let keystroke = Keystroke::parse(key).expect("keystroke parses");
         self.cx.simulate_event(KeyUpEvent { keystroke });
         self.cx.run_until_parked();
@@ -571,6 +597,7 @@ impl<'a> HeadlessDriver<'a> {
     /// callers that already focused the target use this so the mount host
     /// never steals focus.
     pub fn dispatch_key_raw(&mut self, key: &str) {
+        self.input_dispatches += 2;
         let keystroke = Keystroke::parse(key).expect("keystroke parses");
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
@@ -585,6 +612,7 @@ impl<'a> HeadlessDriver<'a> {
     /// event path draws first only when production code already invalidated
     /// the window, making this a scheduler-invalidation oracle.
     pub fn dispatch_probe_key(&mut self, key: &str) {
+        self.input_dispatches += 2;
         let keystroke = Keystroke::parse(key).expect("keystroke parses");
         self.cx.simulate_event(KeyDownEvent {
             keystroke: keystroke.clone(),
@@ -592,5 +620,15 @@ impl<'a> HeadlessDriver<'a> {
         });
         self.cx.simulate_event(KeyUpEvent { keystroke });
         self.cx.run_until_parked();
+    }
+
+    /// Return the private observation token used by the receipt emitter. A
+    /// receipt can only be requested from a driver that has painted a frame
+    /// and sent real input through the GPUI test platform.
+    pub(crate) fn mounted_observation(&self) -> MountedObservation {
+        MountedObservation {
+            painted_frames: self.painted_frames,
+            input_dispatches: self.input_dispatches,
+        }
     }
 }

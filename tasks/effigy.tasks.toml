@@ -163,6 +163,7 @@
 ]
 "check:parity-evidence-ledger" = "bun scripts/parity-evidence-ledger.ts"
 "test:parity-evidence-ledger" = "bun test scripts/parity-evidence-ledger.test.ts"
+"test:nucleus-parity-receipts" = "bun test scripts/nucleus-parity-receipts.test.ts"
 
 # CI gates — light, ubuntu-only. No native (gpui/jetstream) crates, no vite
 # preview builds. The GitHub workflows bootstrap their pinned runtimes and
