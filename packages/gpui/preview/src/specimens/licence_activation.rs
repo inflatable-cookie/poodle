@@ -88,10 +88,9 @@ fn clear_key_message(queue: &Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>) {
         });
 }
 
-/// Build the four machine-name handlers shared by the key and embedded
-/// instances. Edit start snaps the committed value; typing updates the
-/// controlled draft; commit keeps the draft and clears the snapshot; Escape
-/// restores the snapshot (the web EditableLabel reverts the draft).
+/// Build the machine-name handlers shared by the key and embedded instances.
+/// Typing writes the session draft; commit copies it onto the committed
+/// label; Escape discards the draft and leaves the committed value alone.
 fn label_handlers(
     queue: &Arc<std::sync::Mutex<Vec<NodeSpecimenEvent>>>,
     committed: &str,
@@ -100,6 +99,8 @@ fn label_handlers(
     Arc<dyn Fn(&str) + Send + Sync>,
     Arc<dyn Fn(&str) + Send + Sync>,
     Arc<dyn Fn() + Send + Sync>,
+    Arc<dyn Fn(usize, usize) + Send + Sync>,
+    Arc<dyn Fn() + Send + Sync>,
 ) {
     let committed = committed.to_string();
 
@@ -107,16 +108,20 @@ fn label_handlers(
         let queue = Arc::clone(queue);
         let committed = committed.clone();
         Arc::new(move || {
-            queue
-                .lock()
-                .unwrap()
-                .push(NodeSpecimenEvent::SetOptionalText {
-                    key: "la-machine-label-original".to_string(),
-                    value: Some(committed.clone()),
-                });
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            let len = committed.chars().count();
+            let mut events = queue.lock().unwrap();
+            events.push(NodeSpecimenEvent::SetText {
+                key: "la-machine-label-draft".to_string(),
+                value: committed.clone(),
+            });
+            events.push(NodeSpecimenEvent::SetToggle {
                 key: "la-machine-editing".to_string(),
                 value: true,
+            });
+            events.push(NodeSpecimenEvent::SetCaret {
+                key: "la-machine-label".to_string(),
+                start: 0,
+                end: len,
             });
         })
     };
@@ -124,22 +129,24 @@ fn label_handlers(
         let queue = Arc::clone(queue);
         Arc::new(move |value: &str| {
             queue.lock().unwrap().push(NodeSpecimenEvent::SetText {
-                key: "la-machine-label".to_string(),
+                key: "la-machine-label-draft".to_string(),
                 value: value.to_string(),
             });
         })
     };
     let commit = {
         let queue = Arc::clone(queue);
-        Arc::new(move |_value: &str| {
-            queue
-                .lock()
-                .unwrap()
-                .push(NodeSpecimenEvent::SetOptionalText {
-                    key: "la-machine-label-original".to_string(),
-                    value: None,
-                });
-            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+        Arc::new(move |value: &str| {
+            let mut events = queue.lock().unwrap();
+            events.push(NodeSpecimenEvent::SetText {
+                key: "la-machine-label".to_string(),
+                value: value.to_string(),
+            });
+            events.push(NodeSpecimenEvent::SetOptionalText {
+                key: "la-machine-label-draft".to_string(),
+                value: None,
+            });
+            events.push(NodeSpecimenEvent::SetToggle {
                 key: "la-machine-editing".to_string(),
                 value: false,
             });
@@ -154,7 +161,26 @@ fn label_handlers(
                 .push(NodeSpecimenEvent::MachineLabelCancel);
         })
     };
-    (edit, change, commit, cancel)
+    let selection = {
+        let queue = Arc::clone(queue);
+        Arc::new(move |start: usize, end: usize| {
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetCaret {
+                key: "la-machine-label".to_string(),
+                start,
+                end,
+            });
+        })
+    };
+    let restore = {
+        let queue = Arc::clone(queue);
+        Arc::new(move || {
+            queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+                key: "la-machine-restore-focus".to_string(),
+                value: true,
+            });
+        })
+    };
+    (edit, change, commit, cancel, selection, restore)
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -176,6 +202,44 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .cloned()
         .unwrap_or_default();
     let machine_editing = state.specimens.is_on("la-machine-editing");
+    let machine_draft = if machine_editing {
+        Some(
+            state
+                .specimens
+                .text
+                .get("la-machine-label-draft")
+                .cloned()
+                .unwrap_or_else(|| machine_label.clone()),
+        )
+    } else {
+        None
+    };
+    let machine_live_len = machine_draft
+        .as_deref()
+        .unwrap_or(machine_label.as_str())
+        .chars()
+        .count();
+    let (machine_sel_start, machine_sel_end) = state
+        .specimens
+        .carets
+        .get("la-machine-label")
+        .copied()
+        .unwrap_or((0, machine_live_len));
+    let machine_restore = state.specimens.is_on("la-machine-restore-focus");
+    if machine_restore {
+        queue.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: "la-machine-restore-focus".to_string(),
+            value: false,
+        });
+    }
+    let (
+        on_label_edit,
+        on_label_change,
+        on_label_commit,
+        on_label_cancel,
+        on_label_selection,
+        on_label_restore,
+    ) = label_handlers(&queue, machine_label.as_str());
     let offline = state.specimens.is_on("la-offline");
     let route = if offline {
         LicenceActivationRoute::LicenceFile
@@ -238,6 +302,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_key_message(key_message.clone())
             .with_machine_label(Some(machine_label.clone()))
             .with_machine_label_editing(machine_editing)
+            .with_machine_label_draft(machine_draft.clone())
+            .with_machine_label_selection(machine_sel_start, machine_sel_end)
+            .with_machine_label_request_focus(machine_restore)
             .with_key_selection(
                 state
                     .specimens
@@ -278,22 +345,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         })
     })
     .on_key_check(Arc::new(|input: &str| SpecimenKeyFormat.parse(input)))
-    .on_machine_label_edit({
-        let (edit, _change, _commit, _cancel) = label_handlers(&queue, machine_label.as_str());
-        edit
-    })
-    .on_machine_label_change({
-        let (_edit, change, _commit, _cancel) = label_handlers(&queue, machine_label.as_str());
-        change
-    })
-    .on_machine_label_commit({
-        let (_edit, _change, commit, _cancel) = label_handlers(&queue, machine_label.as_str());
-        commit
-    })
-    .on_machine_label_cancel({
-        let (_edit, _change, _commit, cancel) = label_handlers(&queue, machine_label.as_str());
-        cancel
-    })
+    .on_machine_label_edit(Arc::clone(&on_label_edit))
+    .on_machine_label_change(Arc::clone(&on_label_change))
+    .on_machine_label_commit(Arc::clone(&on_label_commit))
+    .on_machine_label_cancel(Arc::clone(&on_label_cancel))
+    .on_machine_label_selection_change(Arc::clone(&on_label_selection))
+    .on_machine_label_restore_display_focus(Arc::clone(&on_label_restore))
     .on_submit(key_submit);
 
     // Embedded account activation: host-owned account content beside the
@@ -428,6 +485,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
             .with_route(route)
             .with_machine_label(Some(machine_label.clone()))
             .with_machine_label_editing(machine_editing)
+            .with_machine_label_draft(machine_draft.clone())
+            .with_machine_label_selection(machine_sel_start, machine_sel_end)
+            .with_machine_label_request_focus(machine_restore)
             .with_file_name(file_name.clone().unwrap_or_default())
             .with_file_contents_base64(file_contents_base64.clone().unwrap_or_default())
             .with_route_message(embedded_route_message.clone()),
@@ -456,22 +516,12 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 });
         })
     })
-    .on_machine_label_edit({
-        let (edit, _change, _commit, _cancel) = label_handlers(&queue, machine_label.as_str());
-        edit
-    })
-    .on_machine_label_change({
-        let (_edit, change, _commit, _cancel) = label_handlers(&queue, machine_label.as_str());
-        change
-    })
-    .on_machine_label_commit({
-        let (_edit, _change, commit, _cancel) = label_handlers(&queue, machine_label.as_str());
-        commit
-    })
-    .on_machine_label_cancel({
-        let (_edit, _change, _commit, cancel) = label_handlers(&queue, machine_label.as_str());
-        cancel
-    })
+    .on_machine_label_edit(on_label_edit)
+    .on_machine_label_change(on_label_change)
+    .on_machine_label_commit(on_label_commit)
+    .on_machine_label_cancel(on_label_cancel)
+    .on_machine_label_selection_change(on_label_selection)
+    .on_machine_label_restore_display_focus(on_label_restore)
     .on_submit(embedded_submit)
     .on_file_browse({
         let queue = Arc::clone(&queue);

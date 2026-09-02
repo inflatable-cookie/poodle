@@ -74,7 +74,8 @@ pub fn docs_tree() -> Vec<TreeNode> {
                     vec![
                         TreeNode::new("src/components/Button.svelte", "Button.svelte")
                             .with_icon("file"),
-                        TreeNode::new("src/components/Tree.svelte", "Tree.svelte").with_icon("file"),
+                        TreeNode::new("src/components/Tree.svelte", "Tree.svelte")
+                            .with_icon("file"),
                     ],
                 )
                 .with_icon("folder"),
@@ -516,11 +517,20 @@ pub enum ModelConnectionEvent {
     SetupQuery(String),
     SetupSubmit(String),
     SetupCancel,
-    CardOpen { id: String, open: bool },
-    CardEnabled { id: String, enabled: bool },
+    CardOpen {
+        id: String,
+        open: bool,
+    },
+    CardEnabled {
+        id: String,
+        enabled: bool,
+    },
     /// The complete shown-id order the editor asked for.
     CatalogueOrder(Vec<String>),
-    CatalogueVisibility { id: String, visible: bool },
+    CatalogueVisibility {
+        id: String,
+        visible: bool,
+    },
     CatalogueGrab(Option<String>),
     CatalogueDropTarget(Option<String>),
     CatalogueHiddenOpen(bool),
@@ -673,6 +683,9 @@ pub enum TreeEvent {
 pub struct LicencePreviewState {
     pub seats: Vec<LicenceSeat>,
     pub editing_machine_id: Option<String>,
+    pub editing_draft: Option<String>,
+    pub editing_selection: (usize, usize),
+    pub request_focus_machine_id: Option<String>,
     pub open_confirm_machine_id: Option<String>,
 }
 
@@ -698,25 +711,76 @@ impl LicencePreviewState {
                 },
             ],
             editing_machine_id: None,
+            editing_draft: None,
+            editing_selection: (0, 0),
+            request_focus_machine_id: None,
             open_confirm_machine_id: None,
         }
     }
 
     pub fn rename(&mut self, machine_id: &str, label: Option<String>) {
-        if let Some(seat) = self.seats.iter_mut().find(|seat| seat.machine_id == machine_id) {
+        if let Some(seat) = self
+            .seats
+            .iter_mut()
+            .find(|seat| seat.machine_id == machine_id)
+        {
             seat.label = label;
         }
         self.editing_machine_id = None;
+        self.editing_draft = None;
+        self.editing_selection = (0, 0);
+    }
+
+    pub fn cancel_edit(&mut self) {
+        self.editing_machine_id = None;
+        self.editing_draft = None;
+        self.editing_selection = (0, 0);
+    }
+
+    pub fn begin_edit(&mut self, machine_id: &str) {
+        let draft = self
+            .seats
+            .iter()
+            .find(|seat| seat.machine_id == machine_id)
+            .and_then(|seat| seat.label.clone())
+            .unwrap_or_default();
+        let len = draft.chars().count();
+        self.editing_machine_id = Some(machine_id.to_string());
+        self.editing_draft = Some(draft);
+        self.editing_selection = (0, len);
     }
 }
 
 /// State changes the LicenceSeats specimen can request.
 #[derive(Clone, Debug)]
 pub enum LicenceSeatsEvent {
-    Rename { machine_id: String, label: Option<String> },
-    Edit { machine_id: String },
-    ReleaseTrigger { machine_id: String },
-    ReleaseConfirm { machine_id: String },
+    Rename {
+        machine_id: String,
+        label: Option<String>,
+    },
+    Edit {
+        machine_id: String,
+    },
+    Draft {
+        machine_id: String,
+        draft: String,
+    },
+    Selection {
+        machine_id: String,
+        start: usize,
+        end: usize,
+    },
+    CancelEdit,
+    RestoreFocus {
+        machine_id: String,
+    },
+    ClearRestoreFocus,
+    ReleaseTrigger {
+        machine_id: String,
+    },
+    ReleaseConfirm {
+        machine_id: String,
+    },
     /// No payload: cancellation applies to whatever row is open.
     ReleaseCancel,
 }
@@ -771,7 +835,10 @@ pub struct AppState {
     /// drafts survive a remount of the reusable editor path.
     pub time_input_live: std::sync::Arc<
         std::sync::Mutex<
-            HashMap<String, std::sync::Arc<std::sync::Mutex<poodle_headless::time_input::TimeInputContext>>>,
+            HashMap<
+                String,
+                std::sync::Arc<std::sync::Mutex<poodle_headless::time_input::TimeInputContext>>,
+            >,
         >,
     >,
     pub tree: TreePreviewState,
@@ -954,14 +1021,8 @@ impl AppState {
                         self.tree.start_rename(&value, &label)
                     }
                     TreeEvent::OpenMenu { value, x, y } => self.tree.open_menu(&value, x, y),
-                    TreeEvent::SetDrop { value, position } => {
-                        self.tree.set_drop(&value, position)
-                    }
-                    TreeEvent::Reorder {
-                        from,
-                        to,
-                        position,
-                    } => {
+                    TreeEvent::SetDrop { value, position } => self.tree.set_drop(&value, position),
+                    TreeEvent::Reorder { from, to, position } => {
                         self.tree.reorder(&from, &to, position);
                         self.tree.clear_drop();
                     }
@@ -983,17 +1044,11 @@ impl AppState {
                     self.invalidate_file_picks();
                 }
                 NodeSpecimenEvent::MachineLabelCancel => {
-                    // Escape restores the value snapped when editing started
-                    // (the web EditableLabel reverts the draft) and closes
-                    // editing.
-                    let original = self
-                        .specimens
-                        .text
-                        .remove("la-machine-label-original")
-                        .unwrap_or_default();
-                    self.specimens
-                        .text
-                        .insert("la-machine-label".to_string(), original);
+                    // Escape discards the session draft and closes editing.
+                    // The committed label never moved, so there is nothing
+                    // to restore onto it.
+                    self.specimens.text.remove("la-machine-label-draft");
+                    self.specimens.carets.remove("la-machine-label");
                     self.specimens
                         .toggles
                         .insert("la-machine-editing".to_string(), false);
@@ -1003,13 +1058,42 @@ impl AppState {
                         self.licence_seats.rename(&machine_id, label);
                     }
                     LicenceSeatsEvent::Edit { machine_id } => {
-                        self.licence_seats.editing_machine_id = Some(machine_id);
+                        self.licence_seats.begin_edit(&machine_id);
+                    }
+                    LicenceSeatsEvent::Draft { machine_id, draft } => {
+                        if self.licence_seats.editing_machine_id.as_deref()
+                            == Some(machine_id.as_str())
+                        {
+                            self.licence_seats.editing_draft = Some(draft);
+                        }
+                    }
+                    LicenceSeatsEvent::Selection {
+                        machine_id,
+                        start,
+                        end,
+                    } => {
+                        if self.licence_seats.editing_machine_id.as_deref()
+                            == Some(machine_id.as_str())
+                        {
+                            self.licence_seats.editing_selection = (start, end);
+                        }
+                    }
+                    LicenceSeatsEvent::CancelEdit => {
+                        self.licence_seats.cancel_edit();
+                    }
+                    LicenceSeatsEvent::RestoreFocus { machine_id } => {
+                        self.licence_seats.request_focus_machine_id = Some(machine_id);
+                    }
+                    LicenceSeatsEvent::ClearRestoreFocus => {
+                        self.licence_seats.request_focus_machine_id = None;
                     }
                     LicenceSeatsEvent::ReleaseTrigger { machine_id } => {
                         self.licence_seats.open_confirm_machine_id = Some(machine_id);
                     }
                     LicenceSeatsEvent::ReleaseConfirm { machine_id } => {
-                        self.licence_seats.seats.retain(|seat| seat.machine_id != machine_id);
+                        self.licence_seats
+                            .seats
+                            .retain(|seat| seat.machine_id != machine_id);
                         self.licence_seats.open_confirm_machine_id = None;
                     }
                     LicenceSeatsEvent::ReleaseCancel => {
@@ -1142,19 +1226,12 @@ impl AppState {
             let spec = request.spec.clone();
             let failed_message = request.failed_message.clone();
             let root = root.clone();
-            window.spawn(cx, async move |cx| {
-                deliver_os_pick(
-                    &root,
-                    receiver,
-                    key,
-                    generation,
-                    spec,
-                    failed_message,
-                    cx,
-                )
-                .await;
-            })
-            .detach();
+            window
+                .spawn(cx, async move |cx| {
+                    deliver_os_pick(&root, receiver, key, generation, spec, failed_message, cx)
+                        .await;
+                })
+                .detach();
         }
     }
 
@@ -1270,11 +1347,10 @@ mod tests {
         let mut events = Vec::new();
         events.push(NodeSpecimenEvent::FileInvalidate);
         state.drain_node_events_into(&mut events);
-        assert!(state
-            .specimens
-            .text
-            .get("la-file-base64")
-            .is_none(), "bytes cleared on route change");
+        assert!(
+            state.specimens.text.get("la-file-base64").is_none(),
+            "bytes cleared on route change"
+        );
         assert!(state.specimens.text.get("la-file-name").is_none());
         assert!(state.file_generation > generation, "generation bumped");
 
@@ -1373,8 +1449,8 @@ mod tests {
         );
     }
 
-    /// Escape restores the value snapped when editing started and closes the
-    /// edit; the draft typed in between is discarded.
+    /// Escape discards the typed draft and closes the edit; the committed
+    /// label never moved.
     #[test]
     fn a_machine_label_cancel_restores_the_snapshot() {
         let mut state = AppState::new();
@@ -1386,15 +1462,10 @@ mod tests {
             .specimens
             .toggles
             .insert("la-machine-editing".to_string(), true);
-        state
-            .specimens
-            .text
-            .insert("la-machine-label-original".to_string(), "Studio Mac".to_string());
-        // Typing edits the draft.
-        state
-            .specimens
-            .text
-            .insert("la-machine-label".to_string(), "Studio Mac 2".to_string());
+        state.specimens.text.insert(
+            "la-machine-label-draft".to_string(),
+            "Studio Mac 2".to_string(),
+        );
 
         let mut events = vec![NodeSpecimenEvent::MachineLabelCancel];
         state.drain_node_events_into(&mut events);
@@ -1405,18 +1476,15 @@ mod tests {
                 .get("la-machine-label")
                 .map(String::as_str),
             Some("Studio Mac"),
-            "the original label is restored, not the typed draft"
+            "the committed label is untouched"
         );
         assert!(!state.specimens.is_on("la-machine-editing"));
-        assert!(state.specimens.text.get("la-machine-label-original").is_none());
+        assert!(state.specimens.text.get("la-machine-label-draft").is_none());
     }
 
     impl AppState {
         fn drain_node_events_into(&mut self, events: &mut Vec<NodeSpecimenEvent>) {
-            self.node_events
-                .lock()
-                .unwrap()
-                .extend(events.drain(..));
+            self.node_events.lock().unwrap().extend(events.drain(..));
             self.drain_node_events();
         }
     }

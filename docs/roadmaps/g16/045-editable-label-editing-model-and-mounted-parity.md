@@ -1,8 +1,9 @@
 # g16.045 — EditableLabel Editing Model And Mounted Parity
 
-Status: ready
+Status: complete — awaiting orchestrator review
 Type: implementation
 Opened: 2026-09-01
+Closed: 2026-09-02
 Depends on: merged `g16.008`, `g16.030`, and operator acceptance recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: `../../contracts/001-working-rules.md`,
@@ -69,16 +70,16 @@ element getter, controlled draft, or second handle type is added.
 
 ## Ordered Work
 
-1. Amend the component contract first. Add paired TypeScript/Rust transition
+1. [x] Amend the component contract first. Add paired TypeScript/Rust transition
    and trim vectors, including NEL, BOM, ZWSP, empty, astral, unchanged, and
    teardown cases.
-2. Align Svelte and React adapters, methods, scalar-length clamp, focus guards,
+2. [x] Align Svelte and React adapters, methods, scalar-length clamp, focus guards,
    keyboard entry, and teardown-blur suppression.
-3. Align the Rust spec, renderer, GPUI session wrapper, and LicenceActivation /
+3. [x] Align the Rust spec, renderer, GPUI session wrapper, and LicenceActivation /
    LicenceSeats in-repo composites. Use the shared headless text-input path.
-4. Add focused and mounted proof. Move only EditableLabel's GPUI mounted-
+4. [x] Add focused and mounted proof. Move only EditableLabel's GPUI mounted-
    behavior ledger cell when the full active-cohort result is proven.
-5. Record one execution log. Leave g16 front doors to orchestrator closeout.
+5. [x] Record one execution log. Leave g16 front doors to orchestrator closeout.
 
 ## Acceptance
 
@@ -91,6 +92,8 @@ element getter, controlled draft, or second handle type is added.
   ASCII insert.
 - Enter, Escape, Tab, pointer/window blur, external value replacement,
   disablement, and teardown follow the fixed callback and focus law exactly.
+  LicenceActivation `machine_name` and LicenceSeats `seat_row` forward the
+  same Enter/Escape restore path; Tab and blur still commit without it.
 - `doubleClick`, `enterOrSpace`, and `programmatic` have the same observable
   activation boundary across Svelte, React, shared Rust, and GPUI.
 - Svelte instance methods and the exported React handle expose only `focus()`,

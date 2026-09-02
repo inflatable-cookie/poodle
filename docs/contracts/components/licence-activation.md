@@ -363,6 +363,10 @@ Status: **bound** — native implementation lands with `g15.007` (specs,
   (`on_machine_label_change`), commit/cancel close it through distinct
   channels, and **Escape restores the value snapped at edit start** (the
   host/ specimen holds the snapshot) — the web EditableLabel's revert rule.
+  Enter and Escape also fire `on_machine_label_restore_display_focus`; the
+  host's next view-mode paint sets `machine_label_request_focus` so the
+  display node requests real focus. Tab, pointer blur, and window blur commit
+  without that flag.
 - Data-state roles (`mode`, `route`, `busy`) mirror the web's `data-*`
   attributes; `pending` freezes the submit action (loading button).
 - The offline file read failure surfaces the approved

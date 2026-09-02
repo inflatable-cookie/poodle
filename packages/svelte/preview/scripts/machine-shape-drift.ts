@@ -120,6 +120,13 @@ const PINNED: Record<
     rsRunner: "packages/contracts/headless/tests/conformance.rs",
     rsEvidence: "fn switch_conformance",
   },
+  edit: {
+    file: "machines.json",
+    tsRunner: "packages/core/test/conformance.test.ts",
+    tsEvidence: 'case "edit"',
+    rsRunner: "packages/contracts/headless/tests/conformance.rs",
+    rsEvidence: "fn edit_conformance",
+  },
   color: {
     file: "domain.json",
     tsRunner: "packages/core/test/domain-conformance.test.ts",

@@ -11,6 +11,7 @@ use poodle_headless::audio::*;
 use poodle_headless::checkbox::*;
 use poodle_headless::disclosure::*;
 use poodle_headless::drag_drop::*;
+use poodle_headless::edit::*;
 use poodle_headless::hover::*;
 use poodle_headless::menu::*;
 use poodle_headless::modal::*;
@@ -43,6 +44,13 @@ fn s<'a>(value: &'a Value, key: &str) -> &'a str {
 
 fn opt_string(value: &Value, key: &str) -> Option<String> {
     value.get(key).and_then(Value::as_str).map(str::to_string)
+}
+
+fn opt_usize(value: &Value, key: &str) -> Option<usize> {
+    match value.get(key) {
+        None | Some(Value::Null) => None,
+        Some(entry) => entry.as_u64().map(|n| n as usize),
+    }
 }
 
 fn options_from(value: &Value) -> Vec<SelectOption> {
@@ -1014,6 +1022,80 @@ fn drop_target_candidate(value: &Value) -> DropTargetCandidate {
                 reason: opt_string(eligibility, "reason"),
             }
         },
+    }
+}
+
+#[test]
+fn edit_conformance() {
+    for case in vectors()["edit"].as_array().unwrap() {
+        let ctx = &case["context"];
+        let context = EditLabelContext {
+            value: s(ctx, "value").to_string(),
+            draft: s(ctx, "draft").to_string(),
+            disabled: b(ctx, "disabled"),
+            max_length: opt_usize(ctx, "maxLength"),
+        };
+        let state = match s(case, "state") {
+            "editing" => EditLabelState::Editing,
+            _ => EditLabelState::View,
+        };
+        let event = match s(&case["event"], "type") {
+            "START_EDIT" => EditLabelEvent::StartEdit,
+            "SET_DRAFT" => EditLabelEvent::SetDraft {
+                draft: s(&case["event"], "draft").to_string(),
+            },
+            "COMMIT" => EditLabelEvent::Commit,
+            "COMMIT_BLUR" => EditLabelEvent::CommitBlur,
+            "CANCEL" => EditLabelEvent::Cancel,
+            "REPLACE_VALUE" => EditLabelEvent::ReplaceValue {
+                value: s(&case["event"], "value").to_string(),
+            },
+            "SET_DISABLED" => EditLabelEvent::SetDisabled {
+                disabled: b(&case["event"], "disabled"),
+            },
+            "TEARDOWN" => EditLabelEvent::Teardown,
+            other => panic!("unknown edit event {other}"),
+        };
+
+        let (next_state, next, effects) = edit_label_transition(state, context, event);
+        let effects = effects
+            .iter()
+            .map(|effect| match effect {
+                EditLabelEffect::EmitEditStart => json!({ "type": "emitEditStart" }),
+                EditLabelEffect::FocusInput => json!({ "type": "focusInput" }),
+                EditLabelEffect::EmitCommit {
+                    value,
+                    previous_value,
+                    restore_focus,
+                } => json!({
+                    "type": "emitCommit",
+                    "value": value,
+                    "previousValue": previous_value,
+                    "restoreFocus": restore_focus,
+                }),
+                EditLabelEffect::EmitCancel { restore_focus } => json!({
+                    "type": "emitCancel",
+                    "restoreFocus": restore_focus,
+                }),
+            })
+            .collect();
+        let state_name = match next_state {
+            EditLabelState::View => "view",
+            EditLabelState::Editing => "editing",
+        };
+
+        assert_case(
+            "edit",
+            case,
+            effects,
+            Some(state_name),
+            Some(json!({
+                "value": next.value,
+                "draft": next.draft,
+                "disabled": next.disabled,
+                "maxLength": next.max_length,
+            })),
+        );
     }
 }
 

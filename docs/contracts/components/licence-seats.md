@@ -163,10 +163,13 @@ Status: **bound** — native implementation lands with `g15.007` (specs,
   unnamed rows look alike on purpose. No hostname, platform, last-seen,
   limit, or entitlement policy appears.
 - `LicenceSeatsHandlers` owns the callbacks: `on_rename(machine_id,
-  trimmed_label | null)`, edit start, `on_release(machine_id)`, and the
-  release trigger/cancel. Rename persistence, the release command, and the
-  resulting seat refresh are host-owned; Poodle never optimistically rewrites
-  authority state.
+  trimmed_label | null)`, edit start, live draft/caret, `on_rename_cancel`,
+  `on_rename_restore_display_focus`, `on_release(machine_id)`, and the
+  release trigger/cancel. Enter and Escape restore the row's display focus:
+  the handler names the machine, and the host's next view-mode paint sets
+  `request_focus_machine_id` on that row. Tab/blur commit without that flag.
+  Rename persistence, the release command, and the resulting seat refresh are
+  host-owned; Poodle never optimistically rewrites authority state.
 - Release composes the warning ConfirmAction by default (trigger: ghost
   danger trash IconButton whose accessible name carries the action and
   machine identity) or releases directly when `confirmRelease=false`. Pending

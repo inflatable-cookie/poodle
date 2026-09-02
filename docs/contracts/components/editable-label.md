@@ -3,7 +3,7 @@
 > **Surface elevation**: EditableLabel is a surface consumer (72% moderate contrast) — see [surface-elevation.md](./surface-elevation.md).
 
 Status: detailed contract
-Updated: 2026-08-14
+Updated: 2026-09-02
 
 ## 1. Purpose
 
@@ -42,15 +42,15 @@ Updated: 2026-08-14
 
 | Prop | Type | Default | Required | Notes |
 |------|------|---------|----------|-------|
-| `value` | `string` | — | yes | current committed label |
-| `ariaLabel` | `string` | `"Edit label"` | no | accessible name for the edit affordance |
+| `value` | `string` | — | yes | host-owned committed label; live edits never write this |
+| `ariaLabel` | `string` | resolved | no | omitted name resolves from visible `value`, then `emptyText`, then `"Edit label"`; display and editor receive the same name |
 | `disabled` | `boolean` | `false` | no | disables edit entry |
 | `activationMode` | `"doubleClick" \| "enterOrSpace" \| "programmatic"` | `"doubleClick"` | no | primary edit-entry pattern |
 | `selectOnFocus` | `boolean` | `true` | no | select all text when editing begins |
 | `variant` | `"default" \| "flush"` | `"default"` | no | default has padding/border; flush has no padding/border |
 | `emptyText` | `string \| null` | `null` | no | italic placeholder text when value is empty |
 | `placeholder` | `string \| null` | `null` | no | input placeholder during editing |
-| `maxLength` | `number \| null` | `null` | no | maximum input length |
+| `maxLength` | `number \| null` | `null` | no | maximum length in Unicode scalar values, not UTF-16 code units. HTML `maxlength` is not the authority |
 | `showEditIcon` | `boolean` | `false` | no | show pencil icon on hover/focus |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
@@ -58,10 +58,48 @@ Updated: 2026-08-14
 
 ### Controlled And Uncontrolled
 
-- committed value is host-owned: `value` prop is the source of truth, and the
-  host applies accepted edits from `onCommit`
-- transient editing state (isEditing, draftValue) owned internally by the component
-- `inputElement` ref available internally for focus management
+- `value` is the committed string. The host applies accepted edits from
+  `onCommit`. There is no public live draft, controlled draft, or pending API.
+- Web owns `isEditing` and the session draft internally.
+- Native projects committed `value`, optional `draft_value`, and `is_editing`.
+  Live edits update `draft_value` only; they never overwrite committed `value`.
+- A host echo of the just-committed value does not restart or cancel a session.
+  An external replacement of committed `value` while editing returns to view on
+  the new committed value with no commit.
+- Disablement during edit cancels. Teardown/unmount itself emits neither commit
+  nor cancel.
+
+### Methods
+
+Web runtimes expose exactly three imperative methods. No public `commit()`,
+element getter, controlled draft, or second handle type.
+
+Svelte exports these component-instance methods:
+
+```ts
+export function focus(): void;
+export function startEditing(): void;
+export function cancelEditing(): void;
+```
+
+React exports `EditableLabelHandle` from the component module and package root,
+and exports `EditableLabel` through
+`forwardRef<EditableLabelHandle, EditableLabelProps>`:
+
+```ts
+export interface EditableLabelHandle {
+  focus(): void;
+  startEditing(): void;
+  cancelEditing(): void;
+}
+```
+
+- `focus()` targets the display control in view mode and the live input in edit
+  mode.
+- `startEditing()` ignores `activationMode` but is inert when disabled or
+  already editing.
+- `cancelEditing()` is inert outside edit mode and otherwise follows the Escape
+  law, including display-focus restoration.
 
 ## 4. States
 
@@ -79,34 +117,49 @@ Updated: 2026-08-14
 ### Component States
 
 ```text
-[view] --activation--> [editing]
-[editing] --Enter/blur--> [view] (commit fires)
-[editing] --Escape--> [view] (cancel fires)
+[view] --activation / startEditing()--> [editing]
+[editing] --Enter--> [view] (commit, restore display focus)
+[editing] --Tab / pointer blur / window blur--> [view] (commit, no restore)
+[editing] --Escape / cancelEditing()--> [view] (cancel, restore display focus)
+[editing] --external value replacement--> [view] (no commit)
+[editing] --disablement--> [view] (cancel)
+[editing] --teardown--> (neither commit nor cancel)
 ```
 
 | State | Trigger | Expected Result |
 |-------|---------|-----------------|
-| view -> editing | activation gesture or programmatic start | input opens with current value, optionally selected |
-| editing -> view (commit) | `Enter` or blur | `commit` fires with trimmed value and previousValue |
-| editing -> view (cancel) | `Escape` | edit discarded, `cancel` fires, original value restored |
+| view -> editing | matching activation gesture or `startEditing()` | input opens seeded from committed `value`; `selectOnFocus=true` selects all, false places the caret at the end |
+| editing -> view (commit) | `Enter`, Tab, pointer blur, or window blur | `onCommit` fires with portable-trimmed draft and `previousValue`; unchanged commits still emit |
+| editing -> view (cancel) | `Escape` or `cancelEditing()` | edit discarded, `onCancel` fires, committed `value` unchanged |
+| editing -> view (replace) | host replaces committed `value` with a different string | return to view on the new value; no commit |
+| editing -> view (disable) | `disabled` becomes true | cancel law; no commit |
+| teardown | unmount while editing | neither commit nor cancel |
 
 ### Behavior Machine
 
 Behavior classification: machine-backed via shared machinery
 
-Machine-backed (g11 extraction sweep): runs `editLabelTransition` in
-`@inflatable-cookie/poodle-core` — view/editing states, start-edit guards (disabled,
-programmatic activation), commit trims the draft and reports
-`{ value, previousValue }`, cancel restores. Focus/select-on-focus are
-effect intents the adapter executes. Bonus hardening: commit/cancel are
-now state-guarded, so a blur after Escape cannot double-emit.
+Machine-backed: paired `editLabelTransition` in `@inflatable-cookie/poodle-core`
+and `poodle_headless::edit`. View/editing, start-edit guards (disabled or
+already editing), portable set-**T** trim, Unicode-scalar `maxLength`, commit
+payload `{ value, previousValue }` (unchanged commits still emit), cancel,
+external replacement, disablement, and teardown. Gesture vs `startEditing()`
+gating lives in the adapter. Focus, select-on-focus, and display-focus
+restoration are effect intents the adapter executes. Commit/cancel stay
+state-guarded, so a blur after Escape or Enter cannot double-emit.
+
+Portable trim set **T** is Unicode White_Space plus U+FEFF: U+0009–U+000D,
+U+0020, U+0085, U+00A0, U+1680, U+2000–U+200A, U+2028, U+2029, U+202F,
+U+205F, U+3000, and U+FEFF. Drop the longest prefix and suffix in **T**.
+Interior characters stay. U+200B is not trimmed. Paired machines must not call
+ECMAScript `String.trim` or Rust `str::trim` as the authority.
 
 ## 5. Callbacks
 
 | Callback | When It Fires | Signature | Notes |
 |----------|---------------|-----------|-------|
 | `onEditStart` | edit mode begins | `() => void` | optional callback |
-| `onCommit` | edit is confirmed | `(detail: { value: string; previousValue: string }) => void` | always fires on commit (host decides whether to apply) |
+| `onCommit` | edit is confirmed | `(detail: { value: string; previousValue: string }) => void` | always fires on commit, including unchanged values; cancel never emits a commit |
 | `onCancel` | edit is abandoned | `() => void` | optional callback |
 
 ## 6. Accessibility
@@ -114,8 +167,10 @@ now state-guarded, so a blur after Escape cannot double-emit.
 ### Semantics
 
 - Role: button-like trigger in view mode (keyboard-reachable), text input in edit mode
-- `aria-label`: from prop, applied to both the display trigger and edit input
-  so the row-specific edit name survives the mode transition
+- `aria-label`: the resolved accessible name, applied to both the display
+  trigger and edit input so the name survives the mode transition. Omitted
+  `ariaLabel` resolves from visible `value`, then `emptyText`, then
+  `"Edit label"`
 - In edit mode: input receives focus and standard text-input accessibility
 - Edit icon: `aria-hidden="true"` (decorative)
 - Labeling rules: assistive technology must discover both current label value and edit action
@@ -124,20 +179,23 @@ now state-guarded, so a blur after Escape cannot double-emit.
 
 | Key | Behavior |
 |-----|----------|
-| `Enter` in view mode | enters edit mode (when `activationMode` is `"enterOrSpace"`) |
-| `Space` in view mode | enters edit mode (when `activationMode` is `"enterOrSpace"`) |
-| double-click in view mode | enters edit mode (when `activationMode` is `"doubleClick"`) |
-| text-input keys in edit mode | standard single-line text editing |
-| `Enter` in edit mode | commits edit and prevents an ancestor form submit |
-| `Escape` in edit mode | cancels edit, restores original value |
-| `Tab` in edit mode | commits edit (blur-triggered commit) |
+| `Enter` / `Space` in view mode | enters edit mode when `activationMode` is `"doubleClick"` or `"enterOrSpace"`; ignored when `"programmatic"` |
+| pointer double-click in view mode | enters edit mode when `activationMode` is `"doubleClick"` |
+| pointer single-click in view mode | enters edit mode when `activationMode` is `"enterOrSpace"` |
+| any gesture in `"programmatic"` view mode | stays in view; only `startEditing()` / native wrapper starts an edit |
+| text-input keys in edit mode | standard single-line text editing via the shared TextInput insertion/composition/selection rules |
+| `Enter` in edit mode | commits, prevents an ancestor form submit, and restores display focus |
+| `Escape` in edit mode | cancels, restores the committed value, and restores display focus |
+| `Tab` in edit mode | commits once through blur; display is not refocused; focus advances |
 
 ### Focus And Announcement
 
 - focus entry: display label is keyboard-reachable
 - focus transition: entering edit mode moves focus into input; `selectOnFocus` selects all text
-- focus restoration: commit or cancel returns focus to the display label
-- live-region behavior: none by default
+- focus restoration: Enter, Escape, and `cancelEditing()` return focus to the
+  display label. Tab, pointer blur, and window blur commit once without
+  restoring. Teardown emits neither commit nor cancel and does not restore.
+- live-region behavior: none by default. No new focus manager.
 
 ## 7. Layout
 
@@ -283,16 +341,23 @@ now state-guarded, so a blur after Escape cannot double-emit.
 ## 9. Svelte Notes
 
 - Display rendered as a `<button>` element for keyboard reachability in view mode
-- Input rendered as a standard `<input type="text">` in edit mode
-- Internal state: `isEditing` boolean, `draftValue` string, `inputElement` ref
-- On edit start: set `isEditing = true`, `draftValue = value`, then tick and focus input
-- `selectOnFocus`: when true, `inputElement.select()` after focus
-- Commit logic: trim draftValue, fire `commit` with value and previousValue
-- Cancel logic: restore draftValue to original value, fire `cancel`
-- Blur on input triggers commit (not cancel)
-- `activationMode="doubleClick"`: `dblclick` on display enters edit mode
-- `activationMode="enterOrSpace"`: `click`, `Enter`, or `Space` on display enters edit mode
-- `activationMode="programmatic"`: no built-in activation gesture; parent must control entry
+- Input rendered as a standard `<input type="text">` in edit mode; do not set
+  HTML `maxlength` — scalar clamp is the authority
+- Internal state: `isEditing` boolean, session `draftValue`, display and input
+  refs. No public draft.
+- Exported instance methods: `focus()`, `startEditing()`, `cancelEditing()`
+- On edit start: set `isEditing = true`, seed draft from committed `value`,
+  then tick and focus input
+- `selectOnFocus`: when true, `input.select()` after focus; when false, place
+  the caret at the end
+- Commit logic: portable set-T trim, fire `onCommit` with value and previousValue
+- Cancel logic: discard draft, fire `onCancel`, restore display focus
+- Pointer/window blur and Tab commit once without restoring display focus
+- Unmount while editing emits neither callback
+- `activationMode="doubleClick"`: pointer double-click or Enter/Space
+- `activationMode="enterOrSpace"`: pointer single-click or Enter/Space
+- `activationMode="programmatic"`: no gesture; `startEditing()` still works
+  unless disabled or already editing
 - Replaces former `InlineEditableField` composite (merged)
 - `data-size` attribute on root reflects the resolved size for CSS variant styling
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
@@ -301,25 +366,41 @@ now state-guarded, so a blur after Escape cannot double-emit.
 
 - expected crate/module surface: `poodle_gpui::primitives::editable_label`
 - Spec struct: `EditableLabelSpec` in primitives crate
+- Native spec projects committed `value`, optional `draft_value`, `is_editing`,
+  and session selection. Live edits paint `draft_value`; `value` and
+  `onCommit.previousValue` retain the committed snapshot
 - GPUI must preserve mode-switching semantics, focus transfer, and suppression of global shortcuts while inline text editor is active
 - Display-to-input swap is an entity-state transition rather than DOM swap
-- Focus restoration after commit/cancel must return to the display element
-- Live editing is real: `on_change` streams caret-at-end edits (single
-  characters append, backspace deletes, `max_length` enforced in-component
-  because the host never sees the keystroke). Full IME/selection/caret
-  movement waits on gpui's `EntityInputHandler` path.
+- Focus restoration after Enter/Escape/`cancelEditing` must return to the display element; Tab/pointer/window blur commit without restoring
+- Live editing reuses the shared headless TextInput insertion, composition, and
+  selection transitions without composing TextInput's visual component.
+  `selectOnFocus=true` selects all; false places the caret at the end.
+  `max_length` is a Unicode-scalar budget in those transitions.
+- Session wrapper stamps `with_id` on the node. Host retains `{key}`,
+  `{key}-draft`, `{key}-editing`, and caret between rebuilds. Live keystrokes
+  never write the committed value key.
+- `enterOrSpace` uses `on_activate` (pointer click plus synthesized
+  Enter/Space). `doubleClick` uses `on_double_activate` for pointer
+  double-click and `on_edit_key` on the display node for Enter/Space; it must
+  not set `on_activate`. `programmatic` installs neither gesture.
+- Enter/Escape/`cancelEditing` restore display focus through
+  `request_focus` on the next view-mode paint. Tab, pointer blur, and window
+  blur commit without restoring. After drop, the host must not apply a blur
+  commit; machine `TEARDOWN` returns to view with no effects.
 
 ## 11. Parity Checklist
 
 ### Tier 1: Strict Parity
 
 - [ ] value, activationMode, selectOnFocus, disabled mean the same thing
-- [ ] commit/cancel/editStart events match (commit includes previousValue)
-- [ ] Enter commits, Escape cancels in edit mode
-- [ ] blur triggers commit (not cancel)
-- [ ] focus transfer and restoration match
+- [ ] commit/cancel/editStart events match (commit includes previousValue; unchanged commits still emit)
+- [ ] Enter commits and restores display focus; Escape cancels and restores it
+- [ ] Tab, pointer blur, and window blur commit once without restoring
+- [ ] teardown emits neither commit nor cancel
 - [ ] emptyText and showEditIcon behavior match
 - [ ] variant flush/default behavior match
+- [ ] `doubleClick`, `enterOrSpace`, and `programmatic` share one activation boundary
+- [ ] portable set-T trim and Unicode-scalar `maxLength` match across machines
 
 ### Tier 2: Visual Parity
 

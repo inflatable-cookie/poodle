@@ -7,6 +7,12 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-09-02 — `rustfmt --edition 2021 packages/gpui/preview/tests/headless_regressions.rs`
+  (and `node_compat.rs`) rewrites the whole file. Those modules are already
+  far over rustfmt's wrap budget, so a one-line insertion becomes a thousand-line
+  churn. Format only the new hunk by hand, or use `cargo fmt` scoped so it
+  respects the crate's existing skip/ignore posture. Hit while repairing g16.045.
+
 - 2026-09-02 — React default `stickyTones = ["danger"]` is a new array per
   render. Putting that identity in a `useEffect` dependency list retriggers
   `setState` forever. Keep a module-level default and depend on a joined key.

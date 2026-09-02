@@ -5330,11 +5330,20 @@ fn a_machine_name_escape_restores_the_original_in_a_mounted_window() {
         let draft = Arc::new(Mutex::new("Studio Mac".to_string()));
         let cancelled = Arc::new(Mutex::new(0usize));
         let build = |label: &str, editing: bool| {
+            let len = label.chars().count();
+            let mut spec = LicenceActivationSpec::new()
+                .with_mode(LicenceActivationMode::Account)
+                .with_machine_label(Some(label.to_string()))
+                .with_machine_label_editing(editing);
+            // Already-editing hosts must project caret. End-caret makes the
+            // typed suffix unique for the Escape-restore check below.
+            if editing {
+                spec = spec
+                    .with_machine_label_draft(Some(label.to_string()))
+                    .with_machine_label_selection(len, len);
+            }
             let mut node = poodle_render::licence_activation(
-                &LicenceActivationSpec::new()
-                    .with_mode(LicenceActivationMode::Account)
-                    .with_machine_label(Some(label.to_string()))
-                    .with_machine_label_editing(editing),
+                &spec,
                 &RenderContext::new(&theme()),
                 poodle_render::LicenceActivationHandlers {
                     on_machine_label_change: Some({
@@ -5392,6 +5401,413 @@ fn a_machine_name_escape_restores_the_original_in_a_mounted_window() {
         );
     });
 }
+
+const MACHINE_NAME_FOCUS_ID: &str = "la-machine-name-focus";
+const MACHINE_NAME_SUBMIT_ID: &str = "la-machine-name-submit";
+const SEAT_RENAME_FOCUS_ID: &str = "seat-rename-focus";
+
+struct MachineNameFocusHost {
+    label: Mutex<String>,
+    draft: Mutex<String>,
+    selection: Mutex<(usize, usize)>,
+    editing: Mutex<bool>,
+    request_focus: Mutex<bool>,
+    log: EventLog,
+}
+
+fn stamp_machine_name_focus_ids(node: &mut Node) {
+    assert!(
+        give_first_id(node, MACHINE_NAME_FOCUS_ID, &|n| {
+            n.a11y.label.as_deref() == Some("Edit machine name")
+        }),
+        "machine-name EditableLabel"
+    );
+    assert!(
+        give_first_id(node, MACHINE_NAME_SUBMIT_ID, &|n| {
+            matches!(&n.kind, NodeKind::Button { label } if label == "Continue with account")
+        }),
+        "account submit"
+    );
+}
+
+fn machine_name_focus_tree(host: &Arc<MachineNameFocusHost>, mounted: &Arc<Mutex<Node>>) -> Node {
+    use poodle_headless::licence::LicenceActivationMode;
+    use poodle_specs::LicenceActivationSpec;
+
+    let provider = theme();
+    let ctx = RenderContext::new(&provider);
+    let editing = *host.editing.lock().expect("editing");
+    let label = host.label.lock().expect("label").clone();
+    let draft = host.draft.lock().expect("draft").clone();
+    let selection = *host.selection.lock().expect("selection");
+    let restore = {
+        let mut flag = host.request_focus.lock().expect("request_focus");
+        let restore = *flag;
+        *flag = false;
+        restore
+    };
+    let mut spec = LicenceActivationSpec::new()
+        .with_mode(LicenceActivationMode::Account)
+        .with_machine_label(Some(label))
+        .with_machine_label_editing(editing)
+        .with_machine_label_request_focus(restore);
+    if editing {
+        spec = spec
+            .with_machine_label_draft(Some(draft))
+            .with_machine_label_selection(selection.0, selection.1);
+    }
+
+    let change_host = Arc::clone(host);
+    let change_mount = Arc::clone(mounted);
+    let select_host = Arc::clone(host);
+    let select_mount = Arc::clone(mounted);
+    let commit_host = Arc::clone(host);
+    let commit_mount = Arc::clone(mounted);
+    let cancel_host = Arc::clone(host);
+    let cancel_mount = Arc::clone(mounted);
+    let restore_host = Arc::clone(host);
+    let restore_mount = Arc::clone(mounted);
+    let mut node = poodle_render::licence_activation(
+        &spec,
+        &ctx,
+        poodle_render::LicenceActivationHandlers {
+            on_machine_label_change: Some(Arc::new(move |next: &str| {
+                *change_host.draft.lock().expect("draft") = next.to_owned();
+                note(&change_host.log, format!("machine/change:{next}"));
+                let tree = machine_name_focus_tree(&change_host, &change_mount);
+                *change_mount.lock().expect("mount") = tree;
+            })),
+            on_machine_label_selection_change: Some(Arc::new(move |start, end| {
+                *select_host.selection.lock().expect("selection") = (start, end);
+                let tree = machine_name_focus_tree(&select_host, &select_mount);
+                *select_mount.lock().expect("mount") = tree;
+            })),
+            on_machine_label_commit: Some(Arc::new(move |next: &str| {
+                if !*commit_host.editing.lock().expect("editing") {
+                    return;
+                }
+                *commit_host.editing.lock().expect("editing") = false;
+                *commit_host.label.lock().expect("label") = next.to_owned();
+                note(&commit_host.log, format!("machine/commit:{next}"));
+                let tree = machine_name_focus_tree(&commit_host, &commit_mount);
+                *commit_mount.lock().expect("mount") = tree;
+            })),
+            on_machine_label_cancel: Some(Arc::new(move || {
+                if !*cancel_host.editing.lock().expect("editing") {
+                    return;
+                }
+                *cancel_host.editing.lock().expect("editing") = false;
+                let restored = cancel_host.label.lock().expect("label").clone();
+                *cancel_host.draft.lock().expect("draft") = restored;
+                note(&cancel_host.log, "machine/cancel".to_owned());
+                let tree = machine_name_focus_tree(&cancel_host, &cancel_mount);
+                *cancel_mount.lock().expect("mount") = tree;
+            })),
+            on_machine_label_restore_display_focus: Some(Arc::new(move || {
+                *restore_host.request_focus.lock().expect("request_focus") = true;
+                note(&restore_host.log, "machine/restore".to_owned());
+                let tree = machine_name_focus_tree(&restore_host, &restore_mount);
+                *restore_mount.lock().expect("mount") = tree;
+            })),
+            ..poodle_render::LicenceActivationHandlers::default()
+        },
+    );
+    stamp_machine_name_focus_ids(&mut node);
+    routing_column(vec![
+        traversal_marker("la-machine-before", &host.log, &ctx),
+        node,
+        traversal_marker("la-machine-after", &host.log, &ctx),
+    ])
+}
+
+fn machine_name_focus_host() -> Arc<MachineNameFocusHost> {
+    Arc::new(MachineNameFocusHost {
+        label: Mutex::new("Studio Mac".to_owned()),
+        draft: Mutex::new("Studio Mac".to_owned()),
+        selection: Mutex::new((10, 10)),
+        editing: Mutex::new(true),
+        request_focus: Mutex::new(false),
+        log: event_log(),
+    })
+}
+
+/// g16.045. LicenceActivation `machine_name` carries EditableLabel's Enter/
+/// Escape display-focus restore. Tab still commits through blur and advances.
+#[test]
+fn licence_activation_machine_name_enter_and_escape_restore_display_focus() {
+    run_headless(|cx| {
+        let host = machine_name_focus_host();
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = machine_name_focus_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 360.0);
+        driver.wait_for_focus_handle(MACHINE_NAME_FOCUS_ID);
+        driver.focus_element(MACHINE_NAME_FOCUS_ID);
+        driver.dispatch_key_raw("2");
+        take_events(&host.log);
+        driver.dispatch_key_raw("enter");
+        driver.draw_frame();
+        assert_eq!(take_events(&host.log), vec!["machine/commit:Studio Mac2", "machine/restore"]);
+        assert_eq!(*host.label.lock().expect("label"), "Studio Mac2");
+        assert!(!*host.editing.lock().expect("editing"));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(MACHINE_NAME_FOCUS_ID),
+            Some(true),
+            "Enter restores the machine-name display focus handle"
+        );
+    });
+
+    run_headless(|cx| {
+        let host = machine_name_focus_host();
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = machine_name_focus_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 360.0);
+        driver.wait_for_focus_handle(MACHINE_NAME_FOCUS_ID);
+        driver.focus_element(MACHINE_NAME_FOCUS_ID);
+        driver.dispatch_key_raw("2");
+        take_events(&host.log);
+        driver.dispatch_key_raw("escape");
+        driver.draw_frame();
+        assert_eq!(take_events(&host.log), vec!["machine/cancel", "machine/restore"]);
+        assert_eq!(*host.label.lock().expect("label"), "Studio Mac");
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(MACHINE_NAME_FOCUS_ID),
+            Some(true),
+            "Escape restores the machine-name display focus handle"
+        );
+    });
+
+    run_headless(|cx| {
+        let host = machine_name_focus_host();
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = machine_name_focus_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 360.0);
+        driver.wait_for_focus_handle(MACHINE_NAME_FOCUS_ID);
+        driver.focus_element(MACHINE_NAME_FOCUS_ID);
+        driver.dispatch_key_raw("2");
+        take_events(&host.log);
+        driver.dispatch_key_raw("tab");
+        driver.draw_frame();
+        assert_eq!(take_events(&host.log), vec!["machine/commit:Studio Mac2"]);
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(MACHINE_NAME_SUBMIT_ID),
+            Some(true),
+            "Tab advances to the next focusable in the activation form"
+        );
+        assert_ne!(
+            poodle_gpui_node_backend::focus_state_for(MACHINE_NAME_FOCUS_ID),
+            Some(true),
+            "Tab does not restore machine-name display focus"
+        );
+    });
+}
+
+struct SeatRenameFocusHost {
+    machine_id: String,
+    label: Mutex<Option<String>>,
+    draft: Mutex<String>,
+    selection: Mutex<(usize, usize)>,
+    editing: Mutex<bool>,
+    request_focus: Mutex<bool>,
+    log: EventLog,
+}
+
+fn seat_rename_focus_tree(host: &Arc<SeatRenameFocusHost>, mounted: &Arc<Mutex<Node>>) -> Node {
+    use poodle_headless::licence::LicenceSeat;
+    use poodle_specs::LicenceSeatsSpec;
+
+    let provider = theme();
+    let ctx = RenderContext::new(&provider);
+    let editing = *host.editing.lock().expect("editing");
+    let label = host.label.lock().expect("label").clone();
+    let draft = host.draft.lock().expect("draft").clone();
+    let selection = *host.selection.lock().expect("selection");
+    let restore = {
+        let mut flag = host.request_focus.lock().expect("request_focus");
+        let restore = *flag;
+        *flag = false;
+        restore
+    };
+    let spec = LicenceSeatsSpec::new()
+        .with_seats(vec![LicenceSeat {
+            machine_id: host.machine_id.clone(),
+            label,
+            this_machine: true,
+        }])
+        .with_editing_machine(editing.then(|| host.machine_id.clone()))
+        .with_editing_draft(editing.then_some(draft))
+        .with_editing_selection(selection.0, selection.1)
+        .with_request_focus_machine(restore.then(|| host.machine_id.clone()));
+
+    let change_host = Arc::clone(host);
+    let change_mount = Arc::clone(mounted);
+    let select_host = Arc::clone(host);
+    let select_mount = Arc::clone(mounted);
+    let commit_host = Arc::clone(host);
+    let commit_mount = Arc::clone(mounted);
+    let cancel_host = Arc::clone(host);
+    let cancel_mount = Arc::clone(mounted);
+    let restore_host = Arc::clone(host);
+    let restore_mount = Arc::clone(mounted);
+    let mut node = poodle_render::licence_seats(
+        &spec,
+        &ctx,
+        poodle_render::LicenceSeatsHandlers {
+            on_rename_change: Some(Arc::new(move |_id, next: &str| {
+                *change_host.draft.lock().expect("draft") = next.to_owned();
+                note(&change_host.log, format!("seat/change:{next}"));
+                let tree = seat_rename_focus_tree(&change_host, &change_mount);
+                *change_mount.lock().expect("mount") = tree;
+            })),
+            on_rename_selection_change: Some(Arc::new(move |_id, start, end| {
+                *select_host.selection.lock().expect("selection") = (start, end);
+                let tree = seat_rename_focus_tree(&select_host, &select_mount);
+                *select_mount.lock().expect("mount") = tree;
+            })),
+            on_rename: Some(Arc::new(move |_id, next: Option<&str>| {
+                if !*commit_host.editing.lock().expect("editing") {
+                    return;
+                }
+                *commit_host.editing.lock().expect("editing") = false;
+                *commit_host.label.lock().expect("label") = next.map(str::to_string);
+                note(
+                    &commit_host.log,
+                    format!("seat/commit:{}", next.unwrap_or("")),
+                );
+                let tree = seat_rename_focus_tree(&commit_host, &commit_mount);
+                *commit_mount.lock().expect("mount") = tree;
+            })),
+            on_rename_cancel: Some(Arc::new(move |_id| {
+                if !*cancel_host.editing.lock().expect("editing") {
+                    return;
+                }
+                *cancel_host.editing.lock().expect("editing") = false;
+                let restored = cancel_host
+                    .label
+                    .lock()
+                    .expect("label")
+                    .clone()
+                    .unwrap_or_default();
+                *cancel_host.draft.lock().expect("draft") = restored;
+                note(&cancel_host.log, "seat/cancel".to_owned());
+                let tree = seat_rename_focus_tree(&cancel_host, &cancel_mount);
+                *cancel_mount.lock().expect("mount") = tree;
+            })),
+            on_rename_restore_display_focus: Some(Arc::new(move |_id| {
+                *restore_host.request_focus.lock().expect("request_focus") = true;
+                note(&restore_host.log, "seat/restore".to_owned());
+                let tree = seat_rename_focus_tree(&restore_host, &restore_mount);
+                *restore_mount.lock().expect("mount") = tree;
+            })),
+            ..poodle_render::LicenceSeatsHandlers::default()
+        },
+    );
+    assert!(
+        give_first_id(&mut node, SEAT_RENAME_FOCUS_ID, &|n| {
+            n.a11y
+                .label
+                .as_deref()
+                .is_some_and(|label| label.starts_with("Rename "))
+        }),
+        "seat-row EditableLabel"
+    );
+    routing_column(vec![
+        traversal_marker("seat-rename-before", &host.log, &ctx),
+        node,
+        traversal_marker("seat-rename-after", &host.log, &ctx),
+    ])
+}
+
+fn seat_rename_focus_host() -> Arc<SeatRenameFocusHost> {
+    Arc::new(SeatRenameFocusHost {
+        machine_id: "id-a".to_owned(),
+        label: Mutex::new(Some("Studio rig".to_owned())),
+        draft: Mutex::new("Studio rig".to_owned()),
+        selection: Mutex::new((10, 10)),
+        editing: Mutex::new(true),
+        request_focus: Mutex::new(false),
+        log: event_log(),
+    })
+}
+
+/// g16.045. LicenceSeats `seat_row` carries EditableLabel's Enter/Escape
+/// display-focus restore. Tab still commits through blur and advances.
+#[test]
+fn licence_seats_seat_row_enter_and_escape_restore_display_focus() {
+    run_headless(|cx| {
+        let host = seat_rename_focus_host();
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = seat_rename_focus_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 240.0);
+        driver.wait_for_focus_handle(SEAT_RENAME_FOCUS_ID);
+        driver.focus_element(SEAT_RENAME_FOCUS_ID);
+        driver.dispatch_key_raw("2");
+        take_events(&host.log);
+        driver.dispatch_key_raw("enter");
+        driver.draw_frame();
+        assert_eq!(take_events(&host.log), vec!["seat/commit:Studio rig2", "seat/restore"]);
+        assert_eq!(
+            host.label.lock().expect("label").as_deref(),
+            Some("Studio rig2")
+        );
+        assert!(!*host.editing.lock().expect("editing"));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(SEAT_RENAME_FOCUS_ID),
+            Some(true),
+            "Enter restores the seat-row display focus handle"
+        );
+    });
+
+    run_headless(|cx| {
+        let host = seat_rename_focus_host();
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = seat_rename_focus_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 240.0);
+        driver.wait_for_focus_handle(SEAT_RENAME_FOCUS_ID);
+        driver.focus_element(SEAT_RENAME_FOCUS_ID);
+        driver.dispatch_key_raw("2");
+        take_events(&host.log);
+        driver.dispatch_key_raw("escape");
+        driver.draw_frame();
+        assert_eq!(take_events(&host.log), vec!["seat/cancel", "seat/restore"]);
+        assert_eq!(
+            host.label.lock().expect("label").as_deref(),
+            Some("Studio rig")
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(SEAT_RENAME_FOCUS_ID),
+            Some(true),
+            "Escape restores the seat-row display focus handle"
+        );
+    });
+
+    run_headless(|cx| {
+        let host = seat_rename_focus_host();
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = seat_rename_focus_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 520.0, 240.0);
+        driver.wait_for_focus_handle(SEAT_RENAME_FOCUS_ID);
+        driver.focus_element(SEAT_RENAME_FOCUS_ID);
+        driver.dispatch_key_raw("2");
+        take_events(&host.log);
+        driver.dispatch_key_raw("tab");
+        driver.draw_frame();
+        assert_eq!(
+            take_events(&host.log),
+            vec!["seat/commit:Studio rig2", "seat-rename-after/focus:true"]
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for("poodle-input-seat-rename-after"),
+            Some(true),
+            "Tab advances past the seat row"
+        );
+        assert_ne!(
+            poodle_gpui_node_backend::focus_state_for(SEAT_RENAME_FOCUS_ID),
+            Some(true),
+            "Tab does not restore seat-row display focus"
+        );
+    });
+}
+
 
 // ── Model-connection family (g15.008) ──────────────────────────────────────
 
@@ -11061,7 +11477,10 @@ struct LabelRouting {
     value: Mutex<String>,
     /// The value the field currently shows — the draft, until it commits.
     draft: Mutex<String>,
+    selection: Mutex<(usize, usize)>,
     editing: Mutex<bool>,
+    request_focus: Mutex<bool>,
+    last_previous: Mutex<Option<String>>,
     log: EventLog,
 }
 
@@ -11069,23 +11488,34 @@ fn label_routing_tree(host: &Arc<LabelRouting>, mounted: &Arc<Mutex<Node>>) -> N
     let provider = theme();
     let ctx = RenderContext::new(&provider);
     let editing = *host.editing.lock().expect("editing");
-    let shown = if editing {
-        host.draft.lock().expect("draft").clone()
-    } else {
-        host.value.lock().expect("value").clone()
+    let value = host.value.lock().expect("value").clone();
+    let draft = host.draft.lock().expect("draft").clone();
+    let selection = *host.selection.lock().expect("selection");
+    let restore = {
+        let mut flag = host.request_focus.lock().expect("request_focus");
+        let restore = *flag;
+        *flag = false;
+        restore
     };
     let spec = poodle_specs::EditableLabelSpec::new()
-        .with_value(&shown)
+        .with_value(&value)
+        .with_draft_value(editing.then_some(draft.clone()))
         .with_editing(editing)
+        .with_selection(selection.0, selection.1)
+        .with_request_focus(restore)
         .with_aria_label("track name");
     let id = host.id.clone();
 
     let change_host = Arc::clone(host);
     let change_mount = Arc::clone(mounted);
+    let select_host = Arc::clone(host);
+    let select_mount = Arc::clone(mounted);
     let commit_host = Arc::clone(host);
     let commit_mount = Arc::clone(mounted);
     let cancel_host = Arc::clone(host);
     let cancel_mount = Arc::clone(mounted);
+    let restore_host = Arc::clone(host);
+    let restore_mount = Arc::clone(mounted);
     let mut label = poodle_render::editable_label_with_handlers(
         &spec,
         &ctx,
@@ -11096,15 +11526,18 @@ fn label_routing_tree(host: &Arc<LabelRouting>, mounted: &Arc<Mutex<Node>>) -> N
                 let tree = label_routing_tree(&change_host, &change_mount);
                 *change_mount.lock().expect("mount") = tree;
             })),
-            on_commit: Some(Arc::new(move |next: &str| {
-                // The shared machine's guard, restated by the host: a commit
-                // only lands while the field is editing, so a blur that
-                // follows Escape or a completed Enter cannot emit a second.
+            on_selection_change: Some(Arc::new(move |start: usize, end: usize| {
+                *select_host.selection.lock().expect("selection") = (start, end);
+                let tree = label_routing_tree(&select_host, &select_mount);
+                *select_mount.lock().expect("mount") = tree;
+            })),
+            on_commit: Some(Arc::new(move |next: &str, previous: &str| {
                 if !*commit_host.editing.lock().expect("editing") {
                     return;
                 }
                 *commit_host.editing.lock().expect("editing") = false;
                 *commit_host.value.lock().expect("value") = next.to_owned();
+                *commit_host.last_previous.lock().expect("previous") = Some(previous.to_owned());
                 note(&commit_host.log, format!("label/commit:{next}"));
                 let tree = label_routing_tree(&commit_host, &commit_mount);
                 *commit_mount.lock().expect("mount") = tree;
@@ -11119,6 +11552,12 @@ fn label_routing_tree(host: &Arc<LabelRouting>, mounted: &Arc<Mutex<Node>>) -> N
                 note(&cancel_host.log, "label/cancel".to_owned());
                 let tree = label_routing_tree(&cancel_host, &cancel_mount);
                 *cancel_mount.lock().expect("mount") = tree;
+            })),
+            on_restore_display_focus: Some(Arc::new(move || {
+                *restore_host.request_focus.lock().expect("request_focus") = true;
+                note(&restore_host.log, "label/restore".to_owned());
+                let tree = label_routing_tree(&restore_host, &restore_mount);
+                *restore_mount.lock().expect("mount") = tree;
             })),
             ..poodle_render::EditableLabelHandlers::default()
         },
@@ -11139,9 +11578,22 @@ fn label_host(id: &str) -> Arc<LabelRouting> {
         id: id.to_owned(),
         value: Mutex::new("Kick".to_owned()),
         draft: Mutex::new("Kick".to_owned()),
+        selection: Mutex::new((4, 4)),
         editing: Mutex::new(true),
+        request_focus: Mutex::new(false),
+        last_previous: Mutex::new(None),
         log: event_log(),
     })
+}
+
+fn painted_label_input(mounted: &Arc<Mutex<Node>>, id: &str) -> String {
+    let tree = mounted.lock().expect("mount");
+    tree.find(&|node| node.id.as_deref() == Some(id))
+        .and_then(|node| match &node.kind {
+            NodeKind::Input { value, .. } => Some(value.clone()),
+            _ => None,
+        })
+        .expect("editing label paints an input")
 }
 
 // ── A childless editable input ─────────────────────────────────────────────
@@ -12728,10 +13180,11 @@ fn number_input_mounted_accessibility_projects_spin_button_surface() {
 /// g16.008. EditableLabel still commits when Tab leaves it — but for the
 /// reason its contract gives: Tab moves focus, and the blur commits the draft
 /// once. Enter is the direct commit, Escape cancels, and neither leaves a
-/// second commit behind for the blur to fire.
+/// second commit behind for the blur to fire. Enter and Escape restore the
+/// real display focus handle; Tab advances past it.
 ///
-/// Deliberately not claimed: activation modes, select-on-focus, the display
-/// mode's own affordances, or focus restoration after a commit.
+/// Deliberately not claimed: activation modes, select-on-focus, or the
+/// display mode's own affordances.
 #[test]
 fn editable_label_commits_on_enter_and_once_through_the_blur_tab_causes() {
     // ── Enter: one commit, and the blur that follows adds nothing ─────────
@@ -12752,11 +13205,16 @@ fn editable_label_commits_on_enter_and_once_through_the_blur_tab_causes() {
         driver.draw_frame();
         assert_eq!(
             take_events(&host.log),
-            vec!["label/commit:Kicks"],
+            vec!["label/commit:Kicks", "label/restore"],
             "Enter commits directly, exactly once"
         );
         assert_eq!(*host.value.lock().expect("value"), "Kicks");
         assert!(!*host.editing.lock().expect("editing"));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&host.id),
+            Some(true),
+            "Enter restores the display focus handle"
+        );
     });
 
     // ── Escape: cancel, and no commit behind it ───────────────────────────
@@ -12772,11 +13230,16 @@ fn editable_label_commits_on_enter_and_once_through_the_blur_tab_causes() {
 
         driver.dispatch_key_raw("escape");
         driver.draw_frame();
-        assert_eq!(take_events(&host.log), vec!["label/cancel"]);
+        assert_eq!(take_events(&host.log), vec!["label/cancel", "label/restore"]);
         assert_eq!(
             *host.value.lock().expect("value"),
             "Kick",
             "a cancelled edit never reaches the committed value"
+        );
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&host.id),
+            Some(true),
+            "Escape restores the display focus handle"
         );
     });
 
@@ -12808,11 +13271,52 @@ fn editable_label_commits_on_enter_and_once_through_the_blur_tab_causes() {
             Some(true),
             "and focus really did advance"
         );
+        assert_ne!(
+            poodle_gpui_node_backend::focus_state_for("poodle-input-label-tab"),
+            Some(true),
+            "Tab does not restore display focus"
+        );
 
         // Further frames cannot produce a second commit: the edit is over.
         driver.draw_frame();
         driver.draw_frame();
         assert_eq!(take_events(&host.log), Vec::<String>::new());
+    });
+}
+
+/// g16.045. Live keystrokes paint the session draft while the host's committed
+/// `value` and the commit callback's previous snapshot stay on Kick.
+#[test]
+fn editable_label_live_draft_stays_off_the_committed_value() {
+    run_headless(|cx| {
+        let host = label_host("label-draft-oracle");
+        let mounted = Arc::new(Mutex::new(Node::container()));
+        *mounted.lock().expect("mount") = label_routing_tree(&host, &mounted);
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 200.0);
+        driver.wait_for_focus_handle(&host.id);
+        driver.focus_element(&host.id);
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("s");
+        assert_eq!(painted_label_input(&mounted, &host.id), "Kicks");
+        assert_eq!(
+            *host.value.lock().expect("value"),
+            "Kick",
+            "live typing never overwrites the committed value"
+        );
+        assert_eq!(*host.draft.lock().expect("draft"), "Kicks");
+        assert!(host.last_previous.lock().expect("previous").is_none());
+        take_events(&host.log);
+
+        driver.dispatch_key_raw("enter");
+        driver.draw_frame();
+        assert_eq!(take_events(&host.log), vec!["label/commit:Kicks", "label/restore"]);
+        assert_eq!(
+            host.last_previous.lock().expect("previous").as_deref(),
+            Some("Kick")
+        );
+        assert_eq!(*host.value.lock().expect("value"), "Kicks");
+        assert!(!*host.editing.lock().expect("editing"));
     });
 }
 

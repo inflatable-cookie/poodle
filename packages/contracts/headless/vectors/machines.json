@@ -892,6 +892,165 @@
       "expect": { "context": { "highlightedValue": "a" }, "effects": [] }
     }
   ],
+  "edit": [
+    {
+      "name": "start edit seeds draft from committed value",
+      "state": "view",
+      "context": { "value": "Kick", "draft": "stale", "disabled": false, "maxLength": null },
+      "event": { "type": "START_EDIT" },
+      "expect": {
+        "state": "editing",
+        "context": { "draft": "Kick", "value": "Kick" },
+        "effects": [{ "type": "emitEditStart" }, { "type": "focusInput" }]
+      }
+    },
+    {
+      "name": "disabled start is inert",
+      "state": "view",
+      "context": { "value": "Kick", "draft": "Kick", "disabled": true, "maxLength": null },
+      "event": { "type": "START_EDIT" },
+      "expect": { "state": "view", "context": { "draft": "Kick" }, "effects": [] }
+    },
+    {
+      "name": "start while already editing is inert",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "Kicks", "disabled": false, "maxLength": null },
+      "event": { "type": "START_EDIT" },
+      "expect": { "state": "editing", "context": { "draft": "Kicks", "value": "Kick" }, "effects": [] }
+    },
+    {
+      "name": "live draft stays off the committed value",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "Kick", "disabled": false, "maxLength": null },
+      "event": { "type": "SET_DRAFT", "draft": "Kicks" },
+      "expect": { "state": "editing", "context": { "draft": "Kicks", "value": "Kick" }, "effects": [] }
+    },
+    {
+      "name": "portable trim drops NEL prefix and BOM suffix",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "\u0085Take\uFEFF", "disabled": false, "maxLength": null },
+      "event": { "type": "COMMIT" },
+      "expect": {
+        "state": "view",
+        "context": { "draft": "Kick", "value": "Kick" },
+        "effects": [{ "type": "emitCommit", "value": "Take", "previousValue": "Kick", "restoreFocus": true }]
+      }
+    },
+    {
+      "name": "zero-width space is not trimmed",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "\u200BKeep\u200B", "disabled": false, "maxLength": null },
+      "event": { "type": "COMMIT" },
+      "expect": {
+        "state": "view",
+        "effects": [{ "type": "emitCommit", "value": "\u200BKeep\u200B", "previousValue": "Kick", "restoreFocus": true }]
+      }
+    },
+    {
+      "name": "interior whitespace survives portable trim",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "  Keep  this  ", "disabled": false, "maxLength": null },
+      "event": { "type": "COMMIT" },
+      "expect": {
+        "state": "view",
+        "effects": [{ "type": "emitCommit", "value": "Keep  this", "previousValue": "Kick", "restoreFocus": true }]
+      }
+    },
+    {
+      "name": "whitespace-only draft commits empty",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": " \u00A0 ", "disabled": false, "maxLength": null },
+      "event": { "type": "COMMIT" },
+      "expect": {
+        "state": "view",
+        "effects": [{ "type": "emitCommit", "value": "", "previousValue": "Kick", "restoreFocus": true }]
+      }
+    },
+    {
+      "name": "unchanged commit still emits",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "Kick", "disabled": false, "maxLength": null },
+      "event": { "type": "COMMIT" },
+      "expect": {
+        "state": "view",
+        "effects": [{ "type": "emitCommit", "value": "Kick", "previousValue": "Kick", "restoreFocus": true }]
+      }
+    },
+    {
+      "name": "blur commit does not restore focus",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "Kicks", "disabled": false, "maxLength": null },
+      "event": { "type": "COMMIT_BLUR" },
+      "expect": {
+        "state": "view",
+        "effects": [{ "type": "emitCommit", "value": "Kicks", "previousValue": "Kick", "restoreFocus": false }]
+      }
+    },
+    {
+      "name": "cancel restores the committed draft and focus",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "abandoned", "disabled": false, "maxLength": null },
+      "event": { "type": "CANCEL" },
+      "expect": {
+        "state": "view",
+        "context": { "draft": "Kick", "value": "Kick" },
+        "effects": [{ "type": "emitCancel", "restoreFocus": true }]
+      }
+    },
+    {
+      "name": "commit while viewing is inert",
+      "state": "view",
+      "context": { "value": "Kick", "draft": "Kick", "disabled": false, "maxLength": null },
+      "event": { "type": "COMMIT" },
+      "expect": { "state": "view", "effects": [] }
+    },
+    {
+      "name": "scalar maxLength accepts one musical G-clef",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "", "disabled": false, "maxLength": 1 },
+      "event": { "type": "SET_DRAFT", "draft": "𝄞" },
+      "expect": { "state": "editing", "context": { "draft": "𝄞", "value": "Kick" }, "effects": [] }
+    },
+    {
+      "name": "scalar maxLength silently drops a second scalar after a G-clef",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "𝄞", "disabled": false, "maxLength": 1 },
+      "event": { "type": "SET_DRAFT", "draft": "𝄞A" },
+      "expect": { "state": "editing", "context": { "draft": "𝄞" }, "effects": [] }
+    },
+    {
+      "name": "external replacement while editing returns to view without commit",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "Kicks", "disabled": false, "maxLength": null },
+      "event": { "type": "REPLACE_VALUE", "value": "Snare" },
+      "expect": { "state": "view", "context": { "value": "Snare", "draft": "Snare" }, "effects": [] }
+    },
+    {
+      "name": "host echo of the committed value does not restart or cancel",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "Kicks", "disabled": false, "maxLength": null },
+      "event": { "type": "REPLACE_VALUE", "value": "Kick" },
+      "expect": { "state": "editing", "context": { "value": "Kick", "draft": "Kicks" }, "effects": [] }
+    },
+    {
+      "name": "disablement during edit cancels without restoring focus",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "Kicks", "disabled": false, "maxLength": null },
+      "event": { "type": "SET_DISABLED", "disabled": true },
+      "expect": {
+        "state": "view",
+        "context": { "draft": "Kick", "disabled": true },
+        "effects": [{ "type": "emitCancel", "restoreFocus": false }]
+      }
+    },
+    {
+      "name": "teardown while editing emits neither commit nor cancel",
+      "state": "editing",
+      "context": { "value": "Kick", "draft": "Kicks", "disabled": false, "maxLength": null },
+      "event": { "type": "TEARDOWN" },
+      "expect": { "state": "view", "context": { "draft": "Kick", "value": "Kick" }, "effects": [] }
+    }
+  ],
   "dragDrop": {
     "sessions": [
       {

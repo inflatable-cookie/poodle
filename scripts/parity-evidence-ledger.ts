@@ -93,6 +93,10 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
     "number_input_mounted_valid_direct_editing_rebuilds_host_draft_and_value",
     "number_input_mounted_accessibility_projects_spin_button_surface",
   ],
+  EditableLabel: [
+    "editable_label_commits_on_enter_and_once_through_the_blur_tab_causes",
+    "editable_label_live_draft_stays_off_the_committed_value",
+  ],
   Breadcrumbs: "breadcrumbs_callback_navigation_through_mounted_pointer_and_keyboard",
   IconButton: "icon_button_activation_toggle_and_tooltip_through_mounted_pointer_and_keyboard",
   Collapsible: "collapsible_disclosure_and_identity_through_mounted_pointer_and_keyboard",
@@ -104,8 +108,14 @@ const MOUNTED_BEHAVIOUR_TESTS: Record<string, string | string[]> = {
   Popover: "a_nested_popover_paints_without_nesting_deferred_draws",
   CodeInput: "a_grouped_code_input_types_and_completes_through_the_real_tree",
   FileUpload: "a_dropzone_browse_flows_fixture_bytes_through_the_generic_seam",
-  LicenceActivation: "licence_activation_key_entry_types_and_emits_through_the_real_tree",
-  LicenceSeats: "licence_seats_release_flows_through_confirm_in_a_mounted_window",
+  LicenceActivation: [
+    "licence_activation_key_entry_types_and_emits_through_the_real_tree",
+    "licence_activation_machine_name_enter_and_escape_restore_display_focus",
+  ],
+  LicenceSeats: [
+    "licence_seats_release_flows_through_confirm_in_a_mounted_window",
+    "licence_seats_seat_row_enter_and_escape_restore_display_focus",
+  ],
   LicenceStatus: "licence_status_renders_state_and_authority_reads_in_a_mounted_window",
   ModelConnectionPicker: "model_connection_picker_roving_focus_moves_real_backend_focus",
   ModelConnectionSetup: "model_connection_setup_direct_add_submits_from_choose_in_a_mounted_window",

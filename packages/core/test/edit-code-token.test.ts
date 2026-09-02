@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
-import { editLabelTransition, listReorderKeyIntent, type EditLabelContext } from "../src/edit.ts";
+import {
+  clampEditableLabelDraft,
+  editLabelTransition,
+  listReorderKeyIntent,
+  trimEditableLabel,
+  type EditLabelContext,
+} from "../src/edit.ts";
 import {
   clampCodePosition,
   codeGroupEndIndices,
@@ -12,7 +18,7 @@ import {
 import { mergeTokens, splitTokenInput, tokenBackspaceRemoves } from "../src/token.ts";
 
 function ctx(overrides: Partial<EditLabelContext> = {}): EditLabelContext {
-  return { value: "Original", draft: "Original", disabled: false, canStartEdit: true, ...overrides };
+  return { value: "Original", draft: "Original", disabled: false, maxLength: null, ...overrides };
 }
 
 describe("editLabelTransition", () => {
@@ -24,9 +30,9 @@ describe("editLabelTransition", () => {
     expect(result.effects).toEqual([{ type: "emitEditStart" }, { type: "focusInput" }]);
   });
 
-  test("guards: disabled and programmatic activation block start", () => {
+  test("guards: disabled and already-editing block start", () => {
     expect(editLabelTransition("view", ctx({ disabled: true }), { type: "START_EDIT" }).state).toBe("view");
-    expect(editLabelTransition("view", ctx({ canStartEdit: false }), { type: "START_EDIT" }).state).toBe("view");
+    expect(editLabelTransition("editing", ctx({ draft: "Kicks" }), { type: "START_EDIT" }).state).toBe("editing");
   });
 
   test("commit trims the draft and reports the previous value", () => {
@@ -34,7 +40,9 @@ describe("editLabelTransition", () => {
     const result = editLabelTransition("editing", editing, { type: "COMMIT" });
 
     expect(result.state).toBe("view");
-    expect(result.effects).toEqual([{ type: "emitCommit", value: "New name", previousValue: "Original" }]);
+    expect(result.effects).toEqual([
+      { type: "emitCommit", value: "New name", previousValue: "Original", restoreFocus: true },
+    ]);
   });
 
   test("cancel restores the draft and emits cancel", () => {
@@ -42,7 +50,19 @@ describe("editLabelTransition", () => {
 
     expect(result.state).toBe("view");
     expect(result.context.draft).toBe("Original");
-    expect(result.effects).toEqual([{ type: "emitCancel" }]);
+    expect(result.effects).toEqual([{ type: "emitCancel", restoreFocus: true }]);
+  });
+
+  test("portable trim drops NEL and BOM that String.trim does not both drop", () => {
+    const raw = "\u0085Take\uFEFF";
+    expect(trimEditableLabel(raw)).toBe("Take");
+    expect(raw.trim()).not.toBe("Take");
+    expect(trimEditableLabel("\u200BKeep\u200B")).toBe("\u200BKeep\u200B");
+  });
+
+  test("scalar clamp keeps a G-clef and rejects a later ASCII insert", () => {
+    expect(clampEditableLabelDraft("𝄞", 1)).toBe("𝄞");
+    expect(clampEditableLabelDraft("𝄞A", 1)).toBe("𝄞");
   });
 });
 

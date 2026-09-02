@@ -19,6 +19,7 @@ pub mod date;
 pub mod disclosure;
 pub mod drag_drop;
 pub mod duration;
+pub mod edit;
 pub mod external_file_drag;
 pub mod file_upload;
 pub mod history_center;

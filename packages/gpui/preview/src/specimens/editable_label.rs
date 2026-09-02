@@ -10,37 +10,155 @@ use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{EditableLabelActivation, EditableLabelSpec, EditableLabelVariant, EyebrowSpec};
 use std::sync::Arc;
 
-fn queue_change(state: &AppState, key: &str) -> Arc<dyn Fn(&str) + Send + Sync> {
-    let events = Arc::clone(&state.node_events);
-    let key = key.to_string();
-    Arc::new(move |value: &str| {
-        events.lock().unwrap().push(NodeSpecimenEvent::SetText {
-            key: key.clone(),
-            value: value.to_string(),
-        });
-    })
-}
-
-fn queue_commit(
+fn live_editable_label(
     state: &AppState,
-    value_key: &str,
-    record_event: bool,
-) -> Arc<dyn Fn(&str) + Send + Sync> {
+    key: &str,
+    mut spec: EditableLabelSpec,
+    theme: &GpuiThemeProvider,
+    record_commit: bool,
+) -> EditableLabel {
+    let draft_key = format!("{key}-draft");
+    let editing_key = format!("{key}-editing");
+    let committed = spec.value.clone();
+    let select_on_focus = spec.select_on_focus;
+    let editing = state
+        .specimens
+        .toggles
+        .get(&editing_key)
+        .copied()
+        .unwrap_or(spec.is_editing);
+    if let Some(draft) = state.specimens.text.get(&draft_key) {
+        spec = spec.with_draft_value(Some(draft.clone()));
+    } else if editing {
+        spec = spec.with_draft_value(Some(committed.clone()));
+    }
+    spec = spec.with_editing(editing);
+    let live_len = spec.live_text().chars().count();
+    let (start, end) = state.specimens.carets.get(key).copied().unwrap_or_else(|| {
+        if select_on_focus {
+            (0, live_len)
+        } else {
+            (live_len, live_len)
+        }
+    });
+    spec = spec.with_selection(start, end);
+    let restore_key = format!("{key}-restore-focus");
+    let restore = state.specimens.is_on(&restore_key);
+    spec = spec.with_request_focus(restore);
+
     let events = Arc::clone(&state.node_events);
-    let value_key = value_key.to_string();
-    Arc::new(move |value: &str| {
-        let mut queue = events.lock().unwrap();
-        queue.push(NodeSpecimenEvent::SetText {
-            key: value_key.clone(),
-            value: value.to_string(),
+    let draft_events = Arc::clone(&state.node_events);
+    let caret_events = Arc::clone(&state.node_events);
+    let commit_events = Arc::clone(&state.node_events);
+    let cancel_events = Arc::clone(&state.node_events);
+    let start_events = Arc::clone(&state.node_events);
+    let restore_events = Arc::clone(&state.node_events);
+    let key_owned = key.to_string();
+    let draft_owned = draft_key.clone();
+    let editing_owned = editing_key.clone();
+    let restore_owned = restore_key.clone();
+
+    if restore {
+        events.lock().unwrap().push(NodeSpecimenEvent::SetToggle {
+            key: restore_key,
+            value: false,
         });
-        if record_event {
+    }
+
+    EditableLabel::from_spec(spec, theme)
+        .on_edit_start({
+            let events = start_events;
+            let committed = committed.clone();
+            let draft_key = draft_owned.clone();
+            let editing_key = editing_owned.clone();
+            let caret_key = key_owned.clone();
+            Arc::new(move || {
+                let len = committed.chars().count();
+                let mut queue = events.lock().unwrap();
+                queue.push(NodeSpecimenEvent::SetText {
+                    key: draft_key.clone(),
+                    value: committed.clone(),
+                });
+                queue.push(NodeSpecimenEvent::SetToggle {
+                    key: editing_key.clone(),
+                    value: true,
+                });
+                queue.push(NodeSpecimenEvent::SetCaret {
+                    key: caret_key.clone(),
+                    start: if select_on_focus { 0 } else { len },
+                    end: len,
+                });
+            })
+        })
+        .on_change(Arc::new(move |value: &str| {
+            draft_events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetText {
+                    key: draft_owned.clone(),
+                    value: value.to_string(),
+                });
+        }))
+        .on_selection_change(Arc::new(move |start: usize, end: usize| {
+            caret_events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetCaret {
+                    key: key_owned.clone(),
+                    start,
+                    end,
+                });
+        }))
+        .on_commit({
+            let value_key = key.to_string();
+            let draft_key = draft_key.clone();
+            let editing_key = editing_key.clone();
+            Arc::new(move |value: &str, _previous: &str| {
+                let mut queue = commit_events.lock().unwrap();
+                queue.push(NodeSpecimenEvent::SetText {
+                    key: value_key.clone(),
+                    value: value.to_string(),
+                });
+                queue.push(NodeSpecimenEvent::SetOptionalText {
+                    key: draft_key.clone(),
+                    value: None,
+                });
+                queue.push(NodeSpecimenEvent::SetToggle {
+                    key: editing_key.clone(),
+                    value: false,
+                });
+                if record_commit {
+                    queue.push(NodeSpecimenEvent::SetText {
+                        key: "editable-label-event".to_string(),
+                        value: format!("Committed: \"{value}\""),
+                    });
+                }
+            })
+        })
+        .on_cancel(Arc::new(move || {
+            let mut queue = cancel_events.lock().unwrap();
+            queue.push(NodeSpecimenEvent::SetOptionalText {
+                key: draft_key.clone(),
+                value: None,
+            });
+            queue.push(NodeSpecimenEvent::SetToggle {
+                key: editing_key.clone(),
+                value: false,
+            });
             queue.push(NodeSpecimenEvent::SetText {
                 key: "editable-label-event".to_string(),
-                value: format!("Committed: \"{value}\""),
+                value: "Edit cancelled".to_string(),
             });
-        }
-    })
+        }))
+        .on_restore_display_focus(Arc::new(move || {
+            restore_events
+                .lock()
+                .unwrap()
+                .push(NodeSpecimenEvent::SetToggle {
+                    key: restore_owned.clone(),
+                    value: true,
+                });
+        }))
 }
 
 pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
@@ -75,7 +193,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
         .flex_col()
         .gap(px(24.0))
         .max_w(px(384.0))
-        // --- Double-click to edit (default, interactive) ---
         .child(
             div()
                 .flex()
@@ -86,20 +203,16 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    EditableLabel::from_spec(
-                        EditableLabelSpec::new().with_value(&title_value),
-                        theme,
-                    )
-                    .with_id("default")
-                    .on_change(queue_change(state, "editable-label-title"))
-                    .on_commit(queue_commit(
+                    live_editable_label(
                         state,
                         "editable-label-title",
+                        EditableLabelSpec::new().with_value(&title_value),
+                        theme,
                         true,
-                    )),
+                    )
+                    .with_id("default"),
                 ),
         )
-        // --- Editing mode (composed input shown, live) ---
         .child(
             div()
                 .flex()
@@ -110,7 +223,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    EditableLabel::from_spec(
+                    live_editable_label(
+                        state,
+                        "editable-label-live",
                         EditableLabelSpec::new()
                             .with_value(
                                 state
@@ -122,12 +237,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             )
                             .with_editing(true),
                         theme,
+                        false,
                     )
-                    .with_id("editing")
-                    .on_change(queue_change(state, "editable-label-live")),
+                    .with_id("editing"),
                 ),
         )
-        // --- Click to edit with icon (enterOrSpace + showEditIcon) ---
         .child(
             div()
                 .flex()
@@ -138,22 +252,19 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    EditableLabel::from_spec(
+                    live_editable_label(
+                        state,
+                        "editable-label-title",
                         EditableLabelSpec::new()
                             .with_value(&title_value)
                             .with_activation_mode(EditableLabelActivation::EnterOrSpace)
                             .with_show_edit_icon(true),
                         theme,
-                    )
-                    .with_id("with-icon")
-                    .on_commit(queue_commit(
-                        state,
-                        "editable-label-title",
                         true,
-                    )),
+                    )
+                    .with_id("with-icon"),
                 ),
         )
-        // --- Empty state (emptyText) ---
         .child(
             div()
                 .flex()
@@ -164,23 +275,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    EditableLabel::from_spec(
+                    live_editable_label(
+                        state,
+                        "editable-label-empty",
                         EditableLabelSpec::new()
                             .with_value(&empty_value)
                             .with_activation_mode(EditableLabelActivation::EnterOrSpace)
                             .with_empty_text("Add a description\u{2026}")
                             .with_placeholder("Add a description\u{2026}"),
                         theme,
-                    )
-                    .with_id("empty")
-                    .on_commit(queue_commit(
-                        state,
-                        "editable-label-empty",
                         true,
-                    )),
+                    )
+                    .with_id("empty"),
                 ),
         )
-        // --- Flush variant (display) ---
         .child(
             div()
                 .flex()
@@ -191,23 +299,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    EditableLabel::from_spec(
+                    live_editable_label(
+                        state,
+                        "editable-label-flush",
                         EditableLabelSpec::new()
                             .with_value(&flush_value)
                             .with_variant(EditableLabelVariant::Flush)
                             .with_activation_mode(EditableLabelActivation::EnterOrSpace)
                             .with_show_edit_icon(true),
                         theme,
-                    )
-                    .with_id("flush")
-                    .on_commit(queue_commit(
-                        state,
-                        "editable-label-flush",
                         false,
-                    )),
+                    )
+                    .with_id("flush"),
                 ),
         )
-        // --- With max length (maxLength + placeholder, editing) ---
         .child(
             div()
                 .flex()
@@ -218,7 +323,9 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     theme,
                 ))
                 .child(
-                    EditableLabel::from_spec(
+                    live_editable_label(
+                        state,
+                        "editable-label-max",
                         EditableLabelSpec::new()
                             .with_value("Short text")
                             .with_activation_mode(EditableLabelActivation::EnterOrSpace)
@@ -226,11 +333,11 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                             .with_placeholder("Enter text\u{2026}")
                             .with_editing(true),
                         theme,
+                        false,
                     )
                     .with_id("max-length"),
                 ),
         )
-        // --- Disabled ---
         .child(
             div()
                 .flex()
@@ -250,7 +357,6 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                     .with_id("disabled"),
                 ),
         )
-        // --- Last event ---
         .when(last_event.is_some(), |el| {
             el.child(
                 div()
