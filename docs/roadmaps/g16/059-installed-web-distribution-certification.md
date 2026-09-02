@@ -10,7 +10,7 @@ Governing refs: `../../architecture/014-compiled-web-package-distribution.md`,
 
 Proof commit: `b37f404737062f9603c097dee0ee8b8916595d1f`
 Worker PR: https://github.com/inflatable-cookie/poodle/pull/163
-Merge: `536c9f7431d1095d48a91ce8d77613932f0e04ad`
+Merge: `536c9f7435c779e5829016432394d0c01ec442ee`
 
 ## Goal
 
