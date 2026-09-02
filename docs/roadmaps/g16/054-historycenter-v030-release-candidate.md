@@ -1,8 +1,7 @@
 # g16.054 — HistoryCenter v0.3.0 Release Candidate
 
-Status: blocked — `g16.053` is complete; serial `g16.056`–`g16.059` must
-complete first; later release certification and Loophole adoption remain
-separate authority gates
+Status: ready — `g16.053` and serial `g16.056`–`g16.059` are complete; later
+release certification and Loophole adoption remain separate authority gates
 Type: release candidate — no release mutation
 Opened: 2026-09-01
 Depends on: completed `g16.053`; completed `g16.059`, which certifies the

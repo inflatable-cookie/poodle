@@ -88,21 +88,21 @@ stay maintained; backend admission is not part of the first card.
 51. [051 — Icon geometry native visual admission](051-icon-geometry-native-visual-admission.md) — blocked on completed `g16.050`, the operational Button lab, and a separately completed icon adapter/manifest extension
 52. [052 — Contributor design-guidance pilot](052-contributor-design-guidance-pilot.md) — gated on named human reviewers, freeze approvals, and orchestrator execution custody
 53. [053 — Repository security-audit boundary repair](053-repository-security-audit-boundary-repair.md) — complete in PR #150; the production matcher is boundary-safe and the repository audit is green without exclusions
-54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — blocked on completed `g16.059`; `g16.053` is complete and no release mutation is authorized
+54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — ready after accepted `g16.059`; immutable candidate only, no release mutation authorized
 55. [055 — Drag source pointer-gesture browser suppression](055-drag-source-preactivation-selection-suppression.md) — complete; merged in PR #151 with shared-controller pre-activation selection suppression and one-shot post-drag compatibility-click cancellation
 56. [056 — Web distribution contract](056-web-distribution-contract.md) — complete; merged in PR #159 after one exact-head repair round with frozen 176/167/108 inventories and byte-exact receipts
 57. [057 — Core build substrate](057-core-build-substrate.md) — complete; merged in PR #161 with deterministic source-free core output and receipt-backed audits
 58. [058 — Shell distributions](058-shell-distributions.md) — complete; merged in PR #162 with source-free dual-lane Svelte, private React, real Svelte declarations, and the five-component markdown boundary
-59. [059 — Installed web distribution certification](059-installed-web-distribution-certification.md) — ready; sole permanent installed-tarball oracle and receipt
+59. [059 — Installed web distribution certification](059-installed-web-distribution-certification.md) — complete; merged in PR #163 with accepted exact-commit receipt
 60. [060 — Tabs controlled-panel focus transfer](060-tabs-controlled-panel-focus-transfer.md) — ready independent consumer-unblock lane; paired web policy, no Figmatic mutation
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050`, `g16.053`, and
-`g16.056`–`g16.058` are complete. `g16.059` is the ready serial continuation.
+`g16.056`–`g16.059` are complete. `g16.054` is the ready serial continuation.
 `g16.051` and `g16.052` retain their
-explicit serial or external gates. `g16.054` is blocked on completed `g16.059` and does
+explicit serial or external gates. `g16.054` is ready after completed `g16.059` and does
 not inherit release authority from the distribution programme. Citations,
 nested-menu pointer intent, the dedicated lab,
 its six-component / 24-fixture visual tranche, GPUI accessibility, public
