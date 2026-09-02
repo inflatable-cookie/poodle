@@ -103,4 +103,106 @@ describe("ToastStack (svelte)", () => {
     expect(container.querySelector(".poodle-toast-stack")).not.toBeNull();
     expect(container.querySelectorAll(".poodle-toast").length).toBe(0);
   }, 2000);
+
+  it("same-id copy and tone settle in place with one live announcement", async () => {
+    const { container, rerender } = render(ToastStack, {
+      props: { items: [{ id: "job", title: "Publishing", tone: "info" }] },
+    });
+    const toast = container.querySelector(".poodle-toast") as HTMLElement;
+    expect(toast.dataset.motion).toBe("settled");
+    expect(toast.getAttribute("aria-live")).toBe("polite");
+
+    await rerender({ items: [{ id: "job", title: "Published", tone: "success" }] });
+
+    expect(container.querySelectorAll(".poodle-toast").length).toBe(1);
+    expect(toast.dataset.motion).toBe("settled");
+    expect(toast.dataset.tone).toBe("success");
+    expect(toast.getAttribute("aria-live")).toBe("polite");
+    expect(toast.textContent).toContain("Published");
+
+    await rerender({ items: [{ id: "job", title: "Published", tone: "success" }] });
+    expect(toast.dataset.motion).toBe("settled");
+    expect(container.querySelectorAll(".poodle-toast").length).toBe(1);
+  });
+
+  it("keeps action focus on a label swap and restores dismiss when the action disappears", async () => {
+    const { container, rerender } = render(ToastStack, {
+      props: {
+        items: [
+          { id: "job", title: "Publish", actionLabel: "Retry", tone: "info" },
+          { id: "next", title: "Later" },
+        ],
+      },
+    });
+    const action = [...container.querySelectorAll("button")].find((button) =>
+      button.textContent?.includes("Retry"),
+    ) as HTMLButtonElement;
+    action.focus();
+    expect(document.activeElement).toBe(action);
+
+    await rerender({
+      items: [
+        { id: "job", title: "Publish", actionLabel: "View", tone: "info" },
+        { id: "next", title: "Later" },
+      ],
+    });
+    const swapped = [...container.querySelectorAll("button")].find((button) =>
+      button.textContent?.includes("View"),
+    ) as HTMLButtonElement;
+    expect(document.activeElement).toBe(swapped);
+
+    await rerender({
+      items: [
+        { id: "job", title: "Publish", tone: "info" },
+        { id: "next", title: "Later" },
+      ],
+    });
+    const dismiss = container.querySelector('button[aria-label="Dismiss Publish"]') as HTMLButtonElement;
+    expect(document.activeElement).toBe(dismiss);
+  });
+
+  it("does not steal focus when an action is removed after focus has left the stack", async () => {
+    const { container, rerender } = render(ToastStack, {
+      props: {
+        items: [
+          { id: "job", title: "Publish", actionLabel: "Retry", tone: "info" },
+          { id: "next", title: "Later" },
+        ],
+      },
+    });
+    const outside = document.createElement("button");
+    outside.type = "button";
+    outside.textContent = "Outside";
+    document.body.append(outside);
+    try {
+      const action = [...container.querySelectorAll("button")].find((button) =>
+        button.textContent?.includes("Retry"),
+      ) as HTMLButtonElement;
+      action.focus();
+      expect(document.activeElement).toBe(action);
+      outside.focus();
+      expect(document.activeElement).toBe(outside);
+
+      await rerender({
+        items: [
+          { id: "job", title: "Publish", tone: "info" },
+          { id: "next", title: "Later" },
+        ],
+      });
+      expect(document.activeElement).toBe(outside);
+    } finally {
+      outside.remove();
+    }
+  });
+
+  it("does not put numeric progress in toast copy during a same-id settle", async () => {
+    const { container, rerender } = render(ToastStack, {
+      props: { items: [{ id: "job", title: "Publishing", message: "Still working.", tone: "info" }] },
+    });
+    await rerender({
+      items: [{ id: "job", title: "Published", message: "Your article is live.", tone: "success" }],
+    });
+    const copy = container.querySelector(".poodle-toast__copy")?.textContent ?? "";
+    expect(copy).not.toMatch(/\d+%/);
+  });
 });

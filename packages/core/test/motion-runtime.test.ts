@@ -10,6 +10,7 @@ import {
   motionKey,
   playClippedHeight,
   playWebAnimation,
+  nextToastVisuals,
 } from "../src/index.ts";
 
 afterEach(() => {
@@ -191,5 +192,25 @@ describe("web motion runtime", () => {
     cancelWebMotion(motionKey(intent.owner, intent.role, intent.channel));
     expect(liveWebMotionCount()).toBe(1);
     holds.at(-1)?.finish();
+  });
+});
+
+describe("nextToastVisuals", () => {
+  test("preloaded ids paint settled", () => {
+    expect(nextToastVisuals([], ["save"], true)).toEqual([{ id: "save", phase: "settled" }]);
+  });
+
+  test("same-id replacement keeps the live phase", () => {
+    const previous = [{ id: "job", phase: "settled" as const }];
+    expect(nextToastVisuals(previous, ["job"], false)).toEqual([{ id: "job", phase: "settled" }]);
+  });
+
+  test("a new id enters; a departing id exits", () => {
+    const previous = [{ id: "keep", phase: "settled" as const }, { id: "old", phase: "settled" as const }];
+    expect(nextToastVisuals(previous, ["keep", "fresh"], false)).toEqual([
+      { id: "keep", phase: "settled" },
+      { id: "fresh", phase: "enter" },
+      { id: "old", phase: "exit" },
+    ]);
   });
 });

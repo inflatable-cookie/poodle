@@ -1,6 +1,6 @@
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { writable } from "svelte/store";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ToastHost } from "../src/ToastHost";
 import type { ToastHostStore, ToastHostStoreItem } from "../src/types";
@@ -23,6 +23,10 @@ function getStoreSnapshot(store: ReturnType<typeof writable<ToastHostStoreItem[]
 }
 
 describe("ToastHost (react)", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("renders nothing while the store is empty", () => {
     const { hostStore } = makeStore([]);
     const { container } = render(<ToastHost store={hostStore} />);
@@ -109,5 +113,50 @@ describe("ToastHost (react)", () => {
     ) as HTMLButtonElement;
     fireEvent.click(action);
     expect(onAction).toHaveBeenCalledWith("t1");
+  });
+
+  it("clears a running clock when the same id becomes sticky", async () => {
+    const { store, hostStore } = makeStore([
+      { id: "job", title: "Saving", message: "Working.", tone: "info" },
+    ]);
+    render(<ToastHost store={hostStore} autoDismissMs={20} />);
+    act(() => {
+      store.set([{ id: "job", title: "Failed", message: "Boom.", tone: "danger" }]);
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 80));
+    });
+    expect(getStoreSnapshot(store).map((toast) => toast.id)).toEqual(["job"]);
+  });
+
+  it("starts the configured delay when sticky pending settles to success", async () => {
+    vi.useFakeTimers();
+    const { store, hostStore } = makeStore([
+      { id: "job", title: "Publishing", message: "Working.", sticky: true },
+    ]);
+    render(<ToastHost store={hostStore} autoDismissMs={2500} />);
+    act(() => {
+      store.set([{ id: "job", title: "Published", message: "Done.", tone: "success" }]);
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2499);
+    });
+    expect(getStoreSnapshot(store).map((toast) => toast.id)).toEqual(["job"]);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2);
+    });
+    expect(getStoreSnapshot(store).map((toast) => toast.id)).toEqual([]);
+  });
+
+  it("keeps one live row when the store repeats an id", async () => {
+    const { hostStore } = makeStore([
+      { id: "job", title: "First", message: "Working." },
+      { id: "job", title: "Last", message: "Done.", tone: "success" },
+    ]);
+    const { container } = render(<ToastHost store={hostStore} />);
+    await waitFor(() => {
+      expect(container.querySelectorAll(".poodle-toast").length).toBe(1);
+    });
+    expect(container.querySelector(".poodle-toast")?.textContent).toContain("Last");
   });
 });

@@ -2,8 +2,10 @@ use crate::app_state::AppState;
 use crate::node_compat::{Button, Eyebrow, ToastStack};
 use crate::specimens::specimen_axes::{density_key, size_key};
 use crate::specimens::specimen_layout::{specimen_layout, SpecimenAxes};
+use crate::style_bridge::color_to_hsla;
 use crate::PreviewRoot;
 use gpui::*;
+use poodle_adapter::ThemeProvider;
 use poodle_gpui::GpuiThemeProvider;
 use poodle_specs::{ButtonSpec, ButtonVariant, EyebrowSpec};
 use poodle_specs::{Toast, ToastStackSpec, ToastTone};
@@ -95,6 +97,29 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                         theme,
                     ),
                     260.0,
+                )),
+        ))
+        .child(group(
+            theme,
+            "Same-id settle",
+            div()
+                .flex()
+                .flex_col()
+                .gap(px(8.0))
+                .child(
+                    div()
+                        .text_sm()
+                        .text_color(color_to_hsla(theme.resolve_color("color.text.secondary")))
+                        .child("Pending used this same id. Toast copy has no percent; Progress stays on the host."),
+                )
+                .child(surface(
+                    ToastStack::from_spec(
+                        ToastStackSpec::new().with_toasts(vec![Toast::new("publish", "Published")
+                            .with_tone(ToastTone::Success)
+                            .with_message("Your article is live.")]),
+                        theme,
+                    ),
+                    120.0,
                 )),
         ))
         .into_any_element();

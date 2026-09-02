@@ -1,7 +1,8 @@
 <script lang="ts">
   import "@inflatable-cookie/poodle-core/styles/toast-host.css";
-  import { normalizeToast, reconcileToastTimers } from "@inflatable-cookie/poodle-core";
+  import { normalizeToast, reconcileToastTimers, uniqueToastInputs } from "@inflatable-cookie/poodle-core";
   import type { Readable } from "svelte/store";
+  import { untrack } from "svelte";
 
   import { default as ToastStack } from "./ToastStack.svelte";
   import type {
@@ -12,10 +13,12 @@
   } from "./types";
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
 
+  const DEFAULT_STICKY_TONES: NonNullable<ToastItem["tone"]>[] = ["danger"];
+
   let {
     store,
     autoDismissMs = 6000,
-    stickyTones = ["danger"],
+    stickyTones = DEFAULT_STICKY_TONES,
     placement = "bottom-end",
     ariaLabel = "Notifications",
     size = null,
@@ -37,6 +40,7 @@
   } = $props();
 
   let items = $state<ToastItem[]>([]);
+  let rawItems = $state<ToastHostStoreItem[]>([]);
 
   const timers = new Map<string, ReturnType<typeof setTimeout>>();
 
@@ -45,27 +49,6 @@
     if (!timer) return;
     clearTimeout(timer);
     timers.delete(id);
-  }
-
-  function reconcileTimers(next: ToastHostStoreItem[]) {
-    const plan = reconcileToastTimers([...timers.keys()], next, {
-      autoDismissMs,
-      // ToastItem["tone"] is optional; undefined entries can never match a tone
-      stickyTones: stickyTones.filter((tone): tone is NonNullable<typeof tone> => tone != null),
-    });
-
-    for (const id of plan.clear) {
-      clearTimer(id);
-    }
-
-    for (const id of plan.start) {
-      const timer = setTimeout(() => {
-        store.dismiss(id);
-        timers.delete(id);
-      }, autoDismissMs);
-
-      timers.set(id, timer);
-    }
   }
 
   function handleDismiss(id: string) {
@@ -80,13 +63,39 @@
 
   $effect(() => {
     const unsubscribe = (store.toasts as Readable<ToastHostStoreItem[]>).subscribe((next) => {
-      items = next.map(normalizeToast);
-      reconcileTimers(next);
+      rawItems = next;
     });
 
     return () => {
       unsubscribe();
     };
+  });
+
+  $effect(() => {
+    const delay = autoDismissMs;
+    const tones = stickyTones;
+    const snapshot = rawItems;
+    untrack(() => {
+      const unique = uniqueToastInputs(snapshot);
+      items = unique.map(normalizeToast);
+      const plan = reconcileToastTimers([...timers.keys()], unique, {
+        autoDismissMs: delay,
+        stickyTones: tones.filter((tone): tone is NonNullable<typeof tone> => tone != null),
+      });
+
+      for (const id of plan.clear) {
+        clearTimer(id);
+      }
+
+      for (const id of plan.start) {
+        const timer = setTimeout(() => {
+          store.dismiss(id);
+          timers.delete(id);
+        }, plan.delayMs);
+
+        timers.set(id, timer);
+      }
+    });
   });
 
   $effect(() => {

@@ -24,6 +24,16 @@
     }
   };
 
+  const publishToasts = writable<ToastHostStoreItem[]>([
+    { id: "publish", title: "Publishing", message: "Still working.", sticky: true },
+  ]);
+  const publishStore = {
+    toasts: publishToasts,
+    dismiss(id: string) {
+      publishToasts.update((items) => items.filter((item) => item.id !== id));
+    }
+  };
+
   function pushToast() {
     const variant = seedTones[nextId % seedTones.length];
     const id = String(nextId++);
@@ -37,6 +47,16 @@
       }
     ]);
   }
+
+  function settlePublish() {
+    publishToasts.update((items) =>
+      items.map((item) =>
+        item.id === "publish"
+          ? { id: "publish", title: "Published", message: "Your article is live.", tone: "success" }
+          : item,
+      ),
+    );
+  }
 </script>
 
 <SpecimenLayout>
@@ -44,12 +64,22 @@
     <p class="poodle-specimen__copy">
       The host owns timer policy and fixed positioning while `ToastStack` stays presentational.
     </p>
-    <Button variant="secondary" onClick={pushToast}>Add toast</Button>
-  </SpecimenGroup>
+      <Button variant="secondary" onClick={pushToast}>Add toast</Button>
+    </SpecimenGroup>
 
-  <div class="poodle-specimen__surface">
-    <ToastHost {store} />
-  </div>
+    <SpecimenGroup label="Same-id settle">
+      <p class="poodle-specimen__copy">
+        One store id starts sticky pending, then upserts success in place. Progress stays off the toast copy.
+      </p>
+      <Button variant="secondary" onClick={settlePublish}>Settle publish</Button>
+    </SpecimenGroup>
+
+    <div class="poodle-specimen__surface">
+      <ToastHost {store} />
+    </div>
+    <div class="poodle-specimen__surface">
+      <ToastHost store={publishStore} />
+    </div>
 
   {#snippet sizes(size)}
     <div class="poodle-specimen__surface">

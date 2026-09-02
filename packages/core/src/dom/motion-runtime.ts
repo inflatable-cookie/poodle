@@ -447,6 +447,29 @@ export function moveToastFocus(
   }
 }
 
+/**
+ * Action removal keeps the row. Move focus to that row's dismiss, then the
+ * next surviving row, then previous, then the connected entry point.
+ */
+export function moveToastFocusFromRemovedAction(
+  stack: HTMLElement,
+  toast: HTMLElement,
+  enteredFrom: Element | null,
+  activator: EventTarget | Node | null = document.activeElement,
+): void {
+  if (!toastOwnsFocus(toast, activator) && activator !== toast) {
+    return;
+  }
+  if (toast.getAttribute("data-motion") !== "exit") {
+    const dismiss = toast.querySelector<HTMLElement>(".poodle-toast__dismiss");
+    if (dismiss && dismiss.getAttribute("tabindex") !== "-1") {
+      holdToastFocus(dismiss);
+      return;
+    }
+  }
+  moveToastFocus(stack, toast, enteredFrom, toast);
+}
+
 export function cancelToastPresence(owner: string): void {
   cancelWebMotion(motionKey(owner, "toast-enter", "item"));
   cancelWebMotion(motionKey(owner, "toast-exit", "item"));

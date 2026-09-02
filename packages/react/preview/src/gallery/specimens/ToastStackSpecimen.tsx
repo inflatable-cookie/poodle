@@ -11,6 +11,7 @@ export function ToastStackSpecimen() {
     { id: "1", title: "Changes saved", message: "Your settings have been updated.", tone: "success" },
     { id: "2", title: "New version available", message: "Update to v2.1 for the latest features.", tone: "info", actionLabel: "Update" },
     { id: "3", title: "Rate limit warning", message: "You are approaching your API limit.", tone: "warning" },
+    { id: "publish", title: "Publishing", message: "Still working.", tone: "info" },
   ]);
 
   const addToast = () => {
@@ -55,6 +56,21 @@ export function ToastStackSpecimen() {
         <SpecimenGroup label="Interactive stack" bare>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             <Button variant="secondary" sizeRole="chrome" onClick={addToast}>Add toast</Button>
+            <Button
+              variant="secondary"
+              sizeRole="chrome"
+              onClick={() =>
+                setItems((prev) =>
+                  prev.map((item) =>
+                    item.id === "publish"
+                      ? { id: "publish", title: "Published", message: "Your article is live.", tone: "success" }
+                      : item,
+                  ),
+                )
+              }
+            >
+              Settle publish
+            </Button>
           </div>
           <div style={variantStyle}>
             <ToastStack

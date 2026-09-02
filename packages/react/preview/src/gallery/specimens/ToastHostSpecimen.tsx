@@ -45,8 +45,38 @@ function makeToastStore() {
   };
 }
 
+function makePublishStore() {
+  let items: ToastHostStoreItem[] = [
+    { id: "publish", title: "Publishing", message: "Still working.", sticky: true },
+  ];
+  const subs = new Set<(items: ToastHostStoreItem[]) => void>();
+  const emit = () => subs.forEach((run) => run([...items]));
+  return {
+    toasts: {
+      subscribe(run: (items: ToastHostStoreItem[]) => void) {
+        subs.add(run);
+        run([...items]);
+        return () => subs.delete(run);
+      },
+    },
+    dismiss(id: string) {
+      items = items.filter((item) => item.id !== id);
+      emit();
+    },
+    settle() {
+      items = items.map((item) =>
+        item.id === "publish"
+          ? { id: "publish", title: "Published", message: "Your article is live.", tone: "success" }
+          : item,
+      );
+      emit();
+    },
+  };
+}
+
 export function ToastHostSpecimen() {
   const store = useMemo(() => makeToastStore(), []);
+  const publishStore = useMemo(() => makePublishStore(), []);
 
   const surface = (node: ReactNode) => (
     <div
@@ -76,7 +106,15 @@ export function ToastHostSpecimen() {
         <Button variant="secondary" onClick={() => store.push()}>Add toast</Button>
       </SpecimenGroup>
 
+      <SpecimenGroup label="Same-id settle">
+        <p style={{ margin: 0, color: "var(--poodle-color-text-secondary)" }}>
+          One store id starts sticky pending, then upserts success in place. Progress stays off the toast copy.
+        </p>
+        <Button variant="secondary" onClick={() => publishStore.settle()}>Settle publish</Button>
+      </SpecimenGroup>
+
       {surface(<ToastHost store={store} />)}
+      {surface(<ToastHost store={publishStore} />)}
     </SpecimenLayout>
   );
 }
