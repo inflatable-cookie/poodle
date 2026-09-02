@@ -8,9 +8,11 @@ Governing refs: `docs/contracts/001-working-rules.md`,
 `docs/contracts/components/tabs.md`
 Branch: `fix/g16-060-tabs-controlled-focus`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-060-tabs-controlled-focus`
-PR head before exact-head repair: `f0909735a25f7b9248971cc4e3448e20ced5f114`
-Live `origin/main` at worker close: `d82ba7202aaecff452ec2c59e79ea7be3be114af`
-Repaired heads: `e96826f91` (first exact-head repair), `c30c2ad32` (second, code), receipt commit on top
+Rebased onto `origin/main` at `38f4fa2a7` (g16.061 routing repair merged as PR
+#166 resolved the ordinary-PR certification block; pre-rebase receipts below
+describe the earlier open-defect state against `d82ba7202`). Rebase kept the
+lane's accepted focus semantics; the lane carries no certification-lane
+changes (routing files are byte-identical to `origin/main`).
 
 ## Outcome
 
@@ -96,22 +98,17 @@ Public declarations/exports (built by `react:package` / `svelte:package`):
 re-exports through `export * from "./types"`, Svelte root through its public
 type export list.
 
-Required boards on the repaired worker tree:
+Required boards after the rebase onto `38f4fa2a7`:
 
-- `effigy ci:web` — red only at `test:web-pack-install`, the inherited g16.059
-  ordinary-PR certification-routing defect: "certification scope rejected
-  paths outside writable allowlist" naming this lane's Tabs, core, and docs
-  paths. Steps 1-11 were green on the repaired head `e96826f91`; steps 13-22
-  were green on identical repaired content in the pre-commit board run. The
-  certification file is unchanged from `origin/main`; the defect stays open
-  and was not weakened here.
-- `effigy docs:check` — pass (rerun after the contract correction on
-  `c30c2ad32`)
+- `effigy ci:web` — pass, all 22 steps green on the rebased head. The routing
+  red is gone: g16.061 (PR #166) resolved the ordinary-PR certification block
+  on `origin/main`, and this lane carries no certification-lane changes
+  (`test/package-install/*`, `PAPERCUTS.md` byte-identical to `origin/main`).
+- `effigy docs:check` — pass
 - `git diff --check origin/main...HEAD` — pass
 
 Vitest `react-components` retains the required source alias for the focused
-source-helper proof. The `react-preview` alias and the attempted certification
-routing change are reverted.
+source-helper proof; the `react-preview` project matches `origin/main`.
 
 ## Figmatic
 

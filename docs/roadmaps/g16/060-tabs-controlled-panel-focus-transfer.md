@@ -131,10 +131,14 @@ head the paired suites run 13 + 13 green with core at 23, and the full
 `react-components` + `svelte-components` projects pass (346 files, 2697
 tests). Contract §6/§9 now state owned `focusin`/`focusout` capture with
 commit-phase application; the unused `panelRef`/`panelElement` bindings are
-removed. `effigy docs:check` and `git diff --check origin/main...HEAD` pass;
-`effigy ci:web` on the repaired head is red only at `test:web-pack-install`,
-the inherited g16.059 ordinary-PR certification-routing defect. The
-certification file is unchanged and the defect was not weakened in this lane.
+removed.
+
+Rebased onto `origin/main` at `38f4fa2a7` after g16.061 (PR #166) merged the
+ordinary-PR certification-routing repair. Focus semantics are unchanged; the
+lane still touches no certification surface (`test/package-install/*`,
+`PAPERCUTS.md` byte-identical to `origin/main`). After the rebase: paired
+suites 13 + 13 green, core 23, full `effigy ci:web` pass (all 22 steps),
+`effigy docs:check` pass, `git diff --check origin/main...HEAD` clean.
 
 Orchestrator owns exact-head review, merge, roadmap closeout, and the Figmatic
 receipt. Do not merge from this worker.
