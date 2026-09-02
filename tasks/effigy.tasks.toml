@@ -175,12 +175,17 @@
 # Longhorn. Includes a negative control. Headless; no window, no permission.
 "drift:gpui-consumer-identity" = "bun test/consumer-dual-dependency/run.ts"
 "check:release-automation" = "bun scripts/check-release-automation.ts"
+"core:build" = "bun scripts/web-distribution/core-build.ts"
+"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts"
 "test:core" = "bun run --cwd packages/core test"
 # Component-shell smoke + interaction tests (Svelte + React) via vitest/happy-dom.
 # Verifies the machine -> DOM wiring the framework packages add on top of the
 # @inflatable-cookie/poodle-core machines (which test:core covers).
 # Component tests use the ordinary Vitest heap and worker scheduling.
-"test:components" = "bunx vitest run"
+"test:components" = [
+  { task = "core:build" },
+  { run = "bunx vitest run" },
+]
 "test:web-pack-install" = "bun test/package-install/web-preview.ts"
 # Compatibility selector for existing downstream handoffs and historical docs.
 "test:svelte-pack-install" = [{ task = "test:web-pack-install" }]
@@ -462,11 +467,13 @@
 
 "ci:web" = [
   { task = "gate:snapshot" },
+  { task = "core:build" },
   { task = "audit:icons" },
   { task = "audit:tokens" },
   { task = "drift:recipes" },
   { task = "drift:drag-inventory" },
   { task = "test:core" },
+  { task = "test:core-build" },
   { task = "test:components" },
   # The packaged counterpart of test:components. Cheap (~4s against ci:web's
   # ~21s) and it catches a class nothing else here can see: g13-b041 had a
@@ -560,6 +567,7 @@
 "docs:build" = [{ task = "svelte:build" }]
 "docs:check" = [
   { task = "gate:snapshot" },
+  { task = "core:build" },
   { task = "drift:recipes" },
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },
@@ -576,7 +584,7 @@
 "parity:report" = [{ task = "report:parity" }]
 
 # Cheap orientation for `effigy doctor`. Never alias health to the full board.
-health = [{ task = "docs:lint" }]
+health = [{ task = "core:build" }, { task = "docs:lint" }]
 
 # Full self-contained local release board (headless / CPU-only). Visual GPUI
 # and paired Jetstream sweeps stay separate (`test:native-visual`,

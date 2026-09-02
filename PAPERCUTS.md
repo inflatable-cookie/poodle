@@ -5,7 +5,14 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
-<!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
+- 2026-09-02 — RESOLVED 2026-09-02. After core exports moved to `dist/`,
+  `docs:lint` (and therefore `health`) failed on a fresh checkout until
+  `core:build` produced `packages/core/dist`. `health` and `test:components`
+  now run `core:build` first. The pack-install directory-membership check
+  now treats `src` and `dist` as trees (`package/<dir>/` or exact
+  `package/<dir>`) and still treats `LICENSE` as a file. g16.059's new
+  receipt/consumer/two-pack work stays out of this harness. Hit while
+  closing g16.057.
 
 - 2026-09-02 — `scripts/gate-tree-guard.ts` writes `poodle-gate-tree-guard.json`
   into the shared OS temp dir. Parallel worktrees (`docs:check` / `ci:web`)

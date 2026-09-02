@@ -1,11 +1,14 @@
 # g16.057 — Core Build Substrate
 
-Status: ready — `g16.056` merged in PR #159
+Status: complete — awaiting orchestrator review
+PR: https://github.com/inflatable-cookie/poodle/pull/161
 Type: implementation — build substrate
 Opened: 2026-09-02
 Depends on: accepted `g16.056`
 Governing refs: `../../architecture/014-compiled-web-package-distribution.md`,
 `056-web-distribution-contract.md`
+Review repair: exact-head comment on PR #161. Five in-bounds findings closed.
+g16.059 redesign stays out of scope.
 
 ## Goal
 
@@ -99,3 +102,5 @@ or any release/workflow/registry mutation appears.
 ## Continuation
 
 Accepted merge unlocks `g16.058`. `g16.054` remains blocked.
+
+Execution log: `docs/logs/2026-09/20260902-g16-057-core-build-substrate.md`.
