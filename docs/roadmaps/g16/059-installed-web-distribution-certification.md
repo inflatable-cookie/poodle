@@ -9,7 +9,7 @@ Governing refs: `../../architecture/014-compiled-web-package-distribution.md`,
 `058-shell-distributions.md`
 
 Proof commit: `fb35a2eb83ddd060ca5d37377ff99c71c9c12189`
-Worker PR: pending after final validation push
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/163
 
 ## Goal
 
@@ -94,8 +94,8 @@ public roster. This is the prerequisite that can unblock `g16.054`.
 ## Limits
 
 - This worker has not merged, released, dispatched a workflow, run a windowed
-  selector, or dispatched `g16.054`. The single authorized worker PR is opened
-  after the final validation push.
+  selector, or dispatched `g16.054`. The single authorized worker PR is
+  [#163](https://github.com/inflatable-cookie/poodle/pull/163).
 - The receipt certifies the committed proof point above. Subsequent
   documentation-only closeout commits must not be substituted for that receipt
   source commit without rerunning the installed oracle.

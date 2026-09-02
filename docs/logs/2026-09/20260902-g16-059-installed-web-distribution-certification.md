@@ -11,7 +11,7 @@ Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-059-installed-web-certificat
 Base: `origin/main` at `721b17791946a6a7dcf254de0775f353d47090eb`
 Required ancestor: PR #162 merge `b43481dff4e25b70fc0b0b076cee116f5e97d93b`
 Proof commit: `fb35a2eb83ddd060ca5d37377ff99c71c9c12189`
-Worker PR: pending after final validation push
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/163
 
 ## Outcome
 
@@ -133,8 +133,8 @@ selector/action was run.
 ## Limits
 
 - This worker has not merged, released, dispatched a workflow, run a windowed
-  selector, or dispatched `g16.054`. The single authorized worker PR is opened
-  after the final validation push.
+  selector, or dispatched `g16.054`. The single authorized worker PR is
+  [#163](https://github.com/inflatable-cookie/poodle/pull/163).
 - The receipt certifies `fb35a2eb83ddd060ca5d37377ff99c71c9c12189`. This log and
   card are documentation-only closeout changes; changing certified code,
   package inputs, or receipt inputs requires rerunning the installed oracle.
