@@ -1,11 +1,14 @@
 # g16.064 — Slider Negative-half Rounding Parity
 
-Status: ready
+Status: complete
 Type: paired semantic repair
 Opened: 2026-09-02
+Completed: 2026-09-02
 Depends on: current Slider and RangeSlider machines
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/slider.md`
+PR: #168
+Merge: `17550c7bbfaa6c02f80e6e43ca26bdae782ac7a9`
 
 ## Goal
 

@@ -31,13 +31,13 @@ Updated: 2026-09-02
     #154; `047` merged in PR #152 after one exact-head repair round; `048`
     merged in PR #153 with a verified static-fallback benchmark verdict; `049`
     merged in PR #156; `050`, `053`–`061` are complete; independent `055`
-    merged in PR #151; `062`, `064`, and `065` remain open in the Nucleus GPUI
-    parity programme; `063` merged in PR #167
+    merged in PR #151; `062` and `065` remain open in the Nucleus GPUI parity
+    programme; `063` and `064` merged in PRs #167 and #168
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
   - Ready frontier: `g16.062` execution-backed Nucleus parity receipts plus
-    independent paired-runtime repairs `g16.064` and `g16.065`.
+    the independent `g16.065` Tabs native-tooltip repair.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -54,7 +54,7 @@ Updated: 2026-09-02
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: dispatch the safe `g16.062`–`g16.065` frontier while the
+  - Next move: complete `g16.062` and `g16.065` while the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.
