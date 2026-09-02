@@ -72,6 +72,25 @@ browser evidence. Keep the route internal until native visual admission.
   geometry remains fixture input only; this card changes no g16.049 pair status
   or runtime-eligibility state.
 
+## Current head proves
+
+Repair of the exact-head review on PR #160. The head now has:
+
+- one GPUI `IconGeometryHost` that spawns a window task, ticks the 180 ms
+  clock, writes the resolved frame in place, and drops that task on teardown
+- web shells that `requestAnimationFrame` when `liveClock` is set and cancel
+  the handle on unmount; stripping `cancelAnimationFrame` fails the shell test
+- a single-owner runtime: second owner retargets, old key samples null,
+  concurrent instances are separate runtimes/hosts
+- zero hot-path `Map` / fresh canonical rows on interior samples; compact and
+  node point capacity/pointers stay stable; p95 receipts over 40 samples
+- `NodeKind::ResolvedIconGeometry` public; registry/runtime/construction
+  hidden (`pub(crate)` on specs, no crate-root `resolved_icon_geometry` on
+  render, `icon-geometry-internal` for hosts/tests)
+
+Controlled-progress props remain a test harness. `PathBuilder::build` remains
+backend paint, not a composition allocation.
+
 ## Review Oracle
 
 | Invariant | Smallest counterexample | Required proof |
