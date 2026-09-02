@@ -122,9 +122,16 @@ delta.
 
 The paired lifecycle suite also covers a destination disabled and a policy
 changed to `"preserve"` after scheduling but before the timer fires. Against
-the pre-repair React head both rows fail by focusing the stale destination;
-against the repaired head the paired suites run 12 + 12 green with core at
-23. `effigy docs:check` and `git diff --check origin/main...HEAD` pass;
+the pre-repair React head both rows fail by focusing the stale destination.
+The second exact-head review (separate committed A→B then B→C before the
+first timer) failed on the pre-fix React head with zero focus on C; the
+pre-emptive pending-inequality invalidation was removed so the latched
+pending request retargets to the latest committed value. Against the repaired
+head the paired suites run 13 + 13 green with core at 23, and the full
+`react-components` + `svelte-components` projects pass (346 files, 2697
+tests). Contract §6/§9 now state owned `focusin`/`focusout` capture with
+commit-phase application; the unused `panelRef`/`panelElement` bindings are
+removed. `effigy docs:check` and `git diff --check origin/main...HEAD` pass;
 `effigy ci:web` on the repaired head is red only at `test:web-pack-install`,
 the inherited g16.059 ordinary-PR certification-routing defect. The
 certification file is unchanged and the defect was not weakened in this lane.
