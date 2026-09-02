@@ -4,9 +4,10 @@ Status: implementation-complete — PR pending orchestrator review (review repai
 Type: implementation
 Opened: 2026-09-01
 Closed: 2026-09-02 (implementation; merge belongs to the orchestrator)
-Proof head: `8fd0a885a03147451affc937447f61f0cfeba4af`
-Repair head: `50d8df605339c928c61e6c95912c877c549015dc`
-Repair: parent-owned native fit, real 44×44 web hits, React teardown refs (see log)
+Proof head: `95a5dbd36d6e5e80b6647aaf7593b44a6a7abed8`
+Repair head: `c00a3c73dbd70dc485afc9250ce1e7f616352550`
+Repair: parent-owned native fit, real 44×44 web hits, React teardown refs,
+production GPUI fallback height (see log)
 Log: `../../logs/2026-09/20260902-g16-046-block-sliders.md`
 Depends on: merged `g16.034` and operator acceptance recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`
@@ -166,10 +167,20 @@ branch without a new worktree:
 3. React Slider and RangeSlider teardown reads the live `onValueCommit` and
    controlledness refs. Adversarial A→B rerender then unmount covers both.
 
+A later exact-head finding on `ed816f3ea` (replayed here as `c00a3c73d`):
+production GPUI hosts used `block_*_min_height` as a fixed height, so a
+fallback line after the 44px surface could paint outside the reserved box
+and overlap the next sibling. Hosts now `request_measured_layout`: inline
+reserves the surface; fallback reserves surface plus the GPUI line. Range
+fallback is nowrap, matching Slider. Mounted production-host proofs use
+production min-height plus a following sibling at 80px and 400px for both
+controls. Not a fixed 80px production height.
+
 Oracle plant-and-restore ran against pre-rebase proof
 `eedb4a38ae4ac010aeb86e998b113b7a1d8d0a2c` (`8fd0a885a03147451affc937447f61f0cfeba4af`
 on this branch after rebase onto `a52d0d32b`). Every row failed under the
 planted pre-fix and passed after restore. The review repair added two biting
 plants the original table missed: CSS `--block-hit: 44px` is not a hit-testable
-target, and core `POINTER_END` is not React adapter teardown. See the execution
-log.
+target, and core `POINTER_END` is not React adapter teardown. Rebased onto
+merged g16.045 at `1b0d40329`; repair replayed as `c00a3c73d`. See the
+execution log.

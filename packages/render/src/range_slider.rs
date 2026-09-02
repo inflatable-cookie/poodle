@@ -992,6 +992,7 @@ fn range_slider_block(
         let mut line = Node::text(fallback);
         line.style.descriptor.text_color = Some(remainder_text_color);
         line.style.text_size = Some(font_px);
+        line.style.no_wrap = true;
         line.roles.insert("part".to_owned(), "fallback".to_owned());
         line.id = Some("block-range-slider-fallback".to_owned());
         stamp_forced_color(&mut line, "canvas", "canvas-text");
@@ -1278,9 +1279,13 @@ mod tests {
             .is_none());
         let narrow = root.with_block_layout(100.0, measure);
         let narrow_node = range_slider(&spec, &narrow, RangeSliderHandlers::default());
-        assert!(narrow_node
+        let fallback = narrow_node
             .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
-            .is_some());
+            .expect("narrow miss paints fallback");
+        assert!(
+            fallback.style.no_wrap,
+            "range fallback must stay one line so the host can reserve surface+line"
+        );
     }
 
     #[test]

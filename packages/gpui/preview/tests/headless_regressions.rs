@@ -4299,7 +4299,7 @@ fn mount_block_slider_host<'a>(
     width: f32,
 ) -> HeadlessDriver<'a> {
     let theme = theme();
-    let min_height = 80.0;
+    let min_height = poodle_gpui_node_backend::block_slider_min_height(&spec);
     HeadlessDriver::new_element_in_box(
         cx,
         Rc::new(move || {
@@ -4312,8 +4312,46 @@ fn mount_block_slider_host<'a>(
             )
         }),
         width,
-        80.0,
+        120.0,
     )
+}
+
+fn block_stack_sibling(id: &str) -> Node {
+    let mut next = Node::container();
+    next.id = Some(id.to_owned());
+    next.style.descriptor.layout.height = LayoutSizing::Fixed(8.0);
+    next.style.fill_width = true;
+    next
+}
+
+fn mount_production_block_stack<'a>(
+    cx: &'a mut TestAppContext,
+    host: Rc<dyn Fn() -> gpui::AnyElement>,
+    next_id: &'static str,
+    width: f32,
+) -> HeadlessDriver<'a> {
+    HeadlessDriver::new_element_in_box(
+        cx,
+        Rc::new(move || {
+            use gpui::{IntoElement as _, ParentElement as _, Styled as _};
+            gpui::div()
+                .flex()
+                .flex_col()
+                .w(px(width))
+                .child(host())
+                .child(poodle_gpui_node_backend::to_gpui(&block_stack_sibling(next_id)))
+                .into_any_element()
+        }),
+        width,
+        200.0,
+    )
+}
+
+fn bounds_contain(outer: gpui::Bounds<Pixels>, inner: gpui::Bounds<Pixels>) -> bool {
+    inner.origin.x >= outer.origin.x - px(0.5)
+        && inner.origin.y >= outer.origin.y - px(0.5)
+        && inner.bottom() <= outer.bottom() + px(0.5)
+        && inner.right() <= outer.right() + px(0.5)
 }
 
 /// g16.046 repair. Fit uses the mounted parent width and GPUI shaped advance,
@@ -4386,6 +4424,182 @@ fn block_slider_fit_uses_parent_width_and_shaped_advance() {
             "available={available} at {width}px misses heuristic {heuristic_need} and must fit shaped {shaped_need} (shaped={shaped})"
         );
     }
+}
+
+/// g16.046 repair. Production GPUI host height follows the fit decision:
+/// inline reserves the 44px surface; fallback reserves the surface plus its
+/// line. A following sibling must sit below the fallback, not under it.
+#[test]
+fn block_slider_production_host_height_contains_fallback_and_not_wide_inline() {
+    let slider = SliderSpec::new(50.0)
+        .with_bounds(0.0, 100.0)
+        .with_appearance(SliderAppearance::Block)
+        .with_visible_label("ABCDEFGH")
+        .with_visible_value_text("50");
+    let range = RangeSliderSpec::new(20.0, 80.0)
+        .with_bounds(0.0, 100.0)
+        .with_appearance(SliderAppearance::Block)
+        .with_visible_label("ABCDEFGH");
+    let slider_surface = poodle_gpui_node_backend::block_slider_min_height(&slider);
+    let range_surface = poodle_gpui_node_backend::block_range_slider_min_height(&range);
+
+    let mut slider_narrow_h = 0.0f32;
+    let mut slider_wide_h = 0.0f32;
+    run_headless(|cx| {
+        let theme = theme();
+        let spec = slider.clone();
+        let surface = slider_surface;
+        let _driver = mount_production_block_stack(
+            cx,
+            Rc::new(move || {
+                poodle_gpui_node_backend::block_slider_element(
+                    spec.clone(),
+                    Arc::new(theme.clone()),
+                    SliderHandlers::default(),
+                    surface,
+                    None,
+                )
+            }),
+            "block-slider-next",
+            80.0,
+        );
+        let host = poodle_gpui_node_backend::bounds_for("block-slider-host").expect("slider host");
+        let fallback =
+            poodle_gpui_node_backend::bounds_for("block-slider-fallback").expect("slider fallback");
+        let next = poodle_gpui_node_backend::bounds_for("block-slider-next").expect("slider sibling");
+        assert!(
+            bounds_contain(host, fallback),
+            "fallback {fallback:?} must sit inside production host {host:?}"
+        );
+        assert!(
+            next.origin.y >= fallback.bottom() - px(0.5),
+            "sibling {next:?} must sit below fallback {fallback:?}"
+        );
+        slider_narrow_h = f32::from(host.size.height);
+        assert!(
+            slider_narrow_h > slider_surface + 4.0,
+            "narrow host {slider_narrow_h} must reserve more than surface {slider_surface}"
+        );
+    });
+    run_headless(|cx| {
+        let theme = theme();
+        let spec = slider.clone();
+        let surface = slider_surface;
+        let _driver = mount_production_block_stack(
+            cx,
+            Rc::new(move || {
+                poodle_gpui_node_backend::block_slider_element(
+                    spec.clone(),
+                    Arc::new(theme.clone()),
+                    SliderHandlers::default(),
+                    surface,
+                    None,
+                )
+            }),
+            "block-slider-next",
+            400.0,
+        );
+        let host = poodle_gpui_node_backend::bounds_for("block-slider-host").expect("slider host");
+        assert!(
+            poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_none(),
+            "wide production host must inline"
+        );
+        let next = poodle_gpui_node_backend::bounds_for("block-slider-next").expect("slider sibling");
+        slider_wide_h = f32::from(host.size.height);
+        assert!(
+            (slider_wide_h - slider_surface).abs() <= 1.0,
+            "wide host {slider_wide_h} must reserve only the surface {slider_surface}, not fallback height"
+        );
+        assert!(
+            next.origin.y >= host.bottom() - px(0.5),
+            "wide sibling {next:?} must sit below the surface host {host:?}"
+        );
+        assert!(
+            slider_wide_h + 4.0 < slider_narrow_h,
+            "wide {slider_wide_h} must not retain narrow fallback height {slider_narrow_h}"
+        );
+    });
+
+    let mut range_narrow_h = 0.0f32;
+    let mut range_wide_h = 0.0f32;
+    run_headless(|cx| {
+        let theme = theme();
+        let spec = range.clone();
+        let surface = range_surface;
+        let _driver = mount_production_block_stack(
+            cx,
+            Rc::new(move || {
+                poodle_gpui_node_backend::block_range_slider_element(
+                    spec.clone(),
+                    Arc::new(theme.clone()),
+                    poodle_render::RangeSliderHandlers::default(),
+                    surface,
+                    None,
+                )
+            }),
+            "block-range-slider-next",
+            80.0,
+        );
+        let host =
+            poodle_gpui_node_backend::bounds_for("block-range-slider-host").expect("range host");
+        let fallback = poodle_gpui_node_backend::bounds_for("block-range-slider-fallback")
+            .expect("range fallback");
+        let next = poodle_gpui_node_backend::bounds_for("block-range-slider-next")
+            .expect("range sibling");
+        assert!(
+            bounds_contain(host, fallback),
+            "range fallback {fallback:?} must sit inside production host {host:?}"
+        );
+        assert!(
+            next.origin.y >= fallback.bottom() - px(0.5),
+            "range sibling {next:?} must sit below fallback {fallback:?}"
+        );
+        range_narrow_h = f32::from(host.size.height);
+        assert!(
+            range_narrow_h > range_surface + 4.0,
+            "narrow range host {range_narrow_h} must reserve more than surface {range_surface}"
+        );
+    });
+    run_headless(|cx| {
+        let theme = theme();
+        let spec = range;
+        let surface = range_surface;
+        let _driver = mount_production_block_stack(
+            cx,
+            Rc::new(move || {
+                poodle_gpui_node_backend::block_range_slider_element(
+                    spec.clone(),
+                    Arc::new(theme.clone()),
+                    poodle_render::RangeSliderHandlers::default(),
+                    surface,
+                    None,
+                )
+            }),
+            "block-range-slider-next",
+            400.0,
+        );
+        let host =
+            poodle_gpui_node_backend::bounds_for("block-range-slider-host").expect("range host");
+        assert!(
+            poodle_gpui_node_backend::bounds_for("block-range-slider-fallback").is_none(),
+            "wide range host must inline"
+        );
+        let next = poodle_gpui_node_backend::bounds_for("block-range-slider-next")
+            .expect("range sibling");
+        range_wide_h = f32::from(host.size.height);
+        assert!(
+            (range_wide_h - range_surface).abs() <= 1.0,
+            "wide range host {range_wide_h} must reserve only the surface {range_surface}"
+        );
+        assert!(
+            next.origin.y >= host.bottom() - px(0.5),
+            "wide range sibling {next:?} must sit below the surface host {host:?}"
+        );
+        assert!(
+            range_wide_h + 4.0 < range_narrow_h,
+            "wide range {range_wide_h} must not retain narrow fallback height {range_narrow_h}"
+        );
+    });
 }
 
 /// g14.005 retained regression. The overlay layer registry is frame-scoped,
