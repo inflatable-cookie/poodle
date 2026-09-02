@@ -10,8 +10,8 @@ Branch: `feature/g16-059-installed-web-certification`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-059-installed-web-certification`
 Base: `origin/main` at `721b17791946a6a7dcf254de0775f353d47090eb`
 Required ancestor: PR #162 merge `b43481dff4e25b70fc0b0b076cee116f5e97d93b`
-Proof commit: `ba08070f9f89fb5c405d853095df68e95546db5c`
-Worker PR: not opened — launcher instruction forbids PR creation
+Proof commit: `fb35a2eb83ddd060ca5d37377ff99c71c9c12189`
+Worker PR: pending after final validation push
 
 ## Outcome
 
@@ -23,12 +23,14 @@ and records one deterministic receipt. The clean-checkout wrapper uses a
 temporary bare clone and passes an explicit inner-run marker, so attached
 worktree artifacts cannot recurse into or contaminate the certification.
 
-The two named clean-main repairs are included:
+The clean-main repairs are included:
 
 - declaration bootstrap serializes the nested TypeScript `6.0.3` install and
   validates that resolver path instead of allowing root TypeScript `7`;
 - `docs:check` and `health` build the contracted Svelte/React `dist/` outputs
   before export-target and docs audits.
+- declaration-tools carries the repository-required exact `MIT` license
+  metadata; dependencies and package behavior are unchanged.
 
 React remains `private: true`; no version, release, workflow, registry,
 publication, native, sibling, or component-behavior surface changed.
@@ -50,36 +52,36 @@ publication, native, sibling, or component-behavior surface changed.
   `branchCount`, `SliderAppearance`, and forbidden Tree reorder callbacks.
 - Roster denominator: `176`.
 - Roster names SHA-256: `f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a`.
-- Artifact-set ID: `0316246f1afc88032066113f2d3b07ede4c48b57ef992dec949f47fd11ae3dbc`.
+- Artifact-set ID: `1cf40d3bdd516f76af5ef44d246141a2ad148d948003a6fac91e207b95ed0347`.
 
 ### Deterministic receipt
 
-Receipt SHA-256: `5d44f1c16ff8843c8271399f7ed39a7928fc811e362b08604bc18bc4daa8b58e`
+Receipt SHA-256: `f45f5f143df32da1e906c77acfb25e22935bfff88f8cba0efba4ee2ca80010bf`
 
 ```json
 {
   "schemaVersion": 1,
   "kind": "poodle-installed-web-distribution",
-  "sourceCommit": "ba08070f9f89fb5c405d853095df68e95546db5c",
+  "sourceCommit": "fb35a2eb83ddd060ca5d37377ff99c71c9c12189",
   "svelteFloor": "5.56.8",
   "belowFloorNegative": "5.38.6",
   "rosterDenominator": 176,
   "rosterNamesSha256": "f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a",
-  "artifactSetId": "0316246f1afc88032066113f2d3b07ede4c48b57ef992dec949f47fd11ae3dbc",
+  "artifactSetId": "1cf40d3bdd516f76af5ef44d246141a2ad148d948003a6fac91e207b95ed0347",
   "packages": {
     "@inflatable-cookie/poodle-core": {
-      "archiveSha256": "32bb872aa6dc8b92c99970b1530b1820ccddc951b1d5ccb38474b791b69d94c7",
-      "buildReceiptSha256": "e47c0704d64f9b7d919b4075886d2941915e8d8b79543c055fafb6c7147174bb",
+      "archiveSha256": "a20d18cfc85cb0d7f73cef6054427c1039c09e2e9ad8a89e49b73128c7f7ff3b",
+      "buildReceiptSha256": "c11b72992391a7bb876fdf08e21d073aae1ff72b7b6319ed6d99012fa517b033",
       "version": "0.2.3"
     },
     "@inflatable-cookie/poodle-react": {
-      "archiveSha256": "78abc5eff0e07b111715e240eaa45977706df008a706b36472bcb1c8284c0ed5",
-      "buildReceiptSha256": "1fdbfbdf3100eab6b7704418567a0a2cb4ad0138dbf18790f44f737b7dbcefa4",
+      "archiveSha256": "2f9df2c4eba97270a6104faa91cfb8598fd84720dc85439195819b8bcaf4761c",
+      "buildReceiptSha256": "10882d4fb89bdcd05136ab95a29b2b2be96deba44878408e537ff21afa820486",
       "version": "0.2.3"
     },
     "@inflatable-cookie/poodle-svelte": {
-      "archiveSha256": "50d6e367137429f95483e4ab3917c86c602b4c6fb3369f87d1f79efba2b12ceb",
-      "buildReceiptSha256": "7b98abfd4356fc3e2034fe317184c924afc198d42ed2285cc4483edf7280711b",
+      "archiveSha256": "31f0121dd32717ca71105e891d7bf89e5e3163228404925dd9fb1838ec061702",
+      "buildReceiptSha256": "8a396cb075578f4737d31d9fb37c7244f571969ea9563dd8af5f7335bb060469",
       "version": "0.2.3"
     }
   }
@@ -119,10 +121,10 @@ restored before the passing run.
 - `effigy test:web-pack-install` — 11 files / 22 tests passed from the clean
   detached proof checkout.
 - `effigy docs:check` — pass.
-- `effigy qa` — broad headless board reached the existing license-audit failure:
-  `scripts/web-distribution/declaration-tools/package.json: expected license "MIT"`.
-  Release automation, web 3,606-test, Rust/headless, and GPUI consumer sections
-  passed before that out-of-scope failure.
+- `effigy qa` — pass. The full headless board passed release automation, web,
+  Rust/headless, GPUI consumer, license, security, and advisory checks; license
+  compliance reported 9 package manifests, 17 Cargo manifests, and 4 notice
+  surfaces clean, with no vulnerabilities.
 - `git diff --check origin/main...HEAD` — pass.
 
 No windowed, native-visual, release, workflow-dispatch, merge, or `g16.054`
@@ -130,10 +132,10 @@ selector/action was run.
 
 ## Limits
 
-- The launcher explicitly forbade creation of a PR, so no PR URL exists for
-  this worker branch. The orchestrator owns any PR creation/review needed for
-  integration.
-- The receipt certifies `ba08070f9f89fb5c405d853095df68e95546db5c`. This log and
+- This worker has not merged, released, dispatched a workflow, run a windowed
+  selector, or dispatched `g16.054`. The single authorized worker PR is opened
+  after the final validation push.
+- The receipt certifies `fb35a2eb83ddd060ca5d37377ff99c71c9c12189`. This log and
   card are documentation-only closeout changes; changing certified code,
   package inputs, or receipt inputs requires rerunning the installed oracle.
 - The receipt is promotion evidence, not a release or publication authority.

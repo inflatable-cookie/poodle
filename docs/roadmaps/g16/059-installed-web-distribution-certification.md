@@ -8,8 +8,8 @@ Governing refs: `../../architecture/014-compiled-web-package-distribution.md`,
 `056-web-distribution-contract.md`, `057-core-build-substrate.md`,
 `058-shell-distributions.md`
 
-Proof commit: `ba08070f9f89fb5c405d853095df68e95546db5c`
-Worker PR: not opened — launcher instruction forbids PR creation
+Proof commit: `fb35a2eb83ddd060ca5d37377ff99c71c9c12189`
+Worker PR: pending after final validation push
 
 ## Goal
 
@@ -31,6 +31,8 @@ public roster. This is the prerequisite that can unblock `g16.054`.
   repeated build/pack hashes, receipt membership, notices, and roster identity.
 - This card does not change versions, edit release notes/history, tag, publish,
   dispatch workflows, mutate registries, or write sibling repositories.
+- The declaration-tools manifest carries the repository-required exact `MIT`
+  license metadata; dependencies and package behavior are unchanged.
 - Merged-main baseline is red from a clean checkout in two linked places:
   Bun's shared module cache can make the nested TypeScript 6.0.3 declaration
   check observe root TypeScript 7, and docs/export audits run before shell
@@ -84,19 +86,19 @@ public roster. This is the prerequisite that can unblock `g16.054`.
   below-floor failure, and the retained HistoryEntry/Slider/Tree proofs.
 - Result: 11 test files and 22 tests passed. The receipt and all seven
   falsification receipts are recorded in the execution log.
-- Deterministic receipt identity: `5d44f1c16ff8843c8271399f7ed39a7928fc811e362b08604bc18bc4daa8b58e`.
-- Receipt source commit: `ba08070f9f89fb5c405d853095df68e95546db5c`.
+- Deterministic receipt identity: `f45f5f143df32da1e906c77acfb25e22935bfff88f8cba0efba4ee2ca80010bf`.
+- Receipt source commit: `fb35a2eb83ddd060ca5d37377ff99c71c9c12189`.
 - Roster: 176 names; `f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a`.
-- Artifact set: `0316246f1afc88032066113f2d3b07ede4c48b57ef992dec949f47fd11ae3dbc`.
+- Artifact set: `1cf40d3bdd516f76af5ef44d246141a2ad148d948003a6fac91e207b95ed0347`.
 
 ## Limits
 
-- This worker did not create a PR, merge, release, workflow dispatch, windowed
-  selector run, or `g16.054` dispatch. The orchestrator must create/review the
-  PR if required by its integration workflow.
+- This worker has not merged, released, dispatched a workflow, run a windowed
+  selector, or dispatched `g16.054`. The single authorized worker PR is opened
+  after the final validation push.
 - The receipt certifies the committed proof point above. Subsequent
-  documentation-only closeout commits, if any, must not be substituted for
-  that receipt source commit without rerunning the installed oracle.
+  documentation-only closeout commits must not be substituted for that receipt
+  source commit without rerunning the installed oracle.
 
 ## Review Oracle
 
@@ -137,11 +139,10 @@ selector is authorized.
 - `effigy test:web-pack-install`: 11 files / 22 tests passed from a clean
   detached checkout of the exact proof commit.
 - `effigy docs:check`: pass.
-- `effigy qa`: broad headless board reached the existing license-audit failure:
-  `scripts/web-distribution/declaration-tools/package.json: expected license "MIT"`.
-  Its preceding release-automation, web 3,606-test, Rust/headless, and GPUI
-  consumer sections passed. The missing license is pre-existing and outside
-  this handoff's two named repairs, so it was not changed.
+- `effigy qa`: pass. The full headless board passed release automation, web,
+  Rust/headless, GPUI consumer, license, security, and advisory checks; license
+  compliance reported 9 package manifests, 17 Cargo manifests, and 4 notice
+  surfaces clean, with no vulnerabilities.
 - `git diff --check origin/main...HEAD`: pass.
 
 ## Stop Conditions
