@@ -7360,6 +7360,16 @@ impl IntoElement for Slider {
             on_change: self.on_change,
             on_value_commit: None,
         };
+        if self.spec.appearance == poodle_specs::SliderAppearance::Block {
+            let min_height = poodle_gpui_node_backend::block_slider_min_height(&self.spec);
+            return poodle_gpui_node_backend::block_slider_element(
+                self.spec,
+                Arc::new(self.theme.clone()),
+                handlers,
+                min_height,
+                self.id,
+            );
+        }
         let mut node = poodle_render::slider(&self.spec, &RenderContext::new(&self.theme), &handlers);
         if let Some(id) = self.id {
             fn stamp(node: &mut poodle_node::Node, id: &str) {
@@ -7423,6 +7433,16 @@ impl IntoElement for RangeSlider {
             on_change: self.on_change,
             on_value_commit: None,
         };
+        if self.spec.appearance == poodle_specs::SliderAppearance::Block {
+            let min_height = poodle_gpui_node_backend::block_range_slider_min_height(&self.spec);
+            return poodle_gpui_node_backend::block_range_slider_element(
+                self.spec,
+                Arc::new(self.theme.clone()),
+                handlers,
+                min_height,
+                self.id,
+            );
+        }
         let mut node = poodle_render::range_slider(&self.spec, &RenderContext::new(&self.theme), handlers);
         if let Some(id) = self.id {
             node.id = Some(id);

@@ -10,10 +10,6 @@ use poodle_specs::ControlSize;
 
 use crate::presentation::rem_to_px;
 
-/// Construction-time capsule span used when the host has not laid the node out.
-/// Not a public fit metric.
-pub const NATIVE_CAPSULE_SPAN_PX: f32 = 160.0;
-
 pub fn capsule_height_rem(size: ControlSize) -> f32 {
     match size {
         ControlSize::Xs => 1.75,

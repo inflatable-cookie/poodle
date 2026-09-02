@@ -1,10 +1,11 @@
 # g16.046 — Block Slider And RangeSlider Appearance
 
-Status: implementation-complete — PR pending orchestrator review
+Status: implementation-complete — PR pending orchestrator review (review repair)
 Type: implementation
 Opened: 2026-09-01
 Closed: 2026-09-02 (implementation; merge belongs to the orchestrator)
 Proof head: `8fd0a885a03147451affc937447f61f0cfeba4af`
+Repair: parent-owned native fit, real 44×44 web hits, React teardown refs (see log)
 Log: `../../logs/2026-09/20260902-g16-046-block-sliders.md`
 Depends on: merged `g16.034` and operator acceptance recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`
@@ -150,8 +151,24 @@ arithmetic, tie/clamp, terminal, 44×44 hits, forced-color roles, and
 horizontal-only rejection match this card. Visual ledger cells were not moved.
 Jetstream remains compile-compat specimens only.
 
+Orchestrator review on that PR required three repairs, landed on the same
+branch without a new worktree:
+
+1. Native block fit uses parent-owned allocated width plus GPUI `shape_line`
+   advance. Construction is still `Spec + RenderContext -> Node` (architecture
+   010). The GPUI host waits for layout, shapes, then constructs. Paint panics
+   without `RenderContext::with_block_layout`. `with_block_layout_width` is
+   test/Jetstream-compat only and still uses the character heuristic.
+2. Web 44×44 hits take pointer events, overflow the 28px `xs` capsule, and
+   keep visual thumb/capsule size. Chromium and WebKit prove geometry plus
+   pointer dispatch. A CSS token match is not that proof.
+3. React Slider and RangeSlider teardown reads the live `onValueCommit` and
+   controlledness refs. Adversarial A→B rerender then unmount covers both.
+
 Oracle plant-and-restore ran against pre-rebase proof
 `eedb4a38ae4ac010aeb86e998b113b7a1d8d0a2c` (`8fd0a885a03147451affc937447f61f0cfeba4af`
 on this branch after rebase onto `a52d0d32b`). Every row failed under the
-planted pre-fix and passed after restore. See the execution log for the plant
-table.
+planted pre-fix and passed after restore. The review repair added two biting
+plants the original table missed: CSS `--block-hit: 44px` is not a hit-testable
+target, and core `POINTER_END` is not React adapter teardown. See the execution
+log.

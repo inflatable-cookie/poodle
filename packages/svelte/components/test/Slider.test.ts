@@ -238,6 +238,8 @@ describe("Slider (svelte) block appearance", () => {
       "utf8",
     );
     expect(css).toContain("--poodle-slider-block-hit: 44px");
+    expect(css).toContain("pointer-events: auto");
+    expect(css).toContain("min-height: max(var(--poodle-slider-block-min-height), var(--poodle-slider-block-hit))");
   });
 
   it("commits once across cancel then lost capture", async () => {

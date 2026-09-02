@@ -12,8 +12,8 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 
 use poodle_headless::slider::{
-    layout_slider_block, measure_block_advance, physical_to_value_norm, resolved_visible_text,
-    safe_slider_max, SliderEffect, SLIDER_BLOCK_HIT_PX,
+    layout_slider_block, physical_to_value_norm, resolved_visible_text, safe_slider_max,
+    SliderEffect, SLIDER_BLOCK_HIT_PX,
 };
 use poodle_node::{
     ColorValue, CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, LayoutSizing, Node,
@@ -28,7 +28,7 @@ use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::slider_block::{
     block_grab, block_hit, block_surface, capsule_height_rem, font_size_rem, fraction_anchor,
-    stamp_disabled_roles, stamp_forced_color, visible_thumb, NATIVE_CAPSULE_SPAN_PX,
+    stamp_disabled_roles, stamp_forced_color, visible_thumb,
 };
 
 /// Thumb diameter in rem — contract §8 size table.
@@ -236,15 +236,15 @@ pub fn slider(spec: &SliderSpec, ctx: &RenderContext<'_>, handlers: &SliderHandl
             let pointer_active = active.load(Ordering::SeqCst);
             let value_norm = physical_to_value_norm(fraction as f64, rtl);
             let event = match phase {
-                ScrubPhase::Press => poodle_headless::slider::SliderControlEvent::PointerBegin {
-                    value_norm,
-                },
+                ScrubPhase::Press => {
+                    poodle_headless::slider::SliderControlEvent::PointerBegin { value_norm }
+                }
                 ScrubPhase::Drag if pointer_active => {
                     poodle_headless::slider::SliderControlEvent::PointerMove { value_norm }
                 }
-                ScrubPhase::Drag => poodle_headless::slider::SliderControlEvent::PointerBegin {
-                    value_norm,
-                },
+                ScrubPhase::Drag => {
+                    poodle_headless::slider::SliderControlEvent::PointerBegin { value_norm }
+                }
                 ScrubPhase::Release => poodle_headless::slider::SliderControlEvent::PointerEnd,
             };
             let (next, effects) = poodle_headless::slider::slider_control_transition(
@@ -540,12 +540,13 @@ fn paint_slider_block(
     let remainder_text_color = ctx.theme().resolve_color("color.text.primary");
     let label = omit_empty_owned(spec.visible_label.as_deref());
     let value_text = resolved_visible_text(visual.value, spec.visible_value_text.as_deref());
+    let (capsule_span, measure) = ctx.require_block_layout("Slider");
     let layout = layout_slider_block(
-        NATIVE_CAPSULE_SPAN_PX,
+        capsule_span,
         fraction,
         label.as_deref(),
         value_text.as_deref(),
-        |text| measure_block_advance(text, font_px),
+        |text| measure(text, font_px),
     );
 
     let mut selected = Node::container();
@@ -597,7 +598,11 @@ fn paint_slider_block(
         spec,
         visual.value,
         safe_slider_max(spec.min, spec.max),
-        if interactive { key_handler.clone() } else { None },
+        if interactive {
+            key_handler.clone()
+        } else {
+            None
+        },
         standard_focus_ring(ctx, spec),
     );
     if spec.is_disabled {
@@ -631,8 +636,8 @@ fn paint_slider_block(
     root = root.child(surface);
     if let Some(fallback) = layout.fallback {
         let mut line = inline_text(&fallback, remainder_text_color, font_px);
-        line.roles
-            .insert("part".to_owned(), "fallback".to_owned());
+        line.roles.insert("part".to_owned(), "fallback".to_owned());
+        line.id = Some("block-slider-fallback".to_owned());
         stamp_forced_color(&mut line, "canvas", "canvas-text");
         if spec.is_disabled {
             stamp_disabled_roles(&mut line);
@@ -684,7 +689,13 @@ mod tests {
         let change = Arc::clone(&seen);
         let commit = Arc::clone(&seen);
         let theme = theme();
-        let ctx = RenderContext::new(&theme);
+        let root = RenderContext::new(&theme);
+        let ctx = if spec.appearance == SliderAppearance::Block {
+            use poodle_headless::slider::measure_block_advance;
+            root.with_block_layout(160.0, Arc::new(measure_block_advance))
+        } else {
+            root
+        };
         let node = slider(
             &spec,
             &ctx,
@@ -890,7 +901,10 @@ mod tests {
         let (node, _) = armed(spec);
         let hit = block_hit_node(&node);
         assert_eq!(hit.style.descriptor.layout.width, LayoutSizing::Fixed(44.0));
-        assert_eq!(hit.style.descriptor.layout.height, LayoutSizing::Fixed(44.0));
+        assert_eq!(
+            hit.style.descriptor.layout.height,
+            LayoutSizing::Fixed(44.0)
+        );
         assert_eq!(hit.a11y.role, Some(NodeRole::Slider));
         let selected = node
             .find(&|n| n.roles.get("forced-color-fill").map(String::as_str) == Some("selection"))
@@ -910,7 +924,9 @@ mod tests {
             selected.roles.get("forced-color-fill"),
             remainder.roles.get("forced-color-fill")
         );
-        assert!(node.find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback")).is_none());
+        assert!(node
+            .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
+            .is_none());
         let texts = node.texts().join(" ");
         assert!(!texts.contains("Volume"));
     }
@@ -952,7 +968,10 @@ mod tests {
                 .unwrap(),
         );
         scrub(0.2, ScrubPhase::Press);
-        assert_eq!(seen.lock().unwrap().last().unwrap(), &("change".into(), 80.0));
+        assert_eq!(
+            seen.lock().unwrap().last().unwrap(),
+            &("change".into(), 80.0)
+        );
         let key = slider_control(&node).interaction.on_key.as_ref().unwrap();
         key(NodeKey::ArrowRight, NodeModifiers::default());
         assert_eq!(seen.lock().unwrap().last().unwrap().1, 81.0);
@@ -983,7 +1002,47 @@ mod tests {
     }
 
     #[test]
+    fn block_fit_follows_context_span_and_measure() {
+        let theme = theme();
+        let spec = SliderSpec::new(50.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_visible_label("AB")
+            .with_visible_value_text("50");
+        let measure: crate::context::BlockTextMeasure =
+            Arc::new(|text: &str, _font| text.chars().count() as f32 * 30.0);
+        let root = RenderContext::new(&theme);
+        let wide = root.with_block_layout(200.0, Arc::clone(&measure));
+        let wide_node = slider(&spec, &wide, &SliderHandlers::default());
+        assert!(wide_node
+            .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
+            .is_none());
+
+        let narrow = root.with_block_layout(100.0, measure);
+        let narrow_node = slider(&spec, &narrow, &SliderHandlers::default());
+        assert!(narrow_node
+            .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
+            .is_some());
+    }
+
+    #[should_panic(
+        expected = "Slider appearance=\"block\" requires RenderContext::with_block_layout"
+    )]
+    #[test]
+    fn block_without_layout_inputs_panics() {
+        let theme = theme();
+        let spec = SliderSpec::new(50.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block);
+        let _node = slider(
+            &spec,
+            &RenderContext::new(&theme),
+            &SliderHandlers::default(),
+        );
+    }
+
     #[should_panic(expected = "appearance=\"block\" rejects orientation=\"vertical\"")]
+    #[test]
     fn vertical_block_is_rejected_before_paint() {
         let spec = SliderSpec::new(40.0)
             .with_bounds(0.0, 100.0)

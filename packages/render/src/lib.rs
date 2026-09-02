@@ -250,7 +250,7 @@ pub use command_palette::{command_palette, command_palette_with_handlers, Comman
 pub use confirm_action::{confirm_action, confirm_action_with_slots, ConfirmActionHandlers};
 // The fixed public path for the construction-time presentation API
 // (architecture 010): `poodle_render::RenderContext`.
-pub use context::{motion_policy_provider, ui_presentation_provider, RenderContext, SlotBuilder};
+pub use context::{motion_policy_provider, ui_presentation_provider, BlockTextMeasure, RenderContext, SlotBuilder};
 pub use context_menu::context_menu;
 pub use data_table::{data_table, data_table_loading, DataTableHandlers};
 pub use date_picker::{date_picker, DatePickerHandlers};

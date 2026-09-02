@@ -137,13 +137,19 @@
 
   function pointerDown(event: PointerEvent): void {
     if (!usesControlPointer || event.button !== 0 || disabled) return;
+    const target = block ? (event.currentTarget as HTMLElement) : root;
+    if (!target) return;
     event.preventDefault();
+    event.stopPropagation();
     activePointer = event.pointerId;
-    root.setPointerCapture(event.pointerId);
+    target.setPointerCapture(event.pointerId);
     runControl({ type: "POINTER_BEGIN", valueNorm: pointNorm(event) });
   }
   function pointerMove(event: PointerEvent): void {
-    if (activePointer === event.pointerId) runControl({ type: "POINTER_MOVE", valueNorm: pointNorm(event) });
+    if (activePointer === event.pointerId) {
+      event.stopPropagation();
+      runControl({ type: "POINTER_MOVE", valueNorm: pointNorm(event) });
+    }
   }
   function terminate(pointerId: number | null = null): void {
     if (activePointer === null || (pointerId !== null && activePointer !== pointerId)) return;
@@ -151,6 +157,7 @@
     runControl({ type: "POINTER_END" });
   }
   function pointerEnd(event: PointerEvent): void {
+    event.stopPropagation();
     terminate(event.pointerId);
   }
   function embeddedKey(event: KeyboardEvent): void {
@@ -189,7 +196,7 @@
 <div bind:this={root} class="poodle-slider" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-appearance={block ? "block" : undefined} data-direction={block || direction === "rtl" ? direction : undefined} data-polarity={visualState.polarity} data-fill-tone={visualState.fillTone} data-state={visualState.pointerActive ? "active" : "idle"} style={sliderStyle} data-size={resolvedSize} data-density={resolvedDensity} dir={block || direction === "rtl" ? direction : undefined}
   role={usesControlPointer ? "slider" : undefined} tabindex={usesControlPointer && !disabled ? 0 : undefined}
   aria-label={usesControlPointer ? ariaLabel ?? undefined : undefined} aria-valuemin={usesControlPointer ? min : undefined} aria-valuemax={usesControlPointer ? safeMax : undefined} aria-valuenow={usesControlPointer ? visualState.value : undefined} aria-valuetext={usesControlPointer ? valueText ?? undefined : undefined} aria-orientation={usesControlPointer ? orientation : undefined} aria-disabled={usesControlPointer ? disabled : undefined}
-  onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd} onkeydown={usesControlPointer ? embeddedKey : undefined}>
+  onpointerdown={usesControlPointer ? pointerDown : undefined} onpointermove={usesControlPointer ? pointerMove : undefined} onpointerup={usesControlPointer ? pointerEnd : undefined} onpointercancel={usesControlPointer ? pointerEnd : undefined} onlostpointercapture={usesControlPointer ? pointerEnd : undefined} onkeydown={usesControlPointer ? embeddedKey : undefined}>
   {#if block}
     <span bind:this={capsule} class="poodle-slider__capsule" aria-hidden="true">
       <span class="poodle-slider__track">
@@ -197,7 +204,8 @@
         <span class="poodle-slider__remainder">{#if blockLayout.inline && visibleValueText}{visibleValueText}{/if}</span>
         <span class="poodle-slider__center"></span>
       </span>
-      <span class="poodle-slider__hit" data-part="hit"><span class="poodle-slider__thumb"></span></span>
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <span class="poodle-slider__hit" data-part="hit" onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}><span class="poodle-slider__thumb"></span></span>
     </span>
     {#if blockLayout.fallback}<span class="poodle-slider__fallback" aria-hidden="true">{blockLayout.fallback}</span>{/if}
   {:else}

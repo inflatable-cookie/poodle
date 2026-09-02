@@ -137,6 +137,8 @@ describe("RangeSlider (svelte) block appearance", () => {
       "utf8",
     );
     expect(css).toContain("--poodle-range-slider-block-hit: 44px");
+    expect(css).toContain("pointer-events: auto");
+    expect(css).toContain("min-height: max(var(--poodle-range-slider-block-min-height), var(--poodle-range-slider-block-hit))");
     mockTrack(root, 100, 32);
     await fireEvent.pointerDown(root, { button: 0, clientX: 50, clientY: 16, pointerId: 1 });
     await fireEvent.pointerMove(root, { clientX: 20, clientY: 16, pointerId: 1 });

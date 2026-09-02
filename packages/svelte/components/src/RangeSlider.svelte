@@ -158,16 +158,29 @@
   }
   function pointerDown(event: PointerEvent): void {
     if (!usesControlPointer || event.button !== 0 || disabled) return;
-    event.preventDefault(); activePointer = event.pointerId; root.setPointerCapture(event.pointerId);
+    const target = block ? (event.currentTarget as HTMLElement) : root;
+    if (!target) return;
+    event.preventDefault();
+    event.stopPropagation();
+    activePointer = event.pointerId;
+    target.setPointerCapture(event.pointerId);
     runControl({ type: "POINTER_BEGIN", valueNorm: pointNorm(event) });
   }
-  function pointerMove(event: PointerEvent): void { if (activePointer === event.pointerId) runControl({ type: "POINTER_MOVE", valueNorm: pointNorm(event) }); }
+  function pointerMove(event: PointerEvent): void {
+    if (activePointer === event.pointerId) {
+      event.stopPropagation();
+      runControl({ type: "POINTER_MOVE", valueNorm: pointNorm(event) });
+    }
+  }
   function terminate(pointerId: number | null = null): void {
     if (activePointer === null || (pointerId !== null && activePointer !== pointerId)) return;
     activePointer = null;
     runControl({ type: "POINTER_END" });
   }
-  function pointerEnd(event: PointerEvent): void { terminate(event.pointerId); }
+  function pointerEnd(event: PointerEvent): void {
+    event.stopPropagation();
+    terminate(event.pointerId);
+  }
   function embeddedKey(event: KeyboardEvent, thumb: "lower" | "upper"): void {
     const keyDirection = ({ ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 } as Record<string, -1 | 1>)[event.key];
     const current = thumb === "lower" ? displayLower : displayUpper;
@@ -196,7 +209,7 @@
 </script>
 
 <div bind:this={root} class="poodle-range-slider" role="group" data-orientation={orientation} data-disabled={disabled} data-variant={variant} data-appearance={block ? "block" : undefined} data-direction={block || direction === "rtl" ? direction : undefined} data-polarity={visualState.polarity} data-fill-split={visualState.fillSplitAtCenter} data-state={visualState.pointerActive ? "active" : "idle"} style={rangeStyle} data-size={resolvedSize} data-density={resolvedDensity} dir={block || direction === "rtl" ? direction : undefined}
-  onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}>
+  onpointerdown={usesControlPointer ? pointerDown : undefined} onpointermove={usesControlPointer ? pointerMove : undefined} onpointerup={usesControlPointer ? pointerEnd : undefined} onpointercancel={usesControlPointer ? pointerEnd : undefined} onlostpointercapture={usesControlPointer ? pointerEnd : undefined}>
   {#if block}
     <span class="poodle-range-slider__block-surface">
     <span bind:this={capsule} class="poodle-range-slider__capsule" aria-hidden="true">
@@ -209,8 +222,8 @@
       {#if blockLayout.inline && blockLayout.selectedText}<span class="poodle-range-slider__inline poodle-range-slider__inline--selected">{blockLayout.selectedText}</span>{/if}
       {#if blockLayout.inline && upperVisible}<span class="poodle-range-slider__inline poodle-range-slider__inline--upper">{upperVisible}</span>{/if}
     </span>
-    <div class="poodle-range-slider__hit poodle-range-slider__hit--lower" data-part="hit" data-thumb="lower" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => embeddedKey(event, "lower")}><span class="poodle-range-slider__thumb"></span></div>
-    <div class="poodle-range-slider__hit poodle-range-slider__hit--upper" data-part="hit" data-thumb="upper" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => embeddedKey(event, "upper")}><span class="poodle-range-slider__thumb"></span></div>
+    <div class="poodle-range-slider__hit poodle-range-slider__hit--lower" data-part="hit" data-thumb="lower" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => embeddedKey(event, "lower")} onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}><span class="poodle-range-slider__thumb"></span></div>
+    <div class="poodle-range-slider__hit poodle-range-slider__hit--upper" data-part="hit" data-thumb="upper" role="slider" tabindex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onkeydown={(event) => embeddedKey(event, "upper")} onpointerdown={pointerDown} onpointermove={pointerMove} onpointerup={pointerEnd} onpointercancel={pointerEnd} onlostpointercapture={pointerEnd}><span class="poodle-range-slider__thumb"></span></div>
     </span>
     {#if blockLayout.fallback}<span class="poodle-range-slider__fallback" aria-hidden="true">{blockLayout.fallback}</span>{/if}
   {:else}

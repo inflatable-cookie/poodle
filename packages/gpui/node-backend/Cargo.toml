@@ -28,6 +28,11 @@ poodle-node = { version = "0.2.3", path = "../../contracts/node" }
 # `poodle-headless` is pure (no gpui, no engine), so this stays a contracts
 # dependency rather than a widening of the interpreter's surface.
 poodle-headless = { version = "0.2.3", path = "../../contracts/headless" }
+# Block Slider/RangeSlider fit is parent-owned width plus shaped advance.
+# The host reconstructs after GPUI layout; it does not interpret presentation.
+poodle-render = { version = "0.2.3", path = "../../render" }
+poodle-specs = { version = "0.2.3", path = "../../contracts/components" }
+poodle-adapter = { version = "0.2.3", path = "../../contracts/adapter" }
 # The single-file pick capability (g15.007) holds the OS prompt's oneshot
 # receiver — the type `App::prompt_for_paths` hands back. Already resolved in
 # the graph as gpui's own dependency; named here to store the receiver.

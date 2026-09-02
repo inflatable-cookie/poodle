@@ -7,6 +7,16 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-09-02 — WebKit refuses some ports as restricted (`4190` is one of
+  them: `Not allowed to use restricted network port`). Local browser probes
+  should pick a free port outside that list (`4187`–`4188` are already taken).
+  Hit while proving g16.046 block hits.
+
+- 2026-09-02 — `rustfmt` on a huge leaf such as
+  `packages/gpui/preview/src/node_compat.rs` still rewrites hundreds of
+  unrelated `IntoElement` wrappers. Format the edited functions by hand or
+  skip rustfmt on that file. Hit while repairing g16.046.
+
 - 2026-09-02 — `rustfmt --edition 2021 packages/gpui/preview/tests/headless_regressions.rs`
   (and `node_compat.rs`) rewrites the whole file. Those modules are already
   far over rustfmt's wrap budget, so a one-line insertion becomes a thousand-line

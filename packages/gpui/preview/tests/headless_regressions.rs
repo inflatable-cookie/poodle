@@ -4220,9 +4220,12 @@ fn block_slider_hit_rtl_and_terminal_on_the_mounted_host() {
         let mut spec = spec;
         spec.aria_label = Some("Volume".into());
         spec.step = 1.0;
+        let theme = theme();
+        let layout_root = RenderContext::new(&theme);
+        let ctx = layout_root.with_block_layout_width(160.0);
         let mut node = poodle_render::slider(
             &spec,
-            &RenderContext::new(&theme()),
+            &ctx,
             &SliderHandlers {
                 on_change: Some(Arc::new(move |next| {
                     *sink.lock().expect("value lock") = next;
@@ -4258,9 +4261,12 @@ fn block_slider_hit_rtl_and_terminal_on_the_mounted_host() {
             .with_appearance(SliderAppearance::Block)
             .with_size(ControlSize::Xs)
             .with_aria_label("Range");
+        let theme = theme();
+        let layout_root = RenderContext::new(&theme);
+        let ctx = layout_root.with_block_layout_width(160.0);
         let node = poodle_render::range_slider(
             &spec,
-            &RenderContext::new(&theme()),
+            &ctx,
             poodle_render::RangeSliderHandlers {
                 on_change: Some(Arc::new(move |lo, hi| {
                     *sink.lock().expect("value lock") = (lo, hi);
@@ -4285,6 +4291,101 @@ fn block_slider_hit_rtl_and_terminal_on_the_mounted_host() {
         driver.dispatch_key_raw("right");
         assert_eq!(*live.lock().expect("value lock"), (20.0, 51.0));
     });
+}
+
+fn mount_block_slider_host<'a>(
+    cx: &'a mut TestAppContext,
+    spec: SliderSpec,
+    width: f32,
+) -> HeadlessDriver<'a> {
+    let theme = theme();
+    let min_height = 80.0;
+    HeadlessDriver::new_element_in_box(
+        cx,
+        Rc::new(move || {
+            poodle_gpui_node_backend::block_slider_element(
+                spec.clone(),
+                Arc::new(theme.clone()),
+                SliderHandlers::default(),
+                min_height,
+                None,
+            )
+        }),
+        width,
+        80.0,
+    )
+}
+
+/// g16.046 repair. Fit uses the mounted parent width and GPUI shaped advance,
+/// not a fixed 160px span or `chars * font * 0.5`.
+#[test]
+fn block_slider_fit_uses_parent_width_and_shaped_advance() {
+    let label = SliderSpec::new(50.0)
+        .with_bounds(0.0, 100.0)
+        .with_appearance(SliderAppearance::Block)
+        .with_visible_label("ABCDEFGH")
+        .with_visible_value_text("50");
+    run_headless(|cx| {
+        let _driver = mount_block_slider_host(cx, label.clone(), 80.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_some(),
+            "narrow parent-owned span must miss and paint fallback"
+        );
+    });
+    run_headless(|cx| {
+        let _driver = mount_block_slider_host(cx, label.clone(), 400.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_none(),
+            "wide parent-owned span must fit inline"
+        );
+    });
+
+    let font_px = poodle_render::presentation::rem_to_px(poodle_render::slider_block::font_size_rem(
+        ControlSize::Md,
+    ));
+    let (shaped, heuristic) = {
+        let mut measured = (0.0f32, 0.0f32);
+        run_headless(|cx| {
+            let mut driver = mount_block_slider_host(cx, label, 200.0);
+            measured = driver.with_window(|window, _| {
+                let text = "iii";
+                (
+                    poodle_gpui_node_backend::shaped_block_advance(window, text, font_px),
+                    text.chars().count() as f32 * font_px * 0.5,
+                )
+            });
+        });
+        measured
+    };
+    let shaped_need = shaped.ceil();
+    let heuristic_need = heuristic.ceil();
+    assert_ne!(
+        shaped_need, heuristic_need,
+        "this platform's shaped advance must disagree with chars*font*0.5 (shaped={shaped}, heuristic={heuristic}, font={font_px})"
+    );
+    let available = shaped_need.min(heuristic_need);
+    let width = 2.0 * (available + 16.0);
+    let sample = SliderSpec::new(50.0)
+        .with_bounds(0.0, 100.0)
+        .with_appearance(SliderAppearance::Block)
+        .with_visible_label("iii")
+        .with_visible_value_text("");
+    let mut missed = false;
+    run_headless(|cx| {
+        let _driver = mount_block_slider_host(cx, sample, width);
+        missed = poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_some();
+    });
+    if shaped_need > heuristic_need {
+        assert!(
+            missed,
+            "available={available} at {width}px fits heuristic {heuristic_need} and must miss shaped {shaped_need} (shaped={shaped})"
+        );
+    } else {
+        assert!(
+            !missed,
+            "available={available} at {width}px misses heuristic {heuristic_need} and must fit shaped {shaped_need} (shaped={shaped})"
+        );
+    }
 }
 
 /// g14.005 retained regression. The overlay layer registry is frame-scoped,

@@ -193,15 +193,18 @@ describe("RangeSlider (react) block appearance", () => {
       />,
     );
     const root = container.querySelector(".poodle-range-slider") as HTMLElement;
+    const lower = container.querySelector(".poodle-range-slider__hit--lower") as HTMLElement;
     expect(container.querySelectorAll(".poodle-range-slider__hit")).toHaveLength(2);
     const css = readFileSync(
       new URL("../../../core/src/styles/range-slider.css", `file://${import.meta.dirname}/`),
       "utf8",
     );
     expect(css).toContain("--poodle-range-slider-block-hit: 44px");
+    expect(css).toContain("pointer-events: auto");
     mockTrack(root, 100, 32);
-    fireEvent.pointerDown(root, { button: 0, clientX: 50, clientY: 16, pointerId: 1 });
-    fireEvent.pointerMove(root, { clientX: 20, clientY: 16, pointerId: 1 });
+    lower.setPointerCapture = vi.fn();
+    fireEvent.pointerDown(lower, { button: 0, clientX: 50, clientY: 16, pointerId: 1 });
+    fireEvent.pointerMove(lower, { clientX: 20, clientY: 16, pointerId: 1 });
     expect(onValueChange).toHaveBeenLastCalledWith([20, 50]);
     const upper = container.querySelector(".poodle-range-slider__hit--upper") as HTMLElement;
     fireEvent.keyDown(upper, { key: "ArrowRight" });

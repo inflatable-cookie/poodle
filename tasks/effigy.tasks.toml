@@ -250,6 +250,14 @@
   { task = "test:motion-policy-browser-chromium" },
   { task = "test:motion-policy-browser-webkit" },
 ]
+# g16.046 block Slider/RangeSlider 44x44 hits: real geometry and pointer
+# dispatch in Chromium and WebKit. Stays out of ci:web like the other probes.
+"test:block-slider-hit-chromium" = "bun test/block-slider-hit-probe/probe.ts --browser=chromium"
+"test:block-slider-hit-webkit" = "bun test/block-slider-hit-probe/probe.ts --browser=webkit"
+"test:block-slider-hit" = [
+  { task = "test:block-slider-hit-chromium" },
+  { task = "test:block-slider-hit-webkit" },
+]
 # Reference performance evidence for g14.024 (recorded in the implementation
 # log, not a CI threshold).
 "test:meter-surface-perf" = "bun test/visual/meter-surface-perf.ts"

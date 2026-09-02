@@ -68,12 +68,20 @@ export function Slider({
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
   const [controlMachine, setControlMachine] = useState(createSliderControlContext);
   const controlRef = useRef(createSliderControlContext());
+  const live = useRef<SliderControlContext | null>(null);
+  const cancelOnUnmount = useRef<(pointerId?: number | null) => void>(() => {});
+  const onValueChangeRef = useRef(onValueChange);
+  const onValueCommitRef = useRef(onValueCommit);
+  const isControlledRef = useRef(false);
   const root = useRef<HTMLDivElement>(null);
   const capsule = useRef<HTMLSpanElement>(null);
   const [capsuleSpan, setCapsuleSpan] = useState(0);
   const activePointer = useRef<number | null>(null);
 
   const isControlled = value !== undefined;
+  onValueChangeRef.current = onValueChange;
+  onValueCommitRef.current = onValueCommit;
+  isControlledRef.current = isControlled;
   const currentValue = isControlled ? value : uncontrolledValue;
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
@@ -120,10 +128,12 @@ export function Slider({
   function runControl(event: Parameters<typeof sliderControlTransition>[1]): void {
     const result = sliderControlTransition(controlRef.current, event);
     controlRef.current = result.context;
+    live.current = result.context;
     setControlMachine(result.context);
     for (const effect of result.effects) {
-      if (!isControlled) setUncontrolledValue(effect.value);
-      if (effect.type === "emitValueChange") onValueChange?.(effect.value); else onValueCommit?.(effect.value);
+      if (!isControlledRef.current) setUncontrolledValue(effect.value);
+      if (effect.type === "emitValueChange") onValueChangeRef.current?.(effect.value);
+      else onValueCommitRef.current?.(effect.value);
     }
   }
   function pointNorm(event: PointerEvent<HTMLDivElement>): number {
@@ -134,17 +144,46 @@ export function Slider({
     return physicalToValueNorm(physical, orientation === "horizontal" ? direction : "ltr");
   }
   function pointerDown(event: PointerEvent<HTMLDivElement>): void {
-    if (!usesControlPointer || event.button !== 0 || disabled || !root.current) return;
-    event.preventDefault(); activePointer.current = event.pointerId; root.current.setPointerCapture(event.pointerId);
+    if (!usesControlPointer || event.button !== 0 || disabled) return;
+    const target = block ? (event.currentTarget as HTMLDivElement) : root.current;
+    if (!target) return;
+    event.preventDefault();
+    event.stopPropagation();
+    activePointer.current = event.pointerId;
+    target.setPointerCapture(event.pointerId);
     runControl({ type: "POINTER_BEGIN", valueNorm: pointNorm(event) });
   }
-  function pointerMove(event: PointerEvent<HTMLDivElement>): void { if (activePointer.current === event.pointerId) runControl({ type: "POINTER_MOVE", valueNorm: pointNorm(event) }); }
+  function pointerMove(event: PointerEvent<HTMLDivElement>): void {
+    if (activePointer.current === event.pointerId) {
+      event.stopPropagation();
+      runControl({ type: "POINTER_MOVE", valueNorm: pointNorm(event) });
+    }
+  }
   function terminate(pointerId: number | null = null): void {
     if (activePointer.current === null || (pointerId !== null && activePointer.current !== pointerId)) return;
     activePointer.current = null;
-    runControl({ type: "POINTER_END" });
+    const snapshot = live.current ?? controlRef.current;
+    const result = sliderControlTransition(snapshot, { type: "POINTER_END" });
+    controlRef.current = result.context;
+    live.current = result.context;
+    setControlMachine(result.context);
+    for (const effect of result.effects) {
+      if (!isControlledRef.current) setUncontrolledValue(effect.value);
+      if (effect.type === "emitValueChange") onValueChangeRef.current?.(effect.value);
+      else onValueCommitRef.current?.(effect.value);
+    }
   }
-  function pointerEnd(event: PointerEvent<HTMLDivElement>): void { terminate(event.pointerId); }
+  function pointerEnd(event: PointerEvent<HTMLDivElement>): void {
+    event.stopPropagation();
+    terminate(event.pointerId);
+  }
+  const pointerHandlers = {
+    onPointerDown: pointerDown,
+    onPointerMove: pointerMove,
+    onPointerUp: pointerEnd,
+    onPointerCancel: pointerEnd,
+    onLostPointerCapture: pointerEnd,
+  };
   function embeddedKey(event: KeyboardEvent<HTMLDivElement>): void {
     if (disabled) return;
     const keyDirection = ({ ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 } as Record<string, -1 | 1>)[event.key];
@@ -172,7 +211,8 @@ export function Slider({
     if (disabled) terminate();
   }, [disabled]);
 
-  useEffect(() => () => terminate(), []);
+  cancelOnUnmount.current = terminate;
+  useEffect(() => () => cancelOnUnmount.current(), []);
 
   return (
     <div ref={root}
@@ -198,8 +238,7 @@ export function Slider({
       aria-valuetext={usesControlPointer ? valueText ?? undefined : undefined}
       aria-orientation={usesControlPointer ? orientation : undefined}
       aria-disabled={usesControlPointer ? disabled : undefined}
-      onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd}
-      onLostPointerCapture={pointerEnd}
+      {...(usesControlPointer ? pointerHandlers : {})}
       onKeyDown={usesControlPointer ? embeddedKey : undefined}
     >
       {block ? (
@@ -210,7 +249,7 @@ export function Slider({
               <span className="poodle-slider__remainder">{blockLayout.inline && visibleValueText ? visibleValueText : null}</span>
               <span className="poodle-slider__center" />
             </span>
-            <span className="poodle-slider__hit" data-part="hit"><span className="poodle-slider__thumb" /></span>
+            <span className="poodle-slider__hit" data-part="hit" {...(block ? pointerHandlers : {})}><span className="poodle-slider__thumb" /></span>
           </span>
           {blockLayout.fallback ? <span className="poodle-slider__fallback" aria-hidden="true">{blockLayout.fallback}</span> : null}
         </>

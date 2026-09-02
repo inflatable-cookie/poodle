@@ -80,6 +80,11 @@ export function RangeSlider({
   const [uncontrolledValue, setUncontrolledValue] = useState<[number, number]>(defaultValue);
   const [controlMachine, setControlMachine] = useState(createRangeSliderControlContext);
   const controlRef = useRef(createRangeSliderControlContext());
+  const live = useRef<RangeSliderControlContext | null>(null);
+  const cancelOnUnmount = useRef<(pointerId?: number | null) => void>(() => {});
+  const onValueChangeRef = useRef(onValueChange);
+  const onValueCommitRef = useRef(onValueCommit);
+  const isControlledRef = useRef(false);
   const root = useRef<HTMLDivElement>(null);
   const capsule = useRef<HTMLSpanElement>(null);
   const [capsuleSpan, setCapsuleSpan] = useState(0);
@@ -90,6 +95,9 @@ export function RangeSlider({
   });
 
   const isControlled = value !== undefined;
+  onValueChangeRef.current = onValueChange;
+  onValueCommitRef.current = onValueCommit;
+  isControlledRef.current = isControlled;
   const currentValue = isControlled ? value : uncontrolledValue;
   const resolvedSize = size ?? resolveSemanticControlSize(uiPresentation.sizeScale, sizeRole);
   const resolvedDensity = density ?? uiPresentation.density;
@@ -141,10 +149,14 @@ export function RangeSlider({
   }
 
   function runControl(event: Parameters<typeof rangeSliderControlTransition>[1]): void {
-    const result = rangeSliderControlTransition(controlRef.current, event); controlRef.current = result.context; setControlMachine(result.context);
+    const result = rangeSliderControlTransition(controlRef.current, event);
+    controlRef.current = result.context;
+    live.current = result.context;
+    setControlMachine(result.context);
     for (const effect of result.effects) {
-      if (!isControlled) setUncontrolledValue(effect.value);
-      if (effect.type === "emitValueChange") onValueChange?.(effect.value); else onValueCommit?.(effect.value);
+      if (!isControlledRef.current) setUncontrolledValue(effect.value);
+      if (effect.type === "emitValueChange") onValueChangeRef.current?.(effect.value);
+      else onValueCommitRef.current?.(effect.value);
     }
   }
   function pointNorm(event: PointerEvent<HTMLDivElement>): number {
@@ -173,17 +185,47 @@ export function RangeSlider({
       measure: (text) => measureInlineAdvance(text, font),
     })
     : { inline: false, fallback: null, selectedText: null };
-  function pointerDown(event: PointerEvent<HTMLDivElement>): void {
-    if (!usesControlPointer || event.button !== 0 || disabled || !root.current) return;
-    event.preventDefault(); activePointer.current = event.pointerId; root.current.setPointerCapture(event.pointerId); runControl({ type: "POINTER_BEGIN", valueNorm: pointNorm(event) });
+  function pointerDown(event: PointerEvent<HTMLElement>): void {
+    if (!usesControlPointer || event.button !== 0 || disabled) return;
+    const target = block ? event.currentTarget : root.current;
+    if (!target) return;
+    event.preventDefault();
+    event.stopPropagation();
+    activePointer.current = event.pointerId;
+    target.setPointerCapture(event.pointerId);
+    runControl({ type: "POINTER_BEGIN", valueNorm: pointNorm(event as PointerEvent<HTMLDivElement>) });
   }
-  function pointerMove(event: PointerEvent<HTMLDivElement>): void { if (activePointer.current === event.pointerId) runControl({ type: "POINTER_MOVE", valueNorm: pointNorm(event) }); }
+  function pointerMove(event: PointerEvent<HTMLElement>): void {
+    if (activePointer.current === event.pointerId) {
+      event.stopPropagation();
+      runControl({ type: "POINTER_MOVE", valueNorm: pointNorm(event as PointerEvent<HTMLDivElement>) });
+    }
+  }
   function terminate(pointerId: number | null = null): void {
     if (activePointer.current === null || (pointerId !== null && activePointer.current !== pointerId)) return;
     activePointer.current = null;
-    runControl({ type: "POINTER_END" });
+    const snapshot = live.current ?? controlRef.current;
+    const result = rangeSliderControlTransition(snapshot, { type: "POINTER_END" });
+    controlRef.current = result.context;
+    live.current = result.context;
+    setControlMachine(result.context);
+    for (const effect of result.effects) {
+      if (!isControlledRef.current) setUncontrolledValue(effect.value);
+      if (effect.type === "emitValueChange") onValueChangeRef.current?.(effect.value);
+      else onValueCommitRef.current?.(effect.value);
+    }
   }
-  function pointerEnd(event: PointerEvent<HTMLDivElement>): void { terminate(event.pointerId); }
+  function pointerEnd(event: PointerEvent<HTMLElement>): void {
+    event.stopPropagation();
+    terminate(event.pointerId);
+  }
+  const pointerHandlers = {
+    onPointerDown: pointerDown,
+    onPointerMove: pointerMove,
+    onPointerUp: pointerEnd,
+    onPointerCancel: pointerEnd,
+    onLostPointerCapture: pointerEnd,
+  };
   function embeddedKey(event: KeyboardEvent<HTMLDivElement>, thumb: "lower" | "upper"): void {
     const direction = ({ ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 } as Record<string, -1 | 1>)[event.key];
     const current = thumb === "lower" ? displayLower : displayUpper;
@@ -207,7 +249,8 @@ export function RangeSlider({
     return () => observer.disconnect();
   }, [block]);
   useEffect(() => { if (disabled) terminate(); }, [disabled]);
-  useEffect(() => () => terminate(), []);
+  cancelOnUnmount.current = terminate;
+  useEffect(() => () => cancelOnUnmount.current(), []);
 
   return (
     <div ref={root}
@@ -220,7 +263,7 @@ export function RangeSlider({
       data-density={resolvedDensity}
       data-variant={variant} data-appearance={block ? "block" : undefined} data-direction={block || direction === "rtl" ? direction : undefined} data-polarity={visualState.polarity} data-fill-split={visualState.fillSplitAtCenter} data-state={visualState.pointerActive ? "active" : "idle"}
       dir={block || direction === "rtl" ? direction : undefined}
-      onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} onPointerCancel={pointerEnd} onLostPointerCapture={pointerEnd}
+      {...(usesControlPointer ? pointerHandlers : {})}
     >
       {block ? (
         <>
@@ -235,8 +278,8 @@ export function RangeSlider({
             {blockLayout.inline && blockLayout.selectedText ? <span className="poodle-range-slider__inline poodle-range-slider__inline--selected">{blockLayout.selectedText}</span> : null}
             {blockLayout.inline && upperVisible ? <span className="poodle-range-slider__inline poodle-range-slider__inline--upper">{upperVisible}</span> : null}
           </span>
-          <div className="poodle-range-slider__hit poodle-range-slider__hit--lower" data-part="hit" data-thumb="lower" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "lower")}><span className="poodle-range-slider__thumb" /></div>
-          <div className="poodle-range-slider__hit poodle-range-slider__hit--upper" data-part="hit" data-thumb="upper" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "upper")}><span className="poodle-range-slider__thumb" /></div>
+          <div className="poodle-range-slider__hit poodle-range-slider__hit--lower" data-part="hit" data-thumb="lower" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} minimum` : "Minimum value"} aria-valuemin={min} aria-valuemax={displayUpper} aria-valuenow={displayLower} aria-valuetext={lowerValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "lower")} {...pointerHandlers}><span className="poodle-range-slider__thumb" /></div>
+          <div className="poodle-range-slider__hit poodle-range-slider__hit--upper" data-part="hit" data-thumb="upper" role="slider" tabIndex={disabled ? undefined : 0} aria-label={ariaLabel ? `${ariaLabel} maximum` : "Maximum value"} aria-valuemin={displayLower} aria-valuemax={safeMax} aria-valuenow={displayUpper} aria-valuetext={upperValueText ?? undefined} aria-orientation={orientation} aria-disabled={disabled} onKeyDown={(event) => embeddedKey(event, "upper")} {...pointerHandlers}><span className="poodle-range-slider__thumb" /></div>
           </span>
           {blockLayout.fallback ? <span className="poodle-range-slider__fallback" aria-hidden="true">{blockLayout.fallback}</span> : null}
         </>

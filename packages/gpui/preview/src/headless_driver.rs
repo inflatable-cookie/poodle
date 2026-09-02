@@ -185,12 +185,22 @@ impl<'a> HeadlessDriver<'a> {
     /// Mount an element factory when a regression owns runtime state outside
     /// the renderer-neutral node tree (scroll handles, for example).
     pub fn new_element(cx: &'a mut TestAppContext, build: Rc<dyn Fn() -> AnyElement>) -> Self {
+        Self::new_element_in_box(cx, build, MOUNT_BOX_WIDTH, MOUNT_BOX_HEIGHT)
+    }
+
+    /// Mount an element factory in a box of the given size.
+    pub fn new_element_in_box(
+        cx: &'a mut TestAppContext,
+        build: Rc<dyn Fn() -> AnyElement>,
+        box_width: f32,
+        box_height: f32,
+    ) -> Self {
         let (root, cx) = cx.add_window_view(|window, cx| {
             let root = HeadlessRoot {
                 content: HeadlessContent::Element(build),
                 focus: cx.focus_handle(),
-                box_width: MOUNT_BOX_WIDTH,
-                box_height: MOUNT_BOX_HEIGHT,
+                box_width,
+                box_height,
                 drag: poodle_gpui_node_backend::DragDropController::new(),
                 drag_host: poodle_gpui_node_backend::DragDropWindowHost::new(),
             };
@@ -202,8 +212,8 @@ impl<'a> HeadlessDriver<'a> {
             cx,
             root,
             root_focus,
-            box_width: MOUNT_BOX_WIDTH,
-            box_height: MOUNT_BOX_HEIGHT,
+            box_width,
+            box_height,
         };
         driver.draw_frame();
         driver
@@ -238,6 +248,10 @@ impl<'a> HeadlessDriver<'a> {
     /// where drawing would confound what the test is measuring.
     pub fn update_app<R>(&mut self, body: impl FnOnce(&mut gpui::App) -> R) -> R {
         self.cx.update(|_window, cx| body(cx))
+    }
+
+    pub fn with_window<R>(&mut self, body: impl FnOnce(&mut Window, &mut gpui::App) -> R) -> R {
+        self.cx.update(|window, cx| body(window, cx))
     }
 
     /// Swap in a new node and repaint.

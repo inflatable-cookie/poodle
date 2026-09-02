@@ -25,7 +25,7 @@ use crate::context::RenderContext;
 use crate::presentation::rem_to_px;
 use crate::slider_block::{
     block_grab, block_hit, block_surface, capsule_height_rem, font_size_rem, fraction_anchor,
-    stamp_disabled_roles, stamp_forced_color, visible_thumb, NATIVE_CAPSULE_SPAN_PX,
+    stamp_disabled_roles, stamp_forced_color, visible_thumb,
 };
 
 /// Host callbacks: continuous change + end-of-drag commit, both `(low, high)`.
@@ -256,69 +256,81 @@ pub fn range_slider(
                             min: f64,
                             max: f64,
                             step: f64| {
+                use poodle_headless::slider::{
+                    range_slider_transition, RangeSliderContext, RangeSliderEvent,
+                };
                 use poodle_node::{NodeKey, NodeModifiers};
-                use poodle_headless::slider::{range_slider_transition, RangeSliderContext, RangeSliderEvent};
-                target.interaction.on_key = Some(Arc::new(move |key: NodeKey, _mods: NodeModifiers| {
-                    let live = (
-                        f64::from_bits(low.load(Ordering::SeqCst)),
-                        f64::from_bits(high.load(Ordering::SeqCst)),
-                    );
-                    let current = match thumb_kind {
-                        RangeThumb::Lower => live.0,
-                        RangeThumb::Upper => live.1,
-                    };
-                    let direction = match key {
-                        NodeKey::ArrowLeft | NodeKey::ArrowDown => -1.0,
-                        NodeKey::ArrowRight | NodeKey::ArrowUp => 1.0,
-                        _ => 0.0,
-                    };
-                    let raw = match key {
-                        NodeKey::Home => min,
-                        NodeKey::End => max,
-                        NodeKey::ArrowLeft
-                        | NodeKey::ArrowDown
-                        | NodeKey::ArrowRight
-                        | NodeKey::ArrowUp => current + direction * step,
-                        _ => return None,
-                    };
-                    let context = RangeSliderContext {
-                        value: live,
-                        min,
-                        max,
-                        step,
-                        disabled: false,
-                    };
-                    let (changed, change_effects) =
-                        range_slider_transition(context, RangeSliderEvent::Input { thumb: thumb_kind, raw });
-                    let commit_raw = match thumb_kind {
-                        RangeThumb::Lower => changed.value.0,
-                        RangeThumb::Upper => changed.value.1,
-                    };
-                    let (committed, commit_effects) = range_slider_transition(
-                        changed,
-                        RangeSliderEvent::Commit {
-                            thumb: thumb_kind,
-                            raw: commit_raw,
-                        },
-                    );
-                    low.store(committed.value.0.to_bits(), Ordering::SeqCst);
-                    high.store(committed.value.1.to_bits(), Ordering::SeqCst);
-                    for effect in change_effects.into_iter().chain(commit_effects) {
-                        match effect {
-                            poodle_headless::slider::RangeSliderEffect::EmitValueChange { value } => {
-                                if let Some(handler) = &on_change {
-                                    handler(value.0, value.1);
+                target.interaction.on_key =
+                    Some(Arc::new(move |key: NodeKey, _mods: NodeModifiers| {
+                        let live = (
+                            f64::from_bits(low.load(Ordering::SeqCst)),
+                            f64::from_bits(high.load(Ordering::SeqCst)),
+                        );
+                        let current = match thumb_kind {
+                            RangeThumb::Lower => live.0,
+                            RangeThumb::Upper => live.1,
+                        };
+                        let direction = match key {
+                            NodeKey::ArrowLeft | NodeKey::ArrowDown => -1.0,
+                            NodeKey::ArrowRight | NodeKey::ArrowUp => 1.0,
+                            _ => 0.0,
+                        };
+                        let raw = match key {
+                            NodeKey::Home => min,
+                            NodeKey::End => max,
+                            NodeKey::ArrowLeft
+                            | NodeKey::ArrowDown
+                            | NodeKey::ArrowRight
+                            | NodeKey::ArrowUp => current + direction * step,
+                            _ => return None,
+                        };
+                        let context = RangeSliderContext {
+                            value: live,
+                            min,
+                            max,
+                            step,
+                            disabled: false,
+                        };
+                        let (changed, change_effects) = range_slider_transition(
+                            context,
+                            RangeSliderEvent::Input {
+                                thumb: thumb_kind,
+                                raw,
+                            },
+                        );
+                        let commit_raw = match thumb_kind {
+                            RangeThumb::Lower => changed.value.0,
+                            RangeThumb::Upper => changed.value.1,
+                        };
+                        let (committed, commit_effects) = range_slider_transition(
+                            changed,
+                            RangeSliderEvent::Commit {
+                                thumb: thumb_kind,
+                                raw: commit_raw,
+                            },
+                        );
+                        low.store(committed.value.0.to_bits(), Ordering::SeqCst);
+                        high.store(committed.value.1.to_bits(), Ordering::SeqCst);
+                        for effect in change_effects.into_iter().chain(commit_effects) {
+                            match effect {
+                                poodle_headless::slider::RangeSliderEffect::EmitValueChange {
+                                    value,
+                                } => {
+                                    if let Some(handler) = &on_change {
+                                        handler(value.0, value.1);
+                                    }
                                 }
-                            }
-                            poodle_headless::slider::RangeSliderEffect::EmitValueCommit { value } => {
-                                if let Some(handler) = &on_value_commit {
-                                    handler(value.0, value.1);
+                                poodle_headless::slider::RangeSliderEffect::EmitValueCommit {
+                                    value,
+                                } => {
+                                    if let Some(handler) = &on_value_commit {
+                                        handler(value.0, value.1);
+                                    }
                                 }
                             }
                         }
-                    }
-                    None
-                }));
+                        None
+                    }));
             };
 
             bind_key(
@@ -569,11 +581,11 @@ fn range_slider_block(
     handlers: RangeSliderHandlers,
 ) -> Node {
     use poodle_headless::slider::{
-        layout_range_slider_block, measure_block_advance, physical_to_value_norm,
-        range_slider_control_transition, range_slider_transition, range_slider_visual_state,
-        resolved_range_text, resolved_visible_text, RangeSliderControlContext,
-        RangeSliderControlEvent, RangeSliderContext, RangeSliderEffect, RangeSliderEvent,
-        RangeThumb, SLIDER_BLOCK_HIT_PX,
+        layout_range_slider_block, physical_to_value_norm, range_slider_control_transition,
+        range_slider_transition, range_slider_visual_state, resolved_range_text,
+        resolved_visible_text, RangeSliderContext, RangeSliderControlContext,
+        RangeSliderControlEvent, RangeSliderEffect, RangeSliderEvent, RangeThumb,
+        SLIDER_BLOCK_HIT_PX,
     };
     use poodle_node::{NodeKey, NodeModifiers};
 
@@ -624,15 +636,16 @@ fn range_slider_block(
         lower_text.as_deref(),
         upper_text.as_deref(),
     );
+    let (capsule_span, measure) = ctx.require_block_layout("RangeSlider");
     let layout = layout_range_slider_block(
-        NATIVE_CAPSULE_SPAN_PX,
+        capsule_span,
         lo,
         hi,
         label.as_deref(),
         lower_text.as_deref(),
         upper_text.as_deref(),
         range_text.as_deref(),
-        |text| measure_block_advance(text, font_px),
+        |text| measure(text, font_px),
     );
 
     let lower_label = match spec.aria_label.as_deref() {
@@ -666,22 +679,11 @@ fn range_slider_block(
         }
         hit
     };
-    let mut thumb_lo = make_hit(
-        "range-slider-lower",
-        "lower",
-        lower_label,
-        spec.low,
-    );
-    let mut thumb_hi = make_hit(
-        "range-slider-upper",
-        "upper",
-        upper_label,
-        spec.high,
-    );
+    let mut thumb_lo = make_hit("range-slider-lower", "lower", lower_label, spec.low);
+    let mut thumb_hi = make_hit("range-slider-upper", "upper", upper_label, spec.high);
 
     let mut scrub_handler: Option<Arc<dyn Fn(f32, ScrubPhase) + Send + Sync>> = None;
-    if !(spec.is_disabled || (handlers.on_change.is_none() && handlers.on_value_commit.is_none()))
-    {
+    if !(spec.is_disabled || (handlers.on_change.is_none() && handlers.on_value_commit.is_none())) {
         let low = Arc::new(AtomicU64::new(spec.low.to_bits()));
         let high = Arc::new(AtomicU64::new(spec.high.to_bits()));
         let context = RangeSliderControlContext {
@@ -710,67 +712,73 @@ fn range_slider_block(
                         min: f64,
                         max: f64,
                         step: f64| {
-            target.interaction.on_key = Some(Arc::new(move |key: NodeKey, _mods: NodeModifiers| {
-                let live = (
-                    f64::from_bits(low.load(Ordering::SeqCst)),
-                    f64::from_bits(high.load(Ordering::SeqCst)),
-                );
-                let current = match thumb_kind {
-                    RangeThumb::Lower => live.0,
-                    RangeThumb::Upper => live.1,
-                };
-                let direction = match key {
-                    NodeKey::ArrowLeft | NodeKey::ArrowDown => -1.0,
-                    NodeKey::ArrowRight | NodeKey::ArrowUp => 1.0,
-                    _ => 0.0,
-                };
-                let raw = match key {
-                    NodeKey::Home => min,
-                    NodeKey::End => max,
-                    NodeKey::ArrowLeft
-                    | NodeKey::ArrowDown
-                    | NodeKey::ArrowRight
-                    | NodeKey::ArrowUp => current + direction * step,
-                    _ => return None,
-                };
-                let context = RangeSliderContext {
-                    value: live,
-                    min,
-                    max,
-                    step,
-                    disabled: false,
-                };
-                let (changed, change_effects) =
-                    range_slider_transition(context, RangeSliderEvent::Input { thumb: thumb_kind, raw });
-                let commit_raw = match thumb_kind {
-                    RangeThumb::Lower => changed.value.0,
-                    RangeThumb::Upper => changed.value.1,
-                };
-                let (committed, commit_effects) = range_slider_transition(
-                    changed,
-                    RangeSliderEvent::Commit {
-                        thumb: thumb_kind,
-                        raw: commit_raw,
-                    },
-                );
-                low.store(committed.value.0.to_bits(), Ordering::SeqCst);
-                high.store(committed.value.1.to_bits(), Ordering::SeqCst);
-                for effect in change_effects.into_iter().chain(commit_effects) {
-                    match effect {
-                        RangeSliderEffect::EmitValueChange { value } => {
-                            if let Some(handler) = &on_change {
-                                handler(value.0, value.1);
+            target.interaction.on_key =
+                Some(Arc::new(move |key: NodeKey, _mods: NodeModifiers| {
+                    let live = (
+                        f64::from_bits(low.load(Ordering::SeqCst)),
+                        f64::from_bits(high.load(Ordering::SeqCst)),
+                    );
+                    let current = match thumb_kind {
+                        RangeThumb::Lower => live.0,
+                        RangeThumb::Upper => live.1,
+                    };
+                    let direction = match key {
+                        NodeKey::ArrowLeft | NodeKey::ArrowDown => -1.0,
+                        NodeKey::ArrowRight | NodeKey::ArrowUp => 1.0,
+                        _ => 0.0,
+                    };
+                    let raw = match key {
+                        NodeKey::Home => min,
+                        NodeKey::End => max,
+                        NodeKey::ArrowLeft
+                        | NodeKey::ArrowDown
+                        | NodeKey::ArrowRight
+                        | NodeKey::ArrowUp => current + direction * step,
+                        _ => return None,
+                    };
+                    let context = RangeSliderContext {
+                        value: live,
+                        min,
+                        max,
+                        step,
+                        disabled: false,
+                    };
+                    let (changed, change_effects) = range_slider_transition(
+                        context,
+                        RangeSliderEvent::Input {
+                            thumb: thumb_kind,
+                            raw,
+                        },
+                    );
+                    let commit_raw = match thumb_kind {
+                        RangeThumb::Lower => changed.value.0,
+                        RangeThumb::Upper => changed.value.1,
+                    };
+                    let (committed, commit_effects) = range_slider_transition(
+                        changed,
+                        RangeSliderEvent::Commit {
+                            thumb: thumb_kind,
+                            raw: commit_raw,
+                        },
+                    );
+                    low.store(committed.value.0.to_bits(), Ordering::SeqCst);
+                    high.store(committed.value.1.to_bits(), Ordering::SeqCst);
+                    for effect in change_effects.into_iter().chain(commit_effects) {
+                        match effect {
+                            RangeSliderEffect::EmitValueChange { value } => {
+                                if let Some(handler) = &on_change {
+                                    handler(value.0, value.1);
+                                }
                             }
-                        }
-                        RangeSliderEffect::EmitValueCommit { value } => {
-                            if let Some(handler) = &on_value_commit {
-                                handler(value.0, value.1);
+                            RangeSliderEffect::EmitValueCommit { value } => {
+                                if let Some(handler) = &on_value_commit {
+                                    handler(value.0, value.1);
+                                }
                             }
                         }
                     }
-                }
-                None
-            }));
+                    None
+                }));
         };
 
         bind_key(
@@ -886,7 +894,11 @@ fn range_slider_block(
     leading.style.descriptor.background = Some(remainder_fill);
     stamp_forced_color(&mut leading, "canvas", "canvas-text");
     if layout.inline {
-        let text = if rtl { upper_text.as_deref() } else { lower_text.as_deref() };
+        let text = if rtl {
+            upper_text.as_deref()
+        } else {
+            lower_text.as_deref()
+        };
         if let Some(text) = text {
             let mut node = Node::text(text);
             node.style.descriptor.text_color = Some(remainder_text_color);
@@ -902,7 +914,11 @@ fn range_slider_block(
     trailing.style.descriptor.background = Some(remainder_fill);
     stamp_forced_color(&mut trailing, "canvas", "canvas-text");
     if layout.inline {
-        let text = if rtl { lower_text.as_deref() } else { upper_text.as_deref() };
+        let text = if rtl {
+            lower_text.as_deref()
+        } else {
+            upper_text.as_deref()
+        };
         if let Some(text) = text {
             let mut node = Node::text(text);
             node.style.descriptor.text_color = Some(remainder_text_color);
@@ -977,6 +993,7 @@ fn range_slider_block(
         line.style.descriptor.text_color = Some(remainder_text_color);
         line.style.text_size = Some(font_px);
         line.roles.insert("part".to_owned(), "fallback".to_owned());
+        line.id = Some("block-range-slider-fallback".to_owned());
         stamp_forced_color(&mut line, "canvas", "canvas-text");
         el = el.child(line);
     }
@@ -1002,13 +1019,19 @@ mod tests {
     }
 
     /// Records every `(low, high)` the component reports.
-    fn armed() -> (Node, std::sync::Arc<std::sync::Mutex<Vec<(f64, f64)>>>) {
+    fn armed(spec: &RangeSliderSpec) -> (Node, std::sync::Arc<std::sync::Mutex<Vec<(f64, f64)>>>) {
         let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let sink = std::sync::Arc::clone(&seen);
         let theme = theme();
-        let ctx = RenderContext::new(&theme);
+        let root = RenderContext::new(&theme);
+        let ctx = if spec.appearance == poodle_specs::SliderAppearance::Block {
+            use poodle_headless::slider::measure_block_advance;
+            root.with_block_layout(160.0, Arc::new(measure_block_advance))
+        } else {
+            root
+        };
         let node = range_slider(
-            &spec(),
+            spec,
             &ctx,
             RangeSliderHandlers {
                 on_change: Some(Arc::new(move |lo, hi| sink.lock().unwrap().push((lo, hi)))),
@@ -1034,7 +1057,7 @@ mod tests {
     /// across that thumb's own few pixels and jump wildly.
     #[test]
     fn the_grab_overlay_carries_the_scrub_and_the_thumbs_do_not() {
-        let (node, _) = armed();
+        let (node, _) = armed(&spec());
         let carrier = node
             .find(&|n| n.interaction.on_scrub.is_some())
             .expect("grab area");
@@ -1080,11 +1103,11 @@ mod tests {
     /// press landed.
     #[test]
     fn pressing_the_track_moves_the_nearest_thumb_to_the_press() {
-        let (node, seen) = armed();
+        let (node, seen) = armed(&spec());
         scrub(&node)(0.1, ScrubPhase::Press);
         assert_eq!(seen.lock().unwrap().last().copied(), Some((10.0, 80.0)));
 
-        let (node, seen) = armed();
+        let (node, seen) = armed(&spec());
         scrub(&node)(0.9, ScrubPhase::Press);
         assert_eq!(seen.lock().unwrap().last().copied(), Some((20.0, 90.0)));
     }
@@ -1093,7 +1116,7 @@ mod tests {
     /// lower thumb up past the upper must not silently hand the drag over.
     #[test]
     fn a_drag_keeps_the_thumb_the_press_chose() {
-        let (node, seen) = armed();
+        let (node, seen) = armed(&spec());
         let scrub = scrub(&node);
         scrub(0.1, ScrubPhase::Press); // grabs the lower thumb
         scrub(0.5, ScrubPhase::Drag);
@@ -1110,7 +1133,7 @@ mod tests {
     /// pointer stopped and move it again.
     #[test]
     fn the_click_that_ends_a_drag_changes_nothing() {
-        let (node, seen) = armed();
+        let (node, seen) = armed(&spec());
         let scrub = scrub(&node);
         scrub(0.1, ScrubPhase::Press);
         scrub(0.4, ScrubPhase::Drag);
@@ -1197,7 +1220,11 @@ mod tests {
     #[test]
     fn block_hits_are_forty_four() {
         let theme = theme();
-        let ctx = RenderContext::new(&theme);
+        let root = RenderContext::new(&theme);
+        let ctx = {
+            use poodle_headless::slider::measure_block_advance;
+            root.with_block_layout(160.0, Arc::new(measure_block_advance))
+        };
         let node = range_slider(
             &RangeSliderSpec::new(50.0, 50.0)
                 .with_bounds(0.0, 100.0)
@@ -1212,14 +1239,17 @@ mod tests {
         for id in ["range-slider-lower", "range-slider-upper"] {
             let hit = node.find(&|n| n.id.as_deref() == Some(id)).expect(id);
             assert_eq!(hit.style.descriptor.layout.width, LayoutSizing::Fixed(44.0));
-            assert_eq!(hit.style.descriptor.layout.height, LayoutSizing::Fixed(44.0));
+            assert_eq!(
+                hit.style.descriptor.layout.height,
+                LayoutSizing::Fixed(44.0)
+            );
             assert_eq!(hit.a11y.role, Some(NodeRole::Slider));
             assert!(hit.interaction.focusable);
         }
         let selected = node
             .find(&|n| n.roles.get("forced-color-fill").map(String::as_str) == Some("selection"));
-        let remainder = node
-            .find(&|n| n.roles.get("forced-color-fill").map(String::as_str) == Some("canvas"));
+        let remainder =
+            node.find(&|n| n.roles.get("forced-color-fill").map(String::as_str) == Some("canvas"));
         assert!(selected.is_some());
         assert!(remainder.is_some());
         assert_ne!(
@@ -1229,9 +1259,38 @@ mod tests {
     }
 
     #[test]
+    fn block_fit_follows_context_span_and_measure() {
+        let theme = theme();
+        let spec = RangeSliderSpec::new(20.0, 80.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(poodle_specs::SliderAppearance::Block)
+            .with_visible_label("AB")
+            .with_visible_lower_text("")
+            .with_visible_upper_text("")
+            .with_visible_range_text("");
+        let measure: crate::context::BlockTextMeasure =
+            Arc::new(|text: &str, _font| text.chars().count() as f32 * 30.0);
+        let root = RenderContext::new(&theme);
+        let wide = root.with_block_layout(200.0, Arc::clone(&measure));
+        let wide_node = range_slider(&spec, &wide, RangeSliderHandlers::default());
+        assert!(wide_node
+            .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
+            .is_none());
+        let narrow = root.with_block_layout(100.0, measure);
+        let narrow_node = range_slider(&spec, &narrow, RangeSliderHandlers::default());
+        assert!(narrow_node
+            .find(&|n| n.roles.get("part").map(String::as_str) == Some("fallback"))
+            .is_some());
+    }
+
+    #[test]
     fn block_pointer_tie_chooses_lower_and_does_not_swap() {
         let theme = theme();
-        let ctx = RenderContext::new(&theme);
+        let root = RenderContext::new(&theme);
+        let ctx = {
+            use poodle_headless::slider::measure_block_advance;
+            root.with_block_layout(160.0, Arc::new(measure_block_advance))
+        };
         let seen = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let sink = std::sync::Arc::clone(&seen);
         let node = range_slider(
