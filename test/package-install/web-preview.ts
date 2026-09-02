@@ -395,6 +395,64 @@ async function provePackedHistoryEntryTypes(
   };
 }
 
+const PACKED_SLIDER_APPEARANCE_DIAGNOSTIC = 'Type \'"pill"\' is not assignable';
+
+async function provePackedSliderAppearanceTypes(
+  consumerRoot: string,
+): Promise<Record<string, unknown>> {
+  const compiler = join(consumerRoot, "node_modules", ".bin", "tsc");
+  const negatives = [
+    {
+      importPath: "@inflatable-cookie/poodle-svelte",
+      file: "slider-appearance-root-negative.ts",
+      config: "tsconfig.slider-root-negative.json",
+    },
+    {
+      importPath: "@inflatable-cookie/poodle-svelte/types",
+      file: "slider-appearance-types-negative.ts",
+      config: "tsconfig.slider-types-negative.json",
+    },
+  ] as const;
+  const negativeEvidence = [];
+  for (const negative of negatives) {
+    assertUnsuppressed(consumerRoot, negative.file);
+    const compile = await runTypeCompile(consumerRoot, compiler, negative.config);
+    if (compile.exitCode === 0) {
+      throw new Error(`packed ${negative.importPath} still accepts appearance "pill"`);
+    }
+    if (!compile.output.includes(PACKED_SLIDER_APPEARANCE_DIAGNOSTIC)) {
+      throw new Error(
+        `packed ${negative.importPath} rejected "pill" with the wrong diagnostic:\n${compile.output}`,
+      );
+    }
+    if (!compile.output.includes(negative.file)) {
+      throw new Error(
+        `packed ${negative.importPath} reported its diagnostic against another file:\n${compile.output}`,
+      );
+    }
+    negativeEvidence.push({
+      importPath: negative.importPath,
+      file: negative.file,
+      exitCode: compile.exitCode,
+      diagnostic: compile.output,
+      suppressed: false,
+    });
+  }
+  return {
+    compiler: realpathSync(compiler),
+    importPaths: negatives.map((negative) => negative.importPath),
+    positive: {
+      file: "slider-appearance-positive.ts",
+      exitCode: 0,
+      diagnostics: [],
+    },
+    expectedFailures: negativeEvidence,
+    sourceImports: false,
+    workspaceAliases: false,
+    declarationTextSubstitute: false,
+  };
+}
+
 const PACKED_TREE_REORDER_DIAGNOSTIC = "Types of property 'onReorder' are incompatible.";
 const REACT_PUBLIC_SPECIFIER = "@inflatable-cookie/poodle-react";
 const REACT_ROOT_RESOLVE_CONFIG = "tsconfig.tree-react-root-resolve.json";
@@ -799,6 +857,7 @@ for (const packageEntry of packages) {
 await run(["bunx", "vitest", "run"], consumerRoot);
 
 const packedHistoryEntryProof = await provePackedHistoryEntryTypes(consumerRoot);
+const packedSliderAppearanceProof = await provePackedSliderAppearanceTypes(consumerRoot);
 const packedTreeReorderProof = await provePackedTreeReorderTypes(consumerRoot);
 
 const artifacts = await Promise.all(
@@ -855,6 +914,7 @@ const evidence = {
   },
   packedTarballs: Object.fromEntries(packedBoundaries),
   packedHistoryEntryProof,
+  packedSliderAppearanceProof,
   packedTreeReorderProof,
   mountedProof: {
     svelte: {

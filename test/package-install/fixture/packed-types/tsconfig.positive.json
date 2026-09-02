@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.base.json",
-  "files": ["ambient.d.ts", "history-entry-positive.ts"]
+  "files": ["ambient.d.ts", "history-entry-positive.ts", "slider-appearance-positive.ts"]
 }
