@@ -146,7 +146,7 @@ fn resolved_geometry_paints_without_pair_lookup_and_tears_down() {
         poodle_gpui_node_backend::begin_probe_capture();
         driver.advance_clock(Duration::from_millis(16));
         driver.drain();
-        driver.draw_if_invalidated();
+        driver.dispatch_probe_key("a");
         assert!(
             host.scheduled_wakeups() >= 1,
             "production scheduler must advance the 180ms clock, duration={ICON_GEOMETRY_DURATION_MS}"
@@ -260,6 +260,7 @@ fn host_keeps_inert_clock_uses_reverse_duration_and_cancels_on_policy_tightening
         let reverse_ms = host.scheduled_duration_ms().expect("reverse duration");
         assert!(reverse_ms > 0 && reverse_ms < u64::from(ICON_GEOMETRY_DURATION_MS));
 
+        let wakeups_before_tightening = host.scheduled_wakeups();
         driver.with_window(|window, _cx| {
             let decisions = host.set_policy(MotionPolicy::Frozen, window, &ctx);
             assert_eq!(decisions.len(), 1);
@@ -267,6 +268,13 @@ fn host_keeps_inert_clock_uses_reverse_duration_and_cancels_on_policy_tightening
         assert_eq!(host.live_clocks(), 0);
         driver.draw_frame();
         assert!(host.scheduled_task_dropped());
+        driver.advance_clock(Duration::from_millis(u64::from(ICON_GEOMETRY_DURATION_MS)));
+        driver.draw_frame();
+        assert_eq!(
+            host.scheduled_wakeups(),
+            wakeups_before_tightening,
+            "policy tightening must stop the scheduled host"
+        );
         drop(driver);
     });
 }

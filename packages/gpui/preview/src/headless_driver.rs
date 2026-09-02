@@ -580,4 +580,17 @@ impl<'a> HeadlessDriver<'a> {
         self.cx.run_until_parked();
         self.draw_frame();
     }
+
+    /// Dispatch a harmless key without the driver's forced repaint. GPUI's
+    /// event path draws first only when production code already invalidated
+    /// the window, making this a scheduler-invalidation oracle.
+    pub fn dispatch_probe_key(&mut self, key: &str) {
+        let keystroke = Keystroke::parse(key).expect("keystroke parses");
+        self.cx.simulate_event(KeyDownEvent {
+            keystroke: keystroke.clone(),
+            is_held: false,
+        });
+        self.cx.simulate_event(KeyUpEvent { keystroke });
+        self.cx.run_until_parked();
+    }
 }
