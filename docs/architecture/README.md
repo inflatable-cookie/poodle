@@ -1,7 +1,7 @@
 # Architecture
 
 Status: active
-Updated: 2026-09-01
+Updated: 2026-09-02
 
 Architecture documents define Poodle's stable ownership and runtime boundaries.
 They explain the current system; milestone sequencing belongs in roadmaps.
@@ -37,3 +37,9 @@ current delivery status.
 - [Semantic motion policy](012-semantic-motion-policy.md) — explicit
   full/reduced/frozen host policy, restriction-only inheritance, lifecycle,
   property budget, native approximation, and first-pilot evidence
+- [Icon geometry substrate](013-icon-geometry-substrate.md) — internal
+  normalized geometry, deterministic pair planning, and candidate/rejection
+  lineage; no runtime-eligible pair
+- [Compiled web package distribution](014-compiled-web-package-distribution.md)
+  — source-free `dist` boundary, dual Svelte client/server lanes, deterministic
+  receipts, and installed-tarball certification ownership

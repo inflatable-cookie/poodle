@@ -1,16 +1,17 @@
 # g16.054 — HistoryCenter v0.3.0 Release Candidate
 
-Status: blocked — `g16.053` is complete; an accepted, separately promoted
-compiled-JS/declarations prerequisite is still missing; later certification
-and Loophole adoption remain separate authority gates
+Status: blocked — `g16.053` is complete; serial `g16.056`–`g16.059` must
+complete first; later release certification and Loophole adoption remain
+separate authority gates
 Type: release candidate — no release mutation
 Opened: 2026-09-01
-Depends on: completed `g16.053`; an accepted, separately promoted prerequisite
-that lands compiled JavaScript and declarations before candidate freeze;
+Depends on: completed `g16.053`; completed `g16.059`, which certifies the
+compiled core/Svelte/private-React distribution from installed tarballs;
 merged `g16.033`; merged `g16.036`; and the accepted sequence recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: `../../specs/022-packaging-versioning-and-release-channel-rules.md`,
 `../../specs/044-deprecation-change-control-and-release-channel-operations.md`,
+`../../architecture/014-compiled-web-package-distribution.md`,
 `../g15/060-v022-release-candidate.md`, `../../contracts/001-working-rules.md`
 
 ## Goal
@@ -33,9 +34,9 @@ green candidate is a released package.
   Rust stays source/tag distribution. Jetstream lockstep identity is not
   admission.
 - Core, Svelte, and React package inputs must already emit compiled JavaScript
-  and declarations under the separately promoted prerequisite. Its build tool,
-  declaration emit, export map, CSS delivery, `sideEffects`, and dependency
-  isolation mechanics remain unplanned and are not selected by this card.
+  and declarations under architecture 014 and completed `g16.056`–`g16.059`.
+  This card consumes their accepted receipt; it does not redesign the build,
+  export map, CSS delivery, `sideEffects`, or dependency isolation.
 - Release notes inventory public intent from immutable `v0.2.2`, name the
   HistoryEntry breaking migration and five-code rejection surface, explain
   unpublished `0.2.3`, and correct READMEs that advertise it.
@@ -47,9 +48,9 @@ green candidate is a released package.
 
 ## Ordered Work
 
-1. Reconcile current main after `g16.053` and the separately promoted compiled
-   JavaScript/declarations prerequisite are accepted. Prove that prerequisite's
-   outputs are landed before freezing candidate inputs, then verify `v0.3.0` /
+1. Reconcile current main after `g16.053` and `g16.059` are complete. Prove the
+   installed-distribution receipt names the landed mainline outputs before
+   freezing candidate inputs, then verify `v0.3.0` /
    `v0.2.4` are absent locally and remotely.
 2. Apply lockstep versions, requirements, locks, generated stamps, changelog,
    `0.3.0` notes, and README/unpublished-`0.2.3` honesty edits.

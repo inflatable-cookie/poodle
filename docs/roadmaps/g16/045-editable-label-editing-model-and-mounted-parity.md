@@ -1,9 +1,10 @@
 # g16.045 — EditableLabel Editing Model And Mounted Parity
 
-Status: complete — awaiting orchestrator review
+Status: complete — merged in PR #155
 Type: implementation
 Opened: 2026-09-01
 Closed: 2026-09-02
+Merge: `1b0d4032984a65c64398fbcd71572a9093a47ace`
 Depends on: merged `g16.008`, `g16.030`, and operator acceptance recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: `../../contracts/001-working-rules.md`,

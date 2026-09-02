@@ -31,11 +31,11 @@ The one-off accounting command used deriveLiveRoster() from scripts/parity-evide
 
 | Surface | Audit posture | Current disposition |
 | --- | --- | --- |
-| EditableLabel | decision-blocked | decision resolved; `g16.045` ready |
-| Slider / RangeSlider | closed component baseline | additive block appearance promoted as `g16.046`; existing track behavior remains closed |
+| EditableLabel | decision-blocked | decision resolved; `g16.045` complete in PR #155 |
+| Slider / RangeSlider | closed component baseline | additive block appearance complete in `g16.046` / PR #154; existing track behavior remains closed |
 | ToastHost / ToastStack | closed component baseline | same-id lifecycle repair promoted as `g16.047` |
 | AgentSubagent | closed component baseline | ownership reconciliation and disposable shimmer benchmark promoted as `g16.048`; no production effect yet |
-| Icon / IconProvider | closed component baseline | internal geometry chain promoted as `g16.049`–`g16.051`; existing Icon remains static |
+| Icon / IconProvider | closed component baseline | `g16.049` complete; `g16.050` ready; later native visual admission remains gated; existing Icon remains static |
 | Tree | closed component baseline | external drop authority complete in `g16.036` / PR #127 |
 
 The canonical ready, serial, gated, and held frontier lives in

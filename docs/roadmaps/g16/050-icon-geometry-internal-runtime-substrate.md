@@ -1,6 +1,6 @@
 # g16.050 — Icon Geometry Internal Runtime Substrate
 
-Status: blocked — serial on merged `g16.049` foundation
+Status: ready — merged `g16.049` foundation available; candidate geometry is fixture-only
 Type: implementation — internal capability
 Opened: 2026-09-01
 Depends on: merged `g16.049` foundation; funded icon-geometry programme recorded in

@@ -27,31 +27,31 @@ Updated: 2026-09-02
     two native-oracle repair rounds and closed the independent MarkdownEditor
     bounded-preview issue; `036` merged in PR #127 with the paired-web Tree
     external drop-authority adapter; `037`–`044` completed the DesEngs research
-    wave in merged PRs #128–#135; `045`–`054` are the canonical post-triage
-    continuation cards; `047` merged in PR #152 after one exact-head repair
-    round; `048` merged in PR #153 with a verified static-fallback benchmark
-    verdict; independent `055` merged in PR #151
+    wave in merged PRs #128–#135; `045` merged in PR #155; `046` merged in PR
+    #154; `047` merged in PR #152 after one exact-head repair round; `048`
+    merged in PR #153 with a verified static-fallback benchmark verdict; `049`
+    merged in PR #156; `050`–`054` and `056`–`059` are the current canonical
+    continuation; independent `055` merged in PR #151
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: `g16.045` EditableLabel, `g16.046` block sliders, and
-    `g16.049` icon geometry foundation. `g16.047` is complete in PR #152;
-    `g16.048` is complete in PR #153 with production shimmer rejected; `g16.053`
-    is complete in PR #150.
+  - Ready frontier: independent `g16.050` icon geometry internal runtime and
+    `g16.056` web distribution contract. `g16.045`–`g16.049` and `g16.053`
+    are complete.
   - Independent completed lane: `g16.055` drag-source pointer-gesture browser
     suppression merged in PR #151; it remains outside the post-triage
     continuation map.
-  - Blocked frontier: `g16.050` on `049`; `g16.051` on `050`, the operational
+  - Blocked frontier: `g16.051` on `050`, the operational
     Button lab, and its separately accepted icon adapter/manifest extension;
     `g16.052` on named reviewers, approvals, and orchestrator run custody;
-    `g16.054` on an accepted, separately promoted compiled-JS/declarations
-    prerequisite whose mechanics remain unplanned; `g16.053` is complete.
+    `g16.057` on `056`, `g16.058` on `057`, `g16.059` on `058`, and `g16.054`
+    on completed `g16.059`; `g16.053` is complete.
     Citations, nested menus, the visual tranche, public IconMorph,
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: orchestrator reviews and merges the exact planning head, then
-    dispatches only the ready frontier with overlap-aware serialization.
+  - Next move: dispatch `g16.050` and `g16.056` in parallel with global
+    front-door integration reserved to the orchestrator.
 
 ## Latest Completed Track
 

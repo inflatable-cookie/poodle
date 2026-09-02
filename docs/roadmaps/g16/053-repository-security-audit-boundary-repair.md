@@ -87,6 +87,6 @@ new unrelated audit failure as part of this papercut.
 
 ## Continuation
 
-Accepted merge clears only the security-audit gate on `g16.054`. The separately
-promoted compiled-JS/declarations prerequisite still blocks candidate work. No
-release mutation authority is granted.
+Accepted merge clears only the security-audit gate on `g16.054`. Serial
+`g16.056`–`g16.059` still block candidate work. No release mutation authority
+is granted.

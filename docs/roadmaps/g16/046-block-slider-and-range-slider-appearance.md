@@ -1,9 +1,10 @@
 # g16.046 — Block Slider And RangeSlider Appearance
 
-Status: implementation-complete — PR pending orchestrator review (review repair)
+Status: complete — merged in PR #154 after exact-head repair
 Type: implementation
 Opened: 2026-09-01
-Closed: 2026-09-02 (implementation; merge belongs to the orchestrator)
+Closed: 2026-09-02
+Merge: `40d251c9b172cea5f043aaa19d220586b1919177`
 Proof head: `95a5dbd36d6e5e80b6647aaf7593b44a6a7abed8`
 Repair head: `c00a3c73dbd70dc485afc9250ce1e7f616352550`
 Height repair: `354a94c081d74712ba5d33917396d4f14e40f3ae`

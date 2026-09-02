@@ -1,7 +1,7 @@
 # Roadmaps
 
 Status: reference
-Updated: 2026-09-01
+Updated: 2026-09-02
 
 Roadmaps record Poodle's executable milestone work. `g15` completed the full
 v0.2.x release programme: the roster and parity baseline, failed v0.2.0
@@ -15,14 +15,11 @@ behavior repairs without inventing another conformance authority.
 - [Generation index](generation-index.md) is the canonical status summary.
 - `g16.036` is complete in PR #127. The 2026-09-01 triage decisions are
   consolidated in the [canonical continuation map](g16/component-continuation-runway.md):
-  `g16.045`, `g16.046`, and `g16.049` are active; `g16.047` is complete in PR
-  #152, `g16.048` is complete in PR #153 with production shimmer rejected,
-  and `g16.053` is complete in PR #150;
-  `g16.050`, `g16.051`,
-  and `g16.052` keep explicit serial, ownership, or external gates. `g16.054`
-  stays blocked on an accepted, separately promoted compiled-JS/declarations
-  prerequisite whose mechanics remain unplanned; its security-audit dependency
-  is complete.
+  `g16.045`–`g16.049` and `g16.053` are complete. `g16.050` and `g16.056` are
+  ready and independent; `g16.057`–`g16.059` are serial behind `g16.056`.
+  `g16.051` and `g16.052` keep explicit serial, ownership, or external gates.
+  `g16.054` stays blocked on completed `g16.059`; its security-audit dependency
+  is complete and architecture 014 owns the compiled-distribution mechanics.
   Citations, nested menus, the lab-backed visual tranche, public IconMorph,
   release and adoption mutations, GPUI accessibility, Jetstream, and the
   separate holistic promotion batch remain gated or held.

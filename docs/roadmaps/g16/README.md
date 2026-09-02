@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — complete through `g16.044`; canonical post-triage continuation
-compiled through `g16.054`; independent `g16.055` complete
+Status: active — complete through `g16.049`; canonical post-triage continuation
+compiled through `g16.059`; independent `g16.055` complete
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -79,27 +79,31 @@ stay maintained; backend admission is not part of the first card.
 42. [042 — Semantic interaction cues research](042-semantic-interaction-cues-research.md) — research-complete in PR #134; consumer-owned, no cue API
 43. [043 — In-place toast lifecycle research](043-in-place-toast-lifecycle-research.md) — research-complete in PR #133; consumer-owned same-id updates
 44. [044 — Nested menu pointer intent research](044-nested-menu-pointer-intent-research.md) — research-complete in PR #131; conditional compose-and-extend direction
-45. [045 — EditableLabel editing model and mounted parity](045-editable-label-editing-model-and-mounted-parity.md) — ready
-46. [046 — Block Slider and RangeSlider appearance](046-block-slider-and-range-slider-appearance.md) — ready
+45. [045 — EditableLabel editing model and mounted parity](045-editable-label-editing-model-and-mounted-parity.md) — complete; merged in PR #155 with paired edit-machine, composite focus-restoration, and mounted GPUI proof
+46. [046 — Block Slider and RangeSlider appearance](046-block-slider-and-range-slider-appearance.md) — complete; merged in PR #154 after exact-head native-fit, web-hit-target, teardown, height, construction-ownership, and accessible-name repairs
 47. [047 — Toast same-id update convention](047-toast-same-id-update-convention.md) — complete; merged in PR #152 after one exact-head repair round
 48. [048 — AgentSubagent ownership and shimmer benchmark](048-agent-subagent-ownership-and-shimmer-benchmark.md) — complete; merged in PR #153 with a verified static-fallback verdict and no production effect
-49. [049 — Icon geometry format and registry foundation](049-icon-geometry-format-and-registry-foundation.md) — ready; IG-01/02 only; all plannable pairs remain candidates and none is runtime-eligible
-50. [050 — Icon geometry internal runtime substrate](050-icon-geometry-internal-runtime-substrate.md) — blocked on the merged `g16.049` foundation; candidate geometry is fixture-only
+49. [049 — Icon geometry format and registry foundation](049-icon-geometry-format-and-registry-foundation.md) — complete; merged in PR #156; IG-01/02 only, six candidates, six rejections, zero accepted/runtime-eligible pairs
+50. [050 — Icon geometry internal runtime substrate](050-icon-geometry-internal-runtime-substrate.md) — ready; candidate geometry is fixture-only and cannot be promoted by this card
 51. [051 — Icon geometry native visual admission](051-icon-geometry-native-visual-admission.md) — blocked on completed `g16.050`, the operational Button lab, and a separately completed icon adapter/manifest extension
 52. [052 — Contributor design-guidance pilot](052-contributor-design-guidance-pilot.md) — gated on named human reviewers, freeze approvals, and orchestrator execution custody
 53. [053 — Repository security-audit boundary repair](053-repository-security-audit-boundary-repair.md) — complete in PR #150; the production matcher is boundary-safe and the repository audit is green without exclusions
-54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — blocked on an accepted, separately promoted compiled-JS/declarations prerequisite; `g16.053` is complete, the remaining mechanics are unplanned, and no release mutation is authorized
+54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — blocked on completed `g16.059`; `g16.053` is complete and no release mutation is authorized
 55. [055 — Drag source pointer-gesture browser suppression](055-drag-source-preactivation-selection-suppression.md) — complete; merged in PR #151 with shared-controller pre-activation selection suppression and one-shot post-drag compatibility-click cancellation
+56. [056 — Web distribution contract](056-web-distribution-contract.md) — ready; freezes the compiled `dist` and breaking `./markdown` boundary
+57. [057 — Core build substrate](057-core-build-substrate.md) — blocked on completed `g16.056`
+58. [058 — Shell distributions](058-shell-distributions.md) — blocked on completed `g16.057`
+59. [059 — Installed web distribution certification](059-installed-web-distribution-certification.md) — blocked on completed `g16.058`; sole permanent installed-tarball oracle and receipt
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
-ready, serial, gated, and held frontier. Ready cards are `g16.045`, `g16.046`,
-and `g16.049`; `g16.047`, `g16.048`, and `g16.053` are complete. `g16.050`,
-`g16.051`, and `g16.052` retain their explicit
-serial or external gates. `g16.054` still requires the separately promoted
-compiled-JS/declarations prerequisite; completing `g16.053` did not open
-candidate work. Citations, nested-menu pointer intent, the dedicated lab,
+ready, serial, gated, and held frontier. `g16.045`–`g16.049` and `g16.053` are
+complete. Ready cards are independent `g16.050` and `g16.056`; the latter
+opens serial `g16.057`–`g16.059`. `g16.051` and `g16.052` retain their explicit
+serial or external gates. `g16.054` is blocked on completed `g16.059` and does
+not inherit release authority from the distribution programme. Citations,
+nested-menu pointer intent, the dedicated lab,
 its six-component / 24-fixture visual tranche, GPUI accessibility, public
 IconMorph admission, release/adoption mutations, and Jetstream remain gated or
 held rather than becoming implicit worker work. The canonical map also holds

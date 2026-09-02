@@ -2,10 +2,10 @@
 
 Status: canonical post-triage planning map
 Compiled: 2026-09-01
-Source head: `ec2c226db781e05db2642f77ff4c6fbfb0fcc94d`
+Source head: `47ab6aa3b1a754706e498b1ce4e30776b6bd6efb`
 Sources: `component-continuation-register.md`, the accepted consolidation
-handoff, promoted cards, the remaining open triage gates, and the open
-holistic posture assessment
+handoff, promoted cards, architecture 014, the remaining open triage gates,
+and the accepted holistic posture assessment
 
 This map replaces the stale post-motion queue with one bounded continuation
 frontier. It records promotion, serial edges, external gates, and holds. It
@@ -29,6 +29,12 @@ renumbered here.
 - `g16.048` is complete in PR #153. The contract now records shipped static
   AgentSubagent ownership; the verified three-engine smoke benchmark returned
   `static-fallback`, so no production shimmer continuation exists.
+- `g16.045` is complete in PR #155. One committed/draft model, portable trim,
+  scalar length, focus restoration, and mounted composite proof are landed.
+- `g16.046` is complete in PR #154. The opt-in block treatment is landed with
+  parent-width native fit, real web hit targets, and no accessible-name leak.
+- `g16.049` is complete in PR #156. Its registry has six candidates, six
+  rejections, and no accepted or runtime-eligible pair.
 - The accepted consolidation resolves the previous EditableLabel,
   block-slider, toast, shimmer, icon-geometry, design-guidance, release,
   citations, nested-menu, lab, visual-tranche, and Jetstream questions.
@@ -39,11 +45,10 @@ These cards have complete boundaries and no unmet serial dependency:
 
 | Card | Lane | Writable boundary | Result |
 | --- | --- | --- | --- |
-| [`g16.045`](045-editable-label-editing-model-and-mounted-parity.md) | EditableLabel | contract, paired runtime implementation, mounted proof | one committed/draft editing model |
-| [`g16.046`](046-block-slider-and-range-slider-appearance.md) | Slider / RangeSlider | additive appearance contract and active-runtime implementation | opt-in horizontal block treatment |
-| [`g16.049`](049-icon-geometry-format-and-registry-foundation.md) | icon geometry IG-01/02 | internal architecture, format, vectors, generated registry | validated candidate geometry foundation; no runtime-eligible pair |
+| [`g16.050`](050-icon-geometry-internal-runtime-substrate.md) | icon geometry IG-03–IG-05 | internal runtime/node/private-shell substrate | fixture-only runtime proof; no public or eligible pair |
+| [`g16.056`](056-web-distribution-contract.md) | compiled web distribution | architecture/package contract and migration boundary | frozen source-free `dist` contract |
 
-These three lanes are independently dispatchable after this planning PR is accepted.
+These two lanes are independently dispatchable.
 If implementation discovers shared barrel, registry, contract, or generated
 file ownership between cards, serialize the overlapping pair before edits.
 Global g16 front-door and closeout edits remain orchestrator-owned.
@@ -52,10 +57,12 @@ Global g16 front-door and closeout edits remain orchestrator-owned.
 
 | Card or continuation | State | Opens when | Fixed boundary |
 | --- | --- | --- | --- |
-| [`g16.050`](050-icon-geometry-internal-runtime-substrate.md) | blocked | merged `g16.049` foundation | IG-03–IG-05; candidate geometry as internal fixtures only; internal plan, node/GPUI headless proof, private web shells |
 | [`g16.051`](051-icon-geometry-native-visual-admission.md) | blocked | completed `g16.050`, operational Button lab, and separately completed icon adapter/manifest extension | IG-06 native visual admission only |
 | [`g16.052`](052-contributor-design-guidance-pilot.md) | gated | named human reviewers, two freeze approvals, and orchestrator execution custody | finite matched pilot; no ordinary worker judgment |
-| [`g16.054`](054-historycenter-v030-release-candidate.md) | blocked | `g16.053` is complete; an accepted, separately promoted compiled-JS/declarations prerequisite whose mechanics remain unplanned is still missing | immutable `0.3.0` candidate and validation evidence; no release mutation |
+| [`g16.057`](057-core-build-substrate.md) | blocked | completed `g16.056` | deterministic source-free core build and receipt |
+| [`g16.058`](058-shell-distributions.md) | blocked | completed `g16.057` | dual-lane Svelte plus private React distribution |
+| [`g16.059`](059-installed-web-distribution-certification.md) | blocked | completed `g16.058` | sole permanent installed browser/SSR oracle and promotion receipt |
+| [`g16.054`](054-historycenter-v030-release-candidate.md) | blocked | completed `g16.059`; `g16.053` is complete | immutable `0.3.0` candidate and validation evidence; no release mutation |
 | IconMorph public admission | gated | `g16.051` returns an admit verdict | IG-07 requires a later explicit public card |
 | HistoryCenter publication and Loophole adoption | gated | accepted `g16.054`, exact receipts, and separate orchestrator authority | tag/publish and sibling adoption stay distinct mutations |
 
@@ -81,7 +88,7 @@ the full semantic content carrier as a separate serial prerequisite.
 ### Separate Holistic Promotion Batch
 
 The [holistic posture assessment](../../triage/20260901-233708-holistic-posture-assessment.md)
-remains open input. Its Nucleus 29-component execution-backed GPUI parity
+is accepted input. Its Nucleus 29-component execution-backed GPUI parity
 programme, React drift gate, approved Linux web/Rust workflow card,
 direct-Underlay authority correction, and recurring consumer-papercut intake
 await a separate promotion batch. This runway compiles none of those cards.
