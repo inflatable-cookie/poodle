@@ -944,8 +944,8 @@ that card, one log, papercuts.
 Writable: Svelte/React build and staging, their manifests/exports, root and
 markdown barrels, peer/CSS declarations, focused build and disposable smoke
 fixtures, that card, one log, papercuts, and only the existing package-install
-roster, compiled-path, Svelte-floor, and CSS-execution retargeting needed to
-keep the accepted 171-root/five-markdown split green. No new permanent
+roster, compiled-path, Svelte-floor, CSS-execution, and markdown-import
+retargeting needed to keep the accepted 171-root/five-markdown split green. No new permanent
 certification behavior or receipt.
 
 | Invariant | Smallest counterexample | Proof |

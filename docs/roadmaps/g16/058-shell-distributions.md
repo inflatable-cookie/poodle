@@ -34,9 +34,10 @@ disposable installed browser/SSR exit smoke. Leave permanent certification to
   through a lazy import: all five render synchronously in browser and SSR.
 - Card 3's installed smoke is disposable and narrow. It must not edit or own
   the permanent receipt or add certification behavior. This repair may update
-  only the existing package-install roster, compiled-path, Svelte-floor, and
-  CSS-execution retargeting for the 171-root/five-markdown split so the current
-  web gate stays green.
+  only the existing package-install roster, compiled-path, Svelte-floor,
+  CSS-execution, and markdown-import retargeting for the
+  171-root/five-markdown split so the current web gate stays green. Existing
+  runtime proofs move to the new subpath; they are not deleted.
 - No version, release-note, workflow, tag, registry, or sibling mutation.
 
 ## Ordered Work
@@ -87,8 +88,8 @@ disposable installed browser/SSR exit smoke. Leave permanent certification to
 Svelte/React build and staging configuration, their package manifests/exports,
 shell root/markdown barrel migration, peer/CSS declarations, focused build and
 disposable smoke fixtures, only the existing package-install roster,
-compiled-path, Svelte-floor, and CSS-execution retargeting, this card, one log,
-and new papercuts. Do not add permanent certification behavior or edit its
+compiled-path, Svelte-floor, CSS-execution, and markdown-import retargeting,
+this card, one log, and new papercuts. Do not add permanent certification behavior or edit its
 receipt, version/release surfaces,
 workflows, tags, registries, sibling repositories, or React publication state.
 
