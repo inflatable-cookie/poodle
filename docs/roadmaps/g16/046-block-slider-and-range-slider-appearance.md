@@ -144,7 +144,8 @@ appearance decision. It is not implied by this card.
 
 ## Closeout
 
-Implementation landed on `feature/g16-046-block-sliders`. Public names, fit
+Implementation landed on `feature/g16-046-block-sliders` as PR
+https://github.com/inflatable-cookie/poodle/pull/154. Public names, fit
 arithmetic, tie/clamp, terminal, 44×44 hits, forced-color roles, and
 horizontal-only rejection match this card. Visual ledger cells were not moved.
 Jetstream remains compile-compat specimens only.
