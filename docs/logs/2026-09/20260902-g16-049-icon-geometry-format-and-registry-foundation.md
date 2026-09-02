@@ -13,8 +13,9 @@ Branch: `feature/g16-049-icon-geometry-foundation`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-049-icon-geometry`
 Starting exact head: `c1a527898e7425853359bd72b7113a8cf38b8d97`
 Planning base ancestor: `7f59ae42f4917c675968819eb23a5e41dc90013c`
-Rebased onto live `origin/main`: `fa8e65796f94eedcef7a6e168ba49aec41a178b5`
-Post-rebase implementation head: `cd3088ce8962a01a6f4a0a081393ee18a789f5e0`
+Rebased onto live `origin/main`: `a52d0d32bdcf78d219c22449ad870ff3641e2569`
+Post-rebase implementation commit: `f617a37d3`
+Current closeout head: `ffedba0e098d973100584a1f18d17e819861ee76`
 PR: pending
 
 ## Outcome
