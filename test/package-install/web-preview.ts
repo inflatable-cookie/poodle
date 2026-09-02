@@ -395,6 +395,145 @@ async function provePackedHistoryEntryTypes(
   };
 }
 
+const PACKED_SLIDER_APPEARANCE_DIAGNOSTIC = 'Type \'"pill"\' is not assignable';
+
+async function provePackedSliderAppearanceTypes(
+  consumerRoot: string,
+): Promise<Record<string, unknown>> {
+  const compiler = join(consumerRoot, "node_modules", ".bin", "tsc");
+  if (!existsSync(compiler)) {
+    throw new Error(
+      "the packed consumer did not install a TypeScript compiler; the SliderAppearance type proof cannot run",
+    );
+  }
+
+  const installedReactTypes = join(
+    consumerRoot,
+    "node_modules",
+    "@inflatable-cookie",
+    "poodle-react",
+    "src",
+    "types.ts",
+  );
+  const installedReactIndex = join(
+    consumerRoot,
+    "node_modules",
+    "@inflatable-cookie",
+    "poodle-react",
+    "src",
+    "index.ts",
+  );
+  if (!existsSync(installedReactTypes) || !existsSync(installedReactIndex)) {
+    throw new Error(
+      "the packed React tarball omitted src/types.ts or src/index.ts; the SliderAppearance React type proof cannot run",
+    );
+  }
+  const typesSource = readFileSync(installedReactTypes, "utf8");
+  if (!typesSource.includes('export type SliderAppearance = "track" | "block"')) {
+    throw new Error(
+      "installed React src/types.ts does not export SliderAppearance as track | block",
+    );
+  }
+  const indexSource = readFileSync(installedReactIndex, "utf8");
+  if (!indexSource.includes('export * from "./types"')) {
+    throw new Error(
+      "installed React src/index.ts no longer re-exports ./types; SliderAppearance would drop off the public root",
+    );
+  }
+
+  const publicPositives = [
+    { file: "slider-appearance-positive.ts", config: "tsconfig.slider-positive.json" },
+  ] as const;
+  const mappedReactPositives = [
+    {
+      file: "slider-appearance-react-positive.ts",
+      config: "tsconfig.slider-react-positive.json",
+    },
+  ] as const;
+  for (const item of [...publicPositives, ...mappedReactPositives]) {
+    const compile = await runTypeCompile(consumerRoot, compiler, item.config);
+    if (compile.exitCode !== 0 || compile.output.length > 0) {
+      throw new Error(
+        `packed SliderAppearance positive proof failed on the installed tarball (${item.file}):\n${compile.output}`,
+      );
+    }
+  }
+
+  const publicNegatives = [
+    {
+      importPath: "@inflatable-cookie/poodle-svelte",
+      file: "slider-appearance-root-negative.ts",
+      config: "tsconfig.slider-root-negative.json",
+    },
+    {
+      importPath: "@inflatable-cookie/poodle-svelte/types",
+      file: "slider-appearance-types-negative.ts",
+      config: "tsconfig.slider-types-negative.json",
+    },
+  ] as const;
+  const mappedReactNegatives = [
+    {
+      importPath: "@inflatable-cookie/poodle-react",
+      file: "slider-appearance-react-negative.ts",
+      config: "tsconfig.slider-react-negative.json",
+    },
+  ] as const;
+  const negativeEvidence = [];
+  for (const negative of [...publicNegatives, ...mappedReactNegatives]) {
+    assertUnsuppressed(consumerRoot, negative.file);
+    const compile = await runTypeCompile(consumerRoot, compiler, negative.config);
+    if (compile.exitCode === 0) {
+      throw new Error(`packed ${negative.importPath} still accepts appearance "pill"`);
+    }
+    if (!compile.output.includes(PACKED_SLIDER_APPEARANCE_DIAGNOSTIC)) {
+      throw new Error(
+        `packed ${negative.importPath} rejected "pill" with the wrong diagnostic:\n${compile.output}`,
+      );
+    }
+    if (!compile.output.includes(negative.file)) {
+      throw new Error(
+        `packed ${negative.importPath} reported its diagnostic against another file:\n${compile.output}`,
+      );
+    }
+    negativeEvidence.push({
+      importPath: negative.importPath,
+      file: negative.file,
+      exitCode: compile.exitCode,
+      diagnostic: compile.output,
+      suppressed: false,
+      compilerPathsMapped: negative.file.includes("react"),
+    });
+  }
+  return {
+    compiler: realpathSync(compiler),
+    importPaths: [...publicNegatives, ...mappedReactNegatives].map(
+      (negative) => negative.importPath,
+    ),
+    publicSpecifierCompile: {
+      files: publicPositives.map((item) => item.file),
+      sourceImports: false,
+      workspaceAliases: false,
+      compilerPathsMapped: false,
+    },
+    reactMappedAssignability: {
+      files: [
+        ...mappedReactPositives.map((item) => item.file),
+        ...mappedReactNegatives.map((item) => item.file),
+      ],
+      pathsMappedTo: "src/types.ts",
+      reason: "src/index.ts value barrel is not tsc-clean",
+      compilerPathsMapped: true,
+      valueBarrelCompiled: false,
+      sourceImports: false,
+      workspaceAliases: false,
+    },
+    expectedFailures: negativeEvidence,
+    sourceImports: false,
+    workspaceAliases: false,
+    declarationTextSubstitute: false,
+  };
+}
+
 const PACKED_TREE_REORDER_DIAGNOSTIC = "Types of property 'onReorder' are incompatible.";
 const REACT_PUBLIC_SPECIFIER = "@inflatable-cookie/poodle-react";
 const REACT_ROOT_RESOLVE_CONFIG = "tsconfig.tree-react-root-resolve.json";
@@ -799,6 +938,7 @@ for (const packageEntry of packages) {
 await run(["bunx", "vitest", "run"], consumerRoot);
 
 const packedHistoryEntryProof = await provePackedHistoryEntryTypes(consumerRoot);
+const packedSliderAppearanceProof = await provePackedSliderAppearanceTypes(consumerRoot);
 const packedTreeReorderProof = await provePackedTreeReorderTypes(consumerRoot);
 
 const artifacts = await Promise.all(
@@ -855,6 +995,7 @@ const evidence = {
   },
   packedTarballs: Object.fromEntries(packedBoundaries),
   packedHistoryEntryProof,
+  packedSliderAppearanceProof,
   packedTreeReorderProof,
   mountedProof: {
     svelte: {

@@ -1,4 +1,5 @@
 import { fireEvent, render } from "@testing-library/react";
+import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 
 import { Slider } from "../src/Slider";
@@ -200,5 +201,99 @@ describe("Slider (react) embedded semantics", () => {
     expect(onValueChange).not.toHaveBeenCalled();
     expect(onValueCommit).not.toHaveBeenCalled();
     expect(root.getAttribute("tabindex")).toBeNull();
+  });
+});
+
+describe("Slider (react) block appearance", () => {
+  it("omitting appearance keeps the track anatomy", () => {
+    const { container } = render(<Slider value={50} ariaLabel="Volume" />);
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("data-appearance")).toBeNull();
+    expect(container.querySelector(".poodle-slider__control")).not.toBeNull();
+    expect(container.querySelector(".poodle-slider__capsule")).toBeNull();
+  });
+
+  it("does not paint ariaLabel as visible text", () => {
+    const { container } = render(<Slider appearance="block" value={50} ariaLabel="Gain" />);
+    expect(container.textContent).not.toContain("Gain");
+    expect(container.querySelector(".poodle-slider")!.getAttribute("aria-label")).toBe("Gain");
+  });
+
+  it("does not use visibleLabel as the accessible name", () => {
+    const { container } = render(<Slider appearance="block" value={50} visibleLabel="Blur" />);
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("aria-label")).toBeNull();
+    expect(container.querySelector(".poodle-slider__capsule")!.getAttribute("aria-hidden")).toBe(
+      "true",
+    );
+  });
+
+  it("rejects vertical block before paint", () => {
+    expect(() =>
+      render(<Slider appearance="block" orientation="vertical" value={40} />),
+    ).toThrow('Slider appearance="block" rejects orientation="vertical"');
+  });
+
+  it("keeps a 44px auto hit target at xs", () => {
+    const { container } = render(<Slider appearance="block" value={50} size="xs" ariaLabel="Gain" />);
+    const root = container.querySelector<HTMLElement>(".poodle-slider")!;
+    expect(root.getAttribute("data-appearance")).toBe("block");
+    expect(container.querySelector(".poodle-slider__hit")).not.toBeNull();
+    const css = readFileSync(
+      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
+      "utf8",
+    );
+    expect(css).toContain("--poodle-slider-block-hit: 44px");
+    expect(css).toContain("pointer-events: auto");
+    expect(css).toContain("min-height: max(var(--poodle-slider-block-min-height), var(--poodle-slider-block-hit))");
+  });
+
+  it("dispatches from the hit outside the capsule footprint", () => {
+    const onValueChange = vi.fn();
+    const { container } = render(
+      <Slider appearance="block" defaultValue={50} min={0} max={100} step={10} ariaLabel="Gain" onValueChange={onValueChange} />,
+    );
+    const root = container.querySelector<HTMLElement>(".poodle-slider")!;
+    const hit = container.querySelector<HTMLElement>(".poodle-slider__hit")!;
+    root.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 44, right: 200, bottom: 44, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    hit.getBoundingClientRect = () => ({ left: 78, top: -8, width: 44, height: 44, right: 122, bottom: 36, x: 78, y: -8, toJSON: () => ({}) } as DOMRect);
+    hit.setPointerCapture = vi.fn();
+    fireEvent.pointerDown(hit, { button: 0, pointerId: 1, clientX: 100, clientY: 0 });
+    expect(onValueChange).toHaveBeenCalled();
+  });
+
+  it("commits once across cancel then lost capture", () => {
+    const onValueChange = vi.fn();
+    const onValueCommit = vi.fn();
+    const { container } = render(
+      <Slider
+        appearance="block"
+        defaultValue={0}
+        min={0}
+        max={100}
+        ariaLabel="Volume"
+        onValueChange={onValueChange}
+        onValueCommit={onValueCommit}
+      />,
+    );
+    const root = container.querySelector(".poodle-slider") as HTMLElement;
+    const hit = container.querySelector(".poodle-slider__hit") as HTMLElement;
+    mockTrack(root, 100, 32);
+    hit.setPointerCapture = vi.fn();
+    fireEvent.pointerDown(hit, { button: 0, clientX: 40, clientY: 16, pointerId: 1 });
+    fireEvent.pointerMove(hit, { clientX: 70, clientY: 16, pointerId: 1 });
+    fireEvent.pointerCancel(hit, { pointerId: 1 });
+    fireEvent.lostPointerCapture(hit, { pointerId: 1 });
+    expect(onValueCommit).toHaveBeenCalledOnce();
+  });
+
+  it("maps selected fill to Highlight and remainder to Canvas", () => {
+    const css = readFileSync(
+      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
+      "utf8",
+    );
+    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__capsule {\n      background: Canvas;");
+    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__fill {\n      background: Highlight;");
+    expect(css).not.toMatch(/\.poodle-slider__fill \{\s*background: Canvas/);
   });
 });

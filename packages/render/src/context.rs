@@ -21,8 +21,11 @@
 //! system; nesting works by ordinary reborrowing inside a child-building
 //! closure, so exiting the closure restores the parent context by construction.
 
+use std::sync::Arc;
+
 use poodle_adapter::ThemeProvider;
 use poodle_headless::motion_policy::{restrict_motion_policy, MotionPolicy};
+use poodle_headless::slider::measure_block_advance;
 use poodle_node::Node;
 use poodle_specs::{
     ControlDensity, ControlSize, MotionPolicyProviderSpec, SemanticControlSizeRole,
@@ -30,6 +33,16 @@ use poodle_specs::{
 };
 
 use crate::presentation::resolve_semantic_size;
+
+/// Parent-owned inline advance for block appearance. The host supplies capsule
+/// span and a measure that reflects real shaping when available.
+pub type BlockTextMeasure = Arc<dyn Fn(&str, f32) -> f32 + Send + Sync>;
+
+#[derive(Clone)]
+struct BlockLayoutInputs {
+    capsule_span_px: f32,
+    measure: BlockTextMeasure,
+}
 
 /// One explicit construction context: a borrowed token-only theme plus the
 /// effective size-scale, density, and motion-policy defaults for the current
@@ -43,6 +56,7 @@ pub struct RenderContext<'a> {
     density: ControlDensity,
     motion_policy: MotionPolicy,
     first_frame_committed: bool,
+    block_layout: Option<BlockLayoutInputs>,
 }
 
 impl<'a> RenderContext<'a> {
@@ -54,6 +68,7 @@ impl<'a> RenderContext<'a> {
             density: ControlDensity::Default,
             motion_policy: MotionPolicy::Full,
             first_frame_committed: false,
+            block_layout: None,
         }
     }
 
@@ -67,6 +82,7 @@ impl<'a> RenderContext<'a> {
             density,
             motion_policy: self.motion_policy,
             first_frame_committed: self.first_frame_committed,
+            block_layout: self.block_layout.clone(),
         }
     }
 
@@ -79,7 +95,44 @@ impl<'a> RenderContext<'a> {
             density: self.density,
             motion_policy: restrict_motion_policy(Some(self.motion_policy), Some(policy)),
             first_frame_committed: self.first_frame_committed,
+            block_layout: self.block_layout.clone(),
         }
+    }
+
+    /// Block appearance inputs established by the host before construction.
+    /// Nested presentation and motion scopes preserve these inputs unchanged.
+    pub fn with_block_layout(
+        &self,
+        capsule_span_px: f32,
+        measure: BlockTextMeasure,
+    ) -> RenderContext<'_> {
+        RenderContext {
+            theme: self.theme,
+            size_scale: self.size_scale,
+            density: self.density,
+            motion_policy: self.motion_policy,
+            first_frame_committed: self.first_frame_committed,
+            block_layout: Some(BlockLayoutInputs {
+                capsule_span_px,
+                measure,
+            }),
+        }
+    }
+
+    /// Test and compile-compat helper when the host has a width but no shaper.
+    /// Production GPUI block paint uses `with_block_layout` plus shaped advance.
+    pub fn with_block_layout_width(&self, capsule_span_px: f32) -> RenderContext<'_> {
+        self.with_block_layout(capsule_span_px, Arc::new(measure_block_advance))
+    }
+
+    /// Required when painting block appearance. Panics if the host omitted layout inputs.
+    pub fn require_block_layout(&self, component: &str) -> (f32, BlockTextMeasure) {
+        let Some(inputs) = self.block_layout.clone() else {
+            panic!(
+                "{component} appearance=\"block\" requires RenderContext::with_block_layout(capsule_span_px, measure)"
+            );
+        };
+        (inputs.capsule_span_px, inputs.measure)
     }
 
     /// The token-only theme. Internal theme-only helpers may take this
@@ -144,6 +197,7 @@ impl<'a> RenderContext<'a> {
             density: self.density,
             motion_policy: self.motion_policy,
             first_frame_committed: committed,
+            block_layout: self.block_layout.clone(),
         }
     }
 }

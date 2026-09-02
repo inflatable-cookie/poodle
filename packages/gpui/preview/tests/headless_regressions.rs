@@ -46,13 +46,16 @@ use poodle_render::{
 use poodle_specs::{
     AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ControlDensity, ControlSize, FaderSpec,
     HistoryCenterRejection, HistoryCenterSpec, KnobSpec, Orientation, PopoverSpec, RangeSliderSpec,
-    RatingSpec, SkeletonSpec, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition, TabVariant,
+    RatingSpec, SkeletonSpec, SliderAppearance, SliderDirection, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition, TabVariant,
     TabsSpec, TimeInputSpec, Toast, ToastStackSpec, ToastTone, TriStateSwitchSpec, TriStateValue,
     UiPresentationProviderSpec, XYPadSpec,
 };
 
 #[path = "../src/headless_driver.rs"]
 mod headless_driver;
+
+#[path = "../src/block_slider_host.rs"]
+mod block_slider_host;
 
 // The preview-local axis decision (g15.019). Pure data, no GPUI: which axis
 // tabs a specimen page publishes, and which tab a retained selection resolves
@@ -4198,6 +4201,396 @@ fn slider_axis_keyboard_and_disabled_rebuild_the_host_spec() {
             disabled
                 .find(&|n| n.interaction.on_scrub.is_some())
                 .is_none()
+        );
+    });
+}
+
+/// g16.046. Block Slider hit is a real 44×44 target; RTL remaps scrub; a
+/// second terminal is inert. Vertical block panics in the renderer, not here.
+#[test]
+fn block_slider_hit_rtl_and_terminal_on_the_mounted_host() {
+    run_headless(|cx| {
+        let live = Arc::new(Mutex::new(0.0f64));
+        let sink = Arc::clone(&live);
+        let commits = Arc::new(Mutex::new(0u32));
+        let commit_count = Arc::clone(&commits);
+        let spec = SliderSpec::new(0.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_direction(SliderDirection::Rtl)
+            .with_size(ControlSize::Xs)
+            .with_visible_label("Volume");
+        let mut spec = spec;
+        spec.aria_label = Some("Volume".into());
+        spec.step = 1.0;
+        let theme = theme();
+        let layout_root = RenderContext::new(&theme);
+        let ctx = layout_root.with_block_layout_width(160.0);
+        let mut node = poodle_render::slider(
+            &spec,
+            &ctx,
+            &SliderHandlers {
+                on_change: Some(Arc::new(move |next| {
+                    *sink.lock().expect("value lock") = next;
+                })),
+                on_value_commit: Some(Arc::new(move |_| {
+                    *commit_count.lock().expect("commit lock") += 1;
+                })),
+            },
+        );
+        stamp_slider_id(&mut node, FIXTURE_ID);
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 80.0);
+        driver.wait_for_focus_handle(FIXTURE_ID);
+        let bounds = poodle_gpui_node_backend::bounds_for(FIXTURE_ID).expect("block hit bounds");
+        assert_eq!(f32::from(bounds.size.width), 44.0);
+        assert_eq!(f32::from(bounds.size.height), 44.0);
+        driver.pointer_scrub_at(0.2, "press");
+        driver.pointer_scrub_at(0.2, "drag");
+        driver.pointer_scrub_at(0.2, "release");
+        assert_eq!(*live.lock().expect("value lock"), 80.0);
+        driver.pointer_scrub_at(0.2, "release");
+        assert_eq!(*commits.lock().expect("commit lock"), 1);
+        tab_until_focused(&mut driver, FIXTURE_ID);
+        driver.dispatch_key_raw("right");
+        assert_eq!(*live.lock().expect("value lock"), 81.0);
+    });
+
+    run_headless(|cx| {
+        let live = Arc::new(Mutex::new((50.0f64, 50.0f64)));
+        let sink = Arc::clone(&live);
+        let spec = RangeSliderSpec::new(50.0, 50.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_size(ControlSize::Xs)
+            .with_aria_label("Range");
+        let theme = theme();
+        let layout_root = RenderContext::new(&theme);
+        let ctx = layout_root.with_block_layout_width(160.0);
+        let node = poodle_render::range_slider(
+            &spec,
+            &ctx,
+            poodle_render::RangeSliderHandlers {
+                on_change: Some(Arc::new(move |lo, hi| {
+                    *sink.lock().expect("value lock") = (lo, hi);
+                })),
+                on_value_commit: None,
+            },
+        );
+        let mounted = Arc::new(Mutex::new(node));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 160.0, 80.0);
+        driver.wait_for_focus_handle("range-slider-lower");
+        let lower = poodle_gpui_node_backend::bounds_for("range-slider-lower").expect("lower hit");
+        let upper = poodle_gpui_node_backend::bounds_for("range-slider-upper").expect("upper hit");
+        assert_eq!(f32::from(lower.size.width), 44.0);
+        assert_eq!(f32::from(lower.size.height), 44.0);
+        assert_eq!(f32::from(upper.size.width), 44.0);
+        assert_eq!(f32::from(upper.size.height), 44.0);
+        driver.pointer_scrub_at(0.5, "press");
+        driver.pointer_scrub_at(0.48, "drag");
+        driver.pointer_scrub_at(0.2, "drag");
+        assert_eq!(*live.lock().expect("value lock"), (20.0, 50.0));
+        tab_until_focused(&mut driver, "range-slider-upper");
+        driver.dispatch_key_raw("right");
+        assert_eq!(*live.lock().expect("value lock"), (20.0, 51.0));
+    });
+}
+
+fn mount_block_slider_host<'a>(
+    cx: &'a mut TestAppContext,
+    spec: SliderSpec,
+    width: f32,
+) -> HeadlessDriver<'a> {
+    let theme = theme();
+    HeadlessDriver::new_element_in_box(
+        cx,
+        Rc::new(move || {
+            block_slider_host::slider_element(
+                spec.clone(),
+                theme.clone(),
+                SliderHandlers::default(),
+                None,
+            )
+        }),
+        width,
+        120.0,
+    )
+}
+
+fn block_stack_sibling(id: &str) -> Node {
+    let mut next = Node::container();
+    next.id = Some(id.to_owned());
+    next.style.descriptor.layout.height = LayoutSizing::Fixed(8.0);
+    next.style.fill_width = true;
+    next
+}
+
+fn mount_production_block_stack<'a>(
+    cx: &'a mut TestAppContext,
+    host: Rc<dyn Fn() -> gpui::AnyElement>,
+    next_id: &'static str,
+    width: f32,
+) -> HeadlessDriver<'a> {
+    HeadlessDriver::new_element_in_box(
+        cx,
+        Rc::new(move || {
+            use gpui::{IntoElement as _, ParentElement as _, Styled as _};
+            gpui::div()
+                .flex()
+                .flex_col()
+                .w(px(width))
+                .child(host())
+                .child(poodle_gpui_node_backend::to_gpui(&block_stack_sibling(next_id)))
+                .into_any_element()
+        }),
+        width,
+        200.0,
+    )
+}
+
+fn bounds_contain(outer: gpui::Bounds<Pixels>, inner: gpui::Bounds<Pixels>) -> bool {
+    inner.origin.x >= outer.origin.x - px(0.5)
+        && inner.origin.y >= outer.origin.y - px(0.5)
+        && inner.bottom() <= outer.bottom() + px(0.5)
+        && inner.right() <= outer.right() + px(0.5)
+}
+
+/// g16.046 repair. Fit uses the mounted parent width and GPUI shaped advance,
+/// not a fixed 160px span or `chars * font * 0.5`.
+#[test]
+fn block_slider_fit_uses_parent_width_and_shaped_advance() {
+    let label = SliderSpec::new(50.0)
+        .with_bounds(0.0, 100.0)
+        .with_appearance(SliderAppearance::Block)
+        .with_visible_label("ABCDEFGH")
+        .with_visible_value_text("50");
+    run_headless(|cx| {
+        let _driver = mount_block_slider_host(cx, label.clone(), 80.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_some(),
+            "narrow parent-owned span must miss and paint fallback"
+        );
+    });
+    run_headless(|cx| {
+        let _driver = mount_block_slider_host(cx, label.clone(), 400.0);
+        assert!(
+            poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_none(),
+            "wide parent-owned span must fit inline"
+        );
+    });
+
+    let font_px = poodle_render::presentation::rem_to_px(poodle_render::slider_block::font_size_rem(
+        ControlSize::Md,
+    ));
+    let (shaped, heuristic) = {
+        let mut measured = (0.0f32, 0.0f32);
+        run_headless(|cx| {
+            let mut driver = mount_block_slider_host(cx, label, 200.0);
+            measured = driver.with_window(|window, _| {
+                let text = "iii";
+                (
+                    poodle_gpui_node_backend::shaped_block_advance(window, text, font_px),
+                    text.chars().count() as f32 * font_px * 0.5,
+                )
+            });
+        });
+        measured
+    };
+    let shaped_need = shaped.ceil();
+    let heuristic_need = heuristic.ceil();
+    assert_ne!(
+        shaped_need, heuristic_need,
+        "this platform's shaped advance must disagree with chars*font*0.5 (shaped={shaped}, heuristic={heuristic}, font={font_px})"
+    );
+    let available = shaped_need.min(heuristic_need);
+    let width = 2.0 * (available + 16.0);
+    let sample = SliderSpec::new(50.0)
+        .with_bounds(0.0, 100.0)
+        .with_appearance(SliderAppearance::Block)
+        .with_visible_label("iii")
+        .with_visible_value_text("");
+    let mut missed = false;
+    run_headless(|cx| {
+        let _driver = mount_block_slider_host(cx, sample, width);
+        missed = poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_some();
+    });
+    if shaped_need > heuristic_need {
+        assert!(
+            missed,
+            "available={available} at {width}px fits heuristic {heuristic_need} and must miss shaped {shaped_need} (shaped={shaped})"
+        );
+    } else {
+        assert!(
+            !missed,
+            "available={available} at {width}px misses heuristic {heuristic_need} and must fit shaped {shaped_need} (shaped={shaped})"
+        );
+    }
+}
+
+/// g16.046 repair. Production GPUI host height follows the fit decision:
+/// inline reserves the 44px surface; fallback reserves the surface plus its
+/// line. A following sibling must sit below the fallback, not under it.
+#[test]
+fn block_slider_production_host_height_contains_fallback_and_not_wide_inline() {
+    let slider = SliderSpec::new(50.0)
+        .with_bounds(0.0, 100.0)
+        .with_appearance(SliderAppearance::Block)
+        .with_visible_label("ABCDEFGH")
+        .with_visible_value_text("50");
+    let range = RangeSliderSpec::new(20.0, 80.0)
+        .with_bounds(0.0, 100.0)
+        .with_appearance(SliderAppearance::Block)
+        .with_visible_label("ABCDEFGH");
+    let slider_surface = block_slider_host::block_slider_surface_height(&slider);
+    let range_surface = block_slider_host::block_range_slider_surface_height(&range);
+
+    let mut slider_narrow_h = 0.0f32;
+    let mut slider_wide_h = 0.0f32;
+    run_headless(|cx| {
+        let theme = theme();
+        let spec = slider.clone();
+        let _driver = mount_production_block_stack(
+            cx,
+            Rc::new(move || {
+                block_slider_host::slider_element(
+                    spec.clone(),
+                    theme.clone(),
+                    SliderHandlers::default(),
+                    None,
+                )
+            }),
+            "block-slider-next",
+            80.0,
+        );
+        let host = poodle_gpui_node_backend::bounds_for("block-slider-host").expect("slider host");
+        let fallback =
+            poodle_gpui_node_backend::bounds_for("block-slider-fallback").expect("slider fallback");
+        let next = poodle_gpui_node_backend::bounds_for("block-slider-next").expect("slider sibling");
+        assert!(
+            bounds_contain(host, fallback),
+            "fallback {fallback:?} must sit inside production host {host:?}"
+        );
+        assert!(
+            next.origin.y >= fallback.bottom() - px(0.5),
+            "sibling {next:?} must sit below fallback {fallback:?}"
+        );
+        slider_narrow_h = f32::from(host.size.height);
+        assert!(
+            slider_narrow_h > slider_surface + 4.0,
+            "narrow host {slider_narrow_h} must reserve more than surface {slider_surface}"
+        );
+    });
+    run_headless(|cx| {
+        let theme = theme();
+        let spec = slider.clone();
+        let _driver = mount_production_block_stack(
+            cx,
+            Rc::new(move || {
+                block_slider_host::slider_element(
+                    spec.clone(),
+                    theme.clone(),
+                    SliderHandlers::default(),
+                    None,
+                )
+            }),
+            "block-slider-next",
+            400.0,
+        );
+        let host = poodle_gpui_node_backend::bounds_for("block-slider-host").expect("slider host");
+        assert!(
+            poodle_gpui_node_backend::bounds_for("block-slider-fallback").is_none(),
+            "wide production host must inline"
+        );
+        let next = poodle_gpui_node_backend::bounds_for("block-slider-next").expect("slider sibling");
+        slider_wide_h = f32::from(host.size.height);
+        assert!(
+            (slider_wide_h - slider_surface).abs() <= 1.0,
+            "wide host {slider_wide_h} must reserve only the surface {slider_surface}, not fallback height"
+        );
+        assert!(
+            next.origin.y >= host.bottom() - px(0.5),
+            "wide sibling {next:?} must sit below the surface host {host:?}"
+        );
+        assert!(
+            slider_wide_h + 4.0 < slider_narrow_h,
+            "wide {slider_wide_h} must not retain narrow fallback height {slider_narrow_h}"
+        );
+    });
+
+    let mut range_narrow_h = 0.0f32;
+    let mut range_wide_h = 0.0f32;
+    run_headless(|cx| {
+        let theme = theme();
+        let spec = range.clone();
+        let _driver = mount_production_block_stack(
+            cx,
+            Rc::new(move || {
+                block_slider_host::range_slider_element(
+                    spec.clone(),
+                    theme.clone(),
+                    poodle_render::RangeSliderHandlers::default(),
+                    None,
+                )
+            }),
+            "block-range-slider-next",
+            80.0,
+        );
+        let host =
+            poodle_gpui_node_backend::bounds_for("block-range-slider-host").expect("range host");
+        let fallback = poodle_gpui_node_backend::bounds_for("block-range-slider-fallback")
+            .expect("range fallback");
+        let next = poodle_gpui_node_backend::bounds_for("block-range-slider-next")
+            .expect("range sibling");
+        assert!(
+            bounds_contain(host, fallback),
+            "range fallback {fallback:?} must sit inside production host {host:?}"
+        );
+        assert!(
+            next.origin.y >= fallback.bottom() - px(0.5),
+            "range sibling {next:?} must sit below fallback {fallback:?}"
+        );
+        range_narrow_h = f32::from(host.size.height);
+        assert!(
+            range_narrow_h > range_surface + 4.0,
+            "narrow range host {range_narrow_h} must reserve more than surface {range_surface}"
+        );
+    });
+    run_headless(|cx| {
+        let theme = theme();
+        let spec = range;
+        let _driver = mount_production_block_stack(
+            cx,
+            Rc::new(move || {
+                block_slider_host::range_slider_element(
+                    spec.clone(),
+                    theme.clone(),
+                    poodle_render::RangeSliderHandlers::default(),
+                    None,
+                )
+            }),
+            "block-range-slider-next",
+            400.0,
+        );
+        let host =
+            poodle_gpui_node_backend::bounds_for("block-range-slider-host").expect("range host");
+        assert!(
+            poodle_gpui_node_backend::bounds_for("block-range-slider-fallback").is_none(),
+            "wide range host must inline"
+        );
+        let next = poodle_gpui_node_backend::bounds_for("block-range-slider-next")
+            .expect("range sibling");
+        range_wide_h = f32::from(host.size.height);
+        assert!(
+            (range_wide_h - range_surface).abs() <= 1.0,
+            "wide range host {range_wide_h} must reserve only the surface {range_surface}"
+        );
+        assert!(
+            next.origin.y >= host.bottom() - px(0.5),
+            "wide range sibling {next:?} must sit below the surface host {host:?}"
+        );
+        assert!(
+            range_wide_h + 4.0 < range_narrow_h,
+            "wide range {range_wide_h} must not retain narrow fallback height {range_narrow_h}"
         );
     });
 }

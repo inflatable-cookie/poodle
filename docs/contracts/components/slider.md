@@ -1,7 +1,7 @@
 # Slider
 
 Status: detailed contract
-Updated: 2026-08-26
+Updated: 2026-09-02
 
 ## 1. Purpose
 
@@ -12,11 +12,17 @@ Updated: 2026-08-26
   native runtimes draw the same semantic control directly
 - In scope: current value, min/max bounds, step behavior, keyboard and pointer
   adjustment, value commit semantics, horizontal and vertical orientation,
-  standard and embedded variants, unipolar and bipolar fill geometry
+  standard and embedded variants, unipolar and bipolar fill geometry, an
+  opt-in horizontal `appearance="block"` treatment with explicit visible
+  label/value content, fit fallback, and `ltr`/`rtl` direction
 - Out of scope: dual-thumb range editing (see RangeSlider), knob/fader
-  semantics, tick marks, value labels
+  semantics, tick marks, vertical block appearance, PageUp/PageDown
+  convergence, invalid/read-only/indeterminate states, a generic tooltip or
+  public fit-metric API
 
 ## 2. Anatomy
+
+Track appearance (`appearance="track"`, the default):
 
 ```text
 [Root .slider]  <div>
@@ -25,12 +31,28 @@ Updated: 2026-08-26
   └── [Control .slider__control]  <input type="range">
 ```
 
+Block appearance (`appearance="block"`), horizontal only:
+
+```text
+[Root .slider data-appearance="block"]  <div>
+  ├── [Capsule .slider__capsule]  <span>
+  │     ├── [Selected .slider__fill]  <span>
+  │     │     └── [Label .slider__inline-label]  (when every assigned item fits)
+  │     ├── [Remainder .slider__remainder]  <span>
+  │     │     └── [Value .slider__inline-value]
+  │     └── [Hit .slider__hit]  (44×44 effective target; small visible thumb)
+  └── [Fallback .slider__fallback]  (one stable line when inline text does not fit)
+```
+
 | Part | Required | Description | Token Targets |
 |------|----------|-------------|---------------|
 | Root | yes | slider host with relative positioning | sizing, disabled opacity |
-| Track | yes | full value range background bar | background, radius |
-| Fill | yes | completed value span driven by CSS custom property | accent color, radius |
-| Control | yes | native range input overlaid on the track for interaction | thumb styling, focus ring, appearance reset |
+| Track | yes, track appearance | full value range background bar | background, radius |
+| Fill | yes | completed value span driven by CSS custom property; selected capsule in block | accent / selected fill, radius |
+| Control | yes, track standard | native range input overlaid on the track for interaction | thumb styling, focus ring, appearance reset |
+| Capsule | yes, block appearance | labelled rounded track that is the visual subject | selected/remainder fill |
+| Hit | yes, block appearance | measurable 44×44 logical-pixel effective target around a small thumb | handle fill/border, focus |
+| Fallback | when inline text does not fit | one noninteractive, accessibility-hidden line immediately after the capsule | remainder text |
 
 ## 3. Props And Inputs
 
@@ -43,12 +65,16 @@ Updated: 2026-08-26
 | `max` | `number` | `100` | no | upper bound |
 | `step` | `number` | `1` | no | increment size |
 | `variant` | `"standard" \| "embedded"` | `"standard"` | no | native-input control or dense composite control |
+| `appearance` | `"track" \| "block"` | `"track"` | no | visual treatment; orthogonal to `variant`. Omitting it preserves today's anatomy. `block` accepts omitted `orientation` or `orientation="horizontal"` only |
+| `direction` | `"ltr" \| "rtl"` | `"ltr"` | no | inline direction. Horizontal geometry mirrors in `rtl`; Left/Down still decrement and Right/Up still increment |
+| `visibleLabel` | `string \| null` | `null` | no | visible label for block appearance. Empty text omits the item. Never derived from `ariaLabel` |
+| `formatVisibleValue` | `((value: number) => string) \| undefined` | `undefined` | no | **Web targets only** — formats the visible value from the normalized, bounds-guarded, step-snapped number. Default visible text is `String(value)`. Native specs carry the resolved string, not the closure |
 | `polarity` | `"unipolar" \| "bipolar"` | `"unipolar"` | no | fill from minimum or from the resolved center |
 | `centerValue` | `number \| null` | `null` | no | bipolar fill anchor; defaults to zero when zero is inside the range, otherwise the midpoint |
 | `law` | `AudioValueLaw` | `linear` | no | embedded-variant value mapping; standard remains the native linear range path |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | layout and interaction axis |
 | `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
-| `ariaLabel` | `string \| null` | `null` | no | accessible name; required when no visible label exists |
+| `ariaLabel` | `string \| null` | `null` | no | accessible name. Track: required when no associated visible label exists. Block: independent of `visibleLabel`; `visibleLabel` is never the accessible name |
 | `valueText` | `string \| null` | `null` | no | human-readable value text for assistive technology (aria-valuetext) |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
@@ -90,10 +116,18 @@ Behavior classification: machine-backed (`sliderTransition` in
 `@inflatable-cookie/poodle-core`)
 
 Keyboard and pointer input stay adapter-owned. The machine owns value
-normalization and the change/commit split. Web standard mode delegates input
-mechanics to the native range input. Embedded web and native runtimes convert
-pointer position into a normalized coordinate owned by the adapter and
-interpreted by `sliderControlTransition`.
+normalization and the change/commit split. Web standard track mode delegates
+input mechanics to the native range input. Embedded web, block appearance, and
+native runtimes convert pointer position into a normalized coordinate owned by
+the adapter and interpreted by `sliderControlTransition`. Direction is applied
+by the adapter before that coordinate reaches the machine; the machine stays
+direction-agnostic.
+
+Release, cancellation, lost capture, disablement, stale-pointer cleanup, and
+teardown share one idempotent terminal on the control machine. The first
+terminal emits one commit with the latest accepted value; later terminals are
+inert. Cancellation does not roll back. Track standard native `change`
+semantics are unchanged when `appearance` is omitted or `"track"`.
 
 - Context: `value` (controllable), `min`, `max`, `step`, `disabled`
 - Events: `INPUT { raw }` (native input), `COMMIT { raw }` (native change),
@@ -113,6 +147,62 @@ controls. The adapter owns pointer capture and converts the pointer position to
 a normalized axis coordinate. The framework-free core owns pointer begin,
 move, and end state, law mapping, step constraint, live change, and commit.
 Drawing consumes `SliderVisualState`; it never reads machine context.
+
+### Block Appearance
+
+`appearance="block"` is additive and orthogonal to `variant`. It does not fork
+value math, paging, or callback ordering.
+
+Horizontal-only admission:
+
+- `appearance="track"` keeps today's horizontal and vertical support.
+- `appearance="block"` accepts omitted `orientation` or
+  `orientation="horizontal"` only.
+- `appearance="block"` with `orientation="vertical"` is invalid in Svelte,
+  React, shared Rust composition, and GPUI. Adapters reject it before paint or
+  construction. They must not coerce orientation, silently render track
+  appearance, or split that rejection by runtime.
+
+Visible content is a separate channel from accessibility copy:
+
+- `visibleLabel` and `formatVisibleValue` never read `ariaLabel` or `valueText`
+  and never write those fields.
+- Block `visibleLabel` is not the accessible name. The control still needs
+  `ariaLabel` or an external label.
+- Formatter input is the normalized, bounds-guarded, step-snapped value.
+- Default visible value text is `String(value)`. Empty label or formatter
+  output omits that assigned item.
+
+Inline text is all-or-nothing. Assigned regions are the selected fill (label)
+and the remainder (value). For each non-empty item:
+
+```text
+available = floor(unoccluded region span - 2 * content inset)
+required  = ceil(shaped inline text advance)
+fits      iff available >= required
+```
+
+Equality fits. Required-minus-one falls back. When any assigned item misses,
+no inline text paints and one stable, noninteractive, accessibility-hidden
+line renders immediately after the capsule. The fallback never follows the
+thumb and does not change on focus or overlap. Content inset is an internal
+metric, not a public fit threshold.
+
+Block value feedback is static under architecture 012. Add no motion role.
+
+Every Slider control owns a measurable 44×44 logical-pixel effective target at
+every size and density. The visible thumb may be smaller. Proof is the hit
+rectangle, not only the painted thumb.
+
+Forced-color roles for block appearance:
+
+| Role | Web system colors | Native role names |
+|------|-------------------|-------------------|
+| remainder fill/text | `Canvas` / `CanvasText` | canvas / canvas-text |
+| selected fill/text | `Highlight` / `HighlightText` | selection / selection-text |
+| handle fill/border | `ButtonFace` / `ButtonText` | control / control-border |
+| focus | `Highlight` | focus-highlight |
+| disabled text/border | `GrayText` | disabled-content |
 
 Unipolar fill starts at zero clamped to the nearest range edge. This makes
 positive-only ranges grow from the minimum and negative-only ranges grow from
@@ -138,7 +228,9 @@ negative status color. All other values publish `fillTone="positive"`.
   web standard mode; custom web and native controls expose the same role
 - Every custom control exposes bounds, current value, optional value text,
   orientation, disabled state, and keyboard behavior on its focusable node
-- `aria-label`: from ariaLabel prop; required when no visible label exists
+- `aria-label`: from ariaLabel prop. Track appearance: required when no
+  associated visible label exists. Block appearance: `visibleLabel` is never
+  the accessible name; supply `ariaLabel` or an external label independently
 - `aria-valuemin`: from min prop
 - `aria-valuemax`: from max prop
 - `aria-valuenow`: from value prop
@@ -146,7 +238,9 @@ negative status color. All other values publish `fillTone="positive"`.
 - `aria-orientation`: from orientation on custom controls; native range inputs
   retain their browser-native projection
 - `disabled`: native disabled attribute when disabled
-- Labeling rules: visible label or programmatic ariaLabel required
+- Labeling rules: track appearance needs an associated visible label or
+  programmatic ariaLabel. Block appearance needs a programmatic accessible
+  name independent of `visibleLabel`.
 
 ### Keyboard
 
@@ -160,11 +254,11 @@ negative status color. All other values publish `fillTone="positive"`.
 | `Page Down` | decrements by larger step (browser-native, typically step * 10) |
 | `Tab` | moves focus to or from the control |
 
-All four arrow keys retain the same value mapping in either orientation:
-Left/Down decrement and Right/Up increment. Orientation changes layout,
-pointer normalization, and accessibility reporting; it does not disable the
-cross-axis arrow pair. Page-key amount remains browser-owned and is not part of
-strict cross-runtime parity.
+All four arrow keys retain the same value mapping in either orientation and
+either `direction`: Left/Down decrement and Right/Up increment. Orientation
+and direction change layout, pointer normalization, and accessibility
+reporting; they do not change numeric key meaning. Page-key amount remains
+browser-owned and is not part of strict cross-runtime parity.
 
 ### Focus And Announcement
 
@@ -212,6 +306,14 @@ strict cross-runtime parity.
 - `--poodle-recipe-slider-control-shadow`
 - `--poodle-recipe-slider-focus-ring`
 - `--poodle-recipe-slider-focus-control-shadow`
+- `--poodle-recipe-slider-block-selected-fill`
+- `--poodle-recipe-slider-block-selected-text`
+- `--poodle-recipe-slider-block-remainder-fill`
+- `--poodle-recipe-slider-block-remainder-text`
+- `--poodle-recipe-slider-block-handle-fill`
+- `--poodle-recipe-slider-block-handle-border`
+- `--poodle-recipe-slider-block-focus-ring`
+- `--poodle-recipe-slider-block-fallback-text`
 
 ### Root `.slider`
 
@@ -375,10 +477,40 @@ The WebKit thumb margin is derived from the size metrics as
 `(thumb diameter - track thickness) / -2`, keeping the thumb centered on the
 track at every size.
 
+### Block appearance metrics
+
+Block capsule cross-size follows a size ladder that can hold inline label
+text. Visible thumb diameter is smaller than the track-appearance thumb. The
+effective hit target is 44×44 logical pixels at every size and density and is
+not a public metric.
+
+| Size | capsule min-height | visible thumb |
+|------|--------------------|---------------|
+| `xs` | `1.75rem` | `0.375rem` |
+| `sm` | `1.875rem` | `0.4375rem` |
+| `md` | `2rem` | `0.5rem` |
+| `lg` | `2.25rem` | `0.5625rem` |
+| `xl` | `2.5rem` | `0.625rem` |
+
+Content inset used by the fit law is an internal `0.5rem` on each inline edge
+of an assigned region. Do not expose it.
+
 ### Density And Vertical Padding
 
 - Density must not alter the slider's vertical padding, `min-height`, or thumb position — those are size-axis properties. Density on a single-thumb slider has no compositional vertical effect; it carries no contract-mandated padding change.
 - Known Svelte deviation: the Svelte target writes `padding: 0.25rem 0` (compact) and `padding: 0.75rem 0` (comfortable) on the root, i.e. density-driven vertical padding. This violates size/density orthogonality and is a Svelte bug, not the contract rule. Rust targets must follow this contract (no density vertical padding), not replicate the Svelte deviation.
+
+### Root block `[data-appearance="block"]`
+
+| Property | Value |
+|----------|-------|
+| `display` | `flex` |
+| `flex-direction` | `column` |
+| `width` | `100%` |
+| `min-height` | capsule size table (`2rem` at `md`) |
+| `dir` | from `direction` |
+
+Block remainder fill uses `--poodle-recipe-slider-block-remainder-fill` falling back to a surface mix. Selected fill uses `--poodle-recipe-slider-block-selected-fill` falling back to accent. Inline label/value use the selected/remainder text hooks. The visible thumb uses the handle fill/border hooks.
 
 ## 9. Svelte Notes
 
@@ -396,9 +528,12 @@ track at every size.
 - Vertical orientation uses `transform: rotate(-90deg)` on the native input
 - `onValueChange` fires on the `input` event (live during drag); `onValueCommit`
   fires on the `change` event (on release)
-- `data-orientation`, `data-disabled`, `data-size`, and `data-density` attributes on root drive
-  layout and state styling
+- `data-orientation`, `data-disabled`, `data-size`, `data-density`,
+  `data-appearance`, and `data-direction` attributes on root drive layout and
+  state styling
 - `data-density` — resolved density value (`compact`, `default`, or `comfortable`)
+- Block appearance sets `dir` from `direction` and uses logical inline
+  geometry. Vertical block input throws before paint.
 
 ## 10. GPUI Notes
 
@@ -410,10 +545,15 @@ track at every size.
   node accessibility intent; native assistive-technology projection remains a
   separately measured backend evidence level
 - orientation must affect layout, pointer normalization, and accessibility
-  reporting; arrow-value mapping stays fixed across orientations
+  reporting; arrow-value mapping stays fixed across orientations and directions
 - pointer/gesture drag behavior is platform-specific but must produce the same
   value snapping and commit semantics
 - vertical orientation must be implemented natively rather than via CSS rotation
+- `appearance="block"` with `orientation="vertical"` panics at construction,
+  matching the web throw, before any node is returned
+- native specs carry resolved `visible_label` and `visible_value_text`
+  strings, never formatter closures
+- GPUI block metadata and hit bounds are not mounted assistive-technology proof
 
 ## 10a. Jetstream Notes
 
@@ -461,6 +601,7 @@ does not require Jetstream execution or evidence while that deferral stands.
 | webkit/moz thumb pseudo-elements | browser-specific CSS selectors | allowed | GPUI renders thumb directly |
 | color-mix formulas | GPUI must achieve same visual result by any means | allowed | verify visual parity |
 | Page Up/Down increment amount | native range inputs keep browser-owned paging behavior | allowed | strict parity covers arrows, Home, and End |
+| vertical block appearance | native RangeSlider axis geometry is still deferred; block stays horizontal in every runtime | allowed | later all-runtime migration after mounted native axis proof |
 
 ## 13. Specimen Definitions
 
@@ -489,6 +630,15 @@ One disabled slider:
 | Label | Min | Max | Value | Props |
 |-------|-----|-----|-------|-------|
 | Disabled | 0 | 100 | 40 | `disabled: true` |
+
+### Block appearance
+
+One horizontal block slider with an explicit visible label. Do not render a
+vertical block specimen.
+
+| Label | Min | Max | Value | Props |
+|-------|-----|-----|-------|-------|
+| Blur | 0 | 100 | 67 | `appearance: "block"`, `visibleLabel: "Blur"` |
 
 ### Embedded controls
 

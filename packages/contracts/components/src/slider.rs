@@ -12,6 +12,32 @@ pub enum SliderVariant {
     Embedded,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum SliderAppearance {
+    #[default]
+    Track,
+    Block,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum SliderDirection {
+    #[default]
+    Ltr,
+    Rtl,
+}
+
+impl SliderDirection {
+    pub fn is_rtl(self) -> bool {
+        self == Self::Rtl
+    }
+}
+
+pub fn reject_vertical_block(appearance: SliderAppearance, orientation: Orientation, component: &str) {
+    if appearance == SliderAppearance::Block && orientation == Orientation::Vertical {
+        panic!("{component} appearance=\"block\" rejects orientation=\"vertical\"");
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct SliderSpec {
     pub value: f64,
@@ -19,6 +45,8 @@ pub struct SliderSpec {
     pub max: f64,
     pub step: f64,
     pub variant: SliderVariant,
+    pub appearance: SliderAppearance,
+    pub direction: SliderDirection,
     pub polarity: SliderPolarity,
     pub center_value: Option<f64>,
     pub law: AudioValueLaw,
@@ -26,6 +54,8 @@ pub struct SliderSpec {
     pub is_disabled: bool,
     pub aria_label: Option<String>,
     pub value_text: Option<String>,
+    pub visible_label: Option<String>,
+    pub visible_value_text: Option<String>,
     pub size: Option<ControlSize>,
     pub size_role: SemanticControlSizeRole,
     pub density: Option<ControlDensity>,
@@ -39,6 +69,8 @@ impl Default for SliderSpec {
             max: 100.0,
             step: 1.0,
             variant: SliderVariant::Standard,
+            appearance: SliderAppearance::Track,
+            direction: SliderDirection::Ltr,
             polarity: SliderPolarity::Unipolar,
             center_value: None,
             law: AudioValueLaw::Linear,
@@ -46,6 +78,8 @@ impl Default for SliderSpec {
             is_disabled: false,
             aria_label: None,
             value_text: None,
+            visible_label: None,
+            visible_value_text: None,
             size: None,
             size_role: SemanticControlSizeRole::Control,
             density: None,
@@ -119,6 +153,26 @@ impl SliderSpec {
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = Some(density);
+        self
+    }
+
+    pub fn with_appearance(mut self, appearance: SliderAppearance) -> Self {
+        self.appearance = appearance;
+        self
+    }
+
+    pub fn with_direction(mut self, direction: SliderDirection) -> Self {
+        self.direction = direction;
+        self
+    }
+
+    pub fn with_visible_label(mut self, label: impl Into<String>) -> Self {
+        self.visible_label = Some(label.into());
+        self
+    }
+
+    pub fn with_visible_value_text(mut self, text: impl Into<String>) -> Self {
+        self.visible_value_text = Some(text.into());
         self
     }
 }

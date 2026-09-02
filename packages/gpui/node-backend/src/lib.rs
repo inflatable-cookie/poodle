@@ -40,6 +40,7 @@ use poodle_node::{
     NodeWheelEvent, ScrubAxis, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
 };
 
+mod measured_node;
 mod drag;
 mod inset_shadow;
 mod interaction;
@@ -933,6 +934,7 @@ mod input_text;
 
 pub use ime::{mark_composing, take_composing};
 pub use input_text::{painted_text_state_for, PaintedTextState};
+pub use measured_node::{measured_node_element, shaped_block_advance, ShapedAdvance};
 
 #[cfg(test)]
 mod tests;

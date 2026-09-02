@@ -45,6 +45,11 @@
     <Slider variant="embedded" polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation" onValueChange={(value) => (bipolar = value)} />
   </SpecimenGroup>
 
+  <SpecimenGroup label="Block appearance">
+    <Slider appearance="block" value={volume} min={0} max={100} visibleLabel="Volume" ariaLabel="Volume" onValueChange={(value) => (volume = value)} />
+    <Slider appearance="block" direction="rtl" value={opacity} min={0} max={100} visibleLabel="Opacity" ariaLabel="Opacity" onValueChange={(value) => (opacity = value)} />
+  </SpecimenGroup>
+
   {#snippet sizes(size)}
     <div class="poodle-slider-specimen__variant-pair">
       <span>{size.toUpperCase()} · standard</span>

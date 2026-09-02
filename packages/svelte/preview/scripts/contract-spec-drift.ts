@@ -160,6 +160,11 @@ const WEB_ONLY_BY_SLUG: Record<string, string[]> = {
   "update-status": ["observe"],
   "update-center": ["observe"],
   "settings-shell": ["page"],
+  // g16.046. Closures resolve to strings before the native spec; the Spec
+  // carries `visible_value_text` / `visible_lower_text` / `visible_upper_text`
+  // / `visible_range_text` instead of the functions.
+  slider: ["formatVisibleValue"],
+  "range-slider": ["formatVisibleValue", "formatVisibleRange"],
 };
 
 /**

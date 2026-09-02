@@ -67,6 +67,11 @@ export function SliderSpecimen() {
           <Slider variant="embedded" polarity="unipolar" value={unipolar} min={0} max={1} step={0.01} ariaLabel="Unipolar modulation" onValueChange={setUnipolar} />
           <Slider variant="embedded" polarity="bipolar" value={bipolar} min={-1} max={1} step={0.01} ariaLabel="Bipolar modulation" onValueChange={setBipolar} />
         </SpecimenGroup>
+
+        <SpecimenGroup label="Block appearance">
+          <Slider appearance="block" value={volume} min={0} max={100} visibleLabel="Volume" ariaLabel="Volume" onValueChange={(value) => setVolume(value)} />
+          <Slider appearance="block" direction="rtl" value={opacity} min={0} max={100} visibleLabel="Opacity" ariaLabel="Opacity" onValueChange={(value) => setOpacity(value)} />
+        </SpecimenGroup>
       </SpecimenLayout>
     </div>
   );

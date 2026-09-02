@@ -7360,6 +7360,14 @@ impl IntoElement for Slider {
             on_change: self.on_change,
             on_value_commit: None,
         };
+        if self.spec.appearance == poodle_specs::SliderAppearance::Block {
+            return crate::block_slider_host::slider_element(
+                self.spec,
+                self.theme,
+                handlers,
+                self.id,
+            );
+        }
         let mut node = poodle_render::slider(&self.spec, &RenderContext::new(&self.theme), &handlers);
         if let Some(id) = self.id {
             fn stamp(node: &mut poodle_node::Node, id: &str) {
@@ -7423,6 +7431,14 @@ impl IntoElement for RangeSlider {
             on_change: self.on_change,
             on_value_commit: None,
         };
+        if self.spec.appearance == poodle_specs::SliderAppearance::Block {
+            return crate::block_slider_host::range_slider_element(
+                self.spec,
+                self.theme,
+                handlers,
+                self.id,
+            );
+        }
         let mut node = poodle_render::range_slider(&self.spec, &RenderContext::new(&self.theme), handlers);
         if let Some(id) = self.id {
             node.id = Some(id);

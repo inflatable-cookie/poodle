@@ -533,6 +533,183 @@ pub fn range_slider_control_transition(
     }
 }
 
+/// Logical-pixel effective target for every block thumb.
+pub const SLIDER_BLOCK_HIT_PX: f32 = 44.0;
+/// Internal inline inset used by the block fit law. Not a public metric.
+pub const SLIDER_BLOCK_CONTENT_INSET_PX: f32 = 8.0;
+
+pub fn block_region_available(unoccluded_span: f32, content_inset: f32) -> f32 {
+    (unoccluded_span - 2.0 * content_inset).floor()
+}
+
+pub fn block_item_fits(available: f32, required_advance: f32) -> bool {
+    available >= required_advance.ceil()
+}
+
+pub fn block_inline_fits(items: &[(Option<&str>, f32)], measure: impl Fn(&str) -> f32) -> bool {
+    items.iter().all(|(text, unoccluded)| match text {
+        None | Some("") => true,
+        Some(text) => block_item_fits(
+            block_region_available(*unoccluded, SLIDER_BLOCK_CONTENT_INSET_PX),
+            measure(text),
+        ),
+    })
+}
+
+pub fn omit_empty_visible_text(text: Option<&str>) -> Option<String> {
+    match text {
+        Some(value) if !value.is_empty() => Some(value.to_owned()),
+        _ => None,
+    }
+}
+
+pub fn default_visible_value_text(value: f64) -> String {
+    format!("{value}")
+}
+
+pub fn default_visible_range_text(lower: f64, upper: f64) -> String {
+    format!(
+        "{} – {}",
+        default_visible_value_text(lower),
+        default_visible_value_text(upper)
+    )
+}
+
+pub fn physical_to_value_norm(physical_norm: f64, rtl: bool) -> f64 {
+    let clamped = physical_norm.clamp(0.0, 1.0);
+    if rtl {
+        1.0 - clamped
+    } else {
+        clamped
+    }
+}
+
+pub fn slider_fallback_text(label: Option<&str>, value_text: Option<&str>) -> Option<String> {
+    let mut parts = Vec::new();
+    if let Some(label) = omit_empty_visible_text(label) {
+        parts.push(label);
+    }
+    if let Some(value) = omit_empty_visible_text(value_text) {
+        parts.push(value);
+    }
+    if parts.is_empty() {
+        None
+    } else {
+        Some(parts.join(" "))
+    }
+}
+
+pub fn range_slider_fallback_text(label: Option<&str>, range_text: Option<&str>) -> Option<String> {
+    slider_fallback_text(label, range_text)
+}
+
+pub fn resolved_visible_text(value: f64, explicit: Option<&str>) -> Option<String> {
+    match explicit {
+        Some("") => None,
+        Some(text) => Some(text.to_owned()),
+        None => omit_empty_visible_text(Some(&default_visible_value_text(value))),
+    }
+}
+
+pub fn resolved_range_text(
+    lower: f64,
+    upper: f64,
+    explicit: Option<&str>,
+    lower_text: Option<&str>,
+    upper_text: Option<&str>,
+) -> Option<String> {
+    match explicit {
+        Some("") => None,
+        Some(text) => Some(text.to_owned()),
+        None => omit_empty_visible_text(Some(&format!(
+            "{} – {}",
+            lower_text
+                .filter(|text| !text.is_empty())
+                .map(ToOwned::to_owned)
+                .unwrap_or_else(|| default_visible_value_text(lower)),
+            upper_text
+                .filter(|text| !text.is_empty())
+                .map(ToOwned::to_owned)
+                .unwrap_or_else(|| default_visible_value_text(upper)),
+        ))),
+    }
+}
+
+/// Approximate inline advance when no shaper is available. Tests may pass a
+/// different measure into [`layout_slider_block`].
+pub fn measure_block_advance(text: &str, font_size: f32) -> f32 {
+    text.chars().count() as f32 * font_size * 0.5
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SliderBlockLayout {
+    pub inline: bool,
+    pub fallback: Option<String>,
+}
+
+pub fn layout_slider_block(
+    capsule_span: f32,
+    selected_norm: f32,
+    label: Option<&str>,
+    value_text: Option<&str>,
+    measure: impl Fn(&str) -> f32,
+) -> SliderBlockLayout {
+    let selected_span = selected_norm.max(0.0) * capsule_span;
+    let remainder_span = (1.0 - selected_norm).max(0.0) * capsule_span;
+    let inline = block_inline_fits(
+        &[(label, selected_span), (value_text, remainder_span)],
+        measure,
+    );
+    SliderBlockLayout {
+        inline,
+        fallback: if inline {
+            None
+        } else {
+            slider_fallback_text(label, value_text)
+        },
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RangeSliderBlockLayout {
+    pub inline: bool,
+    pub fallback: Option<String>,
+    pub selected_text: Option<String>,
+}
+
+pub fn layout_range_slider_block(
+    capsule_span: f32,
+    lower_norm: f32,
+    upper_norm: f32,
+    label: Option<&str>,
+    lower_text: Option<&str>,
+    upper_text: Option<&str>,
+    range_text: Option<&str>,
+    measure: impl Fn(&str) -> f32,
+) -> RangeSliderBlockLayout {
+    let selected_span = (upper_norm - lower_norm).max(0.0) * capsule_span;
+    let lower_span = lower_norm.max(0.0) * capsule_span;
+    let upper_span = (1.0 - upper_norm).max(0.0) * capsule_span;
+    let selected_text = omit_empty_visible_text(label).or_else(|| omit_empty_visible_text(range_text));
+    let inline = block_inline_fits(
+        &[
+            (selected_text.as_deref(), selected_span),
+            (lower_text, lower_span),
+            (upper_text, upper_span),
+        ],
+        measure,
+    );
+    RangeSliderBlockLayout {
+        inline,
+        selected_text,
+        fallback: if inline {
+            None
+        } else {
+            range_slider_fallback_text(label, range_text)
+        },
+    }
+}
+
 #[cfg(test)]
 mod control_tests {
     use super::*;
@@ -674,5 +851,51 @@ mod control_tests {
         assert!(effects.is_empty());
         let (_, effects) = slider_control_transition(context, SliderControlEvent::PointerEnd);
         assert!(effects.is_empty());
+    }
+
+    #[test]
+    fn equality_fits_and_required_minus_one_falls_back() {
+        assert!(block_item_fits(40.0, 40.0));
+        assert!(block_item_fits(40.0, 39.2));
+        assert!(!block_item_fits(40.0, 41.0));
+        assert_eq!(block_region_available(56.0, 8.0), 40.0);
+        assert!(block_inline_fits(&[(Some("Blur"), 56.0), (Some("67"), 56.0)], |text| {
+            text.len() as f32 * 10.0
+        }));
+        assert!(!block_inline_fits(
+            &[(Some("Blur"), 56.0), (Some("too-long-value"), 56.0)],
+            |text| text.len() as f32 * 10.0
+        ));
+        let miss = layout_slider_block(80.0, 0.5, Some("Blur"), Some("67"), |text| {
+            if text == "Blur" {
+                20.0
+            } else {
+                24.1
+            }
+        });
+        assert!(!miss.inline);
+        let equal = layout_slider_block(80.0, 0.5, Some("Blur"), Some("67"), |text| {
+            if text == "Blur" {
+                20.0
+            } else {
+                24.0
+            }
+        });
+        assert!(equal.inline);
+    }
+
+    #[test]
+    fn a_second_pointer_end_is_inert() {
+        let first = slider_control_transition(
+            SliderControlContext {
+                value: 10.0,
+                pointer_active: true,
+                ..SliderControlContext::default()
+            },
+            SliderControlEvent::PointerEnd,
+        );
+        assert_eq!(first.1, vec![SliderEffect::EmitValueCommit { value: 10.0 }]);
+        let second = slider_control_transition(first.0, SliderControlEvent::PointerEnd);
+        assert!(second.1.is_empty());
     }
 }

@@ -18,6 +18,13 @@ import {
 
 export type SliderVariant = "standard" | "embedded";
 export type SliderPolarity = "unipolar" | "bipolar";
+export type SliderAppearance = "track" | "block";
+export type SliderDirection = "ltr" | "rtl";
+
+/** Logical-pixel effective target for every block thumb. */
+export const SLIDER_BLOCK_HIT_PX = 44;
+/** Internal inline inset used by the block fit law. Not a public metric. */
+export const SLIDER_BLOCK_CONTENT_INSET_PX = 8;
 
 export function clampValue(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -340,5 +347,157 @@ export function rangeSliderControlTransition(
       ? { context: { ...context, pointerActive: false, activeThumb: null }, effects: [{ type: "emitValueCommit", value: context.value }] }
       : { context, effects: [] };
     case "SET_VALUE": return { context: { ...context, value: normalizeRangeValue({ ...context, value: event.value }) }, effects: [] };
+  }
+}
+
+export function assertHorizontalBlockAppearance(
+  appearance: SliderAppearance,
+  orientation: "horizontal" | "vertical",
+  component: "Slider" | "RangeSlider" = "Slider",
+): void {
+  if (appearance === "block" && orientation === "vertical") {
+    throw new Error(`${component} appearance="block" rejects orientation="vertical"`);
+  }
+}
+
+export function omitEmptyVisibleText(text: string | null | undefined): string | null {
+  if (text == null || text === "") return null;
+  return text;
+}
+
+export function defaultVisibleValueText(value: number): string {
+  return String(value);
+}
+
+export function defaultVisibleRangeText(lower: number, upper: number): string {
+  return `${defaultVisibleValueText(lower)} – ${defaultVisibleValueText(upper)}`;
+}
+
+export function resolveSliderVisibleValue(
+  value: number,
+  formatVisibleValue?: ((value: number) => string) | null,
+): string | null {
+  return omitEmptyVisibleText((formatVisibleValue ?? defaultVisibleValueText)(value));
+}
+
+export function resolveRangeVisibleValue(
+  value: number,
+  thumb: "lower" | "upper",
+  formatVisibleValue?: ((value: number, thumb: "lower" | "upper") => string) | null,
+): string | null {
+  return omitEmptyVisibleText(
+    formatVisibleValue ? formatVisibleValue(value, thumb) : defaultVisibleValueText(value),
+  );
+}
+
+export function resolveRangeVisibleRange(
+  lower: number,
+  upper: number,
+  formatVisibleRange?: ((lower: number, upper: number) => string) | null,
+  formatVisibleValue?: ((value: number, thumb: "lower" | "upper") => string) | null,
+): string | null {
+  if (formatVisibleRange) return omitEmptyVisibleText(formatVisibleRange(lower, upper));
+  const lowerText = resolveRangeVisibleValue(lower, "lower", formatVisibleValue) ?? defaultVisibleValueText(lower);
+  const upperText = resolveRangeVisibleValue(upper, "upper", formatVisibleValue) ?? defaultVisibleValueText(upper);
+  return omitEmptyVisibleText(`${lowerText} – ${upperText}`);
+}
+
+export function blockRegionAvailable(unoccludedSpan: number, contentInset = SLIDER_BLOCK_CONTENT_INSET_PX): number {
+  return Math.floor(unoccludedSpan - 2 * contentInset);
+}
+
+export function blockItemFits(available: number, requiredAdvance: number): boolean {
+  return available >= Math.ceil(requiredAdvance);
+}
+
+export interface BlockAssignedItem {
+  text: string | null;
+  unoccludedSpan: number;
+}
+
+export function blockInlineFits(
+  items: BlockAssignedItem[],
+  measure: (text: string) => number,
+  contentInset = SLIDER_BLOCK_CONTENT_INSET_PX,
+): boolean {
+  return items.every((item) => {
+    if (!item.text) return true;
+    return blockItemFits(blockRegionAvailable(item.unoccludedSpan, contentInset), measure(item.text));
+  });
+}
+
+export function sliderFallbackText(label: string | null, valueText: string | null): string | null {
+  return omitEmptyVisibleText([label, valueText].filter((part): part is string => part != null && part !== "").join(" "));
+}
+
+export function rangeSliderFallbackText(label: string | null, rangeText: string | null): string | null {
+  return omitEmptyVisibleText([label, rangeText].filter((part): part is string => part != null && part !== "").join(" "));
+}
+
+export function physicalToValueNorm(physicalNorm: number, direction: SliderDirection): number {
+  const clamped = Math.min(Math.max(physicalNorm, 0), 1);
+  return direction === "rtl" ? 1 - clamped : clamped;
+}
+
+export function layoutSliderBlock(input: {
+  capsuleSpan: number;
+  selectedNorm: number;
+  label: string | null;
+  valueText: string | null;
+  measure: (text: string) => number;
+}): { inline: boolean; fallback: string | null } {
+  const selectedSpan = Math.max(input.selectedNorm, 0) * input.capsuleSpan;
+  const remainderSpan = Math.max(1 - input.selectedNorm, 0) * input.capsuleSpan;
+  const inline = blockInlineFits(
+    [
+      { text: input.label, unoccludedSpan: selectedSpan },
+      { text: input.valueText, unoccludedSpan: remainderSpan },
+    ],
+    input.measure,
+  );
+  return { inline, fallback: inline ? null : sliderFallbackText(input.label, input.valueText) };
+}
+
+export function layoutRangeSliderBlock(input: {
+  capsuleSpan: number;
+  lowerNorm: number;
+  upperNorm: number;
+  label: string | null;
+  lowerText: string | null;
+  upperText: string | null;
+  rangeText: string | null;
+  measure: (text: string) => number;
+}): { inline: boolean; fallback: string | null; selectedText: string | null } {
+  const selectedSpan = Math.max(input.upperNorm - input.lowerNorm, 0) * input.capsuleSpan;
+  const lowerSpan = Math.max(input.lowerNorm, 0) * input.capsuleSpan;
+  const upperSpan = Math.max(1 - input.upperNorm, 0) * input.capsuleSpan;
+  const selectedText = input.label ?? input.rangeText;
+  const inline = blockInlineFits(
+    [
+      { text: selectedText, unoccludedSpan: selectedSpan },
+      { text: input.lowerText, unoccludedSpan: lowerSpan },
+      { text: input.upperText, unoccludedSpan: upperSpan },
+    ],
+    input.measure,
+  );
+  return {
+    inline,
+    selectedText,
+    fallback: inline ? null : rangeSliderFallbackText(input.label, input.rangeText),
+  };
+}
+
+export function measureInlineAdvance(text: string, font: string): number {
+  if (!text) return 0;
+  if (typeof document === "undefined") return text.length * 8;
+  try {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context) return text.length * 8;
+    context.font = font;
+    const width = context.measureText(text).width;
+    return width > 0 ? width : text.length * 8;
+  } catch {
+    return text.length * 8;
   }
 }

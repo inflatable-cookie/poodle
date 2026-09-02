@@ -24,7 +24,7 @@ function captions(): string[] {
 
 const PILOTS = [
   { name: "Button", component: ButtonSpecimen, expected: 6 },
-  { name: "RangeSlider", component: RangeSliderSpecimen, expected: 5 },
+  { name: "RangeSlider", component: RangeSliderSpecimen, expected: 6 },
   { name: "Tabs", component: TabsSpecimen, expected: 6 },
 ] as const;
 
