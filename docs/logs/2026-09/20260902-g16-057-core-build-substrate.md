@@ -9,7 +9,7 @@ Governing refs: `docs/architecture/014-compiled-web-package-distribution.md`,
 `docs/specs/070-compiled-web-distribution-contract.md`
 Branch: `feature/g16-057-core-build-substrate`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-057-core-build-substrate`
-Base: `origin/main` at `8132d01ff528ab7654331f22ed1c07949db158b3`
+Base: `origin/main` at `8377a936ef8bb55e30e44da55fe728e2e5ced429`
 
 ## Outcome
 
@@ -96,7 +96,7 @@ All plants restored. Focused tests repeat them against disposable fixtures.
   of the worktree; the route rebuilt it before docs lint.
 - `effigy test:web-pack-install` — pass, 10 files / 20 tests; packed core
   contained `package/dist/**` and the receipt.
-- `effigy ci:web` — pass, including 373 component files / 3,590 tests and the
+- `effigy ci:web` — pass, including 376 component files / 3,602 tests and the
   current pack-install gate.
 - `effigy docs:check` — pass.
 - `git diff --check origin/main...HEAD` — pass.
