@@ -39,9 +39,10 @@ targets cannot hide any forbidden module in any dependency section.
 
 The third exact-head review closed the remaining escaped-literal gap. The
 source audit decodes JavaScript string escapes before classification, rejects
-one-segment and deeper Unix filesystem values, and uses the literal's syntax
-context to keep root-relative asset URLs, module/protocol forms, separators,
-and regex syntax valid.
+one-segment and deeper Unix filesystem values, and keeps only the bounded
+core contract's protocol-relative network URLs and exact separator syntax.
+Identifier and function names grant no path exception; regex literals remain
+outside the quoted-string scan.
 
 ## Driver
 
@@ -84,7 +85,7 @@ emit-clean under it.
 | No marked edge | `marked` in core `devDependencies` | package.json devDependencies lists forbidden module marked |
 | Complete receipt inputs | omit `package.json` or `tsconfig.build.json` | focused receipt inventory assertion fails |
 | Alias-safe dependency audit | `hidden: "npm:react-dom@1.0.0"` in any dependency section | alias target is rejected |
-| Escape-aware path audit | `/workspace`, `/tmp`, `/a`, escaped slashes, or `\u002f` in a filesystem value | decoded path is rejected; `/assets/app.js` in an asset-URL context stays valid |
+| Escape-aware path audit | `/workspace`, `/tmp`, `/a`, `/assets/app.js`, escaped slashes, or `\u002f` in any string context | decoded single-leading-slash value is rejected; protocol-relative URLs and exact separator strings stay valid |
 
 All plants restored. Focused tests repeat them against disposable fixtures.
 

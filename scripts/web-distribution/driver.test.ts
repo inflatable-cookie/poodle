@@ -148,9 +148,14 @@ describe("web distribution driver", () => {
       `export const path = "/workspace";\n`,
       `export const path = "/tmp";\n`,
       `export const path = "/a";\n`,
+      `export const url = "/workspace";\n`,
+      `fetch("/workspace");\n`,
+      `export const value = "/assets/app.js";\n`,
+      `export const assets = ["/assets/app.js"];\n`,
       String.raw`export const path = "\/workspace\/poodle\/src\/x.ts";` + "\n",
       String.raw`export const path = "\u002fworkspace\u002fpoodle\u002fsrc\u002fx.ts";` +
         "\n",
+      String.raw`export const assetUrl = "\u002fassets\u002fapp.js";` + "\n",
       `export const path = "/root/poodle/src/x.ts";\n`,
       `export const path = "/opt/build/poodle/src/x.ts";\n`,
       `export const path = "/private/var/folders/x/src/x.ts";\n`,
@@ -163,19 +168,15 @@ describe("web distribution driver", () => {
     rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
-  test("valid URL, module, separator, and regex syntax does not look like a workspace path", () => {
+  test("valid protocol, separator, and regex syntax does not look like a workspace path", () => {
     const distDir = fixtureDist();
     writeFileSync(
       join(distDir, "index.js"),
-      `export const url = "https://example.com/a";\n` +
+        `export const url = "https://example.com/a";\n` +
         `export const protocolRelative = "//cdn.example.com/a";\n` +
-        `export const assetUrl = "/assets/app.js";\n` +
-        String.raw`export const escapedAssetUrl = "\u002fassets\u002fapp.js";` +
-        "\n" +
-        `export const constructed = new URL("/assets/chunk.js", "https://example.com");\n` +
-        `import "/assets/module.js";\n` +
         `export const moduleId = "node:fs";\n` +
         `export const segments = "a/b".split("/");\n` +
+        `export const wildcard = "text/*".endsWith("/*");\n` +
         `export const matcher = /\\/workspace\\//;\n`,
     );
     expect(() =>
