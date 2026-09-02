@@ -9,7 +9,7 @@ The Nucleus denominator is now a checked-in manifest of 29 rendered
 components. `IconProvider` is recorded as one separate construction
 prerequisite, not row 30. The manifest pins `poodle-gpui-preview` 0.3.0, the
 workspace distribution, source commit
-`20d340383a684f3c0c07c21bb5c8b344c4be8890`, and the GPUI preview Cargo.lock
+`d42b599509f1043e963dc532948328d231da0389`, and the GPUI preview Cargo.lock
 resolution.
 
 The real `effigy regressions:native` selector emits a deterministic receipt
