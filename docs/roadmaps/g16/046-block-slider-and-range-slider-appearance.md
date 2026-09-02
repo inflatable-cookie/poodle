@@ -6,6 +6,7 @@ Opened: 2026-09-01
 Closed: 2026-09-02 (implementation; merge belongs to the orchestrator)
 Proof head: `95a5dbd36d6e5e80b6647aaf7593b44a6a7abed8`
 Repair head: `c00a3c73dbd70dc485afc9250ce1e7f616352550`
+Height repair: `354a94c081d74712ba5d33917396d4f14e40f3ae`
 Repair: parent-owned native fit, real 44×44 web hits, React teardown refs,
 production GPUI fallback height (see log)
 Log: `../../logs/2026-09/20260902-g16-046-block-sliders.md`
@@ -182,5 +183,5 @@ on this branch after rebase onto `a52d0d32b`). Every row failed under the
 planted pre-fix and passed after restore. The review repair added two biting
 plants the original table missed: CSS `--block-hit: 44px` is not a hit-testable
 target, and core `POINTER_END` is not React adapter teardown. Rebased onto
-merged g16.045 at `1b0d40329`; repair replayed as `c00a3c73d`. See the
-execution log.
+merged g16.045 at `1b0d40329`; first repair replayed as `c00a3c73d`; production
+host height landed as `354a94c08`. See the execution log.
