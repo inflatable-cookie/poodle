@@ -80,6 +80,50 @@ function ctx(overrides: Partial<HistoryCenterContext> = {}): HistoryCenterContex
   return historyCenterDefaultContext(overrides);
 }
 
+/**
+ * Shared nested-deletion vector (g16.063).
+ *
+ * Spine newest-first: e2, e1, e0.
+ * Root e1 (cc=3) is open with forks f1/f2, pick f1, run l1a/l1b.
+ * Inner l1a (cc=3) has forks n1/n2, pick n1, run n1x — the delete target.
+ * Inner l1b is a sibling nested branch; root e0 is a sibling root branch.
+ */
+function nestedDeletionTree(): HistoryCenterContext {
+  const f1 = continuation("f1");
+  const f2 = continuation("f2");
+  const n1 = continuation("n1");
+  const n2 = continuation("n2");
+  const s1 = continuation("s1");
+  const x1 = continuation("x1");
+  return ctx({
+    pages: [page([entry("e2", 0), entry("e1", 3), entry("e0", 2)])],
+    open: open([
+      level("e1", {
+        continuations: [f1, continuation("e2", { preferred: true }), f2],
+        pick: f1,
+        runPages: [page([entry("l1b", 2), entry("l1a", 3)])],
+        inner: open([
+          level("l1a", {
+            continuations: [n1, continuation("l1b", { preferred: true }), n2],
+            pick: n1,
+            runPages: [page([entry("n1x", 0)])],
+          }),
+          level("l1b", {
+            continuations: [s1],
+            chosen: s1,
+            runPages: [page([entry("s1x", 0)])],
+          }),
+        ]),
+      }),
+      level("e0", {
+        continuations: [x1, continuation("e1", { preferred: true })],
+        chosen: x1,
+        runPages: [page([entry("x1x", 0)])],
+      }),
+    ]),
+  });
+}
+
 describe("fork count — R4", () => {
   test("forkCount is continuationCount minus one, floored at zero", () => {
     expect(historyCenterForkCount(0)).toBe(0);
@@ -919,6 +963,40 @@ describe("machine — disclosure flow", () => {
       historyCenterTransition("closed", ctx({ pages: forkedPages(2) }), { type: "DELETE_CONTINUATION", entryId: "l1" })
         .effects,
     ).toEqual([]);
+  });
+
+  test("DELETE_CONTINUATION invalidates a nested fork in place and keeps sibling branches", () => {
+    const context = nestedDeletionTree();
+    const root = context.open?.get("e1");
+    const siblingInner = context.open?.get("e1")?.inner?.get("l1b");
+    const siblingRoot = context.open?.get("e0");
+    expect(historyCenterVisibleRows(context.pages, context.open).some((row) => row.kind === "entry" && row.entry.id === "n1x")).toBe(true);
+
+    const deleted = historyCenterTransition("open", context, { type: "DELETE_CONTINUATION", entryId: "n1" });
+
+    expect(deleted.effects).toEqual([
+      { type: "deleteContinuation", entryId: "n1" },
+      { type: "loadContinuations", entryId: "l1a" },
+    ]);
+    expect(deleted.context.open?.has("l1a")).toBe(false);
+    expect(deleted.context.open?.get("e0")).toEqual(siblingRoot);
+    expect(deleted.context.open?.get("e1")?.continuations).toEqual(root?.continuations);
+    expect(deleted.context.open?.get("e1")?.pick).toEqual(root?.pick);
+    expect(deleted.context.open?.get("e1")?.runPages).toEqual(root?.runPages);
+    expect(deleted.context.open?.get("e1")?.inner?.get("l1b")).toEqual(siblingInner);
+
+    const nested = deleted.context.open?.get("e1")?.inner?.get("l1a");
+    expect(nested).toBeDefined();
+    expect(nested?.continuations).toBeNull();
+    expect(nested?.pick).toBeNull();
+    expect(nested?.chosen).toBeNull();
+    expect(nested?.runPages).toEqual([]);
+    expect(nested?.inner).toBeNull();
+
+    const rows = historyCenterVisibleRows(deleted.context.pages, deleted.context.open);
+    expect(rows.some((row) => row.kind === "entry" && row.entry.id === "n1x")).toBe(false);
+    expect(rows.some((row) => row.kind === "entry" && row.entry.id === "s1x")).toBe(true);
+    expect(rows.some((row) => row.kind === "entry" && row.entry.id === "x1x")).toBe(true);
   });
 
   test("RUN_LOADED appends pages to the matching level and the run renders", () => {

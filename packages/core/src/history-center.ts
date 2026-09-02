@@ -1006,8 +1006,9 @@ function deleteContinuation(context: HistoryCenterContext, entryId: string): His
       //
       // Same shape as the stale reconcile: the anchor stays open (disclosure is
       // UI state, b028 R1), the loaded data goes, and the continuations are
-      // re-requested so the picker re-reads without the deleted fork.
-      const next = new Map(context.open ?? []);
+      // re-requested so the picker re-reads without the deleted fork. Nested
+      // anchors must be replaced where they already live — a root Map.set
+      // leaves the stale inner level in place and adds a ghost root key.
       const invalidated: HistoryCenterOpenFork = {
         anchorEntryId: level.anchorEntryId,
         continuations: null,
@@ -1016,10 +1017,10 @@ function deleteContinuation(context: HistoryCenterContext, entryId: string): His
         runPages: [],
         inner: null,
       };
-      next.set(level.anchorEntryId, invalidated);
+      const open = replaceLevel(context.open, invalidated);
       return {
         state: "open",
-        context: { ...context, open: next },
+        context: { ...context, open },
         effects: [
           { type: "deleteContinuation", entryId },
           { type: "loadContinuations", entryId: level.anchorEntryId },
