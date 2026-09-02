@@ -51,7 +51,9 @@ beside the committed label.
 GPUI `on_activate` is click-equivalent, so `doubleClick` uses
 `on_double_activate` plus display `on_edit_key` for enter/space. Programmatic
 mode attaches neither. Focus restore is renderer `on_restore_display_focus`
-plus spec `request_focus` on the next view paint.
+plus spec `request_focus` on the next view paint. Already-editing
+LicenceActivation hosts must project `machine_label_selection`; the mounted
+Escape fixture seeds end-caret so the typed suffix stays unique.
 
 ## Oracle falsification
 

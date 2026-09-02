@@ -5330,11 +5330,20 @@ fn a_machine_name_escape_restores_the_original_in_a_mounted_window() {
         let draft = Arc::new(Mutex::new("Studio Mac".to_string()));
         let cancelled = Arc::new(Mutex::new(0usize));
         let build = |label: &str, editing: bool| {
+            let len = label.chars().count();
+            let mut spec = LicenceActivationSpec::new()
+                .with_mode(LicenceActivationMode::Account)
+                .with_machine_label(Some(label.to_string()))
+                .with_machine_label_editing(editing);
+            // Already-editing hosts must project caret. End-caret makes the
+            // typed suffix unique for the Escape-restore check below.
+            if editing {
+                spec = spec
+                    .with_machine_label_draft(Some(label.to_string()))
+                    .with_machine_label_selection(len, len);
+            }
             let mut node = poodle_render::licence_activation(
-                &LicenceActivationSpec::new()
-                    .with_mode(LicenceActivationMode::Account)
-                    .with_machine_label(Some(label.to_string()))
-                    .with_machine_label_editing(editing),
+                &spec,
                 &RenderContext::new(&theme()),
                 poodle_render::LicenceActivationHandlers {
                     on_machine_label_change: Some({
