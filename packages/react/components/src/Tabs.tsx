@@ -4,6 +4,7 @@ import {
   Fragment,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -13,6 +14,8 @@ import {
 import {
   createDragDropController,
   firstEnabledIndex,
+  nextTabsControlledFocusDestination,
+  resolveTabsControlledFocusDestination,
   tabIndicatorBox,
   tabsKeydownEvent,
   tabsTransition,
@@ -43,6 +46,7 @@ import type {
   Orientation,
   SemanticControlSizeRole,
   TabItem,
+  TabsFocusOnValueChange,
 } from "./types";
 
 /** @deprecated Use TabItem instead (pilot-era alias). */
@@ -100,6 +104,12 @@ export interface TabsProps {
   collapseLabel?: string | null;
   showTooltips?: boolean;
   historyKey?: string | null;
+  /**
+   * Controlled-value focus policy. `"preserve"` never moves focus.
+   * `"selected-tab"` focuses the newly selected enabled tab after render
+   * when focus was inside the outgoing selected panel.
+   */
+  focusOnValueChange?: TabsFocusOnValueChange;
   onValueChange?: ((value: string) => void) | undefined;
   onReorder?: ((items: string[]) => void) | undefined;
   // Forwarded so a host (DockRegion) can run its own drag session on top of
@@ -162,6 +172,7 @@ export function Tabs({
   ariaLabel = null,
   showTooltips = false,
   historyKey = null,
+  focusOnValueChange = "preserve",
   onValueChange = undefined,
   onReorder = undefined,
   crossWindowSourceBridge = undefined,
@@ -179,6 +190,16 @@ export function Tabs({
   const measureListRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const panelFocusOwnedRef = useRef(false);
+  const aliveRef = useRef(true);
+  const committedValueRef = useRef<string | null | undefined>(undefined);
+  const focusPolicyRef = useRef<TabsFocusOnValueChange>("preserve");
+  const focusControlledRef = useRef(false);
+  const focusValueRef = useRef<string | null>(null);
+  const focusItemsRef = useRef<TabItem[]>([]);
+  const pendingFocusDestinationRef = useRef<string | null>(null);
+  const pendingFocusGenerationRef = useRef(0);
+  const focusTransferTimerRef = useRef<number | null>(null);
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingTabFocus = useRef<string | null>(null);
   const lastItemsSignature = useRef("");
@@ -235,6 +256,7 @@ export function Tabs({
     null;
   const selectedIndex = renderedItems.findIndex((item) => item.value === currentValue);
   const hasPanel = children !== undefined;
+
   const isVertical = orientation === "vertical";
   const hasTooltips = isVertical || showTooltips;
   const canCollapse = collapseWhenOverflow && !isVertical;
@@ -360,6 +382,94 @@ export function Tabs({
     tabRefs.current[pendingTabFocus.current]?.focus();
     pendingTabFocus.current = null;
   });
+
+  useEffect(() => {
+    aliveRef.current = true;
+    return () => {
+      aliveRef.current = false;
+      pendingFocusDestinationRef.current = null;
+      pendingFocusGenerationRef.current += 1;
+      if (focusTransferTimerRef.current !== null) {
+        window.clearTimeout(focusTransferTimerRef.current);
+        focusTransferTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  function clearFocusTransferTimer(): void {
+    if (focusTransferTimerRef.current !== null) {
+      window.clearTimeout(focusTransferTimerRef.current);
+      focusTransferTimerRef.current = null;
+    }
+  }
+
+  function invalidateFocusTransfer(): void {
+    pendingFocusDestinationRef.current = null;
+    pendingFocusGenerationRef.current += 1;
+    clearFocusTransferTimer();
+  }
+
+  useLayoutEffect(() => {
+    const previousValue = committedValueRef.current;
+    const firstCommit = previousValue === undefined;
+    const valueChanged = !firstCommit && previousValue !== currentValue;
+    const policyChanged = focusPolicyRef.current !== focusOnValueChange;
+
+    focusPolicyRef.current = focusOnValueChange;
+    focusControlledRef.current = isControlled;
+    focusValueRef.current = currentValue;
+    focusItemsRef.current = renderedItems;
+
+    if (policyChanged) {
+      invalidateFocusTransfer();
+    }
+
+    committedValueRef.current = currentValue;
+    if (firstCommit || !valueChanged) {
+      return;
+    }
+
+    const nextPending = nextTabsControlledFocusDestination({
+      policy: focusOnValueChange,
+      controlled: isControlled,
+      previousValue: previousValue!,
+      nextValue: currentValue,
+      focusWasInOutgoingPanel: panelFocusOwnedRef.current,
+      pendingValue: pendingFocusDestinationRef.current,
+    });
+    panelFocusOwnedRef.current = false;
+
+    if (nextPending === null) {
+      invalidateFocusTransfer();
+      return;
+    }
+
+    pendingFocusDestinationRef.current = nextPending;
+    pendingFocusGenerationRef.current += 1;
+    clearFocusTransferTimer();
+    const generation = pendingFocusGenerationRef.current;
+    focusTransferTimerRef.current = window.setTimeout(() => {
+      focusTransferTimerRef.current = null;
+      const destination = pendingFocusDestinationRef.current;
+      const resolved =
+        aliveRef.current &&
+        generation === pendingFocusGenerationRef.current &&
+        focusPolicyRef.current === "selected-tab" &&
+        focusControlledRef.current &&
+        destination === focusValueRef.current
+          ? resolveTabsControlledFocusDestination({
+              pendingValue: destination,
+              items: focusItemsRef.current,
+              alive: aliveRef.current,
+            })
+          : null;
+
+      pendingFocusDestinationRef.current = null;
+      if (resolved !== null) {
+        tabRefs.current[resolved]?.focus();
+      }
+    }, 0);
+  }, [currentValue, focusOnValueChange, isControlled, renderedItems]);
 
   // ── Tooltip (vertical icon-only mode) ──
 
@@ -838,6 +948,14 @@ export function Tabs({
           role="tabpanel"
           tabIndex={0}
           aria-labelledby={`poodle-tab-${tabsId}-${currentValue}`}
+          onFocus={() => {
+            panelFocusOwnedRef.current = true;
+          }}
+          onBlur={(event) => {
+            const relatedTarget = event.relatedTarget;
+            panelFocusOwnedRef.current =
+              relatedTarget !== null && event.currentTarget.contains(relatedTarget as Node);
+          }}
         >
           {children?.(currentValue)}
         </div>

@@ -4403,6 +4403,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
       { name: "ariaLabel", type: "string | null", default: "null", description: "Accessible label for the tab list." },
       { name: "showTooltips", type: "boolean", default: "false", description: "Whether to show tooltips on tab triggers." },
       { name: "historyKey", type: "string | null", default: "null", description: "Optional URL query param key used to preserve the active tab in browser history." },
+      { name: "focusOnValueChange", type: '"preserve" | "selected-tab"', default: '"preserve"', description: "Controlled-value focus policy. preserve never moves focus. selected-tab focuses the newly selected enabled tab after render when focus was inside the outgoing selected panel." },
       { name: "onValueChange", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when the active tab changes." },
       { name: "onReorder", type: "((items: string[]) => void) | undefined", default: "undefined", description: "Called when tabs are reordered." },
       { name: "onClose", type: "((value: string) => void) | undefined", default: "undefined", description: "Called when a tab close button is requested." },

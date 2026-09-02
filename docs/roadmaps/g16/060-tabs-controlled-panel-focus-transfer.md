@@ -1,6 +1,6 @@
 # g16.060 — Tabs Controlled-panel Focus Transfer
 
-Status: ready
+Status: in review — worker implementation complete
 Opened: 2026-09-02
 Depends on: current Tabs contract and paired Svelte/React implementation;
 independent of the web-distribution/release serial lane
@@ -8,6 +8,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/tabs.md`
 Consumer evidence: Figmatic PR #69 review comment
 https://github.com/inflatable-cookie/figmatic/pull/69#issuecomment-5514814268
+Log: `../../logs/2026-09/20260902-g16-060-tabs-controlled-panel-focus-transfer.md`
 
 ## Goal
 
@@ -108,9 +109,42 @@ type/export proof if the public prop crosses package output, Tabs contract and
 drift checks, `effigy ci:web`, `effigy docs:check`, and `git diff --check
 origin/main...HEAD`. Do not run windowed or release selectors.
 
+## Worker Receipt
+
+Paired web policy landed on `fix/g16-060-tabs-controlled-focus`. Both shells
+capture panel focus through their owned focus lifecycle. React records the
+committed controlled value and applies one cancellable `setTimeout(0)` after
+commit through the owned tab registry; both shells revalidate live policy,
+current value, enabled destination, generation, and teardown before focusing.
+Public prop is `focusOnValueChange?: "preserve" | "selected-tab"` with default
+`"preserve"`. `TabsSpec` is unchanged; `WEB_ONLY_BY_SLUG.tabs` records the
+delta.
+
+The paired lifecycle suite also covers a destination disabled and a policy
+changed to `"preserve"` after scheduling but before the timer fires. Against
+the pre-repair React head both rows fail by focusing the stale destination.
+The second exact-head review (separate committed A→B then B→C before the
+first timer) failed on the pre-fix React head with zero focus on C; the
+pre-emptive pending-inequality invalidation was removed so the latched
+pending request retargets to the latest committed value. Against the repaired
+head the paired suites run 13 + 13 green with core at 23, and the full
+`react-components` + `svelte-components` projects pass (346 files, 2697
+tests). Contract §6/§9 now state owned `focusin`/`focusout` capture with
+commit-phase application; the unused `panelRef`/`panelElement` bindings are
+removed.
+
+Rebased onto `origin/main` at `38f4fa2a7` after g16.061 (PR #166) merged the
+ordinary-PR certification-routing repair. Focus semantics are unchanged; the
+lane still touches no certification surface (`test/package-install/*`,
+`PAPERCUTS.md` byte-identical to `origin/main`). After the rebase: paired
+suites 13 + 13 green, core 23, full `effigy ci:web` pass (all 22 steps),
+`effigy docs:check` pass, `git diff --check origin/main...HEAD` clean.
+
+Orchestrator owns exact-head review, merge, roadmap closeout, and the Figmatic
+receipt. Do not merge from this worker.
+
 ## Continuation
 
 After accepted merge, return the exact Poodle SHA, public prop/import shape,
 validation receipt, and local-link/build instructions to Figmatic. Figmatic
 owns its PR #69 rebase, mounted counterexample, and consumer validation.
-

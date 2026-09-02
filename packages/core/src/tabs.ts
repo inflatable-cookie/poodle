@@ -340,3 +340,63 @@ export function tabsPanelParts<T extends TabsItem>(
     "aria-labelledby": tabsTabId(props.instanceId, value),
   };
 }
+
+/**
+ * Web-only controlled-panel focus policy. `"preserve"` keeps today's behaviour.
+ * `"selected-tab"` focuses the newly selected enabled tab after render when
+ * the outgoing selected panel owned focus.
+ */
+export type TabsFocusOnValueChange = "preserve" | "selected-tab";
+
+/**
+ * Decide the pending destination for a controlled value change.
+ *
+ * Capture requires focus inside the outgoing panel. Once a request exists,
+ * later controlled changes retarget it so only the latest destination applies.
+ * Preserve, uncontrolled, and unchanged values never start a transfer.
+ */
+export function nextTabsControlledFocusDestination(input: {
+  policy: TabsFocusOnValueChange;
+  controlled: boolean;
+  previousValue: string | null;
+  nextValue: string | null;
+  focusWasInOutgoingPanel: boolean;
+  pendingValue: string | null;
+}): string | null {
+  if (!input.controlled || input.policy !== "selected-tab") {
+    return null;
+  }
+
+  if (input.previousValue === input.nextValue) {
+    return input.pendingValue;
+  }
+
+  if (input.nextValue === null) {
+    return null;
+  }
+
+  if (input.focusWasInOutgoingPanel || input.pendingValue !== null) {
+    return input.nextValue;
+  }
+
+  return null;
+}
+
+/** Apply a pending request only while Tabs is alive and the destination exists and is enabled. */
+export function resolveTabsControlledFocusDestination(input: {
+  pendingValue: string | null;
+  items: ReadonlyArray<{ value: string; disabled?: boolean }>;
+  alive: boolean;
+}): string | null {
+  if (!input.alive || input.pendingValue === null) {
+    return null;
+  }
+
+  const item = input.items.find((candidate) => candidate.value === input.pendingValue);
+
+  if (item === undefined || item.disabled === true) {
+    return null;
+  }
+
+  return item.value;
+}

@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  nextTabsControlledFocusDestination,
+  resolveTabsControlledFocusDestination,
   resolveTabsValue,
   tabsKeydownEvent,
   tabsTooltipTransition,
@@ -225,5 +227,60 @@ describe("tabsTooltipTransition", () => {
     expect(tabsTooltipTransition({ name: "hidden" }, { type: "TIMER_FIRE" }).state).toEqual({
       name: "hidden",
     });
+  });
+});
+
+describe("controlled-panel focus policy", () => {
+  const base = {
+    policy: "selected-tab" as const,
+    controlled: true,
+    previousValue: "components",
+    nextValue: "tree",
+    focusWasInOutgoingPanel: true,
+    pendingValue: null as string | null,
+  };
+
+  test("preserve and uncontrolled never start a transfer", () => {
+    expect(nextTabsControlledFocusDestination({ ...base, policy: "preserve" })).toBeNull();
+    expect(nextTabsControlledFocusDestination({ ...base, controlled: false })).toBeNull();
+  });
+
+  test("outside focus is inert; outgoing-panel ownership captures the next tab", () => {
+    expect(
+      nextTabsControlledFocusDestination({ ...base, focusWasInOutgoingPanel: false }),
+    ).toBeNull();
+    expect(nextTabsControlledFocusDestination(base)).toBe("tree");
+  });
+
+  test("a pending request retargets to the latest controlled value", () => {
+    expect(
+      nextTabsControlledFocusDestination({
+        ...base,
+        previousValue: "tree",
+        nextValue: "preview",
+        focusWasInOutgoingPanel: false,
+        pendingValue: "tree",
+      }),
+    ).toBe("preview");
+  });
+
+  test("resolve is inert when torn down, missing, or disabled", () => {
+    const items = [
+      { value: "tree" },
+      { value: "preview", disabled: true },
+    ];
+
+    expect(
+      resolveTabsControlledFocusDestination({ pendingValue: "tree", items, alive: false }),
+    ).toBeNull();
+    expect(
+      resolveTabsControlledFocusDestination({ pendingValue: "ghost", items, alive: true }),
+    ).toBeNull();
+    expect(
+      resolveTabsControlledFocusDestination({ pendingValue: "preview", items, alive: true }),
+    ).toBeNull();
+    expect(
+      resolveTabsControlledFocusDestination({ pendingValue: "tree", items, alive: true }),
+    ).toBe("tree");
   });
 });

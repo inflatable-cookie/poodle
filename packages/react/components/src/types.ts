@@ -703,6 +703,7 @@ export interface TabItem {
 
 export type TabVariant = "card" | "pill" | "block";
 export type TabActivationMode = "automatic" | "manual";
+export type TabsFocusOnValueChange = "preserve" | "selected-tab";
 
 /**
  * Selection edge on the active control: `"none"` draws no edge, `"outline"`

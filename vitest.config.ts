@@ -89,6 +89,7 @@ export default defineConfig({
         },
       },
       {
+        resolve: { alias: workspaceAliases },
         test: {
           name: "react-components",
           environment: "happy-dom",

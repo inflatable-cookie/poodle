@@ -752,6 +752,8 @@ export {
   tabsPanelParts,
   tabsTabId,
   tabsPanelId,
+  nextTabsControlledFocusDestination,
+  resolveTabsControlledFocusDestination,
   type TabsItem,
   type TabsState,
   type TabsContext,
@@ -762,6 +764,7 @@ export {
   type TabsTooltipEvent,
   type TabsTooltipEffect,
   type TabsPartProps,
+  type TabsFocusOnValueChange,
 } from "./tabs";
 
 
