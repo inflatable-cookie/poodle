@@ -53,6 +53,10 @@ Svelte or React components in this card.
   or workspace-only target enters core output.
 - Two clean builds match file-for-file and hash-for-hash.
 - The foundation is reusable by shell builds without owning shell semantics.
+- A fresh prepared checkout can run the ordinary standalone health/docs and
+  component-test routes without relying on an ignored `dist/` left by an
+  earlier command. The existing package-install gate remains green after
+  `files` moves from `src` to `dist`.
 
 ## Review Oracle
 
@@ -63,21 +67,27 @@ Svelte or React components in this card.
 | Output is source-free | staged non-declaration `.ts` | source audit fails |
 | Receipt is reproducible | timestamp enters JSON | second-build hash differs |
 | Card stays core-only | Svelte component compilation appears | diff-scope check fails |
+| Repository routes remain usable | delete ignored core `dist/`, then run health; pack with `files: ["dist"]` | required build prerequisite runs; the current pack boundary accepts directory members and still rejects an omitted tree |
 
 ## Writable Scope
 
 Core build/staging driver, core package manifest/export targets, core declaration
 configuration, core asset-copy and receipt logic, focused build tests, this
-card, one log, and new papercuts. Do not edit Svelte/React component builds,
-the permanent installed certification harness, versions, release notes,
-workflows, tags, registries, or sibling repositories.
+card, one log, and new papercuts. A minimal repair to existing task prerequisites
+and the current package-install directory-membership check is in scope only to
+keep today's health and CI gates green after the manifest moves to `dist`.
+Do not build the g16.059 certification redesign, edit Svelte/React component
+builds, versions, release notes, workflows, tags, registries, or sibling
+repositories.
 
 ## Validation
 
 Run focused driver/unit tests, core declaration checks under Bundler and
 NodeNext, two clean builds and inventory/hash comparison, core export/content
-inspection, relevant Effigy core/build selectors, `effigy docs:check`, and
-`git diff --check origin/main...HEAD`. No release or windowed selector.
+inspection, relevant Effigy core/build selectors, clean-checkout `effigy
+health`, the current `effigy test:web-pack-install`, `effigy ci:web`, `effigy
+docs:check`, and `git diff --check origin/main...HEAD`. No release or windowed
+selector.
 
 ## Stop Conditions
 
