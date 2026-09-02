@@ -73,6 +73,12 @@ Also repaired Vitest `react-components` / `react-preview` to inherit
 `workspaceAliases` so `@inflatable-cookie/poodle-react` resolves to source
 after g16.058 dist-only exports.
 
+After rebase onto certified main, `test:web-pack-install` rejected the Tabs
+paths as outside the g16.059 certification allowlist. The scope guard now
+keeps forbidden-surface rejection, classifies ordinary/unchanged ranges
+without failing pack-install, and only treats allowlist-pure ranges as
+certification.
+
 ## Figmatic
 
 Do not edit Figmatic from this lane. After merge, Figmatic PR #69 should
