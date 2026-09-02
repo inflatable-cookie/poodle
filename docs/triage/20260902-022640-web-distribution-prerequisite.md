@@ -32,8 +32,8 @@ The React migration is the corresponding
 surface is intentionally parser-free. The direct component subpaths remain
 only where they are explicitly included in the export inventory. No root alias,
 compatibility shim, conditional “if admitted” branch, or silent fallback may
-preserve the old markdown imports. The roster, migration note, and `0.3.0`
-release notes must name this break.
+preserve the old markdown imports. The roster and migration note must name
+this break; `g16.054` must carry it into the actual `0.3.0` release notes.
 
 The public release set remains core plus Svelte. React gets the same compiled
 shape in the certification plan, but stays `private` and unpublished until a
@@ -198,8 +198,27 @@ markdown markup. The output lengths were `[296, 736, 296, 736, 390]`.
 The two independent export lanes were not inferred from filenames alone. The
 spike also tried to render the installed `Button.client.js` directly through
 `svelte/server`; it failed with `Error: https://svelte.dev/e/effect_orphan`,
-as required. The server condition must select `Button.server.js`; client
+as required. Server-side resolution must select `Button.server.js`; client
 output must not be reused for SSR.
+
+The affected condition map was rechecked with a disposable source-free
+tarball consumer after that spike. The marker package used the corrected map
+below, packed with Bun `1.3.14`, and installed from the archive into a fresh
+no-workspace consumer. Vite's browser resolver selected the client target for
+root/direct Button/Select and `./markdown`; normal Node SSR and a
+`worker`-condition SSR resolution both selected the server target through
+`default`. `./types` selected compiled `dist/types.js` in all three modes and
+`dist/types.d.ts` in both TypeScript Bundler and NodeNext checks. The archive
+had 15 members, no `src/` or raw `.svelte`, and no `import` condition. The
+disposable script and consumer were removed after:
+
+```text
+env -u KEEP_SPIKE bun .spike-export-conditions.mjs
+browser: client / client / client / client; ./types -> runtime
+Node SSR: server / server / server / server; ./types -> runtime
+worker-like SSR: server / server / server / server; ./types -> runtime
+declarations: Bundler pass; NodeNext pass
+```
 
 The separate revised-floor consumer installed Svelte `5.56.8` and passed the
 same browser and server oracle. A below-floor Svelte `5.38.6` consumer could
@@ -272,7 +291,7 @@ dist/
   Select.client.js      Select.server.js
   markdown.client.js    markdown.server.js
   chunks/*.client.js    chunks/*.server.js
-  index.d.ts             markdown.d.ts  types.d.ts
+  index.d.ts             markdown.d.ts  types.js  types.d.ts
   *.svelte.d.ts
   .poodle-build.json
 ```
@@ -280,36 +299,42 @@ dist/
 The `*.svelte` part of a public import is only a subpath name. It never grants
 permission to ship a `.svelte` file.
 
-The Svelte export map must select the two compiled lanes explicitly:
+The Svelte export map must select the two compiled lanes explicitly. The
+`browser` condition selects the client lane; the server lane is the
+non-browser `default`. `import` is intentionally absent: module loading mode
+is not an environment selector. Node SSR and unknown or worker-like SSR
+therefore fall through to the server build.
 
 ```json
 {
   ".": {
     "types": "./dist/index.d.ts",
     "browser": "./dist/index.client.js",
-    "node": "./dist/index.server.js",
-    "import": "./dist/index.client.js",
     "default": "./dist/index.server.js"
   },
   "./*.svelte": {
     "types": "./dist/*.svelte.d.ts",
     "browser": "./dist/*.client.js",
-    "node": "./dist/*.server.js",
-    "import": "./dist/*.client.js",
     "default": "./dist/*.server.js"
   },
   "./markdown": {
     "types": "./dist/markdown.d.ts",
     "browser": "./dist/markdown.client.js",
-    "node": "./dist/markdown.server.js",
-    "import": "./dist/markdown.client.js",
     "default": "./dist/markdown.server.js"
   },
   "./types": {
-    "types": "./dist/types.d.ts"
+    "types": "./dist/types.d.ts",
+    "browser": "./dist/types.js",
+    "default": "./dist/types.js"
   }
 }
 ```
+
+`./types` keeps both public reachability contracts: its compiled runtime
+target is `dist/types.js`, and its declaration target is `dist/types.d.ts`.
+The condition probe installed and resolved both targets; an emitted
+type-erased runtime module is acceptable if that is what implementation
+compiles from the source.
 
 Do not add a top-level `svelte` field pointing at one lane. Do not add a
 `svelte` condition until its resolver behavior is proven for both browser and
@@ -317,9 +342,10 @@ SSR consumers. If a tool requires that field and cannot express the dual
 shape, stop for an explicit compatibility decision; do not point it at raw
 source or silently reuse the client artifact.
 
-Core uses the same `types`/`import`/`default` pattern for JavaScript entries,
-with `./icons` targeting `dist/icons.js` and its declarations. Its CSS-only
-subpaths remain explicit:
+Core keeps its existing `types`/`import`/`default` pattern for single-lane
+JavaScript entries, with `./icons` targeting `dist/icons.js` and its
+declarations. Core's `import` key is a module-format fallback, not a browser
+environment selector. Its CSS-only subpaths remain explicit:
 
 ```text
 ./styles/*          -> ./dist/styles/*
@@ -365,6 +391,11 @@ and exact source commit.
 
 ## Installed-tarball oracle
 
+The condition-resolution probe and card 3's installed browser/SSR exit smoke
+are disposable, narrow feasibility checks. Card 4 alone edits and owns the
+permanent `test:web-pack-install` certification harness and its acceptance
+receipt described here.
+
 `test:web-pack-install` remains the certification selector. It must be upgraded
 to run this oracle from a clean temporary checkout of the exact commit:
 
@@ -380,9 +411,10 @@ to run this oracle from a clean temporary checkout of the exact commit:
    Button/Select plus `./markdown`, with the browser export condition. Assert
    the mounted DOM and no page errors.
 5. Run the server fixture through installed public imports with `svelte/server`:
-   root and direct Button/Select plus `./markdown`, with the Node export
-   condition. Assert rendered HTML. Also assert that directly rendering a
-   `.client.js` artifact fails, so SSR cannot silently reuse the client lane.
+   root and direct Button/Select plus `./markdown`, under normal Node SSR
+   resolution, which must fall through to the server `default`. Assert
+   rendered HTML. Also assert that directly rendering a `.client.js` artifact
+   fails, so SSR cannot silently reuse the client lane.
 6. Run the revised Svelte `5.56.8` floor leg. Keep a below-floor negative leg
    such as `5.38.6`; a failure is expected and must remain visible. A declared
    floor that fails either browser mount or SSR blocks acceptance.
@@ -412,6 +444,10 @@ honesty, release notes, candidate receipt, tags, registry checks, and final
 release gates. It must not redesign the dual Svelte lanes, export conditions,
 CSS ownership, markdown break, or dependency mechanics selected here.
 
+This prerequisite may record the accepted import migration in this packet and
+its scoped roster/package surfaces. It does not edit the actual `0.3.0` release
+notes or candidate history; those remain solely with `g16.054`.
+
 The sequence is:
 
 1. accept this contract and its evidence;
@@ -432,19 +468,22 @@ consumer-facing exit gate.
 
 | Order | Card | Scope | Exit gate |
 | ---: | --- | --- | --- |
-| 1 | Web distribution contract | Freeze the `dist` inventories, stable names, dual client/server export conditions, revised Svelte floor, declaration suffixes, core CSS ownership and exact `sideEffects`, receipt schema, source-free rule, and the accepted `./markdown` breaking migration. Update the roster/release notes only for that admitted break. | A reviewed contract has no unresolved export, SSR, floor, CSS, tarball, or dependency choice. |
+| 1 | Web distribution contract | Freeze the `dist` inventories, stable names, dual client/server export conditions, revised Svelte floor, declaration suffixes, core CSS ownership and exact `sideEffects`, receipt schema, source-free rule, and the accepted `./markdown` breaking migration. Update only the scoped migration documentation and roster/package surfaces; leave actual `0.3.0` release notes and candidate history to `g16.054`. | A reviewed contract has no unresolved export, SSR, floor, CSS, tarball, or dependency choice. |
 | 2 | Core build substrate | Add the repo-owned build driver foundation for core JavaScript, core CSS/token/icon assets, core declarations, clean staging, sorted inventories, and deterministic `.poodle-build.json`. Do not compile Svelte or React components in this card. | Core staged output is typed, source-free, CSS-complete, deterministic, and receipt-backed. |
-| 3 | Shell distributions | Compile Svelte client and server lanes with Vite and `build.ssr`, emit Svelte declarations into staging without copying raw `.svelte`, compile private React, apply the root/`./markdown` boundary and optional peer, externalize runtime dependencies, and mirror CSS semantics. | Installed Svelte 5.56.8 browser and SSR Button/Select/markdown fixtures pass; client artifact does not pass SSR; React value declarations compile without source mapping. |
-| 4 | Installed certification and promotion receipt | Upgrade `test:web-pack-install` with export/content checks, browser and server oracles, below-floor negative proof, CSS/marked fixtures, roster denominator, notices, repeated-build hashes, repeated tarball hashes, and exact receipt evidence. | One clean installed-tarball receipt is accepted and can be handed to `g16.054`. |
+| 3 | Shell distributions | Compile Svelte client and server lanes with Vite and `build.ssr`, emit Svelte declarations into staging without copying raw `.svelte`, compile private React, apply the root/`./markdown` boundary and optional peer, externalize runtime dependencies, and mirror CSS semantics. Run one disposable, narrow installed browser/SSR smoke against the corrected condition map; do not edit or own the permanent `test:web-pack-install` harness. | Installed Svelte 5.56.8 browser and SSR Button/Select/markdown fixtures pass; client artifact does not pass SSR; React value declarations compile without source mapping. This smoke is disposable/narrow, not the permanent certification. |
+| 4 | Installed certification and promotion receipt | Solely own and upgrade `test:web-pack-install` with export/content checks, browser and server oracles, below-floor negative proof, CSS/marked fixtures, roster denominator, notices, repeated-build hashes, repeated tarball hashes, and exact receipt evidence. | One clean installed-tarball receipt is accepted and can be handed to `g16.054`; this is the only permanent certification harness and receipt. |
 
 ## Stop and rollback
 
 Stop the prerequisite on any of these conditions:
 
 - a declared Svelte floor fails browser mount or server render;
-- browser and Node resolution select the same client-only artifact, a direct
-  client artifact renders through `svelte/server`, or SSR is covered by raw
-  source fallback instead of a server artifact;
+- browser Vite resolution does not select client entries, Node SSR or an
+  unknown/worker-like SSR condition set does not reach server entries, a
+  direct client artifact renders through `svelte/server`, or SSR is covered by
+  raw source fallback instead of a server artifact;
+- any Svelte export uses `import` as an environment selector, or `./types`
+  loses either its compiled runtime target or declaration reachability;
 - a tarball contains raw `.svelte`, non-declaration `.ts`/`.tsx`, `src`, a
   source export, a missing declaration, or a source map;
 - a dual client/server entry, chunk, or export target is missing, a wildcard
@@ -458,6 +497,9 @@ Stop the prerequisite on any of these conditions:
 - two clean builds or packs differ, provenance has a timestamp/absolute path,
   the dotfile receipt is not present in the actual tarball, or the 175/176
   roster disagreement remains;
+- card 1 edits the actual `0.3.0` release notes or candidate history, or card 3
+  edits or owns the permanent `test:web-pack-install` certification surface
+  instead of card 4 alone;
 - root markdown names return through an alias, the accepted `./markdown`
   migration is omitted, React becomes publishable without a named consumer,
   or a workflow/release/registry mutation appears.
