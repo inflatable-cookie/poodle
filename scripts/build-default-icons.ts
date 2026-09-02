@@ -391,10 +391,14 @@ function buildMorphPairRecord(entry: PairManifestEntry): GeneratedPairRecord {
     }
   }
 
-  if (entry.status === "accepted" && (!planned || !left.ok || !right.ok)) {
+  if (entry.status !== "rejected" && (!planned || !left.ok || !right.ok)) {
     const reason = pairError ?? (!left.ok ? diagnostic(left.error) : diagnostic(right.error));
     throw new Error(
-      "Accepted icon geometry pair " + entry.id + " is not normalizable: " + reason.code + ".",
+      "Non-rejected icon geometry pair " +
+        entry.id +
+        " must normalize and plan: " +
+        reason.code +
+        ".",
     );
   }
 

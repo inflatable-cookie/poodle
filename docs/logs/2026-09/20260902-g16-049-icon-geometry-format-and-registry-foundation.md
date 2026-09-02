@@ -13,23 +13,24 @@ Branch: `feature/g16-049-icon-geometry-foundation`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-049-icon-geometry`
 Starting exact head: `c1a527898e7425853359bd72b7113a8cf38b8d97`
 Planning base ancestor: `7f59ae42f4917c675968819eb23a5e41dc90013c`
-Rebased onto live `origin/main`: `a52d0d32bdcf78d219c22449ad870ff3641e2569`
-Post-rebase implementation commit: `f617a37d3`
+Rebased onto live `origin/main`: `99cc55711464edebc31980fe608fb8a7449ba2de`
+Post-rebase implementation commit: `13cde0cb8`
 PR: https://github.com/inflatable-cookie/poodle/pull/156
 
 ## Outcome
 
 Delivered the internal icon-geometry foundation only. TypeScript and Rust now
 share a versioned 24×24 stroke normalizer, canonical line-segment endpoints,
-64-point sampled contours, bounded deterministic correspondence, and the same
-13-vector corpus. The authored manifest has 11 explicit pair states: five
-accepted, one candidate, and five rejected.
+64-point sampled contours, bounded closure-preserving correspondence, a strict
+SVG numeric grammar, and the same 18-vector corpus. The authored manifest has
+12 explicit pair states: five accepted, one structurally plannable candidate,
+and six rejected.
 
 The generated TypeScript and Rust registries carry canonical aliases, source
 node and generated-asset SHA-256 digests, topology, diagnostics, quality
 review, notice identity, payload size, and derived registry data. The largest
 accepted payload is 14,023 bytes; the registry digest is
-`410e617ea898b912e3f3eb2f73be458457a203964c6eabeb861e9ae4af06c4cc`.
+`dc7469b142af8361df66b00bcfe33c92d5500778e514ab4c83eac81cfe46fe8b`.
 
 No `Icon`, `IconProvider`, node vocabulary, package export, runtime, browser,
 native visual, or Jetstream surface was changed.
@@ -46,6 +47,11 @@ source was restored before the green reruns.
 | Topology | contour-count failure mislabeled as `pair-closure`; menu ↔ x vector failed on the required `pair-contour-count` code | typed contour-count rejection |
 | Correspondence | reverse traversal disabled; reverse vector expected `true`, received `false` | reverse traversal retained |
 | Closed start | closed offsets limited to zero; diamond vector expected offset 48, received 0 | exhaustive cyclic offsets retained |
+| Closure assignment | assignment edges allowed every closure; mixed vector selected the cheaper invalid `[0→1, 1→0]` mapping with offset `56` | only equal-`closed` assignment edges; TS and Rust focused tests green |
+| Numeric attributes | TS `Number(raw)` accepted `x1="0x10"` and `x1="0b10"`; shared malformed-attribute vectors failed | anchored full-string SVG grammar in both parsers |
+| Exact paired wire | one Rust sample coordinate changed by `+1`; the circle/ellipse wire digest failed (`0cb3a0d49f232a06` vs `30494cadafe64aa6`) | Rust sampling restored; shared endpoint/pair digests green |
+| Bidirectionality | reverse-plan offset changed by `+1`; exact reverse-flight checks failed in TS (2 vectors) and Rust (closed-loop endpoint mapping) | inverse traversal/cyclic-start mapping restored |
+| Candidate planning | candidate target changed to `ellipsis`; generator failed `circle-to-dot must normalize and plan: pair-contour-count` | `circle-to-dot` remains a plannable candidate; menu-to-ellipsis rejected |
 | Source bytes | one generated SVG stroke byte changed; `effigy audit:icons` failed with source-byte drift | source asset restored |
 | Generated payload | registry digest changed by one hex digit; `effigy audit:icons` listed the generated TS projection as stale | generated projection restored |
 | Manifest identity | a reversed duplicate pair was introduced; audit rejected it | unique canonical pair identities |
@@ -53,49 +59,31 @@ source was restored before the green reruns.
 | Static Icon | Svelte `Icon` viewBox changed to 23×24; exact static-contract assertion failed | `Icon.svelte` restored; final diff excludes public Icon surfaces |
 
 Clean regeneration was run twice. The TypeScript projection hash was
-`63524ce029c76ca7430970fb73e5a359d31e1abf8ea89363c61cddeccb1427db` and the
+`4df672c9c2c00286925b26f6d1dce442f8cc2319fd24631dede18a530f367c4f` and the
 Rust projection hash was
-`a110e97fab04dfde895a262bd57eb934fb6e66c9ee43c046576cc2990a7b44f3` on both
+`75e2a34af492fe36d3c9d187a55c001194db5372292925c22fa30d7408b37847` on both
 runs.
 
 ## Validation
 
-Focused and repository checks:
+The repair batch passed the required focused and repository checks:
 
-- `bun test packages/core/test/icon-geometry.test.ts packages/core/test/icon-geometry-registry.test.ts` — 17 tests pass.
-- `cargo test --quiet --manifest-path packages/contracts/components/Cargo.toml --lib icon_geometry` — 2 tests pass.
-- `effigy test:core` — 1,172 tests pass / 4,032 expectations.
-- `effigy audit:icons` — pass after deterministic regeneration.
-- `effigy ci:rust` — pass, including the component contract suite.
-- `rustfmt --check --edition 2021 packages/contracts/components/src/icon_geometry.rs` — pass for the new Rust module.
-- `bun x tsc -p packages/core/tsconfig.json --noEmit` — existing repository diagnostics remain; no diagnostics match the new geometry files.
-- `git diff --check` — pass after every plant restore.
+- `bun test packages/core/test/icon-geometry.test.ts packages/core/test/icon-geometry-registry.test.ts` — 22 tests pass / 1,123 expectations, including malformed numeric attributes, exact paired wire/cost, closure assignment, registry planning, and reverse-flight checks.
+- `cargo test --quiet --manifest-path packages/contracts/components/Cargo.toml --lib icon_geometry` — 2 tests pass, independently parsing the shared corpus and matching the same endpoint digests, mappings, costs, closure rules, and reverse-flight oracle.
+- `effigy icons:build` — pass twice with identical generated projection bytes. SHA-256: TypeScript `4df672c9c2c00286925b26f6d1dce442f8cc2319fd24631dede18a530f367c4f`; Rust `75e2a34af492fe36d3c9d187a55c001194db5372292925c22fa30d7408b37847`.
+- `effigy audit:icons` — pass: 108 default icon names (92 canonical, 16 aliases).
+- `effigy ci:rust` — pass: 291 component contract tests passed, with the full Rust board green.
+- `effigy docs:check` — pass, including docs inventories, generated reports, and the Svelte production build.
+- `rustfmt --check --edition 2021 packages/contracts/components/src/icon_geometry.rs` — pass.
+- `git diff --check` — pass; the exact `git diff --check origin/main...HEAD` check is repeated after the repair commit.
+- `git diff origin/main -- packages/contracts/components/src/code_input.rs` — empty; the unrelated formatting churn is removed.
 
-Final board results:
+Exact paired-oracle receipts:
 
-- `effigy ci:web` — all substantive checks passed: 372 test files / 3,498
-  tests, 20 packed-consumer tests, zero Svelte-check errors, and docs/specimen
-  drift checks clean. The selector exited 1 only at `gate:clean`, which could
-  not see the fixed `os.tmpdir()` snapshot after the composed task run. A
-  direct `bun scripts/gate-tree-guard.ts --snapshot` followed by `--compare`
-  passed; the existing shared-temp-path papercut is recorded in `PAPERCUTS.md`.
-- `effigy docs:check` — pass, including the Svelte build and generated report
-  checks.
-- `effigy ci:rust` — pass; the component suite reports 291 passed tests and
-  the full contract board is green.
-- The pre-rebase `effigy qa` reached native/headless and license checks, then
-  exited 1 at the old baseline `audit:security` false positive. After the
-  required rebase onto `fa8e657`, direct `bun scripts/audit-repository-security.ts`
-  is clean.
-- The standalone post-rebase `effigy ci:web` passed: 372 files / 3,535 tests,
-  20 packed-consumer tests, zero Svelte-check errors, and the composed tree
-  guard passed. The final post-rebase `effigy qa` reached its nested `ci:web`
-  but exited 1 when that invocation lost the fixed `os.tmpdir()` gate snapshot;
-  the same known Effigy shared-temp-path race is recorded in `PAPERCUTS.md`.
-- No geometry-related selector failed, and no new geometry or public-icon file
-  was reported by any board.
-- Final `git diff --check` — pass. The exact `git diff --check
-  origin/main...HEAD` check is run again after the implementation commit.
+- `reverse-open-correspondence`: pair digest `3d5068f01f9e23a5`, total cost `0`.
+- `closed-loop-offset`: pair digest `3126562101d000af`, total cost `0`.
+- `mixed-closure-cross-cost`: pair digest `56a3f427c3c87d1`; mappings `0→0` open cost `1822668` and `1→1` closed cost `2029089`; total cost `3851756`.
+- The one-unit Rust sample plant changed the circle/ellipse endpoint digest to `0cb3a0d49f232a06` instead of `30494cadafe64aa6` and failed; restoring the sample returned both languages to the shared oracle.
 
 ## Scope notes
 

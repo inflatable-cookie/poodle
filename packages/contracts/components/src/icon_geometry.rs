@@ -448,12 +448,20 @@ fn parse_number_attribute(
             GeometryError::new(GeometryErrorCode::InvalidNumber, format!("missing {key}"))
         });
     };
-    let value = raw.parse::<f64>().map_err(|_| {
+    let raw = raw.trim();
+    let mut end = 0;
+    let value = parse_number_at(raw, &mut end).map_err(|_| {
         GeometryError::new(
             GeometryErrorCode::InvalidNumber,
-            format!("{key} is not a number"),
+            format!("{key} is not a valid SVG number"),
         )
     })?;
+    if end != raw.len() {
+        return Err(GeometryError::new(
+            GeometryErrorCode::InvalidNumber,
+            format!("{key} is not a valid SVG number"),
+        ));
+    }
     if !value.is_finite() {
         return Err(GeometryError::new(
             GeometryErrorCode::InvalidNumber,
@@ -1048,7 +1056,7 @@ fn visit_assignment(
     assignment: &mut Vec<usize>,
     used: &mut [bool],
     cost: f64,
-    options: &[Vec<CorrespondenceOption>],
+    options: &[Vec<Option<CorrespondenceOption>>],
     best: &mut Option<Assignment>,
 ) {
     let left_index = assignment.len();
@@ -1056,7 +1064,13 @@ fn visit_assignment(
         let mappings = assignment
             .iter()
             .enumerate()
-            .map(|(index, right_index)| options[index][*right_index].correspondence.clone())
+            .map(|(index, right_index)| {
+                options[index][*right_index]
+                    .as_ref()
+                    .expect("assigned contours have compatible closure")
+                    .correspondence
+                    .clone()
+            })
             .collect::<Vec<_>>();
         let replace = best.as_ref().is_none_or(|current| {
             cost < current.cost - COST_EPSILON
@@ -1073,18 +1087,15 @@ fn visit_assignment(
         return;
     }
     for right_index in 0..options.len() {
+        let Some(option) = options[left_index][right_index].as_ref() else {
+            continue;
+        };
         if used[right_index] {
             continue;
         }
         used[right_index] = true;
         assignment.push(right_index);
-        visit_assignment(
-            assignment,
-            used,
-            cost + options[left_index][right_index].cost,
-            options,
-            best,
-        );
+        visit_assignment(assignment, used, cost + option.cost, options, best);
         assignment.pop();
         used[right_index] = false;
     }
@@ -1100,13 +1111,19 @@ fn plan_icon_geometry_pair(
             "endpoints have different contour counts",
         ));
     }
-    if left
+    let left_closed_count = left
         .sampled
         .contours
         .iter()
-        .zip(right.sampled.contours.iter())
-        .any(|(left, right)| left.closed != right.closed)
-    {
+        .filter(|contour| contour.closed)
+        .count();
+    let right_closed_count = right
+        .sampled
+        .contours
+        .iter()
+        .filter(|contour| contour.closed)
+        .count();
+    if left_closed_count != right_closed_count {
         return Err(GeometryError::new(
             GeometryErrorCode::PairClosure,
             "endpoints have different closure signatures",
@@ -1125,7 +1142,9 @@ fn plan_icon_geometry_pair(
                 .iter()
                 .enumerate()
                 .map(|(right_index, right_contour)| {
-                    best_correspondence(left_contour, right_contour, left_index, right_index)
+                    (left_contour.closed == right_contour.closed).then(|| {
+                        best_correspondence(left_contour, right_contour, left_index, right_index)
+                    })
                 })
                 .collect::<Vec<_>>()
         })
@@ -1145,6 +1164,139 @@ fn plan_icon_geometry_pair(
         contour_mappings: best.mappings,
         cost_micros: (best.cost * 1_000_000.0).round() as i64,
     })
+}
+
+fn reverse_pair_plan(plan: &IconGeometryPairPlan) -> IconGeometryPairPlan {
+    let mut mappings = plan.contour_mappings.clone();
+    mappings.sort_by_key(|mapping| mapping.right_index);
+    IconGeometryPairPlan {
+        contour_mappings: mappings
+            .into_iter()
+            .map(|mapping| ContourCorrespondence {
+                left_index: mapping.right_index,
+                right_index: mapping.left_index,
+                reversed: mapping.reversed,
+                offset: if mapping.reversed {
+                    mapping.offset
+                } else {
+                    modulo(
+                        SAMPLE_COUNT as isize - mapping.offset as isize,
+                        SAMPLE_COUNT,
+                    )
+                },
+                cost_micros: mapping.cost_micros,
+            })
+            .collect(),
+        cost_micros: plan.cost_micros,
+    }
+}
+
+fn geometry_wire_text(geometry: &NormalizedIconGeometry) -> String {
+    let mut fields = vec![
+        "icon-geometry-wire-v1".to_owned(),
+        "schema=1".to_owned(),
+        "normalizer=1.0.0".to_owned(),
+        format!("elements={}", geometry.element_types.join(",")),
+        format!("contours={}", geometry.canonical.contours.len()),
+        format!("sample-count={SAMPLE_COUNT}"),
+    ];
+    for (index, contour) in geometry.canonical.contours.iter().enumerate() {
+        let sampled = &geometry.sampled.contours[index];
+        fields.push(format!(
+            "contour-{index}-closed={}",
+            if contour.closed { 1 } else { 0 }
+        ));
+        fields.push(format!(
+            "contour-{index}-segments={}",
+            contour
+                .segments
+                .iter()
+                .map(|segment| {
+                    format!(
+                        "{},{},{},{},{}",
+                        segment.start.x,
+                        segment.start.y,
+                        segment.end.x,
+                        segment.end.y,
+                        if segment.closing { 1 } else { 0 }
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join(";")
+        ));
+        fields.push(format!(
+            "contour-{index}-samples={}",
+            sampled
+                .points
+                .iter()
+                .map(|point| format!("{},{}", point.x, point.y))
+                .collect::<Vec<_>>()
+                .join(";")
+        ));
+    }
+    fields.push(format!(
+        "topology-closed={}",
+        geometry
+            .topology
+            .closed
+            .iter()
+            .map(|closed| if *closed { "1" } else { "0" })
+            .collect::<Vec<_>>()
+            .join(",")
+    ));
+    fields.push(format!(
+        "topology-segments={}",
+        geometry
+            .topology
+            .segment_counts
+            .iter()
+            .map(usize::to_string)
+            .collect::<Vec<_>>()
+            .join(",")
+    ));
+    fields.join("|")
+}
+
+fn fnv1a64(value: &str) -> String {
+    let mut hash = 0xcbf29ce484222325_u64;
+    for byte in value.as_bytes() {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(0x100000001b3_u64);
+    }
+    format!("{hash:016x}")
+}
+
+fn geometry_wire_digest(geometry: &NormalizedIconGeometry) -> String {
+    fnv1a64(&geometry_wire_text(geometry))
+}
+
+fn pair_wire_digest(
+    left: &NormalizedIconGeometry,
+    right: &NormalizedIconGeometry,
+    plan: &IconGeometryPairPlan,
+) -> String {
+    let mappings = plan
+        .contour_mappings
+        .iter()
+        .map(|mapping| {
+            format!(
+                "{},{},{},{},{}",
+                mapping.left_index,
+                mapping.right_index,
+                if mapping.reversed { 1 } else { 0 },
+                mapping.offset,
+                mapping.cost_micros
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(";");
+    fnv1a64(&format!(
+        "icon-geometry-pair-wire-v1|left={}|right={}|mappings={}|cost={}",
+        geometry_wire_text(left),
+        geometry_wire_text(right),
+        mappings,
+        plan.cost_micros
+    ))
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -1289,18 +1441,410 @@ include!("icon_geometry.generated.rs");
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde::Deserialize;
 
     const VECTOR_SOURCE: &str = include_str!("../../../core/src/icons/geometry-vectors.json");
 
-    #[derive(Deserialize)]
+    #[derive(Clone, Debug)]
+    enum JsonValue {
+        Object(BTreeMap<String, JsonValue>),
+        Array(Vec<JsonValue>),
+        String(String),
+        Number(String),
+        Bool(bool),
+        Null,
+    }
+
+    struct JsonParser<'a> {
+        bytes: &'a [u8],
+        index: usize,
+    }
+
+    impl<'a> JsonParser<'a> {
+        fn parse(source: &'a str) -> Result<JsonValue, String> {
+            let mut parser = Self {
+                bytes: source.as_bytes(),
+                index: 0,
+            };
+            let value = parser.value()?;
+            parser.whitespace();
+            if parser.index != parser.bytes.len() {
+                return Err(format!("trailing JSON at {}", parser.index));
+            }
+            Ok(value)
+        }
+
+        fn whitespace(&mut self) {
+            while self
+                .bytes
+                .get(self.index)
+                .is_some_and(u8::is_ascii_whitespace)
+            {
+                self.index += 1;
+            }
+        }
+
+        fn value(&mut self) -> Result<JsonValue, String> {
+            self.whitespace();
+            match self.bytes.get(self.index).copied() {
+                Some(b'{') => self.object(),
+                Some(b'[') => self.array(),
+                Some(b'"') => self.string().map(JsonValue::String),
+                Some(b't') => self.literal(b"true", JsonValue::Bool(true)),
+                Some(b'f') => self.literal(b"false", JsonValue::Bool(false)),
+                Some(b'n') => self.literal(b"null", JsonValue::Null),
+                Some(b'-' | b'0'..=b'9') => self.number(),
+                Some(byte) => Err(format!("unexpected JSON byte {byte} at {}", self.index)),
+                None => Err("unexpected end of JSON".to_owned()),
+            }
+        }
+
+        fn literal(&mut self, expected: &[u8], value: JsonValue) -> Result<JsonValue, String> {
+            if self.bytes.get(self.index..self.index + expected.len()) != Some(expected) {
+                return Err(format!("invalid JSON literal at {}", self.index));
+            }
+            self.index += expected.len();
+            Ok(value)
+        }
+
+        fn object(&mut self) -> Result<JsonValue, String> {
+            self.index += 1;
+            let mut values = BTreeMap::new();
+            self.whitespace();
+            if self.bytes.get(self.index) == Some(&b'}') {
+                self.index += 1;
+                return Ok(JsonValue::Object(values));
+            }
+            loop {
+                self.whitespace();
+                let key = self.string()?;
+                self.whitespace();
+                if self.bytes.get(self.index) != Some(&b':') {
+                    return Err(format!("missing object colon at {}", self.index));
+                }
+                self.index += 1;
+                let value = self.value()?;
+                values.insert(key, value);
+                self.whitespace();
+                match self.bytes.get(self.index).copied() {
+                    Some(b',') => self.index += 1,
+                    Some(b'}') => {
+                        self.index += 1;
+                        return Ok(JsonValue::Object(values));
+                    }
+                    _ => return Err(format!("invalid object separator at {}", self.index)),
+                }
+            }
+        }
+
+        fn array(&mut self) -> Result<JsonValue, String> {
+            self.index += 1;
+            let mut values = Vec::new();
+            self.whitespace();
+            if self.bytes.get(self.index) == Some(&b']') {
+                self.index += 1;
+                return Ok(JsonValue::Array(values));
+            }
+            loop {
+                values.push(self.value()?);
+                self.whitespace();
+                match self.bytes.get(self.index).copied() {
+                    Some(b',') => self.index += 1,
+                    Some(b']') => {
+                        self.index += 1;
+                        return Ok(JsonValue::Array(values));
+                    }
+                    _ => return Err(format!("invalid array separator at {}", self.index)),
+                }
+            }
+        }
+
+        fn string(&mut self) -> Result<String, String> {
+            if self.bytes.get(self.index) != Some(&b'"') {
+                return Err(format!("expected JSON string at {}", self.index));
+            }
+            self.index += 1;
+            let mut value = String::new();
+            loop {
+                let byte = *self
+                    .bytes
+                    .get(self.index)
+                    .ok_or_else(|| "unterminated JSON string".to_owned())?;
+                self.index += 1;
+                match byte {
+                    b'"' => return Ok(value),
+                    b'\\' => {
+                        let escaped = *self
+                            .bytes
+                            .get(self.index)
+                            .ok_or_else(|| "unterminated JSON escape".to_owned())?;
+                        self.index += 1;
+                        match escaped {
+                            b'"' => value.push('"'),
+                            b'\\' => value.push('\\'),
+                            b'/' => value.push('/'),
+                            b'b' => value.push('\u{0008}'),
+                            b'f' => value.push('\u{000c}'),
+                            b'n' => value.push('\n'),
+                            b'r' => value.push('\r'),
+                            b't' => value.push('\t'),
+                            b'u' => {
+                                let mut code = 0_u32;
+                                for _ in 0..4 {
+                                    let digit = *self
+                                        .bytes
+                                        .get(self.index)
+                                        .ok_or_else(|| "unterminated unicode escape".to_owned())?;
+                                    self.index += 1;
+                                    code = code * 16
+                                        + match digit {
+                                            b'0'..=b'9' => u32::from(digit - b'0'),
+                                            b'a'..=b'f' => u32::from(digit - b'a' + 10),
+                                            b'A'..=b'F' => u32::from(digit - b'A' + 10),
+                                            _ => return Err("invalid unicode escape".to_owned()),
+                                        };
+                                }
+                                value.push(
+                                    char::from_u32(code)
+                                        .ok_or_else(|| "invalid unicode scalar".to_owned())?,
+                                );
+                            }
+                            _ => return Err("invalid JSON escape".to_owned()),
+                        }
+                    }
+                    byte if byte >= 0x20 => value.push(byte as char),
+                    _ => return Err("control byte in JSON string".to_owned()),
+                }
+            }
+        }
+
+        fn number(&mut self) -> Result<JsonValue, String> {
+            let start = self.index;
+            if self.bytes.get(self.index) == Some(&b'-') {
+                self.index += 1;
+            }
+            match self.bytes.get(self.index).copied() {
+                Some(b'0') => self.index += 1,
+                Some(b'1'..=b'9') => {
+                    self.index += 1;
+                    while self.bytes.get(self.index).is_some_and(u8::is_ascii_digit) {
+                        self.index += 1;
+                    }
+                }
+                _ => return Err(format!("invalid JSON number at {start}")),
+            }
+            if self.bytes.get(self.index) == Some(&b'.') {
+                self.index += 1;
+                let fraction_start = self.index;
+                while self.bytes.get(self.index).is_some_and(u8::is_ascii_digit) {
+                    self.index += 1;
+                }
+                if self.index == fraction_start {
+                    return Err(format!("invalid JSON fraction at {start}"));
+                }
+            }
+            if matches!(self.bytes.get(self.index), Some(b'e' | b'E')) {
+                self.index += 1;
+                if matches!(self.bytes.get(self.index), Some(b'+' | b'-')) {
+                    self.index += 1;
+                }
+                let exponent_start = self.index;
+                while self.bytes.get(self.index).is_some_and(u8::is_ascii_digit) {
+                    self.index += 1;
+                }
+                if self.index == exponent_start {
+                    return Err(format!("invalid JSON exponent at {start}"));
+                }
+            }
+            Ok(JsonValue::Number(
+                String::from_utf8(self.bytes[start..self.index].to_vec())
+                    .map_err(|_| "JSON number is not UTF-8".to_owned())?,
+            ))
+        }
+    }
+
+    fn object(value: &JsonValue) -> &BTreeMap<String, JsonValue> {
+        match value {
+            JsonValue::Object(value) => value,
+            _ => panic!("expected JSON object"),
+        }
+    }
+
+    fn array(value: &JsonValue) -> &[JsonValue] {
+        match value {
+            JsonValue::Array(value) => value,
+            _ => panic!("expected JSON array"),
+        }
+    }
+
+    fn field<'a>(value: &'a JsonValue, key: &str) -> &'a JsonValue {
+        object(value)
+            .get(key)
+            .unwrap_or_else(|| panic!("missing JSON field {key}"))
+    }
+
+    fn optional_field<'a>(value: &'a JsonValue, key: &str) -> Option<&'a JsonValue> {
+        object(value).get(key)
+    }
+
+    fn string(value: &JsonValue) -> &str {
+        match value {
+            JsonValue::String(value) => value,
+            _ => panic!("expected JSON string"),
+        }
+    }
+
+    fn number(value: &JsonValue) -> &str {
+        match value {
+            JsonValue::Number(value) => value,
+            _ => panic!("expected JSON number"),
+        }
+    }
+
+    fn number_f64(value: &JsonValue) -> f64 {
+        number(value).parse().expect("valid JSON float")
+    }
+
+    fn number_i64(value: &JsonValue) -> i64 {
+        number(value).parse().expect("valid JSON integer")
+    }
+
+    fn number_usize(value: &JsonValue) -> usize {
+        number(value).parse().expect("valid JSON usize")
+    }
+
+    fn boolean(value: &JsonValue) -> bool {
+        match value {
+            JsonValue::Bool(value) => *value,
+            _ => panic!("expected JSON boolean"),
+        }
+    }
+
+    fn string_option(value: &JsonValue, key: &str) -> Option<String> {
+        optional_field(value, key).map(string).map(str::to_owned)
+    }
+
+    fn boolean_vec(value: &JsonValue) -> Vec<bool> {
+        array(value).iter().map(boolean).collect()
+    }
+
+    fn usize_vec(value: &JsonValue) -> Vec<usize> {
+        array(value).iter().map(number_usize).collect()
+    }
+
+    fn points_value(value: &JsonValue) -> Vec<Vec<[i64; 2]>> {
+        array(value)
+            .iter()
+            .map(|contour| {
+                array(contour)
+                    .iter()
+                    .map(|point| {
+                        let point = array(point);
+                        [number_i64(&point[0]), number_i64(&point[1])]
+                    })
+                    .collect()
+            })
+            .collect()
+    }
+
+    fn vector_input(value: &JsonValue) -> VectorInput {
+        let view_box = array(field(value, "viewBox"));
+        let mut nodes = Vec::new();
+        for node in array(field(value, "nodes")) {
+            let node = array(node);
+            let attrs = object(&node[1])
+                .iter()
+                .map(|(key, value)| (key.clone(), string(value).to_owned()))
+                .collect();
+            nodes.push((string(&node[0]).to_owned(), attrs));
+        }
+        VectorInput {
+            view_box: [
+                number_f64(&view_box[0]),
+                number_f64(&view_box[1]),
+                number_f64(&view_box[2]),
+                number_f64(&view_box[3]),
+            ],
+            fill: string(field(value, "fill")).to_owned(),
+            stroke: string(field(value, "stroke")).to_owned(),
+            stroke_width: number_f64(field(value, "strokeWidth")),
+            stroke_linecap: string(field(value, "strokeLinecap")).to_owned(),
+            stroke_linejoin: string(field(value, "strokeLinejoin")).to_owned(),
+            nodes,
+        }
+    }
+
+    fn geometry_expectation(value: &JsonValue) -> GeometryExpectation {
+        GeometryExpectation {
+            status: string(field(value, "status")).to_owned(),
+            code: string_option(value, "code"),
+            contour_count: optional_field(value, "contourCount").map(number_usize),
+            closed: optional_field(value, "closed").map(boolean_vec),
+            segment_counts: optional_field(value, "segmentCounts").map(usize_vec),
+            canonical_points: optional_field(value, "canonicalPoints").map(points_value),
+            wire_digest: string_option(value, "wireDigest"),
+        }
+    }
+
+    fn pair_oracle(value: &JsonValue) -> PairOracle {
+        let mappings = array(field(value, "mappings"))
+            .iter()
+            .map(|mapping| ExpectedMapping {
+                left_index: number_usize(field(mapping, "leftIndex")),
+                right_index: number_usize(field(mapping, "rightIndex")),
+                reversed: boolean(field(mapping, "reversed")),
+                offset: number_usize(field(mapping, "offset")),
+                cost_micros: number_i64(field(mapping, "costMicros")),
+            })
+            .collect();
+        PairOracle {
+            left_digest: string(field(value, "leftDigest")).to_owned(),
+            right_digest: string(field(value, "rightDigest")).to_owned(),
+            pair_digest: string(field(value, "pairDigest")).to_owned(),
+            mappings,
+            cost_micros: number_i64(field(value, "costMicros")),
+        }
+    }
+
+    fn pair_expectation(value: &JsonValue) -> PairExpectation {
+        PairExpectation {
+            status: string(field(value, "status")).to_owned(),
+            code: string_option(value, "code"),
+            reversed: optional_field(value, "reversed").map(boolean_vec),
+            offsets: optional_field(value, "offsets").map(usize_vec),
+            oracle: optional_field(value, "oracle").map(pair_oracle),
+        }
+    }
+
+    fn vector(value: &JsonValue) -> GeometryVector {
+        GeometryVector {
+            id: string(field(value, "id")).to_owned(),
+            left: vector_input(field(value, "left")),
+            right: optional_field(value, "right").map(vector_input),
+            expect: VectorExpectation {
+                left: geometry_expectation(field(field(value, "expect"), "left")),
+                right: optional_field(field(value, "expect"), "right").map(geometry_expectation),
+                pair: optional_field(field(value, "expect"), "pair").map(pair_expectation),
+            },
+        }
+    }
+
+    #[derive(Clone, Debug)]
     struct VectorDocument {
-        #[serde(rename = "schemaVersion")]
         schema_version: u32,
         vectors: Vec<GeometryVector>,
     }
 
-    #[derive(Deserialize)]
+    impl VectorDocument {
+        fn parse(source: &str) -> Result<Self, String> {
+            let root = JsonParser::parse(source)?;
+            Ok(Self {
+                schema_version: number_usize(field(&root, "schemaVersion")) as u32,
+                vectors: array(field(&root, "vectors")).iter().map(vector).collect(),
+            })
+        }
+    }
+
+    #[derive(Clone, Debug)]
     struct GeometryVector {
         id: String,
         left: VectorInput,
@@ -1308,47 +1852,60 @@ mod tests {
         expect: VectorExpectation,
     }
 
-    #[derive(Deserialize)]
+    #[derive(Clone, Debug)]
     struct VectorInput {
-        #[serde(rename = "viewBox")]
         view_box: [f64; 4],
         fill: String,
         stroke: String,
-        #[serde(rename = "strokeWidth")]
         stroke_width: f64,
-        #[serde(rename = "strokeLinecap")]
         stroke_linecap: String,
-        #[serde(rename = "strokeLinejoin")]
         stroke_linejoin: String,
         nodes: Vec<(String, BTreeMap<String, String>)>,
     }
 
-    #[derive(Deserialize)]
+    #[derive(Clone, Debug)]
     struct VectorExpectation {
         left: GeometryExpectation,
         right: Option<GeometryExpectation>,
         pair: Option<PairExpectation>,
     }
 
-    #[derive(Deserialize)]
+    #[derive(Clone, Debug)]
     struct GeometryExpectation {
         status: String,
         code: Option<String>,
-        #[serde(rename = "contourCount")]
         contour_count: Option<usize>,
         closed: Option<Vec<bool>>,
-        #[serde(rename = "segmentCounts")]
         segment_counts: Option<Vec<usize>>,
-        #[serde(rename = "canonicalPoints")]
         canonical_points: Option<Vec<Vec<[i64; 2]>>>,
+        wire_digest: Option<String>,
     }
 
-    #[derive(Deserialize)]
+    #[derive(Clone, Debug)]
+    struct ExpectedMapping {
+        left_index: usize,
+        right_index: usize,
+        reversed: bool,
+        offset: usize,
+        cost_micros: i64,
+    }
+
+    #[derive(Clone, Debug)]
+    struct PairOracle {
+        left_digest: String,
+        right_digest: String,
+        pair_digest: String,
+        mappings: Vec<ExpectedMapping>,
+        cost_micros: i64,
+    }
+
+    #[derive(Clone, Debug)]
     struct PairExpectation {
         status: String,
         code: Option<String>,
         reversed: Option<Vec<bool>>,
         offsets: Option<Vec<usize>>,
+        oracle: Option<PairOracle>,
     }
 
     fn input(value: VectorInput) -> IconGeometryInput {
@@ -1400,6 +1957,9 @@ mod tests {
         if let Some(expected_points) = &expected.canonical_points {
             assert_eq!(&points(&geometry), expected_points);
         }
+        if let Some(expected_digest) = &expected.wire_digest {
+            assert_eq!(geometry_wire_digest(&geometry), *expected_digest);
+        }
         assert!(geometry
             .sampled
             .contours
@@ -1409,7 +1969,7 @@ mod tests {
 
     #[test]
     fn shared_vectors_cover_both_normalization_and_pair_planning() {
-        let document: VectorDocument = serde_json::from_str(VECTOR_SOURCE).expect("valid vectors");
+        let document = VectorDocument::parse(VECTOR_SOURCE).expect("valid vectors");
         assert_eq!(document.schema_version, 1);
         for vector in document.vectors {
             let left = normalize_icon_geometry(&input(vector.left));
@@ -1435,21 +1995,82 @@ mod tests {
             let left = left.expect("left endpoint should normalize");
             let right = right.expect("right endpoint should normalize");
             let plan = plan_icon_geometry_pair(&left, &right).expect("pair should plan");
+            if let Some(expected_reversed) = &pair.reversed {
+                assert_eq!(
+                    plan.contour_mappings
+                        .iter()
+                        .map(|mapping| mapping.reversed)
+                        .collect::<Vec<_>>(),
+                    *expected_reversed,
+                    "{}",
+                    vector.id
+                );
+            }
+            if let Some(expected_offsets) = &pair.offsets {
+                assert_eq!(
+                    plan.contour_mappings
+                        .iter()
+                        .map(|mapping| mapping.offset)
+                        .collect::<Vec<_>>(),
+                    *expected_offsets,
+                    "{}",
+                    vector.id
+                );
+            }
+            for mapping in &plan.contour_mappings {
+                assert_eq!(
+                    left.sampled.contours[mapping.left_index].closed,
+                    right.sampled.contours[mapping.right_index].closed,
+                    "{}",
+                    vector.id
+                );
+            }
+            let oracle = pair.oracle.as_ref().expect("missing exact pair oracle");
             assert_eq!(
-                plan.contour_mappings
-                    .iter()
-                    .map(|mapping| mapping.reversed)
-                    .collect::<Vec<_>>(),
-                pair.reversed.clone().unwrap(),
+                geometry_wire_digest(&left),
+                oracle.left_digest,
+                "{}",
+                vector.id
+            );
+            assert_eq!(
+                geometry_wire_digest(&right),
+                oracle.right_digest,
+                "{}",
+                vector.id
+            );
+            assert_eq!(plan.cost_micros, oracle.cost_micros, "{}", vector.id);
+            assert_eq!(
+                pair_wire_digest(&left, &right, &plan),
+                oracle.pair_digest,
                 "{}",
                 vector.id
             );
             assert_eq!(
                 plan.contour_mappings
                     .iter()
-                    .map(|mapping| mapping.offset)
+                    .map(|mapping| {
+                        (
+                            mapping.left_index,
+                            mapping.right_index,
+                            mapping.reversed,
+                            mapping.offset,
+                            mapping.cost_micros,
+                        )
+                    })
                     .collect::<Vec<_>>(),
-                pair.offsets.clone().unwrap(),
+                oracle
+                    .mappings
+                    .iter()
+                    .map(|mapping| {
+                        (
+                            mapping.left_index,
+                            mapping.right_index,
+                            mapping.reversed,
+                            mapping.offset,
+                            mapping.cost_micros,
+                        )
+                    })
+                    .collect::<Vec<_>>(),
                 "{}",
                 vector.id
             );
@@ -1485,6 +2106,65 @@ mod tests {
                     .map(|contour| canonical_points(contour).unwrap())
                     .collect::<Vec<_>>()
             );
+            let reverse_plan = reverse_pair_plan(&plan);
+            let reverse_pair = PlannedIconGeometryPair {
+                left: &right,
+                right: &left,
+                plan: &reverse_plan,
+            };
+            assert_eq!(
+                frame_at(&reverse_pair, 0.0)
+                    .expect("reverse left endpoint")
+                    .contours
+                    .into_iter()
+                    .map(|contour| contour.points)
+                    .collect::<Vec<_>>(),
+                right
+                    .canonical
+                    .contours
+                    .iter()
+                    .map(|contour| canonical_points(contour).unwrap())
+                    .collect::<Vec<_>>()
+            );
+            assert_eq!(
+                frame_at(&reverse_pair, 1.0)
+                    .expect("reverse right endpoint")
+                    .contours
+                    .into_iter()
+                    .map(|contour| contour.points)
+                    .collect::<Vec<_>>(),
+                left.canonical
+                    .contours
+                    .iter()
+                    .map(|contour| canonical_points(contour).unwrap())
+                    .collect::<Vec<_>>()
+            );
+            for progress in [0.25, 0.5, 0.75] {
+                let forward = frame_at(&planned, progress).expect("forward frame");
+                let reverse = frame_at(&reverse_pair, 1.0 - progress).expect("reverse frame");
+                for mapping in &plan.contour_mappings {
+                    let forward_points = &forward.contours[mapping.left_index].points;
+                    let reverse_points = &reverse.contours[mapping.right_index].points;
+                    for (index, forward_point) in forward_points.iter().enumerate() {
+                        let reverse_index = if mapping.reversed {
+                            modulo(
+                                mapping.offset as isize - index as isize,
+                                reverse_points.len(),
+                            )
+                        } else {
+                            modulo(
+                                mapping.offset as isize + index as isize,
+                                reverse_points.len(),
+                            )
+                        };
+                        assert_eq!(
+                            reverse_points[reverse_index], *forward_point,
+                            "{}",
+                            vector.id
+                        );
+                    }
+                }
+            }
         }
     }
 
@@ -1505,6 +2185,35 @@ mod tests {
         assert!(ICON_GEOMETRY_REGISTRY
             .iter()
             .any(|pair| pair.status == GeneratedPairStatus::Rejected));
+        assert_eq!(
+            ICON_GEOMETRY_REGISTRY
+                .iter()
+                .filter(|pair| pair.status == GeneratedPairStatus::Accepted)
+                .count(),
+            5
+        );
+        assert_eq!(
+            ICON_GEOMETRY_REGISTRY
+                .iter()
+                .filter(|pair| pair.status == GeneratedPairStatus::Candidate)
+                .count(),
+            1
+        );
+        assert_eq!(
+            ICON_GEOMETRY_REGISTRY
+                .iter()
+                .filter(|pair| pair.status == GeneratedPairStatus::Rejected)
+                .count(),
+            6
+        );
+        let candidate = ICON_GEOMETRY_REGISTRY
+            .iter()
+            .find(|pair| pair.status == GeneratedPairStatus::Candidate)
+            .expect("candidate pair");
+        assert_eq!(candidate.id, "circle-to-dot");
+        assert!(candidate.geometry_left.is_some());
+        assert!(candidate.geometry_right.is_some());
+        assert!(candidate.plan.is_some());
         for pair in ICON_GEOMETRY_REGISTRY {
             assert!(!pair.id.is_empty());
             assert!(!pair.source_digest_left.is_empty());
@@ -1512,7 +2221,7 @@ mod tests {
             assert!(!pair.asset_digest_left.is_empty());
             assert!(!pair.asset_digest_right.is_empty());
             assert!(!pair.quality_notes.is_empty());
-            if pair.status == GeneratedPairStatus::Accepted {
+            if pair.status != GeneratedPairStatus::Rejected {
                 assert!(pair.geometry_left.is_some());
                 assert!(pair.geometry_right.is_some());
                 assert!(pair.plan.is_some());

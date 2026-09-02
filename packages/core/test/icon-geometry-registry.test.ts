@@ -27,6 +27,16 @@ describe("icon geometry registry", () => {
     expect(new Set(ICON_GEOMETRY_REGISTRY.pairs.map((pair) => pair.status))).toEqual(
       new Set(["accepted", "candidate", "rejected"]),
     );
+    expect(ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => pair.status === "accepted")).toHaveLength(5);
+    expect(ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => pair.status === "candidate")).toHaveLength(1);
+    expect(ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => pair.status === "rejected")).toHaveLength(6);
+    const candidate = ICON_GEOMETRY_REGISTRY.pairs.find(
+      (pair) => pair.status === "candidate",
+    );
+    expect(candidate?.id).toBe("circle-to-dot");
+    expect(candidate?.geometryLeft).not.toBeNull();
+    expect(candidate?.geometryRight).not.toBeNull();
+    expect(candidate?.plan).not.toBeNull();
 
     for (const pair of ICON_GEOMETRY_REGISTRY.pairs) {
       expect(pair.qualityStatus).toBe(pair.status);
@@ -37,18 +47,14 @@ describe("icon geometry registry", () => {
       expect(pair.assetDigestLeft).toMatch(digestPattern);
       expect(pair.assetDigestRight).toMatch(digestPattern);
       expect(pair.payloadBytes).toBeLessThanOrEqual(16 * 1024);
-      if (pair.status === "accepted") {
+      if (pair.status !== "rejected") {
         expect(pair.geometryLeft).not.toBeNull();
         expect(pair.geometryRight).not.toBeNull();
         expect(pair.plan).not.toBeNull();
         expect(pair.derivedDigest).toMatch(digestPattern);
         expect(pair.payloadBytes).toBeGreaterThan(0);
       } else {
-        if (pair.status === "rejected") {
-          expect(pair.rejectionReason).toEqual(expect.any(String));
-        } else {
-          expect(pair.rejectionReason).toBeNull();
-        }
+        expect(pair.rejectionReason).toEqual(expect.any(String));
       }
     }
   });

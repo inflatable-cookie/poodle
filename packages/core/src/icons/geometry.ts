@@ -133,6 +133,8 @@ type PathToken =
 
 const numberPattern =
   /[-+]?(?:(?:\d+\.\d*)|(?:\.\d+)|(?:\d+))(?:[eE][-+]?\d+)?/y;
+const fullNumberPattern =
+  /^[+-]?(?:(?:\d+\.\d*)|(?:\.\d+)|(?:\d+))(?:[eE][+-]?\d+)?$/;
 
 function fail(code: GeometryErrorCode, message: string): never {
   throw new IconGeometryError(code, message);
@@ -148,7 +150,11 @@ function readNumber(
   if (raw === undefined || raw.trim() === "") {
     fail("invalid-number", `missing ${key}`);
   }
-  const value = Number(raw);
+  const normalized = raw.trim();
+  if (!fullNumberPattern.test(normalized)) {
+    fail("invalid-number", `${key} is not a valid SVG number`);
+  }
+  const value = Number(normalized);
   if (!Number.isFinite(value)) fail("invalid-number", `${key} is not finite`);
   return value;
 }
@@ -485,7 +491,9 @@ function canonicalPoints(contour: CanonicalContour): GeometryPoint[] {
 }
 
 function distance(left: GeometryPoint, right: GeometryPoint): number {
-  return Math.hypot(left[0] - right[0], left[1] - right[1]);
+  const x = left[0] - right[0];
+  const y = left[1] - right[1];
+  return Math.sqrt(x * x + y * y);
 }
 
 function sampleContour(contour: CanonicalContour): SampledContour {
@@ -718,14 +726,18 @@ export function planIconGeometryPair(
   if (left.sampled.contours.length !== right.sampled.contours.length) {
     fail("pair-contour-count", "endpoints have different contour counts");
   }
-  if (left.sampled.contours.some((contour, index) => contour.closed !== right.sampled.contours[index]!.closed)) {
+  const leftClosedCount = left.sampled.contours.filter((contour) => contour.closed).length;
+  const rightClosedCount = right.sampled.contours.filter((contour) => contour.closed).length;
+  if (leftClosedCount !== rightClosedCount) {
     fail("pair-closure", "endpoints have different closure signatures");
   }
 
   const count = left.sampled.contours.length;
   const options = left.sampled.contours.map((leftContour, leftIndex) =>
     right.sampled.contours.map((rightContour, rightIndex) =>
-      bestCorrespondence(leftContour, rightContour, leftIndex, rightIndex),
+      leftContour.closed === rightContour.closed
+        ? bestCorrespondence(leftContour, rightContour, leftIndex, rightIndex)
+        : null,
     ),
   );
   let best: { assignment: number[]; cost: number; mappings: ContourCorrespondence[] } | null = null;
@@ -747,10 +759,11 @@ export function planIconGeometryPair(
       return;
     }
     for (let rightIndex = 0; rightIndex < count; rightIndex += 1) {
-      if (used.has(rightIndex)) continue;
+      const option = options[leftIndex]![rightIndex];
+      if (used.has(rightIndex) || !option) continue;
       used.add(rightIndex);
       assignment.push(rightIndex);
-      visit(assignment, used, cost + options[leftIndex]![rightIndex]!.cost);
+      visit(assignment, used, cost + option.cost);
       assignment.pop();
       used.delete(rightIndex);
     }
@@ -861,4 +874,82 @@ export function pairPlanToWire(plan: IconGeometryPairPlan): object {
     contourMappings: plan.contourMappings,
     costMicros: plan.costMicros,
   };
+}
+
+const FNV_OFFSET_BASIS_64 = 0xcbf29ce484222325n;
+const FNV_PRIME_64 = 0x100000001b3n;
+const FNV_MASK_64 = 0xffffffffffffffffn;
+
+function fnv1a64(value: string): string {
+  let hash = FNV_OFFSET_BASIS_64;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= BigInt(value.charCodeAt(index));
+    hash = (hash * FNV_PRIME_64) & FNV_MASK_64;
+  }
+  return hash.toString(16).padStart(16, "0");
+}
+
+function wireBoolean(value: boolean): number {
+  return value ? 1 : 0;
+}
+
+function geometryWireText(geometry: NormalizedIconGeometry): string {
+  const fields = [
+    "icon-geometry-wire-v1",
+    `schema=${geometry.schemaVersion}`,
+    `normalizer=${geometry.normalizerVersion}`,
+    `elements=${geometry.elementTypes.join(",")}`,
+    `contours=${geometry.canonical.contours.length}`,
+    `sample-count=${geometry.sampled.sampleCount}`,
+  ];
+  geometry.canonical.contours.forEach((contour, index) => {
+    const sampled = geometry.sampled.contours[index]!;
+    fields.push(`contour-${index}-closed=${wireBoolean(contour.closed)}`);
+    fields.push(
+      `contour-${index}-segments=${contour.segments
+        .map((segment) =>
+          [
+            segment.start[0],
+            segment.start[1],
+            segment.end[0],
+            segment.end[1],
+            wireBoolean(segment.closing),
+          ].join(","),
+        )
+        .join(";")}`,
+    );
+    fields.push(
+      `contour-${index}-samples=${sampled.points
+        .map((point) => point.join(","))
+        .join(";")}`,
+    );
+  });
+  fields.push(`topology-closed=${geometry.topology.closed.map(wireBoolean).join(",")}`);
+  fields.push(`topology-segments=${geometry.topology.segmentCounts.join(",")}`);
+  return fields.join("|");
+}
+
+export function geometryWireDigest(geometry: NormalizedIconGeometry): string {
+  return fnv1a64(geometryWireText(geometry));
+}
+
+export function pairWireDigest(
+  left: NormalizedIconGeometry,
+  right: NormalizedIconGeometry,
+  plan: IconGeometryPairPlan,
+): string {
+  const mappings = plan.contourMappings
+    .map((mapping) =>
+      [
+        mapping.leftIndex,
+        mapping.rightIndex,
+        wireBoolean(mapping.reversed),
+        mapping.offset,
+        mapping.costMicros,
+      ].join(","),
+    )
+    .join(";");
+  return fnv1a64(
+    `icon-geometry-pair-wire-v1|left=${geometryWireText(left)}|right=${geometryWireText(right)}|mappings=${mappings}|cost=${plan.costMicros}`,
+  );
 }

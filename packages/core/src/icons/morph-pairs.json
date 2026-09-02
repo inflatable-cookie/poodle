@@ -39,6 +39,18 @@
       }
     },
     {
+      "id": "circle-to-dot",
+      "from": "circle",
+      "to": "dot",
+      "semantic": "shape-state",
+      "status": "candidate",
+      "quality": {
+        "review": "candidate",
+        "reviewer": "poodle-core",
+        "notes": "One closed contour on each endpoint; awaiting visual quality review."
+      }
+    },
+    {
       "id": "ellipsis-to-ellipsis-vertical",
       "from": "ellipsis",
       "to": "ellipsis-vertical",
@@ -81,11 +93,12 @@
       "from": "menu",
       "to": "ellipsis",
       "semantic": "overflow-state",
-      "status": "candidate",
+      "status": "rejected",
+      "rejectionReason": "Open menu strokes and closed ellipsis dots have incompatible closure signatures.",
       "quality": {
-        "review": "candidate",
+        "review": "rejected",
         "reviewer": "poodle-core",
-        "notes": "Retained for review only; open menu strokes and closed dots are not currently compatible."
+        "notes": "Closure mismatch is retained as explicit negative evidence; no pair geometry is emitted."
       }
     },
     {

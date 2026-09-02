@@ -339,10 +339,7 @@ mod tests {
     /// inference: a six-character input has no break without `groups`.
     #[test]
     fn grouping_is_explicit_and_never_inferred() {
-        assert_eq!(
-            CodeInputSpec::new().with_length(6).group_end_indices(),
-            Vec::<usize>::new()
-        );
+        assert_eq!(CodeInputSpec::new().with_length(6).group_end_indices(), vec![]);
         assert_eq!(
             CodeInputSpec::new().with_length(20).with_groups([5, 5, 5, 5]).group_end_indices(),
             vec![4, 9, 14]
@@ -354,7 +351,7 @@ mod tests {
         // An invalid partition renders no breaks.
         assert_eq!(
             CodeInputSpec::new().with_length(6).with_groups([2, 2]).group_end_indices(),
-            Vec::<usize>::new()
+            vec![]
         );
     }
 
