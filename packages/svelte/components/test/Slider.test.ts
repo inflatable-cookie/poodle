@@ -1,4 +1,5 @@
 import { fireEvent, render } from "@testing-library/svelte";
+import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 
 import Slider from "../src/Slider.svelte";
@@ -200,5 +201,75 @@ describe("Slider (svelte) embedded semantics", () => {
     expect(onValueChange).not.toHaveBeenCalled();
     expect(onValueCommit).not.toHaveBeenCalled();
     expect(root.getAttribute("tabindex")).toBeNull();
+  });
+});
+
+describe("Slider (svelte) block appearance", () => {
+  it("omitting appearance keeps the track anatomy", () => {
+    const { container } = render(Slider, { props: { value: 50, ariaLabel: "Volume" } });
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("data-appearance")).toBeNull();
+    expect(container.querySelector(".poodle-slider__control")).not.toBeNull();
+    expect(container.querySelector(".poodle-slider__capsule")).toBeNull();
+  });
+
+  it("does not paint ariaLabel as visible text", () => {
+    const { container } = render(Slider, {
+      props: { appearance: "block", value: 50, ariaLabel: "Gain" },
+    });
+    expect(container.textContent).not.toContain("Gain");
+    expect(container.querySelector(".poodle-slider")!.getAttribute("aria-label")).toBe("Gain");
+  });
+
+  it("rejects vertical block before paint", () => {
+    expect(() =>
+      render(Slider, { props: { appearance: "block", orientation: "vertical", value: 40 } }),
+    ).toThrow('Slider appearance="block" rejects orientation="vertical"');
+  });
+
+  it("keeps a 44px hit target and forced-color roles in CSS", () => {
+    const { container } = render(Slider, { props: { appearance: "block", value: 50, size: "xs" } });
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("data-appearance")).toBe("block");
+    const hit = container.querySelector(".poodle-slider__hit") as HTMLElement;
+    expect(hit).not.toBeNull();
+    const css = readFileSync(
+      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
+      "utf8",
+    );
+    expect(css).toContain("--poodle-slider-block-hit: 44px");
+  });
+
+  it("commits once across cancel then lost capture", async () => {
+    const onValueChange = vi.fn();
+    const onValueCommit = vi.fn();
+    const { container } = render(Slider, {
+      props: {
+        appearance: "block",
+        value: 0,
+        min: 0,
+        max: 100,
+        ariaLabel: "Volume",
+        onValueChange,
+        onValueCommit,
+      },
+    });
+    const root = container.querySelector(".poodle-slider") as HTMLElement;
+    mockTrack(root, 100, 32);
+    await fireEvent.pointerDown(root, { button: 0, clientX: 40, clientY: 16, pointerId: 1 });
+    await fireEvent.pointerMove(root, { clientX: 70, clientY: 16, pointerId: 1 });
+    await fireEvent.pointerCancel(root, { pointerId: 1 });
+    await fireEvent.lostPointerCapture(root, { pointerId: 1 });
+    expect(onValueCommit).toHaveBeenCalledOnce();
+  });
+
+  it("maps selected fill to Highlight and remainder to Canvas", () => {
+    const css = readFileSync(
+      new URL("../../../core/src/styles/slider.css", `file://${import.meta.dirname}/`),
+      "utf8",
+    );
+    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__capsule {\n      background: Canvas;");
+    expect(css).toContain(".poodle-slider[data-appearance=\"block\"] .poodle-slider__fill {\n      background: Highlight;");
+    expect(css).not.toMatch(/\.poodle-slider__fill \{\s*background: Canvas/);
   });
 });

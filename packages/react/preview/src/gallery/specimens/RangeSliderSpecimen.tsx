@@ -66,6 +66,11 @@ export function RangeSliderSpecimen() {
         <SpecimenGroup label="Disabled">
           <RangeSlider value={[30, 70]} min={0} max={100} disabled ariaLabel="Disabled range" />
         </SpecimenGroup>
+
+        <SpecimenGroup label="Block appearance">
+          <RangeSlider appearance="block" value={priceRange} min={0} max={100} visibleLabel="Price" ariaLabel="Price range" onValueChange={setPriceRange} />
+          <RangeSlider appearance="block" direction="rtl" value={ageRange} min={18} max={65} step={5} visibleLabel="Age" ariaLabel="Age range" onValueChange={setAgeRange} />
+        </SpecimenGroup>
       </div>
 
       <SpecimenGroup label="Vertical — the same control on the other axis">

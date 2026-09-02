@@ -277,6 +277,8 @@ export type {
   OverlayPlacement,
   OverflowMode,
   PillAppearance,
+  SliderAppearance,
+  SliderDirection,
   PillFont,
   PillSize,
   PillTone,
