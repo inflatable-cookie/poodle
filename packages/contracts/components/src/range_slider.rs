@@ -2,7 +2,7 @@ use poodle_headless::audio::AudioValueLaw;
 use poodle_tokens::semantic;
 
 use crate::types::{ControlDensity, ControlSize, Orientation, SemanticControlSizeRole};
-use crate::{SliderPolarity, SliderVariant};
+use crate::{SliderAppearance, SliderDirection, SliderPolarity, SliderVariant};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RangeSliderSpec {
@@ -12,6 +12,8 @@ pub struct RangeSliderSpec {
     pub max: f64,
     pub step: f64,
     pub variant: SliderVariant,
+    pub appearance: SliderAppearance,
+    pub direction: SliderDirection,
     pub polarity: SliderPolarity,
     pub center_value: Option<f64>,
     pub law: AudioValueLaw,
@@ -27,6 +29,10 @@ pub struct RangeSliderSpec {
     pub lower_value_text: Option<String>,
     /// Human-readable value for the upper thumb (`aria-valuetext`).
     pub upper_value_text: Option<String>,
+    pub visible_label: Option<String>,
+    pub visible_lower_text: Option<String>,
+    pub visible_upper_text: Option<String>,
+    pub visible_range_text: Option<String>,
 }
 
 impl Default for RangeSliderSpec {
@@ -38,6 +44,8 @@ impl Default for RangeSliderSpec {
             max: 100.0,
             step: 1.0,
             variant: SliderVariant::Standard,
+            appearance: SliderAppearance::Track,
+            direction: SliderDirection::Ltr,
             polarity: SliderPolarity::Unipolar,
             center_value: None,
             law: AudioValueLaw::Linear,
@@ -49,6 +57,10 @@ impl Default for RangeSliderSpec {
             density: None,
             lower_value_text: None,
             upper_value_text: None,
+            visible_label: None,
+            visible_lower_text: None,
+            visible_upper_text: None,
+            visible_range_text: None,
         }
     }
 }
@@ -157,6 +169,36 @@ impl RangeSliderSpec {
 
     pub fn with_density(mut self, density: ControlDensity) -> Self {
         self.density = Some(density);
+        self
+    }
+
+    pub fn with_appearance(mut self, appearance: SliderAppearance) -> Self {
+        self.appearance = appearance;
+        self
+    }
+
+    pub fn with_direction(mut self, direction: SliderDirection) -> Self {
+        self.direction = direction;
+        self
+    }
+
+    pub fn with_visible_label(mut self, label: impl Into<String>) -> Self {
+        self.visible_label = Some(label.into());
+        self
+    }
+
+    pub fn with_visible_lower_text(mut self, text: impl Into<String>) -> Self {
+        self.visible_lower_text = Some(text.into());
+        self
+    }
+
+    pub fn with_visible_upper_text(mut self, text: impl Into<String>) -> Self {
+        self.visible_upper_text = Some(text.into());
+        self
+    }
+
+    pub fn with_visible_range_text(mut self, text: impl Into<String>) -> Self {
+        self.visible_range_text = Some(text.into());
         self
     }
 }

@@ -1,7 +1,7 @@
 # 007 Appearance Recipe Contract
 
 Status: active
-Updated: 2026-07-10
+Updated: 2026-09-02
 Depends on: `006-headless-core-and-machine-model.md`
 Supersedes: `005-treatment-system-and-recipe-variables.md` (legacy override layer retired 2026-07-13; Recipes are the single override surface)
 Promoted from: `docs/specs/026-appearance-recipes-and-downstream-override-strategy.md` (g11.005)
@@ -49,8 +49,8 @@ Two classes, machine-classified by
 
 - **Recipe hooks** (`--poodle-recipe-*`, public): the supported override
   surface. Stable: renaming or removing one is a breaking change handled
-  via the g11.001 wave process. The current inventory records 1,057 hooks
-  across 139 scanned components. Three pre-existing internal tone variables
+  via the g11.001 wave process. The current inventory records 1,175 hooks
+  across 147 scanned components. Three pre-existing internal tone variables
   remain classified as candidates; new audio controls add no candidates. Two
   mechanical shapes: components with local appearance variables wrap the
   variable definition; components without them hook inline at the property.
@@ -63,6 +63,16 @@ Two classes, machine-classified by
 
 Regenerate the inventory after styling changes:
 `bun packages/svelte/preview/scripts/build-recipe-inventory.ts`.
+
+## Block Slider Shared Role Map
+
+Slider and RangeSlider `appearance="block"` share one role map. Each component
+exposes the roles through its own `--poodle-recipe-<component>-block-*` hooks.
+The roles are selected fill, selected text, remainder fill, remainder text,
+handle fill, handle border, focus ring, and fallback text. Fit thresholds,
+insets, and hit-wrapper diameters stay internal metrics, not recipe surface.
+Forced-color mappings use the system colors named in the Slider and
+RangeSlider contracts rather than author token mixes.
 
 ## How Apps Override
 

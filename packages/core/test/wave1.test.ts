@@ -15,6 +15,15 @@ import {
   sliderVisualState,
   sliderTransition,
   snapToStep,
+  assertHorizontalBlockAppearance,
+  blockInlineFits,
+  blockItemFits,
+  blockRegionAvailable,
+  physicalToValueNorm,
+  resolveRangeVisibleRange,
+  resolveSliderVisibleValue,
+  sliderFallbackText,
+  layoutSliderBlock,
   type RangeSliderContext,
   type SliderContext,
 } from "../src/slider.ts";
@@ -202,5 +211,87 @@ describe("rangeSlider", () => {
     expect(rangeSliderVisualState(control)).toMatchObject({ lowerNorm: 0.75, upperNorm: 0.75, centerNorm: 0.5, fillSpanNorm: 0 });
     result = rangeSliderControlTransition(control, { type: "POINTER_END" });
     expect(result.effects).toEqual([{ type: "emitValueCommit", value: [0.5, 0.5] }]);
+  });
+});
+
+describe("block appearance helpers", () => {
+  test("equality fits and required-minus-one falls back", () => {
+    expect(blockItemFits(40, 40)).toBe(true);
+    expect(blockItemFits(40, 39.2)).toBe(true);
+    expect(blockItemFits(40, 41)).toBe(false);
+    expect(blockRegionAvailable(56, 8)).toBe(40);
+  });
+
+  test("inline fit is all-or-nothing across assigned items", () => {
+    const measure = (text: string) => text.length * 10;
+    expect(blockInlineFits(
+      [{ text: "Blur", unoccludedSpan: 56 }, { text: "67", unoccludedSpan: 56 }],
+      measure,
+    )).toBe(true);
+    expect(blockInlineFits(
+      [{ text: "Blur", unoccludedSpan: 56 }, { text: "too-long-value", unoccludedSpan: 56 }],
+      measure,
+    )).toBe(false);
+    expect(blockInlineFits([{ text: null, unoccludedSpan: 8 }], measure)).toBe(true);
+  });
+
+  test("visible channels default to String(value) and omit empty text", () => {
+    expect(resolveSliderVisibleValue(67)).toBe("67");
+    expect(resolveSliderVisibleValue(67, () => "")).toBeNull();
+    expect(resolveRangeVisibleRange(20, 80)).toBe("20 – 80");
+    expect(sliderFallbackText("Blur", "67")).toBe("Blur 67");
+    expect(sliderFallbackText(null, "")).toBeNull();
+  });
+
+  test("vertical block is rejected before paint", () => {
+    expect(() => assertHorizontalBlockAppearance("block", "vertical")).toThrow(
+      'Slider appearance="block" rejects orientation="vertical"',
+    );
+    expect(() => assertHorizontalBlockAppearance("block", "horizontal")).not.toThrow();
+    expect(() => assertHorizontalBlockAppearance("track", "vertical")).not.toThrow();
+  });
+
+  test("rtl remaps physical position without changing numeric meaning", () => {
+    expect(physicalToValueNorm(0.2, "ltr")).toBeCloseTo(0.2);
+    expect(physicalToValueNorm(0.2, "rtl")).toBeCloseTo(0.8);
+  });
+
+  test("a second pointer end is inert", () => {
+    let control = createSliderControlContext({ value: 10, pointerActive: true });
+    const first = sliderControlTransition(control, { type: "POINTER_END" });
+    expect(first.effects).toEqual([{ type: "emitValueCommit", value: 10 }]);
+    const second = sliderControlTransition(first.context, { type: "POINTER_END" });
+    expect(second.effects).toEqual([]);
+  });
+
+  test("equal-value range pointer tie chooses lower and holds it", () => {
+    let control = createRangeSliderControlContext({ value: [50, 50], min: 0, max: 100, step: 1 });
+    let result = rangeSliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.5 });
+    expect(result.context.activeThumb).toBe("lower");
+    control = result.context;
+    result = rangeSliderControlTransition(control, { type: "POINTER_MOVE", valueNorm: 0.2 });
+    expect(result.context.activeThumb).toBe("lower");
+    expect(result.context.value).toEqual([20, 50]);
+  });
+
+  test("layoutSliderBlock falls back when one item misses by a pixel", () => {
+    const fit = layoutSliderBlock({
+      capsuleSpan: 80,
+      selectedNorm: 0.5,
+      label: "Blur",
+      valueText: "67",
+      measure: (text) => (text === "Blur" ? 20 : 24.1),
+    });
+    expect(fit.inline).toBe(false);
+    expect(fit.fallback).toBe("Blur 67");
+    const equal = layoutSliderBlock({
+      capsuleSpan: 80,
+      selectedNorm: 0.5,
+      label: "Blur",
+      valueText: "67",
+      measure: (text) => (text === "Blur" ? 20 : 24),
+    });
+    expect(equal.inline).toBe(true);
+    expect(equal.fallback).toBeNull();
   });
 });
