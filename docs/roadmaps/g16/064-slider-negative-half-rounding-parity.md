@@ -56,8 +56,9 @@ the half-step counterexample without an explicit contract decision.
 
 ## Worker Evidence
 
-Branch `fix/g16-064-slider-rounding` (PR pending — orchestrator owns merge and
-status). Law chosen: half ties round toward positive infinity (`Math.round`),
+Branch `fix/g16-064-slider-rounding` — PR
+https://github.com/inflatable-cookie/poodle/pull/168; orchestrator owns merge
+and status. Law chosen: half ties round toward positive infinity (`Math.round`),
 because core is the documented authority and `color.rs` already mirrors
 `Math.round` for conformance; `f64::round` (half away from zero) was the
 drift. Only `poodle-headless::slider::snap_to_step` changed law; TypeScript

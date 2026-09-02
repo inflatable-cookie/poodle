@@ -2,7 +2,8 @@
 
 Status: implementation-complete — PR pending orchestrator review
 Date: 2026-09-02
-PR: pending — worker pushes the branch; orchestrator owns merge
+PR: https://github.com/inflatable-cookie/poodle/pull/168 — orchestrator owns
+merge and status
 Card: `docs/roadmaps/g16/064-slider-negative-half-rounding-parity.md`
 Handoff: `docs/handoffs/20260902-225241-g16-064-slider-rounding.md`
 Governing refs: `docs/contracts/components/slider.md`,
