@@ -4,8 +4,9 @@ Status: accepted target architecture
 Recorded: 2026-09-02
 Owner: Poodle web packages and release tooling
 Depends on: [System shape](001-poodle-system-shape.md),
-[token and package layout](002-token-system-and-package-layout.md), and
-[packaging/versioning rules](../specs/022-packaging-versioning-and-release-channel-rules.md)
+[token and package layout](002-token-system-and-package-layout.md),
+[packaging/versioning rules](../specs/022-packaging-versioning-and-release-channel-rules.md),
+and [compiled web distribution contract](../specs/070-compiled-web-distribution-contract.md)
 
 ## Decision
 
@@ -39,10 +40,13 @@ All three web packages use exact file and side-effect policies:
 "sideEffects": ["**/*.css"]
 ```
 
-Core uses one JavaScript lane with declarations. Its complete existing public
-entry and token inventory is rewritten mechanically to `dist`; no target may
-contain `src`, a source alias, or a `main` fallback. `./icons` resolves to
-compiled JavaScript and declarations. CSS-only entries remain explicit:
+Core uses one JavaScript lane with declarations. Every core JS export uses
+`types`, then `import`, then `default`, with `import` and `default` targeting
+the same compiled JavaScript. That `import` is a module-format fallback, not an
+environment selector. CSS-only entries stay conditionless strings. The complete
+existing public entry and token inventory is rewritten mechanically to `dist`;
+no target may contain `src`, a source alias, or a `main` fallback. `./icons`
+resolves to compiled JavaScript and declarations:
 
 ```text
 ./styles/*          -> ./dist/styles/*
@@ -85,7 +89,9 @@ dist/
 ```
 
 Public `*.svelte` names are import subpaths, not permission to ship Svelte
-source. Export conditions are exact:
+source. The `./*.svelte` key may resolve only the 176 roster names. Internal
+Svelte files such as `DragDropProvider` and `MenuSurface` compile as chunks,
+not public `dist/<Name>.client.js` basenames. Export conditions are exact:
 
 ```json
 {
@@ -119,6 +125,11 @@ runtime and declaration reachability. There is no top-level `svelte` field or
 `svelte` condition until both browser and SSR resolution are separately
 proven. A tool that cannot express the dual shape is a stop condition, not a
 reason to point at source or reuse a client artifact.
+
+React uses one JavaScript lane and stays private. Its public keys are `.`,
+`./markdown`, `./types`, and one `./<Name>` per frozen roster name. It has no
+`./*` wildcard. Exact maps, CSS inventories, icon modules, receipt JSON, and
+the markdown migration live in spec 070.
 
 ## Build ownership and determinism
 
@@ -168,8 +179,9 @@ The harness must:
 9. compare two builds and packs, receipt membership/provenance, one canonical
    public-roster denominator, artifact-set identity, and exact source commit.
 
-The canonical roster and package-install fixture must agree on one derived
-denominator. A hand-maintained 175/176 disagreement is a blocking defect.
+The canonical roster, spec 070, and package-install fixture must agree on one
+derived 176-name denominator. A hand-maintained 175/176 disagreement is a
+blocking defect.
 
 ## Release boundary
 

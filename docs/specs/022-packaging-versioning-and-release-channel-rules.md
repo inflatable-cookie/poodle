@@ -1,7 +1,7 @@
 # 022 Packaging Versioning And Release Channel Rules
 
 Status: active
-Updated: 2026-08-23
+Updated: 2026-09-02
 Depends on: `021-public-package-api-stability-and-parity-debt-baseline.md`
 
 ## Purpose
@@ -67,12 +67,24 @@ The current release posture is:
 
 - `@inflatable-cookie/poodle-core`
 - `@inflatable-cookie/poodle-svelte`
-- `@inflatable-cookie/poodle-react`
 - Rust contracts: `poodle-adapter`, `poodle-events`, `poodle-headless`,
   `poodle-ir`, `poodle-layout`, `poodle-markdown`, `poodle-node`,
   `poodle-specs`, `poodle-style`, and `poodle-tokens`
 - Rust renderers: `poodle-render`, `poodle-gpui`,
   `poodle-gpui-node-backend`, and `poodle-jetstream`
+
+The web public release set is core and Svelte only. See
+[compiled web package distribution](../architecture/014-compiled-web-package-distribution.md)
+and [compiled web distribution contract](070-compiled-web-distribution-contract.md).
+
+### Compiled private validation package
+
+- `@inflatable-cookie/poodle-react` is compiled and certified to the same
+  `dist` boundary as the public web packages, but stays private and unpublished
+  until a named consumer is admitted. `packages/release-manifest.json` still
+  records React as preview `publicIntent`; that metadata mutation belongs to
+  the release-candidate lane after installed certification, not to package
+  publication.
 
 ### Internal Packages
 
@@ -85,10 +97,12 @@ The current release posture is:
 
 ## Consumption Rule
 
-Downstream repos should only plan around preview-channel packages.
+Downstream repos should only plan around preview-channel public-intent
+packages. The web public set is core and Svelte.
 
 They should not depend on:
 
+- `@inflatable-cookie/poodle-react` until a named consumer is admitted
 - internal source-of-truth token build packages
 - bridge packages
 - preview/docs tooling packages

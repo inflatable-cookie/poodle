@@ -1,7 +1,7 @@
 # Specs
 
 Status: active
-Updated: 2026-08-28
+Updated: 2026-09-02
 
 Specs define repository-wide rules that are broader than one component:
 tokens, artifact generation, parity evidence, accessibility, packaging,
@@ -49,6 +49,9 @@ Important current cross-cutting references include:
 - `069-dependable-drag-and-drop-substrate.md` — approved cross-runtime
   lifecycle, pointer/touch/keyboard sensors, host cross-window bridge, inbound
   files, native drag-out, migration, and certification contract
+- `070-compiled-web-distribution-contract.md` — exact compiled `dist`
+  inventories, Svelte client/server and React export maps, receipt schemas,
+  source-free archive law, and the root-to-`./markdown` break
 
 Specs are normative constraints, not task queues. Current execution status
 belongs in the roadmap.
