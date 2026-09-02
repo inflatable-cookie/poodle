@@ -4,7 +4,7 @@ Status: implementation-complete — PR pending orchestrator review
 Type: implementation
 Opened: 2026-09-01
 Closed: 2026-09-02 (implementation; merge belongs to the orchestrator)
-Proof head: `7e8d302c8c847b84da805c0b2f1a01c6165dd35e`
+Proof head: `8fd0a885a03147451affc937447f61f0cfeba4af`
 Log: `../../logs/2026-09/20260902-g16-046-block-sliders.md`
 Depends on: merged `g16.034` and operator acceptance recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`
@@ -151,6 +151,7 @@ horizontal-only rejection match this card. Visual ledger cells were not moved.
 Jetstream remains compile-compat specimens only.
 
 Oracle plant-and-restore ran against pre-rebase proof
-`eedb4a38ae4ac010aeb86e998b113b7a1d8d0a2c` (`7e8d302c8c847b84da805c0b2f1a01c6165dd35e`
-on this branch). Every row failed under the planted pre-fix and passed after
-restore. See the execution log for the plant table.
+`eedb4a38ae4ac010aeb86e998b113b7a1d8d0a2c` (`8fd0a885a03147451affc937447f61f0cfeba4af`
+on this branch after rebase onto `a52d0d32b`). Every row failed under the
+planted pre-fix and passed after restore. See the execution log for the plant
+table.
