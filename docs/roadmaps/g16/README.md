@@ -97,7 +97,7 @@ stay maintained; backend admission is not part of the first card.
 60. [060 — Tabs controlled-panel focus transfer](060-tabs-controlled-panel-focus-transfer.md) — complete; merged in PR #164 and adopted by Figmatic without a consumer focus machine
 61. [061 — Installed web smoke / certification routing](061-installed-web-smoke-certification-routing.md) — complete; merged in PR #166 with receipt-free ordinary smoke and explicit strict/candidate certification
 62. [062 — Nucleus parity receipt foundation](062-nucleus-parity-receipt-foundation.md) — ready; execution-backed M1/A1/V1 receipt schema and fixed 29-component cohort manifest
-63. [063 — HistoryCenter nested deletion parity](063-history-center-nested-deletion-parity.md) — ready; paired recursive deletion counterexample and repair
+63. [063 — HistoryCenter nested deletion parity](063-history-center-nested-deletion-parity.md) — complete; merged in PR #167 with paired recursive invalidation and sibling-preservation proofs
 64. [064 — Slider negative-half rounding parity](064-slider-negative-half-rounding-parity.md) — ready; one cross-runtime quantization law
 65. [065 — Tabs native tooltip parity](065-tabs-native-tooltip-parity.md) — ready; native propagation and mounted timing proof before the Nucleus Tabs child
 
@@ -106,7 +106,8 @@ stay maintained; backend admission is not part of the first card.
 The [canonical continuation map](component-continuation-runway.md) now owns the
 ready, serial, gated, and held frontier. `g16.045`–`g16.050` and
 `g16.053`–`g16.061` are complete. The Nucleus programme now owns the ready
-`g16.062`–`g16.065` frontier; release mutation remains separately gated.
+`g16.062`, `g16.064`, and `g16.065` frontier; `g16.063` is complete in PR
+#167. Release mutation remains separately gated.
 `g16.051` and `g16.052` retain their
 explicit serial or external gates. Completed `g16.054` does not inherit release
 authority from the distribution programme. Citations,

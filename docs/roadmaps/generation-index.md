@@ -31,12 +31,13 @@ Updated: 2026-09-02
     #154; `047` merged in PR #152 after one exact-head repair round; `048`
     merged in PR #153 with a verified static-fallback benchmark verdict; `049`
     merged in PR #156; `050`, `053`–`061` are complete; independent `055`
-    merged in PR #151; `062`–`065` open the Nucleus GPUI parity programme
+    merged in PR #151; `062`, `064`, and `065` remain open in the Nucleus GPUI
+    parity programme; `063` merged in PR #167
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
   - Ready frontier: `g16.062` execution-backed Nucleus parity receipts plus
-    independent paired-runtime repairs `g16.063`–`g16.065`.
+    independent paired-runtime repairs `g16.064` and `g16.065`.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel

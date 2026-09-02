@@ -1,13 +1,16 @@
 # g16.063 — HistoryCenter Nested Deletion Parity
 
-Status: implemented — awaiting orchestrator review
+Status: complete
 Type: paired semantic repair
 Opened: 2026-09-02
 Implemented: 2026-09-02
+Completed: 2026-09-02
 Depends on: current HistoryCenter contract and machines
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/history-center.md`
 Log: `../../logs/2026-09/20260902-g16-063-history-center-nested-deletion-parity.md`
+PR: #167
+Merge: `3cbc81d3f7d4beed4dae0e0ff49870a2febb3dc5`
 
 ## Goal
 
