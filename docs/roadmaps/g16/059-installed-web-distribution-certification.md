@@ -117,6 +117,15 @@ public roster. This is the prerequisite that can unblock `g16.054`.
 | Roster is canonical | fixture remains 175 | denominator gate fails |
 | Green certification is not a release | committed workflow/release/version/registry path appears | derived scope guard fails |
 
+## Routing (g16.061)
+
+Default `effigy test:web-pack-install` is ordinary receipt-free installed
+smoke. Unset `POODLE_WEB_PACK_INSTALL_SCOPE_MODE` is not strict. Exact
+certification of this receipt requires
+`POODLE_WEB_PACK_INSTALL_SCOPE_MODE=strict`. Candidate certification remains the
+explicit `g16.054-candidate` mode from the merged candidate guard. Ordinary
+feature and empty `origin/main` ranges must not emit this receipt.
+
 ## Writable Scope
 
 `test:web-pack-install` and its permanent fixtures/helpers, installed-content

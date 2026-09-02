@@ -178,7 +178,7 @@
 "core:build" = "bun scripts/web-distribution/core-build.ts"
 "svelte:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/svelte-build.ts" }]
 "react:package" = [{ task = "core:build" }, { run = "bun scripts/web-distribution/react-build.ts" }]
-"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts"
+"test:core-build" = "bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts test/package-install/scope.test.ts"
 # Bootstrap the isolated TypeScript 6 declaration toolchain before Bun starts
 # its parallel test-file workers; the helper still validates the exact nested
 # realpath on every build.

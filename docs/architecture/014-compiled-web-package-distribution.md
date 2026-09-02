@@ -158,9 +158,18 @@ Certification must inspect the actual archive member
 ## Installed certification
 
 `test:web-pack-install` is the only permanent installed-distribution
-certification harness. It runs from a clean temporary checkout of one exact
-commit and owns the accepted receipt. Earlier browser/SSR probes are disposable
-implementation smokes, not certification.
+harness. Default invocation, with `POODLE_WEB_PACK_INSTALL_SCOPE_MODE` unset,
+is ordinary installed-package smoke: the full archive, browser/SSR,
+declaration, negative, CSS/parser, deterministic build/pack, and roster
+proof, and no certification receipt or receipt hash. Exact g16.059
+certification requires `POODLE_WEB_PACK_INSTALL_SCOPE_MODE=strict`. Candidate
+certification remains `POODLE_WEB_PACK_INSTALL_SCOPE_MODE=g16.054-candidate`.
+Do not infer certification from changed filenames. A receipt exists only in an
+explicit certification mode.
+
+The harness runs from a clean temporary checkout of one exact commit.
+Certification modes own the accepted receipt. Earlier browser/SSR probes are
+disposable implementation smokes, not certification.
 
 The harness must:
 
@@ -179,8 +188,9 @@ The harness must:
    under Bundler and NodeNext, including unsuppressed expected failures;
 8. prove exact CSS side effects/subpaths, parser isolation, and a clear missing
    `marked` failure for `./markdown`; and
-9. compare two builds and packs, receipt membership/provenance, one canonical
-   public-roster denominator, artifact-set identity, and exact source commit.
+9. compare two builds and packs, one canonical public-roster denominator,
+   artifact-set identity, and exact source commit. Certification modes also
+   compare receipt membership and provenance.
 
 The canonical roster, spec 070, and package-install fixture must agree on one
 derived 176-name denominator. A hand-maintained 175/176 disagreement is a

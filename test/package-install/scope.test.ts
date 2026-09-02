@@ -1,0 +1,279 @@
+import { afterAll, describe, expect, test } from "bun:test";
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import {
+  CANDIDATE_SCOPE_MODE,
+  assertCertificationScope,
+  assertInstalledScope,
+  emitsCertificationReceipt,
+  formatInstalledRunOutput,
+  readInstalledScopeMode,
+  requireExactCommit,
+  withDisposableGitPlant,
+} from "./scope";
+
+const plantRoots: string[] = [];
+
+afterAll(() => {
+  for (const root of plantRoots) {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+async function runGit(root: string, args: string[]): Promise<string> {
+  const child = Bun.spawn(["git", "-C", root, ...args], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const [stdout, stderr, exitCode] = await Promise.all([
+    new Response(child.stdout).text(),
+    new Response(child.stderr).text(),
+    child.exited,
+  ]);
+  if (exitCode !== 0) {
+    throw new Error(`git ${args.join(" ")} failed: ${stderr.trim()}`);
+  }
+  return stdout;
+}
+
+async function writeFiles(root: string, files: Record<string, string>): Promise<void> {
+  for (const [path, contents] of Object.entries(files)) {
+    const parts = path.split("/");
+    if (parts.length > 1) {
+      mkdirSync(join(root, ...parts.slice(0, -1)), { recursive: true });
+    }
+    await Bun.write(join(root, path), contents);
+  }
+}
+
+async function commitAll(root: string, message: string): Promise<string> {
+  await runGit(root, ["add", "--all"]);
+  await runGit(root, ["commit", "--quiet", "-m", message]);
+  return requireExactCommit(
+    (await runGit(root, ["rev-parse", "HEAD"])).trim(),
+    "plant commit",
+  );
+}
+
+async function initPlant(): Promise<string> {
+  const root = mkdtempSync(join(tmpdir(), "poodle-scope-test-"));
+  plantRoots.push(root);
+  await runGit(root, ["init", "--quiet"]);
+  await runGit(root, ["config", "user.email", "poodle-certification@example.invalid"]);
+  await runGit(root, ["config", "user.name", "Poodle Certification"]);
+  return root;
+}
+
+const CANDIDATE_CARGO_PLANT_MANIFEST = "packages/contracts/tokens/Cargo.toml";
+const candidateCargoPlantBase = [
+  "[package]",
+  'name = "poodle-tokens"',
+  'version = "0.2.3"',
+  'edition = "2021"',
+  'license = "MIT"',
+  "publish = false",
+  "",
+  "[dependencies]",
+  'poodle-ir = { version = "0.2.3", path = "../../contracts/ir" }',
+  "",
+].join("\n");
+
+describe("installed-package scope routing", () => {
+  test("unset and ordinary resolve to ordinary; strict and candidate stay explicit", () => {
+    expect(readInstalledScopeMode(undefined)).toBe("ordinary");
+    expect(readInstalledScopeMode("ordinary")).toBe("ordinary");
+    expect(readInstalledScopeMode("strict")).toBe("strict");
+    expect(readInstalledScopeMode(CANDIDATE_SCOPE_MODE)).toBe(CANDIDATE_SCOPE_MODE);
+    expect(emitsCertificationReceipt("ordinary")).toBe(false);
+    expect(emitsCertificationReceipt("strict")).toBe(true);
+    expect(emitsCertificationReceipt(CANDIDATE_SCOPE_MODE)).toBe(true);
+  });
+
+  test("unknown mode rejects instead of becoming ordinary", () => {
+    expect(() => readInstalledScopeMode("typo")).toThrow(
+      /must be ordinary, strict, or g16\.054-candidate: typo/,
+    );
+    expect(() => readInstalledScopeMode("strict ")).toThrow(
+      /must be ordinary, strict, or g16\.054-candidate/,
+    );
+  });
+
+  test("ordinary output cannot print a certification receipt hash", () => {
+    const ordinary = formatInstalledRunOutput({
+      mode: "ordinary",
+      sourceCommit: "a".repeat(40),
+      falsificationReceipts: [],
+      receiptSha256: "should-not-leak",
+      receipt: { kind: "poodle-installed-web-distribution" },
+    });
+    expect(ordinary).not.toContain("receiptSha256");
+    expect(ordinary).not.toContain("poodle-installed-web-distribution");
+    expect(ordinary).toContain('"mode": "ordinary"');
+    const strict = formatInstalledRunOutput({
+      mode: "strict",
+      sourceCommit: "a".repeat(40),
+      falsificationReceipts: [],
+      receiptSha256: "abc123",
+      receipt: { kind: "poodle-installed-web-distribution" },
+    });
+    expect(strict).toContain("receiptSha256");
+    expect(strict).toContain("abc123");
+  });
+
+  test("ordinary empty range passes and is not certification", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const commit = await commitAll(root, "empty range base");
+    const proof = await assertInstalledScope(root, commit, commit, "ordinary");
+    expect(proof.mode).toBe("ordinary");
+    expect(proof.changedPaths).toEqual([]);
+    expect(emitsCertificationReceipt(proof.mode)).toBe(false);
+  });
+
+  test("ordinary feature source path passes", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const base = await commitAll(root, "feature base");
+    await writeFiles(root, {
+      "packages/svelte/components/src/Tabs.svelte": "<div>tabs</div>\n",
+    });
+    const head = await commitAll(root, "ordinary feature");
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.changedPaths).toEqual(["packages/svelte/components/src/Tabs.svelte"]);
+    expect(emitsCertificationReceipt(proof.mode)).toBe(false);
+  });
+
+  test("ordinary allowlist-shaped paths still do not become certification", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const base = await commitAll(root, "allowlist base");
+    await writeFiles(root, { "PAPERCUTS.md": "friction\n" });
+    const head = await commitAll(root, "allowlist-shaped ordinary");
+    const proof = await assertInstalledScope(root, base, head, "ordinary");
+    expect(proof.mode).toBe("ordinary");
+    expect(proof.changedPaths).toEqual(["PAPERCUTS.md"]);
+    expect(emitsCertificationReceipt(proof.mode)).toBe(false);
+  });
+
+  test("ordinary workflow, release, version, and registry paths reject before build", async () => {
+    const cases = [
+      [".github/workflows/release.yml", "workflow"],
+      ["CHANGELOG.md", "release"],
+      ["packages/core/package.json", "version"],
+      [".npmrc", "registry"],
+      ["scripts/publish/release.ts", "release"],
+    ] as const;
+    for (const [path, surface] of cases) {
+      const root = await initPlant();
+      await writeFiles(root, { "README.md": "base\n" });
+      const base = await commitAll(root, "forbidden base");
+      await writeFiles(root, { [path]: "planted\n" });
+      const head = await commitAll(root, "forbidden mutation");
+      await expect(assertInstalledScope(root, base, head, "ordinary")).rejects.toThrow(
+        new RegExp(`certification scope rejected forbidden ${surface} surface: ${path}`),
+      );
+    }
+  });
+
+  test("strict empty range still fails", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const commit = await commitAll(root, "strict empty");
+    await expect(assertCertificationScope(root, commit, commit, "strict")).rejects.toThrow(
+      "certification scope found no changed paths",
+    );
+  });
+
+  test("strict keeps the g16.059 allowlist", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const base = await commitAll(root, "strict base");
+    await writeFiles(root, {
+      "packages/svelte/components/src/Tabs.svelte": "<div>tabs</div>\n",
+    });
+    const head = await commitAll(root, "strict feature");
+    await expect(assertCertificationScope(root, base, head, "strict")).rejects.toThrow(
+      "certification scope rejected paths outside writable allowlist: packages/svelte/components/src/Tabs.svelte",
+    );
+  });
+
+  test("strict accepts a g16.059 writable path", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const base = await commitAll(root, "strict writable base");
+    await writeFiles(root, { "PAPERCUTS.md": "friction\n" });
+    const head = await commitAll(root, "strict writable");
+    const proof = await assertCertificationScope(root, base, head, "strict");
+    expect(proof.mode).toBe("strict");
+    expect(proof.changedPaths).toEqual(["PAPERCUTS.md"]);
+  });
+
+  test("candidate rejects an unauthorized source path", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "README.md": "base\n" });
+    const base = await commitAll(root, "candidate base");
+    await writeFiles(root, { "packages/core/src/unauthorized.ts": "export {}\n" });
+    const head = await commitAll(root, "candidate unauthorized");
+    await expect(
+      assertCertificationScope(root, base, head, CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(
+      "certification scope rejected paths outside writable allowlist: packages/core/src/unauthorized.ts",
+    );
+  });
+
+  test("candidate rejects Cargo publish, registry, and retargeted requirement content", async () => {
+    const plants = {
+      publish: candidateCargoPlantBase.replace("publish = false", "publish = true"),
+      registry: candidateCargoPlantBase.replace(
+        'license = "MIT"',
+        'registry = "https://registry.example.invalid"',
+      ),
+      retargeted: candidateCargoPlantBase.replace(
+        'poodle-ir = { version = "0.2.3", path = "../../contracts/ir" }',
+        'poodle-ir = { version = "0.3.0", path = "../../contracts/evil" }',
+      ),
+    };
+    for (const [kind, planted] of Object.entries(plants)) {
+      const root = await initPlant();
+      await writeFiles(root, { [CANDIDATE_CARGO_PLANT_MANIFEST]: `${candidateCargoPlantBase}\n` });
+      const base = await commitAll(root, `cargo ${kind} base`);
+      await writeFiles(root, { [CANDIDATE_CARGO_PLANT_MANIFEST]: `${planted}\n` });
+      const head = await commitAll(root, `cargo ${kind} plant`);
+      await expect(
+        assertCertificationScope(root, base, head, CANDIDATE_SCOPE_MODE),
+      ).rejects.toThrow(/candidate scope rejected/);
+    }
+  });
+
+  test("candidate rejects the evidence head as the certified source", async () => {
+    const root = await initPlant();
+    await writeFiles(root, { "docs/release-notes/README.md": "release-note index\n" });
+    const base = await commitAll(root, "branch base");
+    await writeFiles(root, {
+      "docs/release-notes/README.md": "release-note index\ncandidate tree delta\n",
+    });
+    await commitAll(root, "candidate tree");
+    await writeFiles(root, {
+      "docs/release-notes/README.md":
+        "release-note index\ncandidate tree delta\nevidence-only delta\n",
+    });
+    const evidence = await commitAll(root, "candidate evidence");
+    await expect(
+      assertCertificationScope(root, base, evidence, CANDIDATE_SCOPE_MODE),
+    ).rejects.toThrow(
+      /candidate scope requires the certified source to be the direct one-commit child/,
+    );
+  });
+
+  test("disposable plants restore by deleting the committed plant root", async () => {
+    let observed = "";
+    await withDisposableGitPlant(async (root) => {
+      observed = root;
+      await runGit(root, ["init", "--quiet"]);
+    });
+    expect(observed.length).toBeGreaterThan(0);
+    expect(plantRoots.includes(observed)).toBe(false);
+  });
+});
