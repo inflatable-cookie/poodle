@@ -1,6 +1,6 @@
 # g16.065 — Tabs Native Tooltip Parity
 
-Status: in review
+Status: in review — PR #169
 Type: cross-runtime semantic and mounted repair
 Opened: 2026-09-02
 Depends on: current Tabs contract, completed `g16.060`

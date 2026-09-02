@@ -8,6 +8,7 @@ Governing refs: `docs/contracts/001-working-rules.md`,
 `docs/contracts/components/tabs.md`
 Branch: `fix/g16-065-tabs-native-tooltips`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-065-tabs-native-tooltips`
+PR: https://github.com/inflatable-cookie/poodle/pull/169
 
 ## Outcome
 
