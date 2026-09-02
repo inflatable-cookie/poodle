@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://poodle.inflatable-cookie.com/schemas/g16/nucleus-parity-receipt.v1.json",
+  "title": "Poodle Nucleus parity execution receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "component",
+    "scenario_id",
+    "proof_level",
+    "runtime",
+    "command",
+    "package",
+    "package_version",
+    "source_commit",
+    "lockfile",
+    "lockfile_sha256",
+    "lock_resolution",
+    "distribution",
+    "production_path_observation",
+    "actions",
+    "assertions",
+    "outcome",
+    "artifact_paths"
+  ],
+  "properties": {
+    "schema": { "const": "poodle.g16-nucleus-parity-receipt.v1" },
+    "component": { "type": "string", "minLength": 1 },
+    "scenario_id": { "type": "string", "minLength": 1 },
+    "proof_level": { "const": "M1" },
+    "runtime": { "const": "gpui-headless" },
+    "command": { "const": "effigy regressions:native" },
+    "package": { "const": "poodle-gpui-preview" },
+    "package_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "source_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "lockfile": { "const": "packages/gpui/preview/Cargo.lock" },
+    "lockfile_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "lock_resolution": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/locked_package" } },
+    "distribution": { "const": "workspace" },
+    "production_path_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observed", "mount", "render_path", "input_dispatch"],
+      "properties": {
+        "observed": { "const": true },
+        "mount": { "const": "HeadlessDriver" },
+        "render_path": { "const": "poodle_render -> poodle_gpui_node_backend::to_gpui" },
+        "input_dispatch": { "const": "gpui-test-platform-dispatch" }
+      }
+    },
+    "actions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "assertions": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "outcome": { "const": "passed" },
+    "artifact_paths": { "type": "array", "items": { "$ref": "#/$defs/artifact" } }
+  },
+  "$defs": {
+    "locked_package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "source"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "source": { "enum": ["crates.io", "workspace"] },
+        "checksum": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?![A-Za-z]:)(?!.*(?:^|/)\\.(?:/|$))(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*//)(?!.*\\\\)(?!.*/$)[^\\u0000]+$"
+        },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    }
+  }
+}

@@ -54,6 +54,9 @@ use poodle_specs::{
 #[path = "../src/headless_driver.rs"]
 mod headless_driver;
 
+#[path = "../src/nucleus_receipts.rs"]
+mod nucleus_receipts;
+
 #[path = "../src/block_slider_host.rs"]
 mod block_slider_host;
 
@@ -254,6 +257,13 @@ fn a_pointer_press_reaches_the_backend_listener_once() {
         driver.wait_for_focus_handle(FIXTURE_ID);
         driver.pointer_activate();
         assert_eq!(*clicks.lock().expect("clicks lock"), 1);
+        nucleus_receipts::emit_if_configured(
+            "Button",
+            "nucleus.shell.button",
+            driver.mounted_observation(),
+            &["mount Button through HeadlessDriver", "pointer press and release through GPUI dispatch"],
+            &["the mounted Button listener fired exactly once"],
+        );
     });
 }
 
