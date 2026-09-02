@@ -38,6 +38,8 @@ Updated: 2026-09-02
     conformance authority
   - Ready frontier: `g16.059` installed web distribution certification.
     `g16.045`–`g16.050`, `g16.053`, and `g16.056`–`g16.058` are complete.
+  - Independent ready lane: `g16.060` paired web Tabs controlled-panel focus
+    transfer; Figmatic remains consumer-owned and untouched.
   - Independent completed lane: `g16.055` drag-source pointer-gesture browser
     suppression merged in PR #151; it remains outside the post-triage
     continuation map.

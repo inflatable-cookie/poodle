@@ -94,6 +94,7 @@ stay maintained; backend admission is not part of the first card.
 57. [057 — Core build substrate](057-core-build-substrate.md) — complete; merged in PR #161 with deterministic source-free core output and receipt-backed audits
 58. [058 — Shell distributions](058-shell-distributions.md) — complete; merged in PR #162 with source-free dual-lane Svelte, private React, real Svelte declarations, and the five-component markdown boundary
 59. [059 — Installed web distribution certification](059-installed-web-distribution-certification.md) — ready; sole permanent installed-tarball oracle and receipt
+60. [060 — Tabs controlled-panel focus transfer](060-tabs-controlled-panel-focus-transfer.md) — ready independent consumer-unblock lane; paired web policy, no Figmatic mutation
 
 ## Parallel Continuation
 
@@ -110,8 +111,9 @@ held rather than becoming implicit worker work. The canonical map also holds
 the five approved holistic-assessment directions for a separate promotion
 batch; no cards for them are compiled here.
 
-`g16.055` is a separately completed Papercuts repair in PR #151. It is not part
-of the post-triage continuation map.
+`g16.055` is a separately completed Papercuts repair in PR #151. `g16.060` is
+an independent ready consumer-unblock lane for Tabs controlled-panel focus.
+Neither is part of the post-triage continuation map.
 
 The earlier continuation programmes remain provenance:
 
