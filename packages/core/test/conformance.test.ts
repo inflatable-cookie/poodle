@@ -23,7 +23,11 @@ import { menuTransition } from "../src/menu.ts";
 import { modalTransition } from "../src/modal.ts";
 import { selectTransition } from "../src/select.ts";
 import { singleSelectTransition } from "../src/single-select.ts";
-import { sliderTransition } from "../src/slider.ts";
+import {
+  rangeSliderTransition,
+  sliderTransition,
+  snapToStep,
+} from "../src/slider.ts";
 import { switchTransition } from "../src/switch.ts";
 import { tabsTransition } from "../src/tabs.ts";
 import { toggleGroupTransition } from "../src/toggle-group.ts";
@@ -79,6 +83,19 @@ function runMachine(machine: string, vector: VectorCase): void {
       const result = sliderTransition(context, event);
       checkContextSubset(result.context as never, vector.expect.context);
       expect(result.effects).toEqual(vector.expect.effects as never);
+      return;
+    }
+    case "rangeSlider": {
+      const result = rangeSliderTransition(context, event);
+      checkContextSubset(result.context as never, vector.expect.context);
+      expect(result.effects).toEqual(vector.expect.effects as never);
+      return;
+    }
+    case "sliderSnap": {
+      const { min, step } = context as { min: number; step: number };
+      const { raw } = event as { raw: number };
+      const value = snapToStep(raw, min, step);
+      checkContextSubset({ value } as never, vector.expect.context);
       return;
     }
     case "disclosure": {
