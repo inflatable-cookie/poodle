@@ -5,13 +5,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
-- 2026-09-02 — RESOLVED 2026-09-02. AgentPlan / AgentPlanRecord `React.lazy`
-  AgentMessage so the root graph stays parser-free. RTL `render()` does not
-  wait; `vitest.setup` `console.error` fails on "suspended resource finished
-  loading" and later rAF/Tabs updates outside `act`. Tests render and
-  `loadAgentMessage()` inside one `act()`, then flush one macrotask. A
-  different Vite specifier does not populate `React.lazy`'s cache. Hit while
-  closing g16.058.
+- 2026-09-02 — RESOLVED 2026-09-02. Lazy AgentMessage in root AgentPlan delayed
+  the parser and emptied SSR plan bodies. Operator moved all five markdown
+  components to `./markdown` and restored synchronous render. Hit while closing
+  g16.058.
+
+- 2026-09-02 — RESOLVED 2026-09-02. `effigy test:shell-build` ran compiler/shim
+  falsification under Bun's 5s default; `spawnSync.status` was `null` at
+  5008 ms. The oracle now has an explicit 30s compiler timeout and a 60s test
+  timeout. Hit while closing g16.058.
 
 - 2026-09-02 — RESOLVED 2026-09-02. Compiled shell archives cannot keep the
   pre-058 pack-install consumer green unchanged. Svelte `5.38.6` cannot run

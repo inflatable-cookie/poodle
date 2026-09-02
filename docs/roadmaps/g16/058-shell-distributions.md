@@ -1,6 +1,6 @@
 # g16.058 — Shell Distributions
 
-Status: implementation repair — PR #162; operator boundary decisions promoted
+Status: implementation complete — PR #162 awaiting exact-head review
 PR: https://github.com/inflatable-cookie/poodle/pull/162
 Type: implementation — compiled Svelte and private React packages
 Opened: 2026-09-02
