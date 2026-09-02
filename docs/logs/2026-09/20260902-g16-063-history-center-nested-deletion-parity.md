@@ -39,16 +39,29 @@ clean index and `git checkout HEAD --`.
 
 | Row | Plant | Result |
 | --- | --- | --- |
-| Nested invalidation | restore root `Map.set` | `open.has("l1a")` true; inner `l1a` still held `n1x` |
+| Nested invalidation | restore root `Map.set` | `open.has("l1a")` expected false, received true |
 | Sibling retention | same plant | `e0` and inner `l1b` still equal; not the failure |
-| Effects | emit a second reload | expected `[delete n1, load l1a]` |
+| Effects | emit `loadContinuations` twice for `l1a` | expected two effects, received three |
 | Root delete | unchanged existing tests | still pass after repair |
 
 Restored sources reran green.
 
 ## Validation
 
-Focused, then required boards. Recorded after the repair commit.
+Focused, then required boards. Tree clean after restore.
+
+- `bun test packages/core/test/history-center.test.ts` — 66 pass, 0 fail
+- `cargo test --manifest-path packages/contracts/headless/Cargo.toml history_center`
+  — 23 pass, 0 fail
+- `effigy ci:web` — pass (~110s)
+- `effigy ci:rust` (`test:contracts`) — pass (~22s)
+- `effigy docs:check` — pass (~29s). First parallel attempt hit
+  `task:poodle/core:build` lock against `ci:web`; rerun after that board
+  finished.
+- `git diff --check origin/main...HEAD` — clean
+- `origin/main` still `a6a9d242a`; no sibling merge to rebase onto
+
+Implementation commit: `1d2a400b620e83fa10e385000709fabbb62f469c`
 
 ## Limits
 
@@ -56,3 +69,5 @@ Focused, then required boards. Recorded after the repair commit.
   vector lives in the paired unit tests, not the conformance harness.
 - Nucleus confidence evidence and g16 front doors stay orchestrator-owned.
 - No windowed or release selector ran.
+- Repo `effigy doctor` reports pre-existing scan errors (god-files,
+  generated-in-src, stale-suppressions). Not this lane.
