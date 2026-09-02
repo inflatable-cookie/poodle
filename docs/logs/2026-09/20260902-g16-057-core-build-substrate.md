@@ -9,8 +9,7 @@ Governing refs: `docs/architecture/014-compiled-web-package-distribution.md`,
 `docs/specs/070-compiled-web-distribution-contract.md`
 Branch: `feature/g16-057-core-build-substrate`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-057-core-build-substrate`
-Base: `origin/main` at `595bec72825a9b830edb2b46f82b4ece049f8e1b`
-Planning base `b515f005a40b40005528a44933e49f4fd1c446c7` is an ancestor.
+Base: `origin/main` at `8132d01ff528ab7654331f22ed1c07949db158b3`
 
 ## Outcome
 
@@ -20,7 +19,16 @@ sorted entries, unhashed public names, `chunks/[name].js`, exact CSS/token
 copies, compiled icon modules, copied `poodle-icons` CLI, and a deterministic
 `dist/.poodle-build.json` are in place. Core `package.json` exports, `files`,
 `bin.poodle-icons`, and `sideEffects` point at `dist`. No Svelte or React
-compilation, no `test:web-pack-install` edits, no version or release mutation.
+compilation, no versions, no release mutation.
+
+Exact-head review of PR #161 closed five in-bounds findings. `health` and
+`test:components` now run `core:build` first. Pack-install directory
+membership treats `src`/`dist` as trees and `LICENSE` as a file. Stale token
+`.js` siblings are gone; TypeScript is the authority. The staged audit covers
+side-effect, dynamic, subpath, and bundled module edges plus Unix/Windows
+workspace paths. Public `.d.ts`/`.d.mts` targets are required. `marked` left
+the core manifest; root `devDependencies` still resolve the lexer fixture.
+g16.059 receipt/consumer/two-pack work stayed out.
 
 ## Driver
 
@@ -37,50 +45,49 @@ emit-clean under it.
 
 - Inventories: 167 CSS files, 108 icon modules, 22 token CSS files, and the
   frozen JS export map agree with spec 070 and disk.
-- Two clean builds: identical output lists, file hashes, and receipt bytes
-  (542ms for the pair in `test:core-build`).
-- Bundler and NodeNext: a no-paths consumer resolves `.`, `./tokens/runtime`,
-  and `./icons/x`.
+- Two clean builds: identical output lists, file hashes, and receipt bytes.
+- Bundler and NodeNext: a no-paths consumer resolves `.`, `./icons`,
+  `./icons/x`, `./icons/build`, `./tokens`, `./tokens/runtime`, `./tokens/css`,
+  `./tokens/themes`, `./tokens/metadata`, and `./tokens/units`.
+- Receipt inputs include `src/tokens/{index,runtime,units,themes,metadata}.ts`
+  and omit the deleted `.js` siblings. Compiled `#region` comments name `.ts`.
 - Receipt: schemaVersion 1, sorted keys, locked svelte/typescript/vite,
   `lanes: ["single"]`, `cssPolicy: core-owned`, `markdownPolicy: none`,
   `sourceMaps: false`, no timestamp or absolute path.
-- `test:core` 1221/0; `effigy docs:check` pass; `git diff --check` pass.
 
 ## Oracle
 
 | Row | Plant | Result |
 | --- | --- | --- |
-| Stable public names | `dist/index-a1b2c3d4.js` | `hashed filename is forbidden: dist/index-a1b2c3d4.js` |
-| CSS inventory complete | remove `dist/styles/button.css` | `missing staged public file(s): dist/styles/button.css` |
-| Output is source-free | `dist/planted.ts` | `raw source is forbidden in staging: dist/planted.ts` |
-| Receipt is reproducible | `timestamp` key in receipt JSON | `receipt contains a timestamp` |
-| Card stays core-only | `import { onMount } from "svelte"` in `dist/index.js` | `forbidden parser or shell module entered dist/index.js` |
+| Stable public names | `dist/index-a1b2c3d4.js` | hashed filename forbidden |
+| CSS inventory complete | remove `dist/styles/button.css` | missing staged public file |
+| Output is source-free | `dist/planted.ts` | raw source forbidden |
+| Receipt is reproducible | `timestamp` key in receipt JSON | receipt contains a timestamp |
+| Card stays core-only | `from "svelte"` in `dist/index.js` | forbidden parser or shell module |
+| Repository routes | delete `packages/core/dist`, then `health`; pack `files: ["dist"]` | `core:build` runs first; packed `package/dist/**` accepted; omitted dist tree rejected |
+| TypeScript authority | sibling `src/tokens/units.js` next to `.ts` | parallel JavaScript source shadows TypeScript |
+| Module-edge audit | `import "svelte"`; `import("react/jsx-runtime")`; bundled stub `marked`; sibling-workspace module; `"/home/..."`; `"C:\\Users\\..."` | each fails closed |
+| Public declarations | delete `dist/icons/icons/x.d.ts` | missing staged public file |
+| No marked edge | `marked` in core `devDependencies` | package.json devDependencies lists forbidden module marked |
 
-All plants restored. `AUDIT_OK` after restore. Focused tests repeat the same
-plants against disposable fixtures.
+All plants restored. Focused tests repeat them against disposable fixtures.
 
 ## Validation
 
-- `bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts` — 12/0
-- `bun run --cwd packages/core test` — 1221/0
-- `effigy docs:check` — pass (runs `core:build` first)
-- `git diff --check` — pass
+- `bun test scripts/web-distribution/driver.test.ts scripts/web-distribution/core-build.test.ts test/package-install/archive-membership.test.ts` — 26/0
+- Remaining addendum gates recorded after this repair commit's local run:
+  core unit tests, clean-checkout `effigy health`, `effigy test:web-pack-install`,
+  `effigy ci:web`, `effigy docs:check`, `git diff --check origin/main...HEAD`.
 
-No windowed, native-visual, pack-install, or release selector.
-
-## Known follow-up
-
-`test:web-pack-install` still special-cases only `files: ["src"]` when checking
-directory archive members. `files: ["dist"]` packs `package/dist/**` and the
-receipt, but not a bare `package/dist` entry. g16.059 owns that harness.
-`health`/`docs:lint` need a prior `core:build` on a fresh checkout.
+No windowed, native-visual, or release selector. No g16.059 redesign.
 
 ## Diff scope
 
-Owned surfaces only: `scripts/web-distribution/**`, core manifest/tsconfig
-emit, `core:build` / `test:core-build` wiring, this card, this log, papercuts.
-No Svelte/React component builds, no `test:web-pack-install`, no versions,
-workflows, or global roadmap front doors.
+Owned surfaces: `scripts/web-distribution/**`, core manifest/tsconfig emit,
+token source authority, `health` / `test:components` / `test:core-build`
+wiring, the current pack-install directory-membership check, this card, this
+log, papercuts. No Svelte/React component builds, versions, workflows, or
+g16.059 certification work.
 
 ## Continuation
 

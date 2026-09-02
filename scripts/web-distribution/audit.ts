@@ -4,14 +4,20 @@ import { join, posix, relative } from "node:path";
 const DECLARATION_SUFFIX = /\.d\.[cm]?ts$/;
 const TIMESTAMP_KEY = /timestamp|builtAt|generatedAt|createdAt/i;
 const ISO_DATE = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
-const ABSOLUTE_PATH = /(?:^|["'\s])(?:\/Users\/|\/home\/|\/tmp\/|[A-Za-z]:\\)/;
-const FORBIDDEN_IMPORT =
-  /from\s+["'](marked|svelte|svelte\/|react|react-dom)["']|require\(\s*["'](marked|svelte|react|react-dom)["']\s*\)/;
+const ABSOLUTE_PATH = /(?:\/(?:Users|home|tmp)\/|[A-Za-z]:(?:\\+|\/(?!\/)))/;
+const MANIFEST_DEP_SECTIONS = [
+  "dependencies",
+  "devDependencies",
+  "peerDependencies",
+  "optionalDependencies",
+] as const;
 
 export type DistAuditOptions = {
   distDir: string;
   publicFiles: readonly string[];
   forbiddenModules: readonly string[];
+  moduleIds?: readonly string[];
+  specifiers?: readonly string[];
 };
 
 function walkFiles(root: string): string[] {
@@ -27,14 +33,81 @@ function walkFiles(root: string): string[] {
   return files;
 }
 
+function sourceWithoutComments(bytes: string): string {
+  return bytes.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+}
+
 function toDistPath(distDir: string, abs: string): string {
   return posix.join("dist", relative(distDir, abs).split("\\").join("/"));
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function specifierMentionsModule(bytes: string, name: string): boolean {
+  const body = `${escapeRegExp(name)}(?:/[^"'\\s]*)?`;
+  return new RegExp(
+    [
+      `from\\s+["']${body}["']`,
+      `import\\s*\\(\\s*["']${body}["']`,
+      `require\\s*\\(\\s*["']${body}["']`,
+      `import\\s+["']${body}["']`,
+    ].join("|"),
+  ).test(bytes);
+}
+
+export function forbiddenGraphHit(
+  forbiddenModules: readonly string[],
+  moduleIds: readonly string[],
+  specifiers: readonly string[],
+): string | null {
+  for (const name of forbiddenModules) {
+    for (const specifier of specifiers) {
+      if (specifier === name || specifier.startsWith(`${name}/`)) return specifier;
+    }
+    const needle = `/node_modules/${name}`;
+    for (const id of moduleIds) {
+      const normalized = id.replace(/\\/g, "/");
+      if (
+        normalized.includes(`${needle}/`) ||
+        normalized.endsWith(needle) ||
+        normalized.includes(`/node_modules/${name}@`)
+      ) {
+        return name;
+      }
+    }
+  }
+  return null;
+}
+
+export function auditPackageDependencies(
+  manifest: Record<string, unknown>,
+  forbiddenModules: readonly string[],
+): void {
+  for (const section of MANIFEST_DEP_SECTIONS) {
+    const deps = manifest[section];
+    if (!deps || typeof deps !== "object" || Array.isArray(deps)) continue;
+    for (const name of forbiddenModules) {
+      if (Object.hasOwn(deps, name)) {
+        throw new Error(`package.json ${section} lists forbidden module ${name}`);
+      }
+    }
+  }
 }
 
 export function auditStagedDist(options: DistAuditOptions): void {
   const files = walkFiles(options.distDir);
   const publicSet = new Set(options.publicFiles);
   const seenPublic = new Set<string>();
+  const graphHit = forbiddenGraphHit(
+    options.forbiddenModules,
+    options.moduleIds ?? [],
+    options.specifiers ?? [],
+  );
+  if (graphHit) {
+    throw new Error(`forbidden parser or shell module entered the module graph: ${graphHit}`);
+  }
 
   for (const abs of files) {
     const distPath = toDistPath(options.distDir, abs);
@@ -72,16 +145,17 @@ export function auditStagedDist(options: DistAuditOptions): void {
       throw new Error(`unexpected staged file ${distPath}`);
     }
 
-    if (distPath.endsWith(".js") || distPath.endsWith(".mjs")) {
-      if (FORBIDDEN_IMPORT.test(bytes)) {
-        throw new Error(`forbidden parser or shell module entered ${distPath}`);
-      }
+    const inspectText =
+      distPath.endsWith(".js") ||
+      distPath.endsWith(".mjs") ||
+      DECLARATION_SUFFIX.test(distPath);
+    if (inspectText) {
       for (const name of options.forbiddenModules) {
-        if (bytes.includes(`from "${name}"`) || bytes.includes(`from '${name}'`)) {
-          throw new Error(`${name} entered ${distPath}`);
+        if (specifierMentionsModule(bytes, name)) {
+          throw new Error(`forbidden parser or shell module entered ${distPath}: ${name}`);
         }
       }
-      if (ABSOLUTE_PATH.test(bytes) && bytes.includes("/Users/")) {
+      if (ABSOLUTE_PATH.test(sourceWithoutComments(bytes))) {
         throw new Error(`workspace path leaked into ${distPath}`);
       }
     }

@@ -4,7 +4,13 @@ import { auditStagedDist } from "./audit";
 import { copyAssets } from "./copy-assets";
 import { emitDeclarations } from "./declarations";
 import { readLockedTools } from "./lockfile";
-import { receiptPath, writeReceipt } from "./receipt";
+import {
+  assertReceiptCoversViteSources,
+  assertTypeScriptAuthority,
+  packageRelativeViteSources,
+  receiptPath,
+  writeReceipt,
+} from "./receipt";
 import { cleanStaging } from "./staging";
 import type { BuiltPackage, PackageBuildSpec } from "./types";
 import { buildViteLibrary } from "./vite-library";
@@ -22,7 +28,7 @@ export async function buildPackage(
     entries[entry.name] = join(packageRoot, entry.source);
   }
 
-  await buildViteLibrary({
+  const graph = await buildViteLibrary({
     root: packageRoot,
     outDir,
     entries,
@@ -32,6 +38,8 @@ export async function buildPackage(
     },
     externals: spec.forbiddenModules,
   });
+  const viteSources = packageRelativeViteSources(packageRoot, graph.moduleIds);
+  assertTypeScriptAuthority(viteSources);
 
   copyAssets(packageRoot, spec.assets);
   emitDeclarations({
@@ -45,10 +53,13 @@ export async function buildPackage(
 
   const tools = readLockedTools(repoRoot);
   const receipt = writeReceipt({ repoRoot, packageRoot, spec, tools });
+  assertReceiptCoversViteSources(receipt.inputs, viteSources);
   auditStagedDist({
     distDir: outDir,
     publicFiles,
     forbiddenModules: spec.forbiddenModules,
+    moduleIds: graph.moduleIds,
+    specifiers: graph.specifiers,
   });
 
   return {

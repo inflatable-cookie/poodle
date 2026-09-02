@@ -1,13 +1,16 @@
 import { describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, writeFileSync, cpSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync, cpSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { auditStagedDist } from "./audit";
+import { auditPackageDependencies, auditStagedDist } from "./audit";
+import { CORE_FORBIDDEN_MODULES } from "./core-contract";
 import { readLockedTools } from "./lockfile";
 import { findRepoRoot } from "./core-build";
 import { sha256File, stableJson } from "./hash";
+import { assertNoParallelJavascript, packageRelativeViteSources } from "./receipt";
 import { cleanStaging } from "./staging";
+import { buildViteLibrary } from "./vite-library";
 
 function fixtureDist(): string {
   const root = mkdtempSync(join(tmpdir(), "poodle-web-dist-"));
@@ -35,7 +38,7 @@ function fixtureDist(): string {
   return distDir;
 }
 
-const publicFiles = ["dist/index.js", "dist/styles/button.css"];
+const publicFiles = ["dist/index.js", "dist/styles/button.css", "dist/index.d.ts"];
 
 describe("web distribution driver", () => {
   test("clean staging removes previous dist", () => {
@@ -109,6 +112,156 @@ describe("web distribution driver", () => {
     ).toThrow(/svelte|forbidden parser or shell/);
     rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
+
+  test("a side-effect svelte import fails the dependency audit", () => {
+    const distDir = fixtureDist();
+    writeFileSync(join(distDir, "index.js"), `import "svelte";\nexport const ok = 1;\n`);
+    expect(() =>
+      auditStagedDist({
+        distDir,
+        publicFiles,
+        forbiddenModules: [...CORE_FORBIDDEN_MODULES],
+      }),
+    ).toThrow(/svelte/);
+    rmSync(join(distDir, ".."), { recursive: true, force: true });
+  });
+
+  test("a dynamic react subpath import fails the dependency audit", () => {
+    const distDir = fixtureDist();
+    writeFileSync(
+      join(distDir, "index.js"),
+      `export const load = () => import("react/jsx-runtime");\n`,
+    );
+    expect(() =>
+      auditStagedDist({
+        distDir,
+        publicFiles,
+        forbiddenModules: [...CORE_FORBIDDEN_MODULES],
+      }),
+    ).toThrow(/react/);
+    rmSync(join(distDir, ".."), { recursive: true, force: true });
+  });
+
+  test("a unix workspace path in compiled JS fails the audit", () => {
+    const distDir = fixtureDist();
+    writeFileSync(
+      join(distDir, "index.js"),
+      `export const path = "/home/reviewer/src/x.ts";\n`,
+    );
+    expect(() =>
+      auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
+    ).toThrow(/workspace path/);
+    rmSync(join(distDir, ".."), { recursive: true, force: true });
+  });
+
+  test("a windows workspace path in a declaration fails the audit", () => {
+    const distDir = fixtureDist();
+    writeFileSync(
+      join(distDir, "index.d.ts"),
+      'export type Leak = "C:\\Users\\reviewer\\src\\x.ts";\n',
+    );
+    expect(() =>
+      auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
+    ).toThrow(/workspace path/);
+    rmSync(join(distDir, ".."), { recursive: true, force: true });
+  });
+
+  test("a missing public icon declaration fails the staged audit", () => {
+    const distDir = fixtureDist();
+    mkdirSync(join(distDir, "icons", "icons"), { recursive: true });
+    writeFileSync(join(distDir, "icons", "icons", "x.d.ts"), "export declare const x: 1;\n");
+    const withIcon = [...publicFiles, "dist/icons/icons/x.d.ts"];
+    auditStagedDist({ distDir, publicFiles: withIcon, forbiddenModules: ["marked"] });
+    rmSync(join(distDir, "icons", "icons", "x.d.ts"));
+    expect(() =>
+      auditStagedDist({ distDir, publicFiles: withIcon, forbiddenModules: ["marked"] }),
+    ).toThrow(/missing staged public file\(s\): dist\/icons\/icons\/x\.d\.ts/);
+    rmSync(join(distDir, ".."), { recursive: true, force: true });
+  });
+
+  test("marked in core devDependencies fails the manifest audit", () => {
+    expect(() =>
+      auditPackageDependencies(
+        { name: "fixture", devDependencies: { marked: "^18.0.9" } },
+        CORE_FORBIDDEN_MODULES,
+      ),
+    ).toThrow(/devDependencies lists forbidden module marked/);
+  });
+
+  test("a sibling .js next to a compiled .ts fails TypeScript authority", () => {
+    const packageRoot = mkdtempSync(join(tmpdir(), "poodle-parallel-js-"));
+    mkdirSync(join(packageRoot, "src", "tokens"), { recursive: true });
+    writeFileSync(join(packageRoot, "src", "tokens", "units.ts"), "export const x = 1;\n");
+    writeFileSync(join(packageRoot, "src", "tokens", "units.js"), "export const x = 1;\n");
+    expect(() => assertNoParallelJavascript(packageRoot)).toThrow(/parallel JavaScript source/);
+    rmSync(packageRoot, { recursive: true, force: true });
+  });
+
+  test("a sibling workspace module cannot bypass receipt input coverage", () => {
+    const packageRoot = "/repo/packages/core";
+    expect(() =>
+      packageRelativeViteSources(packageRoot, [
+        "/repo/packages/core/src/index.ts",
+        "/repo/packages/sibling/src/private.ts",
+      ]),
+    ).toThrow(/source outside package root/);
+  });
+
+  test("a bundled forbidden module fails even with no remaining specifier", async () => {
+    const root = mkdtempSync(join(tmpdir(), "poodle-bundled-marked-"));
+    mkdirSync(join(root, "src"));
+    mkdirSync(join(root, "node_modules", "marked"), { recursive: true });
+    writeFileSync(
+      join(root, "src", "index.ts"),
+      `import { lexer } from "marked";\nexport const x = lexer;\n`,
+    );
+    writeFileSync(
+      join(root, "node_modules", "marked", "package.json"),
+      `${JSON.stringify({ name: "marked", type: "module", main: "index.js" })}\n`,
+    );
+    writeFileSync(
+      join(root, "node_modules", "marked", "index.js"),
+      `export function lexer() { return 1 }\n`,
+    );
+    const distDir = join(root, "dist");
+    mkdirSync(distDir);
+    const graph = await buildViteLibrary({
+      root,
+      outDir: distDir,
+      entries: { index: join(root, "src", "index.ts") },
+      fileName: () => "index.js",
+      externals: [],
+    });
+    const bundled = readFileSync(join(distDir, "index.js"), "utf8");
+    expect(bundled).not.toMatch(/from ["']marked["']/);
+    writeFileSync(join(distDir, "index.d.ts"), "export declare const x: 1;\n");
+    writeFileSync(
+      join(distDir, ".poodle-build.json"),
+      stableJson({
+        cssPolicy: "core-owned",
+        inputs: ["src/index.ts"],
+        lanes: ["single"],
+        markdownPolicy: "none",
+        outputs: [{ path: "dist/index.js", sha256: "ab" }],
+        package: "fixture",
+        schemaVersion: 1,
+        sourceCommit: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        sourceMaps: false,
+        tools: { svelte: "5.56.8", typescript: "7.0.2", vite: "8.2.1" },
+        version: "0.0.0",
+      }),
+    );
+    expect(() =>
+      auditStagedDist({
+        distDir,
+        publicFiles: ["dist/index.js", "dist/index.d.ts"],
+        forbiddenModules: ["marked"],
+        moduleIds: graph.moduleIds,
+        specifiers: graph.specifiers,
+      }),
+    ).toThrow(/marked/);
+    rmSync(root, { recursive: true, force: true });
+  }, 30_000);
 
   test("copying a fixture dist does not invent hashed names", () => {
     const source = fixtureDist();

@@ -9,6 +9,7 @@ import {
 } from "node:fs";
 import { basename, join, resolve } from "node:path";
 
+import { packedMemberMissing } from "./archive-membership";
 import {
   FROZEN_COMPONENT_COUNT,
   buildWebPackageRoster,
@@ -160,10 +161,7 @@ function inspectPackedBoundary(
     if (normalized.includes("*")) {
       return archiveMatches(archiveEntries, normalized).length === 0;
     }
-    if (normalized === "src") {
-      return !archiveEntries.some((entry) => entry.startsWith("package/src/"));
-    }
-    return !archiveEntries.includes(`package/${normalized}`);
+    return packedMemberMissing(archiveEntries, normalized);
   });
   if (missingRequiredFiles.length > 0) {
     throw new Error(

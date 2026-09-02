@@ -413,6 +413,21 @@ export function corePublicCssFiles(): string[] {
   ];
 }
 
+export function corePublicDeclarationFiles(): string[] {
+  return [
+    "dist/index.d.ts",
+    "dist/icons/index.d.ts",
+    "dist/icons/build.d.mts",
+    ...CORE_ICON_MODULES.map((name) => `dist/icons/icons/${name}.d.ts`),
+    "dist/tokens/index.d.ts",
+    "dist/tokens/runtime.d.ts",
+    "dist/tokens/css.d.ts",
+    "dist/tokens/themes.d.ts",
+    "dist/tokens/metadata.d.ts",
+    "dist/tokens/units.d.ts",
+  ];
+}
+
 export function corePackageExports(): Record<string, string | JsExportMap> {
   const tokenCss = (exportKey: string, basename: string): [string, string] => [
     exportKey,

@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join, posix, relative } from "node:path";
 
 import { sha256File, stableJson } from "./hash";
@@ -39,7 +39,57 @@ function packageRelative(packageRoot: string, abs: string): string {
   return relative(packageRoot, abs).split("\\").join("/");
 }
 
+export function assertNoParallelJavascript(packageRoot: string): void {
+  for (const abs of walk(join(packageRoot, "src"))) {
+    const rel = packageRelative(packageRoot, abs);
+    if (!rel.endsWith(".ts") || rel.endsWith(".d.ts")) continue;
+    const sibling = `${rel.slice(0, -3)}.js`;
+    if (existsSync(join(packageRoot, sibling))) {
+      throw new Error(
+        `parallel JavaScript source ${sibling} shadows TypeScript; TypeScript is the authority`,
+      );
+    }
+  }
+}
+
+export function packageRelativeViteSources(
+  packageRoot: string,
+  moduleIds: readonly string[],
+): string[] {
+  const prefix = `${packageRoot.replace(/\\/g, "/")}/`;
+  const sources = new Set<string>();
+  for (const id of moduleIds) {
+    const normalized = id.split("?")[0]?.replace(/\\/g, "/") ?? id;
+    if (normalized.startsWith("\0")) continue;
+    if (!normalized.startsWith(prefix)) {
+      throw new Error(`build consumed source outside package root: ${normalized}`);
+    }
+    sources.add(normalized.slice(prefix.length));
+  }
+  return [...sources].sort();
+}
+
+export function assertTypeScriptAuthority(viteSources: readonly string[]): void {
+  for (const rel of viteSources) {
+    if (rel.endsWith(".js") && !rel.endsWith(".mjs")) {
+      throw new Error(`Vite resolved JavaScript sibling ${rel}; TypeScript is the authority`);
+    }
+  }
+}
+
+export function assertReceiptCoversViteSources(
+  inputs: readonly string[],
+  viteSources: readonly string[],
+): void {
+  const inputSet = new Set(inputs);
+  const missing = viteSources.filter((src) => !inputSet.has(src));
+  if (missing.length > 0) {
+    throw new Error(`receipt omitted Vite input(s): ${missing.join(", ")}`);
+  }
+}
+
 export function collectInputs(packageRoot: string, spec: PackageBuildSpec): string[] {
+  assertNoParallelJavascript(packageRoot);
   const inputs = new Set<string>();
   for (const entry of spec.entries) inputs.add(entry.source);
   for (const asset of spec.assets) inputs.add(asset.from);

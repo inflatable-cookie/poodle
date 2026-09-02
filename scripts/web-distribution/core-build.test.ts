@@ -9,9 +9,10 @@ import {
   CORE_STYLE_FILES,
   corePackageExports,
   corePublicCssFiles,
+  corePublicDeclarationFiles,
   corePublicJsFiles,
 } from "./core-contract";
-import { buildCore, findRepoRoot } from "./core-build";
+import { assertCoreManifest, buildCore, findRepoRoot } from "./core-build";
 import { sha256File } from "./hash";
 import { readReceipt } from "./receipt";
 
@@ -29,11 +30,25 @@ function runTsc(moduleResolution: "bundler" | "nodenext"): string {
   writeFileSync(
     join(consumer, "probe.ts"),
     `import { MOTION_DURATION_MS } from "@inflatable-cookie/poodle-core";
-import { applyThemeAttributes } from "@inflatable-cookie/poodle-core/tokens/runtime";
+import * as icons from "@inflatable-cookie/poodle-core/icons";
 import { x } from "@inflatable-cookie/poodle-core/icons/x";
+import { selectIconSet } from "@inflatable-cookie/poodle-core/icons/build";
+import * as tokens from "@inflatable-cookie/poodle-core/tokens";
+import { applyThemeAttributes } from "@inflatable-cookie/poodle-core/tokens/runtime";
+import * as tokenCss from "@inflatable-cookie/poodle-core/tokens/css";
+import * as themes from "@inflatable-cookie/poodle-core/tokens/themes";
+import * as metadata from "@inflatable-cookie/poodle-core/tokens/metadata";
+import * as units from "@inflatable-cookie/poodle-core/tokens/units";
 void MOTION_DURATION_MS;
-void applyThemeAttributes;
+void icons;
 void x;
+void selectIconSet;
+void tokens;
+void applyThemeAttributes;
+void tokenCss;
+void themes;
+void metadata;
+void units;
 `,
   );
   const tsconfig =
@@ -90,6 +105,8 @@ describe("core compiled distribution", () => {
     expect(JSON.stringify(manifest.exports)).not.toContain("/src/");
     expect(JSON.stringify(manifest.exports)).not.toContain('"svelte"');
     expect(JSON.stringify(manifest.exports)).not.toContain('"main"');
+    expect(JSON.stringify(manifest)).not.toMatch(/"marked"\s*:/);
+    expect(() => assertCoreManifest(repoRoot)).not.toThrow();
   });
 
   test("two clean core builds match file-for-file and hash-for-hash", async () => {
@@ -107,9 +124,26 @@ describe("core compiled distribution", () => {
     expect(first.receipt.sourceCommit).toMatch(/^[0-9a-f]{40}$/);
     expect(firstReceipt).not.toContain("/Users/");
     expect(firstReceipt.toLowerCase()).not.toContain("timestamp");
-    for (const path of [...corePublicJsFiles(), ...corePublicCssFiles()]) {
+    for (const path of [
+      ...corePublicJsFiles(),
+      ...corePublicCssFiles(),
+      ...corePublicDeclarationFiles(),
+    ]) {
       expect(firstOutputs.has(path)).toBe(true);
     }
+    expect(first.receipt.inputs).toContain("src/tokens/index.ts");
+    expect(first.receipt.inputs).toContain("src/tokens/runtime.ts");
+    expect(first.receipt.inputs).toContain("src/tokens/units.ts");
+    expect(first.receipt.inputs).toContain("src/tokens/themes.ts");
+    expect(first.receipt.inputs).toContain("src/tokens/metadata.ts");
+    expect(first.receipt.inputs).not.toContain("src/tokens/index.js");
+    expect(first.receipt.inputs).not.toContain("src/tokens/units.js");
+    const compiledUnits = readFileSync(join(coreRoot, "dist/tokens/units.js"), "utf8");
+    const compiledRuntime = readFileSync(join(coreRoot, "dist/tokens/runtime.js"), "utf8");
+    expect(compiledUnits).toContain("src/tokens/units.ts");
+    expect(compiledRuntime).toContain("src/tokens/runtime.ts");
+    expect(compiledUnits).not.toContain("src/tokens/units.js");
+    expect(compiledRuntime).not.toContain("src/tokens/runtime.js");
 
     const second = await buildCore(repoRoot);
     expect(second.receipt.outputs).toEqual(first.receipt.outputs);

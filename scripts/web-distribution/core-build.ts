@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
+import { auditPackageDependencies } from "./audit";
 import {
   CORE_FORBIDDEN_MODULES,
   CORE_PACKAGE_DIR,
@@ -10,6 +11,7 @@ import {
   coreLibraryEntries,
   corePackageExports,
   corePublicCssFiles,
+  corePublicDeclarationFiles,
   corePublicJsFiles,
   readCorePackageVersion,
 } from "./core-contract";
@@ -49,7 +51,7 @@ export function coreBuildSpec(repoRoot: string): PackageBuildSpec {
 }
 
 export function corePublicFiles(): string[] {
-  return [...corePublicJsFiles(), ...corePublicCssFiles()];
+  return [...corePublicJsFiles(), ...corePublicCssFiles(), ...corePublicDeclarationFiles()];
 }
 
 export function assertCoreManifest(repoRoot: string): void {
@@ -60,7 +62,7 @@ export function assertCoreManifest(repoRoot: string): void {
     exports?: unknown;
     files?: string[];
     sideEffects?: unknown;
-  };
+  } & Record<string, unknown>;
   const expectedExports = corePackageExports();
   if (JSON.stringify(manifest.exports) !== JSON.stringify(expectedExports)) {
     throw new Error("packages/core/package.json exports do not match spec 070");
@@ -74,6 +76,7 @@ export function assertCoreManifest(repoRoot: string): void {
   if (JSON.stringify(manifest.sideEffects) !== JSON.stringify(["**/*.css"])) {
     throw new Error('core sideEffects must be ["**/*.css"]');
   }
+  auditPackageDependencies(manifest, CORE_FORBIDDEN_MODULES);
 }
 
 export async function buildCore(repoRoot: string = findRepoRoot()) {

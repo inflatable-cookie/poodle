@@ -7,6 +7,8 @@ Opened: 2026-09-02
 Depends on: accepted `g16.056`
 Governing refs: `../../architecture/014-compiled-web-package-distribution.md`,
 `056-web-distribution-contract.md`
+Review repair: exact-head comment on PR #161. Five in-bounds findings closed.
+g16.059 redesign stays out of scope.
 
 ## Goal
 
