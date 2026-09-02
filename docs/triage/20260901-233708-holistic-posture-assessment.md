@@ -1,6 +1,7 @@
 # Holistic Posture Assessment — Advisory To The Orchestrator
 
-Status: open — advisory input; nothing here is execution authority
+Status: partially promoted — Nucleus parity and visual-lab routes are canonical;
+remaining advisory items retain no execution authority
 Captured: 2026-09-01
 Owner: Poodle Northstar orchestrator (promotion); authored by an independent
 Fable advisory thread at the operator's request
@@ -311,7 +312,9 @@ The spine records process faithfully and serves readers poorly:
    or "next bounded seam". Twenty-nine components is roughly a quarter of the
    remaining mounted gap and yields a shippable GPUI app as the proof, which
    is the evidence the operator says would unlock commitment. Jetstream
-   admission stays behind the adapter quarantine.
+   admission stays behind the adapter quarantine. Promoted on 2026-09-02 into
+   `docs/roadmaps/g16/nucleus-gpui-parity-programme.md` with the first ready
+   cards `g16.062`–`g16.065`.
 
 Items 1, 2a, 5, 6, and 7 are bounded source work that suits cheap models once
 compiled as cards. Items 2, 2c, and 8 carry release, workflow, or product
@@ -339,11 +342,10 @@ note compiles none of them.
 2. Already compiled elsewhere: `g16.053` scanner repair and `g16.054`
    release-history honesty (PR #148); Jetstream hold (PR #147); `0.3.0`
    disposition (PR #144). This note only cross-references them.
-3. Operator decisions recorded here (parity goal, Nucleus, React retain +
-   gate, Linux CI, compiled dist, direct Underlay imports, recurring consumer
-   papercut sweep) are promoted by the orchestrator into vision,
-   architecture, or contracts first, then compiled as cards with their own
-   evidence.
+3. The parity goal and Nucleus target are promoted into the canonical Nucleus
+   programme and `g16.062`–`g16.065`. Compiled distribution is complete
+   through `g16.059`. React retain + gate, Linux CI, direct Underlay imports,
+   and recurring consumer papercut intake remain pending promotion.
 4. Every other finding (packaging evidence packet, validation hygiene,
    React drift gate, native source-of-truth repairs, ledger execution
    backing, docs compaction, consumer sweep lane) is a separately assessed

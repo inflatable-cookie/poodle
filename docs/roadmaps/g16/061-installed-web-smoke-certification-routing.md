@@ -1,8 +1,10 @@
 # g16.061 — Installed Web Smoke / Certification Routing
 
-Status: complete — awaiting orchestrator review
+Status: complete; merged in PR #166
 Type: validation infrastructure repair
 Opened: 2026-09-02
+Completed: 2026-09-02
+Merge: `38f4fa2a7271e32d5a22078b2615c59e8db03c0a`
 Depends on: merged `g16.054` candidate (`9e38e7971`); completed `g16.059`
 Governing refs: `059-installed-web-distribution-certification.md`,
 `054-historycenter-v030-release-candidate.md`,
@@ -14,6 +16,13 @@ Governing refs: `059-installed-web-distribution-certification.md`,
 Make the permanent installed-package harness usable by ordinary feature PRs
 without producing receipt-shaped certification evidence. Keep strict and
 candidate certification explicit, fail closed, and unchanged in substance.
+
+## Outcome
+
+Unset mode is the full receipt-free ordinary installed smoke. Explicit
+`strict` and `g16.054-candidate` keep their receipt and scope laws. Unknown
+modes fail closed. The repaired route unblocked `g16.060`; its rebased
+`ci:web` passed before PR #164 merged.
 
 ## Fixed Boundary
 
@@ -94,9 +103,8 @@ workflow-dispatch, windowed, or native-visual selectors.
 
 ## Continuation
 
-After accepted merge, rebase PR #164 onto current main, rerun its required
-boards, re-review the changed exact head, merge it, and return the merged SHA
-and local-link instructions to Figmatic. Tagging/publishing the accepted
+PR #164 was rebased onto this merge, passed its required boards, and merged as
+`4ffa31345bc94f82c22d64d83e64b3af2613cfe3`. Tagging/publishing the accepted
 `0.3.0` candidate remains a separate operator-authorized release mutation.
 
 ## Evidence

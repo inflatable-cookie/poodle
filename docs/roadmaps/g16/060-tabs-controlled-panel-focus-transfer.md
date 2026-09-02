@@ -1,13 +1,17 @@
 # g16.060 — Tabs Controlled-panel Focus Transfer
 
-Status: in review — worker implementation complete
+Status: complete; merged in PR #164
 Opened: 2026-09-02
+Completed: 2026-09-02
+Merge: `4ffa31345bc94f82c22d64d83e64b3af2613cfe3`
 Depends on: current Tabs contract and paired Svelte/React implementation;
 independent of the web-distribution/release serial lane
 Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/components/tabs.md`
 Consumer evidence: Figmatic PR #69 review comment
 https://github.com/inflatable-cookie/figmatic/pull/69#issuecomment-5514814268
+Adoption evidence: Figmatic PR #69 head
+`96ec5dae2f2caa6fb4c67c7dca884455bf99b6d8`
 Log: `../../logs/2026-09/20260902-g16-060-tabs-controlled-panel-focus-transfer.md`
 
 ## Goal
@@ -21,6 +25,16 @@ new controlled state is rendered. Otherwise Tabs does not move focus.
 This is Tabs-owned focus continuity. Do not add a consumer focus machine, a
 query-selector recipe, panel-specific initial-focus callback, IconButton
 autofocus, or exported imperative `focus()` API.
+
+## Outcome
+
+The paired web Tabs surface exposes
+`focusOnValueChange="preserve" | "selected-tab"`, defaulting to
+`"preserve"`. The opt-in path latches focus ownership through the outgoing
+panel, retargets across separate controlled commits, revalidates the live
+destination at fire time, and focuses only the latest selected enabled tab.
+Figmatic adopted the public seam without a local focus machine and its mounted
+counterexample passed.
 
 ## Fixed Behaviour
 

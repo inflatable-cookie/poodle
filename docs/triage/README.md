@@ -14,9 +14,8 @@ Current open notes:
   Loophole/Pulse CS20 policy, and keyboard vertical geometry.
 - `20260902-000957-composition-and-menu-gates.md` — citations rich-content
   prerequisite and nested-menu substrate/focus gates.
-- `20260902-000958-conformance-lab-and-visual-gates.md` — external Button MVP,
-  icon adapter extension, and six-component visual-tranche dependencies.
 - `20260902-000959-jetstream-admission-hold.md` — separate Poodle/Jetstream
   authority remains absent.
-- `20260901-233708-holistic-posture-assessment.md` — open advisory for the
-  separately promoted holistic batch; no additional cards are compiled here.
+- `20260901-233708-holistic-posture-assessment.md` — partially promoted;
+  remaining React drift, Linux workflow, Underlay-authority, consumer-intake,
+  validation-hygiene, and docs-compaction candidates stay open.

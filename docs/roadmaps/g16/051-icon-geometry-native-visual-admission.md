@@ -5,7 +5,7 @@ lab, and a completed icon-geometry lab adapter/manifest extension
 Type: external evidence / admission
 Opened: 2026-09-01
 Depends on: completed `g16.050` and every serial gate in
-`../../triage/20260902-000958-conformance-lab-and-visual-gates.md`, including a
+`visual-lab-unblock-runway.md`, including an accepted VL-1 bootstrap and a
 separately planned, reviewed, authorized, and landed icon-geometry lab adapter
 and manifest extension
 Governing refs: the icon-geometry architecture and evidence from `g16.049`–

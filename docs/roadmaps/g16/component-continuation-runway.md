@@ -37,6 +37,9 @@ renumbered here.
   rejections, and no accepted or runtime-eligible pair.
 - `g16.056` is complete in PR #159. Spec 070 freezes the compiled-distribution
   inventories, condition maps, migration, and byte-exact receipt formulas.
+- `g16.057`–`g16.059` are complete compiled-distribution implementation and
+  certification. `g16.060` and `g16.061` are complete consumer-focus and
+  installed-routing repairs.
 - The accepted consolidation resolves the previous EditableLabel,
   block-slider, toast, shimmer, icon-geometry, design-guidance, release,
   citations, nested-menu, lab, visual-tranche, and Jetstream questions.
@@ -47,13 +50,15 @@ These cards have complete boundaries and no unmet serial dependency:
 
 | Card | Lane | Writable boundary | Result |
 | --- | --- | --- | --- |
-| [`g16.050`](050-icon-geometry-internal-runtime-substrate.md) | icon geometry IG-03–IG-05 | internal runtime/node/private-shell substrate | fixture-only runtime proof; no public or eligible pair |
-| [`g16.057`](057-core-build-substrate.md) | compiled web distribution | core build/staging driver, declarations, assets, receipt | deterministic source-free core output |
+| [`g16.062`](062-nucleus-parity-receipt-foundation.md) | Nucleus parity NP-0 | receipt schema, cohort manifest, runner/checker, generated ledger | execution-backed M1/A1/V1 evidence foundation |
+| [`g16.063`](063-history-center-nested-deletion-parity.md) | paired runtime | HistoryCenter core/headless nested deletion | recursive semantic parity |
+| [`g16.064`](064-slider-negative-half-rounding-parity.md) | paired runtime | Slider/RangeSlider core/headless quantization | one tie law and shared vectors |
+| [`g16.065`](065-tabs-native-tooltip-parity.md) | Nucleus navigation dependency | Tabs contract/spec/render/GPUI tooltip path | mounted native tooltip parity |
 
-These two lanes are independently dispatchable.
-If implementation discovers shared barrel, registry, contract, or generated
-file ownership between cards, serialize the overlapping pair before edits.
-Global g16 front-door and closeout edits remain orchestrator-owned.
+All four are independently dispatchable. Shared g16 front-door and closeout
+edits remain orchestrator-owned. `g16.065` is the only direct prerequisite for
+the later Nucleus Tabs child; `g16.063` and `g16.064` do not block unrelated
+cohort work.
 
 ## Serial Frontier
 
@@ -73,9 +78,9 @@ Global g16 front-door and closeout edits remain orchestrator-owned.
 | --- | --- | --- | --- |
 | nested menu pointer intent | gated | recursive React/Rust/GPUI substrate plus resolved focus-contract contradiction | compile only after both prerequisites are explicit; retain conditional pointer corridor and synchronized close grace |
 | agent citations | gated | authored rich semantic content carrier and paragraph-level consumer evidence | keep composition-owned; compile the carrier prerequisite separately |
-| dedicated conformance lab | external hold | separate repository authority and operator-approved Button-only capture environment | bootstrap the closed Button MVP outside this Poodle runway |
-| icon-geometry lab extension | blocked | operational Button MVP plus separately planned/authorized closed adapter and manifest extension | land external extension before `g16.051`; bootstrap alone is insufficient |
-| six-component / 24-fixture visual tranche | blocked | operational lab plus its own bounded adapter/manifest coverage | preserve the accepted fixture set; do not substitute local windowed runs |
+| dedicated conformance lab | authority gate | explicit dedicated-repository authority and maintainer | run VL-1 from [`visual-lab-unblock-runway.md`](visual-lab-unblock-runway.md) |
+| icon-geometry lab extension | blocked | accepted VL-1 plus closed VL-2A adapter/manifest | land external extension before `g16.051`; bootstrap alone is insufficient |
+| Nucleus visual proof | blocked | accepted VL-1 plus Nucleus-owned VL-2B states/adapter | extend in reviewed tranches; no Poodle fake consumer |
 | CS20 `groupId` | owner hold | Loophole/Pulse recording-policy decision | no Poodle card; promote only in the owning repository if stable identity is selected |
 | keyboard vertical geometry | design hold | operator-selected component geometry | keep separate from HistoryCenter, release, and the closed drag programme |
 | GPUI accessibility | programme hold | explicit programme choice and accepted manual/runtime evidence boundary | no component-local card |
@@ -86,13 +91,17 @@ transfer only inside a valid corridor and accepted synchronized close grace.
 The citation direction remains composition-gated: paragraph proof first, with
 the full semantic content carrier as a separate serial prerequisite.
 
-### Separate Holistic Promotion Batch
+### Nucleus GPUI Parity Programme
 
-The [holistic posture assessment](../../triage/20260901-233708-holistic-posture-assessment.md)
-is accepted input. Its Nucleus 29-component execution-backed GPUI parity
-programme, React drift gate, approved Linux web/Rust workflow card,
-direct-Underlay authority correction, and recurring consumer-papercut intake
-await a separate promotion batch. This runway compiles none of those cards.
+The operator-selected Nucleus 29-component switch target is promoted into
+[`nucleus-gpui-parity-programme.md`](nucleus-gpui-parity-programme.md).
+`g16.062`–`g16.065` are its first safe ready frontier. Later component cards
+remain small and depend on `g16.062`; Nucleus M2/V2 and adoption stay outside
+Poodle implementation authority.
+
+The React drift gate, approved Linux web/Rust workflow card, direct-Underlay
+authority correction, and recurring consumer-papercut intake remain open
+holistic-promotion items.
 
 ## Promotion Rule
 

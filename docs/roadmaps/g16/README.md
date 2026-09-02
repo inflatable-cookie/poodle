@@ -1,7 +1,7 @@
 # g16 — Next Work
 
-Status: active — complete through `g16.049`; canonical post-triage continuation
-compiled through `g16.059`; independent `g16.055` complete
+Status: active — complete through `g16.061`; Nucleus GPUI parity continuation
+promoted from the accepted 29-component switch target
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -94,28 +94,31 @@ stay maintained; backend admission is not part of the first card.
 57. [057 — Core build substrate](057-core-build-substrate.md) — complete; merged in PR #161 with deterministic source-free core output and receipt-backed audits
 58. [058 — Shell distributions](058-shell-distributions.md) — complete; merged in PR #162 with source-free dual-lane Svelte, private React, real Svelte declarations, and the five-component markdown boundary
 59. [059 — Installed web distribution certification](059-installed-web-distribution-certification.md) — complete; merged in PR #163 with accepted exact-commit receipt
-60. [060 — Tabs controlled-panel focus transfer](060-tabs-controlled-panel-focus-transfer.md) — implementation accepted on PR #164; merge blocked only on `g16.061` ordinary installed-smoke routing
-61. [061 — Installed web smoke / certification routing](061-installed-web-smoke-certification-routing.md) — ready validation-infrastructure repair; default receipt-free ordinary smoke, explicit strict/candidate certification
+60. [060 — Tabs controlled-panel focus transfer](060-tabs-controlled-panel-focus-transfer.md) — complete; merged in PR #164 and adopted by Figmatic without a consumer focus machine
+61. [061 — Installed web smoke / certification routing](061-installed-web-smoke-certification-routing.md) — complete; merged in PR #166 with receipt-free ordinary smoke and explicit strict/candidate certification
+62. [062 — Nucleus parity receipt foundation](062-nucleus-parity-receipt-foundation.md) — ready; execution-backed M1/A1/V1 receipt schema and fixed 29-component cohort manifest
+63. [063 — HistoryCenter nested deletion parity](063-history-center-nested-deletion-parity.md) — ready; paired recursive deletion counterexample and repair
+64. [064 — Slider negative-half rounding parity](064-slider-negative-half-rounding-parity.md) — ready; one cross-runtime quantization law
+65. [065 — Tabs native tooltip parity](065-tabs-native-tooltip-parity.md) — ready; native propagation and mounted timing proof before the Nucleus Tabs child
 
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
-ready, serial, gated, and held frontier. `g16.045`–`g16.050`, `g16.053`–`g16.059`
-are complete. `g16.061` is the ready validation repair blocking accepted
-`g16.060`; release mutation remains separately gated.
+ready, serial, gated, and held frontier. `g16.045`–`g16.050` and
+`g16.053`–`g16.061` are complete. The Nucleus programme now owns the ready
+`g16.062`–`g16.065` frontier; release mutation remains separately gated.
 `g16.051` and `g16.052` retain their
 explicit serial or external gates. Completed `g16.054` does not inherit release
 authority from the distribution programme. Citations,
 nested-menu pointer intent, the dedicated lab,
-its six-component / 24-fixture visual tranche, GPUI accessibility, public
+its closed icon and Nucleus extensions, GPUI accessibility, public
 IconMorph admission, release/adoption mutations, and Jetstream remain gated or
 held rather than becoming implicit worker work. The canonical map also holds
-the five approved holistic-assessment directions for a separate promotion
-batch; no cards for them are compiled here.
+the remaining approved holistic-assessment directions for later promotion.
 
-`g16.055` is a separately completed Papercuts repair in PR #151. `g16.060` is
-an implementation-accepted consumer unblock awaiting `g16.061`; neither is
-part of the post-triage continuation map.
+`g16.055` is a separately completed Papercuts repair in PR #151. `g16.060` and
+its `g16.061` validation prerequisite are complete; neither is part of the
+post-triage continuation map.
 
 The earlier continuation programmes remain provenance:
 
