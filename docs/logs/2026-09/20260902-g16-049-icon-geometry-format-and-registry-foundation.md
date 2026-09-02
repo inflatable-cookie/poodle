@@ -13,8 +13,9 @@ Branch: `feature/g16-049-icon-geometry-foundation`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-049-icon-geometry`
 Starting exact head: `c1a527898e7425853359bd72b7113a8cf38b8d97`
 Planning base ancestor: `7f59ae42f4917c675968819eb23a5e41dc90013c`
-Rebased onto live `origin/main`: `99cc55711464edebc31980fe608fb8a7449ba2de`
-Post-rebase implementation commit: `13cde0cb8`
+Rebased onto live `origin/main`: `1b0d4032984a65c64398fbcd71572a9093a47ace`
+Post-rebase implementation commit: `38beec197`
+Parser repair commit: `fea4287a7c6db0c80dc2a8b465e0f6b9e8864ff`
 PR: https://github.com/inflatable-cookie/poodle/pull/156
 
 ## Outcome
@@ -31,6 +32,12 @@ node and generated-asset SHA-256 digests, topology, diagnostics, quality
 review, notice identity, payload size, and derived registry data. The largest
 accepted payload is 14,023 bytes; the registry digest is
 `dc7469b142af8361df66b00bcfe33c92d5500778e514ab4c83eac81cfe46fe8b`.
+
+The Rust vector proof uses derived fixture structs and `serde_json::from_str`
+with bounded dev dependencies; the handwritten JSON parser is removed. The
+two explicit `Vec<usize>` empty-vector assertions in `code_input.rs` are the
+minimal type disambiguation required by serde_json's generic numeric equality
+implementations.
 
 No `Icon`, `IconProvider`, node vocabulary, package export, runtime, browser,
 native visual, or Jetstream surface was changed.
@@ -70,13 +77,14 @@ The repair batch passed the required focused and repository checks:
 
 - `bun test packages/core/test/icon-geometry.test.ts packages/core/test/icon-geometry-registry.test.ts` — 22 tests pass / 1,123 expectations, including malformed numeric attributes, exact paired wire/cost, closure assignment, registry planning, and reverse-flight checks.
 - `cargo test --quiet --manifest-path packages/contracts/components/Cargo.toml --lib icon_geometry` — 2 tests pass, independently parsing the shared corpus and matching the same endpoint digests, mappings, costs, closure rules, and reverse-flight oracle.
+- Rust fixture decoding — derived `serde::Deserialize` structs with `serde_json::from_str`; no handwritten JSON parser remains.
 - `effigy icons:build` — pass twice with identical generated projection bytes. SHA-256: TypeScript `4df672c9c2c00286925b26f6d1dce442f8cc2319fd24631dede18a530f367c4f`; Rust `75e2a34af492fe36d3c9d187a55c001194db5372292925c22fa30d7408b37847`.
 - `effigy audit:icons` — pass: 108 default icon names (92 canonical, 16 aliases).
 - `effigy ci:rust` — pass: 291 component contract tests passed, with the full Rust board green.
 - `effigy docs:check` — pass, including docs inventories, generated reports, and the Svelte production build.
 - `rustfmt --check --edition 2021 packages/contracts/components/src/icon_geometry.rs` — pass.
 - `git diff --check` — pass; the exact `git diff --check origin/main...HEAD` check is repeated after the repair commit.
-- `git diff origin/main -- packages/contracts/components/src/code_input.rs` — empty; the unrelated formatting churn is removed.
+- `packages/contracts/components/Cargo.toml` restores the bounded `serde` derive and `serde_json` dev dependencies. Their generic numeric `PartialEq<Value>` implementations require two existing empty-vector assertions in `code_input.rs` to carry explicit `Vec<usize>` type information; no formatter-only churn is retained.
 
 Exact paired-oracle receipts:
 
