@@ -123,6 +123,17 @@ describe("slider", () => {
     expect(snapToStep(7, 0, 0)).toBe(7);
   });
 
+  test("negative half ties snap toward positive infinity from min", () => {
+    // Portable tie law shared with poodle-headless: Math.round half-up,
+    // anchored at (raw - min) / step — never raw / step and never f64::round.
+    expect(snapToStep(-0.5, 0, 1)).toBe(0);
+    expect(snapToStep(-1, 0, 2)).toBe(0);
+    expect(snapToStep(-1.5, 0, 1)).toBe(-1);
+    expect(snapToStep(5, 10, 10)).toBe(10);
+    expect(snapToStep(15, 10, 10)).toBe(20);
+    expect(snapToStep(0.5, 0, 1)).toBe(1);
+  });
+
   test("embedded pointer gestures map laws and publish unipolar/bipolar fill geometry", () => {
     let control = createSliderControlContext({ value: 0, min: -1, max: 1, step: 0, polarity: "bipolar" });
     let result = sliderControlTransition(control, { type: "POINTER_BEGIN", valueNorm: 0.25 });

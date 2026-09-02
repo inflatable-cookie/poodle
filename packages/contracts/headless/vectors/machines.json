@@ -157,6 +157,166 @@
       "context": { "value": 5, "min": 10, "max": 10, "step": 1, "disabled": false },
       "event": { "type": "INPUT", "raw": 50 },
       "expect": { "context": { "value": 11 }, "effects": [{ "type": "emitValueChange", "value": 11 }] }
+    },
+    {
+      "name": "negative half step snaps to minimum",
+      "context": { "value": 50, "min": 0, "max": 100, "step": 2, "disabled": false },
+      "event": { "type": "INPUT", "raw": -1 },
+      "expect": { "context": { "value": 0 }, "effects": [{ "type": "emitValueChange", "value": 0 }] }
+    },
+    {
+      "name": "negative half commit clamps to minimum",
+      "context": { "value": 50, "min": 0, "max": 100, "step": 10, "disabled": false },
+      "event": { "type": "COMMIT", "raw": -5 },
+      "expect": { "context": { "value": 0 }, "effects": [{ "type": "emitValueCommit", "value": 0 }] }
+    },
+    {
+      "name": "positive half step rounds to the step above min",
+      "context": { "value": 50, "min": 0, "max": 100, "step": 10, "disabled": false },
+      "event": { "type": "INPUT", "raw": 5 },
+      "expect": { "context": { "value": 10 }, "effects": [{ "type": "emitValueChange", "value": 10 }] }
+    },
+    {
+      "name": "min-offset negative half snap anchors from non-zero minimum",
+      "context": { "value": 50, "min": 10, "max": 110, "step": 10, "disabled": false },
+      "event": { "type": "INPUT", "raw": 5 },
+      "expect": { "context": { "value": 10 }, "effects": [{ "type": "emitValueChange", "value": 10 }] }
+    },
+    {
+      "name": "non-zero minimum positive half rounds up from min",
+      "context": { "value": 50, "min": 10, "max": 110, "step": 10, "disabled": false },
+      "event": { "type": "COMMIT", "raw": 15 },
+      "expect": { "context": { "value": 20 }, "effects": [{ "type": "emitValueCommit", "value": 20 }] }
+    },
+    {
+      "name": "step larger than range clamps to max",
+      "context": { "value": 0, "min": 0, "max": 1, "step": 2, "disabled": false },
+      "event": { "type": "INPUT", "raw": 1 },
+      "expect": { "context": { "value": 1 }, "effects": [{ "type": "emitValueChange", "value": 1 }] }
+    },
+    {
+      "name": "last step exceeding max clamps to max",
+      "context": { "value": 50, "min": 0, "max": 100, "step": 60, "disabled": false },
+      "event": { "type": "COMMIT", "raw": 110 },
+      "expect": { "context": { "value": 100 }, "effects": [{ "type": "emitValueCommit", "value": 100 }] }
+    }
+  ],
+  "rangeSlider": [
+    {
+      "name": "lower thumb negative half clamps to min",
+      "context": { "value": [40, 80], "min": 0, "max": 100, "step": 10, "disabled": false },
+      "event": { "type": "INPUT", "thumb": "lower", "raw": -5 },
+      "expect": { "context": { "value": [0, 80] }, "effects": [{ "type": "emitValueChange", "value": [0, 80] }] }
+    },
+    {
+      "name": "upper thumb negative half clamps to lower sibling",
+      "context": { "value": [40, 80], "min": 0, "max": 100, "step": 10, "disabled": false },
+      "event": { "type": "INPUT", "thumb": "upper", "raw": -5 },
+      "expect": { "context": { "value": [40, 40] }, "effects": [{ "type": "emitValueChange", "value": [40, 40] }] }
+    },
+    {
+      "name": "upper thumb positive half rounds from min anchor",
+      "context": { "value": [40, 80], "min": 0, "max": 100, "step": 10, "disabled": false },
+      "event": { "type": "COMMIT", "thumb": "upper", "raw": 55 },
+      "expect": { "context": { "value": [40, 60] }, "effects": [{ "type": "emitValueCommit", "value": [40, 60] }] }
+    },
+    {
+      "name": "lower thumb min-offset negative half anchors from non-zero min",
+      "context": { "value": [40, 80], "min": 10, "max": 110, "step": 10, "disabled": false },
+      "event": { "type": "INPUT", "thumb": "lower", "raw": 5 },
+      "expect": { "context": { "value": [10, 80] }, "effects": [{ "type": "emitValueChange", "value": [10, 80] }] }
+    },
+    {
+      "name": "upper thumb min-offset positive half never crosses lower",
+      "context": { "value": [20, 60], "min": 10, "max": 110, "step": 10, "disabled": false },
+      "event": { "type": "INPUT", "thumb": "upper", "raw": 25 },
+      "expect": { "context": { "value": [20, 30] }, "effects": [{ "type": "emitValueChange", "value": [20, 30] }] }
+    },
+    {
+      "name": "upper thumb negative half below min clamps to lower sibling",
+      "context": { "value": [20, 60], "min": 10, "max": 110, "step": 10, "disabled": false },
+      "event": { "type": "COMMIT", "thumb": "upper", "raw": 5 },
+      "expect": { "context": { "value": [20, 20] }, "effects": [{ "type": "emitValueCommit", "value": [20, 20] }] }
+    },
+    {
+      "name": "oversized step upper thumb stays within range",
+      "context": { "value": [0, 1], "min": 0, "max": 1, "step": 2, "disabled": false },
+      "event": { "type": "INPUT", "thumb": "upper", "raw": 1 },
+      "expect": { "context": { "value": [0, 1] }, "effects": [{ "type": "emitValueChange", "value": [0, 1] }] }
+    },
+    {
+      "name": "degenerate range widens pair to min+1",
+      "context": { "value": [10, 10], "min": 10, "max": 10, "step": 1, "disabled": false },
+      "event": { "type": "COMMIT", "thumb": "upper", "raw": 12 },
+      "expect": { "context": { "value": [10, 11] }, "effects": [{ "type": "emitValueCommit", "value": [10, 11] }] }
+    }
+  ],
+  "sliderSnap": [
+    {
+      "name": "negative half tie snaps to min (unit step)",
+      "context": { "min": 0, "step": 1 },
+      "event": { "type": "SNAP", "raw": -0.5 },
+      "expect": { "context": { "value": 0 } }
+    },
+    {
+      "name": "negative half tie snaps to min (step two)",
+      "context": { "min": 0, "step": 2 },
+      "event": { "type": "SNAP", "raw": -1 },
+      "expect": { "context": { "value": 0 } }
+    },
+    {
+      "name": "deep negative half tie snaps one step below min",
+      "context": { "min": 0, "step": 1 },
+      "event": { "type": "SNAP", "raw": -1.5 },
+      "expect": { "context": { "value": -1 } }
+    },
+    {
+      "name": "min-offset negative half tie anchors from non-zero min",
+      "context": { "min": 10, "step": 10 },
+      "event": { "type": "SNAP", "raw": 5 },
+      "expect": { "context": { "value": 10 } }
+    },
+    {
+      "name": "negative min anchor half tie stays at anchor",
+      "context": { "min": -1, "step": 1 },
+      "event": { "type": "SNAP", "raw": -1.5 },
+      "expect": { "context": { "value": -1 } }
+    },
+    {
+      "name": "positive half tie rounds to the step above",
+      "context": { "min": 0, "step": 1 },
+      "event": { "type": "SNAP", "raw": 0.5 },
+      "expect": { "context": { "value": 1 } }
+    },
+    {
+      "name": "non-zero min positive half tie rounds from min",
+      "context": { "min": 10, "step": 10 },
+      "event": { "type": "SNAP", "raw": 15 },
+      "expect": { "context": { "value": 20 } }
+    },
+    {
+      "name": "sub-half negative value snaps to anchor",
+      "context": { "min": 0, "step": 10 },
+      "event": { "type": "SNAP", "raw": -3 },
+      "expect": { "context": { "value": 0 } }
+    },
+    {
+      "name": "fractional positive value snaps down",
+      "context": { "min": 0, "step": 10 },
+      "event": { "type": "SNAP", "raw": 3 },
+      "expect": { "context": { "value": 0 } }
+    },
+    {
+      "name": "non-positive step passes through unsnapped",
+      "context": { "min": 0, "step": 0 },
+      "event": { "type": "SNAP", "raw": 7 },
+      "expect": { "context": { "value": 7 } }
+    },
+    {
+      "name": "negative step passes through unsnapped",
+      "context": { "min": 0, "step": -1 },
+      "event": { "type": "SNAP", "raw": 7 },
+      "expect": { "context": { "value": 7 } }
     }
   ],
   "menu": [

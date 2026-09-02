@@ -6,6 +6,11 @@
  * Keyboard and pointer interaction come from the native range input; the
  * machine owns value normalization (step snapping, clamping, degenerate-range
  * guard, thumb-crossing prevention) and the change/commit callback split.
+ *
+ * Step quantization follows one portable tie law: a raw index exactly halfway
+ * between two steps rounds toward positive infinity (`Math.round`). The Rust
+ * mirror (`poodle-headless::slider`) implements the same law explicitly
+ * because `f64::round` rounds half away from zero instead.
  */
 
 import {
@@ -35,6 +40,8 @@ export function snapToStep(value: number, min: number, step: number): number {
     return value;
   }
 
+  // Portable tie law: half ties round toward positive infinity via
+  // Math.round; poodle-headless mirrors this with ((index) + 0.5).floor().
   return min + Math.round((value - min) / step) * step;
 }
 

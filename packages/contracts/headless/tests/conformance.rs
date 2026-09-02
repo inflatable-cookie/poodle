@@ -348,6 +348,98 @@ fn slider_conformance() {
     }
 }
 
+/// Shared step-quantization tie-law vectors: `sliderSnap` drives
+/// `snap_to_step` directly so the portable half-toward-+infinity law stays
+/// pinned even where the min clamp would mask a drifted tie law.
+#[test]
+fn slider_snap_conformance() {
+    for case in vectors()["sliderSnap"].as_array().unwrap() {
+        let ctx = &case["context"];
+        let value = snap_to_step(f(&case["event"], "raw"), f(ctx, "min"), f(ctx, "step"));
+        assert_case(
+            "sliderSnap",
+            case,
+            Vec::new(),
+            None,
+            Some(json!({ "value": value })),
+        );
+    }
+}
+
+#[test]
+fn range_slider_conformance() {
+    for case in vectors()["rangeSlider"].as_array().unwrap() {
+        let ctx = &case["context"];
+        let pair = ctx["value"]
+            .as_array()
+            .map(|entries| {
+                (
+                    entries[0].as_f64().unwrap_or(0.0),
+                    entries[1].as_f64().unwrap_or(0.0),
+                )
+            })
+            .unwrap_or((0.0, 0.0));
+        let context = RangeSliderContext {
+            value: pair,
+            min: f(ctx, "min"),
+            max: f(ctx, "max"),
+            step: f(ctx, "step"),
+            disabled: b(ctx, "disabled"),
+        };
+        let event = match s(&case["event"], "type") {
+            "INPUT" => RangeSliderEvent::Input {
+                thumb: range_thumb(&case["event"]),
+                raw: f(&case["event"], "raw"),
+            },
+            "COMMIT" => RangeSliderEvent::Commit {
+                thumb: range_thumb(&case["event"]),
+                raw: f(&case["event"], "raw"),
+            },
+            "SET_VALUE" => {
+                let value = &case["event"]["value"];
+                RangeSliderEvent::SetValue {
+                    value: (
+                        value[0].as_f64().unwrap_or(0.0),
+                        value[1].as_f64().unwrap_or(0.0),
+                    ),
+                }
+            }
+            other => panic!("unknown range slider event {other}"),
+        };
+
+        let (next, effects) = range_slider_transition(context, event);
+        let effects = effects
+            .iter()
+            .map(|effect| match effect {
+                RangeSliderEffect::EmitValueChange { value } => json!({
+                    "type": "emitValueChange",
+                    "value": [value.0, value.1]
+                }),
+                RangeSliderEffect::EmitValueCommit { value } => json!({
+                    "type": "emitValueCommit",
+                    "value": [value.0, value.1]
+                }),
+            })
+            .collect();
+
+        assert_case(
+            "rangeSlider",
+            case,
+            effects,
+            None,
+            Some(json!({ "value": [next.value.0, next.value.1] })),
+        );
+    }
+}
+
+fn range_thumb(event: &Value) -> RangeThumb {
+    match s(event, "thumb") {
+        "lower" => RangeThumb::Lower,
+        "upper" => RangeThumb::Upper,
+        other => panic!("unknown range slider thumb {other}"),
+    }
+}
+
 #[test]
 fn menu_conformance() {
     for case in vectors()["menu"].as_array().unwrap() {
