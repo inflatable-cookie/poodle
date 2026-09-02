@@ -1,6 +1,6 @@
 # g16.059 — Installed Web Distribution Certification
 
-Status: blocked — requires accepted `g16.058`
+Status: ready — `g16.058` merged as `b43481dff`
 Type: implementation — installed package oracle and promotion receipt
 Opened: 2026-09-02
 Depends on: accepted `g16.058`
@@ -28,6 +28,11 @@ public roster. This is the prerequisite that can unblock `g16.054`.
   repeated build/pack hashes, receipt membership, notices, and roster identity.
 - This card does not change versions, edit release notes/history, tag, publish,
   dispatch workflows, mutate registries, or write sibling repositories.
+- Merged-main baseline is red from a clean checkout in two linked places:
+  Bun's shared module cache can make the nested TypeScript 6.0.3 declaration
+  check observe root TypeScript 7, and docs/export audits run before shell
+  `dist/` exists. This card owns the minimal resolver and selector-order repair;
+  it must not weaken the 6.0.3 pin or permit stale artifacts.
 
 ## Ordered Work
 

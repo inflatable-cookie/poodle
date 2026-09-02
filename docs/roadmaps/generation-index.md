@@ -36,22 +36,21 @@ Updated: 2026-09-02
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: `g16.058` shell distributions. `g16.045`–`g16.050`,
-    `g16.053`, and `g16.056`–`g16.057` are complete.
+  - Ready frontier: `g16.059` installed web distribution certification.
+    `g16.045`–`g16.050`, `g16.053`, and `g16.056`–`g16.058` are complete.
   - Independent completed lane: `g16.055` drag-source pointer-gesture browser
     suppression merged in PR #151; it remains outside the post-triage
     continuation map.
   - Blocked frontier: `g16.051` on `050`, the operational
     Button lab, and its separately accepted icon adapter/manifest extension;
     `g16.052` on named reviewers, approvals, and orchestrator run custody;
-    `g16.059` on `058`, and `g16.054`
-    on completed `g16.059`; `g16.053` is complete.
+    `g16.054` on completed `g16.059`; `g16.053` is complete.
     Citations, nested menus, the visual tranche, public IconMorph,
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: dispatch `g16.058`; keep `g16.059` serial and retain global
-    front-door integration reserved to the orchestrator.
+  - Next move: dispatch `g16.059`; retain global front-door integration and
+    the later `g16.054` release-candidate decision with the orchestrator.
 
 ## Latest Completed Track
 

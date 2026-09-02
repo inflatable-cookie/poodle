@@ -61,8 +61,8 @@ Global g16 front-door and closeout edits remain orchestrator-owned.
 | --- | --- | --- | --- |
 | [`g16.051`](051-icon-geometry-native-visual-admission.md) | blocked | completed `g16.050`, operational Button lab, and separately completed icon adapter/manifest extension | IG-06 native visual admission only |
 | [`g16.052`](052-contributor-design-guidance-pilot.md) | gated | named human reviewers, two freeze approvals, and orchestrator execution custody | finite matched pilot; no ordinary worker judgment |
-| [`g16.058`](058-shell-distributions.md) | implementation repair | PR #162; operator boundary decisions promoted | dual-lane Svelte plus private React distribution |
-| [`g16.059`](059-installed-web-distribution-certification.md) | blocked | completed `g16.058` | sole permanent installed browser/SSR oracle and promotion receipt |
+| [`g16.058`](058-shell-distributions.md) | complete | merged in PR #162 as `b43481dff` | dual-lane Svelte plus private React distribution |
+| [`g16.059`](059-installed-web-distribution-certification.md) | ready | `g16.058` merged as `b43481dff` | sole permanent installed browser/SSR oracle and promotion receipt |
 | [`g16.054`](054-historycenter-v030-release-candidate.md) | blocked | completed `g16.059`; `g16.053` is complete | immutable `0.3.0` candidate and validation evidence; no release mutation |
 | IconMorph public admission | gated | `g16.051` returns an admit verdict | IG-07 requires a later explicit public card |
 | HistoryCenter publication and Loophole adoption | gated | accepted `g16.054`, exact receipts, and separate orchestrator authority | tag/publish and sibling adoption stay distinct mutations |
