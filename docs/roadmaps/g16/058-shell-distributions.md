@@ -82,7 +82,7 @@ disposable installed browser/SSR exit smoke. Leave permanent certification to
 | Markdown is isolated | Button root resolves `marked` | graph assertion fails |
 | Root is parser-free | any of the five markdown components remains in root, or uses a lazy parser import | fresh root import or synchronous browser/SSR render fails |
 | Declarations preserve the API | a public component emits bare `Component` | negative prop/callback fixture compiles |
-| Permanent harness ownership is serial | card adds certification beyond the roster expectation | scope check fails |
+| Permanent harness ownership is serial | card adds 059 receipt, below-floor negative, or new certification probe | scope check fails |
 
 ## Writable Scope
 
