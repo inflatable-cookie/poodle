@@ -2,7 +2,7 @@
 
 Status: complete — awaiting orchestrator review
 Date: 2026-09-02
-PR: pending
+PR: https://github.com/inflatable-cookie/poodle/pull/159
 Card: `docs/roadmaps/g16/056-web-distribution-contract.md`
 Handoff: `docs/handoffs/20260902-095101-g16-056-web-distribution-contract.md`
 Governing refs: `docs/architecture/014-compiled-web-package-distribution.md`,

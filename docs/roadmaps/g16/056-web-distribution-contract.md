@@ -1,6 +1,7 @@
 # g16.056 — Web Distribution Contract
 
 Status: complete — awaiting orchestrator review
+PR: https://github.com/inflatable-cookie/poodle/pull/159
 Type: implementation — contract and migration boundary
 Opened: 2026-09-02
 Depends on: accepted [compiled web package distribution](../../architecture/014-compiled-web-package-distribution.md)
