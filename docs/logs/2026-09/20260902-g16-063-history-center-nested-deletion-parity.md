@@ -10,6 +10,7 @@ Branch: `fix/g16-063-history-nested-delete`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-063-history-nested-delete`
 Planning base: `4ffa31345bc94f82c22d64d83e64b3af2613cfe3` (ancestor)
 Live `origin/main` at dispatch: `a6a9d242a4473f2436e148b011c910f299ca6f36`
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/167
 
 ## Outcome
 
