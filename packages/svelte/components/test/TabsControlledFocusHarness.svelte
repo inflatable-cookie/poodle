@@ -50,6 +50,12 @@
     value = "preview";
     value = "tree";
   }
+  function supersedeCommits(): void {
+    value = "preview";
+    queueMicrotask(() => {
+      value = "tree";
+    });
+  }
 
   function selectMissing(): void {
     value = "ghost";
@@ -84,6 +90,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 <span role="presentation" data-testid="accept-open" onclick={acceptOpen}>Accept Open</span>
 <button type="button" data-testid="supersede" onclick={supersede}>Supersede</button>
+<button type="button" data-testid="supersede-commits" onclick={supersedeCommits}>Supersede in commits</button>
 <button type="button" data-testid="select-missing" onclick={selectMissing}>Select missing</button>
 <button type="button" data-testid="stale-disable" onclick={staleDisable}>Disable Tree</button>
 <button type="button" data-testid="stale-policy" onclick={stalePolicy}>Preserve focus</button>

@@ -160,6 +160,21 @@ describe("Tabs controlled-panel focus (svelte)", () => {
     expect(treeFocus).toHaveBeenCalledTimes(1);
     expect(document.activeElement).toBe(treeTab);
   });
+  it("separate-commit supersession retargets the latched transfer to the final tab", async () => {
+    render(TabsControlledFocusHarness, { props: { focusOnValueChange: "selected-tab" } });
+    const previewTab = inspectorTab("Preview");
+    const treeTab = inspectorTab("Tree");
+    const previewFocus = vi.spyOn(previewTab, "focus");
+    const treeFocus = vi.spyOn(treeTab, "focus");
+    screen.getByTestId("list-card").focus();
+
+    await fireEvent.click(screen.getByTestId("supersede-commits"));
+    await flush();
+
+    expect(previewFocus).not.toHaveBeenCalled();
+    expect(treeFocus).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(treeTab);
+  });
 
   it("teardown makes a pending transfer inert", async () => {
     render(TabsControlledFocusHarness, { props: { focusOnValueChange: "selected-tab" } });

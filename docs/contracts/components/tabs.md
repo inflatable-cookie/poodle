@@ -387,12 +387,16 @@ the spec.
 - controlled `focusOnValueChange="selected-tab"`: if focus was inside the
   outgoing selected panel immediately before that panel is replaced, focus the
   newly selected enabled tab after render. Default `"preserve"` does not move
-  focus. Capture uses the owned panel node; the destination is the owned tab
-  ref. Svelte captures in `$effect.pre`; React captures during render against
-  `panelRef` while the outgoing panel is still mounted. No consumer selector,
-  panel initial-focus callback, or body/panel fallback. Repeated or superseded
-  controlled changes focus only the latest eligible destination once. Teardown,
-  a missing tab, or a disabled tab makes the request inert.
+  focus. Both shells track outgoing-panel focus ownership through owned panel
+  `focusin`/`focusout` state; no render-phase DOM read, ref mutation, or state
+  update occurs. The destination is the owned tab registry. Svelte schedules
+  the transfer from its `$effect.pre`; React applies the committed controlled
+  change from a commit-phase layout effect, then one cancellable timer. No
+  consumer selector, panel initial-focus callback, or body/panel fallback.
+  Repeated or superseded controlled changes — batched, or committed separately
+  before the first timer fires — retarget and focus only the latest eligible
+  destination once. Teardown, a policy change to `"preserve"`, a missing tab,
+  or a disabled tab makes the request inert.
 
 ## 7. Layout
 
@@ -872,8 +876,10 @@ Applies when `fullWidth` is set and orientation is horizontal.
 - Module-level `nextTabsId` counter for unique IDs across instances
 - Close button stops click propagation so the parent tab does not also activate
 - `children(activeValue)` receives `activeValue` as snippet argument
-- `focusOnValueChange` is captured in `$effect.pre` against the still-mounted
-  outgoing panel, then applied after render through the owned tab registry.
+- `focusOnValueChange` tracks outgoing-panel focus ownership through panel
+  `focusin`/`focusout` state, schedules from `$effect.pre`, and applies after
+  render through the owned tab registry with live policy, value, destination,
+  and teardown checks.
 - `data-full-width` — set when `fullWidth` is true; drives the full-width flex layout (non-vertical only)
 - `showTooltips` wraps each tab in a `Tooltip`; for vertical/icon-only tabs the tooltip surfaces the hidden label
 - `collapseWhenOverflow` measures the tablist against its container and, on overflow, replaces the tabs with a `Menu` trigger labeled by `collapseLabel` (falling back to the active tab label)

@@ -172,7 +172,6 @@
   let indicatorSnap = $state(false);
   const motionReady = useMotionReady();
   let rootElement = $state<HTMLDivElement | null>(null);
-  let panelElement = $state<HTMLDivElement | null>(null);
   let panelFocusOwned = false;
   let pendingFocusDestination: string | null = null;
   let pendingFocusGeneration = 0;
@@ -944,7 +943,6 @@
   {#if hasPanel && currentValue}
     <div
       class="poodle-tabs__panel"
-      bind:this={panelElement}
       id={`poodle-tabpanel-${tabsId}-${currentValue}`}
       data-value={currentValue}
       role="tabpanel"

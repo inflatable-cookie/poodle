@@ -187,7 +187,6 @@ export function Tabs({
   const motionReady = useMotionReady();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const panelRef = useRef<HTMLDivElement | null>(null);
   const measureListRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -422,19 +421,6 @@ export function Tabs({
     focusItemsRef.current = renderedItems;
 
     if (policyChanged) {
-      invalidateFocusTransfer();
-    }
-
-    const pending = pendingFocusDestinationRef.current;
-    if (
-      pending !== null &&
-      (pending !== currentValue ||
-        resolveTabsControlledFocusDestination({
-          pendingValue: pending,
-          items: focusItemsRef.current,
-          alive: aliveRef.current,
-        }) === null)
-    ) {
       invalidateFocusTransfer();
     }
 
@@ -957,7 +943,6 @@ export function Tabs({
       {hasPanel && currentValue ? (
         <div
           className="poodle-tabs__panel"
-          ref={panelRef}
           id={`poodle-tabpanel-${tabsId}-${currentValue}`}
           data-value={currentValue}
           role="tabpanel"
