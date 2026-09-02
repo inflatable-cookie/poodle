@@ -305,7 +305,7 @@ function portable(value: string): string {
 async function runFromCleanCheckout(): Promise<void> {
   const proofCommit = (await runCapture(["git", "rev-parse", "HEAD"], repoRoot)).trim();
   const requiredBaseCommit = requireExactCommit(
-    (await runCapture(["git", "rev-parse", "origin/main^{commit}"], repoRoot)).trim(),
+    (await runCapture(["git", "merge-base", proofCommit, "origin/main"], repoRoot)).trim(),
     "required base commit",
   );
   const commonGitDir = resolve(
