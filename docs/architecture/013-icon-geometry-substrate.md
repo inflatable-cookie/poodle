@@ -1,7 +1,7 @@
 # 013 Icon Geometry Substrate
 
 Status: active internal foundation
-Accepted: 2026-09-02
+Recorded: 2026-09-02
 Owner: Poodle core
 Depends on: [Semantic motion policy](012-semantic-motion-policy.md),
 [Icon contract](../contracts/components/icon.md),
@@ -18,8 +18,9 @@ The layer has two parts:
 
 - a pure normalizer that turns a bounded 24×24 stroke icon into canonical line
   segments and fixed sampled contours; and
-- a curated pair registry that records which normalized endpoints are
-  candidates, accepted, or rejected.
+- a curated pair registry that records normalized endpoints as candidate or
+  rejected evidence. The schema retains an accepted state for a later visual
+  gate, but g16.049 emits no accepted or runtime-eligible pair.
 
 The registry is evidence and future internal input. A deterministic geometry
 plan is not a visual-quality approval and does not admit a public `IconMorph`.
@@ -85,18 +86,20 @@ corpus. The reverse-plan oracle swaps endpoints, checks exact canonical
 endpoints, and compares every interior sample after only the recorded
 traversal/cyclic-start reindexing.
 
-Numeric cost is diagnostic only. An accepted entry requires an explicit human
-quality review. Visible twisting, self-crossing, collapse, unintended global
-motion, contour duplication, or a semantic state change remains a rejection
-even when the numeric plan is deterministic.
+Numeric cost is diagnostic only. A candidate remains a candidate until a later
+human visual review explicitly gates it; g16.049 stores no reviewer identity or
+acceptance authority. Visible twisting, self-crossing, collapse, unintended
+global motion, contour duplication, or a semantic state change remains a
+rejection even when the numeric plan is deterministic.
 
 ## Registry and provenance
 
 `packages/core/src/icons/morph-pairs.json` is the authored pair surface. It
 contains 8–12 entries from the current default manifest, with explicit
-`candidate`, `accepted`, or `rejected` status and a quality review record.
-Only accepted entries are eligible for a future runtime. Candidate and
-rejected entries remain generated evidence and cannot become silent fallbacks.
+`candidate` or `rejected` status and a quality-state record; `accepted` is
+reserved for a later visual-review gate. No g16.049 entry is runtime-eligible.
+Candidate geometry is generated evidence and may be used by g16.050 only as an
+internal test fixture. Rejected entries cannot become silent fallbacks.
 
 The generator extends `scripts/build-default-icons.ts` and emits paired
 internal projections:
@@ -113,7 +116,7 @@ contains:
 - source-node and generated-asset SHA-256 digests;
 - normalizer and pair-schema versions;
 - contour, closure, primitive, and sample topology;
-- correspondence cost and quality review state;
+- correspondence cost and quality state, without reviewer identity;
 - a derived geometry digest; and
 - the existing Lucide/Feather notice identity.
 
@@ -121,9 +124,10 @@ Every non-rejected manifest entry must normalize both endpoints and emit a
 plan. Rejected entries retain diagnostics and no geometry payload.
 
 The audit fails on version, source-byte, alias, topology, schema, orphan,
-duplicate, reversed-duplicate, unreviewed-candidate, stale-output, or payload
-drift. Regeneration is byte-stable. Each pair's normalized payload stays at or
-below 16 KiB, excluding notice text.
+duplicate, reversed-duplicate, invalid-quality-state,
+accepted-before-visual-gate, stale-output, or payload drift. Regeneration is
+byte-stable. Each pair's normalized payload stays at or below 16 KiB,
+excluding notice text.
 
 ## Ownership and boundary
 

@@ -24,14 +24,16 @@ Delivered the internal icon-geometry foundation only. TypeScript and Rust now
 share a versioned 24×24 stroke normalizer, canonical line-segment endpoints,
 64-point sampled contours, bounded closure-preserving correspondence, a strict
 SVG numeric grammar, and the same 18-vector corpus. The authored manifest has
-12 explicit pair states: five accepted, one structurally plannable candidate,
-and six rejected.
+12 explicit pair states: six structurally plannable candidates and six
+rejected. No g16.049 pair is accepted or runtime-eligible; candidate geometry
+is retained only as internal evidence and a possible g16.050 test fixture.
 
 The generated TypeScript and Rust registries carry canonical aliases, source
 node and generated-asset SHA-256 digests, topology, diagnostics, quality
-review, notice identity, payload size, and derived registry data. The largest
-accepted payload is 14,023 bytes; the registry digest is
-`dc7469b142af8361df66b00bcfe33c92d5500778e514ab4c83eac81cfe46fe8b`.
+state and notes without reviewer identity, notice identity, payload size, and
+derived registry data. The largest candidate fixture payload is 14,023 bytes;
+the registry digest is
+`369861be0c28f08f638dffa01afae71b001aee1a945bfb94e7b5e78872b34f3c`.
 
 The Rust vector proof uses derived fixture structs and `serde_json::from_str`
 with bounded dev dependencies; the handwritten JSON parser is removed. The
@@ -62,24 +64,24 @@ source was restored before the green reruns.
 | Source bytes | one generated SVG stroke byte changed; `effigy audit:icons` failed with source-byte drift | source asset restored |
 | Generated payload | registry digest changed by one hex digit; `effigy audit:icons` listed the generated TS projection as stale | generated projection restored |
 | Manifest identity | a reversed duplicate pair was introduced; audit rejected it | unique canonical pair identities |
-| Candidate review | candidate quality was changed to `accepted`; audit rejected the mismatched review state | candidate remains explicit |
+| Candidate gate | a structurally plannable pair was changed from `candidate` to `accepted`; the foundation audit rejected accepted status before the visual gate | six candidate fixtures remain explicit; no pair is runtime-eligible |
 | Static Icon | Svelte `Icon` viewBox changed to 23×24; exact static-contract assertion failed | `Icon.svelte` restored; final diff excludes public Icon surfaces |
 
 Clean regeneration was run twice. The TypeScript projection hash was
-`4df672c9c2c00286925b26f6d1dce442f8cc2319fd24631dede18a530f367c4f` and the
+`53767e226cd96a9439c0cf410eff45257b393931bf1a353c8c18ede568e70222` and the
 Rust projection hash was
-`75e2a34af492fe36d3c9d187a55c001194db5372292925c22fa30d7408b37847` on both
+`5bbe61957753ebdc0cac500b1c7a7e311819a37f2ebd2cf2f3c158ec7bc3ed99` on both
 runs.
 
 ## Validation
 
 The repair batch passed the required focused and repository checks:
 
-- `bun test packages/core/test/icon-geometry.test.ts packages/core/test/icon-geometry-registry.test.ts` — 22 tests pass / 1,123 expectations, including malformed numeric attributes, exact paired wire/cost, closure assignment, registry planning, and reverse-flight checks.
+- `bun test packages/core/test/icon-geometry.test.ts packages/core/test/icon-geometry-registry.test.ts` — 22 tests pass / 1,124 expectations, including malformed numeric attributes, exact paired wire/cost, closure assignment, registry planning, and reverse-flight checks.
 - `cargo test --quiet --manifest-path packages/contracts/components/Cargo.toml --lib icon_geometry` — 2 tests pass, independently parsing the shared corpus and matching the same endpoint digests, mappings, costs, closure rules, and reverse-flight oracle.
 - Rust fixture decoding — derived `serde::Deserialize` structs with `serde_json::from_str`; no handwritten JSON parser remains.
-- `effigy icons:build` — pass twice with identical generated projection bytes. SHA-256: TypeScript `4df672c9c2c00286925b26f6d1dce442f8cc2319fd24631dede18a530f367c4f`; Rust `75e2a34af492fe36d3c9d187a55c001194db5372292925c22fa30d7408b37847`.
-- `effigy audit:icons` — pass: 108 default icon names (92 canonical, 16 aliases).
+- `effigy icons:build` — pass twice with identical generated projection bytes. SHA-256: TypeScript `53767e226cd96a9439c0cf410eff45257b393931bf1a353c8c18ede568e70222`; Rust `5bbe61957753ebdc0cac500b1c7a7e311819a37f2ebd2cf2f3c158ec7bc3ed99`.
+- `effigy audit:icons` — pass: 12 pair records (0 accepted, 6 candidates, 6 rejected) and 108 default icon names (92 canonical, 16 aliases).
 - `effigy ci:rust` — pass: 291 component contract tests passed, with the full Rust board green.
 - `effigy docs:check` — pass, including docs inventories, generated reports, and the Svelte production build.
 - `rustfmt --check --edition 2021 packages/contracts/components/src/icon_geometry.rs` — pass.
@@ -104,5 +106,6 @@ Rust module's isolated rustfmt check passes.
 
 ## Next task
 
-An accepted merge unlocks orchestrator review of `g16.050`; this worker does
-not launch it or admit `IconMorph`.
+Once the g16.049 foundation is merged, orchestrator review may continue with
+`g16.050`; candidate geometry remains an internal fixture only. This worker
+does not launch it or admit `IconMorph`.

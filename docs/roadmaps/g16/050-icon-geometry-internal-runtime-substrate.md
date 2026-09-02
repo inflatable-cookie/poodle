@@ -1,9 +1,9 @@
 # g16.050 — Icon Geometry Internal Runtime Substrate
 
-Status: blocked — serial on accepted `g16.049`
+Status: blocked — serial on merged `g16.049` foundation
 Type: implementation — internal capability
 Opened: 2026-09-01
-Depends on: accepted `g16.049`; funded icon-geometry programme recorded in
+Depends on: merged `g16.049` foundation; funded icon-geometry programme recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`
 Governing refs: the architecture produced by `g16.049`,
 `../../architecture/012-semantic-motion-policy.md`,
@@ -12,10 +12,10 @@ Governing refs: the architecture produced by `g16.049`,
 
 ## Goal
 
-Deliver IG-03 through IG-05 over the validated registry: pure plan/lifecycle,
-a distinct resolved geometry node with shared Rust/GPUI headless proof, and
-private Svelte/React shells with controlled browser evidence. Keep the route
-internal until native visual admission.
+Deliver IG-03 through IG-05 over candidate geometry fixtures from the validated
+registry: pure plan/lifecycle, a distinct resolved geometry node with shared
+Rust/GPUI headless proof, and private Svelte/React shells with controlled
+browser evidence. Keep the route internal until native visual admission.
 
 ## Fixed Boundary
 
@@ -30,6 +30,9 @@ internal until native visual admission.
   GPUI owns path construction, paint, invalidation, scheduling, and teardown.
 - Web shells keep one stable outer visual root, deterministic SSR endpoint,
   hydration, selection/focus/layout invariants, and the same pure plan.
+- g16.049 emits no accepted or runtime-eligible pair. This card may use
+  candidate geometry only as an internal test fixture; it must not change pair
+  status, add reviewer or acceptance authority, or promote eligibility.
 - The route is private/internal. No public IconMorph contract/export, provider
   widening, Icon behavior change, or active-cohort visual admission occurs.
 - Initial budgets: zero hot-path allocation after plan creation; p95 geometry
@@ -62,7 +65,9 @@ internal until native visual admission.
 - Svelte and React keep one stable root and equal semantic inputs through SSR,
   hydration, motion policies, interruption, focus, and controlled captures.
 - Evidence labels structure/headless/browser results honestly. No native pixel,
-  AT, public API, release, consumer, or Jetstream claim appears.
+  AT, public API, release, consumer, or Jetstream claim appears. Candidate
+  geometry remains fixture input only; this card changes no g16.049 pair status
+  or runtime-eligibility state.
 
 ## Review Oracle
 
@@ -101,5 +106,6 @@ headless substrate.
 
 ## Continuation
 
-Accepted merge unlocks the gated `g16.051` dedicated-lab visual review. Public
-IconMorph remains uncompiled until that gate passes.
+Completion of `g16.050` unlocks the gated `g16.051` dedicated-lab visual
+review. Candidate geometry remains fixture-only, and public IconMorph remains
+uncompiled until that gate passes.

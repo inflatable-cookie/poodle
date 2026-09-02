@@ -83,9 +83,9 @@ stay maintained; backend admission is not part of the first card.
 46. [046 — Block Slider and RangeSlider appearance](046-block-slider-and-range-slider-appearance.md) — ready
 47. [047 — Toast same-id update convention](047-toast-same-id-update-convention.md) — complete; merged in PR #152 after one exact-head repair round
 48. [048 — AgentSubagent ownership and shimmer benchmark](048-agent-subagent-ownership-and-shimmer-benchmark.md) — complete; merged in PR #153 with a verified static-fallback verdict and no production effect
-49. [049 — Icon geometry format and registry foundation](049-icon-geometry-format-and-registry-foundation.md) — ready; IG-01/02 only
-50. [050 — Icon geometry internal runtime substrate](050-icon-geometry-internal-runtime-substrate.md) — blocked on accepted `g16.049`
-51. [051 — Icon geometry native visual admission](051-icon-geometry-native-visual-admission.md) — blocked on accepted `g16.050`, the operational Button lab, and a separately accepted icon adapter/manifest extension
+49. [049 — Icon geometry format and registry foundation](049-icon-geometry-format-and-registry-foundation.md) — ready; IG-01/02 only; all plannable pairs remain candidates and none is runtime-eligible
+50. [050 — Icon geometry internal runtime substrate](050-icon-geometry-internal-runtime-substrate.md) — blocked on the merged `g16.049` foundation; candidate geometry is fixture-only
+51. [051 — Icon geometry native visual admission](051-icon-geometry-native-visual-admission.md) — blocked on completed `g16.050`, the operational Button lab, and a separately completed icon adapter/manifest extension
 52. [052 — Contributor design-guidance pilot](052-contributor-design-guidance-pilot.md) — gated on named human reviewers, freeze approvals, and orchestrator execution custody
 53. [053 — Repository security-audit boundary repair](053-repository-security-audit-boundary-repair.md) — complete in PR #150; the production matcher is boundary-safe and the repository audit is green without exclusions
 54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — blocked on an accepted, separately promoted compiled-JS/declarations prerequisite; `g16.053` is complete, the remaining mechanics are unplanned, and no release mutation is authorized

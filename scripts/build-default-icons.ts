@@ -40,7 +40,6 @@ type PairManifestEntry = {
   rejectionReason?: string;
   quality: {
     review: PairReview;
-    reviewer: string;
     notes: string;
   };
 };
@@ -221,7 +220,6 @@ type GeneratedPairRecord = {
   normalizerVersion: string;
   schemaVersion: number;
   qualityStatus: PairReview;
-  qualityReviewer: string;
   qualityNotes: string;
   rejectionReason: string | null;
   topologyLeft: object | null;
@@ -341,14 +339,14 @@ function validatePairManifestShape(): void {
     if (!["candidate", "accepted", "rejected"].includes(pair.status)) {
       throw new Error("Icon geometry pair " + pair.id + " has an invalid status.");
     }
-    if (!pair.quality || !pair.quality.reviewer || !pair.quality.notes) {
-      throw new Error("Icon geometry pair " + pair.id + " has no quality review record.");
+    if (!pair.quality || !pair.quality.notes) {
+      throw new Error("Icon geometry pair " + pair.id + " has no quality state record.");
     }
     if (pair.quality.review !== pair.status) {
       throw new Error(
         "Icon geometry pair " +
           pair.id +
-          " has an unreviewed-candidate or mismatched quality state.",
+          " has a mismatched quality state.",
       );
     }
     if (pair.status === "rejected" && !pair.rejectionReason) {
@@ -357,6 +355,11 @@ function validatePairManifestShape(): void {
     if (pair.status !== "rejected" && pair.rejectionReason) {
       throw new Error("Only rejected icon geometry pairs may have a rejection reason.");
     }
+  }
+  if (morphPairManifest.pairs.some((pair) => pair.status === "accepted")) {
+    throw new Error(
+      "g16.049 cannot contain accepted pairs before the human visual-review gate.",
+    );
   }
 }
 
@@ -458,7 +461,6 @@ function buildMorphPairRecord(entry: PairManifestEntry): GeneratedPairRecord {
     normalizerVersion: ICON_GEOMETRY_NORMALIZER_VERSION,
     schemaVersion: ICON_GEOMETRY_SCHEMA_VERSION,
     qualityStatus: entry.quality.review,
-    qualityReviewer: entry.quality.reviewer,
     qualityNotes: entry.quality.notes,
     rejectionReason: entry.rejectionReason ?? null,
     topologyLeft: left.ok ? topology(left.value) : null,
@@ -664,7 +666,6 @@ function renderRustMorphRegistry(registry: GeneratedPairRegistry): string {
       `  normalizer_version: ${rustString(pair.normalizerVersion)},`,
       `  schema_version: ${pair.schemaVersion},`,
       `  quality_status: ${rustString(pair.qualityStatus)},`,
-      `  quality_reviewer: ${rustString(pair.qualityReviewer)},`,
       `  quality_notes: ${rustString(pair.qualityNotes)},`,
       `  rejection_reason: ${rustOptionString(pair.rejectionReason)},`,
       `  diagnostic_code: ${rustOptionString(diagnosticCode)},`,

@@ -6,7 +6,7 @@ import { ICON_GEOMETRY_REGISTRY } from "../src/icons/morph-pairs.generated";
 const digestPattern = /^[a-f0-9]{64}$/;
 
 describe("icon geometry registry", () => {
-  test("keeps the accepted, candidate, and rejected states explicit", () => {
+  test("keeps candidate and rejected states explicit with no runtime eligibility", () => {
     expect(ICON_GEOMETRY_REGISTRY.schemaVersion).toBe(1);
     expect(ICON_GEOMETRY_REGISTRY.normalizerVersion).toBe("1.0.0");
     expect(ICON_GEOMETRY_REGISTRY.source).toEqual({
@@ -25,13 +25,25 @@ describe("icon geometry registry", () => {
     expect(registryIds as string[]).toEqual(manifestIds);
     expect(new Set(registryIds).size).toBe(registryIds.length);
     expect(new Set(ICON_GEOMETRY_REGISTRY.pairs.map((pair) => pair.status))).toEqual(
-      new Set(["accepted", "candidate", "rejected"]),
+      new Set(["candidate", "rejected"]),
     );
-    expect(ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => pair.status === "accepted")).toHaveLength(5);
-    expect(ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => pair.status === "candidate")).toHaveLength(1);
+    expect(ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => pair.status === "accepted")).toHaveLength(0);
+    expect(ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => pair.status === "candidate")).toHaveLength(6);
     expect(ICON_GEOMETRY_REGISTRY.pairs.filter((pair) => pair.status === "rejected")).toHaveLength(6);
+    expect(
+      ICON_GEOMETRY_REGISTRY.pairs
+        .filter((pair) => pair.status === "candidate")
+        .map((pair) => pair.id),
+    ).toEqual([
+      "arrow-down-to-arrow-up",
+      "arrow-left-to-arrow-right",
+      "chevron-left-to-chevron-right",
+      "circle-to-dot",
+      "ellipsis-to-ellipsis-vertical",
+      "plus-to-x",
+    ]);
     const candidate = ICON_GEOMETRY_REGISTRY.pairs.find(
-      (pair) => pair.status === "candidate",
+      (pair) => pair.id === "circle-to-dot",
     );
     expect(candidate?.id).toBe("circle-to-dot");
     expect(candidate?.geometryLeft).not.toBeNull();
@@ -40,7 +52,6 @@ describe("icon geometry registry", () => {
 
     for (const pair of ICON_GEOMETRY_REGISTRY.pairs) {
       expect(pair.qualityStatus).toBe(pair.status);
-      expect(pair.qualityReviewer.length).toBeGreaterThan(0);
       expect(pair.qualityNotes.length).toBeGreaterThan(0);
       expect(pair.sourceDigestLeft).toMatch(digestPattern);
       expect(pair.sourceDigestRight).toMatch(digestPattern);
@@ -59,11 +70,11 @@ describe("icon geometry registry", () => {
     }
   });
 
-  test("emits compact, complete endpoint payloads", () => {
-    const accepted = ICON_GEOMETRY_REGISTRY.pairs.filter(
-      (pair) => pair.status === "accepted",
+  test("emits compact candidate fixture payloads", () => {
+    const candidates = ICON_GEOMETRY_REGISTRY.pairs.filter(
+      (pair) => pair.status === "candidate",
     );
-    for (const pair of accepted) {
+    for (const pair of candidates) {
       for (const geometry of [pair.geometryLeft, pair.geometryRight]) {
         if (!geometry) throw new Error(`missing geometry for ${pair.id}`);
         expect(geometry.schemaVersion).toBe(1);

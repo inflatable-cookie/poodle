@@ -1425,7 +1425,6 @@ pub(crate) struct GeneratedIconGeometryPair {
     pub(crate) normalizer_version: &'static str,
     pub(crate) schema_version: u32,
     pub(crate) quality_status: &'static str,
-    pub(crate) quality_reviewer: &'static str,
     pub(crate) quality_notes: &'static str,
     pub(crate) rejection_reason: Option<&'static str>,
     pub(crate) diagnostic_code: Option<&'static str>,
@@ -1792,7 +1791,7 @@ mod tests {
     }
 
     #[test]
-    fn generated_registry_has_complete_lineage_and_explicit_states() {
+    fn generated_registry_has_complete_lineage_and_candidate_gate() {
         assert_eq!(ICON_GEOMETRY_REGISTRY_SCHEMA_VERSION, 1);
         assert_eq!(ICON_GEOMETRY_NORMALIZER_VERSION, "1.0.0");
         assert_eq!(ICON_GEOMETRY_SOURCE_PACKAGE, "lucide-static");
@@ -1804,23 +1803,20 @@ mod tests {
             .any(|pair| pair.status == GeneratedPairStatus::Candidate));
         assert!(ICON_GEOMETRY_REGISTRY
             .iter()
-            .any(|pair| pair.status == GeneratedPairStatus::Accepted));
-        assert!(ICON_GEOMETRY_REGISTRY
-            .iter()
             .any(|pair| pair.status == GeneratedPairStatus::Rejected));
         assert_eq!(
             ICON_GEOMETRY_REGISTRY
                 .iter()
                 .filter(|pair| pair.status == GeneratedPairStatus::Accepted)
                 .count(),
-            5
+            0
         );
         assert_eq!(
             ICON_GEOMETRY_REGISTRY
                 .iter()
                 .filter(|pair| pair.status == GeneratedPairStatus::Candidate)
                 .count(),
-            1
+            6
         );
         assert_eq!(
             ICON_GEOMETRY_REGISTRY
@@ -1831,7 +1827,7 @@ mod tests {
         );
         let candidate = ICON_GEOMETRY_REGISTRY
             .iter()
-            .find(|pair| pair.status == GeneratedPairStatus::Candidate)
+            .find(|pair| pair.id == "circle-to-dot")
             .expect("candidate pair");
         assert_eq!(candidate.id, "circle-to-dot");
         assert!(candidate.geometry_left.is_some());

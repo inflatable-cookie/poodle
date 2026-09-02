@@ -35,8 +35,11 @@ provenance. Keep existing Icon static and add no public IconMorph.
 - TypeScript and Rust consume the same golden vectors and generated lineage,
   including exact canonical/sample wire digests, paired mappings, and costs.
   Source version/digest, schema/normalizer version, topology, diagnostics,
-  quality review, derived digest, and Lucide/Feather notice identity are
-  mandatory.
+  quality state and notes, derived digest, and Lucide/Feather notice identity
+  are mandatory; no reviewer identity is asserted by this foundation.
+- Every structurally plannable pair remains `candidate` until later human
+  visual review. g16.049 has zero runtime-eligible pairs; g16.050 may consume
+  candidate geometry only as an internal test fixture and cannot promote it.
 - Existing Icon, IconProvider, NodeKind::Icon, generic NodeAnimation, default
   registry behavior, packages, and public exports remain unchanged.
 
@@ -57,13 +60,15 @@ provenance. Keep existing Icon static and add no public IconMorph.
 - Separate runs emit byte-identical TypeScript/Rust registry artifacts and
   digests from the same pinned source and schema.
 - Alias, source-version, source-byte, topology, schema, orphan, duplicate,
-  reversed-duplicate, unreviewed-candidate, and payload drift fail closed.
+  reversed-duplicate, invalid-quality-state, accepted-before-visual-gate, and
+  payload drift fail closed.
 - Exact endpoints, direction reversal, contour ordering, tie-breaks,
   closure-preserving assignment, full-string numeric grammar, quantization,
   exact paired wire/cost parity, and unsupported geometry pass the shared
   vector corpus.
-- Numerical cost never auto-accepts a visibly bad pair. Human quality status is
-  explicit in the registry.
+- Numerical cost never changes a candidate into an accepted pair. Human visual
+  review is a later gate; this foundation records no accepted or runtime-
+  eligible pair.
 - No public component, node variant, provider widening, runtime clock, GPUI
   production route, web shell, visual claim, release, or Jetstream work enters
   the diff.
@@ -107,13 +112,14 @@ diff. No windowed/native-visual selector was run.
   negative, topology, strict-number, closure-assignment, exact-wire, reverse,
   and closed-start vectors consumed independently by both languages.
 - `packages/core/src/icons/morph-pairs.json` contains 12 explicit entries:
-  five accepted, one structurally plannable candidate, and six rejected. Alias
+  six structurally plannable candidates and six rejected pairs; no pair is
+  accepted or runtime-eligible in g16.049. Alias
   `home` resolves to canonical `house` and remains an explicit rejection;
   `menu-to-ellipsis` is explicitly rejected for closure mismatch.
 - The generator emits the TypeScript and Rust projections with source-node and
   asset digests, schema/normalizer versions, topology, diagnostics, quality
-  review, notice identity, and derived registry digest. The largest accepted
-  payload is 14,023 bytes against the 16 KiB limit.
+  state, notes, notice identity, and derived registry digest. The largest
+  candidate fixture payload is 14,023 bytes against the 16 KiB limit.
 - The static `Icon` contract and public icon barrels are unchanged. The
   adversarial plant/restore record, strict numeric counterexample, exact
   parity oracles, and validation results are in the execution log.
@@ -127,5 +133,6 @@ surface to prove the foundation.
 
 ## Continuation
 
-Accepted merge unlocks `g16.050`. It does not admit a component or visual
-capability.
+Once the g16.049 foundation is merged, orchestrator review may continue with
+`g16.050`. Candidate geometry remains internal test-fixture input only; this
+card admits no pair, component, or visual capability.

@@ -7,11 +7,10 @@
       "from": "arrow-down",
       "to": "arrow-up",
       "semantic": "directional-state",
-      "status": "accepted",
+      "status": "candidate",
       "quality": {
-        "review": "accepted",
-        "reviewer": "poodle-core",
-        "notes": "Two open contours; arrow direction changes without contour invention."
+        "review": "candidate",
+        "notes": "Structurally plannable; awaiting human visual review."
       }
     },
     {
@@ -19,11 +18,10 @@
       "from": "arrow-left",
       "to": "arrow-right",
       "semantic": "directional-state",
-      "status": "accepted",
+      "status": "candidate",
       "quality": {
-        "review": "accepted",
-        "reviewer": "poodle-core",
-        "notes": "Two open contours; shared shaft and arrowhead remain readable."
+        "review": "candidate",
+        "notes": "Structurally plannable; awaiting human visual review."
       }
     },
     {
@@ -31,11 +29,10 @@
       "from": "chevron-left",
       "to": "chevron-right",
       "semantic": "directional-state",
-      "status": "accepted",
+      "status": "candidate",
       "quality": {
-        "review": "accepted",
-        "reviewer": "poodle-core",
-        "notes": "One open contour; reversal preserves the chevron silhouette."
+        "review": "candidate",
+        "notes": "Structurally plannable; awaiting human visual review."
       }
     },
     {
@@ -46,8 +43,7 @@
       "status": "candidate",
       "quality": {
         "review": "candidate",
-        "reviewer": "poodle-core",
-        "notes": "One closed contour on each endpoint; awaiting visual quality review."
+        "notes": "Structurally plannable; awaiting human visual review."
       }
     },
     {
@@ -55,11 +51,10 @@
       "from": "ellipsis",
       "to": "ellipsis-vertical",
       "semantic": "orientation-state",
-      "status": "accepted",
+      "status": "candidate",
       "quality": {
-        "review": "accepted",
-        "reviewer": "poodle-core",
-        "notes": "Three closed contours; cyclic starts and contour ordering are deterministic."
+        "review": "candidate",
+        "notes": "Structurally plannable; awaiting human visual review."
       }
     },
     {
@@ -71,7 +66,6 @@
       "rejectionReason": "Alias resolves home to house, whose generated path uses unsupported curve commands.",
       "quality": {
         "review": "rejected",
-        "reviewer": "poodle-core",
         "notes": "Alias canonicalization is retained as rejection evidence; no pair geometry is emitted."
       }
     },
@@ -84,7 +78,6 @@
       "rejectionReason": "Rounded rectangles and curve commands are outside the v1 normalizer subset.",
       "quality": {
         "review": "rejected",
-        "reviewer": "poodle-core",
         "notes": "Static icon fallback remains the only result for this pair."
       }
     },
@@ -97,7 +90,6 @@
       "rejectionReason": "Open menu strokes and closed ellipsis dots have incompatible closure signatures.",
       "quality": {
         "review": "rejected",
-        "reviewer": "poodle-core",
         "notes": "Closure mismatch is retained as explicit negative evidence; no pair geometry is emitted."
       }
     },
@@ -110,7 +102,6 @@
       "rejectionReason": "Three open contours cannot correspond to two open contours without inventing topology.",
       "quality": {
         "review": "rejected",
-        "reviewer": "poodle-core",
         "notes": "Numerical contour duplication is deliberately not allowed."
       }
     },
@@ -123,7 +114,6 @@
       "rejectionReason": "Play uses unsupported curves and pause uses rounded rectangles with incompatible topology.",
       "quality": {
         "review": "rejected",
-        "reviewer": "poodle-core",
         "notes": "The pair remains explicit negative evidence rather than an automatic fallback."
       }
     },
@@ -132,11 +122,10 @@
       "from": "plus",
       "to": "x",
       "semantic": "toggle-state",
-      "status": "accepted",
+      "status": "candidate",
       "quality": {
-        "review": "accepted",
-        "reviewer": "poodle-core",
-        "notes": "Two open contours; orthogonal strokes map to the two diagonals."
+        "review": "candidate",
+        "notes": "Structurally plannable; awaiting human visual review."
       }
     },
     {
@@ -148,7 +137,6 @@
       "rejectionReason": "The shared speaker path uses unsupported curves and arcs.",
       "quality": {
         "review": "rejected",
-        "reviewer": "poodle-core",
         "notes": "A valid static icon pair is not enough to approve geometry continuity."
       }
     }
