@@ -67,6 +67,21 @@ Restored with `git checkout -- packages/core/src/dom/drag-drop-controller.ts`.
 Focused controller pointerdown/click tests and Svelte Tree click test passed
 after restore.
 
+Planted on `017cd1164` without committing. Dropped `preventDefault()` from
+`onCompatibilityClick` and restored `user-select` / `-webkit-user-select` as
+bare values (no `getPropertyPriority()`).
+
+Failures:
+
+- Controller `restores authored user-select and -webkit-user-select including
+  !important`: `getPropertyPriority("user-select")` was `''`.
+- Controller `consumes the source compatibility click after an activated
+  pointer gesture`: `defaultPrevented` was false (`committed`).
+- Controller `prevents the compatibility click default on a registered link
+  source`: `defaultPrevented` was false.
+
+Restored from `017cd1164`. Those three tests passed after restore.
+
 ## Validation
 
 - `bunx vitest run --project headless-dom test/headless-dom/drag-drop-controller.test.ts` — 72 pass
