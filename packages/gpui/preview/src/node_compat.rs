@@ -7361,12 +7361,10 @@ impl IntoElement for Slider {
             on_value_commit: None,
         };
         if self.spec.appearance == poodle_specs::SliderAppearance::Block {
-            let min_height = poodle_gpui_node_backend::block_slider_min_height(&self.spec);
-            return poodle_gpui_node_backend::block_slider_element(
+            return crate::block_slider_host::slider_element(
                 self.spec,
-                Arc::new(self.theme.clone()),
+                self.theme,
                 handlers,
-                min_height,
                 self.id,
             );
         }
@@ -7434,12 +7432,10 @@ impl IntoElement for RangeSlider {
             on_value_commit: None,
         };
         if self.spec.appearance == poodle_specs::SliderAppearance::Block {
-            let min_height = poodle_gpui_node_backend::block_range_slider_min_height(&self.spec);
-            return poodle_gpui_node_backend::block_range_slider_element(
+            return crate::block_slider_host::range_slider_element(
                 self.spec,
-                Arc::new(self.theme.clone()),
+                self.theme,
                 handlers,
-                min_height,
                 self.id,
             );
         }

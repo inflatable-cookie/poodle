@@ -219,6 +219,15 @@ describe("Slider (react) block appearance", () => {
     expect(container.querySelector(".poodle-slider")!.getAttribute("aria-label")).toBe("Gain");
   });
 
+  it("does not use visibleLabel as the accessible name", () => {
+    const { container } = render(<Slider appearance="block" value={50} visibleLabel="Blur" />);
+    const root = container.querySelector(".poodle-slider")!;
+    expect(root.getAttribute("aria-label")).toBeNull();
+    expect(container.querySelector(".poodle-slider__capsule")!.getAttribute("aria-hidden")).toBe(
+      "true",
+    );
+  });
+
   it("rejects vertical block before paint", () => {
     expect(() =>
       render(<Slider appearance="block" orientation="vertical" value={40} />),

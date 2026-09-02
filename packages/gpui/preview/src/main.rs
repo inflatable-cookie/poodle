@@ -5,6 +5,7 @@
 #![recursion_limit = "512"]
 
 mod app_state;
+mod block_slider_host;
 mod component_registry;
 mod contract_usage_docs;
 mod node_compat;

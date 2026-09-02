@@ -882,10 +882,9 @@ pub fn js_radio_group(
 }
 
 pub fn js_range_slider(spec: &RangeSliderSpec, theme: &JetstreamThemeProvider) -> El {
-    let ctx = block_render_context(theme, spec.appearance, 320.0);
     El(pr::range_slider(
         spec,
-        &ctx,
+        &pr::RenderContext::new(theme),
         pr::RangeSliderHandlers::default(),
     ))
 }
@@ -987,21 +986,7 @@ pub fn js_skeleton(spec: &SkeletonSpec, theme: &JetstreamThemeProvider) -> El {
 }
 
 pub fn js_slider(spec: &SliderSpec, theme: &JetstreamThemeProvider) -> El {
-    let ctx = block_render_context(theme, spec.appearance, 320.0);
-    El(pr::slider(spec, &ctx, &pr::SliderHandlers::default()))
-}
-
-fn block_render_context(
-    theme: &JetstreamThemeProvider,
-    appearance: poodle_specs::SliderAppearance,
-    capsule_span_px: f32,
-) -> pr::RenderContext<'_> {
-    let root = pr::RenderContext::new(theme);
-    if appearance == poodle_specs::SliderAppearance::Block {
-        root.with_block_layout_width(capsule_span_px)
-    } else {
-        root
-    }
+    El(pr::slider(spec, &pr::RenderContext::new(theme), &pr::SliderHandlers::default()))
 }
 
 pub fn js_spacer(spec: &SpacerSpec, theme: &JetstreamThemeProvider) -> El {

@@ -1062,4 +1062,19 @@ mod tests {
         assert!(!texts.contains("Gain"));
         assert_eq!(slider_control(&node).a11y.label.as_deref(), Some("Gain"));
     }
+
+    #[test]
+    fn visible_label_never_becomes_block_accessible_name() {
+        let spec = SliderSpec::new(50.0)
+            .with_bounds(0.0, 100.0)
+            .with_appearance(SliderAppearance::Block)
+            .with_visible_label("Blur");
+        let (node, _) = armed(spec);
+        assert_eq!(slider_control(&node).a11y.label, None);
+        let fallback_or_inline = node.texts().join(" ");
+        assert!(
+            fallback_or_inline.contains("Blur"),
+            "visibleLabel still paints: {fallback_or_inline:?}"
+        );
+    }
 }

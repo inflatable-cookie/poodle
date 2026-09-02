@@ -3971,11 +3971,8 @@ dependencies = [
  "anyhow",
  "futures",
  "gpui",
- "poodle-adapter",
  "poodle-headless",
  "poodle-node",
- "poodle-render",
- "poodle-specs",
 ]
 
 [[package]]

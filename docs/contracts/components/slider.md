@@ -74,7 +74,7 @@ Block appearance (`appearance="block"`), horizontal only:
 | `law` | `AudioValueLaw` | `linear` | no | embedded-variant value mapping; standard remains the native linear range path |
 | `orientation` | `"horizontal" \| "vertical"` | `"horizontal"` | no | layout and interaction axis |
 | `disabled` | `boolean` | `false` | no | disables interaction, applies disabled opacity |
-| `ariaLabel` | `string \| null` | `null` | no | accessible name; required when no visible label exists |
+| `ariaLabel` | `string \| null` | `null` | no | accessible name. Track: required when no associated visible label exists. Block: independent of `visibleLabel`; `visibleLabel` is never the accessible name |
 | `valueText` | `string \| null` | `null` | no | human-readable value text for assistive technology (aria-valuetext) |
 | `size` | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | `null` | no | explicit control size override; when null, resolves from inherited presentation |
 | `sizeRole` | `"chrome" \| "control" \| "prominent"` | `"control"` | no | semantic size offset from inherited presentation |
@@ -167,6 +167,8 @@ Visible content is a separate channel from accessibility copy:
 
 - `visibleLabel` and `formatVisibleValue` never read `ariaLabel` or `valueText`
   and never write those fields.
+- Block `visibleLabel` is not the accessible name. The control still needs
+  `ariaLabel` or an external label.
 - Formatter input is the normalized, bounds-guarded, step-snapped value.
 - Default visible value text is `String(value)`. Empty label or formatter
   output omits that assigned item.
@@ -226,7 +228,9 @@ negative status color. All other values publish `fillTone="positive"`.
   web standard mode; custom web and native controls expose the same role
 - Every custom control exposes bounds, current value, optional value text,
   orientation, disabled state, and keyboard behavior on its focusable node
-- `aria-label`: from ariaLabel prop; required when no visible label exists
+- `aria-label`: from ariaLabel prop. Track appearance: required when no
+  associated visible label exists. Block appearance: `visibleLabel` is never
+  the accessible name; supply `ariaLabel` or an external label independently
 - `aria-valuemin`: from min prop
 - `aria-valuemax`: from max prop
 - `aria-valuenow`: from value prop
@@ -234,7 +238,9 @@ negative status color. All other values publish `fillTone="positive"`.
 - `aria-orientation`: from orientation on custom controls; native range inputs
   retain their browser-native projection
 - `disabled`: native disabled attribute when disabled
-- Labeling rules: visible label or programmatic ariaLabel required
+- Labeling rules: track appearance needs an associated visible label or
+  programmatic ariaLabel. Block appearance needs a programmatic accessible
+  name independent of `visibleLabel`.
 
 ### Keyboard
 

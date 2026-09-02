@@ -54,6 +54,9 @@ use poodle_specs::{
 #[path = "../src/headless_driver.rs"]
 mod headless_driver;
 
+#[path = "../src/block_slider_host.rs"]
+mod block_slider_host;
+
 // The preview-local axis decision (g15.019). Pure data, no GPUI: which axis
 // tabs a specimen page publishes, and which tab a retained selection resolves
 // to once the available set shrinks.
@@ -4299,15 +4302,13 @@ fn mount_block_slider_host<'a>(
     width: f32,
 ) -> HeadlessDriver<'a> {
     let theme = theme();
-    let min_height = poodle_gpui_node_backend::block_slider_min_height(&spec);
     HeadlessDriver::new_element_in_box(
         cx,
         Rc::new(move || {
-            poodle_gpui_node_backend::block_slider_element(
+            block_slider_host::slider_element(
                 spec.clone(),
-                Arc::new(theme.clone()),
+                theme.clone(),
                 SliderHandlers::default(),
-                min_height,
                 None,
             )
         }),
@@ -4440,23 +4441,21 @@ fn block_slider_production_host_height_contains_fallback_and_not_wide_inline() {
         .with_bounds(0.0, 100.0)
         .with_appearance(SliderAppearance::Block)
         .with_visible_label("ABCDEFGH");
-    let slider_surface = poodle_gpui_node_backend::block_slider_min_height(&slider);
-    let range_surface = poodle_gpui_node_backend::block_range_slider_min_height(&range);
+    let slider_surface = block_slider_host::block_slider_surface_height(&slider);
+    let range_surface = block_slider_host::block_range_slider_surface_height(&range);
 
     let mut slider_narrow_h = 0.0f32;
     let mut slider_wide_h = 0.0f32;
     run_headless(|cx| {
         let theme = theme();
         let spec = slider.clone();
-        let surface = slider_surface;
         let _driver = mount_production_block_stack(
             cx,
             Rc::new(move || {
-                poodle_gpui_node_backend::block_slider_element(
+                block_slider_host::slider_element(
                     spec.clone(),
-                    Arc::new(theme.clone()),
+                    theme.clone(),
                     SliderHandlers::default(),
-                    surface,
                     None,
                 )
             }),
@@ -4484,15 +4483,13 @@ fn block_slider_production_host_height_contains_fallback_and_not_wide_inline() {
     run_headless(|cx| {
         let theme = theme();
         let spec = slider.clone();
-        let surface = slider_surface;
         let _driver = mount_production_block_stack(
             cx,
             Rc::new(move || {
-                poodle_gpui_node_backend::block_slider_element(
+                block_slider_host::slider_element(
                     spec.clone(),
-                    Arc::new(theme.clone()),
+                    theme.clone(),
                     SliderHandlers::default(),
-                    surface,
                     None,
                 )
             }),
@@ -4525,15 +4522,13 @@ fn block_slider_production_host_height_contains_fallback_and_not_wide_inline() {
     run_headless(|cx| {
         let theme = theme();
         let spec = range.clone();
-        let surface = range_surface;
         let _driver = mount_production_block_stack(
             cx,
             Rc::new(move || {
-                poodle_gpui_node_backend::block_range_slider_element(
+                block_slider_host::range_slider_element(
                     spec.clone(),
-                    Arc::new(theme.clone()),
+                    theme.clone(),
                     poodle_render::RangeSliderHandlers::default(),
-                    surface,
                     None,
                 )
             }),
@@ -4563,15 +4558,13 @@ fn block_slider_production_host_height_contains_fallback_and_not_wide_inline() {
     run_headless(|cx| {
         let theme = theme();
         let spec = range;
-        let surface = range_surface;
         let _driver = mount_production_block_stack(
             cx,
             Rc::new(move || {
-                poodle_gpui_node_backend::block_range_slider_element(
+                block_slider_host::range_slider_element(
                     spec.clone(),
-                    Arc::new(theme.clone()),
+                    theme.clone(),
                     poodle_render::RangeSliderHandlers::default(),
-                    surface,
                     None,
                 )
             }),

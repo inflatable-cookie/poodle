@@ -40,7 +40,7 @@ use poodle_node::{
     NodeWheelEvent, ScrubAxis, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
 };
 
-mod block_slider_layout;
+mod measured_node;
 mod drag;
 mod inset_shadow;
 mod interaction;
@@ -934,10 +934,7 @@ mod input_text;
 
 pub use ime::{mark_composing, take_composing};
 pub use input_text::{painted_text_state_for, PaintedTextState};
-pub use block_slider_layout::{
-    block_range_slider_element, block_range_slider_min_height, block_slider_element,
-    block_slider_min_height, shaped_block_advance,
-};
+pub use measured_node::{measured_node_element, shaped_block_advance, ShapedAdvance};
 
 #[cfg(test)]
 mod tests;

@@ -181,7 +181,9 @@ coerce orientation, silently render track appearance, or split that rejection
 by runtime.
 
 Visible content never reads `ariaLabel`, `lowerValueText`, or `upperValueText`
-and never writes those fields. Formatter inputs are normalized, bounds-guarded,
+and never writes those fields. `visibleLabel` is not a thumb accessible name;
+thumbs keep the §6 names (`"{ariaLabel} minimum/maximum"` or the defaults).
+Formatter inputs are normalized, bounds-guarded,
 step-snapped values. Empty label or formatter text omits that item. Default
 endpoint text is `String(value)`. Default range text joins resolved lower and
 upper text with `" – "`. Native specs carry resolved `visible_label`,

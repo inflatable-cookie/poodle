@@ -8,7 +8,8 @@ Proof head: `95a5dbd36d6e5e80b6647aaf7593b44a6a7abed8`
 Repair head: `c00a3c73dbd70dc485afc9250ce1e7f616352550`
 Height repair: `354a94c081d74712ba5d33917396d4f14e40f3ae`
 Repair: parent-owned native fit, real 44×44 web hits, React teardown refs,
-production GPUI fallback height (see log)
+production GPUI fallback height, construction ownership, accessible-name
+channels (see log)
 Log: `../../logs/2026-09/20260902-g16-046-block-sliders.md`
 Depends on: merged `g16.034` and operator acceptance recorded in
 `../../handoffs/20260901-234025-post-triage-canonical-runway.md`
@@ -152,16 +153,18 @@ Implementation landed on `feature/g16-046-block-sliders` as PR
 https://github.com/inflatable-cookie/poodle/pull/154. Public names, fit
 arithmetic, tie/clamp, terminal, 44×44 hits, forced-color roles, and
 horizontal-only rejection match this card. Visual ledger cells were not moved.
-Jetstream remains compile-compat specimens only.
+Jetstream remains deferred. This card does not change Jetstream preview
+behavior.
 
 Orchestrator review on that PR required three repairs, landed on the same
 branch without a new worktree:
 
 1. Native block fit uses parent-owned allocated width plus GPUI `shape_line`
-   advance. Construction is still `Spec + RenderContext -> Node` (architecture
-   010). The GPUI host waits for layout, shapes, then constructs. Paint panics
-   without `RenderContext::with_block_layout`. `with_block_layout_width` is
-   test/Jetstream-compat only and still uses the character heuristic.
+   advance. Construction stays `Spec + RenderContext -> Node` in the GPUI
+   composition layer. The node backend measures width, shapes named strings,
+   and interprets the rebuilt Node. Paint panics without
+   `RenderContext::with_block_layout`. `with_block_layout_width` is test-compat
+   only and still uses the character heuristic.
 2. Web 44×44 hits take pointer events, overflow the 28px `xs` capsule, and
    keep visual thumb/capsule size. Chromium and WebKit prove geometry plus
    pointer dispatch. A CSS token match is not that proof.
@@ -176,6 +179,13 @@ reserves the surface; fallback reserves surface plus the GPUI line. Range
 fallback is nowrap, matching Slider. Mounted production-host proofs use
 production min-height plus a following sibling at 80px and 400px for both
 controls. Not a fixed 80px production height.
+
+Exact-head review of `68bdb09f0` requested three more in-bounds repairs:
+node-backend no longer depends on `poodle-render` / `poodle-specs` /
+`poodle-adapter` or constructs Slider/RangeSlider; Jetstream preview diffs
+are gone; Slider §3/§6 treat block `visibleLabel` as not the accessible name,
+with a focused proof that `visibleLabel` alone never becomes it. RangeSlider
+keeps explicit/default per-thumb names.
 
 Oracle plant-and-restore ran against pre-rebase proof
 `eedb4a38ae4ac010aeb86e998b113b7a1d8d0a2c` (`8fd0a885a03147451affc937447f61f0cfeba4af`
