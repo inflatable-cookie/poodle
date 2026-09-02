@@ -40,11 +40,10 @@ mod form_layout;
 mod grid;
 mod hover_card;
 mod icon;
-// g16.049 geometry and its generated registry are intentionally dormant until
-// g16.050 supplies the internal runtime consumer; keep this private module
-// warning-clean without muting unrelated component modules.
+// g16.049/g16.050 geometry and its generated registry stay an internal
+// module: not a public component API, even as `pub mod`.
 #[allow(dead_code)]
-mod icon_geometry;
+pub(crate) mod icon_geometry;
 mod icon_button;
 mod icon_provider;
 mod list_card;

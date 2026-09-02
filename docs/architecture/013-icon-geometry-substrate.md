@@ -133,7 +133,8 @@ excluding notice text.
 
 - `poodle-core` owns the pure TypeScript normalizer and authored manifest.
 - `poodle-specs` owns the paired pure Rust normalizer and generated internal
-  Rust projection. The module is not re-exported as a public component API.
+  Rust projection. The module stays `pub(crate)`; it is not a public component
+  API, even as `pub mod`.
 - `scripts/build-default-icons.ts` owns deterministic source validation and
   paired projection generation.
 - `packages/core/src/icons/geometry-vectors.json` is the shared golden corpus
@@ -141,12 +142,55 @@ excluding notice text.
   numeric, closure-assignment, exact-wire, cost, and reverse-flight oracles.
 - Existing icon assets and their `LICENSE.txt` notice remain the single source
   lineage. No second catalogue or Morphicons source is copied or vendored.
-- A future resolved geometry node, GPUI path paint, web shell, lifecycle
-  helper, native visual admission, and public contract require later cards.
+- `g16.050` owns the private plan/lifecycle runtime, the distinct
+  `NodeKind::ResolvedIconGeometry` leaf, shared Rust construction, GPUI
+  `PathBuilder` paint, and test-private Svelte/React shells. Native visual
+  admission and public IconMorph remain later cards. The node kind stays
+  public vocabulary. Registry, runtime, and construction stay hidden:
+  `poodle-specs` has no public `icon_geometry` module; `poodle-render`
+  has no crate-root `resolved_icon_geometry` re-export; hosts and probes
+  opt into `icon-geometry-internal`.
 
 The geometry layer must not import Svelte, React, DOM, GPUI, a host clock, or
 the public Icon registry. It must not put path data in `NodeAnimation` or make
 GPUI perform pair lookup.
+
+## Internal runtime (g16.050)
+
+The lifecycle is a dedicated icon-geometry clock, not `NodeAnimation` and not a
+new public `MotionProperty`. Role `"icon-geometry"`, channel `"glyph"`,
+duration 180 ms. Architecture 012 still owns policy: full interpolates;
+reduced and frozen snap to the latest semantic endpoint; same-pair reversal
+rebases from the sampled axis; pair swap cancels the old plan; a rejected or
+missing pair clears the frame.
+
+One runtime is one owner, one clock, one plan, one frame. A second owner on
+the same runtime retargets; sampling the old key returns null. Concurrent
+instances are separate runtimes and hosts.
+
+The resolved node carries only compact quantized contours. No pair id, SVG
+string, or registry travels with the frame, so a backend cannot recover pair
+meaning. `NodeKind::Icon` stays a named static asset.
+
+Shared construction owns lookup, size, colour, and frame. It lives in
+`poodle-render`'s crate-private `icon_geometry` module; the
+`icon-geometry-internal` feature is a sealed host/test route, not a public
+consumer API. GPUI owns invalidation, scheduling, and teardown: a production
+host spawns a window task that ticks the 180 ms clock and writes the resolved
+frame in place. Web shells call `requestAnimationFrame` when the decision
+carries a live clock and cancel that handle on unmount. Controlled-progress
+props remain a test harness, not the production clock.
+
+Hot-path sampling mutates a reused contour buffer after plan creation. Interior
+samples allocate no `Map` and do not rebuild canonical point rows.
+Canonical vertices are used at progress 0 and 1; interiors use the 64-sample
+correspondence. GPUI `PathBuilder::build` is backend-owned paint, not
+composition allocation. Budgets: p95 geometry update at most 1 ms per
+instance and 4 ms for four concurrent instances; p95 cold plan at most 2 ms.
+The receipt is a sorted sample p95, not a single `Instant`.
+
+Candidate fixtures remain the only runtime input. This layer does not change
+pair status, eligibility, or public Icon behavior.
 
 ## Evidence boundary
 
@@ -159,3 +203,14 @@ Generator tests prove manifest state handling, provenance, paired output,
 payload limits, and drift failures. These checks establish an internal
 geometry foundation only. They do not claim visual quality, browser behavior,
 native pixels, frame pacing, accessibility, or public component parity.
+
+g16.050 adds internal runtime evidence only: TypeScript and Rust lifecycle
+traces (authored endpoints, A→B→A, A→B→C, policy snap, SSR initial, abort,
+teardown, buffer reuse, second-owner retarget); a named `NodeKind::Icon` path
+that stays unchanged; a resolved-geometry node with empty `texts()` and no
+pair id; a GPUI production host that ticks the 180 ms clock, invalidates,
+and drops the scheduled task on teardown; allocation/p95 receipts over
+repeated samples; a sealed construction path with no crate-root consumer
+export; and private Svelte/React SSR, hydration, focus, layout, live rAF,
+and controlled start/mid/end/reverse/frozen shells. No native pixel, AT,
+public API, release, consumer, or Jetstream claim.

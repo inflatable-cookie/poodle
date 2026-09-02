@@ -90,6 +90,10 @@ pub mod grid;
 pub mod history_center;
 pub mod hover_card;
 pub mod icon;
+#[cfg(feature = "icon-geometry-internal")]
+pub mod icon_geometry;
+#[cfg(not(feature = "icon-geometry-internal"))]
+pub(crate) mod icon_geometry;
 pub mod icon_button;
 pub mod icon_provider;
 pub mod inline_list_section;

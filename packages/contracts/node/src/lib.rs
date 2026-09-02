@@ -88,6 +88,20 @@ pub struct Node {
     pub children: Vec<Node>,
 }
 
+/// One closed or open contour of quantized geometry (`1/10,000` of the 24-unit grid).
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ResolvedIconContour {
+    pub closed: bool,
+    pub points: Vec<(i32, i32)>,
+}
+
+/// Compact validated resolved geometry. Progress `0`/`1` use canonical vertices;
+/// interiors use sampled correspondence. No pair identity travels with the frame.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct ResolvedIconGeometryFrame {
+    pub contours: Vec<ResolvedIconContour>,
+}
+
 /// What the node *is*. Everything else describes it.
 #[derive(Clone, Default)]
 pub enum NodeKind {
@@ -98,6 +112,12 @@ pub enum NodeKind {
     Text { content: String },
     /// A named icon. The backend rasterises; the name is the contract.
     Icon { name: String, size: f32 },
+    /// Compact validated icon geometry. Shared composition owns pair lookup;
+    /// backends receive only this frame — no SVG, pair id, or registry.
+    ResolvedIconGeometry {
+        size: f32,
+        frame: ResolvedIconGeometryFrame,
+    },
     /// An image by source path/URL; the backend owns decode and upload.
     /// Fits by covering the box (object-fit: cover) — the one mode a
     /// component has needed so far.
@@ -997,6 +1017,13 @@ impl Node {
         }
     }
 
+    pub fn resolved_icon_geometry(size: f32, frame: ResolvedIconGeometryFrame) -> Self {
+        Self {
+            kind: NodeKind::ResolvedIconGeometry { size, frame },
+            ..Self::default()
+        }
+    }
+
     pub fn child(mut self, child: Node) -> Self {
         self.children.push(child);
         self
@@ -1030,6 +1057,7 @@ impl Node {
             NodeKind::Image { .. }
             | NodeKind::Progress { .. }
             | NodeKind::ProgressRing { .. }
+            | NodeKind::ResolvedIconGeometry { .. }
             | NodeKind::Container => {}
         }
         for child in &self.children {
@@ -1056,6 +1084,9 @@ impl fmt::Debug for Node {
             NodeKind::Container => "Container".to_string(),
             NodeKind::Text { content } => format!("Text({content:?})"),
             NodeKind::Icon { name, .. } => format!("Icon({name:?})"),
+            NodeKind::ResolvedIconGeometry { frame, .. } => {
+                format!("ResolvedIconGeometry(contours={})", frame.contours.len())
+            },
             NodeKind::Button { label } => format!("Button({label:?})"),
             NodeKind::Image { source } => format!("Image({source:?})"),
             NodeKind::Progress { fraction } => format!("Progress({fraction})"),

@@ -28,6 +28,12 @@ libc = "0.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
+[features]
+default = []
+# Sealed host/test route for the private icon-geometry runtime. Not a public
+# consumer API; preview probes and internal hosts opt in explicitly.
+icon-geometry-internal = []
+
 [package.metadata.poodle]
 public-intent = true
 channel = "preview"

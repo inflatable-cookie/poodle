@@ -27,17 +27,17 @@ use std::time::Duration;
 
 use gpui::{
     canvas, deferred, div, img, linear_color_stop, linear_gradient, point, px, relative, size, svg,
-    AnyElement, AnyView, App, AppContext, ClickEvent, CursorStyle, Div, ElementId, Hsla,
+    AnyElement, AnyView, App, AppContext, Bounds, ClickEvent, CursorStyle, Div, ElementId, Hsla,
     InteractiveElement, IntoElement, KeyDownEvent, MouseButton, MouseDownEvent, MouseMoveEvent,
-    MouseUpEvent, ParentElement, PathBuilder, ScrollDelta, ScrollWheelEvent, SharedString,
+    MouseUpEvent, ParentElement, PathBuilder, Pixels, ScrollDelta, ScrollWheelEvent, SharedString,
     Stateful, StatefulInteractiveElement, StyleRefinement, Styled, StyledImage, Window,
 };
 use poodle_node::{
     AnimEasing, AnimLoop, AnimProperty, ColorValue, ContinuousValuePhase, CrossAxisAlignment,
     CursorHint, FocusRing, FontFamily, LayoutDirection, LayoutOverflow, LayoutSizing,
     MainAxisAlignment, Node, NodeAnimation, NodeContinuousValueEvent, NodeDragEvent, NodeDragPhase,
-    NodeKey, NodeKind, NodeModifiers, NodePoint, NodePosition,
-    NodeWheelEvent, ScrubAxis, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
+    NodeKey, NodeKind, NodeModifiers, NodePoint, NodePosition, NodeWheelEvent,
+    ResolvedIconGeometryFrame, ScrubAxis, ScrubPhase, SelectGranularity, StylePatch, TextAlign,
 };
 
 mod measured_node;
@@ -440,6 +440,27 @@ fn to_gpui_impl(node: &Node) -> AnyElement {
                 .flex_shrink_0();
             build_svg_leaf(node, el)
         }
+        NodeKind::ResolvedIconGeometry { size, frame } => {
+            record_probe_channel("content.text-icon.resolved-geometry");
+            let paint_color = node
+                .style
+                .descriptor
+                .text_color
+                .map(color)
+                .unwrap_or_else(gpui::white);
+            let size = *size;
+            let frame = frame.clone();
+            let glyph = canvas(
+                move |_, _, _| {},
+                move |bounds, _, window, _| {
+                    record_probe_channel("content.text-icon.resolved-geometry.paint");
+                    paint_resolved_icon_geometry(window, bounds, &frame, paint_color);
+                },
+            )
+            .size(px(size))
+            .flex_shrink_0();
+            build_box(node, div().child(glyph).size(px(size)).flex_shrink_0())
+        }
         NodeKind::Image { source } => {
             record_probe_channel("structure.identity.image");
             // Vocabulary: fits by covering the box (object-fit: cover).
@@ -826,6 +847,44 @@ fn apply_children<E: ParentElement>(mut el: E, node: &Node, id: &str) -> E {
     }
     FOCUS_SCOPE.with(|f| f.set(inherited));
     el
+}
+
+fn paint_resolved_icon_geometry(
+    window: &mut Window,
+    bounds: Bounds<Pixels>,
+    frame: &ResolvedIconGeometryFrame,
+    paint_color: Hsla,
+) {
+    let width = f32::from(bounds.size.width);
+    let height = f32::from(bounds.size.height);
+    let side = width.min(height);
+    if side <= 0.0 || frame.contours.is_empty() {
+        return;
+    }
+    let stroke = px((2.0 / 24.0) * side);
+    let origin = bounds.origin;
+    let to_point = |x: i32, y: i32| {
+        point(
+            origin.x + px((x as f32 / 10_000.0) / 24.0 * side),
+            origin.y + px((y as f32 / 10_000.0) / 24.0 * side),
+        )
+    };
+    for contour in &frame.contours {
+        if contour.points.len() < 2 {
+            continue;
+        }
+        let mut path = PathBuilder::stroke(stroke);
+        path.move_to(to_point(contour.points[0].0, contour.points[0].1));
+        for &(x, y) in &contour.points[1..] {
+            path.line_to(to_point(x, y));
+        }
+        if contour.closed {
+            path.close();
+        }
+        if let Ok(built) = path.build() {
+            window.paint_path(built, paint_color);
+        }
+    }
 }
 
 // ── Animation ───────────────────────────────────────────────────────

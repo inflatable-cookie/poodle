@@ -1,6 +1,6 @@
 # g16.050 — Icon Geometry Internal Runtime Substrate
 
-Status: ready — merged `g16.049` foundation available; candidate geometry is fixture-only
+Status: implementation complete — PR #160 pending orchestrator review
 Type: implementation — internal capability
 Opened: 2026-09-01
 Depends on: merged `g16.049` foundation; funded icon-geometry programme recorded in
@@ -9,6 +9,9 @@ Governing refs: the architecture produced by `g16.049`,
 `../../architecture/012-semantic-motion-policy.md`,
 `../../contracts/components/icon.md`,
 `../../contracts/components/icon-button.md`
+Architecture: `../../architecture/013-icon-geometry-substrate.md`
+Execution log: `../../logs/2026-09/20260902-g16-050-icon-geometry-internal-runtime-substrate.md`
+PR: https://github.com/inflatable-cookie/poodle/pull/160
 
 ## Goal
 
@@ -68,6 +71,29 @@ browser evidence. Keep the route internal until native visual admission.
   AT, public API, release, consumer, or Jetstream claim appears. Candidate
   geometry remains fixture input only; this card changes no g16.049 pair status
   or runtime-eligibility state.
+
+## Current head proves
+
+Repair of the exact-head review on PR #160. The head now has:
+
+- one GPUI `IconGeometryHost` whose timer re-enters without holding the app
+  borrow, writes the resolved frame, calls `window.refresh()`, preserves an
+  inert live task, uses the runtime's proportional reverse duration, and
+  cancels on policy tightening/teardown
+- web shells whose rAF loop resumes the live clock's progress and duration;
+  paired tests prove inert continuation, proportional reverse completion, and
+  full-to-frozen cancellation
+- a single-owner runtime: second owner retargets, old key samples null,
+  concurrent instances are separate runtimes/hosts
+- zero hot-path `Map`, key clone, or fresh canonical rows on interior samples;
+  an allocator-backed probe wraps the actual scheduled GPUI tick and reports
+  zero allocations after plan creation; p95 receipts still cover 40 samples
+- `NodeKind::ResolvedIconGeometry` public; registry/runtime/construction
+  hidden (`pub(crate)` on specs, no crate-root `resolved_icon_geometry` on
+  render, `icon-geometry-internal` for hosts/tests)
+
+Controlled-progress props remain a test harness. `PathBuilder::build` remains
+backend paint, not a composition allocation.
 
 ## Review Oracle
 
