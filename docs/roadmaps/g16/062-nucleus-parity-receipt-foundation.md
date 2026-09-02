@@ -1,6 +1,6 @@
 # g16.062 — Nucleus Parity Receipt Foundation
 
-Status: implementation complete — PR review pending
+Status: complete — merged in PR #170 at `d88a60e27`
 Type: evidence infrastructure
 Opened: 2026-09-02
 Depends on: promoted Nucleus parity programme
@@ -88,5 +88,6 @@ claim accessibility, visuals, or Nucleus adoption from mounted evidence.
 
 Evidence log: `docs/logs/2026-09/20260902-g16-062-nucleus-parity-receipt-foundation.md`.
 
-After merge, compile small NP-1 through NP-5 cards from validated gaps. Do not
-dispatch a tranche as one batch.
+Compile small NP-1 through NP-5 cards from validated gaps. Do not dispatch a
+tranche as one batch. `g16.066` launches first under the recorded native
+harness merge order; the Nucleus child cards remain independently promotable.

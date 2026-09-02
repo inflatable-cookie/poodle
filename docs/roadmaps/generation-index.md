@@ -31,15 +31,14 @@ Updated: 2026-09-02
     #154; `047` merged in PR #152 after one exact-head repair round; `048`
     merged in PR #153 with a verified static-fallback benchmark verdict; `049`
     merged in PR #156; `050`, `053`–`061` are complete; independent `055`
-    merged in PR #151; `062` remains in review in the Nucleus GPUI parity
-    programme; `063` and `064` merged in PRs #167 and #168; `065` returned to
+    merged in PR #151; `062` merged in PR #170; `063` and `064` merged in PRs
+    #167 and #168; `065` returned to
     planning after PR #169 proved the GPUI tooltip boundary insufficient
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: repair and merge `g16.062`; then launch `g16.066`, the
-    Poodle-owned GPUI Node tooltip lifecycle runtime. `g16.065` resumes after
-    that dependency lands.
+  - Ready frontier: launch `g16.066`, the Poodle-owned GPUI Node tooltip
+    lifecycle runtime. `g16.065` resumes after that dependency lands.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -56,7 +55,7 @@ Updated: 2026-09-02
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: complete `g16.062`, then `g16.066` → `g16.065`, while the
+  - Next move: complete `g16.066` → `g16.065`, while the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.

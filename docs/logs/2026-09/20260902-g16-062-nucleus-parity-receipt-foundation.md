@@ -1,7 +1,7 @@
 # g16.062 — Nucleus parity receipt foundation
 
 Date: 2026-09-02
-Status: implementation complete; worker PR review pending
+Status: complete; merged in PR #170 at `d88a60e27`
 
 ## Outcome
 
