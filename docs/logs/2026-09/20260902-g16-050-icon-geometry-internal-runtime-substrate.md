@@ -16,6 +16,8 @@ Rebased onto live `origin/main`: `595bec72825a9b830edb2b46f82b4ece049f8e1b`
 Post-rebase implementation head: `4f71bf3899d0d9678b4cac58ffac8476721a07fb`
 Reviewed head (blocked): `63ea7582ec7e596b067b878e804bf717464b2a4b`
 Repair code head: `a225058a3a0b200d5508835d41777f0e989ec19e`
+Second-review lifecycle repair: `6906c4438`
+Second-review scheduler oracle: `e1041024f`
 PR: https://github.com/inflatable-cookie/poodle/pull/160
 
 ## Outcome
@@ -66,6 +68,27 @@ and PR.
    hides construction by default; `icon-geometry-internal` is the host/test
    route. No crate-root `resolved_icon_geometry`.
 
+## Second exact-head repair
+
+Review of `dda88f992` found that the scheduler wakeup did not prove a window
+invalidation, host/shell clocks did not preserve the pure runtime's inert and
+proportional laws, and the native scheduler still cloned its key each tick.
+
+1. GPUI invalidation. The timer now re-enters the app without advancing the
+   test clock under the app borrow, mutates the resolved node, and calls
+   `window.refresh()`. The mounted oracle dispatches a harmless key without
+   forcing a frame; GPUI paints only when the scheduler already invalidated the
+   window.
+2. Host/shell lifecycle. Inert GPUI activation keeps the existing task and
+   timing. Reverse reads the runtime's proportional duration. Policy tightening
+   snaps the runtime, updates the node, and cancels the task. Web rAF reads the
+   live clock's progress and duration, so framework cleanup/restart resumes the
+   same segment rather than granting a fresh 180 ms.
+3. Scheduler allocation. The tick borrows the stored key instead of cloning
+   its `String`. A test-binary counting allocator is armed by a function-pointer
+   probe immediately around the real scheduled tick plus invalidation; it
+   reports zero allocations after plan creation.
+
 ## Falsification
 
 Each plant was applied temporarily, the intended check failed, and the exact
@@ -91,6 +114,16 @@ Exact-head repair:
 | Allocation | `new Map(...)` restored in `writeFrameAt`; TS suite: Map constructed 34 times | interior samples allocate no Map |
 | Seal | `pub use icon_geometry::resolved_icon_geometry` at render crate root; `construction_is_sealed_from_the_crate_root` panicked | no crate-root consumer path |
 
+Second exact-head repair:
+
+| Oracle | Plant and observed bite | Restored state |
+| --- | --- | --- |
+| GPUI invalidation | removed `window.refresh()` from the scheduled tick; mounted probe stayed empty: `scheduler invalidation must repaint ... []` | scheduled tick invalidates before the test platform's event-driven paint |
+| Native inert/reverse | restored unconditional task clearing and fixed 180 ms host duration; lifecycle proof lost the live key (`None` vs motion key) | inert keeps the task; reverse duration comes from the runtime |
+| Native policy | removed task cancellation from policy tightening; wakeups advanced from 4 to 5 after frozen | frozen/reduced stop the scheduler |
+| Native allocation | restored `inner.key.clone()` inside the tick; allocator receipt reported 1 allocation | scheduled tick borrows the stored key and reports zero |
+| Web timing | forced rAF to restart at progress 0 for 180 ms; paired shells remained at an interior path at 144 ms instead of the authored `from` endpoint | rAF resumes live progress and uses proportional segment duration |
+
 ## Validation
 
 Focused (first landing):
@@ -114,6 +147,15 @@ Focused (exact-head repair):
 - `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test icon_geometry_headless` — 4 pass
 - `bunx vitest run --project svelte-components --project svelte-components-ssr --project react-components` on the private shells — 10 pass
 - `bunx svelte-check --workspace packages/svelte/components --threshold error` — 0 errors (4 pre-existing warnings)
+
+Focused (second exact-head repair):
+
+- `bun test packages/core/test/icon-geometry-runtime.test.ts` — 11 pass
+- `cargo test --manifest-path packages/contracts/components/Cargo.toml --test icon_geometry` — 5 pass
+- `cargo test --manifest-path packages/render/Cargo.toml --lib icon_geometry` — 5 pass
+- `cargo test --manifest-path packages/gpui/preview/Cargo.toml --test icon_geometry_headless -- --test-threads=1` — 6 pass
+- `bunx vitest run --project react-components packages/react/components/test/IconGeometryShell.test.tsx` — 6 pass
+- `bunx vitest run --project svelte-components packages/svelte/components/test/IconGeometryShell.test.ts` — 4 pass
 
 Repository boards (repair head):
 

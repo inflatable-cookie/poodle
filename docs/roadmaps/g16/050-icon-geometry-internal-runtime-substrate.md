@@ -76,14 +76,18 @@ browser evidence. Keep the route internal until native visual admission.
 
 Repair of the exact-head review on PR #160. The head now has:
 
-- one GPUI `IconGeometryHost` that spawns a window task, ticks the 180 ms
-  clock, writes the resolved frame in place, and drops that task on teardown
-- web shells that `requestAnimationFrame` when `liveClock` is set and cancel
-  the handle on unmount; stripping `cancelAnimationFrame` fails the shell test
+- one GPUI `IconGeometryHost` whose timer re-enters without holding the app
+  borrow, writes the resolved frame, calls `window.refresh()`, preserves an
+  inert live task, uses the runtime's proportional reverse duration, and
+  cancels on policy tightening/teardown
+- web shells whose rAF loop resumes the live clock's progress and duration;
+  paired tests prove inert continuation, proportional reverse completion, and
+  full-to-frozen cancellation
 - a single-owner runtime: second owner retargets, old key samples null,
   concurrent instances are separate runtimes/hosts
-- zero hot-path `Map` / fresh canonical rows on interior samples; compact and
-  node point capacity/pointers stay stable; p95 receipts over 40 samples
+- zero hot-path `Map`, key clone, or fresh canonical rows on interior samples;
+  an allocator-backed probe wraps the actual scheduled GPUI tick and reports
+  zero allocations after plan creation; p95 receipts still cover 40 samples
 - `NodeKind::ResolvedIconGeometry` public; registry/runtime/construction
   hidden (`pub(crate)` on specs, no crate-root `resolved_icon_geometry` on
   render, `icon-geometry-internal` for hosts/tests)
