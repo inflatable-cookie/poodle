@@ -40,10 +40,13 @@ All three web packages use exact file and side-effect policies:
 "sideEffects": ["**/*.css"]
 ```
 
-Core uses one JavaScript lane with declarations. Its complete existing public
-entry and token inventory is rewritten mechanically to `dist`; no target may
-contain `src`, a source alias, or a `main` fallback. `./icons` resolves to
-compiled JavaScript and declarations. CSS-only entries remain explicit:
+Core uses one JavaScript lane with declarations. Every core JS export uses
+`types`, then `import`, then `default`, with `import` and `default` targeting
+the same compiled JavaScript. That `import` is a module-format fallback, not an
+environment selector. CSS-only entries stay conditionless strings. The complete
+existing public entry and token inventory is rewritten mechanically to `dist`;
+no target may contain `src`, a source alias, or a `main` fallback. `./icons`
+resolves to compiled JavaScript and declarations:
 
 ```text
 ./styles/*          -> ./dist/styles/*

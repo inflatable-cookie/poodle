@@ -23,6 +23,20 @@ receipt JSON, forbidden archive content, and the root-to-`./markdown` break
 without a shim. Successors inherit writable scopes and oracles from that spec.
 No package was built, packed, versioned, or released.
 
+## Repair (PR review)
+
+Exact-head review at `d4737ab0e13efb14af51faf13fa08984dd94dad2` blocked two
+contract gaps:
+
+1. Core JS maps are `types` / `import` / `default` with `import` and `default`
+   the same compiled file. `import` is a module-format fallback. Svelte still
+   forbids `import`.
+2. `rosterNamesSha256` is SHA-256 of UTF-8 names with LF after every name
+   including the last (`f497bfa0…a84a`). `artifactSetId` is SHA-256 of compact
+   UTF-8 JSON `[Hcore,Hreact,Hsvelte]` with no trailing newline. g16.059 now
+   rejects `join` without a final LF, pretty-printed JSON, a trailing LF, or
+   role order.
+
 ## Current-state drift recorded, not repaired
 
 - `files` still ship `src`; Svelte still has a `svelte` field and condition

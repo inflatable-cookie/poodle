@@ -273,11 +273,73 @@ XYPad
 
 ## Core export map
 
-Core is one JavaScript lane. Every JS target has `types` then `default`.
-There is no `svelte`, `browser`, or `import` environment selector. No target
-contains `src`, a source alias, or a `main` fallback.
+Core is one JavaScript lane. Every JS export uses `types`, then `import`, then
+`default`. `import` and `default` target the same compiled JavaScript. That
+`import` is a module-format fallback, not an environment selector. There is no
+`svelte` or `browser` condition. No target contains `src`, a source alias, or a
+`main` fallback.
+
+Svelte still forbids `import`. Core must not copy that prohibition.
 
 Conditionless string targets are CSS-only.
+
+```json
+{
+  ".": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js",
+    "default": "./dist/index.js"
+  },
+  "./icons": {
+    "types": "./dist/icons/index.d.ts",
+    "import": "./dist/icons/index.js",
+    "default": "./dist/icons/index.js"
+  },
+  "./icons/build": {
+    "types": "./dist/icons/build.d.mts",
+    "import": "./dist/icons/build.mjs",
+    "default": "./dist/icons/build.mjs"
+  },
+  "./icons/*": {
+    "types": "./dist/icons/icons/*.d.ts",
+    "import": "./dist/icons/icons/*.js",
+    "default": "./dist/icons/icons/*.js"
+  },
+  "./tokens": {
+    "types": "./dist/tokens/index.d.ts",
+    "import": "./dist/tokens/index.js",
+    "default": "./dist/tokens/index.js"
+  },
+  "./tokens/runtime": {
+    "types": "./dist/tokens/runtime.d.ts",
+    "import": "./dist/tokens/runtime.js",
+    "default": "./dist/tokens/runtime.js"
+  },
+  "./tokens/css": {
+    "types": "./dist/tokens/css.d.ts",
+    "import": "./dist/tokens/css.js",
+    "default": "./dist/tokens/css.js"
+  },
+  "./tokens/themes": {
+    "types": "./dist/tokens/themes.d.ts",
+    "import": "./dist/tokens/themes.js",
+    "default": "./dist/tokens/themes.js"
+  },
+  "./tokens/metadata": {
+    "types": "./dist/tokens/metadata.d.ts",
+    "import": "./dist/tokens/metadata.js",
+    "default": "./dist/tokens/metadata.js"
+  },
+  "./tokens/units": {
+    "types": "./dist/tokens/units.d.ts",
+    "import": "./dist/tokens/units.js",
+    "default": "./dist/tokens/units.js"
+  }
+}
+```
+
+The same three-condition object applies to every core JS family in the table
+below. CSS rows stay strings.
 
 | Export | Target |
 | --- | --- |
@@ -692,7 +754,7 @@ Packed members are only the contracted `files` plus npm's required
 | source | `src/`, raw `.svelte`, non-declaration `.ts`/`.tsx` |
 | maps | `*.map` |
 | workspace | workspace protocol, sibling paths, TS path aliases inside the archive |
-| selectors | `svelte` condition, top-level `svelte` field, `import` before `default` on Svelte |
+| selectors | `svelte` condition, top-level `svelte` field, `import` on any Svelte export; core JS missing `import`, or core `import`/`default` pointing at different files |
 | fallbacks | `main` source fallback, compatibility alias, root markdown re-export |
 | receipts | timestamps, absolute paths, unsorted inventories |
 
@@ -749,8 +811,8 @@ not mutate the certified tree.
   "svelteFloor": "5.56.8",
   "belowFloorNegative": "5.38.6",
   "rosterDenominator": 176,
-  "rosterNamesSha256": "sha256 of newline-joined sorted names",
-  "artifactSetId": "stable id over the three archive hashes",
+  "rosterNamesSha256": "f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a",
+  "artifactSetId": "64-char lowercase hex from the artifactSetId formula",
   "packages": {
     "@inflatable-cookie/poodle-core": {
       "archiveSha256": "lowercase hex",
@@ -771,9 +833,54 @@ not mutate the certified tree.
 }
 ```
 
-Package keys are sorted. The harness compares two builds and two packs, then
-records this object. `g16.054` may copy identity into candidate history; it
-does not change this schema.
+Package keys in `packages` are the three names below, sorted lexicographically
+by the package name string.
+
+### `rosterNamesSha256`
+
+SHA-256 (FIPS 180-4) over the UTF-8 bytes of the 176 sorted names in
+**Canonical component denominator**, in that order, with one LF (`0x0A`) after
+every name including the last. No BOM, no CR, no spaces around names, no blank
+lines. Digest is 64-char lowercase hex.
+
+That payload is a POSIX text. `Array.prototype.join("\n")` without a final LF
+is non-conforming. For the names frozen in this spec the digest is:
+
+```text
+f497bfa0a47e1627a1ee7076016ac5566d83584d458b3f3693b688885a02a84a
+```
+
+The same names joined with LF *between* names only hash to
+`740db11b4f8a28e28b5aeae52fc28665197b7161e4fce65a6bd1b0e148293a79` and fail.
+
+### `artifactSetId`
+
+Let `Hcore`, `Hreact`, and `Hsvelte` be the 64-char lowercase hex
+`archiveSha256` values for:
+
+1. `@inflatable-cookie/poodle-core`
+2. `@inflatable-cookie/poodle-react`
+3. `@inflatable-cookie/poodle-svelte`
+
+That order is lexicographic by package name, not publication role. Canonical
+bytes are UTF-8 JSON with no whitespace and no trailing newline:
+
+```text
+["<Hcore>","<Hreact>","<Hsvelte>"]
+```
+
+`artifactSetId` is SHA-256 of those bytes, 64-char lowercase hex.
+
+Worked vector, not a production archive: if the three hashes are 64 `a`, 64
+`b`, and 64 `c` letters, the canonical bytes are 202 bytes starting
+`["aaaa` and not ending in LF, and `artifactSetId` is
+`a3e9a05750d52fe7168bb71489884987f74a7e0ff0a70b437132829956a308b0`.
+Pretty-printed JSON, a trailing LF, or role order core/Svelte/React each
+produce a different digest and fail.
+
+The harness compares two builds and two packs, then records this object.
+`g16.054` may copy identity into candidate history; it does not change this
+schema.
 
 ## Root markdown migration
 
@@ -819,6 +926,7 @@ that card, one log, papercuts.
 | Icons complete | `./icons/x` missing JS or declarations | export check fails |
 | Source-free | staged non-declaration `.ts` | source audit fails |
 | Receipt reproducible | timestamp or absolute path in JSON | second-build hash differs |
+| Core import is format fallback | core `.` omits `import`, or `import` and `default` differ | export-map check fails |
 | Parser isolation | `marked` in core output or receipt | dependency audit fails |
 | Card stays core-only | Svelte component compilation | diff-scope check fails |
 
@@ -854,6 +962,7 @@ papercuts. Minimal package/build repairs only after explicit review.
 | Negatives bite | `branchCount` compiles | unsuppressed fixture fails |
 | Receipt matches tree | evidence edit changes package tree | certified tree hash changes |
 | Roster canonical | fixture remains 175, or names disagree with this spec | denominator gate fails |
+| Receipt bytes are exact | `rosterNamesSha256` joins names with LF between them and omits the final LF, or `artifactSetId` pretty-prints JSON, appends LF, or orders core/Svelte/React | installed receipt comparison fails |
 | Dotfile membership | receipt missing from tarball | archive member check fails |
 | Not a release | tag, workflow, or npm change | scope gate fails |
 
