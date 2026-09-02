@@ -116,10 +116,12 @@ describe("ToastHost (react)", () => {
   });
 
   it("clears a running clock when the same id becomes sticky", async () => {
-    const { store, hostStore } = makeStore([{ id: "job", title: "Saving", tone: "info" }]);
+    const { store, hostStore } = makeStore([
+      { id: "job", title: "Saving", message: "Working.", tone: "info" },
+    ]);
     render(<ToastHost store={hostStore} autoDismissMs={20} />);
     act(() => {
-      store.set([{ id: "job", title: "Failed", tone: "danger" }]);
+      store.set([{ id: "job", title: "Failed", message: "Boom.", tone: "danger" }]);
     });
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 80));
@@ -129,10 +131,12 @@ describe("ToastHost (react)", () => {
 
   it("starts the configured delay when sticky pending settles to success", async () => {
     vi.useFakeTimers();
-    const { store, hostStore } = makeStore([{ id: "job", title: "Publishing", sticky: true }]);
+    const { store, hostStore } = makeStore([
+      { id: "job", title: "Publishing", message: "Working.", sticky: true },
+    ]);
     render(<ToastHost store={hostStore} autoDismissMs={2500} />);
     act(() => {
-      store.set([{ id: "job", title: "Published", tone: "success" }]);
+      store.set([{ id: "job", title: "Published", message: "Done.", tone: "success" }]);
     });
     await act(async () => {
       await vi.advanceTimersByTimeAsync(2499);
@@ -146,8 +150,8 @@ describe("ToastHost (react)", () => {
 
   it("keeps one live row when the store repeats an id", async () => {
     const { hostStore } = makeStore([
-      { id: "job", title: "First" },
-      { id: "job", title: "Last", tone: "success" },
+      { id: "job", title: "First", message: "Working." },
+      { id: "job", title: "Last", message: "Done.", tone: "success" },
     ]);
     const { container } = render(<ToastHost store={hostStore} />);
     await waitFor(() => {
