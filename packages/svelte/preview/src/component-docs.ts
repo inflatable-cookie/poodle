@@ -72,7 +72,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AgentMessage } from "@inflatable-cookie/poodle-svelte";
+  import { AgentMessage } from "@inflatable-cookie/poodle-svelte/markdown";
 </script>
 
 <AgentMessage
@@ -100,7 +100,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AgentPlan } from "@inflatable-cookie/poodle-svelte";
+  import { AgentPlan } from "@inflatable-cookie/poodle-svelte/markdown";
 </script>
 
 <AgentPlan
@@ -128,7 +128,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AgentPlanRecord } from "@inflatable-cookie/poodle-svelte";
+  import { AgentPlanRecord } from "@inflatable-cookie/poodle-svelte/markdown";
 </script>
 
 <AgentPlanRecord
@@ -253,7 +253,8 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AgentTranscript, type TranscriptItem } from "@inflatable-cookie/poodle-svelte";
+  import { AgentTranscript } from "@inflatable-cookie/poodle-svelte/markdown";
+  import type { TranscriptItem } from "@inflatable-cookie/poodle-svelte";
 
   const items: TranscriptItem[] = [
     { kind: "message", id: "m1", role: "assistant", markdown: "Checking the package surface." },
@@ -2679,7 +2680,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { MarkdownEditor } from "@inflatable-cookie/poodle-svelte";
+  import { MarkdownEditor } from "@inflatable-cookie/poodle-svelte/markdown";
 
   let content = "# Hello World\n\nStart writing here...";
 </script>

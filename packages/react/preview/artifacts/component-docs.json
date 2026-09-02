@@ -124,7 +124,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AgentMessage } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AgentMessage\n  role=\"assistant\"\n  markdown=\"I updated the **theme tokens**.\"\n  onLinkClick={(href) => console.log(href)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { AgentMessage } from \"@inflatable-cookie/poodle-svelte/markdown\";\n</script>\n\n<AgentMessage\n  role=\"assistant\"\n  markdown=\"I updated the **theme tokens**.\"\n  onLinkClick={(href) => console.log(href)}\n/>"
   },
   "agent-plan": {
     "props": [
@@ -203,7 +203,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AgentPlan } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AgentPlan\n  plan=\"1. Update tokens\n2. Verify every runtime\"\n  onAccept={() => acceptPlan()}\n  onRevise={() => focusComposer()}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { AgentPlan } from \"@inflatable-cookie/poodle-svelte/markdown\";\n</script>\n\n<AgentPlan\n  plan=\"1. Update tokens\n2. Verify every runtime\"\n  onAccept={() => acceptPlan()}\n  onRevise={() => focusComposer()}\n/>"
   },
   "agent-plan-record": {
     "props": [
@@ -282,7 +282,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AgentPlanRecord } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AgentPlanRecord\n  plan=\"1. Update tokens\n2. Verify every runtime\"\n  status=\"accepted\"\n  decidedAt=\"Today at 10:42\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { AgentPlanRecord } from \"@inflatable-cookie/poodle-svelte/markdown\";\n</script>\n\n<AgentPlanRecord\n  plan=\"1. Update tokens\n2. Verify every runtime\"\n  status=\"accepted\"\n  decidedAt=\"Today at 10:42\"\n/>"
   },
   "agent-question": {
     "props": [
@@ -628,7 +628,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AgentTranscript, type TranscriptItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items: TranscriptItem[] = [\n    { kind: \"message\", id: \"m1\", role: \"assistant\", markdown: \"Checking the package surface.\" },\n    { kind: \"tool-call\", id: \"t1\", label: \"Ran command\", status: \"success\", detail: \"effigy docs:check\" },\n  ];\n</script>\n\n<AgentTranscript {items} ariaLabel=\"Release audit conversation\" />"
+    "usage": "<script lang=\"ts\">\n  import { AgentTranscript } from \"@inflatable-cookie/poodle-svelte/markdown\";\n  import type { TranscriptItem } from \"@inflatable-cookie/poodle-svelte\";\n\n  const items: TranscriptItem[] = [\n    { kind: \"message\", id: \"m1\", role: \"assistant\", markdown: \"Checking the package surface.\" },\n    { kind: \"tool-call\", id: \"t1\", label: \"Ran command\", status: \"success\", detail: \"effigy docs:check\" },\n  ];\n</script>\n\n<AgentTranscript {items} ariaLabel=\"Release audit conversation\" />"
   },
   "changed-files": {
     "props": [
@@ -6687,7 +6687,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { MarkdownEditor } from \"@inflatable-cookie/poodle-svelte\";\n\n  let content = \"# Hello World\n\nStart writing here...\";\n</script>\n\n<MarkdownEditor\n  value={content}\n  onValueChange={(nextValue) => (content = nextValue)}\n  mode=\"split\"\n  minHeight=\"20rem\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { MarkdownEditor } from \"@inflatable-cookie/poodle-svelte/markdown\";\n\n  let content = \"# Hello World\n\nStart writing here...\";\n</script>\n\n<MarkdownEditor\n  value={content}\n  onValueChange={(nextValue) => (content = nextValue)}\n  mode=\"split\"\n  minHeight=\"20rem\"\n/>"
   },
   "media-picker": {
     "props": [

@@ -5,7 +5,7 @@
     "types": [],
     "paths": {
       "@inflatable-cookie/poodle-react": [
-        "../node_modules/@inflatable-cookie/poodle-react/src/types.ts"
+        "../node_modules/@inflatable-cookie/poodle-react/dist/types.d.ts"
       ]
     }
   },

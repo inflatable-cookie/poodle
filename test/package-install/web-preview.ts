@@ -65,13 +65,18 @@ type PackedBoundaryEvidence = {
   wildcardExportMatches: Record<string, number>;
 };
 
-async function run(command: string[], cwd: string): Promise<void> {
-  const process = Bun.spawn(command, {
+async function run(
+  command: string[],
+  cwd: string,
+  env?: Record<string, string>,
+): Promise<void> {
+  const child = Bun.spawn(command, {
     cwd,
     stdout: "inherit",
     stderr: "inherit",
+    env: env ? { ...globalThis.process.env, ...env } : undefined,
   });
-  const exitCode = await process.exited;
+  const exitCode = await child.exited;
   if (exitCode !== 0) {
     throw new Error(`Command failed (${exitCode}): ${command.join(" ")}`);
   }
@@ -410,32 +415,32 @@ async function provePackedSliderAppearanceTypes(
     "node_modules",
     "@inflatable-cookie",
     "poodle-react",
-    "src",
-    "types.ts",
+    "dist",
+    "types.d.ts",
   );
   const installedReactIndex = join(
     consumerRoot,
     "node_modules",
     "@inflatable-cookie",
     "poodle-react",
-    "src",
-    "index.ts",
+    "dist",
+    "index.d.ts",
   );
   if (!existsSync(installedReactTypes) || !existsSync(installedReactIndex)) {
     throw new Error(
-      "the packed React tarball omitted src/types.ts or src/index.ts; the SliderAppearance React type proof cannot run",
+      "the packed React tarball omitted dist/types.d.ts or dist/index.d.ts; the SliderAppearance React type proof cannot run",
     );
   }
   const typesSource = readFileSync(installedReactTypes, "utf8");
   if (!typesSource.includes('export type SliderAppearance = "track" | "block"')) {
     throw new Error(
-      "installed React src/types.ts does not export SliderAppearance as track | block",
+      "installed React dist/types.d.ts does not export SliderAppearance as track | block",
     );
   }
   const indexSource = readFileSync(installedReactIndex, "utf8");
   if (!indexSource.includes('export * from "./types"')) {
     throw new Error(
-      "installed React src/index.ts no longer re-exports ./types; SliderAppearance would drop off the public root",
+      "installed React dist/index.d.ts no longer re-exports ./types; SliderAppearance would drop off the public root",
     );
   }
 
@@ -518,8 +523,8 @@ async function provePackedSliderAppearanceTypes(
         ...mappedReactPositives.map((item) => item.file),
         ...mappedReactNegatives.map((item) => item.file),
       ],
-      pathsMappedTo: "src/types.ts",
-      reason: "src/index.ts value barrel is not tsc-clean",
+      pathsMappedTo: "dist/types.d.ts",
+      reason: "compiled public types live in dist",
       compilerPathsMapped: true,
       valueBarrelCompiled: false,
       sourceImports: false,
@@ -555,13 +560,13 @@ async function proveInstalledReactPublicRoot(
     exports?: { "."?: { types?: string; default?: string } };
   };
   const typesEntry = manifest.exports?.["."]?.types;
-  if (typesEntry !== "./src/index.ts") {
+  if (typesEntry !== "./dist/index.d.ts") {
     throw new Error(
-      `installed React package types export is ${JSON.stringify(typesEntry)}, not ./src/index.ts`,
+      `installed React package types export is ${JSON.stringify(typesEntry)}, not ./dist/index.d.ts`,
     );
   }
-  const indexPath = realpathSync(join(packageRoot, "src", "index.ts"));
-  const typesPath = realpathSync(join(packageRoot, "src", "types.ts"));
+  const indexPath = realpathSync(join(packageRoot, "dist", "index.d.ts"));
+  const typesPath = realpathSync(join(packageRoot, "dist", "types.d.ts"));
   const process = Bun.spawn(
     [
       compiler,
@@ -655,12 +660,12 @@ async function provePackedTreeReorderTypes(
     "node_modules",
     "@inflatable-cookie",
     "poodle-react",
-    "src",
-    "types.ts",
+    "dist",
+    "types.d.ts",
   );
   if (!existsSync(installedReactTypes)) {
     throw new Error(
-      "the packed React tarball omitted src/types.ts; the Tree reorder React type proof cannot run",
+      "the packed React tarball omitted dist/types.d.ts; the Tree reorder React type proof cannot run",
     );
   }
 
@@ -747,8 +752,8 @@ async function provePackedTreeReorderTypes(
         ...mappedReactPositives.map((item) => item.file),
         ...mappedReactNegatives.map((item) => item.file),
       ],
-      pathsMappedTo: "src/types.ts",
-      reason: "src/index.ts value barrel is not tsc-clean",
+      pathsMappedTo: "dist/types.d.ts",
+      reason: "compiled public types live in dist",
       compilerPathsMapped: true,
       valueBarrelCompiled: false,
       sourceImports: false,
@@ -866,7 +871,8 @@ const consumerManifest = {
     ...tarballDependencies,
     react: "18.0.0",
     "react-dom": "18.0.0",
-    svelte: "5.38.6",
+    svelte: "5.56.8",
+    marked: "^18.0.9",
   },
   overrides: tarballDependencies,
   devDependencies: {
@@ -933,7 +939,28 @@ for (const packageEntry of packages) {
   }
 }
 
-await run(["bunx", "vitest", "run"], consumerRoot);
+await Bun.write(
+  join(consumerRoot, "css-load.mjs"),
+  `export async function load(url, context, nextLoad) {
+  if (url.endsWith(".css") || url.includes(".css?")) {
+    return { format: "module", shortCircuit: true, source: "export default {};\\n" };
+  }
+  return nextLoad(url, context);
+}
+`,
+);
+const cssRegister = join(consumerRoot, "css-register.mjs");
+await Bun.write(
+  cssRegister,
+  `import { register } from "node:module";
+register(new URL("./css-load.mjs", import.meta.url));
+`,
+);
+await run(["node", "node_modules/vitest/vitest.mjs", "run"], consumerRoot, {
+  NODE_OPTIONS: [globalThis.process.env.NODE_OPTIONS, `--import ${cssRegister}`]
+    .filter(Boolean)
+    .join(" "),
+});
 
 const packedHistoryEntryProof = await provePackedHistoryEntryTypes(consumerRoot);
 const packedSliderAppearanceProof = await provePackedSliderAppearanceTypes(consumerRoot);
@@ -966,11 +993,11 @@ const evidence = {
   generatedAt: new Date().toISOString(),
   frameworkFloors: {
     react: "18.0.0",
-    svelte: "5.38.6",
+    svelte: "5.56.8",
   },
   peerRanges: {
     react: ">=18",
-    svelte: ">=5.38.6 <6",
+    svelte: ">=5.56.8 <6",
   },
   consumerRoot,
   constraints: {

@@ -222,6 +222,36 @@ function parseReactExports(source: string): Map<string, string> {
   return exports;
 }
 
+function parseSveltePublicExports(root: string): Map<string, string> {
+  const exports = parseSvelteExports(read(root, "packages/svelte/components/src/index.ts"));
+  for (const [name, source] of parseSvelteExports(read(root, "packages/svelte/components/src/markdown.ts"))) {
+    exports.set(name, source);
+  }
+  return exports;
+}
+
+function parseReactPublicExports(root: string): Map<string, string> {
+  const exports = parseReactExports(read(root, "packages/react/components/src/index.ts"));
+  for (const [name, source] of parseReactExports(read(root, "packages/react/components/src/markdown.ts"))) {
+    exports.set(name, source);
+  }
+  return exports;
+}
+
+function svelteExportBarrel(root: string, name: string): string {
+  const markdown = parseSvelteExports(read(root, "packages/svelte/components/src/markdown.ts"));
+  return markdown.has(name)
+    ? "packages/svelte/components/src/markdown.ts"
+    : "packages/svelte/components/src/index.ts";
+}
+
+function reactExportBarrel(root: string, name: string): string {
+  const markdown = parseReactExports(read(root, "packages/react/components/src/markdown.ts"));
+  return markdown.has(name)
+    ? "packages/react/components/src/markdown.ts"
+    : "packages/react/components/src/index.ts";
+}
+
 function resolveSourceFile(root: string, directory: string, sourcePath: string): string | undefined {
   const candidates = [
     sourcePath,
@@ -290,7 +320,7 @@ function parseVisualSkipped(root: string): Set<string> {
 }
 
 export function deriveLiveRoster(root = ROOT): LiveComponent[] {
-  const svelteExports = parseSvelteExports(read(root, "packages/svelte/components/src/index.ts"));
+  const svelteExports = parseSveltePublicExports(root);
   const canonicalByName = new Map(canonicalComponents.map((component) => [component.displayName, component]));
   const entries = [...svelteExports.keys()].map((name) => ({
     name,
@@ -330,10 +360,10 @@ function expectedComponentRow(
 ): ComponentRow {
   const { name, slug, portable } = component;
   const contractPath = `docs/contracts/components/${slug}.md`;
-  const svelteIndexPath = "packages/svelte/components/src/index.ts";
+  const svelteIndexPath = svelteExportBarrel(root, name);
   const svelteSourcePath = `packages/svelte/components/src/${name}.svelte`;
   const svelteRegistryPath = "packages/svelte/preview/src/specimens/registry.ts";
-  const reactIndexPath = "packages/react/components/src/index.ts";
+  const reactIndexPath = reactExportBarrel(root, name);
   const reactRegistryPath = "packages/react/preview/src/gallery/specimen-map.ts";
   const gpuiRegistryPath = "packages/gpui/preview/src/specimens/mod.rs";
   const nativeProofPath = "packages/gpui/native-accessibility-proof.json";
@@ -345,7 +375,7 @@ function expectedComponentRow(
   if (!exists(root, svelteSourcePath)) throw new Error(`Missing Svelte implementation for ${name}.`);
 
   const svelteTestPath = findFocusedTest(root, "svelte", name);
-  const reactExports = parseReactExports(read(root, reactIndexPath));
+  const reactExports = parseReactPublicExports(root);
   const reactSource = reactExports.get(name);
   if (reactSource === undefined) throw new Error(`React export missing for ${name}.`);
   const reactSourcePath = resolveSourceFile(root, "packages/react/components/src", reactSource);
@@ -560,7 +590,7 @@ function summaryMarkdown(rows: ComponentRow[]): string {
 
 export function deriveRows(root = ROOT): ComponentRow[] {
   const roster = deriveLiveRoster(root);
-  const svelteExports = parseSvelteExports(read(root, "packages/svelte/components/src/index.ts"));
+  const svelteExports = parseSveltePublicExports(root);
   const svelteRegistry = read(root, "packages/svelte/preview/src/specimens/registry.ts");
   const reactRegistry = read(root, "packages/react/preview/src/gallery/specimen-map.ts");
   const visualSkipped = parseVisualSkipped(root);

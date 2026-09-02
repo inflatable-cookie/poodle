@@ -1,5 +1,35 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { configDefaults, defineConfig } from "vitest/config";
+
+const repoRoot = dirname(fileURLToPath(import.meta.url));
+const workspaceAliases = {
+  "@inflatable-cookie/poodle-svelte/markdown": join(
+    repoRoot,
+    "packages/svelte/components/src/markdown.ts",
+  ),
+  "@inflatable-cookie/poodle-svelte/types": join(
+    repoRoot,
+    "packages/svelte/components/src/types.ts",
+  ),
+  "@inflatable-cookie/poodle-svelte": join(
+    repoRoot,
+    "packages/svelte/components/src/index.ts",
+  ),
+  "@inflatable-cookie/poodle-react/markdown": join(
+    repoRoot,
+    "packages/react/components/src/markdown.ts",
+  ),
+  "@inflatable-cookie/poodle-react/types": join(
+    repoRoot,
+    "packages/react/components/src/types.ts",
+  ),
+  "@inflatable-cookie/poodle-react": join(
+    repoRoot,
+    "packages/react/components/src/index.ts",
+  ),
+};
 
 // Component-shell smoke tests for the Svelte and React implementations.
 // Verifies the machine -> DOM wiring per framework: components mount, contract
@@ -7,11 +37,12 @@ import { configDefaults, defineConfig } from "vitest/config";
 // Pure state-machine logic lives in @inflatable-cookie/poodle-core (its own suite); these
 // tests cover the framework binding those machines to real DOM.
 export default defineConfig({
+  resolve: { alias: workspaceAliases },
   test: {
     projects: [
       {
         plugins: [svelte()],
-        resolve: { conditions: ["browser"] },
+        resolve: { alias: workspaceAliases, conditions: ["browser"] },
         test: {
           name: "svelte-components",
           environment: "happy-dom",
@@ -37,7 +68,7 @@ export default defineConfig({
       },
       {
         plugins: [svelte()],
-        resolve: { conditions: ["browser"] },
+        resolve: { alias: workspaceAliases, conditions: ["browser"] },
         test: {
           name: "svelte-preview",
           environment: "happy-dom",
@@ -78,7 +109,7 @@ export default defineConfig({
       {
         // Runtime accessibility sweep (axe-core) over the Svelte components.
         plugins: [svelte()],
-        resolve: { conditions: ["browser"] },
+        resolve: { alias: workspaceAliases, conditions: ["browser"] },
         test: {
           name: "a11y",
           environment: "happy-dom",
@@ -92,7 +123,7 @@ export default defineConfig({
         // one happy-dom process and diffs their emitted poodle-* anatomy classes.
         // Needs the Svelte plugin and Vitest's JSX transform in the same project.
         plugins: [svelte()],
-        resolve: { conditions: ["browser"] },
+        resolve: { alias: workspaceAliases, conditions: ["browser"] },
         test: {
           name: "parity",
           environment: "happy-dom",

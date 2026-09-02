@@ -1,7 +1,16 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const FROZEN_COMPONENT_COUNT = 176;
+export const FROZEN_ROSTER_COUNT = 176;
+export const FROZEN_COMPONENT_COUNT = 171;
+
+const MARKDOWN_COMPONENT_NAMES = [
+  "AgentMessage",
+  "AgentPlan",
+  "AgentPlanRecord",
+  "AgentTranscript",
+  "MarkdownEditor",
+] as const;
 
 // These are public React-root runtime exports outside the frozen component
 // denominator. Keep this authority explicit and bounded: a new root export
@@ -108,25 +117,44 @@ function parseSvelteComponentExports(source: string): string[] {
   ].map((match) => match[1]);
 }
 
+function rootComponentNames(frozenNames: string[]): string[] {
+  const markdown = new Set<string>(MARKDOWN_COMPONENT_NAMES);
+  return frozenNames.filter((name) => !markdown.has(name));
+}
+
 function buildFrameworkRoster(
   frozenNames: string[],
   sourceComponentNames: string[],
   rootRuntimeNames: string[],
   nonComponentRootNames = difference(rootRuntimeNames, frozenNames),
 ): FrameworkRoster {
+  const componentNames = rootComponentNames(frozenNames);
   return {
-    componentNames: [...frozenNames],
+    componentNames,
     rootRuntimeNames: sortedUnique(rootRuntimeNames),
     nonComponentRootNames: sortedUnique(nonComponentRootNames),
-    sourceMissingNames: difference(frozenNames, sourceComponentNames),
-    sourceExtraNames: difference(sourceComponentNames, frozenNames),
+    sourceMissingNames: difference(componentNames, sourceComponentNames),
+    sourceExtraNames: difference(sourceComponentNames, componentNames),
   };
 }
 
 function validateFrozenNames(frozenNames: string[]): void {
-  if (frozenNames.length !== FROZEN_COMPONENT_COUNT) {
+  if (frozenNames.length !== FROZEN_ROSTER_COUNT) {
     throw new Error(
-      `Frozen roster denominator changed: expected ${FROZEN_COMPONENT_COUNT}, found ${frozenNames.length}`,
+      `Frozen roster denominator changed: expected ${FROZEN_ROSTER_COUNT}, found ${frozenNames.length}`,
+    );
+  }
+  const missingMarkdown = MARKDOWN_COMPONENT_NAMES.filter(
+    (name) => !frozenNames.includes(name),
+  );
+  if (missingMarkdown.length > 0) {
+    throw new Error(
+      `Frozen roster is missing markdown component(s): ${missingMarkdown.join(", ")}`,
+    );
+  }
+  if (rootComponentNames(frozenNames).length !== FROZEN_COMPONENT_COUNT) {
+    throw new Error(
+      `Root component count drifted: expected ${FROZEN_COMPONENT_COUNT}, found ${rootComponentNames(frozenNames).length}`,
     );
   }
   const duplicates = duplicateNames(frozenNames);
@@ -134,6 +162,19 @@ function validateFrozenNames(frozenNames: string[]): void {
     throw new Error(
       `Frozen roster contains duplicate component name(s): ${duplicates.join(", ")}`,
     );
+  }
+}
+
+function validateMarkdownBarrels(svelteMarkdown: string, reactMarkdown: string): void {
+  const svelteNames = parseSvelteComponentExports(svelteMarkdown);
+  const reactNames = parseExplicitRootExports(reactMarkdown);
+  for (const name of MARKDOWN_COMPONENT_NAMES) {
+    if (!svelteNames.includes(name)) {
+      throw new Error(`Svelte markdown barrel is missing ${name}`);
+    }
+    if (!reactNames.includes(name)) {
+      throw new Error(`React markdown barrel is missing ${name}`);
+    }
   }
 }
 
@@ -213,6 +254,10 @@ export function readWebPackageRoster(repoRoot: string): WebPackageRoster {
   const reactSource = readFileSync(
     join(repoRoot, "packages/react/components/src/index.ts"),
     "utf8",
+  );
+  validateMarkdownBarrels(
+    readFileSync(join(repoRoot, "packages/svelte/components/src/markdown.ts"), "utf8"),
+    readFileSync(join(repoRoot, "packages/react/components/src/markdown.ts"), "utf8"),
   );
 
   return buildWebPackageRoster(frozenNames, svelteSource, reactSource);

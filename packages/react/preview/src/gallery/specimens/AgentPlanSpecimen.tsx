@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { AgentChatInput, AgentPlan, type AgentPlanStatus } from "@inflatable-cookie/poodle-react";
+import { AgentChatInput, type AgentPlanStatus } from "@inflatable-cookie/poodle-react";
+import { AgentPlan } from "@inflatable-cookie/poodle-react/markdown";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

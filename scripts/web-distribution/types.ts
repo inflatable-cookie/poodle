@@ -1,3 +1,5 @@
+import type { PluginOption } from "vite";
+
 export type JsExportMap = {
   types: string;
   import: string;
@@ -52,6 +54,9 @@ export type PackageBuildSpec = {
   declarationTsconfig: string;
   extraDeclarationCopies?: AssetCopy[];
   forbiddenModules: string[];
+  externalModules?: string[];
+  vitePlugins?: PluginOption[];
+  chunkFileNames?: string;
 };
 
 export type BuiltPackage = {

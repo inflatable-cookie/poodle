@@ -5,6 +5,40 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-02 — RESOLVED 2026-09-02. Lazy AgentMessage in root AgentPlan delayed
+  the parser and emptied SSR plan bodies. Operator moved all five markdown
+  components to `./markdown` and restored synchronous render. Hit while closing
+  g16.058.
+
+- 2026-09-02 — RESOLVED 2026-09-02. `effigy test:shell-build` ran compiler/shim
+  falsification under Bun's 5s default; `spawnSync.status` was `null` at
+  5008 ms. The oracle now has an explicit 30s compiler timeout and a 60s test
+  timeout. Hit while closing g16.058.
+
+- 2026-09-02 — RESOLVED 2026-09-02. Compiled shell archives cannot keep the
+  pre-058 pack-install consumer green unchanged. Svelte `5.38.6` cannot run
+  `5.56.8` client output (`$.delegated` is not a function). Vite 7.3.1 leaves
+  CSS imports in compiled React `node_modules` `.js` for Node
+  (`ERR_UNKNOWN_FILE_EXTENSION`). Existing Slider/Tree React type proofs
+  required packed `src/types.ts`. The existing consumer is pinned to `5.56.8`,
+  uses the disposable-smoke CSS stub, and those proofs read `dist/*.d.ts`. No
+  059 receipt or below-floor negative. Hit while closing g16.058.
+
+- 2026-09-02 — RESOLVED 2026-09-02. Node 22 `navigator` is a getter-only
+  global. Disposable browser mount uses `defineProperty`; Node
+  `--conditions=browser --import css-register.mjs` runs the mount. Hit while
+  closing g16.058.
+
+- 2026-09-02 — RESOLVED 2026-09-02. `@sveltejs/package` `emitDts` rejects
+  TypeScript 7.0.2 (`"typescript": "^5.0.0 || ^6.0.0"`). Distribution
+  declarations now stage through `scripts/web-distribution/declaration-tools`
+  pinned to TypeScript `6.0.3` and `@sveltejs/package` 2.5.7. Root repo
+  TypeScript stays `^7.0.2`. Hit while closing g16.058.
+
+- 2026-09-02 — Staged-dist path audit treats any `/…` quoted string as a
+  workspace path. Svelte SSR HTML contains `"/</span>"`, which is not a path.
+  Values with `<` or `>` are skipped. Hit while closing g16.058.
+
 - 2026-09-02 — RESOLVED 2026-09-02. After core exports moved to `dist/`,
   `docs:lint` (and therefore `health`) failed on a fresh checkout until
   `core:build` produced `packages/core/dist`. `health` and `test:components`

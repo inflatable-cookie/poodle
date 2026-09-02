@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { AgentTranscript, type TranscriptItem } from "@inflatable-cookie/poodle-react";
+import { AgentTranscript } from "@inflatable-cookie/poodle-react/markdown";
+import type { TranscriptItem } from "@inflatable-cookie/poodle-react";
 
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";

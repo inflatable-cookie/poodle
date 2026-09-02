@@ -38,6 +38,7 @@ function toDistPath(distDir: string, abs: string): string {
 
 function isAbsolutePathValue(value: string): boolean {
   if (value === "/" || value === "/*") return false;
+  if (/[<>]/.test(value)) return false;
   if (/^\/\/[^/\r\n]+/.test(value)) return false;
   if (/^\//.test(value)) return true;
   return (

@@ -440,8 +440,16 @@ function validatePackageSurfaceCoverage(
   packageName: "@inflatable-cookie/poodle-svelte" | "@inflatable-cookie/poodle-svelte" | "@inflatable-cookie/poodle-svelte",
   errors: string[],
 ): void {
-  const indexSource = fs.readFileSync(path.join(repoRoot, packagePath, "src", "index.ts"), "utf8");
-  const componentExports = parseDefaultComponentExports(indexSource);
+  const packageDir = path.join(repoRoot, packagePath);
+  const indexSource = fs.readFileSync(path.join(packageDir, "src", "index.ts"), "utf8");
+  const markdownPath = path.join(packageDir, "src", "markdown.ts");
+  const markdownSource = fs.existsSync(markdownPath)
+    ? fs.readFileSync(markdownPath, "utf8")
+    : "";
+  const componentExports = [
+    ...parseDefaultComponentExports(indexSource),
+    ...parseDefaultComponentExports(markdownSource),
+  ].sort();
   const helperExports = parseNamedRootExports(indexSource);
   const actualExports = [...componentExports, ...helperExports].sort();
   const coverageEntries = packageSurfaceCoverage.filter((entry) => entry.packageName === packageName);

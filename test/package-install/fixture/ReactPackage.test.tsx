@@ -10,8 +10,6 @@ import {
   type LicenceSeat,
 } from "@inflatable-cookie/poodle-core";
 import {
-  AgentPlan,
-  AgentPlanRecord,
   Button,
   Icon,
   IconProvider,
@@ -23,6 +21,7 @@ import {
   ModelConnectionPicker,
   ModelConnectionSetup,
 } from "@inflatable-cookie/poodle-react";
+import { AgentPlan, AgentPlanRecord } from "@inflatable-cookie/poodle-react/markdown";
 
 const licenceKeyFormat: LicenceKeyFormat = {
   parse: (input) => ({ ok: true, key: input, grouped: input }),
@@ -133,7 +132,7 @@ describe("packed @inflatable-cookie/poodle-react", () => {
     expect(view.getByRole("img", { name: "Complete" })).toBeTruthy();
   });
 
-  it("mounts the AgentPlan pair (new root exports) from the packed tarball", () => {
+  it("mounts the AgentPlan pair from the packed markdown entry", () => {
     const view = render(
       <>
         <AgentPlan plan="1. Add the surface\n2. Wire the callbacks" />

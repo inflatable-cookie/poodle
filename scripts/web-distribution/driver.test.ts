@@ -10,7 +10,7 @@ import { findRepoRoot } from "./core-build";
 import { sha256File, stableJson } from "./hash";
 import { assertNoParallelJavascript, packageRelativeViteSources } from "./receipt";
 import { cleanStaging } from "./staging";
-import { buildViteLibrary } from "./vite-library";
+import { buildViteLibrary, isExternalId } from "./vite-library";
 
 function fixtureDist(): string {
   const root = mkdtempSync(join(tmpdir(), "poodle-web-dist-"));
@@ -177,7 +177,8 @@ describe("web distribution driver", () => {
         `export const moduleId = "node:fs";\n` +
         `export const segments = "a/b".split("/");\n` +
         `export const wildcard = "text/*".endsWith("/*");\n` +
-        `export const matcher = /\\/workspace\\//;\n`,
+        `export const matcher = /\\/workspace\\//;\n` +
+        `export const html = "/</span>";\n`,
     );
     expect(() =>
       auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
@@ -343,5 +344,15 @@ describe("web distribution driver", () => {
     });
     rmSync(join(source, ".."), { recursive: true, force: true });
     rmSync(destRoot, { recursive: true, force: true });
+  });
+
+  test("external ids match package names and subpaths only", () => {
+    expect(isExternalId("svelte", ["svelte"])).toBe(true);
+    expect(isExternalId("svelte/internal/client", ["svelte"])).toBe(true);
+    expect(isExternalId("@inflatable-cookie/poodle-core/styles/button.css", [
+      "@inflatable-cookie/poodle-core",
+    ])).toBe(true);
+    expect(isExternalId("./Button.svelte", ["svelte"])).toBe(false);
+    expect(isExternalId("/tmp/x.js", ["svelte"])).toBe(false);
   });
 });
