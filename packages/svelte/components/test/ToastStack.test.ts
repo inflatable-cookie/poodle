@@ -161,6 +161,40 @@ describe("ToastStack (svelte)", () => {
     expect(document.activeElement).toBe(dismiss);
   });
 
+  it("does not steal focus when an action is removed after focus has left the stack", async () => {
+    const { container, rerender } = render(ToastStack, {
+      props: {
+        items: [
+          { id: "job", title: "Publish", actionLabel: "Retry", tone: "info" },
+          { id: "next", title: "Later" },
+        ],
+      },
+    });
+    const outside = document.createElement("button");
+    outside.type = "button";
+    outside.textContent = "Outside";
+    document.body.append(outside);
+    try {
+      const action = [...container.querySelectorAll("button")].find((button) =>
+        button.textContent?.includes("Retry"),
+      ) as HTMLButtonElement;
+      action.focus();
+      expect(document.activeElement).toBe(action);
+      outside.focus();
+      expect(document.activeElement).toBe(outside);
+
+      await rerender({
+        items: [
+          { id: "job", title: "Publish", tone: "info" },
+          { id: "next", title: "Later" },
+        ],
+      });
+      expect(document.activeElement).toBe(outside);
+    } finally {
+      outside.remove();
+    }
+  });
+
   it("does not put numeric progress in toast copy during a same-id settle", async () => {
     const { container, rerender } = render(ToastStack, {
       props: { items: [{ id: "job", title: "Publishing", message: "Still working.", tone: "info" }] },

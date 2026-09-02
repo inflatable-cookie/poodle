@@ -165,6 +165,43 @@ describe("ToastStack (react)", () => {
     expect(document.activeElement).toBe(dismiss);
   });
 
+  it("does not steal focus when an action is removed after focus has left the stack", () => {
+    const { container, rerender } = render(
+      <>
+        <button type="button">Outside</button>
+        <ToastStack
+          items={[
+            { id: "job", title: "Publish", actionLabel: "Retry", tone: "info" },
+            { id: "next", title: "Later" },
+          ]}
+        />
+      </>,
+    );
+    const action = [...container.querySelectorAll("button")].find((button) =>
+      button.textContent?.includes("Retry"),
+    ) as HTMLButtonElement;
+    const outside = [...container.querySelectorAll("button")].find(
+      (button) => button.textContent === "Outside",
+    ) as HTMLButtonElement;
+    action.focus();
+    expect(document.activeElement).toBe(action);
+    outside.focus();
+    expect(document.activeElement).toBe(outside);
+
+    rerender(
+      <>
+        <button type="button">Outside</button>
+        <ToastStack
+          items={[
+            { id: "job", title: "Publish", tone: "info" },
+            { id: "next", title: "Later" },
+          ]}
+        />
+      </>,
+    );
+    expect(document.activeElement).toBe(outside);
+  });
+
   it("does not put numeric progress in toast copy during a same-id settle", () => {
     const { container, rerender } = render(
       <ToastStack items={[{ id: "job", title: "Publishing", message: "Still working.", tone: "info" }]} />,

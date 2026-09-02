@@ -148,9 +148,18 @@ export function ToastStack({
         }
         const target = event.target as HTMLElement | null;
         const toast = target?.closest<HTMLElement>(".poodle-toast");
-        focusedActionId.current = target?.closest(".poodle-toast__actions") && toast?.dataset.toastId
-          ? toast.dataset.toastId
-          : focusedActionId.current;
+        focusedActionId.current =
+          target?.closest(".poodle-toast__actions") && toast?.dataset.toastId
+            ? toast.dataset.toastId
+            : null;
+      }}
+      onBlurCapture={(event: FocusEvent<HTMLUListElement>) => {
+        const stack = stackRef.current;
+        const target = event.target as Node;
+        // Unmount detaches the action first; keep the latch so removal can restore.
+        if (stack?.contains(target) && !stack.contains(event.relatedTarget as Node | null)) {
+          focusedActionId.current = null;
+        }
       }}
     >
       {visuals.map((visual) => {

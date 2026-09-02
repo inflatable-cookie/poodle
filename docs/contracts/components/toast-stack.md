@@ -141,7 +141,8 @@ beyond plain props. Classified in the g11.004 long-tail sweep.
 - action-label replacement keeps focus on that action control. Removing the
   focused action moves focus to that row's dismiss control, then the next
   surviving row, then the previous row, then the still-connected element from
-  which focus entered the stack.
+  which focus entered the stack. If focus has already left that action,
+  removing it must not move focus.
 - GPUI-native accessibility mapping notes: native danger rows project
   `NodeRole::Alert`; other native rows stay `ListItem`. That metadata is not a
   GPUI assistive-technology parity claim. GPUI must still preserve transient
@@ -360,8 +361,9 @@ ordinary host focus order. Only then retain any inert visual remnant.
 - toast tone set via `data-tone` attribute and `--poodle-toast-tone` CSS custom property
 - items keyed by `item.id` in `{#each}` block; same-id field replacement
   updates the retained item without changing presence phase
-- action-label swaps keep the focused action; removing it restores focus
-  through dismiss → next → previous → entered-from
+- action-label swaps keep the focused action; removing the focused action
+  restores focus through dismiss → next → previous → entered-from. Removing
+  an action after focus has left it must not steal focus.
 - `ToastItem` and `ToastTone` types imported from shared `types.ts`
 - resolves size via `resolveSemanticControlSize` from inherited `getUiPresentation`
 - resolves density via `getUiPresentation` store

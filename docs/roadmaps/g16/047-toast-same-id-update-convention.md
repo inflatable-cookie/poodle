@@ -126,8 +126,9 @@ adoption remains consumer-owned and needs separate repository authority.
   configured timer table, including custom `autoDismissMs`, custom
   `stickyTones`, disabled expiry, become-sticky clear, and copy churn.
 - `nextToastVisuals` keeps phase on same-id replacement. Paired Svelte/React
-  stacks keep the settled row, announce the settled copy, restore action
-  focus, and keep percents out of toast copy.
+  stacks keep the settled row, announce the settled copy, restore a focused
+  action, leave already-departed focus alone, and keep percents out of toast
+  copy.
 - Shared Rust danger rows set `NodeRole::Alert`. Mounted GPUI
   `mounted_toast_danger_uses_alert_role` draws that tree without claiming
   assistive-technology parity.
@@ -148,6 +149,7 @@ Proofs were committed first. Restores used `git checkout --` on a clean index.
 | Disabled expiry | drop `autoDismissMs <= 0` guard | start included `job` | green |
 | Same-id keeps row/phase | `nextToastVisuals` always enters | phase expected settled, received enter | green |
 | Focus fallback | skip `moveToastFocusFromRemovedAction` | activeElement is `body`, not dismiss | green |
+| Action removal after focus left | preserve stale `focusedActionId` / no stack-leave clear | expected Outside, received Dismiss Publish | green |
 | Native danger Alert | always `ListItem` | expected Alert, received ListItem | green |
 | API-zero | add `createToastPromise` | source scan matched the helper | green |
 

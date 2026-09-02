@@ -59,6 +59,7 @@ Committed proofs first. Plants used a clean index and `git checkout --`.
 | Disabled / negative expiry | drop `autoDismissMs <= 0` guard | start included `job` / `a` |
 | Same-id phase | always enter | expected settled, received enter |
 | Focus fallback | skip action-removal restore | focus landed on `body` |
+| Action removal after focus left | preserve stale `focusedActionId`, no stack-leave clear | expected Outside, received Dismiss Publish |
 | Native Alert | always ListItem | expected Alert, received ListItem |
 | API-zero | add `createToastPromise` | source scan matched the helper |
 
@@ -86,6 +87,16 @@ Focused, then required boards, including a rerun after rebasing onto
 - `effigy qa` — pass, including `audit:security` after the g16.053 matcher
   repair
 - `git diff --check origin/main...HEAD` — pass
+
+## Review repair (PR #152)
+
+React cleared the action-focus latch only on a later action focus, so same-id
+action removal stole focus back onto dismiss after the user had already moved
+to an external control. The latch now tracks current action ownership and
+clears when focus leaves the action or stack; unmount-while-focused still
+restores. Paired Svelte already used live `document.activeElement` and did not
+steal. Plant: preserve stale `focusedActionId` / skip stack-leave clear →
+activeElement was Dismiss Publish, expected Outside.
 
 ## Unresolved
 
