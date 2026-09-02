@@ -97,7 +97,7 @@ export function collectInputs(packageRoot: string, spec: PackageBuildSpec): stri
   for (const abs of walk(join(packageRoot, "src"))) {
     const rel = packageRelative(packageRoot, abs);
     if (rel.endsWith(".js") && !rel.endsWith(".mjs")) continue;
-    if (/\.(?:[cm]?tsx?|mjs|css)$/.test(rel)) inputs.add(rel);
+    if (/\.(?:[cm]?tsx?|mjs|css|svelte)$/.test(rel)) inputs.add(rel);
   }
   const sorted = [...inputs].sort();
   return sorted;

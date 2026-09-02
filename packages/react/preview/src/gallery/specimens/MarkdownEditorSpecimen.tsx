@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MarkdownEditor } from "@inflatable-cookie/poodle-react";
+import { MarkdownEditor } from "@inflatable-cookie/poodle-react/markdown";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

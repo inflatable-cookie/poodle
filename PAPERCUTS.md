@@ -5,6 +5,15 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 ## Open
 
+- 2026-09-02 — `@sveltejs/package` `emitDts` rejects TypeScript 7.0.2
+  (`"typescript": "^5.0.0 || ^6.0.0"`). Svelte shell declarations are `tsc`
+  `emitDeclarationOnly` plus generated `Component` shims for each `.svelte`
+  file. Hit while closing g16.058.
+
+- 2026-09-02 — Staged-dist path audit treats any `/…` quoted string as a
+  workspace path. Svelte SSR HTML contains `"/</span>"`, which is not a path.
+  Values with `<` or `>` are skipped. Hit while closing g16.058.
+
 - 2026-09-02 — RESOLVED 2026-09-02. After core exports moved to `dist/`,
   `docs:lint` (and therefore `health`) failed on a fresh checkout until
   `core:build` produced `packages/core/dist`. `health` and `test:components`

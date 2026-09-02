@@ -72,7 +72,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AgentMessage } from "@inflatable-cookie/poodle-svelte";
+  import { AgentMessage } from "@inflatable-cookie/poodle-svelte/markdown";
 </script>
 
 <AgentMessage
@@ -2679,7 +2679,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { MarkdownEditor } from "@inflatable-cookie/poodle-svelte";
+  import { MarkdownEditor } from "@inflatable-cookie/poodle-svelte/markdown";
 
   let content = "# Hello World\n\nStart writing here...";
 </script>

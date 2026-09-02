@@ -1,4 +1,4 @@
-import { build } from "vite";
+import { build, type PluginOption } from "vite";
 
 export type ViteLibraryBuild = {
   root: string;
@@ -6,7 +6,16 @@ export type ViteLibraryBuild = {
   entries: Record<string, string>;
   fileName: (entryName: string) => string;
   externals?: string[];
+  plugins?: PluginOption[];
+  ssr?: boolean;
+  chunkFileNames?: string;
 };
+
+export function isExternalId(id: string, modules: readonly string[]): boolean {
+  if (id.startsWith("\0") || id.startsWith(".") || id.startsWith("/")) return false;
+  if (/^[A-Za-z]:[\\/]/.test(id)) return false;
+  return modules.some((name) => id === name || id.startsWith(`${name}/`));
+}
 
 export type ViteLibraryGraph = {
   moduleIds: string[];
@@ -47,16 +56,20 @@ export async function buildViteLibrary(options: ViteLibraryBuild): Promise<ViteL
     throw new Error("vite library entries must be supplied in sorted name order");
   }
 
+  const externals = options.externals ?? [];
   const result = await build({
     configFile: false,
     root: options.root,
     logLevel: "warn",
+    plugins: options.plugins,
+    esbuild: { jsx: "automatic", jsxDev: false },
     build: {
       target: "es2022",
       minify: false,
       sourcemap: false,
       emptyOutDir: false,
       cssCodeSplit: false,
+      ssr: options.ssr === true,
       outDir: options.outDir,
       lib: {
         entry: options.entries,
@@ -64,10 +77,11 @@ export async function buildViteLibrary(options: ViteLibraryBuild): Promise<ViteL
         fileName: (_format, entryName) => options.fileName(entryName),
       },
       rollupOptions: {
-        external: options.externals ?? [],
+        preserveEntrySignatures: "exports-only",
+        external: (id) => isExternalId(id, externals),
         output: {
           entryFileNames: (chunk) => options.fileName(chunk.name),
-          chunkFileNames: "chunks/[name].js",
+          chunkFileNames: options.chunkFileNames ?? "chunks/[name].js",
           assetFileNames: "[name][extname]",
         },
       },

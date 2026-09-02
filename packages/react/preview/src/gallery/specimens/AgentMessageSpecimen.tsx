@@ -1,4 +1,4 @@
-import { AgentMessage } from "@inflatable-cookie/poodle-react";
+import { AgentMessage } from "@inflatable-cookie/poodle-react/markdown";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

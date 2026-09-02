@@ -22,34 +22,54 @@
     "svelte",
     "ui"
   ],
-  "svelte": "./src/index.ts",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "svelte": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/index.client.js",
+      "default": "./dist/index.server.js"
     },
     "./*.svelte": {
-      "svelte": "./src/*.svelte",
-      "default": "./src/*.svelte"
+      "types": "./dist/*.svelte.d.ts",
+      "browser": "./dist/*.client.js",
+      "default": "./dist/*.server.js"
     },
-    "./types": "./src/types.ts"
+    "./markdown": {
+      "types": "./dist/markdown.d.ts",
+      "browser": "./dist/markdown.client.js",
+      "default": "./dist/markdown.server.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "browser": "./dist/types.js",
+      "default": "./dist/types.js"
+    }
   },
   "files": [
-    "src",
+    "dist",
     "README.md",
     "LICENSE"
   ],
+  "scripts": {
+    "build": "bun ../../scripts/web-distribution/svelte-build.ts"
+  },
   "poodleRelease": {
     "publicIntent": true,
     "channel": "preview",
     "stability": "pre-release"
   },
   "peerDependencies": {
-    "svelte": ">=5.38.6 <6"
+    "svelte": ">=5.56.8 <6",
+    "marked": "^18.0.9"
+  },
+  "peerDependenciesMeta": {
+    "marked": {
+      "optional": true
+    }
   },
   "dependencies": {
-    "@inflatable-cookie/poodle-core": "0.2.3",
-    "marked": "^18.0.9"
+    "@inflatable-cookie/poodle-core": "0.2.3"
   }
 }

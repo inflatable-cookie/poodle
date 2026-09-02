@@ -36,7 +36,9 @@ export async function buildPackage(
       const entry = spec.entries.find((item) => item.name === entryName);
       return `${entryName}${entry?.outputExt ?? ".js"}`;
     },
-    externals: spec.forbiddenModules,
+    externals: spec.externalModules ?? spec.forbiddenModules,
+    plugins: spec.vitePlugins,
+    chunkFileNames: spec.chunkFileNames,
   });
   const viteSources = packageRelativeViteSources(packageRoot, graph.moduleIds);
   assertTypeScriptAuthority(viteSources);

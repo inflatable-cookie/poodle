@@ -124,7 +124,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AgentMessage } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AgentMessage\n  role=\"assistant\"\n  markdown=\"I updated the **theme tokens**.\"\n  onLinkClick={(href) => console.log(href)}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { AgentMessage } from \"@inflatable-cookie/poodle-svelte/markdown\";\n</script>\n\n<AgentMessage\n  role=\"assistant\"\n  markdown=\"I updated the **theme tokens**.\"\n  onLinkClick={(href) => console.log(href)}\n/>"
   },
   "agent-plan": {
     "props": [
@@ -6687,7 +6687,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { MarkdownEditor } from \"@inflatable-cookie/poodle-svelte\";\n\n  let content = \"# Hello World\n\nStart writing here...\";\n</script>\n\n<MarkdownEditor\n  value={content}\n  onValueChange={(nextValue) => (content = nextValue)}\n  mode=\"split\"\n  minHeight=\"20rem\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { MarkdownEditor } from \"@inflatable-cookie/poodle-svelte/markdown\";\n\n  let content = \"# Hello World\n\nStart writing here...\";\n</script>\n\n<MarkdownEditor\n  value={content}\n  onValueChange={(nextValue) => (content = nextValue)}\n  mode=\"split\"\n  minHeight=\"20rem\"\n/>"
   },
   "media-picker": {
     "props": [

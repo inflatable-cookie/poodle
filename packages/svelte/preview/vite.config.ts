@@ -9,6 +9,12 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "@inflatable-cookie/poodle-svelte/markdown": fileURLToPath(
+        new URL("../components/src/markdown.ts", import.meta.url),
+      ),
+      "@inflatable-cookie/poodle-svelte/types": fileURLToPath(
+        new URL("../components/src/types.ts", import.meta.url),
+      ),
       "@inflatable-cookie/poodle-svelte": fileURLToPath(new URL("../components/src/index.ts", import.meta.url)),
     },
   },
