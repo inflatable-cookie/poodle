@@ -7,6 +7,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-09-02 — React default `stickyTones = ["danger"]` is a new array per
+  render. Putting that identity in a `useEffect` dependency list retriggers
+  `setState` forever. Keep a module-level default and depend on a joined key.
+  Hit while wiring g16.047 config reconcile.
+
 - 2026-09-01 — RESOLVED 2026-09-01. An earlier `ci:web` run OOMed the
   specimen census at the ordinary V8 heap while closing g16.034. The shared
   rAF/cancel cleanup and React smoke cleanup removed the leak: ordinary

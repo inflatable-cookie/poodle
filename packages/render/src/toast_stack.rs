@@ -227,10 +227,14 @@ pub fn toast_stack(
         }
 
         // Toast box: tinted fill + fade gradient, tone border,
-        // elevation-overlay shadow, clipped, listitem role. Authored items
-        // paint the settled endpoint; construction does not attach enter.
+        // elevation-overlay shadow, clipped. Danger projects Alert; other
+        // rows stay list items. That metadata is not a GPUI AT-parity claim.
         let mut toast_el = Node::container();
-        toast_el.a11y.role = Some(NodeRole::ListItem);
+        toast_el.a11y.role = Some(if toast.tone == poodle_specs::ToastTone::Danger {
+            NodeRole::Alert
+        } else {
+            NodeRole::ListItem
+        });
         toast_el.position = NodePosition::Relative;
         toast_el.id = Some(format!("poodle-toast-{}", toast.id));
         {
@@ -294,5 +298,25 @@ mod tests {
             toast.style.animation.is_none(),
             "authored items paint the endpoint; construction does not attach enter"
         );
+    }
+
+    #[test]
+    fn danger_uses_alert_and_other_tones_stay_list_items() {
+        let theme =
+            poodle_jetstream::JetstreamThemeProvider::from_theme(&poodle_tokens::themes::ECLIPSE);
+        let ctx = RenderContext::new(&theme);
+        let spec = ToastStackSpec::new().with_toasts(vec![
+            Toast::new("ok", "Saved").with_tone(poodle_specs::ToastTone::Success),
+            Toast::new("fail", "Publishing failed").with_tone(poodle_specs::ToastTone::Danger),
+        ]);
+        let node = toast_stack(&spec, &ctx, ToastStackHandlers::default());
+        let success = node
+            .find(&|n| n.id.as_deref() == Some("poodle-toast-ok"))
+            .expect("success toast");
+        let danger = node
+            .find(&|n| n.id.as_deref() == Some("poodle-toast-fail"))
+            .expect("danger toast");
+        assert_eq!(success.a11y.role, Some(NodeRole::ListItem));
+        assert_eq!(danger.a11y.role, Some(NodeRole::Alert));
     }
 }

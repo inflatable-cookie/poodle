@@ -47,7 +47,7 @@ use poodle_specs::{
     AccordionSelectionValue, ActiveEdge, AgentTranscriptSpec, ControlDensity, ControlSize, FaderSpec,
     HistoryCenterRejection, HistoryCenterSpec, KnobSpec, Orientation, PopoverSpec, RangeSliderSpec,
     RatingSpec, SkeletonSpec, SliderSpec, SpinnerSpec, TabActivationMode, TabDefinition, TabVariant,
-    TabsSpec, TimeInputSpec, Toast, ToastStackSpec, TriStateSwitchSpec, TriStateValue,
+    TabsSpec, TimeInputSpec, Toast, ToastStackSpec, ToastTone, TriStateSwitchSpec, TriStateValue,
     UiPresentationProviderSpec, XYPadSpec,
 };
 
@@ -18881,6 +18881,60 @@ fn mounted_motion_policy_construction_does_not_invent_clocks() {
         assert!(
             channels.contains(&"surface.animation.approximation.opacity-stand-in"),
             "unsupported translation must stay a named approximation: {channels:?}"
+        );
+    });
+}
+
+/// g16.047. Native danger projects Alert; success stays ListItem. Drawing the
+/// node tree does not claim GPUI assistive-technology parity.
+#[test]
+fn mounted_toast_danger_uses_alert_role() {
+    run_headless(|cx| {
+        let node = toast_stack(
+            &ToastStackSpec::new().with_toasts(vec![
+                Toast::new("ok", "Saved").with_tone(ToastTone::Success),
+                Toast::new("fail", "Publishing failed").with_tone(ToastTone::Danger),
+            ]),
+            &RenderContext::new(&theme()),
+            ToastStackHandlers::default(),
+        );
+        assert_eq!(
+            node.find(&|n| n.id.as_deref() == Some("poodle-toast-ok"))
+                .expect("success toast")
+                .a11y
+                .role,
+            Some(NodeRole::ListItem)
+        );
+        assert_eq!(
+            node.find(&|n| n.id.as_deref() == Some("poodle-toast-fail"))
+                .expect("danger toast")
+                .a11y
+                .role,
+            Some(NodeRole::Alert)
+        );
+
+        let tree = Arc::new(Mutex::new(node));
+        let build = {
+            let tree = Arc::clone(&tree);
+            Rc::new(move || {
+                use gpui::{IntoElement as _, ParentElement as _};
+                gpui::div()
+                    .child(poodle_gpui_node_backend::to_gpui(
+                        &tree.lock().expect("tree lock").clone(),
+                    ))
+                    .into_any_element()
+            }) as Rc<dyn Fn() -> gpui::AnyElement>
+        };
+        let mut driver = HeadlessDriver::new_element(cx, build);
+        driver.draw_frame();
+        let mounted = tree.lock().expect("tree lock").clone();
+        assert_eq!(
+            mounted
+                .find(&|n| n.id.as_deref() == Some("poodle-toast-fail"))
+                .expect("mounted danger")
+                .a11y
+                .role,
+            Some(NodeRole::Alert)
         );
     });
 }

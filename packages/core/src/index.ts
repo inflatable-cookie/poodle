@@ -869,6 +869,7 @@ export {
   playClippedHeight,
   dropToastVisual,
   moveToastFocus,
+  moveToastFocusFromRemovedAction,
   settleToastVisual,
   nextToastVisuals,
   playToastPresence,

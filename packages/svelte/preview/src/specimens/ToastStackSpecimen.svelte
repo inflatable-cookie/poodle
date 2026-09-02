@@ -8,6 +8,7 @@
     { id: "1", title: "Changes saved", message: "Your settings have been updated.", tone: "success" },
     { id: "2", title: "New version available", message: "Update to v2.1 for the latest features.", tone: "info", actionLabel: "Update" },
     { id: "3", title: "Rate limit warning", message: "You are approaching your API limit.", tone: "warning" },
+    { id: "publish", title: "Publishing", message: "Still working.", tone: "info" },
   ]);
 
   function addToast(): void {
@@ -19,6 +20,14 @@
     ];
     nextId += 1;
   }
+
+  function settlePublish(): void {
+    items = items.map((item) =>
+      item.id === "publish"
+        ? { id: "publish", title: "Published", message: "Your article is live.", tone: "success" }
+        : item,
+    );
+  }
 </script>
 
 <SpecimenLayout showSizes={true} showDensities={true} bareVariants>
@@ -27,6 +36,7 @@
       <SpecimenGroup label="Interactive stack" bare>
         <div class="poodle-specimen__actions">
           <Button variant="secondary" sizeRole="chrome" onClick={addToast}>Add toast</Button>
+          <Button variant="secondary" sizeRole="chrome" onClick={settlePublish}>Settle publish</Button>
         </div>
         <div class="poodle-toast-stack-specimen__variant">
           <ToastStack

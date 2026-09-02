@@ -189,4 +189,11 @@ describe("isToastSticky / uniqueToastInputs / reconcileToastTimers", () => {
     expect(plan.clear).toEqual(["job"]);
     expect(plan.start).toEqual([]);
   });
+
+  test("public surface stays API-zero", async () => {
+    const source = await Bun.file(new URL("../src/toast.ts", import.meta.url)).text();
+    expect(source).not.toMatch(/\bpending\s*\|/);
+    expect(source).not.toMatch(/createToastPromise|unwrapPromise|progressSlot/);
+    expect(source).not.toMatch(/lifecycle:\s*["']pending["']/);
+  });
 });

@@ -9,6 +9,7 @@
     cancelToastPresence,
     dropToastVisual,
     moveToastFocus,
+    moveToastFocusFromRemovedAction,
     nextToastVisuals,
     playToastPresence,
     settleToastVisual,
@@ -60,6 +61,27 @@
       return item ? [{ visual, item }] : [];
     }),
   );
+
+  $effect.pre(() => {
+    const liveItems = items;
+    untrack(() => {
+      if (!stackElement) {
+        return;
+      }
+      for (const [id, previous] of retainedItems) {
+        const next = liveItems.find((item) => item.id === id);
+        if (!previous.actionLabel || next?.actionLabel) {
+          continue;
+        }
+        const toastEl = [...stackElement.querySelectorAll<HTMLElement>(".poodle-toast")].find(
+          (node) => node.dataset.toastId === id,
+        );
+        if (toastEl) {
+          moveToastFocusFromRemovedAction(stackElement, toastEl, enteredFrom);
+        }
+      }
+    });
+  });
 
   $effect(() => {
     const liveItems = items;
@@ -187,6 +209,7 @@
   {#each rows as { visual, item } (visual.id)}
     <li
       class="poodle-toast"
+      data-toast-id={item.id}
       data-tone={item.tone ?? "info"}
       data-motion={visual.phase}
       data-motion-inert={visual.phase === "exit" ? "true" : undefined}

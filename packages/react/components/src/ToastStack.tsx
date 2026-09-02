@@ -1,9 +1,10 @@
-import { useEffect, useId, useRef, useState, type FocusEvent } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type FocusEvent } from "react";
 import {
   applyToastExitInert,
   cancelToastPresence,
   dropToastVisual,
   moveToastFocus,
+  moveToastFocusFromRemovedAction,
   nextToastVisuals,
   playToastPresence,
   settleToastVisual,
@@ -46,6 +47,8 @@ export function ToastStack({
   const resolvedDensity = density ?? uiPresentation.density;
   const stackRef = useRef<HTMLUListElement | null>(null);
   const enteredFrom = useRef<Element | null>(null);
+  const focusedActionId = useRef<string | null>(null);
+  const previousItems = useRef(items);
   const mounted = useRef(true);
   const initialPass = useRef(false);
   const [visuals, setVisuals] = useState<ToastVisual[]>(() =>
@@ -59,6 +62,31 @@ export function ToastStack({
       mounted.current = false;
     };
   }, []);
+
+  useLayoutEffect(() => {
+    const stack = stackRef.current;
+    const previous = previousItems.current;
+    previousItems.current = items;
+    if (!stack) {
+      return;
+    }
+    for (const prev of previous) {
+      const next = items.find((item) => item.id === prev.id);
+      if (!prev.actionLabel || next?.actionLabel) {
+        continue;
+      }
+      if (focusedActionId.current !== prev.id) {
+        continue;
+      }
+      const toastEl = [...stack.querySelectorAll<HTMLElement>(".poodle-toast")].find(
+        (node) => node.dataset.toastId === prev.id,
+      );
+      if (toastEl) {
+        moveToastFocusFromRemovedAction(stack, toastEl, enteredFrom.current, toastEl);
+      }
+      focusedActionId.current = null;
+    }
+  }, [items]);
 
   useEffect(() => {
     const liveIds = items.map((item) => item.id);
@@ -118,6 +146,11 @@ export function ToastStack({
         if (!stackRef.current?.contains(event.relatedTarget as Node | null)) {
           enteredFrom.current = event.relatedTarget as Element | null;
         }
+        const target = event.target as HTMLElement | null;
+        const toast = target?.closest<HTMLElement>(".poodle-toast");
+        focusedActionId.current = target?.closest(".poodle-toast__actions") && toast?.dataset.toastId
+          ? toast.dataset.toastId
+          : focusedActionId.current;
       }}
     >
       {visuals.map((visual) => {
@@ -208,6 +241,7 @@ function ToastRow({
     <li
       ref={ref}
       className="poodle-toast"
+      data-toast-id={item.id}
       data-tone={item.tone ?? "info"}
       data-motion={visual.phase}
       data-motion-inert={exiting ? "true" : undefined}

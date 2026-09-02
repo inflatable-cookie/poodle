@@ -155,6 +155,20 @@ pub(crate) fn render(state: &AppState, cx: &mut Context<PreviewRoot>) -> Div {
                 .toasts(action_toasts),
             ),
         ))
+        .child(group(
+            theme,
+            "Same-id settle",
+            surface(
+                theme,
+                ToastHost::from_spec(
+                    ToastHostSpec::new().with_placement(ToastHostPlacement::BottomEnd),
+                    theme,
+                )
+                .toasts(vec![Toast::new("publish", "Published")
+                    .with_tone(ToastTone::Success)
+                    .with_message("Your article is live.")]),
+            ),
+        ))
         .into_any_element();
 
     specimen_layout(
