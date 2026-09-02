@@ -132,9 +132,13 @@ semantics are unchanged when `appearance` is omitted or `"track"`.
 - Context: `value` (controllable), `min`, `max`, `step`, `disabled`
 - Events: `INPUT { raw }` (native input), `COMMIT { raw }` (native change),
   `SET_VALUE` (programmatic)
-- Normalization: snap to step from `min`, clamp into `[min, safeMax]` where
-  a degenerate range (`max <= min`) widens to `min + 1`; non-positive step
-  passes values through unsnapped
+- Normalization: snap to step from `min` (quantize `(raw - min) / step` to a
+  step index), clamp into `[min, safeMax]` where a degenerate range
+  (`max <= min`) widens to `min + 1`; non-positive step passes values through
+  unsnapped. The step-index tie law is portable: an index exactly halfway
+  between two steps rounds toward positive infinity (JavaScript `Math.round`
+  semantics). `poodle-headless` implements the identical law explicitly;
+  Rust's `f64::round` (half away from zero) is not the law
 - Transitions: `INPUT` sets normalized value, effect
   `emitValueChange(value)`; `COMMIT` sets normalized value, effect
   `emitValueCommit(value)`

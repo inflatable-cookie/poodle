@@ -1,4 +1,6 @@
-//! Slider and RangeSlider machines. Mirror of core `slider.ts`.
+//! Slider and RangeSlider machines. Mirror of core `slider.ts`; the
+//! step-quantization tie law is identical there and here (half ties round
+//! toward positive infinity, JavaScript `Math.round` semantics).
 
 use crate::audio::{denormalize_value, normalize_value, AudioValueLaw};
 
@@ -11,7 +13,11 @@ pub fn snap_to_step(value: f64, min: f64, step: f64) -> f64 {
         return value;
     }
 
-    min + ((value - min) / step).round() * step
+    // Portable tie law: an index exactly halfway between two steps rounds
+    // toward positive infinity, matching JavaScript `Math.round` in core
+    // `slider.ts`. `f64::round` would round half away from zero instead, so
+    // `snap_to_step(-0.5-index)` returned one step below `min`.
+    min + ((value - min) / step + 0.5).floor() * step
 }
 
 /// Degenerate ranges (max <= min) widen to one step so percentage math stays finite.
@@ -713,6 +719,19 @@ pub fn layout_range_slider_block(
 #[cfg(test)]
 mod control_tests {
     use super::*;
+
+    #[test]
+    fn negative_half_ties_round_toward_positive_infinity() {
+        // Portable law mirroring JavaScript Math.round in core `slider.ts`;
+        // f64::round would return one step lower at these exact ties.
+        assert_eq!(snap_to_step(-0.5, 0.0, 1.0), 0.0);
+        assert_eq!(snap_to_step(-1.0, 0.0, 2.0), 0.0);
+        assert_eq!(snap_to_step(-1.5, 0.0, 1.0), -1.0);
+        assert_eq!(snap_to_step(5.0, 10.0, 10.0), 10.0);
+        assert_eq!(snap_to_step(15.0, 10.0, 10.0), 20.0);
+        assert_eq!(snap_to_step(0.5, 0.0, 1.0), 1.0);
+        assert_eq!(snap_to_step(-1.5, -1.0, 1.0), -1.0);
+    }
 
     #[test]
     fn bipolar_fill_grows_from_center() {

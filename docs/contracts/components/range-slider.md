@@ -144,9 +144,12 @@ interaction.
   `disabled`
 - Events: `INPUT { thumb, raw }`, `COMMIT { thumb, raw }`, `SET_VALUE`
 - Normalization: `normalizeRangeValue` orders the pair and clamps both ends
-  into `[min, safeMax]`; per-event, the raw value snaps to step and a thumb
-  cannot cross its sibling (lower clamps to `[min, upper]`, upper to
-  `[lower, max]`)
+  into `[min, safeMax]`; per-event, the raw value snaps to step from `min`
+  and a thumb cannot cross its sibling (lower clamps to `[min, upper]`,
+  upper to `[lower, max]`). The step-index tie law is the Slider contract's
+  portable law: an index exactly halfway between two steps rounds toward
+  positive infinity (`Math.round` semantics), identically in core and
+  `poodle-headless`
 - Transitions: `INPUT` sets the pair, effect `emitValueChange(pair)`;
   `COMMIT` sets the pair, effect `emitValueCommit(pair)`
 - Machinery dependencies: none.
