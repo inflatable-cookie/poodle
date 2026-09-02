@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { flushSync } from "react-dom";
 import { useState, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -56,6 +57,8 @@ function Harness({
 }) {
   const [value, setValue] = useState(initialValue);
   const [alive, setAlive] = useState(true);
+  const [liveItems, setLiveItems] = useState(items);
+  const [livePolicy, setLivePolicy] = useState(focusOnValueChange);
 
   return (
     <>
@@ -85,6 +88,34 @@ function Harness({
       </button>
       <button
         type="button"
+        data-testid="stale-disable"
+        onClick={() => {
+          flushSync(() => setValue("tree"));
+          queueMicrotask(() =>
+            flushSync(() =>
+              setLiveItems((currentItems) =>
+                currentItems.map((item) =>
+                  item.value === "tree" ? { ...item, disabled: true } : item,
+                ),
+              ),
+            ),
+          );
+        }}
+      >
+        Disable Tree
+      </button>
+      <button
+        type="button"
+        data-testid="stale-policy"
+        onClick={() => {
+          flushSync(() => setValue("tree"));
+          queueMicrotask(() => flushSync(() => setLivePolicy("preserve")));
+        }}
+      >
+        Preserve focus
+      </button>
+      <button
+        type="button"
         data-testid="teardown"
         onClick={() => {
           setValue("tree");
@@ -95,9 +126,9 @@ function Harness({
       </button>
       {alive ? (
         <Tabs
-          items={items}
+          items={liveItems}
           value={value}
-          focusOnValueChange={focusOnValueChange}
+          focusOnValueChange={livePolicy}
           ariaLabel="Inspector"
           onValueChange={setValue}
         >
@@ -204,6 +235,32 @@ describe("Tabs controlled-panel focus (react)", () => {
     screen.getByTestId("list-card").focus();
 
     fireEvent.click(screen.getByTestId("select-tree"));
+    await flush();
+
+    expect(focus).not.toHaveBeenCalled();
+    expect(document.activeElement).not.toBe(treeTab);
+  });
+
+  it("revalidates a destination disabled before the pending timer fires", async () => {
+    render(<Harness focusOnValueChange="selected-tab" />);
+    const treeTab = inspectorTab("Tree");
+    const focus = vi.spyOn(treeTab, "focus");
+    screen.getByTestId("list-card").focus();
+
+    fireEvent.click(screen.getByTestId("stale-disable"));
+    await flush();
+
+    expect(focus).not.toHaveBeenCalled();
+    expect((treeTab as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("invalidates a pending destination when policy changes to preserve", async () => {
+    render(<Harness focusOnValueChange="selected-tab" />);
+    const treeTab = inspectorTab("Tree");
+    const focus = vi.spyOn(treeTab, "focus");
+    screen.getByTestId("list-card").focus();
+
+    fireEvent.click(screen.getByTestId("stale-policy"));
     await flush();
 
     expect(focus).not.toHaveBeenCalled();

@@ -25,6 +25,17 @@
   let value = $state<string | null>("components");
   let alive = $state(true);
 
+  function initialItems(): TabItem[] {
+    return items;
+  }
+
+  function initialPolicy(): TabsFocusOnValueChange {
+    return focusOnValueChange;
+  }
+
+  let liveItems = $state<TabItem[]>(initialItems());
+  let livePolicy = $state<TabsFocusOnValueChange>(initialPolicy());
+
   function selectTree(): void {
     value = "tree";
   }
@@ -44,6 +55,22 @@
     value = "ghost";
   }
 
+  function staleDisable(): void {
+    value = "tree";
+    queueMicrotask(() => {
+      liveItems = liveItems.map((item) =>
+        item.value === "tree" ? { ...item, disabled: true } : item,
+      );
+    });
+  }
+
+  function stalePolicy(): void {
+    value = "tree";
+    queueMicrotask(() => {
+      livePolicy = "preserve";
+    });
+  }
+
   function teardownAfterCapture(): void {
     value = "tree";
     queueMicrotask(() => {
@@ -58,10 +85,12 @@
 <span role="presentation" data-testid="accept-open" onclick={acceptOpen}>Accept Open</span>
 <button type="button" data-testid="supersede" onclick={supersede}>Supersede</button>
 <button type="button" data-testid="select-missing" onclick={selectMissing}>Select missing</button>
+<button type="button" data-testid="stale-disable" onclick={staleDisable}>Disable Tree</button>
+<button type="button" data-testid="stale-policy" onclick={stalePolicy}>Preserve focus</button>
 <button type="button" data-testid="teardown" onclick={teardownAfterCapture}>Teardown</button>
 
 {#if alive}
-  <Tabs {items} {value} {focusOnValueChange} ariaLabel="Inspector" onValueChange={(next) => (value = next)}>
+  <Tabs items={liveItems} {value} focusOnValueChange={livePolicy} ariaLabel="Inspector" onValueChange={(next) => (value = next)}>
     {#snippet children(activeValue)}
       {#if activeValue === "components"}
         <button type="button" data-testid="list-card">ListCard row</button>

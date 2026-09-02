@@ -173,6 +173,7 @@
   const motionReady = useMotionReady();
   let rootElement = $state<HTMLDivElement | null>(null);
   let panelElement = $state<HTMLDivElement | null>(null);
+  let panelFocusOwned = false;
   let pendingFocusDestination: string | null = null;
   let pendingFocusGeneration = 0;
   let seededPolicyValue = false;
@@ -424,14 +425,12 @@
 
     const previousValue = lastPolicyValue;
     lastPolicyValue = nextValue;
-    const active = typeof document === "undefined" ? null : document.activeElement;
     const nextPending = nextTabsControlledFocusDestination({
       policy: focusOnValueChange,
       controlled: isControlled,
       previousValue,
       nextValue,
-      focusWasInOutgoingPanel:
-        panelElement !== null && active instanceof Node && panelElement.contains(active),
+      focusWasInOutgoingPanel: panelFocusOwned,
       pendingValue: pendingFocusDestination,
     });
 
@@ -454,6 +453,14 @@
         if (destroyed || generation !== pendingFocusGeneration) {
           return;
         }
+        if (
+          focusOnValueChange !== "selected-tab" ||
+          !isControlled ||
+          currentValue !== dest
+        ) {
+          pendingFocusDestination = null;
+          return;
+        }
 
         const resolved = resolveTabsControlledFocusDestination({
           pendingValue: dest,
@@ -465,6 +472,10 @@
           tabElements[resolved]?.focus();
         }
       }, 0);
+    }
+
+    if (previousValue !== nextValue) {
+      panelFocusOwned = false;
     }
   });
 
@@ -939,6 +950,12 @@
       role="tabpanel"
       tabindex="0"
       aria-labelledby={`poodle-tab-${tabsId}-${currentValue}`}
+      onfocusin={() => (panelFocusOwned = true)}
+      onfocusout={(event) => {
+        const relatedTarget = event.relatedTarget;
+        panelFocusOwned =
+          relatedTarget !== null && event.currentTarget.contains(relatedTarget as Node);
+      }}
     >
       {@render children?.(currentValue)}
     </div>

@@ -119,6 +119,32 @@ describe("Tabs controlled-panel focus (svelte)", () => {
     expect(document.activeElement).not.toBe(treeTab);
   });
 
+  it("revalidates a destination disabled before the pending timer fires", async () => {
+    render(TabsControlledFocusHarness, { props: { focusOnValueChange: "selected-tab" } });
+    const treeTab = inspectorTab("Tree");
+    const focus = vi.spyOn(treeTab, "focus");
+    screen.getByTestId("list-card").focus();
+
+    await fireEvent.click(screen.getByTestId("stale-disable"));
+    await flush();
+
+    expect(focus).not.toHaveBeenCalled();
+    expect((treeTab as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("invalidates a pending destination when policy changes to preserve", async () => {
+    render(TabsControlledFocusHarness, { props: { focusOnValueChange: "selected-tab" } });
+    const treeTab = inspectorTab("Tree");
+    const focus = vi.spyOn(treeTab, "focus");
+    screen.getByTestId("list-card").focus();
+
+    await fireEvent.click(screen.getByTestId("stale-policy"));
+    await flush();
+
+    expect(focus).not.toHaveBeenCalled();
+    expect(document.activeElement).not.toBe(treeTab);
+  });
+
   it("superseded Components → Preview → Tree focuses only the Tree tab once", async () => {
     render(TabsControlledFocusHarness, { props: { focusOnValueChange: "selected-tab" } });
     const previewTab = inspectorTab("Preview");

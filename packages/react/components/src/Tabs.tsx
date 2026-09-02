@@ -191,13 +191,16 @@ export function Tabs({
   const measureListRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const panelFocusOwnedRef = useRef(false);
   const aliveRef = useRef(true);
-  const seededPolicyValueRef = useRef(false);
-  const lastPolicyValueRef = useRef<string | null>(null);
+  const committedValueRef = useRef<string | null | undefined>(undefined);
+  const focusPolicyRef = useRef<TabsFocusOnValueChange>("preserve");
+  const focusControlledRef = useRef(false);
+  const focusValueRef = useRef<string | null>(null);
+  const focusItemsRef = useRef<TabItem[]>([]);
   const pendingFocusDestinationRef = useRef<string | null>(null);
   const pendingFocusGenerationRef = useRef(0);
   const focusTransferTimerRef = useRef<number | null>(null);
-  const [focusTransferEpoch, setFocusTransferEpoch] = useState(0);
   const tooltipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingTabFocus = useRef<string | null>(null);
   const lastItemsSignature = useRef("");
@@ -255,31 +258,6 @@ export function Tabs({
   const selectedIndex = renderedItems.findIndex((item) => item.value === currentValue);
   const hasPanel = children !== undefined;
 
-  if (!seededPolicyValueRef.current) {
-    seededPolicyValueRef.current = true;
-    lastPolicyValueRef.current = currentValue;
-  } else if (lastPolicyValueRef.current !== currentValue) {
-    const previousValue = lastPolicyValueRef.current;
-    lastPolicyValueRef.current = currentValue;
-    const active = typeof document === "undefined" ? null : document.activeElement;
-    const nextPending = nextTabsControlledFocusDestination({
-      policy: focusOnValueChange,
-      controlled: isControlled,
-      previousValue,
-      nextValue: currentValue,
-      focusWasInOutgoingPanel:
-        panelRef.current !== null &&
-        active instanceof Node &&
-        panelRef.current.contains(active),
-      pendingValue: pendingFocusDestinationRef.current,
-    });
-
-    if (nextPending !== pendingFocusDestinationRef.current) {
-      pendingFocusDestinationRef.current = nextPending;
-      pendingFocusGenerationRef.current += 1;
-      setFocusTransferEpoch((epoch) => epoch + 1);
-    }
-  }
   const isVertical = orientation === "vertical";
   const hasTooltips = isVertical || showTooltips;
   const canCollapse = collapseWhenOverflow && !isVertical;
@@ -411,6 +389,7 @@ export function Tabs({
     return () => {
       aliveRef.current = false;
       pendingFocusDestinationRef.current = null;
+      pendingFocusGenerationRef.current += 1;
       if (focusTransferTimerRef.current !== null) {
         window.clearTimeout(focusTransferTimerRef.current);
         focusTransferTimerRef.current = null;
@@ -418,46 +397,93 @@ export function Tabs({
     };
   }, []);
 
-  useLayoutEffect(() => {
-    if (focusTransferEpoch === 0) {
-      return;
-    }
-
-    const dest = pendingFocusDestinationRef.current;
-    const generation = pendingFocusGenerationRef.current;
-    if (dest === null) {
-      return;
-    }
-
+  function clearFocusTransferTimer(): void {
     if (focusTransferTimerRef.current !== null) {
       window.clearTimeout(focusTransferTimerRef.current);
       focusTransferTimerRef.current = null;
     }
+  }
 
+  function invalidateFocusTransfer(): void {
+    pendingFocusDestinationRef.current = null;
+    pendingFocusGenerationRef.current += 1;
+    clearFocusTransferTimer();
+  }
+
+  useLayoutEffect(() => {
+    const previousValue = committedValueRef.current;
+    const firstCommit = previousValue === undefined;
+    const valueChanged = !firstCommit && previousValue !== currentValue;
+    const policyChanged = focusPolicyRef.current !== focusOnValueChange;
+
+    focusPolicyRef.current = focusOnValueChange;
+    focusControlledRef.current = isControlled;
+    focusValueRef.current = currentValue;
+    focusItemsRef.current = renderedItems;
+
+    if (policyChanged) {
+      invalidateFocusTransfer();
+    }
+
+    const pending = pendingFocusDestinationRef.current;
+    if (
+      pending !== null &&
+      (pending !== currentValue ||
+        resolveTabsControlledFocusDestination({
+          pendingValue: pending,
+          items: focusItemsRef.current,
+          alive: aliveRef.current,
+        }) === null)
+    ) {
+      invalidateFocusTransfer();
+    }
+
+    committedValueRef.current = currentValue;
+    if (firstCommit || !valueChanged) {
+      return;
+    }
+
+    const nextPending = nextTabsControlledFocusDestination({
+      policy: focusOnValueChange,
+      controlled: isControlled,
+      previousValue: previousValue!,
+      nextValue: currentValue,
+      focusWasInOutgoingPanel: panelFocusOwnedRef.current,
+      pendingValue: pendingFocusDestinationRef.current,
+    });
+    panelFocusOwnedRef.current = false;
+
+    if (nextPending === null) {
+      invalidateFocusTransfer();
+      return;
+    }
+
+    pendingFocusDestinationRef.current = nextPending;
+    pendingFocusGenerationRef.current += 1;
+    clearFocusTransferTimer();
+    const generation = pendingFocusGenerationRef.current;
     focusTransferTimerRef.current = window.setTimeout(() => {
       focusTransferTimerRef.current = null;
-      if (!aliveRef.current || generation !== pendingFocusGenerationRef.current) {
-        return;
-      }
+      const destination = pendingFocusDestinationRef.current;
+      const resolved =
+        aliveRef.current &&
+        generation === pendingFocusGenerationRef.current &&
+        focusPolicyRef.current === "selected-tab" &&
+        focusControlledRef.current &&
+        destination === focusValueRef.current
+          ? resolveTabsControlledFocusDestination({
+              pendingValue: destination,
+              items: focusItemsRef.current,
+              alive: aliveRef.current,
+            })
+          : null;
 
       pendingFocusDestinationRef.current = null;
-      const resolved = resolveTabsControlledFocusDestination({
-        pendingValue: dest,
-        items: renderedItems,
-        alive: aliveRef.current,
-      });
       if (resolved !== null) {
         tabRefs.current[resolved]?.focus();
       }
     }, 0);
-
-    return () => {
-      if (focusTransferTimerRef.current !== null) {
-        window.clearTimeout(focusTransferTimerRef.current);
-        focusTransferTimerRef.current = null;
-      }
-    };
-  }, [focusTransferEpoch]);
+  }, [currentValue, focusOnValueChange, isControlled, renderedItems]);
 
   // ── Tooltip (vertical icon-only mode) ──
 
@@ -937,6 +963,14 @@ export function Tabs({
           role="tabpanel"
           tabIndex={0}
           aria-labelledby={`poodle-tab-${tabsId}-${currentValue}`}
+          onFocus={() => {
+            panelFocusOwnedRef.current = true;
+          }}
+          onBlur={(event) => {
+            const relatedTarget = event.relatedTarget;
+            panelFocusOwnedRef.current =
+              relatedTarget !== null && event.currentTarget.contains(relatedTarget as Node);
+          }}
         >
           {children?.(currentValue)}
         </div>
