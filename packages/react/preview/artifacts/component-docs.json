@@ -8933,6 +8933,36 @@
         "description": "Uses native range inputs or the dense control-machine pointer surface."
       },
       {
+        "name": "appearance",
+        "type": "\"track\" | \"block\"",
+        "default": "\"track\"",
+        "description": "Visual treatment. Orthogonal to variant. Block is horizontal only."
+      },
+      {
+        "name": "direction",
+        "type": "\"ltr\" | \"rtl\"",
+        "default": "\"ltr\"",
+        "description": "Inline direction. Horizontal geometry mirrors in rtl; arrow keys keep numeric meaning."
+      },
+      {
+        "name": "visibleLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Visible label for block appearance. Never derived from ariaLabel."
+      },
+      {
+        "name": "formatVisibleValue",
+        "type": "((value: number, thumb: \"lower\" | \"upper\") => string) | undefined",
+        "default": "undefined",
+        "description": "Web-only per-thumb formatter for block visible values. Native specs carry resolved strings."
+      },
+      {
+        "name": "formatVisibleRange",
+        "type": "((lower: number, upper: number) => string) | undefined",
+        "default": "undefined",
+        "description": "Web-only formatter for the selected-window range text. Native specs carry the resolved string."
+      },
+      {
         "name": "polarity",
         "type": "\"unipolar\" | \"bipolar\"",
         "default": "\"unipolar\"",
@@ -10132,6 +10162,30 @@
         "type": "\"standard\" | \"embedded\"",
         "default": "\"standard\"",
         "description": "Uses the native input or dense control-machine pointer surface."
+      },
+      {
+        "name": "appearance",
+        "type": "\"track\" | \"block\"",
+        "default": "\"track\"",
+        "description": "Visual treatment. Orthogonal to variant. Block is horizontal only."
+      },
+      {
+        "name": "direction",
+        "type": "\"ltr\" | \"rtl\"",
+        "default": "\"ltr\"",
+        "description": "Inline direction. Horizontal geometry mirrors in rtl; arrow keys keep numeric meaning."
+      },
+      {
+        "name": "visibleLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Visible label for block appearance. Never derived from ariaLabel."
+      },
+      {
+        "name": "formatVisibleValue",
+        "type": "((value: number) => string) | undefined",
+        "default": "undefined",
+        "description": "Web-only formatter for block visible value. Native specs carry the resolved string."
       },
       {
         "name": "polarity",

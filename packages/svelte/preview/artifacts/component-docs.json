@@ -3694,9 +3694,9 @@
       },
       {
         "name": "onPanelDrop",
-        "type": "((payload: { panel: PanelDragData; targetEdge: DockEdge }) => void) | undefined",
+        "type": "((payload: { panel: PanelDragData; targetEdge: DockEdge; index: number }) => void) | undefined",
         "default": "undefined",
-        "description": "Called when a panel is dropped onto this dock."
+        "description": "Called when a panel is dropped onto this dock. `index` is the insert slot in the destination items; a drop on the region body appends."
       }
     ],
     "slots": [
@@ -8933,6 +8933,36 @@
         "description": "Uses native range inputs or the dense control-machine pointer surface."
       },
       {
+        "name": "appearance",
+        "type": "\"track\" | \"block\"",
+        "default": "\"track\"",
+        "description": "Visual treatment. Orthogonal to variant. Block is horizontal only."
+      },
+      {
+        "name": "direction",
+        "type": "\"ltr\" | \"rtl\"",
+        "default": "\"ltr\"",
+        "description": "Inline direction. Horizontal geometry mirrors in rtl; arrow keys keep numeric meaning."
+      },
+      {
+        "name": "visibleLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Visible label for block appearance. Never derived from ariaLabel."
+      },
+      {
+        "name": "formatVisibleValue",
+        "type": "((value: number, thumb: \"lower\" | \"upper\") => string) | undefined",
+        "default": "undefined",
+        "description": "Web-only per-thumb formatter for block visible values. Native specs carry resolved strings."
+      },
+      {
+        "name": "formatVisibleRange",
+        "type": "((lower: number, upper: number) => string) | undefined",
+        "default": "undefined",
+        "description": "Web-only formatter for the selected-window range text. Native specs carry the resolved string."
+      },
+      {
         "name": "polarity",
         "type": "\"unipolar\" | \"bipolar\"",
         "default": "\"unipolar\"",
@@ -10132,6 +10162,30 @@
         "type": "\"standard\" | \"embedded\"",
         "default": "\"standard\"",
         "description": "Uses the native input or dense control-machine pointer surface."
+      },
+      {
+        "name": "appearance",
+        "type": "\"track\" | \"block\"",
+        "default": "\"track\"",
+        "description": "Visual treatment. Orthogonal to variant. Block is horizontal only."
+      },
+      {
+        "name": "direction",
+        "type": "\"ltr\" | \"rtl\"",
+        "default": "\"ltr\"",
+        "description": "Inline direction. Horizontal geometry mirrors in rtl; arrow keys keep numeric meaning."
+      },
+      {
+        "name": "visibleLabel",
+        "type": "string | null",
+        "default": "null",
+        "description": "Visible label for block appearance. Never derived from ariaLabel."
+      },
+      {
+        "name": "formatVisibleValue",
+        "type": "((value: number) => string) | undefined",
+        "default": "undefined",
+        "description": "Web-only formatter for block visible value. Native specs carry the resolved string."
       },
       {
         "name": "polarity",
@@ -11863,6 +11917,24 @@
     "slots": [],
     "events": [],
     "usage": "<script lang=\"ts\">\n  import { TriStateSwitch } from \"@inflatable-cookie/poodle-svelte\";\n\n  let filter = \"default\";\n</script>\n\n<TriStateSwitch value={filter} ariaLabel=\"Include archived items\" excludedColor=\"#ef4444\" includedColor=\"#22c55e\" onValueChange={(value) => (filter = value)} />"
+  },
+  "motion-policy-provider": {
+    "props": [
+      {
+        "name": "policy",
+        "type": "MotionPolicy",
+        "default": "\"full\"",
+        "description": "Requested local restriction: full, reduced, or frozen. Nesting can only tighten."
+      }
+    ],
+    "slots": [
+      {
+        "name": "children",
+        "description": "Snippet for descendants built under the effective policy."
+      }
+    ],
+    "events": [],
+    "usage": "<script lang=\"ts\">\n  import { MotionPolicyProvider, Skeleton, Spinner } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<MotionPolicyProvider policy=\"reduced\">\n  <Skeleton />\n  <Spinner />\n</MotionPolicyProvider>"
   },
   "ui-presentation-provider": {
     "props": [
