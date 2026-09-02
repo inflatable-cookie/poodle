@@ -24,8 +24,8 @@ behavior repairs without inventing another conformance authority.
   Citations, nested menus, the lab-backed visual tranche, public IconMorph,
   release and adoption mutations, GPUI accessibility, Jetstream, and the
   separate holistic promotion batch remain gated or held.
-  Independent `g16.055` is active with its own worker handoff;
-  it remains outside the post-triage continuation map.
+  Independent `g16.055` is complete in PR #151 and remains outside the
+  post-triage continuation map.
 - `g16.001` is complete and operator-reviewed in PR #75. It repairs stale
   parity reporting and produces one component-level evidence ledger. `g16.002`
   closed — partial outcome: mounted GPUI behaviour for Checkbox, Switch, and

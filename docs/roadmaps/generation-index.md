@@ -1,6 +1,6 @@
 # Roadmap Generation Index
 
-Updated: 2026-09-01
+Updated: 2026-09-02
 
 ## Active Track
 
@@ -28,16 +28,16 @@ Updated: 2026-09-01
     bounded-preview issue; `036` merged in PR #127 with the paired-web Tree
     external drop-authority adapter; `037`–`044` completed the DesEngs research
     wave in merged PRs #128–#135; `045`–`054` are the canonical post-triage
-    continuation cards; independent `055` is ready on current main
+    continuation cards; independent `055` merged in PR #151
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
   - Ready frontier: `g16.045` EditableLabel, `g16.046` block sliders,
     `g16.047` toast updates, `g16.048` AgentSubagent reconciliation/benchmark,
     and `g16.049` icon geometry foundation. `g16.053` is complete in PR #150.
-  - Independent active lane: `g16.055` drag-source pointer-gesture browser
-    suppression, with its own committed worker handoff; it is outside the
-    post-triage continuation map.
+  - Independent completed lane: `g16.055` drag-source pointer-gesture browser
+    suppression merged in PR #151; it remains outside the post-triage
+    continuation map.
   - Blocked frontier: `g16.050` on `049`; `g16.051` on `050`, the operational
     Button lab, and its separately accepted icon adapter/manifest extension;
     `g16.052` on named reviewers, approvals, and orchestrator run custody;

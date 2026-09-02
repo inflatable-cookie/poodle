@@ -12,10 +12,10 @@ frontier. It records promotion, serial edges, external gates, and holds. It
 does not change parity evidence, authorize release or sibling-repository
 mutation, or create a worker handoff.
 
-Current main also carries independent ready card
-[`g16.055`](055-drag-source-preactivation-selection-suppression.md) and its
-worker handoff. They remain outside this post-triage map and are neither
-absorbed nor renumbered here.
+Current main also carries completed independent card
+[`g16.055`](055-drag-source-preactivation-selection-suppression.md), merged in
+PR #151. It remains outside this post-triage map and is neither absorbed nor
+renumbered here.
 
 ## Closed Baseline
 

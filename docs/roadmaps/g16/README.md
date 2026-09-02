@@ -1,7 +1,7 @@
 # g16 — Next Work
 
 Status: active — complete through `g16.044`; canonical post-triage continuation
-compiled through `g16.054`; independent `g16.055` ready
+compiled through `g16.054`; independent `g16.055` complete
 Posture: strict-ready
 Opened: 2026-08-25
 Governing refs: `../../../README.md`, `../../README.md`,
@@ -89,7 +89,7 @@ stay maintained; backend admission is not part of the first card.
 52. [052 — Contributor design-guidance pilot](052-contributor-design-guidance-pilot.md) — gated on named human reviewers, freeze approvals, and orchestrator execution custody
 53. [053 — Repository security-audit boundary repair](053-repository-security-audit-boundary-repair.md) — complete in PR #150; the production matcher is boundary-safe and the repository audit is green without exclusions
 54. [054 — HistoryCenter v0.3.0 release candidate](054-historycenter-v030-release-candidate.md) — blocked on an accepted, separately promoted compiled-JS/declarations prerequisite; `g16.053` is complete, the remaining mechanics are unplanned, and no release mutation is authorized
-55. [055 — Drag source pointer-gesture browser suppression](055-drag-source-preactivation-selection-suppression.md) — in progress; independent Papercuts repair covering pre-activation text selection and post-drag compatibility clicks
+55. [055 — Drag source pointer-gesture browser suppression](055-drag-source-preactivation-selection-suppression.md) — complete; merged in PR #151 with shared-controller pre-activation selection suppression and one-shot post-drag compatibility-click cancellation
 
 ## Parallel Continuation
 
@@ -105,8 +105,8 @@ held rather than becoming implicit worker work. The canonical map also holds
 the five approved holistic-assessment directions for a separate promotion
 batch; no cards for them are compiled here.
 
-`g16.055` is a separate active Papercuts repair. It is not part of the
-post-triage continuation map.
+`g16.055` is a separately completed Papercuts repair in PR #151. It is not part
+of the post-triage continuation map.
 
 The earlier continuation programmes remain provenance:
 

@@ -1,6 +1,6 @@
 # g16.055 — Drag Source Pointer-gesture Browser Suppression
 
-Status: in-review
+Status: complete — merged in PR #151
 Date: 2026-09-02
 Card: `docs/roadmaps/g16/055-drag-source-preactivation-selection-suppression.md`
 Handoff: `docs/handoffs/20260902-002950-g16-055-drag-source-selection-suppression.md`
@@ -10,6 +10,8 @@ Branch: `fix/g16-055-drag-source-selection-suppression`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-055-drag-source-selection`
 Base: `origin/main` at `943e41ee111d1fb1291ab8b39aef8aa5b2bd735e`
 Planning base `74f612d6b5dadb3b91bb62961d5396c64d7c1a95` is an ancestor.
+Reviewed head: `37c6929f2f0a373867a32b4baa0efc2ede55e812`
+Merge: `2245ea0a27a06e16d584cdf62895b7f12f3d6f09`
 
 ## Outcome
 
@@ -91,8 +93,13 @@ Restored from `017cd1164`. Those three tests passed after restore.
 - `effigy docs:check` — pass
 - `git diff --check` — clean
 
+Orchestrator exact-head review independently reran the focused controller and
+paired Tree suites (166/166), the combined Chromium/WebKit drag-drop browser
+probe, `effigy docs:check`, and the committed diff check before merge.
+
 ## Release / adoption
 
-Merge to source first. Ship in the gated `0.3.0` candidate. Do not open a
-`0.2.x` lane. Figmatic may verify against the merged source head; package
-adoption waits for the compiled `0.3.0` distribution.
+Merged to source in PR #151. Ship in the gated `0.3.0` candidate. Do not open a
+`0.2.x` lane. Figmatic may verify against merge
+`2245ea0a27a06e16d584cdf62895b7f12f3d6f09`; package adoption waits for the
+compiled `0.3.0` distribution.

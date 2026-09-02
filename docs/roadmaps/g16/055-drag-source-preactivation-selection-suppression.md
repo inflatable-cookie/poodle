@@ -1,6 +1,6 @@
 # g16.055 — Drag Source Pointer-gesture Browser Suppression
 
-Status: in-review
+Status: complete — merged in PR #151
 Opened: 2026-09-02
 Depends on: g16.021–g16.028 drag substrate and the merged Tree interaction
 repair from PR #125; independent of the post-triage product runway
@@ -10,6 +10,7 @@ Reported failures: dragging a reorderable Tree row can paint a browser text
 selection across labels traversed before the pointer activation threshold is
 crossed; after an activated move, the browser delivers a compatibility click
 to the source row and Tree emits a redundant selection request
+Merge: `2245ea0a27a06e16d584cdf62895b7f12f3d6f09`
 
 ## Goal
 
