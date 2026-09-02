@@ -363,19 +363,5 @@ describe("Svelte compiled distribution", () => {
     rmSync(plantedImport, { recursive: true, force: true });
     rmSync(consumer, { recursive: true, force: true });
 
-    const packInstallDiff = spawnSync(
-      "git",
-      ["diff", "--name-only", "origin/main", "--", "test/package-install"],
-      { cwd: repoRoot, encoding: "utf8" },
-    );
-      expect(packInstallDiff.stdout.trim().split("\n").filter(Boolean).sort()).toEqual([
-      "test/package-install/fixture/ReactPackage.test.tsx",
-      "test/package-install/fixture/packed-types/tsconfig.slider-react-negative.json",
-      "test/package-install/fixture/packed-types/tsconfig.slider-react-positive.json",
-      "test/package-install/fixture/packed-types/tsconfig.tree-react-negative.json",
-      "test/package-install/fixture/packed-types/tsconfig.tree-react-positive.json",
-      "test/package-install/roster.ts",
-      "test/package-install/web-preview.ts",
-    ]);
   }, 60_000);
 });

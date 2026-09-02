@@ -2,12 +2,7 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",
-    "types": [],
-    "paths": {
-      "@inflatable-cookie/poodle-react": [
-        "../node_modules/@inflatable-cookie/poodle-react/dist/types.d.ts"
-      ]
-    }
+    "types": []
   },
   "files": ["ambient.d.ts", "slider-appearance-react-positive.ts"]
 }

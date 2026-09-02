@@ -21,7 +21,15 @@ import {
   ModelConnectionPicker,
   ModelConnectionSetup,
 } from "@inflatable-cookie/poodle-react";
-import { AgentPlan, AgentPlanRecord } from "@inflatable-cookie/poodle-react/markdown";
+import { Button as DirectButton } from "@inflatable-cookie/poodle-react/Button";
+import { Select as DirectSelect } from "@inflatable-cookie/poodle-react/Select";
+import {
+  AgentMessage,
+  AgentPlan,
+  AgentPlanRecord,
+  AgentTranscript,
+  MarkdownEditor,
+} from "@inflatable-cookie/poodle-react/markdown";
 
 const licenceKeyFormat: LicenceKeyFormat = {
   parse: (input) => ({ ok: true, key: input, grouped: input }),
@@ -145,5 +153,25 @@ describe("packed @inflatable-cookie/poodle-react", () => {
     expect(view.getByRole("button", { name: "Revise" })).toBeTruthy();
     expect(view.container.querySelector(".poodle-agent-plan-record")).toBeTruthy();
     expect(view.getByRole("button", { name: "Show plan" })).toBeTruthy();
+  });
+
+  it("loads direct controls and every markdown entry from the archive", () => {
+    const view = render(
+      <>
+        <DirectButton>Direct</DirectButton>
+        <DirectSelect options={[]} />
+        <AgentMessage markdown="installed markdown" />
+        <AgentPlan plan="1. Installed plan" />
+        <AgentPlanRecord plan="1. Installed record" status="accepted" />
+        <AgentTranscript items={[]} />
+        <MarkdownEditor />
+      </>,
+    );
+
+    expect(view.getByRole("button", { name: "Direct" })).toBeTruthy();
+    expect(view.getAllByRole("textbox").length).toBeGreaterThanOrEqual(1);
+    expect(view.container.textContent).toContain("installed markdown");
+    expect(view.container.textContent).toContain("Installed plan");
+    expect(view.container.textContent).toContain("Installed record");
   });
 });

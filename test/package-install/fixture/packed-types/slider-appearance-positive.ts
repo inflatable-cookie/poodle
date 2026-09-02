@@ -1,7 +1,6 @@
 // Positive packed proof that `SliderAppearance` is exported from both public
-// Svelte paths (g16.046). React assignability lives in the mapped
-// `slider-appearance-react-positive.ts` compile: the installed React `types`
-// condition is `src/index.ts`, a value barrel that is not tsc-clean.
+// Svelte paths (g16.046). React assignability is compiled separately through
+// the installed React package exports.
 import type { SliderAppearance as RootAppearance } from "@inflatable-cookie/poodle-svelte";
 import type { SliderAppearance as TypesAppearance } from "@inflatable-cookie/poodle-svelte/types";
 

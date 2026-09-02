@@ -1,6 +1,6 @@
 {
   // Installed public-root resolution. No paths map. Does not prove assignability;
-  // tsc --traceResolution must land on package exports types → src/index.ts.
+  // tsc --traceResolution must land on package exports types → dist/index.d.ts.
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-jsx",

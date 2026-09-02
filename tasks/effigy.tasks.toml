@@ -573,6 +573,10 @@
 "docs:check" = [
   { task = "gate:snapshot" },
   { task = "core:build" },
+  # Export and docs audits inspect the compiled shell packages. Build their
+  # contracted dist trees before the first audit on a clean checkout.
+  { task = "svelte:package" },
+  { task = "react:package" },
   { task = "drift:recipes" },
   { task = "svelte:surface-audit" },
   { task = "docs:lint" },
@@ -589,7 +593,12 @@
 "parity:report" = [{ task = "report:parity" }]
 
 # Cheap orientation for `effigy doctor`. Never alias health to the full board.
-health = [{ task = "core:build" }, { task = "docs:lint" }]
+health = [
+  { task = "core:build" },
+  { task = "svelte:package" },
+  { task = "react:package" },
+  { task = "docs:lint" },
+]
 
 # Full self-contained local release board (headless / CPU-only). Visual GPUI
 # and paired Jetstream sweeps stay separate (`test:native-visual`,
