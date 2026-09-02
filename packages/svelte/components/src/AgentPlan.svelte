@@ -3,6 +3,7 @@
 
   import { canDecidePlan, planStatusLabel, type AgentPlanStatus } from "@inflatable-cookie/poodle-core";
 
+  import AgentMessage from "./AgentMessage.svelte";
   import { getUiPresentation, resolveSemanticControlSize } from "./presentation";
 
   import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
@@ -59,9 +60,7 @@
 >
   <!-- The plan is markdown, rendered by the same path as the turn's prose. -->
   <div class="poodle-agent-plan__body">
-      {#await import("./AgentMessage.svelte") then { default: AgentMessage }}
-        <AgentMessage markdown={plan} role="assistant" size={resolvedSize} density={resolvedDensity} />
-      {/await}
+    <AgentMessage markdown={plan} role="assistant" size={resolvedSize} density={resolvedDensity} />
   </div>
 
   {#if isPending}

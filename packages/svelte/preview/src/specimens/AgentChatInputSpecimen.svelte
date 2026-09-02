@@ -1,7 +1,6 @@
 <script lang="ts">
   import {
     AgentChatInput,
-    AgentPlan,
     AgentQuestion,
     Button,
     ModelPicker,
@@ -16,6 +15,7 @@
     type ModelSelection,
     type RefOption,
   } from "@inflatable-cookie/poodle-svelte";
+  import { AgentPlan } from "@inflatable-cookie/poodle-svelte/markdown";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor } from "@testing-library/svelte";
+import { fireEvent, render } from "@testing-library/svelte";
 import { describe, expect, it, vi } from "vitest";
 
 import AgentPlanRecord from "../src/AgentPlanRecord.svelte";
@@ -24,9 +24,7 @@ describe("AgentPlanRecord (svelte)", () => {
     });
     const body = container.querySelector(".poodle-agent-plan-record__body") as HTMLElement;
     expect(body).not.toBeNull();
-    await waitFor(() => {
-      expect(body.querySelector("h1")).not.toBeNull();
-    });
+    expect(body.querySelector("h1")).not.toBeNull();
     expect(container.querySelector(".poodle-agent-plan-record__summary")).toBeNull();
 
     await fireEvent.click(container.querySelector(".poodle-agent-plan-record__toggle") as HTMLElement);

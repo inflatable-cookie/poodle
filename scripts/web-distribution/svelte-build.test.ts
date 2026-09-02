@@ -77,12 +77,14 @@ function writeConsumer(moduleResolution: "bundler" | "nodenext", probe: string):
   return consumer;
 }
 
+const COMPILER_TIMEOUT_MS = 30_000;
+
 function runTsc(moduleResolution: "bundler" | "nodenext"): void {
   const consumer = writeConsumer(
     moduleResolution,
     `import { Button as RootButton, DragDropProvider } from "@inflatable-cookie/poodle-svelte";
 import DirectButton from "@inflatable-cookie/poodle-svelte/Button.svelte";
-import { AgentMessage, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-svelte/markdown";
+import { AgentMessage, AgentPlan, AgentPlanRecord, AgentTranscript, MarkdownEditor } from "@inflatable-cookie/poodle-svelte/markdown";
 import type { ControlSize } from "@inflatable-cookie/poodle-svelte/types";
 import type { ControlSize as TypesSize } from "@inflatable-cookie/poodle-svelte/types";
 import type { ComponentProps } from "svelte";
@@ -90,6 +92,8 @@ void RootButton;
 void DragDropProvider;
 void DirectButton;
 void AgentMessage;
+void AgentPlan;
+void AgentPlanRecord;
 void AgentTranscript;
 void MarkdownEditor;
 const size: ControlSize = "md";
@@ -106,6 +110,7 @@ void okButton;
   const result = spawnSync("bun", ["x", "tsc", "-p", "tsconfig.json", "--pretty", "false"], {
     cwd: consumer,
     encoding: "utf8",
+    timeout: COMPILER_TIMEOUT_MS,
   });
   if (result.status !== 0) {
     throw new Error(
@@ -140,6 +145,7 @@ void badSelectSnippet;
   const result = spawnSync("bun", ["x", "tsc", "-p", "tsconfig.json", "--pretty", "false"], {
     cwd: consumer,
     encoding: "utf8",
+    timeout: COMPILER_TIMEOUT_MS,
   });
   return {
     status: result.status,
@@ -150,9 +156,11 @@ void badSelectSnippet;
 describe("Svelte compiled distribution", () => {
   test("frozen roster and package exports match spec 070", () => {
     expect(SHELL_ROSTER_NAMES).toHaveLength(176);
-    expect(rootRosterNames()).toHaveLength(173);
+    expect(rootRosterNames()).toHaveLength(171);
     expect([...MARKDOWN_COMPONENT_NAMES]).toEqual([
       "AgentMessage",
+      "AgentPlan",
+      "AgentPlanRecord",
       "AgentTranscript",
       "MarkdownEditor",
     ]);
@@ -207,13 +215,22 @@ describe("Svelte compiled distribution", () => {
     expect(readFileSync(join(svelteRoot, "dist/AgentMessage.client.js"), "utf8")).toMatch(
       /from ["']marked["']/,
     );
+    expect(readFileSync(join(svelteRoot, "dist/AgentPlan.client.js"), "utf8")).toMatch(
+      /AgentMessage|marked/,
+    );
     expect(readFileSync(join(svelteRoot, "dist/index.d.ts"), "utf8")).not.toContain("AgentMessage");
+    expect(readFileSync(join(svelteRoot, "dist/index.d.ts"), "utf8")).not.toMatch(/\bAgentPlan\b/);
+    expect(readFileSync(join(svelteRoot, "dist/index.d.ts"), "utf8")).not.toMatch(
+      /\bAgentPlanRecord\b/,
+    );
     expect(readFileSync(join(svelteRoot, "dist/index.d.ts"), "utf8")).not.toContain(
       "AgentTranscript",
     );
     expect(readFileSync(join(svelteRoot, "dist/index.d.ts"), "utf8")).not.toContain("MarkdownEditor");
     const markdownDts = readFileSync(join(svelteRoot, "dist/markdown.d.ts"), "utf8");
     expect(markdownDts).toContain("AgentMessage");
+    expect(markdownDts).toMatch(/\bAgentPlan\b/);
+    expect(markdownDts).toMatch(/\bAgentPlanRecord\b/);
     expect(markdownDts).toContain("AgentTranscript");
     expect(markdownDts).toContain("MarkdownEditor");
     const buttonDts = readFileSync(join(svelteRoot, "dist/Button.svelte.d.ts"), "utf8");
@@ -351,7 +368,8 @@ describe("Svelte compiled distribution", () => {
       ["diff", "--name-only", "origin/main", "--", "test/package-install"],
       { cwd: repoRoot, encoding: "utf8" },
     );
-    expect(packInstallDiff.stdout.trim().split("\n").filter(Boolean).sort()).toEqual([
+      expect(packInstallDiff.stdout.trim().split("\n").filter(Boolean).sort()).toEqual([
+      "test/package-install/fixture/ReactPackage.test.tsx",
       "test/package-install/fixture/packed-types/tsconfig.slider-react-negative.json",
       "test/package-install/fixture/packed-types/tsconfig.slider-react-positive.json",
       "test/package-install/fixture/packed-types/tsconfig.tree-react-negative.json",
@@ -359,5 +377,5 @@ describe("Svelte compiled distribution", () => {
       "test/package-install/roster.ts",
       "test/package-install/web-preview.ts",
     ]);
-  });
+  }, 60_000);
 });

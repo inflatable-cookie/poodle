@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { AgentPlanRecord } from "../src/AgentPlanRecord";
@@ -17,16 +17,14 @@ describe("AgentPlanRecord (react)", () => {
     expect(container.querySelector(".poodle-agent-plan-record__body")).toBeNull();
   });
 
-  it("renders the full plan through markdown when expanded, never both summary and plan", async () => {
+  it("renders the full plan through markdown when expanded, never both summary and plan", () => {
     const onToggle = vi.fn();
     const { container } = render(
       <AgentPlanRecord plan={plan} status="revised" expanded onToggle={onToggle} />,
     );
     const body = container.querySelector(".poodle-agent-plan-record__body") as HTMLElement;
     expect(body).not.toBeNull();
-    await waitFor(() => {
-      expect(body.querySelector("h1")).not.toBeNull();
-    });
+    expect(body.querySelector("h1")).not.toBeNull();
     expect(container.querySelector(".poodle-agent-plan-record__summary")).toBeNull();
 
     fireEvent.click(container.querySelector(".poodle-agent-plan-record__toggle") as HTMLElement);

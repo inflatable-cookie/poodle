@@ -100,7 +100,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AgentPlan } from "@inflatable-cookie/poodle-svelte";
+  import { AgentPlan } from "@inflatable-cookie/poodle-svelte/markdown";
 </script>
 
 <AgentPlan
@@ -128,7 +128,7 @@ export const componentDocsMap: Record<string, ComponentDocs> = {
     slots: [],
     events: [],
     usage: `<script lang="ts">
-  import { AgentPlanRecord } from "@inflatable-cookie/poodle-svelte";
+  import { AgentPlanRecord } from "@inflatable-cookie/poodle-svelte/markdown";
 </script>
 
 <AgentPlanRecord

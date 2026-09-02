@@ -2,10 +2,12 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export const FROZEN_ROSTER_COUNT = 176;
-export const FROZEN_COMPONENT_COUNT = 173;
+export const FROZEN_COMPONENT_COUNT = 171;
 
 const MARKDOWN_COMPONENT_NAMES = [
   "AgentMessage",
+  "AgentPlan",
+  "AgentPlanRecord",
   "AgentTranscript",
   "MarkdownEditor",
 ] as const;

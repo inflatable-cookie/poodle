@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { AgentChatInput, AgentPlan, type AgentPlanStatus } from "@inflatable-cookie/poodle-svelte";
+  import { AgentChatInput, type AgentPlanStatus } from "@inflatable-cookie/poodle-svelte";
+  import { AgentPlan } from "@inflatable-cookie/poodle-svelte/markdown";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 

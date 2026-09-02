@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { useState } from "react";
 
 import "@inflatable-cookie/poodle-core/styles/agent-plan-record.css";
 
@@ -8,14 +8,9 @@ import {
   type AgentPlanSettledStatus,
 } from "@inflatable-cookie/poodle-core";
 
-import { loadAgentMessage } from "./agent-message-load";
+import { AgentMessage } from "./AgentMessage";
 import { resolveSemanticControlSize, useUiPresentation } from "./presentation";
 import type { ControlDensity, ControlSize, SemanticControlSizeRole } from "./types";
-
-const AgentMessage = lazy(async () => {
-  const module = await loadAgentMessage();
-  return { default: module.AgentMessage };
-});
 
 export interface AgentPlanRecordProps {
   /** Raw markdown of the plan that was decided. */
@@ -88,9 +83,7 @@ export function AgentPlanRecord({
         <p className="poodle-agent-plan-record__summary">{summary}</p>
       ) : (
         <div className="poodle-agent-plan-record__body">
-          <Suspense fallback={null}>
-            <AgentMessage markdown={plan} role="assistant" size={resolvedSize} density={resolvedDensity} />
-          </Suspense>
+          <AgentMessage markdown={plan} role="assistant" size={resolvedSize} density={resolvedDensity} />
         </div>
       )}
 

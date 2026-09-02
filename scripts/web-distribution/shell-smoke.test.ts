@@ -276,10 +276,15 @@ try {
 
       writeFileSync(
         join(consumer, "root-import.mjs"),
-        `import { Button } from "@inflatable-cookie/poodle-svelte";
-import { Button as ReactButton } from "@inflatable-cookie/poodle-react";
-if (typeof Button !== "function") throw new Error("svelte root Button missing");
-if (typeof ReactButton !== "function") throw new Error("react root Button missing");
+        `import * as SvelteRoot from "@inflatable-cookie/poodle-svelte";
+import * as ReactRoot from "@inflatable-cookie/poodle-react";
+const leaked = ["AgentMessage", "AgentPlan", "AgentPlanRecord", "AgentTranscript", "MarkdownEditor"];
+for (const name of leaked) {
+  if (name in SvelteRoot) throw new Error(\`svelte root leaked \${name}\`);
+  if (name in ReactRoot) throw new Error(\`react root leaked \${name}\`);
+}
+if (typeof SvelteRoot.Button !== "function") throw new Error("svelte root Button missing");
+if (typeof ReactRoot.Button !== "function") throw new Error("react root Button missing");
 process.stdout.write("root-parser-free\\n");
 `,
       );
@@ -298,18 +303,123 @@ process.stdout.write("root-parser-free\\n");
       writeFileSync(
         join(consumer, "markdown-ssr.mjs"),
         `import { Button as RootButton } from "@inflatable-cookie/poodle-svelte";
-import { AgentMessage } from "@inflatable-cookie/poodle-svelte/markdown";
+import { AgentMessage, AgentPlan, AgentPlanRecord } from "@inflatable-cookie/poodle-svelte/markdown";
+import DirectPlan from "@inflatable-cookie/poodle-svelte/AgentPlan.svelte";
 import { render } from "svelte/server";
+const markdown = "## Proposed plan\\n\\n1. Add the surface";
 const root = render(RootButton, { props: { type: "button" } }).body;
 if (!root.includes("poodle-button")) throw new Error("root Button SSR missed anatomy");
-const body = render(AgentMessage, { props: { markdown: "hi" } }).body;
-if (!body.includes("poodle-agent-message")) throw new Error("markdown SSR missed anatomy");
+const message = render(AgentMessage, { props: { markdown: "hi" } }).body;
+if (!message.includes("poodle-agent-message")) throw new Error("markdown SSR missed anatomy");
+const plan = render(AgentPlan, { props: { plan: markdown } }).body;
+if (!plan.includes("poodle-agent-plan__body")) throw new Error("AgentPlan SSR missed body");
+if (!plan.includes("poodle-agent-message")) throw new Error("AgentPlan SSR missed markdown");
+if (!plan.includes("Proposed plan")) throw new Error("AgentPlan SSR did not render markdown");
+if (plan.includes("<!--$!-->") || /suspended/i.test(plan)) throw new Error("AgentPlan SSR used Suspense");
+const directPlan = render(DirectPlan, { props: { plan: markdown } }).body;
+if (!directPlan.includes("Proposed plan")) throw new Error("direct AgentPlan SSR missed markdown");
+const record = render(AgentPlanRecord, {
+  props: { plan: markdown, status: "accepted", expanded: true },
+}).body;
+if (!record.includes("poodle-agent-plan-record__body")) throw new Error("AgentPlanRecord SSR missed body");
+if (!record.includes("poodle-agent-message")) throw new Error("AgentPlanRecord SSR missed markdown");
+if (!record.includes("Proposed plan")) throw new Error("AgentPlanRecord SSR did not render markdown");
+if (record.includes("<!--$!-->") || /suspended/i.test(record)) {
+  throw new Error("AgentPlanRecord SSR used Suspense");
+}
 process.stdout.write("markdown-ok\\n");
 `,
       );
       expect(run("node", ["--import", "./css-register.mjs", "./markdown-ssr.mjs"], consumer)).toContain(
         "markdown-ok",
       );
+
+      writeFileSync(
+        join(consumer, "plan-mount.mjs"),
+        `import { Window } from "happy-dom";
+import { mount, unmount } from "svelte";
+const window = new Window({ url: "https://poodle.test/" });
+const assigned = [];
+for (const key of Object.getOwnPropertyNames(window)) {
+  if (key in globalThis) continue;
+  try {
+    globalThis[key] = window[key];
+    assigned.push(key);
+  } catch {}
+}
+const previous = { window: globalThis.window, document: globalThis.document };
+globalThis.window = window;
+globalThis.document = window.document;
+try {
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    get: () => window.navigator,
+  });
+} catch {}
+try {
+  const { AgentPlan, AgentPlanRecord } = await import("@inflatable-cookie/poodle-svelte/markdown");
+  const target = window.document.createElement("div");
+  window.document.body.appendChild(target);
+  const plan = mount(AgentPlan, {
+    target,
+    props: { plan: "## Proposed plan\\n\\n1. Add the surface" },
+  });
+  if (!target.innerHTML.includes("poodle-agent-plan__body")) {
+    throw new Error(\`plan mount missed body: \${target.innerHTML}\`);
+  }
+  if (!target.innerHTML.includes("Proposed plan")) {
+    throw new Error(\`plan mount missed markdown: \${target.innerHTML}\`);
+  }
+  unmount(plan);
+  target.replaceChildren();
+  const record = mount(AgentPlanRecord, {
+    target,
+    props: { plan: "## Proposed plan\\n\\n1. Add the surface", status: "accepted", expanded: true },
+  });
+  if (!target.innerHTML.includes("poodle-agent-plan-record__body")) {
+    throw new Error(\`record mount missed body: \${target.innerHTML}\`);
+  }
+  if (!target.innerHTML.includes("Proposed plan")) {
+    throw new Error(\`record mount missed markdown: \${target.innerHTML}\`);
+  }
+  unmount(record);
+  process.stdout.write("plan-mount-ok\\n");
+} finally {
+  Object.assign(globalThis, previous);
+  for (const key of assigned) delete globalThis[key];
+  window.close();
+}
+`,
+      );
+      expect(
+        run("node", ["--conditions=browser", "--import", "./css-register.mjs", "./plan-mount.mjs"], consumer),
+      ).toContain("plan-mount-ok");
+
+      writeFileSync(
+        join(consumer, "react-plan-ssr.mjs"),
+        `import { createElement } from "react";
+import { renderToString } from "react-dom/server";
+import { AgentPlan, AgentPlanRecord } from "@inflatable-cookie/poodle-react/markdown";
+const markdown = "## Proposed plan\\n\\n1. Add the surface";
+const plan = renderToString(createElement(AgentPlan, { plan: markdown }));
+if (!plan.includes("poodle-agent-plan__body")) throw new Error("react AgentPlan SSR missed body");
+if (!plan.includes("poodle-agent-message")) throw new Error("react AgentPlan SSR missed markdown");
+if (!plan.includes("Proposed plan")) throw new Error("react AgentPlan SSR did not render markdown");
+if (/suspended|abort/i.test(plan)) throw new Error("react AgentPlan SSR used Suspense");
+const record = renderToString(
+  createElement(AgentPlanRecord, { plan: markdown, status: "accepted", expanded: true }),
+);
+if (!record.includes("poodle-agent-plan-record__body")) {
+  throw new Error("react AgentPlanRecord SSR missed body");
+}
+if (!record.includes("Proposed plan")) throw new Error("react AgentPlanRecord SSR did not render markdown");
+if (/suspended|abort/i.test(record)) throw new Error("react AgentPlanRecord SSR used Suspense");
+process.stdout.write("react-plan-ok\\n");
+`,
+      );
+      expect(
+        run("node", ["--import", "./css-register.mjs", "./react-plan-ssr.mjs"], consumer),
+      ).toContain("react-plan-ok");
 
       const reactOut = run(
         "node",

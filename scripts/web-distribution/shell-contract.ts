@@ -190,6 +190,8 @@ export const SHELL_ROSTER_NAMES = [
 
 export const MARKDOWN_COMPONENT_NAMES = [
   "AgentMessage",
+  "AgentPlan",
+  "AgentPlanRecord",
   "AgentTranscript",
   "MarkdownEditor",
 ] as const;

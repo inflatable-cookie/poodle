@@ -203,7 +203,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AgentPlan } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AgentPlan\n  plan=\"1. Update tokens\n2. Verify every runtime\"\n  onAccept={() => acceptPlan()}\n  onRevise={() => focusComposer()}\n/>"
+    "usage": "<script lang=\"ts\">\n  import { AgentPlan } from \"@inflatable-cookie/poodle-svelte/markdown\";\n</script>\n\n<AgentPlan\n  plan=\"1. Update tokens\n2. Verify every runtime\"\n  onAccept={() => acceptPlan()}\n  onRevise={() => focusComposer()}\n/>"
   },
   "agent-plan-record": {
     "props": [
@@ -282,7 +282,7 @@
     ],
     "slots": [],
     "events": [],
-    "usage": "<script lang=\"ts\">\n  import { AgentPlanRecord } from \"@inflatable-cookie/poodle-svelte\";\n</script>\n\n<AgentPlanRecord\n  plan=\"1. Update tokens\n2. Verify every runtime\"\n  status=\"accepted\"\n  decidedAt=\"Today at 10:42\"\n/>"
+    "usage": "<script lang=\"ts\">\n  import { AgentPlanRecord } from \"@inflatable-cookie/poodle-svelte/markdown\";\n</script>\n\n<AgentPlanRecord\n  plan=\"1. Update tokens\n2. Verify every runtime\"\n  status=\"accepted\"\n  decidedAt=\"Today at 10:42\"\n/>"
   },
   "agent-question": {
     "props": [

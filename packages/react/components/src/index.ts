@@ -210,8 +210,6 @@ export {
 } from "./drag-drop";
 export { resolveIconNodes } from "./icon-registry";
 export * from "./types";
-export { AgentPlan, type AgentPlanProps } from "./AgentPlan";
-export { AgentPlanRecord, type AgentPlanRecordProps } from "./AgentPlanRecord";
 export { AgentQuestion, agentQuestionCanSubmit, type AgentQuestionProps } from "./AgentQuestion";
 export { AgentQuestionRecord, type AgentQuestionRecordProps } from "./AgentQuestionRecord";
 export { AgentSubagent, type AgentSubagentProps } from "./AgentSubagent";

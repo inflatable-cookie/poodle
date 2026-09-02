@@ -2,7 +2,6 @@ import { useState } from "react";
 import { resolveQuestionAnswer } from "@inflatable-cookie/poodle-core";
 import {
   AgentChatInput,
-  AgentPlan,
   AgentQuestion,
   Button,
   Icon,
@@ -17,6 +16,7 @@ import {
   type ModelSelection,
   type RefOption,
 } from "@inflatable-cookie/poodle-react";
+import { AgentPlan } from "@inflatable-cookie/poodle-react/markdown";
 import { SpecimenGroup } from "../SpecimenGroup";
 import { SpecimenLayout } from "../SpecimenLayout";
 

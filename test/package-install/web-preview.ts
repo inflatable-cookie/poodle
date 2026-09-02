@@ -1055,8 +1055,6 @@ const evidence = {
         "ModelConnectionCard",
         "ModelCatalogueEditor",
         "MeterSurface",
-        "AgentPlan",
-        "AgentPlanRecord",
       ],
       publicImportsOnly: true,
       licenceStyleSubpath: true,

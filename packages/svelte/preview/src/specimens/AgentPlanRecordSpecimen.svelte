@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AgentPlanRecord } from "@inflatable-cookie/poodle-svelte";
+  import { AgentPlanRecord } from "@inflatable-cookie/poodle-svelte/markdown";
   import SpecimenGroup from "../components/SpecimenGroup.svelte";
   import SpecimenLayout from "../components/SpecimenLayout.svelte";
 
