@@ -1,9 +1,9 @@
 # g16.065 — Tabs Native Tooltip Parity
 
-Status: ready
+Status: blocked — waits for `g16.066`
 Type: cross-runtime semantic and mounted repair
 Opened: 2026-09-02
-Depends on: current Tabs contract, completed `g16.060`
+Depends on: current Tabs contract, completed `g16.060`, completed `g16.066`
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/tabs.md`
 
@@ -62,5 +62,10 @@ using preview-only state.
 
 ## Continuation
 
-Accepted merge unblocks the later Nucleus Tabs component card. It does not
-claim Nucleus M2, accessibility A2, or visual V2.
+PR #169 was closed without merge after the stop condition proved the GPUI
+0.2.2 `.tooltip()` path cannot provide the contract's 300ms delay or
+focus-departure dismissal. `g16.066` now owns the generic backend boundary.
+After that merge, resume this card from the preserved PR #169 branch, rebase,
+and complete the Tabs projection and mounted oracle. Accepted merge then
+unblocks the later Nucleus Tabs component card. It does not claim Nucleus M2,
+accessibility A2, or visual V2.

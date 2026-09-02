@@ -94,7 +94,9 @@ g16.062 receipt contract + fixed cohort manifest
 
 g16.063 HistoryCenter repair ─────────────── parallel confidence repair
 g16.064 Slider repair ───────────────────── parallel confidence repair
-g16.065 Tabs tooltip repair ───────────────> Nucleus Tabs child card
+g16.062 receipt foundation ────────────────> g16.066 GPUI tooltip runtime
+                                                └──> g16.065 Tabs tooltip repair
+                                                       └──> Nucleus Tabs child card
 
 accepted component receipts
   └──> NP-6 reusable Poodle fixture/evidence bundle
