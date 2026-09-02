@@ -61,6 +61,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   clobber each other's snapshot; `--compare` then fails with "no snapshot found".
   Hit while closing g16.050 next to a sibling lane.
 
+- 2026-09-02 — Same-worktree parallel `effigy ci:web` and `effigy docs:check`
+  both take `task:poodle/core:build`. The second fails immediately with
+  `lock conflict for task:poodle/core:build`. Run those boards sequentially, or
+  make the waiter retry until the holder exits. Hit while closing g16.063.
+
 - 2026-09-02 — Worker handoff `Planning base commit` used a padded short SHA
   (`a809792c62399523830068082454445123754879`) instead of `git rev-parse`
   (`a809792c6cd9873f9716b4954d2b4b803c6b65eb`). The unique prefix is an

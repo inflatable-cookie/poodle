@@ -1432,6 +1432,76 @@ mod tests {
         HistoryContinuation::new(entry_id, format!("Fork {entry_id}"), branch_id)
     }
 
+    /// Shared nested-deletion vector (g16.063).
+    ///
+    /// Spine newest-first: e2, e1, e0.
+    /// Root e1 (cc=3) is open with forks f1/f2, pick f1, run l1a/l1b.
+    /// Inner l1a (cc=3) has forks n1/n2, pick n1, run n1x — the delete target.
+    /// Inner l1b is a sibling nested branch; root e0 is a sibling root branch.
+    fn nested_deletion_tree() -> HistoryCenterContext {
+        let f1 = fork("f1", "b-f1");
+        let f2 = fork("f2", "b-f2");
+        let n1 = fork("n1", "b-n1");
+        let n2 = fork("n2", "b-n2");
+        let s1 = fork("s1", "b-s1");
+        let x1 = fork("x1", "b-x1");
+        HistoryCenterContext {
+            pages: Some(vec![page(
+                vec![entry("e2", 0), entry("e1", 3), entry("e0", 2)],
+                0,
+            )]),
+            open: vec![
+                HistoryCenterOpenFork {
+                    anchor_entry_id: "e1".to_owned(),
+                    continuations: Some(vec![
+                        f1.clone(),
+                        fork("e2", "b-e2").with_preferred(true),
+                        f2,
+                    ]),
+                    pick: Some(f1),
+                    chosen: None,
+                    run_pages: vec![page(vec![entry("l1b", 2), entry("l1a", 3)], 0)],
+                    inner: vec![
+                        HistoryCenterOpenFork {
+                            anchor_entry_id: "l1a".to_owned(),
+                            continuations: Some(vec![
+                                n1.clone(),
+                                fork("l1b", "b-l1b").with_preferred(true),
+                                n2,
+                            ]),
+                            pick: Some(n1),
+                            chosen: None,
+                            run_pages: vec![page(vec![entry("n1x", 0)], 0)],
+                            inner: Vec::new(),
+                        },
+                        HistoryCenterOpenFork {
+                            anchor_entry_id: "l1b".to_owned(),
+                            continuations: Some(vec![s1.clone()]),
+                            pick: None,
+                            chosen: Some(s1),
+                            run_pages: vec![page(vec![entry("s1x", 0)], 0)],
+                            inner: Vec::new(),
+                        },
+                    ],
+                },
+                HistoryCenterOpenFork {
+                    anchor_entry_id: "e0".to_owned(),
+                    continuations: Some(vec![x1.clone(), fork("e1", "b-e1").with_preferred(true)]),
+                    pick: None,
+                    chosen: Some(x1),
+                    run_pages: vec![page(vec![entry("x1x", 0)], 0)],
+                    inner: Vec::new(),
+                },
+            ],
+            ..HistoryCenterContext::default()
+        }
+    }
+
+    fn entry_present(rows: &[HistoryCenterRow], id: &str) -> bool {
+        rows.iter()
+            .any(|row| matches!(row, HistoryCenterRow::Entry { entry, .. } if entry.id == id))
+    }
+
     fn open_context(pages: Vec<HistoryPathPage>) -> HistoryCenterContext {
         HistoryCenterContext {
             pages: Some(pages),
@@ -1846,6 +1916,76 @@ mod tests {
         assert!(level.chosen.is_none());
         assert!(level.run_pages.is_empty());
         assert!(level.inner.is_empty());
+    }
+
+    #[test]
+    fn delete_invalidates_a_nested_fork_in_place_and_keeps_siblings() {
+        let context = nested_deletion_tree();
+        let sibling_root = super::find_level(&context.open, "e0")
+            .expect("root sibling")
+            .clone();
+        let sibling_inner = super::find_level(&context.open, "l1b")
+            .expect("inner sibling")
+            .clone();
+        let root = super::find_level(&context.open, "e1")
+            .expect("root")
+            .clone();
+        assert!(entry_present(
+            &history_center_visible_rows(context.pages.as_ref(), &context.open),
+            "n1x",
+        ));
+
+        let result = history_center_transition(
+            HistoryCenterState::Open,
+            context,
+            HistoryCenterEvent::DeleteContinuation {
+                entry_id: "n1".to_owned(),
+            },
+        );
+
+        assert_eq!(
+            result.effects,
+            [
+                HistoryCenterEffect::DeleteContinuation {
+                    entry_id: "n1".to_owned(),
+                },
+                HistoryCenterEffect::LoadContinuations {
+                    entry_id: "l1a".to_owned(),
+                },
+            ],
+        );
+        assert!(
+            result
+                .context
+                .open
+                .iter()
+                .all(|level| level.anchor_entry_id != "l1a"),
+            "nested invalidation must not become a root key",
+        );
+        assert_eq!(
+            super::find_level(&result.context.open, "e0"),
+            Some(&sibling_root)
+        );
+        let next_root = super::find_level(&result.context.open, "e1").expect("root retained");
+        assert_eq!(next_root.continuations, root.continuations);
+        assert_eq!(next_root.pick, root.pick);
+        assert_eq!(next_root.run_pages, root.run_pages);
+        assert_eq!(
+            super::find_level(&result.context.open, "l1b"),
+            Some(&sibling_inner)
+        );
+
+        let nested = super::find_level(&result.context.open, "l1a").expect("nested level stays");
+        assert!(nested.continuations.is_none());
+        assert!(nested.pick.is_none());
+        assert!(nested.chosen.is_none());
+        assert!(nested.run_pages.is_empty());
+        assert!(nested.inner.is_empty());
+
+        let rows = history_center_visible_rows(result.context.pages.as_ref(), &result.context.open);
+        assert!(!entry_present(&rows, "n1x"));
+        assert!(entry_present(&rows, "s1x"));
+        assert!(entry_present(&rows, "x1x"));
     }
 
     #[test]

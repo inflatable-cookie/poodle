@@ -426,7 +426,9 @@ rendering indented under the anchor and activating one of its rows asked the
 host to navigate to an entry it had just removed. So `DELETE_CONTINUATION`
 drops that level's `continuations`, `pick`, `chosen`, `runPages` and `inner`,
 keeps the anchor open, and emits `loadContinuations` alongside the delete
-command. The picker then re-reads whatever the host now has.
+command. Replacement is recursive: a nested level is updated where it
+already lives, never copied onto the root map. The picker then re-reads
+whatever the host now has.
 
 Poodle does not remove the fork from its own cache and carry on: it has no way
 to know what the delete did to the rest of the history, and guessing is how a

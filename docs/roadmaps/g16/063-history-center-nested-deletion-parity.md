@@ -1,17 +1,29 @@
 # g16.063 — HistoryCenter Nested Deletion Parity
 
-Status: ready
+Status: implemented — awaiting orchestrator review
 Type: paired semantic repair
 Opened: 2026-09-02
+Implemented: 2026-09-02
 Depends on: current HistoryCenter contract and machines
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `../../contracts/components/history-center.md`
+Log: `../../logs/2026-09/20260902-g16-063-history-center-nested-deletion-parity.md`
 
 ## Goal
 
 Make deletion of a nested continuation update the actual nested level in both
 TypeScript and Rust. Preserve unrelated branches and emit the same delete and
 reload effects.
+
+## Outcome
+
+One shared nested tree (`e1` → inner `l1a`/`l1b`, sibling root `e0`) now
+runs in core and headless. Deleting inner fork `n1` invalidates `l1a` in
+place, keeps `e0` and `l1b` structurally equal, leaves `e1`'s
+continuations/pick/run untouched, and emits one `deleteContinuation` plus one
+`loadContinuations` for `l1a`. TypeScript now uses the existing recursive
+`replaceLevel` helper; Rust already did. Root-level deletion tests are
+unchanged.
 
 ## Fixed Boundary
 
@@ -58,4 +70,4 @@ decision or if TypeScript and Rust cannot share the same semantic vector.
 ## Continuation
 
 Record the repaired pair in the Nucleus confidence evidence. It is not a
-dependency for unrelated cohort components.
+dependency for unrelated cohort components. Front doors stay orchestrator-owned.
