@@ -1341,3 +1341,9 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
   ancestry check before trusting the base. Fix: validate the full SHA when the
   handoff is generated, or reject it before dispatch. Surface: Northstar
   worker-pr-loop handoff validation.
+
+- 2026-09-02 — g16.048's disposable Playwright runner stalled while launching
+  Firefox after Chromium in one multi-engine process, although an isolated
+  Firefox launch completed. The bounded workaround is one `--browser=` run per
+  engine and receipt consolidation; a future runner should isolate launches or
+  apply an engine-start timeout. Surface: disposable browser benchmark runner.
