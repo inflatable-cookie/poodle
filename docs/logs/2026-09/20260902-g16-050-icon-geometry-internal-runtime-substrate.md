@@ -1,6 +1,6 @@
 # g16.050 — Icon Geometry Internal Runtime Substrate
 
-Status: implementation complete — PR pending
+Status: implementation complete — PR #160
 Date: 2026-09-02
 Card: `docs/roadmaps/g16/050-icon-geometry-internal-runtime-substrate.md`
 Handoff: `docs/handoffs/20260902-095100-g16-050-icon-geometry-runtime.md`
@@ -13,7 +13,8 @@ Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-050-icon-geometry-runtime`
 Starting exact head: `9e8e646f25a1dfde818083c798ffba53adea3e95`
 Planning base ancestor: `a809792c6cd9873f9716b4954d2b4b803c6b65eb`
 Rebased onto live `origin/main`: `595bec72825a9b830edb2b46f82b4ece049f8e1b`
-Post-rebase implementation head: `cf8e1ebe8`
+Post-rebase implementation head: `4f71bf3899d0d9678b4cac58ffac8476721a07fb`
+PR: https://github.com/inflatable-cookie/poodle/pull/160
 
 ## Outcome
 

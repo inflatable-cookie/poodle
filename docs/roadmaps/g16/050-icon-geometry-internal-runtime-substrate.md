@@ -1,6 +1,6 @@
 # g16.050 — Icon Geometry Internal Runtime Substrate
 
-Status: implementation complete — PR pending orchestrator review
+Status: implementation complete — PR #160 pending orchestrator review
 Type: implementation — internal capability
 Opened: 2026-09-01
 Depends on: merged `g16.049` foundation; funded icon-geometry programme recorded in
@@ -11,6 +11,7 @@ Governing refs: the architecture produced by `g16.049`,
 `../../contracts/components/icon-button.md`
 Architecture: `../../architecture/013-icon-geometry-substrate.md`
 Execution log: `../../logs/2026-09/20260902-g16-050-icon-geometry-internal-runtime-substrate.md`
+PR: https://github.com/inflatable-cookie/poodle/pull/160
 
 ## Goal
 
