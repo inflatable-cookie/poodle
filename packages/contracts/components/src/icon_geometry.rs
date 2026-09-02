@@ -1441,410 +1441,18 @@ include!("icon_geometry.generated.rs");
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde::Deserialize;
 
     const VECTOR_SOURCE: &str = include_str!("../../../core/src/icons/geometry-vectors.json");
 
-    #[derive(Clone, Debug)]
-    enum JsonValue {
-        Object(BTreeMap<String, JsonValue>),
-        Array(Vec<JsonValue>),
-        String(String),
-        Number(String),
-        Bool(bool),
-        Null,
-    }
-
-    struct JsonParser<'a> {
-        bytes: &'a [u8],
-        index: usize,
-    }
-
-    impl<'a> JsonParser<'a> {
-        fn parse(source: &'a str) -> Result<JsonValue, String> {
-            let mut parser = Self {
-                bytes: source.as_bytes(),
-                index: 0,
-            };
-            let value = parser.value()?;
-            parser.whitespace();
-            if parser.index != parser.bytes.len() {
-                return Err(format!("trailing JSON at {}", parser.index));
-            }
-            Ok(value)
-        }
-
-        fn whitespace(&mut self) {
-            while self
-                .bytes
-                .get(self.index)
-                .is_some_and(u8::is_ascii_whitespace)
-            {
-                self.index += 1;
-            }
-        }
-
-        fn value(&mut self) -> Result<JsonValue, String> {
-            self.whitespace();
-            match self.bytes.get(self.index).copied() {
-                Some(b'{') => self.object(),
-                Some(b'[') => self.array(),
-                Some(b'"') => self.string().map(JsonValue::String),
-                Some(b't') => self.literal(b"true", JsonValue::Bool(true)),
-                Some(b'f') => self.literal(b"false", JsonValue::Bool(false)),
-                Some(b'n') => self.literal(b"null", JsonValue::Null),
-                Some(b'-' | b'0'..=b'9') => self.number(),
-                Some(byte) => Err(format!("unexpected JSON byte {byte} at {}", self.index)),
-                None => Err("unexpected end of JSON".to_owned()),
-            }
-        }
-
-        fn literal(&mut self, expected: &[u8], value: JsonValue) -> Result<JsonValue, String> {
-            if self.bytes.get(self.index..self.index + expected.len()) != Some(expected) {
-                return Err(format!("invalid JSON literal at {}", self.index));
-            }
-            self.index += expected.len();
-            Ok(value)
-        }
-
-        fn object(&mut self) -> Result<JsonValue, String> {
-            self.index += 1;
-            let mut values = BTreeMap::new();
-            self.whitespace();
-            if self.bytes.get(self.index) == Some(&b'}') {
-                self.index += 1;
-                return Ok(JsonValue::Object(values));
-            }
-            loop {
-                self.whitespace();
-                let key = self.string()?;
-                self.whitespace();
-                if self.bytes.get(self.index) != Some(&b':') {
-                    return Err(format!("missing object colon at {}", self.index));
-                }
-                self.index += 1;
-                let value = self.value()?;
-                values.insert(key, value);
-                self.whitespace();
-                match self.bytes.get(self.index).copied() {
-                    Some(b',') => self.index += 1,
-                    Some(b'}') => {
-                        self.index += 1;
-                        return Ok(JsonValue::Object(values));
-                    }
-                    _ => return Err(format!("invalid object separator at {}", self.index)),
-                }
-            }
-        }
-
-        fn array(&mut self) -> Result<JsonValue, String> {
-            self.index += 1;
-            let mut values = Vec::new();
-            self.whitespace();
-            if self.bytes.get(self.index) == Some(&b']') {
-                self.index += 1;
-                return Ok(JsonValue::Array(values));
-            }
-            loop {
-                values.push(self.value()?);
-                self.whitespace();
-                match self.bytes.get(self.index).copied() {
-                    Some(b',') => self.index += 1,
-                    Some(b']') => {
-                        self.index += 1;
-                        return Ok(JsonValue::Array(values));
-                    }
-                    _ => return Err(format!("invalid array separator at {}", self.index)),
-                }
-            }
-        }
-
-        fn string(&mut self) -> Result<String, String> {
-            if self.bytes.get(self.index) != Some(&b'"') {
-                return Err(format!("expected JSON string at {}", self.index));
-            }
-            self.index += 1;
-            let mut value = String::new();
-            loop {
-                let byte = *self
-                    .bytes
-                    .get(self.index)
-                    .ok_or_else(|| "unterminated JSON string".to_owned())?;
-                self.index += 1;
-                match byte {
-                    b'"' => return Ok(value),
-                    b'\\' => {
-                        let escaped = *self
-                            .bytes
-                            .get(self.index)
-                            .ok_or_else(|| "unterminated JSON escape".to_owned())?;
-                        self.index += 1;
-                        match escaped {
-                            b'"' => value.push('"'),
-                            b'\\' => value.push('\\'),
-                            b'/' => value.push('/'),
-                            b'b' => value.push('\u{0008}'),
-                            b'f' => value.push('\u{000c}'),
-                            b'n' => value.push('\n'),
-                            b'r' => value.push('\r'),
-                            b't' => value.push('\t'),
-                            b'u' => {
-                                let mut code = 0_u32;
-                                for _ in 0..4 {
-                                    let digit = *self
-                                        .bytes
-                                        .get(self.index)
-                                        .ok_or_else(|| "unterminated unicode escape".to_owned())?;
-                                    self.index += 1;
-                                    code = code * 16
-                                        + match digit {
-                                            b'0'..=b'9' => u32::from(digit - b'0'),
-                                            b'a'..=b'f' => u32::from(digit - b'a' + 10),
-                                            b'A'..=b'F' => u32::from(digit - b'A' + 10),
-                                            _ => return Err("invalid unicode escape".to_owned()),
-                                        };
-                                }
-                                value.push(
-                                    char::from_u32(code)
-                                        .ok_or_else(|| "invalid unicode scalar".to_owned())?,
-                                );
-                            }
-                            _ => return Err("invalid JSON escape".to_owned()),
-                        }
-                    }
-                    byte if byte >= 0x20 => value.push(byte as char),
-                    _ => return Err("control byte in JSON string".to_owned()),
-                }
-            }
-        }
-
-        fn number(&mut self) -> Result<JsonValue, String> {
-            let start = self.index;
-            if self.bytes.get(self.index) == Some(&b'-') {
-                self.index += 1;
-            }
-            match self.bytes.get(self.index).copied() {
-                Some(b'0') => self.index += 1,
-                Some(b'1'..=b'9') => {
-                    self.index += 1;
-                    while self.bytes.get(self.index).is_some_and(u8::is_ascii_digit) {
-                        self.index += 1;
-                    }
-                }
-                _ => return Err(format!("invalid JSON number at {start}")),
-            }
-            if self.bytes.get(self.index) == Some(&b'.') {
-                self.index += 1;
-                let fraction_start = self.index;
-                while self.bytes.get(self.index).is_some_and(u8::is_ascii_digit) {
-                    self.index += 1;
-                }
-                if self.index == fraction_start {
-                    return Err(format!("invalid JSON fraction at {start}"));
-                }
-            }
-            if matches!(self.bytes.get(self.index), Some(b'e' | b'E')) {
-                self.index += 1;
-                if matches!(self.bytes.get(self.index), Some(b'+' | b'-')) {
-                    self.index += 1;
-                }
-                let exponent_start = self.index;
-                while self.bytes.get(self.index).is_some_and(u8::is_ascii_digit) {
-                    self.index += 1;
-                }
-                if self.index == exponent_start {
-                    return Err(format!("invalid JSON exponent at {start}"));
-                }
-            }
-            Ok(JsonValue::Number(
-                String::from_utf8(self.bytes[start..self.index].to_vec())
-                    .map_err(|_| "JSON number is not UTF-8".to_owned())?,
-            ))
-        }
-    }
-
-    fn object(value: &JsonValue) -> &BTreeMap<String, JsonValue> {
-        match value {
-            JsonValue::Object(value) => value,
-            _ => panic!("expected JSON object"),
-        }
-    }
-
-    fn array(value: &JsonValue) -> &[JsonValue] {
-        match value {
-            JsonValue::Array(value) => value,
-            _ => panic!("expected JSON array"),
-        }
-    }
-
-    fn field<'a>(value: &'a JsonValue, key: &str) -> &'a JsonValue {
-        object(value)
-            .get(key)
-            .unwrap_or_else(|| panic!("missing JSON field {key}"))
-    }
-
-    fn optional_field<'a>(value: &'a JsonValue, key: &str) -> Option<&'a JsonValue> {
-        object(value).get(key)
-    }
-
-    fn string(value: &JsonValue) -> &str {
-        match value {
-            JsonValue::String(value) => value,
-            _ => panic!("expected JSON string"),
-        }
-    }
-
-    fn number(value: &JsonValue) -> &str {
-        match value {
-            JsonValue::Number(value) => value,
-            _ => panic!("expected JSON number"),
-        }
-    }
-
-    fn number_f64(value: &JsonValue) -> f64 {
-        number(value).parse().expect("valid JSON float")
-    }
-
-    fn number_i64(value: &JsonValue) -> i64 {
-        number(value).parse().expect("valid JSON integer")
-    }
-
-    fn number_usize(value: &JsonValue) -> usize {
-        number(value).parse().expect("valid JSON usize")
-    }
-
-    fn boolean(value: &JsonValue) -> bool {
-        match value {
-            JsonValue::Bool(value) => *value,
-            _ => panic!("expected JSON boolean"),
-        }
-    }
-
-    fn string_option(value: &JsonValue, key: &str) -> Option<String> {
-        optional_field(value, key).map(string).map(str::to_owned)
-    }
-
-    fn boolean_vec(value: &JsonValue) -> Vec<bool> {
-        array(value).iter().map(boolean).collect()
-    }
-
-    fn usize_vec(value: &JsonValue) -> Vec<usize> {
-        array(value).iter().map(number_usize).collect()
-    }
-
-    fn points_value(value: &JsonValue) -> Vec<Vec<[i64; 2]>> {
-        array(value)
-            .iter()
-            .map(|contour| {
-                array(contour)
-                    .iter()
-                    .map(|point| {
-                        let point = array(point);
-                        [number_i64(&point[0]), number_i64(&point[1])]
-                    })
-                    .collect()
-            })
-            .collect()
-    }
-
-    fn vector_input(value: &JsonValue) -> VectorInput {
-        let view_box = array(field(value, "viewBox"));
-        let mut nodes = Vec::new();
-        for node in array(field(value, "nodes")) {
-            let node = array(node);
-            let attrs = object(&node[1])
-                .iter()
-                .map(|(key, value)| (key.clone(), string(value).to_owned()))
-                .collect();
-            nodes.push((string(&node[0]).to_owned(), attrs));
-        }
-        VectorInput {
-            view_box: [
-                number_f64(&view_box[0]),
-                number_f64(&view_box[1]),
-                number_f64(&view_box[2]),
-                number_f64(&view_box[3]),
-            ],
-            fill: string(field(value, "fill")).to_owned(),
-            stroke: string(field(value, "stroke")).to_owned(),
-            stroke_width: number_f64(field(value, "strokeWidth")),
-            stroke_linecap: string(field(value, "strokeLinecap")).to_owned(),
-            stroke_linejoin: string(field(value, "strokeLinejoin")).to_owned(),
-            nodes,
-        }
-    }
-
-    fn geometry_expectation(value: &JsonValue) -> GeometryExpectation {
-        GeometryExpectation {
-            status: string(field(value, "status")).to_owned(),
-            code: string_option(value, "code"),
-            contour_count: optional_field(value, "contourCount").map(number_usize),
-            closed: optional_field(value, "closed").map(boolean_vec),
-            segment_counts: optional_field(value, "segmentCounts").map(usize_vec),
-            canonical_points: optional_field(value, "canonicalPoints").map(points_value),
-            wire_digest: string_option(value, "wireDigest"),
-        }
-    }
-
-    fn pair_oracle(value: &JsonValue) -> PairOracle {
-        let mappings = array(field(value, "mappings"))
-            .iter()
-            .map(|mapping| ExpectedMapping {
-                left_index: number_usize(field(mapping, "leftIndex")),
-                right_index: number_usize(field(mapping, "rightIndex")),
-                reversed: boolean(field(mapping, "reversed")),
-                offset: number_usize(field(mapping, "offset")),
-                cost_micros: number_i64(field(mapping, "costMicros")),
-            })
-            .collect();
-        PairOracle {
-            left_digest: string(field(value, "leftDigest")).to_owned(),
-            right_digest: string(field(value, "rightDigest")).to_owned(),
-            pair_digest: string(field(value, "pairDigest")).to_owned(),
-            mappings,
-            cost_micros: number_i64(field(value, "costMicros")),
-        }
-    }
-
-    fn pair_expectation(value: &JsonValue) -> PairExpectation {
-        PairExpectation {
-            status: string(field(value, "status")).to_owned(),
-            code: string_option(value, "code"),
-            reversed: optional_field(value, "reversed").map(boolean_vec),
-            offsets: optional_field(value, "offsets").map(usize_vec),
-            oracle: optional_field(value, "oracle").map(pair_oracle),
-        }
-    }
-
-    fn vector(value: &JsonValue) -> GeometryVector {
-        GeometryVector {
-            id: string(field(value, "id")).to_owned(),
-            left: vector_input(field(value, "left")),
-            right: optional_field(value, "right").map(vector_input),
-            expect: VectorExpectation {
-                left: geometry_expectation(field(field(value, "expect"), "left")),
-                right: optional_field(field(value, "expect"), "right").map(geometry_expectation),
-                pair: optional_field(field(value, "expect"), "pair").map(pair_expectation),
-            },
-        }
-    }
-
-    #[derive(Clone, Debug)]
+    #[derive(Deserialize)]
     struct VectorDocument {
+        #[serde(rename = "schemaVersion")]
         schema_version: u32,
         vectors: Vec<GeometryVector>,
     }
 
-    impl VectorDocument {
-        fn parse(source: &str) -> Result<Self, String> {
-            let root = JsonParser::parse(source)?;
-            Ok(Self {
-                schema_version: number_usize(field(&root, "schemaVersion")) as u32,
-                vectors: array(field(&root, "vectors")).iter().map(vector).collect(),
-            })
-        }
-    }
-
-    #[derive(Clone, Debug)]
+    #[derive(Deserialize)]
     struct GeometryVector {
         id: String,
         left: VectorInput,
@@ -1852,54 +1460,69 @@ mod tests {
         expect: VectorExpectation,
     }
 
-    #[derive(Clone, Debug)]
+    #[derive(Deserialize)]
     struct VectorInput {
+        #[serde(rename = "viewBox")]
         view_box: [f64; 4],
         fill: String,
         stroke: String,
+        #[serde(rename = "strokeWidth")]
         stroke_width: f64,
+        #[serde(rename = "strokeLinecap")]
         stroke_linecap: String,
+        #[serde(rename = "strokeLinejoin")]
         stroke_linejoin: String,
         nodes: Vec<(String, BTreeMap<String, String>)>,
     }
 
-    #[derive(Clone, Debug)]
+    #[derive(Deserialize)]
     struct VectorExpectation {
         left: GeometryExpectation,
         right: Option<GeometryExpectation>,
         pair: Option<PairExpectation>,
     }
 
-    #[derive(Clone, Debug)]
+    #[derive(Deserialize)]
     struct GeometryExpectation {
         status: String,
         code: Option<String>,
+        #[serde(rename = "contourCount")]
         contour_count: Option<usize>,
         closed: Option<Vec<bool>>,
+        #[serde(rename = "segmentCounts")]
         segment_counts: Option<Vec<usize>>,
+        #[serde(rename = "canonicalPoints")]
         canonical_points: Option<Vec<Vec<[i64; 2]>>>,
+        #[serde(rename = "wireDigest")]
         wire_digest: Option<String>,
     }
 
-    #[derive(Clone, Debug)]
+    #[derive(Deserialize)]
     struct ExpectedMapping {
+        #[serde(rename = "leftIndex")]
         left_index: usize,
+        #[serde(rename = "rightIndex")]
         right_index: usize,
         reversed: bool,
         offset: usize,
+        #[serde(rename = "costMicros")]
         cost_micros: i64,
     }
 
-    #[derive(Clone, Debug)]
+    #[derive(Deserialize)]
     struct PairOracle {
+        #[serde(rename = "leftDigest")]
         left_digest: String,
+        #[serde(rename = "rightDigest")]
         right_digest: String,
+        #[serde(rename = "pairDigest")]
         pair_digest: String,
         mappings: Vec<ExpectedMapping>,
+        #[serde(rename = "costMicros")]
         cost_micros: i64,
     }
 
-    #[derive(Clone, Debug)]
+    #[derive(Deserialize)]
     struct PairExpectation {
         status: String,
         code: Option<String>,
@@ -1969,7 +1592,7 @@ mod tests {
 
     #[test]
     fn shared_vectors_cover_both_normalization_and_pair_planning() {
-        let document = VectorDocument::parse(VECTOR_SOURCE).expect("valid vectors");
+        let document: VectorDocument = serde_json::from_str(VECTOR_SOURCE).expect("valid vectors");
         assert_eq!(document.schema_version, 1);
         for vector in document.vectors {
             let left = normalize_icon_geometry(&input(vector.left));
