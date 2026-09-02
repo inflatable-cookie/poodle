@@ -36,21 +36,81 @@ function toDistPath(distDir: string, abs: string): string {
   return posix.join("dist", relative(distDir, abs).split("\\").join("/"));
 }
 
-function isAbsolutePathValue(value: string): boolean {
-  const leadingBackslashes = /^\\+/.exec(value)?.[0].length ?? 0;
-  const uncRemainder = value.slice(leadingBackslashes);
-  const authoredUncPath =
-    leadingBackslashes >= 4 && /\\+[^\\\r\n]+/.test(uncRemainder);
+type QuotedValue = {
+  value: string;
+  start: number;
+};
+
+function isUrlOrSyntaxContext(source: string, start: number): boolean {
+  const before = source.slice(Math.max(0, start - 192), start).trimEnd();
   return (
-    /^(?:\/[^/\r\n]+){2,}\/?$/.test(value) ||
+    /\.(?:split|join|includes|startsWith|endsWith|replace|replaceAll|match|search)\(\s*$/.test(
+      before,
+    ) ||
+    /(?:^|[^\w$])(?:new\s+URL|fetch|Request|Worker|SharedWorker|import)\(\s*$/.test(
+      before,
+    ) ||
+    /(?:^|[^\w$])(?:from|import)\s*$/.test(before) ||
+    /(?:^|[^\w$])(?:[\w$]*(?:url|uri|href|src)|poster|endpoint|separator|delimiter)\s*[:=]\s*$/i.test(
+      before,
+    )
+  );
+}
+
+function isAbsolutePathValue(value: string, urlOrSyntaxContext = false): boolean {
+  if (/^\/\//.test(value)) return false;
+  if (/^\//.test(value)) return !urlOrSyntaxContext;
+  return (
     /^[A-Za-z]:[\\/]/.test(value) ||
-    authoredUncPath ||
+    /^\\\\[^\\\r\n]+\\[^\\\r\n]+/.test(value) ||
     /^file:(?:\/\/)?\//i.test(value)
   );
 }
 
-function quotedValues(source: string): string[] {
-  const values: string[] = [];
+function decodeEscape(source: string, index: number): { value: string; next: number } {
+  const escaped = source[index + 1];
+  if (escaped === undefined) return { value: "\\", next: index + 1 };
+  const simple: Record<string, string> = {
+    "0": "\0",
+    b: "\b",
+    f: "\f",
+    n: "\n",
+    r: "\r",
+    t: "\t",
+    v: "\v",
+  };
+  if (escaped in simple) return { value: simple[escaped] ?? "", next: index + 2 };
+  if (escaped === "\n") return { value: "", next: index + 2 };
+  if (escaped === "\r") {
+    return { value: "", next: source[index + 2] === "\n" ? index + 3 : index + 2 };
+  }
+  if (escaped === "x") {
+    const digits = source.slice(index + 2, index + 4);
+    if (/^[0-9A-Fa-f]{2}$/.test(digits)) {
+      return { value: String.fromCodePoint(Number.parseInt(digits, 16)), next: index + 4 };
+    }
+  }
+  if (escaped === "u") {
+    if (source[index + 2] === "{") {
+      const close = source.indexOf("}", index + 3);
+      const digits = close === -1 ? "" : source.slice(index + 3, close);
+      if (/^[0-9A-Fa-f]{1,6}$/.test(digits)) {
+        const codePoint = Number.parseInt(digits, 16);
+        if (codePoint <= 0x10ffff) {
+          return { value: String.fromCodePoint(codePoint), next: close + 1 };
+        }
+      }
+    }
+    const digits = source.slice(index + 2, index + 6);
+    if (/^[0-9A-Fa-f]{4}$/.test(digits)) {
+      return { value: String.fromCodePoint(Number.parseInt(digits, 16)), next: index + 6 };
+    }
+  }
+  return { value: escaped, next: index + 2 };
+}
+
+function quotedValues(source: string): QuotedValue[] {
+  const values: QuotedValue[] = [];
   let index = 0;
   while (index < source.length) {
     const current = source[index];
@@ -70,13 +130,15 @@ function quotedValues(source: string): string[] {
       continue;
     }
     const quote = current;
+    const start = index;
     let value = "";
     index += 1;
     while (index < source.length) {
       const character = source[index];
       if (character === "\\" && index + 1 < source.length) {
-        value += character + source[index + 1];
-        index += 2;
+        const decoded = decodeEscape(source, index);
+        value += decoded.value;
+        index = decoded.next;
         continue;
       }
       if (character === quote) {
@@ -86,13 +148,18 @@ function quotedValues(source: string): string[] {
       value += character;
       index += 1;
     }
-    values.push(value);
+    values.push({ value, start });
   }
   return values;
 }
 
 function absolutePathInSource(source: string): string | null {
-  return quotedValues(source).find(isAbsolutePathValue) ?? null;
+  for (const candidate of quotedValues(source)) {
+    if (isAbsolutePathValue(candidate.value, isUrlOrSyntaxContext(source, candidate.start))) {
+      return candidate.value;
+    }
+  }
+  return null;
 }
 
 function absolutePathInJson(value: unknown): string | null {

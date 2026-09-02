@@ -142,15 +142,20 @@ describe("web distribution driver", () => {
     rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
-  test("generic unix workspace paths in compiled JS fail the audit", () => {
+  test("plain and escaped unix workspace paths in compiled JS fail the audit", () => {
     const distDir = fixtureDist();
-    for (const path of [
-      "/workspace/poodle/src/x.ts",
-      "/root/poodle/src/x.ts",
-      "/opt/build/poodle/src/x.ts",
-      "/private/var/folders/x/src/x.ts",
+    for (const source of [
+      `export const path = "/workspace";\n`,
+      `export const path = "/tmp";\n`,
+      `export const path = "/a";\n`,
+      String.raw`export const path = "\/workspace\/poodle\/src\/x.ts";` + "\n",
+      String.raw`export const path = "\u002fworkspace\u002fpoodle\u002fsrc\u002fx.ts";` +
+        "\n",
+      `export const path = "/root/poodle/src/x.ts";\n`,
+      `export const path = "/opt/build/poodle/src/x.ts";\n`,
+      `export const path = "/private/var/folders/x/src/x.ts";\n`,
     ]) {
-      writeFileSync(join(distDir, "index.js"), `export const path = ${JSON.stringify(path)};\n`);
+      writeFileSync(join(distDir, "index.js"), source);
       expect(() =>
         auditStagedDist({ distDir, publicFiles, forbiddenModules: ["marked"] }),
       ).toThrow(/workspace path/);
@@ -158,13 +163,17 @@ describe("web distribution driver", () => {
     rmSync(join(distDir, ".."), { recursive: true, force: true });
   });
 
-  test("valid URL, module, and regex syntax does not look like a workspace path", () => {
+  test("valid URL, module, separator, and regex syntax does not look like a workspace path", () => {
     const distDir = fixtureDist();
     writeFileSync(
       join(distDir, "index.js"),
       `export const url = "https://example.com/a";\n` +
         `export const protocolRelative = "//cdn.example.com/a";\n` +
+        `export const assetUrl = "/assets/app.js";\n` +
+        String.raw`export const escapedAssetUrl = "\u002fassets\u002fapp.js";` +
+        "\n" +
         `export const moduleId = "node:fs";\n` +
+        `export const segments = "a/b".split("/");\n` +
         `export const matcher = /\\/workspace\\//;\n`,
     );
     expect(() =>
