@@ -98,6 +98,10 @@ path = "tests/catalogue.rs"
 name = "headless_regressions"
 path = "tests/headless_regressions.rs"
 
+[[test]]
+name = "icon_geometry_headless"
+path = "tests/icon_geometry_headless.rs"
+
 # g15.046 Button visual fixture inventory. Data parsing only: this target
 # renders nothing, opens no window, and captures no pixels. It lives here
 # because GPUI is the runtime that consumes the inventory in g15.047, and it

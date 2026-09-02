@@ -1,6 +1,6 @@
 # g16.050 — Icon Geometry Internal Runtime Substrate
 
-Status: ready — merged `g16.049` foundation available; candidate geometry is fixture-only
+Status: implementation complete — PR pending orchestrator review
 Type: implementation — internal capability
 Opened: 2026-09-01
 Depends on: merged `g16.049` foundation; funded icon-geometry programme recorded in
@@ -9,6 +9,8 @@ Governing refs: the architecture produced by `g16.049`,
 `../../architecture/012-semantic-motion-policy.md`,
 `../../contracts/components/icon.md`,
 `../../contracts/components/icon-button.md`
+Architecture: `../../architecture/013-icon-geometry-substrate.md`
+Execution log: `../../logs/2026-09/20260902-g16-050-icon-geometry-internal-runtime-substrate.md`
 
 ## Goal
 

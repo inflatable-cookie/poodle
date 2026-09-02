@@ -90,6 +90,7 @@ pub mod grid;
 pub mod history_center;
 pub mod hover_card;
 pub mod icon;
+pub mod icon_geometry;
 pub mod icon_button;
 pub mod icon_provider;
 pub mod inline_list_section;
@@ -300,6 +301,7 @@ pub use history_center::{
 };
 pub use hover_card::hover_card;
 pub use icon::icon;
+pub use icon_geometry::resolved_icon_geometry;
 pub use icon_button::{icon_button, icon_button_with_handlers, IconButtonHandlers};
 pub use icon_provider::icon_provider;
 pub use inline_list_section::inline_list_section;

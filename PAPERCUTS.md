@@ -7,6 +7,11 @@ they hit a solvable hurdle; they do not stop the current task to fix one.
 
 <!-- Keep entries short. Append newest entries at the top. Do not include secrets. -->
 
+- 2026-09-02 — `scripts/gate-tree-guard.ts` writes `poodle-gate-tree-guard.json`
+  into the shared OS temp dir. Parallel worktrees (`docs:check` / `ci:web`)
+  clobber each other's snapshot; `--compare` then fails with "no snapshot found".
+  Hit while closing g16.050 next to a sibling lane.
+
 - 2026-09-02 — Worker handoff `Planning base commit` used a padded short SHA
   (`a809792c62399523830068082454445123754879`) instead of `git rev-parse`
   (`a809792c6cd9873f9716b4954d2b4b803c6b65eb`). The unique prefix is an
