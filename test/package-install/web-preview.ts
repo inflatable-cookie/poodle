@@ -135,12 +135,179 @@ async function runResult(
   return { exitCode, stdout, stderr };
 }
 
+const CERTIFICATION_WRITABLE_PATHS = [
+  "PAPERCUTS.md",
+  "scripts/web-distribution/**",
+  "tasks/effigy.tasks.toml",
+  "test/package-install/**",
+  "docs/roadmaps/g16/059-installed-web-distribution-certification.md",
+  "docs/logs/2026-09/20260902-g16-059-installed-web-distribution-certification.md",
+] as const;
+
+const PRIVATE_DECLARATION_TOOLS_MANIFEST =
+  "scripts/web-distribution/declaration-tools/package.json";
+
+const CERTIFICATION_FORBIDDEN_SURFACES = [
+  {
+    label: "workflow",
+    patterns: [".github/workflows/**", ".github/actions/**"],
+  },
+  {
+    label: "release",
+    patterns: [
+      "CHANGELOG.md",
+      "CHANGELOG.*",
+      "RELEASE_NOTES.md",
+      "release/**",
+      "releases/**",
+      "docs/release/**",
+      "docs/releases/**",
+      ".changeset/**",
+      "scripts/release/**",
+      "scripts/publish/**",
+      "tasks/release/**",
+    ],
+  },
+  {
+    label: "registry",
+    patterns: [
+      ".npmrc",
+      ".npmignore",
+      ".yarnrc",
+      ".yarnrc.yml",
+      ".pnpmfile.cjs",
+      "registry/**",
+      "scripts/registry/**",
+      "scripts/publish/**",
+    ],
+  },
+] as const;
+
+type CertificationScopeProof = {
+  requiredBaseCommit: string;
+  sourceCommit: string;
+  changedPaths: string[];
+};
+
+function matchesScopePattern(path: string, pattern: string): boolean {
+  if (pattern.endsWith("/**")) {
+    return path.startsWith(pattern.slice(0, -2));
+  }
+  if (pattern.endsWith(".*")) {
+    return path.startsWith(pattern.slice(0, -1));
+  }
+  return path === pattern;
+}
+
+function isWritableCertificationPath(path: string): boolean {
+  return CERTIFICATION_WRITABLE_PATHS.some((pattern) =>
+    matchesScopePattern(path, pattern),
+  );
+}
+
+function forbiddenCertificationSurfaceLabels(path: string): string[] {
+  const labels = CERTIFICATION_FORBIDDEN_SURFACES.filter((surface) =>
+    surface.patterns.some((pattern) => matchesScopePattern(path, pattern)),
+  ).map((surface) => surface.label);
+  const isPackageManifest =
+    path === "package.json" ||
+    /^(?:packages|scripts)\/[^/]+(?:\/[^/]+)*\/package\.json$/.test(path);
+  if (isPackageManifest && path !== PRIVATE_DECLARATION_TOOLS_MANIFEST) {
+    labels.push("version");
+  }
+  if (
+    path === "Cargo.toml" ||
+    path === "Cargo.lock" ||
+    /^(?:packages|scripts)\/[^/]+(?:\/[^/]+)*\/Cargo\.(?:toml|lock)$/.test(path)
+  ) {
+    labels.push("version");
+  }
+  return [...new Set(labels)];
+}
+
+function requireExactCommit(value: string, label: string): string {
+  if (!/^[0-9a-f]{40}$/.test(value)) {
+    throw new Error(`${label} is not an exact Git SHA: ${value}`);
+  }
+  return value;
+}
+
+async function changedPathsForCommitRange(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+): Promise<string[]> {
+  const ancestor = await runResult(
+    ["git", "merge-base", "--is-ancestor", requiredBaseCommit, sourceCommit],
+    checkoutRoot,
+  );
+  if (ancestor.exitCode !== 0) {
+    throw new Error(
+      `certification source ${sourceCommit} is not descended from required base ${requiredBaseCommit}`,
+    );
+  }
+  const changedPaths = await runCapture(
+    [
+      "git",
+      "diff",
+      "--name-only",
+      "--no-renames",
+      "--diff-filter=ACDMRTUXB",
+      "-z",
+      requiredBaseCommit,
+      sourceCommit,
+    ],
+    checkoutRoot,
+  );
+  return sortedUnique(changedPaths.split("\0").filter(Boolean));
+}
+
+async function assertCertificationScope(
+  checkoutRoot: string,
+  requiredBaseCommit: string,
+  sourceCommit: string,
+): Promise<CertificationScopeProof> {
+  requireExactCommit(requiredBaseCommit, "required base commit");
+  requireExactCommit(sourceCommit, "certification source commit");
+  const changedPaths = await changedPathsForCommitRange(
+    checkoutRoot,
+    requiredBaseCommit,
+    sourceCommit,
+  );
+  if (changedPaths.length === 0) {
+    throw new Error("certification scope found no changed paths");
+  }
+  const forbidden = changedPaths.flatMap((path) =>
+    forbiddenCertificationSurfaceLabels(path).map((surface) => ({ path, surface })),
+  );
+  if (forbidden.length > 0) {
+    throw new Error(
+      `certification scope rejected forbidden ${forbidden
+        .map(({ surface, path }) => `${surface} surface: ${path}`)
+        .join(", ")}`,
+    );
+  }
+  const outsideAllowlist = changedPaths.filter(
+    (path) => !isWritableCertificationPath(path),
+  );
+  if (outsideAllowlist.length > 0) {
+    throw new Error(
+      `certification scope rejected paths outside writable allowlist: ${outsideAllowlist.join(", ")}`,
+    );
+  }
+  return { requiredBaseCommit, sourceCommit, changedPaths };
+}
+
 function portable(value: string): string {
   return value.replaceAll(repoRoot, "<clean-checkout>").trim();
 }
 
 async function runFromCleanCheckout(): Promise<void> {
   const proofCommit = (await runCapture(["git", "rev-parse", "HEAD"], repoRoot)).trim();
+  const requiredBaseCommit = requireExactCommit(
+    (await runCapture(["git", "rev-parse", "origin/main^{commit}"], repoRoot)).trim(),
+    "required base commit",
+  );
   const commonGitDir = resolve(
     repoRoot,
     (await runCapture(["git", "rev-parse", "--git-common-dir"], repoRoot)).trim(),
@@ -151,7 +318,10 @@ async function runFromCleanCheckout(): Promise<void> {
     // Clone through a bare repository so ignored artifacts in this attached
     // worktree cannot become part of the clean certification checkout.
     await run(["git", "clone", "--quiet", "--bare", commonGitDir, bareRoot], repoRoot);
-    await run(["git", "-C", bareRoot, "fetch", "--quiet", commonGitDir, proofCommit], repoRoot);
+    await run(
+      ["git", "-C", bareRoot, "fetch", "--quiet", commonGitDir, requiredBaseCommit, proofCommit],
+      repoRoot,
+    );
     await run(["git", "clone", "--quiet", "--no-local", bareRoot, checkoutRoot], repoRoot);
     await run(["git", "checkout", "--quiet", "--detach", proofCommit], checkoutRoot);
     const clonedCommit = (await runCapture(["git", "rev-parse", "HEAD"], checkoutRoot)).trim();
@@ -162,7 +332,10 @@ async function runFromCleanCheckout(): Promise<void> {
     const output = await runCapture(
       ["bun", "test/package-install/web-preview.ts"],
       checkoutRoot,
-      { POODLE_WEB_PACK_INSTALL_INNER: "1" },
+      {
+        POODLE_WEB_PACK_INSTALL_INNER: "1",
+        POODLE_WEB_PACK_INSTALL_BASE_COMMIT: requiredBaseCommit,
+      },
     );
     process.stdout.write(output);
   } finally {
@@ -1036,10 +1209,19 @@ async function packPackages(destination: string): Promise<PackedPackage[]> {
   return packed;
 }
 
-const exactSourceCommit = (await runCapture(["git", "rev-parse", "HEAD"], repoRoot)).trim();
-if (!/^[0-9a-f]{40}$/.test(exactSourceCommit)) {
-  throw new Error(`certification source commit is not an exact Git SHA: ${exactSourceCommit}`);
-}
+const exactSourceCommit = requireExactCommit(
+  (await runCapture(["git", "rev-parse", "HEAD"], repoRoot)).trim(),
+  "certification source commit",
+);
+const requiredBaseCommit = requireExactCommit(
+  globalThis.process.env.POODLE_WEB_PACK_INSTALL_BASE_COMMIT ?? "",
+  "required base commit",
+);
+const scopeProof = await assertCertificationScope(
+  repoRoot,
+  requiredBaseCommit,
+  exactSourceCommit,
+);
 const roster = readWebPackageRoster(repoRoot);
 const rosterRegression = assertReactExtraExportRegression(repoRoot, roster);
 
@@ -1544,13 +1726,60 @@ const installedSourcePlant = (() => {
   throw new Error("source-resolution falsification plant did not fail");
 })();
 
-function expectedFailure(oracle: string, plant: () => void): Record<string, unknown> {
+async function expectedFailure(
+  oracle: string,
+  plant: () => void | Promise<void>,
+): Promise<Record<string, unknown>> {
   try {
-    plant();
+    await plant();
   } catch (error) {
     return { oracle, failed: true, receipt: String(error) };
   }
   throw new Error(`${oracle} falsification plant did not fail`);
+}
+
+async function scopeFalsificationPlant(): Promise<void> {
+  const plantRoot = mkdtempSync(join(runRoot, "scope-plant-"));
+  const forbiddenPath = [".github", "workflows", "release.yml"].join("/");
+  try {
+    await run(["git", "init", "--quiet", plantRoot], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "config", "user.email", "poodle-certification@example.invalid"],
+      repoRoot,
+    );
+    await run(
+      ["git", "-C", plantRoot, "config", "user.name", "Poodle Certification"],
+      repoRoot,
+    );
+    await Bun.write(join(plantRoot, "README.md"), "scope base\n");
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(["git", "-C", plantRoot, "commit", "--quiet", "-m", "scope base"], repoRoot);
+    const plantBaseCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "scope falsification base commit",
+    );
+    mkdirSync(join(plantRoot, ".github", "workflows"), { recursive: true });
+    await Bun.write(join(plantRoot, forbiddenPath), "name: planted\n");
+    await run(["git", "-C", plantRoot, "add", "--all"], repoRoot);
+    await run(
+      ["git", "-C", plantRoot, "commit", "--quiet", "-m", "scope forbidden mutation"],
+      repoRoot,
+    );
+    const plantProofCommit = requireExactCommit(
+      (await runCapture(["git", "-C", plantRoot, "rev-parse", "HEAD"], repoRoot)).trim(),
+      "scope falsification proof commit",
+    );
+    const acceptedScope = await assertCertificationScope(
+      plantRoot,
+      plantBaseCommit,
+      plantProofCommit,
+    );
+    throw new Error(
+      `scope guard accepted forbidden changed paths: ${acceptedScope.changedPaths.join(", ")}`,
+    );
+  } finally {
+    rmSync(plantRoot, { recursive: true, force: true });
+  }
 }
 
 const receipt = {
@@ -1599,24 +1828,22 @@ const falsificationReceipts = [
       ...(packedTreeReorderProof.expectedFailures ?? []),
     ]),
   },
-  expectedFailure("receipt identity changes when evidence is edited", () => {
+  await expectedFailure("receipt identity changes when evidence is edited", () => {
     const editedReceipt = receiptText.replace('"schemaVersion": 1', '"schemaVersion": 2');
     if (createHash("sha256").update(editedReceipt).digest("hex") === receiptSha256) {
       throw new Error("edited receipt retained the certified identity");
     }
     throw new Error("edited receipt hash differs from the certified identity");
   }),
-  expectedFailure("canonical roster denominator rejects a 175-name plant", () => {
+  await expectedFailure("canonical roster denominator rejects a 175-name plant", () => {
     const svelteSource = readFileSync(join(repoRoot, "packages/svelte/components/src/index.ts"), "utf8");
     const reactSource = readFileSync(join(repoRoot, "packages/react/components/src/index.ts"), "utf8");
     buildWebPackageRoster(roster.frozenNames.slice(1), svelteSource, reactSource);
   }),
-  expectedFailure("certification scope rejects release/workflow mutation", () => {
-    const forbidden = [".github/workflows/release.yml"];
-    if (forbidden.some((path) => path.startsWith(".github/"))) {
-      throw new Error(`release/workflow path rejected: ${forbidden.join(", ")}`);
-    }
-  }),
+  await expectedFailure(
+    "certification scope rejects a real workflow mutation",
+    scopeFalsificationPlant,
+  ),
 ];
 
 const evidence = {
@@ -1624,6 +1851,13 @@ const evidence = {
   sourceCommit: exactSourceCommit,
   receiptSha256,
   receipt,
+  certificationScope: {
+    ...scopeProof,
+    writablePathAllowlist: CERTIFICATION_WRITABLE_PATHS,
+    forbiddenSurfaces: CERTIFICATION_FORBIDDEN_SURFACES.map(
+      (surface) => surface.label,
+    ).concat("version"),
+  },
   frameworkFloors: { react: "18.0.0", svelte: "5.56.8" },
   peerRanges: { react: ">=18", svelte: ">=5.56.8 <6" },
   constraints: {
