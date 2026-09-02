@@ -15,7 +15,8 @@ behavior repairs without inventing another conformance authority.
 - [Generation index](generation-index.md) is the canonical status summary.
 - `g16.036` is complete in PR #127. The 2026-09-01 triage decisions are
   consolidated in the [canonical continuation map](g16/component-continuation-runway.md):
-  `g16.045`–`g16.049` are active; `g16.053` is complete in PR #150;
+  `g16.045`, `g16.046`, `g16.048`, and `g16.049` are active; `g16.047` is
+  complete in PR #152 and `g16.053` is complete in PR #150;
   `g16.050`, `g16.051`,
   and `g16.052` keep explicit serial, ownership, or external gates. `g16.054`
   stays blocked on an accepted, separately promoted compiled-JS/declarations

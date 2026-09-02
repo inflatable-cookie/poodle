@@ -23,6 +23,9 @@ renumbered here.
 - `g16.036` is complete in PR #127. Its paired-web Tree authority seam keeps
   the existing native synchronous single-row route.
 - `g16.037`–`g16.044` are research-complete in PRs #128–#135.
+- `g16.047` is complete in PR #152. Same-id Toast updates now own configured
+  timer transitions, discrete settlement announcement, focus-safe action
+  removal, and honest native danger-role metadata.
 - The accepted consolidation resolves the previous EditableLabel,
   block-slider, toast, shimmer, icon-geometry, design-guidance, release,
   citations, nested-menu, lab, visual-tranche, and Jetstream questions.
@@ -35,11 +38,10 @@ These cards have complete boundaries and no unmet serial dependency:
 | --- | --- | --- | --- |
 | [`g16.045`](045-editable-label-editing-model-and-mounted-parity.md) | EditableLabel | contract, paired runtime implementation, mounted proof | one committed/draft editing model |
 | [`g16.046`](046-block-slider-and-range-slider-appearance.md) | Slider / RangeSlider | additive appearance contract and active-runtime implementation | opt-in horizontal block treatment |
-| [`g16.047`](047-toast-same-id-update-convention.md) | ToastHost / ToastStack | existing host update path, timer, announcement, focus, native role | consumer-owned same-id settlement convention |
 | [`g16.048`](048-agent-subagent-ownership-and-shimmer-benchmark.md) | AgentSubagent | contract reconciliation, then disposable web benchmark | threshold verdict; no shipped shimmer |
 | [`g16.049`](049-icon-geometry-format-and-registry-foundation.md) | icon geometry IG-01/02 | internal architecture, format, vectors, generated registry | validated internal geometry foundation |
 
-These five lanes are independently dispatchable after this planning PR is accepted.
+These four lanes are independently dispatchable after this planning PR is accepted.
 If implementation discovers shared barrel, registry, contract, or generated
 file ownership between cards, serialize the overlapping pair before edits.
 Global g16 front-door and closeout edits remain orchestrator-owned.

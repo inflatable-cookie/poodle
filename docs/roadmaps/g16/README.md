@@ -81,7 +81,7 @@ stay maintained; backend admission is not part of the first card.
 44. [044 — Nested menu pointer intent research](044-nested-menu-pointer-intent-research.md) — research-complete in PR #131; conditional compose-and-extend direction
 45. [045 — EditableLabel editing model and mounted parity](045-editable-label-editing-model-and-mounted-parity.md) — ready
 46. [046 — Block Slider and RangeSlider appearance](046-block-slider-and-range-slider-appearance.md) — ready
-47. [047 — Toast same-id update convention](047-toast-same-id-update-convention.md) — ready
+47. [047 — Toast same-id update convention](047-toast-same-id-update-convention.md) — complete; merged in PR #152 after one exact-head repair round
 48. [048 — AgentSubagent ownership and shimmer benchmark](048-agent-subagent-ownership-and-shimmer-benchmark.md) — ready; contract reconciliation precedes the disposable benchmark
 49. [049 — Icon geometry format and registry foundation](049-icon-geometry-format-and-registry-foundation.md) — ready; IG-01/02 only
 50. [050 — Icon geometry internal runtime substrate](050-icon-geometry-internal-runtime-substrate.md) — blocked on accepted `g16.049`
@@ -94,8 +94,9 @@ stay maintained; backend admission is not part of the first card.
 ## Parallel Continuation
 
 The [canonical continuation map](component-continuation-runway.md) now owns the
-ready, serial, gated, and held frontier. Ready cards are `g16.045`–`g16.049`;
-`g16.053` is complete. `g16.050`, `g16.051`, and `g16.052` retain their explicit
+ready, serial, gated, and held frontier. Ready cards are `g16.045`, `g16.046`,
+`g16.048`, and `g16.049`; `g16.047` and `g16.053` are complete. `g16.050`,
+`g16.051`, and `g16.052` retain their explicit
 serial or external gates. `g16.054` still requires the separately promoted
 compiled-JS/declarations prerequisite; completing `g16.053` did not open
 candidate work. Citations, nested-menu pointer intent, the dedicated lab,

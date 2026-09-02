@@ -1,6 +1,6 @@
 # g16.047 — Toast Same-Id Update Convention
 
-Status: implemented — awaiting orchestrator review
+Status: complete
 Date: 2026-09-02
 Card: `docs/roadmaps/g16/047-toast-same-id-update-convention.md`
 Handoff: `docs/handoffs/20260902-004202-g16-047-toast-same-id.md`
@@ -15,6 +15,8 @@ Planning base: `7f59ae42f4917c675968819eb23a5e41dc90013c` (ancestor)
 Live `origin/main` at dispatch: `c1a527898e7425853359bd72b7113a8cf38b8d97`
 Rebased onto live `origin/main`: `ccb2ebd5bec2627b28f3cf589d4e4297780438ba`
 (includes merged g16.053 PR #150 and g16.055 PR #151)
+Reviewed head: `fe41ca9ed6b5a1fd9617d8ace081c718b5473159`
+Merged: PR #152 at `77e19a619263f92fcb8e4cb6d5d3bd87b82b4ced`
 
 ## Outcome
 
@@ -97,6 +99,13 @@ clears when focus leaves the action or stack; unmount-while-focused still
 restores. Paired Svelte already used live `document.activeElement` and did not
 steal. Plant: preserve stale `focusedActionId` / skip stack-leave clear →
 activeElement was Dismiss Publish, expected Outside.
+
+## Orchestrator closeout
+
+The repaired exact head was reviewed against the action-focus ownership rule.
+Independent checks reran 44 paired ToastStack/ToastHost tests, 26 core
+toast/motion tests, `effigy docs:check`, and the range diff check. PR #152 was
+accepted and merged at `77e19a619263f92fcb8e4cb6d5d3bd87b82b4ced`.
 
 ## Unresolved
 

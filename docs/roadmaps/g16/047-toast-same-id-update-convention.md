@@ -1,6 +1,6 @@
 # g16.047 — Toast Same-Id Update Convention
 
-Status: implemented — awaiting orchestrator review
+Status: complete — merged in PR #152
 Type: implementation
 Opened: 2026-09-01
 Depends on: merged `g16.034`, completed `g16.043` research, and operator
@@ -12,6 +12,7 @@ Governing refs: `../../contracts/001-working-rules.md`,
 `../../contracts/003-native-accessibility.md`,
 `../../architecture/012-semantic-motion-policy.md`
 Log: `../../logs/2026-09/20260902-g16-047-toast-same-id-update-convention.md`
+Merge: `77e19a619263f92fcb8e4cb6d5d3bd87b82b4ced`
 
 ## Goal
 

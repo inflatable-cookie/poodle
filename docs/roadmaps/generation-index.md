@@ -28,13 +28,15 @@ Updated: 2026-09-02
     bounded-preview issue; `036` merged in PR #127 with the paired-web Tree
     external drop-authority adapter; `037`–`044` completed the DesEngs research
     wave in merged PRs #128–#135; `045`–`054` are the canonical post-triage
-    continuation cards; independent `055` merged in PR #151
+    continuation cards; `047` merged in PR #152 after one exact-head repair
+    round; independent `055` merged in PR #151
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
   - Ready frontier: `g16.045` EditableLabel, `g16.046` block sliders,
-    `g16.047` toast updates, `g16.048` AgentSubagent reconciliation/benchmark,
-    and `g16.049` icon geometry foundation. `g16.053` is complete in PR #150.
+    `g16.048` AgentSubagent reconciliation/benchmark, and `g16.049` icon
+    geometry foundation. `g16.047` is complete in PR #152; `g16.053` is
+    complete in PR #150.
   - Independent completed lane: `g16.055` drag-source pointer-gesture browser
     suppression merged in PR #151; it remains outside the post-triage
     continuation map.
