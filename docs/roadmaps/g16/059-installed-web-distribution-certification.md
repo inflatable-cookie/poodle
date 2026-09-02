@@ -142,8 +142,7 @@ selector is authorized.
   Its preceding release-automation, web 3,606-test, Rust/headless, and GPUI
   consumer sections passed. The missing license is pre-existing and outside
   this handoff's two named repairs, so it was not changed.
-- `git diff --check origin/main...HEAD`: pending final closeout after the
-  receipt/log update.
+- `git diff --check origin/main...HEAD`: pass.
 
 ## Stop Conditions
 
