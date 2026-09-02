@@ -1,6 +1,6 @@
 {
   "name": "@inflatable-cookie/poodle-react",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -760,7 +760,7 @@
     }
   },
   "dependencies": {
-    "@inflatable-cookie/poodle-core": "0.2.3"
+    "@inflatable-cookie/poodle-core": "0.3.0"
   },
   "poodleRelease": {
     "publicIntent": true,

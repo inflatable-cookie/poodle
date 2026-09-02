@@ -5,12 +5,14 @@ package. It contains hand-written TSX shells over the shared
 `@inflatable-cookie/poodle-core` state machines. Same contracts, tokens, recipes, and CSS as
 `@inflatable-cookie/poodle-svelte`; the Svelte implementation stays the visual proof reference.
 
-**This package is not published to npm.** It is packed and certified with each
-release but stays source-only until it has a downstream consumer and a runtime
-behaviour denominator of its own; the name stays reserved under the claimed
-scope. `@inflatable-cookie/poodle-core` and `@inflatable-cookie/poodle-svelte`
-are the published preview-channel packages. Consume React through a workspace
-or file dependency, paired with a matching `0.2.3` core.
+**This package is not published to npm.** The `0.3.0` candidate is packed and
+certified for validation but remains private until it has a downstream
+consumer and a runtime behaviour denominator of its own; the name stays
+reserved under the claimed scope. `0.3.0` core and Svelte are candidate
+versions, not published packages. Consume React through a workspace or file
+dependency, paired with the matching `0.3.0` core after the candidate passes
+its separate certification and publication gates. `0.2.3` was prepared but
+unpublished, and `0.2.4` is skipped.
 
 ## Public Surface
 

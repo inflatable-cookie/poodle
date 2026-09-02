@@ -9,7 +9,59 @@ so minor releases may contain documented breaking changes.
 
 Nothing yet.
 
-## [0.2.3] - 2026-08-30
+## [0.3.0] - 2026-09-02 (candidate — not published)
+
+This is an immutable release candidate, not a release. No `v0.3.0` tag or
+registry publication exists; certification, tagging, and publication remain
+separate operator gates.
+
+### Breaking
+
+- **HistoryCenter v3 `HistoryEntry`.** `branchCount` is replaced by
+  `continuationCount`, and the v2 `branches` / `paths` input is replaced by
+  paged history data. Consumers must migrate to the v3 `pages` shape and the
+  host-owned continuation callbacks. The packed Svelte root and `/types`
+  paths retain the v3 type and reject the retired field with an unsuppressed
+  diagnostic.
+- **HistoryCenter rejection meanings.** The renderer-neutral rejection
+  surface is now the five-code union `AlreadyAtTarget`, `UnknownEntry`,
+  `StaleHistory`, `ProtectedEntry`, and `DeletionUnavailable`; hosts map
+  authority outcomes onto those meanings instead of treating every refusal as
+  an unknown entry.
+- **Markdown entry points.** `AgentMessage`, `AgentPlan`, `AgentPlanRecord`,
+  `AgentTranscript`, and `MarkdownEditor` move out of the Svelte and React
+  package roots into explicit `/markdown` entries. Their direct component
+  entries remain available. There is no compatibility alias or root fallback.
+
+### Added and changed
+
+- The public-intent delta accumulated after immutable `v0.2.2` includes the
+  triggerless `ContextMenu` composition prepared as `0.2.3`, cross-runtime
+  drag-and-drop and opaque file/cross-window bridges, Tree reorder authority,
+  TimeInput and NumberInput value/draft contracts, continuous audio controls,
+  shared motion policy, EditableLabel, block Slider/RangeSlider appearance,
+  and same-id Toast updates.
+- Core, Svelte, the private React validation package, and the Rust source/tag
+  distribution set are versioned at `0.3.0`. Core and Svelte are the only
+  eventual npm publication set; React remains private and Rust remains
+  source/tag distribution. Internal preview/tooling packages are not consumer
+  dependencies.
+- The web package boundary is compiled `dist/` JavaScript plus declarations.
+  The candidate consumes the accepted installed certification and records its
+  own exact tarball identities separately.
+
+### Downstream checks
+
+- Migrate root markdown imports to `/markdown`, and update HistoryCenter
+  callers from the v2 `branches` / `paths` / `branchCount` vocabulary to v3
+  `pages`, `continuationCount`, and host-owned continuation operations.
+- Pin a separately published exact version after certification. `0.2.3` was
+  prepared but unpublished, and `0.2.4` is skipped.
+
+## [0.2.3] - 2026-08-30 (prepared — unpublished)
+
+`0.2.3` was prepared in the repository but was never tagged or published. Its
+intended delta is carried into the `0.3.0` candidate above; `0.2.4` is skipped.
 
 ### Added
 
@@ -257,6 +309,7 @@ complete migration checklist.
   migration guidance, and downstream checks.
 
 [Unreleased]: https://github.com/inflatable-cookie/poodle/commits/main
+[0.3.0]: docs/release-notes/0.3.0.md
 [0.2.3]: docs/release-notes/0.2.3.md
 [0.2.2]: docs/release-notes/0.2.2.md
 [0.2.1]: docs/release-notes/0.2.1.md

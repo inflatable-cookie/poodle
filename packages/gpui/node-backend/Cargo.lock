@@ -3768,7 +3768,7 @@ checksum = "5da3b0203fd7ee5720aa0b5e790b591aa5d3f41c3ed2c34a3a393382198af2f7"
 
 [[package]]
 name = "poodle-gpui-node-backend"
-version = "0.2.3"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "futures",
@@ -3779,18 +3779,18 @@ dependencies = [
 
 [[package]]
 name = "poodle-headless"
-version = "0.2.3"
+version = "0.3.0"
 
 [[package]]
 name = "poodle-layout"
-version = "0.2.3"
+version = "0.3.0"
 dependencies = [
  "poodle-tokens",
 ]
 
 [[package]]
 name = "poodle-node"
-version = "0.2.3"
+version = "0.3.0"
 dependencies = [
  "poodle-headless",
  "poodle-layout",
@@ -3800,7 +3800,7 @@ dependencies = [
 
 [[package]]
 name = "poodle-style"
-version = "0.2.3"
+version = "0.3.0"
 dependencies = [
  "poodle-layout",
  "poodle-tokens",
@@ -3808,7 +3808,7 @@ dependencies = [
 
 [[package]]
 name = "poodle-tokens"
-version = "0.2.3"
+version = "0.3.0"
 
 [[package]]
 name = "postage"

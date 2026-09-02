@@ -1,6 +1,6 @@
 [package]
 name = "poodle-gpui"
-version = "0.2.3"
+version = "0.3.0"
 edition = "2021"
 license = "MIT"
 rust-version = "1.95"
@@ -15,13 +15,13 @@ publish = false
 path = "src/lib.rs"
 
 [dependencies]
-poodle-adapter = { version = "0.2.3", path = "../../contracts/adapter" }
-poodle-headless = { version = "0.2.3", path = "../../contracts/headless" }
-poodle-events = { version = "0.2.3", path = "../../contracts/events" }
-poodle-layout = { version = "0.2.3", path = "../../contracts/layout" }
-poodle-specs = { version = "0.2.3", path = "../../contracts/components" }
-poodle-style = { version = "0.2.3", path = "../../contracts/style" }
-poodle-tokens = { version = "0.2.3", path = "../../contracts/tokens" }
+poodle-adapter = { version = "0.3.0", path = "../../contracts/adapter" }
+poodle-headless = { version = "0.3.0", path = "../../contracts/headless" }
+poodle-events = { version = "0.3.0", path = "../../contracts/events" }
+poodle-layout = { version = "0.3.0", path = "../../contracts/layout" }
+poodle-specs = { version = "0.3.0", path = "../../contracts/components" }
+poodle-style = { version = "0.3.0", path = "../../contracts/style" }
+poodle-tokens = { version = "0.3.0", path = "../../contracts/tokens" }
 
 [package.metadata.poodle]
 public-intent = true
