@@ -92,6 +92,8 @@ element getter, controlled draft, or second handle type is added.
   ASCII insert.
 - Enter, Escape, Tab, pointer/window blur, external value replacement,
   disablement, and teardown follow the fixed callback and focus law exactly.
+  LicenceActivation `machine_name` and LicenceSeats `seat_row` forward the
+  same Enter/Escape restore path; Tab and blur still commit without it.
 - `doubleClick`, `enterOrSpace`, and `programmatic` have the same observable
   activation boundary across Svelte, React, shared Rust, and GPUI.
 - Svelte instance methods and the exported React handle expose only `focus()`,
