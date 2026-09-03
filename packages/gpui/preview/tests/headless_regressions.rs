@@ -6837,6 +6837,128 @@ fn agent_transcript_records_rebuild_through_production_mounted_input() {
     });
 }
 
+/// AgentTranscript postures and the user-message shell must stay observable as
+/// their production dependencies, not as transcript-authored lookalike nodes.
+#[test]
+fn agent_transcript_dependencies_are_structural_not_metadata() {
+    use crate::node_compat::IntoCompatNode;
+    use gpui::IntoElement;
+    use poodle_adapter::ThemeProvider;
+    use poodle_headless::agent_transcript::{
+        TranscriptActivity, TranscriptItem, TranscriptMessage, TranscriptRole,
+    };
+
+    #[derive(Debug, Default)]
+    struct MountedPostureFacts {
+        empty_state: bool,
+        empty_contained: bool,
+        loading_spinner: bool,
+        loading_label: bool,
+        loading_contained: bool,
+        dependency_channels: bool,
+        mounted: bool,
+    }
+
+    let mounted = Arc::new(Mutex::new(MountedPostureFacts::default()));
+    let mounted_result = Arc::clone(&mounted);
+    run_headless(move |cx| {
+        let items = Rc::new(RefCell::new(Vec::<TranscriptItem>::new()));
+        let build_items = Rc::clone(&items);
+        let theme_provider = theme();
+        let build: Rc<dyn Fn() -> gpui::AnyElement> = Rc::new(move || {
+            crate::node_compat::AgentTranscript::from_spec(
+                AgentTranscriptSpec::new(build_items.borrow().clone())
+                    .with_empty_label("No mounted records"),
+                &theme_provider,
+            )
+            .with_instance_id("dependencies")
+            .into_element()
+        });
+
+        poodle_gpui_node_backend::begin_probe_capture();
+        let mut driver = HeadlessDriver::new_element_in_box(cx, build, 480.0, 260.0);
+        let root_id = "agent-transcript:dependencies";
+        let empty_id = "agent-transcript:dependencies:empty-state";
+        let root_bounds = poodle_gpui_node_backend::bounds_for(root_id).expect("transcript root");
+        let empty_bounds = poodle_gpui_node_backend::bounds_for(empty_id);
+
+        items.borrow_mut().push(TranscriptItem::Activity(TranscriptActivity {
+            id: "working".to_owned(),
+            label: "Working".to_owned(),
+            spinning: Some(true),
+        }));
+        driver.draw_frame();
+        driver.scroll_vertical(1.0);
+
+        let spinner_id = "agent-transcript:dependencies:activity-spinner";
+        let label_id = "agent-transcript:dependencies:activity-label";
+        let spinner_bounds = poodle_gpui_node_backend::bounds_for(spinner_id);
+        let label_bounds = poodle_gpui_node_backend::bounds_for(label_id);
+        let channels = poodle_gpui_node_backend::take_probe_capture();
+        let mut facts = mounted_result.lock().expect("mounted facts");
+        facts.empty_state = empty_bounds.is_some();
+        facts.empty_contained = empty_bounds.is_some_and(|bounds| bounds_contain(root_bounds, bounds));
+        facts.loading_spinner = spinner_bounds.is_some();
+        facts.loading_label = label_bounds.is_some();
+        facts.loading_contained = spinner_bounds
+            .zip(label_bounds)
+            .is_some_and(|(spinner, label)| {
+                bounds_contain(root_bounds, spinner) && bounds_contain(root_bounds, label)
+            });
+        facts.dependency_channels = channels.contains(&"surface.channels.background")
+            && channels.contains(&"content.text-icon.icon")
+            && channels.contains(&"content.text-icon.text");
+        facts.mounted = driver.mounted_observation().is_valid();
+    });
+
+    let theme_provider = theme();
+    let user_message = crate::node_compat::AgentTranscript::from_spec(
+        AgentTranscriptSpec::new(vec![TranscriptItem::Message(TranscriptMessage {
+            id: "user".to_owned(),
+            role: Some(TranscriptRole::User),
+            markdown: "Contract surface".to_owned(),
+            ..Default::default()
+        })]),
+        &theme_provider,
+    )
+    .with_instance_id("surface")
+    .into_compat_node()
+    .children
+    .into_iter()
+    .next()
+    .expect("user message");
+
+    let mounted = mounted.lock().expect("mounted facts");
+    let mut blockers = Vec::new();
+    if !mounted.empty_state || !mounted.empty_contained {
+        blockers.push("empty posture did not mount the contained production EmptyState");
+    }
+    if !mounted.loading_spinner || !mounted.loading_label || !mounted.loading_contained {
+        blockers.push("loading posture did not mount the contained production Spinner and Text");
+    }
+    if !mounted.dependency_channels || !mounted.mounted {
+        blockers.push("posture dependencies did not reach the mounted GPUI backend");
+    }
+    if user_message.style.descriptor.background
+        != Some(theme_provider.resolve_color("color.background.elevated"))
+        || user_message.style.descriptor.corner_radii.top_left
+            != theme_provider.resolve_radius("radius.surface")
+    {
+        blockers.push("user AgentMessage lost its exact elevated fill or surface radius");
+    }
+    if user_message.style.descriptor.shadow.is_some() {
+        blockers.push("user AgentMessage retained Surface elevation shadow absent from its contract");
+    }
+    if user_message.style.descriptor.layout.direction != LayoutDirection::Row
+        || user_message.children.len() != 1
+        || user_message.children[0].style.descriptor.layout.direction != LayoutDirection::Column
+    {
+        blockers.push("user AgentMessage substituted a raw shell for production Surface composition");
+    }
+
+    assert!(blockers.is_empty(), "{}", blockers.join("; "));
+}
+
 /// Host-owned open state and trace for one nested popover pair. The outer
 /// composition routes through the node_compat adapter machine; the inner
 /// composition rides the renderer-node path with host handlers, exactly like
