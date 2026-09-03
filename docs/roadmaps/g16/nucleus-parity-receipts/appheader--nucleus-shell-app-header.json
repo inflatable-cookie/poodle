@@ -1,7 +1,7 @@
 {
   "schema": "poodle.g16-nucleus-parity-receipt.v1",
-  "component": "Button",
-  "scenario_id": "nucleus.shell.button",
+  "component": "AppHeader",
+  "scenario_id": "nucleus.shell.app-header",
   "proof_level": "M1",
   "runtime": "gpui-headless",
   "command": "effigy regressions:native",
@@ -46,11 +46,13 @@
     "input_dispatch": "gpui-test-platform-dispatch"
   },
   "actions": [
-    "mount Button through HeadlessDriver",
-    "pointer press and release through GPUI dispatch"
+    "render AppHeader with centered custom-identity composite through poodle_render",
+    "pointer hover dispatch through HeadlessDriver"
   ],
   "assertions": [
-    "the mounted Button listener fired exactly once"
+    "production render path resolves shell background, bottom border, size ladder min-height, typography, density padding/gaps, fill-width posture, and aria-label fallback/override",
+    "presence of center slot switches layout from flat root regions to symmetric grow trailing column",
+    "mounted bounds confirm child containment, positive dimensions, stable region ordering, and non-focusable styled-only root"
   ],
   "outcome": "passed",
   "artifact_paths": []

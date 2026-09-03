@@ -1,6 +1,6 @@
 # g16.069 — Nucleus AppHeader M1 Receipt
 
-Status: ready
+Status: in-review
 Type: Nucleus NP-1 mounted receipt child
 Opened: 2026-09-03
 Depends on: completed `g16.062`, completed `g16.067`, completed `g16.068`
@@ -9,6 +9,7 @@ Governing refs: `nucleus-gpui-parity-programme.md`,
 `nucleus-parity-manifest.json`, `parity-evidence-ledger.md`,
 `../../contracts/components/app-header.md`,
 `../../contracts/components/icon.md`, `../../contracts/components/text.md`
+Log: `../../logs/2026-09/20260903-g16-069-nucleus-app-header-receipt.md`
 
 ## Goal
 
