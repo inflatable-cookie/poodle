@@ -855,6 +855,7 @@ pub(crate) struct RelationPicker {
     handlers: poodle_render::RelationPickerHandlers,
 }
 
+#[derive(Clone)]
 pub(crate) struct EditableLabel {
     spec: EditableLabelSpec,
     theme: GpuiThemeProvider,
@@ -1919,6 +1920,12 @@ impl IntoElement for EditableLabel {
 
     fn into_element(self) -> Self::Element {
         poodle_gpui_node_backend::to_gpui(&self.into_node())
+    }
+}
+
+impl IntoCompatNode for EditableLabel {
+    fn into_compat_node(self) -> poodle_node::Node {
+        self.into_node()
     }
 }
 

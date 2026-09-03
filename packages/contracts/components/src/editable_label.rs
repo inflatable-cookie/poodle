@@ -243,3 +243,59 @@ impl EditableLabelSpec {
         self
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn editable_label_defaults_keep_display_and_session_state_separate() {
+        let spec = EditableLabelSpec::new();
+
+        assert_eq!(spec.value, "");
+        assert_eq!(spec.live_text(), "");
+        assert!(!spec.is_editing);
+        assert!(!spec.is_disabled);
+        assert_eq!(spec.activation_mode, EditableLabelActivation::DoubleClick);
+        assert!(spec.select_on_focus);
+        assert_eq!(spec.variant, EditableLabelVariant::Default);
+        assert_eq!(spec.selection_range(), (0, 0));
+        assert_eq!(spec.resolved_accessible_name(), "Edit label");
+    }
+
+    #[test]
+    fn editable_label_live_text_name_and_selection_follow_the_portable_contract() {
+        let editing = EditableLabelSpec::new()
+            .with_value("Kick")
+            .with_empty_text("Untitled")
+            .with_editing(true)
+            .with_draft_value(Some("𝄞Take".to_owned()))
+            .with_selection(1, usize::MAX)
+            .with_max_length(5)
+            .with_activation_mode(EditableLabelActivation::EnterOrSpace)
+            .with_variant(EditableLabelVariant::Flush)
+            .with_show_edit_icon(true);
+
+        assert_eq!(editing.value, "Kick");
+        assert_eq!(editing.live_text(), "𝄞Take");
+        assert_eq!(editing.selection_range(), (1, 5));
+        assert_eq!(editing.resolved_accessible_name(), "Kick");
+        assert_eq!(editing.max_length, Some(5));
+        assert_eq!(editing.text_color_token(), semantic::COLOR_TEXT_PRIMARY);
+        assert_eq!(
+            editing.edit_border_token(),
+            semantic::COLOR_ACCENT_FOCUS_RING
+        );
+        assert_eq!(
+            editing.focus_ring_color_token(),
+            semantic::COLOR_ACCENT_FOCUS_RING
+        );
+
+        let explicit_name = editing.clone().with_aria_label("Clip name");
+        assert_eq!(explicit_name.resolved_accessible_name(), "Clip name");
+
+        let display = EditableLabelSpec::new().with_empty_text("Untitled");
+        assert_eq!(display.resolved_accessible_name(), "Untitled");
+        assert_eq!(display.edit_border_token(), semantic::COLOR_BORDER_SUBTLE);
+    }
+}

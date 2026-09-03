@@ -1,8 +1,9 @@
 # g16.080 — Nucleus EditableLabel M1 Receipt
 
-Status: ready
+Status: complete
 Type: Nucleus NP-2 mounted receipt child
 Opened: 2026-09-03
+Closed: 2026-09-03
 Depends on: completed `g16.045`, completed `g16.062`, completed `g16.077`
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `062-nucleus-parity-receipt-foundation.md`,
@@ -79,6 +80,13 @@ one log; and new papercuts. Do not edit Nucleus, web behavior, visual-lab code,
 Jetstream, workflows, versions, releases, or other component rows.
 
 ## Validation
+
+PR #186 review revision closes the activation and typography counterexamples:
+default single-click is mounted and inert before a distinct default
+double-click entry; `enterOrSpace` enters through separate mounted Enter and
+Space paths; display and input Nodes carry label size, weight, relative
+line-height, and explicit sans-family inheritance metadata; empty display text
+carries italics.
 
 Run focused EditableLabel spec/machine/render/backend tests, the named mounted
 fixture, `effigy regressions:native`, receipt and ledger tests,
