@@ -64,9 +64,12 @@ Updated: 2026-09-03
   - Completed: `g16.087` Callout merged in PR #194 at
     `e674faac7f0c37d742b22d7a782a87bfd4875621`; the mounted Nucleus cohort is
     25/29.
-  - Ready frontier: prepare and review `g16.089` DetailItem and `g16.090`
-    CommandPalette without shared evidence, then finalize them serially.
-    `g16.091` may prepare ToastHost in parallel; MessageCenter stays gated on it.
+  - Completed: `g16.090` CommandPalette merged in PR #195 at
+    `f8e88fb458256746f941927ca3b29ab764da52c4`; the mounted Nucleus cohort is
+    26/29.
+  - Ready frontier: repair/re-review `g16.089` DetailItem while `g16.091`
+    prepares ToastHost without shared evidence. MessageCenter stays gated on
+    ToastHost.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -83,7 +86,7 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: review and serially finalize `g16.089` and `g16.090` without
+  - Next move: review and serially finalize `g16.089`, then `g16.091`, without
     overlapping shared receipt files; the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
