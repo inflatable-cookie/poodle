@@ -19845,3 +19845,587 @@ fn mounted_toast_danger_uses_alert_role() {
         );
     });
 }
+
+/// g16.066. Window-owned tooltip lifecycle runtime: 300ms delay, hover/focus
+/// trigger, pointer leave, focus departure (blur), Escape, click dismissal,
+/// target supersession, removal sweep, disabled inertness, and window isolation.
+#[test]
+fn gpui_node_tooltip_delay_timing_and_mounted_lifecycle() {
+    use poodle_gpui_node_backend::{
+        is_tooltip_pending, is_tooltip_visible, painted_tooltip, TOOLTIP_DELAY,
+    };
+    use std::time::Duration;
+
+    run_headless(|cx| {
+        let mut save_btn = Node::button("Save");
+        save_btn.id = Some("save-button".into());
+        save_btn.interaction.focusable = true;
+        save_btn.a11y.tab_index = Some(0);
+        save_btn.tooltip = Some("Save document".into());
+        save_btn.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+        save_btn.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+
+        let mounted = Arc::new(Mutex::new(save_btn));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 400.0, 300.0);
+        driver.wait_for_focus_handle("save-button");
+
+        let target_bounds = poodle_gpui_node_backend::bounds_for("save-button")
+            .expect("save-button painted bounds");
+        let target_center = target_bounds.center();
+        let outside = point(px(10.0), px(10.0));
+
+        assert!(!is_tooltip_pending("save-button"));
+        assert!(!is_tooltip_visible("save-button"));
+        assert!(painted_tooltip().is_none());
+
+        driver.pointer_hover(target_center);
+        assert!(
+            is_tooltip_pending("save-button"),
+            "pointer hover must start a pending timer"
+        );
+        assert!(!is_tooltip_visible("save-button"));
+
+        driver.advance_clock(Duration::from_millis(299));
+        driver.draw_frame();
+        assert!(
+            is_tooltip_pending("save-button"),
+            "tooltip must remain pending at 299ms"
+        );
+        assert!(
+            !is_tooltip_visible("save-button"),
+            "tooltip must stay absent at 299ms"
+        );
+        assert!(painted_tooltip().is_none());
+
+        driver.advance_clock(Duration::from_millis(1));
+        driver.draw_frame();
+        assert!(
+            is_tooltip_visible("save-button"),
+            "tooltip must become visible at 300ms"
+        );
+        assert!(!is_tooltip_pending("save-button"));
+
+        let painted = painted_tooltip().expect("painted tooltip at 300ms");
+        assert_eq!(painted.target_id, "save-button");
+        assert_eq!(painted.text, "Save document");
+
+        driver.pointer_hover(outside);
+        assert!(
+            !is_tooltip_visible("save-button"),
+            "pointer leave must hide visible tooltip immediately"
+        );
+        assert!(painted_tooltip().is_none());
+
+        driver.pointer_hover(target_center);
+        assert!(is_tooltip_pending("save-button"));
+        driver.advance_clock(Duration::from_millis(100));
+        driver.pointer_hover(outside);
+        assert!(
+            !is_tooltip_pending("save-button"),
+            "early pointer leave must cancel pending timer"
+        );
+        driver.advance_clock(Duration::from_millis(500));
+        driver.draw_frame();
+        assert!(
+            !is_tooltip_visible("save-button"),
+            "cancelled timer must never paint tooltip"
+        );
+        assert!(painted_tooltip().is_none());
+
+        driver.focus_element("save-button");
+        assert!(
+            is_tooltip_pending("save-button"),
+            "focus enter must start pending timer"
+        );
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(
+            is_tooltip_visible("save-button"),
+            "focus timer at 300ms must make tooltip visible"
+        );
+        assert!(painted_tooltip().is_some());
+
+        driver.blur_element_focus("save-button");
+        assert!(
+            !is_tooltip_visible("save-button"),
+            "focus departure must hide tooltip immediately"
+        );
+        assert!(painted_tooltip().is_none());
+
+        driver.pointer_hover(target_center);
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(is_tooltip_visible("save-button"));
+
+        driver.dispatch_key("escape");
+        assert!(
+            !is_tooltip_visible("save-button"),
+            "Escape must dismiss visible tooltip"
+        );
+        assert!(painted_tooltip().is_none());
+
+        driver.pointer_hover(outside);
+        driver.pointer_hover(target_center);
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(is_tooltip_visible("save-button"));
+
+        driver.pointer_press(target_center);
+        assert!(
+            !is_tooltip_visible("save-button"),
+            "pointer press must dismiss visible tooltip"
+        );
+        driver.pointer_release(target_center);
+    });
+}
+
+/// g16.066. Target supersession, paint authority, disabled inertness, and empty tooltips.
+#[test]
+fn gpui_node_tooltip_generation_supersession_paint_authority_and_disabled() {
+    use poodle_gpui_node_backend::{
+        is_tooltip_pending, is_tooltip_visible, painted_tooltip, TOOLTIP_DELAY,
+    };
+    use std::time::Duration;
+
+    run_headless(|cx| {
+        let mut btn_a = Node::button("A");
+        btn_a.id = Some("btn-a".into());
+        btn_a.tooltip = Some("Alpha action".into());
+        btn_a.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
+        btn_a.style.descriptor.layout.height = LayoutSizing::Fixed(36.0);
+
+        let mut btn_b = Node::button("B");
+        btn_b.id = Some("btn-b".into());
+        btn_b.tooltip = Some("Beta action".into());
+        btn_b.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
+        btn_b.style.descriptor.layout.height = LayoutSizing::Fixed(36.0);
+
+        let mut btn_disabled = Node::button("Disabled");
+        btn_disabled.id = Some("btn-disabled".into());
+        btn_disabled.interaction.disabled = true;
+        btn_disabled.tooltip = Some("Cannot activate".into());
+        btn_disabled.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
+        btn_disabled.style.descriptor.layout.height = LayoutSizing::Fixed(36.0);
+
+        let mut btn_empty = Node::button("Empty");
+        btn_empty.id = Some("btn-empty".into());
+        btn_empty.tooltip = Some(String::new());
+        btn_empty.style.descriptor.layout.width = LayoutSizing::Fixed(80.0);
+        btn_empty.style.descriptor.layout.height = LayoutSizing::Fixed(36.0);
+
+        let mut row = Node::container();
+        row.style.descriptor.layout.direction = LayoutDirection::Row;
+        row.style.descriptor.layout.spacing.gap = 12.0;
+        row = row
+            .child(btn_a)
+            .child(btn_b)
+            .child(btn_disabled)
+            .child(btn_empty);
+
+        let mounted = Arc::new(Mutex::new(row));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 500.0, 300.0);
+        driver.draw_frame();
+
+        let bounds_a = poodle_gpui_node_backend::bounds_for("btn-a").expect("bounds for A");
+        let bounds_b = poodle_gpui_node_backend::bounds_for("btn-b").expect("bounds for B");
+        let bounds_disabled =
+            poodle_gpui_node_backend::bounds_for("btn-disabled").expect("bounds for disabled");
+        let bounds_empty =
+            poodle_gpui_node_backend::bounds_for("btn-empty").expect("bounds for empty");
+
+        driver.pointer_hover(bounds_a.center());
+        assert!(is_tooltip_pending("btn-a"));
+
+        driver.advance_clock(Duration::from_millis(150));
+        assert!(is_tooltip_pending("btn-a"));
+
+        driver.pointer_hover(bounds_b.center());
+        assert!(
+            !is_tooltip_pending("btn-a"),
+            "hovering B must cancel A's pending state"
+        );
+        assert!(is_tooltip_pending("btn-b"));
+
+        driver.advance_clock(Duration::from_millis(200));
+        driver.draw_frame();
+        assert!(
+            !is_tooltip_visible("btn-a"),
+            "A must never paint: superseded generation is inert"
+        );
+        assert!(
+            !is_tooltip_visible("btn-b"),
+            "B is not visible yet (only 200ms elapsed)"
+        );
+
+        driver.advance_clock(Duration::from_millis(100));
+        driver.draw_frame();
+        assert!(
+            is_tooltip_visible("btn-b"),
+            "B must become visible after its full 300ms delay"
+        );
+        let painted = painted_tooltip().expect("painted tooltip for B");
+        assert_eq!(painted.target_id, "btn-b");
+        assert_eq!(painted.text, "Beta action");
+
+        driver.pointer_hover(point(px(10.0), px(10.0)));
+
+        driver.pointer_hover(bounds_a.center());
+        assert!(is_tooltip_pending("btn-a"));
+
+        let mut empty_root = Node::container();
+        empty_root.id = Some("empty-root".into());
+        *mounted.lock().expect("mounted lock") = empty_root;
+        driver.draw_frame();
+
+        driver.advance_clock(Duration::from_millis(500));
+        driver.draw_frame();
+        assert!(
+            !is_tooltip_visible("btn-a"),
+            "removed target must never show tooltip"
+        );
+        assert!(painted_tooltip().is_none());
+
+        driver.pointer_hover(bounds_disabled.center());
+        assert!(
+            !is_tooltip_pending("btn-disabled"),
+            "disabled target must not start tooltip timer"
+        );
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(!is_tooltip_visible("btn-disabled"));
+
+        driver.pointer_hover(bounds_empty.center());
+        assert!(
+            !is_tooltip_pending("btn-empty"),
+            "empty tooltip text must not start tooltip timer"
+        );
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+        assert!(!is_tooltip_visible("btn-empty"));
+    });
+}
+
+/// g16.066. Overlapping two-window isolation: both windows stay alive.
+/// A frame, timer, or dismiss in B must not cancel or paint A's tooltip.
+#[test]
+fn gpui_node_tooltip_overlapping_two_window_isolation() {
+    use poodle_gpui_node_backend::{
+        is_tooltip_pending, is_tooltip_visible, painted_tooltip_for, TOOLTIP_DELAY,
+    };
+
+    fn tooltip_button(id: &str, label: &str, tooltip: &str) -> Node {
+        let mut btn = Node::button(label);
+        btn.id = Some(id.into());
+        btn.tooltip = Some(tooltip.into());
+        btn.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+        btn.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        btn
+    }
+
+    run_headless(|cx| {
+        let mut cx_b = cx.clone();
+        let mounted_a = Arc::new(Mutex::new(tooltip_button(
+            "win1-btn",
+            "Window 1 Button",
+            "Window 1 Tooltip",
+        )));
+        let mounted_b = Arc::new(Mutex::new(tooltip_button(
+            "win2-btn",
+            "Window 2 Button",
+            "Window 2 Tooltip",
+        )));
+        let mut driver_a = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted_a), 400.0, 300.0);
+        let mut driver_b =
+            HeadlessDriver::new_in_box(&mut cx_b, Arc::clone(&mounted_b), 400.0, 300.0);
+
+        let handle_a = driver_a.with_window(|w, _cx| w.window_handle());
+        let handle_b = driver_b.with_window(|w, _cx| w.window_handle());
+        assert!(
+            handle_a != handle_b,
+            "overlapping windows must have distinct handles"
+        );
+
+        driver_a.draw_frame();
+        let center_a = poodle_gpui_node_backend::bounds_for("win1-btn")
+            .expect("bounds for win1-btn")
+            .center();
+        driver_a.pointer_hover(center_a);
+        assert!(
+            is_tooltip_pending("win1-btn"),
+            "window A must start its own pending timer"
+        );
+
+        driver_b.draw_frame();
+        let center_b = poodle_gpui_node_backend::bounds_for("win2-btn")
+            .expect("bounds for win2-btn")
+            .center();
+        driver_b.pointer_hover(center_b);
+        assert!(
+            is_tooltip_pending("win1-btn"),
+            "window B's frame must not sweep window A's pending timer"
+        );
+        assert!(
+            is_tooltip_pending("win2-btn"),
+            "window B must start its own pending timer while A is still alive"
+        );
+
+        driver_a.advance_clock(TOOLTIP_DELAY);
+        driver_a.draw_frame();
+        driver_b.draw_frame();
+
+        let painted_a = painted_tooltip_for(handle_a)
+            .expect("window A tooltip must survive window B's overlapping paint");
+        let painted_b = painted_tooltip_for(handle_b).expect("window B painted tooltip");
+        assert_eq!(painted_a.target_id, "win1-btn");
+        assert_eq!(painted_a.text, "Window 1 Tooltip");
+        assert_eq!(painted_b.target_id, "win2-btn");
+        assert_eq!(painted_b.text, "Window 2 Tooltip");
+
+        driver_b.pointer_hover(point(px(10.0), px(10.0)));
+        assert!(!is_tooltip_visible("win2-btn"), "dismissing B must hide B");
+        driver_a.draw_frame();
+        let painted_a_after_b_dismiss = painted_tooltip_for(handle_a)
+            .expect("dismissing B must not hide A's visible tooltip");
+        assert_eq!(painted_a_after_b_dismiss.text, "Window 1 Tooltip");
+        assert!(
+            painted_tooltip_for(handle_b).is_none(),
+            "B's tooltip must stay gone after A paints"
+        );
+    });
+}
+
+/// g16.066. Production window teardown clears pending and visible tooltip
+/// state and blocks late paint. The path is `Window::remove_window`, not
+/// `reset_focus_registry`.
+#[test]
+fn gpui_node_tooltip_window_teardown_clears_pending_visible_and_blocks_late_paint() {
+    use poodle_gpui_node_backend::{
+        is_tooltip_pending, is_tooltip_visible, painted_tooltip_for, tooltip_runtime_owns_window,
+        TOOLTIP_DELAY,
+    };
+
+    fn tooltip_button(id: &str, label: &str, tooltip: &str) -> Node {
+        let mut btn = Node::button(label);
+        btn.id = Some(id.into());
+        btn.tooltip = Some(tooltip.into());
+        btn.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+        btn.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        btn
+    }
+
+    run_headless(|cx| {
+        let mut cx_live = cx.clone();
+        let mut cx_witness = cx.clone();
+
+        let mounted_pending = Arc::new(Mutex::new(tooltip_button(
+            "pending-btn",
+            "Pending",
+            "Pending Tooltip",
+        )));
+        let mounted_live = Arc::new(Mutex::new(tooltip_button(
+            "live-btn",
+            "Live",
+            "Live Tooltip",
+        )));
+        let mounted_witness = Arc::new(Mutex::new(tooltip_button(
+            "witness-btn",
+            "Witness",
+            "Witness Tooltip",
+        )));
+
+        let mut driver_pending =
+            HeadlessDriver::new_in_box(cx, Arc::clone(&mounted_pending), 400.0, 300.0);
+        let mut driver_live =
+            HeadlessDriver::new_in_box(&mut cx_live, Arc::clone(&mounted_live), 400.0, 300.0);
+        let handle_pending = driver_pending.with_window(|w, _cx| w.window_handle());
+        let handle_live = driver_live.with_window(|w, _cx| w.window_handle());
+
+        driver_pending.draw_frame();
+        let pending_center = poodle_gpui_node_backend::bounds_for("pending-btn")
+            .expect("bounds for pending-btn")
+            .center();
+        driver_pending.pointer_hover(pending_center);
+        assert!(is_tooltip_pending("pending-btn"));
+        assert!(tooltip_runtime_owns_window(handle_pending));
+
+        driver_pending.close_window();
+        assert!(
+            !is_tooltip_pending("pending-btn"),
+            "pending tooltip must die on window close"
+        );
+        assert!(
+            !tooltip_runtime_owns_window(handle_pending),
+            "closed window must not retain tooltip runtime state"
+        );
+        assert!(painted_tooltip_for(handle_pending).is_none());
+
+        driver_pending.advance_clock(TOOLTIP_DELAY + std::time::Duration::from_millis(200));
+        driver_live.draw_frame();
+        assert!(
+            !is_tooltip_visible("pending-btn"),
+            "closed pending tooltip must not paint after its timer would have fired"
+        );
+        assert!(painted_tooltip_for(handle_pending).is_none());
+
+        driver_live.draw_frame();
+        let live_center = poodle_gpui_node_backend::bounds_for("live-btn")
+            .expect("bounds for live-btn")
+            .center();
+        driver_live.pointer_hover(live_center);
+        driver_live.advance_clock(TOOLTIP_DELAY);
+        driver_live.draw_frame();
+        let painted_live = painted_tooltip_for(handle_live).expect("live window visible tooltip");
+        assert_eq!(painted_live.text, "Live Tooltip");
+        assert!(tooltip_runtime_owns_window(handle_live));
+
+        driver_live.close_window();
+        assert!(
+            !is_tooltip_visible("live-btn"),
+            "visible tooltip must die on window close"
+        );
+        assert!(!tooltip_runtime_owns_window(handle_live));
+        assert!(painted_tooltip_for(handle_live).is_none());
+
+        let mut driver_witness =
+            HeadlessDriver::new_in_box(&mut cx_witness, Arc::clone(&mounted_witness), 400.0, 300.0);
+        driver_witness.draw_frame();
+        driver_witness.advance_clock(TOOLTIP_DELAY);
+        driver_witness.draw_frame();
+        assert!(
+            painted_tooltip_for(handle_live).is_none(),
+            "a later window's frames must not resurrect the torn-down visible tooltip"
+        );
+        assert!(
+            painted_tooltip_for(handle_pending).is_none(),
+            "a later window's frames must not resurrect the torn-down pending tooltip"
+        );
+    });
+}
+
+/// g16.066. Repeated production create/close must return tooltip runtime and
+/// teardown-binding counts to baseline. `reset_focus_registry` is not this path.
+#[test]
+fn gpui_node_tooltip_teardown_bindings_retire_across_repeated_close() {
+    use poodle_gpui_node_backend::{
+        begin_probe_capture, is_tooltip_pending, take_probe_capture, tooltip_runtime_owns_window,
+        tooltip_runtime_window_count, tooltip_teardown_binding_count,
+    };
+
+    fn tooltip_button(id: &str, label: &str, tooltip: &str) -> Node {
+        let mut btn = Node::button(label);
+        btn.id = Some(id.into());
+        btn.tooltip = Some(tooltip.into());
+        btn.style.descriptor.layout.width = LayoutSizing::Fixed(120.0);
+        btn.style.descriptor.layout.height = LayoutSizing::Fixed(40.0);
+        btn
+    }
+
+    run_headless(|cx| {
+        let baseline_bindings = tooltip_teardown_binding_count();
+        let baseline_runtime = tooltip_runtime_window_count();
+        assert_eq!(baseline_bindings, 0, "test start must not inherit bindings");
+        assert_eq!(baseline_runtime, 0, "test start must not inherit runtime");
+
+        for cycle in 0..3 {
+            let mut cx_cycle = cx.clone();
+            let id = format!("cycle-{cycle}-btn");
+            let mounted = Arc::new(Mutex::new(tooltip_button(&id, "Cycle", "Cycle Tooltip")));
+            let mut driver =
+                HeadlessDriver::new_in_box(&mut cx_cycle, Arc::clone(&mounted), 400.0, 300.0);
+            let handle = driver.with_window(|w, _cx| w.window_handle());
+
+            driver.draw_frame();
+            let center = poodle_gpui_node_backend::bounds_for(&id)
+                .expect("cycle button bounds")
+                .center();
+            driver.pointer_hover(center);
+            assert!(
+                is_tooltip_pending(&id),
+                "cycle {cycle} must start a pending tooltip"
+            );
+            assert_eq!(
+                tooltip_teardown_binding_count(),
+                baseline_bindings + 1,
+                "cycle {cycle} must add exactly one close binding"
+            );
+            assert_eq!(
+                tooltip_runtime_window_count(),
+                baseline_runtime + 1,
+                "cycle {cycle} must own exactly one tooltip runtime"
+            );
+
+            begin_probe_capture();
+            driver.close_window();
+            let channels = take_probe_capture();
+            assert!(
+                channels.contains(&"tooltip.lifecycle.teardown"),
+                "cycle {cycle} close must emit teardown: {channels:?}"
+            );
+
+            assert_eq!(
+                tooltip_teardown_binding_count(),
+                baseline_bindings,
+                "cycle {cycle} close must retire its binding"
+            );
+            assert_eq!(
+                tooltip_runtime_window_count(),
+                baseline_runtime,
+                "cycle {cycle} close must drop tooltip runtime"
+            );
+            assert!(
+                !tooltip_runtime_owns_window(handle),
+                "closed cycle {cycle} must not retain runtime"
+            );
+        }
+    });
+}
+
+/// g16.066. Tooltip probe channels receipt: verify lifecycle probe emissions.
+#[test]
+fn gpui_node_tooltip_probe_channels() {
+    use poodle_gpui_node_backend::{begin_probe_capture, take_probe_capture, TOOLTIP_DELAY};
+
+    run_headless(|cx| {
+        let mut btn = Node::button("Probe Target");
+        btn.id = Some("probe-target".into());
+        btn.tooltip = Some("Probe Tooltip".into());
+        btn.style.descriptor.layout.width = LayoutSizing::Fixed(100.0);
+        btn.style.descriptor.layout.height = LayoutSizing::Fixed(36.0);
+
+        let mounted = Arc::new(Mutex::new(btn));
+        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 400.0, 300.0);
+        driver.draw_frame();
+
+        begin_probe_capture();
+
+        let center = poodle_gpui_node_backend::bounds_for("probe-target")
+            .expect("bounds for probe-target")
+            .center();
+
+        driver.pointer_hover(center);
+        driver.advance_clock(TOOLTIP_DELAY);
+        driver.draw_frame();
+
+        let channels = take_probe_capture();
+        assert!(
+            channels.contains(&"tooltip.projection.received"),
+            "must emit tooltip.projection.received: {channels:?}"
+        );
+        assert!(
+            channels.contains(&"tooltip.lifecycle.pending"),
+            "must emit tooltip.lifecycle.pending: {channels:?}"
+        );
+        assert!(
+            channels.contains(&"tooltip.lifecycle.shown"),
+            "must emit tooltip.lifecycle.shown: {channels:?}"
+        );
+
+        begin_probe_capture();
+        driver.pointer_hover(point(px(10.0), px(10.0)));
+        let channels = take_probe_capture();
+        assert!(
+            channels.contains(&"tooltip.lifecycle.hidden"),
+            "must emit tooltip.lifecycle.hidden on leave: {channels:?}"
+        );
+    });
+}

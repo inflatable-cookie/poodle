@@ -202,6 +202,8 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         let tab_index = node.a11y.tab_index;
         let node_focusable = node.interaction.focusable;
         let painted_id = input_text::painted_key(node, &id);
+        let focus_tooltip = node.tooltip.clone();
+        let focus_disabled = node.interaction.disabled;
         el = el.child(
             gpui::canvas(
                 move |_bounds, window, cx| {
@@ -286,6 +288,17 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
                         }
                         if let Some(handler) = &on_focus_change {
                             handler(now);
+                        }
+                        if let Some(tooltip_text) =
+                            focus_tooltip.as_deref().filter(|text| !text.is_empty())
+                        {
+                            if !focus_disabled {
+                                if now {
+                                    crate::tooltip::on_focus_enter(window, cx, &id, tooltip_text);
+                                } else {
+                                    crate::tooltip::on_focus_departure(window, cx, &id);
+                                }
+                            }
                         }
                         cx.refresh_windows();
                     }
@@ -443,11 +456,40 @@ pub(super) fn apply_listeners(mut el: Stateful<Div>, node: &Node, id: &str) -> S
         .map(str::to_string)
     {
         record_probe_channel("tooltip.projection.received");
-        el = el.tooltip(move |_window, cx| {
-            AnyView::from(cx.new(|_| NodeTooltip {
-                text: SharedString::from(text.clone()),
-            }))
-        });
+        let target_id = id.to_owned();
+        let is_disabled = node.interaction.disabled;
+        let tooltip_text = text.clone();
+        el = el.child(
+            gpui::canvas(
+                move |bounds, window, _cx| {
+                    crate::tooltip::record_tooltip_target_paint(
+                        window,
+                        &target_id,
+                        &tooltip_text,
+                        bounds,
+                        is_disabled,
+                    );
+                },
+                |_, _, _, _| {},
+            )
+            .absolute()
+            .top(px(0.0))
+            .left(px(0.0))
+            .size_full(),
+        );
+
+        if !is_disabled {
+            let enter_id = id.to_owned();
+            let leave_id = id.to_owned();
+            let hover_text = text.clone();
+            el = el.on_hover(move |hovered: &bool, window: &mut Window, cx: &mut App| {
+                if *hovered {
+                    crate::tooltip::on_pointer_enter(window, cx, &enter_id, &hover_text);
+                } else {
+                    crate::tooltip::on_pointer_leave(window, cx, &leave_id);
+                }
+            });
+        }
     }
     // Non-focusable overlay members (option rows, disabled rows) must stop
     // the window host from taking focus on press. That blur otherwise runs
@@ -1135,25 +1177,6 @@ struct EmptyDragPreview;
 impl gpui::Render for EmptyDragPreview {
     fn render(&mut self, _window: &mut Window, _cx: &mut gpui::Context<Self>) -> impl IntoElement {
         div()
-    }
-}
-
-/// Native hover tooltip for `Node.tooltip`. GPUI's `.tooltip()` requires an
-/// `AnyView`; this is the smallest text view, not Poodle's Tooltip overlay.
-struct NodeTooltip {
-    text: SharedString,
-}
-
-impl gpui::Render for NodeTooltip {
-    fn render(&mut self, _window: &mut Window, _cx: &mut gpui::Context<Self>) -> impl IntoElement {
-        div()
-            .px(px(8.0))
-            .py(px(4.0))
-            .rounded(px(6.0))
-            .bg(gpui::hsla(0.0, 0.0, 0.12, 0.96))
-            .text_color(gpui::hsla(0.0, 0.0, 0.96, 1.0))
-            .text_sm()
-            .child(self.text.clone())
     }
 }
 

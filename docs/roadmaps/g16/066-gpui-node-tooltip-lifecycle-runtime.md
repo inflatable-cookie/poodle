@@ -1,17 +1,28 @@
 # g16.066 — GPUI Node Tooltip Lifecycle Runtime
 
-Status: queued — launch after `g16.062` merges
+Status: implementation-complete — PR pending orchestrator review
 Type: shared native backend repair
 Opened: 2026-09-02
+Implemented: 2026-09-03
 Depends on: current `Node.tooltip` contract; `g16.062` only for merge ordering
 Governing refs: `nucleus-gpui-parity-programme.md`,
 `065-tabs-native-tooltip-parity.md`, `../../contracts/components/tooltip.md`
+Log: `../../logs/2026-09/20260903-g16-066-gpui-node-tooltip-lifecycle-runtime.md`
+PR: #171
 
 ## Goal
 
 Give every non-empty `Node.tooltip` one Poodle-owned GPUI lifecycle: show after
 300ms, hide on pointer leave, focus departure, Escape, disablement, removal,
 teardown, or supersession. Keep the existing string field and component APIs.
+
+## Outcome
+
+`poodle-gpui-node-backend` no longer maps `Node.tooltip` through GPUI 0.2.2
+`.tooltip()`. One window-keyed runtime owns the 300ms timer, generation
+supersession, paint-authority sweep, and overlay bubble. Empty strings stay
+inert. IconButton and SegmentedControl keep their tooltip text and ordinary
+activation/focus behavior. No public Node or component API changed.
 
 ## Fixed Boundary
 
@@ -46,15 +57,18 @@ and window key path are the authority. Stale timers and events are inert.
 | Terminal paths converge | leave only cancels pending | visible/focused cases leak |
 | Generation is exact | A timer fires after B hover | A never paints |
 | Paint is authority | target removed while pending | no late tooltip |
-| Window ownership is isolated | hover in two windows | independent lifecycle receipts |
+| Window ownership is isolated | hover in two live windows | overlapping mounts; B's frame does not cancel A's pending/visible tooltip |
+| Teardown is production | leaked close bindings / reset-as-close | `remove_window` clears pending and visible; binding and runtime counts return to baseline; bounded probe records teardown |
 | Existing consumers survive | fix only Tabs | IconButton and SegmentedControl regressions stay green |
 
 ## Writable Scope
 
 `poodle-gpui-node-backend` tooltip interaction/paint/runtime, focused backend
 tests, mounted GPUI tooltip fixtures, Tooltip contract wording if needed, this
-card, one log, and new papercuts. No Tabs projection, public Node field, web
-Tooltip behavior, Nucleus source, visual lab, Jetstream, workflow, release, or
+card, one log, and new papercuts. Nucleus receipt/manifest/ledger refresh is
+allowed only after this runtime is committed, via the real
+`effigy regressions:native` selector. No Tabs projection, public Node field,
+web Tooltip behavior, visual lab, Jetstream, workflow, release, or
 windowed/native-visual selector.
 
 ## Validation
