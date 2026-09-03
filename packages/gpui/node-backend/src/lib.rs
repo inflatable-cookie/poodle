@@ -219,6 +219,7 @@ pub fn reset_element_ids() {
 pub fn reset_focus_registry() {
     FOCUS_HANDLES.with(|handles| handles.borrow_mut().clear());
     FOCUS_STATES.with(|states| states.borrow_mut().clear());
+    PAINTED_FOCUS_IDENTITIES.with(|ids| ids.borrow_mut().clear());
     FOCUSED_FIELD.with(|field| *field.borrow_mut() = None);
     interaction::reset_continuous_value_session();
     tooltip::reset_tooltip_registry();
@@ -755,6 +756,11 @@ thread_local! {
         RefCell::new(std::collections::HashMap::new());
     static FOCUS_STATES: RefCell<std::collections::HashMap<String, bool>> =
         RefCell::new(std::collections::HashMap::new());
+    /// Tracked focus identities that reached paint in this frame. Handles
+    /// survive the next build so they can be reattached, then disappear at
+    /// frame end if their owning node did not paint.
+    static PAINTED_FOCUS_IDENTITIES: RefCell<std::collections::HashSet<String>> =
+        RefCell::new(std::collections::HashSet::new());
     // What the ring paint pass last painted per element id. Written only from
     // the real paint pass; absent means no ring is on screen.
     static PAINTED_RINGS: RefCell<std::collections::HashMap<String, PaintedRing>> =
@@ -845,6 +851,22 @@ pub(crate) fn clear_painted_ring(id: &str) {
 /// [`layers::overlay_frame_begin`] beside `ELEMENT_BOUNDS`.
 pub(crate) fn clear_painted_rings() {
     PAINTED_RINGS.with(|r| r.borrow_mut().clear());
+}
+
+pub(crate) fn prepare_focus_identity_frame() {
+    PAINTED_FOCUS_IDENTITIES.with(|ids| ids.borrow_mut().clear());
+}
+
+pub(crate) fn sweep_unpainted_focus_identities() {
+    let painted = PAINTED_FOCUS_IDENTITIES.with(|ids| ids.borrow().clone());
+    FOCUS_HANDLES.with(|handles| handles.borrow_mut().retain(|id, _| painted.contains(id)));
+    FOCUS_STATES.with(|states| states.borrow_mut().retain(|id, _| painted.contains(id)));
+    FOCUSED_FIELD.with(|focused| {
+        let mut focused = focused.borrow_mut();
+        if focused.as_deref().is_some_and(|id| !painted.contains(id)) {
+            *focused = None;
+        }
+    });
 }
 
 /// The focus handle of whatever holds focus right now.

@@ -96,6 +96,7 @@ pub fn overlay_frame_begin() {
     // must not survive it.
     crate::clear_painted_rings();
     super::clear_painted_inset_shadows();
+    crate::prepare_focus_identity_frame();
     crate::interaction::prepare_continuous_value_frame();
 }
 
@@ -115,6 +116,7 @@ pub fn overlay_frame_begin_for(handle: AnyWindowHandle, cx: &mut App) {
 /// next-frame delay.
 pub fn overlay_frame_end() {
     FOCUS_REQUESTS.with(|requests| requests.borrow_mut().clear());
+    crate::sweep_unpainted_focus_identities();
     crate::interaction::sweep_lost_continuous_host();
 }
 

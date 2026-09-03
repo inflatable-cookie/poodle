@@ -3,7 +3,7 @@
 //!
 //! Ported from: `packages/jetstream/components/src/toast_host.rs`.
 
-use poodle_node::{LayoutDirection, LayoutSizing, Node, NodePosition};
+use poodle_node::{LayoutDirection, LayoutSizing, MainAxisAlignment, Node, NodePosition};
 use poodle_specs::{ToastHostPlacement, ToastHostSpec, ToastPosition, ToastStackSpec};
 
 use crate::context::RenderContext;
@@ -53,6 +53,12 @@ pub fn toast_host(
         let s = &mut container.style;
         // Explicit Row (see switch.rs).
         s.descriptor.layout.direction = LayoutDirection::Row;
+        s.descriptor.layout.alignment.main = match spec.placement {
+            ToastHostPlacement::BottomEnd | ToastHostPlacement::TopEnd => MainAxisAlignment::End,
+            ToastHostPlacement::BottomStart | ToastHostPlacement::TopStart => {
+                MainAxisAlignment::Start
+            }
+        };
         s.descriptor.layout.width = LayoutSizing::Fixed(width);
         s.max_width = Some(width);
     }
@@ -99,7 +105,13 @@ pub fn toast_host(
     forwarded.density = spec.density;
     forwarded.aria_label = (!spec.aria_label.is_empty()).then(|| spec.aria_label.clone());
 
-    container.child(toast_stack(&forwarded, ctx, handlers))
+    let mut stack = toast_stack(&forwarded, ctx, handlers);
+    // ToastStack is independently usable as a corner-mounted overlay, but
+    // inside ToastHost the host is the sole placement owner. Keep the stack
+    // in flow so it gives the host its height and does not apply a second,
+    // density-derived inset.
+    stack.position = NodePosition::InFlow;
+    container.child(stack)
 }
 
 #[cfg(test)]

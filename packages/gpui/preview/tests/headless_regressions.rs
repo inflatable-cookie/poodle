@@ -29274,11 +29274,18 @@ fn toast_host_exact_tones_composition_axes_and_focus_reach_mounted_paint() {
                 Some("comfortable")
             );
             assert_eq!(
-                poodle_gpui_node_backend::bounds_for(&action_id)
-                    .expect("mounted Button bounds")
-                    .size
-                    .height,
-                px(44.0)
+                action.style.layout.height,
+                LayoutSizing::Fixed(poodle_render::presentation::rem_to_px(2.75))
+            );
+            assert_eq!(
+                action.style.layout.spacing.padding.left,
+                theme_provider.resolve_space("space.control.x")
+                    + poodle_render::presentation::rem_to_px(0.125)
+            );
+            assert_eq!(
+                action.style.layout.spacing.padding.right,
+                theme_provider.resolve_space("space.control.x")
+                    + poodle_render::presentation::rem_to_px(0.125)
             );
         }
 

@@ -130,6 +130,11 @@ pub fn toast_stack(
         }
     };
     let item_gap = ctx.theme().resolve_space(spec.gap_token());
+    let dismiss_reserve = rem_to_px(match density {
+        ControlDensity::Compact => 1.25,
+        ControlDensity::Default => 1.5,
+        ControlDensity::Comfortable => 1.75,
+    });
 
     let elevated = ctx.theme().resolve_color(spec.fill_token());
     let border_default = ctx.theme().resolve_color(spec.border_token());
@@ -205,6 +210,7 @@ pub fn toast_stack(
 
         // Leading tone accent bar — contract §8: 0.1875rem (3px), full height.
         let mut accent_bar = Node::container();
+        accent_bar.runtime_id = scoped(instance_id, &format!("toast:{}:accent", toast.id));
         accent_bar.position = NodePosition::Absolute {
             top: Some(0.0),
             right: None,
@@ -360,7 +366,7 @@ pub fn toast_stack(
             s.descriptor.shadow = Some(poodle_tokens::typed::semantic::ELEVATION_OVERLAY);
             let padc = &mut s.descriptor.layout.spacing.padding;
             padc.left = pad;
-            padc.right = pad + rem_to_px(1.5);
+            padc.right = pad + dismiss_reserve;
             padc.top = pad;
             padc.bottom = pad;
             s.descriptor.layout.direction = LayoutDirection::Row;
@@ -471,8 +477,10 @@ mod tests {
 
         for (id, tone) in tones {
             let row = node
-                .find(&|node| node.runtime_id.as_deref()
-                    == Some(format!("toast-host:tokens:toast:{id}").as_str()))
+                .find(&|node| {
+                    node.runtime_id.as_deref()
+                        == Some(format!("toast-host:tokens:toast:{id}").as_str())
+                })
                 .unwrap_or_else(|| panic!("{id} row"));
             let tone_color = theme.resolve_color(spec.tone_color(&tone));
             let fill = mix_srgb(tone_color, elevated, 0.12);
@@ -517,20 +525,42 @@ mod tests {
             ));
 
             let action = row
-                .find(&|node| node.runtime_id.as_deref()
-                    == Some(format!("toast-host:tokens:toast:{id}:action").as_str()))
+                .find(&|node| {
+                    node.runtime_id.as_deref()
+                        == Some(format!("toast-host:tokens:toast:{id}:action").as_str())
+                })
                 .expect("secondary action Button");
             assert!(matches!(action.kind, NodeKind::Button { .. }));
-            assert_eq!(action.roles.get("dependency").map(String::as_str), Some("button"));
-            assert_eq!(action.roles.get("variant").map(String::as_str), Some("secondary"));
+            assert_eq!(
+                action.roles.get("dependency").map(String::as_str),
+                Some("button")
+            );
+            assert_eq!(
+                action.roles.get("variant").map(String::as_str),
+                Some("secondary")
+            );
             assert_eq!(action.roles.get("size").map(String::as_str), Some("lg"));
             assert_eq!(
                 action.roles.get("density").map(String::as_str),
                 Some("comfortable")
             );
+            assert_eq!(
+                action.style.descriptor.layout.height,
+                LayoutSizing::Fixed(rem_to_px(2.75))
+            );
+            assert_eq!(
+                action.style.descriptor.layout.spacing.padding.left,
+                theme.resolve_space("space.control.x") + rem_to_px(0.125)
+            );
+            assert_eq!(
+                action.style.descriptor.layout.spacing.padding.right,
+                theme.resolve_space("space.control.x") + rem_to_px(0.125)
+            );
             let actions = row
-                .find(&|node| node.runtime_id.as_deref()
-                    == Some(format!("toast-host:tokens:toast:{id}:actions").as_str()))
+                .find(&|node| {
+                    node.runtime_id.as_deref()
+                        == Some(format!("toast-host:tokens:toast:{id}:actions").as_str())
+                })
                 .expect("actions wrapper");
             assert_eq!(
                 actions.style.descriptor.layout.spacing.margin.top,
@@ -538,8 +568,10 @@ mod tests {
             );
 
             let dismiss = row
-                .find(&|node| node.runtime_id.as_deref()
-                    == Some(format!("toast-host:tokens:toast:{id}:dismiss").as_str()))
+                .find(&|node| {
+                    node.runtime_id.as_deref()
+                        == Some(format!("toast-host:tokens:toast:{id}:dismiss").as_str())
+                })
                 .expect("dismiss control");
             assert_eq!(
                 dismiss.style.focus_ring,
