@@ -119,6 +119,8 @@ stay maintained; backend admission is not part of the first card.
 82. [082 — Nucleus AgentChatInput M1 receipt](082-nucleus-agent-chat-input-m1.md) — complete; merged in PR #188 after preparation repair and one final receipt-claim correction with production composer execution and one M1 receipt
 83. [083 — Nucleus AgentTranscript M1 receipt](083-nucleus-agent-transcript-m1.md) — complete; merged in PR #190 after two preparation repair rounds and exact-head M1 review with real posture/dependency structure, mounted record geometry, and one M1 receipt
 84. [084 — Nucleus AgentQuestion M1 receipt](084-nucleus-agent-question-m1.md) — preparation-ready; build one production mounted question proof in parallel, then pause before shared receipt files
+85. [085 — Nucleus ModelPicker M1 receipt](085-nucleus-model-picker-m1.md) — preparation-ready; build one production mounted picker proof in parallel, then pause before shared receipt files
+86. [086 — Nucleus StatusIndicator M1 receipt](086-nucleus-status-indicator-m1.md) — preparation-ready; build one production mounted status proof in parallel, then pause before shared receipt files
 
 ## Parallel Continuation
 

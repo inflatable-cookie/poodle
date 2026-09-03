@@ -68,7 +68,8 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: finalize and review `g16.084` while the
+  - Next move: finalize and review `g16.084` while `g16.085` and `g16.086`
+    prepare independent production proofs without touching shared receipt files; the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.
