@@ -46,9 +46,10 @@ Updated: 2026-09-03
   - Aim: use one current active-cohort evidence ledger to select and close
     bounded semantic and mounted-behavior gaps without inventing another
     conformance authority
-  - Ready frontier: complete preparation review for `g16.082` AgentChatInput,
-    then finalize it against the merged 18/29 cohort identity. Receipt emission,
-    cohort refresh, exact-head review, and merge remain serial.
+  - Ready frontier: finalize `g16.082` AgentChatInput against the merged 18/29
+    cohort identity. Prepare `g16.083` AgentTranscript and `g16.084`
+    AgentQuestion in parallel, but pause both before shared evidence. Receipt
+    emission, cohort refresh, exact-head review, and merge remain serial.
     `g16.045`–`g16.050` and `g16.053`–`g16.061` are complete; the immutable
     `0.3.0` candidate merged in PR #165 without release authority.
   - Independent completed lane: `g16.060` paired web Tabs controlled-panel
@@ -65,7 +66,8 @@ Updated: 2026-09-03
     publication/adoption, CS20, keyboard geometry, GPUI accessibility,
     Jetstream, and the separate holistic promotion batch retain the gates
     recorded in `g16/component-continuation-runway.md`.
-  - Next move: review and serially finalize `g16.082` while the
+  - Next move: review and serially finalize `g16.082`; prepare `g16.083` and
+    `g16.084` while the
     dedicated visual lab is bootstrapped under separate repository authority;
     retain tag, publication, workflow, and sibling-adoption authority with the
     orchestrator.
