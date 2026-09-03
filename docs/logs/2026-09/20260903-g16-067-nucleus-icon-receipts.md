@@ -13,6 +13,7 @@ Governing refs: `docs/roadmaps/g16/nucleus-gpui-parity-programme.md`,
 Branch: `feature/g16-067-nucleus-icon-receipts`
 Worktree: `/Users/tom/.paseo/worktrees/1ugbsx1t/g16-067-nucleus-icon-receipts`
 Planning base: `f4a4c80d2` (`origin/main`)
+Worker PR: https://github.com/inflatable-cookie/poodle/pull/173
 
 ## Outcome
 
