@@ -15,7 +15,7 @@ use std::sync::Arc;
 
 use poodle_node::{
     CrossAxisAlignment, LayoutDirection, LayoutOverflow, LayoutSizing, MainAxisAlignment, Node,
-    StylePatch,
+    NodePosition, StylePatch,
 };
 use poodle_specs::{
     CollapseDirection, CollapseToggleSpec, Orientation, ResizeHandleSpec, SplitOrientation,
@@ -231,7 +231,24 @@ pub fn split_view(
             });
         }
 
-        centered(cluster_dir).child(handle).child(cluster)
+        let mut d = Node::container();
+        d.position = NodePosition::Relative;
+        if is_horizontal {
+            d.style.descriptor.layout.direction = LayoutDirection::Column;
+            d.style.fill_height = true;
+            d.style.self_stretch = true;
+        } else {
+            d.style.descriptor.layout.direction = LayoutDirection::Row;
+            d.style.fill_width = true;
+            d.style.self_stretch = true;
+        }
+        cluster.position = NodePosition::Absolute {
+            top: None,
+            left: None,
+            right: None,
+            bottom: None,
+        };
+        d.child(handle).child(cluster)
     } else {
         handle
     };
@@ -330,5 +347,229 @@ mod tests {
             assert_eq!(cluster.style.descriptor.opacity, 1.0);
             assert!(cluster.style.hover.is_none());
         }
+    }
+
+    #[test]
+    fn horizontal_and_vertical_root_and_pane_layout_postures() {
+        let horizontal_spec = SplitViewSpec::new("split-h", SplitOrientation::Horizontal)
+            .with_ratio(0.35)
+            .with_aria_label("Horizontal split");
+        let h_node = render(&horizontal_spec);
+        assert_eq!(
+            h_node.style.descriptor.layout.direction,
+            LayoutDirection::Row
+        );
+        assert!(h_node.style.fill_width);
+        assert!(h_node.style.fill_height);
+        assert_eq!(
+            h_node.style.descriptor.layout.width,
+            LayoutSizing::Grow
+        );
+        assert_eq!(
+            h_node.a11y.label.as_deref(),
+            Some("Horizontal split")
+        );
+
+        let p_pane = &h_node.children[0];
+        assert_eq!(p_pane.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert!(p_pane.style.fill_height);
+        assert!(!p_pane.style.fill_width);
+        assert_eq!(p_pane.style.min_width, Some(0.0));
+        assert_eq!(p_pane.style.min_height, Some(0.0));
+        assert_eq!(p_pane.style.descriptor.layout.overflow_x, LayoutOverflow::Hidden);
+        assert_eq!(p_pane.style.descriptor.layout.overflow_y, LayoutOverflow::Hidden);
+        assert_eq!(p_pane.style.flex_grow, Some(1.0));
+        assert_eq!(p_pane.style.flex_basis_pct, Some(0.35));
+
+        let s_pane = &h_node.children[2];
+        assert_eq!(s_pane.style.descriptor.layout.direction, LayoutDirection::Row);
+        assert!(s_pane.style.fill_height);
+        assert_eq!(s_pane.style.flex_grow, Some(1.0));
+        assert!((s_pane.style.flex_basis_pct.unwrap() - 0.65).abs() < 1e-5);
+
+        let vertical_spec = SplitViewSpec::new("split-v", SplitOrientation::Vertical)
+            .with_ratio(0.4);
+        let v_node = render(&vertical_spec);
+        assert_eq!(
+            v_node.style.descriptor.layout.direction,
+            LayoutDirection::Column
+        );
+        assert!(v_node.style.fill_width);
+        assert!(v_node.style.fill_height);
+        assert_eq!(v_node.children[0].style.fill_width, true);
+        assert_eq!(v_node.children[0].style.flex_basis_pct, Some(0.4));
+        assert!((v_node.children[2].style.flex_basis_pct.unwrap() - 0.6).abs() < 1e-5);
+    }
+
+    #[test]
+    fn pane_min_sizes_apply_on_matching_axis() {
+        let h_spec = SplitViewSpec::new("split-min-h", SplitOrientation::Horizontal)
+            .with_min_primary_size(120.0)
+            .with_min_secondary_size(180.0);
+        let h_node = render(&h_spec);
+        assert_eq!(h_node.children[0].style.min_width, Some(120.0));
+        assert_eq!(h_node.children[2].style.min_width, Some(180.0));
+
+        let v_spec = SplitViewSpec::new("split-min-v", SplitOrientation::Vertical)
+            .with_min_primary_size(100.0)
+            .with_min_secondary_size(160.0);
+        let v_node = render(&v_spec);
+        assert_eq!(v_node.children[0].style.min_height, Some(100.0));
+        assert_eq!(v_node.children[2].style.min_height, Some(160.0));
+    }
+
+    #[test]
+    fn fixed_pane_sizes_and_collapses() {
+        let fixed_p = SplitViewSpec::new("fixed-p", SplitOrientation::Horizontal)
+            .with_primary_size(240.0);
+        let node_p = render(&fixed_p);
+        assert_eq!(
+            node_p.children[0].style.descriptor.layout.width,
+            LayoutSizing::Fixed(240.0)
+        );
+        assert_eq!(node_p.children[2].style.flex_grow, Some(1.0));
+
+        let fixed_s = SplitViewSpec::new("fixed-s", SplitOrientation::Vertical)
+            .with_secondary_size(300.0);
+        let node_s = render(&fixed_s);
+        assert_eq!(
+            node_s.children[2].style.descriptor.layout.height,
+            LayoutSizing::Fixed(300.0)
+        );
+        assert_eq!(node_s.children[0].style.flex_grow, Some(1.0));
+
+        let collapsed_p = SplitViewSpec::new("collapsed-p", SplitOrientation::Horizontal)
+            .with_primary_collapsed(true);
+        let node_cp = render(&collapsed_p);
+        assert_eq!(
+            node_cp.children[0].style.descriptor.layout.width,
+            LayoutSizing::Fixed(0.0)
+        );
+
+        let collapsed_s = SplitViewSpec::new("collapsed-s", SplitOrientation::Vertical)
+            .with_secondary_collapsed(true);
+        let node_cs = render(&collapsed_s);
+        assert_eq!(
+            node_cs.children[2].style.descriptor.layout.height,
+            LayoutSizing::Fixed(0.0)
+        );
+    }
+
+    #[test]
+    fn disabled_split_dims_root_and_passes_disabled_to_handle_and_toggles() {
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let disabled_spec = toggling_spec().with_disabled(true);
+        let node = split_view(&disabled_spec, &ctx, None, None, SplitViewHandlers::default());
+        assert_eq!(
+            node.style.descriptor.opacity,
+            ctx.theme().resolve_opacity("state.opacity.disabled")
+        );
+        let divider = &node.children[1];
+        let handle = &divider.children[0];
+        assert!(handle.interaction.disabled);
+        let cluster = &divider.children[1];
+        let primary_toggle = &cluster.children[0];
+        assert!(primary_toggle.interaction.disabled);
+    }
+
+    #[test]
+    fn toggle_chevron_directions_by_orientation() {
+        use poodle_node::NodeKind;
+
+        let h_node = render(&toggling_spec());
+        let h_cluster = cluster(&h_node);
+        let h_primary_icon = &h_cluster.children[0].children[0];
+        let h_secondary_icon = &h_cluster.children[1].children[0];
+        match &h_primary_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "chevron-left");
+                assert_eq!(*size, 12.0);
+            }
+            _ => panic!("expected icon kind"),
+        }
+        match &h_secondary_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "chevron-right");
+                assert_eq!(*size, 12.0);
+            }
+            _ => panic!("expected icon kind"),
+        }
+
+        let v_spec = SplitViewSpec::new("split-v", SplitOrientation::Vertical)
+            .with_show_collapse_primary(true)
+            .with_show_collapse_secondary(true);
+        let v_node = render(&v_spec);
+        let v_cluster = cluster(&v_node);
+        let v_primary_icon = &v_cluster.children[0].children[0];
+        let v_secondary_icon = &v_cluster.children[1].children[0];
+        match &v_primary_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "chevron-up");
+                assert_eq!(*size, 12.0);
+            }
+            _ => panic!("expected icon kind"),
+        }
+        match &v_secondary_icon.kind {
+            NodeKind::Icon { name, size } => {
+                assert_eq!(name, "chevron-down");
+                assert_eq!(*size, 12.0);
+            }
+            _ => panic!("expected icon kind"),
+        }
+    }
+
+    #[test]
+    fn handlers_are_forwarded_to_handle_and_toggles() {
+        use std::sync::Mutex;
+        let resize_events = Arc::new(Mutex::new(Vec::<(ResizePhase, f32)>::new()));
+        let p_collapse = Arc::new(Mutex::new(Vec::<bool>::new()));
+        let s_collapse = Arc::new(Mutex::new(Vec::<bool>::new()));
+
+        let resize_sink = Arc::clone(&resize_events);
+        let p_sink = Arc::clone(&p_collapse);
+        let s_sink = Arc::clone(&s_collapse);
+
+        let theme = theme();
+        let ctx = RenderContext::new(&theme);
+        let node = split_view(
+            &toggling_spec(),
+            &ctx,
+            None,
+            None,
+            SplitViewHandlers {
+                on_resize: Some(Arc::new(move |phase, delta| {
+                    resize_sink.lock().unwrap().push((phase, delta));
+                })),
+                on_primary_collapse: Some(Arc::new(move |next| {
+                    p_sink.lock().unwrap().push(next);
+                })),
+                on_secondary_collapse: Some(Arc::new(move |next| {
+                    s_sink.lock().unwrap().push(next);
+                })),
+            },
+        );
+
+        let divider = &node.children[1];
+        let handle = &divider.children[0];
+        let key_handler = handle.interaction.on_key.as_ref().expect("on_key");
+        key_handler(poodle_node::NodeKey::ArrowRight, poodle_node::NodeModifiers::default());
+        assert_eq!(
+            *resize_events.lock().unwrap(),
+            [
+                (ResizePhase::Start, 0.0),
+                (ResizePhase::Move, 8.0),
+                (ResizePhase::End, 0.0)
+            ]
+        );
+
+        let cluster = &divider.children[1];
+        let p_toggle = &cluster.children[0];
+        p_toggle.interaction.on_activate.as_ref().expect("p_toggle on_activate")();
+        assert_eq!(*p_collapse.lock().unwrap(), [true]);
+
+        let s_toggle = &cluster.children[1];
+        s_toggle.interaction.on_activate.as_ref().expect("s_toggle on_activate")();
+        assert_eq!(*s_collapse.lock().unwrap(), [true]);
     }
 }

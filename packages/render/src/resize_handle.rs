@@ -164,6 +164,7 @@ pub fn resize_handle(
                 let s = &mut root.style;
                 s.descriptor.layout.width = LayoutSizing::Fixed(visual_size);
                 s.self_stretch = true;
+                s.fill_height = true;
                 s.flex_shrink_zero = true;
                 s.descriptor.layout.direction = LayoutDirection::Column;
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;
@@ -198,6 +199,7 @@ pub fn resize_handle(
                 let s = &mut root.style;
                 s.descriptor.layout.height = LayoutSizing::Fixed(visual_size);
                 s.self_stretch = true;
+                s.fill_width = true;
                 s.flex_shrink_zero = true;
                 s.descriptor.layout.direction = LayoutDirection::Row;
                 s.descriptor.layout.alignment.cross = CrossAxisAlignment::Center;

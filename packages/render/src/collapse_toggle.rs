@@ -9,9 +9,10 @@ use poodle_node::{
     CrossAxisAlignment, CursorHint, FocusRing, LayoutDirection, MainAxisAlignment, Node, NodeRole,
     StylePatch,
 };
-use poodle_specs::CollapseToggleSpec;
+use poodle_specs::{CollapseToggleSpec, IconSpec};
 
 use crate::context::RenderContext;
+use crate::icon::icon;
 use crate::presentation::rem_to_px;
 
 pub fn collapse_toggle(
@@ -24,7 +25,6 @@ pub fn collapse_toggle(
     // size — never a role-resolved value.
     let base_size = ctx.base_size(spec.size);
     let density = ctx.resolve_density(spec.density);
-    let icon_size = theme.resolve_space(spec.icon_size_token(base_size));
     let radius = theme.resolve_radius(spec.radius_token());
     let text_color = theme.resolve_color(spec.text_color_token());
 
@@ -51,7 +51,9 @@ pub fn collapse_toggle(
         s.line_height = Some(1.0);
     }
 
-    let mut chevron = Node::icon(spec.effective_icon_name(), icon_size);
+    let icon_spec = IconSpec::new(spec.effective_icon_name())
+        .with_size(spec.effective_icon_size(base_size));
+    let mut chevron = icon(&icon_spec, ctx);
     chevron.style.descriptor.text_color = Some(text_color);
     el = el.child(chevron);
 
