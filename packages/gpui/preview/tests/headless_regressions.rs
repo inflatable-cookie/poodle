@@ -16939,14 +16939,308 @@ fn label_host(id: &str) -> Arc<LabelRouting> {
     })
 }
 
-fn painted_label_input(mounted: &Arc<Mutex<Node>>, id: &str) -> String {
-    let tree = mounted.lock().expect("mount");
-    tree.find(&|node| node.id.as_deref() == Some(id))
-        .and_then(|node| match &node.kind {
-            NodeKind::Input { value, .. } => Some(value.clone()),
-            _ => None,
+#[derive(Clone)]
+struct MountedLabelState {
+    name: String,
+    value: String,
+    draft: String,
+    selection: (usize, usize),
+    editing: bool,
+    request_focus: bool,
+    present: bool,
+    disabled: bool,
+    activation: poodle_specs::EditableLabelActivation,
+    select_on_focus: bool,
+    max_length: Option<usize>,
+    aria_label: Option<String>,
+    empty_text: Option<String>,
+    placeholder: Option<String>,
+}
+
+impl MountedLabelState {
+    fn new(name: &str, value: &str) -> Self {
+        Self {
+            name: name.to_owned(),
+            value: value.to_owned(),
+            draft: value.to_owned(),
+            selection: (0, 0),
+            editing: false,
+            request_focus: false,
+            present: true,
+            disabled: false,
+            activation: poodle_specs::EditableLabelActivation::DoubleClick,
+            select_on_focus: true,
+            max_length: None,
+            aria_label: None,
+            empty_text: None,
+            placeholder: None,
+        }
+    }
+
+    fn editing(mut self, draft: &str) -> Self {
+        self.editing = true;
+        self.request_focus = true;
+        self.draft = draft.to_owned();
+        let end = draft.chars().count();
+        self.selection = (end, end);
+        self
+    }
+
+    fn activation(mut self, activation: poodle_specs::EditableLabelActivation) -> Self {
+        self.activation = activation;
+        self
+    }
+
+    fn select_on_focus(mut self, select: bool) -> Self {
+        self.select_on_focus = select;
+        self
+    }
+
+    fn disabled(mut self) -> Self {
+        self.disabled = true;
+        self
+    }
+
+    fn limited(mut self, max_length: usize) -> Self {
+        self.max_length = Some(max_length);
+        self
+    }
+
+}
+
+struct MountedLabelHost {
+    labels: Mutex<Vec<MountedLabelState>>,
+    log: EventLog,
+    mounted_nodes: Mutex<std::collections::HashMap<String, Node>>,
+}
+
+impl MountedLabelHost {
+    fn new(labels: Vec<MountedLabelState>) -> Arc<Self> {
+        Arc::new(Self {
+            labels: Mutex::new(labels),
+            log: event_log(),
+            mounted_nodes: Mutex::new(std::collections::HashMap::new()),
         })
-        .expect("editing label paints an input")
+    }
+
+    fn label(&self, name: &str) -> MountedLabelState {
+        self.labels
+            .lock()
+            .expect("labels")
+            .iter()
+            .find(|label| label.name == name)
+            .cloned()
+            .unwrap_or_else(|| panic!("{name} label state exists"))
+    }
+
+    fn take_for_render(&self, name: &str) -> MountedLabelState {
+        let mut labels = self.labels.lock().expect("labels");
+        let label = labels
+            .iter_mut()
+            .find(|label| label.name == name)
+            .unwrap_or_else(|| panic!("{name} label state exists"));
+        let render = label.clone();
+        label.request_focus = false;
+        render
+    }
+
+    fn mutate(
+        &self,
+        name: &str,
+        entry: Option<String>,
+        mutate: impl FnOnce(&mut MountedLabelState),
+    ) {
+        let mut labels = self.labels.lock().expect("labels");
+        let label = labels
+            .iter_mut()
+            .find(|label| label.name == name)
+            .unwrap_or_else(|| panic!("{name} label state exists"));
+        mutate(label);
+        drop(labels);
+        if let Some(entry) = entry {
+            note(&self.log, entry);
+        }
+    }
+
+    fn stash_node(&self, name: &str, node: Node) {
+        self.mounted_nodes
+            .lock()
+            .expect("mounted nodes")
+            .insert(name.to_owned(), node);
+    }
+
+    fn mounted_node(&self, name: &str) -> Node {
+        self.mounted_nodes
+            .lock()
+            .expect("mounted nodes")
+            .get(name)
+            .cloned()
+            .unwrap_or_else(|| panic!("{name} mounted node exists"))
+    }
+
+    fn take_log(&self) -> Vec<String> {
+        take_events(&self.log)
+    }
+
+    fn set_present(&self, name: &str, present: bool) {
+        self.mutate(name, None, |label| label.present = present);
+    }
+}
+
+fn mounted_label_id(name: &str) -> String {
+    format!("poodle-editable-label-{name}")
+}
+
+fn mounted_label_element(host: &Arc<MountedLabelHost>, name: &str) -> gpui::AnyElement {
+    use gpui::IntoElement;
+    use node_compat::IntoCompatNode;
+
+    let state = host.take_for_render(name);
+    let mut spec = poodle_specs::EditableLabelSpec::new()
+        .with_value(&state.value)
+        .with_draft_value(state.editing.then_some(state.draft.clone()))
+        .with_editing(state.editing)
+        .with_disabled(state.disabled)
+        .with_activation_mode(state.activation)
+        .with_select_on_focus(state.select_on_focus)
+        .with_selection(state.selection.0, state.selection.1)
+        .with_request_focus(state.request_focus);
+    if let Some(max_length) = state.max_length {
+        spec = spec.with_max_length(max_length);
+    }
+    if let Some(aria_label) = &state.aria_label {
+        spec = spec.with_aria_label(aria_label);
+    }
+    if let Some(empty_text) = &state.empty_text {
+        spec = spec.with_empty_text(empty_text);
+    }
+    if let Some(placeholder) = &state.placeholder {
+        spec = spec.with_placeholder(placeholder);
+    }
+
+    let start_host = Arc::clone(host);
+    let start_name = name.to_owned();
+    let change_host = Arc::clone(host);
+    let change_name = name.to_owned();
+    let selection_host = Arc::clone(host);
+    let selection_name = name.to_owned();
+    let commit_host = Arc::clone(host);
+    let commit_name = name.to_owned();
+    let cancel_host = Arc::clone(host);
+    let cancel_name = name.to_owned();
+    let restore_host = Arc::clone(host);
+    let restore_name = name.to_owned();
+
+    let builder = node_compat::EditableLabel::from_spec(spec, &theme())
+        .with_id(name)
+        .on_edit_start(Arc::new(move || {
+            start_host.mutate(
+                &start_name,
+                Some(format!("{start_name}/start")),
+                |label| {
+                    label.editing = true;
+                    label.draft = label.value.clone();
+                    let end = label.draft.chars().count();
+                    label.selection = if label.select_on_focus { (0, end) } else { (end, end) };
+                    label.request_focus = true;
+                },
+            );
+        }))
+        .on_change(Arc::new(move |value: &str| {
+            change_host.mutate(
+                &change_name,
+                Some(format!("{change_name}/change:{value}")),
+                |label| label.draft = value.to_owned(),
+            );
+        }))
+        .on_selection_change(Arc::new(move |start: usize, end: usize| {
+            selection_host.mutate(&selection_name, None, |label| {
+                label.selection = (start, end)
+            });
+        }))
+        .on_commit(Arc::new(move |value: &str, previous: &str| {
+            commit_host.mutate(
+                &commit_name,
+                Some(format!("{commit_name}/commit:{value}:{previous}")),
+                |label| {
+                    if !label.editing {
+                        return;
+                    }
+                    label.editing = false;
+                    label.value = value.to_owned();
+                    label.draft = value.to_owned();
+                    let end = label.value.chars().count();
+                    label.selection = (end, end);
+                },
+            );
+        }))
+        .on_cancel(Arc::new(move || {
+            cancel_host.mutate(
+                &cancel_name,
+                Some(format!("{cancel_name}/cancel")),
+                |label| {
+                    if !label.editing {
+                        return;
+                    }
+                    label.editing = false;
+                    label.draft = label.value.clone();
+                    let end = label.value.chars().count();
+                    label.selection = (end, end);
+                },
+            );
+        }))
+        .on_restore_display_focus(Arc::new(move || {
+            restore_host.mutate(
+                &restore_name,
+                Some(format!("{restore_name}/restore")),
+                |label| label.request_focus = true,
+            );
+        }));
+
+    let node = builder.clone().into_compat_node();
+    host.stash_node(name, node);
+    builder.into_element()
+}
+
+fn mounted_label_container(host: &Arc<MountedLabelHost>) -> gpui::AnyElement {
+    use gpui::{div, px, IntoElement, ParentElement, Styled};
+
+    let names: Vec<String> = host
+        .labels
+        .lock()
+        .expect("labels")
+        .iter()
+        .filter(|label| label.present)
+        .map(|label| label.name.clone())
+        .collect();
+    let mut root = div()
+        .id("editable-label-receipt")
+        .flex()
+        .flex_col()
+        .gap(px(12.0))
+        .w(px(360.0));
+    for name in names {
+        root = root.child(mounted_label_element(host, &name));
+    }
+    let after = node_compat::TextInput::from_spec(
+        poodle_specs::TextInputSpec::new()
+            .with_id("editable-label-after")
+            .with_aria_label("After labels"),
+        &theme(),
+    )
+    .into_element();
+    root.child(after).into_any_element()
+}
+
+fn mount_labels<'a>(
+    cx: &'a mut TestAppContext,
+    host: &Arc<MountedLabelHost>,
+    height: f32,
+) -> HeadlessDriver<'a> {
+    let host = Arc::clone(host);
+    let build: Rc<dyn Fn() -> gpui::AnyElement> =
+        Rc::new(move || mounted_label_container(&host));
+    HeadlessDriver::new_element_in_box(cx, build, 420.0, height)
 }
 
 // ── A childless editable input ─────────────────────────────────────────────
@@ -18637,39 +18931,421 @@ fn editable_label_commits_on_enter_and_once_through_the_blur_tab_causes() {
     });
 }
 
-/// g16.045. Live keystrokes paint the session draft while the host's committed
-/// `value` and the commit callback's previous snapshot stay on Kick.
+/// g16.045 / g16.080. EditableLabel through the production GPUI adapter,
+/// renderer, node backend, and test-platform input path. The host owns only
+/// committed values; the mounted session state keeps live draft, selection,
+/// focus requests, and terminal effects separate per caller id.
+///
+/// Deliberately not claimed: browser behavior, application persistence or
+/// validation, OS input-method parity, A1 accessibility execution, V1 pixels,
+/// or Jetstream admission.
 #[test]
 fn editable_label_live_draft_stays_off_the_committed_value() {
+    use node_compat::IntoCompatNode;
+    use poodle_node::{CursorHint, NodeKind, NodeRole};
+    use poodle_specs::{EditableLabelActivation, EditableLabelSpec};
+
+    // Production wrapper and renderer structure. These nodes are built by the
+    // same adapter object whose IntoElement path is mounted below.
+    let provider = theme();
+    let ctx = RenderContext::new(&provider);
+    let display_spec = EditableLabelSpec::new()
+        .with_value("Kick")
+        .with_show_edit_icon(true);
+    let display = node_compat::EditableLabel::from_spec(display_spec.clone(), &provider)
+        .with_id("structure-display")
+        .into_compat_node();
+    assert_eq!(display.id.as_deref(), Some("poodle-editable-label-structure-display"));
+    assert!(matches!(display.kind, NodeKind::Container));
+    assert_eq!(display.a11y.role, Some(NodeRole::Button));
+    assert_eq!(display.a11y.label.as_deref(), Some("Kick"));
+    assert!(display.interaction.focusable);
+    assert!(display.interaction.on_double_activate.is_none());
+    assert!(display.interaction.on_edit_key.is_none());
+    assert_eq!(display.style.descriptor.cursor, CursorHint::Text);
+    assert_eq!(
+        display.style.descriptor.border.width,
+        ctx.theme().resolve_space("border.width.focus")
+    );
+    assert!(display.style.descriptor.layout.spacing.padding.left > 0.0);
+    assert_eq!(display.children.len(), 2, "label text plus edit icon");
+    assert_eq!(display.children[0].intrinsic_text(), Some("Kick"));
+    assert_eq!(display.children[0].style.text_size, Some(13.0));
+
+    let editing_spec = EditableLabelSpec::new()
+        .with_value("Kick")
+        .with_draft_value(Some("Kicks".to_owned()))
+        .with_editing(true)
+        .with_selection(5, 5)
+        .with_request_focus(true)
+        .with_placeholder("Track name");
+    let editing = node_compat::EditableLabel::from_spec(editing_spec, &provider)
+        .with_id("structure-input")
+        .on_change(Arc::new(|_| {}))
+        .on_selection_change(Arc::new(|_, _| {}))
+        .on_commit(Arc::new(|_, _| {}))
+        .on_cancel(Arc::new(|| {}))
+        .into_compat_node();
+    assert_eq!(editing.id.as_deref(), Some("poodle-editable-label-structure-input"));
+    assert!(matches!(
+        &editing.kind,
+        NodeKind::Input { value, placeholder }
+            if value == "Kicks" && placeholder == "Track name"
+    ));
+    assert_eq!(editing.a11y.role, Some(NodeRole::TextInput));
+    assert_eq!(editing.a11y.label.as_deref(), Some("Kick"));
+    assert_eq!(editing.caret.as_ref().map(|caret| caret.selection), Some((5, 5)));
+    assert!(editing.interaction.focusable);
+    assert!(editing.interaction.request_focus);
+    assert!(editing.interaction.on_edit_insert.is_some());
+    assert!(editing.interaction.on_edit_key.is_some());
+    assert!(editing.interaction.on_submit.is_some());
+    assert!(editing.interaction.on_cancel.is_some());
+    assert!(editing.interaction.on_focus_change.is_some());
+    assert!(editing.style.fill_width);
+    assert_eq!(editing.style.text_size, Some(13.0));
+    assert!(editing.style.focus.is_some());
+
+    let empty = node_compat::EditableLabel::from_spec(
+        EditableLabelSpec::new().with_empty_text("Add a name"),
+        &provider,
+    )
+    .with_id("structure-empty")
+    .into_compat_node();
+    assert_eq!(empty.a11y.label.as_deref(), Some("Add a name"));
+    assert_eq!(empty.children[0].intrinsic_text(), Some("Add a name"));
+    assert_eq!(
+        empty.children[0].style.descriptor.text_color,
+        Some(ctx.theme().resolve_color("color.text.secondary"))
+    );
+
+    // Pointer double activation, live draft paint, terminal focus restoration,
+    // disabled inertia, bounds, containment, and equal-value identity.
     run_headless(|cx| {
-        let host = label_host("label-draft-oracle");
-        let mounted = Arc::new(Mutex::new(Node::container()));
-        *mounted.lock().expect("mount") = label_routing_tree(&host, &mounted);
-        let mut driver = HeadlessDriver::new_in_box(cx, Arc::clone(&mounted), 420.0, 200.0);
-        driver.wait_for_focus_handle(&host.id);
-        driver.focus_element(&host.id);
-        take_events(&host.log);
+        let host = MountedLabelHost::new(vec![
+            MountedLabelState::new("subject", "Kick").select_on_focus(false),
+            MountedLabelState::new("witness", "Kick"),
+            MountedLabelState::new("disabled", "Kick").disabled(),
+        ]);
+        let mut driver = mount_labels(cx, &host, 240.0);
+        let subject_id = mounted_label_id("subject");
+        let witness_id = mounted_label_id("witness");
+        let disabled_id = mounted_label_id("disabled");
+        let after_id = "poodle-input-editable-label-after";
+
+        driver.wait_for_focus_handle(&subject_id);
+        driver.wait_for_focus_handle(&witness_id);
+        driver.wait_for_focus_handle(after_id);
+        assert!(poodle_gpui_node_backend::focus_handle_for(&disabled_id).is_none());
+
+        let subject_bounds = poodle_gpui_node_backend::bounds_for(&subject_id).expect("subject bounds");
+        let witness_bounds = poodle_gpui_node_backend::bounds_for(&witness_id).expect("witness bounds");
+        let disabled_bounds = poodle_gpui_node_backend::bounds_for(&disabled_id).expect("disabled bounds");
+        for (name, bounds) in [
+            ("subject", subject_bounds),
+            ("witness", witness_bounds),
+            ("disabled", disabled_bounds),
+        ] {
+            assert!(bounds.size.width > px(0.0) && bounds.size.height > px(0.0), "{name}");
+            assert!(bounds.left() >= px(headless_driver::MOUNT_BOX_LEFT), "{name}");
+            assert!(bounds.top() >= px(headless_driver::MOUNT_BOX_TOP), "{name}");
+            assert!(
+                bounds.right() <= px(headless_driver::MOUNT_BOX_LEFT + 420.0),
+                "{name} stays within the production mount width"
+            );
+            assert!(
+                bounds.bottom() <= px(headless_driver::MOUNT_BOX_TOP + 240.0),
+                "{name} stays within the production mount height"
+            );
+        }
+        assert!(subject_bounds.bottom() <= witness_bounds.top());
+        assert!(witness_bounds.bottom() <= disabled_bounds.top());
+
+        driver.pointer_press_details(subject_bounds.center(), 2, Modifiers::none());
+        driver.pointer_release_details(subject_bounds.center(), 2, Modifiers::none());
+        assert_eq!(host.take_log(), vec!["subject/start"]);
+        assert!(host.label("subject").editing);
+        assert_eq!(host.label("subject").selection, (4, 4));
+        assert_eq!(
+            poodle_gpui_node_backend::focus_state_for(&subject_id),
+            Some(true),
+            "double activation transfers focus to the live input"
+        );
 
         driver.dispatch_key_raw("s");
-        assert_eq!(painted_label_input(&mounted, &host.id), "Kicks");
-        assert_eq!(
-            *host.value.lock().expect("value"),
-            "Kick",
-            "live typing never overwrites the committed value"
-        );
-        assert_eq!(*host.draft.lock().expect("draft"), "Kicks");
-        assert!(host.last_previous.lock().expect("previous").is_none());
-        take_events(&host.log);
+        let subject = host.label("subject");
+        assert_eq!(subject.value, "Kick", "live typing cannot overwrite the committed value");
+        assert_eq!(subject.draft, "Kicks");
+        assert!(subject.editing);
+        assert!(matches!(
+            host.mounted_node("subject").kind,
+            NodeKind::Input { ref value, .. } if value == "Kicks"
+        ));
+        assert!(matches!(
+            host.mounted_node("witness").kind,
+            NodeKind::Container
+        ));
+        assert_eq!(host.label("witness").value, "Kick");
+        assert!(host.take_log().iter().any(|event| event == "subject/change:Kicks"));
+
+        driver.dispatch_key_raw("escape");
+        assert_eq!(host.take_log(), vec!["subject/cancel", "subject/restore"]);
+        assert_eq!(host.label("subject").value, "Kick");
+        assert_eq!(host.label("subject").draft, "Kick");
+        assert!(!host.label("subject").editing);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_id), Some(true));
+
+        let subject_bounds = poodle_gpui_node_backend::bounds_for(&subject_id).expect("subject view bounds");
+        driver.pointer_press_details(subject_bounds.center(), 2, Modifiers::none());
+        driver.pointer_release_details(subject_bounds.center(), 2, Modifiers::none());
+        host.take_log();
+        driver.dispatch_key_raw("s");
+        host.take_log();
 
         driver.dispatch_key_raw("enter");
-        driver.draw_frame();
-        assert_eq!(take_events(&host.log), vec!["label/commit:Kicks", "label/restore"]);
         assert_eq!(
-            host.last_previous.lock().expect("previous").as_deref(),
-            Some("Kick")
+            host.take_log(),
+            vec!["subject/commit:Kicks:Kick", "subject/restore"]
         );
-        assert_eq!(*host.value.lock().expect("value"), "Kicks");
-        assert!(!*host.editing.lock().expect("editing"));
+        assert_eq!(host.label("subject").value, "Kicks");
+        assert_eq!(host.label("witness").value, "Kick");
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&subject_id), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&witness_id), Some(false));
+
+        host.take_log();
+        driver.pointer_activate_id(&disabled_id);
+        driver.dispatch_key_raw("enter");
+        driver.dispatch_key_raw("space");
+        assert_eq!(host.take_log(), Vec::<String>::new());
+        assert!(!host.label("disabled").editing);
+    });
+
+    // Enter, Space, single-click, and programmatic entry boundaries. The
+    // default select-on-focus path selects the full committed value.
+    run_headless(|cx| {
+        let host = MountedLabelHost::new(vec![
+            MountedLabelState::new("enter", "Same"),
+            MountedLabelState::new("space", "Same"),
+            MountedLabelState::new("click", "Same")
+                .activation(EditableLabelActivation::EnterOrSpace),
+            MountedLabelState::new("programmatic", "Same")
+                .activation(EditableLabelActivation::Programmatic),
+        ]);
+        let mut driver = mount_labels(cx, &host, 300.0);
+
+        let enter_id = mounted_label_id("enter");
+        driver.wait_for_focus_handle(&enter_id);
+        driver.focus_element(&enter_id);
+        driver.dispatch_key_raw("enter");
+        assert!(host.label("enter").editing);
+        assert_eq!(host.label("enter").selection, (0, 4));
+        assert_eq!(host.take_log(), vec!["enter/start"]);
+        driver.dispatch_key_raw("escape");
+        host.take_log();
+
+        let space_id = mounted_label_id("space");
+        driver.focus_element(&space_id);
+        driver.dispatch_key_raw("space");
+        assert!(host.label("space").editing);
+        assert_eq!(host.take_log(), vec!["space/start"]);
+        driver.dispatch_key_raw("escape");
+        host.take_log();
+
+        let click_id = mounted_label_id("click");
+        driver.pointer_activate_id(&click_id);
+        assert!(host.label("click").editing);
+        assert_eq!(host.take_log(), vec!["click/start"]);
+        driver.dispatch_key_raw("escape");
+        host.take_log();
+
+        let programmatic_id = mounted_label_id("programmatic");
+        driver.focus_element(&programmatic_id);
+        driver.dispatch_key_raw("enter");
+        driver.dispatch_key_raw("space");
+        driver.pointer_activate_id(&programmatic_id);
+        let bounds = poodle_gpui_node_backend::bounds_for(&programmatic_id)
+            .expect("programmatic label bounds");
+        driver.pointer_press_details(bounds.center(), 2, Modifiers::none());
+        driver.pointer_release_details(bounds.center(), 2, Modifiers::none());
+        assert!(!host.label("programmatic").editing);
+        assert_eq!(host.take_log(), Vec::<String>::new());
+    });
+
+    const TRIM_SET: &str = "\u{0009}\u{000A}\u{000B}\u{000C}\u{000D}\u{0020}\u{0085}\u{00A0}\u{1680}\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{200A}\u{2028}\u{2029}\u{202F}\u{205F}\u{3000}\u{FEFF}";
+
+    // Every scalar in portable trim set T is exercised through mounted Enter.
+    run_headless(|cx| {
+        let draft = format!("{TRIM_SET}Take{TRIM_SET}");
+        assert_ne!(draft.trim(), "Take", "Rust trim is not the contract law");
+        let host = MountedLabelHost::new(vec![
+            MountedLabelState::new("trim", "Kick").editing(&draft),
+        ]);
+        let mut driver = mount_labels(cx, &host, 120.0);
+        let id = mounted_label_id("trim");
+        driver.wait_for_focus_handle(&id);
+        host.take_log();
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.label("trim").value, "Take");
+        assert_eq!(
+            host.take_log(),
+            vec!["trim/commit:Take:Kick", "trim/restore"]
+        );
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&id), Some(true));
+    });
+
+    // ZWSP is deliberately outside T, and a trimmed unchanged value still
+    // emits one commit with the original committed snapshot.
+    run_headless(|cx| {
+        let host = MountedLabelHost::new(vec![
+            MountedLabelState::new("zwsp", "Kick")
+                .editing("\u{200B}Keep\u{200B}"),
+            MountedLabelState::new("unchanged", "Kick")
+                .editing(&format!("{TRIM_SET}Kick{TRIM_SET}")),
+        ]);
+        let mut driver = mount_labels(cx, &host, 170.0);
+
+        let zwsp_id = mounted_label_id("zwsp");
+        driver.wait_for_focus_handle(&zwsp_id);
+        driver.focus_element(&zwsp_id);
+        host.take_log();
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.label("zwsp").value, "\u{200B}Keep\u{200B}");
+        assert_eq!(
+            host.take_log(),
+            vec!["zwsp/commit:\u{200B}Keep\u{200B}:Kick", "zwsp/restore"]
+        );
+
+        let unchanged_id = mounted_label_id("unchanged");
+        driver.focus_element(&unchanged_id);
+        host.take_log();
+        driver.dispatch_key_raw("enter");
+        assert_eq!(host.label("unchanged").value, "Kick");
+        assert_eq!(
+            host.take_log(),
+            vec!["unchanged/commit:Kick:Kick", "unchanged/restore"]
+        );
+    });
+
+    // Unicode scalar maxLength accepts one astral scalar and rejects the next
+    // ASCII scalar without a callback or draft mutation.
+    run_headless(|cx| {
+        let host = MountedLabelHost::new(vec![
+            MountedLabelState::new("scalar", "").editing("").limited(1),
+        ]);
+        let mut driver = mount_labels(cx, &host, 120.0);
+        let id = mounted_label_id("scalar");
+        driver.wait_for_focus_handle(&id);
+        host.take_log();
+        driver.dispatch_key_raw("𝄞");
+        assert_eq!(host.label("scalar").draft, "𝄞");
+        assert_eq!(host.label("scalar").draft.chars().count(), 1);
+        assert!(matches!(
+            host.mounted_node("scalar").kind,
+            NodeKind::Input { ref value, .. } if value == "𝄞"
+        ));
+        host.take_log();
+        driver.dispatch_key_raw("A");
+        assert_eq!(host.label("scalar").draft, "𝄞");
+        assert_eq!(host.take_log(), Vec::<String>::new());
+    });
+
+    // Tab and pointer blur commit once and let focus leave. Neither asks the
+    // rebuilt display control to reclaim focus.
+    run_headless(|cx| {
+        let host = MountedLabelHost::new(vec![
+            MountedLabelState::new("tab", "Kick").editing("Kicks"),
+        ]);
+        let mut driver = mount_labels(cx, &host, 120.0);
+        let id = mounted_label_id("tab");
+        let after_id = "poodle-input-editable-label-after";
+        driver.wait_for_focus_handle(&id);
+        driver.wait_for_focus_handle(after_id);
+        driver.focus_element(&id);
+        host.take_log();
+        driver.dispatch_key_raw("tab");
+        assert_eq!(host.label("tab").value, "Kicks");
+        assert_eq!(host.take_log(), vec!["tab/commit:Kicks:Kick"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(after_id), Some(true));
+        assert_ne!(poodle_gpui_node_backend::focus_state_for(&id), Some(true));
+        driver.draw_frame();
+        assert_eq!(host.take_log(), Vec::<String>::new());
+    });
+
+    run_headless(|cx| {
+        let host = MountedLabelHost::new(vec![
+            MountedLabelState::new("blur", "Kick").editing("Kicks"),
+        ]);
+        let mut driver = mount_labels(cx, &host, 120.0);
+        let id = mounted_label_id("blur");
+        let after_id = "poodle-input-editable-label-after";
+        driver.wait_for_focus_handle(&id);
+        driver.wait_for_focus_handle(after_id);
+        driver.focus_element(&id);
+        host.take_log();
+        driver.pointer_activate_id(after_id);
+        assert_eq!(host.label("blur").value, "Kicks");
+        assert_eq!(host.take_log(), vec!["blur/commit:Kicks:Kick"]);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(after_id), Some(true));
+        assert_ne!(poodle_gpui_node_backend::focus_state_for(&id), Some(true));
+    });
+
+    // Terminal identity and teardown oracle. Both fields start equal, but one
+    // unmounts mid-session without changing either callback stream.
+    run_headless(|cx| {
+        let host = MountedLabelHost::new(vec![
+            MountedLabelState::new("left", "Same").editing("Same-left"),
+            MountedLabelState::new("right", "Same").editing("Same-right"),
+        ]);
+        let mut driver = mount_labels(cx, &host, 170.0);
+        let left_id = mounted_label_id("left");
+        let right_id = mounted_label_id("right");
+        driver.wait_for_focus_handle(&left_id);
+        driver.wait_for_focus_handle(&right_id);
+        driver.focus_element(&left_id);
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&left_id), Some(true));
+        assert_eq!(poodle_gpui_node_backend::focus_state_for(&right_id), Some(false));
+        assert_eq!(host.label("left").value, "Same");
+        assert_eq!(host.label("right").value, "Same");
+        assert_eq!(host.label("left").draft, "Same-left");
+        assert_eq!(host.label("right").draft, "Same-right");
+        host.take_log();
+
+        host.set_present("left", false);
+        driver.draw_frame();
+        assert_eq!(
+            host.take_log(),
+            Vec::<String>::new(),
+            "teardown emits neither commit nor cancel"
+        );
+        assert_eq!(host.label("left").value, "Same");
+        assert_eq!(host.label("right").value, "Same");
+        assert_eq!(host.label("right").draft, "Same-right");
+        assert!(poodle_gpui_node_backend::bounds_for(&left_id).is_none());
+        assert!(poodle_gpui_node_backend::bounds_for(&right_id).is_some());
+
+        nucleus_receipts::emit_if_configured(
+            "EditableLabel",
+            "nucleus.navigation.editable-label",
+            driver.mounted_observation(),
+            &[
+                "mount controlled EditableLabel sessions through node_compat::EditableLabel::from_spec(...).into_element() in HeadlessDriver",
+                "enter edit mode through pointer double activation, pointer single activation, Enter, and Space while programmatic and disabled gestures stay inert",
+                "dispatch printable scalar input, Enter, Escape, Tab, and pointer blur through the GPUI test platform",
+                "commit every scalar in portable trim set T and preserve ZWSP through mounted input",
+                "mount equal-valued caller-id instances and remove one live editor through the production rebuild path",
+            ],
+            &[
+                "production adapter projects display Button and editing TextInput semantics, one visible mode, accessible-name fallback, label typography, field treatment, and text cursor",
+                "mounted bounds are positive, non-overlapping, and contained by the production mount box",
+                "live draft paint stays separate from the host-owned committed value until commit and preserves the previous committed snapshot",
+                "Enter commits and Escape cancels with display focus restoration while Tab and pointer blur commit exactly once and let focus leave",
+                "portable trim removes Unicode White_Space plus BOM, preserves ZWSP, and unchanged trimmed commit still fires once",
+                "Unicode scalar maxLength accepts one astral scalar and rejects the next insertion",
+                "disabled and programmatic display controls remain inert to their forbidden gestures",
+                "equal-valued caller-id instances keep focus, draft, callback, bounds, and teardown identity separate",
+                "removing a focused live editor emits neither commit nor cancel",
+            ],
+        );
     });
 }
 
